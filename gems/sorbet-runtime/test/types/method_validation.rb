@@ -567,11 +567,11 @@ module Opus::Types::Test
         c = Class.new do
           extend T::Sig
 
-          built_sig = T::Private::Methods.__declare_sig(self) do
+          built_sig = T::Private::Methods._declare_sig(self) do
             returns(Integer)
           end
 
-          T::Private::Methods.__with_declared_signature(self, built_sig) do
+          T::Private::Methods._with_declared_signature(self, built_sig) do
             def bad_return
               "ok"
             end
@@ -587,11 +587,11 @@ module Opus::Types::Test
         c = Class.new do
           extend T::Sig
 
-          built_sig = T::Private::Methods.__declare_sig(self) do
+          built_sig = T::Private::Methods._declare_sig(self) do
             params(x: Integer).returns(Symbol)
           end
 
-          T::Private::Methods.__with_declared_signature(self, built_sig) do
+          T::Private::Methods._with_declared_signature(self, built_sig) do
             def bad_arg(x)
               :ok
             end

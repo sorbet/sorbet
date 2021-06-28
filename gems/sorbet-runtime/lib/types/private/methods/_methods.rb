@@ -33,18 +33,18 @@ module T::Private::Methods
 
   def self.declare_sig(mod, arg, &blk)
     # caller_depth is 2: 1 to get to our caller and 1 to get to sig()'s caller.
-    T::Private::DeclState.current.active_declaration = __declare_sig_internal(mod, arg, caller_depth: 2, &blk)
+    T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, arg, caller_depth: 2, &blk)
 
     nil
   end
 
   # See tests for how to use this.  But you shouldn't be using this.
-  def self.__declare_sig(mod, arg=nil, &blk)
+  def self._declare_sig(mod, arg=nil, &blk)
     # caller_depth is 1: 1 to get to our caller.
-    __declare_sig_internal(mod, arg, caller_depth: 1, raw: true, &blk)
+    _declare_sig_internal(mod, arg, caller_depth: 1, raw: true, &blk)
   end
 
-  private_class_method def self.__declare_sig_internal(mod, arg, caller_depth:, raw: false, &blk)
+  private_class_method def self._declare_sig_internal(mod, arg, caller_depth:, raw: false, &blk)
     install_hooks(mod)
 
     if T::Private::DeclState.current.active_declaration
@@ -61,9 +61,9 @@ module T::Private::Methods
     DeclarationBlock.new(mod, loc, blk, arg == :final, raw)
   end
 
-  def self.__with_declared_signature(mod, declblock, &blk)
+  def self._with_declared_signature(mod, declblock, &blk)
     # If declblock is provided, this code is equivalent to the check in
-    # __declare_sig_internal, above.
+    # _declare_sig_internal, above.
     # If declblock is not provided and we have an active declaration, we are
     # obviously doing something wrong.
     if T::Private::DeclState.current.active_declaration

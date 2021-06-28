@@ -100,7 +100,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
         extend T::Helpers
         final!
 
-        T::Private::Methods.__with_declared_signature(self, nil) do
+        T::Private::Methods._with_declared_signature(self, nil) do
           def foo; end
         end
       end
@@ -126,7 +126,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
         extend T::Helpers
         final!
 
-        T::Private::Methods.__with_declared_signature(self, nil) do
+        T::Private::Methods._with_declared_signature(self, nil) do
           def self.foo; end
         end
       end
@@ -242,11 +242,11 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       extend T::Helpers
       final!
 
-      built_sig = T::Private::Methods.__declare_sig(self, :final) do
+      built_sig = T::Private::Methods._declare_sig(self, :final) do
         returns(Integer)
       end
 
-      T::Private::Methods.__with_declared_signature(self, built_sig) do
+      T::Private::Methods._with_declared_signature(self, built_sig) do
         def self.i_am_secretly_final
           4242
         end
@@ -260,11 +260,11 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       extend T::Helpers
       final!
 
-      built_sig = T::Private::Methods.__declare_sig(self, :final) do
+      built_sig = T::Private::Methods._declare_sig(self, :final) do
         returns(Integer)
       end
 
-      T::Private::Methods.__with_declared_signature(self, built_sig) do
+      T::Private::Methods._with_declared_signature(self, built_sig) do
         def i_am_secretly_final
           1337
         end

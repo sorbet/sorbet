@@ -131,11 +131,11 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         extend T::Helpers
 
-        built_sig = T::Private::Methods.__declare_sig(self, :final) do
+        built_sig = T::Private::Methods._declare_sig(self, :final) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def i_am_secretly_final; end
         end
 
@@ -152,11 +152,11 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         extend T::Helpers
 
-        built_sig = T::Private::Methods.__declare_sig(self, :final) do
+        built_sig = T::Private::Methods._declare_sig(self, :final) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def i_am_secretly_final; end
         end
 
@@ -173,11 +173,11 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         extend T::Helpers
 
-        built_sig = T::Private::Methods.__declare_sig(self, :final) do
+        built_sig = T::Private::Methods._declare_sig(self, :final) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def i_am_secretly_final; end
         end
 
@@ -193,19 +193,19 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         extend T::Helpers
 
-        built_sig = T::Private::Methods.__declare_sig(self, :final) do
+        built_sig = T::Private::Methods._declare_sig(self, :final) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def i_am_secretly_final; end
         end
 
-        built_sig = T::Private::Methods.__declare_sig(self, :final) do
+        built_sig = T::Private::Methods._declare_sig(self, :final) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def i_am_secretly_final; end
         end
       end
@@ -219,19 +219,19 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         extend T::Helpers
 
-        built_sig = T::Private::Methods.__declare_sig(self, :final) do
+        built_sig = T::Private::Methods._declare_sig(self, :final) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def i_am_secretly_final; end
         end
 
-        built_sig = T::Private::Methods.__declare_sig(self) do
+        built_sig = T::Private::Methods._declare_sig(self) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def i_am_secretly_final; end
         end
       end
@@ -245,15 +245,15 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         extend T::Helpers
 
-        built_sig = T::Private::Methods.__declare_sig(self, :final) do
+        built_sig = T::Private::Methods._declare_sig(self, :final) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def i_am_secretly_final; end
         end
 
-        T::Private::Methods.__with_declared_signature(self, nil) do
+        T::Private::Methods._with_declared_signature(self, nil) do
           def i_am_secretly_final; end
         end
       end
@@ -267,11 +267,11 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         extend T::Helpers
 
-        built_sig = T::Private::Methods.__declare_sig(self, :final) do
+        built_sig = T::Private::Methods._declare_sig(self, :final) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def self.i_am_secretly_final2; end
         end
 
@@ -288,11 +288,11 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         extend T::Helpers
 
-        built_sig = T::Private::Methods.__declare_sig(self, :final) do
+        built_sig = T::Private::Methods._declare_sig(self, :final) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def self.i_am_secretly_final2; end
         end
 
@@ -309,11 +309,11 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         extend T::Helpers
 
-        built_sig = T::Private::Methods.__declare_sig(self, :final) do
+        built_sig = T::Private::Methods._declare_sig(self, :final) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def self.i_am_secretly_final2; end
         end
 
@@ -329,19 +329,19 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         extend T::Helpers
 
-        built_sig = T::Private::Methods.__declare_sig(self, :final) do
+        built_sig = T::Private::Methods._declare_sig(self, :final) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def self.i_am_secretly_final2; end
         end
 
-        built_sig = T::Private::Methods.__declare_sig(self, :final) do
+        built_sig = T::Private::Methods._declare_sig(self, :final) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def self.i_am_secretly_final2; end
         end
       end
@@ -355,19 +355,19 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         extend T::Helpers
 
-        built_sig = T::Private::Methods.__declare_sig(self, :final) do
+        built_sig = T::Private::Methods._declare_sig(self, :final) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def self.i_am_secretly_final2; end
         end
 
-        built_sig = T::Private::Methods.__declare_sig(self) do
+        built_sig = T::Private::Methods._declare_sig(self) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def self.i_am_secretly_final2; end
         end
       end
@@ -381,15 +381,15 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         extend T::Helpers
 
-        built_sig = T::Private::Methods.__declare_sig(self, :final) do
+        built_sig = T::Private::Methods._declare_sig(self, :final) do
           void
         end
 
-        T::Private::Methods.__with_declared_signature(self, built_sig) do
+        T::Private::Methods._with_declared_signature(self, built_sig) do
           def self.i_am_secretly_final2; end
         end
 
-        T::Private::Methods.__with_declared_signature(self, nil) do
+        T::Private::Methods._with_declared_signature(self, nil) do
           def self.i_am_secretly_final2; end
         end
       end

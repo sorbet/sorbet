@@ -24,7 +24,7 @@ module Opus::Types::Test
 
       it 'returns nil on secretly-defined methods with no sigs' do
         c = Class.new do
-          T::Private::Methods.__with_declared_signature(self, nil) do
+          T::Private::Methods._with_declared_signature(self, nil) do
             def no_sig; end
           end
         end
