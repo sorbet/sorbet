@@ -104,7 +104,7 @@ void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &
     mpack_finish_array(&writer);
 
     // expression_range
-    auto expression_range = ref.definitionLoc.position(ctx);
+    auto expression_range = core::Loc(ctx.file, ref.definitionLoc).position(ctx);
     packRange(expression_range.first.line, expression_range.second.line);
     // expression_pos_range
     packRange(ref.loc.beginPos(), ref.loc.endPos());

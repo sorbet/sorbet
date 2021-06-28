@@ -14,7 +14,7 @@ struct QualifiedName {
     std::vector<core::NameRef> nameParts;
     std::optional<core::NameRef> package;
 
-    static QualifiedName fromFullName(std::vector<core::NameRef> fullName);
+    static QualifiedName fromFullName(std::vector<core::NameRef> &&fullName);
 
     bool empty() const {
         return nameParts.empty();
@@ -132,8 +132,8 @@ struct Reference {
     QualifiedName resolved;
 
     // loc and definitionLoc will differ if this is a defining ref, otherwise they will be the same
-    core::Loc loc;
-    core::Loc definitionLoc;
+    core::LocOffsets loc;
+    core::LocOffsets definitionLoc;
 
     // this is always true
     // TODO(gdritter): delete this, of course
