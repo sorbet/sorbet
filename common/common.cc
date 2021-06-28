@@ -248,13 +248,13 @@ bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view filePath,
     return false;
 }
 
-void appendFilesInDir(string_view basePath, string_view path, const sorbet::UnorderedSet<string> &extensions,
+void appendFilesInDir(string_view basePath, const string &path, const sorbet::UnorderedSet<string> &extensions,
                       bool recursive, vector<string> &result, const std::vector<std::string> &absoluteIgnorePatterns,
                       const std::vector<std::string> &relativeIgnorePatterns) {
     DIR *dir;
     struct dirent *entry;
 
-    if ((dir = opendir(string(path).c_str())) == nullptr) {
+    if ((dir = opendir(path.c_str())) == nullptr) {
         switch (errno) {
             case ENOTDIR:
                 throw sorbet::FileNotDirException();
@@ -291,7 +291,10 @@ vector<string> sorbet::FileOps::listFilesInDir(string_view path, const Unordered
                                                const std::vector<std::string> &absoluteIgnorePatterns,
                                                const std::vector<std::string> &relativeIgnorePatterns) {
     vector<string> result;
-    appendFilesInDir(path, path, extensions, recursive, result, absoluteIgnorePatterns, relativeIgnorePatterns);
+    // Mini-optimization: appendFilesInDir needs to grab a c_str from path, so we pass in a string reference to avoid
+    // copying.
+    string pathStr(path);
+    appendFilesInDir(path, pathStr, extensions, recursive, result, absoluteIgnorePatterns, relativeIgnorePatterns);
     fast_sort(result);
     return result;
 }
