@@ -82,9 +82,11 @@ public:
     void initEmpty();
     void installIntrinsics();
 
-    // Expand symbol and name tables to the given lengths. Does nothing if the value is <= current capacity.
-    void preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 fieldsSize, u4 typeArgumentsSize,
-                           u4 typeMembersSize, u4 utf8NameSize, u4 constantNameSize, u4 uniqueNameSize);
+    // Expand name tables to the given lengths. Does nothing if the value is <= current capacity.
+    void preallocateNameTables(u4 utf8NameSize, u4 constantNameSize, u4 uniqueNameSize);
+    // Expand symbol tables to the given lengths. Does nothing if the value is <= current capacity.
+    void preallocateSymbolTables(u4 classAndModulesSize, u4 methodsSize, u4 fieldsSize, u4 typeArgumentsSize,
+                                 u4 typeMembersSize);
 
     GlobalState(const GlobalState &) = delete;
     GlobalState(GlobalState &&) = delete;

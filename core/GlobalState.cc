@@ -723,30 +723,38 @@ void GlobalState::installIntrinsics() {
     }
 }
 
-void GlobalState::preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 fieldsSize, u4 typeArgumentsSize,
-                                    u4 typeMembersSize, u4 utf8NameSize, u4 constantNameSize, u4 uniqueNameSize) {
+void GlobalState::preallocateSymbolTables(u4 classAndModulesSize, u4 methodsSize, u4 fieldsSize, u4 typeArgumentsSize,
+                                          u4 typeMembersSize) {
     u4 classAndModulesSizeScaled = nextPowerOfTwo(classAndModulesSize);
     u4 methodsSizeScaled = nextPowerOfTwo(methodsSize);
     u4 fieldsSizeScaled = nextPowerOfTwo(fieldsSize);
     u4 typeArgumentsSizeScaled = nextPowerOfTwo(typeArgumentsSize);
     u4 typeMembersSizeScaled = nextPowerOfTwo(typeMembersSize);
-    u4 utf8NameSizeScaled = nextPowerOfTwo(utf8NameSize);
-    u4 constantNameSizeScaled = nextPowerOfTwo(constantNameSize);
-    u4 uniqueNameSizeScaled = nextPowerOfTwo(uniqueNameSize);
-
     // Note: reserve is a no-op if size is < current capacity.
     classAndModules.reserve(classAndModulesSizeScaled);
     methods.reserve(methodsSizeScaled);
     fields.reserve(fieldsSizeScaled);
     typeArguments.reserve(typeArgumentsSizeScaled);
     typeMembers.reserve(typeMembersSizeScaled);
+
+    sanityCheck();
+
+    trace(fmt::format("Preallocated symbol tables. classAndModules={} methods={} fields={} typeArguments={} "
+                      "typeMembers={}",
+                      classAndModules.capacity(), methods.capacity(), fields.capacity(), typeArguments.capacity(),
+                      typeMembers.capacity()));
+}
+
+void GlobalState::preallocateNameTables(u4 utf8NameSize, u4 constantNameSize, u4 uniqueNameSize) {
+    u4 utf8NameSizeScaled = nextPowerOfTwo(utf8NameSize);
+    u4 constantNameSizeScaled = nextPowerOfTwo(constantNameSize);
+    u4 uniqueNameSizeScaled = nextPowerOfTwo(uniqueNameSize);
+
     expandNames(utf8NameSizeScaled, constantNameSizeScaled, uniqueNameSizeScaled);
     sanityCheck();
 
-    trace(fmt::format("Preallocated symbol and name tables. classAndModules={} methods={} fields={} typeArguments={} "
-                      "typeMembers={} utf8Names={} constantNames={} uniqueNames={}",
-                      classAndModules.capacity(), methods.capacity(), fields.capacity(), typeArguments.capacity(),
-                      typeMembers.capacity(), utf8Names.capacity(), constantNames.capacity(), uniqueNames.capacity()));
+    trace(fmt::format("Preallocated symbol and name tables. utf8Names={} constantNames={} uniqueNames={}",
+                      utf8Names.capacity(), constantNames.capacity(), uniqueNames.capacity()));
 }
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;

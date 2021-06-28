@@ -347,6 +347,10 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
     // Replace error queue with one that is owned by this thread.
     finalGS->errorQueue = make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer,
                                                         make_shared<ErrorFlusherLSP>(epoch, errorReporter));
+    // Preallocate the symbol tables in preparation for namer.
+    gs->preallocateSymbolTables(config->opts.reserveClassTableCapacity, config->opts.reserveMethodTableCapacity,
+                                config->opts.reserveFieldTableCapacity, config->opts.reserveTypeArgumentTableCapacity,
+                                config->opts.reserveTypeMemberTableCapacity);
     auto &epochManager = *finalGS->epochManager;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.

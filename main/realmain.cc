@@ -470,10 +470,8 @@ int realmain(int argc, char *argv[]) {
     if (opts.sleepInSlowPath) {
         gs->sleepInSlowPath = true;
     }
-    gs->preallocateTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
-                          opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
-                          opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
-                          opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
+    gs->preallocateNameTables(opts.reserveUtf8NameTableCapacity, opts.reserveConstantNameTableCapacity,
+                              opts.reserveUniqueNameTableCapacity);
     for (auto code : opts.isolateErrorCode) {
         gs->onlyShowErrorClass(code);
     }
@@ -558,6 +556,12 @@ int realmain(int argc, char *argv[]) {
             }
         }
         cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed);
+
+        // Now that indexing is complete, resize the symbol tables in preparation for namer.
+        // Delaying symbol table expansion avoids memory blowup in indexing, which clones 1 global state per core.
+        gs->preallocateSymbolTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
+                                    opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
+                                    opts.reserveTypeMemberTableCapacity);
 
         if (gs->runningUnderAutogen) {
 #ifdef SORBET_REALMAIN_MIN
