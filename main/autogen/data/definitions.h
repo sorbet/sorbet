@@ -49,7 +49,7 @@ struct AutoloaderConfig;
 struct NamedDefinition;
 class DefTree;
 
-enum class ClassKind { Class, Module };
+enum class ClassKind : u1 { Class, Module };
 
 // A reference to a specific `Definition` inside of a `ParsedFile`.
 struct DefinitionRef {
@@ -88,7 +88,7 @@ struct ReferenceRef {
 
 // A constant definition---a class, module, constant definition, or constant alias---along with relevant metadata
 struct Definition {
-    enum class Type : u8 { Module, Class, Casgn, Alias };
+    enum class Type : u1 { Module, Class, Casgn, Alias };
 
     // the reference to this definition. Once `AutogenWalk` is completed and a full `ParsedFile` has been created, it
     // should always be the case that
