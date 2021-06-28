@@ -49,7 +49,7 @@ struct AutoloaderConfig;
 struct NamedDefinition;
 class DefTree;
 
-enum class ClassKind { Class, Module };
+enum class ClassKind : u1 { Class, Module };
 
 // A reference to a specific `Definition` inside of a `ParsedFile`.
 struct DefinitionRef {
