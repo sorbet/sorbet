@@ -344,7 +344,7 @@ class Dir < Object
   # ```
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, Pathname),
         arg1: Integer,
     )
     .returns(Integer)
