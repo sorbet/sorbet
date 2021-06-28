@@ -27,6 +27,8 @@ module T::Private::Methods::CallValidation
           )
         end
       end
+    # Do nothing in this case; this method was not wrapped in _on_method_added.
+    elsif method_sig.defined_raw
     # Note, this logic is duplicated (intentionally, for micro-perf) at `Methods._on_method_added`,
     # make sure to keep changes in sync.
     # This is a trapdoor point for each method:

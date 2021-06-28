@@ -26,14 +26,23 @@ module T::Private::Methods
   # in installed_hooks.
   @old_hooks = nil
 
-  @declaring_final_method = false
-
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
 
-  DeclarationBlock = Struct.new(:mod, :loc, :blk, :final)
+  DeclarationBlock = Struct.new(:mod, :loc, :blk, :final, :raw)
 
-  def self.declare_sig(mod, arg, &blk)
+  def self.declare_sig(mod, loc, arg, &blk)
+    T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, loc, arg, &blk)
+
+    nil
+  end
+
+  # See tests for how to use this.  But you shouldn't be using this.
+  def self._declare_sig(mod, arg=nil, &blk)
+    _declare_sig_internal(mod, caller_locations(1, 1).first, arg, raw: true, &blk)
+  end
+
+  private_class_method def self._declare_sig_internal(mod, loc, arg, raw: false, &blk)
     install_hooks(mod)
 
     if T::Private::DeclState.current.active_declaration
@@ -45,15 +54,26 @@ module T::Private::Methods
       raise "Invalid argument to `sig`: #{arg}"
     end
 
-    loc = caller_locations(2, 1).first
+    DeclarationBlock.new(mod, loc, blk, arg == :final, raw)
+  end
 
-    T::Private::DeclState.current.active_declaration = DeclarationBlock.new(mod, loc, blk, arg == :final)
-
-    nil
+  def self._with_declared_signature(mod, declblock, &blk)
+    # If declblock is provided, this code is equivalent to the check in
+    # _declare_sig_internal, above.
+    # If declblock is not provided and we have an active declaration, we are
+    # obviously doing something wrong.
+    if T::Private::DeclState.current.active_declaration
+      T::Private::DeclState.current.reset!
+      raise "You called sig twice without declaring a method in between"
+    end
+    if declblock
+      T::Private::DeclState.current.active_declaration = declblock
+    end
+    mod.module_exec(&blk)
   end
 
   def self.start_proc
-    DeclBuilder.new(PROC_TYPE)
+    DeclBuilder.new(PROC_TYPE, false)
   end
 
   def self.finalize_proc(decl)
@@ -182,17 +202,6 @@ module T::Private::Methods
     @modules_with_final[mod.singleton_class]
   end
 
-  # See tests for how to use this.
-  def self._with_declaring_final_method_INTERNAL(&blk)
-    begin
-      prev_value = @declaring_final_method
-      @declaring_final_method = true
-      yield
-    ensure
-      @declaring_final_method = prev_value
-    end
-  end
-
   # Only public because it needs to get called below inside the replace_method blocks below.
   def self._on_method_added(hook_mod, method_name, is_singleton_method: false)
     if T::Private::DeclState.current.skip_on_method_added
@@ -202,9 +211,7 @@ module T::Private::Methods
     current_declaration = T::Private::DeclState.current.active_declaration
     mod = is_singleton_method ? hook_mod.singleton_class : hook_mod
 
-    directly_declaring_final_method = @declaring_final_method
-    method_is_final = directly_declaring_final_method || current_declaration&.final
-    if T::Private::Final.final_module?(mod) && !method_is_final
+    if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
     end
     # Don't compute mod.ancestors if we don't need to bother checking final-ness.
@@ -227,17 +234,17 @@ module T::Private::Methods
       )
     end
 
-    unless directly_declaring_final_method
-      original_method = mod.instance_method(method_name)
-      sig_block = lambda do
-        T::Private::Methods.run_sig(hook_mod, method_name, original_method, current_declaration)
-      end
+    original_method = mod.instance_method(method_name)
+    sig_block = lambda do
+      T::Private::Methods.run_sig(hook_mod, method_name, original_method, current_declaration)
+    end
 
-      # Always replace the original method with this wrapper,
-      # which is called only on the *first* invocation.
-      # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
-      # (or unwrap back to the original method).
-      key = method_owner_and_name_to_key(mod, method_name)
+    # Always replace the original method with this wrapper,
+    # which is called only on the *first* invocation.
+    # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
+    # (or unwrap back to the original method).
+    key = method_owner_and_name_to_key(mod, method_name)
+    unless current_declaration.raw
       T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
         method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
         method_sig ||= T::Private::Methods._handle_missing_method_signature(
@@ -265,11 +272,10 @@ module T::Private::Methods
           original_method.bind(self).call(*args, &blk)
         end
       end
-
-      @sig_wrappers[key] = sig_block
     end
 
-    if method_is_final
+    @sig_wrappers[key] = sig_block
+    if current_declaration.final
       @was_ever_final_names.add(method_name)
       # use hook_mod, not mod, because for example, we want class C to be marked as having final if we def C.foo as
       # final. change this to mod to see some final_method tests fail.
@@ -338,7 +344,7 @@ module T::Private::Methods
   end
 
   def self.run_builder(declaration_block)
-    builder = DeclBuilder.new(declaration_block.mod)
+    builder = DeclBuilder.new(declaration_block.mod, declaration_block.raw)
     builder
       .instance_exec(&declaration_block.blk)
       .finalize!
@@ -369,6 +375,7 @@ module T::Private::Methods
         check_level: current_declaration.checked,
         on_failure: current_declaration.on_failure,
         override_allow_incompatible: current_declaration.override_allow_incompatible,
+        defined_raw: current_declaration.raw,
       )
 
       SignatureValidation.validate(signature)

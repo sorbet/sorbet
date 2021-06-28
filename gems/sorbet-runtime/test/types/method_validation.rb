@@ -558,6 +558,52 @@ module Opus::Types::Test
       end
     end
 
+    describe 'secretly-defined methods with sigs' do
+      # The behavior of methods defined via this interface is special: we expect
+      # that the methods themselves will perform argument validation.  The sig
+      # itself should only be registered to the method so that the rest of sorbet-runtime
+      # continues to work "normally".
+      it 'should not raise errors on return type mismatch' do
+        c = Class.new do
+          extend T::Sig
+
+          built_sig = T::Private::Methods._declare_sig(self) do
+            returns(Integer)
+          end
+
+          T::Private::Methods._with_declared_signature(self, built_sig) do
+            def bad_return
+              "ok"
+            end
+          end
+        end
+        assert_equal("ok", c.new.bad_return)
+        # Force the sig block to be actually run.
+        T::Utils.signature_for_method(c.instance_method(:bad_return))
+        assert_equal("ok", c.new.bad_return)
+      end
+
+      it 'should not raise errors on argument type mismatch' do
+        c = Class.new do
+          extend T::Sig
+
+          built_sig = T::Private::Methods._declare_sig(self) do
+            params(x: Integer).returns(Symbol)
+          end
+
+          T::Private::Methods._with_declared_signature(self, built_sig) do
+            def bad_arg(x)
+              :ok
+            end
+          end
+        end
+        assert_equal(:ok, c.new.bad_arg("wrong arg type"))
+        # Force the sig block to be actually run.
+        T::Utils.signature_for_method(c.instance_method(:bad_arg))
+        assert_equal(:ok, c.new.bad_arg("wrong arg type"))
+      end
+    end
+
     # These tests should behave identically with and without a declaration
     [false, true].each do |using_declaration|
       describe "handling missing args (using_declaration=#{using_declaration}" do
