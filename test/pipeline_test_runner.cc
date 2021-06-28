@@ -27,6 +27,7 @@
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "main/autogen/autogen.h"
+#include "main/autogen/crc.h"
 #include "namer/namer.h"
 #include "packager/packager.h"
 #include "parser/parser.h"
@@ -314,9 +315,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             *gs, "autogen",
             [&]() {
                 stringstream payload;
+                auto crcBuilder = autogen::CRCBuilder::create();
                 for (auto &tree : trees) {
                     core::Context ctx(*gs, core::Symbols::root(), tree.file);
-                    auto pf = autogen::Autogen::generate(ctx, move(tree));
+                    auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder);
                     tree = move(pf.tree);
                     payload << pf.toString(ctx);
                 }

@@ -388,6 +388,7 @@ void DefTreeBuilder::collapseSameFileDefs(const core::GlobalState &gs, const Aut
     }
 }
 
+// TODO: Why not check each subdir? Don't do recursively.
 void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const std::string &path,
                                     const DefTree &root) {
     UnorderedSet<string> toDelete; // Remove from this set as we write files
