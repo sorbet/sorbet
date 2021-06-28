@@ -4,6 +4,7 @@
 
 # Sorbet
 
+
 This repository contains Sorbet, a fast, powerful type checker designed for Ruby.
 It aims to be easy to add to existing codebases with gradual types, and fast to
 respond with errors and suggestions.
