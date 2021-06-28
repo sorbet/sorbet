@@ -306,7 +306,8 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         }
         {
             Timer timeit(logger, "autogenAutoloaderWrite");
-            autogen::AutoloadWriter::writeAutoloads(gs, autoloaderCfg, opts.print.AutogenAutoloader.outputPath, root);
+            autogen::AutoloadWriter::writeAutoloads(gs, workers, autoloaderCfg, opts.print.AutogenAutoloader.outputPath,
+                                                    root);
         }
     }
 
