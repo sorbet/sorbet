@@ -150,6 +150,8 @@ SORBET_ALIVE(VALUE, sorbet_processThrowReturnSetJmp,
              (int setjmp_retval, rb_control_frame_t *cfp, struct rb_vm_tag *tag));
 SORBET_ALIVE(void, sorbet_teardownTagForThrowReturn, (struct rb_vm_tag * tag));
 
+SORBET_ALIVE(void, sorbet_vm_define_method, (VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq, bool isSelf));
+
 // The next several functions exist to convert Ruby definitions into LLVM IR, and
 // are always inlined as a consequence.
 
@@ -388,14 +390,14 @@ VALUE sorbet_defineNestedClass(VALUE owner, const char *name, VALUE super) {
 // this DOES override existing methods
 SORBET_INLINE
 void sorbet_defineMethod(VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq) {
-    rb_add_method_sorbet(klass, rb_intern(name), methodPtr, (rb_sorbet_param_t *)paramp, METHOD_VISI_PUBLIC, iseq);
+    sorbet_vm_define_method(klass, name, methodPtr, paramp, iseq, false);
 }
 
 // this DOES override existing methods
 SORBET_INLINE
 void sorbet_defineMethodSingleton(VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp,
                                   rb_iseq_t *iseq) {
-    rb_define_singleton_sorbet_method(klass, name, methodPtr, (rb_sorbet_param_t *)paramp, iseq);
+    sorbet_vm_define_method(klass, name, methodPtr, paramp, iseq, true);
 }
 
 SORBET_INLINE
