@@ -2494,7 +2494,7 @@ private:
     }
 
     static void fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
-                                  ParsedSig &sig, bool isOverloaded, const ast::MethodDef &mdef) {
+                                  ParsedSig sig, bool isOverloaded, const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
         ENFORCE(isOverloaded || method.data(ctx)->arguments().size() == mdef.args.size());
 
@@ -2564,7 +2564,10 @@ private:
         }
 
         // Get the parameters order from the signature
-        vector<ParsedSig::ArgSpec> sigParams(sig.argTypes);
+        vector<ParsedSig::ArgSpec> sigParams;
+        for (auto &spec : sig.argTypes) {
+            sigParams.push_back(spec);
+        }
 
         vector<ast::Local const *> defParams; // Parameters order from the method declaration
         bool seenOptional = false;
@@ -2596,7 +2599,7 @@ private:
 
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
-                arg.type = std::move(spec->type);
+                arg.type = spec->type;
                 arg.loc = spec->loc;
                 arg.rebind = spec->rebind;
                 sig.argTypes.erase(spec);
@@ -2625,7 +2628,7 @@ private:
             }
         }
 
-        for (const auto &spec : sig.argTypes) {
+        for (auto spec : sig.argTypes) {
             if (auto e = ctx.state.beginError(spec.loc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unknown argument name `{}`", spec.name.show(ctx));
             }
@@ -2634,8 +2637,8 @@ private:
         // Check params ordering match between signature and definition
         if (sig.argTypes.empty()) {
             int j = 0;
-            for (const auto &spec : sigParams) {
-                auto *param = defParams[j];
+            for (auto spec : sigParams) {
+                auto param = defParams[j];
                 auto sname = spec.name;
                 auto dname = param->localVariable._name;
                 // TODO(jvilk): Do we need to check .show? Typically NameRef equality is equal to string equality.
@@ -2834,7 +2837,7 @@ private:
     }
 
 public:
-    static void resolveMultiSignatureJob(core::MutableContext ctx, ResolveMultiSignatureJob &job) {
+    static void resolveMultiSignatureJob(core::MutableContext ctx, const ResolveMultiSignatureJob &job) {
         auto &sigs = job.sigs;
         auto &mdef = *job.mdef;
         ENFORCE_NO_TIMER(sigs.size() > 1);
@@ -2861,15 +2864,15 @@ public:
             } else {
                 overloadSym = mdef.symbol;
             }
-            fillInInfoFromSig(ctx, overloadSym, sig.loc, sig.sig, isOverloaded, mdef);
+            fillInInfoFromSig(ctx, overloadSym, sig.loc, move(sig.sig), isOverloaded, mdef);
         }
         handleAbstractMethod(ctx, mdef);
     }
-    static void resolveSignatureJob(core::MutableContext ctx, ResolveSignatureJob &job) {
+    static void resolveSignatureJob(core::MutableContext ctx, const ResolveSignatureJob &job) {
         prodCounterInc("types.sig.count");
         auto &mdef = *job.mdef;
         bool isOverloaded = false;
-        fillInInfoFromSig(ctx, mdef.symbol, job.loc, job.sig, isOverloaded, mdef);
+        fillInInfoFromSig(ctx, mdef.symbol, job.loc, move(job.sig), isOverloaded, mdef);
         handleAbstractMethod(ctx, mdef);
     }
 
