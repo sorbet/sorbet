@@ -44,11 +44,11 @@ end
 class MessagePack::Buffer
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def <<(_); end
+  def <<(arg0); end
 
   sig {returns(::T.untyped)}
   def clear(); end
@@ -64,49 +64,49 @@ class MessagePack::Buffer
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def io(); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def read(*_); end
+  def read(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def read_all(*_); end
+  def read_all(*arg0); end
 
   sig {returns(::T.untyped)}
   def size(); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def skip(_); end
+  def skip(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def skip_all(_); end
+  def skip_all(arg0); end
 
   sig {returns(::T.untyped)}
   def to_a(); end
@@ -119,19 +119,19 @@ class MessagePack::Buffer
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write(_); end
+  def write(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write_to(_); end
+  def write_to(arg0); end
 end
 
 module MessagePack::CoreExt
@@ -153,41 +153,41 @@ class MessagePack::ExtensionValue < Struct
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def payload=(_); end
+  def payload=(arg0); end
 
   sig {returns(::T.untyped)}
   def type(); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def type=(_); end
+  def type=(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.[](*_); end
+  def self.[](*arg0); end
 
   sig {returns(::T.untyped)}
   def self.members(); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.new(*_); end
+  def self.new(*arg0); end
 end
 
 class MessagePack::Factory
@@ -202,11 +202,11 @@ class MessagePack::Factory
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig do
     params(
@@ -228,19 +228,19 @@ class MessagePack::Factory
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def packer(*_); end
+  def packer(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def register_type(*_); end
+  def register_type(*arg0); end
 
   sig do
     params(
@@ -270,11 +270,11 @@ class MessagePack::Factory
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def unpacker(*_); end
+  def unpacker(*arg0); end
 end
 
 class MessagePack::MalformedFormatError < MessagePack::UnpackError
@@ -301,27 +301,27 @@ class MessagePack::Packer
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def pack(_); end
+  def pack(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def register_type(*_); end
+  def register_type(*arg0); end
 
   sig {returns(::T.untyped)}
   def registered_types(); end
@@ -348,114 +348,114 @@ class MessagePack::Packer
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write(_); end
+  def write(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write_array(_); end
+  def write_array(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write_array_header(_); end
+  def write_array_header(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write_ext(_, _1); end
+  def write_ext(arg0, arg1); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write_extension(_); end
+  def write_extension(arg0); end
 
   sig {returns(::T.untyped)}
   def write_false(); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write_float(_); end
+  def write_float(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write_float32(_); end
+  def write_float32(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write_hash(_); end
+  def write_hash(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write_int(_); end
+  def write_int(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write_map_header(_); end
+  def write_map_header(arg0); end
 
   sig {returns(::T.untyped)}
   def write_nil(); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write_string(_); end
+  def write_string(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write_symbol(_); end
+  def write_symbol(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def write_to(_); end
+  def write_to(arg0); end
 
   sig {returns(::T.untyped)}
   def write_true(); end
@@ -489,30 +489,30 @@ class MessagePack::Unpacker
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def feed(_); end
+  def feed(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def feed_each(_); end
+  def feed_each(arg0); end
 
   sig {returns(::T.untyped)}
   def full_unpack(); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def read(); end
@@ -525,11 +525,11 @@ class MessagePack::Unpacker
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def register_type(*_); end
+  def register_type(*arg0); end
 
   sig {returns(::T.untyped)}
   def registered_types(); end
