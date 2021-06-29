@@ -342,3 +342,135 @@ VALUE sorbet_stringInterpolate(VALUE recv, ID fun, int argc, VALUE *argv, BlockF
 VALUE sorbet_blockReturnUndef(VALUE **pc, VALUE closure, rb_control_frame_t *cfp) {
     return RUBY_Qundef;
 }
+
+extern VALUE sorbet_getConstant(const char *path, long pathLen);
+
+#define MOD_CONST_GET(path) sorbet_getConstant(path, sizeof(path) - 1)
+
+static VALUE sigs_for_methods() {
+    static VALUE sigs;
+    if (UNLIKELY(sigs == 0)) {
+        sigs = rb_hash_new();
+        rb_gc_register_address(&sigs);
+    }
+    return sigs;
+}
+
+static VALUE sigs_for_self_methods() {
+    static VALUE sigs;
+    if (UNLIKELY(sigs == 0)) {
+        sigs = rb_hash_new();
+        rb_gc_register_address(&sigs);
+    }
+    return sigs;
+}
+
+// In Ruby terms, this is:
+//  sig{parms(mod: Module, method: Symbol, isSelf: T::Boolean, arg: T.nilable(Symbol), block: T.untyped).void}
+void sorbet_vm_register_sig(VALUE self, VALUE method, VALUE isSelf, VALUE arg, rb_block_call_func_t block) {
+    VALUE methods = MOD_CONST_GET("T::Private::Methods");
+    // TODO: need to pass block through to here.
+    VALUE args[] = {self, arg};
+    VALUE built_sig = rb_block_call(methods, rb_intern("_declare_sig"), 2, args, block, Qnil);
+
+    // Store the sig someplace where we can get to it later.  This is complicated,
+    // because we can have cases like:
+    //
+    // sig {...}
+    // def some_method(...)
+    // # sometime later
+    // sig {...}
+    // def some_method(...)
+    //
+    // and Sorbet will accept this (so long as the multiple definitions type-check).
+    //
+    // Nested method definitions are also problematic: Sorbet models the *sigs*
+    // of all such definitions as occuring at the top-level, even if those signatures
+    // are not applied until execution would reach the definition of the method, viz.
+    //
+    // sig {...} # sig 1
+    // def some_method(...)
+    //   sig {...} # sig 2
+    //   def some_internal_method(...) # internal
+    // # sometime later
+    // sig {...} # sig 3
+    // def some_internal_method(...) # external
+    //
+    // is internally modeled as:
+    //
+    // Sorbet::Private::Static.sig {...} # sig 1
+    // Sorbet::Private::Static.sig {...} # sig 2
+    // Sorbet::Private::Static.sig {...} # sig 3
+    // # ...
+    // def some_method(...)
+    //   Sorbet::Private::Static.keep_def(:some_internal_method)
+    // end
+    //
+    // Sorbet::Private::Static.keep_def(:some_internal_method)
+    //
+    // In such a situation, we should actually apply sig 3 to the external definition
+    // and only use sig 2 for the internal definition, but it seems hard to come up
+    // with data structures that would reflect that situation.
+    //
+    // There are disabled testcases for situations like this, and multiple definitions
+    // generally, which the Sorbet compiler does not gracefully handle at the moment.
+    //
+    // For now, we're just going to say that for every (module, method_name)
+    // combination, there always exists a unique signature that applies to the single
+    // method defined as method_name.  This is obviously not correct, given the above,
+    // but is good enough for our purposes.
+    VALUE sig_table = RTEST(isSelf) ? sigs_for_self_methods() : sigs_for_methods();
+    VALUE mod_entry = rb_hash_lookup2(sig_table, self, Qundef);
+    if (mod_entry == Qundef) {
+        mod_entry = rb_hash_new();
+        rb_hash_aset(sig_table, self, mod_entry);
+    }
+
+    rb_hash_aset(mod_entry, method, built_sig);
+}
+
+struct method_block_params {
+    VALUE klass;
+    const char *name;
+    // name as an ID.
+    ID id;
+    rb_sorbet_func_t methodPtr;
+    // rb_sorbet_param_t
+    void *paramp;
+    rb_iseq_t *iseq;
+    bool isSelf;
+};
+
+static void define_method_block(RB_BLOCK_CALL_FUNC_ARGLIST(first_arg, data)) {
+    struct method_block_params *params = (struct method_block_params *)data;
+    if (params->isSelf) {
+        rb_define_singleton_sorbet_method(params->klass, params->name, params->methodPtr,
+                                          params->paramp, params->iseq);
+    } else {
+        rb_add_method_sorbet(params->klass, params->id, params->methodPtr, params->paramp,
+                             METHOD_VISI_PUBLIC, params->iseq);
+    }
+}
+
+void sorbet_vm_define_method(VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq, bool isSelf) {
+    VALUE sig_table = isSelf ? sigs_for_self_methods() : sigs_for_methods();
+    VALUE mod_entry = rb_hash_lookup2(sig_table, klass, Qnil);
+    VALUE built_sig = Qnil;
+    ID id = rb_intern(name);
+    if (mod_entry != Qnil) {
+        built_sig = rb_hash_lookup2(mod_entry, ID2SYM(id), Qnil);
+    }
+
+    struct method_block_params params;
+    params.klass = klass;
+    params.name = name;
+    params.id = id;
+    params.methodPtr = methodPtr;
+    params.paramp = paramp;
+    params.iseq = iseq;
+    params.isSelf = isSelf;
+
+    VALUE methods = MOD_CONST_GET("T::Private::Methods");
+    VALUE args[] = {klass, built_sig};
+    rb_block_call(methods, rb_intern("_with_declared_signature"), 2, args, define_method_block, (VALUE)&params);
+}
