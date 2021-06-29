@@ -1,3 +1,0 @@
-s(:assign,
-  s(:lvasgn, :_2),
-  s(:int, "1"))
