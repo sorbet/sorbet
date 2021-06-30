@@ -553,9 +553,13 @@ llvm::Value *IREmitterHelpers::callViaRubyVMSimple(MethodCallContext &mcctx) {
     auto *closure = Payload::buildLocalsOffset(mcctx.cs);
     vector<llvm::Value *> args;
     args.emplace_back(cache);
+
     if (auto *blk = mcctx.blkAsFunction()) {
+        auto blkId = mcctx.blk.value();
+        args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(irctx.blockUsesBreak[blkId]))));
         args.emplace_back(blk);
     } else {
+        args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(false))));
         args.emplace_back(llvm::ConstantPointerNull::get(llvm::PointerType::getUnqual(cs.getRubyBlockFFIType())));
     }
     args.emplace_back(closure);

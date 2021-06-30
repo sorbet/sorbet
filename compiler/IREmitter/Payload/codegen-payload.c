@@ -110,7 +110,8 @@ SORBET_ALIVE(VALUE, sorbet_rb_int_ge_slowpath, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_i_getRubyClass, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_getRubyConstant, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_objIsKindOf, (VALUE, VALUE));
-SORBET_ALIVE(VALUE, sorbet_i_send, (struct FunctionInlineCache *, BlockFFIType blk, VALUE, rb_control_frame_t *, ...));
+SORBET_ALIVE(VALUE, sorbet_i_send,
+             (struct FunctionInlineCache *, _Bool blkUsesBreak, BlockFFIType blk, VALUE, rb_control_frame_t *, ...));
 
 SORBET_ALIVE(_Bool, sorbet_i_isa_Integer, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_TrueClass, (VALUE) __attribute__((const)));
@@ -1821,6 +1822,27 @@ VALUE sorbet_callFuncBlockWithCache(struct FunctionInlineCache *cache, BlockFFIT
 }
 
 SORBET_INLINE
+VALUE sorbet_callFuncBlockWithCache_noBreak(struct FunctionInlineCache *cache, BlockFFIType blockImpl, VALUE closure) {
+    rb_execution_context_t *ec = GET_EC();
+    rb_control_frame_t *cfp = ec->cfp;
+
+    // This is an inlined version of the block handler setup that `rb_iterate` performs. See the following two links for
+    // the use of `rb_vm_ifunc_proc_new` and the setup of the captured block handler.
+    // * https://github.com/ruby/ruby/blob/ruby_2_7/vm_eval.c#L1448
+    // * https://github.com/ruby/ruby/blob/ruby_2_7/vm_eval.c#L1406-L1408
+    const struct vm_ifunc *const ifunc = rb_vm_ifunc_proc_new(blockImpl, (void *)closure);
+    struct rb_captured_block *captured = (struct rb_captured_block *)&cfp->self;
+    captured->code.ifunc = ifunc;
+
+    // It's important that we clear out the passed block handler state in the execution context:
+    // https://github.com/ruby/ruby/blob/ruby_2_7/vm.c#L203-L210
+    ec->passed_block_handler = VM_BLOCK_HANDLER_NONE;
+
+    // We don't need to pass the block handler through ec->passed_block_handler in this case.
+    return sorbet_callFuncWithCache(cache, VM_BH_FROM_IFUNC_BLOCK(captured));
+}
+
+SORBET_INLINE
 VALUE sorbet_makeBlockHandlerProc(VALUE block) {
     return rb_funcall(block, rb_intern2("to_proc", 7), 0);
 }
@@ -2271,5 +2293,6 @@ VALUE __sorbet_only_exists_to_keep_functions_alive__() __attribute__((optnone)) 
            (long)&sorbet_isa_Float + (long)&sorbet_isa_Untyped + (long)&sorbet_isa_Hash + (long)&sorbet_isa_Array +
            (long)&sorbet_isa_Regexp + (long)&sorbet_isa_String + (long)&sorbet_isa_Proc +
            (long)&sorbet_isa_RootSingleton + (long)&sorbet_get_sp + (long)&sorbet_push +
-           (long)&sorbet_callFuncWithCache + (long)&sorbet_callFuncBlockWithCache + (long)&sorbet_vmBlockHandlerNone;
+           (long)&sorbet_callFuncWithCache + (long)&sorbet_callFuncBlockWithCache +
+           (long)&sorbet_callFuncBlockWithCache_noBreak + (long)&sorbet_vmBlockHandlerNone;
 }

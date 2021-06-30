@@ -1612,11 +1612,11 @@ functionEntryInitializers:
   ret i64 52
 }
 
-; Function Attrs: argmemonly nofree nosync nounwind willreturn writeonly
-declare void @llvm.memset.p0i8.i64(i8* nocapture writeonly, i8, i64, i1 immarg) #11
-
 ; Function Attrs: inaccessiblememonly nofree nosync nounwind willreturn
-declare void @llvm.experimental.noalias.scope.decl(metadata) #12
+declare void @llvm.experimental.noalias.scope.decl(metadata) #11
+
+; Function Attrs: argmemonly nofree nosync nounwind willreturn writeonly
+declare void @llvm.memset.p0i8.i64(i8* nocapture writeonly, i8, i64, i1 immarg) #12
 
 ; Function Attrs: nofree nosync nounwind willreturn
 declare void @llvm.assume(i1 noundef) #13
@@ -1641,8 +1641,8 @@ attributes #7 = { sspreq }
 attributes #8 = { nounwind ssp }
 attributes #9 = { ssp }
 attributes #10 = { argmemonly nofree norecurse nosync nounwind ssp willreturn writeonly }
-attributes #11 = { argmemonly nofree nosync nounwind willreturn writeonly }
-attributes #12 = { inaccessiblememonly nofree nosync nounwind willreturn }
+attributes #11 = { inaccessiblememonly nofree nosync nounwind willreturn }
+attributes #12 = { argmemonly nofree nosync nounwind willreturn writeonly }
 attributes #13 = { nofree nosync nounwind willreturn }
 attributes #14 = { nounwind }
 attributes #15 = { noreturn nounwind }
