@@ -443,15 +443,15 @@ struct method_block_params {
 static void define_method_block(RB_BLOCK_CALL_FUNC_ARGLIST(first_arg, data)) {
     struct method_block_params *params = (struct method_block_params *)data;
     if (params->isSelf) {
-        rb_define_singleton_sorbet_method(params->klass, params->name, params->methodPtr,
-                                          params->paramp, params->iseq);
+        rb_define_singleton_sorbet_method(params->klass, params->name, params->methodPtr, params->paramp, params->iseq);
     } else {
-        rb_add_method_sorbet(params->klass, params->id, params->methodPtr, params->paramp,
-                             METHOD_VISI_PUBLIC, params->iseq);
+        rb_add_method_sorbet(params->klass, params->id, params->methodPtr, params->paramp, METHOD_VISI_PUBLIC,
+                             params->iseq);
     }
 }
 
-void sorbet_vm_define_method(VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq, bool isSelf) {
+void sorbet_vm_define_method(VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq,
+                             bool isSelf) {
     VALUE sig_table = isSelf ? sigs_for_self_methods() : sigs_for_methods();
     VALUE mod_entry = rb_hash_lookup2(sig_table, klass, Qnil);
     VALUE built_sig = Qnil;
