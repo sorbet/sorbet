@@ -84,7 +84,7 @@ module T::Utils
       when 0 then nil
       when 1 then non_nil_types.first
       else
-        T::Types::Union::Private::Pool.union_of_types(non_nil_types[0], non_nil_types[1], non_nil_types[2..])
+        T::Types::Union::Private::Pool.union_of_types(non_nil_types[0], non_nil_types[1], non_nil_types[2..-1])
       end
     else
       nil
