@@ -1,4 +1,5 @@
 #include "parser/Builder.h"
+#include "absl/strings/str_split.h"
 #include "common/common.h"
 #include "common/typecase.h"
 #include "core/Names.h"
@@ -30,37 +31,42 @@ namespace sorbet::parser {
 
 string Dedenter::dedent(string_view str) {
     string out;
-    for (auto ch : str) {
-        if (spacesToRemove > 0) {
-            switch (ch) {
-                case ' ':
-                    spacesToRemove--;
-                    break;
-                case '\n':
-                    spacesToRemove = dedentLevel;
-                    break;
-                case '\t': {
-                    int indent = dedentLevel - spacesToRemove;
-                    int delta = 8 - indent % 8;
-                    if (delta > spacesToRemove) {
-                        // Prevent against underflow on unsigned integer.
-                        // In this case, the tab doesn't get chomped.
+
+    auto lines = absl::StrSplit(str, "\\\n");
+
+    for (auto line : lines) {
+        spacesToRemove = dedentLevel;
+
+        for (auto ch : line) {
+            if (spacesToRemove > 0) {
+                switch (ch) {
+                    case ' ':
+                        spacesToRemove--;
+                        break;
+                    case '\t': {
+                        int indent = dedentLevel - spacesToRemove;
+                        int delta = 8 - indent % 8;
+                        if (delta > spacesToRemove) {
+                            // Prevent against underflow on unsigned integer.
+                            // In this case, the tab doesn't get chomped.
+                            out.push_back(ch);
+                            spacesToRemove = 0;
+                        } else {
+                            spacesToRemove -= delta;
+                        }
+                        break;
+                    }
+                    default:
+                        // String does not have anymore whitespace left to remove.
                         out.push_back(ch);
                         spacesToRemove = 0;
-                    } else {
-                        spacesToRemove -= delta;
-                    }
-                    break;
                 }
-                default:
-                    // String does not have anymore whitespace left to remove.
-                    out.push_back(ch);
-                    spacesToRemove = 0;
+            } else {
+                out.push_back(ch);
             }
-        } else {
-            out.push_back(ch);
         }
     }
+
     if (!out.empty() && out.back() == '\n') {
         spacesToRemove = dedentLevel;
     }
@@ -639,10 +645,6 @@ public:
     }
 
     unique_ptr<Node> dedentString(unique_ptr<Node> node, size_t dedentLevel) {
-        if (dedentLevel == 0) {
-            return node;
-        }
-
         Dedenter dedenter(dedentLevel);
         unique_ptr<Node> result;
 

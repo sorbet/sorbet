@@ -1080,7 +1080,7 @@ void lexer::set_state_expr_value() {
         // treat '\' as a line continuation, but still dedent the body, so the heredoc above becomes "12\n".
         // This information is emitted as is, without escaping,
         // later this escape sequence (\\\n) gets handled manually in the dedenter
-        std::string str = gsub(tok(), "\\\n", "");
+        auto str = tok();
         current_literal.extend_string(str, ts, te);
       } else if (current_literal.support_line_continuation_via_slash() && escaped_char == '\n') {
         // Heredocs, regexp and a few other types of literals support line
