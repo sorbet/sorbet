@@ -13,6 +13,19 @@ module Sorbet::Private::Static
 
   sig do
     params(
+        arg0: T.untyped,
+        arg1: T.untyped,
+        arg2: T.untyped,
+        arg3: T.nilable(Symbol),
+        blk: T.proc.bind(T::Private::Methods::DeclBuilder).void
+    )
+    .void
+  end
+  def self.sigForMethod(arg0, arg1, arg2, arg3=nil, &blk)
+  end
+
+  sig do
+    params(
         expr: T.untyped,
     )
     .void

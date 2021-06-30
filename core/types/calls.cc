@@ -1587,13 +1587,14 @@ public:
 
 class SorbetPrivateStatic_sig : public IntrinsicMethod {
 public:
+    // Forward Sorbet::Private::Static.sig(recv, ...) {...} to recv.sig(...) {...}
     // Forward Sorbet::Private::Static.sig(<self-method>, <method-name>, recv, ...) {...} to recv.sig(...) {...}
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        if (args.args.size() < 3) {
+        const size_t receiverOffset = args.name == core::Names::sig() ? 0 : 2;
+        if (args.args.size() < (receiverOffset + 1)) {
             return;
         }
 
-        const size_t receiverOffset = 2;
         const size_t argsOffset = receiverOffset + 1;
         auto callLocsReceiver = args.locs.args[receiverOffset];
         auto callLocsArgs = InlinedVector<LocOffsets, 2>{};
@@ -3020,6 +3021,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::new_(), &Class_new},
 
     {Symbols::Sorbet_Private_Static(), Intrinsic::Kind::Singleton, Names::sig(), &SorbetPrivateStatic_sig},
+    {Symbols::Sorbet_Private_Static(), Intrinsic::Kind::Singleton, Names::sigForMethod(), &SorbetPrivateStatic_sig},
 
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHashOrKeywordArgs},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
