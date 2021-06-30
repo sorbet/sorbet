@@ -494,6 +494,19 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
     return;
 }
 
+bool returnFromBlockIsPresent(CompilerState &cs, cfg::CFG &cfg, const vector<FunctionType> &blockTypes) {
+    for (auto &bb : cfg.basicBlocks) {
+        if (blockTypes[bb->rubyBlockId] == FunctionType::Block) {
+            for (auto &bind : bb->exprs) {
+                if (cfg::isa_instruction<cfg::Return>(bind.value.get())) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 // Returns the number of scopes that must be traversed to get back out out to the top-level method frame.
 int getBlockLevel(vector<int> &blockParents, vector<FunctionType> &blockTypes, int rubyBlockId) {
     auto level = 0;
@@ -570,6 +583,8 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
     vector<llvm::AllocaInst *> sendArgArrayByBlock;
     vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
+    vector<llvm::AllocaInst *> throwReturnFlagByBlock;
+    llvm::AllocaInst *ecTag = nullptr;
     UnorderedMap<int, llvm::AllocaInst *> blockControlFramePtrs;
 
     int i = 0;
@@ -597,6 +612,21 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             blockControlFramePtrs[i] = controlFramePtr;
         }
         argumentSetupBlocksByFunction.emplace_back(llvm::BasicBlock::Create(cs, "argumentSetup", fun));
+        throwReturnFlagByBlock.emplace_back(
+            builder.CreateAlloca(llvm::Type::getInt1Ty(cs), nullptr, "throwReturnFlag"));
+        builder.CreateStore(builder.getFalse(), throwReturnFlagByBlock[i]);
+        if (i == 0) {
+            // If no return statements are actually present inside blocks, we will not need to push an EC tag. In that
+            // case, we leave ecTag as nullptr.
+            //
+            // TODO(aprocter): I think this is a little bit more conservative than it needs to be, because it will push
+            // a tag even if the a return-from-block comes from a lambda, which is not actually necessary.
+            if (returnFromBlockIsPresent(cs, cfg, blockTypes)) {
+                ecTag = builder.CreateAlloca(llvm::StructType::getTypeByName(cs, "struct.rb_vm_tag"), nullptr, "ecTag");
+            } else {
+                ecTag = nullptr;
+            }
+        }
         i++;
     }
 
@@ -753,6 +783,8 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(blockExits),
         move(blockScopes),
         move(blockUsesBreak),
+        move(throwReturnFlagByBlock),
+        ecTag,
     };
 
     auto [llvmVariables, selfVariables] = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation);

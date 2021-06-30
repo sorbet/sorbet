@@ -191,10 +191,25 @@ void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBas
                                            int rubyBlockId, llvm::Value *retVal) {
     auto &builder = static_cast<llvm::IRBuilder<> &>(build);
 
+    auto *func = irctx.rubyBlocks2Functions[rubyBlockId];
+
+    auto *throwReturnBlock = llvm::BasicBlock::Create(cs, "throwReturn", func);
+    auto *normalReturnBlock = llvm::BasicBlock::Create(cs, "normalReturn", func);
+
     if (functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId])) {
         builder.CreateCall(cs.getFunction("sorbet_popRubyStack"), {});
     }
+    if (rubyBlockId == 0 && irctx.ecTag != nullptr) {
+        builder.CreateCall(cs.getFunction("sorbet_teardownTagForThrowReturn"), {irctx.ecTag});
+    }
+    auto *throwReturnFlag = builder.CreateLoad(irctx.throwReturnFlagByBlock[rubyBlockId]);
+    builder.CreateCondBr(throwReturnFlag, throwReturnBlock, normalReturnBlock);
 
+    builder.SetInsertPoint(throwReturnBlock);
+    builder.CreateCall(cs.getFunction("sorbet_throwReturn"), {retVal});
+    builder.CreateUnreachable();
+
+    builder.SetInsertPoint(normalReturnBlock);
     builder.CreateRet(retVal);
 }
 
@@ -209,6 +224,13 @@ void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build,
     } else {
         emitUncheckedReturn(cs, builder, irctx, rubyBlockId, retVal);
     }
+}
+
+void IREmitterHelpers::setThrowReturnFlag(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+                                          int rubyBlockId) {
+    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
+
+    builder.CreateStore(builder.getTrue(), irctx.throwReturnFlagByBlock[rubyBlockId]);
 }
 
 namespace {

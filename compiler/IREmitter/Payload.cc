@@ -1173,4 +1173,22 @@ llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &bui
 llvm::Value *Payload::buildLocalsOffset(CompilerState &cs) {
     return llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true));
 }
+
+void Payload::setupEcTag(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx) {
+    auto &builder = builderCast(build);
+
+    auto *setjmpRetval = builder.CreateCall(cs.getFunction("sorbet_initializeTag"), {irctx.ecTag}, "setjmpRetval");
+
+    auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, 0);
+    auto *throwReturnVal = builder.CreateCall(cs.getFunction("sorbet_processThrowReturnSetJmp"),
+                                              {setjmpRetval, cfp, irctx.ecTag}, "throwReturnVal");
+    auto *throwReturnValIsUndef = testIsUndef(cs, builder, throwReturnVal);
+
+    auto *fun = builder.GetInsertBlock()->getParent();
+    auto *caughtThrowReturnJump = llvm::BasicBlock::Create(cs, "caughtThrowReturnJump", fun);
+    builder.CreateCondBr(throwReturnValIsUndef, irctx.argumentSetupBlocksByFunction[0], caughtThrowReturnJump);
+
+    builder.SetInsertPoint(caughtThrowReturnJump);
+    IREmitterHelpers::emitReturn(cs, builder, irctx, 0, throwReturnVal);
+}
 } // namespace sorbet::compiler

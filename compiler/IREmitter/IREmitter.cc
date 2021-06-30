@@ -586,11 +586,15 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         return;
                     }
 
-                    // TODO(aprocter): Once we're able to support return statements that cross block frames but
-                    // _don't_ cross exception frames, delete this more general restriction:
+                    // If this is a return from a block, we set the "return-via-throw" flag which will be processed
+                    // by emitReturn.
                     if (irctx.rubyBlockType[bb->rubyBlockId] == FunctionType::Block) {
-                        // NOTE: this doesn't catch all block-return cases:
-                        // https://github.com/stripe/sorbet_llvm/issues/94
+                        // TODO(aprocter): return statements inside blocks are currently disabled, since a VM patch
+                        // that was required in order to support them was causing issues. Once that is fixed, the body
+                        // of the if should be changed back to:
+                        //
+                        //     IREmitterHelpers::setThrowReturnFlag(cs, builder, irctx, bb->rubyBlockId);
+                        //
                         failCompilation(cs, core::Loc(cs.file, bind.loc),
                                         "returns through multiple stacks not implemented");
                         return;
@@ -792,9 +796,30 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     emitDeadBlocks(cs, cfg, irctx);
     emitBlockExits(cs, cfg, irctx);
     emitPostProcess(cs, cfg, irctx);
+
+    // Link the function initializer blocks.
     for (int funId = 0; funId < irctx.functionInitializersByFunction.size(); funId++) {
+        llvm::BasicBlock *nextBlock;
+
+        // Block 0 (the root Ruby block) is a special case: rather than jumping straight to argument setup, we may need
+        // to push an EC tag and execute setjmp. (If irctx.ecTag is nullptr, that means that we detected statically in
+        // IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping that the EC tag is actually unnecessary.) The EC tag
+        // setup will subsequently branch to the argument setup block; that branch is built in Payload::setupEcTag,
+        // which is called here.
+        //
+        // In other cases, we will just jump directly from the init block to the argument setup block.
+        if (funId == 0 && irctx.ecTag != nullptr) {
+            llvm::BasicBlock *ecTagSetupBlock = llvm::BasicBlock::Create(cs, "ecTagSetup", func);
+            builder.SetInsertPoint(ecTagSetupBlock);
+            Payload::setupEcTag(cs, builder, irctx);
+
+            nextBlock = ecTagSetupBlock;
+        } else {
+            nextBlock = irctx.argumentSetupBlocksByFunction[funId];
+        }
+
         builder.SetInsertPoint(irctx.functionInitializersByFunction[funId]);
-        builder.CreateBr(irctx.argumentSetupBlocksByFunction[funId]);
+        builder.CreateBr(nextBlock);
     }
 
     cs.debug->finalize();

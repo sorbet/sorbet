@@ -131,6 +131,67 @@ void sorbet_vmMethodSearch(struct FunctionInlineCache *cache, VALUE recv) {
 
 // Send Support ********************************************************************************************************
 
+// Wrapped version of vm_call_opt_call:
+// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/vm_insnhelper.c#L2683-L2691
+// The wrapper catches TAG_RETURN jumps (from return statements inside lambdas), and handles appropriately.
+static VALUE sorbet_vm_call_opt_call(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp,
+                                     struct rb_calling_info *calling, struct rb_call_data *cd) {
+    enum ruby_tag_type state;
+    VALUE retval;
+    rb_control_frame_t *const volatile save_cfp = ec->cfp;
+
+    // Push a tag to the execution context's stack, so that subsequent longjmps (inside EC_JUMP_TAG) will know where to
+    // jump to.
+    EC_PUSH_TAG(ec);
+
+    // If EC_EXEC_TAG() returns 0, the tag has just been set (including setjmp), and we continue with a call to
+    // vm_call_opt_call.
+    if ((state = EC_EXEC_TAG()) == 0) {
+        retval = vm_call_opt_call(ec, reg_cfp, calling, cd);
+    }
+    // If EC_EXEC_TAG() returns TAG_RETURN, we have caught a longjmp (via EC_JUMP_TAG) from someone below us in the
+    // call stack indicating they would like to do a non-local 'return'. We need to examine the vm_throw_data to decide
+    // whether the return should go to the current method's caller, or to something above it.
+    //
+    // If the returned state is something other than TAG_RETURN, _or_ the 'return' is not intended to be handled in
+    // this frame, then we will continue the transfer below via EC_JUMP_TAG.
+    else if (state == TAG_RETURN) {
+        const struct vm_throw_data *const err = (struct vm_throw_data *)ec->errinfo;
+        const rb_control_frame_t *const escape_cfp = THROW_DATA_CATCH_FRAME(err);
+
+        // The use of RUBY_VM_PREVIOUS_CONTROL_FRAME here is strange, but I think it is correct. If we are calling a
+        // compiled lambda, and a return under the lambda resolves to return from the lambda, then the escape CFP will
+        // be the lambda's control frame, but the catch here is happening in the lambda's caller's frame's context.
+        //
+        // Note that interpreted lambdas called from here follow a different codepath: the rb_vm_exec for the lambda's
+        // block frame will catch the TAG_RETURN and simply return the value to us.
+        if (save_cfp == RUBY_VM_PREVIOUS_CONTROL_FRAME(escape_cfp)) {
+            rb_vm_rewind_cfp(ec, save_cfp);
+
+            // Zero out state to indicate to the logic below that we have processed the return and do not need to
+            // re-raise.
+            state = 0;
+
+            ec->tag->state = TAG_NONE;
+            ec->errinfo = Qnil;
+            retval = THROW_DATA_VAL(err);
+        }
+    }
+
+    // If we have fallen through to this point (whether or not we caught an EC_JUMP_TAG), we will pop the tag that we
+    // pushed above.
+    EC_POP_TAG();
+
+    // If state is still nonzero, we did not handle the jump, so it must have been intended for someone above us. Thus
+    // we "re-raise" the jump.
+    if (state) {
+        EC_JUMP_TAG(ec, state);
+    }
+
+    // If we get this far, this jump was ours to handle, so we just return the thrown retval.
+    return retval;
+}
+
 // This is a version of vm_call_method_each_type that differs in the handling of refined methods. As we know that we're
 // calling from a CFUNC context, using vm_env_cref will cause a runtime crash, so instead we inline the behavior of
 // `vm_call0_body` for refined methods,
@@ -199,8 +260,12 @@ again:
                     CC_SET_FASTPATH(cc, vm_call_opt_send, TRUE);
                     return vm_call_opt_send(ec, cfp, calling, cd);
                 case OPTIMIZED_METHOD_TYPE_CALL:
-                    CC_SET_FASTPATH(cc, vm_call_opt_call, TRUE);
-                    return vm_call_opt_call(ec, cfp, calling, cd);
+                    // begin differences from vm_call_method_each_type
+                    // We use a patched version of sorbet_vm_call_opt_call which catches and handles returns from
+                    // lambdas.
+                    CC_SET_FASTPATH(cc, sorbet_vm_call_opt_call, TRUE);
+                    return sorbet_vm_call_opt_call(ec, cfp, calling, cd);
+                    // end differences from vm_call_method_each_type
                 case OPTIMIZED_METHOD_TYPE_BLOCK_CALL:
                     CC_SET_FASTPATH(cc, vm_call_opt_block_call, TRUE);
                     return vm_call_opt_block_call(ec, cfp, calling, cd);
@@ -408,4 +473,13 @@ void sorbet_vm_setivar(VALUE obj, ID id, VALUE val, IVC ic) {
     struct rb_call_cache *cc = 0;
     int is_attr = 0;
     vm_setivar(obj, id, val, ic, cc, is_attr);
+}
+
+VALUE sorbet_vm_throw(const rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, rb_num_t throw_state,
+                      VALUE throwobj) {
+    return vm_throw(ec, reg_cfp, throw_state, throwobj);
+}
+
+void sorbet_ec_jump_tag(rb_execution_context_t *ec, enum ruby_tag_type tt) {
+    EC_JUMP_TAG(ec, tt);
 }
