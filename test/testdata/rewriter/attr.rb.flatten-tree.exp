@@ -57,22 +57,22 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.sig(false, :initialize, <self>) do ||
+        ::Sorbet::Private::Static.sigForMethod(false, :initialize, <self>) do ||
           <self>.void()
         end
-        ::Sorbet::Private::Static.sig(false, :v1, <self>) do ||
+        ::Sorbet::Private::Static.sigForMethod(false, :v1, <self>) do ||
           <self>.returns(::Integer)
         end
-        ::Sorbet::Private::Static.sig(false, :v1=, <self>) do ||
+        ::Sorbet::Private::Static.sigForMethod(false, :v1=, <self>) do ||
           <self>.params(:v1, ::Integer).returns(::Integer)
         end
-        ::Sorbet::Private::Static.sig(false, :v2, <self>) do ||
+        ::Sorbet::Private::Static.sigForMethod(false, :v2, <self>) do ||
           <self>.returns(::String)
         end
-        ::Sorbet::Private::Static.sig(false, :v2=, <self>) do ||
+        ::Sorbet::Private::Static.sigForMethod(false, :v2=, <self>) do ||
           <self>.params(:v2, ::String).returns(::String)
         end
-        ::Sorbet::Private::Static.sig(false, :v3, <self>) do ||
+        ::Sorbet::Private::Static.sigForMethod(false, :v3, <self>) do ||
           <self>.returns(::String)
         end
         <self>.extend(::T::Sig)

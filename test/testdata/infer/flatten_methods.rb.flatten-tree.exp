@@ -29,10 +29,10 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.sig(true, :takes_integer_static, <self>) do ||
+        ::Sorbet::Private::Static.sigForMethod(true, :takes_integer_static, <self>) do ||
           <self>.params(:x, ::Integer).void()
         end
-        ::Sorbet::Private::Static.sig(false, :takes_integer_instance, <self>) do ||
+        ::Sorbet::Private::Static.sigForMethod(false, :takes_integer_instance, <self>) do ||
           <self>.params(:x, ::Integer).void()
         end
         <self>.extend(::T::Sig)
