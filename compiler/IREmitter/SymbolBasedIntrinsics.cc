@@ -487,7 +487,28 @@ class SorbetPrivateStaticSigIntrinsic : public SymbolBasedIntrinsicMethod {
 public:
     SorbetPrivateStaticSigIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
         auto &builder = builderCast(mcctx.build);
+        auto *send = mcctx.send;
+        // args[0] = isSelf
+        // args[1] = methodName
+        // args[2] = recv
+        // args[3..] = originalArgs, if present
+        if (send->args[2].variable != cfg::LocalRef::selfVariable()) {
+            return Payload::rubyNil(mcctx.cs, builder);
+        }
+
+        ENFORCE(mcctx.blkAsFunction() != nullptr);
+        // stack[0] is the receiver, which we don't care about.
+        auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, cfg::LocalRef::selfVariable(), 0);
+        llvm::Value *sigArg;
+        if (send->args.size() > 3) {
+            sigArg = stack[4];
+        } else {
+            sigArg = Payload::rubyNil(mcctx.cs, builder);
+        }
+        builder.CreateCall(cs.getFunction("sorbet_vm_register_sig"),
+                           {stack[1], stack[2], stack[3], sigArg, mcctx.blkAsFunction()});
         return Payload::rubyNil(mcctx.cs, builder);
     }
 
