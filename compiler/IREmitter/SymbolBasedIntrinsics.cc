@@ -494,6 +494,8 @@ public:
         // args[1] = methodName
         // args[2] = recv
         // args[3..] = originalArgs, if present
+        //
+        // Do nothing for non-self calls (e.g. T::Sig::WithoutRuntime.sig)
         if (send->args[2].variable != cfg::LocalRef::selfVariable()) {
             return Payload::rubyNil(mcctx.cs, builder);
         }
