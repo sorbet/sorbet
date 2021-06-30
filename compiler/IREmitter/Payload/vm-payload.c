@@ -457,7 +457,7 @@ void sorbet_vm_define_method(VALUE klass, const char *name, rb_sorbet_func_t met
     VALUE built_sig = Qnil;
     ID id = rb_intern(name);
     if (mod_entry != Qnil) {
-        built_sig = rb_hash_lookup2(mod_entry, ID2SYM(id), Qnil);
+        built_sig = rb_hash_delete(mod_entry, ID2SYM(id));
     }
 
     struct method_block_params params;
