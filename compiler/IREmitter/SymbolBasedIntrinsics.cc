@@ -187,14 +187,21 @@ public:
             }
             auto *forwarder = generateForwarder(mcctx);
 
-            // The ruby stack doens't need to be managed here because the known c intrinsics don't expect to be called
-            // by the vm.
-            res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock"),
-                                     {forwarder, recv, id, argc, argv, blk, offset}, "rawSendResultWithBlock");
-
-            // NOTE: we can't emit a type annotation if the block passed might use break, as the break would potentially
-            // change the type of value returned.
-            if (!mcctx.irctx.blockUsesBreak[mcctx.blk.value()]) {
+            // NOTE: The ruby stack doesn't need to be managed here because the known c intrinsics don't expect to be
+            // called by the vm.
+            bool usesBreak = mcctx.irctx.blockUsesBreak[mcctx.blk.value()];
+            if (usesBreak) {
+                res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock"),
+                                         {forwarder, recv, id, argc, argv, blk, offset}, "rawSendResultWithBlock");
+            } else {
+                // Since the block doesn't use break we can make two optimizations:
+                //
+                // 1. Use the version of sorbet_callIntrinsicInlineBlock that doesn't use rb_iterate and will inline
+                //    better
+                // 2. Emit a type assertion on the result of the function, as we know that there won't be non-local
+                //    control flow based on the use of `break` that could change the type of the returned value
+                res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock_noBreak"),
+                                         {forwarder, recv, id, argc, argv, blk, offset}, "rawSendResultWithBlock");
                 cMethodWithBlock->assertResultType(cs, builder, res);
             }
         } else {

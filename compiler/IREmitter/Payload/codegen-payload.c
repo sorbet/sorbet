@@ -1901,6 +1901,33 @@ VALUE sorbet_callIntrinsicInlineBlock(VALUE (*body)(VALUE), VALUE recv, ID fun, 
 }
 
 SORBET_INLINE
+VALUE sorbet_callIntrinsicInlineBlock_noBreak(VALUE (*body)(VALUE), VALUE recv, ID fun, int argc, VALUE *argv,
+                                      BlockFFIType blk, VALUE closure) {
+    struct sorbet_inlineIntrinsicEnv env;
+    env.recv = recv;
+    env.fun = fun;
+    env.argc = argc;
+    env.argv = argv;
+    env.closure = closure;
+
+    // In the case that we don't see `break` used in the block, it's OK to skip setting up the tag stack and instead
+    // directly allocate the resources needed to setup the block frame. The setup before the call to the `body`
+    // function is a combination of the conditional allocation from `rb_iterate` and the setup of the block handler
+    // when that allocation was successful.
+
+    rb_execution_context_t *ec = GET_EC();
+    rb_control_frame_t *cfp = ec->cfp;
+
+    const struct vm_ifunc *const ifunc = rb_vm_ifunc_proc_new(blk, (void *)closure);
+    struct rb_captured_block *captured = (struct rb_captured_block *)&cfp->self;
+    captured->code.ifunc = ifunc;
+    VALUE blockHandler = VM_BH_FROM_IFUNC_BLOCK(captured);
+    ec->passed_block_handler = blockHandler;
+
+    return body((VALUE)&env);
+}
+
+SORBET_INLINE
 unsigned int sorbet_vmCallKwarg() {
     return VM_CALL_KWARG;
 }
