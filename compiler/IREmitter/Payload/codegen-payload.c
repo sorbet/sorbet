@@ -1902,7 +1902,7 @@ VALUE sorbet_callIntrinsicInlineBlock(VALUE (*body)(VALUE), VALUE recv, ID fun, 
 
 SORBET_INLINE
 VALUE sorbet_callIntrinsicInlineBlock_noBreak(VALUE (*body)(VALUE), VALUE recv, ID fun, int argc, VALUE *argv,
-                                      BlockFFIType blk, VALUE closure) {
+                                              BlockFFIType blk, VALUE closure) {
     struct sorbet_inlineIntrinsicEnv env;
     env.recv = recv;
     env.fun = fun;
