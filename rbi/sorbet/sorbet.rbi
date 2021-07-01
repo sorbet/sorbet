@@ -16,7 +16,7 @@ module Sorbet::Private::Static
         arg0: T.untyped,
         arg1: T.untyped,
         arg2: T.untyped,
-        arg3: T.nilable(Symbol),
+        arg3: T.untyped,
         blk: T.proc.bind(T::Private::Methods::DeclBuilder).void
     )
     .void

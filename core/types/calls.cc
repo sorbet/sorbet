@@ -1588,28 +1588,34 @@ public:
 class SorbetPrivateStatic_sig : public IntrinsicMethod {
 public:
     // Forward Sorbet::Private::Static.sig(recv, ...) {...} to recv.sig(...) {...}
-    // Forward Sorbet::Private::Static.sig(<self-method>, <method-name>, recv, ...) {...} to recv.sig(...) {...}
+    // Forward Sorbet::Private::Static.sigForMethod(recv, ..., <self-method>, <method-name>) {...} to recv.sig(...) {...}
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        const size_t receiverOffset = args.name == core::Names::sig() ? 0 : 2;
-        if (args.args.size() < (receiverOffset + 1)) {
+        // sigForMethod has trailing args that we don't want to dispatch to the
+        // actual sig method.
+        const size_t argsToDropOffEnd = args.name == core::Names::sig() ? 0 : 2;
+        // We should always have the actual receiver plus whatever args we're going
+        // to ignore for dispatching purposes.
+        if (args.args.size() < (argsToDropOffEnd + 1)) {
             return;
         }
 
-        const size_t argsOffset = receiverOffset + 1;
-        auto callLocsReceiver = args.locs.args[receiverOffset];
+        const size_t argsOffset = 1;
+        auto callLocsReceiver = args.locs.args[0];
         auto callLocsArgs = InlinedVector<LocOffsets, 2>{};
-        for (auto loc = args.locs.args.begin() + argsOffset; loc != args.locs.args.end(); ++loc) {
+        for (auto loc = args.locs.args.begin() + argsOffset,
+                 end = args.locs.args.end() - argsToDropOffEnd; loc != end; ++loc) {
             callLocsArgs.emplace_back(*loc);
         }
         CallLocs callLocs{args.locs.file, args.locs.call, callLocsReceiver, callLocsArgs};
 
-        u2 numPosArgs = args.numPosArgs - argsOffset;
+        u2 numPosArgs = args.numPosArgs - (1 + argsToDropOffEnd);
         auto dispatchArgsArgs = InlinedVector<const TypeAndOrigins *, 2>{};
-        for (auto arg = args.args.begin() + argsOffset; arg != args.args.end(); ++arg) {
+        for (auto arg = args.args.begin() + argsOffset,
+                 end = args.args.end() - argsToDropOffEnd; arg != end; ++arg) {
             dispatchArgsArgs.emplace_back(*arg);
         }
 
-        auto recv = *args.args[receiverOffset];
+        auto recv = *args.args[0];
         res = recv.type.dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv.type, recv,
                                           recv.type, args.block, args.originForUninitialized});
     }

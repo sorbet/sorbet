@@ -2657,9 +2657,9 @@ private:
         auto &origArgs = send->args;
         if (auto *self = ast::cast_tree<ast::Local>(send->args[0])) {
             if (self->localVariable == core::LocalVariable::selfVariable()) {
-                auto it = origArgs.insert(origArgs.begin(), mdef.flags.isSelfMethod ? ast::MK::True(send->loc)
-                                                                                    : ast::MK::False(send->loc));
-                it = origArgs.insert(it + 1, ast::MK::Symbol(send->loc, method.data(ctx)->name));
+                origArgs.emplace_back(mdef.flags.isSelfMethod ? ast::MK::True(send->loc)
+                                      : ast::MK::False(send->loc));
+                origArgs.emplace_back(ast::MK::Symbol(send->loc, method.data(ctx)->name));
                 send->numPosArgs += 2;
                 send->fun = core::Names::sigForMethod();
             }
