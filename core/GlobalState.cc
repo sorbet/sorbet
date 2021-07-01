@@ -474,6 +474,13 @@ void GlobalState::initEmpty() {
     enterMethodArgumentSymbol(Loc::none(), method, Names::args());
     ENFORCE(method == Symbols::todoMethod());
 
+    method = enterMethod(*this, Symbols::Sorbet_Private_StaticSingleton(), Names::sigForMethod())
+        .untypedArg(Names::arg0())
+        .untypedArg(Names::arg1())
+        .untypedArg(Names::arg2())
+        .untypedArg(Names::arg3()).build();
+    ENFORCE(method == Symbols::sigForMethod());
+
     typeArgument =
         enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
     ENFORCE(typeArgument == Symbols::todoTypeArgument());
