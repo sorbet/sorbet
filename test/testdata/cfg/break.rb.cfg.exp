@@ -76,7 +76,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: FalseClass = false\l<statTemp>$7: Symbol(:bar) = :bar\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).sigForMethod(<statTemp>$6: FalseClass, <statTemp>$7: Symbol(:bar), <self>: T.class_of(<root>))\l<selfRestore>$10: T.class_of(<root>) = <self>\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$7: FalseClass = false\l<statTemp>$8: Symbol(:bar) = :bar\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).sigForMethod(<self>: T.class_of(<root>), <statTemp>$7: FalseClass, <statTemp>$8: Symbol(:bar))\l<selfRestore>$10: T.class_of(<root>) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_2" [style="bold"];

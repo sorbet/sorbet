@@ -36,10 +36,10 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.sigForMethod(true, :private, <self>) do ||
+        ::Sorbet::Private::Static.sigForMethod(<self>, true, :private) do ||
           <self>.params(:arg0, ::Integer).void()
         end
-        ::Sorbet::Private::Static.sigForMethod(true, :private_class_method, <self>) do ||
+        ::Sorbet::Private::Static.sigForMethod(<self>, true, :private_class_method) do ||
           <self>.params(:arg0, ::Integer).void()
         end
         <self>.extend(::T::Sig)

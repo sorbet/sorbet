@@ -146,7 +146,7 @@ subgraph "cluster_::<Class:Funcs>#<static-init>" {
     "bb::<Class:Funcs>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Funcs>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: FalseClass = false\l<statTemp>$7: Symbol(:f) = :f\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).sigForMethod(<statTemp>$6: FalseClass, <statTemp>$7: Symbol(:f), <self>: T.class_of(Funcs))\l<selfRestore>$10: T.class_of(Funcs) = <self>\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Funcs>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$7: FalseClass = false\l<statTemp>$8: Symbol(:f) = :f\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).sigForMethod(<self>: T.class_of(Funcs), <statTemp>$7: FalseClass, <statTemp>$8: Symbol(:f))\l<selfRestore>$10: T.class_of(Funcs) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_0" -> "bb::<Class:Funcs>#<static-init>_2" [style="bold"];
@@ -169,7 +169,7 @@ subgraph "cluster_::<Class:Funcs>#<static-init>" {
     "bb::<Class:Funcs>#<static-init>_3" [
         shape = rectangle;
         color = black;
-        label = "block[id=3, rubyBlockId=0](<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Funcs))\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$9, sigForMethod>\l<self>: T.class_of(Funcs) = <selfRestore>$10\l<cfgAlias>$24: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$25: FalseClass = false\l<statTemp>$26: Symbol(:g) = :g\l<block-pre-call-temp>$28: Sorbet::Private::Static::Void = <cfgAlias>$24: T.class_of(Sorbet::Private::Static).sigForMethod(<statTemp>$25: FalseClass, <statTemp>$26: Symbol(:g), <self>: T.class_of(Funcs))\l<selfRestore>$29: T.class_of(Funcs) = <self>\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Funcs))\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$9, sigForMethod>\l<self>: T.class_of(Funcs) = <selfRestore>$10\l<cfgAlias>$24: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$26: FalseClass = false\l<statTemp>$27: Symbol(:g) = :g\l<block-pre-call-temp>$28: Sorbet::Private::Static::Void = <cfgAlias>$24: T.class_of(Sorbet::Private::Static).sigForMethod(<self>: T.class_of(Funcs), <statTemp>$26: FalseClass, <statTemp>$27: Symbol(:g))\l<selfRestore>$29: T.class_of(Funcs) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_3" -> "bb::<Class:Funcs>#<static-init>_6" [style="bold"];
@@ -192,7 +192,7 @@ subgraph "cluster_::<Class:Funcs>#<static-init>" {
     "bb::<Class:Funcs>#<static-init>_7" [
         shape = rectangle;
         color = black;
-        label = "block[id=7, rubyBlockId=0](<block-pre-call-temp>$28: Sorbet::Private::Static::Void, <selfRestore>$29: T.class_of(Funcs))\l<statTemp>$22: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$28, sigForMethod>\l<self>: T.class_of(Funcs) = <selfRestore>$29\l<cfgAlias>$43: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$44: TrueClass = true\l<statTemp>$45: Symbol(:g) = :g\l<block-pre-call-temp>$47: Sorbet::Private::Static::Void = <cfgAlias>$43: T.class_of(Sorbet::Private::Static).sigForMethod(<statTemp>$44: TrueClass, <statTemp>$45: Symbol(:g), <self>: T.class_of(Funcs))\l<selfRestore>$48: T.class_of(Funcs) = <self>\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=0](<block-pre-call-temp>$28: Sorbet::Private::Static::Void, <selfRestore>$29: T.class_of(Funcs))\l<statTemp>$22: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$28, sigForMethod>\l<self>: T.class_of(Funcs) = <selfRestore>$29\l<cfgAlias>$43: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$45: TrueClass = true\l<statTemp>$46: Symbol(:g) = :g\l<block-pre-call-temp>$47: Sorbet::Private::Static::Void = <cfgAlias>$43: T.class_of(Sorbet::Private::Static).sigForMethod(<self>: T.class_of(Funcs), <statTemp>$45: TrueClass, <statTemp>$46: Symbol(:g))\l<selfRestore>$48: T.class_of(Funcs) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_7" -> "bb::<Class:Funcs>#<static-init>_10" [style="bold"];
@@ -215,7 +215,7 @@ subgraph "cluster_::<Class:Funcs>#<static-init>" {
     "bb::<Class:Funcs>#<static-init>_11" [
         shape = rectangle;
         color = black;
-        label = "block[id=11, rubyBlockId=0](<block-pre-call-temp>$47: Sorbet::Private::Static::Void, <selfRestore>$48: T.class_of(Funcs))\l<statTemp>$41: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$47, sigForMethod>\l<self>: T.class_of(Funcs) = <selfRestore>$48\l<cfgAlias>$62: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$63: FalseClass = false\l<statTemp>$64: Symbol(:h) = :h\l<block-pre-call-temp>$66: Sorbet::Private::Static::Void = <cfgAlias>$62: T.class_of(Sorbet::Private::Static).sigForMethod(<statTemp>$63: FalseClass, <statTemp>$64: Symbol(:h), <self>: T.class_of(Funcs))\l<selfRestore>$67: T.class_of(Funcs) = <self>\l<unconditional>\l"
+        label = "block[id=11, rubyBlockId=0](<block-pre-call-temp>$47: Sorbet::Private::Static::Void, <selfRestore>$48: T.class_of(Funcs))\l<statTemp>$41: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$47, sigForMethod>\l<self>: T.class_of(Funcs) = <selfRestore>$48\l<cfgAlias>$62: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$64: FalseClass = false\l<statTemp>$65: Symbol(:h) = :h\l<block-pre-call-temp>$66: Sorbet::Private::Static::Void = <cfgAlias>$62: T.class_of(Sorbet::Private::Static).sigForMethod(<self>: T.class_of(Funcs), <statTemp>$64: FalseClass, <statTemp>$65: Symbol(:h))\l<selfRestore>$67: T.class_of(Funcs) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_11" -> "bb::<Class:Funcs>#<static-init>_14" [style="bold"];
@@ -238,7 +238,7 @@ subgraph "cluster_::<Class:Funcs>#<static-init>" {
     "bb::<Class:Funcs>#<static-init>_15" [
         shape = rectangle;
         color = black;
-        label = "block[id=15, rubyBlockId=0](<block-pre-call-temp>$66: Sorbet::Private::Static::Void, <selfRestore>$67: T.class_of(Funcs))\l<statTemp>$60: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$66, sigForMethod>\l<self>: T.class_of(Funcs) = <selfRestore>$67\l<cfgAlias>$81: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$82: TrueClass = true\l<statTemp>$83: Symbol(:h) = :h\l<block-pre-call-temp>$85: Sorbet::Private::Static::Void = <cfgAlias>$81: T.class_of(Sorbet::Private::Static).sigForMethod(<statTemp>$82: TrueClass, <statTemp>$83: Symbol(:h), <self>: T.class_of(Funcs))\l<selfRestore>$86: T.class_of(Funcs) = <self>\l<unconditional>\l"
+        label = "block[id=15, rubyBlockId=0](<block-pre-call-temp>$66: Sorbet::Private::Static::Void, <selfRestore>$67: T.class_of(Funcs))\l<statTemp>$60: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$66, sigForMethod>\l<self>: T.class_of(Funcs) = <selfRestore>$67\l<cfgAlias>$81: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$83: TrueClass = true\l<statTemp>$84: Symbol(:h) = :h\l<block-pre-call-temp>$85: Sorbet::Private::Static::Void = <cfgAlias>$81: T.class_of(Sorbet::Private::Static).sigForMethod(<self>: T.class_of(Funcs), <statTemp>$83: TrueClass, <statTemp>$84: Symbol(:h))\l<selfRestore>$86: T.class_of(Funcs) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_15" -> "bb::<Class:Funcs>#<static-init>_18" [style="bold"];

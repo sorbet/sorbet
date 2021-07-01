@@ -16,7 +16,7 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.sigForMethod(false, :test_resolve, <self>) do ||
+        ::Sorbet::Private::Static.sigForMethod(<self>, false, :test_resolve) do ||
           <self>.returns(::T2)
         end
         ::Sorbet::Private::Static.keep_def(<self>, :test_resolve, :normal)
