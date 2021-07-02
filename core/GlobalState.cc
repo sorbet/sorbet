@@ -483,7 +483,7 @@ void GlobalState::initEmpty() {
                  .untypedArg(Names::arg0())
                  .untypedArg(Names::arg1())
                  .untypedArg(Names::arg2())
-                 .untypedArg(Names::arg3())
+                 .defaultArg(Names::arg3())
                  .build();
     ENFORCE(method == Symbols::SorbetPrivateStaticResolvedSig_sig());
 
