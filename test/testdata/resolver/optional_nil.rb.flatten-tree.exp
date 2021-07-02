@@ -28,16 +28,16 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.sigForMethod(<self>, false, :foo) do ||
+        ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :foo) do ||
           <self>.params(:x, ::String).returns(::String)
         end
-        ::Sorbet::Private::Static.sigForMethod(<self>, false, :bar) do ||
+        ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :bar) do ||
           <self>.params(:y, ::String).returns(::String)
         end
-        ::Sorbet::Private::Static.sigForMethod(<self>, false, :qux) do ||
+        ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :qux) do ||
           <self>.params(:z, ::String).returns(::String)
         end
-        ::Sorbet::Private::Static.sigForMethod(<self>, false, :baz) do ||
+        ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :baz) do ||
           <self>.params(:w, ::String).returns(::String)
         end
         <self>.extend(::T::Sig)

@@ -7,7 +7,7 @@ begin
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        ::Sorbet::Private::Static.sigForMethod(<self>, false, :foo) do ||
+        ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :foo) do ||
           <self>.params(:blk, ::T.proc().params(:a, ::Integer, :b, ::String).void()).void()
         end
         <self>.extend(::T::Sig)

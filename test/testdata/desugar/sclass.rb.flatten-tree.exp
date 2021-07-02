@@ -152,7 +152,7 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.sigForMethod(<self>, false, :f=) do ||
+        ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :f=) do ||
           <self>.params(:f, ::Integer).returns(::Integer)
         end
         ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
