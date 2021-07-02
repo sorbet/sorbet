@@ -85,6 +85,10 @@ bool TypeSyntax::isSig(core::Context ctx, const ast::Send &send) {
     if (send.block.get() == nullptr) {
         return false;
     }
+    // NB: this only needs to check for Sorbet::Private::Static.sig and not
+    // Sorbet::Private::Static::ResolvedSig.sig, because this function is only
+    // used during resolver to identify potential sigs.  We don't create
+    // Sorbet::Private::Static::ResolvedSig.sig until after resolver is run.
     auto nargs = send.args.size();
     if (!(nargs == 1 || nargs == 2)) {
         return false;
