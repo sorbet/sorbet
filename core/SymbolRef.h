@@ -865,6 +865,14 @@ public:
         return MethodRef::fromRaw(10);
     }
 
+    static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
+        return ClassOrModuleRef::fromRaw(87);
+    }
+
+    static ClassOrModuleRef Sorbet_Private_Static_ResolvedSigSingleton() {
+        return ClassOrModuleRef::fromRaw(88);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static ClassOrModuleRef Proc0() {
         return ClassOrModuleRef::fromRaw(MAX_SYNTHETIC_CLASS_SYMBOLS - MAX_PROC_ARITY * 2 - 2);
