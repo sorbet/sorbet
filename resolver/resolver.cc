@@ -2676,8 +2676,7 @@ private:
 
         cnst->symbol = core::Symbols::Sorbet_Private_Static_ResolvedSig();
 
-        origArgs.emplace_back(mdef.flags.isSelfMethod ? ast::MK::True(send->loc)
-                              : ast::MK::False(send->loc));
+        origArgs.emplace_back(mdef.flags.isSelfMethod ? ast::MK::True(send->loc) : ast::MK::False(send->loc));
         origArgs.emplace_back(ast::MK::Symbol(send->loc, method.data(ctx)->name));
         send->numPosArgs += 2;
     }

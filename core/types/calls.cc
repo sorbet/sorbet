@@ -1596,24 +1596,23 @@ void applySig(const GlobalState &gs, const DispatchArgs &args, DispatchResult &r
     const size_t argsOffset = 1;
     auto callLocsReceiver = args.locs.args[0];
     auto callLocsArgs = InlinedVector<LocOffsets, 2>{};
-    for (auto loc = args.locs.args.begin() + argsOffset,
-             end = args.locs.args.end() - argsToDropOffEnd; loc != end; ++loc) {
+    for (auto loc = args.locs.args.begin() + argsOffset, end = args.locs.args.end() - argsToDropOffEnd; loc != end;
+         ++loc) {
         callLocsArgs.emplace_back(*loc);
     }
     CallLocs callLocs{args.locs.file, args.locs.call, callLocsReceiver, callLocsArgs};
 
     u2 numPosArgs = args.numPosArgs - (1 + argsToDropOffEnd);
     auto dispatchArgsArgs = InlinedVector<const TypeAndOrigins *, 2>{};
-    for (auto arg = args.args.begin() + argsOffset,
-             end = args.args.end() - argsToDropOffEnd; arg != end; ++arg) {
+    for (auto arg = args.args.begin() + argsOffset, end = args.args.end() - argsToDropOffEnd; arg != end; ++arg) {
         dispatchArgsArgs.emplace_back(*arg);
     }
 
     auto recv = *args.args[0];
     res = recv.type.dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv.type, recv,
-                recv.type, args.block, args.originForUninitialized});
+                                      recv.type, args.block, args.originForUninitialized});
 }
-}
+} // namespace
 
 class SorbetPrivateStatic_sig : public IntrinsicMethod {
 public:
@@ -1625,7 +1624,8 @@ public:
 
 class SorbetPrivateStaticResolvedSig_sig : public IntrinsicMethod {
 public:
-    // Forward Sorbet::Private::Static::ResolvedSig.sig(recv, ..., <self-method>, <method-name>) {...} to recv.sig(...) {...}
+    // Forward Sorbet::Private::Static::ResolvedSig.sig(recv, ..., <self-method>, <method-name>) {...} to recv.sig(...)
+    // {...}
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         const size_t selfAndMethodSymbol = 2;
         applySig(gs, args, res, selfAndMethodSymbol);
@@ -3038,7 +3038,8 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::new_(), &Class_new},
 
     {Symbols::Sorbet_Private_Static(), Intrinsic::Kind::Singleton, Names::sig(), &SorbetPrivateStatic_sig},
-    {Symbols::Sorbet_Private_Static_ResolvedSig(), Intrinsic::Kind::Singleton, Names::sig(), &SorbetPrivateStaticResolvedSig_sig},
+    {Symbols::Sorbet_Private_Static_ResolvedSig(), Intrinsic::Kind::Singleton, Names::sig(),
+     &SorbetPrivateStaticResolvedSig_sig},
 
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHashOrKeywordArgs},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
