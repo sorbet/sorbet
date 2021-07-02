@@ -2655,15 +2655,31 @@ private:
         // them later.
         auto *send = sig.origSend;
         auto &origArgs = send->args;
-        if (auto *self = ast::cast_tree<ast::Local>(send->args[0])) {
-            if (self->localVariable == core::LocalVariable::selfVariable()) {
-                origArgs.emplace_back(mdef.flags.isSelfMethod ? ast::MK::True(send->loc)
-                                      : ast::MK::False(send->loc));
-                origArgs.emplace_back(ast::MK::Symbol(send->loc, method.data(ctx)->name));
-                send->numPosArgs += 2;
-                send->fun = core::Names::sigForMethod();
-            }
+        auto *self = ast::cast_tree<ast::Local>(send->args[0]);
+        if (self == nullptr) {
+            return;
         }
+
+        // We distinguish "user-written" sends by checking for self.
+        // T::Sig::WithoutRuntime.sig wouldn't have any runtime effect that we need
+        // to record later.
+        if (self->localVariable != core::LocalVariable::selfVariable()) {
+            return;
+        }
+
+        auto *cnst = ast::cast_tree<ast::ConstantLit>(send->recv);
+        ENFORCE(cnst != nullptr);
+        // This condition really shouldn't happen.
+        if (cnst == nullptr) {
+            return;
+        }
+
+        cnst->symbol = core::Symbols::Sorbet_Private_Static_ResolvedSig();
+
+        origArgs.emplace_back(mdef.flags.isSelfMethod ? ast::MK::True(send->loc)
+                              : ast::MK::False(send->loc));
+        origArgs.emplace_back(ast::MK::Symbol(send->loc, method.data(ctx)->name));
+        send->numPosArgs += 2;
     }
 
     // Force errors from any signatures that didn't attach to methods.

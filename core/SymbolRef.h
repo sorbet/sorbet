@@ -861,16 +861,16 @@ public:
         return MethodRef::fromRaw(9);
     }
 
-    static MethodRef sigForMethod() {
-        return MethodRef::fromRaw(10);
-    }
-
     static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
         return ClassOrModuleRef::fromRaw(87);
     }
 
     static ClassOrModuleRef Sorbet_Private_Static_ResolvedSigSingleton() {
         return ClassOrModuleRef::fromRaw(88);
+    }
+
+    static MethodRef SorbetPrivateStaticResolvedSig_sig() {
+        return MethodRef::fromRaw(10);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
@@ -899,7 +899,7 @@ public:
     static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 40;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 3;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
-    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 98;
+    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 100;
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {

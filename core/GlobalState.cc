@@ -474,17 +474,17 @@ void GlobalState::initEmpty() {
     enterMethodArgumentSymbol(Loc::none(), method, Names::args());
     ENFORCE(method == Symbols::todoMethod());
 
-    method = enterMethod(*this, Symbols::Sorbet_Private_StaticSingleton(), Names::sigForMethod())
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig());
+    ENFORCE(id == Symbols::Sorbet_Private_Static_ResolvedSig());
+    id = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::Sorbet_Private_Static_ResolvedSigSingleton());
+
+    method = enterMethod(*this, Symbols::Sorbet_Private_Static_ResolvedSigSingleton(), Names::sig())
         .untypedArg(Names::arg0())
         .untypedArg(Names::arg1())
         .untypedArg(Names::arg2())
         .untypedArg(Names::arg3()).build();
-    ENFORCE(method == Symbols::sigForMethod());
-
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig());
-    ENFORCE(id == Symbols::Sorbet_Private_Static_ResolvedSig());
-    id = Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this);
-    ENFORCE(id == Symbols::Sorbet_Private_Static_ResolvedSigSingleton());
+    ENFORCE(method == Symbols::SorbetPrivateStaticResolvedSig_sig());
 
     typeArgument =
         enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
