@@ -165,8 +165,8 @@ private:
 
         // We intentionally do not walk v->ancestors nor v->singletonAncestors.
         // They are guaranteed to be simple trees in the desugarer.
-        for (auto &def : cast_tree<ClassDef>(v)->rhs) {
-            def = mapIt(std::move(def), ctx.withOwner(cast_tree<ClassDef>(v)->symbol).withFile(ctx.file));
+        for (auto &def : cast_tree_nonnull<ClassDef>(v).rhs) {
+            def = mapIt(std::move(def), ctx.withOwner(cast_tree_nonnull<ClassDef>(v).symbol).withFile(ctx.file));
         }
 
         if constexpr (HAS_MEMBER_postTransformClassDef<FUNC>()) {
@@ -180,14 +180,16 @@ private:
             v = CALL_MEMBER_preTransformMethodDef<FUNC>::call(func, ctx, std::move(v));
         }
 
-        for (auto &arg : cast_tree<MethodDef>(v)->args) {
+        for (auto &arg : cast_tree_nonnull<MethodDef>(v).args) {
             // Only OptionalArgs have subexpressions within them.
             if (auto *optArg = cast_tree<OptionalArg>(arg)) {
-                optArg->default_ = mapIt(std::move(optArg->default_), ctx.withOwner(cast_tree<MethodDef>(v)->symbol));
+                optArg->default_ =
+                    mapIt(std::move(optArg->default_), ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol));
             }
         }
-        cast_tree<MethodDef>(v)->rhs = mapIt(std::move(cast_tree<MethodDef>(v)->rhs),
-                                             ctx.withOwner(cast_tree<MethodDef>(v)->symbol).withFile(ctx.file));
+        cast_tree_nonnull<MethodDef>(v).rhs =
+            mapIt(std::move(cast_tree_nonnull<MethodDef>(v).rhs),
+                  ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol).withFile(ctx.file));
 
         if constexpr (HAS_MEMBER_postTransformMethodDef<FUNC>()) {
             return CALL_MEMBER_postTransformMethodDef<FUNC>::call(func, ctx, std::move(v));
@@ -200,9 +202,9 @@ private:
         if constexpr (HAS_MEMBER_preTransformIf<FUNC>()) {
             v = CALL_MEMBER_preTransformIf<FUNC>::call(func, ctx, std::move(v));
         }
-        cast_tree<If>(v)->cond = mapIt(std::move(cast_tree<If>(v)->cond), ctx);
-        cast_tree<If>(v)->thenp = mapIt(std::move(cast_tree<If>(v)->thenp), ctx);
-        cast_tree<If>(v)->elsep = mapIt(std::move(cast_tree<If>(v)->elsep), ctx);
+        cast_tree_nonnull<If>(v).cond = mapIt(std::move(cast_tree_nonnull<If>(v).cond), ctx);
+        cast_tree_nonnull<If>(v).thenp = mapIt(std::move(cast_tree_nonnull<If>(v).thenp), ctx);
+        cast_tree_nonnull<If>(v).elsep = mapIt(std::move(cast_tree_nonnull<If>(v).elsep), ctx);
 
         if constexpr (HAS_MEMBER_postTransformIf<FUNC>()) {
             return CALL_MEMBER_postTransformIf<FUNC>::call(func, ctx, std::move(v));
@@ -214,8 +216,8 @@ private:
         if constexpr (HAS_MEMBER_preTransformWhile<FUNC>()) {
             v = CALL_MEMBER_preTransformWhile<FUNC>::call(func, ctx, std::move(v));
         }
-        cast_tree<While>(v)->cond = mapIt(std::move(cast_tree<While>(v)->cond), ctx);
-        cast_tree<While>(v)->body = mapIt(std::move(cast_tree<While>(v)->body), ctx);
+        cast_tree_nonnull<While>(v).cond = mapIt(std::move(cast_tree_nonnull<While>(v).cond), ctx);
+        cast_tree_nonnull<While>(v).body = mapIt(std::move(cast_tree_nonnull<While>(v).body), ctx);
 
         if constexpr (HAS_MEMBER_postTransformWhile<FUNC>()) {
             return CALL_MEMBER_postTransformWhile<FUNC>::call(func, ctx, std::move(v));
@@ -228,7 +230,7 @@ private:
             return CALL_MEMBER_preTransformBreak<FUNC>::call(func, ctx, std::move(v));
         }
 
-        cast_tree<Break>(v)->expr = mapIt(std::move(cast_tree<Break>(v)->expr), ctx);
+        cast_tree_nonnull<Break>(v).expr = mapIt(std::move(cast_tree_nonnull<Break>(v).expr), ctx);
 
         if constexpr (HAS_MEMBER_postTransformBreak<FUNC>()) {
             return CALL_MEMBER_postTransformBreak<FUNC>::call(func, ctx, std::move(v));
@@ -247,7 +249,7 @@ private:
             return CALL_MEMBER_preTransformNext<FUNC>::call(func, ctx, std::move(v));
         }
 
-        cast_tree<Next>(v)->expr = mapIt(std::move(cast_tree<Next>(v)->expr), ctx);
+        cast_tree_nonnull<Next>(v).expr = mapIt(std::move(cast_tree_nonnull<Next>(v).expr), ctx);
 
         if constexpr (HAS_MEMBER_postTransformNext<FUNC>()) {
             return CALL_MEMBER_postTransformNext<FUNC>::call(func, ctx, std::move(v));
@@ -259,7 +261,7 @@ private:
         if constexpr (HAS_MEMBER_preTransformReturn<FUNC>()) {
             v = CALL_MEMBER_preTransformReturn<FUNC>::call(func, ctx, std::move(v));
         }
-        cast_tree<Return>(v)->expr = mapIt(std::move(cast_tree<Return>(v)->expr), ctx);
+        cast_tree_nonnull<Return>(v).expr = mapIt(std::move(cast_tree_nonnull<Return>(v).expr), ctx);
 
         if constexpr (HAS_MEMBER_postTransformReturn<FUNC>()) {
             return CALL_MEMBER_postTransformReturn<FUNC>::call(func, ctx, std::move(v));
@@ -273,13 +275,13 @@ private:
             v = CALL_MEMBER_preTransformRescueCase<FUNC>::call(func, ctx, std::move(v));
         }
 
-        for (auto &el : cast_tree<RescueCase>(v)->exceptions) {
+        for (auto &el : cast_tree_nonnull<RescueCase>(v).exceptions) {
             el = mapIt(std::move(el), ctx);
         }
 
-        cast_tree<RescueCase>(v)->var = mapIt(std::move(cast_tree<RescueCase>(v)->var), ctx);
+        cast_tree_nonnull<RescueCase>(v).var = mapIt(std::move(cast_tree_nonnull<RescueCase>(v).var), ctx);
 
-        cast_tree<RescueCase>(v)->body = mapIt(std::move(cast_tree<RescueCase>(v)->body), ctx);
+        cast_tree_nonnull<RescueCase>(v).body = mapIt(std::move(cast_tree_nonnull<RescueCase>(v).body), ctx);
 
         if constexpr (HAS_MEMBER_postTransformRescueCase<FUNC>()) {
             return CALL_MEMBER_postTransformRescueCase<FUNC>::call(func, ctx, std::move(v));
@@ -292,16 +294,16 @@ private:
             v = CALL_MEMBER_preTransformRescue<FUNC>::call(func, ctx, std::move(v));
         }
 
-        cast_tree<Rescue>(v)->body = mapIt(std::move(cast_tree<Rescue>(v)->body), ctx);
+        cast_tree_nonnull<Rescue>(v).body = mapIt(std::move(cast_tree_nonnull<Rescue>(v).body), ctx);
 
-        for (auto &el : cast_tree<Rescue>(v)->rescueCases) {
+        for (auto &el : cast_tree_nonnull<Rescue>(v).rescueCases) {
             ENFORCE(isa_tree<RescueCase>(el), "invalid tree where rescue case was expected");
             el = mapRescueCase(std::move(el), ctx);
             ENFORCE(isa_tree<RescueCase>(el), "rescue case was mapped into non-rescue case");
         }
 
-        cast_tree<Rescue>(v)->else_ = mapIt(std::move(cast_tree<Rescue>(v)->else_), ctx);
-        cast_tree<Rescue>(v)->ensure = mapIt(std::move(cast_tree<Rescue>(v)->ensure), ctx);
+        cast_tree_nonnull<Rescue>(v).else_ = mapIt(std::move(cast_tree_nonnull<Rescue>(v).else_), ctx);
+        cast_tree_nonnull<Rescue>(v).ensure = mapIt(std::move(cast_tree_nonnull<Rescue>(v).ensure), ctx);
 
         if constexpr (HAS_MEMBER_postTransformRescue<FUNC>()) {
             return CALL_MEMBER_postTransformRescue<FUNC>::call(func, ctx, std::move(v));
@@ -322,8 +324,8 @@ private:
             v = CALL_MEMBER_preTransformAssign<FUNC>::call(func, ctx, std::move(v));
         }
 
-        cast_tree<Assign>(v)->lhs = mapIt(std::move(cast_tree<Assign>(v)->lhs), ctx);
-        cast_tree<Assign>(v)->rhs = mapIt(std::move(cast_tree<Assign>(v)->rhs), ctx);
+        cast_tree_nonnull<Assign>(v).lhs = mapIt(std::move(cast_tree_nonnull<Assign>(v).lhs), ctx);
+        cast_tree_nonnull<Assign>(v).rhs = mapIt(std::move(cast_tree_nonnull<Assign>(v).rhs), ctx);
 
         if constexpr (HAS_MEMBER_postTransformAssign<FUNC>()) {
             return CALL_MEMBER_postTransformAssign<FUNC>::call(func, ctx, std::move(v));
@@ -336,16 +338,16 @@ private:
         if constexpr (HAS_MEMBER_preTransformSend<FUNC>()) {
             v = CALL_MEMBER_preTransformSend<FUNC>::call(func, ctx, std::move(v));
         }
-        cast_tree<Send>(v)->recv = mapIt(std::move(cast_tree<Send>(v)->recv), ctx);
-        for (auto &arg : cast_tree<Send>(v)->args) {
+        cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
+        for (auto &arg : cast_tree_nonnull<Send>(v).args) {
             arg = mapIt(std::move(arg), ctx);
             ENFORCE(arg != nullptr);
         }
 
-        if (cast_tree<Send>(v)->block) {
-            auto nblock = mapBlock(std::move(cast_tree<Send>(v)->block), ctx);
+        if (cast_tree_nonnull<Send>(v).block) {
+            auto nblock = mapBlock(std::move(cast_tree_nonnull<Send>(v).block), ctx);
             ENFORCE(isa_tree<Block>(nblock), "block was mapped into not-a block");
-            cast_tree<Send>(v)->block = std::move(nblock);
+            cast_tree_nonnull<Send>(v).block = std::move(nblock);
         }
 
         if constexpr (HAS_MEMBER_postTransformSend<FUNC>()) {
@@ -359,11 +361,11 @@ private:
         if constexpr (HAS_MEMBER_preTransformHash<FUNC>()) {
             v = CALL_MEMBER_preTransformHash<FUNC>::call(func, ctx, std::move(v));
         }
-        for (auto &key : cast_tree<Hash>(v)->keys) {
+        for (auto &key : cast_tree_nonnull<Hash>(v).keys) {
             key = mapIt(std::move(key), ctx);
         }
 
-        for (auto &value : cast_tree<Hash>(v)->values) {
+        for (auto &value : cast_tree_nonnull<Hash>(v).values) {
             value = mapIt(std::move(value), ctx);
         }
 
@@ -377,7 +379,7 @@ private:
         if constexpr (HAS_MEMBER_preTransformArray<FUNC>()) {
             v = CALL_MEMBER_preTransformArray<FUNC>::call(func, ctx, std::move(v));
         }
-        for (auto &elem : cast_tree<Array>(v)->elems) {
+        for (auto &elem : cast_tree_nonnull<Array>(v).elems) {
             elem = mapIt(std::move(elem), ctx);
         }
 
@@ -413,13 +415,13 @@ private:
             v = CALL_MEMBER_preTransformBlock<FUNC>::call(func, ctx, std::move(v));
         }
 
-        for (auto &arg : cast_tree<Block>(v)->args) {
+        for (auto &arg : cast_tree_nonnull<Block>(v).args) {
             // Only OptionalArgs have subexpressions within them.
             if (auto *optArg = cast_tree<OptionalArg>(arg)) {
                 optArg->default_ = mapIt(std::move(optArg->default_), ctx);
             }
         }
-        cast_tree<Block>(v)->body = mapIt(std::move(cast_tree<Block>(v)->body), ctx);
+        cast_tree_nonnull<Block>(v).body = mapIt(std::move(cast_tree_nonnull<Block>(v).body), ctx);
 
         if constexpr (HAS_MEMBER_postTransformBlock<FUNC>()) {
             return CALL_MEMBER_postTransformBlock<FUNC>::call(func, ctx, std::move(v));
@@ -432,11 +434,11 @@ private:
             v = CALL_MEMBER_preTransformInsSeq<FUNC>::call(func, ctx, std::move(v));
         }
 
-        for (auto &stat : cast_tree<InsSeq>(v)->stats) {
+        for (auto &stat : cast_tree_nonnull<InsSeq>(v).stats) {
             stat = mapIt(std::move(stat), ctx);
         }
 
-        cast_tree<InsSeq>(v)->expr = mapIt(std::move(cast_tree<InsSeq>(v)->expr), ctx);
+        cast_tree_nonnull<InsSeq>(v).expr = mapIt(std::move(cast_tree_nonnull<InsSeq>(v).expr), ctx);
 
         if constexpr (HAS_MEMBER_postTransformInsSeq<FUNC>()) {
             return CALL_MEMBER_postTransformInsSeq<FUNC>::call(func, ctx, std::move(v));
@@ -456,7 +458,7 @@ private:
         if constexpr (HAS_MEMBER_preTransformCast<FUNC>()) {
             v = CALL_MEMBER_preTransformCast<FUNC>::call(func, ctx, std::move(v));
         }
-        cast_tree<Cast>(v)->arg = mapIt(std::move(cast_tree<Cast>(v)->arg), ctx);
+        cast_tree_nonnull<Cast>(v).arg = mapIt(std::move(cast_tree_nonnull<Cast>(v).arg), ctx);
 
         if constexpr (HAS_MEMBER_postTransformCast<FUNC>()) {
             return CALL_MEMBER_postTransformCast<FUNC>::call(func, ctx, std::move(v));
@@ -623,8 +625,8 @@ private:
 
         // We intentionally do not walk v->ancestors nor v->singletonAncestors.
         // They are guaranteed to be simple trees in the desugarer.
-        for (auto &def : cast_tree<ClassDef>(v)->rhs) {
-            def = mapIt(std::move(def), ctx.withOwner(cast_tree<ClassDef>(v)->symbol));
+        for (auto &def : cast_tree_nonnull<ClassDef>(v).rhs) {
+            def = mapIt(std::move(def), ctx.withOwner(cast_tree_nonnull<ClassDef>(v).symbol));
         }
 
         if constexpr (HAS_MEMBER_postTransformClassDef<FUNC>()) {
@@ -638,10 +640,11 @@ private:
             v = CALL_MEMBER_preTransformMethodDef<FUNC>::call(func, ctx, std::move(v));
         }
 
-        for (auto &arg : cast_tree<MethodDef>(v)->args) {
+        for (auto &arg : cast_tree_nonnull<MethodDef>(v).args) {
             // Only OptionalArgs have subexpressions within them.
             if (auto *optArg = cast_tree<OptionalArg>(arg)) {
-                optArg->default_ = mapIt(std::move(optArg->default_), ctx.withOwner(cast_tree<MethodDef>(v)->symbol));
+                optArg->default_ =
+                    mapIt(std::move(optArg->default_), ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol));
             }
         }
         // because this is a ShallowMap, we do not map over the body of the method
@@ -657,9 +660,9 @@ private:
         if constexpr (HAS_MEMBER_preTransformIf<FUNC>()) {
             v = CALL_MEMBER_preTransformIf<FUNC>::call(func, ctx, std::move(v));
         }
-        cast_tree<If>(v)->cond = mapIt(std::move(cast_tree<If>(v)->cond), ctx);
-        cast_tree<If>(v)->thenp = mapIt(std::move(cast_tree<If>(v)->thenp), ctx);
-        cast_tree<If>(v)->elsep = mapIt(std::move(cast_tree<If>(v)->elsep), ctx);
+        cast_tree_nonnull<If>(v).cond = mapIt(std::move(cast_tree_nonnull<If>(v).cond), ctx);
+        cast_tree_nonnull<If>(v).thenp = mapIt(std::move(cast_tree_nonnull<If>(v).thenp), ctx);
+        cast_tree_nonnull<If>(v).elsep = mapIt(std::move(cast_tree_nonnull<If>(v).elsep), ctx);
 
         if constexpr (HAS_MEMBER_postTransformIf<FUNC>()) {
             return CALL_MEMBER_postTransformIf<FUNC>::call(func, ctx, std::move(v));
@@ -671,8 +674,8 @@ private:
         if constexpr (HAS_MEMBER_preTransformWhile<FUNC>()) {
             v = CALL_MEMBER_preTransformWhile<FUNC>::call(func, ctx, std::move(v));
         }
-        cast_tree<While>(v)->cond = mapIt(std::move(cast_tree<While>(v)->cond), ctx);
-        cast_tree<While>(v)->body = mapIt(std::move(cast_tree<While>(v)->body), ctx);
+        cast_tree_nonnull<While>(v).cond = mapIt(std::move(cast_tree_nonnull<While>(v).cond), ctx);
+        cast_tree_nonnull<While>(v).body = mapIt(std::move(cast_tree_nonnull<While>(v).body), ctx);
 
         if constexpr (HAS_MEMBER_postTransformWhile<FUNC>()) {
             return CALL_MEMBER_postTransformWhile<FUNC>::call(func, ctx, std::move(v));
@@ -685,7 +688,7 @@ private:
             return CALL_MEMBER_preTransformBreak<FUNC>::call(func, ctx, std::move(v));
         }
 
-        cast_tree<Break>(v)->expr = mapIt(std::move(cast_tree<Break>(v)->expr), ctx);
+        cast_tree_nonnull<Break>(v).expr = mapIt(std::move(cast_tree_nonnull<Break>(v).expr), ctx);
 
         if constexpr (HAS_MEMBER_postTransformBreak<FUNC>()) {
             return CALL_MEMBER_postTransformBreak<FUNC>::call(func, ctx, std::move(v));
@@ -704,7 +707,7 @@ private:
             return CALL_MEMBER_preTransformNext<FUNC>::call(func, ctx, std::move(v));
         }
 
-        cast_tree<Next>(v)->expr = mapIt(std::move(cast_tree<Next>(v)->expr), ctx);
+        cast_tree_nonnull<Next>(v).expr = mapIt(std::move(cast_tree_nonnull<Next>(v).expr), ctx);
 
         if constexpr (HAS_MEMBER_postTransformNext<FUNC>()) {
             return CALL_MEMBER_postTransformNext<FUNC>::call(func, ctx, std::move(v));
@@ -716,7 +719,7 @@ private:
         if constexpr (HAS_MEMBER_preTransformReturn<FUNC>()) {
             v = CALL_MEMBER_preTransformReturn<FUNC>::call(func, ctx, std::move(v));
         }
-        cast_tree<Return>(v)->expr = mapIt(std::move(cast_tree<Return>(v)->expr), ctx);
+        cast_tree_nonnull<Return>(v).expr = mapIt(std::move(cast_tree_nonnull<Return>(v).expr), ctx);
 
         if constexpr (HAS_MEMBER_postTransformReturn<FUNC>()) {
             return CALL_MEMBER_postTransformReturn<FUNC>::call(func, ctx, std::move(v));
@@ -730,13 +733,13 @@ private:
             v = CALL_MEMBER_preTransformRescueCase<FUNC>::call(func, ctx, std::move(v));
         }
 
-        for (auto &el : cast_tree<RescueCase>(v)->exceptions) {
+        for (auto &el : cast_tree_nonnull<RescueCase>(v).exceptions) {
             el = mapIt(std::move(el), ctx);
         }
 
-        cast_tree<RescueCase>(v)->var = mapIt(std::move(cast_tree<RescueCase>(v)->var), ctx);
+        cast_tree_nonnull<RescueCase>(v).var = mapIt(std::move(cast_tree_nonnull<RescueCase>(v).var), ctx);
 
-        cast_tree<RescueCase>(v)->body = mapIt(std::move(cast_tree<RescueCase>(v)->body), ctx);
+        cast_tree_nonnull<RescueCase>(v).body = mapIt(std::move(cast_tree_nonnull<RescueCase>(v).body), ctx);
 
         if constexpr (HAS_MEMBER_postTransformRescueCase<FUNC>()) {
             return CALL_MEMBER_postTransformRescueCase<FUNC>::call(func, ctx, std::move(v));
@@ -749,16 +752,16 @@ private:
             v = CALL_MEMBER_preTransformRescue<FUNC>::call(func, ctx, std::move(v));
         }
 
-        cast_tree<Rescue>(v)->body = mapIt(std::move(cast_tree<Rescue>(v)->body), ctx);
+        cast_tree_nonnull<Rescue>(v).body = mapIt(std::move(cast_tree_nonnull<Rescue>(v).body), ctx);
 
-        for (auto &el : cast_tree<Rescue>(v)->rescueCases) {
+        for (auto &el : cast_tree_nonnull<Rescue>(v).rescueCases) {
             ENFORCE(isa_tree<RescueCase>(el), "invalid tree where rescue case was expected");
             el = mapRescueCase(std::move(el), ctx);
             ENFORCE(isa_tree<RescueCase>(el), "rescue case was mapped into non-rescue case");
         }
 
-        cast_tree<Rescue>(v)->else_ = mapIt(std::move(cast_tree<Rescue>(v)->else_), ctx);
-        cast_tree<Rescue>(v)->ensure = mapIt(std::move(cast_tree<Rescue>(v)->ensure), ctx);
+        cast_tree_nonnull<Rescue>(v).else_ = mapIt(std::move(cast_tree_nonnull<Rescue>(v).else_), ctx);
+        cast_tree_nonnull<Rescue>(v).ensure = mapIt(std::move(cast_tree_nonnull<Rescue>(v).ensure), ctx);
 
         if constexpr (HAS_MEMBER_postTransformRescue<FUNC>()) {
             return CALL_MEMBER_postTransformRescue<FUNC>::call(func, ctx, std::move(v));
@@ -779,8 +782,8 @@ private:
             v = CALL_MEMBER_preTransformAssign<FUNC>::call(func, ctx, std::move(v));
         }
 
-        cast_tree<Assign>(v)->lhs = mapIt(std::move(cast_tree<Assign>(v)->lhs), ctx);
-        cast_tree<Assign>(v)->rhs = mapIt(std::move(cast_tree<Assign>(v)->rhs), ctx);
+        cast_tree_nonnull<Assign>(v).lhs = mapIt(std::move(cast_tree_nonnull<Assign>(v).lhs), ctx);
+        cast_tree_nonnull<Assign>(v).rhs = mapIt(std::move(cast_tree_nonnull<Assign>(v).rhs), ctx);
 
         if constexpr (HAS_MEMBER_postTransformAssign<FUNC>()) {
             return CALL_MEMBER_postTransformAssign<FUNC>::call(func, ctx, std::move(v));
@@ -793,16 +796,16 @@ private:
         if constexpr (HAS_MEMBER_preTransformSend<FUNC>()) {
             v = CALL_MEMBER_preTransformSend<FUNC>::call(func, ctx, std::move(v));
         }
-        cast_tree<Send>(v)->recv = mapIt(std::move(cast_tree<Send>(v)->recv), ctx);
-        for (auto &arg : cast_tree<Send>(v)->args) {
+        cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
+        for (auto &arg : cast_tree_nonnull<Send>(v).args) {
             arg = mapIt(std::move(arg), ctx);
             ENFORCE(arg != nullptr);
         }
 
-        if (cast_tree<Send>(v)->block) {
-            auto nblock = mapBlock(std::move(cast_tree<Send>(v)->block), ctx);
+        if (cast_tree_nonnull<Send>(v).block) {
+            auto nblock = mapBlock(std::move(cast_tree_nonnull<Send>(v).block), ctx);
             ENFORCE(isa_tree<Block>(nblock), "block was mapped into not-a block");
-            cast_tree<Send>(v)->block = std::move(nblock);
+            cast_tree_nonnull<Send>(v).block = std::move(nblock);
         }
 
         if constexpr (HAS_MEMBER_postTransformSend<FUNC>()) {
@@ -816,11 +819,11 @@ private:
         if constexpr (HAS_MEMBER_preTransformHash<FUNC>()) {
             v = CALL_MEMBER_preTransformHash<FUNC>::call(func, ctx, std::move(v));
         }
-        for (auto &key : cast_tree<Hash>(v)->keys) {
+        for (auto &key : cast_tree_nonnull<Hash>(v).keys) {
             key = mapIt(std::move(key), ctx);
         }
 
-        for (auto &value : cast_tree<Hash>(v)->values) {
+        for (auto &value : cast_tree_nonnull<Hash>(v).values) {
             value = mapIt(std::move(value), ctx);
         }
 
@@ -834,7 +837,7 @@ private:
         if constexpr (HAS_MEMBER_preTransformArray<FUNC>()) {
             v = CALL_MEMBER_preTransformArray<FUNC>::call(func, ctx, std::move(v));
         }
-        for (auto &elem : cast_tree<Array>(v)->elems) {
+        for (auto &elem : cast_tree_nonnull<Array>(v).elems) {
             elem = mapIt(std::move(elem), ctx);
         }
 
@@ -870,13 +873,13 @@ private:
             v = CALL_MEMBER_preTransformBlock<FUNC>::call(func, ctx, std::move(v));
         }
 
-        for (auto &arg : cast_tree<Block>(v)->args) {
+        for (auto &arg : cast_tree_nonnull<Block>(v).args) {
             // Only OptionalArgs have subexpressions within them.
             if (auto *optArg = cast_tree<OptionalArg>(arg)) {
                 optArg->default_ = mapIt(std::move(optArg->default_), ctx);
             }
         }
-        cast_tree<Block>(v)->body = mapIt(std::move(cast_tree<Block>(v)->body), ctx);
+        cast_tree_nonnull<Block>(v).body = mapIt(std::move(cast_tree_nonnull<Block>(v).body), ctx);
 
         if constexpr (HAS_MEMBER_postTransformBlock<FUNC>()) {
             return CALL_MEMBER_postTransformBlock<FUNC>::call(func, ctx, std::move(v));
@@ -889,11 +892,11 @@ private:
             v = CALL_MEMBER_preTransformInsSeq<FUNC>::call(func, ctx, std::move(v));
         }
 
-        for (auto &stat : cast_tree<InsSeq>(v)->stats) {
+        for (auto &stat : cast_tree_nonnull<InsSeq>(v).stats) {
             stat = mapIt(std::move(stat), ctx);
         }
 
-        cast_tree<InsSeq>(v)->expr = mapIt(std::move(cast_tree<InsSeq>(v)->expr), ctx);
+        cast_tree_nonnull<InsSeq>(v).expr = mapIt(std::move(cast_tree_nonnull<InsSeq>(v).expr), ctx);
 
         if constexpr (HAS_MEMBER_postTransformInsSeq<FUNC>()) {
             return CALL_MEMBER_postTransformInsSeq<FUNC>::call(func, ctx, std::move(v));
@@ -913,7 +916,7 @@ private:
         if constexpr (HAS_MEMBER_preTransformCast<FUNC>()) {
             v = CALL_MEMBER_preTransformCast<FUNC>::call(func, ctx, std::move(v));
         }
-        cast_tree<Cast>(v)->arg = mapIt(std::move(cast_tree<Cast>(v)->arg), ctx);
+        cast_tree_nonnull<Cast>(v).arg = mapIt(std::move(cast_tree_nonnull<Cast>(v).arg), ctx);
 
         if constexpr (HAS_MEMBER_postTransformCast<FUNC>()) {
             return CALL_MEMBER_postTransformCast<FUNC>::call(func, ctx, std::move(v));
