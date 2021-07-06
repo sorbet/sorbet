@@ -333,7 +333,7 @@ class Sorbet::Private::Serialize
         if (!KEYWORDS.include?(arg_name.to_sym)) && method.name.to_s.end_with?('=') && arg_name =~ /\A[a-z_][a-z0-9A-Z_]*\Z/ && index == 0
           name = arg_name
         else
-          name = '_' + (uniq == 0 ? '' : uniq.to_s)
+          name = 'arg' + (uniq == 0 ? '' : uniq.to_s)
           uniq += 1
         end
       end
