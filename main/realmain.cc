@@ -194,7 +194,7 @@ struct AutogenResult {
         optional<autogen::Subclasses::Map> subclasses;
     };
     CounterState counters;
-    vector<pair<int, Serialized>> prints;
+    vector<pair<int, pair<ast::ParsedFile, Serialized>>> prints;
     unique_ptr<autogen::DefTree> defTree = make_unique<autogen::DefTree>();
 };
 
@@ -214,23 +214,25 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     }
 
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<pair<size_t, ast::ParsedFile>>>(indexed.size());
     vector<AutogenResult::Serialized> merged(indexed.size());
-    for (int i = 0; i < indexed.size(); ++i) {
-        fileq->push(move(i), 1);
+    for (size_t i = 0; i < indexed.size(); i++) {
+        pair<size_t, ast::ParsedFile> job = make_pair(i, move(indexed[i]));
+        fileq->push(move(job), 1);
     }
     auto crcBuilder = autogen::CRCBuilder::create();
 
-    workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, crcBuilder, fileq, resultq]() {
+    workers.multiplexJob("runAutogen", [&gs, &opts, &autoloaderCfg, crcBuilder, fileq, resultq]() {
         AutogenResult out;
         int n = 0;
         {
             Timer timeit(logger, "autogenWorker");
-            int idx = 0;
+            pair<size_t, ast::ParsedFile> job;
 
-            for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
+            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 ++n;
-                auto &tree = indexed[idx];
+                auto idx = job.first;
+                auto &tree = job.second;
                 if (tree.file.data(gs).isRBI() || tree.file.data(gs).isPackage()) {
                     continue;
                 }
@@ -263,7 +265,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                     autogen::DefTreeBuilder::addParsedFileDefinitions(ctx, autoloaderCfg, out.defTree, pf);
                 }
 
-                out.prints.emplace_back(make_pair(idx, serialized));
+                out.prints.emplace_back(make_pair(idx, make_pair(move(tree), move(serialized))));
             }
         }
 
@@ -280,7 +282,8 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         }
         counterConsume(move(out.counters));
         for (auto &print : out.prints) {
-            merged[print.first] = move(print.second);
+            merged[print.first] = move(print.second.second);
+            indexed[print.first] = move(print.second.first);
         }
         if (opts.print.AutogenAutoloader.enabled) {
             Timer timeit(logger, "autogenAutoloaderDefTreeMerge");
