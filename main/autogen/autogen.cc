@@ -35,8 +35,9 @@ class AutogenWalk {
         return out;
     }
 
-    // Convert a constant literal into a fully qualified name
-    vector<core::NameRef> constantName(core::Context ctx, ast::ConstantLit &cnstRef) {
+    // Convert a constant literal into a fully qualified name.
+    // Returns `true` if the constant is fully qualified and can be traced back to the root scope, `false` otherwise.
+    bool constantName(core::Context ctx, ast::ConstantLit &cnstRef, QualifiedName &name) {
         vector<core::NameRef> out;
         auto *cnst = &cnstRef;
         while (cnst != nullptr && cnst->original != nullptr) {
@@ -45,7 +46,11 @@ class AutogenWalk {
             cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
         }
         reverse(out.begin(), out.end());
-        return out;
+        name = QualifiedName::fromFullName(move(out));
+        if (cnst && cnst->symbol == core::Symbols::root()) {
+            return true;
+        }
+        return false;
     }
 
 public:
@@ -177,19 +182,6 @@ public:
         return block;
     }
 
-    // `true` if the constant is fully qualified and can be traced back to the root scope, `false` otherwise
-    bool isCBaseConstant(ast::ConstantLit &cnstRef) {
-        auto *cnst = &cnstRef;
-        while (cnst != nullptr && cnst->original != nullptr) {
-            auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
-            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
-        }
-        if (cnst && cnst->symbol == core::Symbols::root()) {
-            return true;
-        }
-        return false;
-    }
-
     ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
 
@@ -206,8 +198,10 @@ public:
         auto &ref = refs.emplace_back();
         ref.id = refs.size() - 1;
 
+        const bool isCBaseConstant = constantName(ctx, original, ref.name);
+
         // if it's a constant we can resolve from the root...
-        if (isCBaseConstant(original)) {
+        if (isCBaseConstant) {
             // then its scope is easy
             ref.scope = nesting.front();
         } else {
@@ -223,7 +217,6 @@ public:
         // to the definition of the constant, because in that case we'll later on extend the location to cover the whole
         // class or assignment
         ref.definitionLoc = original.loc;
-        ref.name = QualifiedName::fromFullName(constantName(ctx, original));
         auto sym = original.symbol;
         if (!sym.isClassOrModule() || sym != core::Symbols::StubModule()) {
             ref.resolved = QualifiedName::fromFullName(symbolName(ctx, sym));
