@@ -60,26 +60,6 @@ module Sorbet::Private::Static
 end
 
 module Sorbet::Private::Static::ResolvedSig
-  # For user-written sigs (i.e. ones where Sorbet::Private::Static.sig would
-  # be dispatching to self) that have been associated with a method, we
-  # change the sigs into a call to this method.  The send to this method
-  # also carries some metadata about the method with which the sig is
-  # associated.
-  #
-  # We initially changed the method to which the sig dispatches,
-  # e.g. Sorbet::Private::Static.sigForMethod, but that change interacts
-  # badly with code completion in LSP.  Code completion would see the
-  # Sorbet::Private::Static.sigForMethod in the AST send and assume that it
-  # would need to search for "sigForMethod" in the user's code, which
-  # wouldn't exist and might actually wind up doing unexpected things.
-  #
-  # We also cannot stuff the extra metadata-y arguments into the original
-  # Sorbet::Private::Static.sig send because we want *that* send to reflect
-  # the original intent of the user: same number of arguments, etc.
-  #
-  # Ergo, we need to dispatch to a method that is called "sig" to make code
-  # completion give reasonable results.
-  #
   # This sig is a bit of a fib: `sig_arg` is technically T.nilable(Symbol), so
   # we might have sends to this method that only have three args: `original_recv`,
   # `is_self_method`, and `method_name`.  But we never resolve sends to this

@@ -2653,6 +2653,10 @@ private:
         // Later passes are going to separate the sig and the method definition.
         // Record some information in the sig call itself so that we can reassociate
         // them later.
+        //
+        // Note that the sig still needs to send to a method called "sig" so that
+        // code completion in LSP works.  We change the receiver, below, so that
+        // sigs that don't pass through here still reflect the user's intent.
         auto *send = sig.origSend;
         auto &origArgs = send->args;
         auto *self = ast::cast_tree<ast::Local>(send->args[0]);
