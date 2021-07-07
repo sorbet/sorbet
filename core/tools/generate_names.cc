@@ -340,7 +340,6 @@ NameDef names[] = {
     {"arg0"},
     {"arg1"},
     {"arg2"},
-    {"arg3"},
     {"opts"},
     {"args"},
     {"Elem", "Elem", true},
