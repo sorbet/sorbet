@@ -233,6 +233,8 @@ declare i64 @sorbet_flo_lt(i64, i64) local_unnamed_addr #0
 
 declare i64 @sorbet_flo_le(i64, i64) local_unnamed_addr #0
 
+declare i64 @rb_id2sym(i64) local_unnamed_addr #0
+
 ; Function Attrs: cold noreturn
 declare void @sorbet_cast_failure(i64, i8*, i8*) local_unnamed_addr #1
 
@@ -258,8 +260,6 @@ declare i64 @rb_intern(i8*) local_unnamed_addr #0
 declare void @rb_add_method_sorbet(i64, i64, i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)*, %struct.rb_sorbet_param_struct*, i32, i8*) local_unnamed_addr #0
 
 declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #0
-
-declare i64 @rb_id2sym(i64) local_unnamed_addr #0
 
 declare i64 @rb_fstring_new(i8*, i64) local_unnamed_addr #0
 

@@ -55,6 +55,12 @@ void setSorbetFunctionLinkage(Module &module) {
             continue;
         }
 
+        // Keep the special keep-alive functions as external, as they will be explicitly removed by a pass late in
+        // sorbet_llvm's pipeline.
+        if (name.startswith("sorbet_exists_to_keep_alive_") && fun.hasExternalLinkage()) {
+            continue;
+        }
+
         // Set all of the `external` (default linkage) functions defined in the payload to `internal` linkage, as any
         // other functions have more specific linkage set explicitly in the source.
         if (name.startswith("sorbet_") && fun.hasExternalLinkage()) {

@@ -160,61 +160,61 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @guarded_const_AttrReaderSigChecked = linkonce local_unnamed_addr global i64 0
 @rb_cObject = external local_unnamed_addr constant i64
 
+declare i64 @rb_id2sym(i64) local_unnamed_addr #0
+
 ; Function Attrs: cold noreturn
-declare void @sorbet_cast_failure(i64, i8*, i8*) local_unnamed_addr #0
+declare void @sorbet_cast_failure(i64, i8*, i8*) local_unnamed_addr #1
 
 ; Function Attrs: noreturn
-declare void @sorbet_raiseArity(i32, i32, i32) local_unnamed_addr #1
+declare void @sorbet_raiseArity(i32, i32, i32) local_unnamed_addr #2
 
-declare %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64, i64, i64, i64, %struct.rb_iseq_struct*, i32, i32, %struct.SorbetLineNumberInfo*, i64*, i32, i32) local_unnamed_addr #2
+declare %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64, i64, i64, i64, %struct.rb_iseq_struct*, i32, i32, %struct.SorbetLineNumberInfo*, i64*, i32, i32) local_unnamed_addr #0
 
-declare void @sorbet_initLineNumberInfo(%struct.SorbetLineNumberInfo*, i64*, i32) local_unnamed_addr #2
+declare void @sorbet_initLineNumberInfo(%struct.SorbetLineNumberInfo*, i64*, i32) local_unnamed_addr #0
 
-declare i64 @sorbet_getConstant(i8*, i64) local_unnamed_addr #2
+declare i64 @sorbet_getConstant(i8*, i64) local_unnamed_addr #0
 
-declare i64 @sorbet_readRealpath() local_unnamed_addr #2
+declare i64 @sorbet_readRealpath() local_unnamed_addr #0
 
-declare %struct.rb_control_frame_struct* @sorbet_pushStaticInitFrame(i64) local_unnamed_addr #2
+declare %struct.rb_control_frame_struct* @sorbet_pushStaticInitFrame(i64) local_unnamed_addr #0
 
-declare void @sorbet_popFrame() local_unnamed_addr #2
+declare void @sorbet_popFrame() local_unnamed_addr #0
 
-declare void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache*, i64, i32, i32, i32, i64*) local_unnamed_addr #2
+declare void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache*, i64, i32, i32, i32, i64*) local_unnamed_addr #0
 
-declare i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache*, i64) local_unnamed_addr #2
+declare i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache*, i64) local_unnamed_addr #0
 
-declare void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct*, %struct.rb_control_frame_struct*, %struct.rb_iseq_struct*) local_unnamed_addr #2
+declare void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct*, %struct.rb_control_frame_struct*, %struct.rb_iseq_struct*) local_unnamed_addr #0
 
-declare i64 @sorbet_rb_int_plus_slowpath(i64, i64) local_unnamed_addr #2
+declare i64 @sorbet_rb_int_plus_slowpath(i64, i64) local_unnamed_addr #0
 
-declare i64 @sorbet_rb_int_lt_slowpath(i64, i64) local_unnamed_addr #2
+declare i64 @sorbet_rb_int_lt_slowpath(i64, i64) local_unnamed_addr #0
 
-declare i64 @sorbet_vm_getivar(i64, i64, %struct.iseq_inline_iv_cache_entry*) local_unnamed_addr #2
+declare i64 @sorbet_vm_getivar(i64, i64, %struct.iseq_inline_iv_cache_entry*) local_unnamed_addr #0
 
-declare void @sorbet_vm_setivar(i64, i64, i64, %struct.iseq_inline_iv_cache_entry*) local_unnamed_addr #2
+declare void @sorbet_vm_setivar(i64, i64, i64, %struct.iseq_inline_iv_cache_entry*) local_unnamed_addr #0
 
-declare i64 @rb_define_class(i8*, i64) local_unnamed_addr #2
+declare i64 @rb_define_class(i8*, i64) local_unnamed_addr #0
 
-declare i64 @rb_intern(i8*) local_unnamed_addr #2
+declare i64 @rb_intern(i8*) local_unnamed_addr #0
 
-declare void @rb_add_method_sorbet(i64, i64, i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)*, %struct.rb_sorbet_param_struct*, i32, i8*) local_unnamed_addr #2
+declare void @rb_add_method_sorbet(i64, i64, i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)*, %struct.rb_sorbet_param_struct*, i32, i8*) local_unnamed_addr #0
 
-declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #2
+declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #0
 
-declare i64 @rb_id2sym(i64) local_unnamed_addr #2
+declare i64 @rb_fstring_new(i8*, i64) local_unnamed_addr #0
 
-declare i64 @rb_fstring_new(i8*, i64) local_unnamed_addr #2
-
-declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #2
+declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #0
 
 ; Function Attrs: noreturn
-declare void @rb_raise(i64, i8*, ...) local_unnamed_addr #1
+declare void @rb_raise(i64, i8*, ...) local_unnamed_addr #2
 
-declare i64 @rb_int2big(i64) local_unnamed_addr #2
+declare i64 @rb_int2big(i64) local_unnamed_addr #0
 
 ; Function Attrs: nofree nosync nounwind readnone speculatable willreturn
 declare { i64, i1 } @llvm.sadd.with.overflow.i64(i64, i64) #3
 
-declare i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct*, i32) local_unnamed_addr #2
+declare i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct*, i32) local_unnamed_addr #0
 
 ; Function Attrs: allocsize(0,1)
 declare noalias nonnull i8* @ruby_xcalloc(i64, i64) local_unnamed_addr #4
@@ -912,9 +912,9 @@ define linkonce void @const_recompute_AttrReaderSigChecked() local_unnamed_addr 
   ret void
 }
 
-attributes #0 = { cold noreturn "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #1 = { noreturn "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #2 = { "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #0 = { "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #1 = { cold noreturn "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #2 = { noreturn "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #3 = { nofree nosync nounwind readnone speculatable willreturn }
 attributes #4 = { allocsize(0,1) "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #5 = { argmemonly nofree nosync nounwind willreturn }

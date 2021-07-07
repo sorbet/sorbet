@@ -406,7 +406,17 @@ public:
     };
 
     virtual bool runOnModule(llvm::Module &mod) override {
-        mod.getFunction("__sorbet_only_exists_to_keep_functions_alive__")->eraseFromParent();
+        vector<llvm::Function *> functionsToRemove;
+
+        for (auto &fn : mod.functions()) {
+            if (fn.getName().startswith("sorbet_exists_to_keep_alive_")) {
+                functionsToRemove.emplace_back(&fn);
+            }
+        }
+
+        for (auto *fn : functionsToRemove) {
+            fn->eraseFromParent();
+        }
 
         // We run each lowering pass in sequence. Each does a full visit on the module.
         // We don't have that many lowering passes right now, so this cost is small.
