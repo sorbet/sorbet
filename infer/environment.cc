@@ -79,6 +79,8 @@ struct KnowledgeFact {
 };
 
 KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
+    Timer timeit(ctx.state.tracer(), "KnowledgeFilter::KnowledgeFilter");
+
     used_vars.resize(cfg->numLocalVariables());
     for (auto &bb : cfg->basicBlocks) {
         ENFORCE(bb->bexit.cond.variable.exists());
@@ -189,6 +191,8 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
 }
 
 void KnowledgeFact::min(core::Context ctx, const KnowledgeFact &other) {
+    Timer timeit(ctx.state.tracer(), "KnowledgeFact::min");
+
     for (auto it = yesTypeTests.begin(); it != yesTypeTests.end(); /* nothing */) {
         auto &entry = *it;
         cfg::LocalRef local = entry.first;
