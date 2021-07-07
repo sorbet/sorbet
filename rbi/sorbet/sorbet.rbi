@@ -79,17 +79,23 @@ module Sorbet::Private::Static::ResolvedSig
   #
   # Ergo, we need to dispatch to a method that is called "sig" to make code
   # completion give reasonable results.
+  #
+  # This sig is a bit of a fib: `sig_arg` is technically T.nilable(Symbol), so
+  # we might have sends to this method that only have three args: `original_recv`,
+  # `is_self_method`, and `method_name`.  But we never resolve sends to this
+  # method; any sends to this method are resolved instead as sends to
+  # original_recv.sig with the last two args dropped.
   sig do
     params(
-        arg0: T.untyped,
-        arg1: T.untyped,
-        arg2: T.untyped,
-        arg3: T.untyped,
+        original_recv: T.untyped,
+        sig_arg: T.untyped,
+        is_self_method: T.untyped,
+        method_name: T.untyped,
         blk: T.proc.bind(T::Private::Methods::DeclBuilder).void
     )
     .void
   end
-  def self.sig(arg0, arg1, arg2, arg3=nil, &blk)
+  def self.sig(original_recv, sig_arg, is_self_method, method_name=nil, &blk)
   end
 end
 
