@@ -249,7 +249,7 @@ functionEntryInitializers:
 
 ; Function Attrs: nounwind sspreq uwtable
 define internal fastcc void @"func_Foo.<static-init>L62"(i64 %selfRaw, %struct.rb_control_frame_struct* %cfp) unnamed_addr #8 !dbg !24 {
-fastSymCallIntrinsic_Static_sig:
+fastSymCallIntrinsic_ResolvedSig_sig:
   %stackFrame = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Foo.<static-init>", align 8
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !13
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
@@ -264,6 +264,8 @@ fastSymCallIntrinsic_Static_sig:
   tail call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %0, %struct.rb_control_frame_struct* %2, %struct.rb_iseq_struct* %stackFrame) #16
   %8 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %cfp, i64 0, i32 0
   store i64* getelementptr inbounds ([19 x i64], [19 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %8, align 8, !dbg !25, !tbaa !13
+  %rubyId_bar = load i64, i64* @rubyIdPrecomputed_bar, align 8, !dbg !26
+  %rawSym = tail call i64 @rb_id2sym(i64 %rubyId_bar), !dbg !26
   %9 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !26, !tbaa !13
   %10 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %9, i64 0, i32 5, !dbg !26
   %11 = load i32, i32* %10, align 8, !dbg !26, !tbaa !27
@@ -274,13 +276,13 @@ fastSymCallIntrinsic_Static_sig:
   %16 = icmp eq i32 %15, 0, !dbg !26
   br i1 %16, label %fastSymCallIntrinsic_Static_keep_def, label %17, !dbg !26, !prof !29
 
-17:                                               ; preds = %fastSymCallIntrinsic_Static_sig
+17:                                               ; preds = %fastSymCallIntrinsic_ResolvedSig_sig
   %18 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %9, i64 0, i32 8, !dbg !26
   %19 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %18, align 8, !dbg !26, !tbaa !30
   %20 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %19, i32 noundef 0) #16, !dbg !26
   br label %fastSymCallIntrinsic_Static_keep_def, !dbg !26
 
-fastSymCallIntrinsic_Static_keep_def:             ; preds = %fastSymCallIntrinsic_Static_sig, %17
+fastSymCallIntrinsic_Static_keep_def:             ; preds = %fastSymCallIntrinsic_ResolvedSig_sig, %17
   store i64* getelementptr inbounds ([19 x i64], [19 x i64]* @iseqEncodedArray, i64 0, i64 6), i64** %8, align 8, !dbg !26, !tbaa !13
   %21 = load i64, i64* @"guard_epoch_T::Sig", align 8, !dbg !31
   %22 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !31, !tbaa !32
@@ -306,10 +308,10 @@ fastSymCallIntrinsic_Static_keep_def:             ; preds = %fastSymCallIntrinsi
   store i64* %31, i64** %28, align 8, !dbg !31
   %send = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_extend, i64 0), !dbg !31
   store i64* getelementptr inbounds ([19 x i64], [19 x i64]* @iseqEncodedArray, i64 0, i64 9), i64** %8, align 8, !dbg !31, !tbaa !13
-  %rubyId_bar = load i64, i64* @rubyIdPrecomputed_bar, align 8, !dbg !35
-  %rawSym = tail call i64 @rb_id2sym(i64 %rubyId_bar), !dbg !35
+  %rubyId_bar34 = load i64, i64* @rubyIdPrecomputed_bar, align 8, !dbg !35
+  %rawSym35 = tail call i64 @rb_id2sym(i64 %rubyId_bar34), !dbg !35
   %rubyId_normal = load i64, i64* @rubyIdPrecomputed_normal, align 8, !dbg !35
-  %rawSym28 = tail call i64 @rb_id2sym(i64 %rubyId_normal), !dbg !35
+  %rawSym36 = tail call i64 @rb_id2sym(i64 %rubyId_normal), !dbg !35
   %32 = load i64, i64* @guard_epoch_Foo, align 8, !dbg !35
   %33 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !35, !tbaa !32
   %needTakeSlowPath2 = icmp ne i64 %32, %33, !dbg !35
@@ -325,7 +327,7 @@ fastSymCallIntrinsic_Static_keep_def:             ; preds = %fastSymCallIntrinsi
   %38 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !35, !tbaa !32
   %guardUpdated3 = icmp eq i64 %37, %38, !dbg !35
   tail call void @llvm.assume(i1 %guardUpdated3), !dbg !35
-  %stackFrame30 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Foo#bar", align 8, !dbg !35
+  %stackFrame38 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Foo#bar", align 8, !dbg !35
   %39 = tail call noalias nonnull i8* @ruby_xcalloc(i64 noundef 1, i64 noundef 64) #17, !dbg !35
   %40 = bitcast i8* %39 to i16*, !dbg !35
   %41 = load i16, i16* %40, align 8, !dbg !35
@@ -358,7 +360,7 @@ fastSymCallIntrinsic_Static_keep_def:             ; preds = %fastSymCallIntrinsi
   store i8* %53, i8** %56, align 8, !dbg !35, !tbaa !41
   %57 = tail call i64 @rb_intern(i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar, i64 0, i64 0)) #16, !dbg !35
   %58 = bitcast i8* %39 to %struct.rb_sorbet_param_struct*, !dbg !35
-  %59 = bitcast %struct.rb_iseq_struct* %stackFrame30 to i8*, !dbg !35
+  %59 = bitcast %struct.rb_iseq_struct* %stackFrame38 to i8*, !dbg !35
   tail call void @rb_add_method_sorbet(i64 %36, i64 %57, i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)* noundef @"func_Foo#bar", %struct.rb_sorbet_param_struct* nonnull %58, i32 noundef 1, i8* %59) #16, !dbg !35
   %60 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !35, !tbaa !13
   %61 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %60, i64 0, i32 5, !dbg !35
@@ -462,7 +464,7 @@ entry:
   %24 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_block for.i24.i", i64 %"rubyId_block for.i23.i", i64 %"rubyStr_test/testdata/compiler/block_type_checking.rb.i25.i", i64 %realpath, %struct.rb_iseq_struct* %23, i32 noundef 2, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef null, i32 noundef 0, i32 noundef 4)
   store %struct.rb_iseq_struct* %24, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Foo.<static-init>$block_1", align 8
   %rubyId_sig.i = load i64, i64* @rubyIdPrecomputed_sig, align 8, !dbg !26
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_sig, i64 %rubyId_sig.i, i32 noundef 20, i32 noundef 1, i32 noundef 0, i64* noundef null), !dbg !26
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_sig, i64 %rubyId_sig.i, i32 noundef 20, i32 noundef 3, i32 noundef 0, i64* noundef null), !dbg !26
   %rubyId_proc.i = load i64, i64* @rubyIdPrecomputed_proc, align 8, !dbg !46
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_proc, i64 %rubyId_proc.i, i32 noundef 16, i32 noundef 0, i32 noundef 0, i64* noundef null), !dbg !46
   %rubyId_returns.i = load i64, i64* @rubyIdPrecomputed_returns, align 8, !dbg !46

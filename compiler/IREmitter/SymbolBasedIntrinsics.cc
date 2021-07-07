@@ -492,7 +492,8 @@ public:
     }
 
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
-        return {core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs)};
+        return {core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs),
+                core::Symbols::Sorbet_Private_Static_ResolvedSig().data(gs)->lookupSingletonClass(gs)};
     };
     virtual InlinedVector<core::NameRef, 2> applicableMethods(const core::GlobalState &gs) const override {
         return {core::Names::sig()};
