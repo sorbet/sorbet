@@ -133,12 +133,6 @@ To see the failing output, either:
 - Copy/paste the `*.log` file and run it (the output will open in `less`)
 
 
-## Ruby patches
-
-We maintain a set of patches to the Ruby VM in Stripe's Ruby repo:
-
-https://go/git/stripe-private-oss-forks/ruby
-
 ## Writing tests
 
 We write tests by adding files to subfolders of the `test/` directory.
