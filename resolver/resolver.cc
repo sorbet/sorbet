@@ -2668,11 +2668,7 @@ private:
         }
 
         auto *cnst = ast::cast_tree<ast::ConstantLit>(send->recv);
-        ENFORCE(cnst != nullptr);
-        // This condition really shouldn't happen.
-        if (cnst == nullptr) {
-            return;
-        }
+        ENFORCE(cnst != nullptr, "sig send receiver must be a ConstantLit if we got a ParsedSig from the send");
 
         cnst->symbol = core::Symbols::Sorbet_Private_Static_ResolvedSig();
 
