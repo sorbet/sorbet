@@ -197,7 +197,7 @@ void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBas
     auto *normalReturnBlock = llvm::BasicBlock::Create(cs, "normalReturn", func);
 
     if (functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId])) {
-        builder.CreateCall(cs.getFunction("sorbet_popRubyStack"), {});
+        builder.CreateCall(cs.getFunction("sorbet_popFrame"), {});
     }
     if (rubyBlockId == 0 && irctx.ecTag != nullptr) {
         builder.CreateCall(cs.getFunction("sorbet_teardownTagForThrowReturn"), {irctx.ecTag});

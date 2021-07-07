@@ -59,7 +59,7 @@ void sorbet_pushBlockFrame(const struct rb_captured_block *captured) {
                   captured->self, VM_GUARDED_PREV_EP(captured->ep), (VALUE)NULL, 0, ec->cfp->sp, 0, 0);
 }
 
-void sorbet_popRubyStack() {
+void sorbet_popFrame() {
     rb_execution_context_t *ec = GET_EC();
     vm_pop_frame(ec, ec->cfp, ec->cfp->ep);
 }

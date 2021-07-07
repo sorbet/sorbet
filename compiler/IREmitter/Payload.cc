@@ -1101,7 +1101,7 @@ void Payload::pushRubyStackVector(CompilerState &cs, llvm::IRBuilderBase &build,
     auto spPtrType = llvm::dyn_cast<llvm::PointerType>(spPtr->getType());
     llvm::Value *sp = builder.CreateLoad(spPtrType->getElementType(), spPtr);
     for (auto *arg : stack) {
-        sp = builder.CreateCall(cs.getFunction("sorbet_push"), {sp, arg});
+        sp = builder.CreateCall(cs.getFunction("sorbet_pushValueStack"), {sp, arg});
     }
     builder.CreateStore(sp, spPtr);
 }

@@ -320,7 +320,8 @@ public:
     // clang-format on
     //
     // Lines 1 & 2 correspond to the sorbet_get_sp call, and the sp load from spPtr
-    // Lines 3 & 4 correspond to the sorbet_push call for self, while 5 & 6 correspond to the sorbet_push call for "a".
+    // Lines 3 & 4 correspond to the sorbet_pushValueStack call for self, while 5 & 6 correspond to the
+    // sorbet_pushValueStack call for "a".
     // Line 7 corresponds to the store to spPtr.
     // Line 8 corresponds to the sorbet_callFuncWithCache call.
     virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module,
@@ -338,7 +339,7 @@ public:
         auto spPtrType = llvm::dyn_cast<llvm::PointerType>(spPtr->getType());
         llvm::Value *sp = builder.CreateLoad(spPtrType->getElementType(), spPtr);
         for (auto iter = std::next(instr->arg_begin(), 5); iter < instr->arg_end(); ++iter) {
-            sp = builder.CreateCall(module.getFunction("sorbet_push"), {sp, iter->get()});
+            sp = builder.CreateCall(module.getFunction("sorbet_pushValueStack"), {sp, iter->get()});
         }
         builder.CreateStore(sp, spPtr);
 

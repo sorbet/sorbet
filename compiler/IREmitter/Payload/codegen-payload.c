@@ -71,7 +71,7 @@ SORBET_ALIVE(const VALUE, sorbet_readRealpath, (void));
 SORBET_ALIVE(rb_control_frame_t *, sorbet_pushCfuncFrame, (struct FunctionInlineCache *, VALUE, const rb_iseq_t *));
 SORBET_ALIVE(rb_control_frame_t *, sorbet_pushStaticInitFrame, (VALUE));
 SORBET_ALIVE(void, sorbet_pushBlockFrame, (const struct rb_captured_block *));
-SORBET_ALIVE(void, sorbet_popRubyStack, (void));
+SORBET_ALIVE(void, sorbet_popFrame, (void));
 
 SORBET_ALIVE(void, sorbet_vm_env_write_slowpath, (const VALUE *, int, VALUE));
 SORBET_ALIVE(void, sorbet_setupFunctionInlineCache,
@@ -772,7 +772,7 @@ VALUE sorbet_rb_array_each_withBlock(VALUE recv, ID fun, int argc, const VALUE *
         blk(val, closure, 1, &val, Qnil);
     }
 
-    sorbet_popRubyStack();
+    sorbet_popFrame();
 
     return recv;
 }
@@ -809,7 +809,7 @@ VALUE sorbet_rb_array_each_with_object_withBlock(VALUE recv, ID fun, int argc, c
         blk(val, closure, 2, &block_argv[0], Qnil);
     }
 
-    sorbet_popRubyStack();
+    sorbet_popFrame();
 
     return object;
 }
@@ -843,7 +843,7 @@ VALUE sorbet_rb_array_select_withBlock(VALUE recv, ID fun, int argc, const VALUE
         }
     }
 
-    sorbet_popRubyStack();
+    sorbet_popFrame();
 
     return result;
 }
@@ -879,7 +879,7 @@ VALUE sorbet_rb_array_find_withBlock(VALUE recv, ID fun, int argc, const VALUE *
         }
     }
 
-    sorbet_popRubyStack();
+    sorbet_popFrame();
 
     if (NIL_P(result) && !NIL_P(if_none)) {
         return rb_funcallv(if_none, idCall, 0, 0);
@@ -918,7 +918,7 @@ VALUE sorbet_rb_array_collect_withBlock(VALUE recv, ID fun, int argc, const VALU
         rb_ary_push(collect, blk(val, closure, 1, &val, Qnil));
     }
 
-    sorbet_popRubyStack();
+    sorbet_popFrame();
 
     return collect;
 }
@@ -947,7 +947,7 @@ VALUE sorbet_rb_array_collect_bang_withBlock(VALUE recv, ID fun, int argc, const
         rb_ary_store(recv, i, blk(val, closure, 1, &val, Qnil));
     }
 
-    sorbet_popRubyStack();
+    sorbet_popFrame();
 
     return recv;
 }
@@ -988,12 +988,12 @@ VALUE sorbet_rb_array_any_withBlock(VALUE recv, ID fun, int argc, const VALUE *c
         VALUE val = RARRAY_AREF(recv, i);
         VALUE ret = blk(val, closure, 1, &val, Qnil);
         if (RTEST(ret)) {
-            sorbet_popRubyStack();
+            sorbet_popFrame();
             return Qtrue;
         }
     }
 
-    sorbet_popRubyStack();
+    sorbet_popFrame();
 
     return Qfalse;
 }
@@ -1034,12 +1034,12 @@ VALUE sorbet_rb_array_all_withBlock(VALUE recv, ID fun, int argc, const VALUE *c
         VALUE val = RARRAY_AREF(recv, i);
         VALUE ret = blk(val, closure, 1, &val, Qnil);
         if (!RTEST(ret)) {
-            sorbet_popRubyStack();
+            sorbet_popFrame();
             return Qfalse;
         }
     }
 
-    sorbet_popRubyStack();
+    sorbet_popFrame();
 
     return Qtrue;
 }
@@ -1323,7 +1323,7 @@ VALUE sorbet_rb_int_dotimes_withBlock(VALUE recv, ID fun, int argc, const VALUE 
         }
     }
 
-    sorbet_popRubyStack();
+    sorbet_popFrame();
 
     return recv;
 }
@@ -1380,7 +1380,7 @@ VALUE sorbet_rb_hash_each_pair_withBlock(VALUE recv, ID fun, int argc, const VAL
     rb_hash_foreach(recv, numPositionalArgs > 1 ? sorbet_rb_hash_each_fun_fast : sorbet_rb_hash_each_fun_slow,
                     (VALUE)&passthrough);
 
-    sorbet_popRubyStack();
+    sorbet_popFrame();
 
     return recv;
 }
@@ -1435,7 +1435,7 @@ VALUE sorbet_rb_hash_each_with_object_withBlock(VALUE recv, ID fun, int argc, co
     passthrough.argv[1] = object;
     rb_hash_foreach(recv, sorbet_rb_hash_each_with_object_fun, (VALUE)&passthrough);
 
-    sorbet_popRubyStack();
+    sorbet_popFrame();
 
     return object;
 }
@@ -1509,7 +1509,7 @@ VALUE sorbet_rb_hash_any_withBlock(VALUE recv, ID fun, int argc, const VALUE *co
     rb_hash_foreach(recv, numPositionalArgs > 1 ? sorbet_rb_hash_any_fun_fast : sorbet_rb_hash_any_fun_slow,
                     (VALUE)&passthrough);
 
-    sorbet_popRubyStack();
+    sorbet_popFrame();
 
     return passthrough.retval;
 }
@@ -1735,9 +1735,9 @@ VALUE **sorbet_get_sp(rb_control_frame_t *cfp) {
     return &(cfp->sp);
 }
 
-// Push an entry to the ruby stack and return the new sp
+// Push an entry to the ruby value stack and return the new sp
 SORBET_INLINE
-VALUE *sorbet_push(VALUE *sp, const VALUE val) {
+VALUE *sorbet_pushValueStack(VALUE *sp, const VALUE val) {
     *sp = val;
     return (sp + 1);
 }
@@ -1871,7 +1871,7 @@ VALUE sorbet_callFuncDirect(struct FunctionInlineCache *cache, rb_sorbet_func_t 
 
     rb_control_frame_t *cfp = sorbet_pushCfuncFrame(cache, recv, iseq);
     VALUE res = methodPtr(argc, argv, recv, cfp);
-    sorbet_popRubyStack();
+    sorbet_popFrame();
     return res;
 }
 
@@ -1879,7 +1879,7 @@ SORBET_INLINE
 VALUE sorbet_callStaticInitDirect(rb_sorbet_func_t methodPtr, int argc, VALUE *argv, VALUE recv) {
     rb_control_frame_t *cfp = sorbet_pushStaticInitFrame(recv);
     VALUE res = methodPtr(argc, argv, recv, cfp);
-    sorbet_popRubyStack();
+    sorbet_popFrame();
     return res;
 }
 
@@ -2386,7 +2386,7 @@ VALUE __sorbet_only_exists_to_keep_functions_alive__() __attribute__((optnone)) 
            (long)&sorbet_isa_FalseClass + (long)&sorbet_isa_NilClass + (long)&sorbet_isa_Symbol +
            (long)&sorbet_isa_Float + (long)&sorbet_isa_Untyped + (long)&sorbet_isa_Hash + (long)&sorbet_isa_Array +
            (long)&sorbet_isa_Regexp + (long)&sorbet_isa_String + (long)&sorbet_isa_Proc +
-           (long)&sorbet_isa_RootSingleton + (long)&sorbet_get_sp + (long)&sorbet_push +
+           (long)&sorbet_isa_RootSingleton + (long)&sorbet_get_sp + (long)&sorbet_pushValueStack +
            (long)&sorbet_callFuncWithCache + (long)&sorbet_callFuncBlockWithCache +
            (long)&sorbet_callFuncBlockWithCache_noBreak + (long)&sorbet_vmBlockHandlerNone;
 }
