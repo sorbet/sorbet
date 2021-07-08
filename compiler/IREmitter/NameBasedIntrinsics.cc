@@ -167,8 +167,8 @@ public:
         auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 3);
         auto &builder = builderCast(mcctx.build);
         auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
-        Payload::pushRubyStackVector(cs, builder, cfp, stack);
-        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, string(name), flags, stack.size() - 1, keywords);
+        Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyBlockId), stack);
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, string(name), flags, stack.size(), keywords);
         return Payload::callFuncWithCache(mcctx.cs, mcctx.build, cache, blockHandler);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -463,7 +463,7 @@ public:
         // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
         // is actually the first arg of the callWithSplat intrinsic method.
         Payload::pushRubyStackVector(
-            cs, builder, cfp, {Payload::varGet(mcctx.cs, recv, mcctx.build, irctx, mcctx.rubyBlockId), splatArray});
+            cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.build, irctx, mcctx.rubyBlockId), {splatArray});
 
         // Call the receiver.
         auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flags, 1, {});

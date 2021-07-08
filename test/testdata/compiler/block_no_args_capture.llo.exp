@@ -176,15 +176,15 @@ vm_get_ep.exit:
   %9 = getelementptr inbounds i64, i64* %5, i64 -1, !dbg !22
   %10 = load i64, i64* %9, align 8, !dbg !22, !tbaa !4
   %11 = and i64 %10, -4, !dbg !22
-  %12 = load i64, i64* @rb_mKernel, align 8, !dbg !22
-  %13 = inttoptr i64 %11 to i64*, !dbg !22
-  %14 = getelementptr inbounds i64, i64* %13, i64 -3, !dbg !22
-  %15 = load i64, i64* %14, align 8, !dbg !22, !tbaa !4
+  %12 = inttoptr i64 %11 to i64*, !dbg !22
+  %13 = getelementptr inbounds i64, i64* %12, i64 -3, !dbg !22
+  %14 = load i64, i64* %13, align 8, !dbg !22, !tbaa !4
+  %15 = load i64, i64* @rb_mKernel, align 8, !dbg !22
   %16 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 1, !dbg !22
   %17 = load i64*, i64** %16, align 8, !dbg !22
-  store i64 %12, i64* %17, align 8, !dbg !22, !tbaa !4
+  store i64 %15, i64* %17, align 8, !dbg !22, !tbaa !4
   %18 = getelementptr inbounds i64, i64* %17, i64 1, !dbg !22
-  store i64 %15, i64* %18, align 8, !dbg !22, !tbaa !4
+  store i64 %14, i64* %18, align 8, !dbg !22, !tbaa !4
   %19 = getelementptr inbounds i64, i64* %18, i64 1, !dbg !22
   store i64* %19, i64** %16, align 8, !dbg !22
   %send = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts, i64 0), !dbg !22

@@ -423,21 +423,11 @@ llvm::Value *IREmitterHelpers::receiverFastPathTestWithCache(MethodCallContext &
                                                              const vector<string> &expectedRubyCFuncs,
                                                              const string &methodNameForDebug) {
     auto &cs = mcctx.cs;
-    auto *send = mcctx.send;
     auto &builder = static_cast<llvm::IRBuilder<> &>(mcctx.build);
 
-    CallCacheFlags flags;
-    if (send->isPrivateOk) {
-        flags.fcall = true;
-    } else {
-        flags.args_simple = true;
-    }
-    auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, methodNameForDebug, flags, 0, {});
+    auto *cache = mcctx.getInlineCache();
     auto *recv = mcctx.varGetRecv();
-
-    // TODO(jez) We could do even better by hoisting this out, so that all potential
-    // things that want to use the cache cooperate in updating it once per call.
-    builder.CreateCall(cs.getFunction("sorbet_vmMethodSearch"), {cache, recv});
+    mcctx.emitMethodSearch();
 
     // We could initialize result with the first result (because expectedRubyCFunc is
     // non-empty), but this makes the code slightly cleaner, and LLVM will optimize.

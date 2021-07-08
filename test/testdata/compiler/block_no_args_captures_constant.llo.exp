@@ -114,9 +114,9 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @rubyIdPrecomputed_keep_def = internal unnamed_addr global i64 0, align 8
 @str_keep_def = private unnamed_addr constant [9 x i8] c"keep_def\00", align 1
 @ic_foo = internal global %struct.FunctionInlineCache zeroinitializer
-@rb_mKernel = external local_unnamed_addr constant i64
 @guard_epoch_A = linkonce local_unnamed_addr global i64 0
 @guarded_const_A = linkonce local_unnamed_addr global i64 0
+@rb_mKernel = external local_unnamed_addr constant i64
 @rb_cObject = external local_unnamed_addr constant i64
 
 declare i64 @rb_id2sym(i64) local_unnamed_addr #0
@@ -192,27 +192,27 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
 
 1:                                                ; preds = %functionEntryInitializers
   store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 6), i64** %0, align 8, !dbg !16, !tbaa !12
-  %2 = load i64, i64* @rb_mKernel, align 8, !dbg !17
-  %3 = load i64, i64* @guard_epoch_A, align 8, !dbg !17
-  %4 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !17, !tbaa !18
-  %needTakeSlowPath = icmp ne i64 %3, %4, !dbg !17
-  br i1 %needTakeSlowPath, label %5, label %6, !dbg !17, !prof !20
+  %2 = load i64, i64* @guard_epoch_A, align 8, !dbg !17
+  %3 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !17, !tbaa !18
+  %needTakeSlowPath = icmp ne i64 %2, %3, !dbg !17
+  br i1 %needTakeSlowPath, label %4, label %5, !dbg !17, !prof !20
 
-5:                                                ; preds = %1
+4:                                                ; preds = %1
   tail call void @const_recompute_A(), !dbg !17
-  br label %6, !dbg !17
+  br label %5, !dbg !17
 
-6:                                                ; preds = %1, %5
-  %7 = load i64, i64* @guarded_const_A, align 8, !dbg !17
-  %8 = load i64, i64* @guard_epoch_A, align 8, !dbg !17
-  %9 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !17, !tbaa !18
-  %guardUpdated = icmp eq i64 %8, %9, !dbg !17
+5:                                                ; preds = %1, %4
+  %6 = load i64, i64* @guarded_const_A, align 8, !dbg !17
+  %7 = load i64, i64* @guard_epoch_A, align 8, !dbg !17
+  %8 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !17, !tbaa !18
+  %guardUpdated = icmp eq i64 %7, %8, !dbg !17
   tail call void @llvm.assume(i1 %guardUpdated), !dbg !17
+  %9 = load i64, i64* @rb_mKernel, align 8, !dbg !17
   %10 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %cfp, i64 0, i32 1, !dbg !17
   %11 = load i64*, i64** %10, align 8, !dbg !17
-  store i64 %2, i64* %11, align 8, !dbg !17, !tbaa !4
+  store i64 %9, i64* %11, align 8, !dbg !17, !tbaa !4
   %12 = getelementptr inbounds i64, i64* %11, i64 1, !dbg !17
-  store i64 %7, i64* %12, align 8, !dbg !17, !tbaa !4
+  store i64 %6, i64* %12, align 8, !dbg !17, !tbaa !4
   %13 = getelementptr inbounds i64, i64* %12, i64 1, !dbg !17
   store i64* %13, i64** %10, align 8, !dbg !17
   %send = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts, i64 0), !dbg !17
@@ -241,8 +241,8 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   tail call void @sorbet_pushBlockFrame(%struct.rb_captured_block* %29) #12, !dbg !34
   br label %30, !dbg !34
 
-30:                                               ; preds = %30, %6
-  %31 = phi i64 [ 0, %6 ], [ %45, %30 ], !dbg !34
+30:                                               ; preds = %30, %5
+  %31 = phi i64 [ 0, %5 ], [ %45, %30 ], !dbg !34
   %32 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !21, !tbaa !12
   %33 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %32, i64 0, i32 2, !dbg !21
   %34 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %33, align 8, !dbg !21, !tbaa !22
@@ -258,9 +258,9 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %40, align 8, !dbg !39, !tbaa !12
   %41 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %34, i64 0, i32 1, !dbg !42
   %42 = load i64*, i64** %41, align 8, !dbg !42
-  store i64 %2, i64* %42, align 8, !dbg !42, !tbaa !4
+  store i64 %9, i64* %42, align 8, !dbg !42, !tbaa !4
   %43 = getelementptr inbounds i64, i64* %42, i64 1, !dbg !42
-  store i64 %7, i64* %43, align 8, !dbg !42, !tbaa !4
+  store i64 %6, i64* %43, align 8, !dbg !42, !tbaa !4
   %44 = getelementptr inbounds i64, i64* %43, i64 1, !dbg !42
   store i64* %44, i64** %41, align 8, !dbg !42
   %send26 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts.1, i64 0), !dbg !42
@@ -308,27 +308,27 @@ functionEntryInitializers:
   store i64 %7, i64* %5, align 8, !tbaa !4
   %8 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 0
   store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %8, align 8, !dbg !49, !tbaa !12
-  %9 = load i64, i64* @rb_mKernel, align 8, !dbg !50
-  %10 = load i64, i64* @guard_epoch_A, align 8, !dbg !50
-  %11 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !50, !tbaa !18
-  %needTakeSlowPath = icmp ne i64 %10, %11, !dbg !50
-  br i1 %needTakeSlowPath, label %12, label %13, !dbg !50, !prof !20
+  %9 = load i64, i64* @guard_epoch_A, align 8, !dbg !50
+  %10 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !50, !tbaa !18
+  %needTakeSlowPath = icmp ne i64 %9, %10, !dbg !50
+  br i1 %needTakeSlowPath, label %11, label %12, !dbg !50, !prof !20
 
-12:                                               ; preds = %functionEntryInitializers
+11:                                               ; preds = %functionEntryInitializers
   tail call void @const_recompute_A(), !dbg !50
-  br label %13, !dbg !50
+  br label %12, !dbg !50
 
-13:                                               ; preds = %functionEntryInitializers, %12
-  %14 = load i64, i64* @guarded_const_A, align 8, !dbg !50
-  %15 = load i64, i64* @guard_epoch_A, align 8, !dbg !50
-  %16 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !50, !tbaa !18
-  %guardUpdated = icmp eq i64 %15, %16, !dbg !50
+12:                                               ; preds = %functionEntryInitializers, %11
+  %13 = load i64, i64* @guarded_const_A, align 8, !dbg !50
+  %14 = load i64, i64* @guard_epoch_A, align 8, !dbg !50
+  %15 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !50, !tbaa !18
+  %guardUpdated = icmp eq i64 %14, %15, !dbg !50
   tail call void @llvm.assume(i1 %guardUpdated), !dbg !50
+  %16 = load i64, i64* @rb_mKernel, align 8, !dbg !50
   %17 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 1, !dbg !50
   %18 = load i64*, i64** %17, align 8, !dbg !50
-  store i64 %9, i64* %18, align 8, !dbg !50, !tbaa !4
+  store i64 %16, i64* %18, align 8, !dbg !50, !tbaa !4
   %19 = getelementptr inbounds i64, i64* %18, i64 1, !dbg !50
-  store i64 %14, i64* %19, align 8, !dbg !50, !tbaa !4
+  store i64 %13, i64* %19, align 8, !dbg !50, !tbaa !4
   %20 = getelementptr inbounds i64, i64* %19, i64 1, !dbg !50
   store i64* %20, i64** %17, align 8, !dbg !50
   %send = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts.1, i64 0), !dbg !50

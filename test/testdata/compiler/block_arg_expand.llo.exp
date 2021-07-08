@@ -279,22 +279,22 @@ fillFromDefaultBlockDone2:                        ; preds = %argArrayExpandArray
   br i1 %44, label %45, label %typeTestSuccess, !dbg !28, !prof !26
 
 45:                                               ; preds = %fillFromDefaultBlockDone2.thread, %fillFromDefaultBlockDone2
-  %el1.sroa.0.153 = phi i64 [ 8, %fillFromDefaultBlockDone2.thread ], [ %el1.sroa.0.1, %fillFromDefaultBlockDone2 ]
-  %el2.sroa.0.050 = phi i64 [ 8, %fillFromDefaultBlockDone2.thread ], [ %el2.sroa.0.0, %fillFromDefaultBlockDone2 ]
-  %46 = and i64 %el1.sroa.0.153, 7, !dbg !28
+  %el1.sroa.0.151 = phi i64 [ 8, %fillFromDefaultBlockDone2.thread ], [ %el1.sroa.0.1, %fillFromDefaultBlockDone2 ]
+  %el2.sroa.0.048 = phi i64 [ 8, %fillFromDefaultBlockDone2.thread ], [ %el2.sroa.0.0, %fillFromDefaultBlockDone2 ]
+  %46 = and i64 %el1.sroa.0.151, 7, !dbg !28
   %47 = icmp ne i64 %46, 0, !dbg !28
-  %48 = and i64 %el1.sroa.0.153, -9, !dbg !28
+  %48 = and i64 %el1.sroa.0.151, -9, !dbg !28
   %49 = icmp eq i64 %48, 0, !dbg !28
   %50 = or i1 %47, %49, !dbg !28
-  br i1 %50, label %codeRepl45, label %sorbet_isa_Integer.exit, !dbg !28
+  br i1 %50, label %codeRepl43, label %sorbet_isa_Integer.exit, !dbg !28
 
 sorbet_isa_Integer.exit:                          ; preds = %45
-  %51 = inttoptr i64 %el1.sroa.0.153 to %struct.iseq_inline_iv_cache_entry*, !dbg !28
+  %51 = inttoptr i64 %el1.sroa.0.151 to %struct.iseq_inline_iv_cache_entry*, !dbg !28
   %52 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %51, i64 0, i32 0, !dbg !28
   %53 = load i64, i64* %52, align 8, !dbg !28, !tbaa !23
   %54 = and i64 %53, 31, !dbg !28
   %55 = icmp eq i64 %54, 10, !dbg !28
-  br i1 %55, label %typeTestSuccess, label %codeRepl45, !dbg !28, !prof !29
+  br i1 %55, label %typeTestSuccess, label %codeRepl43, !dbg !28, !prof !29
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers, %rb_array_len.exit
   %argcPhi = phi i32 [ %argc, %functionEntryInitializers ], [ %41, %rb_array_len.exit ], !dbg !22
@@ -307,48 +307,48 @@ fillFromDefaultBlockDone2.thread:                 ; preds = %fillRequiredArgs
   br label %45, !dbg !28
 
 typeTestSuccess:                                  ; preds = %fillFromDefaultBlockDone2, %sorbet_isa_Integer.exit
-  %el1.sroa.0.152 = phi i64 [ %el1.sroa.0.1, %fillFromDefaultBlockDone2 ], [ %el1.sroa.0.153, %sorbet_isa_Integer.exit ]
-  %el2.sroa.0.049 = phi i64 [ %el2.sroa.0.0, %fillFromDefaultBlockDone2 ], [ %el2.sroa.0.050, %sorbet_isa_Integer.exit ]
-  %56 = and i64 %el2.sroa.0.049, 1, !dbg !30
+  %el1.sroa.0.150 = phi i64 [ %el1.sroa.0.1, %fillFromDefaultBlockDone2 ], [ %el1.sroa.0.151, %sorbet_isa_Integer.exit ]
+  %el2.sroa.0.047 = phi i64 [ %el2.sroa.0.0, %fillFromDefaultBlockDone2 ], [ %el2.sroa.0.048, %sorbet_isa_Integer.exit ]
+  %56 = and i64 %el2.sroa.0.047, 1, !dbg !30
   %57 = icmp eq i64 %56, 0, !dbg !30
   br i1 %57, label %58, label %"fastSymCallIntrinsic_Integer_+", !dbg !30, !prof !26
 
 58:                                               ; preds = %typeTestSuccess
-  %59 = and i64 %el2.sroa.0.049, 7, !dbg !30
+  %59 = and i64 %el2.sroa.0.047, 7, !dbg !30
   %60 = icmp ne i64 %59, 0, !dbg !30
-  %61 = and i64 %el2.sroa.0.049, -9, !dbg !30
+  %61 = and i64 %el2.sroa.0.047, -9, !dbg !30
   %62 = icmp eq i64 %61, 0, !dbg !30
   %63 = or i1 %60, %62, !dbg !30
-  br i1 %63, label %codeRepl, label %sorbet_isa_Integer.exit46, !dbg !30
+  br i1 %63, label %codeRepl, label %sorbet_isa_Integer.exit44, !dbg !30
 
-sorbet_isa_Integer.exit46:                        ; preds = %58
-  %64 = inttoptr i64 %el2.sroa.0.049 to %struct.iseq_inline_iv_cache_entry*, !dbg !30
+sorbet_isa_Integer.exit44:                        ; preds = %58
+  %64 = inttoptr i64 %el2.sroa.0.047 to %struct.iseq_inline_iv_cache_entry*, !dbg !30
   %65 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %64, i64 0, i32 0, !dbg !30
   %66 = load i64, i64* %65, align 8, !dbg !30, !tbaa !23
   %67 = and i64 %66, 31, !dbg !30
   %68 = icmp eq i64 %67, 10, !dbg !30
   br i1 %68, label %"fastSymCallIntrinsic_Integer_+", label %codeRepl, !dbg !30, !prof !29
 
-codeRepl45:                                       ; preds = %45, %sorbet_isa_Integer.exit
-  %el1.sroa.0.154 = phi i64 [ %el1.sroa.0.153, %45 ], [ %el1.sroa.0.153, %sorbet_isa_Integer.exit ]
-  tail call fastcc void @"func_<root>.<static-init>$152$block_1.cold.1"(i64 %el1.sroa.0.154) #13, !dbg !28
+codeRepl43:                                       ; preds = %45, %sorbet_isa_Integer.exit
+  %el1.sroa.0.152 = phi i64 [ %el1.sroa.0.151, %45 ], [ %el1.sroa.0.151, %sorbet_isa_Integer.exit ]
+  tail call fastcc void @"func_<root>.<static-init>$152$block_1.cold.1"(i64 %el1.sroa.0.152) #13, !dbg !28
   unreachable
 
-codeRepl:                                         ; preds = %58, %sorbet_isa_Integer.exit46
-  %el2.sroa.0.051 = phi i64 [ %el2.sroa.0.049, %58 ], [ %el2.sroa.0.049, %sorbet_isa_Integer.exit46 ]
-  tail call fastcc void @"func_<root>.<static-init>$152$block_1.cold.1"(i64 %el2.sroa.0.051) #13, !dbg !30
+codeRepl:                                         ; preds = %58, %sorbet_isa_Integer.exit44
+  %el2.sroa.0.049 = phi i64 [ %el2.sroa.0.047, %58 ], [ %el2.sroa.0.047, %sorbet_isa_Integer.exit44 ]
+  tail call fastcc void @"func_<root>.<static-init>$152$block_1.cold.1"(i64 %el2.sroa.0.049) #13, !dbg !30
   unreachable
 
-"fastSymCallIntrinsic_Integer_+":                 ; preds = %typeTestSuccess, %sorbet_isa_Integer.exit46
+"fastSymCallIntrinsic_Integer_+":                 ; preds = %typeTestSuccess, %sorbet_isa_Integer.exit44
   tail call void @llvm.experimental.noalias.scope.decl(metadata !31), !dbg !28
-  %69 = and i64 %el2.sroa.0.049, 1, !dbg !28
-  %70 = and i64 %69, %el1.sroa.0.152, !dbg !28
+  %69 = and i64 %el2.sroa.0.047, 1, !dbg !28
+  %70 = and i64 %69, %el1.sroa.0.150, !dbg !28
   %71 = icmp eq i64 %70, 0, !dbg !28
   br i1 %71, label %81, label %72, !dbg !28, !prof !34
 
 72:                                               ; preds = %"fastSymCallIntrinsic_Integer_+"
-  %73 = add nsw i64 %el2.sroa.0.049, -1, !dbg !28
-  %74 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %el1.sroa.0.152, i64 %73) #14, !dbg !28
+  %73 = add nsw i64 %el2.sroa.0.047, -1, !dbg !28
+  %74 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %el1.sroa.0.150, i64 %73) #14, !dbg !28
   %75 = extractvalue { i64, i1 } %74, 1, !dbg !28
   %76 = extractvalue { i64, i1 } %74, 0, !dbg !28
   br i1 %75, label %77, label %sorbet_rb_int_plus.exit, !dbg !28
@@ -360,7 +360,7 @@ codeRepl:                                         ; preds = %58, %sorbet_isa_Int
   br label %sorbet_rb_int_plus.exit, !dbg !28
 
 81:                                               ; preds = %"fastSymCallIntrinsic_Integer_+"
-  %82 = tail call i64 @sorbet_rb_int_plus_slowpath(i64 %el1.sroa.0.152, i64 %el2.sroa.0.049) #12, !dbg !28, !noalias !31
+  %82 = tail call i64 @sorbet_rb_int_plus_slowpath(i64 %el1.sroa.0.150, i64 %el2.sroa.0.047) #12, !dbg !28, !noalias !31
   br label %sorbet_rb_int_plus.exit, !dbg !28
 
 sorbet_rb_int_plus.exit:                          ; preds = %77, %72, %81
@@ -572,9 +572,9 @@ fillFromDefaultBlockDone2:                        ; preds = %argArrayExpandArray
   store i64 %y.sroa.0.0, i64* %51, align 8, !dbg !54, !tbaa !4
   %52 = getelementptr inbounds i64, i64* %51, i64 1, !dbg !54
   store i64* %52, i64** %49, align 8, !dbg !54
-  %send38 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_p.9, i64 0), !dbg !54
+  %send40 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_p.9, i64 0), !dbg !54
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 23), i64** %10, align 8, !dbg !54, !tbaa !13
-  ret i64 %send38, !dbg !55
+  ret i64 %send40, !dbg !55
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers, %rb_array_len.exit
   %argcPhi = phi i32 [ %argc, %functionEntryInitializers ], [ %43, %rb_array_len.exit ], !dbg !51
@@ -689,9 +689,9 @@ fillFromDefaultBlockDone2:                        ; preds = %argArrayExpandArray
   store i64 %y.sroa.0.0, i64* %51, align 8, !dbg !60, !tbaa !4
   %52 = getelementptr inbounds i64, i64* %51, i64 1, !dbg !60
   store i64* %52, i64** %49, align 8, !dbg !60
-  %send38 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_p.13, i64 0), !dbg !60
+  %send40 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_p.13, i64 0), !dbg !60
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 28), i64** %10, align 8, !dbg !60, !tbaa !13
-  ret i64 %send38, !dbg !61
+  ret i64 %send40, !dbg !61
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers, %rb_array_len.exit
   %argcPhi = phi i32 [ %argc, %functionEntryInitializers ], [ %43, %rb_array_len.exit ], !dbg !57
@@ -941,13 +941,13 @@ forward_sorbet_rb_array_each_withBlock.exit.i:    ; preds = %rb_array_len.exit.i
 
 rb_check_arity.1.exit.i8.i:                       ; preds = %111, %forward_sorbet_rb_array_each_withBlock.exit.i
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 13), i64** %35, align 8, !dbg !71, !tbaa !13
-  %rubyId_each61.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !87
+  %rubyId_each66.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !87
   %115 = bitcast %struct.sorbet_inlineIntrinsicEnv* %5 to i8*, !dbg !87
   call void @llvm.lifetime.start.p0i8(i64 noundef 40, i8* noundef nonnull %115) #12, !dbg !87
   %116 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %5, i64 0, i32 0, !dbg !87
   store i64 %39, i64* %116, align 8, !dbg !87, !tbaa !72
   %117 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %5, i64 0, i32 1, !dbg !87
-  store i64 %rubyId_each61.i, i64* %117, align 8, !dbg !87, !tbaa !74
+  store i64 %rubyId_each66.i, i64* %117, align 8, !dbg !87, !tbaa !74
   %118 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %5, i64 0, i32 2, !dbg !87
   store i32 0, i32* %118, align 8, !dbg !87, !tbaa !75
   %119 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %5, i64 0, i32 3, !dbg !87
@@ -1083,13 +1083,13 @@ forward_sorbet_rb_array_each_withBlock.1.exit.i:  ; preds = %rb_array_len.exit.i
 
 rb_check_arity.1.exit.i14.i:                      ; preds = %197, %forward_sorbet_rb_array_each_withBlock.1.exit.i
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 18), i64** %35, align 8, !dbg !87, !tbaa !13
-  %rubyId_each72.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !103
+  %rubyId_each78.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !103
   %201 = bitcast %struct.sorbet_inlineIntrinsicEnv* %4 to i8*, !dbg !103
   call void @llvm.lifetime.start.p0i8(i64 noundef 40, i8* noundef nonnull %201) #12, !dbg !103
   %202 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %4, i64 0, i32 0, !dbg !103
   store i64 %39, i64* %202, align 8, !dbg !103, !tbaa !72
   %203 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %4, i64 0, i32 1, !dbg !103
-  store i64 %rubyId_each72.i, i64* %203, align 8, !dbg !103, !tbaa !74
+  store i64 %rubyId_each78.i, i64* %203, align 8, !dbg !103, !tbaa !74
   %204 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %4, i64 0, i32 2, !dbg !103
   store i32 0, i32* %204, align 8, !dbg !103, !tbaa !75
   %205 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %4, i64 0, i32 3, !dbg !103
@@ -1225,13 +1225,13 @@ forward_sorbet_rb_array_each_withBlock.3.exit.i:  ; preds = %rb_array_len.exit.i
 
 rb_check_arity.1.exit.i21.i:                      ; preds = %283, %forward_sorbet_rb_array_each_withBlock.3.exit.i
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 23), i64** %35, align 8, !dbg !103, !tbaa !13
-  %rubyId_each83.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !119
+  %rubyId_each90.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !119
   %287 = bitcast %struct.sorbet_inlineIntrinsicEnv* %3 to i8*, !dbg !119
   call void @llvm.lifetime.start.p0i8(i64 noundef 40, i8* noundef nonnull %287) #12, !dbg !119
   %288 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %3, i64 0, i32 0, !dbg !119
   store i64 %39, i64* %288, align 8, !dbg !119, !tbaa !72
   %289 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %3, i64 0, i32 1, !dbg !119
-  store i64 %rubyId_each83.i, i64* %289, align 8, !dbg !119, !tbaa !74
+  store i64 %rubyId_each90.i, i64* %289, align 8, !dbg !119, !tbaa !74
   %290 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %3, i64 0, i32 2, !dbg !119
   store i32 0, i32* %290, align 8, !dbg !119, !tbaa !75
   %291 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %3, i64 0, i32 3, !dbg !119
@@ -1347,13 +1347,13 @@ forward_sorbet_rb_array_each_withBlock.6.exit.i:  ; preds = %rb_array_len.exit.i
 
 rb_check_arity.1.exit.i.i:                        ; preds = %356, %forward_sorbet_rb_array_each_withBlock.6.exit.i
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 28), i64** %35, align 8, !dbg !119, !tbaa !13
-  %rubyId_each94.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !129
+  %rubyId_each102.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !129
   %360 = bitcast %struct.sorbet_inlineIntrinsicEnv* %7 to i8*, !dbg !129
   call void @llvm.lifetime.start.p0i8(i64 noundef 40, i8* noundef nonnull %360) #12, !dbg !129
   %361 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %7, i64 0, i32 0, !dbg !129
   store i64 %39, i64* %361, align 8, !dbg !129, !tbaa !72
   %362 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %7, i64 0, i32 1, !dbg !129
-  store i64 %rubyId_each94.i, i64* %362, align 8, !dbg !129, !tbaa !74
+  store i64 %rubyId_each102.i, i64* %362, align 8, !dbg !129, !tbaa !74
   %363 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %7, i64 0, i32 2, !dbg !129
   store i32 0, i32* %363, align 8, !dbg !129, !tbaa !75
   %364 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %7, i64 0, i32 3, !dbg !129

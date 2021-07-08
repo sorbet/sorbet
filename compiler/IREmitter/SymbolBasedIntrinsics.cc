@@ -622,13 +622,14 @@ public:
 
         auto *blockHandler = Payload::vmBlockHandlerNone(cs, mcctx.build);
 
-        auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, cfg::LocalRef::selfVariable(), 0);
+        auto recv = cfg::LocalRef::selfVariable();
+        auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 0);
         auto &irctx = mcctx.irctx;
         auto &builder = builderCast(mcctx.build);
         auto rubyBlockId = mcctx.rubyBlockId;
         auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
-        Payload::pushRubyStackVector(cs, builder, cfp, stack);
-        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, "new", flags, stack.size() - 1, keywords);
+        Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyBlockId), stack);
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, "new", flags, stack.size(), keywords);
         return Payload::callFuncWithCache(cs, mcctx.build, cache, blockHandler);
     };
 

@@ -557,8 +557,9 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     if (i->link != nullptr) {
                         blk.emplace(i->link->rubyBlockId);
                     }
-                    MethodCallContext mcctx{cs, builder, irctx, bb->rubyBlockId, i, blk};
+                    auto mcctx = MethodCallContext::create(cs, builder, irctx, bb->rubyBlockId, i, blk);
                     auto rawCall = IREmitterHelpers::emitMethodCall(mcctx);
+                    mcctx.finalize();
                     Payload::varSet(cs, bind.bind.variable, rawCall, builder, irctx, bb->rubyBlockId);
                 },
                 [&](cfg::Return *i) {

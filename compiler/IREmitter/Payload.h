@@ -73,7 +73,7 @@ public:
     static llvm::Value *retrySingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
     static llvm::Value *voidSingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
 
-    static void pushRubyStackVector(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *cfp,
+    static void pushRubyStackVector(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *cfp, llvm::Value *recv,
                                     const std::vector<llvm::Value *> &stack);
 
     static llvm::Value *vmBlockHandlerNone(CompilerState &cs, llvm::IRBuilderBase &builder);

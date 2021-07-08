@@ -317,7 +317,7 @@ sorbet_rb_int_plus.exit119.i:                     ; preds = %72, %68, %63
   br label %rb_vm_check_ints.exit6.i, !dbg !39
 
 rb_vm_check_ints.exit6.i:                         ; preds = %83, %sorbet_rb_int_plus.exit119.i
-  %"rubyStr_ 63.i" = load i64, i64* @"rubyStrFrozen_ ", align 8, !dbg !43
+  %"rubyStr_ 64.i" = load i64, i64* @"rubyStrFrozen_ ", align 8, !dbg !43
   store i64 3, i64* %callArgs0Addr.i, align 8, !dbg !44
   call void @llvm.experimental.noalias.scope.decl(metadata !45) #8, !dbg !44
   %87 = load i64, i64* %19, align 8, !dbg !44, !tbaa !4, !alias.scope !45
@@ -364,12 +364,12 @@ rb_vm_check_ints.exit5.i:                         ; preds = %110, %sorbet_rb_int
   store i64 %47, i64* %callArgs0Addr.i, align 8, !dbg !48
   store i64 %"rubyStr_ .i", i64* %callArgs1Addr.i, align 8, !dbg !48
   store i64 %74, i64* %callArgs2Addr.i, align 8, !dbg !48
-  store i64 %"rubyStr_ 63.i", i64* %callArgs3Addr.i, align 8, !dbg !48
+  store i64 %"rubyStr_ 64.i", i64* %callArgs3Addr.i, align 8, !dbg !48
   store i64 %101, i64* %callArgs4Addr.i, align 8, !dbg !48
   %"rubyId_<string-interpolate>.i" = load i64, i64* @"rubyIdPrecomputed_<string-interpolate>", align 8, !dbg !48
-  %rawSendResult85.i = call i64 @sorbet_stringInterpolate(i64 noundef 8, i64 %"rubyId_<string-interpolate>.i", i32 noundef 5, i64* noundef nonnull %19, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #8, !dbg !48
+  %rawSendResult89.i = call i64 @sorbet_stringInterpolate(i64 noundef 8, i64 %"rubyId_<string-interpolate>.i", i32 noundef 5, i64* noundef nonnull %19, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #8, !dbg !48
   store i64* getelementptr inbounds ([9 x i64], [9 x i64]* @iseqEncodedArray, i64 0, i64 7), i64** %18, align 8, !dbg !48, !tbaa !14
-  br i1 %114, label %"fastSymCallIntrinsic_Integer_+91.i", label %"alternativeCallIntrinsic_Integer_+90.i", !dbg !13
+  br i1 %114, label %"fastSymCallIntrinsic_Integer_+97.i", label %"alternativeCallIntrinsic_Integer_+96.i", !dbg !13
 
 afterSend.i:                                      ; preds = %142, %sorbet_rb_int_lt.exit.i, %"alternativeCallIntrinsic_Integer_<.i"
   %114 = phi i1 [ %117, %"alternativeCallIntrinsic_Integer_<.i" ], [ %122, %sorbet_rb_int_lt.exit.i ], [ %122, %142 ]
@@ -429,7 +429,7 @@ sorbet_rb_int_lt.exit.i:                          ; preds = %132, %127
   %145 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %144, i32 noundef 0) #8, !dbg !8
   br label %afterSend.i, !dbg !8
 
-"alternativeCallIntrinsic_Integer_+90.i":         ; preds = %rb_vm_check_ints.exit5.i
+"alternativeCallIntrinsic_Integer_+96.i":         ; preds = %rb_vm_check_ints.exit5.i
   %146 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %10, i64 0, i32 1, !dbg !13
   %147 = load i64*, i64** %146, align 8, !dbg !13
   store i64 %i.sroa.0.0.i, i64* %147, align 8, !dbg !13, !tbaa !4
@@ -440,7 +440,7 @@ sorbet_rb_int_lt.exit.i:                          ; preds = %132, %127
   %send2 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @"ic_+.3", i64 0), !dbg !13
   br label %BB2.i.backedge, !dbg !13
 
-"fastSymCallIntrinsic_Integer_+91.i":             ; preds = %rb_vm_check_ints.exit5.i
+"fastSymCallIntrinsic_Integer_+97.i":             ; preds = %rb_vm_check_ints.exit5.i
   store i64 3, i64* %callArgs0Addr.i, align 8, !dbg !13
   call void @llvm.experimental.noalias.scope.decl(metadata !52) #8, !dbg !13
   %150 = load i64, i64* %19, align 8, !dbg !13, !tbaa !4, !alias.scope !52
@@ -449,7 +449,7 @@ sorbet_rb_int_lt.exit.i:                          ; preds = %132, %127
   %153 = icmp eq i64 %152, 0, !dbg !13
   br i1 %153, label %163, label %154, !dbg !13, !prof !34
 
-154:                                              ; preds = %"fastSymCallIntrinsic_Integer_+91.i"
+154:                                              ; preds = %"fastSymCallIntrinsic_Integer_+97.i"
   %155 = add nsw i64 %150, -1, !dbg !13
   %156 = call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0.i, i64 %155) #9, !dbg !13
   %157 = extractvalue { i64, i1 } %156, 1, !dbg !13
@@ -462,7 +462,7 @@ sorbet_rb_int_lt.exit.i:                          ; preds = %132, %127
   %162 = call i64 @rb_int2big(i64 %161) #8, !dbg !13, !noalias !52
   br label %sorbet_rb_int_plus.exit.i, !dbg !13
 
-163:                                              ; preds = %"fastSymCallIntrinsic_Integer_+91.i"
+163:                                              ; preds = %"fastSymCallIntrinsic_Integer_+97.i"
   %164 = call i64 @sorbet_rb_int_plus_slowpath(i64 %i.sroa.0.0.i, i64 %150) #8, !dbg !13, !noalias !52
   br label %sorbet_rb_int_plus.exit.i, !dbg !13
 
@@ -484,8 +484,8 @@ sorbet_rb_int_plus.exit.i:                        ; preds = %163, %159, %154
   %177 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %176, i32 noundef 0) #8, !dbg !13
   br label %BB2.i.backedge, !dbg !13
 
-BB2.i.backedge:                                   ; preds = %174, %sorbet_rb_int_plus.exit.i, %"alternativeCallIntrinsic_Integer_+90.i"
-  %i.sroa.0.0.i.be = phi i64 [ %send2, %"alternativeCallIntrinsic_Integer_+90.i" ], [ %165, %sorbet_rb_int_plus.exit.i ], [ %165, %174 ]
+BB2.i.backedge:                                   ; preds = %174, %sorbet_rb_int_plus.exit.i, %"alternativeCallIntrinsic_Integer_+96.i"
+  %i.sroa.0.0.i.be = phi i64 [ %send2, %"alternativeCallIntrinsic_Integer_+96.i" ], [ %165, %sorbet_rb_int_plus.exit.i ], [ %165, %174 ]
   br label %BB2.i
 
 "func_<root>.<static-init>$152.exit":             ; preds = %afterSend.i

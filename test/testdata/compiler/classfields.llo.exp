@@ -372,21 +372,21 @@ entry:
   %72 = xor i32 %71, -1, !dbg !8
   %73 = and i32 %72, %69, !dbg !8
   %74 = icmp eq i32 %73, 0, !dbg !8
-  br i1 %74, label %fastSymCallIntrinsic_Static_keep_def37.i.i, label %75, !dbg !8, !prof !53
+  br i1 %74, label %fastSymCallIntrinsic_Static_keep_def39.i.i, label %75, !dbg !8, !prof !53
 
 75:                                               ; preds = %47
   %76 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %67, i64 0, i32 8, !dbg !8
   %77 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %76, align 8, !dbg !8, !tbaa !54
   %78 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %77, i32 noundef 0) #11, !dbg !8
-  br label %fastSymCallIntrinsic_Static_keep_def37.i.i, !dbg !8
+  br label %fastSymCallIntrinsic_Static_keep_def39.i.i, !dbg !8
 
-fastSymCallIntrinsic_Static_keep_def37.i.i:       ; preds = %75, %47
+fastSymCallIntrinsic_Static_keep_def39.i.i:       ; preds = %75, %47
   store i64* getelementptr inbounds ([29 x i64], [29 x i64]* @iseqEncodedArray, i64 0, i64 16), i64** %43, align 8, !dbg !8, !tbaa !23
   %rubyId_read.i.i2 = load i64, i64* @rubyIdPrecomputed_read, align 8, !dbg !55
   %rawSym31.i.i = call i64 @rb_id2sym(i64 %rubyId_read.i.i2) #11, !dbg !55
   %rubyId_normal32.i.i = load i64, i64* @rubyIdPrecomputed_normal, align 8, !dbg !55
   %rawSym33.i.i = call i64 @rb_id2sym(i64 %rubyId_normal32.i.i) #11, !dbg !55
-  %stackFrame38.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_B#read", align 8, !dbg !55
+  %stackFrame40.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_B#read", align 8, !dbg !55
   %79 = call noalias nonnull i8* @ruby_xcalloc(i64 noundef 1, i64 noundef 64) #12, !dbg !55
   %80 = bitcast i8* %79 to i16*, !dbg !55
   %81 = load i16, i16* %80, align 8, !dbg !55
@@ -396,7 +396,7 @@ fastSymCallIntrinsic_Static_keep_def37.i.i:       ; preds = %75, %47
   call void @llvm.memset.p0i8.i64(i8* nonnull align 4 %83, i8 0, i64 28, i1 false) #11, !dbg !55
   %84 = call i64 @rb_intern(i8* noundef getelementptr inbounds ([5 x i8], [5 x i8]* @str_read, i64 0, i64 0)) #11, !dbg !55
   %85 = bitcast i8* %79 to %struct.rb_sorbet_param_struct*, !dbg !55
-  %86 = bitcast %struct.rb_iseq_struct* %stackFrame38.i.i to i8*, !dbg !55
+  %86 = bitcast %struct.rb_iseq_struct* %stackFrame40.i.i to i8*, !dbg !55
   call void @rb_add_method_sorbet(i64 %48, i64 %84, i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)* noundef @"func_B#read", %struct.rb_sorbet_param_struct* nonnull %85, i32 noundef 1, i8* %86) #11, !dbg !55
   %87 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !55, !tbaa !23
   %88 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %87, i64 0, i32 5, !dbg !55
@@ -408,26 +408,26 @@ fastSymCallIntrinsic_Static_keep_def37.i.i:       ; preds = %75, %47
   %94 = icmp eq i32 %93, 0, !dbg !55
   br i1 %94, label %fastSymCallIntrinsic_Static_keep_self_def.i.i, label %95, !dbg !55, !prof !53
 
-95:                                               ; preds = %fastSymCallIntrinsic_Static_keep_def37.i.i
+95:                                               ; preds = %fastSymCallIntrinsic_Static_keep_def39.i.i
   %96 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %87, i64 0, i32 8, !dbg !55
   %97 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %96, align 8, !dbg !55, !tbaa !54
   %98 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %97, i32 noundef 0) #11, !dbg !55
   br label %fastSymCallIntrinsic_Static_keep_self_def.i.i, !dbg !55
 
-fastSymCallIntrinsic_Static_keep_self_def.i.i:    ; preds = %95, %fastSymCallIntrinsic_Static_keep_def37.i.i
+fastSymCallIntrinsic_Static_keep_self_def.i.i:    ; preds = %95, %fastSymCallIntrinsic_Static_keep_def39.i.i
   store i64* getelementptr inbounds ([29 x i64], [29 x i64]* @iseqEncodedArray, i64 0, i64 19), i64** %43, align 8, !dbg !55, !tbaa !23
-  %rubyId_read44.i.i = load i64, i64* @rubyIdPrecomputed_read, align 8, !dbg !56
-  %rawSym45.i.i = call i64 @rb_id2sym(i64 %rubyId_read44.i.i) #11, !dbg !56
-  %rubyId_normal46.i.i = load i64, i64* @rubyIdPrecomputed_normal, align 8, !dbg !56
-  %rawSym47.i.i = call i64 @rb_id2sym(i64 %rubyId_normal46.i.i) #11, !dbg !56
-  %stackFrame49.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @stackFramePrecomputed_func_B.read, align 8, !dbg !56
+  %rubyId_read46.i.i = load i64, i64* @rubyIdPrecomputed_read, align 8, !dbg !56
+  %rawSym47.i.i = call i64 @rb_id2sym(i64 %rubyId_read46.i.i) #11, !dbg !56
+  %rubyId_normal48.i.i = load i64, i64* @rubyIdPrecomputed_normal, align 8, !dbg !56
+  %rawSym49.i.i = call i64 @rb_id2sym(i64 %rubyId_normal48.i.i) #11, !dbg !56
+  %stackFrame53.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @stackFramePrecomputed_func_B.read, align 8, !dbg !56
   %99 = call noalias nonnull i8* @ruby_xcalloc(i64 noundef 1, i64 noundef 64) #12, !dbg !56
   %100 = bitcast i8* %99 to i16*, !dbg !56
   %101 = load i16, i16* %100, align 8, !dbg !56
   %102 = and i16 %101, -384, !dbg !56
   store i16 %102, i16* %100, align 8, !dbg !56
   %103 = getelementptr inbounds i8, i8* %99, i64 4, !dbg !56
-  %104 = bitcast %struct.rb_iseq_struct* %stackFrame49.i.i to i8*, !dbg !56
+  %104 = bitcast %struct.rb_iseq_struct* %stackFrame53.i.i to i8*, !dbg !56
   call void @llvm.memset.p0i8.i64(i8* nonnull align 4 %103, i8 0, i64 28, i1 false) #11, !dbg !56
   call void @rb_define_singleton_sorbet_method(i64 %48, i8* noundef getelementptr inbounds ([5 x i8], [5 x i8]* @str_read, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)* noundef @func_B.read, i8* nonnull %99, i8* %104) #11, !dbg !56
   %105 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !56, !tbaa !23

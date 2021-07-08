@@ -233,8 +233,8 @@ typeTestSuccess:                                  ; preds = %4
   store i64 %rawArg_a, i64* %14, align 8, !dbg !22, !tbaa !4
   %15 = getelementptr inbounds i64, i64* %14, i64 1, !dbg !22
   store i64* %15, i64** %13, align 8, !dbg !22
-  %send31 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_foo.1, i64 0), !dbg !22
-  ret i64 %send31
+  %send33 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_foo.1, i64 0), !dbg !22
+  ret i64 %send33
 
 codeRepl:                                         ; preds = %4
   tail call fastcc void @"func_Object#doubleCast.cold.1"(i64 %rawArg_a) #14, !dbg !17
@@ -329,7 +329,7 @@ fastSymCallIntrinsic_Static_keep_def:             ; preds = %44, %24
   %rawSym = tail call i64 @rb_id2sym(i64 %rubyId_doubleCast), !dbg !40
   %rubyId_normal = load i64, i64* @rubyIdPrecomputed_normal, align 8, !dbg !40
   %rawSym16 = tail call i64 @rb_id2sym(i64 %rubyId_normal), !dbg !40
-  %stackFrame18 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Object#doubleCast", align 8, !dbg !40
+  %stackFrame20 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Object#doubleCast", align 8, !dbg !40
   %48 = tail call noalias nonnull i8* @ruby_xcalloc(i64 noundef 1, i64 noundef 64) #16, !dbg !40
   %49 = bitcast i8* %48 to i16*, !dbg !40
   %50 = load i16, i16* %49, align 8, !dbg !40
@@ -356,7 +356,7 @@ fastSymCallIntrinsic_Static_keep_def:             ; preds = %44, %24
   store i8* %59, i8** %62, align 8, !dbg !40, !tbaa !45
   %63 = tail call i64 @rb_intern(i8* noundef getelementptr inbounds ([11 x i8], [11 x i8]* @str_doubleCast, i64 0, i64 0)) #15, !dbg !40
   %64 = bitcast i8* %48 to %struct.rb_sorbet_param_struct*, !dbg !40
-  %65 = bitcast %struct.rb_iseq_struct* %stackFrame18 to i8*, !dbg !40
+  %65 = bitcast %struct.rb_iseq_struct* %stackFrame20 to i8*, !dbg !40
   tail call void @rb_add_method_sorbet(i64 %9, i64 %63, i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)* noundef @"func_Object#doubleCast", %struct.rb_sorbet_param_struct* nonnull %64, i32 noundef 1, i8* %65) #15, !dbg !40
   %66 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !40, !tbaa !12
   %67 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %66, i64 0, i32 5, !dbg !40
