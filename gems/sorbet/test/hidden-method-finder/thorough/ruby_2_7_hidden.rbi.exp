@@ -13,7 +13,7 @@ class Array
 end
 
 class Array
-  def self.try_convert(arg); end
+  def self.try_convert(_); end
 end
 
 BasicObject::BasicObject = BasicObject
@@ -25,7 +25,7 @@ class BigDecimal
 end
 
 class BigDecimal
-  def self.interpret_loosely(arg); end
+  def self.interpret_loosely(_); end
 end
 
 class Binding
@@ -135,7 +135,7 @@ class Bundler::Fetcher::CompactIndex::ClientFetcher
 end
 
 class Bundler::Fetcher::CompactIndex::ClientFetcher
-  def self.[](*arg); end
+  def self.[](*_); end
 
   def self.members(); end
 end
@@ -440,7 +440,7 @@ module Bundler::Plugin::API::Source
 
   def dependency_names=(dependency_names); end
 
-  def double_check_for(*arg); end
+  def double_check_for(*_); end
 
   def eql?(other); end
 
@@ -979,11 +979,11 @@ module Bundler::Thor::Base::ClassMethods
 
   def arguments(); end
 
-  def attr_accessor(*arg); end
+  def attr_accessor(*_); end
 
-  def attr_reader(*arg); end
+  def attr_reader(*_); end
 
-  def attr_writer(*arg); end
+  def attr_writer(*_); end
 
   def baseclass(); end
 
@@ -1213,9 +1213,9 @@ class Bundler::Thor::Group
 
   def self.invoke_from_option(*names, &block); end
 
-  def self.printable_commands(*arg); end
+  def self.printable_commands(*_); end
 
-  def self.printable_tasks(*arg); end
+  def self.printable_tasks(*_); end
 
   def self.remove_invocation(*names); end
 
@@ -1520,7 +1520,7 @@ class Bundler::Thor::Shell::Basic
 
   def say_status(status, message, log_status=T.unsafe(nil)); end
 
-  def set_color(string, *arg); end
+  def set_color(string, *_); end
 
   def show_diff(destination, content); end
 
@@ -1832,7 +1832,7 @@ class Bundler::VersionRanges::NEq
 end
 
 class Bundler::VersionRanges::NEq
-  def self.[](*arg); end
+  def self.[](*_); end
 
   def self.members(); end
 end
@@ -1867,13 +1867,13 @@ class Bundler::VersionRanges::ReqR::Endpoint
 end
 
 class Bundler::VersionRanges::ReqR::Endpoint
-  def self.[](*arg); end
+  def self.[](*_); end
 
   def self.members(); end
 end
 
 class Bundler::VersionRanges::ReqR
-  def self.[](*arg); end
+  def self.[](*_); end
 
   def self.members(); end
 end
@@ -1996,7 +1996,7 @@ end
 class DidYouMean::NullChecker
   def corrections(); end
 
-  def initialize(*arg); end
+  def initialize(*_); end
 end
 
 class DidYouMean::ParseDimensions
@@ -2068,7 +2068,7 @@ module Dir::Tmpname
 end
 
 class Dir
-  def self.exists?(arg); end
+  def self.exists?(_); end
 end
 
 class ERB
@@ -2078,24 +2078,24 @@ class ERB
 end
 
 class Encoding
-  def _dump(*arg); end
+  def _dump(*_); end
   CESU_8 = ::T.let(nil, ::T.untyped)
 end
 
 class Encoding::Converter
-  def initialize(*arg); end
+  def initialize(*_); end
 end
 
 class Encoding
-  def self._load(arg); end
+  def self._load(_); end
 end
 
 module Enumerable
-  def sum(*arg); end
+  def sum(*_); end
 end
 
 class Enumerator
-  def +(arg); end
+  def +(_); end
 
   def each_with_index(); end
 end
@@ -2109,7 +2109,7 @@ class Enumerator::ArithmeticSequence
 
   def exclude_end?(); end
 
-  def last(*arg); end
+  def last(*_); end
 
   def step(); end
 end
@@ -2124,9 +2124,9 @@ class Enumerator::Chain
 end
 
 class Enumerator::Generator
-  def each(*arg, &blk); end
+  def each(*_, &blk); end
 
-  def initialize(*arg); end
+  def initialize(*_); end
 end
 
 class Enumerator::Lazy
@@ -2145,7 +2145,7 @@ class Enumerator::Yielder
 end
 
 class Enumerator
-  def self.produce(*arg); end
+  def self.produce(*_); end
 end
 
 Errno::ECAPMODE = Errno::NOERROR
@@ -2180,7 +2180,7 @@ end
 
 class Etc::Group
   extend ::Enumerable
-  def self.[](*arg); end
+  def self.[](*_); end
 
   def self.each(&blk); end
 
@@ -2207,7 +2207,7 @@ end
 
 class Etc::Passwd
   extend ::Enumerable
-  def self.[](*arg); end
+  def self.[](*_); end
 
   def self.each(&blk); end
 
@@ -2225,13 +2225,13 @@ class FalseClass
 end
 
 class Fiber
-  def initialize(*arg); end
+  def initialize(*_); end
 end
 
 class File
-  def self.absolute_path?(arg); end
+  def self.absolute_path?(_); end
 
-  def self.exists?(arg); end
+  def self.exists?(_); end
 end
 
 module FileUtils
@@ -2811,31 +2811,31 @@ Gem::Version::Requirement = Gem::Requirement
 
 class Hash
   include ::JSON::Ext::Generator::GeneratorMethods::Hash
-  def deconstruct_keys(arg); end
+  def deconstruct_keys(_); end
 end
 
 class Hash
-  def self.ruby2_keywords_hash(arg); end
+  def self.ruby2_keywords_hash(_); end
 
-  def self.ruby2_keywords_hash?(arg); end
+  def self.ruby2_keywords_hash?(_); end
 
-  def self.try_convert(arg); end
+  def self.try_convert(_); end
 end
 
 class IO
   def nread(); end
 
-  def pathconf(arg); end
+  def pathconf(_); end
 
   def ready?(); end
 
   def set_encoding_by_bom(); end
 
-  def wait(*arg); end
+  def wait(*_); end
 
-  def wait_readable(*arg); end
+  def wait_readable(*_); end
 
-  def wait_writable(*arg); end
+  def wait_writable(*_); end
 end
 
 IO::EWOULDBLOCKWaitReadable = IO::EAGAINWaitReadable
@@ -2847,11 +2847,11 @@ class Integer
 end
 
 class JSON::Ext::Generator::State
-  def self.from_state(arg); end
+  def self.from_state(_); end
 end
 
 class JSON::Ext::Parser
-  def initialize(*arg); end
+  def initialize(*_); end
 end
 
 JSON::Parser = JSON::Ext::Parser
@@ -2905,7 +2905,7 @@ class Monitor
 
   def try_mon_enter(); end
 
-  def wait_for_cond(arg, arg1); end
+  def wait_for_cond(_, _1); end
 end
 
 module MonitorMixin
@@ -2956,27 +2956,27 @@ class OpenStruct
 end
 
 class Pathname
-  def fnmatch?(*arg); end
+  def fnmatch?(*_); end
 
-  def glob(*arg); end
+  def glob(*_); end
 
-  def make_symlink(arg); end
+  def make_symlink(_); end
 end
 
 class Proc
-  def <<(arg); end
+  def <<(_); end
 
-  def >>(arg); end
+  def >>(_); end
 
   def clone(); end
 end
 
 class Random
-  def self.bytes(arg); end
+  def self.bytes(_); end
 end
 
 class Range
-  def %(arg); end
+  def %(_); end
 
   def entries(); end
 
@@ -2997,7 +2997,7 @@ end
 module RubyVM::MJIT
   def self.enabled?(); end
 
-  def self.pause(*arg); end
+  def self.pause(*_); end
 
   def self.resume(); end
 end
@@ -3059,9 +3059,9 @@ end
 class Struct
   def deconstruct(); end
 
-  def deconstruct_keys(arg); end
+  def deconstruct_keys(_); end
 
-  def filter(*arg); end
+  def filter(*_); end
 end
 
 Struct::Group = Etc::Group

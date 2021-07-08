@@ -16,25 +16,25 @@ class HasOverloads
   end
   sig do
     params(
-      arg0: String,
+      _: String,
     )
     .returns(String)
   end
   sig do
     params(
-        arg0: Exception,
+        _: Exception,
       )
     .returns(NilClass)
   end
   sig do
     params(
-      arg0: Class,
-      arg1: String,
-      arg2: T::Array[String],
+      _: Class,
+      _1: String,
+      _2: T::Array[String],
     )
     .returns(Symbol)
   end
-  def overloaded(arg0, arg1=arg0, arg2=arg0);
+  def overloaded(_, _1=_, _2=_);
     make_untyped
   end
 
@@ -64,11 +64,11 @@ class OverloadAndGenerics
   extend T::Sig
   Elem = type_member
 
-  def arg0; end
+  def _; end
 
   sig {params(x: Elem).returns(Elem)}
   sig {params(x: String).returns(String)}
-  def overloaded(x); arg0; end
+  def overloaded(x); _; end
 end
 
 class Foo
@@ -78,10 +78,10 @@ class Foo
     T.assert_type!(h.overloaded("s"), String)
     T.assert_type!(h.overloaded(Exception.new), NilClass)
     T.assert_type!(h.overloaded(self.class), Symbol)
-    h.overloaded(1) # error: Expected `String` but found `Integer(1)` for argument `arg0`
+    h.overloaded(1) # error: Expected `String` but found `Integer(1)` for argument `_`
                     # should ask for string
-    h.overloaded("1", 2) # error: Expected `Class` but found `String("1")` for argument `arg0`
-  #                   ^ error: Expected `String` but found `Integer(2)` for argument `arg1`
+    h.overloaded("1", 2) # error: Expected `Class` but found `String("1")` for argument `_`
+  #                   ^ error: Expected `String` but found `Integer(2)` for argument `_1`
 
     g = OverloadAndGenerics[Integer].new
     T.assert_type!(g.overloaded("hi"), String)
