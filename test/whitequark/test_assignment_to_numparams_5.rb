@@ -1,4 +1,4 @@
 # typed: true
 
-_1 = true # error: _1 is reserved for numbered parameter
+_1 = true
 puts _1

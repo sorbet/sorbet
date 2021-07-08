@@ -209,10 +209,7 @@ public:
     }
 
     unique_ptr<Node> arg(const token *name) {
-        core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->string(), loc);
-
-        return make_unique<Arg>(loc, gs_.enterNameUTF8(name->string()));
+        return make_unique<Arg>(tokLoc(name), gs_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> args(const token *begin, sorbet::parser::NodeVec args, const token *end, bool check_args) {
@@ -276,8 +273,9 @@ public:
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
         if (auto *id = parser::cast_node<Ident>(node.get())) {
             auto name_str = id->name.show(gs_);
-            checkReservedForNumberedParameters(name_str, id->loc);
-
+            if (isNumberedParameterName(name_str) && driver_->lex.context.inDynamicBlock()) {
+                error(ruby_parser::dclass::CantAssignToNumparam, id->loc, name_str);
+            }
             driver_->lex.declare(name_str);
             return make_unique<LVarLhs>(id->loc, id->name);
         } else if (auto *iv = parser::cast_node<IVar>(node.get())) {
@@ -499,12 +497,10 @@ public:
         if (name != nullptr) {
             loc = tokLoc(name);
             nm = gs_.enterNameUTF8(name->string());
-            checkReservedForNumberedParameters(name->string(), loc);
         } else {
             loc = tokLoc(amper);
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
         }
-
         return make_unique<Blockarg>(loc, nm);
     }
 
@@ -712,8 +708,6 @@ public:
         core::LocOffsets declLoc = tokLoc(def, name).join(maybe_loc(args));
         core::LocOffsets loc = tokLoc(def, end);
 
-        checkReservedForNumberedParameters(name->string(), declLoc);
-
         return make_unique<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name->string()), std::move(args),
                                       std::move(body));
     }
@@ -739,7 +733,6 @@ public:
         if (isLiteralNode(*(definee.get()))) {
             error(ruby_parser::dclass::SingletonLiteral, definee->loc);
         }
-        checkReservedForNumberedParameters(name->string(), declLoc);
 
         return make_unique<DefS>(loc, declLoc, std::move(definee), gs_.enterNameUTF8(name->string()), std::move(args),
                                  std::move(body));
@@ -890,17 +883,11 @@ public:
     }
 
     unique_ptr<Node> kwarg(const token *name) {
-        core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->string(), loc);
-
-        return make_unique<Kwarg>(loc, gs_.enterNameUTF8(name->string()));
+        return make_unique<Kwarg>(tokLoc(name), gs_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> kwoptarg(const token *name, unique_ptr<Node> value) {
-        core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->string(), loc);
-
-        return make_unique<Kwoptarg>(loc.join(value->loc), gs_.enterNameUTF8(name->string()), tokLoc(name),
+        return make_unique<Kwoptarg>(tokLoc(name).join(value->loc), gs_.enterNameUTF8(name->string()), tokLoc(name),
                                      std::move(value));
     }
 
@@ -915,11 +902,9 @@ public:
         if (name != nullptr) {
             loc = loc.join(tokLoc(name));
             nm = gs_.enterNameUTF8(name->string());
-            checkReservedForNumberedParameters(name->string(), loc);
         } else {
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter_);
         }
-
         return make_unique<Kwrestarg>(loc, nm);
     }
 
@@ -1140,10 +1125,7 @@ public:
     }
 
     unique_ptr<Node> optarg_(const token *name, const token *eql, unique_ptr<Node> value) {
-        core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->string(), loc);
-
-        return make_unique<Optarg>(loc.join(value->loc), gs_.enterNameUTF8(name->string()), tokLoc(name),
+        return make_unique<Optarg>(tokLoc(name).join(value->loc), gs_.enterNameUTF8(name->string()), tokLoc(name),
                                    std::move(value));
     }
 
@@ -1243,12 +1225,10 @@ public:
             nameLoc = tokLoc(name);
             loc = loc.join(nameLoc);
             nm = gs_.enterNameUTF8(name->string());
-            checkReservedForNumberedParameters(name->string(), nameLoc);
         } else {
             // case like 'def m(*); end'
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::star(), ++uniqueCounter_);
         }
-
         return make_unique<Restarg>(loc, nm, nameLoc);
     }
 
@@ -1257,10 +1237,7 @@ public:
     }
 
     unique_ptr<Node> shadowarg(const token *name) {
-        core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->string(), loc);
-
-        return make_unique<Shadowarg>(loc, gs_.enterNameUTF8(name->string()));
+        return make_unique<Shadowarg>(tokLoc(name), gs_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> splat(const token *star, unique_ptr<Node> arg) {
@@ -1571,12 +1548,6 @@ public:
                parser::isa_node<DString>(&node) || parser::isa_node<Symbol>(&node) ||
                parser::isa_node<DSymbol>(&node) || parser::isa_node<Regexp>(&node) || parser::isa_node<Array>(&node) ||
                parser::isa_node<Hash>(&node);
-    }
-
-    void checkReservedForNumberedParameters(std::string name, core::LocOffsets loc) {
-        if (isNumberedParameterName(name)) {
-            error(ruby_parser::dclass::ReservedForNumparam, loc, name);
-        }
     }
 
     bool isNumberedParameterName(std::string_view name) {
