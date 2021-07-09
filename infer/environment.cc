@@ -175,7 +175,12 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
             if (isNeeded && !type.isUntyped() && !core::isa_type<core::MetaType>(type)) {
                 // Direct mutation of `yesTypeTests` rather than going through `addYesTypeTest`.
                 // This is fine since `copy` is unmoored from a particular environment.
-                copy.mutate().yesTypeTests.emplace_back(local, type);
+                auto &yes = copy.mutate().yesTypeTests;
+                auto it = absl::c_lower_bound(yes, local, [](const auto &left, const auto local) -> bool {
+                    return left.first.id() < local.id();
+                });
+
+                yes.emplace(it, local, type);
             }
         } else {
             auto &second = fnd->second;
@@ -276,12 +281,22 @@ KnowledgeFact &KnowledgeRef::mutate() {
 void KnowledgeRef::addYesTypeTest(cfg::LocalRef of, TypeTestReverseIndex &index, cfg::LocalRef ref,
                                   core::TypePtr type) {
     index.addToIndex(ref, of);
-    this->mutate().yesTypeTests.emplace_back(ref, move(type));
+
+    auto &yes = this->mutate().yesTypeTests;
+
+    auto it = absl::c_lower_bound(yes, ref,
+                                  [](const auto &left, const auto ref) -> bool { return left.first.id() < ref.id(); });
+    yes.emplace(it, ref, move(type));
 }
 
 void KnowledgeRef::addNoTypeTest(cfg::LocalRef of, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type) {
     index.addToIndex(ref, of);
-    this->mutate().noTypeTests.emplace_back(ref, move(type));
+
+    auto &no = this->mutate().noTypeTests;
+
+    auto it = absl::c_lower_bound(no, ref,
+                                  [](const auto &left, const auto ref) -> bool { return left.first.id() < ref.id(); });
+    no.emplace(it, ref, move(type));
 }
 
 void KnowledgeRef::markDead() {
