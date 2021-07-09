@@ -213,6 +213,7 @@ void KnowledgeFact::min(core::Context ctx, const KnowledgeFact &other) {
             // Note: No need to update Environment::typeTestsWithVar since it is an overapproximation
             it = yesTypeTests.erase(it);
         } else {
+            Timer typesAny(ctx.state.tracer(), "yesTypeTests.Types::any");
             entry.second = core::Types::any(ctx, fnd->second, entry.second);
             it++;
         }
@@ -227,6 +228,7 @@ void KnowledgeFact::min(core::Context ctx, const KnowledgeFact &other) {
             // Note: No need to update Environment::typeTestsWithVar since it is an overapproximation
             it = noTypeTests.erase(it);
         } else {
+            Timer typesAny(ctx.state.tracer(), "noTypeTests.Types::any");
             entry.second = core::Types::all(ctx, fnd->second, entry.second);
             it++;
         }
