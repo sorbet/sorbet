@@ -193,10 +193,10 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
 void KnowledgeFact::min(core::Context ctx, const KnowledgeFact &other) {
     Timer timeit(ctx.state.tracer(), "KnowledgeFact::min");
 
-    histogramInc("infer.min.yesTypeTests.size", yesTypeTests.size());
-    histogramInc("infer.min.noTypeTests.size", noTypeTests.size());
-    histogramInc("infer.min.yesTypeTests.other.size", other.yesTypeTests.size());
-    histogramInc("infer.min.noTypeTests.other.size", other.noTypeTests.size());
+    prodHistogramAdd("infer.min.yesTypeTests.size", yesTypeTests.size());
+    prodHistogramAdd("infer.min.noTypeTests.size", noTypeTests.size());
+    prodHistogramAdd("infer.min.yesTypeTests.other.size", other.yesTypeTests.size());
+    prodHistogramAdd("infer.min.noTypeTests.other.size", other.noTypeTests.size());
 
     for (auto it = yesTypeTests.begin(); it != yesTypeTests.end(); /* nothing */) {
         auto &entry = *it;
