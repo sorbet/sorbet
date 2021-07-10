@@ -34,9 +34,40 @@ module T::Props
         # Use separate methods in order to ensure that we only close over necessary
         # variables
         if !T::Props::Utils.need_nil_write_check?(rules) || has_explicit_nil_default
-          nilable_proc(prop, accessor_key, non_nil_type, klass, validate)
+          if validate.nil? && non_nil_type.is_a?(T::Types::Simple)
+            simple_nilable_proc(prop, accessor_key, non_nil_type.raw_type, klass)
+          else
+            nilable_proc(prop, accessor_key, non_nil_type, klass, validate)
+          end
         else
-          non_nil_proc(prop, accessor_key, non_nil_type, klass, validate)
+          if validate.nil? && non_nil_type.is_a?(T::Types::Simple)
+            simple_non_nil_proc(prop, accessor_key, non_nil_type.raw_type, klass)
+          else
+            non_nil_proc(prop, accessor_key, non_nil_type, klass, validate)
+          end
+        end
+      end
+
+      sig do
+        params(
+          prop: Symbol,
+          accessor_key: Symbol,
+          non_nil_type: Module,
+          klass: T.all(Module, T::Props::ClassMethods),
+        )
+        .returns(SetterProc)
+      end
+      private_class_method def self.simple_non_nil_proc(prop, accessor_key, non_nil_type, klass)
+        proc do |val|
+          unless val.is_a?(non_nil_type)
+            T::Props::Private::SetterFactory.raise_pretty_error(
+              klass,
+              prop,
+              T::Utils.coerce(non_nil_type),
+              val,
+            )
+          end
+          instance_variable_set(accessor_key, val)
         end
       end
 
@@ -68,6 +99,33 @@ module T::Props
             )
           end
           instance_variable_set(accessor_key, val)
+        end
+      end
+
+      sig do
+        params(
+          prop: Symbol,
+          accessor_key: Symbol,
+          non_nil_type: Module,
+          klass: T.all(Module, T::Props::ClassMethods),
+        )
+        .returns(SetterProc)
+      end
+      private_class_method def self.simple_nilable_proc(prop, accessor_key, non_nil_type, klass)
+        proc do |val|
+          if val.nil?
+            instance_variable_set(accessor_key, nil)
+          elsif val.is_a?(non_nil_type)
+            instance_variable_set(accessor_key, val)
+          else
+            T::Props::Private::SetterFactory.raise_pretty_error(
+              klass,
+              prop,
+              T::Utils.coerce(non_nil_type),
+              val,
+            )
+            instance_variable_set(accessor_key, val)
+          end
         end
       end
 
