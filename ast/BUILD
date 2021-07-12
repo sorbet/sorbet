@@ -11,7 +11,9 @@ cc_library(
             # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
             "flycheck_*",
         ],
-    ), hdrs = [ "ArgParsing.h",
+    ),
+    hdrs = [
+        "ArgParsing.h",
         "ast.h",
     ],
     linkstatic = select({
@@ -24,9 +26,4 @@ cc_library(
         "//core",
         "//core/hashing",
     ],
-)
-
-cc_library(
-    name = "ast_bad",
-    srcs = [ "Trees.cc" ],
 )
