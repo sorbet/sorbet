@@ -3,6 +3,7 @@
 #include "common/common.h"
 #include "common/typecase.h"
 #include "core/Names.h"
+#include "core/errors/parser.h"
 #include "parser/Dedenter.h"
 #include "parser/parser.h"
 
@@ -1625,6 +1626,17 @@ public:
 
     void checkReservedForNumberedParameters(std::string name, core::LocOffsets loc) {
         if (isNumberedParameterName(name)) {
+            core::Loc location = core::Loc(file_, loc);
+
+            if (auto e = gs_.beginError(location, core::errors::Parser::ParserError)) {
+                std::string replacement = fmt::format("arg{}", name[1]);
+
+                e.setHeader("{} is reserved for numbered parameter", name);
+                e.addAutocorrect(
+                    core::AutocorrectSuggestion{fmt::format("Replace `{}` with `{}`", name, replacement),
+                                                {core::AutocorrectSuggestion::Edit{location, replacement}}});
+            }
+
             error(ruby_parser::dclass::ReservedForNumparam, loc, name);
         }
     }
