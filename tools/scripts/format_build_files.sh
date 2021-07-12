@@ -9,7 +9,6 @@ if [ "$1" == "-t" ]; then
 
   # quieter bazel output
   bazel_args=(
-    "--curses=no"
     "--ui_event_filters=-info,-stdout,-stderr"
     "--noshow_progress"
   )

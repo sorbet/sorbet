@@ -13,7 +13,6 @@ cleanup() {
 trap cleanup exit
 
 bazel run \
-  --curses=no \
   --ui_event_filters=-info,-stdout,-stderr \
   --noshow_progress \
   --script_path "$buildifier" \
