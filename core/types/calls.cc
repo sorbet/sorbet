@@ -1306,6 +1306,13 @@ public:
     }
 } T_noreturn;
 
+class T_self_type : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        res.returnType = make_type<MetaType>(Types::untypedUntracked());
+    }
+} T_self_type;
+
 class T_must : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -3033,6 +3040,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::nilable(), &T_nilable},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::revealType(), &T_revealType},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::noreturn(), &T_noreturn},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::selfType(), &T_self_type},
 
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::proc(), &T_proc},
 
