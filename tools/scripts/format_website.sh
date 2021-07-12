@@ -34,12 +34,15 @@ done
 
 cd "$(dirname "$0")/../../website"
 
-yarn
+yarn --silent
 
 if [ "$TEST" != "" ]; then
-  if ! yarn prettier-check; then
+  trap "rm prettier.output" exit
+  if ! yarn --silent prettier-lint > prettier.output; then
+    echo "Some docs need to be formatted!"
+    sed 's/^/* /' prettier.output
     echo
-    echo "^ To fix these files, run 'yarn prettier' in the website/ folder locally."
+    echo "Run \`./tools/scripts/format_website.sh\` to format them"
     exit 1
   fi
 else

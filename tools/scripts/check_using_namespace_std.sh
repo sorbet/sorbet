@@ -2,17 +2,17 @@
 
 set -euo pipefail
 
-red=$'\x1b[0;31m'
-cnone=$'\x1b[0m'
+trap 'rm -f using_namespace.output' EXIT
 
-if git grep --line '^\s*using namespace std;' '*.h'; then
-  echo
-  echo "${red}[ERR!]${cnone} Please don't use 'using namespace std;' in header files."
+if git grep --line '^\s*using namespace std;' '*.h' > using_namespace.output; then
+  echo "Please don't use \`using namespace std;\` in header files."
+  echo ""
   echo "Header files should fully-qualify standard library names, but feel free"
-  echo "to use 'using namespace std;' in *.cc files."
-  echo
-  echo "The offending locations are listed above."
-  echo
+  echo "to use \`using namespace std;\` in *.cc files."
+  echo ""
+  echo "\`\`\`"
+  cat using_namespace.output
+  echo "\`\`\`"
 
   exit 1
 fi
