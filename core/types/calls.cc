@@ -1261,10 +1261,16 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
 
 namespace {
 
-ClassOrModuleRef unwrapSymbol(const GlobalState &gs, const TypePtr &type) {
+// @param mustExist Whether to ENFORCE on failure. If false, the returned ClassOrModuleRef will not
+//   exist. (Passing mustExist is largely the same as ENFORCE'ing `exists()` at the call site, but
+//   the error message is slightly better, because it mentions the bad type).
+//
+//   When `mustExist == false`, the caller must take care to check whether the result exists.
+ClassOrModuleRef unwrapSymbol(const GlobalState &gs, const TypePtr &type, bool mustExist) {
     ClassOrModuleRef result;
     TypePtr typePtr = type;
-    while (!result.exists()) {
+    bool breakOut = false;
+    while (!result.exists() && !breakOut) {
         typecase(
             typePtr,
 
@@ -1276,7 +1282,10 @@ ClassOrModuleRef unwrapSymbol(const GlobalState &gs, const TypePtr &type) {
                 if (is_proxy_type(ty)) {
                     typePtr = ty.underlying(gs);
                 } else {
-                    ENFORCE(false, "Unexpected type: {}", ty.typeName());
+                    if (mustExist) {
+                        ENFORCE(false, "Unexpected type: {}", ty.typeName());
+                    }
+                    breakOut = true;
                 }
             });
     }
@@ -1406,7 +1415,8 @@ public:
 class Object_class : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        ClassOrModuleRef self = unwrapSymbol(gs, args.thisType);
+        auto mustExist = true;
+        ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
         auto singleton = self.data(gs)->lookupSingletonClass(gs);
         if (singleton.exists()) {
             res.returnType = singleton.data(gs)->externalType();
@@ -1419,7 +1429,8 @@ public:
 class Class_new : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        ClassOrModuleRef self = unwrapSymbol(gs, args.thisType);
+        auto mustExist = true;
+        ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
 
         auto attachedClass = self.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
@@ -1465,7 +1476,8 @@ public:
     // Unfortunately, this means that some errors are double reported (once by resolver, and then
     // again by infer).
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        ClassOrModuleRef self = unwrapSymbol(gs, args.thisType);
+        auto mustExist = true;
+        ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
         auto attachedClass = self.data(gs)->attachedClass(gs);
 
         if (!attachedClass.exists()) {
@@ -2232,7 +2244,8 @@ public:
         }
 
         auto selfTy = *args.args[0];
-        ClassOrModuleRef self = unwrapSymbol(gs, selfTy.type);
+        auto mustExist = true;
+        ClassOrModuleRef self = unwrapSymbol(gs, selfTy.type, mustExist);
 
         u2 numPosArgs = args.numPosArgs - 1;
 
