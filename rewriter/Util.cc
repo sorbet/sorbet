@@ -8,12 +8,20 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
+ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig, const ast::ExpressionPtr **failing) {
+#define RECORD_FAILING(tree)                  \
+    do {                                      \
+        if (failing && *failing == nullptr) { \
+            *failing = &tree;                 \
+        }                                     \
+    } while (0)
+
     auto send = ast::cast_tree<ast::Send>(orig);
     if (send) {
         ast::Send::ARGS_store args;
-        auto dupRecv = dupType(send->recv);
+        auto dupRecv = dupType(send->recv, failing);
         if (!dupRecv) {
+            RECORD_FAILING(send->recv);
             return nullptr;
         }
         if (send->fun == core::Names::enum_()) {
@@ -30,8 +38,9 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
                 ENFORCE(ast::isa_tree<ast::Literal>(send->args[i]));
                 args.emplace_back(send->args[i].deepCopy());
 
-                auto dupedValue = ASTUtil::dupType(send->args[i + 1]);
+                auto dupedValue = dupType(send->args[i + 1], failing);
                 if (dupedValue == nullptr) {
+                    RECORD_FAILING(send->args[i + 1]);
                     return nullptr;
                 }
 
@@ -42,9 +51,10 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         }
 
         for (auto &arg : send->args) {
-            auto dupArg = dupType(arg);
+            auto dupArg = dupType(arg, failing);
             if (!dupArg) {
                 // This isn't a Type signature, bail out
+                RECORD_FAILING(arg);
                 return nullptr;
             }
             args.emplace_back(std::move(dupArg));
@@ -54,8 +64,9 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
 
     auto *ident = ast::cast_tree<ast::ConstantLit>(orig);
     if (ident) {
-        auto orig = dupType(ident->original);
+        auto orig = dupType(ident->original, failing);
         if (ident->original && !orig) {
+            RECORD_FAILING(ident->original);
             return nullptr;
         }
         return ast::make_expression<ast::ConstantLit>(ident->loc, ident->symbol, std::move(orig));
@@ -63,6 +74,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
 
     auto *cons = ast::cast_tree<ast::UnresolvedConstantLit>(orig);
     if (!cons) {
+        RECORD_FAILING(orig);
         return nullptr;
     }
 
@@ -73,16 +85,19 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         }
         auto *id = ast::cast_tree<ast::ConstantLit>(cons->scope);
         if (id == nullptr) {
+            RECORD_FAILING(cons->scope);
             return nullptr;
         }
         ENFORCE(id->symbol == core::Symbols::root());
-        return ast::MK::UnresolvedConstant(cons->loc, dupType(cons->scope), cons->cnst);
+        return ast::MK::UnresolvedConstant(cons->loc, dupType(cons->scope, failing), cons->cnst);
     }
-    auto scope = dupType(cons->scope);
+    auto scope = dupType(cons->scope, failing);
     if (scope == nullptr) {
+        RECORD_FAILING(cons->scope);
         return nullptr;
     }
     return ast::MK::UnresolvedConstant(cons->loc, std::move(scope), cons->cnst);
+#undef RECORD_FAILING
 }
 
 bool ASTUtil::hasHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name) {

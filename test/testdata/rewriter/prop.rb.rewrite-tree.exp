@@ -904,4 +904,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::Sorbet::Private::Static.keep_def(<self>, :main, :normal)
+
+  class <emptyTree>::<C NoTuples><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def initialize<<todo method>>(&<blk>)
+      <self>.super(ZSuperArgs)
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.const(:tuples, [<emptyTree>::<C Integer>, <emptyTree>::<C String>])
+
+    <self>.const(:array_tuples, <emptyTree>::<C T>::<C Array>.[]([<emptyTree>::<C String>, <emptyTree>::<C Integer>]))
+  end
 end

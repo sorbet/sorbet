@@ -3,6 +3,7 @@ class NotAODM
     def self.prop(*args); end
     prop
     prop :foo, :not_a_string
+             # ^^^^^^^^^^^^^ error: Invalid type in prop type descriptor
     prop "not_a_symbol", String
     prop :foo, String, "not_a_hash"
     prop "too", String, {}, "many"
@@ -145,4 +146,11 @@ def main
     T.reveal_type(AdvancedODM.new.ifunset_nilable) # error: Revealed type: `T.nilable(String)`
     AdvancedODM.new.ifunset = nil # error: does not match expected type
     AdvancedODM.new.ifunset_nilable = nil
+end
+
+class NoTuples < T::Struct
+  extend T::Sig
+
+  const :tuples, [Integer, String] # error: Invalid type in prop type descriptor
+  const :array_tuples, T::Array[[String, Integer]] # error: Invalid type in prop type descriptor
 end

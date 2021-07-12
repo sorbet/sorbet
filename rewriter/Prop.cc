@@ -196,8 +196,14 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             return nullopt;
         }
 
-        ret.type = ASTUtil::dupType(send->args[1]);
+        const ast::ExpressionPtr *failure = nullptr;
+        ret.type = ASTUtil::dupType(send->args[1], &failure);
         if (ret.type == nullptr) {
+            if (failure != nullptr) {
+                if (auto e = ctx.beginError(failure->loc(), core::errors::Rewriter::InvalidPropType)) {
+                    e.setHeader("Invalid type in prop type descriptor");
+                }
+            }
             return nullopt;
         }
     }
