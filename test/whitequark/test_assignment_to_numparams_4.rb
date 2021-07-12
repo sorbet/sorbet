@@ -1,3 +1,3 @@
 # typed: true
 
-proc {_1; _9 = nil} # error: cannot assign to numbered parameter _9
+proc {_1; _9 = nil} # error: _9 is reserved for numbered parameter
