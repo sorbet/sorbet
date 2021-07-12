@@ -7,6 +7,6 @@ end
 class A; end
 
 x = MyGeneric[T.class_of(A)].new
-T.reveal_type(x) # error: Revealed type: `MyGeneric[T.untyped]`
+T.reveal_type(x) # error: Revealed type: `MyGeneric[T.class_of(A)]`
 
-T.reveal_type(T::Array[T.class_of(Integer)].new) # error: Revealed type: `T::Array[T.untyped]`
+T.reveal_type(T::Array[T.class_of(Integer)].new) # error: Revealed type: `T::Array[T.class_of(Integer)]`
