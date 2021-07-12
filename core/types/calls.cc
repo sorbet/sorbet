@@ -1300,7 +1300,6 @@ public:
 class T_self_type : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        // TODO(jez) Might not matter that we actually get the right type here.
         res.returnType = make_type<MetaType>(Types::untypedUntracked());
     }
 } T_self_type;
