@@ -40,7 +40,7 @@ if [ "$TEST" != "" ]; then
   trap "rm prettier.output" exit
   if ! yarn --silent prettier-lint > prettier.output; then
     echo "Some docs need to be formatted!"
-    cat prettier.output | sed 's/^/* /'
+    sed 's/^/* /' prettier.output
     echo
     echo "Run \`./tools/scripts/format_website.sh\` to format them"
     exit 1

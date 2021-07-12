@@ -17,7 +17,7 @@ bazel run \
   --ui_event_filters=-info,-stdout,-stderr \
   --noshow_progress \
   --script_path "$buildifier" \
-  @com_github_bazelbuild_buildtools//buildifier 2>&1 &> /dev/null
+  @com_github_bazelbuild_buildtools//buildifier &> /dev/null
 
 (
     sed -n '1,/BEGIN compile_commands/p' tools/BUILD

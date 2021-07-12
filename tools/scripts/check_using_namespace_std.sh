@@ -2,9 +2,6 @@
 
 set -euo pipefail
 
-red=$'\x1b[0;31m'
-cnone=$'\x1b[0m'
-
 trap 'rm -f using_namespace.output' EXIT
 
 if git grep --line '^\s*using namespace std;' '*.h' > using_namespace.output; then
