@@ -47,6 +47,8 @@ if [ "${#misformatted[@]}" -eq 0 ]; then
     exit 0
 fi
 
+shellcheck_warning=true
+
 if [ "$mode" = "fix" ]; then
     echo "Formatted the following files:" >&2
 else

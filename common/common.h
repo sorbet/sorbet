@@ -18,6 +18,8 @@ static_assert(false, "Need c++14 to compile this codebase");
 #include <string_view>
 #include <type_traits>
 
+using namespace std;
+
 namespace sorbet {
 
 template <class T, size_t N> using InlinedVector = absl::InlinedVector<T, N>;
