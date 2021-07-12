@@ -26,7 +26,9 @@ class A
       i: T.class_of(T1, T2),
       #  ^^^^^^^^^^^^^^^^^^ error: Too many arguments provided for method `T.class_of`
       j: T.class_of(T.nilable(Integer)), # error: T.class_of needs a Class as its argument
-      k: T.class_of(1), # error: T.class_of needs a Class as its argument
+      k: T.class_of(1),
+      #  ^^^^^^^^^^^^^ error: T.class_of needs a Class as its argument
+      #             ^  error: Unsupported usage of literal type
       l: {[] => String}, # error: Shape keys must be literals
       m: {foo: 0}, # error: Unsupported literal in type syntax
       n: T.all, # error: Not enough arguments provided for method

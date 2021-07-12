@@ -15,7 +15,11 @@ T.untyped.to_s # error: Call to method `to_s` on `T.untyped` mistakes a type for
 T.self_type.to_s # error: Call to method `to_s` on `T.untyped` mistakes a type for a value
 
 # And yet another one
-T.class_of(Integer).foo
+T.class_of(Integer).to_s # error: Call to method `to_s` on `T.class_of(Integer)` mistakes a type for a value
 
 # This one is weird and kind of tricky to change: https://github.com/sorbet/sorbet/issues/3427
 puts (T.proc.void + 1) # error: Method `+` does not exist on `T.class_of(T.proc)`
+
+# Edge cases. Do anything but crash.
+T.class_of.foo # error: Not enough arguments
+T.class_of(Integer, String).foo # error: Too many arguments

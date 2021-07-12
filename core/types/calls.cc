@@ -1306,6 +1306,31 @@ public:
     }
 } T_noreturn;
 
+class T_class_of : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1 && args.locs.args.size() != 1) {
+            // Arity mismatch error was already reported. Fail gracefully
+            return;
+        }
+
+        // The argument to `T.class_of(...)` is a value, but has a type meaning. That means we need
+        // to  `unwrapType` to handle things like type aliases and constant literal types.
+        auto unwrappedType = unwrapType(gs, core::Loc(args.locs.file, args.locs.args[0]), args.args[0]->type);
+        auto mustExist = false;
+        auto classSymbol = unwrapSymbol(gs, unwrappedType, mustExist);
+        if (!classSymbol.exists()) {
+            // Non-class type in `T.class_of` is an error that was already reported in type syntax parsing.
+            return;
+        }
+
+        auto classOf = classSymbol.data(gs)->lookupSingletonClass(gs);
+        if (classOf.exists()) {
+            res.returnType = make_type<MetaType>(classOf.data(gs)->externalType());
+        }
+    }
+} T_class_of;
+
 class T_self_type : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -3040,6 +3065,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::nilable(), &T_nilable},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::revealType(), &T_revealType},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::noreturn(), &T_noreturn},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::classOf(), &T_class_of},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::selfType(), &T_self_type},
 
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::proc(), &T_proc},
