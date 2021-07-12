@@ -224,6 +224,8 @@ module Test10
     def m2
       T.attached_class.foo
       T.class_of(M2).foo
+    # ^^^^^^^^^^^^^^^^^^ error: Call to method `foo` on `T.class_of(Test10::M2)`
+    # ^^^^^^^^^^^^^^^^^^ error: Method `foo` does not exist on `Object` component
     end
   end
 end
