@@ -3072,6 +3072,31 @@ public:
     }
 } Module_tripleEq;
 
+class T_Enum_tripleEq : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            return;
+        }
+        auto rhs = args.args[0]->type;
+        if (rhs.isUntyped()) {
+            res.returnType = rhs;
+            return;
+        }
+        auto lhs = args.thisType;
+        ENFORCE(!lhs.isUntyped(), "lhs of T::Enum.=== must be typed");
+        if (Types::isSubType(gs, rhs, lhs)) {
+            res.returnType = Types::trueClass();
+            return;
+        }
+        if (Types::glb(gs, rhs, lhs).isBottom()) {
+            res.returnType = Types::falseClass();
+            return;
+        }
+        res.returnType = Types::Boolean();
+    }
+} T_Enum_tripleEq;
+
 } // namespace
 
 const vector<Intrinsic> intrinsicMethods{
@@ -3150,6 +3175,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Enumerable(), Intrinsic::Kind::Instance, Names::toH(), &Enumerable_toH},
 
     {Symbols::Module(), Intrinsic::Kind::Instance, Names::tripleEq(), &Module_tripleEq},
+    {Symbols::T_Enum(), Intrinsic::Kind::Instance, Names::tripleEq(), &T_Enum_tripleEq},
 };
 
 } // namespace sorbet::core
