@@ -85,8 +85,9 @@ The complete list of constructs that affect Sorbet's flow-sensitive typing:
 - `nil?`
 - `blank?` / `present?` (these assume a Rails-compatible monkey patch on both
   `NilClass` and `Object`)
-- `Class#===` (this is how `case` on a class object works)
-- `Class#<` (like `is_a?`, but for class objects instead of instances of
+- `Module#===` (this is how `case` on a class object works)
+- `Module#<`, `Module#<=` (like `is_a?`, but for class objects instead of
+  instances of classes)
 - Negated conditions (including both `!` and `unless`)
 - Truthiness (everything but `nil` and `false` is truthy in Ruby)
 - `block_given?` (internally, this is a special case of truthiness)
