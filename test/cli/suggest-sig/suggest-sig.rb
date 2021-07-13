@@ -155,3 +155,23 @@ end
 def explicitly_named_block_parameter(&blk)
   42
 end
+
+module ReorderedKeywordArgs
+  extend T::Sig
+
+  sig {params(x: Integer, y: String).void}
+  def self.bar(x:, y: 'default')
+  end
+
+  def self.test1(x:, y:)
+    self.bar(x: x, y: y)
+  end
+
+  def self.test2(x:, y:)
+    self.bar(y: y, x: x)
+  end
+
+  def self.test3(x:, y:)
+    self.bar(x: x)
+  end
+end

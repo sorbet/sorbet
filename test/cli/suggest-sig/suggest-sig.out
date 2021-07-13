@@ -323,7 +323,34 @@ suggest-sig.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` http
 suggest-sig.rb:108: Method `params` does not exist on `T.class_of(TestCarash)` https://srb.help/7003
      108 |  sig {params(merchant: Merchant).void}
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 40
+
+suggest-sig.rb:166: This function does not have a `sig` https://srb.help/7017
+     166 |  def self.test1(x:, y:)
+            ^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig.rb:166: Inserted `sig {params(x: Integer, y: String).void}
+  `
+     166 |  def self.test1(x:, y:)
+            ^
+
+suggest-sig.rb:170: This function does not have a `sig` https://srb.help/7017
+     170 |  def self.test2(x:, y:)
+            ^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig.rb:170: Inserted `sig {params(x: Integer, y: String).void}
+  `
+     170 |  def self.test2(x:, y:)
+            ^
+
+suggest-sig.rb:174: This function does not have a `sig` https://srb.help/7017
+     174 |  def self.test3(x:, y:)
+            ^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig.rb:174: Inserted `sig {params(x: Integer, y: T.untyped).void}
+  `
+     174 |  def self.test3(x:, y:)
+            ^
+Errors: 43
 
 --------------------------------------------------------------------------
 
@@ -504,4 +531,27 @@ end
 sig {params(blk: T.untyped).returns(Integer)}
 def explicitly_named_block_parameter(&blk)
   42
+end
+
+module ReorderedKeywordArgs
+  extend T::Sig
+
+  sig {params(x: Integer, y: String).void}
+  def self.bar(x:, y: 'default')
+  end
+
+  sig {params(x: Integer, y: String).void}
+  def self.test1(x:, y:)
+    self.bar(x: x, y: y)
+  end
+
+  sig {params(x: Integer, y: String).void}
+  def self.test2(x:, y:)
+    self.bar(y: y, x: x)
+  end
+
+  sig {params(x: Integer, y: T.untyped).void}
+  def self.test3(x:, y:)
+    self.bar(x: x)
+  end
 end
