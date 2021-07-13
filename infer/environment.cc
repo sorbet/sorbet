@@ -640,7 +640,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
         whoKnows.sanityCheck();
 
-    } else if (send->fun == core::Names::lessThan()) {
+    } else if (send->fun == core::Names::lessThan() || send->fun == core::Names::leq()) {
         const auto &recvKlass = send->recv.type;
         const auto &argType = send->args[0].type;
 
