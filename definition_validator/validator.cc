@@ -495,6 +495,39 @@ void validateSealed(core::Context ctx, const core::ClassOrModuleRef klass, const
     validateSealedAncestorHelper(ctx, singleton, classDef, klass, "extended");
 }
 
+void validateSuperClass(core::Context ctx, const core::ClassOrModuleRef sym, const ast::ClassDef &classDef) {
+    if (!sym.data(ctx)->isClassOrModuleClass()) {
+        return;
+    }
+
+    const auto superClass = sym.data(ctx)->superClass();
+    if (!superClass.exists()) {
+        return;
+    }
+
+    // these will raise an error elsewhere
+    if (superClass == core::Symbols::StubModule() || superClass == core::Symbols::StubSuperClass()) {
+        return;
+    }
+
+    const auto superSingleton = superClass.data(ctx)->lookupSingletonClass(ctx);
+    if (!superSingleton.exists()) {
+        return;
+    }
+
+    // These base cases are to replicate the behavior of the VM:
+    // https://github.com/ruby/ruby/blob/b91b3bc7717a97f4f1cdf6131b1688e1958dcfed/class.c#L660-L677
+    if (superSingleton.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
+        return;
+    }
+
+    if (auto e = ctx.state.beginError(core::Loc(sym.data(ctx)->loc().file(), classDef.declLoc),
+                                      core::errors::Resolver::NonClassSuperclass)) {
+        e.setHeader("The super class `{}` of `{}` does not derive from `{}`", superClass.show(ctx), sym.show(ctx),
+                    core::Symbols::Class().show(ctx));
+    }
+}
+
 void validateUselessRequiredAncestors(core::Context ctx, const core::ClassOrModuleRef sym) {
     auto data = sym.data(ctx);
 
@@ -692,6 +725,7 @@ public:
         validateAbstract(ctx, singleton);
         validateFinal(ctx, sym, classDef);
         validateSealed(ctx, sym, classDef);
+        validateSuperClass(ctx, sym, classDef);
 
         if (ctx.state.requiresAncestorEnabled) {
             validateRequiredAncestors(ctx, singleton);

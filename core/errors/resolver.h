@@ -72,6 +72,7 @@ constexpr ErrorClass UselessRequiredAncestor{5063, StrictLevel::True};
 constexpr ErrorClass UnsatisfiedRequiredAncestor{5064, StrictLevel::True};
 constexpr ErrorClass UnsatisfiableRequiredAncestor{5065, StrictLevel::True};
 constexpr ErrorClass ExperimentalRequiredAncestor{5066, StrictLevel::False};
+constexpr ErrorClass NonClassSuperclass{5067, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif
