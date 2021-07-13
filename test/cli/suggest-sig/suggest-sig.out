@@ -306,7 +306,7 @@ suggest-sig.rb:112: This function does not have a `sig` https://srb.help/7017
      112 |  def self.load_account_business_profile(merchant)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:112: Inserted `sig {params(merchant: T.untyped).returns(Integer)}
+    suggest-sig.rb:112: Inserted `sig {params(merchant: TestCarash::Merchant).returns(Integer)}
   `
      112 |  def self.load_account_business_profile(merchant)
             ^
@@ -323,7 +323,52 @@ suggest-sig.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` http
 suggest-sig.rb:108: Method `params` does not exist on `T.class_of(TestCarash)` https://srb.help/7003
      108 |  sig {params(merchant: Merchant).void}
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 40
+
+suggest-sig.rb:166: This function does not have a `sig` https://srb.help/7017
+     166 |  def self.test1(x:, y:)
+            ^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig.rb:166: Inserted `sig {params(x: Integer, y: String).void}
+  `
+     166 |  def self.test1(x:, y:)
+            ^
+
+suggest-sig.rb:170: This function does not have a `sig` https://srb.help/7017
+     170 |  def self.test2(x:, y:)
+            ^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig.rb:170: Inserted `sig {params(x: Integer, y: String).void}
+  `
+     170 |  def self.test2(x:, y:)
+            ^
+
+suggest-sig.rb:174: This function does not have a `sig` https://srb.help/7017
+     174 |  def self.test3(x:, y:)
+            ^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig.rb:174: Inserted `sig {params(x: Integer, y: T.untyped).void}
+  `
+     174 |  def self.test3(x:, y:)
+            ^
+
+suggest-sig.rb:186: This function does not have a `sig` https://srb.help/7017
+     186 |  def self.test1(y)
+            ^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig.rb:186: Inserted `sig {params(y: T.untyped).void}
+  `
+     186 |  def self.test1(y)
+            ^
+
+suggest-sig.rb:191: This function does not have a `sig` https://srb.help/7017
+     191 |  def self.test2(y)
+            ^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig.rb:191: Inserted `sig {params(y: T.untyped).void}
+  `
+     191 |  def self.test2(y)
+            ^
+Errors: 45
 
 --------------------------------------------------------------------------
 
@@ -456,7 +501,7 @@ class TestCarash
   def self.blar(merchant:)
   end
 
-  sig {params(merchant: T.untyped).returns(Integer)}
+  sig {params(merchant: TestCarash::Merchant).returns(Integer)}
   def self.load_account_business_profile(merchant)
     blar(merchant: merchant)
     1
@@ -504,4 +549,48 @@ end
 sig {params(blk: T.untyped).returns(Integer)}
 def explicitly_named_block_parameter(&blk)
   42
+end
+
+module ReorderedKeywordArgs
+  extend T::Sig
+
+  sig {params(x: Integer, y: String).void}
+  def self.bar(x:, y: 'default')
+  end
+
+  sig {params(x: Integer, y: String).void}
+  def self.test1(x:, y:)
+    self.bar(x: x, y: y)
+  end
+
+  sig {params(x: Integer, y: String).void}
+  def self.test2(x:, y:)
+    self.bar(y: y, x: x)
+  end
+
+  sig {params(x: Integer, y: T.untyped).void}
+  def self.test3(x:, y:)
+    self.bar(x: x)
+  end
+end
+
+module KwHashSendSuggest
+  extend T::Sig
+
+  sig {params(x: Integer).void}
+  def self.foo(x:)
+  end
+
+  sig {params(y: T.untyped).void}
+  def self.test1(y)
+    # signature suggestion driven by an implicit keyword args hash
+    self.foo(y)
+  end
+
+  sig {params(y: T.untyped).void}
+  def self.test2(y)
+    # signature suggestion driven by an explicit kwsplat
+    self.foo(**y)
+  end
+
 end
