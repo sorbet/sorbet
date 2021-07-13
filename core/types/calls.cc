@@ -1255,7 +1255,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                     }
                 }
             }
-            return dispatchCallProxyType(gs, underlying(gs), args);
+            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
     }
 }
 
