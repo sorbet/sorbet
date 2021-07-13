@@ -352,14 +352,23 @@ suggest-sig.rb:174: This function does not have a `sig` https://srb.help/7017
             ^
 
 suggest-sig.rb:186: This function does not have a `sig` https://srb.help/7017
-     186 |  def self.bar(y)
-            ^^^^^^^^^^^^^^^
+     186 |  def self.test1(y)
+            ^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:186: Inserted `sig {params(y: Integer).void}
+    suggest-sig.rb:186: Inserted `sig {params(y: T.untyped).void}
   `
-     186 |  def self.bar(y)
+     186 |  def self.test1(y)
             ^
-Errors: 44
+
+suggest-sig.rb:191: This function does not have a `sig` https://srb.help/7017
+     191 |  def self.test2(y)
+            ^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig.rb:191: Inserted `sig {params(y: T.untyped).void}
+  `
+     191 |  def self.test2(y)
+            ^
+Errors: 45
 
 --------------------------------------------------------------------------
 
@@ -572,9 +581,16 @@ module BadSendSuggest
   def self.foo(x:)
   end
 
-  sig {params(y: Integer).void}
-  def self.bar(y)
+  sig {params(y: T.untyped).void}
+  def self.test1(y)
+    # signature suggestion driven by an implicit keyword args hash
     self.foo(y)
+  end
+
+  sig {params(y: T.untyped).void}
+  def self.test2(y)
+    # signature suggestion driven by an explicit kwsplat
+    self.foo(**y)
   end
 
 end

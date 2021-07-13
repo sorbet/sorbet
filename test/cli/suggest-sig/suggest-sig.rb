@@ -183,8 +183,14 @@ module BadSendSuggest
   def self.foo(x:)
   end
 
-  def self.bar(y)
+  def self.test1(y)
+    # signature suggestion driven by an implicit keyword args hash
     self.foo(y)
+  end
+
+  def self.test2(y)
+    # signature suggestion driven by an explicit kwsplat
+    self.foo(**y)
   end
 
 end
