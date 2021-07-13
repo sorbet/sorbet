@@ -77,7 +77,12 @@ core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchC
             return nullptr;
         }
     } else {
-        to = args[argId].type;
+        auto &argInfo = args[argId];
+        if (argInfo.flags.isKeyword) {
+            return nullptr;
+        }
+
+        to = argInfo.type;
     }
 
     if (!to || !to.isFullyDefined()) {
