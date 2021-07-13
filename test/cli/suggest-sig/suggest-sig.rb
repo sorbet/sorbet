@@ -176,7 +176,7 @@ module ReorderedKeywordArgs
   end
 end
 
-module BadSendSuggest
+module KwHashSendSuggest
   extend T::Sig
 
   sig {params(x: Integer).void}
