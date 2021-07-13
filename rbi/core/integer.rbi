@@ -271,25 +271,7 @@ class Integer < Numeric
   # Returns `true` if the value of `int` is less than that of `real`.
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(T::Boolean)
   end
@@ -309,25 +291,7 @@ class Integer < Numeric
   # `real`.
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(T::Boolean)
   end
@@ -342,25 +306,7 @@ class Integer < Numeric
   # `nil` is returned if the two values are incomparable.
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(Integer)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(Integer)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(Integer)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(Integer)
   end
@@ -403,25 +349,7 @@ class Integer < Numeric
   # Returns `true` if the value of `int` is greater than that of `real`.
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(T::Boolean)
   end
@@ -431,25 +359,7 @@ class Integer < Numeric
   # `real`.
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(T::Boolean)
   end
