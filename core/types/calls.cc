@@ -3072,6 +3072,24 @@ public:
     }
 } Module_tripleEq;
 
+static bool isEnumClass(const GlobalState &gs, ClassOrModuleRef klass) {
+    if (!klass.exists()) {
+        return false;
+    }
+
+    auto superClass = klass.data(gs)->superClass();
+    return superClass.exists() && superClass == Symbols::T_Enum();
+}
+
+static bool isEnumValue(const GlobalState &gs, ClassOrModuleRef klass) {
+    if (!klass.exists()) {
+        return false;
+    }
+
+    auto superClass = klass.data(gs)->superClass();
+    return isEnumClass(gs, superClass);
+}
+
 class T_Enum_tripleEq : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -3085,14 +3103,19 @@ public:
         }
         auto lhs = args.thisType;
         ENFORCE(!lhs.isUntyped(), "lhs of T::Enum.=== must be typed");
-        if (Types::isSubType(gs, rhs, lhs)) {
-            res.returnType = Types::trueClass();
-            return;
-        }
         if (Types::glb(gs, rhs, lhs).isBottom()) {
             res.returnType = Types::falseClass();
             return;
         }
+
+        bool must_exist = false;
+        auto lhs_unwrapped = unwrapSymbol(gs, lhs, must_exist);
+        auto rhs_unwrapped = unwrapSymbol(gs, rhs, must_exist);
+        if (Types::isSubType(gs, rhs, lhs) && isEnumValue(gs, lhs_unwrapped) && isEnumValue(gs, rhs_unwrapped)) {
+            res.returnType = Types::trueClass();
+            return;
+        }
+
         res.returnType = Types::Boolean();
     }
 } T_Enum_tripleEq;
