@@ -1338,6 +1338,23 @@ public:
     }
 } T_self_type;
 
+class T_attached_class : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        // We don't currently have a way to get the `self` of the method that we're currently type
+        // checking (we only have things that can be seen directly from this single dispatch: the
+        // receiver and the args' types). This means that currently we can't do better than using
+        // `T.untyped` here.
+        //
+        // In the future, we might want to fix this similar to how we did with `<Magic>.<self-new>`,
+        // by e.g. rewriting `T.attached_class` to `<Magic>.<attached-class>(<self>)`, which would
+        // then let us have access to `self` in this intrinsic.
+        //
+        // https://github.com/sorbet/sorbet/issues/4352
+        res.returnType = make_type<MetaType>(Types::untypedUntracked());
+    }
+} T_attached_class;
+
 class T_must : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -3067,6 +3084,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::noreturn(), &T_noreturn},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::classOf(), &T_class_of},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::selfType(), &T_self_type},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::attachedClass(), &T_attached_class},
 
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::proc(), &T_proc},
 
