@@ -640,7 +640,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
         whoKnows.sanityCheck();
 
-    } else if (send->fun == core::Names::lessThan()) {
+    } else if (send->fun == core::Names::lessThan() || send->fun == core::Names::leq()) {
         const auto &recvKlass = send->recv.type;
         const auto &argType = send->args[0].type;
 
@@ -661,7 +661,11 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
         auto &whoKnows = getKnowledge(local);
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
-        whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
+        if (send->fun == core::Names::leq()) {
+            // We only know the NoTypeTest for `<=`, not `<`, because `x < A` being false could mean
+            // that `x == A`, which would mean `x` still has type `T.class_of(A)`.
+            whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
+        }
         whoKnows.sanityCheck();
     }
 }
