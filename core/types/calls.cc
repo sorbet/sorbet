@@ -3072,6 +3072,7 @@ public:
     }
 } Module_tripleEq;
 
+// Returns true if the referenced class is a child of T::Enum.
 static bool isEnumClass(const GlobalState &gs, ClassOrModuleRef klass) {
     if (!klass.exists()) {
         return false;
@@ -3081,6 +3082,8 @@ static bool isEnumClass(const GlobalState &gs, ClassOrModuleRef klass) {
     return superClass.exists() && superClass == Symbols::T_Enum();
 }
 
+// Returns true if the referenced class is a grandchild of T::Enum, i.e., one of the singleton classes for the enum
+// values.
 static bool isEnumValue(const GlobalState &gs, ClassOrModuleRef klass) {
     if (!klass.exists()) {
         return false;
@@ -3108,6 +3111,8 @@ public:
             return;
         }
 
+        // If lhs and rhs are both grandchildren of T::Enum, we can safely assume they are singleton classes created by
+        // the T::Enum rewriter, since inheriting from children of T::Enum is otherwise prohibited.
         bool must_exist = false;
         auto lhs_unwrapped = unwrapSymbol(gs, lhs, must_exist);
         auto rhs_unwrapped = unwrapSymbol(gs, rhs, must_exist);
