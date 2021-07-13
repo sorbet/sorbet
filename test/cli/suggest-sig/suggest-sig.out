@@ -306,7 +306,7 @@ suggest-sig.rb:112: This function does not have a `sig` https://srb.help/7017
      112 |  def self.load_account_business_profile(merchant)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:112: Inserted `sig {params(merchant: T.untyped).returns(Integer)}
+    suggest-sig.rb:112: Inserted `sig {params(merchant: TestCarash::Merchant).returns(Integer)}
   `
      112 |  def self.load_account_business_profile(merchant)
             ^
@@ -456,7 +456,7 @@ class TestCarash
   def self.blar(merchant:)
   end
 
-  sig {params(merchant: T.untyped).returns(Integer)}
+  sig {params(merchant: TestCarash::Merchant).returns(Integer)}
   def self.load_account_business_profile(merchant)
     blar(merchant: merchant)
     1
