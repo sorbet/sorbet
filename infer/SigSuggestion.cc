@@ -79,6 +79,8 @@ core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchC
     } else {
         auto &argInfo = args[argId];
         if (argInfo.flags.isKeyword) {
+            // TODO(trevor) this is possibly due to the argument being a keyword args splat. Right now we ignore this
+            // case, but it would be great to give a hash or shape suggestion instead.
             return nullptr;
         }
 
