@@ -115,7 +115,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
 
     auto numPosArgs = snd->numPosArgs;
     auto numKwArgs = snd->args.size() - numPosArgs;
-    bool hasKwSplat = numKwArgs & 0x1;
+    bool hasKwSplat = numKwArgs % 2 == 1;
 
     // Since this is a "fake" dispatch and we are not going to display the errors anyway,
     // core::Loc::none() should be okay here.
@@ -141,7 +141,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
                 }
             }
 
-            // increment over the keyword argument
+            // increment over the keyword argument symbol
             i++;
         }
 
