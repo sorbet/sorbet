@@ -175,3 +175,16 @@ module ReorderedKeywordArgs
     self.bar(x: x)
   end
 end
+
+module BadSendSuggest
+  extend T::Sig
+
+  sig {params(x: Integer).void}
+  def self.foo(x:)
+  end
+
+  def self.bar(y)
+    self.foo(y)
+  end
+
+end

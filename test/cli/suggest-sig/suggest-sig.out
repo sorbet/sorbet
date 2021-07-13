@@ -350,7 +350,16 @@ suggest-sig.rb:174: This function does not have a `sig` https://srb.help/7017
   `
      174 |  def self.test3(x:, y:)
             ^
-Errors: 43
+
+suggest-sig.rb:186: This function does not have a `sig` https://srb.help/7017
+     186 |  def self.bar(y)
+            ^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig.rb:186: Inserted `sig {params(y: Integer).void}
+  `
+     186 |  def self.bar(y)
+            ^
+Errors: 44
 
 --------------------------------------------------------------------------
 
@@ -554,4 +563,18 @@ module ReorderedKeywordArgs
   def self.test3(x:, y:)
     self.bar(x: x)
   end
+end
+
+module BadSendSuggest
+  extend T::Sig
+
+  sig {params(x: Integer).void}
+  def self.foo(x:)
+  end
+
+  sig {params(y: Integer).void}
+  def self.bar(y)
+    self.foo(y)
+  end
+
 end
