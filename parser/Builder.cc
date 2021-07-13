@@ -715,6 +715,7 @@ public:
         std::string name = tname->string();
 
         checkEndlessSetter(name, declLoc);
+        checkReservedForNumberedParameters(name, declLoc);
 
         return make_unique<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name), std::move(args), std::move(body));
     }
@@ -727,6 +728,7 @@ public:
         std::string name = head->name.toString(gs_);
 
         checkEndlessSetter(name, declLoc);
+        checkReservedForNumberedParameters(name, declLoc);
 
         return make_unique<DefS>(loc, declLoc, std::move(head->definee), head->name, std::move(args), std::move(body));
     }
@@ -770,7 +772,7 @@ public:
         if (isLiteralNode(*(head->definee.get()))) {
             error(ruby_parser::dclass::SingletonLiteral, head->definee->loc);
         }
-        checkReservedForNumberedParameters(name->string(), declLoc);
+        checkReservedForNumberedParameters(head->name.toString(gs_), declLoc);
 
         return make_unique<DefS>(loc, declLoc, std::move(head->definee), head->name, std::move(args), std::move(body));
     }
