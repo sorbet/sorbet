@@ -61,6 +61,21 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         return ast::make_expression<ast::ConstantLit>(ident->loc, ident->symbol, std::move(orig));
     }
 
+    auto *arrayLit = ast::cast_tree<ast::Array>(orig);
+    if (arrayLit != nullptr) {
+        auto elems = ast::Array::ENTRY_store{};
+        for (const auto &elem : arrayLit->elems) {
+            auto duppedElem = dupType(elem);
+            if (duppedElem == nullptr) {
+                return nullptr;
+            }
+
+            elems.emplace_back(std::move(duppedElem));
+        }
+
+        return ast::MK::Array(arrayLit->loc, std::move(elems));
+    }
+
     auto *cons = ast::cast_tree<ast::UnresolvedConstantLit>(orig);
     if (!cons) {
         return nullptr;
