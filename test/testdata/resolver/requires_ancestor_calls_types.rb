@@ -224,10 +224,8 @@ module Test10
     def m2
       T.attached_class.foo
     # ^^^^^^^^^^^^^^^^^^^^ error: Call to method `foo` on `T.untyped` mistakes a type for a value
-    # ^^^^^^^^^^^^^^^^^^^^ error: Method `foo` does not exist on `Object` component of `<Type: T.untyped>`
       T.class_of(M2).foo
     # ^^^^^^^^^^^^^^^^^^ error: Call to method `foo` on `T.class_of(Test10::M2)`
-    # ^^^^^^^^^^^^^^^^^^ error: Method `foo` does not exist on `Object` component
     end
   end
 end
