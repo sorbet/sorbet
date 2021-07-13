@@ -703,6 +703,29 @@ public:
         return make_unique<Class>(loc, declLoc, std::move(name), std::move(superclass), std::move(body));
     }
 
+    unique_ptr<Node> defEndlessMethod(const token *def, const token *tname, unique_ptr<Node> args, const token *equal,
+                                      unique_ptr<Node> body) {
+        core::LocOffsets declLoc = tokLoc(def, tname).join(maybe_loc(args));
+        core::LocOffsets loc = tokLoc(def).join(body->loc);
+        std::string name = tname->string();
+
+        checkEndlessSetter(name, declLoc);
+
+        return make_unique<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name), std::move(args), std::move(body));
+    }
+
+    unique_ptr<Node> defEndlessSingleton(unique_ptr<Node> defHead, unique_ptr<Node> args, const token *equal,
+                                         unique_ptr<Node> body) {
+        auto *head = parser::cast_node<DefsHead>(defHead.get());
+        core::LocOffsets declLoc = head->loc.join(maybe_loc(args));
+        core::LocOffsets loc = head->loc.join(body->loc);
+        std::string name = head->name.toString(gs_);
+
+        checkEndlessSetter(name, declLoc);
+
+        return make_unique<DefS>(loc, declLoc, std::move(head->definee), head->name, std::move(args), std::move(body));
+    }
+
     unique_ptr<Node> defMethod(const token *def, const token *name, unique_ptr<Node> args, unique_ptr<Node> body,
                                const token *end) {
         core::LocOffsets declLoc = tokLoc(def, name).join(maybe_loc(args));
@@ -725,17 +748,23 @@ public:
         return make_unique<SClass>(loc, declLoc, std::move(expr), std::move(body));
     }
 
-    unique_ptr<Node> defSingleton(const token *def, unique_ptr<Node> definee, const token *dot, const token *name,
-                                  unique_ptr<Node> args, unique_ptr<Node> body, const token *end) {
-        core::LocOffsets declLoc = tokLoc(def, name).join(maybe_loc(args));
-        core::LocOffsets loc = tokLoc(def, end);
+    unique_ptr<Node> defsHead(const token *def, unique_ptr<Node> definee, const token *dot, const token *name) {
+        core::LocOffsets declLoc = tokLoc(def, name);
 
-        if (isLiteralNode(*(definee.get()))) {
-            error(ruby_parser::dclass::SingletonLiteral, definee->loc);
+        return make_unique<DefsHead>(declLoc, std::move(definee), gs_.enterNameUTF8(name->string()));
+    }
+
+    unique_ptr<Node> defSingleton(unique_ptr<Node> defHead, unique_ptr<Node> args, unique_ptr<Node> body,
+                                  const token *end) {
+        auto *head = parser::cast_node<DefsHead>(defHead.get());
+        core::LocOffsets declLoc = head->loc.join(maybe_loc(args));
+        core::LocOffsets loc = head->loc.join(tokLoc(end));
+
+        if (isLiteralNode(*(head->definee.get()))) {
+            error(ruby_parser::dclass::SingletonLiteral, head->definee->loc);
         }
 
-        return make_unique<DefS>(loc, declLoc, std::move(definee), gs_.enterNameUTF8(name->string()), std::move(args),
-                                 std::move(body));
+        return make_unique<DefS>(loc, declLoc, std::move(head->definee), head->name, std::move(args), std::move(body));
     }
 
     unique_ptr<Node> empty_else(const token *tok) {
@@ -1513,6 +1542,13 @@ public:
         driver_->pattern_hash_keys.declare(name);
     }
 
+    void checkEndlessSetter(std::string name, core::LocOffsets loc) {
+        if (name != "===" && name != "==" && name != "!=" && name != "<=" && name != ">=" &&
+            name[name.length() - 1] == '=') {
+            error(ruby_parser::dclass::EndlessSetter, loc);
+        }
+    }
+
     void checkLVarName(std::string name, core::LocOffsets loc) {
         std::regex lvar_regex("^[a-z_][a-zA-Z0-9_]*$");
         if (!std::regex_match(name, lvar_regex)) {
@@ -1776,11 +1812,28 @@ ForeignPtr def_sclass(SelfPtr builder, const token *class_, const token *lshft_,
     return build->toForeign(build->def_sclass(class_, lshft_, build->cast_node(expr), build->cast_node(body), end_));
 }
 
-ForeignPtr defSingleton(SelfPtr builder, const token *def, ForeignPtr definee, const token *dot, const token *name,
-                        ForeignPtr args, ForeignPtr body, const token *end) {
+ForeignPtr defsHead(SelfPtr builder, const token *def, ForeignPtr definee, const token *dot, const token *name) {
     auto build = cast_builder(builder);
-    return build->toForeign(build->defSingleton(def, build->cast_node(definee), dot, name, build->cast_node(args),
-                                                build->cast_node(body), end));
+    return build->toForeign(build->defsHead(def, build->cast_node(definee), dot, name));
+}
+
+ForeignPtr defEndlessMethod(SelfPtr builder, const token *def, const token *name, ForeignPtr args, const token *equal,
+                            ForeignPtr body) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->defEndlessMethod(def, name, build->cast_node(args), equal, build->cast_node(body)));
+}
+
+ForeignPtr defEndlessSingleton(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, const token *equal,
+                               ForeignPtr body) {
+    auto build = cast_builder(builder);
+    return build->toForeign(
+        build->defEndlessSingleton(build->cast_node(defHead), build->cast_node(args), equal, build->cast_node(body)));
+}
+
+ForeignPtr defSingleton(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, ForeignPtr body, const token *end) {
+    auto build = cast_builder(builder);
+    return build->toForeign(
+        build->defSingleton(build->cast_node(defHead), build->cast_node(args), build->cast_node(body), end));
 }
 
 ForeignPtr encodingLiteral(SelfPtr builder, const token *tok) {
@@ -2325,9 +2378,12 @@ struct ruby_parser::builder Builder::interface = {
     cvar,
     dedentString,
     def_class,
+    defEndlessMethod,
+    defEndlessSingleton,
     defMethod,
     defModule,
     def_sclass,
+    defsHead,
     defSingleton,
     encodingLiteral,
     false_,
