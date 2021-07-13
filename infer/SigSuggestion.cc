@@ -56,16 +56,34 @@ optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context
     return core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend T::Sig\n", prefix)};
 }
 
-core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component, int argId) {
+core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component,
+                             optional<core::NameRef> keyword, int argId) {
     ENFORCE(component.method.exists());
     const auto &args = component.method.data(ctx)->arguments();
     if (argId >= args.size()) {
         return nullptr;
     }
-    const auto &to = args[argId].type;
+
+    core::TypePtr to = nullptr;
+    if (keyword.has_value()) {
+        auto name = *keyword;
+        for (auto &argInfo : args) {
+            if (argInfo.flags.isKeyword && argInfo.name == name) {
+                to = argInfo.type;
+                break;
+            }
+        }
+        if (to == nullptr) {
+            return nullptr;
+        }
+    } else {
+        to = args[argId].type;
+    }
+
     if (!to || !to.isFullyDefined()) {
         return nullptr;
     }
+
     return to;
 }
 
@@ -89,30 +107,52 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
         snd->receiverLoc,
         snd->argLocs,
     };
+
+    auto numPosArgs = snd->numPosArgs;
+    auto numKwArgs = snd->args.size() - numPosArgs;
+    bool hasKwSplat = numKwArgs & 0x1;
+
     // Since this is a "fake" dispatch and we are not going to display the errors anyway,
     // core::Loc::none() should be okay here.
     auto originForUninitialized = core::Loc::none();
     auto originForFullType = core::Loc::none();
-    core::DispatchArgs dispatchArgs{snd->fun,       locs,           snd->numPosArgs,
+    core::DispatchArgs dispatchArgs{snd->fun,       locs,           numPosArgs,
                                     args,           snd->recv.type, {snd->recv.type, {originForFullType}},
                                     snd->recv.type, snd->link,      originForUninitialized};
     auto dispatchInfo = snd->recv.type.dispatchCall(ctx, dispatchArgs);
 
-    int i = -1;
-
     // See if we can learn what types should they have
-    for (auto &arg : snd->args) {
-        i++;
+    bool inKwArgs = false;
+    for (int i = 0, argIdx = 0; i < snd->args.size(); i++, argIdx++) {
+        inKwArgs = inKwArgs || (i >= numPosArgs && !hasKwSplat);
+
+        // extract the keyword argument name when the send contains inlined keyword arguments
+        optional<core::NameRef> keyword;
+        if (inKwArgs) {
+            if (core::isa_type<core::LiteralType>(snd->args[i].type)) {
+                auto lit = core::cast_type_nonnull<core::LiteralType>(snd->args[i].type);
+                if (lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol) {
+                    keyword = lit.asName(ctx);
+                }
+            }
+
+            // increment over the keyword argument
+            i++;
+        }
+
+        auto &arg = snd->args[i];
+
         // See if we can learn about what functions are expected to exist on arguments
         auto fnd = blockLocals.find(arg.variable);
         if (fnd == blockLocals.end()) {
             continue;
         }
+
         core::TypePtr thisType;
         auto iter = &dispatchInfo;
         while (iter != nullptr) {
             if (iter->main.method.exists()) {
-                auto argType = extractArgType(ctx, *snd, iter->main, i);
+                auto argType = extractArgType(ctx, *snd, iter->main, keyword, argIdx);
                 if (argType && !argType.isUntyped()) {
                     if (!thisType) {
                         thisType = argType;
