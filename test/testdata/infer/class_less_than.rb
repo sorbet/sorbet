@@ -10,7 +10,7 @@ def parent_less_than(x)
   if x < Parent
     T.reveal_type(x) # error: `T.class_of(Parent)`
   else
-    T.reveal_type(x) # error: This code is unreachable
+    T.reveal_type(x) # error: `T.class_of(Parent)`
   end
 
   if x < Child
@@ -40,13 +40,13 @@ def child_less_than(x)
   if x < Parent
     T.reveal_type(x) # error: `T.class_of(Child)`
   else
-    T.reveal_type(x) # error: This code is unreachable
+    T.reveal_type(x) # error: `T.class_of(Child)`
   end
 
   if x < Child
     T.reveal_type(x) # error: `T.class_of(Child)`
   else
-    T.reveal_type(x) # error: This code is unreachable
+    T.reveal_type(x) # error: `T.class_of(Child)`
   end
 end
 
