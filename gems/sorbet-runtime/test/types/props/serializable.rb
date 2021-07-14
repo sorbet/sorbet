@@ -537,6 +537,49 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class StructWithTuples < T::Struct
+    prop :unary_tuple, [Symbol]
+    prop :tuple, [Integer, String]
+    prop :triple, [Float, TrueClass, FalseClass]
+    prop :array_of_tuple, T::Array[[Integer, String]]
+    prop :tuple_with_combinator, [T.nilable(String)]
+    prop :combinator_with_tuple, T.nilable([Symbol, Float])
+  end
+
+  describe 'tuples' do
+    it 'typechecks' do
+      exn = assert_raises(TypeError) do
+        StructWithTuples.new(
+          unary_tuple: ['not a symbol'],
+          tuple: [0, ''],
+          triple: [0.0, true, false],
+          array_of_tuple: [[0, '']],
+          tuple_with_combinator: [nil]
+        )
+      end
+      assert_includes(exn.message, '.unary_tuple to ["not a symbol"] (instance of Array) - need a [Symbol]')
+    end
+
+    it 'roundtrips' do
+      expected = StructWithTuples.new(
+        unary_tuple: [:hello],
+        tuple: [0, ''],
+        triple: [0.0, true, false],
+        array_of_tuple: [[0, '']],
+        tuple_with_combinator: [nil]
+      )
+
+      actual = StructWithTuples.from_hash(expected.serialize)
+
+      assert_equal(expected.unary_tuple, actual.unary_tuple)
+      assert_equal(expected.tuple, actual.tuple)
+      assert_equal(expected.triple, actual.triple)
+      assert_equal(expected.array_of_tuple, actual.array_of_tuple)
+      assert_equal(expected.tuple_with_combinator, actual.tuple_with_combinator)
+      assert_nil(actual.combinator_with_tuple)
+    end
+  end
+
   class CustomType
     extend T::Props::CustomType
 
