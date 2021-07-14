@@ -268,6 +268,12 @@ NodeDef nodes[] = {
         "false",
         vector<FieldDef>(),
     },
+    // Find pattern
+    {
+        "FindPattern",
+        "find_pattern",
+        vector<FieldDef>({{"elements", FieldType::NodeVec}}),
+    },
     // __FILE__
     {
         "FileLiteral",

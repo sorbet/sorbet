@@ -239,6 +239,7 @@ using namespace std::string_literals;
   p_kw
   p_kw_label
   p_primitive
+  p_rest
   p_top_expr_body
   p_var_ref
   p_value
@@ -308,6 +309,7 @@ using namespace std::string_literals;
   p_args_head
   p_args_post
   p_args_tail
+  p_find
   p_kwarg
   p_kwargs
   p_kwnorest
@@ -2426,6 +2428,10 @@ opt_block_args_tail:
                       list->concat($3);
                       $$ = driver.build.array_pattern(self, nullptr, list, nullptr);
                     }
+                | p_find
+                    {
+                      $$ = driver.build.find_pattern(self, nullptr, $1, nullptr);
+                    }
                 | p_args_tail
                     {
                       $$ = driver.build.array_pattern(self, nullptr, $1, nullptr);
@@ -2462,6 +2468,12 @@ opt_block_args_tail:
                       auto pattern = driver.build.array_pattern(self, nullptr, $3, nullptr);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
                     }
+                | p_const p_lparen p_find rparen
+                    {
+                      driver.pattern_hash_keys.pop();
+                      auto pattern = driver.build.find_pattern(self, nullptr, $3, nullptr);
+                      $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
+                    }
                 | p_const p_lparen p_kwargs rparen
                     {
                       driver.pattern_hash_keys.pop();
@@ -2480,6 +2492,12 @@ opt_block_args_tail:
                       auto pattern = driver.build.array_pattern(self, nullptr, $3, nullptr);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
                     }
+                | p_const p_lbracket p_find rbracket
+                    {
+                      driver.pattern_hash_keys.pop();
+                      auto pattern = driver.build.find_pattern(self, nullptr, $3, nullptr);
+                      $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
+                    }
                 | p_const p_lbracket p_kwargs rbracket
                     {
                       driver.pattern_hash_keys.pop();
@@ -2492,14 +2510,13 @@ opt_block_args_tail:
                       auto pattern = driver.build.array_pattern(self, $2, list, nullptr);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $3);
                     }
-                | tLBRACK
+                | tLBRACK p_args rbracket
                     {
-                      driver.pattern_hash_keys.push();
+                      $$ = driver.build.array_pattern(self, $1, $2, $3);
                     }
-                  p_args rbracket
+                | tLBRACK p_find rbracket
                     {
-                      driver.pattern_hash_keys.pop();
-                      $$ = driver.build.array_pattern(self, $1, $3, $4);
+                      $$ = driver.build.find_pattern(self, $1, $2, $3);
                     }
                 | tLBRACK rbracket
                     {
@@ -2587,27 +2604,28 @@ opt_block_args_tail:
                       $$ = $1;
                       $$->emplace_back(last_item);
                     }
-     p_args_tail: tSTAR tIDENTIFIER
+     p_args_tail: p_rest
                     {
-                      auto match_rest = driver.build.match_rest(self, $1, $2);
-                      $$ = driver.alloc.node_list(match_rest);
+                      $$ = driver.alloc.node_list($1);
                     }
-                | tSTAR tIDENTIFIER tCOMMA p_args_post
+                | p_rest tCOMMA p_args_post
                     {
-                      auto match_rest = driver.build.match_rest(self, $1, $2);
-                      $$ = driver.alloc.node_list(match_rest);
-                      $$->concat($4);
-                    }
-                | tSTAR
-                    {
-                      auto match_rest = driver.build.match_rest(self, $1, nullptr);
-                      $$ = driver.alloc.node_list(match_rest);
-                    }
-                | tSTAR tCOMMA p_args_post
-                    {
-                      auto match_rest = driver.build.match_rest(self, $1, nullptr);
-                      $$ = driver.alloc.node_list(match_rest);
+                      $$ = driver.alloc.node_list($1);
                       $$->concat($3);
+                    }
+         p_find: p_rest tCOMMA p_args_post tCOMMA p_rest
+                    {
+                      $$ = driver.alloc.node_list($1);
+                      $$->concat($3);
+                      $$->emplace_back($5);
+                    }
+         p_rest: tSTAR tIDENTIFIER
+                    {
+                      $$ = driver.build.match_rest(self, $1, $2);
+                    }
+               | tSTAR
+                    {
+                      $$ = driver.build.match_rest(self, $1, nullptr);
                     }
      p_args_post: p_arg
                     {
