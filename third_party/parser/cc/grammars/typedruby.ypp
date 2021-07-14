@@ -201,6 +201,7 @@ using namespace std::string_literals;
   command_rhs
   compstmt
   cpath
+  defs_head
   dsym
   expr
   expr_value
@@ -212,6 +213,8 @@ using namespace std::string_literals;
   f_larglist
   f_marg
   f_opt
+  f_paren_args
+  f_opt_paren_args
   f_rest_marg
   fitem
   for_var
@@ -328,6 +331,7 @@ using namespace std::string_literals;
   blkarg_mark
   call_op
   cname
+  def_name
   do
   dot_or_colon
   f_arg_asgn
@@ -354,6 +358,7 @@ using namespace std::string_literals;
   k_return
 
 %type <delimited_list>
+  defn_head
   opt_paren_args
   paren_args
 
@@ -751,6 +756,32 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
 
                       $$ = driver.alloc.node_with_token($3, $2);
                     }
+
+        def_name: fname
+                    {
+                      driver.lex.extend_static();
+                      driver.lex.cmdarg.push(false);
+                      driver.lex.cond.push(false);
+                      driver.current_arg_stack.push("");
+
+                      $$ = $1;
+                    }
+
+        defn_head: kDEF def_name
+                    {
+                      driver.lex.context.push(Context::State::DEF);
+                      $$ = driver.alloc.delimited_node_list($1, driver.alloc.node_list(), $2);
+                    }
+
+        defs_head: kDEF singleton dot_or_colon
+                     {
+                       driver.lex.set_state_expr_fname();
+                     }
+                   def_name
+                     {
+                       driver.lex.context.push(Context::State::DEFS);
+                       $$ = driver.build.defsHead(self, $1, $2, $3, $5);
+                     }
 
     command_call: command
                 | block_command
@@ -1264,6 +1295,52 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                     {
                       $$ = driver.build.ternary(self, $1, $2, $3, $5, $6);
                     }
+                | defn_head f_opt_paren_args tEQL arg
+                    {
+                      $$ = driver.build.defEndlessMethod(self, $1->begin, $1->end, $2, $3, $4);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | defn_head f_opt_paren_args tEQL arg kRESCUE_MOD arg
+                    {
+                      auto rescue_body = driver.build.rescue_body(self, $5, nullptr, nullptr, nullptr, nullptr, $6);
+                      auto method_body = driver.build.beginBody(self, $4, driver.alloc.node_list(rescue_body), nullptr, nullptr, nullptr, nullptr);
+
+                      $$ = driver.build.defEndlessMethod(self, $1->begin, $1->end, $2, $3, method_body);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | defs_head f_opt_paren_args tEQL arg
+                    {
+                      $$ = driver.build.defEndlessSingleton(self, $1, $2, $3, $4);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | defs_head f_opt_paren_args tEQL arg kRESCUE_MOD arg
+                    {
+                      auto rescue_body = driver.build.rescue_body(self, $5, nullptr, nullptr, nullptr, nullptr, $6);
+                      auto method_body = driver.build.beginBody(self, $4, driver.alloc.node_list(rescue_body), nullptr, nullptr, nullptr, nullptr);
+
+                      $$ = driver.build.defEndlessSingleton(self, $1, $2, $3, method_body);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
                 | primary
 
            relop: tGT | tLT | tGEQ | tLEQ
@@ -1701,17 +1778,9 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                       driver.lex.unextend();
                       driver.lex.context.pop();
                     }
-                | kDEF fname
+                | defn_head f_arglist bodystmt kEND
                     {
-                      driver.lex.extend_static();
-                      driver.lex.cmdarg.push(false);
-                      driver.lex.cond.push(false);
-                      driver.lex.context.push(Context::State::DEF);
-                      driver.current_arg_stack.push("");
-                    }
-                    f_arglist bodystmt kEND
-                    {
-                      $$ = driver.build.defMethod(self, $1, $2, $4, $5, $6);
+                      $$ = driver.build.defMethod(self, $1->begin, $1->end, $2, $3, $4);
 
                       driver.lex.cmdarg.pop();
                       driver.lex.cond.pop();
@@ -1719,21 +1788,9 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                       driver.lex.context.pop();
                       driver.current_arg_stack.pop();
                     }
-                | kDEF singleton dot_or_colon
+                | defs_head f_arglist bodystmt kEND
                     {
-                      driver.lex.set_state_expr_fname();
-                    }
-                    fname
-                    {
-                      driver.lex.extend_static();
-                      driver.lex.cmdarg.push(false);
-                      driver.lex.cond.push(false);
-                      driver.lex.context.push(Context::State::DEFS);
-                      driver.current_arg_stack.push("");
-                    }
-                    f_arglist bodystmt kEND
-                    {
-                      $$ = driver.build.defSingleton(self, $1, $2, $3, $5, $7, $8, $9);
+                      $$ = driver.build.defSingleton(self, $1, $2, $3, $4);
                       DIAGCHECK();
 
                       driver.lex.cmdarg.pop();
@@ -3089,8 +3146,13 @@ keyword_variable: kNIL
                     {
                       $$ = nullptr;
                     }
+f_opt_paren_args: f_paren_args
+                | none
+                    {
+                      $$ = driver.build.args(self, nullptr, driver.alloc.node_list(), nullptr, false);
+                    }
 
-       f_arglist: tLPAREN2 f_args rparen
+       f_paren_args: tLPAREN2 f_args rparen
                     {
                       driver.lex.set_state_expr_value();
                       $$ = driver.build.args(self, $1, $2, $3, true);
@@ -3110,6 +3172,7 @@ keyword_variable: kNIL
                       auto node_list = driver.alloc.node_list(forward_arg);
                       $$ = driver.build.args(self, $1, node_list, $3, true);
                     }
+       f_arglist: f_paren_args
                 |   {
                       $<boolean>$ = driver.lex.in_kwarg;
                       driver.lex.in_kwarg = true;

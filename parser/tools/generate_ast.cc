@@ -211,6 +211,15 @@ NodeDef nodes[] = {
                           {"args", FieldType::Node},
                           {"body", FieldType::Node}}),
     },
+    // def <expr>.name singleton-class name method def
+    {
+        "DefsHead",
+        "defshead",
+        vector<FieldDef>({
+            {"definee", FieldType::Node},
+            {"name", FieldType::Name},
+        }),
+    },
     // string with an interpolation, all nodes are concatenated in a single string
     {
         "DString",

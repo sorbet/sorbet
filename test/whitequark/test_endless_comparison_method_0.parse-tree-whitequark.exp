@@ -1,0 +1,4 @@
+s(:def, :===,
+  s(:args,
+    s(:arg, :other)),
+  s(:send, nil, :do_something))

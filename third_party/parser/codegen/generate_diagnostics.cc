@@ -44,6 +44,7 @@ tuple<string, string> MESSAGES[] = {
     {"ArgumentCvar", "formal argument cannot be a class variable"},
     {"DuplicateArgument", "duplicate argument name {}"},
     {"EmptySymbol", "empty symbol literal"},
+    {"EndlessSetter", "setter method cannot be defined in an endless method definition"},
     {"OddHash", "odd number of entries for a hash"},
     {"SingletonLiteral", "cannot define a singleton method for a literal"},
     {"DynamicConst", "dynamic constant assignment"},
