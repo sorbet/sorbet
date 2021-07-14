@@ -497,11 +497,13 @@ void validateSealed(core::Context ctx, const core::ClassOrModuleRef klass, const
 
 void validateSuperClass(core::Context ctx, const core::ClassOrModuleRef sym, const ast::ClassDef &classDef) {
     if (!sym.data(ctx)->isClassOrModuleClass()) {
+        ENFORCE(classDef.kind != ast::ClassDef::Kind::Class);
         return;
     }
 
     const auto superClass = sym.data(ctx)->superClass();
     if (!superClass.exists()) {
+        // Happens for certain special classes at the top of the inheritance hierarchy.
         return;
     }
 
