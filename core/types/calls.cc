@@ -526,6 +526,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         }
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+    } else if (symbol == Symbols::DeclBuilderForProcsSingleton() && args.name.rawId() == Names::new_().rawId()) {
+        if (!args.suppressErrors) {
+            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod)) {
+                e.setHeader("Cannot call `{}` on declaration builder type `{}`", Names::new_().show(gs),
+                            symbol.show(gs));
+            }
+        }
+        return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
     }
 
     SymbolRef mayBeOverloaded = symbol.data(gs)->findMemberTransitive(gs, args.name);
@@ -1250,9 +1258,43 @@ TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const
     return getMethodArguments(gs, klass, name, targs);
 }
 
+bool MetaType::canCallNew(const GlobalState &gs) const {
+    if (isa_type<OrType>(wrapped) || isa_type<AndType>(wrapped)) {
+        return false;
+    }
+
+    if (isa_type<ClassType>(wrapped)) {
+        auto sym = cast_type_nonnull<ClassType>(wrapped).symbol;
+        if (sym == Symbols::untyped() || sym == Symbols::bottom()) {
+            return false;
+        }
+    }
+
+    if (auto *appliedType = cast_type<AppliedType>(wrapped)) {
+        if (appliedType->klass.data(gs)->isSingletonClass(gs)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     switch (args.name.rawId()) {
         case Names::new_().rawId(): {
+            if (!canCallNew(gs)) {
+                auto callLoc = core::Loc(args.locs.file, args.locs.call);
+                if (auto e = gs.beginError(callLoc, errors::Infer::MetaTypeDispatchCall)) {
+                    e.setHeader("Cannot call `{}` on type `{}`", Names::new_().show(gs), wrapped.show(gs));
+                    if (auto *appliedType = cast_type<AppliedType>(wrapped)) {
+                        auto receiverLoc = core::Loc(args.locs.file, args.locs.receiver);
+                        e.replaceWith("Replace with class name", receiverLoc, "{}",
+                                      appliedType->klass.data(gs)->attachedClass(gs).show(gs));
+                    }
+                }
+                return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+            }
+
             auto innerArgs = DispatchArgs{Names::initialize(),
                                           args.locs,
                                           args.numPosArgs,
@@ -1269,15 +1311,14 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             return original;
         }
         default:
-            auto loc = args.callLoc();
-            if (auto e = gs.beginError(loc, errors::Infer::MetaTypeDispatchCall)) {
+            if (auto e = gs.beginError(args.callLoc(), errors::Infer::MetaTypeDispatchCall)) {
                 e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.show(gs),
                             this->wrapped.show(gs));
                 if (args.name == core::Names::tripleEq()) {
                     if (auto appliedType = cast_type<AppliedType>(this->wrapped)) {
                         e.addErrorNote("It looks like you're trying to pattern match on a generic, "
                                        "which doesn't work at runtime");
-                        e.replaceWith("Replace with class name", loc, "{}", appliedType->klass.show(gs));
+                        e.replaceWith("Replace with class name", args.callLoc(), "{}", appliedType->klass.show(gs));
                     }
                 }
             }

@@ -1,0 +1,51 @@
+suggest-class-new-not-singleton.rb:3: Cannot call `new` on type `T.class_of(String)` https://srb.help/7030
+     3 |T.class_of(String).new
+        ^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-class-new-not-singleton.rb:3: Replaced with `String`
+     3 |T.class_of(String).new
+        ^^^^^^^^^^^^^^^^^^
+
+suggest-class-new-not-singleton.rb:4: Cannot call `new` on type `T.class_of(Integer)` https://srb.help/7030
+     4 |T.class_of(Integer).new
+        ^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-class-new-not-singleton.rb:4: Replaced with `Integer`
+     4 |T.class_of(Integer).new
+        ^^^^^^^^^^^^^^^^^^^
+
+suggest-class-new-not-singleton.rb:5: Cannot call `new` on type `T.class_of(T::Array)` https://srb.help/7030
+     5 |T.class_of(T::Array).new
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-class-new-not-singleton.rb:5: Replaced with `T::Array`
+     5 |T.class_of(T::Array).new
+        ^^^^^^^^^^^^^^^^^^^^
+
+suggest-class-new-not-singleton.rb:6: Cannot call `new` on type `T.class_of(Array)` https://srb.help/7030
+     6 |T.class_of(T::Array[String]).new
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-class-new-not-singleton.rb:6: Replaced with `Array`
+     6 |T.class_of(T::Array[String]).new
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+suggest-class-new-not-singleton.rb:8: Cannot call `new` on type `T.class_of(String)` https://srb.help/7030
+     8 |x.new
+        ^^^^^
+  Autocorrect: Done
+    suggest-class-new-not-singleton.rb:8: Replaced with `String`
+     8 |x.new
+        ^
+Errors: 5
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+String.new
+Integer.new
+T::Array.new
+Array.new
+x = T.class_of(String)
+String.new
