@@ -580,6 +580,39 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class StructWithShapes < T::Struct
+    prop :empty_shape, {}
+    prop :symbol_key_shape, {foo: Integer}
+    prop :string_key_shape, {'foo' => Integer}
+  end
+
+  describe 'shapes' do
+    it 'typechecks' do
+      exn = assert_raises(TypeError) do
+        StructWithShapes.new(
+          empty_shape: {},
+          symbol_key_shape: {foo: 0},
+          string_key_shape: {:not_a_string => 0}
+        )
+      end
+      assert_includes(exn.message, '.string_key_shape to {:not_a_string => 0} (instance of Hash) - need a {\'foo\' => Integer}')
+    end
+
+    it 'roundtrips' do
+      expected = StructWithShapes.new(
+        empty_shape: {},
+        symbol_key_shape: {foo: 0},
+        string_key_shape: {'foo' => 0}
+      )
+
+      actual = StructWithShapes.from_hash(expected.serialize)
+
+      assert_equal(expected.empty_shape, actual.empty_shape)
+      assert_equal(expected.symbol_key_shape, actual.symbol_key_shape)
+      assert_equal(expected.string_key_shape, actual.string_key_shape)
+    end
+  end
+
   class CustomType
     extend T::Props::CustomType
 
