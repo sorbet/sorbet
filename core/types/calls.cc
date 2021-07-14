@@ -3106,7 +3106,7 @@ public:
         }
         auto lhs = args.thisType;
         ENFORCE(!lhs.isUntyped(), "lhs of T::Enum.=== must be typed");
-        if (Types::glb(gs, rhs, lhs).isBottom()) {
+        if (Types::glb(gs, rhs, lhs).isBottom() && Types::glb(gs, rhs, Types::String()).isBottom()) {
             res.returnType = Types::falseClass();
             return;
         }
