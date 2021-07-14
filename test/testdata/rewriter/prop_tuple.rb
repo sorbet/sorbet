@@ -10,6 +10,10 @@ class StructWithTuples < T::Struct
   prop :combinator_with_tuple, T.nilable([Symbol, Float])
 end
 
+class StructWithBadTuples < T::Struct
+  prop :bad_literal, [42, 42]
+end
+
 x = StructWithTuples.new(
   unary_tuple: [:hello],
   tuple: [0, ''],
