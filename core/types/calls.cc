@@ -631,7 +631,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     lines.reserve(alternatives.size());
                     for (auto alternative : alternatives) {
                         auto possibleSymbol = alternative.symbol;
-                        if (!possibleSymbol.isClassOrModule() && !possibleSymbol.isMethod()) {
+                        if (!possibleSymbol.isClassOrModule() &&
+                            (!possibleSymbol.isMethod() || possibleSymbol.data(gs)->isMethodPrivate())) {
                             continue;
                         }
 
