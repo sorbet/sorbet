@@ -497,7 +497,8 @@ void validateSealed(core::Context ctx, const core::ClassOrModuleRef klass, const
 
 void validateSuperClass(core::Context ctx, const core::ClassOrModuleRef sym, const ast::ClassDef &classDef) {
     if (!sym.data(ctx)->isClassOrModuleClass()) {
-        ENFORCE(classDef.kind != ast::ClassDef::Kind::Class);
+        // In this case, a class with the same name as a module has been defined, and we'll already have raised an error
+        // in the namer.
         return;
     }
 
