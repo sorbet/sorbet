@@ -2,7 +2,7 @@
 module ActiveSupport::TestCase
 end
 
-class MyTest < ActiveSupport::TestCase
+class MyTest < ActiveSupport::TestCase # error: The super class `ActiveSupport::TestCase` of `MyTest` does not derive from `Class`
   # Helper instance method
   def assert(test)
     test ? true : false

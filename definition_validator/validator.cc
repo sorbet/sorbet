@@ -495,6 +495,51 @@ void validateSealed(core::Context ctx, const core::ClassOrModuleRef klass, const
     validateSealedAncestorHelper(ctx, singleton, classDef, klass, "extended");
 }
 
+void validateSuperClass(core::Context ctx, const core::ClassOrModuleRef sym, const ast::ClassDef &classDef) {
+    if (!sym.data(ctx)->isClassOrModuleClass()) {
+        // In this case, a class with the same name as a module has been defined, and we'll already have raised an error
+        // in the namer.
+        return;
+    }
+
+    // If the ancestors are empty or the first element is a todo, this means that there was syntactically no superclass
+    if (classDef.ancestors.empty()) {
+        return;
+    }
+
+    if (auto *cnst = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front())) {
+        if (cnst->symbol == core::Symbols::todo()) {
+            return;
+        }
+    }
+
+    const auto superClass = sym.data(ctx)->superClass();
+    if (!superClass.exists()) {
+        // Happens for certain special classes at the top of the inheritance hierarchy.
+        return;
+    }
+
+    // these will raise an error elsewhere
+    if (superClass == core::Symbols::StubModule() || superClass == core::Symbols::StubSuperClass()) {
+        return;
+    }
+
+    const auto superSingleton = superClass.data(ctx)->lookupSingletonClass(ctx);
+    if (!superSingleton.exists()) {
+        return;
+    }
+
+    if (superSingleton.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
+        return;
+    }
+
+    if (auto e = ctx.state.beginError(core::Loc(sym.data(ctx)->loc().file(), classDef.declLoc),
+                                      core::errors::Resolver::NonClassSuperclass)) {
+        e.setHeader("The super class `{}` of `{}` does not derive from `{}`", superClass.show(ctx), sym.show(ctx),
+                    core::Symbols::Class().show(ctx));
+    }
+}
+
 void validateUselessRequiredAncestors(core::Context ctx, const core::ClassOrModuleRef sym) {
     auto data = sym.data(ctx);
 
@@ -692,6 +737,7 @@ public:
         validateAbstract(ctx, singleton);
         validateFinal(ctx, sym, classDef);
         validateSealed(ctx, sym, classDef);
+        validateSuperClass(ctx, sym, classDef);
 
         if (ctx.state.requiresAncestorEnabled) {
             validateRequiredAncestors(ctx, singleton);
