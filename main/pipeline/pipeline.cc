@@ -535,6 +535,10 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
     ast::ParsedFile result{ast::MK::EmptyTree(), resolved.file};
     core::FileRef f = resolved.file;
 
+    if (opts.stopAfterPhase == options::Phase::NAMER) {
+        return result;
+    }
+
     resolved = definition_validator::runOne(ctx, std::move(resolved));
 
     resolved = class_flatten::runOne(ctx, move(resolved));
@@ -546,7 +550,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         opts.print.FlattenTreeRaw.fmt("{}\n", resolved.tree.showRaw(ctx));
     }
 
-    if (opts.stopAfterPhase == options::Phase::NAMER || opts.stopAfterPhase == options::Phase::RESOLVER) {
+    if (opts.stopAfterPhase == options::Phase::RESOLVER) {
         return result;
     }
     if (f.data(ctx).isRBI()) {
