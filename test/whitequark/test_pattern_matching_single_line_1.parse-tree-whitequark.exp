@@ -1,0 +1,6 @@
+s(:begin,
+  s(:match_pattern_p,
+    s(:int, "1"),
+    s(:array_pattern,
+      s(:match_var, :a))),
+  s(:lvar, :a))
