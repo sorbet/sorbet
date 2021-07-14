@@ -960,8 +960,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     send->argLocs,
                 };
 
-                core::DispatchArgs dispatchArgs{send->fun, locs,          send->numPosArgs, args,    recvType.type,
-                                                recvType,  recvType.type, send->link,       ownerLoc};
+                core::DispatchArgs dispatchArgs{
+                    send->fun, locs,          send->numPosArgs, args,     recvType.type,
+                    recvType,  recvType.type, send->link,       ownerLoc, send->isPrivateOk};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
