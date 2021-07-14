@@ -517,8 +517,6 @@ void validateSuperClass(core::Context ctx, const core::ClassOrModuleRef sym, con
         return;
     }
 
-    // These base cases are to replicate the behavior of the VM:
-    // https://github.com/ruby/ruby/blob/b91b3bc7717a97f4f1cdf6131b1688e1958dcfed/class.c#L660-L677
     if (superSingleton.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
         return;
     }
