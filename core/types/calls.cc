@@ -3072,25 +3072,27 @@ public:
     }
 } Module_tripleEq;
 
-// Returns true if the referenced class is a child of T::Enum.
-static bool isEnumClass(const GlobalState &gs, ClassOrModuleRef klass) {
-    if (!klass.exists()) {
+// Returns true if the type is exactly the class of a specific enum value. For example, given:
+//
+//   class C < T::Enum
+//     enums do
+//       X = new
+//       Y = new
+//     end
+//   end
+//
+//  class TotallyUnrelatedThing ; end
+//
+// returns true for "X" and "Y", but false for "C", "T::Enum", and "TotallyUnrelatedThing".
+static bool isEnumValueClass(const GlobalState &gs, const TypePtr &type) {
+    bool must_exist = false;
+    auto unwrapped = unwrapSymbol(gs, type, must_exist);
+
+    if (!unwrapped.exists()) {
         return false;
     }
 
-    auto superClass = klass.data(gs)->superClass();
-    return superClass.exists() && superClass == Symbols::T_Enum();
-}
-
-// Returns true if the referenced class is a grandchild of T::Enum, i.e., one of the singleton classes for the enum
-// values.
-static bool isEnumValue(const GlobalState &gs, ClassOrModuleRef klass) {
-    if (!klass.exists()) {
-        return false;
-    }
-
-    auto superClass = klass.data(gs)->superClass();
-    return isEnumClass(gs, superClass);
+    return unwrapped.data(gs)->name.isTEnumName(gs);
 }
 
 class T_Enum_tripleEq : public IntrinsicMethod {
@@ -3106,17 +3108,14 @@ public:
         }
         auto lhs = args.thisType;
         ENFORCE(!lhs.isUntyped(), "lhs of T::Enum.=== must be typed");
+
+        // We have to allow String on the rhs, in order to support legacy_t_enum_migration_mode.
         if (Types::glb(gs, rhs, lhs).isBottom() && Types::glb(gs, rhs, Types::String()).isBottom()) {
             res.returnType = Types::falseClass();
             return;
         }
 
-        // If lhs and rhs are both grandchildren of T::Enum, we can safely assume they are singleton classes created by
-        // the T::Enum rewriter, since inheriting from children of T::Enum is otherwise prohibited.
-        bool must_exist = false;
-        auto lhs_unwrapped = unwrapSymbol(gs, lhs, must_exist);
-        auto rhs_unwrapped = unwrapSymbol(gs, rhs, must_exist);
-        if (Types::isSubType(gs, rhs, lhs) && isEnumValue(gs, lhs_unwrapped) && isEnumValue(gs, rhs_unwrapped)) {
+        if (isEnumValueClass(gs, lhs) && Types::isSubType(gs, rhs, lhs)) {
             res.returnType = Types::trueClass();
             return;
         }
