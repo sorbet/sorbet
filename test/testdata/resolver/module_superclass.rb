@@ -16,5 +16,4 @@ module M; end
 
 # It's not okay to subclass a module
   class SubclassModule1 < M; end
-# ^^^^^^^^^^^^^^^^^^^^^^^^^ error: The super class `M` of `SubclassModule1` does not
-
+# ^^^^^^^^^^^^^^^^^^^^^^^^^ error: The super class `M` of `SubclassModule1` does not derive from `Class`
