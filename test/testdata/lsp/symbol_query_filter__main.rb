@@ -16,7 +16,7 @@ class Foo < AbstractFoo
   end
 end
 
-class SomeClass # error: The super class `AnotherModule::NestedModule` of `SomeClass` does not derive from `Class`
+class SomeClass
   include HelperMethods
         # ^ usage: HelperMethods
   extend StaticHelperMethods

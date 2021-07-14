@@ -502,6 +502,17 @@ void validateSuperClass(core::Context ctx, const core::ClassOrModuleRef sym, con
         return;
     }
 
+    // If the ancestors are empty or the first element is a todo, this means that there was syntactically no superclass
+    if (classDef.ancestors.empty()) {
+        return;
+    }
+
+    if (auto *cnst = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front())) {
+        if (cnst->symbol == core::Symbols::todo()) {
+            return;
+        }
+    }
+
     const auto superClass = sym.data(ctx)->superClass();
     if (!superClass.exists()) {
         // Happens for certain special classes at the top of the inheritance hierarchy.

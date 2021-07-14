@@ -730,6 +730,7 @@ private:
                     ast::isa_tree<ast::EmptyTree>(
                         ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original).scope));
             if (isSuperclass && sym == core::Symbols::todo()) {
+                // This is the case where the superclass is empty, for example: `class A; end`
                 return;
             }
             job.ancestor = cnst;
