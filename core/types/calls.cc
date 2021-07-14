@@ -3098,6 +3098,24 @@ public:
             res.returnType = Types::falseClass();
             return;
         }
+
+        auto rhsSym = Symbols::noClassOrModule();
+        if (isa_type<ClassType>(rhs)) {
+            rhsSym = cast_type_nonnull<ClassType>(rhs).symbol;
+        } else if (auto *app = cast_type<AppliedType>(rhs)) {
+            rhsSym = app->klass;
+        }
+
+        if (rhsSym.exists() && rhsSym.data(gs)->isClassOrModuleSealed()) {
+            if (Types::isSubType(gs, lhs, rhs)) {
+                auto removed = Types::approximateSubtract(gs, rhs, lhs);
+                if (removed.isBottom()) {
+                    res.returnType = Types::trueClass();
+                    return;
+                }
+            }
+        }
+
         res.returnType = Types::Boolean();
     }
 } Module_tripleEq;
