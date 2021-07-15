@@ -463,6 +463,22 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
     return sig;
 }
 
+std::optional<std::string> autoCorrectOrOfOnlyClasses(core::Context ctx, core::TypePtr type) {
+    if (auto *o = core::cast_type<core::OrType>(type) ) {
+        auto left = autoCorrectOrOfOnlyClasses(ctx, o->left);
+        auto right = autoCorrectOrOfOnlyClasses(ctx, o->right);
+        if (left && right) {
+            return fmt::format("T.any({}, {})", left.value(), right.value());
+        } else {
+            return {};
+        }
+    } else if (core::isa_type<core::ClassType>(type)) {
+        return fmt::format("T.class_of({})", type.show(ctx.state));
+    } else {
+        return {};
+    }
+}
+
 TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                             TypeSyntaxArgs args) {
     switch (send.fun.rawId()) {
@@ -558,7 +574,15 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
             auto *obj = ast::cast_tree<ast::ConstantLit>(send.args[0]);
             if (!obj) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("T.class_of needs a Class as its argument");
+                    auto type = getResultTypeWithSelfTypeParams(ctx, send.args.front(), sig, args);
+                    auto autocorrect = autoCorrectOrOfOnlyClasses(ctx, type);
+                    if (core::isa_type<core::OrType>(type) && autocorrect) {
+                        e.setHeader("`{}` needs a class or module as its argument. Apply `{}` to each element of the `{}` instead",
+                                    "T.class_of", "T.class_of", "T.any");
+                        e.replaceWith("Distribute `T.class_of`", core::Loc(ctx.file, send.loc), "{}", autocorrect.value());
+                    } else {
+                        e.setHeader("`{}` needs a class or module as its argument", "T.class_of");
+                    }
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
