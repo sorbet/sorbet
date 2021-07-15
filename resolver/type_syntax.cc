@@ -577,8 +577,7 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                     auto type = getResultTypeWithSelfTypeParams(ctx, send.args.front(), sig, args);
                     auto autocorrect = autoCorrectOrOfOnlyClasses(ctx, type);
                     if (core::isa_type<core::OrType>(type) && autocorrect) {
-                        e.setHeader("`{}` needs a class or module as its argument. Apply `{}` to each element of the `{}` instead",
-                                    "T.class_of", "T.class_of", "T.any");
+                        e.setHeader("`{}` must wrap each individual class type, not the outer `{}`", "T.class_of", "T.any");
                         e.replaceWith("Distribute `T.class_of`", core::Loc(ctx.file, send.loc), "{}", autocorrect.value());
                     } else {
                         e.setHeader("`{}` needs a class or module as its argument", "T.class_of");
