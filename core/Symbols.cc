@@ -1522,6 +1522,11 @@ bool Symbol::hasSingleSealedSubclass(const GlobalState &gs) const {
 
     auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
 
+    // When the sealed type is a class, it must also be abstract for there to be a single subclass.
+    if (this->isClassOrModuleClass() && !this->isClassOrModuleAbstract()) {
+        return false;
+    }
+
     auto data = sealedSubclasses.data(gs);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
     auto appliedType = cast_type<AppliedType>(data->resultType);
