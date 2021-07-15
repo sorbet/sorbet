@@ -2332,7 +2332,11 @@ void lexer::set_state_expr_value() {
         if (version >= ruby_version::RUBY_27) {
           emit(token_type::tBDOT3, ident, ts, te);
         } else {
-          emit(token_type::tDOT3, ident, ts, te);
+          if (!lambda_stack.empty() && lambda_stack.top() == paren_nest) {
+            emit(token_type::tDOT3, ident, ts, te);
+          } else {
+            emit(token_type::tBDOT3, ident, ts, te);
+          }
         }
 
         fnext expr_beg; fbreak;
