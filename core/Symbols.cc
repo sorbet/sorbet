@@ -1472,6 +1472,7 @@ void Symbol::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass)
     }
 }
 
+// Returns the locations that are allowed to subclass the sealed class.
 const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
     ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(gs).show(gs));
     auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
