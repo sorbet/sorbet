@@ -1,8 +1,0 @@
-autocorrect-private-suggested.rb:7: Method `my_private_metho` does not exist on `A` https://srb.help/7003
-     7 |    my_private_metho
-            ^^^^^^^^^^^^^^^^
-  Did you mean:
-    autocorrect-private-suggested.rb:4: `A#my_private_method`
-     4 |  private def my_private_method; end
-                  ^^^^^^^^^^^^^^^^^^^^^
-Errors: 1
