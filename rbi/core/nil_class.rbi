@@ -86,4 +86,8 @@ class NilClass < Object
   # Only the object *nil* responds `true` to `nil?`.
   sig {returns(TrueClass)}
   def nil?; end
+
+  # Only `nil` and `false` are falsy.
+  sig {returns(TrueClass)}
+  def !(); end
 end
