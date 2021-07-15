@@ -76,6 +76,32 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         return ast::MK::Array(arrayLit->loc, std::move(elems));
     }
 
+    auto *hashLit = ast::cast_tree<ast::Hash>(orig);
+    if (hashLit != nullptr) {
+        auto keys = ast::Hash::ENTRY_store{};
+        auto values = ast::Hash::ENTRY_store{};
+        ENFORCE(hashLit->keys.size() == hashLit->values.size());
+        for (size_t i = 0; i < hashLit->keys.size(); i++) {
+            const auto &key = hashLit->keys[i];
+
+            auto *keyLit = ast::cast_tree<ast::Literal>(key);
+            if (keyLit == nullptr) {
+                return nullptr;
+            }
+
+            const auto &value = hashLit->values[i];
+            auto duppedValue = dupType(value);
+            if (duppedValue == nullptr) {
+                return nullptr;
+            }
+
+            keys.emplace_back(key.deepCopy());
+            values.emplace_back(std::move(duppedValue));
+        }
+
+        return ast::MK::Hash(hashLit->loc, std::move(keys), std::move(values));
+    }
+
     auto *cons = ast::cast_tree<ast::UnresolvedConstantLit>(orig);
     if (!cons) {
         return nullptr;
