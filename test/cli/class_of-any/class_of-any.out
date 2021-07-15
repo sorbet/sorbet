@@ -1,4 +1,4 @@
-test/cli/class_of-any/class_of-any.rb:9: `T.class_of` needs a class or module as its argument. Apply `T.class_of` to each element of the `T.any` instead https://srb.help/5004
+test/cli/class_of-any/class_of-any.rb:9: `T.class_of` must wrap each individual class type, not the outer `T.any` https://srb.help/5004
      9 |sig { returns(T.class_of(T.any(A, T.any(B, C)))) }
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
