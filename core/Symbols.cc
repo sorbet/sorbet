@@ -1516,6 +1516,22 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
     return result;
 }
 
+bool Symbol::hasSingleSealedSubclass(const GlobalState &gs) const {
+    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(gs).show(gs));
+
+    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
+
+    auto data = sealedSubclasses.data(gs);
+    ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
+    auto appliedType = cast_type<AppliedType>(data->resultType);
+    ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
+    ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
+
+    // There is exactly one subclass when the sealedSubclasses field is a set with a single non-bottom type in it
+    auto currentClasses = appliedType->targs[0];
+    return !currentClasses.isBottom() && !isa_type<OrType>(currentClasses);
+}
+
 // Record a required ancestor for this class of module
 //
 // Each RequiredAncestor is stored into a magic method referenced by `prop` where:

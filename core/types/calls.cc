@@ -3091,7 +3091,7 @@ public:
         }
 
         if (rhsSym.exists() && rhsSym.data(gs)->isClassOrModuleSealed() &&
-            rhsSym.data(gs)->sealedLocs(gs).size() == 1) {
+            rhsSym.data(gs)->hasSingleSealedSubclass(gs)) {
             rhs = rhsSym.data(gs)->sealedSubclassesToUnion(gs);
         }
 

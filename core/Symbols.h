@@ -568,6 +568,8 @@ public:
     const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs) const;
     TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
 
+    bool hasSingleSealedSubclass(const GlobalState &ctx) const;
+
     // Record a required ancestor for this class of module
     void recordRequiredAncestor(GlobalState &gs, ClassOrModuleRef ancestor, Loc loc);
 
