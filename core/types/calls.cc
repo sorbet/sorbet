@@ -3082,6 +3082,19 @@ public:
             res.returnType = rhs;
             return;
         }
+
+        auto rhsSym = Symbols::noClassOrModule();
+        if (isa_type<ClassType>(rhs)) {
+            rhsSym = cast_type_nonnull<ClassType>(rhs).symbol;
+        } else if (auto *app = cast_type<AppliedType>(rhs)) {
+            rhsSym = app->klass;
+        }
+
+        if (rhsSym.exists() && rhsSym.data(gs)->isClassOrModuleSealed() &&
+            rhsSym.data(gs)->sealedLocs(gs).size() == 1) {
+            rhs = rhsSym.data(gs)->sealedSubclassesToUnion(gs);
+        }
+
         auto rc = Types::getRepresentedClass(gs, args.thisType);
         // in most cases, thisType is T.class_of(rc). see test/testdata/class_not_class_of.rb for an edge case.
         if (rc == core::Symbols::noClassOrModule()) {
@@ -3097,23 +3110,6 @@ public:
         if (Types::glb(gs, rhs, lhs).isBottom()) {
             res.returnType = Types::falseClass();
             return;
-        }
-
-        auto rhsSym = Symbols::noClassOrModule();
-        if (isa_type<ClassType>(rhs)) {
-            rhsSym = cast_type_nonnull<ClassType>(rhs).symbol;
-        } else if (auto *app = cast_type<AppliedType>(rhs)) {
-            rhsSym = app->klass;
-        }
-
-        if (rhsSym.exists() && rhsSym.data(gs)->isClassOrModuleSealed()) {
-            if (Types::isSubType(gs, lhs, rhs)) {
-                auto removed = Types::approximateSubtract(gs, rhs, lhs);
-                if (removed.isBottom()) {
-                    res.returnType = Types::trueClass();
-                    return;
-                }
-            }
         }
 
         res.returnType = Types::Boolean();
