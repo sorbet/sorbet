@@ -3150,6 +3150,19 @@ public:
             res.returnType = rhs;
             return;
         }
+
+        auto rhsSym = Symbols::noClassOrModule();
+        if (isa_type<ClassType>(rhs)) {
+            rhsSym = cast_type_nonnull<ClassType>(rhs).symbol;
+        } else if (auto *app = cast_type<AppliedType>(rhs)) {
+            rhsSym = app->klass;
+        }
+
+        if (rhsSym.exists() && rhsSym.data(gs)->isClassOrModuleSealed() &&
+            rhsSym.data(gs)->hasSingleSealedSubclass(gs)) {
+            rhs = rhsSym.data(gs)->sealedSubclassesToUnion(gs);
+        }
+
         auto lhs = args.thisType;
         ENFORCE(!lhs.isUntyped(), "lhs of T::Enum.=== must be typed");
 
