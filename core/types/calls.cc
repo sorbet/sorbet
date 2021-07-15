@@ -3072,6 +3072,58 @@ public:
     }
 } Module_tripleEq;
 
+// Returns true if the type is exactly the class of a specific enum value. For example, given:
+//
+//   class C < T::Enum
+//     enums do
+//       X = new
+//       Y = new
+//     end
+//   end
+//
+//  class TotallyUnrelatedThing ; end
+//
+// returns true for "X" and "Y", but false for "C", "T::Enum", and "TotallyUnrelatedThing".
+static bool isEnumValueClass(const GlobalState &gs, const TypePtr &type) {
+    bool must_exist = false;
+    auto unwrapped = unwrapSymbol(gs, type, must_exist);
+
+    if (!unwrapped.exists()) {
+        return false;
+    }
+
+    return unwrapped.data(gs)->name.isTEnumName(gs);
+}
+
+class T_Enum_tripleEq : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            return;
+        }
+        auto rhs = args.args[0]->type;
+        if (rhs.isUntyped()) {
+            res.returnType = rhs;
+            return;
+        }
+        auto lhs = args.thisType;
+        ENFORCE(!lhs.isUntyped(), "lhs of T::Enum.=== must be typed");
+
+        // We have to allow String on the rhs, in order to support legacy_t_enum_migration_mode.
+        if (Types::glb(gs, rhs, lhs).isBottom() && Types::glb(gs, rhs, Types::String()).isBottom()) {
+            res.returnType = Types::falseClass();
+            return;
+        }
+
+        if (isEnumValueClass(gs, lhs) && Types::isSubType(gs, rhs, lhs)) {
+            res.returnType = Types::trueClass();
+            return;
+        }
+
+        res.returnType = Types::Boolean();
+    }
+} T_Enum_tripleEq;
+
 } // namespace
 
 const vector<Intrinsic> intrinsicMethods{
@@ -3150,6 +3202,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Enumerable(), Intrinsic::Kind::Instance, Names::toH(), &Enumerable_toH},
 
     {Symbols::Module(), Intrinsic::Kind::Instance, Names::tripleEq(), &Module_tripleEq},
+    {Symbols::T_Enum(), Intrinsic::Kind::Instance, Names::tripleEq(), &T_Enum_tripleEq},
 };
 
 } // namespace sorbet::core
