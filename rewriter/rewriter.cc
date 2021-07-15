@@ -29,6 +29,7 @@
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
 #include "rewriter/TestCase.h"
+#include "rewriter/TrueFalse.h"
 #include "rewriter/TypeMembers.h"
 
 using namespace std;
@@ -187,6 +188,16 @@ public:
 
         if (SigRewriter::run(ctx, send)) {
             return tree;
+        }
+
+        return tree;
+    }
+
+    ast::ExpressionPtr postTransformAssign(core::MutableContext ctx, ast::ExpressionPtr tree) {
+        auto *asgn = ast::cast_tree<ast::Assign>(tree);
+
+        if (auto expr = TrueFalse::run(ctx, asgn)) {
+            return expr;
         }
 
         return tree;

@@ -273,6 +273,9 @@ NameDef names[] = {
     {"rewriterRaiseUnimplemented", "Sorbet rewriter pass partially unimplemented"},
 
     {"test"},
+
+    {"booleanTrue", "<boolean-true>"},
+    {"booleanFalse", "<boolean-false>"},
     // end DSL methods
 
     // The next two names are used as keys in SymbolInfo::members to store

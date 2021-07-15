@@ -550,6 +550,10 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::selfNew())
                  .repeatedUntypedArg(Names::arg0())
                  .buildWithResultUntyped();
+    // Synthesize <Magic>.<boolean-true>() => T::Boolean
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::booleanTrue()).buildWithResult(Types::Boolean());
+    // Synthesize <Magic>.<boolean-false>() => T::Boolean
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::booleanFalse()).buildWithResult(Types::Boolean());
     // Synthesize <Magic>.<nil-for-safe-navigation>(recv: T.untyped) => NilClass
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::nilForSafeNavigation())
                  .untypedArg(Names::arg0())

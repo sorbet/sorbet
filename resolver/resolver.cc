@@ -1427,6 +1427,11 @@ class ResolveTypeMembersAndFieldsWalk {
                 }
                 result = cast.type;
             },
+            [&](const ast::Send &send) {
+                if (send.fun == core::Names::booleanTrue() || send.fun == core::Names::booleanFalse()) {
+                    result = core::Types::Boolean();
+                }
+            },
             [&](const ast::InsSeq &outer) { result = resolveConstantType(ctx, outer.expr); },
             [&](const ast::ExpressionPtr &expr) {});
         return result;

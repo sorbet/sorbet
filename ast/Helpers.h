@@ -198,6 +198,12 @@ public:
         return make_expression<ast::Literal>(loc, core::Types::falseClass());
     }
 
+    static ExpressionPtr Boolean(core::LocOffsets loc, bool value) {
+        auto name = value ? core::Names::booleanTrue() : core::Names::booleanFalse();
+        auto magic = Constant(loc, core::Symbols::Magic());
+        return Send0(loc, std::move(magic), name);
+    }
+
     static ExpressionPtr UnresolvedConstant(core::LocOffsets loc, ExpressionPtr scope, core::NameRef name) {
         return make_expression<UnresolvedConstantLit>(loc, std::move(scope), name);
     }
