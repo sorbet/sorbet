@@ -17,3 +17,18 @@ def example(x)
 
   res # no error (cases are exhaustive so res is not nilable)
 end
+
+class MyEnum1 < T::Enum
+  enums do
+    X = new
+  end
+end
+
+sig {params(x: MyEnum1).returns(Integer)}
+def example2(x)
+  res = case x
+  when MyEnum1::X then 1
+  end
+
+  res # no error (cases are exhaustive so res is not nilable)
+end
