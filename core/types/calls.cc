@@ -528,8 +528,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
     } else if (symbol == Symbols::DeclBuilderForProcsSingleton() && args.name.rawId() == Names::new_().rawId()) {
         if (!args.suppressErrors) {
-            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod)) {
-                e.setHeader("Cannot call `{}` on declaration builder type `{}`", Names::new_().show(gs),
+            if (auto e =
+                    gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::MetaTypeDispatchCall)) {
+                e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", Names::new_().show(gs),
                             symbol.show(gs));
             }
         }
