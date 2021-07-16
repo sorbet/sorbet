@@ -1,4 +1,4 @@
-suggest-class-new-not-singleton.rb:3: Cannot call `new` on type `T.class_of(String)` https://srb.help/7030
+suggest-class-new-not-singleton.rb:3: Call to method `new` on `T.class_of(String)` mistakes a type for a value https://srb.help/7030
      3 |T.class_of(String).new
         ^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -6,7 +6,7 @@ suggest-class-new-not-singleton.rb:3: Cannot call `new` on type `T.class_of(Stri
      3 |T.class_of(String).new
         ^^^^^^^^^^^^^^^^^^
 
-suggest-class-new-not-singleton.rb:4: Cannot call `new` on type `T.class_of(Integer)` https://srb.help/7030
+suggest-class-new-not-singleton.rb:4: Call to method `new` on `T.class_of(Integer)` mistakes a type for a value https://srb.help/7030
      4 |T.class_of(Integer).new
         ^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -14,7 +14,7 @@ suggest-class-new-not-singleton.rb:4: Cannot call `new` on type `T.class_of(Inte
      4 |T.class_of(Integer).new
         ^^^^^^^^^^^^^^^^^^^
 
-suggest-class-new-not-singleton.rb:5: Cannot call `new` on type `T.class_of(T::Array)` https://srb.help/7030
+suggest-class-new-not-singleton.rb:5: Call to method `new` on `T.class_of(T::Array)` mistakes a type for a value https://srb.help/7030
      5 |T.class_of(T::Array).new
         ^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -22,7 +22,7 @@ suggest-class-new-not-singleton.rb:5: Cannot call `new` on type `T.class_of(T::A
      5 |T.class_of(T::Array).new
         ^^^^^^^^^^^^^^^^^^^^
 
-suggest-class-new-not-singleton.rb:6: Cannot call `new` on type `T.class_of(Array)` https://srb.help/7030
+suggest-class-new-not-singleton.rb:6: Call to method `new` on `T.class_of(Array)` mistakes a type for a value https://srb.help/7030
      6 |T.class_of(T::Array[String]).new
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -30,7 +30,7 @@ suggest-class-new-not-singleton.rb:6: Cannot call `new` on type `T.class_of(Arra
      6 |T.class_of(T::Array[String]).new
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-suggest-class-new-not-singleton.rb:8: Cannot call `new` on type `T.class_of(String)` https://srb.help/7030
+suggest-class-new-not-singleton.rb:8: Call to method `new` on `T.class_of(String)` mistakes a type for a value https://srb.help/7030
      8 |x.new
         ^^^^^
   Autocorrect: Done
