@@ -463,6 +463,19 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
     return sig;
 }
 
+// This function recurses through an OrType, and accumlates all the class names,
+// wrapped in T.class_of, and checks if the type is only made up of Classes and OrTypes
+bool recurseOrType(core::Context ctx, core::TypePtr type, std::vector<std::string> &v) {
+    if (auto *o = core::cast_type<core::OrType>(type)) {
+        return recurseOrType(ctx, o->left, v) && recurseOrType(ctx, o->right, v);
+    } else if (core::isa_type<core::ClassType>(type)) {
+        v.push_back(fmt::format("T.class_of({})", type.show(ctx)));
+        return true;
+    } else {
+        return false;
+    }
+}
+
 TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                             TypeSyntaxArgs args) {
     switch (send.fun.rawId()) {
@@ -558,7 +571,17 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
             auto *obj = ast::cast_tree<ast::ConstantLit>(send.args[0]);
             if (!obj) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("T.class_of needs a Class as its argument");
+                    auto type = getResultTypeWithSelfTypeParams(ctx, send.args.front(), sig, args);
+                    std::vector<std::string> classes;
+                    auto shouldAutoCorrect = recurseOrType(ctx, type, classes);
+                    if (core::isa_type<core::OrType>(type) && shouldAutoCorrect) {
+                        auto autocorrect = fmt::format("T.any({})", fmt::join(classes, ", "));
+                        e.setHeader("`{}` must wrap each individual class type, not the outer `{}`", "T.class_of",
+                                    "T.any");
+                        e.replaceWith("Distribute `T.class_of`", core::Loc(ctx.file, send.loc), "{}", autocorrect);
+                    } else {
+                        e.setHeader("`{}` needs a class or module as its argument", "T.class_of");
+                    }
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }

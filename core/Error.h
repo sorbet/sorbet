@@ -99,7 +99,7 @@ public:
           std::vector<AutocorrectSuggestion> autocorrects, bool isSilenced)
         : loc(loc), what(what), header(move(header)), isSilenced(isSilenced), autocorrects(move(autocorrects)),
           sections(sections) {
-        ENFORCE(this->header.empty() || this->header.back() != '.');
+        ENFORCE(this->header.empty() || this->header.back() != '.', "Error headers should not end with a period");
         ENFORCE(this->header.find('\n') == std::string::npos, "{} has a newline in it", this->header);
     }
 };
