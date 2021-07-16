@@ -1,12 +1,28 @@
-test/cli/class_of-any/class_of-any.rb:9: `T.class_of` must wrap each individual class type, not the outer `T.any` https://srb.help/5004
+class_of-any.rb:9: `T.class_of` must wrap each individual class type, not the outer `T.any` https://srb.help/5004
      9 |sig { returns(T.class_of(T.any(A, T.any(B, C)))) }
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/class_of-any/class_of-any.rb:9: Replace with `T.any(T.class_of(B), T.class_of(C), T.class_of(A))`
+  Autocorrect: Done
+    class_of-any.rb:9: Replaced with `T.any(T.class_of(B), T.class_of(C), T.class_of(A))`
      9 |sig { returns(T.class_of(T.any(A, T.any(B, C)))) }
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/class_of-any/class_of-any.rb:12: `T.class_of` needs a class or module as its argument https://srb.help/5004
+class_of-any.rb:12: `T.class_of` needs a class or module as its argument https://srb.help/5004
     12 |sig { returns(T.class_of(T.any(A, D))) }
                       ^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 2
+
+--------------------------------------------------------------------------
+
+# typed: true
+extend T::Sig
+
+class A; end
+class B; end
+class C; end
+class D < A; end
+
+sig { returns(T.any(T.class_of(B), T.class_of(C), T.class_of(A))) }
+def foo; end
+
+sig { returns(T.class_of(T.any(A, D))) }
+def bar; end
