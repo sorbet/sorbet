@@ -501,6 +501,8 @@ int realmain(int argc, char *argv[]) {
 
     logger->trace("done building initial global state");
 
+    // force a rebuild?
+
     if (opts.runLSP) {
 #ifdef SORBET_REALMAIN_MIN
         logger->warn("LSP is disabled in sorbet-orig for faster builds");
