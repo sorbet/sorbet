@@ -1,28 +1,48 @@
 ---
 id: class-of
-title: T.class_of
+title: Types for Class Objects via T.class_of
+sidebar_label: T.class_of
 ---
 
-> TODO: This page is still a fragment. Contributions welcome!
+Classes are also values in Ruby. Sorbet uses `T.class_of(...)` to describe the
+type of those class objects.
 
 ```ruby
 T.class_of(Integer)
 ```
 
-It can be confusing whether you want `MyClass` or `T.class_of(MyClass)`. For
-reference, these assertions are true:
+The difference between `MyClass` and `T.class_of(MyClass)` can be confusing.
+Here are some examples to make it less confusing:
+
+| These expressions... | ...have these types   |
+| -------------------- | --------------------- |
+| `0`, `1`, `2 + 2`    | `Integer`             |
+| `Integer`            | `T.class_of(Integer)` |
+| `42.class`           | `T.class_of(Integer)` |
+
+Here's a playground link to confirm these types:
 
 ```ruby
-T.let(5, Integer)
+# typed: true
+T.let(0, Integer)
+T.let(1, Integer)
+T.let(2 + 2, Integer)
 
-T.let(5.class, T.class_of(Integer))
 T.let(Integer, T.class_of(Integer))
+T.let(42.class, T.class_of(Integer))
 ```
 
-You can also use modules. It respects inheritance in the same way that
-[Class Types](class-types.md) do:
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0AT.let(0%2C%20Integer)%0AT.let(1%2C%20Integer)%0AT.let(2%20%2B%202%2C%20Integer)%0A%0AT.let(Integer%2C%20T.class_of(Integer))%0AT.let(42.class%2C%20T.class_of(Integer))">
+  → View on sorbet.run
+</a>
+
+## `T.class_of` and inheritance
+
+As with [Class Types](class-types.md#inheritance), `T.class_of` types work with
+inheritance:
 
 ```ruby
+# typed: true
 extend T::Sig
 
 class Grandparent; end
@@ -30,46 +50,151 @@ class Parent < Grandparent; end
 class Child < Parent; end
 
 sig {params(x: T.class_of(Parent)).void}
-def foo(x); end
+def example(x); end
 
-foo(Parent) # ok
-foo(Child) # ok
-
-foo(Grandparent) # error
+example(Grandparent)   # error
+example(Parent)        # ok
+example(Child)         # ok
 ```
 
-<a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Aclass%20Grandparent%3B%20end%0Aclass%20Parent%20%3C%20Grandparent%3B%20end%0Aclass%20Child%20%3C%20Parent%3B%20end%0A%0Asig%20%7Bparams(x%3A%20T.class_of(Parent)).void%7D%0Adef%20foo(x)%3B%20end%0A%0A%0Afoo(Parent)%20%23%20ok%0Afoo(Child)%20%23%20ok%0A%0Afoo(Grandparent)%20%23%20error">
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20Grandparent%3B%20end%0Aclass%20Parent%20%3C%20Grandparent%3B%20end%0Aclass%20Child%20%3C%20Parent%3B%20end%0A%0Asig%20%7Bparams(x%3A%20T.class_of(Parent)).void%7D%0Adef%20example(x)%3B%20end%0A%0Aexample(Grandparent)%20%20%20%23%20error%0Aexample(Parent)%20%20%20%20%20%20%20%20%23%20ok%0Aexample(Child)%20%20%20%20%20%20%20%20%20%23%20ok">
   → View on sorbet.run
 </a>
 
-Gotcha: module ancestor chains (`include`, `extend`) work in a way many people
-don't expect:
+The most surprising feature of `T.class_of` comes from not understanding
+inheritance in Ruby, especially with `include` or `extend` plus modules.
+
+See below for a common gotcha.
+
+## `T.class_of` and modules
+
+**TL;DR**: `T.class_of` has some unintuitive behavior with modules instead of
+classes. Consider either using an abstract class or using
+`T.all(Class, MyInterface::ClassMethods)` instead of `T.class_of(MyInterface)`.
+
+To showcase the problem and solutions, let’s walk through a running example. The
+full code for this example is available here:
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20Module%3B%20include%20T%3A%3ASig%3B%20end%0A%0Amodule%20MyInterface%0A%20%20extend%20T%3A%3AHelpers%0A%0A%20%20def%20some_instance_method%3B%20end%0A%0A%20%20module%20ClassMethods%0A%20%20%20%20def%20some_class_method%3B%20end%0A%20%20end%0A%20%20mixes_in_class_methods(ClassMethods)%0Aend%0A%0Aclass%20MyClass%0A%20%20include%20MyInterface%0Aend%0A%0Asig%20%7Bparams(x%3A%20T.class_of(MyClass)).void%7D%0Adef%20example1(x)%0A%20%20x.new.some_instance_method%20%20%23%20ok%0A%20%20x.some_class_method%20%20%20%20%20%20%20%20%20%23%20ok%0Aend%0A%0Aexample1(MyClass)%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20ok%0A%0Asig%20%7Bparams(x%3A%20T.class_of(MyInterface)).void%7D%0Adef%20example2(x)%0A%20%20x.new.some_instance_method%20%20%23%20error%3A%20%60new%60%20does%20not%20exist%0A%20%20x.some_class_method%20%20%20%20%20%20%20%20%20%23%20error%3A%20%60some_class_method%60%20does%20not%20exist%0Aend%0A%0Aexample2(MyClass)%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20error%3A%20Expected%20%60T.class_of(MyInterface)%60%20but%20found%20%60T.class_of(MyClass)%60%0A%0Asig%20%7Bparams(x%3A%20T.all(Class%2C%20MyInterface%3A%3AClassMethods)).void%7D%0Adef%20example3(x)%0A%20%20x.new.some_instance_method%20%20%23%20error%3A%20%60some_instance_method%60%20does%20not%20exist%0A%20%20x.some_class_method%20%20%20%20%20%20%20%20%20%23%20ok%0Aend%0A%0Aexample3(MyClass)%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20ok">
+  → View on sorbet.run
+</a>
+
+Consider we have some code like this:
 
 ```ruby
-# typed: true
-
-extend T::Sig
-
-module M
-  def self.foo; end
-end
-class C; include M; end
-
-sig {params(x: T.class_of(M)).void}
-def test(x)
-  x.foo
+class MyClass
+  def some_instance_method; end
+  def self.some_class_methodd; end
 end
 
+sig {params(x: T.class_of(MyClass)).void}
+def example1(x)
+  x.new.some_instance_method  # ok
+  x.some_class_method         # ok
+end
 
-M.foo                      # ok
-M.is_a?(M.singleton_class) # => true
-test(M)                    # ok, given above
-
-C.foo                      # not ok: this raises a NoMethodError when run
-C.is_a?(M.singleton_class) # => false
-test(C)                    # not ok, given above
+example1(MyClass)             # ok
 ```
 
-<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aextend%20T%3A%3ASig%0A%0Amodule%20M%0A%20%20def%20self.foo%3B%20end%0Aend%0Aclass%20C%3B%20include%20M%3B%20end%0A%0Asig%20%7Bparams(x%3A%20T.class_of(M)).void%7D%0Adef%20test(x)%0A%20%20x.foo%0Aend%0A%0A%0AM.foo%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20ok%0AM.is_a%3F(M.singleton_class)%20%23%20%3D%3E%20true%0Atest(M)%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20ok%2C%20given%20above%0A%0AC.foo%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20not%20ok%3A%20this%20raises%20a%20NoMethodError%20when%20run%0AC.is_a%3F(M.singleton_class)%20%23%20%3D%3E%20false%0Atest(C)%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20not%20ok%2C%20given%20above">
-  → View on sorbet.run
-</a>
+This is a class which has an instance method and a class method.
+`T.class_of(MyClass)` works like we expect.
+
+Now imagine that we have a lot of these classes and we want to factor out an
+interface. The straightforward way to do this uses
+[`mixes_in_class_methods`](abstract#interfaces-and-the-included-hook), like
+this:
+
+```ruby
+module MyInterface
+  extend T::Helpers
+
+  def some_instance_method; end
+
+  module ClassMethods
+    def some_class_method; end
+  end
+  mixes_in_class_methods(ClassMethods)
+end
+
+class MyClass
+  include MyInterface
+end
+```
+
+This will make `some_instance_method` and `some_class_method` available on
+`MyClass`, just like before. But if we try to replace `T.class_of(MyClass)` with
+`T.class_of(MyInterface)`, it doesn’t work:
+
+```ruby
+sig {params(x: T.class_of(MyInterface)).void}  # ← sig has changed
+def example2(x)
+  x.new.some_instance_method  # error: `new` does not exist
+  x.some_class_method         # error: `some_class_method` does not exist
+end
+
+example2(MyClass)             # error: Expected `T.class_of(MyInterface)`
+                              #        but found `T.class_of(MyClass)`
+```
+
+**These errors are correct**, and we can verify them in the Ruby REPL. First,
+let's explain the error on the last line above:
+
+```
+❯ MyClass.singleton_class.ancestors
+=> [#<Class:MyClass>, MyInterface::ClassMethods, #<Class:Object>, T::Private::Methods::MethodHooks, #<Class:BasicObject>, Class, Module, T::Sig, Object, Kernel, BasicObject]
+```
+
+The first two ancestors of the `MyClass` object are itself and
+`MyInterface::ClassMethods`. But notably, `#<Class:MyInterface>` **does not**
+appear in this list, so Sorbet is correct to say that `MyClass` does not have
+type `T.class_of(MyInterface)`. This is because neither `include` nor `extend`
+in Ruby will cause `#<Class:MyInterface>` to appear in any ancestors list.
+
+Next, let's explain the other two errors:
+
+```
+❯ MyInterface.singleton_class.ancestors
+=> [#<Class:MyInterface>, T::Private::MixesInClassMethods, T::Helpers, Module, T::Sig, Object, Kernel, BasicObject]
+```
+
+For the `MyInterface` class object, we see that its only ancestor is itself
+(ignoring those common ancestors). Notably, **none** of the classes in this list
+define either a method called `new` (because `Class` is not there) nor
+`some_class_method` (because `MyInterface::ClassMethods` is not there).
+
+While these errors are correct, **we want to be able to type this code**. There
+are two options:
+
+1.  Use an abstract class instead of an interface.
+
+    Sometimes this is not possible, because the class in question already has a
+    superclass that can't be changed. However, if this is an option to you, it's
+    likely the most straightforward. If we change `MyInterface` to
+    `MyAbstractClass`, all our problems vanish.
+
+2.  Use `T.all(Class, MyInterface::ClassMethods)`.
+
+    This is only a partial solution, but might be good enough.
+
+Specifically, option (2) looks like this:
+
+```ruby
+sig {params(x: T.all(Class, MyInterface::ClassMethods)).void}
+def example3(x)
+  x.new.some_instance_method  # error: `some_instance_method` does not exist
+  x.some_class_method         # ok
+end
+
+example3(MyClass)             # ok
+```
+
+We’re down to only one error now. The error is still technically correct: since
+we’re using `Class` instead of `T.class_of(...)`, Sorbet has no way to know what
+the instance type created by `x.new` will be (it could be anything), so it
+treats the type as `Object`, causing `some_instance_method` to not be found.
+
+But if this tradeoff is okay, both the top-level call site and the call to
+`x.some_class_method` now typecheck successfully.
+
+> A future feature of Sorbet might be able to improve this workaround. See
+> https://github.com/sorbet/sorbet/issues/62.

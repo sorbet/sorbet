@@ -83,6 +83,8 @@ end
 
 ## Inheritance
 
+<!-- id="inheritance" is important -->
+
 Ruby is object-oriented, so an instance of a child class is also an instance of
 the child class's superclass. To make this more explicit, let's look at an
 example:
