@@ -6,6 +6,12 @@ class MyGeneric
   X = type_member
 end
 
+class MyOtherGeneric
+  extend T::Generic
+
+  X = type_template
+end
+
 MyArrayString = T.type_alias {T::Array[String]}
 
 # -- good --
@@ -14,6 +20,7 @@ String.new
 T::Array[String].new
 MyGeneric.new
 MyGeneric[Integer].new
+MyOtherGeneric.new
 
 # -- bad, but we can't detect them yet --
 
