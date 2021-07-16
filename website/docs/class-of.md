@@ -84,7 +84,7 @@ Consider we have some code like this:
 ```ruby
 class MyClass
   def some_instance_method; end
-  def self.some_class_methodd; end
+  def self.some_class_method; end
 end
 
 sig {params(x: T.class_of(MyClass)).void}
