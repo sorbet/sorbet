@@ -25,9 +25,10 @@ class A
        # ^^^^^^ error: Unsupported method `T.junk`
       i: T.class_of(T1, T2),
       #  ^^^^^^^^^^^^^^^^^^ error: Too many arguments provided for method `T.class_of`
-      j: T.class_of(T.nilable(Integer)), # error: T.class_of needs a Class as its argument
+      j: T.class_of(T.nilable(Integer)), # error: `T.class_of` must wrap each individual class type, not the outer `T.any`
       k: T.class_of(1),
-      #  ^^^^^^^^^^^^^ error: T.class_of needs a Class as its argument
+      #  ^^^^^^^^^^^^^ error: `T.class_of` needs a class or module as its argument
+      #             ^  error: Unsupported literal in type syntax
       #             ^  error: Unsupported usage of literal type
       l: {[] => String}, # error: Shape keys must be literals
       m: {foo: 0}, # error: Unsupported literal in type syntax
