@@ -38,5 +38,4 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Run tests
         run: |
-          echo "making a change to trigger a new build"
           bazel test --config=buildfarm-sanitized-linux //...
