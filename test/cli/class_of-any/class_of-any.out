@@ -2,7 +2,7 @@ test/cli/class_of-any/class_of-any.rb:9: `T.class_of` must wrap each individual 
      9 |sig { returns(T.class_of(T.any(A, T.any(B, C)))) }
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/class_of-any/class_of-any.rb:9: Replace with `T.any(T.any(T.class_of(B), T.class_of(C)), T.class_of(A))`
+    test/cli/class_of-any/class_of-any.rb:9: Replace with `T.any(T.class_of(B), T.class_of(C), T.class_of(A))`
      9 |sig { returns(T.class_of(T.any(A, T.any(B, C)))) }
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

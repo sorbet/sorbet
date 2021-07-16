@@ -463,19 +463,16 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
     return sig;
 }
 
-std::optional<std::string> autoCorrectOrOfOnlyClasses(core::Context ctx, core::TypePtr type) {
-    if (auto *o = core::cast_type<core::OrType>(type) ) {
-        auto left = autoCorrectOrOfOnlyClasses(ctx, o->left);
-        auto right = autoCorrectOrOfOnlyClasses(ctx, o->right);
-        if (left && right) {
-            return fmt::format("T.any({}, {})", left.value(), right.value());
-        } else {
-            return {};
-        }
+// This function recurses through an OrType, and accumlates all the class names,
+// wrapped in T.class_of, and checks if the type is only made up of Classes and OrTypes
+bool recurseOrType(core::Context ctx, core::TypePtr type, std::vector<std::string> &v) {
+    if (auto *o = core::cast_type<core::OrType>(type)) {
+        return recurseOrType(ctx, o->left, v) && recurseOrType(ctx, o->right, v);
     } else if (core::isa_type<core::ClassType>(type)) {
-        return fmt::format("T.class_of({})", type.show(ctx.state));
+        v.push_back(fmt::format("T.class_of({})", type.show(ctx)));
+        return true;
     } else {
-        return {};
+        return false;
     }
 }
 
@@ -575,10 +572,13 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
             if (!obj) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     auto type = getResultTypeWithSelfTypeParams(ctx, send.args.front(), sig, args);
-                    auto autocorrect = autoCorrectOrOfOnlyClasses(ctx, type);
-                    if (core::isa_type<core::OrType>(type) && autocorrect) {
-                        e.setHeader("`{}` must wrap each individual class type, not the outer `{}`", "T.class_of", "T.any");
-                        e.replaceWith("Distribute `T.class_of`", core::Loc(ctx.file, send.loc), "{}", autocorrect.value());
+                    std::vector<std::string> classes;
+                    auto shouldAutoCorrect = recurseOrType(ctx, type, classes);
+                    if (core::isa_type<core::OrType>(type) && shouldAutoCorrect) {
+                        auto autocorrect = fmt::format("T.any({})", fmt::join(classes, ", "));
+                        e.setHeader("`{}` must wrap each individual class type, not the outer `{}`", "T.class_of",
+                                    "T.any");
+                        e.replaceWith("Distribute `T.class_of`", core::Loc(ctx.file, send.loc), "{}", autocorrect);
                     } else {
                         e.setHeader("`{}` needs a class or module as its argument", "T.class_of");
                     }
