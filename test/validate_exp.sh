@@ -14,7 +14,7 @@ if [[ ! -d "${RUNFILES_DIR:-/dev/null}" && ! -f "${RUNFILES_MANIFEST_FILE:-/dev/
   fi
 fi
 if [[ -f "${RUNFILES_DIR:-/dev/null}/bazel_tools/tools/bash/runfiles/runfiles.bash" ]]; then
-  # shellcheck disable=SC1090
+  # shellcheck disable=SC1090,SC1091
   source "${RUNFILES_DIR}/bazel_tools/tools/bash/runfiles/runfiles.bash"
 elif [[ -f "${RUNFILES_MANIFEST_FILE:-/dev/null}" ]]; then
   # shellcheck disable=SC1090
@@ -60,6 +60,10 @@ trap cleanup EXIT
 
 info "Checking Build:"
 pushd "$build_dir/" > /dev/null
+
+# We only have one type of exp file right now, and shellcheck doesn't like that
+# the loop only runs once.
+# shellcheck disable=SC2043
 for ext in "llo"; do
   exp="$root/${rb[0]%.rb}.$ext.exp"
   if [ -f "$exp" ]; then

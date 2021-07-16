@@ -97,13 +97,13 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @"ic_==" = internal global %struct.FunctionInlineCache zeroinitializer
 @"rubyIdPrecomputed_==" = internal unnamed_addr global i64 0, align 8
 @"str_==" = private unnamed_addr constant [3 x i8] c"==\00", align 1
-@rubyStrFrozen_fail = internal unnamed_addr global i64 0, align 8
-@str_fail = private unnamed_addr constant [5 x i8] c"fail\00", align 1
+@rubyStrFrozen_ok = internal unnamed_addr global i64 0, align 8
+@str_ok = private unnamed_addr constant [3 x i8] c"ok\00", align 1
 @ic_puts = internal global %struct.FunctionInlineCache zeroinitializer
 @rubyIdPrecomputed_puts = internal unnamed_addr global i64 0, align 8
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
-@rubyStrFrozen_ok = internal unnamed_addr global i64 0, align 8
-@str_ok = private unnamed_addr constant [3 x i8] c"ok\00", align 1
+@rubyStrFrozen_fail = internal unnamed_addr global i64 0, align 8
+@str_fail = private unnamed_addr constant [5 x i8] c"fail\00", align 1
 @ic_puts.1 = internal global %struct.FunctionInlineCache zeroinitializer
 @"stackFramePrecomputed_func_<root>.<static-init>$152" = internal unnamed_addr global %struct.rb_iseq_struct* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
@@ -229,15 +229,15 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %9 = and i64 %send44, -9, !dbg !17
   %10 = icmp ne i64 %9, 0, !dbg !17
   %.sink = select i1 %10, i64* getelementptr inbounds ([23 x i64], [23 x i64]* @iseqEncodedArray, i64 0, i64 16), i64* getelementptr inbounds ([23 x i64], [23 x i64]* @iseqEncodedArray, i64 0, i64 18), !dbg !17
-  %rubyStrFrozen_ok.sink = select i1 %10, i64* @rubyStrFrozen_ok, i64* @rubyStrFrozen_fail, !dbg !17
-  %ic_puts.1.sink = select i1 %10, %struct.FunctionInlineCache* @ic_puts.1, %struct.FunctionInlineCache* @ic_puts, !dbg !17
+  %rubyStrFrozen_fail.sink = select i1 %10, i64* @rubyStrFrozen_ok, i64* @rubyStrFrozen_fail, !dbg !17
+  %ic_puts.1.sink = select i1 %10, %struct.FunctionInlineCache* @ic_puts, %struct.FunctionInlineCache* @ic_puts.1, !dbg !17
   store i64* %.sink, i64** %0, align 8, !tbaa !12
-  %rubyStr_ok = load i64, i64* %rubyStrFrozen_ok.sink, align 8, !dbg !18
+  %rubyStr_fail = load i64, i64* %rubyStrFrozen_fail.sink, align 8, !dbg !18
   %11 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %cfp, i64 0, i32 1, !dbg !18
   %12 = load i64*, i64** %11, align 8, !dbg !18
   store i64 %selfRaw, i64* %12, align 8, !dbg !18, !tbaa !4
   %13 = getelementptr inbounds i64, i64* %12, i64 1, !dbg !18
-  store i64 %rubyStr_ok, i64* %13, align 8, !dbg !18, !tbaa !4
+  store i64 %rubyStr_fail, i64* %13, align 8, !dbg !18, !tbaa !4
   %14 = getelementptr inbounds i64, i64* %13, i64 1, !dbg !18
   store i64* %14, i64** %11, align 8, !dbg !18
   %send46 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* %ic_puts.1.sink, i64 0), !dbg !18
@@ -460,14 +460,14 @@ entry:
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @"ic_+", i64 %"rubyId_+.i", i32 noundef 16, i32 noundef 1, i32 noundef 0, i64* noundef null), !dbg !17
   %"rubyId_==.i" = load i64, i64* @"rubyIdPrecomputed_==", align 8, !dbg !17
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @"ic_==", i64 %"rubyId_==.i", i32 noundef 16, i32 noundef 1, i32 noundef 0, i64* noundef null), !dbg !17
-  %13 = call i64 @rb_fstring_new(i8* noundef getelementptr inbounds ([5 x i8], [5 x i8]* @str_fail, i64 0, i64 0), i64 noundef 4) #11
+  %13 = call i64 @rb_fstring_new(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* @str_ok, i64 0, i64 0), i64 noundef 2) #11
   call void @rb_gc_register_mark_object(i64 %13) #11
-  store i64 %13, i64* @rubyStrFrozen_fail, align 8
+  store i64 %13, i64* @rubyStrFrozen_ok, align 8
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !48
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_puts, i64 %rubyId_puts.i, i32 noundef 20, i32 noundef 1, i32 noundef 0, i64* noundef null), !dbg !48
-  %14 = call i64 @rb_fstring_new(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* @str_ok, i64 0, i64 0), i64 noundef 2) #11
+  %14 = call i64 @rb_fstring_new(i8* noundef getelementptr inbounds ([5 x i8], [5 x i8]* @str_fail, i64 0, i64 0), i64 noundef 4) #11
   call void @rb_gc_register_mark_object(i64 %14) #11
-  store i64 %14, i64* @rubyStrFrozen_ok, align 8
+  store i64 %14, i64* @rubyStrFrozen_fail, align 8
   %rubyId_puts3.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !49
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_puts.1, i64 %rubyId_puts3.i, i32 noundef 20, i32 noundef 1, i32 noundef 0, i64* noundef null), !dbg !49
   %15 = call i64 @rb_fstring_new(i8* noundef getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 noundef 16) #11
@@ -611,8 +611,8 @@ attributes #12 = { nounwind allocsize(0,1) }
 !45 = !DILocation(line: 14, column: 1, scope: !19)
 !46 = !DILocation(line: 22, column: 1, scope: !19)
 !47 = !DILocation(line: 12, column: 5, scope: !19)
-!48 = !DILocation(line: 18, column: 5, scope: !8)
-!49 = !DILocation(line: 16, column: 5, scope: !8)
+!48 = !DILocation(line: 16, column: 5, scope: !8)
+!49 = !DILocation(line: 18, column: 5, scope: !8)
 !50 = !DILocation(line: 7, column: 3, scope: !21)
 !51 = !{!52, !5, i64 400}
 !52 = !{!"rb_vm_struct", !5, i64 0, !53, i64 8, !13, i64 192, !13, i64 200, !13, i64 208, !34, i64 216, !6, i64 224, !54, i64 264, !54, i64 280, !54, i64 296, !54, i64 312, !5, i64 328, !25, i64 336, !25, i64 340, !25, i64 344, !25, i64 344, !25, i64 344, !25, i64 344, !25, i64 348, !5, i64 352, !6, i64 360, !5, i64 400, !5, i64 408, !5, i64 416, !5, i64 424, !5, i64 432, !5, i64 440, !5, i64 448, !13, i64 456, !13, i64 464, !56, i64 472, !57, i64 992, !13, i64 1016, !13, i64 1024, !25, i64 1032, !25, i64 1036, !54, i64 1040, !6, i64 1056, !5, i64 1096, !5, i64 1104, !5, i64 1112, !5, i64 1120, !5, i64 1128, !25, i64 1136, !13, i64 1144, !13, i64 1152, !13, i64 1160, !13, i64 1168, !13, i64 1176, !13, i64 1184, !25, i64 1192, !58, i64 1200, !6, i64 1232}
