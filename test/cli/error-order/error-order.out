@@ -1,0 +1,17 @@
+test/cli/error-order/error-order.rb:4: Revealed type: `String("this error first")` https://srb.help/7014
+     4 |  T.reveal_type('this error first')
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `String("this error first")` originating from:
+    test/cli/error-order/error-order.rb:4:
+     4 |  T.reveal_type('this error first')
+                        ^^^^^^^^^^^^^^^^^^
+
+test/cli/error-order/error-order.rb:6: Revealed type: `String("this error second")` https://srb.help/7014
+     6 |  T.reveal_type('this error second')
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `String("this error second")` originating from:
+    test/cli/error-order/error-order.rb:6:
+     6 |  T.reveal_type('this error second')
+                        ^^^^^^^^^^^^^^^^^^^
+Errors: 2
+expected to fail!
