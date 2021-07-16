@@ -30,7 +30,7 @@ jobs:
 
       # TODO(trevor): do we need to write a .bazelrc.local to get reasonable cache performance?
       - name: Mount the bazel cache
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.6
         with:
           path: "~/.cache/bazel"
           key: bazel
