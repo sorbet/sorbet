@@ -1258,7 +1258,11 @@ TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const
     return getMethodArguments(gs, klass, name, targs);
 }
 
-bool MetaType::canCallNew(const GlobalState &gs) const {
+namespace {
+
+// Determines whether we will allow `new` on a type wrapped by a `MetaType`. Note that this function is conservative,
+// in that there are some cases we want to reject but cannot detect here.
+bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
     if (isa_type<OrType>(wrapped) || isa_type<AndType>(wrapped)) {
         return false;
     }
@@ -1279,17 +1283,24 @@ bool MetaType::canCallNew(const GlobalState &gs) const {
     return true;
 }
 
+} // namespace
+
 DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     switch (args.name.rawId()) {
         case Names::new_().rawId(): {
-            if (!canCallNew(gs)) {
+            if (!canCallNew(gs, wrapped)) {
                 auto callLoc = core::Loc(args.locs.file, args.locs.call);
                 if (auto e = gs.beginError(callLoc, errors::Infer::MetaTypeDispatchCall)) {
-                    e.setHeader("Cannot call `{}` on type `{}`", Names::new_().show(gs), wrapped.show(gs));
+                    e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", Names::new_().show(gs),
+                                wrapped.show(gs));
+
+                    // For T.class_of(Foo), we'll suggest replacing it with the attached class (Foo).
                     if (auto *appliedType = cast_type<AppliedType>(wrapped)) {
-                        auto receiverLoc = core::Loc(args.locs.file, args.locs.receiver);
-                        e.replaceWith("Replace with class name", receiverLoc, "{}",
-                                      appliedType->klass.data(gs)->attachedClass(gs).show(gs));
+                        if (appliedType->klass.data(gs)->isSingletonClass(gs)) {
+                            auto receiverLoc = core::Loc(args.locs.file, args.locs.receiver);
+                            e.replaceWith("Replace with class name", receiverLoc, "{}",
+                                          appliedType->klass.data(gs)->attachedClass(gs).show(gs));
+                        }
                     }
                 }
                 return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());

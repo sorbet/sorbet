@@ -755,9 +755,6 @@ public:
 
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr underlying(const GlobalState &gs) const;
-
-private:
-    bool canCallNew(const GlobalState &gs) const;
 };
 CheckSize(MetaType, 16, 8);
 
