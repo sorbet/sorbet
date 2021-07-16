@@ -3082,6 +3082,22 @@ public:
             res.returnType = rhs;
             return;
         }
+
+        auto rhsSym = Symbols::noClassOrModule();
+        if (isa_type<ClassType>(rhs)) {
+            rhsSym = cast_type_nonnull<ClassType>(rhs).symbol;
+        } else if (auto *app = cast_type<AppliedType>(rhs)) {
+            rhsSym = app->klass;
+        }
+
+        // If at any point we ever change isSubType to transparently convert between sealed classes and a
+        // union of subclasses, this code can go away. It's written like this now to limit the blast
+        // radius of allocating large union types.
+        if (rhsSym.exists() && rhsSym.data(gs)->isClassOrModuleSealed() &&
+            rhsSym.data(gs)->hasSingleSealedSubclass(gs)) {
+            rhs = rhsSym.data(gs)->sealedSubclassesToUnion(gs);
+        }
+
         auto rc = Types::getRepresentedClass(gs, args.thisType);
         // in most cases, thisType is T.class_of(rc). see test/testdata/class_not_class_of.rb for an edge case.
         if (rc == core::Symbols::noClassOrModule()) {
@@ -3098,6 +3114,7 @@ public:
             res.returnType = Types::falseClass();
             return;
         }
+
         res.returnType = Types::Boolean();
     }
 } Module_tripleEq;
@@ -3136,6 +3153,22 @@ public:
             res.returnType = rhs;
             return;
         }
+
+        auto rhsSym = Symbols::noClassOrModule();
+        if (isa_type<ClassType>(rhs)) {
+            rhsSym = cast_type_nonnull<ClassType>(rhs).symbol;
+        } else if (auto *app = cast_type<AppliedType>(rhs)) {
+            rhsSym = app->klass;
+        }
+
+        // If at any point we ever change isSubType to transparently convert between sealed classes and a
+        // union of subclasses, this code can go away. It's written like this now to limit the blast
+        // radius of allocating large union types.
+        if (rhsSym.exists() && rhsSym.data(gs)->isClassOrModuleSealed() &&
+            rhsSym.data(gs)->hasSingleSealedSubclass(gs)) {
+            rhs = rhsSym.data(gs)->sealedSubclassesToUnion(gs);
+        }
+
         auto lhs = args.thisType;
         ENFORCE(!lhs.isUntyped(), "lhs of T::Enum.=== must be typed");
 
