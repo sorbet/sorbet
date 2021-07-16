@@ -61,10 +61,8 @@ trap cleanup EXIT
 info "Checking Build:"
 pushd "$build_dir/" > /dev/null
 
-# We only have one type of exp file right now, and shellcheck doesn't like that
-# the loop only runs once.
-# shellcheck disable=SC2043
-for ext in "llo"; do
+exts=("llo")
+for ext in "${exts[@]}"; do
   exp="$root/${rb[0]%.rb}.$ext.exp"
   if [ -f "$exp" ]; then
     actual="${rb[0]}.$ext"
