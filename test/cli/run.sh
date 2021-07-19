@@ -36,7 +36,20 @@ sorbet="$(dirname "$(rlocation com_stripe_sorbet_llvm/main/sorbet)")"
 if ! [[ "$sorbet" = /* ]]; then
   sorbet="${root}/${sorbet}"
 fi
-export PATH="${sorbet}:$PATH"
+
+# TODO(aprocter): It feels like we should be able to say
+# $(rlocation sorbet_ruby_2_7/ruby) here, but when we do that it triggers some
+# weird runfiles-related behavior in the wrapper script that rlocation winds up
+# pointing us to (the wrapper script exits with "ERROR: cannot find
+# @bazel_tools//tools/bash/runfiles:runfiles.bash"). As a workaround, we go
+# directly to the binary (sorbet_ruby_2_7/toolchain/bin/ruby) instead of the
+# shell wrapper (sorbet_ruby_2_7/ruby).
+sorbet_ruby="$(dirname "$(rlocation sorbet_ruby_2_7/toolchain/bin/ruby)")"
+if ! [[ "$sorbet_ruby" = /* ]]; then
+  sorbet_ruby="${root}/${sorbet_ruby}"
+fi
+
+export PATH="${sorbet}:${sorbet_ruby}:$PATH"
 
 # Run the test
 cd "${test_path}"

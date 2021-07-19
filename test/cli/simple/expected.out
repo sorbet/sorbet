@@ -5,3 +5,4 @@ To forcibly silence this error, either pass --silence-dev-message,
 or set SORBET_SILENCE_DEV_MESSAGE=1 in your shell environment.
 
 No errors! Great job.
+Hello, world

@@ -36,7 +36,7 @@ cat > "${new_test_path}/test.sh" << EOF
 
 set -euo pipefail
 
-# NOTE: Sorbet is already in the PATH
+# NOTE: Sorbet and Sorbet Ruby are already in the PATH
 EOF
 chmod +x "${new_test_path}/test.sh"
 

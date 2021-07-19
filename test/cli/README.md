@@ -19,7 +19,7 @@ Run the `new_test.sh` script to add a new test skeleton:
 
 set -euo pipefail
 
-# NOTE: Sorbet is already in the PATH
+# NOTE: Sorbet and Sorbet Ruby are already in the PATH
 ```
 
 # Updating exp files
