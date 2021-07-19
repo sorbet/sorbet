@@ -1651,7 +1651,7 @@ module Enumerable
     params(
         n: Integer,
     )
-    .returns(T.nilable(T::Array[Elem]))
+    .returns(T::Array[Elem])
   end
   def take(n); end
 
