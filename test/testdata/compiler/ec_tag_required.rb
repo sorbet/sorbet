@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
-# DISABLED FOR NOW: run_filecheck: INITIAL
+# run_filecheck: INITIAL
 
 # INITIAL-LABEL: define i64 @"func_Object#func_a"
 # INITIAL-NOT: alloca %struct.rb_vm_tag

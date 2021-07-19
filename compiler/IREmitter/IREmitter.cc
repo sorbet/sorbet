@@ -590,15 +590,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     // If this is a return from a block, we set the "return-via-throw" flag which will be processed
                     // by emitReturn.
                     if (irctx.rubyBlockType[bb->rubyBlockId] == FunctionType::Block) {
-                        // TODO(aprocter): return statements inside blocks are currently disabled, since a VM patch
-                        // that was required in order to support them was causing issues. Once that is fixed, the body
-                        // of the if should be changed back to:
-                        //
-                        //     IREmitterHelpers::setThrowReturnFlag(cs, builder, irctx, bb->rubyBlockId);
-                        //
-                        failCompilation(cs, core::Loc(cs.file, bind.loc),
-                                        "returns through multiple stacks not implemented");
-                        return;
+                        IREmitterHelpers::setThrowReturnFlag(cs, builder, irctx, bb->rubyBlockId);
                     }
 
                     auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
