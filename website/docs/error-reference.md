@@ -465,6 +465,10 @@ See [5014](#5014). 5036 is the same error as [5014](#5014) but slightly modified
 to allow more common Ruby idioms to pass by in `# typed: true` (5036 is only
 reported in `# typed: strict`).
 
+## 5037
+
+Sorbet does not support aliasing a method from a parent class. See [this issue](https://github.com/sorbet/sorbet/issues/2378) for more details.
+
 ## 5041
 
 Sorbet does not allow inheriting from a class which inherits from `T::Struct`.
