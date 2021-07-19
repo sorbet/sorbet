@@ -3,3 +3,4 @@
 *.rbi diff=ruby
 *.md diff=markdown
 test/**/*.out diff
+test/cli/windows-line-endings/windows-line-endings.rb eol=crlf

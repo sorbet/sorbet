@@ -77,6 +77,9 @@ StrictLevel File::fileSigil(string_view source) {
         while (end < source.size() && source[end] != ' ' && source[end] != '\n') {
             ++end;
         }
+        if (source[end - 1] == '\r') {
+            end -= 1;
+        }
 
         string_view suffix = source.substr(start, end - start);
         if (suffix == "ignore") {
