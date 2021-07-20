@@ -832,13 +832,13 @@ struct DispatchArgs {
     // unreported errors is expensive!
     bool suppressErrors = false;
 
-    Loc locForCall() const {
+    Loc callLoc() const {
         return core::Loc(locs.file, locs.call);
     }
-    Loc locForReceiver() const {
+    Loc receiverLoc() const {
         return core::Loc(locs.file, locs.receiver);
     }
-    Loc locForArg(size_t i) const {
+    Loc argLoc(size_t i) const {
         return core::Loc(locs.file, locs.args[i]);
     }
 
