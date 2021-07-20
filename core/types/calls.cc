@@ -2570,7 +2570,7 @@ public:
             auto actualType = *args.args[1];
             // This check (with the dropLiteral's) mimicks what we do for pinning errors in environment.cc
             if (!Types::isSubType(gs, Types::dropLiteral(gs, actualType.type), Types::dropLiteral(gs, expectedType))) {
-                auto argLoc = Loc(args.locs.file, args.locs.args[1]);
+                auto argLoc = args.argLoc(1);
 
                 if (auto e = gs.beginError(argLoc, errors::Infer::MethodArgumentMismatch)) {
                     e.setHeader("Expected `{}` but found `{}` for key `{}`", expectedType.show(gs),
