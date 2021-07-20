@@ -521,7 +521,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                               Symbols::noMethod());
     } else if (symbol == Symbols::void_()) {
         if (!args.suppressErrors) {
-            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod)) {
+            if (auto e = gs.beginError(args.locForCall(), errors::Infer::UnknownMethod)) {
                 e.setHeader("Can not call method `{}` on void type", args.name.show(gs));
             }
         }
@@ -549,7 +549,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // some cases, so we special-case it here as a last resort.
             auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
             if (!args.args.empty() && !args.suppressErrors) {
-                if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
+                if (auto e = gs.beginError(args.locForCall(),
                                            errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0,
                                 args.args.size());
@@ -570,7 +570,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // and recorded.
         // Instead, the error always should get queued up in the
         // errors list of the result so that the caller can deal with the error.
-        auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod);
+        auto e = gs.beginError(args.locForCall(), errors::Infer::UnknownMethod);
         if (e) {
             string thisStr = args.thisType.show(gs);
             if (args.fullType.type != args.thisType) {
@@ -587,7 +587,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     (args.name == core::Names::requiresAncestor() && gs.requiresAncestorEnabled)) {
                     auto attachedClass = symbol.data(gs)->attachedClass(gs);
                     if (auto suggestion =
-                            maybeSuggestExtendTHelpers(gs, attachedClass, core::Loc(args.locs.file, args.locs.call))) {
+                            maybeSuggestExtendTHelpers(gs, attachedClass, args.locForCall())) {
                         e.addAutocorrect(std::move(*suggestion));
                     }
                 }
@@ -644,7 +644,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         if (possibleSymbol.isClassOrModule()) {
                             // TODO(jez) Use Loc::adjust here?
                             const auto replacement = possibleSymbol.data(gs)->name.show(gs);
-                            const auto loc = core::Loc(args.locs.file, args.locs.call);
+                            const auto loc = args.locForCall();
                             const auto toReplace = args.name.toString(gs);
                             // This is a bit hacky but the loc corresponding to the send isn't available here and until
                             // it is, this verifies that the methodLoc below exists.
@@ -659,8 +659,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             const auto replacement = possibleSymbol.data(gs)->name.toString(gs);
                             const auto toReplace = args.name.toString(gs);
                             if (replacement != toReplace) {
-                                const auto recvLoc = core::Loc(args.locs.file, args.locs.receiver);
-                                const auto callLoc = core::Loc(args.locs.file, args.locs.call);
+                                const auto recvLoc = args.locForReceiver();
+                                const auto callLoc = args.locForCall();
                                 // See comment above.
                                 // TODO(jez) Use adjust loc here?
                                 if (recvLoc.exists() && callLoc.exists() &&
@@ -753,9 +753,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
 
         auto offset = ait - args.args.begin();
-        if (auto e = matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
-                                  core::Loc(args.locs.file, args.locs.receiver), symbol, method, *arg, spec,
-                                  args.selfType, targs, core::Loc(args.locs.file, args.locs.args[offset]),
+        if (auto e = matchArgType(gs, *constr, args.locForCall(),
+                                  args.locForReceiver(), symbol, method, *arg, spec,
+                                  args.selfType, targs, args.locForArg(offset),
                                   args.originForUninitialized, args.args.size() == 1)) {
             result.main.errors.emplace_back(std::move(e));
         }
@@ -770,7 +770,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     // the send, assume that the last argument is an implicit keyword args hash.
     bool implicitKwsplat = false;
     if (ait != aPosEnd && hasKwargs && args.args.size() == args.numPosArgs) {
-        auto splatLoc = core::Loc(args.locs.file, args.locs.args[args.args.size() - 1]);
+        auto splatLoc = args.locForArg(args.args.size() - 1);
 
         // If --ruby3-keyword-args is set, we will treat "**-less" keyword hash argument as an error.
         if (gs.ruby3KeywordArgs) {
@@ -881,8 +881,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
             // If there are positional arguments left to be filled, but there were keyword arguments present,
             // consume the keyword args hash as though it was a positional arg.
-            if (auto e = matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
-                                      core::Loc(args.locs.file, args.locs.receiver), symbol, method,
+            if (auto e = matchArgType(gs, *constr, args.locForCall(),
+                                      args.locForReceiver(), symbol, method,
                                       TypeAndOrigins{kwargs, {kwargsLoc}}, *pit, args.selfType, targs, kwargsLoc,
                                       args.originForUninitialized, args.args.size() == 1)) {
                 result.main.errors.emplace_back(std::move(e));
@@ -900,7 +900,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 ait += numKwargs;
             }
         } else if (kwSplatIsHash) {
-            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UntypedSplat)) {
+            if (auto e = gs.beginError(args.locForCall(), errors::Infer::UntypedSplat)) {
                 e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
                             "arguments");
                 auto &kwSplatArg = *aend;
@@ -913,7 +913,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     if (pit != pend) {
         if (!(pit->flags.isKeyword || pit->flags.isDefault || pit->flags.isRepeated || pit->flags.isBlock)) {
-            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
+            if (auto e = gs.beginError(args.locForCall(),
                                        errors::Infer::MethodArgumentCountMismatch)) {
                 if (args.fullType.type != args.thisType) {
                     e.setHeader("Not enough arguments provided for method `{}` on `{}` component of `{}`. "
@@ -976,8 +976,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         auto offset = it - hash->keys.begin();
                         tpe.type = hash->values[offset];
                         if (auto e =
-                                matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
-                                             core::Loc(args.locs.file, args.locs.receiver), symbol, method, tpe, spec,
+                                matchArgType(gs, *constr, args.locForCall(),
+                                             args.locForReceiver(), symbol, method, tpe, spec,
                                              args.selfType, targs, Loc::none(), args.originForUninitialized)) {
                             result.main.errors.emplace_back(std::move(e));
                         }
@@ -994,8 +994,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 });
                 if (arg == hash->keys.end()) {
                     if (!spec.flags.isDefault) {
-                        if (auto e = missingArg(gs, core::Loc(args.locs.file, args.locs.call),
-                                                core::Loc(args.locs.file, args.locs.receiver), method, spec)) {
+                        if (auto e = missingArg(gs, args.locForCall(),
+                                                args.locForReceiver(), method, spec)) {
                             result.main.errors.emplace_back(std::move(e));
                         }
                     }
@@ -1006,8 +1006,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 tpe.origins = {kwargsLoc};
                 auto offset = arg - hash->keys.begin();
                 tpe.type = hash->values[offset];
-                if (auto e = matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
-                                          core::Loc(args.locs.file, args.locs.receiver), symbol, method, tpe, spec,
+                if (auto e = matchArgType(gs, *constr, args.locForCall(),
+                                          args.locForReceiver(), symbol, method, tpe, spec,
                                           args.selfType, targs, Loc::none(), args.originForUninitialized)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
@@ -1021,7 +1021,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
                 NameRef arg = key.asName(gs);
 
-                if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
+                if (auto e = gs.beginError(args.locForCall(),
                                            errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`", arg.show(gs),
                                 method.show(gs));
@@ -1034,8 +1034,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (!spec.flags.isKeyword || spec.flags.isDefault || spec.flags.isRepeated) {
                     continue;
                 }
-                if (auto e = missingArg(gs, core::Loc(args.locs.file, args.locs.call),
-                                        core::Loc(args.locs.file, args.locs.receiver), method, spec)) {
+                if (auto e = missingArg(gs, args.locForCall(),
+                                        args.locForReceiver(), method, spec)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
             }
@@ -1044,7 +1044,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     if (ait != aend) {
         if (auto e =
-                gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::MethodArgumentCountMismatch)) {
+                gs.beginError(args.locForCall(), errors::Infer::MethodArgumentCountMismatch)) {
             auto hashCount = (numKwargs > 0 || hasKwsplat) ? 1 : 0;
             auto numArgsGiven = args.numPosArgs + hashCount;
             if (!hasKwargs) {
@@ -1066,7 +1066,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     return arg.flags.isKeyword && arg.flags.isDefault && consumed.count(arg.name) == 0;
                 });
                 if (firstKeyword != data->arguments().end()) {
-                    e.addErrorLine(core::Loc(args.locs.file, args.locs.call),
+                    e.addErrorLine(args.locForCall(),
                                    "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
                                    method.show(gs), firstKeyword->argumentName(gs));
                 }
@@ -1091,7 +1091,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 bspec.isSyntheticBlockArgument()) {
                 // TODO(jez) Do we have a loc for the block itself, not the entire call?
                 if (auto e =
-                        gs.beginError(core::Loc(args.locs.file, args.locs.call), core::errors::Infer::TakesNoBlock)) {
+                        gs.beginError(args.locForCall(), core::errors::Infer::TakesNoBlock)) {
                     e.setHeader("Method `{}` does not take a block", method.show(gs));
                     for (const auto loc : method.data(gs)->locs()) {
                         e.addErrorLine(loc, "`{}` defined here", method.show(gs));
@@ -1141,7 +1141,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // if block is there we do not attempt to solve the constaint. CFG adds an explicit solve
         // node that triggers constraint solving
         if (!constr->solve(gs)) {
-            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
+            if (auto e = gs.beginError(args.locForCall(),
                                        errors::Infer::GenericMethodConstaintUnsolved)) {
                 e.setHeader("Could not find valid instantiation of type parameters for `{}`", method.show(gs));
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", method.show(gs));
@@ -1153,7 +1153,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         ENFORCE(data->arguments().back().flags.isBlock, "The last arg should be the block arg.");
         auto blockType = data->arguments().back().type;
         if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
-            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::BlockNotPassed)) {
+            if (auto e = gs.beginError(args.locForCall(), errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", args.name.show(gs));
                 e.addErrorLine(method.data(gs)->loc(), "defined here");
                 result.main.errors.emplace_back(e.build());
@@ -1246,7 +1246,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             return original;
         }
         default:
-            auto loc = core::Loc(args.locs.file, args.locs.call);
+            auto loc = args.locForCall();
             if (auto e = gs.beginError(loc, errors::Infer::MetaTypeDispatchCall)) {
                 e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.show(gs),
                             this->wrapped.show(gs));
@@ -1319,7 +1319,7 @@ public:
 
         // The argument to `T.class_of(...)` is a value, but has a type meaning. That means we need
         // to  `unwrapType` to handle things like type aliases and constant literal types.
-        auto unwrappedType = unwrapType(gs, core::Loc(args.locs.file, args.locs.args[0]), args.args[0]->type);
+        auto unwrappedType = unwrapType(gs, args.locForArg(0), args.args[0]->type);
         auto mustExist = false;
         auto classSymbol = unwrapSymbol(gs, unwrappedType, mustExist);
         if (!classSymbol.exists()) {
@@ -1364,7 +1364,7 @@ public:
         if (args.args.empty()) {
             return;
         }
-        const auto loc = core::Loc(args.locs.file, args.locs.call);
+        const auto loc = args.locForCall();
         if (!args.args[0]->type.isFullyDefined()) {
             if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("T.must() applied to incomplete type `{}`", args.args[0]->type.show(gs));
@@ -1402,7 +1402,7 @@ public:
         auto i = -1;
         for (auto &arg : args.args) {
             i++;
-            auto ty = unwrapType(gs, core::Loc(args.locs.file, args.locs.args[i]), arg->type);
+            auto ty = unwrapType(gs, args.locForArg(i), arg->type);
             ret = Types::any(gs, ret, ty);
         }
 
@@ -1421,7 +1421,7 @@ public:
         auto i = -1;
         for (auto &arg : args.args) {
             i++;
-            auto ty = unwrapType(gs, core::Loc(args.locs.file, args.locs.args[i]), arg->type);
+            auto ty = unwrapType(gs, args.locForArg(i), arg->type);
             ret = Types::all(gs, ret, ty);
         }
 
@@ -1436,7 +1436,7 @@ public:
             return;
         }
 
-        if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::RevealType)) {
+        if (auto e = gs.beginError(args.locForCall(), errors::Infer::RevealType)) {
             e.setHeader("Revealed type: `{}`", args.args[0]->type.showWithMoreInfo(gs));
             e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
         }
@@ -1452,7 +1452,7 @@ public:
         }
 
         res.returnType = make_type<MetaType>(Types::any(
-            gs, unwrapType(gs, core::Loc(args.locs.file, args.locs.args[0]), args.args[0]->type), Types::nilClass()));
+            gs, unwrapType(gs, args.locForArg(0), args.args[0]->type), Types::nilClass()));
     }
 } T_nilable;
 
@@ -1579,7 +1579,7 @@ public:
         }
 
         if (args.numPosArgs != arity) {
-            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
+            if (auto e = gs.beginError(args.locForCall(),
                                        errors::Infer::GenericArgumentCountMismatch)) {
                 e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
                             attachedClass.show(gs), arity, args.numPosArgs);
@@ -1603,7 +1603,7 @@ public:
                 // arguments from the list that's supplied.
                 targs.emplace_back(memType->upperBound);
             } else if (it != args.args.end()) {
-                auto loc = core::Loc(args.locs.file, args.locs.args[it - args.args.begin()]);
+                auto loc = args.locForArg(it - args.args.begin());
                 auto argType = unwrapType(gs, loc, (*it)->type);
                 bool validBounds = true;
 
@@ -1729,7 +1729,7 @@ public:
         for (auto &elem : args.args) {
             ++i;
             if (isType) {
-                elems.emplace_back(unwrapType(gs, core::Loc(args.locs.file, args.locs.args[i]), elem->type));
+                elems.emplace_back(unwrapType(gs, args.locForArg(i), elem->type));
             } else {
                 elems.emplace_back(elem->type);
             }
@@ -1888,7 +1888,7 @@ public:
         auto *posTuple = cast_type<TupleType>(args.args[2]->type);
         if (posTuple == nullptr) {
             if (auto e =
-                    gs.beginError(core::Loc(args.locs.file, args.locs.args[2]), core::errors::Infer::UntypedSplat)) {
+                    gs.beginError(args.locForArg(2), core::errors::Infer::UntypedSplat)) {
                 e.setHeader("Splats are only supported where the size of the array is known statically");
             }
             return;
@@ -1898,7 +1898,7 @@ public:
         auto *kwTuple = cast_type<TupleType>(kwArgsType);
         if (kwTuple == nullptr && !kwArgsType.isNilClass()) {
             if (auto e =
-                    gs.beginError(core::Loc(args.locs.file, args.locs.args[2]), core::errors::Infer::UntypedSplat)) {
+                    gs.beginError(args.locForArg(2), core::errors::Infer::UntypedSplat)) {
                 e.setHeader(
                     "Keyword args with splats are only supported where the shape of the hash is known statically");
             }
@@ -1909,7 +1909,7 @@ public:
 
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
         InlinedVector<const TypeAndOrigins *, 2> sendArgs = Magic_callWithSplat::generateSendArgs(
-            posTuple, kwTuple, sendArgStore, core::Loc(args.locs.file, args.locs.args[2]));
+            posTuple, kwTuple, sendArgStore, args.locForArg(2));
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
         DispatchArgs innerArgs{fn,
@@ -2119,7 +2119,7 @@ public:
         }
 
         if (isa_type<TypeVar>(args.args[2]->type)) {
-            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.args[2]),
+            if (auto e = gs.beginError(args.locForArg(2),
                                        core::errors::Infer::GenericPassedAsBlock)) {
                 e.setHeader("Passing generics as block arguments is not supported");
             }
@@ -2169,8 +2169,8 @@ public:
                                args.isPrivateOk};
 
         Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, link, finalBlockType,
-                                          core::Loc(args.locs.file, args.locs.args[2]),
-                                          core::Loc(args.locs.file, args.locs.call), res);
+                                          args.locForArg(2),
+                                          args.locForCall(), res);
     }
 } Magic_callWithBlock;
 
@@ -2213,7 +2213,7 @@ public:
         auto *posTuple = cast_type<TupleType>(args.args[2]->type);
         if (posTuple == nullptr) {
             if (auto e =
-                    gs.beginError(core::Loc(args.locs.file, args.locs.args[2]), core::errors::Infer::UntypedSplat)) {
+                    gs.beginError(args.locForArg(2), core::errors::Infer::UntypedSplat)) {
                 e.setHeader("Splats are only supported where the size of the array is known statically");
             }
             return;
@@ -2225,7 +2225,7 @@ public:
         auto *kwTuple = cast_type<TupleType>(kwType);
         if (kwTuple == nullptr && !kwType.isNilClass()) {
             if (auto e =
-                    gs.beginError(core::Loc(args.locs.file, args.locs.args[2]), core::errors::Infer::UntypedSplat)) {
+                    gs.beginError(args.locForArg(2), core::errors::Infer::UntypedSplat)) {
                 e.setHeader(
                     "Keyword args with splats are only supported where the shape of the hash is known statically");
             }
@@ -2233,7 +2233,7 @@ public:
         }
 
         if (isa_type<TypeVar>(args.args[4]->type)) {
-            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.args[4]),
+            if (auto e = gs.beginError(args.locForArg(4),
                                        core::errors::Infer::GenericPassedAsBlock)) {
                 e.setHeader("Passing generics as block arguments is not supported");
             }
@@ -2242,7 +2242,7 @@ public:
 
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
         InlinedVector<const TypeAndOrigins *, 2> sendArgs = Magic_callWithSplat::generateSendArgs(
-            posTuple, kwTuple, sendArgStore, core::Loc(args.locs.file, args.locs.args[2]));
+            posTuple, kwTuple, sendArgStore, args.locForArg(2));
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
 
@@ -2265,8 +2265,8 @@ public:
                                args.isPrivateOk};
 
         Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, link, finalBlockType,
-                                          core::Loc(args.locs.file, args.locs.args[4]),
-                                          core::Loc(args.locs.file, args.locs.call), res);
+                                          args.locForArg(4),
+                                          args.locForCall(), res);
     }
 } Magic_callWithSplatAndBlock;
 
@@ -2275,7 +2275,7 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         ENFORCE(args.args.size() == 1);
         auto ty = core::Types::widen(gs, args.args.front()->type);
-        auto loc = core::Loc(args.locs.file, args.locs.args[0]);
+        auto loc = args.locForArg(0);
         if (auto e = gs.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
             e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
                         "# typed: strict");
@@ -3048,7 +3048,7 @@ public:
             args.locs.call,
             argLocs,
         };
-        TypeAndOrigins myType{args.selfType, {core::Loc(args.locs.file, args.locs.receiver)}};
+        TypeAndOrigins myType{args.selfType, {args.locForReceiver()}};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs{&myType};
 
         DispatchArgs dispatch{core::Names::enumerableToH(),
