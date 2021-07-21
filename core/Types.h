@@ -832,6 +832,16 @@ struct DispatchArgs {
     // unreported errors is expensive!
     bool suppressErrors = false;
 
+    Loc callLoc() const {
+        return core::Loc(locs.file, locs.call);
+    }
+    Loc receiverLoc() const {
+        return core::Loc(locs.file, locs.receiver);
+    }
+    Loc argLoc(size_t i) const {
+        return core::Loc(locs.file, locs.args[i]);
+    }
+
     DispatchArgs withSelfRef(const TypePtr &newSelfRef) const;
     DispatchArgs withThisRef(const TypePtr &newThisRef) const;
     DispatchArgs withErrorsSuppressed() const;
