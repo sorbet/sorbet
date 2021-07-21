@@ -11,6 +11,7 @@ class Passes {
 public:
     static llvm::ModulePass *createDeleteUnusedSorbetIntrinsticsPass();
     static llvm::ModulePass *createDeleteUnusedInlineCachesPass();
+    static llvm::ModulePass *createRemoveUnnecessaryHashDupsPass();
     static const std::vector<llvm::ModulePass *> standardLowerings();
 };
 } // namespace sorbet::compiler

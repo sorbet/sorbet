@@ -207,7 +207,7 @@ public:
     //     %45 = load i64, i64* @rb_cModule, align 8, !dbg !14
     //     %46 = call i64 @sorbet_i_objIsKindOf(i64 %44, i64 %45) #1, !dbg !14
     //
-    // and returns an instrution that looks like this:
+    // and returns an instruction that looks like this:
     //
     //     %47 = call i64 @sorbet_rubyTrue()
     //
@@ -577,6 +577,82 @@ static llvm::RegisterPass<DeleteUnusedInlineCachesPass> Z("deleteUnusuedInlineCa
                                                           false  // Analysis Pass
 );
 
+class RemoveUnnecessaryHashDupsPass : public llvm::ModulePass {
+public:
+    static char ID;
+
+    RemoveUnnecessaryHashDupsPass() : llvm::ModulePass(ID) {}
+
+    bool runOnModule(llvm::Module &mod) override {
+        bool modifiedCode = false;
+
+        auto *rbHashDupFn = mod.getFunction("rb_hash_dup");
+        auto *rbToHashTypeFn = mod.getFunction("rb_to_hash_type");
+        auto *sorbetGlobalConstDupHashFn = mod.getFunction("sorbet_globalConstDupHash");
+        auto *sorbetSendFn = mod.getFunction("sorbet_i_send");
+
+        for (auto &function : mod) {
+            for (auto &block : function) {
+                for (auto insn_iter = block.begin(); insn_iter != block.end();) {
+                    llvm::Instruction *insn = &*insn_iter;
+                    // This increment needs to happen outside of the loop header, because we are
+                    // potentially deleting this instruction in this loop body, so incrementing at
+                    // the end of the loop body could fail.
+                    insn_iter++;
+
+                    auto *hashDupCall = llvm::dyn_cast<llvm::CallInst>(insn);
+                    if (hashDupCall == nullptr || hashDupCall->getCalledFunction() != rbHashDupFn) {
+                        continue;
+                    }
+                    ENFORCE(hashDupCall->getNumArgOperands() == 1);
+                    auto *toHashCall = llvm::dyn_cast<llvm::CallInst>(hashDupCall->getOperand(0));
+                    if (toHashCall == nullptr || toHashCall->getCalledFunction() != rbToHashTypeFn ||
+                        toHashCall->getParent() != hashDupCall->getParent()) {
+                        continue;
+                    }
+                    ENFORCE(toHashCall->getNumArgOperands() == 1);
+                    auto *constDupCall = llvm::dyn_cast<llvm::CallInst>(toHashCall->getOperand(0));
+                    if (constDupCall == nullptr || constDupCall->getCalledFunction() != sorbetGlobalConstDupHashFn ||
+                        constDupCall->getParent() != hashDupCall->getParent()) {
+                        continue;
+                    }
+                    if (!hashDupCall->hasOneUser() || !toHashCall->hasOneUser() || !constDupCall->hasOneUser()) {
+                        continue;
+                    }
+
+                    auto use = hashDupCall->use_begin();
+                    llvm::User *user = use->getUser();
+                    auto *sendCall = llvm::dyn_cast<llvm::CallInst>(user);
+                    if (sendCall == nullptr || sendCall->getCalledFunction() != sorbetSendFn ||
+                        sendCall->getParent() != hashDupCall->getParent()) {
+                        continue;
+                    }
+
+                    // Check that the rb_hash_dup is the last arg to send,
+                    // The last operand is the definition,
+                    // which means that getNumOperands - getOperandNo == 2
+                    if (user->getNumOperands() - use->getOperandNo() != 2) {
+                        continue;
+                    }
+
+                    user->setOperand(use->getOperandNo(), toHashCall);
+                    hashDupCall->eraseFromParent();
+                    modifiedCode = true;
+                }
+            }
+        }
+        return modifiedCode;
+    }
+};
+
+char RemoveUnnecessaryHashDupsPass::ID = 0;
+
+static llvm::RegisterPass<RemoveUnnecessaryHashDupsPass> AA("removeUnnecessaryHashDupsPass",
+                                                            "Remove Unnecessary Hash Dups",
+                                                            false, // Only looks at CFG
+                                                            false  // Analysis Pass
+);
+
 } // namespace
 const std::vector<llvm::ModulePass *> Passes::standardLowerings() {
     // LLVM pass manager is going to destuct them, so we need to allocate them every time
@@ -589,5 +665,9 @@ llvm::ModulePass *Passes::createDeleteUnusedSorbetIntrinsticsPass() {
 
 llvm::ModulePass *Passes::createDeleteUnusedInlineCachesPass() {
     return new DeleteUnusedInlineCachesPass();
+}
+
+llvm::ModulePass *Passes::createRemoveUnnecessaryHashDupsPass() {
+    return new RemoveUnnecessaryHashDupsPass();
 }
 } // namespace sorbet::compiler

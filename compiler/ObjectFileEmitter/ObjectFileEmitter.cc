@@ -402,11 +402,12 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
     pm.add(llvm::createGlobalDCEPass());                // Remove dead fns and globals. We benefit from this a lot
     // Module passes
     addModulePasses(pm);
-    // LTO passes
+    pm.add(Passes::createRemoveUnnecessaryHashDupsPass());
     // print lowered IR
     auto nameOptl = ((string)dir) + "/" + (string)objectName + ".lll";
     llvm::raw_fd_ostream lllFile(nameOptl, ec1, llvm::sys::fs::F_Text);
     auto *printLowered = llvm::createPrintModulePass(lllFile, "");
+    // LTO passes
     addLTOPasses(pm, printLowered);
     // print optimized IR
     auto nameOpt = ((string)dir) + "/" + (string)objectName + ".llo";
