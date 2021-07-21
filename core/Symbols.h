@@ -169,6 +169,9 @@ public:
         return typeParams;
     }
 
+    // The depth of this symbol in the inheritence hierarchy. This is used to optimize `derivesFrom`.
+    u1 depth = 0;
+
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const;
 
     // TODO(dmitry) perf: most calls to this method could be eliminated as part of perf work.

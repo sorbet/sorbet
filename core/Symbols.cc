@@ -169,12 +169,16 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
 }
 
 bool Symbol::derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const {
+    bool checkSuper = this->superClass().exists();
     if (isClassOrModuleLinearizationComputed()) {
         for (SymbolRef a : mixins()) {
             if (a == sym) {
                 return true;
             }
         }
+
+        // Use hierarchy depth to fail early
+        checkSuper = checkSuper && this->depth > sym.data(gs)->depth;
     } else {
         for (SymbolRef a : mixins()) {
             if (a == sym || a.data(gs)->derivesFrom(gs, sym)) {
@@ -182,7 +186,7 @@ bool Symbol::derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const {
             }
         }
     }
-    if (this->superClass().exists()) {
+    if (checkSuper) {
         return SymbolRef(sym) == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
     }
     return false;

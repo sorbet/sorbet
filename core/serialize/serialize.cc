@@ -571,6 +571,7 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     for (auto &loc : what.locs()) {
         pickle(p, loc);
     }
+    p.putU1(what.depth);
 }
 
 Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
@@ -616,6 +617,7 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
     for (int i = 0; i < locCount; i++) {
         result.locs_.emplace_back(unpickleLoc(p));
     }
+    result.depth = p.getU1();
     return result;
 }
 

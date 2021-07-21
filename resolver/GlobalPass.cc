@@ -291,9 +291,13 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
     ENFORCE_NO_TIMER(ofClass.exists());
     auto data = ofClass.data(gs);
     if (!data->isClassOrModuleLinearizationComputed()) {
+        data->depth = 0;
         if (data->superClass().exists()) {
             computeClassLinearization(gs, data->superClass());
+            // NOTE: the payload doesn't have depth information set
+            data->depth = data->superClass().data(gs)->depth + 1;
         }
+
         InlinedVector<core::ClassOrModuleRef, 4> currentMixins = data->mixins();
         InlinedVector<core::ClassOrModuleRef, 4> newMixins;
         for (auto mixin : currentMixins) {
