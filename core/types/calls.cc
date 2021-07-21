@@ -826,7 +826,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         }
 
-        // merge in the keyword splat argument if it's present
+        // Merge in the keyword splat argument if it's present.
+        // Note that we rely on this merging being done after the explicitly-named
+        // arguments in the call when determining whether keyword args are properly
+        // typed, below.
         bool kwSplatIsHash = false;
         TypePtr kwSplatType;
         if (hasKwsplat) {
@@ -933,6 +936,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     // keep this around so we know which keyword arguments have been supplied
     UnorderedSet<NameRef> consumed;
     if (hasKwargs) {
+        // Remember where the kwargs started
+        auto kwait = aPosEnd;
         // Mark the keyword args as consumed
         ait += numKwargs;
 
@@ -945,6 +950,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
             pend = kwit;
 
+            bool sawKwSplat = false;
             while (kwit != data->arguments().end()) {
                 const ArgInfo &spec = *kwit;
                 if (spec.flags.isBlock) {
@@ -976,6 +982,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             result.main.errors.emplace_back(std::move(e));
                         }
                     }
+                    sawKwSplat = true;
                     break;
                 }
                 ++kwit;
@@ -995,12 +1002,42 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     continue;
                 }
                 consumed.insert(spec.name);
-                TypeAndOrigins tpe;
-                tpe.origins = {kwargsLoc};
+                // We want the precise location of the kwarg that we are processing.
+                // To do that, we rely on hash->{keys,values} being added in the order
+                // that the kwargs appear in the the call.  We also rely on args from
+                // a shapely-typed kwsplat hash (implicit or explicit) being added to
+                // hash->{keys,values} after the explicitly-named kwargs in the call.
                 auto offset = arg - hash->keys.begin();
+                // offset * 2 skips kwargs we have already seen.
+                // + 1 moves us to the value being passed.
+                ENFORCE(!sawKwSplat);
+                auto kwaValue = kwait + (offset * 2) + 1;
+                TypeAndOrigins tpe;
+                ENFORCE(args.args.size() == args.locs.args.size(), "what?!");
+                // This in-bounds check is unusual, but it's necessary for cases
+                // where we are processing a kwarg that comes from a non-kwsplat
+                // shapely-typed hash.  In such cases, our kwargOffset will appear to
+                // be out-of-bounds with respect to the actual number of arguments in
+                // the call.  (We could track the location information of kwargs from
+                // such a hash, but that would require rewriting a good chunk of this
+                // function.)  We actually do something slightly stronger, which is
+                // to check whether the thing we're pointing at lives inside the range
+                // of passed kwargs in the call.
+                //
+                // If we encounter this case, we've already setup kwargsLoc to reflect
+                // as closely as possible the location of the entire shapely-typed
+                // hash, so use that for the "origin" of the argument and say that the
+                // argument has no location.  The latter also inhibits type-driven
+                // autocorrects from kicking in.
+                bool argInBounds = kwaValue < ait;
+                // Note: it's OK to compute with kwaValue even if it's out-of-bounds.
+                auto kwargOffset = kwaValue - args.args.begin();
+                auto originLoc = argInBounds ? args.argLoc(kwargOffset) : kwargsLoc;
+                auto argLoc = argInBounds ? args.argLoc(kwargOffset) : Loc::none();
+                tpe.origins = {originLoc};
                 tpe.type = hash->values[offset];
                 if (auto e = matchArgType(gs, *constr, args.callLoc(), args.receiverLoc(), symbol, method, tpe, spec,
-                                          args.selfType, targs, Loc::none(), args.originForUninitialized)) {
+                                          args.selfType, targs, argLoc, args.originForUninitialized)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
             }
