@@ -215,10 +215,10 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
 
-    if (auto *o2 = cast_type<OrType>(t2)) { // 3, 5, 6
+    if (isa_type<OrType>(t2)) { // 3, 5, 6
         categoryCounterInc("lub", "or>");
         return lubDistributeOr(gs, t2, t1);
-    } else if (auto *a2 = cast_type<AndType>(t2)) { // 2, 4
+    } else if (isa_type<AndType>(t2)) { // 2, 4
         categoryCounterInc("lub", "and>");
         auto t1d = underlying(gs, t1);
         auto t2filtered = dropLubComponents(gs, t2, t1d);
