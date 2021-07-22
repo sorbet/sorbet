@@ -16,7 +16,7 @@ namespace {
 string spacesForTabLevel(int tabs) {
     fmt::memory_buffer ss;
     for (int i = 0; i < tabs; i++) {
-        fmt::format_to(ss, "&nbsp;");
+        fmt::format_to(std::back_inserter(ss), "&nbsp;");
     }
     return to_string(ss);
 }

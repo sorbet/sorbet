@@ -80,7 +80,7 @@ void PrinterConfig::print(const string_view &contents) const {
         fmt::print("{}", contents);
     } else {
         absl::MutexLock lck(&state->mutex);
-        fmt::format_to(state->buf, "{}", contents);
+        fmt::format_to(std::back_inserter(state->buf), "{}", contents);
     }
 };
 
@@ -245,10 +245,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     fmt::memory_buffer all_prints;
     fmt::memory_buffer all_stop_after;
 
-    fmt::format_to(all_prints, "Print: [{}]",
+    fmt::format_to(std::back_inserter(all_prints), "Print: [{}]",
                    fmt::map_join(
                        print_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
-    fmt::format_to(all_stop_after, "Stop After: [{}]",
+    fmt::format_to(std::back_inserter(all_stop_after), "Stop After: [{}]",
                    fmt::map_join(
                        stop_after_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
 

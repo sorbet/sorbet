@@ -245,7 +245,7 @@ vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const 
 string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatchResult, core::SymbolRef method,
                      const core::TypePtr &receiverType, const core::TypeConstraint *constraint, u2 totalArgs) {
     fmt::memory_buffer result;
-    fmt::format_to(result, "{}", method.data(gs)->name.shortName(gs));
+    fmt::format_to(std::back_inserter(result), "{}", method.data(gs)->name.shortName(gs));
     auto nextTabstop = 1;
 
     /* If we are completing an existing send that either has some arguments
@@ -253,7 +253,7 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
      * since the rest is likely useless
      */
     if (totalArgs > 0 || dispatchResult.main.blockReturnType != nullptr) {
-        fmt::format_to(result, "${{0}}");
+        fmt::format_to(std::back_inserter(result), "${{0}}");
         return to_string(result);
     }
 
@@ -271,19 +271,19 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
             continue;
         }
         if (argSym.flags.isKeyword) {
-            fmt::format_to(argBuf, "{}: ", argSym.name.shortName(gs));
+            fmt::format_to(std::back_inserter(argBuf), "{}: ", argSym.name.shortName(gs));
         }
         if (argSym.type) {
             auto resultType = getResultType(gs, argSym.type, method, receiverType, constraint).show(gs);
-            fmt::format_to(argBuf, "${{{}:{}}}", nextTabstop++, resultType);
+            fmt::format_to(std::back_inserter(argBuf), "${{{}:{}}}", nextTabstop++, resultType);
         } else {
-            fmt::format_to(argBuf, "${{{}}}", nextTabstop++);
+            fmt::format_to(std::back_inserter(argBuf), "${{{}}}", nextTabstop++);
         }
         typeAndArgNames.emplace_back(to_string(argBuf));
     }
 
     if (!typeAndArgNames.empty()) {
-        fmt::format_to(result, "({})", fmt::join(typeAndArgNames, ", "));
+        fmt::format_to(std::back_inserter(result), "({})", fmt::join(typeAndArgNames, ", "));
     }
 
     ENFORCE(!method.data(gs)->arguments().empty());
@@ -305,10 +305,10 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
             }
         }
 
-        fmt::format_to(result, " do{}\n  ${{{}}}\nend", blkArgs, nextTabstop++);
+        fmt::format_to(std::back_inserter(result), " do{}\n  ${{{}}}\nend", blkArgs, nextTabstop++);
     }
 
-    fmt::format_to(result, "${{0}}");
+    fmt::format_to(std::back_inserter(result), "${{0}}");
     return to_string(result);
 }
 

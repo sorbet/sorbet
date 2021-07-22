@@ -499,7 +499,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             [&]() {
                 fmt::memory_buffer buf;
                 for (const auto &[file, editedSource] : toWrite) {
-                    fmt::format_to(buf, "# -- {} --\n{}# ------------------------------\n",
+                    fmt::format_to(std::back_inserter(buf), "# -- {} --\n{}# ------------------------------\n",
                                    core::File::censorFilePathForSnapshotTests(file.data(*gs).path()), editedSource);
                 }
                 return to_string(buf);

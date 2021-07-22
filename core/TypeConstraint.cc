@@ -265,7 +265,7 @@ string TypeConstraint::toString(const core::GlobalState &gs) const {
     auto collated = this->collateBounds(gs);
 
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "bounds: [{}]\n",
+    fmt::format_to(std::back_inserter(buf), "bounds: [{}]\n",
                    fmt::map_join(
                        collated.begin(), collated.end(), ", ", [&gs](auto entry) -> auto {
                            const auto &[sym, bounds] = entry;
@@ -274,7 +274,7 @@ string TypeConstraint::toString(const core::GlobalState &gs) const {
                            auto upper = upperBound != nullptr ? upperBound.show(gs) : "_";
                            return fmt::format("{} <: {} <: {}", lower, sym.show(gs), upper);
                        }));
-    fmt::format_to(buf, "solution: [{}]\n",
+    fmt::format_to(std::back_inserter(buf), "solution: [{}]\n",
                    fmt::map_join(
                        this->solution.begin(), this->solution.end(), ", ", [&gs](auto pair) -> auto {
                            return fmt::format("{}: {}", pair.first.show(gs), pair.second.show(gs));
