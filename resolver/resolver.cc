@@ -1731,6 +1731,12 @@ class ResolveTypeMembersAndFieldsWalk {
         } else if (cast->cast != core::Names::let()) {
             if (auto e = ctx.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
                 e.setHeader("Use `{}` to specify the type of constants", "T.let");
+                if (cast->cast == core::Names::cast()) {
+                    e.addErrorNote("If you really want to use `T.cast`, "
+                                   "assign to an intermediate variable first and then "
+                                   "assign that variable to `{}`",
+                                   asgn.lhs.toString(ctx));
+                }
             }
         }
 

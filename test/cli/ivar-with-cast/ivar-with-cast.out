@@ -1,0 +1,6 @@
+test/cli/ivar-with-cast/ivar-with-cast.rb:6: Use `T.let` to specify the type of constants https://srb.help/5013
+     6 |    @val = T.cast(0, Integer)
+                   ^^^^^^^^^^^^^^^^^^
+  Note:
+    If you really want to use `T.cast`, assign to an intermediate variable first and then assign that variable to `@val`
+Errors: 1
