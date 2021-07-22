@@ -2330,7 +2330,7 @@ public:
 
         auto &arg = args.args[0];
         InlinedVector<LocOffsets, 2> argLocs{args.locs.receiver};
-        CallLocs locs{args.locs.file, args.locs.call, args.locs.call, argLocs};
+        CallLocs locs{args.locs.file, args.locs.call, args.locs.receiver, argLocs};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs;
 
         DispatchArgs dispatch{core::Names::toA(), locs,      0,
