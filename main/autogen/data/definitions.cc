@@ -76,7 +76,7 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer out;
     auto nameToString = [&](const auto &nm) -> string { return nm.show(gs); };
 
-    fmt::format_to(out,
+    fmt::format_to(std::back_inserter(out),
                    "# ParsedFile: {}\n"
                    "requires: [{}]\n"
                    "## defs:\n",
@@ -99,7 +99,7 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
                 break;
         }
 
-        fmt::format_to(out,
+        fmt::format_to(std::back_inserter(out),
                        "[def id={}]\n"
                        " type={}\n"
                        " defines_behavior={}\n"
@@ -109,20 +109,23 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
         if (def.defining_ref.exists()) {
             auto &ref = def.defining_ref.data(*this);
             if (ref.name.package) {
-                fmt::format_to(out, " defining_pkg=[{}]\n", nameToString(*ref.name.package));
+                fmt::format_to(std::back_inserter(out), " defining_pkg=[{}]\n", nameToString(*ref.name.package));
             }
-            fmt::format_to(out, " defining_ref=[{}]\n", fmt::map_join(ref.name.nameParts, " ", nameToString));
+            fmt::format_to(std::back_inserter(out), " defining_ref=[{}]\n",
+                           fmt::map_join(ref.name.nameParts, " ", nameToString));
         }
         if (def.parent_ref.exists()) {
             auto &ref = def.parent_ref.data(*this);
-            fmt::format_to(out, " parent_ref=[{}]\n", fmt::map_join(ref.name.nameParts, " ", nameToString));
+            fmt::format_to(std::back_inserter(out), " parent_ref=[{}]\n",
+                           fmt::map_join(ref.name.nameParts, " ", nameToString));
         }
         if (def.aliased_ref.exists()) {
             auto &ref = def.aliased_ref.data(*this);
-            fmt::format_to(out, " aliased_ref=[{}]\n", fmt::map_join(ref.name.nameParts, " ", nameToString));
+            fmt::format_to(std::back_inserter(out), " aliased_ref=[{}]\n",
+                           fmt::map_join(ref.name.nameParts, " ", nameToString));
         }
     }
-    fmt::format_to(out, "## refs:\n");
+    fmt::format_to(std::back_inserter(out), "## refs:\n");
     for (auto &ref : refs) {
         vector<string> nestingStrings;
         for (auto &scope : ref.nesting) {
@@ -131,7 +134,7 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
         }
 
         auto refFullName = showFullName(gs, ref.scope);
-        fmt::format_to(out,
+        fmt::format_to(std::back_inserter(out),
                        "[ref id={}]\n"
                        " scope=[{}]\n"
                        " name=[{}]\n"
@@ -147,7 +150,8 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
 
         if (ref.parent_of.exists()) {
             auto parentOfFullName = showFullName(gs, ref.parent_of);
-            fmt::format_to(out, " parent_of=[{}]\n", fmt::map_join(parentOfFullName, " ", nameToString));
+            fmt::format_to(std::back_inserter(out), " parent_of=[{}]\n",
+                           fmt::map_join(parentOfFullName, " ", nameToString));
         }
     }
     return to_string(out);

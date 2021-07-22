@@ -299,10 +299,10 @@ void KnowledgeRef::removeReferencesToVar(cfg::LocalRef var) {
 string TestedKnowledge::toString(const core::GlobalState &gs, const cfg::CFG &cfg) const {
     fmt::memory_buffer buf;
     if (!_truthy->noTypeTests.empty() || !_truthy->yesTypeTests.empty()) {
-        fmt::format_to(buf, "  Being truthy entails:\n{}", _truthy->toString(gs, cfg));
+        fmt::format_to(std::back_inserter(buf), "  Being truthy entails:\n{}", _truthy->toString(gs, cfg));
     }
     if (!_falsy->noTypeTests.empty() || !_falsy->yesTypeTests.empty()) {
-        fmt::format_to(buf, "  Being falsy entails:\n{}", _falsy->toString(gs, cfg));
+        fmt::format_to(std::back_inserter(buf), "  Being falsy entails:\n{}", _falsy->toString(gs, cfg));
     }
     return to_string(buf);
 }
@@ -367,7 +367,7 @@ void TestedKnowledge::sanityCheck() const {
 string Environment::toString(const core::GlobalState &gs, const cfg::CFG &cfg) const {
     fmt::memory_buffer buf;
     if (isDead) {
-        fmt::format_to(buf, "dead={:d}\n", isDead);
+        fmt::format_to(std::back_inserter(buf), "dead={:d}\n", isDead);
     }
     vector<pair<cfg::LocalRef, VariableState>> sorted;
     for (const auto &pair : _vars) {
@@ -384,8 +384,9 @@ string Environment::toString(const core::GlobalState &gs, const cfg::CFG &cfg) c
         if (var.data(cfg)._name == core::Names::debugEnvironmentTemp()) {
             continue;
         }
-        fmt::format_to(buf, "{}: {}{}\n{}\n", var.showRaw(gs, cfg), state.typeAndOrigins.type.toStringWithTabs(gs, 0),
-                       state.knownTruthy ? " (and truthy)\n" : "", state.knowledge.toString(gs, cfg));
+        fmt::format_to(std::back_inserter(buf), "{}: {}{}\n{}\n", var.showRaw(gs, cfg),
+                       state.typeAndOrigins.type.toStringWithTabs(gs, 0), state.knownTruthy ? " (and truthy)\n" : "",
+                       state.knowledge.toString(gs, cfg));
     }
     return to_string(buf);
 }

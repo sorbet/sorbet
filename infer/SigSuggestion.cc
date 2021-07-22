@@ -418,7 +418,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         return nullopt;
     }
 
-    fmt::format_to(ss, "sig {{");
+    fmt::format_to(std::back_inserter(ss), "sig {{");
 
     ENFORCE(!methodSymbol.data(ctx)->arguments().empty(), "There should always be at least one arg (the block arg).");
     bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->arguments().size() == 1 &&
@@ -428,13 +428,13 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         // Only need override / implementation if the parent has a sig
         if (closestMethod.exists() && closestMethod.data(ctx)->resultType != nullptr) {
             if (closestMethod.data(ctx)->isAbstract() || childNeedsOverride(ctx, methodSymbol, closestMethod)) {
-                fmt::format_to(ss, "override.");
+                fmt::format_to(std::back_inserter(ss), "override.");
             }
         }
     }
 
     if (!onlyArgumentIsBlkArg) {
-        fmt::format_to(ss, "params(");
+        fmt::format_to(std::back_inserter(ss), "params(");
 
         bool first = true;
         for (auto &argSym : methodSymbol.data(ctx)->arguments()) {
@@ -448,7 +448,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                 continue;
             }
             if (!first) {
-                fmt::format_to(ss, ", ");
+                fmt::format_to(std::back_inserter(ss), ", ");
             }
             first = false;
             auto argType = guessedArgumentTypes[argSym.name];
@@ -466,9 +466,9 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                 // TODO: maybe combine the old and new types in some way?
                 chosenType = oldType;
             }
-            fmt::format_to(ss, "{}: {}", argSym.argumentName(ctx), chosenType.show(ctx));
+            fmt::format_to(std::back_inserter(ss), "{}: {}", argSym.argumentName(ctx), chosenType.show(ctx));
         }
-        fmt::format_to(ss, ").");
+        fmt::format_to(std::back_inserter(ss), ").");
     }
     if (!guessedSomethingUseful) {
         return nullopt;
@@ -479,9 +479,9 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                          !guessedReturnType.isUntyped() && !guessedReturnType.isBottom());
 
     if (suggestsVoid) {
-        fmt::format_to(ss, "void}}");
+        fmt::format_to(std::back_inserter(ss), "void}}");
     } else {
-        fmt::format_to(ss, "returns({})}}", guessedReturnType.show(ctx));
+        fmt::format_to(std::back_inserter(ss), "returns({})}}", guessedReturnType.show(ctx));
     }
 
     auto [replacementLoc, padding] = loc.findStartOfLine(ctx);

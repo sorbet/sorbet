@@ -79,13 +79,13 @@ string TupleType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     auto thisTabs = buildTabs(tabs);
     auto nestedTabs = buildTabs(tabs + 1);
-    fmt::format_to(buf, "TupleType {{\n");
+    fmt::format_to(std::back_inserter(buf), "TupleType {{\n");
     int i = -1;
     for (auto &el : this->elems) {
         i++;
-        fmt::format_to(buf, "{}{} = {}\n", nestedTabs, i, el.toStringWithTabs(gs, tabs + 3));
+        fmt::format_to(std::back_inserter(buf), "{}{} = {}\n", nestedTabs, i, el.toStringWithTabs(gs, tabs + 3));
     }
-    fmt::format_to(buf, "{}}}", thisTabs);
+    fmt::format_to(std::back_inserter(buf), "{}}}", thisTabs);
     return to_string(buf);
 }
 
@@ -101,39 +101,39 @@ string ShapeType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     auto thisTabs = buildTabs(tabs);
     auto nestedTabs = buildTabs(tabs + 1);
-    fmt::format_to(buf, "ShapeType {{\n");
+    fmt::format_to(std::back_inserter(buf), "ShapeType {{\n");
     auto valueIterator = this->values.begin();
     for (auto &el : this->keys) {
-        fmt::format_to(buf, "{}{} => {}\n", nestedTabs, el.toStringWithTabs(gs, tabs + 2),
+        fmt::format_to(std::back_inserter(buf), "{}{} => {}\n", nestedTabs, el.toStringWithTabs(gs, tabs + 2),
                        (*valueIterator).toStringWithTabs(gs, tabs + 3));
         ++valueIterator;
     }
-    fmt::format_to(buf, "{}}}", thisTabs);
+    fmt::format_to(std::back_inserter(buf), "{}}}", thisTabs);
     return to_string(buf);
 }
 
 string ShapeType::show(const GlobalState &gs) const {
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "{{");
+    fmt::format_to(std::back_inserter(buf), "{{");
     auto valueIterator = this->values.begin();
     bool first = true;
     for (auto &key : this->keys) {
         if (first) {
             first = false;
         } else {
-            fmt::format_to(buf, ", ");
+            fmt::format_to(std::back_inserter(buf), ", ");
         }
         auto underlying = cast_type_nonnull<LiteralType>(key).underlying(gs);
         ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
         if (undSymbol == Symbols::Symbol()) {
-            fmt::format_to(buf, "{}: {}", cast_type_nonnull<LiteralType>(key).asName(gs).show(gs),
+            fmt::format_to(std::back_inserter(buf), "{}: {}", cast_type_nonnull<LiteralType>(key).asName(gs).show(gs),
                            (*valueIterator).show(gs));
         } else {
-            fmt::format_to(buf, "{} => {}", key.show(gs), (*valueIterator).show(gs));
+            fmt::format_to(std::back_inserter(buf), "{} => {}", key.show(gs), (*valueIterator).show(gs));
         }
         ++valueIterator;
     }
-    fmt::format_to(buf, "}}");
+    fmt::format_to(std::back_inserter(buf), "}}");
     return to_string(buf);
 }
 
@@ -331,22 +331,22 @@ string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     auto nestedTabs = buildTabs(tabs + 1);
     auto twiceNestedTabs = buildTabs(tabs + 2);
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "AppliedType {{\n{}klass = {}\n{}targs = [\n", nestedTabs, this->klass.toStringFullName(gs),
-                   nestedTabs);
+    fmt::format_to(std::back_inserter(buf), "AppliedType {{\n{}klass = {}\n{}targs = [\n", nestedTabs,
+                   this->klass.toStringFullName(gs), nestedTabs);
 
     int i = -1;
     for (auto &targ : this->targs) {
         ++i;
         if (i < this->klass.data(gs)->typeMembers().size()) {
             auto tyMem = this->klass.data(gs)->typeMembers()[i];
-            fmt::format_to(buf, "{}{} = {}\n", twiceNestedTabs, tyMem.data(gs)->name.showRaw(gs),
+            fmt::format_to(std::back_inserter(buf), "{}{} = {}\n", twiceNestedTabs, tyMem.data(gs)->name.showRaw(gs),
                            targ.toStringWithTabs(gs, tabs + 3));
         } else {
             // this happens if we try to print type before resolver has processed stdlib
-            fmt::format_to(buf, "{}EARLY_TYPE_MEMBER\n", twiceNestedTabs);
+            fmt::format_to(std::back_inserter(buf), "{}EARLY_TYPE_MEMBER\n", twiceNestedTabs);
         }
     }
-    fmt::format_to(buf, "{}]\n{}}}", nestedTabs, thisTabs);
+    fmt::format_to(std::back_inserter(buf), "{}]\n{}}}", nestedTabs, thisTabs);
 
     return to_string(buf);
 }
@@ -354,20 +354,20 @@ string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 string AppliedType::show(const GlobalState &gs) const {
     fmt::memory_buffer buf;
     if (this->klass == Symbols::Array()) {
-        fmt::format_to(buf, "T::Array");
+        fmt::format_to(std::back_inserter(buf), "T::Array");
     } else if (this->klass == Symbols::Hash()) {
-        fmt::format_to(buf, "T::Hash");
+        fmt::format_to(std::back_inserter(buf), "T::Hash");
     } else if (this->klass == Symbols::Enumerable()) {
-        fmt::format_to(buf, "T::Enumerable");
+        fmt::format_to(std::back_inserter(buf), "T::Enumerable");
     } else if (this->klass == Symbols::Enumerator()) {
-        fmt::format_to(buf, "T::Enumerator");
+        fmt::format_to(std::back_inserter(buf), "T::Enumerator");
     } else if (this->klass == Symbols::Range()) {
-        fmt::format_to(buf, "T::Range");
+        fmt::format_to(std::back_inserter(buf), "T::Range");
     } else if (this->klass == Symbols::Set()) {
-        fmt::format_to(buf, "T::Set");
+        fmt::format_to(std::back_inserter(buf), "T::Set");
     } else {
         if (std::optional<int> procArity = Types::getProcArity(*this)) {
-            fmt::format_to(buf, "T.proc");
+            fmt::format_to(std::back_inserter(buf), "T.proc");
 
             // The first element in targs is the return type.
             // The rest are the arguments (in the correct order)
@@ -377,28 +377,28 @@ string AppliedType::show(const GlobalState &gs) const {
             targs_it++;
 
             if (*procArity > 0) {
-                fmt::format_to(buf, ".params(");
+                fmt::format_to(std::back_inserter(buf), ".params(");
             }
 
             int arg_num = 0;
-            fmt::format_to(buf, "{}",
+            fmt::format_to(std::back_inserter(buf), "{}",
                            fmt::map_join(
                                targs_it, this->targs.end(), ", ", [&](auto targ) -> auto {
                                    return fmt::format("arg{}: {}", arg_num++, targ.show(gs));
                                }));
 
             if (*procArity > 0) {
-                fmt::format_to(buf, ")");
+                fmt::format_to(std::back_inserter(buf), ")");
             }
 
             if (return_type == core::Types::void_()) {
-                fmt::format_to(buf, ".void");
+                fmt::format_to(std::back_inserter(buf), ".void");
             } else {
-                fmt::format_to(buf, ".returns({})", return_type.show(gs));
+                fmt::format_to(std::back_inserter(buf), ".returns({})", return_type.show(gs));
             }
             return to_string(buf);
         } else {
-            fmt::format_to(buf, "{}", this->klass.show(gs));
+            fmt::format_to(std::back_inserter(buf), "{}", this->klass.show(gs));
         }
     }
     auto targs = this->targs;
@@ -420,7 +420,8 @@ string AppliedType::show(const GlobalState &gs) const {
     }
 
     if (!targs.empty()) {
-        fmt::format_to(buf, "[{}]", fmt::map_join(targs, ", ", [&](auto targ) { return targ.show(gs); }));
+        fmt::format_to(std::back_inserter(buf), "[{}]",
+                       fmt::map_join(targs, ", ", [&](auto targ) { return targ.show(gs); }));
     }
     return to_string(buf);
 }

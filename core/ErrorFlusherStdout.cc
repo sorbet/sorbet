@@ -19,10 +19,10 @@ void ErrorFlusherStdout::flushErrors(spdlog::logger &logger, const GlobalState &
 
             auto &out = error->error->isCritical() ? critical : nonCritical;
             if (out.size() != 0) {
-                fmt::format_to(out, "\n\n");
+                fmt::format_to(std::back_inserter(out), "\n\n");
             }
             ENFORCE(error->text.has_value());
-            fmt::format_to(out, "{}", error->text.value_or(""));
+            fmt::format_to(std::back_inserter(out), "{}", error->text.value_or(""));
 
             for (auto &autocorrect : error->error->autocorrects) {
                 autocorrects.emplace_back(move(autocorrect));

@@ -108,11 +108,11 @@ bool NamedDefinition::preferredTo(const core::GlobalState &gs, const NamedDefini
 
 void showHelper(const core::GlobalState &gs, fmt::memory_buffer &buf, const DefTree &node, int level) {
     auto fileRefToString = [&](const NamedDefinition &nd) -> string_view { return nd.fileRef.data(gs).path(); };
-    fmt::format_to(buf, "{} [{}]\n", node.root() ? "<ROOT>" : node.name().show(gs),
+    fmt::format_to(std::back_inserter(buf), "{} [{}]\n", node.root() ? "<ROOT>" : node.name().show(gs),
                    fmt::map_join(node.namedDefs, ", ", fileRefToString));
     for (const auto &[name, tree] : node.children) {
         for (int i = 0; i < level; ++i) {
-            fmt::format_to(buf, "  ");
+            fmt::format_to(std::back_inserter(buf), "  ");
         }
         showHelper(gs, buf, *tree, level + 1);
     }
@@ -186,7 +186,7 @@ core::NameRef DefTree::name() const {
 
 string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "{}\n", alCfg.preamble);
+    fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
 
     core::FileRef definingFile;
     if (!namedDefs.empty()) {
@@ -207,20 +207,20 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
                                             return nr.show(gs);
                                         }));
         if (!root()) {
-            fmt::format_to(buf, "{}.on_autoload('{}')\n", alCfg.registryModule, fullName);
+            fmt::format_to(std::back_inserter(buf), "{}.on_autoload('{}')\n", alCfg.registryModule, fullName);
             predeclare(gs, fullName, buf);
         }
         if (!children.empty()) {
-            fmt::format_to(buf, "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
+            fmt::format_to(std::back_inserter(buf), "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
             vector<pair<core::NameRef, string>> childNames;
             std::transform(children.begin(), children.end(), back_inserter(childNames),
                            [&gs](const auto &pair) { return make_pair(pair.first, pair.first.show(gs)); });
             fast_sort(childNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second < rhs.second; });
             for (const auto &pair : childNames) {
-                fmt::format_to(buf, "  {}: \"{}/{}\",\n", pair.second, alCfg.rootDir,
+                fmt::format_to(std::back_inserter(buf), "  {}: \"{}/{}\",\n", pair.second, alCfg.rootDir,
                                children.at(pair.first)->path(gs));
             }
-            fmt::format_to(buf, "}})\n", fullName);
+            fmt::format_to(std::back_inserter(buf), "}})\n", fullName);
         }
     } else if (type == Definition::Type::Casgn || type == Definition::Type::Alias) {
         ENFORCE(qname.size() > 1);
@@ -231,7 +231,7 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
     }
 
     if (definingFile.exists()) {
-        fmt::format_to(buf, "\n{}.for_autoload({}, \"{}\"{})\n", alCfg.registryModule, fullName,
+        fmt::format_to(std::back_inserter(buf), "\n{}.for_autoload({}, \"{}\"{})\n", alCfg.registryModule, fullName,
                        alCfg.normalizePath(gs, definingFile), casgnArg);
     }
     return to_string(buf);
@@ -252,24 +252,24 @@ void DefTree::requires(const core::GlobalState &gs, const AutoloaderConfig &alCf
     fast_sort(reqs);
     auto last = unique(reqs.begin(), reqs.end());
     for (auto it = reqs.begin(); it != last; ++it) {
-        fmt::format_to(buf, "require '{}'\n", *it);
+        fmt::format_to(std::back_inserter(buf), "require '{}'\n", *it);
     }
 }
 
 void DefTree::predeclare(const core::GlobalState &gs, string_view fullName, fmt::memory_buffer &buf) const {
     if (hasDef() && definitionType(gs) == Definition::Type::Class) {
-        fmt::format_to(buf, "\nclass {}", fullName);
+        fmt::format_to(std::back_inserter(buf), "\nclass {}", fullName);
         auto &def = definition(gs);
         if (!def.parentName.empty()) {
-            fmt::format_to(buf, " < {}", fmt::map_join(def.parentName.nameParts, "::", [&](const auto &nr) -> string {
-                               return nr.show(gs);
-                           }));
+            fmt::format_to(
+                std::back_inserter(buf), " < {}",
+                fmt::map_join(def.parentName.nameParts, "::", [&](const auto &nr) -> string { return nr.show(gs); }));
         }
     } else {
-        fmt::format_to(buf, "\nmodule {}", fullName);
+        fmt::format_to(std::back_inserter(buf), "\nmodule {}", fullName);
     }
     // TODO aliases? casgn?
-    fmt::format_to(buf, "\nend\n");
+    fmt::format_to(std::back_inserter(buf), "\nend\n");
 }
 
 string DefTree::path(const core::GlobalState &gs) const {
@@ -486,13 +486,14 @@ namespace {
 string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const Package &pkg,
                                 const string_view mangledName) {
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "{}\n", alCfg.preamble);
-    fmt::format_to(buf, "{}.autoload_map(::PackageRoot::{}, {{\n", alCfg.registryModule, mangledName);
+    fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
+    fmt::format_to(std::back_inserter(buf), "{}.autoload_map(::PackageRoot::{}, {{\n", alCfg.registryModule,
+                   mangledName);
     for (auto expt : pkg.exports) {
         auto name = expt.join(gs, "::");
-        fmt::format_to(buf, "  {}: \"{}/{}.rb\",\n", name, mangledName, name);
+        fmt::format_to(std::back_inserter(buf), "  {}: \"{}/{}.rb\",\n", name, mangledName, name);
     }
-    fmt::format_to(buf, "}})\n");
+    fmt::format_to(std::back_inserter(buf), "}})\n");
 
     return to_string(buf);
 }
@@ -502,8 +503,8 @@ void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const Au
                                            const std::string &path, const vector<Package> &packages) {
     // we're going to be building up the root package map as we walk all the other packages, so make that first
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "{}\n", alCfg.preamble);
-    fmt::format_to(buf, "{}.autoload_map(::PackageRoot, {{\n", alCfg.registryModule);
+    fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
+    fmt::format_to(std::back_inserter(buf), "{}.autoload_map(::PackageRoot, {{\n", alCfg.registryModule);
 
     // walk over all the packages
     for (auto &pkg : packages) {
@@ -520,10 +521,10 @@ void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const Au
         FileOps::writeIfDifferent(targetPath, source);
 
         // and add the entry for this file to the root autoload
-        fmt::format_to(buf, "  {}: \"{}\",\n", pkgName, join(mangledName, "_root.rb"));
+        fmt::format_to(std::back_inserter(buf), "  {}: \"{}\",\n", pkgName, join(mangledName, "_root.rb"));
     }
 
-    fmt::format_to(buf, "}})\n");
+    fmt::format_to(std::back_inserter(buf), "}})\n");
     auto rootSrc = to_string(buf);
     FileOps::writeIfDifferent(join(path, "_root.rb"), rootSrc);
 }

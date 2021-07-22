@@ -40,16 +40,16 @@ string JSON::escape(string from) {
                 if (0x00 <= ch && ch <= 0x1f) {
                     string_view toAdd(from.data() + firstUnusedChar, currentChar - firstUnusedChar);
                     firstUnusedChar = currentChar + 1;
-                    fmt::format_to(buf, "{}\\u{:04x}", toAdd, ch);
+                    fmt::format_to(std::back_inserter(buf), "{}\\u{:04x}", toAdd, ch);
                 }
                 continue;
         }
         string_view toAdd(from.data() + firstUnusedChar, currentChar - firstUnusedChar);
         firstUnusedChar = currentChar + 1;
-        fmt::format_to(buf, "{}{}", toAdd, special);
+        fmt::format_to(std::back_inserter(buf), "{}{}", toAdd, special);
     }
     string_view toAdd(from.data() + firstUnusedChar, from.size() - firstUnusedChar);
-    fmt::format_to(buf, "{}", toAdd);
+    fmt::format_to(std::back_inserter(buf), "{}", toAdd);
 
     return to_string(buf);
 }

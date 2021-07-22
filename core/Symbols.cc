@@ -359,7 +359,7 @@ bool SymbolRef::isSynthetic() const {
 
 void printTabs(fmt::memory_buffer &to, int count) {
     string ident(count * 2, ' ');
-    fmt::format_to(to, "{}", ident);
+    fmt::format_to(std::back_inserter(to), "{}", ident);
 }
 
 SymbolRef::SymbolRef(const GlobalState &from, SymbolRef::Kind kind, u4 id)
@@ -855,15 +855,15 @@ bool isHiddenFromPrinting(const GlobalState &gs, const Symbol &symbol) {
 
 void printLocs(const GlobalState &gs, fmt::memory_buffer &buf, const InlinedVector<Loc, 2> &locs, bool showRaw) {
     if (!locs.empty()) {
-        fmt::format_to(buf, " @ ");
+        fmt::format_to(std::back_inserter(buf), " @ ");
         if (locs.size() > 1) {
-            fmt::format_to(buf, "(");
+            fmt::format_to(std::back_inserter(buf), "(");
         }
-        fmt::format_to(buf, "{}", fmt::map_join(locs, ", ", [&](auto loc) {
+        fmt::format_to(std::back_inserter(buf), "{}", fmt::map_join(locs, ", ", [&](auto loc) {
                            return showRaw ? loc.showRaw(gs) : loc.filePosToString(gs);
                        }));
         if (locs.size() > 1) {
-            fmt::format_to(buf, ")");
+            fmt::format_to(std::back_inserter(buf), ")");
         }
     }
 }
@@ -889,7 +889,7 @@ void printResultType(const GlobalState &gs, fmt::memory_buffer &buf, const TypeP
         } else {
             printed = resultType.show(gs);
         }
-        fmt::format_to(buf, " -> {}", printed);
+        fmt::format_to(std::back_inserter(buf), " -> {}", printed);
     }
 }
 
@@ -1068,14 +1068,14 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
 
     auto sym = data(gs);
 
-    fmt::format_to(buf, "{} {}", showKind(gs), showRaw ? toStringFullName(gs) : showFullName(gs));
+    fmt::format_to(std::back_inserter(buf), "{} {}", showKind(gs), showRaw ? toStringFullName(gs) : showFullName(gs));
 
     auto typeMembers = sym->typeMembers();
     auto it =
         remove_if(typeMembers.begin(), typeMembers.end(), [&gs](auto &sym) -> bool { return sym.data(gs)->isFixed(); });
     typeMembers.erase(it, typeMembers.end());
     if (!typeMembers.empty()) {
-        fmt::format_to(buf, "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
+        fmt::format_to(std::back_inserter(buf), "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
                            auto name = symb.data(gs)->name;
                            return showRaw ? name.showRaw(gs) : name.show(gs);
                        }));
@@ -1083,16 +1083,17 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
 
     if (sym->superClass().exists()) {
         auto superClass = sym->superClass();
-        fmt::format_to(buf, " < {}", showRaw ? superClass.toStringFullName(gs) : superClass.showFullName(gs));
+        fmt::format_to(std::back_inserter(buf), " < {}",
+                       showRaw ? superClass.toStringFullName(gs) : superClass.showFullName(gs));
     }
 
-    fmt::format_to(buf, " ({})", fmt::map_join(sym->mixins(), ", ", [&](auto symb) {
+    fmt::format_to(std::back_inserter(buf), " ({})", fmt::map_join(sym->mixins(), ", ", [&](auto symb) {
                        auto name = symb.data(gs)->name;
                        return showRaw ? name.showRaw(gs) : name.show(gs);
                    }));
 
     if (sym->isClassOrModulePrivate()) {
-        fmt::format_to(buf, " : private");
+        fmt::format_to(std::back_inserter(buf), " : private");
     }
     // root should have no locs. We used to have special handling here to hide locs on root
     // when censorForSnapshotTests was passed, but it's not needed anymore.
@@ -1101,7 +1102,7 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
     printLocs(gs, buf, sym->locs(), showRaw);
 
     ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
-    fmt::format_to(buf, "\n");
+    fmt::format_to(std::back_inserter(buf), "\n");
     for (auto pair : sym->membersStableOrderSlow(gs)) {
         if (!pair.second.exists()) {
             ENFORCE(*this == core::Symbols::root());
@@ -1119,7 +1120,7 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
 
         auto str = pair.second.toStringWithOptions(gs, tabs + 1, showFull, showRaw);
         ENFORCE(!str.empty());
-        fmt::format_to(buf, "{}", move(str));
+        fmt::format_to(std::back_inserter(buf), "{}", move(str));
     }
 
     return to_string(buf);
@@ -1132,7 +1133,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
 
     auto sym = data(gs);
 
-    fmt::format_to(buf, "{} {}", showKind(gs), showRaw ? toStringFullName(gs) : showFullName(gs));
+    fmt::format_to(std::back_inserter(buf), "{} {}", showKind(gs), showRaw ? toStringFullName(gs) : showFullName(gs));
 
     auto methodFlags = InlinedVector<string, 3>{};
 
@@ -1159,7 +1160,8 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
     }
 
     if (!methodFlags.empty()) {
-        fmt::format_to(buf, " : {}", fmt::map_join(methodFlags, "|", [](const auto &flag) { return flag; }));
+        fmt::format_to(std::back_inserter(buf), " : {}",
+                       fmt::map_join(methodFlags, "|", [](const auto &flag) { return flag; }));
     }
 
     auto typeMembers = sym->typeArguments();
@@ -1167,24 +1169,24 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
         remove_if(typeMembers.begin(), typeMembers.end(), [&gs](auto &sym) -> bool { return sym.data(gs)->isFixed(); });
     typeMembers.erase(it, typeMembers.end());
     if (!typeMembers.empty()) {
-        fmt::format_to(buf, "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
+        fmt::format_to(std::back_inserter(buf), "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
                            auto name = symb.data(gs)->name;
                            return showRaw ? name.showRaw(gs) : name.show(gs);
                        }));
     }
-    fmt::format_to(buf, " ({})",
+    fmt::format_to(std::back_inserter(buf), " ({})",
                    fmt::map_join(sym->arguments(), ", ", [&](const auto &symb) { return symb.argumentName(gs); }));
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);
 
     if (sym->rebind().exists()) {
-        fmt::format_to(buf, " rebindTo {}",
+        fmt::format_to(std::back_inserter(buf), " rebindTo {}",
                        showRaw ? sym->rebind().toStringFullName(gs) : sym->rebind().showFullName(gs));
     }
 
     ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
-    fmt::format_to(buf, "\n");
+    fmt::format_to(std::back_inserter(buf), "\n");
     for (auto pair : sym->membersStableOrderSlow(gs)) {
         ENFORCE_NO_TIMER(pair.second.exists());
         // These should only show up in classes.
@@ -1197,14 +1199,14 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
 
         auto str = pair.second.toStringWithOptions(gs, tabs + 1, showFull, showRaw);
         ENFORCE(!str.empty());
-        fmt::format_to(buf, "{}", move(str));
+        fmt::format_to(std::back_inserter(buf), "{}", move(str));
     }
 
     for (auto &arg : sym->arguments()) {
         auto str = arg.toString(gs);
         ENFORCE(!str.empty());
         printTabs(buf, tabs + 1);
-        fmt::format_to(buf, "{}\n", move(str));
+        fmt::format_to(std::back_inserter(buf), "{}\n", move(str));
     }
 
     return to_string(buf);
@@ -1224,14 +1226,14 @@ string FieldRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showF
         access = " : private"sv;
     }
 
-    fmt::format_to(buf, "{} {}{}", type, showRaw ? toStringFullName(gs) : showFullName(gs), access);
+    fmt::format_to(std::back_inserter(buf), "{} {}{}", type, showRaw ? toStringFullName(gs) : showFullName(gs), access);
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);
 
     ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
 
-    fmt::format_to(buf, "\n");
+    fmt::format_to(std::back_inserter(buf), "\n");
 
     return to_string(buf);
 }
@@ -1243,13 +1245,14 @@ string TypeMemberRef::toStringWithOptions(const GlobalState &gs, int tabs, bool 
 
     auto sym = data(gs);
 
-    fmt::format_to(buf, "{}{} {}", showKind(gs), getVariance(sym), showRaw ? toStringFullName(gs) : showFullName(gs));
+    fmt::format_to(std::back_inserter(buf), "{}{} {}", showKind(gs), getVariance(sym),
+                   showRaw ? toStringFullName(gs) : showFullName(gs));
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);
 
     ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
-    fmt::format_to(buf, "\n");
+    fmt::format_to(std::back_inserter(buf), "\n");
     ENFORCE_NO_TIMER(sym->members().empty());
 
     return to_string(buf);
@@ -1262,13 +1265,14 @@ string TypeArgumentRef::toStringWithOptions(const GlobalState &gs, int tabs, boo
 
     auto sym = data(gs);
 
-    fmt::format_to(buf, "{}{} {}", showKind(gs), getVariance(sym), showRaw ? toStringFullName(gs) : showFullName(gs));
+    fmt::format_to(std::back_inserter(buf), "{}{} {}", showKind(gs), getVariance(sym),
+                   showRaw ? toStringFullName(gs) : showFullName(gs));
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);
 
     ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
-    fmt::format_to(buf, "\n");
+    fmt::format_to(std::back_inserter(buf), "\n");
     ENFORCE_NO_TIMER(sym->members().empty());
 
     return to_string(buf);
@@ -1295,7 +1299,7 @@ string ArgInfo::show(const GlobalState &gs) const {
 
 string ArgInfo::toString(const GlobalState &gs) const {
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "argument {}", show(gs));
+    fmt::format_to(std::back_inserter(buf), "argument {}", show(gs));
     vector<string_view> flagTexts;
     if (flags.isDefault) {
         flagTexts.emplace_back("optional"sv);
@@ -1312,15 +1316,15 @@ string ArgInfo::toString(const GlobalState &gs) const {
     if (flags.isShadow) {
         flagTexts.emplace_back("shadow"sv);
     }
-    fmt::format_to(buf, "<{}>", fmt::join(flagTexts, ", "));
+    fmt::format_to(std::back_inserter(buf), "<{}>", fmt::join(flagTexts, ", "));
     if (this->type) {
-        fmt::format_to(buf, " -> {}", this->type.show(gs));
+        fmt::format_to(std::back_inserter(buf), " -> {}", this->type.show(gs));
     }
 
-    fmt::format_to(buf, " @ {}", loc.showRaw(gs));
+    fmt::format_to(std::back_inserter(buf), " @ {}", loc.showRaw(gs));
 
     if (this->rebind.exists()) {
-        fmt::format_to(buf, " rebindTo {}", this->rebind.showFullName(gs));
+        fmt::format_to(std::back_inserter(buf), " rebindTo {}", this->rebind.showFullName(gs));
     }
 
     return to_string(buf);

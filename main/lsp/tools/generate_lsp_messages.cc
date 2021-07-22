@@ -30,15 +30,15 @@ int main(int argc, char **argv) {
         fmt::memory_buffer enumHeaderBuffer;
         fmt::memory_buffer enumClassFileBuffer;
 
-        fmt::format_to(enumClassFileBuffer, "#include \"main/lsp/json_types.h\"\n");
-        fmt::format_to(enumClassFileBuffer, "#include \"main/lsp/lsp_messages_gen_helpers.h\"\n");
-        fmt::format_to(enumClassFileBuffer, "namespace sorbet::realmain::lsp {{\n");
+        fmt::format_to(std::back_inserter(enumClassFileBuffer), "#include \"main/lsp/json_types.h\"\n");
+        fmt::format_to(std::back_inserter(enumClassFileBuffer), "#include \"main/lsp/lsp_messages_gen_helpers.h\"\n");
+        fmt::format_to(std::back_inserter(enumClassFileBuffer), "namespace sorbet::realmain::lsp {{\n");
 
         // Emits enums before class definitions themselves.
         for (auto &enumType : enumTypes) {
             enumType->emit(enumHeaderBuffer, enumClassFileBuffer);
         }
-        fmt::format_to(enumClassFileBuffer, "}}\n");
+        fmt::format_to(std::back_inserter(enumClassFileBuffer), "}}\n");
 
         if (!writeFile(argv[3], enumHeaderBuffer)) {
             return 1;
@@ -54,14 +54,14 @@ int main(int argc, char **argv) {
         fmt::memory_buffer headerBuffer;
         fmt::memory_buffer classFileBuffer;
 
-        fmt::format_to(classFileBuffer, "#include \"main/lsp/json_types.h\"\n");
-        fmt::format_to(classFileBuffer, "#include \"main/lsp/lsp_messages_gen_helpers.h\"\n");
-        fmt::format_to(classFileBuffer, "namespace sorbet::realmain::lsp {{\n");
+        fmt::format_to(std::back_inserter(classFileBuffer), "#include \"main/lsp/json_types.h\"\n");
+        fmt::format_to(std::back_inserter(classFileBuffer), "#include \"main/lsp/lsp_messages_gen_helpers.h\"\n");
+        fmt::format_to(std::back_inserter(classFileBuffer), "namespace sorbet::realmain::lsp {{\n");
 
         for (auto &classType : classTypes) {
             classType->emit(headerBuffer, classFileBuffer);
         }
-        fmt::format_to(classFileBuffer, "}}\n");
+        fmt::format_to(std::back_inserter(classFileBuffer), "}}\n");
 
         // Output buffers to files.
         if (!writeFile(argv[1], headerBuffer)) {
