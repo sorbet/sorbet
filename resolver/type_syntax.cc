@@ -818,12 +818,30 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                             string typeStr = sym.show(ctx);
 
                             if (usedOnSourceClass) {
+                                // Autocorrects here are awkward, because we want to
+                                // offer the autocorrect at the definition of the
+                                // type_member or type_template and we only have
+                                // access to the use of the type_member or
+                                // type_template here.  We could examine the source
+                                // and attempt to identify the location for the
+                                // autocorrect, but that gets messy.
+                                //
+                                // Plus, it's not absolutely clear that the
+                                // definition is really at fault: it might be that
+                                // the user is using the wrong
+                                // type_member/type_template constant for the given
+                                // context, or they need to change the definition of
+                                // the method this use is associated with.  Try to give
+                                // them enough of a hint to decide what to do on their
+                                // own.
                                 if (ctxIsSingleton) {
                                     e.setHeader("`{}` type `{}` used in a singleton method definition", typeSource,
                                                 typeStr);
+                                    e.addErrorNote("Did you mean to use a similarly-named `type_template`?");
                                 } else {
                                     e.setHeader("`{}` type `{}` used in an instance method definition", typeSource,
                                                 typeStr);
+                                    e.addErrorNote("Did you mean to use a similarly-named `type_member`?");
                                 }
                             } else {
                                 e.setHeader("`{}` type `{}` used outside of the class definition", typeSource, typeStr);

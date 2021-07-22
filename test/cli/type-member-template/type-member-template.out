@@ -1,0 +1,12 @@
+test/cli/type-member-template/type-member-template.rb:10: `type_template` type `T.class_of(A)::Template` used in an instance method definition https://srb.help/5027
+    10 |  sig {returns(Template)}
+                       ^^^^^^^^
+  Note:
+    Did you mean to use a similarly-named `type_member`?
+
+test/cli/type-member-template/type-member-template.rb:13: `type_member` type `A::Member` used in a singleton method definition https://srb.help/5027
+    13 |  sig {returns(Member)}
+                       ^^^^^^
+  Note:
+    Did you mean to use a similarly-named `type_template`?
+Errors: 2
