@@ -2202,14 +2202,14 @@ module Kernel
   # ```
   sig do
     params(
-        read: T::Array[IO],
-        write: T::Array[IO],
-        error: T::Array[IO],
-        timeout: Integer,
+        read_array: T.nilable(T::Array[IO]),
+        write_array: T.nilable(T::Array[IO]),
+        error_array: T.nilable(T::Array[IO]),
+        timeout: T.any(NilClass, Integer, Float),
     )
-    .returns(T::Array[String])
+    .returns(T.nilable(T::Array[T::Array[IO]]))
   end
-  def select(read, write=T.unsafe(nil), error=T.unsafe(nil), timeout=T.unsafe(nil)); end
+  def select(read_array, write_array=nil, error_array=nil, timeout=nil); end
 
   # Suspends the current thread for *duration* seconds (which may be any number,
   # including a `Float` with fractional seconds). Returns the actual number of
