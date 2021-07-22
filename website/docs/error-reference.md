@@ -467,7 +467,38 @@ reported in `# typed: strict`).
 
 ## 5037
 
-Sorbet does not support aliasing a method from a parent class. See [this issue](https://github.com/sorbet/sorbet/issues/2378) for more details.
+This error indicates that an `alias` or `alias_method` is referencing a method
+which Sorbet does not believe exists. In a way, it's a very similar error to
+[7003](#7003), but with an alias instead of a method call.
+
+Some steps to debug:
+
+1.  Double check that the code actually runs, either in the REPL, in CI, or with
+manual tests. If the method doesn’t actually exist when run, Sorbet caught a
+bug!
+
+1.  Many times, methods are defined dynamically in Ruby. Sorbet cannot see
+methods defined with `define_method`. Sorbet also can't see methods defined
+using Ruby's `included` + `other.extend(self)` pattern. For such dynamically
+defined methods, Sorbet requires `*.rbi` files which define the method
+statically.
+
+1.  Sorbet does not support aliasing a method from a parent class (with either
+    `alias` or `alias_method`):
+
+    ```ruby
+    class A
+      def foo; end
+    end
+
+    class B < A
+      alias_method :bar, :foo
+      alias baz foo
+    end
+    ```
+
+    See [this issue](https://github.com/sorbet/sorbet/issues/2378) for more
+    details.
 
 ## 5041
 
