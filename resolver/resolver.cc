@@ -1483,7 +1483,19 @@ class ResolveTypeMembersAndFieldsWalk {
         auto owner = data->owner;
 
         core::LambdaParam *parentType = nullptr;
-        auto parentMember = owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
+        core::SymbolRef parentMember = core::Symbols::noSymbol();
+        parentMember = owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
+
+        // check mixins if the type member doesn't exist in the parent
+        if (!parentMember.exists()) {
+            for (auto mixin : owner.data(ctx)->mixins()) {
+                parentMember = mixin.data(ctx)->findMember(ctx, data->name);
+                if (parentMember.exists()) {
+                    break;
+                }
+            }
+        }
+
         if (parentMember.exists()) {
             if (parentMember.isTypeMember()) {
                 parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType);
@@ -1653,11 +1665,6 @@ class ResolveTypeMembersAndFieldsWalk {
             return false;
         }
         if (job.lhs.isTypeMember()) {
-            auto superclass = job.lhs.data(ctx)->owner.data(ctx)->superClass();
-            if (!isGenericResolved(ctx, superclass)) {
-                return false;
-            }
-
             resolveTypeMember(ctx.withOwner(job.owner), job.lhs.asTypeMemberRef(), job.rhs, resolvedAttachedClasses);
         } else {
             resolveTypeAlias(ctx.withOwner(job.owner), job.lhs, job.rhs);
@@ -2005,6 +2012,23 @@ public:
             }
 
             if (symbol.isClassOrModule()) {
+                // This is the same as the implementation of T::Generic.[] in calls.cc
+                // NOTE: the type members of these symbols will only be depended on during payload construction, as
+                // after that their bounds will have been fully resolved.
+                if (symbol == core::Symbols::T_Array()) {
+                    symbol = core::Symbols::Array();
+                } else if (symbol == core::Symbols::T_Hash()) {
+                    symbol = core::Symbols::Hash();
+                } else if (symbol == core::Symbols::T_Enumerable()) {
+                    symbol = core::Symbols::Enumerable();
+                } else if (symbol == core::Symbols::T_Enumerator()) {
+                    symbol = core::Symbols::Enumerator();
+                } else if (symbol == core::Symbols::T_Range()) {
+                    symbol = core::Symbols::Range();
+                } else if (symbol == core::Symbols::T_Set()) {
+                    symbol = core::Symbols::Set();
+                }
+
                 // crawl up uses of `T.class_of` to find the right singleton symbol.
                 // This is for cases like `T.class_of(T.class_of(A))`.
                 for (auto it = classOfDepth_.rbegin(); it != classOfDepth_.rend() && *it; ++it) {
@@ -2184,7 +2208,15 @@ public:
             ENFORCE(send->fun == core::Names::typeAlias() || send->fun == core::Names::typeMember() ||
                     send->fun == core::Names::typeTemplate());
 
-            todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, send, dependencies_, ctx.file});
+            auto owner = sym.data(ctx)->owner;
+
+            dependencies_.emplace_back(owner.data(ctx)->superClass());
+
+            for (auto mixin : owner.data(ctx)->mixins()) {
+                dependencies_.emplace_back(mixin);
+            }
+
+            todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, send, std::move(dependencies_), ctx.file});
         } else if (data->isStaticField()) {
             ResolveStaticFieldItem job{ctx.file, sym.asFieldRef(), &asgn};
             auto resultType = tryResolveStaticField(ctx, job);
