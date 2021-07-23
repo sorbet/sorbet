@@ -837,11 +837,11 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                                 if (ctxIsSingleton) {
                                     e.setHeader("`{}` type `{}` used in a singleton method definition", typeSource,
                                                 typeStr);
-                                    e.addErrorNote("Did you mean to use a similarly-named `type_template`?");
+                                    e.addErrorNote("Only a `type_template` can be used in a singleton method definition.");
                                 } else {
                                     e.setHeader("`{}` type `{}` used in an instance method definition", typeSource,
                                                 typeStr);
-                                    e.addErrorNote("Did you mean to use a similarly-named `type_member`?");
+                                    e.addErrorNote("Only a `type_member` can be used in an instance method definition.");
                                 }
                             } else {
                                 e.setHeader("`{}` type `{}` used outside of the class definition", typeSource, typeStr);
