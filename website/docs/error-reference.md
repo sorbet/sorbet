@@ -474,14 +474,14 @@ which Sorbet does not believe exists. In a way, it's a very similar error to
 Some steps to debug:
 
 1.  Double check that the code actually runs, either in the REPL, in CI, or with
-manual tests. If the method doesn’t actually exist when run, Sorbet caught a
-bug!
+    manual tests. If the method doesn’t actually exist when run, Sorbet caught a
+    bug!
 
 1.  Many times, methods are defined dynamically in Ruby. Sorbet cannot see
-methods defined with `define_method`. Sorbet also can't see methods defined
-using Ruby's `included` + `other.extend(self)` pattern. For such dynamically
-defined methods, Sorbet requires `*.rbi` files which define the method
-statically.
+    methods defined with `define_method`. Sorbet also can't see methods defined
+    using Ruby's `included` + `other.extend(self)` pattern. For such dynamically
+    defined methods, Sorbet requires `*.rbi` files which define the method
+    statically.
 
 1.  Sorbet does not support aliasing a method from a parent class (with either
     `alias` or `alias_method`):
