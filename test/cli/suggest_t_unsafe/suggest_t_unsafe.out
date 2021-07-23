@@ -1,6 +1,6 @@
 suggest_t_unsafe.rb:25: Expected `String` but found `T.nilable(String)` for argument `str` https://srb.help/7002
     25 |  takes_string_kw(str: nilable_string)
-                          ^^^^^^^^^^^^^^^^^^^
+                               ^^^^^^^^^^^^^^
   Expected `String` for argument `str` of method `Object#takes_string_kw`:
     suggest_t_unsafe.rb:19:
     19 |sig {params(str: String).void}
@@ -8,7 +8,11 @@ suggest_t_unsafe.rb:25: Expected `String` but found `T.nilable(String)` for argu
   Got `T.nilable(String)` originating from:
     suggest_t_unsafe.rb:25:
     25 |  takes_string_kw(str: nilable_string)
-                          ^^^^^^^^^^^^^^^^^^^
+                               ^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:25: Replaced with `T.unsafe(nilable_string)`
+    25 |  takes_string_kw(str: nilable_string)
+                               ^^^^^^^^^^^^^^
 
 suggest_t_unsafe.rb:8: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
      8 |foo[0]
@@ -105,14 +109,14 @@ def takes_string_kw(str:); end
 sig {params(nilable_string: T.nilable(String)).void}
 def takes_nilable_string(nilable_string)
   # This used to crash Sorbet, because there was no Loc for the `str` argument
-  takes_string_kw(str: nilable_string)
+  takes_string_kw(str: T.unsafe(nilable_string))
 end
 
 --------------------------------------------------------------------------
 
 suggest_t_unsafe.rb:25: Expected `String` but found `T.nilable(String)` for argument `str` https://srb.help/7002
     25 |  takes_string_kw(str: nilable_string)
-                          ^^^^^^^^^^^^^^^^^^^
+                               ^^^^^^^^^^^^^^
   Expected `String` for argument `str` of method `Object#takes_string_kw`:
     suggest_t_unsafe.rb:19:
     19 |sig {params(str: String).void}
@@ -120,7 +124,11 @@ suggest_t_unsafe.rb:25: Expected `String` but found `T.nilable(String)` for argu
   Got `T.nilable(String)` originating from:
     suggest_t_unsafe.rb:25:
     25 |  takes_string_kw(str: nilable_string)
-                          ^^^^^^^^^^^^^^^^^^^
+                               ^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:25: Replaced with `custom_wrapper(nilable_string)`
+    25 |  takes_string_kw(str: nilable_string)
+                               ^^^^^^^^^^^^^^
 
 suggest_t_unsafe.rb:8: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
      8 |foo[0]
@@ -217,5 +225,5 @@ def takes_string_kw(str:); end
 sig {params(nilable_string: T.nilable(String)).void}
 def takes_nilable_string(nilable_string)
   # This used to crash Sorbet, because there was no Loc for the `str` argument
-  takes_string_kw(str: nilable_string)
+  takes_string_kw(str: custom_wrapper(nilable_string))
 end
