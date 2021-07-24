@@ -793,7 +793,14 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                         name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(importedPackages));
 
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
-    rootKlass.rhs.emplace_back(move(packageNamespace));
+
+    // Wrap the PackageSpec class to avoid naming conflicts with un-packaged constants.
+    auto wrapper = ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
+                                   name2Expr(core::Names::Constants::PackageSpecs()), {}, std::move(rootKlass.rhs));
+
+    rootKlass.rhs.clear();
+    rootKlass.rhs.emplace_back(move(wrapper));
+    rootKlass.rhs.emplace_back(move(packageNamespace)); // The package namespace remains outside the wrapper
     return file;
 }
 
