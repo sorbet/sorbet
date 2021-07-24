@@ -4,3 +4,9 @@
 *.md diff=markdown
 test/**/*.out diff
 test/cli/windows-line-endings/windows-line-endings.rb eol=crlf
+test/**/*.out diff
+*.llo.exp linguist-language=LLVM
+*.ll.exp linguist-language=LLVM
+
+test/testdata/**/*.llo.exp linguist-generated
+test/testdata/**/*.ll.exp linguist-generated

@@ -51,5 +51,12 @@ config_setting(
     values = {
         "host_cpu": "darwin",
         "compilation_mode": "dbg",
+    }
+)
+
+config_setting(
+    name = "release",
+    values = {
+        "define": "release=true",
     },
 )

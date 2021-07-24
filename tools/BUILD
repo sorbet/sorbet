@@ -5,6 +5,8 @@ clang_tool("clang-format")
 
 clang_tool("clang-tidy")
 
+clang_tool("opt")
+
 compilation_database(
     name = "compdb",
     testonly = True,
@@ -112,6 +114,20 @@ compilation_database(
         "//common:common",
         "//third_party/progressbar:progressbar",
         "//sorbet_version:sorbet_version",
+        "//third_party/xxd:xxd",
+        "//plugin_injector:plugin_injector",
+        "//compiler/ObjectFileEmitter:ObjectFileEmitter",
+        "//compiler/Passes:Passes",
+        "//compiler/Linker:Linker",
+        "//compiler/IREmitter/Payload:vm_payload_for_compile_commands",
+        "//compiler/IREmitter/Payload:pseudo_lib",
+        "//compiler/IREmitter/Payload:postprocess_payload",
+        "//compiler/IREmitter/Payload:generate_load_payload",
+        "//compiler/IREmitter:IREmitter",
+        "//compiler/Names:Names",
+        "//compiler/IREmitter/Payload:Payload",
+        "//compiler/Core:Core",
+        "//compiler/Errors:Errors",
         # END compile_commands targets
     ],
 )

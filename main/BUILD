@@ -31,7 +31,8 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         "realmain",
-        "//main/pipeline/semantic_extension:none",
+        "//compiler/ObjectFileEmitter",
+        "//plugin_injector",
         "//payload",
     ],
 )

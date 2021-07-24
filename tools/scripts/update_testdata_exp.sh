@@ -117,4 +117,55 @@ for this_src in "${rb_src[@]}" DUMMY; do
   srcs=("$this_src")
 done
 
-parallel --joblog - < "$COMMAND_FILE"
+if ! parallel --joblog - < "$COMMAND_FILE"; then
+  echo 'WARN: parallel exiited non-zero'
+fi
+
+# Clear out the command file to re-use it for compiler exp file generation
+echo "" > "$COMMAND_FILE"
+
+exp_extensions="llo ll stderr"
+syncback=()
+
+for this_src in "${rb_src[@]}" DUMMY; do
+    this_base="${this_src%__*}"
+    if [ "$this_base" = "$basename" ]; then
+        srcs=("${srcs[@]}" "$this_src")
+        continue
+    fi
+
+    dir="$(dirname "$this_base")"
+    basename="$this_base"
+    srcs=("$this_src")
+
+    for ext in $exp_extensions; do
+        exp=${basename%.rb}.$ext.exp
+        if [ -f "${basename%.rb}.$ext.exp" ]; then
+            llvmir=$(mktemp -d)
+            syncback+=("$exp")
+            echo \
+                bazel-bin/main/sorbet \
+                --silence-dev-message \
+                --no-error-count \
+                --suppress-non-critical \
+                --llvm-ir-folder \
+                "$llvmir" \
+                "${srcs[@]}" \
+                2\> "$llvmir/update_testdata_exp.stderr"\; \
+                \< "$llvmir/$dir/*.$ext" sed -e \'/^target triple =/d\' \> "$exp" \
+            >> "$COMMAND_FILE"
+        fi
+    done
+done
+
+if ! parallel --joblog - < "$COMMAND_FILE"; then
+  echo 'WARN: parallel exiited non-zero'
+fi
+
+if [ "${EMIT_SYNCBACK:-}" != "" ]; then
+  echo '### BEGIN SYNCBACK ###'
+  for file in "${syncback[@]}"; do
+    echo "$file"
+  done
+  echo '### END SYNCBACK ###'
+fi
