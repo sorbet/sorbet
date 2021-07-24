@@ -21,7 +21,7 @@ if [ -z "$rb_file" ]; then
 fi
 
 ruby="./bazel-bin/external/sorbet_ruby_2_7/toolchain/bin/ruby"
-sorbet_runtime="./bazel-sorbet_llvm/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb"
+sorbet_runtime="./gems/sorbet-runtime/lib/sorbet-runtime.rb"
 
 echo
 info "Building Ruby..."

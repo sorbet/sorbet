@@ -47,7 +47,7 @@ root=$PWD
 llvm_diff_path="$root/external/llvm_toolchain_12_0_0/bin/llvm-diff"
 
 ruby="$(rlocation sorbet_ruby_2_7/ruby)"
-diff_diff="$(rlocation com_stripe_sorbet_llvm/test/diff-diff.rb)"
+diff_diff="$(rlocation com_stripe_ruby_typer/test/diff-diff.rb)"
 
 diff_dir="$(mktemp -d)"
 

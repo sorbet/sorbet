@@ -1,4 +1,4 @@
-def cli_test(path):
+def cli_test(path, tags = []):
     # path will be like `$name/$name.sh`
     words = path.split("/")
     name = words[-2]
@@ -34,6 +34,7 @@ def cli_test(path):
             output,
         ],
         size = "medium",
+        tags = tags,
     )
 
     native.sh_test(
@@ -49,7 +50,7 @@ def cli_test(path):
             "manual",
             "external",
             "local",
-        ],
+        ] + tags,
         size = "small",
     )
 

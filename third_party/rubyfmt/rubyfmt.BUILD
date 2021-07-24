@@ -42,5 +42,5 @@ cc_library(
     name = "rubyfmt_macro_wrappers",
     srcs = ["librubyfmt/src/rubyfmt.c"],
     linkstatic = True,
-    deps = ["@ruby_2_6//:headers"],
+    deps = ["@sorbet_ruby_2_6//:headers"],
 )

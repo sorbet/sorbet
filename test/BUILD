@@ -184,11 +184,17 @@ load(":pipeline_test.bzl", "pipeline_tests")
 
 pipeline_tests(
     "test_corpus",
-    glob([
-        "testdata/**/*.rb",
-        "testdata/**/*.exp",
-        "testdata/**/*.exp.svg",
-    ]),
+    glob(
+        [
+            "testdata/**/*.rb",
+            "testdata/**/*.exp",
+            "testdata/**/*.exp.svg",
+        ],
+        exclude = [
+            "testdata/compiler/**/*",
+            "testdata/ruby_benchmark/**/*",
+        ],
+    ),
     "PosTests",
     filter = "PosTests",
 )
@@ -205,18 +211,24 @@ pipeline_tests(
 
 pipeline_tests(
     "test_corpus_lsp",
-    glob([
-        "testdata/**/*.rb",
-        "testdata/**/*.exp",
-        "testdata/**/*.exp.svg",
-    ]),
+    glob(
+        [
+            "testdata/**/*.rb",
+            "testdata/**/*.exp",
+            "testdata/**/*.exp.svg",
+        ],
+        exclude = [
+            "testdata/compiler/**/*",
+            "testdata/ruby_benchmark/**/*",
+        ],
+    ),
     "LSPTests",
     filter = "LSPTests",
 )
 
 test_suite(
     name = "test",
-    tests = ["test_corpus", "compiler_test_corpus"],
+    tests = ["test_corpus"],
 )
 
 test_suite(
@@ -225,22 +237,17 @@ test_suite(
 )
 
 load(":compiler_tests.bzl", "compiler_tests")
-load("@com_stripe_ruby_typer//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one
+load("//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one
 
 clang_tool("llvm-diff")  # depended on by compiler_tests
 
 compiler_tests(
-    "compiler_test_corpus",
+    "compiler",
     glob([
         "testdata/compiler/**/*.rb",
-    ]),
-)
-
-compiler_tests(
-    "ruby_benchmark",
-    glob([
         "testdata/ruby_benchmark/**/*.rb",
     ]),
+    tags = ["compiler"],
 )
 
 sh_library(
@@ -258,7 +265,7 @@ sh_binary(
     srcs = ["generate_out_file.sh"],
     data = [
         "patch_require.rb",
-        "@com_stripe_ruby_typer//gems/sorbet-runtime",
+        "//gems/sorbet-runtime",
         "@sorbet_ruby_2_7//:ruby",
     ],
     deps = [
@@ -270,7 +277,8 @@ sh_binary(
 sh_binary(
     name = "build_extension",
     srcs = ["build_extension.sh"],
-    data = ["//main:sorbet"],
+    data = ["//compiler:sorbet"],
+    tags = ["compiler"],
     deps = [
         ":hermetic_tar",
         ":logging",
@@ -281,6 +289,7 @@ sh_binary(
 sh_binary(
     name = "test_corpus_runner",
     srcs = ["test_corpus_runner.sh"],
+    tags = ["compiler"],
     deps = [
         ":logging",
     ],
@@ -293,6 +302,7 @@ sh_binary(
         "diff-diff.rb",
         "@sorbet_ruby_2_7//:ruby",
     ],
+    tags = ["compiler"],
     deps = [
         ":logging",
         "@bazel_tools//tools/bash/runfiles",
@@ -304,6 +314,7 @@ sh_binary(
     testonly = 1,
     srcs = ["filecheck.sh"],
     data = ["@llvm//:FileCheck"],
+    tags = ["compiler"],
     deps = [
         ":logging",
     ],

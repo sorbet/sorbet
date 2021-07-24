@@ -4,8 +4,9 @@ cc_library(
         "ObjectFileEmitter.cc",
         "ObjectFileEmitter.h",
     ],
+    hdrs = ["ObjectFileEmitter.h"],
     linkstatic = select({
-        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+        "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
     visibility = ["//visibility:public"],
@@ -13,7 +14,7 @@ cc_library(
         "//compiler/IREmitter/Payload",
         "//compiler/Linker",
         "//compiler/Passes",
-        "@com_stripe_ruby_typer//core",
+        "//core",
         "@spdlog",
     ],
 )

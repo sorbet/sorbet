@@ -64,15 +64,15 @@ fi
 echo
 info "Building SorbetLLVM..."
 if [ -n "$debug" ]; then
-  ./bazel build //main:sorbet --config dbg --config=static-libs
+  ./bazel build //compiler:sorbet --config dbg --config=static-libs
 else
-  ./bazel build //main:sorbet -c opt
+  ./bazel build //compiler:sorbet -c opt
 fi
 
 if [ -z "$debug" ]; then
-  command=( "bazel-bin/main/sorbet" )
+  command=( "bazel-bin/compiler/sorbet" )
 else
-  command=( "${LLDB:-lldb}" "--" "./bazel-bin/main/sorbet" )
+  command=( "${LLDB:-lldb}" "--" "./bazel-bin/compiler/sorbet" )
 fi
 
 command=( "${command[@]}" --silence-dev-message "--llvm-ir-folder=$llvmir" \

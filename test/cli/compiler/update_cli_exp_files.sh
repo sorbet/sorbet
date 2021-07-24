@@ -17,7 +17,7 @@ if [[ -n "${EMIT_SYNCBACK:-}" ]]; then
   echo '### BEGIN SYNCBACK ###'
 fi
 
-bazel cquery 'filter("\.out$", deps("//test/cli:actual_cli", 1))' 2>/dev/null | \
+bazel cquery 'filter("\.out$", deps("//test/cli/compiler:actual_compiler", 1))' 2>/dev/null | \
   cut -d ' ' -f 1 | \
   while read -r target; do
     target="${target#//}"

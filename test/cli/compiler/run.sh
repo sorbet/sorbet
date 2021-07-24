@@ -32,7 +32,7 @@ test_path=$1
 test_output="${root}/$2"
 
 # Put sorbet into the path so that it's accessible from the cli test
-sorbet="$(dirname "$(rlocation com_stripe_sorbet_llvm/main/sorbet)")"
+sorbet="$(dirname "$(rlocation com_stripe_ruby_typer/compiler/sorbet)")"
 if ! [[ "$sorbet" = /* ]]; then
   sorbet="${root}/${sorbet}"
 fi

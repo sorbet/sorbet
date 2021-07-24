@@ -148,7 +148,7 @@ force_compile=1 llvmir="$PWD/${build_dir}/" $ruby \
   --disable=gems \
   --disable=did_you_mean \
   -r "rubygems" \
-  -r "${root}/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
+  -r "${root}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
   -r "${root}/test/patch_require.rb" \
   "$runfile" \
   1> "$stdout" 2> "$stderr"
@@ -160,7 +160,7 @@ info    "├─ stderr:      $stderr"
 success "└─ exit code:   $code"
 
 shorten_bazel() {
-  sed -e "s+_bazel_$USER/[^ ]*com_stripe_sorbet_llvm/+bazel/.../com_stripe_sorbet_llvm/+"
+  sed -e "s+_bazel_$USER/[^ ]*com_stripe_ruby_typer/+bazel/.../com_stripe_ruby_typer/+"
 }
 
 something_failed=

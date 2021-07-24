@@ -1,11 +1,11 @@
 # vim: ft=bzl sw=4 ts=4 et
 
-load("@com_stripe_sorbet_llvm//third_party/ruby:build-ruby.bzl", "ruby")
+load("@com_stripe_ruby_typer//third_party/ruby:build-ruby.bzl", "ruby")
 
 ruby(
     append_srcs = [
-        "@com_stripe_sorbet_llvm//compiler/ruby-static-exports:vm_append_files",
-        "@com_stripe_sorbet_llvm//compiler/IREmitter/Payload/patches:vm_append_files",
+        "@com_stripe_ruby_typer//compiler/ruby-static-exports:vm_append_files",
+        "@com_stripe_ruby_typer//compiler/IREmitter/Payload/patches:vm_append_files",
     ],
     configure_flags = [
         "--enable-shared",
@@ -18,7 +18,7 @@ ruby(
         # Enforce that we don't need Ruby to build in release builds.
         # (In non-release builds, we allow for an available system Ruby to
         # speed up the build.)
-        "@com_stripe_sorbet_llvm//tools/config:release": ["--with-baseruby=no"],
+        "@com_stripe_ruby_typer//tools/config:release": ["--with-baseruby=no"],
         "//conditions:default": [],
     }),
     copts = [
@@ -38,7 +38,7 @@ ruby(
     ],
     extra_srcs = [
         "@com_stripe_ruby_typer//sorbet_version:sorbet_version_srcs",
-        "@com_stripe_sorbet_llvm//compiler/IREmitter/Payload:vm_payload_srcs",
+        "@com_stripe_ruby_typer//compiler/IREmitter/Payload:vm_payload_srcs",
     ],
     gems = [
         "@bundler_stripe//file",

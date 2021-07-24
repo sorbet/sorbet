@@ -23,33 +23,27 @@ source .buildkite/tools/setup-bazel.sh
 
 err=0
 
-# Build sorbet_ruby once with gcc, to ensure that this build will work on
-# pay-server
+# Build sorbet_ruby once with gcc, to ensure that we can build it without depending on the clang toolchain in the
+# sandbox
 echo "--- building ruby with gcc"
-./bazel build \
-  @sorbet_ruby//:ruby \
-  @sorbet_ruby_2_7//:ruby \
-  --crosstool_top=@bazel_tools//tools/cpp:toolchain
+./bazel build @sorbet_ruby_2_7//:ruby --crosstool_top=@bazel_tools//tools/cpp:toolchain
 
 echo "+++ running tests"
-./bazel test @com_stripe_ruby_typer//test //... --config=dbg -c opt --test_summary=terse --test_output=errors || err=$?
+./bazel test //test //test:compiler //test/cli/compiler \
+  --config=dbg \
+  -c opt \
+  --test_summary=terse \
+  --test_output=errors || err=$?
 
 echo "--- uploading test results"
 
 rm -rf _tmp_
 mkdir -p _tmp_/log/junit/
 
-./bazel query '(tests(//...) + tests(@com_stripe_ruby_typer//test)) except attr("tags", "manual", //...)' | \
+./bazel query '(tests(//test) + tests(//test:compiler) + tests(//test/cli/compiler)) except attr("tags", "manual", //...)' | \
   while read -r line; do
     path="${line/://}"
     path="${path#//}"
-
-    #  @com_stripe_ruby_typer//... -> external/com_stripe_ruby_typer//...
-    path="${path/@/external/}"
-
-    #  .../com_stripe_ruby_typer//... -> .../com_stripe_ruby_typer/...
-    path="${path/\/\//\/}"
-
     cp "bazel-testlogs/$path/test.xml" _tmp_/log/junit/"${path//\//_}-${BUILDKITE_JOB_ID}.xml"
 done
 

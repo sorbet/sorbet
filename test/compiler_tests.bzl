@@ -146,27 +146,31 @@ def compiler_tests(suite_name, all_paths, extra_args = [], tags = []):
     native.test_suite(
         name = suite_name,
         tests = oracle_tests + validate_tests + filecheck_tests,
+        tags = tags,
     )
 
     native.test_suite(
         name = "{}_oracle".format(suite_name),
         tests = oracle_tests,
+        tags = tags,
     )
 
     native.test_suite(
         name = "{}_validate_exp".format(suite_name),
         tests = validate_tests,
+        tags = tags,
     )
 
     native.test_suite(
         name = "{}_filecheck".format(suite_name),
         tests = filecheck_tests,
+        tags = tags,
     )
 
     native.test_suite(
         name = "{}_too_slow".format(suite_name),
         tests = too_slow_tests,
-        tags = ["manual"],
+        tags = ["manual"] + tags,
     )
 
 RubyOracle = provider(
@@ -499,7 +503,7 @@ validate_sorbet_output_test = rule(
             executable = True,
         ),
         "_sorbet_runtime": attr.label(
-            default = "@com_stripe_ruby_typer//gems/sorbet-runtime",
+            default = "//gems/sorbet-runtime",
         ),
         "_patch_require": attr.label(
             default = ":patch_require.rb",

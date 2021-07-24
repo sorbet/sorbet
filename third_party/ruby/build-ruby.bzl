@@ -108,6 +108,17 @@ run_cmd ./configure \
 run_cmd make V=1 -j8
 run_cmd make V=1 install
 
+ruby_version=$(./miniruby -r ./rbconfig.rb -e 'puts "#{{RbConfig::CONFIG["MAJOR"]}}.#{{RbConfig::CONFIG["MINOR"]}}"')
+
+static_libs="$base/{static_libs}"
+mkdir -p "$static_libs"
+
+cp libruby*-static.a "$static_libs/libruby-static.a"
+
+# from https://github.com/penelopezone/rubyfmt/blob/3051835cc28db04e9d9caf0c8430407ca0347e83/librubyfmt/build.rs#L34
+ar crs "libripper-static.a" ext/ripper/ripper.o
+cp "libripper-static.a" "$static_libs"
+
 internal_incdir="$base/{internal_incdir}"
 
 mkdir -p "$internal_incdir"
@@ -232,8 +243,11 @@ def _build_ruby_impl(ctx):
     sharedir = ctx.actions.declare_directory("toolchain/share")
 
     internal_incdir = ctx.actions.declare_directory("toolchain/internal_include")
+    static_libs = ctx.actions.declare_file("toolchain/static_libs")
+    static_lib_ruby = ctx.actions.declare_file("toolchain/static_libs/libruby-static.a")
+    static_lib_ripper = ctx.actions.declare_file("toolchain/static_libs/libripper-static.a")
 
-    outputs = binaries + [libdir, incdir, sharedir, internal_incdir]
+    outputs = binaries + [libdir, incdir, sharedir, internal_incdir, static_libs, static_lib_ruby, static_lib_ripper]
 
     install_extra_srcs = []
     extra_srcs_object_files = []
@@ -269,6 +283,9 @@ def _build_ruby_impl(ctx):
             toolchain = libdir.dirname,
             src_dir = src_dir,
             internal_incdir = internal_incdir.path,
+            static_libs = static_libs.path,
+            static_lib_ruby = static_lib_ruby.path,
+            static_lib_ripper = static_lib_ripper.path,
             hdrs = " ".join(hdrs),
             libs = " ".join(libs),
             rubygems = ctx.files.rubygems[0].path,
@@ -289,10 +306,14 @@ def _build_ruby_impl(ctx):
             internal_includes = internal_incdir,
             lib = libdir,
             share = sharedir,
+            static_libs = static_libs,
+            static_lib_ruby = static_lib_ruby,
+            static_lib_ripper = static_lib_ripper,
         ),
         DefaultInfo(
             files = depset(outputs),
         ),
+        CcInfo(),
     ]
 
 _build_ruby = rule(
@@ -521,6 +542,52 @@ _ruby_internal_headers = rule(
     implementation = _ruby_internal_headers_impl,
 )
 
+def _rubyfmt_static_deps_impl(ctx):
+    ruby_info = ctx.attr.ruby[RubyInfo]
+
+    libs = [ruby_info.static_lib_ruby, ruby_info.static_lib_ripper]
+    cc_toolchain = find_cpp_toolchain(ctx)
+
+    cc_toolchain = ctx.attr._cc_toolchain[cc_common.CcToolchainInfo]
+    feature_configuration = cc_common.configure_features(
+        ctx = ctx,
+        cc_toolchain = cc_toolchain,
+        requested_features = ctx.features,
+        unsupported_features = ctx.disabled_features,
+    )
+
+    build = []
+
+    for file in libs:
+        library_to_link = cc_common.create_library_to_link(
+            cc_toolchain = cc_toolchain,
+            actions = ctx.actions,
+            feature_configuration = feature_configuration,
+            static_library = file,
+        )
+        build.append(library_to_link)
+
+    build = depset(build)
+    li = cc_common.create_linker_input(
+        owner = ctx.label,
+        libraries = build,
+    )
+    lc = cc_common.create_linking_context(linker_inputs = depset([li]))
+    return [CcInfo(linking_context = lc)]
+
+_rubyfmt_static_deps = rule(
+    attrs = {
+        "ruby": attr.label(
+            providers = [CcInfo],
+        ),
+        "_cc_toolchain": attr.label(
+            default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
+        ),
+    },
+    fragments = ["cpp"],
+    implementation = _rubyfmt_static_deps_impl,
+)
+
 def ruby(rubygems, gems, extra_srcs = None, append_srcs = None, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
     """
     Define a ruby build.
@@ -595,6 +662,12 @@ def ruby(rubygems, gems, extra_srcs = None, append_srcs = None, configure_flags 
 
     _ruby_binary(
         name = "bundle",
+        ruby = ":ruby-dist",
+        visibility = ["//visibility:public"],
+    )
+
+    _rubyfmt_static_deps(
+        name = "rubyfmt-static-deps",
         ruby = ":ruby-dist",
         visibility = ["//visibility:public"],
     )

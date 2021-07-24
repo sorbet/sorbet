@@ -19,7 +19,7 @@ module Kernel
       case RUBY_PLATFORM
       when "x86_64-linux"
         suffix = '.so'
-      when "x86_64-darwin18", "x86_64-darwin19"
+      when "x86_64-darwin18", "x86_64-darwin19", "x86_64-darwin20"
         suffix = '.bundle'
       else
         raise "unknown platform: #{RUBY_PLATFORM}"

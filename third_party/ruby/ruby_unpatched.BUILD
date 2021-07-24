@@ -1,6 +1,6 @@
 # vim: ft=bzl sw=4 ts=4 et
 
-load("@com_stripe_sorbet_llvm//third_party/ruby:build-ruby.bzl", "ruby")
+load("@com_stripe_ruby_typer//third_party/ruby:build-ruby.bzl", "ruby")
 
 ruby(
     configure_flags = [
@@ -14,7 +14,7 @@ ruby(
         # Enforce that we don't need Ruby to build in release builds.
         # (In non-release builds, we allow for an available system Ruby to
         # speed up the build.)
-        "@com_stripe_sorbet_llvm//tools/config:release": ["--with-baseruby=no"],
+        "@com_stripe_ruby_typer//tools/config:release": ["--with-baseruby=no"],
         "//conditions:default": [],
     }),
     copts = [

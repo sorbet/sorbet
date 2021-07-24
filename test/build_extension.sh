@@ -29,10 +29,10 @@ fi
 # Find logging and hermetic_tar with rlocation, as this script is run from a genrule
 
 # shellcheck disable=SC1090
-source "$(rlocation com_stripe_sorbet_llvm/test/logging.sh)"
+source "$(rlocation com_stripe_ruby_typer/test/logging.sh)"
 
 # shellcheck disable=SC1090
-source "$(rlocation com_stripe_sorbet_llvm/test/hermetic_tar.sh)"
+source "$(rlocation com_stripe_ruby_typer/test/hermetic_tar.sh)"
 
 # Argument Parsing #############################################################
 
@@ -47,7 +47,7 @@ ruby_source=( "$@" )
 
 # Environment Setup ############################################################
 
-sorbet="$(rlocation com_stripe_sorbet_llvm/main/sorbet)"
+sorbet="$(rlocation com_stripe_ruby_typer/compiler/sorbet)"
 
 # Main #########################################################################
 

@@ -7,9 +7,9 @@ base_dir="$(pwd)"
 cd ../../../..
 # we are now at the repo root
 
-versions=("ruby_2_6" "ruby_2_7")
+versions=("sorbet_ruby_2_6" "sorbet_ruby_2_7")
 
-if ! bazel test //gems/sorbet/test/hidden-method-finder -c opt "$@"; then
+if ! bazel test //gems/sorbet/test/hidden-method-finder --define compiler=false -c opt "$@"; then
     for test_dir in bazel-bin/gems/sorbet/test/hidden-method-finder/{simple,thorough}; do
         echo "Updating $test_dir"
         suite="$(basename "${test_dir}")"

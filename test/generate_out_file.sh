@@ -27,7 +27,7 @@ fi
 
 # Find logging with rlocation, as this script is run from a genrule
 # shellcheck disable=SC1090
-source "$(rlocation com_stripe_sorbet_llvm/test/logging.sh)"
+source "$(rlocation com_stripe_ruby_typer/test/logging.sh)"
 
 # Argument Parsing #############################################################
 
@@ -49,7 +49,7 @@ ruby="$(rlocation sorbet_ruby_2_7/ruby)"
 # in the sandbox. To work around this, we pull out these dirs and use -I below
 # to modify the include path (which can take absolute or relative paths).
 sorbet_runtime_include=$(dirname "$(rlocation com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb)")
-patch_require_include=$(dirname "$(rlocation com_stripe_sorbet_llvm/test/patch_require.rb)")
+patch_require_include=$(dirname "$(rlocation com_stripe_ruby_typer/test/patch_require.rb)")
 
 # Main #########################################################################
 
