@@ -5,7 +5,7 @@ sidebar_label: T.class_of
 ---
 
 Classes are also values in Ruby. Sorbet uses `T.class_of(...)` to describe the
-type of those class objects.
+types of those class objects.
 
 ```ruby
 T.class_of(Integer)
@@ -68,8 +68,8 @@ See below for a common gotcha.
 
 ## `T.class_of` and modules
 
-**TL;DR**: `T.class_of` has some unintuitive behavior with modules instead of
-classes. Consider either using an abstract class or using
+**TL;DR**: `T.class_of` has some unintuitive behavior with modules (as opposed
+to classes). Consider either using an abstract class or using
 `T.all(Class, MyInterface::ClassMethods)` instead of `T.class_of(MyInterface)`.
 
 To showcase the problem and solutions, let’s walk through a running example. The
@@ -79,7 +79,7 @@ full code for this example is available here:
   → View on sorbet.run
 </a>
 
-Consider we have some code like this:
+Suppose we have some code like this:
 
 ```ruby
 class MyClass
@@ -158,23 +158,23 @@ Next, let's explain the other two errors:
 ```
 
 For the `MyInterface` class object, we see that its only ancestor is itself
-(ignoring those common ancestors). Notably, **none** of the classes in this list
+(ignoring common ancestors like `Object`). Notably, **none** of the classes in this list
 define either a method called `new` (because `Class` is not there) nor
 `some_class_method` (because `MyInterface::ClassMethods` is not there).
 
-While these errors are correct, **we want to be able to type this code**. There
+While these errors are technically correct, **we want to be able to type this code**. There
 are two options:
 
 1.  Use an abstract class instead of an interface.
 
     Sometimes this is not possible, because the class in question already has a
-    superclass that can't be changed. However, if this is an option to you, it's
+    superclass that can't be changed. However, if this option is available, it's
     likely the most straightforward. If we change `MyInterface` to
     `MyAbstractClass`, all our problems vanish.
 
 2.  Use `T.all(Class, MyInterface::ClassMethods)`.
 
-    This is only a partial solution, but might be good enough.
+    For our example this is only a partial solution, but in many cases it is good enough.
 
 Specifically, option (2) looks like this:
 
@@ -192,9 +192,9 @@ We’re down to only one error now. The error is still technically correct: sinc
 we’re using `Class` instead of `T.class_of(...)`, Sorbet has no way to know what
 the instance type created by `x.new` will be (it could be anything), so it
 treats the type as `Object`, causing `some_instance_method` to not be found.
-
-But if this tradeoff is okay, both the top-level call site and the call to
-`x.some_class_method` now typecheck successfully.
+However, both the top-level call site to `example3` and the call to `x.some_class_method`
+now typecheck successfully. In cases where we don't actually need to use instance methods
+from `MyInterface`, this may be an acceptable workaround.
 
 > A future feature of Sorbet might be able to improve this workaround. See
 > https://github.com/sorbet/sorbet/issues/62.
