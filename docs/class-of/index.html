@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>T.class_of · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&gt; TODO: This page is still a fragment. Contributions welcome!"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="T.class_of · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&gt; TODO: This page is still a fragment. Contributions welcome!"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Types for Class Objects via T.class_of · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Classes are also values in Ruby. Sorbet uses `T.class_of(...)` to describe the"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Types for Class Objects via T.class_of · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="Classes are also values in Ruby. Sorbet uses `T.class_of(...)` to describe the"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
               (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
               (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
               m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -62,66 +62,166 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/class-of.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">T.class_of</h1></header><article><div><span><blockquote>
-<p>TODO: This page is still a fragment. Contributions welcome!</p>
-</blockquote>
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/class-of.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Types for Class Objects via T.class_of</h1></header><article><div><span><p>Classes are also values in Ruby. Sorbet uses <code>T.class_of(...)</code> to describe the
+types of those class objects.</p>
 <pre><code class="hljs css language-ruby">T.class_of(Integer)
 </code></pre>
-<p>It can be confusing whether you want <code>MyClass</code> or <code>T.class_of(MyClass)</code>. For
-reference, these assertions are true:</p>
-<pre><code class="hljs css language-ruby">T.let(<span class="hljs-number">5</span>, Integer)
+<p>The difference between <code>MyClass</code> and <code>T.class_of(MyClass)</code> can be confusing.
+Here are some examples to make it less confusing:</p>
+<table>
+<thead>
+<tr><th>These expressions…</th><th>…have these types</th></tr>
+</thead>
+<tbody>
+<tr><td><code>0</code>, <code>1</code>, <code>2 + 2</code></td><td><code>Integer</code></td></tr>
+<tr><td><code>Integer</code></td><td><code>T.class_of(Integer)</code></td></tr>
+<tr><td><code>42.class</code></td><td><code>T.class_of(Integer)</code></td></tr>
+</tbody>
+</table>
+<p>Here’s a playground link to confirm these types:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+T.let(<span class="hljs-number">0</span>, Integer)
+T.let(<span class="hljs-number">1</span>, Integer)
+T.let(<span class="hljs-number">2</span> + <span class="hljs-number">2</span>, Integer)
 
-T.let(<span class="hljs-number">5</span><span class="hljs-class">.<span class="hljs-keyword">class</span>, <span class="hljs-title">T</span>.<span class="hljs-title">class_of</span>(<span class="hljs-title">Integer</span>))</span>
 T.let(Integer, T.class_of(Integer))
+T.let(<span class="hljs-number">42</span><span class="hljs-class">.<span class="hljs-keyword">class</span>, <span class="hljs-title">T</span>.<span class="hljs-title">class_of</span>(<span class="hljs-title">Integer</span>))</span>
 </code></pre>
-<p>You can also use modules. It respects inheritance in the same way that
-<a href="/docs/class-types">Class Types</a> do:</p>
-<pre><code class="hljs css language-ruby">extend T::Sig
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0AT.let(0%2C%20Integer)%0AT.let(1%2C%20Integer)%0AT.let(2%20%2B%202%2C%20Integer)%0A%0AT.let(Integer%2C%20T.class_of(Integer))%0AT.let(42.class%2C%20T.class_of(Integer))">
+→ View on sorbet.run
+</a></p>
+<h2><a class="anchor" aria-hidden="true" id="tclass_of-and-inheritance"></a><a href="#tclass_of-and-inheritance" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.class_of</code> and inheritance</h2>
+<p>As with <a href="/docs/class-types#inheritance">Class Types</a>, <code>T.class_of</code> types work with
+inheritance:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+extend T::Sig
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Grandparent</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span> &lt; Grandparent;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent;</span> <span class="hljs-keyword">end</span>
 
 sig {params(<span class="hljs-symbol">x:</span> T.class_of(Parent)).void}
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 
-foo(Parent) <span class="hljs-comment"># ok</span>
-foo(Child) <span class="hljs-comment"># ok</span>
-
-foo(Grandparent) <span class="hljs-comment"># error</span>
+example(Grandparent)   <span class="hljs-comment"># error</span>
+example(Parent)        <span class="hljs-comment"># ok</span>
+example(Child)         <span class="hljs-comment"># ok</span>
 </code></pre>
-<p><a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Aclass%20Grandparent%3B%20end%0Aclass%20Parent%20%3C%20Grandparent%3B%20end%0Aclass%20Child%20%3C%20Parent%3B%20end%0A%0Asig%20%7Bparams(x%3A%20T.class_of(Parent)).void%7D%0Adef%20foo(x)%3B%20end%0A%0A%0Afoo(Parent)%20%23%20ok%0Afoo(Child)%20%23%20ok%0A%0Afoo(Grandparent)%20%23%20error">
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20Grandparent%3B%20end%0Aclass%20Parent%20%3C%20Grandparent%3B%20end%0Aclass%20Child%20%3C%20Parent%3B%20end%0A%0Asig%20%7Bparams(x%3A%20T.class_of(Parent)).void%7D%0Adef%20example(x)%3B%20end%0A%0Aexample(Grandparent)%20%20%20%23%20error%0Aexample(Parent)%20%20%20%20%20%20%20%20%23%20ok%0Aexample(Child)%20%20%20%20%20%20%20%20%20%23%20ok">
 → View on sorbet.run
 </a></p>
-<p>Gotcha: module ancestor chains (<code>include</code>, <code>extend</code>) work in a way many people
-don’t expect:</p>
-<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
-
-extend T::Sig
-
-<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">M</span></span>
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
-<span class="hljs-keyword">end</span>
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span>;</span> <span class="hljs-keyword">include</span> M; <span class="hljs-keyword">end</span>
-
-sig {params(<span class="hljs-symbol">x:</span> T.class_of(M)).void}
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test</span><span class="hljs-params">(x)</span></span>
-  x.foo
-<span class="hljs-keyword">end</span>
-
-
-M.foo                      <span class="hljs-comment"># ok</span>
-M.is_a?(M.singleton_class) <span class="hljs-comment"># =&gt; true</span>
-test(M)                    <span class="hljs-comment"># ok, given above</span>
-
-C.foo                      <span class="hljs-comment"># not ok: this raises a NoMethodError when run</span>
-C.is_a?(M.singleton_class) <span class="hljs-comment"># =&gt; false</span>
-test(C)                    <span class="hljs-comment"># not ok, given above</span>
-</code></pre>
-<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aextend%20T%3A%3ASig%0A%0Amodule%20M%0A%20%20def%20self.foo%3B%20end%0Aend%0Aclass%20C%3B%20include%20M%3B%20end%0A%0Asig%20%7Bparams(x%3A%20T.class_of(M)).void%7D%0Adef%20test(x)%0A%20%20x.foo%0Aend%0A%0A%0AM.foo%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20ok%0AM.is_a%3F(M.singleton_class)%20%23%20%3D%3E%20true%0Atest(M)%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20ok%2C%20given%20above%0A%0AC.foo%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20not%20ok%3A%20this%20raises%20a%20NoMethodError%20when%20run%0AC.is_a%3F(M.singleton_class)%20%23%20%3D%3E%20false%0Atest(C)%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20not%20ok%2C%20given%20above">
+<p>The most surprising feature of <code>T.class_of</code> comes from not understanding
+inheritance in Ruby, especially with <code>include</code> or <code>extend</code> plus modules.</p>
+<p>See below for a common gotcha.</p>
+<h2><a class="anchor" aria-hidden="true" id="tclass_of-and-modules"></a><a href="#tclass_of-and-modules" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.class_of</code> and modules</h2>
+<p><strong>TL;DR</strong>: <code>T.class_of</code> has some unintuitive behavior with modules (as opposed
+to classes). Consider either using an abstract class or using
+<code>T.all(Class, MyInterface::ClassMethods)</code> instead of <code>T.class_of(MyInterface)</code>.</p>
+<p>To showcase the problem and solutions, let’s walk through a running example. The
+full code for this example is available here:</p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20Module%3B%20include%20T%3A%3ASig%3B%20end%0A%0Amodule%20MyInterface%0A%20%20extend%20T%3A%3AHelpers%0A%0A%20%20def%20some_instance_method%3B%20end%0A%0A%20%20module%20ClassMethods%0A%20%20%20%20def%20some_class_method%3B%20end%0A%20%20end%0A%20%20mixes_in_class_methods(ClassMethods)%0Aend%0A%0Aclass%20MyClass%0A%20%20include%20MyInterface%0Aend%0A%0Asig%20%7Bparams(x%3A%20T.class_of(MyClass)).void%7D%0Adef%20example1(x)%0A%20%20x.new.some_instance_method%20%20%23%20ok%0A%20%20x.some_class_method%20%20%20%20%20%20%20%20%20%23%20ok%0Aend%0A%0Aexample1(MyClass)%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20ok%0A%0Asig%20%7Bparams(x%3A%20T.class_of(MyInterface)).void%7D%0Adef%20example2(x)%0A%20%20x.new.some_instance_method%20%20%23%20error%3A%20%60new%60%20does%20not%20exist%0A%20%20x.some_class_method%20%20%20%20%20%20%20%20%20%23%20error%3A%20%60some_class_method%60%20does%20not%20exist%0Aend%0A%0Aexample2(MyClass)%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20error%3A%20Expected%20%60T.class_of(MyInterface)%60%20but%20found%20%60T.class_of(MyClass)%60%0A%0Asig%20%7Bparams(x%3A%20T.all(Class%2C%20MyInterface%3A%3AClassMethods)).void%7D%0Adef%20example3(x)%0A%20%20x.new.some_instance_method%20%20%23%20error%3A%20%60some_instance_method%60%20does%20not%20exist%0A%20%20x.some_class_method%20%20%20%20%20%20%20%20%20%23%20ok%0Aend%0A%0Aexample3(MyClass)%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20ok">
 → View on sorbet.run
 </a></p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/sealed"><span class="arrow-prev">← </span><span>Sealed Classes</span></a><a class="docs-next button" href="/docs/stdlib-generics"><span>Arrays &amp; Hashes</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2021 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<p>Suppose we have some code like this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">some_instance_method</span>;</span> <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">some_class_method</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">x:</span> T.class_of(MyClass)).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example1</span><span class="hljs-params">(x)</span></span>
+  x.new.some_instance_method  <span class="hljs-comment"># ok</span>
+  x.some_class_method         <span class="hljs-comment"># ok</span>
+<span class="hljs-keyword">end</span>
+
+example1(MyClass)             <span class="hljs-comment"># ok</span>
+</code></pre>
+<p><code>MyClass</code> declares a class which has an instance method and a class method. The
+<code>T.class_of(MyClass)</code> annotation allows <code>example1</code> to call both those methods.
+None of this is too surprising.</p>
+<p>Now imagine that we have a lot of these classes and we want to factor out an
+interface. The straightforward way to do this uses
+<a href="abstract#interfaces-and-the-included-hook"><code>mixes_in_class_methods</code></a>, like
+this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">MyInterface</span></span>
+  extend T::Helpers
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">some_instance_method</span>;</span> <span class="hljs-keyword">end</span>
+
+  <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">ClassMethods</span></span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">some_class_method</span>;</span> <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+  mixes_in_class_methods(ClassMethods)
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+  <span class="hljs-keyword">include</span> MyInterface
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>This will make <code>some_instance_method</code> and <code>some_class_method</code> available on
+<code>MyClass</code>, just like before. But if we try to replace <code>T.class_of(MyClass)</code> with
+<code>T.class_of(MyInterface)</code>, it doesn’t work:</p>
+<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">x:</span> T.class_of(MyInterface)).void}  <span class="hljs-comment"># ← sig has changed</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example2</span><span class="hljs-params">(x)</span></span>
+  x.new.some_instance_method  <span class="hljs-comment"># error: `new` does not exist</span>
+  x.some_class_method         <span class="hljs-comment"># error: `some_class_method` does not exist</span>
+<span class="hljs-keyword">end</span>
+
+example2(MyClass)             <span class="hljs-comment"># error: Expected `T.class_of(MyInterface)`</span>
+                              <span class="hljs-comment">#        but found `T.class_of(MyClass)`</span>
+</code></pre>
+<p><strong>These errors are correct</strong>, and we can verify them in the Ruby REPL. First,
+let’s explain the error on the last line above:</p>
+<pre><code class="hljs">❯ MyClass.singleton_class.ancestors
+=&gt; [#&lt;Class:MyClass&gt;, MyInterface::ClassMethods, #&lt;Class:Object&gt;, T::Private::Methods::MethodHooks, #&lt;Class:BasicObject&gt;, Class, Module, T::Sig, Object, Kernel, BasicObject]
+</code></pre>
+<p>The first two ancestors of the <code>MyClass</code> object are itself and
+<code>MyInterface::ClassMethods</code>. But notably, <code>#&lt;Class:MyInterface&gt;</code> <strong>does not</strong>
+appear in this list, so Sorbet is correct to say that <code>MyClass</code> does not have
+type <code>T.class_of(MyInterface)</code>. This is because neither <code>include</code> nor <code>extend</code>
+in Ruby will cause <code>#&lt;Class:MyInterface&gt;</code> to appear in any ancestors list.</p>
+<p>Next, let’s explain the other two errors:</p>
+<pre><code class="hljs">❯ MyInterface.singleton_class.ancestors
+=&gt; [#&lt;Cla<span class="hljs-symbol">ss:My</span>Interface&gt;, <span class="hljs-symbol">T:</span><span class="hljs-symbol">:Pr</span>iva<span class="hljs-symbol">te:</span><span class="hljs-symbol">:Mi</span>xesInClassMethods, <span class="hljs-symbol">T:</span><span class="hljs-symbol">:He</span>lpers, Module, <span class="hljs-symbol">T:</span><span class="hljs-symbol">:Si</span>g, Object, Kernel, BasicObject]
+</code></pre>
+<p>For the <code>MyInterface</code> class object, we see that its only ancestor is itself
+(ignoring common ancestors like <code>Object</code>). Notably, <strong>none</strong> of the classes in
+this list define either a method called <code>new</code> (because <code>Class</code> is not there) nor
+<code>some_class_method</code> (because <code>MyInterface::ClassMethods</code> is not there).</p>
+<p>While these errors are technically correct, <strong>we want to be able to type this
+code</strong>. There are two options:</p>
+<ol>
+<li><p>Use an abstract class instead of an interface.</p>
+<p>Sometimes this is not possible, because the class in question already has a
+superclass that can’t be changed. However, if this option is available, it’s
+likely the most straightforward. If we change <code>MyInterface</code> to
+<code>MyAbstractClass</code>, all our problems vanish.</p></li>
+<li><p>Use <code>T.all(Class, MyInterface::ClassMethods)</code>.</p>
+<p>For our example this is only a partial solution, but in many cases it is
+good enough.</p></li>
+</ol>
+<p>Specifically, option (2) looks like this:</p>
+<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">x:</span> T.all(Class, MyInterface::ClassMethods)).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example3</span><span class="hljs-params">(x)</span></span>
+  x.new.some_instance_method  <span class="hljs-comment"># error: `some_instance_method` does not exist</span>
+  x.some_class_method         <span class="hljs-comment"># ok</span>
+<span class="hljs-keyword">end</span>
+
+example3(MyClass)             <span class="hljs-comment"># ok</span>
+</code></pre>
+<p>We’re down to only one error now. The error is still technically correct: since
+we’re using <code>Class</code> instead of <code>T.class_of(...)</code>, Sorbet has no way to know what
+the instance type created by <code>x.new</code> will be (it could be anything), so it
+treats the type as <code>Object</code>, causing <code>some_instance_method</code> to not be found.
+However, both the top-level call site to <code>example3</code> and the call to
+<code>x.some_class_method</code> now typecheck successfully. In cases where we don’t
+actually need to use instance methods from <code>MyInterface</code>, this may be an
+acceptable workaround.</p>
+<blockquote>
+<p>A future feature of Sorbet might be able to improve this workaround. See
+<a href="https://github.com/sorbet/sorbet/issues/62">https://github.com/sorbet/sorbet/issues/62</a>.</p>
+</blockquote>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/sealed"><span class="arrow-prev">← </span><span>Sealed Classes</span></a><a class="docs-next button" href="/docs/stdlib-generics"><span>Arrays &amp; Hashes</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#tclass_of-and-inheritance"><code>T.class_of</code> and inheritance</a></li><li><a href="#tclass_of-and-modules"><code>T.class_of</code> and modules</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2021 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
