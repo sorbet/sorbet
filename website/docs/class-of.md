@@ -159,12 +159,12 @@ Next, let's explain the other two errors:
 ```
 
 For the `MyInterface` class object, we see that its only ancestor is itself
-(ignoring common ancestors like `Object`). Notably, **none** of the classes in this list
-define either a method called `new` (because `Class` is not there) nor
+(ignoring common ancestors like `Object`). Notably, **none** of the classes in
+this list define either a method called `new` (because `Class` is not there) nor
 `some_class_method` (because `MyInterface::ClassMethods` is not there).
 
-While these errors are technically correct, **we want to be able to type this code**. There
-are two options:
+While these errors are technically correct, **we want to be able to type this
+code**. There are two options:
 
 1.  Use an abstract class instead of an interface.
 
@@ -175,7 +175,8 @@ are two options:
 
 2.  Use `T.all(Class, MyInterface::ClassMethods)`.
 
-    For our example this is only a partial solution, but in many cases it is good enough.
+    For our example this is only a partial solution, but in many cases it is
+    good enough.
 
 Specifically, option (2) looks like this:
 
@@ -193,9 +194,10 @@ We’re down to only one error now. The error is still technically correct: sinc
 we’re using `Class` instead of `T.class_of(...)`, Sorbet has no way to know what
 the instance type created by `x.new` will be (it could be anything), so it
 treats the type as `Object`, causing `some_instance_method` to not be found.
-However, both the top-level call site to `example3` and the call to `x.some_class_method`
-now typecheck successfully. In cases where we don't actually need to use instance methods
-from `MyInterface`, this may be an acceptable workaround.
+However, both the top-level call site to `example3` and the call to
+`x.some_class_method` now typecheck successfully. In cases where we don't
+actually need to use instance methods from `MyInterface`, this may be an
+acceptable workaround.
 
 > A future feature of Sorbet might be able to improve this workaround. See
 > https://github.com/sorbet/sorbet/issues/62.
