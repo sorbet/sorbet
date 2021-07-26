@@ -1030,7 +1030,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // argument has no location.  The latter also inhibits type-driven
                 // autocorrects from kicking in.
                 bool argInBounds = kwaValue < ait;
-                // Note: it's OK to compute with kwaValue even if it's out-of-bounds.
                 auto kwargOffset = kwaValue - args.args.begin();
                 auto originLoc = argInBounds ? args.argLoc(kwargOffset) : kwargsLoc;
                 auto argLoc = argInBounds ? args.argLoc(kwargOffset) : Loc::none();
