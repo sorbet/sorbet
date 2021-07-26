@@ -311,10 +311,6 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::typeAliasTemp());
     id = synthesizeClass(core::Names::Constants::Chalk(), 0, true);
     ENFORCE(id == Symbols::Chalk());
-    id = enterClassSymbol(Loc::none(), Symbols::Chalk(), core::Names::Constants::Tools());
-    ENFORCE(id == Symbols::Chalk_Tools());
-    id = enterClassSymbol(Loc::none(), Symbols::Chalk_Tools(), core::Names::Constants::Accessible());
-    ENFORCE(id == Symbols::Chalk_Tools_Accessible());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Generic());
     ENFORCE(id == Symbols::T_Generic());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Tuple());
