@@ -1013,7 +1013,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 ENFORCE(!sawKwSplat);
                 auto kwaValue = kwait + (offset * 2) + 1;
                 TypeAndOrigins tpe;
-                ENFORCE(args.args.size() == args.locs.args.size(), "what?!");
+                ENFORCE(args.args.size() == args.locs.args.size(), "Send arg and loc vectors did not match in length");
                 // This in-bounds check is unusual, but it's necessary for cases
                 // where we are processing a kwarg that comes from a non-kwsplat
                 // shapely-typed hash.  In such cases, our kwargOffset will appear to
