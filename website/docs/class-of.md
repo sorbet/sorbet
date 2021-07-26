@@ -96,8 +96,9 @@ end
 example1(MyClass)             # ok
 ```
 
-This is a class which has an instance method and a class method.
-`T.class_of(MyClass)` works like we expect.
+`MyClass` declares a class which has an instance method and a class method. The
+`T.class_of(MyClass)` annotation allows `example1` to call both those methods.
+None of this is too surprising.
 
 Now imagine that we have a lot of these classes and we want to factor out an
 interface. The straightforward way to do this uses
