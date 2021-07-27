@@ -462,8 +462,6 @@ NameDef names[] = {
     {"Base", "Base", true},
     {"Void", "Void", true},
     {"TypeAlias", "<TypeAlias>", true},
-    {"Tools", "Tools", true},
-    {"Accessible", "Accessible", true},
     {"Generic", "Generic", true},
     {"Tuple", "Tuple", true},
     {"Shape", "Shape", true},
