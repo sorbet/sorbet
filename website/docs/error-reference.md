@@ -87,8 +87,8 @@ end
 
 In this case, it is possible to directly call `include` on the the singleton
 class of `EXPRESSION`, but it should be done with **utmost caution**, as Sorbet
-will fail in strange ways and make far less accurate predictions about the
-codebase:
+will not consider the include and provide a less accurate analysis (see also
+[#4002](#4002)):
 
 ```rb
 some_variable.singleton_class.include(Foo)
@@ -131,7 +131,7 @@ def x
   rand.round == 0 ? A : B
 end
 
-class Main
+class C
   include x  # error: `include` must be passed a constant literal
 end
 ```
@@ -141,9 +141,9 @@ inheritance hierarchy in a codebase. Sorbet must know the complete inheritance
 hierarchy of a codebase in order to check that a variable is a valid instance of
 a type.
 
-It is possible to silence this error, but it should be done with **utmost
-caution**, as Sorbet will fail in strange ways and make far less accurate
-predictions about a codebase. To silence this error, use `T.unsafe`:
+It is possible to silence this error with `T.unsafe`, but it should be done with
+**utmost caution**, as Sorbet will not consider the include and provide a less
+accurate analysis:
 
 ```ruby
 module A; end
@@ -153,9 +153,21 @@ def x
   rand.round == 0 ? A : B
 end
 
-class Main
+class C
   T.unsafe(self).include x
 end
+```
+
+Which might create unexpected errors:
+
+```ruby
+c = C.new
+
+c.a # error: Method `a` does not exist on `C`
+c.b # error: Method `b` does not exist on `C`
+
+T.let(C, A) # error: Argument does not have asserted type `A`
+T.let(C, B) # error: Argument does not have asserted type `B`
 ```
 
 ## 4010
