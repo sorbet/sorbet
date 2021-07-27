@@ -591,6 +591,11 @@ public:
         auto *sorbetGlobalConstDupHashFn = mod.getFunction("sorbet_globalConstDupHash");
         auto *sorbetSendFn = mod.getFunction("sorbet_i_send");
 
+        if (rbHashDupFn == nullptr || rbToHashTypeFn == nullptr || sorbetGlobalConstDupHashFn == nullptr ||
+            sorbetSendFn == nullptr) {
+            return false;
+        }
+
         for (auto &function : mod) {
             for (auto &block : function) {
                 for (auto insn_iter = block.begin(); insn_iter != block.end();) {
