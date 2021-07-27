@@ -267,7 +267,9 @@ void addLTOPasses(llvm::legacy::PassManager &pm, llvm::ModulePass *printLowered)
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
     {
         // print out the IR right before the sorbet lowerings
-        pm.add(printLowered);
+        if (printLowered != nullptr) {
+            pm.add(printLowered);
+        }
 
         // Sorbet modifications, run our lowering super late in pipeline
         // this allows other optimizations to move intrinsics around as black boxes and keep optimizing them under
@@ -327,7 +329,7 @@ void ObjectFileEmitter::init() {
 }
 
 bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, unique_ptr<llvm::Module> module,
-                            string_view dir, string_view objectName) {
+                            string_view soDir, optional<string_view> llvmIrDir, string_view objectName) {
     // We need to ensure that the codegen flags have been initialized, so that InitTargetOptionsFromCodeGenFlags has
     // sane defaults to use.
     static llvm::codegen::RegisterCodeGenFlags codeGenFlags;
@@ -366,10 +368,10 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
 
     llvm::legacy::PassManager pm;
     // print unoptimized IR
-    {
+    if (llvmIrDir.has_value()) {
         llvm::legacy::PassManager ppm;
         std::error_code ec;
-        auto name = ((string)dir) + "/" + (string)objectName + ".ll";
+        auto name = ((string)llvmIrDir.value()) + "/" + (string)objectName + ".ll";
         llvm::raw_fd_ostream llFile(name, ec, llvm::sys::fs::F_Text);
         ppm.add(llvm::createPrintModulePass(llFile, ""));
         ppm.run(*module);
@@ -404,15 +406,24 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
     addModulePasses(pm);
     pm.add(Passes::createRemoveUnnecessaryHashDupsPass());
     // print lowered IR
-    auto nameOptl = ((string)dir) + "/" + (string)objectName + ".lll";
-    llvm::raw_fd_ostream lllFile(nameOptl, ec1, llvm::sys::fs::F_Text);
-    auto *printLowered = llvm::createPrintModulePass(lllFile, "");
+    llvm::ModulePass *printLowered = nullptr;
+    // We store lllFile in an std::optional declared outside the "if" to make sure it stays alive until the pass is run.
+    std::optional<llvm::raw_fd_ostream> lllFile;
+    if (llvmIrDir.has_value()) {
+        auto nameOptl = ((string)llvmIrDir.value()) + "/" + (string)objectName + ".lll";
+        lllFile.emplace(nameOptl, ec1, llvm::sys::fs::F_Text);
+        printLowered = llvm::createPrintModulePass(lllFile.value(), "");
+    }
     // LTO passes
     addLTOPasses(pm, printLowered);
     // print optimized IR
-    auto nameOpt = ((string)dir) + "/" + (string)objectName + ".llo";
-    llvm::raw_fd_ostream lloFile(nameOpt, ec1, llvm::sys::fs::F_Text);
-    pm.add(llvm::createPrintModulePass(lloFile, ""));
+    // We store lloFile in an std::optional declared outside the "if" to make sure it stays alive until the pass is run.
+    std::optional<llvm::raw_fd_ostream> lloFile;
+    if (llvmIrDir.has_value()) {
+        auto nameOpt = ((string)llvmIrDir.value()) + "/" + (string)objectName + ".llo";
+        lloFile.emplace(nameOpt, ec1, llvm::sys::fs::F_Text);
+        pm.add(llvm::createPrintModulePass(lloFile.value(), ""));
+    }
     {
         Timer timer(logger, "functionPasses");
 
@@ -431,8 +442,8 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
     if (debug_mode) {
         pm.add(llvm::createVerifierPass());
     }
-    auto objectFileName = (string)fmt::format("{}/{}.o", dir, objectName);
-    auto soNamePrefix = (string)fmt::format("{}/{}", dir, objectName);
+    auto objectFileName = (string)fmt::format("{}/{}.o", soDir, objectName);
+    auto soNamePrefix = (string)fmt::format("{}/{}", soDir, objectName);
     if (!outputObjectFile(logger, pm, objectFileName, move(module), targetMachine)) {
         return false;
     }

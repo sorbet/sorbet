@@ -2,6 +2,7 @@
 #define SORBET_COMPILER_OBJECT_FILE_EMITTER_H
 
 #include <memory>
+#include <optional>
 #include <string_view>
 namespace spdlog {
 class logger;
@@ -17,7 +18,7 @@ class ObjectFileEmitter {
 public:
     static void init();
     static bool run(spdlog::logger &logger, llvm::LLVMContext &lctx, std::unique_ptr<llvm::Module> module,
-                    std::string_view targetDir, std::string_view fileName);
+                    std::string_view soDir, std::optional<std::string_view> llvmIrDir, std::string_view fileName);
 };
 } // namespace sorbet::compiler
 #endif

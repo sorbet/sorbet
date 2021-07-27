@@ -148,6 +148,8 @@ for this_src in "${rb_src[@]}" DUMMY; do
                 --silence-dev-message \
                 --no-error-count \
                 --suppress-non-critical \
+                --so-folder \
+                "$llvmir" \
                 --llvm-ir-folder \
                 "$llvmir" \
                 "${srcs[@]}" \

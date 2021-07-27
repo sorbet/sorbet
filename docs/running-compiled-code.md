@@ -88,11 +88,14 @@ All of the sigils at the top of the file are necessary:
 Place the ruby program above in `test.rb`, and compile it with the following commands:
 
 ```shell
-$ mkdir output
-$ scratchpad/bin/sorbet --llvm-ir-folder=output test.rb
+$ mkdir so_output
+$ mkdir ir_output
+$ scratchpad/bin/sorbet --so-folder=so_output --llvm-ir-folder=ir_output test.rb
 No errors! Great job.
-$ ls output
-test.rb.ll  test.rb.lll  test.rb.llo  test.rb.so
+$ ls so_output
+test.rb.so
+$ ls ir_output
+test.rb.ll  test.rb.lll  test.rb.llo
 ```
 
 The files produced have suffixes that correspond to different phases of compilation: `.lll` is the initial LLVM IR

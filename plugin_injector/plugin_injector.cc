@@ -37,8 +37,8 @@ string objectFileName(const core::GlobalState &gs, const core::FileRef &f) {
     return sourceFile;
 }
 
-void ensureOutputDir(const string_view irOutputDir, string_view fileName) {
-    string path(irOutputDir);
+void ensureOutputDir(const string_view outputDir, string_view fileName) {
+    string path(outputDir);
 
     auto finalSlashPos = fileName.rfind('/');
     if (finalSlashPos == string_view::npos) {
@@ -95,6 +95,7 @@ public:
 };
 
 class LLVMSemanticExtension : public SemanticExtension {
+    optional<string> soOutputDir;
     optional<string> irOutputDir;
     bool forceCompiled;
     mutable struct {
@@ -116,7 +117,7 @@ class LLVMSemanticExtension : public SemanticExtension {
     }
 
     bool shouldCompile(const core::GlobalState &gs, const core::FileRef &f) const {
-        if (!irOutputDir.has_value()) {
+        if (!soOutputDir.has_value()) {
             return false;
         }
         if (forceCompiled) {
@@ -172,7 +173,8 @@ class LLVMSemanticExtension : public SemanticExtension {
     }
 
 public:
-    LLVMSemanticExtension(optional<string> irOutputDir, bool forceCompiled) {
+    LLVMSemanticExtension(optional<string> soOutputDir, optional<string> irOutputDir, bool forceCompiled) {
+        this->soOutputDir = move(soOutputDir);
         this->irOutputDir = move(irOutputDir);
         this->forceCompiled = forceCompiled;
     }
@@ -334,15 +336,18 @@ public:
 
         compiler::CompilerState cs(gs, lctx, module.get(), debug.get(), compileUnit, f, nullptr, nullptr, nullptr);
         string fileName = objectFileName(gs, f);
-        ensureOutputDir(irOutputDir.value(), fileName);
-        compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
+        ensureOutputDir(soOutputDir.value(), fileName);
+        if (irOutputDir.has_value()) {
+            ensureOutputDir(irOutputDir.value(), fileName);
+        }
+        compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), soOutputDir.value(), irOutputDir, fileName);
     };
 
     virtual void finishTypecheck(const core::GlobalState &gs) const override {}
 
     virtual ~LLVMSemanticExtension(){};
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) override {
-        return make_unique<LLVMSemanticExtension>(this->irOutputDir, this->forceCompiled);
+        return make_unique<LLVMSemanticExtension>(this->soOutputDir, this->irOutputDir, this->forceCompiled);
     };
     virtual void merge(const core::GlobalState &from, core::GlobalState &to, core::GlobalSubstitution &subst) override {
     }
@@ -351,6 +356,7 @@ public:
 class LLVMSemanticExtensionProvider : public SemanticExtensionProvider {
 public:
     virtual void injectOptions(cxxopts::Options &optsBuilder) const override {
+        optsBuilder.add_options("compiler")("so-folder", "Output .so files to directory", cxxopts::value<string>());
         optsBuilder.add_options("compiler")("llvm-ir-folder", "Output LLVM IR to directory", cxxopts::value<string>());
         optsBuilder.add_options("compiler")("force-compiled", "Force all files to this compiled level",
                                             cxxopts::value<bool>());
@@ -361,8 +367,19 @@ public:
             throw EarlyReturnWithCode(0);
         }
 
+        optional<string> soOutputDir;
         optional<string> irOutputDir;
         bool forceCompiled = false;
+        if (providedOptions.count("so-folder") > 0) {
+            auto outputDir = providedOptions["so-folder"].as<string>();
+
+            if (!FileOps::dirExists(outputDir)) {
+                fmt::print("Missing output directory {}\n", outputDir);
+                throw EarlyReturnWithCode(1);
+            }
+
+            soOutputDir = outputDir;
+        }
         if (providedOptions.count("llvm-ir-folder") > 0) {
             auto outputDir = providedOptions["llvm-ir-folder"].as<string>();
 
@@ -377,12 +394,13 @@ public:
             forceCompiled = providedOptions["force-compiled"].as<bool>();
         }
 
-        return make_unique<LLVMSemanticExtension>(irOutputDir, forceCompiled);
+        return make_unique<LLVMSemanticExtension>(soOutputDir, irOutputDir, forceCompiled);
     };
     virtual std::unique_ptr<SemanticExtension> defaultInstance() const override {
-        auto forceCompile = false;
+        optional<string> soOutputDir;
         optional<string> irOutputDir;
-        return make_unique<LLVMSemanticExtension>(irOutputDir, forceCompile);
+        auto forceCompile = false;
+        return make_unique<LLVMSemanticExtension>(soOutputDir, irOutputDir, forceCompile);
     }
     virtual ~LLVMSemanticExtensionProvider(){};
 };

@@ -2,16 +2,16 @@
 
 set -euo pipefail
 
-llvmir="$(mktemp -d)"
+outdir="$(mktemp -d)"
 
 cleanup() {
-    rm -rf "$llvmir"
+    rm -rf "$outdir"
 }
 trap cleanup EXIT
 
 go () {
   source="$1"
-  sorbet --silence-dev-message --llvm-ir-folder="$llvmir" "$source" || echo 'sorbet failed'
+  sorbet --silence-dev-message --so-folder="$outdir" --llvm-ir-folder="$outdir" "$source" || echo 'sorbet failed'
 }
 
 go supported_case.rb
