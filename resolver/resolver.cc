@@ -1742,10 +1742,9 @@ class ResolveTypeMembersAndFieldsWalk {
                 auto argSource = core::Loc(ctx.file, cast->arg.loc()).source(ctx).value();
                 e.replaceWith("Replace with `T.let`", rhsLoc, "T.let({}, {})", argSource, cast->type.show(ctx));
                 if (cast->cast == core::Names::cast()) {
-                    e.addErrorNote("If you really want to use `T.cast`, "
-                                   "assign to an intermediate variable first and then "
+                    e.addErrorNote("If you really want to use `{}`, assign to an intermediate variable first and then "
                                    "assign that variable to `{}`",
-                                   asgn.lhs.toString(ctx));
+                                   "T.cast", asgn.lhs.toString(ctx));
                 }
             }
         }
