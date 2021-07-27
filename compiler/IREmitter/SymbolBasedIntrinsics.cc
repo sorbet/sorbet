@@ -483,9 +483,9 @@ public:
     }
 } DefineMethodIntrinsic;
 
-class SorbetPrivateStaticSigIntrinsic : public SymbolBasedIntrinsicMethod {
+class SorbetPrivateStaticResolvedSigIntrinsic : public SymbolBasedIntrinsicMethod {
 public:
-    SorbetPrivateStaticSigIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
+    SorbetPrivateStaticResolvedSigIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
         auto &cs = mcctx.cs;
         auto &builder = builderCast(mcctx.build);
@@ -515,8 +515,23 @@ public:
     }
 
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
-        return {core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs),
-                core::Symbols::Sorbet_Private_Static_ResolvedSig().data(gs)->lookupSingletonClass(gs)};
+        return {core::Symbols::Sorbet_Private_Static_ResolvedSig().data(gs)->lookupSingletonClass(gs)};
+    };
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(const core::GlobalState &gs) const override {
+        return {core::Names::sig()};
+    }
+} SorbetPrivateStaticResolvedSigIntrinsic;
+
+class SorbetPrivateStaticSigIntrinsic : public SymbolBasedIntrinsicMethod {
+public:
+    SorbetPrivateStaticSigIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &builder = builderCast(mcctx.build);
+        return Payload::rubyNil(mcctx.cs, builder);
+    }
+
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
+        return {core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs)};
     };
     virtual InlinedVector<core::NameRef, 2> applicableMethods(const core::GlobalState &gs) const override {
         return {core::Names::sig()};
@@ -773,7 +788,7 @@ static const vector<CallCMethodSingleton> knownCMethodsSingleton{
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs(const core::GlobalState &gs) {
     vector<const SymbolBasedIntrinsicMethod *> res{
-        &DefineMethodIntrinsic, &SorbetPrivateStaticSigIntrinsic, &Module_tripleEq, &Regexp_new, &TEnum_new,
+        &DefineMethodIntrinsic, &SorbetPrivateStaticResolvedSigIntrinsic, &SorbetPrivateStaticSigIntrinsic, &Module_tripleEq, &Regexp_new, &TEnum_new,
         &TEnum_abstract,
     };
     for (auto &method : knownCMethodsInstance) {
