@@ -490,27 +490,33 @@ public:
         auto &cs = mcctx.cs;
         auto &builder = builderCast(mcctx.build);
         auto *send = mcctx.send;
-        // args[0] = isSelf
-        // args[1] = methodName
-        // args[2] = recv
-        // args[3..] = originalArgs, if present
+        // args[0] = originalRecv
+        // args[1] = arg to sig, if present
+        // args[2] = isSelf
+        // args[3] = methodName
+        // args[4..] = originalArgs, if present
         //
         // Do nothing for non-self calls (e.g. T::Sig::WithoutRuntime.sig)
-        if (send->args[2].variable != cfg::LocalRef::selfVariable()) {
+        if (send->args[0].variable != cfg::LocalRef::selfVariable()) {
             return Payload::rubyNil(mcctx.cs, builder);
         }
 
         ENFORCE(mcctx.blkAsFunction() != nullptr);
         // stack[0] is the receiver, which we don't care about.
         auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, cfg::LocalRef::selfVariable(), 0);
-        llvm::Value *sigArg;
+        llvm::Value *originalRecv = stack[0];
+        llvm::Value *sigArg, **args;
         if (send->args.size() > 3) {
-            sigArg = stack[4];
+            sigArg = stack[1];
+            args = &stack[2];
         } else {
             sigArg = Payload::rubyNil(mcctx.cs, builder);
+            args = &stack[1];
         }
+        llvm::Value *isSelf = args[0];
+        llvm::Value *methodName = args[1];
         builder.CreateCall(cs.getFunction("sorbet_vm_register_sig"),
-                           {stack[1], stack[2], stack[3], sigArg, mcctx.blkAsFunction()});
+                           {isSelf, methodName, originalRecv, sigArg, mcctx.blkAsFunction()});
         return Payload::rubyNil(mcctx.cs, builder);
     }
 
