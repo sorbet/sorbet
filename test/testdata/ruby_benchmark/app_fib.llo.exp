@@ -172,12 +172,12 @@ declare i64 @sorbet_rb_int_minus_slowpath(i64, i64) local_unnamed_addr #0
 
 declare i64 @sorbet_rb_int_lt_slowpath(i64, i64) local_unnamed_addr #0
 
+declare void @sorbet_vm_define_method(i64, i8*, i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)*, i8*, %struct.rb_iseq_struct*, i1 zeroext) local_unnamed_addr #0
+
 ; Function Attrs: nounwind readnone willreturn
 declare i64 @rb_class_inherited_p(i64, i64) local_unnamed_addr #1
 
 declare i64 @rb_define_class(i8*, i64) local_unnamed_addr #0
-
-declare void @rb_define_singleton_sorbet_method(i64, i8*, i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)*, i8*, i8*) local_unnamed_addr #0
 
 declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #0
 
@@ -302,25 +302,24 @@ fastSymCallIntrinsic_Static_keep_self_def:        ; preds = %fastSymCallIntrinsi
   %41 = getelementptr inbounds i8, i8* %28, i64 32, !dbg !28
   %42 = bitcast i8* %41 to i8**, !dbg !28
   store i8* %39, i8** %42, align 8, !dbg !28, !tbaa !36
-  %43 = bitcast %struct.rb_iseq_struct* %stackFrame33 to i8*, !dbg !28
-  tail call void @rb_define_singleton_sorbet_method(i64 %25, i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_fib, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)* noundef @func_HasFib.fib, i8* nonnull %28, i8* %43) #16, !dbg !28
-  %44 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !28, !tbaa !12
-  %45 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %44, i64 0, i32 5, !dbg !28
-  %46 = load i32, i32* %45, align 8, !dbg !28, !tbaa !24
-  %47 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %44, i64 0, i32 6, !dbg !28
-  %48 = load i32, i32* %47, align 4, !dbg !28, !tbaa !25
-  %49 = xor i32 %48, -1, !dbg !28
-  %50 = and i32 %49, %46, !dbg !28
-  %51 = icmp eq i32 %50, 0, !dbg !28
-  br i1 %51, label %normalReturn, label %52, !dbg !28, !prof !26
+  tail call void @sorbet_vm_define_method(i64 %25, i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_fib, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)* noundef @func_HasFib.fib, i8* nonnull %28, %struct.rb_iseq_struct* %stackFrame33, i1 noundef zeroext true) #16, !dbg !28
+  %43 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !28, !tbaa !12
+  %44 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %43, i64 0, i32 5, !dbg !28
+  %45 = load i32, i32* %44, align 8, !dbg !28, !tbaa !24
+  %46 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %43, i64 0, i32 6, !dbg !28
+  %47 = load i32, i32* %46, align 4, !dbg !28, !tbaa !25
+  %48 = xor i32 %47, -1, !dbg !28
+  %49 = and i32 %48, %45, !dbg !28
+  %50 = icmp eq i32 %49, 0, !dbg !28
+  br i1 %50, label %normalReturn, label %51, !dbg !28, !prof !26
 
-52:                                               ; preds = %24
-  %53 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %44, i64 0, i32 8, !dbg !28
-  %54 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %53, align 8, !dbg !28, !tbaa !27
-  %55 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %54, i32 noundef 0) #16, !dbg !28
+51:                                               ; preds = %24
+  %52 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %43, i64 0, i32 8, !dbg !28
+  %53 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %52, align 8, !dbg !28, !tbaa !27
+  %54 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %53, i32 noundef 0) #16, !dbg !28
   br label %normalReturn, !dbg !28
 
-normalReturn:                                     ; preds = %52, %24
+normalReturn:                                     ; preds = %51, %24
   ret void
 }
 
