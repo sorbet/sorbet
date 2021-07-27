@@ -53,6 +53,47 @@ and should not be reported.
 
 [#1993]: https://github.com/sorbet/sorbet/pull/1993
 
+## 3001
+
+Sorbet doesn’t support singleton definitions outside of the class itself:
+
+```rb
+class << MyClass # error: `class << EXPRESSION` is only supported for `class << self`
+  def foo
+    # ...
+  end
+end
+```
+
+The workaround is to move the definition inside the `MyClass` class itself:
+
+```rb
+class MyClass
+  class << self
+    def foo
+      # ...
+    end
+  end
+end
+```
+
+Sometimes, `EXPRESSION` is not a constant literal like in what follows:
+
+```rb
+class << some_variable
+  include Foo
+end
+```
+
+In this case, it is possible to directly call `include` on the the singleton
+class of `EXPRESSION`, but it should be done with **utmost caution**, as Sorbet
+will fail in strange ways and make far less accurate predictions about the
+codebase:
+
+```rb
+some_variable.singleton_class.include(Foo)
+```
+
 ## 3011
 
 There was a Hash literal with duplicated keys.
