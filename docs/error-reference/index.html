@@ -123,8 +123,8 @@ and should not be reported.</p>
 </code></pre>
 <p>In this case, it is possible to directly call <code>include</code> on the the singleton
 class of <code>EXPRESSION</code>, but it should be done with <strong>utmost caution</strong>, as Sorbet
-will fail in strange ways and make far less accurate predictions about the
-codebase:</p>
+will not consider the include and provide a less accurate analysis (see also
+<a href="#4002">#4002</a>):</p>
 <pre><code class="hljs css language-rb">some_variable.singleton_class.<span class="hljs-keyword">include</span>(Foo)
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="3011"></a><a href="#3011" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3011</h2>
@@ -151,7 +151,7 @@ this is an error, even in <code># typed: false</code> files:</p>
   rand.round == <span class="hljs-number">0</span> ? A : B
 <span class="hljs-keyword">end</span>
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Main</span></span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span></span>
   <span class="hljs-keyword">include</span> x  <span class="hljs-comment"># error: `include` must be passed a constant literal</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
@@ -159,9 +159,9 @@ this is an error, even in <code># typed: false</code> files:</p>
 inheritance hierarchy in a codebase. Sorbet must know the complete inheritance
 hierarchy of a codebase in order to check that a variable is a valid instance of
 a type.</p>
-<p>It is possible to silence this error, but it should be done with <strong>utmost
-caution</strong>, as Sorbet will fail in strange ways and make far less accurate
-predictions about a codebase. To silence this error, use <code>T.unsafe</code>:</p>
+<p>It is possible to silence this error with <code>T.unsafe</code>, but it should be done with
+<strong>utmost caution</strong>, as Sorbet will not consider the include and provide a less
+accurate analysis:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">A</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">B</span>;</span> <span class="hljs-keyword">end</span>
 
@@ -169,9 +169,18 @@ predictions about a codebase. To silence this error, use <code>T.unsafe</code>:<
   rand.round == <span class="hljs-number">0</span> ? A : B
 <span class="hljs-keyword">end</span>
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Main</span></span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span></span>
   T.unsafe(<span class="hljs-keyword">self</span>).<span class="hljs-keyword">include</span> x
 <span class="hljs-keyword">end</span>
+</code></pre>
+<p>Which might create unexpected errors:</p>
+<pre><code class="hljs css language-ruby">c = C.new
+
+c.a <span class="hljs-comment"># error: Method `a` does not exist on `C`</span>
+c.b <span class="hljs-comment"># error: Method `b` does not exist on `C`</span>
+
+T.let(C, A) <span class="hljs-comment"># error: Argument does not have asserted type `A`</span>
+T.let(C, B) <span class="hljs-comment"># error: Argument does not have asserted type `B`</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="4010"></a><a href="#4010" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4010</h2>
 <p>There are multiple definitions for a method. Having multiple definitions for a
