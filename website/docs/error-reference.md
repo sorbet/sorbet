@@ -227,6 +227,38 @@ know statically what this `...` code does (and for example even if could assume
 that it's defining a class, Sorbet can't know what methods or constants it has).
 Therefore, Sorbet does not support this pattern.
 
+## 5001
+
+Sorbet cannot resolve references to dynamic constants. The common case occurs
+when a constant is dynamically referenced through the singleton class of `self`:
+
+```rb
+class MyCachable < Cachable
+  CACHE_KEY_PREFIX = "my_cachable_"
+
+  def cache_key
+    self.class::CACHE_KEY_PREFIX + identifier
+  end
+end
+```
+
+This code can by made statically analysable by using a singleton method to
+reference the constant:
+
+```rb
+class MyCachable < Cachable
+  def cache_key
+    self.class.cache_key_prefix + identifier
+  end
+
+  class << self
+    def cache_key_prefix
+      "my_cachable_"
+    end
+  end
+end
+```
+
 ## 5002
 
 This means that the typechecker has been unable to resolve a reference to a
