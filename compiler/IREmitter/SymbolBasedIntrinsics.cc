@@ -505,16 +505,16 @@ public:
         // stack[0] is the receiver, which we don't care about.
         auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, cfg::LocalRef::selfVariable(), 0);
         llvm::Value *originalRecv = stack[0];
-        llvm::Value *sigArg, **args;
+        llvm::Value *sigArg, **remainingArgs;
         if (send->args.size() > 3) {
             sigArg = stack[1];
-            args = &stack[2];
+            remainingArgs = &stack[2];
         } else {
             sigArg = Payload::rubyNil(mcctx.cs, builder);
-            args = &stack[1];
+            remainingArgs = &stack[1];
         }
-        llvm::Value *isSelf = args[0];
-        llvm::Value *methodName = args[1];
+        llvm::Value *isSelf = remainingArgs[0];
+        llvm::Value *methodName = remainingArgs[1];
         builder.CreateCall(cs.getFunction("sorbet_vm_register_sig"),
                            {isSelf, methodName, originalRecv, sigArg, mcctx.blkAsFunction()});
         return Payload::rubyNil(mcctx.cs, builder);
