@@ -788,7 +788,12 @@ static const vector<CallCMethodSingleton> knownCMethodsSingleton{
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs(const core::GlobalState &gs) {
     vector<const SymbolBasedIntrinsicMethod *> res{
-        &DefineMethodIntrinsic, &SorbetPrivateStaticResolvedSigIntrinsic, &SorbetPrivateStaticSigIntrinsic, &Module_tripleEq, &Regexp_new, &TEnum_new,
+        &DefineMethodIntrinsic,
+        &SorbetPrivateStaticResolvedSigIntrinsic,
+        &SorbetPrivateStaticSigIntrinsic,
+        &Module_tripleEq,
+        &Regexp_new,
+        &TEnum_new,
         &TEnum_abstract,
     };
     for (auto &method : knownCMethodsInstance) {
