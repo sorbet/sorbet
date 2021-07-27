@@ -766,6 +766,7 @@ private:
 // ...to __package.rb files to set up the package namespace.
 ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const PackageDB &packageDB) {
     ast::ClassDef::RHS_store importedPackages;
+    ast::ClassDef::RHS_store testImportedPackages;
 
     auto package = packageDB.getPackageByFile(ctx, file.file);
     if (package == nullptr) {
@@ -805,19 +806,24 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
             }
         }
         importedPackages = treeBuilder.makeModule(ctx);
+        testImportedPackages = treeBuilder.makeModule(ctx);
     }
 
     auto packageNamespace =
         ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
                         name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(importedPackages));
+    auto testPackageNamespace =
+        ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
+                        name2Expr(core::Names::Constants::PackageTests()), {}, std::move(testImportedPackages));
 
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     rootKlass.rhs.emplace_back(move(packageNamespace));
+    rootKlass.rhs.emplace_back(move(testPackageNamespace));
     return file;
 }
 
 ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, core::NameRef packageMangledName,
-                                    const PackageInfo *pkg) {
+                                    const PackageInfo *pkg, bool isTestFile) {
     if (ast::isa_tree<ast::EmptyTree>(file.tree)) {
         // Nothing to wrap. This occurs when a file is marked typed: Ignore.
         return file;
@@ -909,10 +915,11 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     filesProcessed++;
-                    if (job.file.data(gs).sourceType == core::File::Type::Normal) {
+                    auto &file = job.file.data(gs);
+                    if (file.sourceType == core::File::Type::Normal) {
                         core::Context ctx(gs, core::Symbols::root(), job.file);
                         if (auto pkg = constPkgDB.getPackageForContext(ctx)) {
-                            job = rewritePackagedFile(ctx, move(job), pkg->name.mangledName, pkg);
+                            job = rewritePackagedFile(ctx, move(job), pkg->name.mangledName, pkg, file.isTest());
                         } else {
                             // Don't transform, but raise an error on the first line.
                             if (auto e =
