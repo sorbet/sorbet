@@ -61,7 +61,6 @@ done
 
 shift $((OPTIND - 1))
 
-orig_so_folder="$so_folder"
 orig_llvmir="$llvmir"
 rb_files=( "$@" )
 
