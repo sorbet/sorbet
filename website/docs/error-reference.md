@@ -590,7 +590,7 @@ end
 ```
 
 One way to make those methods visible statically is to add a declaration for
-them in an [RBI](https://sorbet.org/docs/rbi) file. For example, we can write
+them in an [RBI file](https://sorbet.org/docs/rbi). For example, we can write
 our definitions as RBI under `sorbet/rbi/shims/foo.rbi`:
 
 ```rb
@@ -603,7 +603,7 @@ end
 ```
 
 Sometimes, Sorbet will complain about an alias to a method coming from an
-included modules. For example here, `bar` is coming from the inclusion of `Bar`
+included modules. For example, here `bar` is coming from the inclusion of `Bar`
 but Sorbet will complain about the method not existing anyway:
 
 ```rb
