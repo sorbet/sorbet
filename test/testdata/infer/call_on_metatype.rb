@@ -23,3 +23,13 @@ puts (T.proc.void + 1) # error: Method `+` does not exist on `T.class_of(T.proc)
 # Edge cases. Do anything but crash.
 T.class_of.foo # error: Not enough arguments
 T.class_of(Integer, String).foo # error: Too many arguments
+
+# T::Types::Base methods
+x = nil
+T.nilable(Integer).valid?(x) # error: mistakes a type for a value
+T.nilable(Integer).recursively_valid?(x) # error: mistakes a type for a value
+T.nilable(Integer).subtype_of?(x) # error: mistakes a type for a value
+T.nilable(Integer).describe_obj(x) # error: mistakes a type for a value
+T.nilable(Integer).error_message_for_obj(x) # error: mistakes a type for a value
+T.nilable(Integer).error_message_for_obj_recursive(x) # error: mistakes a type for a value
+T.nilable(Integer).validate!(x) # error: mistakes a type for a value
