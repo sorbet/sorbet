@@ -564,6 +564,76 @@ See [5014](#5014). 5036 is the same error as [5014](#5014) but slightly modified
 to allow more common Ruby idioms to pass by in `# typed: true` (5036 is only
 reported in `# typed: strict`).
 
+## 5037
+
+Sorbet must be able to statically resolve a method to create an alias to it.
+
+Here, the method is created through a DSL called `data_accessor` which defines
+methods at runtime through meta-programming:
+
+```rb
+class Base
+  def self.data_accessor(key)
+    define_method(key) do
+	  data[key]
+    end
+  end
+
+  # ...
+end
+
+class Foo < Base
+  data_accessor :foo
+
+  alias_method :bar, :foo # error: Can't make method alias from `bar` to non existing method `foo`
+end
+```
+
+One way to make those methods visible statically is to add a declaration for
+them in an [RBI file](https://sorbet.org/docs/rbi). For example, we can write
+our definitions as RBI under `sorbet/rbi/shims/foo.rbi`:
+
+```rb
+# sorbet/rbi/shims/foo.rbi
+# typed: true
+
+module Foo
+  def foo; end
+end
+```
+
+Sometimes, Sorbet will complain about an alias to a method coming from an
+included modules. For example, here `bar` is coming from the inclusion of `Bar`
+but Sorbet will complain about the method not existing anyway:
+
+```rb
+module Bar
+  def bar; end
+end
+
+class Foo
+  include Bar
+
+  alias_method :foo, :bar # error: Can't make method alias from `foo` to non existing method `bar`
+end
+```
+
+It's because Sorbet resolves method aliases before it resolves includes. You can
+see an example of this behaviour
+[here](https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Bar%0A%20%20def%20bar%3B%20end%0Aend%0A%0Amodule%20Foo%0A%20%20include%20Bar%0A%0A%20%20alias_method%20%3Afoo%2C%20%3Abar%20%23%20aliases%20are%20resolved%20before%20includes%2C%20so%20%60bar%60%20is%20not%20found%20yet%0A%0A%20%20def%20baz%0A%20%20%20%20bar%20%23%20includes%20are%20resolved%20when%20we%20analyze%20this%20code%0A%20%20end%0Aend).
+To workaround this limitation, we can replace the `alias_method` by a real
+method definition:
+
+```rb
+class Foo
+  include Bar
+
+  def foo
+    bar
+  end
+end
+```
+
 ## 5041
 
 Sorbet does not allow inheriting from a class which inherits from `T::Struct`.
