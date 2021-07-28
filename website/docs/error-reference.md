@@ -94,6 +94,20 @@ will not consider the include and provide a less accurate analysis (see also
 some_variable.singleton_class.include(Foo)
 ```
 
+## 3002
+
+Sorbet is limited to C++ `INT_MAX`:
+
+```rb
+puts 11377327221391349843 + 1 # error: Unsupported integer literal: 11377327221391349843
+```
+
+A possible workaround is to use a string and `to_i`:
+
+```rb
+puts "11377327221391349843".to_i + 1
+```
+
 ## 3011
 
 There was a Hash literal with duplicated keys.
