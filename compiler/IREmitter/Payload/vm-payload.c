@@ -366,7 +366,7 @@ static VALUE sigs_for_self_methods() {
 }
 
 // In Ruby terms, this is:
-//  sig{parms(isSelf: T::Boolean, method: Symbol, self: Module, arg: T.nilable(Symbol), block: T.untyped).void}
+//  sig{params(isSelf: T::Boolean, method: Symbol, self: Module, arg: T.nilable(Symbol), block: T.untyped).void}
 void sorbet_vm_register_sig(VALUE isSelf, VALUE method, VALUE self, VALUE arg, rb_block_call_func_t block) {
     VALUE methods = MOD_CONST_GET("T::Private::Methods");
     VALUE args[] = {self, arg};

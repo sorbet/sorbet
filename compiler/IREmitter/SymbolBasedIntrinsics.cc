@@ -488,8 +488,10 @@ public:
     SorbetPrivateStaticResolvedSigIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
         auto &cs = mcctx.cs;
+        auto &irctx = mcctx.irctx;
         auto &builder = builderCast(mcctx.build);
         auto *send = mcctx.send;
+        auto rubyBlockId = mcctx.rubyBlockId;
         // args[0] = originalRecv
         // args[1] = arg to sig, if present
         // args[2] = isSelf
@@ -502,18 +504,18 @@ public:
         }
 
         ENFORCE(mcctx.blkAsFunction() != nullptr);
-        auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, cfg::LocalRef::selfVariable(), 0);
-        llvm::Value *originalRecv = stack[0];
-        llvm::Value *sigArg, **remainingArgs;
+        llvm::Value *originalRecv = Payload::varGet(cs, send->args[0].variable, builder, irctx, rubyBlockId);
+        llvm::Value *sigArg;
+        cfg::VariableUseSite *remainingArgs;
         if (send->args.size() > 3) {
-            sigArg = stack[1];
-            remainingArgs = &stack[2];
+            sigArg = Payload::varGet(cs, send->args[1].variable, builder, irctx, rubyBlockId);
+            remainingArgs = &send->args[2];
         } else {
-            sigArg = Payload::rubyNil(mcctx.cs, builder);
-            remainingArgs = &stack[1];
+            sigArg = Payload::rubyNil(cs, builder);
+            remainingArgs = &send->args[1];
         }
-        llvm::Value *isSelf = remainingArgs[0];
-        llvm::Value *methodName = remainingArgs[1];
+        llvm::Value *isSelf = Payload::varGet(cs, remainingArgs[0].variable, builder, irctx, rubyBlockId);
+        llvm::Value *methodName = Payload::varGet(cs, remainingArgs[1].variable, builder, irctx, rubyBlockId);
         builder.CreateCall(cs.getFunction("sorbet_vm_register_sig"),
                            {isSelf, methodName, originalRecv, sigArg, mcctx.blkAsFunction()});
         return Payload::rubyNil(mcctx.cs, builder);
