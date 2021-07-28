@@ -502,7 +502,6 @@ public:
         }
 
         ENFORCE(mcctx.blkAsFunction() != nullptr);
-        // stack[0] is the receiver, which we don't care about.
         auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, cfg::LocalRef::selfVariable(), 0);
         llvm::Value *originalRecv = stack[0];
         llvm::Value *sigArg, **remainingArgs;
