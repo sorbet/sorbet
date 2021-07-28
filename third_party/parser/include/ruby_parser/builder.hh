@@ -56,6 +56,7 @@ struct builder {
 	ForeignPtr(*defSingleton)(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, ForeignPtr body, const token* end);
 	ForeignPtr(*encodingLiteral)(SelfPtr builder, const token* tok);
 	ForeignPtr(*false_)(SelfPtr builder, const token* tok);
+	ForeignPtr(*find_pattern)(SelfPtr builder, const token* lbrack_t, const node_list* elements, const token* rbrack_t);
 	ForeignPtr(*fileLiteral)(SelfPtr builder, const token* tok);
 	ForeignPtr(*float_)(SelfPtr builder, const token* tok);
 	ForeignPtr(*floatComplex)(SelfPtr builder, const token* tok);

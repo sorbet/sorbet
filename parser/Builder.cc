@@ -779,6 +779,20 @@ public:
         return make_unique<False>(tokLoc(tok));
     }
 
+    unique_ptr<Node> find_pattern(const token *lbrack_t, sorbet::parser::NodeVec elements, const token *rbrack_t) {
+        auto loc = collectionLoc(elements);
+
+        if (lbrack_t != nullptr) {
+            loc = tokLoc(lbrack_t).join(loc);
+        }
+
+        if (rbrack_t != nullptr) {
+            loc = loc.join(tokLoc(rbrack_t));
+        }
+
+        return make_unique<FindPattern>(loc, std::move(elements));
+    }
+
     unique_ptr<Node> fileLiteral(const token *tok) {
         return make_unique<FileLiteral>(tokLoc(tok));
     }
@@ -1846,6 +1860,11 @@ ForeignPtr false_(SelfPtr builder, const token *tok) {
     return build->toForeign(build->false_(tok));
 }
 
+ForeignPtr find_pattern(SelfPtr builder, const token *lbrack_t, const node_list *elements, const token *rbrack_t) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->find_pattern(lbrack_t, build->convertNodeList(elements), rbrack_t));
+}
+
 ForeignPtr fileLiteral(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
     return build->toForeign(build->fileLiteral(tok));
@@ -2387,6 +2406,7 @@ struct ruby_parser::builder Builder::interface = {
     defSingleton,
     encodingLiteral,
     false_,
+    find_pattern,
     fileLiteral,
     float_,
     floatComplex,

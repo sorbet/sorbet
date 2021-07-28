@@ -1,3 +1,3 @@
 # typed: true
 
-1 in a, b # error: unexpected token ","
+1 => a, b # error: unexpected token ","
