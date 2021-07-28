@@ -695,6 +695,85 @@ parameters. See the
 [T.attached_class](attached-class.md#tattached_class-as-an-argument)
 documentation for a more thorough description of why this is.
 
+## 5064
+
+Using the `requires_ancestor` method, module `Bar` has indicated to Sorbet that
+it can only work properly if it is explicitly included along module `Foo`. In
+this example, we see that while module `Bar` is included in `MyClass`, `MyClass`
+does not include `Foo`.
+
+```rb
+module Foo
+  def foo; end
+end
+
+module Bar
+  extend T::Helpers
+
+  requires_ancestor Foo
+
+  def bar
+    foo
+  end
+end
+
+class MyClass # error: `MyClass` must include `Foo` (required by `Bar`)
+  include Bar
+end
+```
+
+The solution is to include `Foo` in `MyClass`:
+
+```rb
+class MyClass
+  include Foo
+  include Bar
+end
+```
+
+Other potential (albeit less common) sources of this error code are classes that
+are required to have some class as an ancestor:
+
+```
+class Foo
+  def foo; end
+end
+
+module Bar
+  extend T::Helpers
+
+  requires_ancestor Foo
+
+  def bar
+    foo
+  end
+end
+
+class MySuperClass
+  extend T::Helpers
+  include Bar
+
+  abstract!
+end
+
+class MyClass < MySuperClass # error: `MyClass` must inherit `Foo` (required by `Bar`)
+end
+```
+
+Ensuring `MyClass` inherits from `Foo` at some point will fix the error:
+
+```rb
+class MySuperClass < Foo
+  extend T::Helpers
+  include Bar
+
+  abstract!
+end
+
+class MyClass < MySuperClass
+end
+```
+
 ## 6002
 
 In `# typed: strict` files, Sorbet requires that all instance and class
