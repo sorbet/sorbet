@@ -141,6 +141,13 @@ NameDef names[] = {
     {"revealType", "reveal_type"},
     {"absurd"},
     {"nonForcingIsA_p", "non_forcing_is_a?"},
+    {"valid_p", "valid?"},
+    {"recursivelyValid_p", "recursively_valid?"},
+    {"subtypeOf_p", "subtype_of?"},
+    {"describeObj", "describe_obj"},
+    {"errorMessageForObj", "error_message_for_obj"},
+    {"errorMessageForObjRecursive", "error_message_for_obj_recursive"},
+    {"validate_bang", "validate!"},
     // end T keywords
 
     // Ruby DSL methods which we understand

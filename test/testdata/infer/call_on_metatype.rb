@@ -26,10 +26,10 @@ T.class_of(Integer, String).foo # error: Too many arguments
 
 # T::Types::Base methods
 x = nil
-T.nilable(Integer).valid?(x) # error: mistakes a type for a value
-T.nilable(Integer).recursively_valid?(x) # error: mistakes a type for a value
-T.nilable(Integer).subtype_of?(x) # error: mistakes a type for a value
-T.nilable(Integer).describe_obj(x) # error: mistakes a type for a value
-T.nilable(Integer).error_message_for_obj(x) # error: mistakes a type for a value
-T.nilable(Integer).error_message_for_obj_recursive(x) # error: mistakes a type for a value
-T.nilable(Integer).validate!(x) # error: mistakes a type for a value
+T.nilable(Integer).valid?(x)
+T.nilable(Integer).recursively_valid?(x)
+T.nilable(Integer).subtype_of?(x)
+T.nilable(Integer).describe_obj(x)
+T.nilable(Integer).error_message_for_obj(x)
+T.nilable(Integer).error_message_for_obj_recursive(x)
+T.nilable(Integer).validate!(x)
