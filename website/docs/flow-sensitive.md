@@ -110,7 +110,7 @@ For example, consider that we have some method `maybe_int` which when called
 either returns an Integer or `nil`. This code doesn't typecheck:
 
 ```ruby
-x = maybe_int.nil? && (2 * maybe_int)
+x = !maybe_int.nil? && (2 * maybe_int)
 ```
 
 This problem is subtle because `maybe_int` looks like a variable when it's
@@ -119,7 +119,7 @@ this:
 
 ```ruby
 # This is the same as above:
-x = maybe_int().nil? && (2 * maybe_int())
+x = !maybe_int().nil? && (2 * maybe_int())
 ```
 
 Sorbet can’t know that two calls to `maybe_int` return identical things because,
@@ -128,10 +128,10 @@ method call in a **temporary variable**:
 
 ```ruby
 tmp = maybe_int
-y = tmp.nil? && (2 * tmp)
+y = !tmp.nil? && (2 * tmp)
 ```
 
-<a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Breturns(T.nilable(Integer))%7D%0Adef%20maybe_int%3B%201%3B%20end%0A%0A%23%20Problem%3A%0Ax%20%3D%20maybe_int.nil%3F%20%26%26%20(2%20*%20maybe_int)%0A%0A%23%20%5E%20this%20is%20essentially%3A%0A%23%20x%20%3D%20maybe_int().nil%3F%20%26%26%20(2%20*%20maybe_int())%0A%0A%23%20Solution%3A%0Atmp%20%3D%20maybe_int%0Ay%20%3D%20tmp.nil%3F%20%26%26%20(2%20*%20tmp)">→
+<a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Breturns(T.nilable(Integer))%7D%0Adef%20maybe_int%3B%201%3B%20end%0A%0A%23%20Problem%3A%0Ax%20%3D%20!maybe_int.nil%3F%20%26%26%20(2%20*%20maybe_int)%0A%0A%23%20%5E%20this%20is%20essentially%3A%0A%23%20x%20%3D%20!maybe_int().nil%3F%20%26%26%20(2%20*%20maybe_int())%0A%0A%23%20Solution%3A%0Atmp%20%3D%20maybe_int%0Ay%20%3D%20!tmp.nil%3F%20%26%26%20(2%20*%20tmp)">→
 View full example on sorbet.run</a>
 
 > **Note**: Many Ruby constructs that look like local variables are actually
