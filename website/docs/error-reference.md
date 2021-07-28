@@ -655,6 +655,13 @@ end
 
 Use of `implementation` has been replaced by `override`.
 
+## 5056
+
+The `generated` annotation in method signatures is deprecated.
+
+For alternatives, see [Enabling Runtime Checks](runtime.md) which talks about
+how to change the runtime behavior when method signatures encounter a problem.
+
 ## 5057
 
 Static methods (like `self.foo`) can never be mixed into another class or
@@ -768,13 +775,6 @@ list.each do |elem|
   found_valid = true if valid?(elem) # ok
 end
 ```
-
-## 5056
-
-The `generated` annotation in method signatures is deprecated.
-
-For alternatives, see [Enabling Runtime Checks](runtime.md) which talks about
-how to change the runtime behavior when method signatures encounter a problem.
 
 ## 7002
 
