@@ -26,10 +26,17 @@ T.class_of(Integer, String).foo # error: Too many arguments
 
 # T::Types::Base methods
 x = nil
-T.nilable(Integer).valid?(x)
-T.nilable(Integer).recursively_valid?(x)
-T.nilable(Integer).subtype_of?(x)
-T.nilable(Integer).describe_obj(x)
-T.nilable(Integer).error_message_for_obj(x)
-T.nilable(Integer).error_message_for_obj_recursive(x)
-T.nilable(Integer).validate!(x)
+y = T.nilable(Integer).valid?(x)
+T.reveal_type(y) # error: `T.untyped`
+y = T.nilable(Integer).recursively_valid?(x)
+T.reveal_type(y) # error: `T.untyped`
+y = T.nilable(Integer).subtype_of?(x)
+T.reveal_type(y) # error: `T.untyped`
+y = T.nilable(Integer).describe_obj(x)
+T.reveal_type(y) # error: `T.untyped`
+y = T.nilable(Integer).error_message_for_obj(x)
+T.reveal_type(y) # error: `T.untyped`
+y = T.nilable(Integer).error_message_for_obj_recursive(x)
+T.reveal_type(y) # error: `T.untyped`
+y = T.nilable(Integer).validate!(x)
+T.reveal_type(y) # error: `T.untyped`
