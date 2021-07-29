@@ -283,7 +283,7 @@ class CSV < Object
     )
     .returns(T::Enumerator[T.any(T::Array[T.nilable(T.untyped)], CSV::Row)])
   end
-  def self.foreach(path, mode="r", options=T.unsafe(nil), &blk); end
+  def self.foreach(path, mode="r", **options, &blk); end
 
   # This constructor will wrap either a
   # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or
