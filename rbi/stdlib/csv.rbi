@@ -269,6 +269,7 @@ class CSV < Object
   sig do
     params(
         path: T.any(String, ::Sorbet::Private::Static::IOLike),
+        mode: String,
         options: T::Hash[Symbol, BasicObject],
         blk: T.proc.params(arg0: T.any(T::Array[T.nilable(T.untyped)], CSV::Row)).void,
     )
@@ -277,11 +278,12 @@ class CSV < Object
   sig do
     params(
         path: T.any(String, ::Sorbet::Private::Static::IOLike),
+        mode: String,
         options: T::Hash[Symbol, BasicObject],
     )
     .returns(T::Enumerator[T.any(T::Array[T.nilable(T.untyped)], CSV::Row)])
   end
-  def self.foreach(path, options=T.unsafe(nil), &blk); end
+  def self.foreach(path, mode="r", options=T.unsafe(nil), &blk); end
 
   # This constructor will wrap either a
   # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or
