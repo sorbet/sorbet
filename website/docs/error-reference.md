@@ -53,6 +53,61 @@ and should not be reported.
 
 [#1993]: https://github.com/sorbet/sorbet/pull/1993
 
+## 3001
+
+Sorbet doesn’t support singleton definitions outside of the class itself:
+
+```rb
+class << MyClass # error: `class << EXPRESSION` is only supported for `class << self`
+  def foo
+    # ...
+  end
+end
+```
+
+The workaround is to move the definition inside the `MyClass` class itself:
+
+```rb
+class MyClass
+  class << self
+    def foo
+      # ...
+    end
+  end
+end
+```
+
+Sometimes, `EXPRESSION` is not a constant literal like in what follows:
+
+```rb
+class << some_variable
+  include Foo
+end
+```
+
+In this case, it is possible to directly call `include` on the the singleton
+class of `EXPRESSION`, but it should be done with **utmost caution**, as Sorbet
+will not consider the include and provide a less accurate analysis (see also
+[#4002](#4002)):
+
+```rb
+some_variable.singleton_class.include(Foo)
+```
+
+## 3002
+
+Sorbet is limited to C++ `INT_MAX`:
+
+```rb
+puts 11377327221391349843 + 1 # error: Unsupported integer literal: 11377327221391349843
+```
+
+A possible workaround is to use a string and `to_i`:
+
+```rb
+puts "11377327221391349843".to_i + 1
+```
+
 ## 3011
 
 There was a Hash literal with duplicated keys.
@@ -90,7 +145,7 @@ def x
   rand.round == 0 ? A : B
 end
 
-class Main
+class C
   include x  # error: `include` must be passed a constant literal
 end
 ```
@@ -100,9 +155,9 @@ inheritance hierarchy in a codebase. Sorbet must know the complete inheritance
 hierarchy of a codebase in order to check that a variable is a valid instance of
 a type.
 
-It is possible to silence this error, but it should be done with **utmost
-caution**, as Sorbet will fail in strange ways and make far less accurate
-predictions about a codebase. To silence this error, use `T.unsafe`:
+It is possible to silence this error with `T.unsafe`, but it should be done with
+**utmost caution**, as Sorbet will not consider the include and provide a less
+accurate analysis:
 
 ```ruby
 module A; end
@@ -112,9 +167,21 @@ def x
   rand.round == 0 ? A : B
 end
 
-class Main
+class C
   T.unsafe(self).include x
 end
+```
+
+Which might create unexpected errors:
+
+```ruby
+c = C.new
+
+c.a # error: Method `a` does not exist on `C`
+c.b # error: Method `b` does not exist on `C`
+
+T.let(C, A) # error: Argument does not have asserted type `A`
+T.let(C, B) # error: Argument does not have asserted type `B`
 ```
 
 ## 4010
@@ -185,6 +252,38 @@ where `...` is some expression which computes a class or module. Sorbet can't
 know statically what this `...` code does (and for example even if could assume
 that it's defining a class, Sorbet can't know what methods or constants it has).
 Therefore, Sorbet does not support this pattern.
+
+## 5001
+
+Sorbet cannot resolve references to dynamic constants. The common case occurs
+when a constant is dynamically referenced through the singleton class of `self`:
+
+```rb
+class MyCachable < Cachable
+  CACHE_KEY_PREFIX = "my_cachable_"
+
+  def cache_key
+    self.class::CACHE_KEY_PREFIX + identifier
+  end
+end
+```
+
+This code can by made statically analysable by using a singleton method to
+reference the constant:
+
+```rb
+class MyCachable < Cachable
+  def cache_key
+    self.class.cache_key_prefix + identifier
+  end
+
+  class << self
+    def cache_key_prefix
+      "my_cachable_"
+    end
+  end
+end
+```
 
 ## 5002
 
@@ -465,6 +564,76 @@ See [5014](#5014). 5036 is the same error as [5014](#5014) but slightly modified
 to allow more common Ruby idioms to pass by in `# typed: true` (5036 is only
 reported in `# typed: strict`).
 
+## 5037
+
+Sorbet must be able to statically resolve a method to create an alias to it.
+
+Here, the method is created through a DSL called `data_accessor` which defines
+methods at runtime through meta-programming:
+
+```rb
+class Base
+  def self.data_accessor(key)
+    define_method(key) do
+	  data[key]
+    end
+  end
+
+  # ...
+end
+
+class Foo < Base
+  data_accessor :foo
+
+  alias_method :bar, :foo # error: Can't make method alias from `bar` to non existing method `foo`
+end
+```
+
+One way to make those methods visible statically is to add a declaration for
+them in an [RBI file](https://sorbet.org/docs/rbi). For example, we can write
+our definitions as RBI under `sorbet/rbi/shims/foo.rbi`:
+
+```rb
+# sorbet/rbi/shims/foo.rbi
+# typed: true
+
+module Foo
+  def foo; end
+end
+```
+
+Sometimes, Sorbet will complain about an alias to a method coming from an
+included modules. For example, here `bar` is coming from the inclusion of `Bar`
+but Sorbet will complain about the method not existing anyway:
+
+```rb
+module Bar
+  def bar; end
+end
+
+class Foo
+  include Bar
+
+  alias_method :foo, :bar # error: Can't make method alias from `foo` to non existing method `bar`
+end
+```
+
+It's because Sorbet resolves method aliases before it resolves includes. You can
+see an example of this behaviour
+[here](https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Bar%0A%20%20def%20bar%3B%20end%0Aend%0A%0Amodule%20Foo%0A%20%20include%20Bar%0A%0A%20%20alias_method%20%3Afoo%2C%20%3Abar%20%23%20aliases%20are%20resolved%20before%20includes%2C%20so%20%60bar%60%20is%20not%20found%20yet%0A%0A%20%20def%20baz%0A%20%20%20%20bar%20%23%20includes%20are%20resolved%20when%20we%20analyze%20this%20code%0A%20%20end%0Aend).
+To workaround this limitation, we can replace the `alias_method` by a real
+method definition:
+
+```rb
+class Foo
+  include Bar
+
+  def foo
+    bar
+  end
+end
+```
+
 ## 5041
 
 Sorbet does not allow inheriting from a class which inherits from `T::Struct`.
@@ -556,6 +725,13 @@ end
 
 Use of `implementation` has been replaced by `override`.
 
+## 5056
+
+The `generated` annotation in method signatures is deprecated.
+
+For alternatives, see [Enabling Runtime Checks](runtime.md) which talks about
+how to change the runtime behavior when method signatures encounter a problem.
+
 ## 5057
 
 Static methods (like `self.foo`) can never be mixed into another class or
@@ -595,6 +771,85 @@ It's an error to use `T.attached_class` to describe the type of method
 parameters. See the
 [T.attached_class](attached-class.md#tattached_class-as-an-argument)
 documentation for a more thorough description of why this is.
+
+## 5064
+
+Using the `requires_ancestor` method, module `Bar` has indicated to Sorbet that
+it can only work properly if it is explicitly included along module `Foo`. In
+this example, we see that while module `Bar` is included in `MyClass`, `MyClass`
+does not include `Foo`.
+
+```rb
+module Foo
+  def foo; end
+end
+
+module Bar
+  extend T::Helpers
+
+  requires_ancestor Foo
+
+  def bar
+    foo
+  end
+end
+
+class MyClass # error: `MyClass` must include `Foo` (required by `Bar`)
+  include Bar
+end
+```
+
+The solution is to include `Foo` in `MyClass`:
+
+```rb
+class MyClass
+  include Foo
+  include Bar
+end
+```
+
+Other potential (albeit less common) sources of this error code are classes that
+are required to have some class as an ancestor:
+
+```
+class Foo
+  def foo; end
+end
+
+module Bar
+  extend T::Helpers
+
+  requires_ancestor Foo
+
+  def bar
+    foo
+  end
+end
+
+class MySuperClass
+  extend T::Helpers
+  include Bar
+
+  abstract!
+end
+
+class MyClass < MySuperClass # error: `MyClass` must inherit `Foo` (required by `Bar`)
+end
+```
+
+Ensuring `MyClass` inherits from `Foo` at some point will fix the error:
+
+```rb
+class MySuperClass < Foo
+  extend T::Helpers
+  include Bar
+
+  abstract!
+end
+
+class MyClass < MySuperClass
+end
+```
 
 ## 6002
 
@@ -669,13 +924,6 @@ list.each do |elem|
   found_valid = true if valid?(elem) # ok
 end
 ```
-
-## 5056
-
-The `generated` annotation in method signatures is deprecated.
-
-For alternatives, see [Enabling Runtime Checks](runtime.md) which talks about
-how to change the runtime behavior when method signatures encounter a problem.
 
 ## 7002
 

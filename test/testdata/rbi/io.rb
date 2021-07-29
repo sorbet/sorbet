@@ -13,5 +13,5 @@ def test_io_read_encoding(file_name)
   IO.read(file_name, encoding: Encoding::ASCII_8BIT)
   IO.read(file_name, encoding: Encoding::ASCII_8BIT.to_s)
   IO.read(file_name, encoding: 42)
-  #                  ^^^^^^^^^^^^ error: Expected `T.any(String, Encoding)` but found `Integer(42)` for argument `encoding`
+  #                            ^^ error: Expected `T.any(String, Encoding)` but found `Integer(42)` for argument `encoding`
 end

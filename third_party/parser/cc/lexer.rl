@@ -2687,7 +2687,7 @@ void lexer::set_state_expr_value() {
       '*' | '=>'
       => {
         emit_table(PUNCTUATION);
-        fgoto expr_value;
+        fnext expr_value; fbreak;
       };
 
       # When '|', '~', '!', '=>' are used as operators

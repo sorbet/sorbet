@@ -2,7 +2,6 @@
 # typed: true
 
 # Use as a mixin with extend (`extend T::Generic`).
-# Docs at https://hackpad.corp.stripe.com/Type-Validation-in-pay-server-1JaoTHir5Mo.
 module T::Generic
   include T::Helpers
   include Kernel
