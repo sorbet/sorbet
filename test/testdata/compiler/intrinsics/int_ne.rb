@@ -5,7 +5,7 @@
 
 T::Sig::WithoutRuntime.sig{params(x: Integer, y: T.untyped).returns(T::Boolean)}
 def test(x, y)
-  x < y
+  x != y
 end
 
 puts(test(10, 20))
