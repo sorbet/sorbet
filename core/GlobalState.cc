@@ -447,6 +447,11 @@ void GlobalState::initEmpty() {
                  .build();
     ENFORCE(method == Symbols::PackageSpec_import());
 
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::test_import())
+                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
+                 .build();
+    ENFORCE(method == Symbols::PackageSpec_test_import());
+
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::export_()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_export());
 
