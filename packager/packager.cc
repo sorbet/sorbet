@@ -24,6 +24,12 @@ struct FullyQualifiedName {
     vector<core::NameRef> parts;
     core::Loc loc;
     ast::ExpressionPtr toLiteral(core::LocOffsets loc) const;
+
+    FullyQualifiedName() = default;
+    FullyQualifiedName(const FullyQualifiedName &) = delete;
+    FullyQualifiedName(FullyQualifiedName &&) = default;
+    FullyQualifiedName &operator=(const FullyQualifiedName &) = delete;
+    FullyQualifiedName &operator=(FullyQualifiedName &&) = default;
 };
 
 class NameFormatter final {
@@ -41,12 +47,23 @@ struct PackageName {
     core::LocOffsets loc;
     core::NameRef mangledName = core::NameRef::noName();
     FullyQualifiedName fullName;
-    bool isTestImport = false;
 
     // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
     string toString(const core::GlobalState &gs) const {
         return absl::StrJoin(fullName.parts, "::", NameFormatter(gs));
     }
+};
+
+enum class ImportType {
+    Normal,
+    Test, // test_import
+};
+
+struct Import {
+    PackageName name;
+    ImportType type;
+
+    Import(PackageName &&name, ImportType type) : name(std::move(name)), type(type) {}
 };
 
 struct PackageInfo {
@@ -56,7 +73,7 @@ struct PackageInfo {
     // loc for the package definition. Used for error messages.
     core::Loc loc;
     // The names of each package imported by this package.
-    vector<PackageName> importedPackageNames;
+    vector<Import> importedPackageNames;
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
     vector<FullyQualifiedName> exports;
@@ -188,13 +205,12 @@ FullyQualifiedName getFullyQualifiedName(core::Context ctx, ast::UnresolvedConst
 }
 
 // Gets the package name in `tree` if applicable.
-PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit *constantLit, bool isTestImport=false) {
+PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit *constantLit) {
     ENFORCE(constantLit != nullptr);
 
     PackageName pName;
     pName.loc = constantLit->loc;
     pName.fullName = getFullyQualifiedName(ctx, constantLit);
-    pName.isTestImport = isTestImport;
 
     // Foo::Bar => Foo_Bar_Package
     auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx)), "_Package");
@@ -433,13 +449,13 @@ struct PackageInfoFinder {
         if ((send.fun == core::Names::import() || send.fun == core::Names::test_import()) && send.args.size() == 1) {
             // null indicates an invalid import.
             if (auto target = verifyConstant(ctx, send.fun, send.args[0])) {
-                auto name = getPackageName(ctx, target, send.fun == core::Names::test_import());
+                auto name = getPackageName(ctx, target);
                 if (name.mangledName == info->name.mangledName) {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
                         e.setHeader("Package `{}` cannot {} itself", info->name.toString(ctx), send.fun.toString(ctx));
                     }
                 }
-                info->importedPackageNames.emplace_back(move(name));
+                info->importedPackageNames.emplace_back(move(name), method2ImportType(send));
             }
         }
 
@@ -522,6 +538,17 @@ struct PackageInfoFinder {
                 return true;
             default:
                 return false;
+        }
+    }
+
+    ImportType method2ImportType(const ast::Send &send) const {
+        switch (send.fun.rawId()) {
+            case core::Names::import().rawId():
+                return ImportType::Normal;
+            case core::Names::test_import().rawId():
+                return ImportType::Test;
+            default:
+                ENFORCE(false);
         }
     }
 
@@ -643,11 +670,10 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
 // For a given package, a tree that is the union of all constants exported by the packages it
 // imports.
 class ImportTree final {
-
     struct Source {
         core::NameRef packageMangledName;
         core::LocOffsets importLoc;
-        bool testOnly;
+        ImportType importType;
         bool exists() {
             return importLoc.exists();
         }
@@ -659,8 +685,6 @@ class ImportTree final {
     Source source;
 
 public:
-    enum class ImportType { Normal = 1, Test = 2 };
-
     ImportTree() = default;
     ImportTree(const ImportTree &) = delete;
     ImportTree(ImportTree &&) = default;
@@ -671,23 +695,24 @@ public:
 };
 
 class ImportTreeBuilder final {
-    PackageInfo package; // The package we are building an import tree for.
+    // PackageInfo package; // The package we are building an import tree for.
+    core::NameRef pkgMangledName;
     ImportTree root;
 
 public:
-    ImportTreeBuilder(PackageInfo package) : package(package) {}
+    ImportTreeBuilder(const PackageInfo &package) : pkgMangledName(package.name.mangledName) {}
     ImportTreeBuilder(const ImportTreeBuilder &) = delete;
     ImportTreeBuilder(ImportTreeBuilder &&) = default;
     ImportTreeBuilder &operator=(const ImportTreeBuilder &) = delete;
     ImportTreeBuilder &operator=(ImportTreeBuilder &&) = default;
 
-    void mergeImports(const PackageInfo &importedPackage, core::LocOffsets loc) {
+    void mergeImports(const PackageInfo &importedPackage, const Import &import) {
         for (const auto &exportedFqn : importedPackage.exports) {
-            addImport(importedPackage, loc, exportedFqn);
+            addImport(importedPackage, import.name.loc, exportedFqn, import.type);
         }
     }
 
-    ast::ClassDef::RHS_store makeModule(core::Context ctx, ImportTree::ImportType importType) {
+    ast::ClassDef::RHS_store makeModule(core::Context ctx, ImportType importType) {
         vector<core::NameRef> parts;
         ast::ClassDef::RHS_store modRhs;
         makeModule(ctx, &root, parts, modRhs, importType, ImportTree::Source());
@@ -695,7 +720,8 @@ public:
     }
 
 private:
-    void addImport(const PackageInfo &importedPackage, core::LocOffsets loc, const FullyQualifiedName &exportFqn) {
+    void addImport(const PackageInfo &importedPackage, core::LocOffsets loc, const FullyQualifiedName &exportFqn,
+                   ImportType importType) {
         ImportTree *node = &root;
         for (auto nameRef : exportFqn.parts) {
             auto &child = node->children[nameRef];
@@ -704,11 +730,11 @@ private:
             }
             node = child.get();
         }
-        node->source = {importedPackage.name.mangledName, loc, importedPackage.name.isTestImport};
+        node->source = {importedPackage.name.mangledName, loc, importType}; // TODO not always normal
     }
 
     void makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts, ast::ClassDef::RHS_store &modRhs,
-                    ImportTree::ImportType importType, ImportTree::Source parentSrc) {
+                    ImportType importType, ImportTree::Source parentSrc) {
         auto newParentSrc = parentSrc;
         if (node->source.exists() && !parentSrc.exists()) {
             newParentSrc = node->source;
@@ -736,7 +762,7 @@ private:
                                 fmt::map_join(parts, "::", [&](const auto &nr) { return nr.show(ctx); }));
                     e.addErrorLine(core::Loc(ctx.file, parentSrc.importLoc), "Conflict from");
                 }
-            } else {
+            } else if (importType == ImportType::Test || node->source.importType == ImportType::Normal) {
                 // Construct a module containing an assignment for an imported name:
                 // For name `A::B::C::D` imported from package `A::B` construct:
                 // module A::B::C
@@ -763,7 +789,7 @@ private:
     }
 
     ast::ExpressionPtr importModuleName(vector<core::NameRef> &parts, core::LocOffsets importLoc) {
-        ast::ExpressionPtr name = name2Expr(package.name.mangledName);
+        ast::ExpressionPtr name = name2Expr(pkgMangledName);
         for (auto part = parts.begin(); part < parts.end() - 1; part++) {
             name = name2Expr(*part, move(name));
         }
@@ -802,7 +828,8 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
     {
         UnorderedMap<core::NameRef, core::LocOffsets> importedNames;
         ImportTreeBuilder treeBuilder(*package);
-        for (auto &imported : package->importedPackageNames) {
+        for (auto &import : package->importedPackageNames) {
+            auto &imported = import.name;
             auto importedPackage = packageDB.getPackageByMangledName(imported.mangledName);
             if (importedPackage == nullptr) {
                 if (auto e = ctx.beginError(imported.loc, core::errors::Packager::PackageNotFound)) {
@@ -819,11 +846,12 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 }
             } else {
                 importedNames[imported.mangledName] = imported.loc;
-                treeBuilder.mergeImports(*importedPackage, imported.loc);
+                treeBuilder.mergeImports(*importedPackage, import);
             }
         }
-        importedPackages = treeBuilder.makeModule(ctx, ImportTree::ImportType::Normal);
-        testImportedPackages = treeBuilder.makeModule(ctx, ImportTree::ImportType::Test); // TODO nroman
+        importedPackages = treeBuilder.makeModule(ctx, ImportType::Normal);
+        testImportedPackages =
+            treeBuilder.makeModule(ctx, ImportType::Test); // TODO Also need to add alias for original pkg
     }
 
     auto packageNamespace =
