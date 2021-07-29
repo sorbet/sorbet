@@ -1095,8 +1095,16 @@ with `T.unsafe(...)`. T.unsafe is one of a handful of
 
 ## 7007
 
-Sorbet found a mistmatch between the type specified for a parameter in the
-signature and the default value provided.
+Sorbet can statically assert that the value passed into a `T.let` does not match
+the expected type:
+
+```rb
+x = T.let(1, String) # error: Argument does not have asserted type `String`
+```
+
+Because of the way default values are desugared by Sorbet, this error also
+occurs when Sorbet finds a mistmatch between the type specified for a parameter
+in the signature and the default value provided in the method.
 
 In this case, the signature states that `category` type is a `Category`, yet we
 try to use `nil` as default value:
