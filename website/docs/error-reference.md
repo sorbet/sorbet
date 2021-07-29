@@ -1093,6 +1093,31 @@ Sorbet allows the second `if` because we've explicitly made `x` unanalyzable
 with `T.unsafe(...)`. T.unsafe is one of a handful of
 [escape hatches](troubleshooting.md#escape-hatches) built into Sorbet.
 
+## 7007
+
+Sorbet found a mistmatch between the type specified for a parameter in the
+signature and the default value provided.
+
+In this case, the signature states that `category` type is a `Category`, yet we
+try to use `nil` as default value:
+
+```rb
+sig { params(name: String, category: Category).void }
+def publish_item(name, category = nil) # error: Argument does not have asserted type `Category`
+  # ...
+end
+```
+
+If `category` value is `nil` by default, maybe we should make it so its type is
+nilable:
+
+```rb
+sig { params(name: String, category: T.nilable(Category)).void }
+def publish_item(name, category = nil)
+  # ...
+end
+```
+
 ## 7014
 
 Sorbet has a special method called `T.reveal_type` which can be useful for
