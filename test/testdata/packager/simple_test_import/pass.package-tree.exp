@@ -26,6 +26,20 @@ end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Project_MainLib_Package$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Project>::<C MainLib>::<C Lib><<C <todo sym>>> < (::<todo sym>)
+      <emptyTree>::<C Project>::<C Util>::<C MyUtil>.new()
+
+      <emptyTree>::<C Project>::<C TestOnly>::<C SomeHelper>.new()
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageTests>>::<C Project_MainLib_Package$1><<C <todo sym>>> < ()
+    class <emptyTree>::<C Test>::<C Project>::<C MainLib>::<C LibTest><<C <todo sym>>> < (::<todo sym>)
+      <emptyTree>::<C Project>::<C MainLib>::<C Lib>.new()
+
+      <emptyTree>::<C Project>::<C Util>::<C MyUtil>.new()
+
+      <emptyTree>::<C Project>::<C TestOnly>::<C SomeHelper>.new()
     end
   end
 end

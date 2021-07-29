@@ -717,7 +717,8 @@ public:
         }
     }
 
-    ast::ClassDef::RHS_store makeModule(core::Context ctx, ImportType importType) { // TODO TODO better name for importType
+    ast::ClassDef::RHS_store makeModule(core::Context ctx,
+                                        ImportType importType) { // TODO TODO better name for importType
         vector<core::NameRef> parts;
         ast::ClassDef::RHS_store modRhs;
         makeModule(ctx, &root, parts, modRhs, importType, ImportTree::Source());
@@ -774,8 +775,8 @@ private:
                 //   D = <Mangled A::B>::A::B::C::D
                 // end
                 auto importLoc = node->source.importLoc;
-                auto assignRhs =
-                    prependPackageScope(parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
+                auto assignRhs = prependPackageScope(parts2literal(parts, core::LocOffsets::none()),
+                                                     node->source.packageMangledName);
                 auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
                                               std::move(assignRhs));
 
@@ -866,11 +867,12 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
         //   <Imports>
         //   <Mangled_Pkg_A>::Pkg::A = <PackageRegistry>::<Mangled_Pkg_A>::Pkg::A
         // end
-        auto assignRhs = prependPackageScope(package->name.fullName.toLiteral(core::LocOffsets::none()), package->name.mangledName);
-        auto assign = ast::MK::Assign(
-                core::LocOffsets::none(),
-                prependScope(package->name.fullName.toLiteral(core::LocOffsets::none()), name2Expr(package->name.mangledName)),
-                std::move(assignRhs));
+        auto assignRhs =
+            prependPackageScope(package->name.fullName.toLiteral(core::LocOffsets::none()), package->name.mangledName);
+        auto assign = ast::MK::Assign(core::LocOffsets::none(),
+                                      prependScope(package->name.fullName.toLiteral(core::LocOffsets::none()),
+                                                   name2Expr(package->name.mangledName)),
+                                      std::move(assignRhs));
         testImportedPackages.emplace_back(std::move(assign));
     }
 
@@ -897,10 +899,11 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, cor
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     EnforcePackagePrefix enforcePrefix(pkg);
     file.tree = ast::ShallowMap::apply(ctx, enforcePrefix, move(file.tree));
+
+    auto wrapperName = isTestFile ? core::Names::Constants::PackageTests() : core::Names::Constants::PackageRegistry();
     auto moduleWrapper =
         ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                        name2Expr(packageMangledName, name2Expr(core::Names::Constants::PackageRegistry())), {},
-                        std::move(rootKlass.rhs));
+                        name2Expr(packageMangledName, name2Expr(wrapperName)), {}, std::move(rootKlass.rhs));
     rootKlass.rhs.clear();
     rootKlass.rhs.emplace_back(move(moduleWrapper));
     return file;
