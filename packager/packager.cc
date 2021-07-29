@@ -41,6 +41,7 @@ struct PackageName {
     core::LocOffsets loc;
     core::NameRef mangledName = core::NameRef::noName();
     FullyQualifiedName fullName;
+    bool isTestImport = false;
 
     // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
     string toString(const core::GlobalState &gs) const {
@@ -187,12 +188,13 @@ FullyQualifiedName getFullyQualifiedName(core::Context ctx, ast::UnresolvedConst
 }
 
 // Gets the package name in `tree` if applicable.
-PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit *constantLit) {
+PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit *constantLit, bool isTestImport=false) {
     ENFORCE(constantLit != nullptr);
 
     PackageName pName;
     pName.loc = constantLit->loc;
     pName.fullName = getFullyQualifiedName(ctx, constantLit);
+    pName.isTestImport = isTestImport;
 
     // Foo::Bar => Foo_Bar_Package
     auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx)), "_Package");
@@ -404,7 +406,7 @@ struct PackageInfoFinder {
         }
 
         // Sanity check arguments for unrecognized methods
-        if (send.fun != core::Names::export_() && send.fun != core::Names::import()) {
+        if (!isSpecMethod(send)) {
             for (const auto &arg : send.args) {
                 if (!ast::isa_tree<ast::Literal>(arg)) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Packager::InvalidPackageExpression)) {
@@ -428,13 +430,13 @@ struct PackageInfoFinder {
             }
         }
 
-        if (send.fun == core::Names::import() && send.args.size() == 1) {
+        if ((send.fun == core::Names::import() || send.fun == core::Names::test_import()) && send.args.size() == 1) {
             // null indicates an invalid import.
-            if (auto target = verifyConstant(ctx, core::Names::import(), send.args[0])) {
-                auto name = getPackageName(ctx, target);
+            if (auto target = verifyConstant(ctx, send.fun, send.args[0])) {
+                auto name = getPackageName(ctx, target, send.fun == core::Names::test_import());
                 if (name.mangledName == info->name.mangledName) {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
-                        e.setHeader("Package `{}` cannot import itself", info->name.toString(ctx));
+                        e.setHeader("Package `{}` cannot {} itself", info->name.toString(ctx), send.fun.toString(ctx));
                     }
                 }
                 info->importedPackageNames.emplace_back(move(name));
@@ -510,6 +512,17 @@ struct PackageInfoFinder {
 
         ENFORCE(info->exports.empty());
         std::swap(exported, info->exports);
+    }
+
+    bool isSpecMethod(const sorbet::ast::Send &send) const {
+        switch (send.fun.rawId()) {
+            case core::Names::import().rawId():
+            case core::Names::test_import().rawId():
+            case core::Names::export_().rawId():
+                return true;
+            default:
+                return false;
+        }
     }
 
     /* Forbid arbitrary computation in packages */
@@ -630,9 +643,11 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
 // For a given package, a tree that is the union of all constants exported by the packages it
 // imports.
 class ImportTree final {
+
     struct Source {
         core::NameRef packageMangledName;
         core::LocOffsets importLoc;
+        bool testOnly;
         bool exists() {
             return importLoc.exists();
         }
@@ -644,6 +659,8 @@ class ImportTree final {
     Source source;
 
 public:
+    enum class ImportType { Normal = 1, Test = 2 };
+
     ImportTree() = default;
     ImportTree(const ImportTree &) = delete;
     ImportTree(ImportTree &&) = default;
@@ -670,10 +687,10 @@ public:
         }
     }
 
-    ast::ClassDef::RHS_store makeModule(core::Context ctx) {
+    ast::ClassDef::RHS_store makeModule(core::Context ctx, ImportTree::ImportType importType) {
         vector<core::NameRef> parts;
         ast::ClassDef::RHS_store modRhs;
-        makeModule(ctx, &root, parts, modRhs, ImportTree::Source());
+        makeModule(ctx, &root, parts, modRhs, importType, ImportTree::Source());
         return modRhs;
     }
 
@@ -687,11 +704,11 @@ private:
             }
             node = child.get();
         }
-        node->source = {importedPackage.name.mangledName, loc};
+        node->source = {importedPackage.name.mangledName, loc, importedPackage.name.isTestImport};
     }
 
     void makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts, ast::ClassDef::RHS_store &modRhs,
-                    ImportTree::Source parentSrc) {
+                    ImportTree::ImportType importType, ImportTree::Source parentSrc) {
         auto newParentSrc = parentSrc;
         if (node->source.exists() && !parentSrc.exists()) {
             newParentSrc = node->source;
@@ -706,7 +723,7 @@ private:
         });
         for (auto const &[nameRef, child] : childPairs) {
             parts.emplace_back(nameRef);
-            makeModule(ctx, child, parts, modRhs, newParentSrc);
+            makeModule(ctx, child, parts, modRhs, importType, newParentSrc);
             parts.pop_back();
         }
 
@@ -805,8 +822,8 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 treeBuilder.mergeImports(*importedPackage, imported.loc);
             }
         }
-        importedPackages = treeBuilder.makeModule(ctx);
-        testImportedPackages = treeBuilder.makeModule(ctx);
+        importedPackages = treeBuilder.makeModule(ctx, ImportTree::ImportType::Normal);
+        testImportedPackages = treeBuilder.makeModule(ctx, ImportTree::ImportType::Test); // TODO nroman
     }
 
     auto packageNamespace =
