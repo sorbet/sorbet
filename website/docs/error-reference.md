@@ -575,7 +575,7 @@ methods at runtime through meta-programming:
 class Base
   def self.data_accessor(key)
     define_method(key) do
-	  data[key]
+      data[key]
     end
   end
 
