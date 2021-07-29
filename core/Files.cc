@@ -191,7 +191,7 @@ bool File::isPackage() const {
 }
 
 bool File::isTest() const {
-    return absl::StrContains(path(), "/test/"); // TODO do we need to pre-compute?
+    return absl::EndsWith(path(), ".test.rb") || absl::StrContains(path(), "/test/"); // TODO do we need to pre-compute?
 }
 
 vector<int> &File::lineBreaks() const {
