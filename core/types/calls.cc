@@ -1314,6 +1314,18 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             original.main.sendTp = wrapped;
             return original;
         }
+        case Names::valid_p().rawId():
+        case Names::recursivelyValid_p().rawId():
+        case Names::subtypeOf_p().rawId():
+        case Names::describeObj().rawId():
+        case Names::errorMessageForObj().rawId():
+        case Names::errorMessageForObjRecursive().rawId():
+        case Names::validate_bang().rawId(): {
+            // These are methods on `T::Types::Base`. Don't report an error, but also for the time
+            // being don't even attempt to type the result properly. We can break these out and
+            // handle them better in the future if we want to.
+            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+        }
         default:
             if (auto e = gs.beginError(args.callLoc(), errors::Infer::MetaTypeDispatchCall)) {
                 e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.show(gs),
