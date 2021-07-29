@@ -271,17 +271,9 @@ class CSV < Object
         path: T.any(String, ::Sorbet::Private::Static::IOLike),
         mode: String,
         options: BasicObject,
-        blk: T.proc.params(arg0: T.any(T::Array[T.nilable(T.untyped)], CSV::Row)).void,
+        blk: T.nilable(T.proc.params(arg0: T.any(T::Array[T.nilable(T.untyped)], CSV::Row)).void),
     )
-    .void
-  end
-  sig do
-    params(
-        path: T.any(String, ::Sorbet::Private::Static::IOLike),
-        mode: String,
-        options: BasicObject,
-    )
-    .returns(T::Enumerator[T.any(T::Array[T.nilable(T.untyped)], CSV::Row)])
+    .returns(T.nilable(T::Enumerator[T.any(T::Array[T.nilable(T.untyped)], CSV::Row)]))
   end
   def self.foreach(path, mode="r", **options, &blk); end
 
