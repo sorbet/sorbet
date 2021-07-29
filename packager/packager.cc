@@ -277,8 +277,8 @@ ast::ExpressionPtr prependScope(ast::ExpressionPtr scope, ast::ExpressionPtr toP
 }
 
 // Prefix a constant reference with a name: `Foo::Bar` -> `<PackageRegistry>::<name>::Foo::Bar`
-ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef name) {
-    return prependScope(move(scope), name2Expr(name, name2Expr(core::Names::Constants::PackageRegistry())));
+ast::ExpressionPtr prependPackageScope(ast::ExpressionPtr scope, core::NameRef mangledName) {
+    return prependScope(move(scope), name2Expr(mangledName, name2Expr(core::Names::Constants::PackageRegistry())));
 }
 
 ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
@@ -496,7 +496,7 @@ struct PackageInfoFinder {
 
     // Bar::Baz => <PackageRegistry>::Foo_Package::Bar::Baz
     ast::ExpressionPtr prependInternalPackageName(ast::ExpressionPtr scope) {
-        return prependName(move(scope), this->info->name.mangledName);
+        return prependPackageScope(move(scope), this->info->name.mangledName);
     }
 
     // Generate a list of FQNs exported by this package. No export may be a prefix of another.
@@ -717,7 +717,7 @@ public:
         }
     }
 
-    ast::ClassDef::RHS_store makeModule(core::Context ctx, ImportType importType) {
+    ast::ClassDef::RHS_store makeModule(core::Context ctx, ImportType importType) { // TODO TODO better name for importType
         vector<core::NameRef> parts;
         ast::ClassDef::RHS_store modRhs;
         makeModule(ctx, &root, parts, modRhs, importType, ImportTree::Source());
@@ -775,7 +775,7 @@ private:
                 // end
                 auto importLoc = node->source.importLoc;
                 auto assignRhs =
-                    prependName(parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
+                    prependPackageScope(parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
                 auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
                                               std::move(assignRhs));
 
@@ -859,12 +859,20 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
             treeBuilder.makeModule(ctx, ImportType::Test); // TODO Also need to add alias for original pkg
     }
 
-    auto assignRhs = prependName(package->name.fullName.toLiteral(core::LocOffsets::none()), package->name.mangledName);
-    auto assign = ast::MK::Assign(
-        core::LocOffsets::none(),
-        prependScope(package->name.fullName.toLiteral(core::LocOffsets::none()), name2Expr(package->name.mangledName)),
-        std::move(assignRhs));
-    testImportedPackages.emplace_back(std::move(assign));
+    {
+        // In the test namespace for this package add an alias to give tests full access to the
+        // packaged code:
+        // module <PackageTests>
+        //   <Imports>
+        //   <Mangled_Pkg_A>::Pkg::A = <PackageRegistry>::<Mangled_Pkg_A>::Pkg::A
+        // end
+        auto assignRhs = prependPackageScope(package->name.fullName.toLiteral(core::LocOffsets::none()), package->name.mangledName);
+        auto assign = ast::MK::Assign(
+                core::LocOffsets::none(),
+                prependScope(package->name.fullName.toLiteral(core::LocOffsets::none()), name2Expr(package->name.mangledName)),
+                std::move(assignRhs));
+        testImportedPackages.emplace_back(std::move(assign));
+    }
 
     auto packageNamespace =
         ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
