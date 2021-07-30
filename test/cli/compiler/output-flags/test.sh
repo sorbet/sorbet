@@ -48,3 +48,15 @@ popd >/dev/null
 
 rm -rf "$sodir"
 rm -rf "$irdir"
+
+echo "legacy --llvm-ir-folder flag..."
+
+irdir="$(mktemp -d)"
+sorbet --silence-dev-message --llvm-ir-folder="$irdir" hello.rb
+
+echo "Files in \$irdir:"
+pushd "$irdir" >/dev/null
+find . -type f -print | sort
+popd >/dev/null
+
+rm -rf "$irdir"

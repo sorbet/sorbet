@@ -11,3 +11,10 @@ Files in $irdir:
 ./hello.rb.ll
 ./hello.rb.lll
 ./hello.rb.llo
+legacy --llvm-ir-folder flag...
+No errors! Great job.
+Files in $irdir:
+./hello.rb.ll
+./hello.rb.lll
+./hello.rb.llo
+./hello.rb.so
