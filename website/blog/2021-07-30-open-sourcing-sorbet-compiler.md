@@ -17,6 +17,8 @@ approach!
 We teased this a few weeks back in a tweet, which drew a fair bit of attention,
 and also a lot of questions:
 
+<!--truncate-->
+
 <blockquote class="twitter-tweet"><p lang="en" dir="ltr">We&#39;re big believers in multi-year infrastructure bets. After a few years of Ruby infra work, our in-house Ruby compiler is now 22–170% faster than Ruby&#39;s default implementation for Stripe&#39;s production API traffic. If interested in working on such problems, we&#39;re hiring!</p>&mdash; Patrick Collison (@patrickc) <a href="https://twitter.com/patrickc/status/1410269843585069056?ref_src=twsrc%5Etfw">June 30, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 Before answering the questions raised in the above discussion, some disclaimers:
