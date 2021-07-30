@@ -10,6 +10,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BClass>
     end
   end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C A_Package$1>::<C B><<C <todo sym>>> < ()
+      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BClass>
+    end
+
+    <emptyTree>::<C A_Package$1>::<C A> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>
+  end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
@@ -17,6 +25,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    <emptyTree>::<C B_Package$1>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)

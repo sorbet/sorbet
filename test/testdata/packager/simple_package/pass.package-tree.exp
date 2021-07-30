@@ -18,6 +18,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
+      <emptyTree>::<C CallsBar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C CallsBar>
+    end
+
+    module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
+      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C Foo>
+    end
+
+    <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
@@ -84,6 +93,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Bar><<C <todo sym>>> < ()
+      <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C Bar>
+    end
+
+    module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Bar><<C <todo sym>>> < ()
+      <emptyTree>::<C CallsFoo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C CallsFoo>
+    end
+
+    <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
