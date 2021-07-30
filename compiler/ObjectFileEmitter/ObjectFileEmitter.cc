@@ -407,7 +407,8 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
     pm.add(Passes::createRemoveUnnecessaryHashDupsPass());
     // print lowered IR
     llvm::ModulePass *printLowered = nullptr;
-    // We store lllFile in an std::optional declared outside the "if" to make sure it stays alive until the pass is run.
+    // We put the ostream in an std::optional declared outside the "if", because unfortunately `createPrintModulePass`
+    // doesn't take ownership of it.
     std::optional<llvm::raw_fd_ostream> lllFile;
     if (llvmIrDir.has_value()) {
         auto nameOptl = ((string)llvmIrDir.value()) + "/" + (string)objectName + ".lll";
@@ -417,7 +418,8 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
     // LTO passes
     addLTOPasses(pm, printLowered);
     // print optimized IR
-    // We store lloFile in an std::optional declared outside the "if" to make sure it stays alive until the pass is run.
+    // We put the ostream in an std::optional declared outside the "if", because unfortunately `createPrintModulePass`
+    // doesn't take ownership of it.
     std::optional<llvm::raw_fd_ostream> lloFile;
     if (llvmIrDir.has_value()) {
         auto nameOpt = ((string)llvmIrDir.value()) + "/" + (string)objectName + ".llo";
