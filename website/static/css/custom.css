@@ -134,6 +134,11 @@
   flex-basis: 50%;
 }
 
+.twitter-tweet-rendered {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* Responsive styles*/
 @media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
 }
