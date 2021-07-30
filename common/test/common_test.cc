@@ -2,9 +2,13 @@
 // violates our requirements, thus has to go first
 #include "common/FileOps.h"
 #include "common/Levenstein.h"
+#include "common/Path.h"
 #include "common/UIntSet.h"
 #include "common/UIntSetForEach.h"
 #include "common/common.h"
+
+// Make sure the compiler uses our implementation in Path.cc
+extern template class sorbet::BasePath<std::string>;
 
 namespace sorbet::common {
 
@@ -235,6 +239,39 @@ TEST_SUITE("UIntSet") {
         bigger.add(33);
         CHECK(bigger.contains(33));
         CHECK_EQ(1, bigger.size());
+    }
+}
+
+typedef sorbet::BasePath<std::string> SimplePath;
+
+TEST_SUITE("SimplePath") {
+    TEST_CASE("string()") {
+        CHECK_EQ("baz/foo.txt", sorbet::BasePath<std::string>("baz/foo.txt").string());
+    }
+
+    TEST_CASE("replaceFilename") {
+        CHECK_EQ("foo/bar/baz.txt", SimplePath("foo/bar/foo.rb").replaceFilename("baz.txt").string());
+        CHECK_EQ("foo.txt", SimplePath("bar.rb").replaceFilename("foo.txt").string());
+        CHECK_EQ("foo/bar/baz.txt", SimplePath("foo/bar/").replaceFilename("baz.txt").string());
+    }
+
+    TEST_CASE("replaceExtension") {
+        CHECK_EQ("foo.txt", SimplePath("foo.rb").replaceExtension(".txt").string());
+        CHECK_EQ("foo.txt", SimplePath("foo").replaceExtension(".txt").string());
+        CHECK_EQ("baz/foo.txt", SimplePath("baz/foo.rb").replaceExtension(".txt").string());
+        CHECK_EQ("baz/foo.txt", SimplePath("baz/foo").replaceExtension(".txt").string());
+    }
+
+    TEST_CASE("lexicallyNormal") {
+        // TODO
+    }
+
+    TEST_CASE("combineLeft") {
+        CHECK_EQ("baz/foo.txt", SimplePath("foo.txt").combineLeft("baz").string());
+    }
+
+    TEST_CASE("combineRight") {
+        CHECK_EQ("baz/foo.txt", SimplePath("baz").combineRight("foo.txt").string());
     }
 }
 

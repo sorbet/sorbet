@@ -92,14 +92,29 @@ public:
     bool check(const Diagnostic &diagnostic, std::string_view sourceLine, std::string_view errorPrefix);
 };
 
+class BaseDefAssertion : public RangeAssertion {
+public:
+    const std::string symbol;
+
+    BaseDefAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                     std::string_view symbol);
+
+    virtual std::unique_ptr<Location> getDefinitionLocation(const LSPConfiguration &config) const {
+        return getLocation(config);
+    }
+
+    static void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                      LSPWrapper &wrapper, int &nextId, const Location &queryLoc,
+                      const std::vector<std::shared_ptr<BaseDefAssertion>> &definitions);
+};
+
 // # ^^^ def: symbol
-class DefAssertion final : public RangeAssertion {
+class DefAssertion final : public BaseDefAssertion {
 public:
     static std::shared_ptr<DefAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
                                               int assertionLine, std::string_view assertionContents,
                                               std::string_view assertionType);
 
-    const std::string symbol;
     const int version;
     const bool isDefOfSelf;
     const bool isDefaultArgValue;
@@ -170,6 +185,25 @@ public:
     std::shared_ptr<DefAssertion> def;
 
     TypeAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol);
+
+    std::string toString() const override;
+};
+
+// # ^^^ file-def: file-path line col
+class FileDefAssertion final : public BaseDefAssertion {
+public:
+    static std::shared_ptr<FileDefAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                  int assertionLine, std::string_view assertionContents,
+                                                  std::string_view assertionType);
+
+    const std::string targetFilename;
+    const int targetLine;
+    const int targetColumn;
+
+    FileDefAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                     std::string targetFilename, int targetLine, int targetColumn);
+
+    std::unique_ptr<Location> getDefinitionLocation(const LSPConfiguration &config) const override;
 
     std::string toString() const override;
 };

@@ -25,6 +25,10 @@ cc_library(
         "common.h",
         "typecase.h",
     ],
+    defines = select({
+        "//tools/config:webasm": [],
+        "//conditions:default": ["USE_STL_FILESYSTEM"],
+    }),
     linkopts = select({
         "//tools/config:linux": ["-lm"],
         "//conditions:default": [],

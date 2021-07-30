@@ -398,6 +398,7 @@ NameDef names[] = {
     {"staticInit", "<static-init>"},
 
     {"require"},
+    {"require_relative"},
     {"callWithSplat", "<call-with-splat>"},
     {"callWithBlock", "<call-with-block>"},
     {"callWithSplatAndBlock", "<call-with-splat-and-block>"},

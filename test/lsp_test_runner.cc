@@ -426,6 +426,10 @@ TEST_CASE("LSPTest") {
         // (The first element of the pair is only ever TypeDefAssertions but we only ever care that they're
         // RangeAssertions, so rather than fiddle with up casting, we'll just make the whole vector RangeAssertions)
         UnorderedMap<string, pair<vector<shared_ptr<RangeAssertion>>, vector<shared_ptr<TypeAssertion>>>> typeDefMap;
+
+        // FileDefAssertion[]
+        vector<shared_ptr<FileDefAssertion>> fileDefAssertions;
+
         for (auto &assertion : assertions) {
             if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
                 auto &entry = defUsageMap[defAssertion->symbol];
@@ -446,6 +450,8 @@ TEST_CASE("LSPTest") {
             } else if (auto typeAssertion = dynamic_pointer_cast<TypeAssertion>(assertion)) {
                 auto &[_typeDefs, typeAssertions] = typeDefMap[typeAssertion->symbol];
                 typeAssertions.emplace_back(typeAssertion);
+            } else if (auto fileDefAssertion = dynamic_pointer_cast<FileDefAssertion>(assertion)) {
+                fileDefAssertions.emplace_back(fileDefAssertion);
             }
         }
 
@@ -478,7 +484,7 @@ TEST_CASE("LSPTest") {
                     symbol = usageAssertion->symbol;
                 }
 
-                vector<shared_ptr<DefAssertion>> defs;
+                vector<shared_ptr<BaseDefAssertion>> defs;
                 for (auto version : versions) {
                     auto entry = defAssertions.find(version);
                     if (entry != defAssertions.end()) {
@@ -503,7 +509,7 @@ TEST_CASE("LSPTest") {
 
                 auto queryLoc = assertion->getLocation(config);
                 // Check that a definition request at this location returns defs.
-                DefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, *queryLoc, defs);
+                BaseDefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, *queryLoc, defs);
                 // Check that a reference request at this location returns entryAssertions.
                 UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc, entryAssertions);
                 // Check that a highlight request at this location returns all of the entryAssertions for the same
@@ -527,6 +533,14 @@ TEST_CASE("LSPTest") {
                 // Check that a type definition request at this location returns type-def.
                 TypeDefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc, typeDefs);
             }
+        }
+
+        // Check file-def point to the right place
+        for (auto &fileDefAssertion : fileDefAssertions) {
+            // Where the request originates from
+            auto queryLoc = fileDefAssertion->getLocation(config);
+            // Check that a definition request lead to the location specified in the assertion
+            BaseDefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, *queryLoc, {fileDefAssertion});
         }
     }
 
