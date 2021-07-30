@@ -2,12 +2,32 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://sorbet.org/blog</id>
     <title>Sorbet Blog</title>
-    <updated>2020-07-30T06:00:00.000Z</updated>
+    <updated>2021-07-30T06:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://sorbet.org/blog"/>
     <subtitle>The best place to stay up-to-date with the latest Sorbet news and events.</subtitle>
     <logo>https://sorbet.org/img/sorbet-logo-white-sparkles.svg</logo>
     <rights>© 2021 Stripe</rights>
+    <entry>
+        <title type="html"><![CDATA[Sorbet Compiler: An experimental, ahead-of-time compiler for Ruby]]></title>
+        <id>https://sorbet.org/blog/2021/07/30/open-sourcing-sorbet-compiler.html</id>
+        <link href="https://sorbet.org/blog/2021/07/30/open-sourcing-sorbet-compiler.html"/>
+        <updated>2021-07-30T06:00:00.000Z</updated>
+        <summary type="html"><![CDATA[<p>For the past year, the <a href="https://sorbet.org/">Sorbet</a> team has been working on an
+experimental, ahead-of-time compiler for Ruby, powered by Sorbet and LLVM. Today
+we’re sharing the source code for it. It lives alongside the existing code for
+Sorbet on GitHub, mostly in the <code>compiler/</code> folder:</p>
+<p>→ <a href="https://github.com/sorbet/sorbet/tree/master/compiler/">https://github.com/sorbet/sorbet/tree/master/compiler/</a></p>
+<p>We want to be clear up front: the code is nowhere near ready for external use
+right now, but we welcome you to read the code and give us feedback on our
+approach!</p>
+<p>We teased this a few weeks back in a tweet, which drew a fair bit of attention,
+and also a lot of questions:</p>
+]]></summary>
+        <author>
+            <name/>
+        </author>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Types in Ruby 3, RBS, and Sorbet]]></title>
         <id>https://sorbet.org/blog/2020/07/30/ruby-3-rbs-sorbet.html</id>
