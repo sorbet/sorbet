@@ -17,8 +17,6 @@ def hidden_methods_tests(ruby = None, tests = []):
     native.test_suite(
         name = name,
         tests = test_rules,
-        # NOTE: ensure that this rule isn't caught in //...
-        tags = ["manual"],
     )
 
 def _hidden_methods_test(test_path, ruby):
@@ -52,9 +50,6 @@ def _hidden_methods_test(test_path, ruby):
         ),
         outs = [actual],
 
-        # NOTE: this is manual to avoid being caught with `//...`
-        tags = ["manual"],
-
         # NOTE: this redirects stdout/stderr to a log, and only outputs on
         # failure.
         cmd =
@@ -78,9 +73,6 @@ def _hidden_methods_test(test_path, ruby):
             test_path,
             ruby,
         ],
-
-        # NOTE: this is manual to avoid being caught with `//...`
-        tags = ["manual"],
     )
 
     res["test_name"] = test_name

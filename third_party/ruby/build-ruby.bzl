@@ -62,6 +62,9 @@ export PATH="$(dirname "{cc}"):$PATH"
 # and this feels more maintainable than patching it.
 cp -aL "{src_dir}"/* "$build_dir"
 
+{install_extra_srcs}
+{install_append_srcs}
+
 pushd "$build_dir" > /dev/null
 
 run_cmd() {{
@@ -72,6 +75,16 @@ run_cmd() {{
         exit 1
     fi
 }}
+
+run_cmd sed -i.bak -e 's@^COMMONOBJS\( *\)=@COMMONOBJS\\1= {extra_srcs_object_files}@' common.mk
+run_cmd rm -f common.mk.bak
+
+# This is a hack to get C level backtraces working. (The default autoconf test
+# for backtraces uses a sigaltstack size that is too small, so the SIGSEGV
+# signal handler itself causes a SIGSEGV). This value was plucked from signal.c:
+# https://github.com/ruby/ruby/blob/v2_6_5/signal.c#L568
+run_cmd sed -i.bak -e 's@SIGSTKSZ@16*1024@' configure
+run_cmd rm -f configure.bak
 
 # This is a hack. The configure script builds up a command for compiling C
 # files that includes `-fvisibility=hidden`. To override it, our flag needs to
@@ -120,17 +133,58 @@ find ccan -type f -name \*.h | while read file; do
   cp $file "$internal_incdir/$file"
 done
 
-# install bundler
-cp "$base/{bundler}" bundler.gem
+# Put the installed ruby into our path to run gem commands
+export PATH="$out_dir/bin:$PATH"
 
-# --local to avoid going to rubygmes for the gem
-# --env-shebang to not hardcode the path to ruby in the sandbox
-# --force because bundler is packaged with ruby starting with 2.6
-run_cmd "$out_dir/bin/gem" install --local --env-shebang --force bundler.gem
+cp "$base/{rubygems}" rubygems-update.gem
+run_cmd gem install --no-document --local --env-shebang rubygems-update.gem
+
+# Overwrites the version of the `gem` and `bundle` commands inside the Ruby
+# distribution itself with newer versions (the specific newer versions are
+# pinned for a given rubygems-update version).
+run_cmd update_rubygems
+
+# Fix the shebang in the wrapper scripts updated by 'update_rubygems'
+ruby_path="$(which ruby)"
+for file in gem bundle rake; do
+    sed -i'' -e "1s|$ruby_path|/usr/bin/env ruby|" "$out_dir/bin/$file"
+done
+
+# rubygems-update isn't needed after update_rubygems has been run
+run_cmd gem uninstall rubygems-update
+
+# NOTE: bundle and bundler are the same, but bundler doesn't get updated by
+# rubygems_update.
+cp "$out_dir/bin/bundle" "$out_dir/bin/bundler"
+
+{install_gems}
 
 popd > /dev/null
 
 rm -rf "$build_dir"
+
+"""
+
+# Attempt to preserve the directory structure of the extra source files, so that things like #include
+# directives "just work". For example, `#include "foo/foo.h"` would mean `foo.h` needs to be inside `foo/`
+_INSTALL_EXTRA_SRC = """
+mkdir -p "$build_dir/{dirname}"
+cp "{file}" "$build_dir/{dirname}/{basename}"
+"""
+
+_INSTALL_APPEND_SRC = """
+cat "{file}" >> "$build_dir/{target}"
+"""
+
+_INSTALL_GEM = """
+
+# Copy {file} locally to avoid having the gem command accidentally interpret it
+# as a gem name, rather than a filename.
+cp "$base/{file}" package.gem
+
+# --local to avoid going to rubygmes for the gem
+# --env-shebang to not hardcode the path to ruby in the sandbox
+run_cmd gem install --local --env-shebang package.gem
 
 """
 
@@ -195,10 +249,31 @@ def _build_ruby_impl(ctx):
 
     outputs = binaries + [libdir, incdir, sharedir, internal_incdir, static_libs, static_lib_ruby, static_lib_ripper]
 
+    install_extra_srcs = []
+    extra_srcs_object_files = []
+    for extra_src in ctx.attr.extra_srcs:
+        dirname = extra_src.label.package
+
+        for file in extra_src.files.to_list():
+            basename = file.basename
+            install_extra_srcs.append(_INSTALL_EXTRA_SRC.format(file = file.path, dirname = dirname, basename = basename))
+
+            if file.extension == "c":
+                without_ext = basename[0:basename.rfind(".")]
+                extra_obj = "{dirname}/{without_ext}.$(OBJEXT)".format(without_ext = without_ext, dirname = dirname)
+                extra_srcs_object_files.append(extra_obj)
+
+    install_append_srcs = []
+    for append_src in ctx.attr.append_srcs:
+        for file in append_src.files.to_list():
+            install_append_srcs.append(_INSTALL_APPEND_SRC.format(file = file.path, target = file.basename))
+
+    install_gems = [_INSTALL_GEM.format(file = file.path) for file in ctx.files.gems]
+
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = deps + ctx.files.src + ctx.files.bundler,
+        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.gems + ctx.files.extra_srcs + ctx.files.append_srcs,
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
@@ -213,9 +288,13 @@ def _build_ruby_impl(ctx):
             static_lib_ripper = static_lib_ripper.path,
             hdrs = " ".join(hdrs),
             libs = " ".join(libs),
-            bundler = ctx.files.bundler[0].path,
+            rubygems = ctx.files.rubygems[0].path,
             configure_flags = " ".join(ctx.attr.configure_flags),
             sysroot_flag = ctx.attr.sysroot_flag,
+            install_extra_srcs = "\n".join(install_extra_srcs),
+            extra_srcs_object_files = " ".join(extra_srcs_object_files),
+            install_append_srcs = "\n".join(install_append_srcs),
+            install_gems = "\n".join(install_gems),
         )),
     )
 
@@ -241,9 +320,18 @@ _build_ruby = rule(
     attrs = {
         "src": attr.label(),
         "deps": attr.label_list(),
-        "bundler": attr.label(
+        "rubygems": attr.label(
             mandatory = True,
-            doc = "The bundler gem to install",
+            doc = "The rubygems-update gem to install and apply",
+        ),
+        "gems": attr.label_list(
+            doc = "Additional ruby gems to install into the ruby build",
+        ),
+        "extra_srcs": attr.label_list(
+            doc = "A list of *.c and *.h files to treat as extra source files to libruby",
+        ),
+        "append_srcs": attr.label_list(
+            doc = "A list of *.c files to append to the file of the same name in the ruby vm",
         ),
         "configure_flags": attr.string_list(
             doc = "Additional arguments to configure",
@@ -266,7 +354,6 @@ _build_ruby = rule(
     provides = [
         RubyInfo,
         DefaultInfo,
-        CcInfo,
     ],
     toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
     implementation = _build_ruby_impl,
@@ -365,7 +452,6 @@ def _ruby_binary_impl(ctx):
 
     runfiles = ctx.runfiles(root_symlinks = symlinks)
     runfiles = runfiles.merge(runfiles_bash)
-    runfiles_bash = ctx.attr._runfiles_bash[DefaultInfo].files
 
     return [DefaultInfo(executable = wrapper, runfiles = runfiles)]
 
@@ -502,7 +588,7 @@ _rubyfmt_static_deps = rule(
     implementation = _rubyfmt_static_deps_impl,
 )
 
-def ruby(bundler, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
+def ruby(rubygems, gems, extra_srcs = None, append_srcs = None, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
     """
     Define a ruby build.
     """
@@ -516,12 +602,15 @@ def ruby(bundler, configure_flags = [], copts = [], cppopts = [], linkopts = [],
     _build_ruby(
         name = "ruby-dist",
         src = ":source",
-        bundler = bundler,
+        extra_srcs = extra_srcs,
+        append_srcs = append_srcs,
+        rubygems = rubygems,
         configure_flags = configure_flags,
         copts = copts,
         cppopts = cppopts,
         linkopts = linkopts,
         deps = deps,
+        gems = gems,
         # This is a hack because macOS Catalina changed the way that system headers and libraries work.
         sysroot_flag = select({
             "@com_stripe_ruby_typer//tools/config:darwin": "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",

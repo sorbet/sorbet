@@ -30,8 +30,11 @@ err=0
 
 mkdir -p _out_
 
+# NOTE: we skip the compiler tests because llvm doesn't interact well with the sanitizer
 ./bazel test \
   --experimental_generate_json_trace_profile --profile=_out_/profile.json \
+  --test_tag_filters=-compiler \
+  --build_tag_filters=-compiler \
   @gems//... \
   //gems/sorbet/test/snapshot \
   //gems/sorbet/test/hidden-method-finder \
@@ -43,7 +46,7 @@ rm -rf _tmp_
 mkdir -p _tmp_/log/junit/
 
 # TODO: does this query omit the snapshot tests?
-./bazel query 'tests(//...) except attr("tags", "manual", //...)' | while read -r line; do
+./bazel query 'tests(//...) except (attr("tags", "manual", //...) + attr("tags", "compiler", //...))' | while read -r line; do
     path="${line/://}"
     path="${path#//}"
     cp "bazel-testlogs/$path/test.xml" _tmp_/log/junit/"${path//\//_}-${BUILDKITE_JOB_ID}.xml"

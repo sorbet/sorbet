@@ -53,3 +53,10 @@ config_setting(
         "compilation_mode": "dbg",
     },
 )
+
+config_setting(
+    name = "release",
+    values = {
+        "define": "release=true",
+    },
+)
