@@ -3,4 +3,4 @@
 # We have to manually specify --dir because remote-script hard-codes pay-server for backwards compatibility.
 #    https://git.corp.stripe.com/stripe-internal/pay-server/pull/196272/files#diff-3476184fa78de8564df28ff68cf18631R89
 # I think we should fix remote-script to stop doing that.
-exec $HOME/stripe/pay-server/scripts/bin/remote-script --dir /pay/src/sorbet_llvm "$@"
+exec $HOME/stripe/pay-server/scripts/bin/remote-script --dir /pay/src/sorbet "$@"
