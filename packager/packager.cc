@@ -19,6 +19,7 @@ namespace sorbet::packager {
 namespace {
 
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
+constexpr core::NameRef TEST_NAME = core::Names::Constants::Test();
 
 struct FullyQualifiedName {
     vector<core::NameRef> parts;
@@ -26,7 +27,7 @@ struct FullyQualifiedName {
     ast::ExpressionPtr toLiteral(core::LocOffsets loc) const;
 
     FullyQualifiedName() = default;
-    FullyQualifiedName(const FullyQualifiedName &) = delete;
+    explicit FullyQualifiedName(const FullyQualifiedName &) = default;
     FullyQualifiedName(FullyQualifiedName &&) = default;
     FullyQualifiedName &operator=(const FullyQualifiedName &) = delete;
     FullyQualifiedName &operator=(FullyQualifiedName &&) = default;
@@ -47,6 +48,7 @@ struct PackageName {
     core::LocOffsets loc;
     core::NameRef mangledName = core::NameRef::noName();
     FullyQualifiedName fullName;
+    FullyQualifiedName fullTestPkgName;
 
     // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
     string toString(const core::GlobalState &gs) const {
@@ -211,6 +213,8 @@ PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit 
     PackageName pName;
     pName.loc = constantLit->loc;
     pName.fullName = getFullyQualifiedName(ctx, constantLit);
+    pName.fullTestPkgName = FullyQualifiedName(pName.fullName);
+    pName.fullTestPkgName.parts.insert(pName.fullTestPkgName.parts.begin(), TEST_NAME);
 
     // Foo::Bar => Foo_Bar_Package
     auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx)), "_Package");
@@ -307,12 +311,13 @@ bool sharesPrefix(const vector<core::NameRef> &a, const vector<core::NameRef> &b
 // prefix.
 class EnforcePackagePrefix final {
     const PackageInfo *pkg;
+    const bool isTestFile;
     vector<core::NameRef> nameParts;
     int rootConsts = 0;
     int skipPush = 0;
 
 public:
-    EnforcePackagePrefix(const PackageInfo *pkg) : pkg(pkg) {
+    EnforcePackagePrefix(const PackageInfo *pkg, bool isTestFile) : pkg(pkg), isTestFile(isTestFile) {
         ENFORCE(pkg != nullptr);
     }
 
@@ -322,7 +327,7 @@ public:
             // Ignore top-level <root>
             return tree;
         }
-        const auto &pkgName = pkg->name.fullName.parts;
+        const auto &pkgName = requiredNamespace();
         if (nameParts.size() > pkgName.size()) {
             // At this depth we can stop checking the prefixes since beyond the end of the prefix.
             skipPush++;
@@ -363,7 +368,7 @@ public:
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(original);
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs != nullptr) {
-            auto &pkgName = pkg->name.fullName.parts;
+            auto &pkgName = requiredNamespace();
             if (rootConsts == 0 && !isPrefix(pkgName, nameParts)) {
                 if (auto e = ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
                     e.setHeader("Constants may not be defined outside of the enclosing package namespace `{}`",
@@ -401,6 +406,14 @@ private:
                 ENFORCE(scope->symbol == core::Symbols::root());
                 rootConsts--;
             }
+        }
+    }
+
+    const vector<core::NameRef> &requiredNamespace() const {
+        if (isTestFile) {
+            return pkg->name.fullTestPkgName.parts;
+        } else {
+            return pkg->name.fullName.parts;
         }
     }
 };
@@ -444,7 +457,7 @@ struct PackageInfoFinder {
         if (send.fun == core::Names::export_() && send.args.size() == 1) {
             // null indicates an invalid export.
             if (auto target = verifyConstant(ctx, core::Names::export_(), send.args[0])) {
-                exported.push_back(getFullyQualifiedName(ctx, target));
+                exported.emplace_back(getFullyQualifiedName(ctx, target));
                 // Transform the constant lit to refer to the target within the mangled package namespace.
                 send.args[0] = prependInternalPackageName(move(send.args[0]));
             }
@@ -897,7 +910,7 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, cor
     }
 
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
-    EnforcePackagePrefix enforcePrefix(pkg);
+    EnforcePackagePrefix enforcePrefix(pkg, isTestFile);
     file.tree = ast::ShallowMap::apply(ctx, enforcePrefix, move(file.tree));
 
     auto wrapperName = isTestFile ? core::Names::Constants::PackageTests() : core::Names::Constants::PackageRegistry();
