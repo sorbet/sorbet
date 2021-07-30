@@ -49,6 +49,9 @@ ruby(
             "-Wl,-z,relro",
             "-Wl,-z,noexecstack",
         ],
+        "@com_stripe_ruby_typer//tools/config:darwin": [
+            "-mlinker-version=400",
+        ],
         "//conditions:default": [],
     }),
     rubygems = "@rubygems_update_stripe//file",
