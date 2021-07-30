@@ -21,7 +21,7 @@ trap cleanup EXIT
 echo ".so but no IR output..."
 
 sodir="$(mktemp -d)"
-sorbet --silence-dev-message --so-folder="$sodir" hello.rb
+sorbet --silence-dev-message --compiled-out-dir="$sodir" hello.rb
 
 echo "Files in \$sodir:"
 pushd "$sodir" >/dev/null
@@ -34,7 +34,7 @@ echo ".so and IR output..."
 
 sodir="$(mktemp -d)"
 irdir="$(mktemp -d)"
-sorbet --silence-dev-message --so-folder="$sodir" --llvm-ir-folder="$irdir" hello.rb
+sorbet --silence-dev-message --compiled-out-dir="$sodir" --llvm-ir-dir="$irdir" hello.rb
 
 echo "Files in \$sodir:"
 pushd "$sodir" >/dev/null

@@ -11,7 +11,7 @@ trap cleanup EXIT
 
 go () {
   source="$1"
-  sorbet --silence-dev-message --so-folder="$outdir" --llvm-ir-folder="$outdir" "$source" || echo 'sorbet failed'
+  sorbet --silence-dev-message --compiled-out-dir="$outdir" --llvm-ir-dir="$outdir" "$source" || echo 'sorbet failed'
 }
 
 go supported_case.rb

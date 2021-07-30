@@ -88,11 +88,11 @@ All of the sigils at the top of the file are necessary:
 Place the ruby program above in `test.rb`, and compile it with the following commands:
 
 ```shell
-$ mkdir so_output
+$ mkdir compiled_output
 $ mkdir ir_output
-$ scratchpad/bin/sorbet --so-folder=so_output --llvm-ir-folder=ir_output test.rb
+$ scratchpad/bin/sorbet --compiled-out-dir=compiled_output --llvm-ir-dir=ir_output test.rb
 No errors! Great job.
-$ ls so_output
+$ ls compiled_output
 test.rb.so
 $ ls ir_output
 test.rb.ll  test.rb.lll  test.rb.llo

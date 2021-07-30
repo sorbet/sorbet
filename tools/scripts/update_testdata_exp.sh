@@ -148,9 +148,9 @@ for this_src in "${rb_src[@]}" DUMMY; do
                 --silence-dev-message \
                 --no-error-count \
                 --suppress-non-critical \
-                --so-folder \
+                --compiled-out-dir \
                 "$llvmir" \
-                --llvm-ir-folder \
+                --llvm-ir-dir \
                 "$llvmir" \
                 "${srcs[@]}" \
                 2\> "$llvmir/update_testdata_exp.stderr"\; \

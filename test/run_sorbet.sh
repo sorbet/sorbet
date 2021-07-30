@@ -26,10 +26,10 @@ else
   llvmir=''
 fi
 
-if [ -n "${so_folder:-}" ]; then
-  explicit_so_folder=1
+if [ -n "${compiled_out_dir:-}" ]; then
+  explicit_compiled_out_dir=1
 else
-  so_folder=''
+  compiled_out_dir=''
 fi
 
 while getopts ":hdi:" opt; do
@@ -44,8 +44,8 @@ while getopts ":hdi:" opt; do
       ;;
 
     s)
-      explicit_so_folder=1
-      so_folder="${OPTARG}"
+      explicit_compiled_out_dir=1
+      compiled_out_dir="${OPTARG}"
       ;;
 
     i)
@@ -68,8 +68,8 @@ cleanup() {
   if [ -n "${llvmir:-}" ] && [ -z "${explicit_llvmir:-}" ]; then
     rm -rf "$llvmir"
   fi
-  if [ -n "${so_folder:-}" ] && [ -z "${explicit_so_folder:-}" ]; then
-    rm -rf "$so_folder"
+  if [ -n "${compiled_out_dir:-}" ] && [ -z "${explicit_compiled_out_dir:-}" ]; then
+    rm -rf "compiled_out_dir"
   fi
 }
 trap cleanup EXIT
@@ -82,12 +82,12 @@ elif [[ "$llvmir" != /* ]]; then
   llvmir="$PWD/$llvmir"
 fi
 
-if [ -z "$so_folder" ]; then
-  so_folder="$(mktemp -d)"
-elif [[ ! -d "$so_folder" ]]; then
-  fatal ".so output directory '${so_folder}' does not exist"
-elif [[ "$so_folder" != /* ]]; then
-  so_folder="$PWD/$so_folder"
+if [ -z "$compiled_out_dir" ]; then
+  compiled_out_dir="$(mktemp -d)"
+elif [[ ! -d "$compiled_out_dir" ]]; then
+  fatal ".so output directory '${compiled_out_dir}' does not exist"
+elif [[ "$compiled_out_dir" != /* ]]; then
+  compiled_out_dir="$PWD/$compiled_out_dir"
 fi
 
 echo
@@ -104,7 +104,7 @@ else
   command=( "${LLDB:-lldb}" "--" "./bazel-bin/compiler/sorbet" )
 fi
 
-command=( "${command[@]}" --silence-dev-message "--so-folder=$so_folder" "--llvm-ir-folder=$llvmir" \
+command=( "${command[@]}" --silence-dev-message "--compiled-out-dir=$compiled_out_dir" "--llvm-ir-dir=$llvmir" \
   "${rb_files[@]}" )
 
 echo
