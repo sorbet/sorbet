@@ -15,8 +15,10 @@ case "${unameOut}" in
 esac
 
 
+TESTS=( "//..."  )
 if [[ "linux" == "$platform" ]]; then
   CONFIG_OPTS="--config=buildfarm-sanitized-linux"
+  TESTS+=( "@gems//..." "//gems/sorbet/test/snapshot" "gems/sorbet/test/hidden-method-finder" )
 elif [[ "mac" == "$platform" ]]; then
   CONFIG_OPTS="--config=buildfarm-sanitized-mac"
 fi
@@ -35,10 +37,8 @@ mkdir -p _out_
   --experimental_generate_json_trace_profile --profile=_out_/profile.json \
   --test_tag_filters=-compiler \
   --build_tag_filters=-compiler \
-  @gems//... \
-  //gems/sorbet/test/snapshot \
-  //gems/sorbet/test/hidden-method-finder \
-  //... $CONFIG_OPTS --test_summary=terse || err=$?
+  "${TESTS[@]}" \
+  $CONFIG_OPTS --test_summary=terse || err=$?
 
 echo "--- uploading test results"
 
