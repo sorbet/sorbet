@@ -9,7 +9,7 @@ cd ../../../..
 
 versions=("sorbet_ruby_2_6" "sorbet_ruby_2_7")
 
-if ! bazel test //gems/sorbet/test/hidden-method-finder --define compiler=false -c opt "$@"; then
+if ! bazel test //gems/sorbet/test/hidden-method-finder -c opt "$@"; then
     for test_dir in bazel-bin/gems/sorbet/test/hidden-method-finder/{simple,thorough}; do
         echo "Updating $test_dir"
         suite="$(basename "${test_dir}")"
