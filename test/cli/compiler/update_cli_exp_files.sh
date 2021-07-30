@@ -3,13 +3,13 @@
 set -euo pipefail
 
 test_dir="$(dirname "${BASH_SOURCE[0]}")"
-root_dir="${test_dir}/../.."
+root_dir="${test_dir}/../../.."
 
 # shellcheck disable=SC1090
 source "${root_dir}/test/logging.sh"
 
 info "Building the exp test outputs"
-bazel build //test/cli:actual_cli > /dev/null 2>&1
+bazel build //test/cli/compiler:actual_compiler > /dev/null 2>&1
 
 info "Updating exp files"
 
