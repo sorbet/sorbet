@@ -219,6 +219,14 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         categoryCounterInc("lub", "or>");
         return lubDistributeOr(gs, t2, t1);
     } else if (auto *a2 = cast_type<AndType>(t2)) { // 2, 4
+        if (auto *a1 = cast_type<AndType>(t1)) {
+            // Check if a1 and a2 are equivalent. This helps simplify T.all types created during type inference.
+            if ((a1->left == a2->left && a1->right == a2->right) || (a1->left == a2->right && a1->right == a2->left)) {
+                categoryCounterInc("lub", "<and>");
+                return t2;
+            }
+        }
+
         categoryCounterInc("lub", "and>");
         auto t1d = underlying(gs, t1);
         auto t2filtered = dropLubComponents(gs, t2, t1d);

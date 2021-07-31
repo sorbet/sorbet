@@ -74,4 +74,19 @@ module Main
     [a, b].each(&:lazy)
     #            ^^^^^ error: Method `lazy` does not exist on `NilClass`
   end
+
+
+  module Cat
+  end
+  
+  module Dog
+  end
+
+  T1 = T.type_alias{T.all(Cat, Dog)}
+  T2 = T.type_alias{T.all(Cat, Dog)}
+  T3 = T.type_alias{T.any(T1, T2)}
+
+  def equivalent_and_types_lub
+    T.reveal_type(T3) # error: Revealed type: `<Type: T.all(Main::Cat, Main::Dog)>`
+  end
 end
