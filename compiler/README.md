@@ -1,4 +1,4 @@
-# sorbet_llvm
+# The Sorbet Compiler
 
 This repository contains the Sorbet compiler. It uses Sorbet and LLVM to emit
 shared objects that conform to Ruby's C extension API given Ruby source files.
@@ -7,11 +7,6 @@ It also contains Sorbet Ruby, a set of scripts that build Ruby in a specific way
 so that it can run shared objects that the Sorbet Compiler emits.
 
 This README contains documentation specifically for contributing to sorbet_llvm.
-You might also want to:
-
-- Read the [design doc](http://go/srbc/design) for the Sorbet compiler.
-
-- Read the [Sorbet Ruby at Stripe](http://go/sorbet_ruby) documentation.
 
 If you are at Stripe, you might also want to see <http://go/types/internals> for
 docs about Stripe-specific development workflows and historical Stripe context.
