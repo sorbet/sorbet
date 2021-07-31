@@ -65,10 +65,5 @@ def update_test():
     ]
     native.test_suite(
         name = "update",
-        tags = [
-            "manual",
-            "external",
-            "local",
-        ],
         tests = update_rules,
     )
