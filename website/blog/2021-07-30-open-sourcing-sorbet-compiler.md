@@ -158,7 +158,7 @@ the Ruby VM?
 
 Ruby is fundamentally an interpreted language. Apart from maybe having a CI step
 to pre-download third-party gems, many Ruby projects do not have any sort of
-build step—the project's Ruby source code is meant to run run unprocessed by the
+build step—the project's Ruby source code is meant to run unprocessed by the
 Ruby VM.
 
 By contrast, our hypothesis was that we could deliver substantial performance
