@@ -65,6 +65,9 @@ snapshot_tests(
 
 test_suite(
     name = "snapshot",
+
+    # NOTE: this is manual to avoid being caught with `//...`
+    tags = ["manual"],
     tests = [
         ":snapshot-sorbet_ruby_2_6",
         ":snapshot-sorbet_ruby_2_7",
@@ -73,6 +76,9 @@ test_suite(
 
 test_suite(
     name = "update",
+
+    # NOTE: this is manual to avoid being caught with `//...`
+    tags = ["manual"],
     tests = [
         ":update-sorbet_ruby_2_6",
         ":update-sorbet_ruby_2_7",

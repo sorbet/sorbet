@@ -70,4 +70,5 @@ def call_validation_rb_files():
     native.test_suite(
         name = "update_call_validation",
         tests = updaters,
+        tags = ["manual"],
     )

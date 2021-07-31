@@ -23,11 +23,15 @@ def snapshot_tests(ruby = None, tests = []):
     native.test_suite(
         name = name,
         tests = test_rules,
+        # NOTE: ensure that this rule isn't caught in //...
+        tags = ["manual"],
     )
 
     native.test_suite(
         name = update_name,
         tests = update_rules,
+        # NOTE: ensure that this rule isn't caught in //...
+        tags = ["manual"],
     )
 
 def _snapshot_test(test_path, ruby):

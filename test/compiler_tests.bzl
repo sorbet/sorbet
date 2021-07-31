@@ -166,6 +166,7 @@ def compiler_tests(suite_name, all_paths, extra_args = [], tags = []):
     native.test_suite(
         name = "{}_too_slow".format(suite_name),
         tests = too_slow_tests,
+        tags = ["manual"],
     )
 
 RubyOracle = provider(
