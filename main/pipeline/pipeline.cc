@@ -679,9 +679,8 @@ private:
     const int prohibitedLinesEnd;
 
     bool isAllowListed(core::Context ctx, core::SymbolRef sym) {
-        return sym.data(ctx)->name == core::Names::staticInit() ||
-               sym.data(ctx)->name == core::Names::Constants::Root() ||
-               sym.data(ctx)->name == core::Names::unresolvedAncestors();
+        return sym.name(ctx) == core::Names::staticInit() || sym.name(ctx) == core::Names::Constants::Root() ||
+               sym.name(ctx) == core::Names::unresolvedAncestors();
     }
 
     void checkLoc(core::Context ctx, core::Loc loc) {

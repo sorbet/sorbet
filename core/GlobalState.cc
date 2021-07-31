@@ -841,7 +841,7 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
     // the previous name was: for `x$n` where `n` is larger than 2, it'll be `x$(n-1)`, for bare `x`,
     // it'll be whatever the largest `x$n` that exists is, if any; otherwise, there will be none.
     ENFORCE(sym.exists(), "lookup up previous name of non-existing symbol");
-    NameRef name = sym.data(*this)->name;
+    NameRef name = sym.name(*this);
     auto ownerScope = owner.dataAllowingNone(*this);
 
     if (name.kind() == NameKind::UNIQUE) {

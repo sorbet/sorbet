@@ -629,7 +629,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     auto objMeth = core::Symbols::Object().data(gs)->findMemberTransitive(gs, args.name);
                     if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isClassOrModuleModule()) {
                         e.addErrorNote("Did you mean to `{}` in this module?",
-                                       fmt::format("include {}", objMeth.data(gs)->owner.data(gs)->name.show(gs)));
+                                       fmt::format("include {}", objMeth.data(gs)->owner.name(gs).show(gs)));
                     }
                 }
                 auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);
@@ -650,7 +650,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         bool addedAutocorrect = false;
                         if (possibleSymbol.isClassOrModule()) {
                             // TODO(jez) Use Loc::adjust here?
-                            const auto replacement = possibleSymbol.data(gs)->name.show(gs);
+                            const auto replacement = possibleSymbol.name(gs).show(gs);
                             const auto loc = args.callLoc();
                             const auto toReplace = args.name.toString(gs);
                             // This is a bit hacky but the loc corresponding to the send isn't available here and until
@@ -663,7 +663,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                 addedAutocorrect = true;
                             }
                         } else {
-                            const auto replacement = possibleSymbol.data(gs)->name.toString(gs);
+                            const auto replacement = possibleSymbol.name(gs).toString(gs);
                             const auto toReplace = args.name.toString(gs);
                             if (replacement != toReplace) {
                                 const auto recvLoc = args.receiverLoc();

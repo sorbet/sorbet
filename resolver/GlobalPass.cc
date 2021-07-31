@@ -114,12 +114,11 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
                 if (sym.data(gs)->typeMembers()[i] != my) {
                     if (auto e = gs.beginError(my.data(gs)->loc(), core::errors::Resolver::TypeMembersInWrongOrder)) {
                         e.setHeader("Type members for `{}` repeated in wrong order", sym.show(gs));
-                        e.addErrorLine(my.data(gs)->loc(), "Found type member with name `{}`",
-                                       my.data(gs)->name.show(gs));
+                        e.addErrorLine(my.data(gs)->loc(), "Found type member with name `{}`", my.name(gs).show(gs));
                         e.addErrorLine(sym.data(gs)->typeMembers()[i].data(gs)->loc(),
                                        "Expected type member with name `{}`",
-                                       sym.data(gs)->typeMembers()[i].data(gs)->name.show(gs));
-                        e.addErrorLine(tp.data(gs)->loc(), "`{}` defined in parent here:", tp.data(gs)->name.show(gs));
+                                       sym.data(gs)->typeMembers()[i].name(gs).show(gs));
+                        e.addErrorLine(tp.data(gs)->loc(), "`{}` defined in parent here:", tp.name(gs).show(gs));
                     }
                     int foundIdx = 0;
                     while (foundIdx < sym.data(gs)->typeMembers().size() &&
@@ -146,7 +145,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
     if (sym.data(gs)->isClassOrModuleClass()) {
         for (core::SymbolRef tp : sym.data(gs)->typeMembers()) {
             // AttachedClass is covariant, but not controlled by the user.
-            if (tp.data(gs)->name == core::Names::Constants::AttachedClass()) {
+            if (tp.name(gs) == core::Names::Constants::AttachedClass()) {
                 continue;
             }
 

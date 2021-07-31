@@ -504,11 +504,11 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, Clas
     } else {
         currentAlignment.reserve(asIf.data(gs)->typeMembers().size());
         for (auto originalTp : asIf.data(gs)->typeMembers()) {
-            auto name = originalTp.data(gs)->name;
+            auto name = originalTp.name(gs);
             SymbolRef align;
             int i = 0;
             for (auto x : what.data(gs)->typeMembers()) {
-                if (x.data(gs)->name == name) {
+                if (x.name(gs) == name) {
                     align = x;
                     currentAlignment.emplace_back(x);
                     break;

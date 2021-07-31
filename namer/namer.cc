@@ -795,8 +795,7 @@ class SymbolDefiner {
         }
 
         // Check if class was already mangled.
-        auto klassSymbol =
-            ctx.state.lookupClassSymbol(scope.data(ctx)->owner.asClassOrModuleRef(), scope.data(ctx)->name);
+        auto klassSymbol = ctx.state.lookupClassSymbol(scope.data(ctx)->owner.asClassOrModuleRef(), scope.name(ctx));
         if (klassSymbol.exists()) {
             return klassSymbol;
         }
@@ -809,7 +808,7 @@ class SymbolDefiner {
             e.addErrorLine(scope.data(ctx)->loc(), "`{}` defined here", newOwnerName);
         }
         // Mangle this one out of the way, and re-enter a symbol with this name as a class.
-        auto scopeName = scope.data(ctx)->name;
+        auto scopeName = scope.name(ctx);
         ctx.state.mangleRenameSymbol(scope, scopeName);
         auto scopeKlass = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc),
                                                      scope.data(ctx)->owner.asClassOrModuleRef(), scopeName);
@@ -1124,15 +1123,15 @@ class SymbolDefiner {
         if (!symbol.isClassOrModule()) {
             // we might have already mangled the class symbol, so see if we have a symbol that is a class already
             auto klassSymbol =
-                ctx.state.lookupClassSymbol(symbol.data(ctx)->owner.asClassOrModuleRef(), symbol.data(ctx)->name);
+                ctx.state.lookupClassSymbol(symbol.data(ctx)->owner.asClassOrModuleRef(), symbol.name(ctx));
             if (klassSymbol.exists()) {
                 return klassSymbol;
             }
 
             emitRedefinedConstantError(ctx, core::Loc(ctx.file, klass.loc), symbol.show(ctx), symbol.data(ctx)->loc());
 
-            auto origName = symbol.data(ctx)->name;
-            ctx.state.mangleRenameSymbol(symbol, symbol.data(ctx)->name);
+            auto origName = symbol.name(ctx);
+            ctx.state.mangleRenameSymbol(symbol, symbol.name(ctx));
             klassSymbol = ctx.state.enterClassSymbol(declLoc, symbol.data(ctx)->owner.asClassOrModuleRef(), origName);
             klassSymbol.data(ctx)->setIsModule(isModule);
 
@@ -1252,7 +1251,7 @@ class SymbolDefiner {
         if (!sym.exists() && currSym.exists()) {
             emitRedefinedConstantError(ctx, core::Loc(ctx.file, staticField.asgnLoc), staticField.name.show(ctx),
                                        currSym.data(ctx)->loc());
-            ctx.state.mangleRenameSymbol(currSym, currSym.data(ctx)->name);
+            ctx.state.mangleRenameSymbol(currSym, currSym.name(ctx));
         }
         if (sym.exists()) {
             ENFORCE(currSym.exists());
@@ -1330,7 +1329,7 @@ class SymbolDefiner {
             }
             // if we have more than one type member with the same name, then we have messed up somewhere
             ENFORCE(absl::c_find_if(onSymbol.data(ctx)->typeMembers(), [&](auto mem) {
-                        return mem.data(ctx)->name == existingTypeMember.data(ctx)->name;
+                        return mem.name(ctx) == existingTypeMember.data(ctx)->name;
                     }) != onSymbol.data(ctx)->typeMembers().end());
             sym = existingTypeMember;
         } else {
@@ -1700,7 +1699,7 @@ public:
 
         core::SymbolRef maybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
         if (!maybeScope.isClassOrModule()) {
-            auto scopeName = maybeScope.data(ctx)->name;
+            auto scopeName = maybeScope.name(ctx);
             maybeScope = ctx.state.lookupClassSymbol(maybeScope.data(ctx)->owner.asClassOrModuleRef(), scopeName);
         }
         auto scope = maybeScope.asClassOrModuleRef();

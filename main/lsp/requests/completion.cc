@@ -245,7 +245,7 @@ vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const 
 string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatchResult, core::SymbolRef method,
                      const core::TypePtr &receiverType, const core::TypeConstraint *constraint, u2 totalArgs) {
     fmt::memory_buffer result;
-    fmt::format_to(std::back_inserter(result), "{}", method.data(gs)->name.shortName(gs));
+    fmt::format_to(std::back_inserter(result), "{}", method.name(gs).shortName(gs));
     auto nextTabstop = 1;
 
     /* If we are completing an existing send that either has some arguments
@@ -376,7 +376,7 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
     auto supportsSnippets = clientConfig.clientCompletionItemSnippetSupport;
     auto markupKind = clientConfig.clientCompletionItemMarkupKind;
 
-    auto label = string(maybeAlias.data(gs)->name.shortName(gs));
+    auto label = string(maybeAlias.name(gs).shortName(gs));
 
     // Intuition for when to use maybeAlias vs what: if it needs to know the original name: maybeAlias.
     // If it needs to know the types / arity: what. Default to `what` if you don't know.
@@ -630,7 +630,7 @@ bool isSimilarConstant(const core::GlobalState &gs, string_view prefix, core::Sy
         return false;
     }
 
-    auto name = sym.data(gs)->name;
+    auto name = sym.name(gs);
     if (name.kind() != core::NameKind::CONSTANT) {
         return false;
     }

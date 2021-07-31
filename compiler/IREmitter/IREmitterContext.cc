@@ -72,7 +72,7 @@ AliasesAndKeywords setupAliasesAndKeywords(CompilerState &cs, const cfg::CFG &cf
                 } else {
                     // It's currently impossible in Sorbet to declare a global field with a T.let
                     // (they will all be Magic_undeclaredFieldStub)
-                    auto name = i->what.data(cs)->name;
+                    auto name = i->what.name(cs);
                     auto shortName = name.shortName(cs);
                     ENFORCE(!(shortName.size() > 0 && shortName[0] == '$'));
 
@@ -499,7 +499,7 @@ llvm::DISubprogram *getDebugScope(CompilerState &cs, cfg::CFG &cfg, llvm::DIScop
     auto loc = cfg.symbol.data(cs)->loc();
 
     auto owner = cfg.symbol.data(cs)->owner;
-    std::string diName(owner.data(cs)->name.shortName(cs));
+    std::string diName(owner.name(cs).shortName(cs));
 
     if (owner.data(cs)->isSingletonClass(cs)) {
         diName += ".";

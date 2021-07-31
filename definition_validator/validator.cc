@@ -394,15 +394,15 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::ClassOrM
             // Method is 'final', and passes the check.
             sym.data(gs)->isFinalMethod() ||
             // <static-init> is a fake method Sorbet synthesizes for typechecking.
-            sym.data(gs)->name == core::Names::staticInit() ||
+            sym.name(gs) == core::Names::staticInit() ||
             // <unresolved-ancestors> is a fake method Sorbet synthesizes to ensure class hierarchy changes in IDE take
             // slow path.
-            sym.data(gs)->name == core::Names::unresolvedAncestors()) {
+            sym.name(gs) == core::Names::unresolvedAncestors()) {
             continue;
         }
         if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::FinalModuleNonFinalMethod)) {
             e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
-                        errMsgClass.show(gs), sym.data(gs)->name.show(gs));
+                        errMsgClass.show(gs), sym.name(gs).show(gs));
         }
     }
 }

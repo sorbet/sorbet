@@ -1024,7 +1024,7 @@ void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, l
         switch (alias.kind) {
             case Alias::AliasKind::Constant: {
                 auto sym = alias.constantSym;
-                auto name = sym.data(cs.gs)->name.show(cs.gs);
+                auto name = sym.name(cs.gs).show(cs.gs);
                 auto owner = sym.data(cs.gs)->owner;
                 builder.CreateCall(cs.getFunction("sorbet_setConstant"),
                                    {Payload::getRubyConstant(cs, owner, builder), Payload::toCString(cs, name, builder),

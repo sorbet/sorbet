@@ -16,7 +16,7 @@ variant<JSONNullObject, unique_ptr<PrepareRenameResult>> getPrepareRenameResult(
     }
 
     auto result = make_unique<PrepareRenameResult>(move(range));
-    auto name = symbol.data(gs)->name.show(gs);
+    auto name = symbol.name(gs).show(gs);
     result->placeholder = name;
     return result;
 }

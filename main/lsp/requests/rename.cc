@@ -27,7 +27,7 @@ bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalStat
         if (!filetype.empty()) {
             auto error =
                 fmt::format("Renaming constants defined in {} files is not supported; symbol {} is defined at {}",
-                            filetype, symbol.data(gs)->name.show(gs), loc.filePosToString(gs));
+                            filetype, symbol.name(gs).show(gs), loc.filePosToString(gs));
             response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, error);
             return false;
         }

@@ -1402,7 +1402,7 @@ class ResolveTypeMembersAndFieldsWalk {
             // class or body, rather then nested in some block
             if (job.atTopLevel && ctx.owner.data(ctx)->isClassOrModule()) {
                 // Declaring a class instance variable
-            } else if (job.atTopLevel && ctx.owner.data(ctx)->name == core::Names::initialize()) {
+            } else if (job.atTopLevel && ctx.owner.name(ctx) == core::Names::initialize()) {
                 // Declaring a instance variable
             } else if (ctx.owner.data(ctx)->isMethod() && ctx.owner.data(ctx)->owner.data(ctx)->isSingletonClass(ctx) &&
                        !core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {

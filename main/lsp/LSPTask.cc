@@ -160,7 +160,7 @@ LSPQueryResult LSPTask::queryBySymbol(LSPTypecheckerDelegate &typechecker, core:
     ENFORCE(sym.exists());
     vector<core::FileRef> frefs;
     const core::GlobalState &gs = typechecker.state();
-    const core::NameHash symNameHash(gs, sym.data(gs)->name);
+    const core::NameHash symNameHash(gs, sym.name(gs));
     // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
     int i = -1;
     for (auto &file : typechecker.state().getFiles()) {
@@ -381,7 +381,7 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
 
     string_view baseName;
 
-    string symbolName = symbol.data(gs)->name.toString(gs);
+    string symbolName = symbol.name(gs).toString(gs);
     // Extract the base name from `symbol`.
     if (absl::StartsWith(symbolName, "@")) {
         if (!symbol.isField(gs)) {

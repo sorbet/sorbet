@@ -28,7 +28,7 @@ string getFunctionNamePrefix(CompilerState &cs, core::SymbolRef sym) {
         return getFunctionNamePrefix(cs, maybeAttached) + ".singleton_class";
     }
     string suffix;
-    auto name = sym.data(cs)->name;
+    auto name = sym.name(cs);
     if (name.kind() == core::NameKind::CONSTANT && name.dataCnst(cs)->original.kind() == core::NameKind::UTF8) {
         suffix = string(name.shortName(cs));
     } else {
@@ -51,7 +51,7 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
         prefix = prefix + getFunctionNamePrefix(cs, sym.data(cs)->owner) + "#";
     }
 
-    auto name = sym.data(cs)->name;
+    auto name = sym.name(cs);
     string suffix;
     if (name.kind() == core::NameKind::UTF8) {
         suffix = string(name.shortName(cs));
@@ -78,7 +78,7 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
 }
 
 bool IREmitterHelpers::isFileStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
-    auto name = sym.data(gs)->name;
+    auto name = sym.name(gs);
     if (name.kind() != core::NameKind::UNIQUE) {
         return false;
     }
@@ -86,7 +86,7 @@ bool IREmitterHelpers::isFileStaticInit(const core::GlobalState &gs, core::Symbo
 }
 
 bool IREmitterHelpers::isClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
-    return sym.data(gs)->name == core::Names::staticInit();
+    return sym.name(gs) == core::Names::staticInit();
 }
 
 bool IREmitterHelpers::isFileOrClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
@@ -367,7 +367,7 @@ core::SymbolRef IREmitterHelpers::fixupOwningSymbol(const core::GlobalState &gs,
 std::string IREmitterHelpers::showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym) {
     std::string withoutOwnerStr;
 
-    auto name = sym.data(gs)->name;
+    auto name = sym.name(gs);
     if (name.kind() == core::NameKind::UNIQUE) {
         withoutOwnerStr = name.dataUnique(gs)->original.show(gs);
     } else {
@@ -405,7 +405,7 @@ bool IREmitterHelpers::isRootishSymbol(const core::GlobalState &gs, core::Symbol
 
     // --stripe-packages interposes its own set of symbols at the toplevel.
     // Absent any runtime support, we need to consider these as rootish.
-    if (sym == core::Symbols::PackageRegistry() || sym.data(gs)->name.isPackagerName(gs)) {
+    if (sym == core::Symbols::PackageRegistry() || sym.name(gs).isPackagerName(gs)) {
         return true;
     }
 

@@ -186,9 +186,9 @@ string Ident::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) con
 
 string Alias::toString(const core::GlobalState &gs, const CFG &cfg) const {
     if (name.exists()) {
-        return fmt::format("alias {} ({})", this->what.data(gs)->name.toString(gs), name.toString(gs));
+        return fmt::format("alias {} ({})", this->what.name(gs).toString(gs), name.toString(gs));
     } else {
-        return fmt::format("alias {}", this->what.data(gs)->name.toString(gs));
+        return fmt::format("alias {}", this->what.name(gs).toString(gs));
     }
 }
 

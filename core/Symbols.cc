@@ -26,7 +26,7 @@ constexpr string_view COLON_SEPARATOR = "::"sv;
 constexpr string_view HASH_SEPARATOR = "#"sv;
 
 string showInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name, string_view separator) {
-    if (!owner.exists() || owner == Symbols::root() || owner.data(gs)->name.isPackagerName(gs)) {
+    if (!owner.exists() || owner == Symbols::root() || owner.name(gs).isPackagerName(gs)) {
         return name.show(gs);
     }
     ENFORCE(owner != core::Symbols::PackageRegistry());
@@ -1103,7 +1103,7 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
     typeMembers.erase(it, typeMembers.end());
     if (!typeMembers.empty()) {
         fmt::format_to(std::back_inserter(buf), "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
-                           auto name = symb.data(gs)->name;
+                           auto name = symb.name(gs);
                            return showRaw ? name.showRaw(gs) : name.show(gs);
                        }));
     }
@@ -1197,7 +1197,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
     typeMembers.erase(it, typeMembers.end());
     if (!typeMembers.empty()) {
         fmt::format_to(std::back_inserter(buf), "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
-                           auto name = symb.data(gs)->name;
+                           auto name = symb.name(gs);
                            return showRaw ? name.showRaw(gs) : name.show(gs);
                        }));
     }
@@ -1317,6 +1317,21 @@ string SymbolRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
             return asTypeArgumentRef().toStringWithOptions(gs, tabs, showFull, showRaw);
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().toStringWithOptions(gs, tabs, showFull, showRaw);
+    }
+}
+
+core::NameRef SymbolRef::name(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->name;
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->name;
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->name;
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->name;
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->name;
     }
 }
 
@@ -1899,7 +1914,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
         }
         fast_sort(membersToHash, [](const auto &a, const auto &b) -> bool { return a.rawId() < b.rawId(); });
         for (auto member : membersToHash) {
-            result = mix(result, _hash(member.data(gs)->name.shortName(gs)));
+            result = mix(result, _hash(member.name(gs).shortName(gs)));
         }
     }
     for (const auto &e : mixins_) {
@@ -1918,7 +1933,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
     }
     for (const auto &e : typeParams) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
+            result = mix(result, _hash(e.name(gs).shortName(gs)));
         }
     }
 
