@@ -10,7 +10,7 @@
 
 namespace sorbet::compiler {
 
-// Like GlobalState, but for sorbet_llvm.
+// Like GlobalState, but for the Sorbet Compiler.
 class CompilerState {
 public:
     // Things created and managed ouside of us (by either Sorbet or plugin_injector)
