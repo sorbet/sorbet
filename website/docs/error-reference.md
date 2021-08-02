@@ -1166,7 +1166,7 @@ Sorbet found a reference to a generic type with the wrong number of type
 arrguments.
 
 Here we defined `MyMap` as a generic class expecting two type parameters
-`KeyType` and `ValueType` but we try to instanciate it with only one type
+`KeyType` and `ValueType` but we try to instantiate it with only one type
 argument:
 
 ```rb
