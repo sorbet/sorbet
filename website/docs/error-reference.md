@@ -1050,7 +1050,14 @@ bar(x: 1) # ok
 ## 7005
 
 Sorbet detected a mismatch between the declared return type for the method and
-the type of the returned value.
+the type of the returned value:
+
+```rb
+sig { returns(Integer) }
+def answer
+  "42" # error: Expected `Integer` but found `String("42")` for method result type
+end
+```
 
 Here we specified in the signature that `find` returns an instance of
 `Configuration`, yet the returned value might be `nil`:
@@ -1072,7 +1079,7 @@ def find(name)
 end
 ```
 
-In some case, we're already being cautious and perform some checks before
+In some cases, we're already being cautious and perform some checks before
 returning yet Sorbet still complains about the return type:
 
 ```rb
@@ -1083,7 +1090,7 @@ def find(name)
 end
 ```
 
-While this code is correct, Sorbet cannot assert the state of `@lookup` didn’t
+While this code is correct, Sorbet cannot assume the state of `@lookup` didn’t
 change between the `key?` check and the `[]` read. To fix this, we can take
 advantage of flow-typing to make the whole method work without inline type
 annotations:
@@ -1098,7 +1105,7 @@ end
 ```
 
 By using a local variable, we allow Sorbet to assert that `config` is never
-nilable passed the `raise` instruction.
+nilable past the `raise` instruction.
 
 ## 7006
 
