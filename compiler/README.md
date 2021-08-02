@@ -350,7 +350,7 @@ It's best to just never use `unique_ptr::release` in the compiler.
 
 ## Editor and environment
 
-Nearly all of the [Editor and environment] tips from the Sorbet repo apply here
+Nearly all of the [Editor and environment] tips from the main README apply here
 too.
 
 [Editor and environment]: https://github.com/sorbet/sorbet#editor-and-environment
