@@ -106,11 +106,14 @@ Place the Ruby program above in `test.rb`, and compile it with the following
 commands:
 
 ```shell
-$ mkdir output
-$ scratchpad/bin/sorbet --llvm-ir-folder=output test.rb
+$ mkdir compiled_output
+$ mkdir ir_output
+$ scratchpad/bin/sorbet --compiled-out-dir=compiled_output --llvm-ir-dir=ir_output test.rb
 No errors! Great job.
-$ ls output
-test.rb.ll  test.rb.lll  test.rb.llo  test.rb.so
+$ ls compiled_output
+test.rb.so
+$ ls ir_output
+test.rb.ll  test.rb.lll  test.rb.llo
 ```
 
 The files produced have suffixes that correspond to different phases of

@@ -1,0 +1,20 @@
+No errors! Great job.
+.so but no IR output...
+No errors! Great job.
+Files in $sodir:
+./hello.rb.so
+.so and IR output...
+No errors! Great job.
+Files in $sodir:
+./hello.rb.so
+Files in $irdir:
+./hello.rb.ll
+./hello.rb.lll
+./hello.rb.llo
+legacy --llvm-ir-folder flag...
+No errors! Great job.
+Files in $irdir:
+./hello.rb.ll
+./hello.rb.lll
+./hello.rb.llo
+./hello.rb.so

@@ -73,12 +73,14 @@ for file in "${ruby_source[@]}"; do
 done
 
 echo
-info "Using Sorbet to generate llvm-ir-folder..."
-llvm_ir_folder_flag="--llvm-ir-folder=$output_dir"
-info "├─ Using $llvm_ir_folder_flag"
+info "Using Sorbet to generate compiled files and llvm ir..."
+compiled_out_dir_flag="--compiled-out-dir=$output_dir"
+llvm_ir_dir_flag="--llvm-ir-dir=$output_dir"
+info "├─ Using $compiled_out_dir_flag"
+info "├─ Using $llvm_ir_dir_flag"
 set +e
 $sorbet --silence-dev-message --no-error-count \
-  "$llvm_ir_folder_flag" "${ruby_source[@]}" > "$stdout" 2>&1
+  "$compiled_out_dir_flag" "$llvm_ir_dir_flag" "${ruby_source[@]}" > "$stdout" 2>&1
 echo "$?" > "$exitcode"
 set -e
 

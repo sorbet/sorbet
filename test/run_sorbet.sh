@@ -20,9 +20,19 @@ EOF
 }
 
 debug=
-llvmir="${llvmir:-}"
+if [ -n "${llvmir:-}" ]; then
+  explicit_llvmir=1
+else
+  llvmir=''
+fi
 
-while getopts ":hdi:" opt; do
+if [ -n "${compiled_out_dir:-}" ]; then
+  explicit_compiled_out_dir=1
+else
+  compiled_out_dir=''
+fi
+
+while getopts ":hdsi:" opt; do
   case $opt in
     h)
       usage
@@ -31,6 +41,11 @@ while getopts ":hdi:" opt; do
 
     d)
       debug=1
+      ;;
+
+    s)
+      explicit_compiled_out_dir=1
+      compiled_out_dir="${OPTARG}"
       ;;
 
     i)
@@ -46,19 +61,33 @@ done
 
 shift $((OPTIND - 1))
 
-orig_llvmir=$llvmir
+orig_llvmir="$llvmir"
 rb_files=( "$@" )
 
-if [ -z "$llvmir" ]; then
-  llvmir=$(mktemp -d)
-  cleanup() {
+cleanup() {
+  if [ -n "${llvmir:-}" ] && [ -z "${explicit_llvmir:-}" ]; then
     rm -rf "$llvmir"
-  }
-  trap cleanup EXIT
+  fi
+  if [ -n "${compiled_out_dir:-}" ] && [ -z "${explicit_compiled_out_dir:-}" ]; then
+    rm -rf "compiled_out_dir"
+  fi
+}
+trap cleanup EXIT
+
+if [ -z "$llvmir" ]; then
+  llvmir="$(mktemp -d)"
 elif [[ ! -d "$llvmir" ]]; then
   fatal "llvm output directory '${llvmir}' does not exist"
 elif [[ "$llvmir" != /* ]]; then
   llvmir="$PWD/$llvmir"
+fi
+
+if [ -z "$compiled_out_dir" ]; then
+  compiled_out_dir="$(mktemp -d)"
+elif [[ ! -d "$compiled_out_dir" ]]; then
+  fatal ".so output directory '${compiled_out_dir}' does not exist"
+elif [[ "$compiled_out_dir" != /* ]]; then
+  compiled_out_dir="$PWD/$compiled_out_dir"
 fi
 
 echo
@@ -75,7 +104,7 @@ else
   command=( "${LLDB:-lldb}" "--" "./bazel-bin/compiler/sorbet" )
 fi
 
-command=( "${command[@]}" --silence-dev-message "--llvm-ir-folder=$llvmir" \
+command=( "${command[@]}" --silence-dev-message "--compiled-out-dir=$compiled_out_dir" "--llvm-ir-dir=$llvmir" \
   "${rb_files[@]}" )
 
 echo

@@ -37,8 +37,8 @@ string objectFileName(const core::GlobalState &gs, const core::FileRef &f) {
     return sourceFile;
 }
 
-void ensureOutputDir(const string_view irOutputDir, string_view fileName) {
-    string path(irOutputDir);
+void ensureOutputDir(const string_view outputDir, string_view fileName) {
+    string path(outputDir);
 
     auto finalSlashPos = fileName.rfind('/');
     if (finalSlashPos == string_view::npos) {
@@ -95,6 +95,7 @@ public:
 };
 
 class LLVMSemanticExtension : public SemanticExtension {
+    optional<string> compiledOutputDir;
     optional<string> irOutputDir;
     bool forceCompiled;
     mutable struct {
@@ -116,7 +117,7 @@ class LLVMSemanticExtension : public SemanticExtension {
     }
 
     bool shouldCompile(const core::GlobalState &gs, const core::FileRef &f) const {
-        if (!irOutputDir.has_value()) {
+        if (!compiledOutputDir.has_value()) {
             return false;
         }
         if (forceCompiled) {
@@ -172,7 +173,8 @@ class LLVMSemanticExtension : public SemanticExtension {
     }
 
 public:
-    LLVMSemanticExtension(optional<string> irOutputDir, bool forceCompiled) {
+    LLVMSemanticExtension(optional<string> compiledOutputDir, optional<string> irOutputDir, bool forceCompiled) {
+        this->compiledOutputDir = move(compiledOutputDir);
         this->irOutputDir = move(irOutputDir);
         this->forceCompiled = forceCompiled;
     }
@@ -334,15 +336,19 @@ public:
 
         compiler::CompilerState cs(gs, lctx, module.get(), debug.get(), compileUnit, f, nullptr, nullptr, nullptr);
         string fileName = objectFileName(gs, f);
-        ensureOutputDir(irOutputDir.value(), fileName);
-        compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
+        ensureOutputDir(compiledOutputDir.value(), fileName);
+        if (irOutputDir.has_value()) {
+            ensureOutputDir(irOutputDir.value(), fileName);
+        }
+        compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), compiledOutputDir.value(), irOutputDir,
+                                         fileName);
     };
 
     virtual void finishTypecheck(const core::GlobalState &gs) const override {}
 
     virtual ~LLVMSemanticExtension(){};
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) override {
-        return make_unique<LLVMSemanticExtension>(this->irOutputDir, this->forceCompiled);
+        return make_unique<LLVMSemanticExtension>(this->compiledOutputDir, this->irOutputDir, this->forceCompiled);
     };
     virtual void merge(const core::GlobalState &from, core::GlobalState &to, core::GlobalSubstitution &subst) override {
     }
@@ -351,7 +357,15 @@ public:
 class LLVMSemanticExtensionProvider : public SemanticExtensionProvider {
 public:
     virtual void injectOptions(cxxopts::Options &optsBuilder) const override {
-        optsBuilder.add_options("compiler")("llvm-ir-folder", "Output LLVM IR to directory", cxxopts::value<string>());
+        optsBuilder.add_options("compiler")(
+            "compiled-out-dir", "Output compiled code (*.rb.so or *.rb.bundle) to directory, which must already exist",
+            cxxopts::value<string>());
+        optsBuilder.add_options("compiler")("llvm-ir-dir", "Output LLVM IR to directory, which must already exist",
+                                            cxxopts::value<string>());
+        // TODO(aprocter): Remove this once we no longer need it for backwards compatibility in the Stripe codebase.
+        optsBuilder.add_options("compiler")("llvm-ir-folder",
+                                            "(DEPRECATED) Sets the value for both --compiled-out-dir and --llvm-ir-dir",
+                                            cxxopts::value<string>());
         optsBuilder.add_options("compiler")("force-compiled", "Force all files to this compiled level",
                                             cxxopts::value<bool>());
     };
@@ -361,10 +375,21 @@ public:
             throw EarlyReturnWithCode(0);
         }
 
+        optional<string> compiledOutputDir;
         optional<string> irOutputDir;
         bool forceCompiled = false;
-        if (providedOptions.count("llvm-ir-folder") > 0) {
-            auto outputDir = providedOptions["llvm-ir-folder"].as<string>();
+        if (providedOptions.count("compiled-out-dir") > 0) {
+            auto outputDir = providedOptions["compiled-out-dir"].as<string>();
+
+            if (!FileOps::dirExists(outputDir)) {
+                fmt::print("Missing output directory {}\n", outputDir);
+                throw EarlyReturnWithCode(1);
+            }
+
+            compiledOutputDir = outputDir;
+        }
+        if (providedOptions.count("llvm-ir-dir") > 0) {
+            auto outputDir = providedOptions["llvm-ir-dir"].as<string>();
 
             if (!FileOps::dirExists(outputDir)) {
                 fmt::print("Missing output directory {}\n", outputDir);
@@ -373,16 +398,29 @@ public:
 
             irOutputDir = outputDir;
         }
+        // TODO(aprocter): Remove this once we no longer need it for backwards compatibility in the Stripe codebase.
+        if (providedOptions.count("llvm-ir-folder") > 0) {
+            auto outputDir = providedOptions["llvm-ir-folder"].as<string>();
+
+            if (!FileOps::dirExists(outputDir)) {
+                fmt::print("Missing output directory {}\n", outputDir);
+                throw EarlyReturnWithCode(1);
+            }
+
+            compiledOutputDir = outputDir;
+            irOutputDir = outputDir;
+        }
         if (providedOptions.count("force-compiled") > 0) {
             forceCompiled = providedOptions["force-compiled"].as<bool>();
         }
 
-        return make_unique<LLVMSemanticExtension>(irOutputDir, forceCompiled);
+        return make_unique<LLVMSemanticExtension>(compiledOutputDir, irOutputDir, forceCompiled);
     };
     virtual std::unique_ptr<SemanticExtension> defaultInstance() const override {
-        auto forceCompile = false;
+        optional<string> compiledOutputDir;
         optional<string> irOutputDir;
-        return make_unique<LLVMSemanticExtension>(irOutputDir, forceCompile);
+        auto forceCompile = false;
+        return make_unique<LLVMSemanticExtension>(compiledOutputDir, irOutputDir, forceCompile);
     }
     virtual ~LLVMSemanticExtensionProvider(){};
 };
