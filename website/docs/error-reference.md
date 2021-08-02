@@ -1263,8 +1263,11 @@ See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 
 ## 7030
 
-This kind of error generally occurs when we try to use generic types in pattern
-matching:
+This error is consistently used when the user is trying (implicitly or
+explicitly) to call some method on a Sorbet type (e.g. `T::Array[Integer]`)
+which would actually return a Sorbet-runtime representation of a type.
+
+This error generally occurs when generic types are used in pattern matching:
 
 ```rb
 def get_value(input)
@@ -1277,9 +1280,9 @@ def get_value(input)
 end
 ```
 
-Since generic types are erased at runtime, this construct would never work if we
-execute the program. Sorbet protects us from this and suggests to use the erased
-type `Array` instead:
+Since generic types are erased at runtime, this construct would never work when
+the program executed. Replace the generic type `T::Array[Integer]` by the erased
+type `Array` so the runtime behavior is correct:
 
 ```
 def get_value(input)
