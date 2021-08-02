@@ -1149,7 +1149,7 @@ end
 If the instance variable can hold both an `Integer` and a `String`, maybe the
 type specified with `T.let` should be enlarged:
 
-```
+```ruby
 @x = T.let(0, Object)
 ```
 
