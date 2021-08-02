@@ -25,6 +25,16 @@ DispatchResult dispatchCallProxyType(const GlobalState &gs, TypePtr und, Dispatc
     categoryCounterInc("dispatch_call", "proxytype");
     return und.dispatchCall(gs, args.withThisRef(und));
 }
+
+bool allComponentsPresent(DispatchResult &res) {
+    if (!res.main.method.exists()) {
+        return false;
+    }
+    if (!res.secondary || res.secondaryKind == DispatchResult::Combinator::AND) {
+        return true;
+    }
+    return allComponentsPresent(*res.secondary);
+}
 } // namespace
 
 bool LiteralType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
@@ -60,16 +70,6 @@ TypePtr OrType::getCallArguments(const GlobalState &gs, NameRef name) const {
         rargs = Types::untypedUntracked();
     }
     return Types::glb(gs, largs, rargs);
-}
-
-bool allComponentsPresent(DispatchResult &res) {
-    if (!res.main.method.exists()) {
-        return false;
-    }
-    if (!res.secondary || res.secondaryKind == DispatchResult::Combinator::AND) {
-        return true;
-    }
-    return allComponentsPresent(*res.secondary);
 }
 
 DispatchResult AndType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
