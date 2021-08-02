@@ -1,8 +1,9 @@
 # typed: true
 require 'csv'
 
-T.assert_type!(CSV.foreach('source.csv', headers: true), T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)])
-T.assert_type!(CSV.foreach('source.csv', headers: true, col_sep: ','), T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)])
+T.assert_type!(CSV.foreach('source.csv', headers: true), T.nilable(T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)]))
+T.assert_type!(CSV.foreach('source.csv', 'r:bom|utf-8'), T.nilable(T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)]))
+T.assert_type!(CSV.foreach('source.csv', headers: true, col_sep: ','), T.nilable(T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)]))
 CSV.foreach('source.csv') do |row|
   T.assert_type!(row, T.any(T::Array[T.untyped], CSV::Row))
 end
