@@ -56,7 +56,7 @@ void setSorbetFunctionLinkage(Module &module) {
         }
 
         // Keep the special keep-alive functions as external, as they will be explicitly removed by a pass late in
-        // sorbet_llvm's pipeline.
+        // the compiler's pipeline.
         if (name.startswith("sorbet_exists_to_keep_alive_") && fun.hasExternalLinkage()) {
             continue;
         }

@@ -866,7 +866,7 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
     builder.SetInsertPoint(bb);
 
     if (IREmitterHelpers::isFileOrClassStaticInit(cs, sym)) {
-        // We include sorbet_version.c when compiling sorbet_llvm itself to get the expected version.
+        // We include sorbet_version.c when compiling the Sorbet Compiler itself to get the expected version.
         // The actual version will be linked into libruby.so and compared against at runtime.
         auto compileTimeBuildSCMRevision = sorbet_getBuildSCMRevision();
         auto compileTimeIsReleaseBuild = sorbet_getIsReleaseBuild();

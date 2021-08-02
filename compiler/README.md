@@ -6,7 +6,8 @@ shared objects that conform to Ruby's C extension API given Ruby source files.
 It also contains Sorbet Ruby, a set of scripts that build Ruby in a specific way
 so that it can run shared objects that the Sorbet Compiler emits.
 
-This README contains documentation specifically for contributing to sorbet_llvm.
+This README contains documentation specifically for contributing to the compiler
+portion of Sorbet.
 
 If you are at Stripe, you might also want to see <http://go/types/internals> for
 docs about Stripe-specific development workflows and historical Stripe context.
@@ -25,7 +26,7 @@ docs about Stripe-specific development workflows and historical Stripe context.
 - [Debugging](#debugging)
   - [`.lldbinit`](#lldbinit)
   - [Debugging the Ruby VM](#debugging-the-ruby-vm)
-- [C++ in `sorbet_llvm`](#c-in-sorbet_llvm)
+- [C++ in the compiler](#c-in-the-compiler)
 - [Editor and environment](#editor-and-environment)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -39,24 +40,27 @@ For the best chance of success:
 Then run:
 
 ```bash
-./bazel test //test:test
+./bazel test //test:compiler
 ```
 
 This will take a long time, as it's downloading everything and building
 everything (including LLVM) from scratch.
 
-> sorbet_llvm is tested on a very narrow set of machines and rarely built from
-> scratch. It's likely that the first time you try to build it on a new machine
-> you will encounter problems, and need to either install certain system-wide
-> dependencies, or switch operating systems.
->
+> The Sorbet Compiler is tested on a very narrow set of machines and rarely
+> built from scratch. It's likely that the first time you try to build it on a
+> new machine you will encounter problems, and need to either install certain
+> system-wide dependencies, or switch operating systems.
 
-## Learning how the Sorbet compiler works
+
+## Learning how the Sorbet Compiler works
 
 TODO(jez) compiler internals
 
 
-## Running Sorbet Ruby and the Sorbet compiler
+## Running Sorbet Ruby and the Sorbet Compiler
+
+For a more complete walk through, see
+[docs/running-compiled-code.md](docs/running-compiled-code.md).
 
 There's a fair amount of set up before you can run Sorbet Ruby on a file or load
 a compiled Ruby file:
@@ -90,25 +94,13 @@ running it.
 To run all the tests:
 
 ```
-bazel test //... --config=dbg
+bazel test //test:compiler //test/cli/compiler --config=dbg
 ```
-
-(The `//...` literally means "all targets".)
-
-To run a subset of the tests curated for faster iteration and development speed,
-run:
-
-```
-bazel test test --config=dbg
-```
-
-Note that in bazel terms, the first `test` is a subcommand but the second `test`
-is a shortcut for writing `//test:test`, so we're being a bit cute here.
 
 By default, all test output goes into files. To also print it to the screen:
 
 ```
-bazel test //... --config=dbg --test_output=errors
+bazel test //test:compiler //test/cli/compiler --config=dbg --test_output=errors
 ```
 
 If any test failed, you will see two pieces of information printed:
@@ -255,7 +247,7 @@ option that will drop into `lldb` before running.
 
 ### `.lldbinit`
 
-We have a custom `.lldbinit` file in `sorbet_llvm` with some helper commands.
+We have a custom `.lldbinit` file with some helper commands.
 The new commands it makes available inside `lldb` are:
 
 - `rubysourcemaps`
@@ -327,9 +319,9 @@ Other:
 [`stop_in_debugger`]: https://github.com/jez/stop_in_debugger
 
 
-## C++ in `sorbet_llvm`
+## C++ in the compiler
 
-<!-- TODO(jez) This probably makes more sense in a potential sorbet_llvm internals doc -->
+<!-- TODO(jez) This probably makes more sense in a potential compiler internals doc -->
 
 In Sorbet, any exception is a crash (Sorbet never raises exceptions for expected
 behavior).
@@ -353,25 +345,19 @@ ownership of `y` is transfered to `z`. This means that the memory associated
 with `y` will never be freed, but the `AbortCompilation` will be caught and
 execution will continue, and this memory will have leaked.
 
-It's best to just never use `unique_ptr::release` in sorbet_llvm.
+It's best to just never use `unique_ptr::release` in the compiler.
 
 
 ## Editor and environment
 
-Nearly all of the [Editor and
-environment](https://github.com/sorbet/sorbet#editor-and-environment) tips from
-the Sorbet repo apply here too.
+Nearly all of the [Editor and environment] tips from the main README apply here
+too.
+
+[Editor and environment]: https://github.com/sorbet/sorbet#editor-and-environment
 
 Especially the `--disk_cache` suggestions. If you're working on a Stripe devbox,
 you'll want to make the `.bazelrc.local` file on the devbox--it's gitignored by
 default, so you'll want to make it directly on the devbox.
-
-```bash
-# We're using `pay ssh` not `pay exec` to get shell expansion on the devbox
-pay ssh 'echo "build  --disk_cache=$HOME/.cache/sorbet_llvm/bazel-cache" >> ./.bazelrc.local'
-pay ssh 'echo "test   --disk_cache=$HOME/.cache/sorbet_llvm/bazel-cache" >> ./.bazelrc.local'
-pay ssh 'mkdir -p "$HOME/.cache/sorbet_llvm/bazel-cache"'
-```
 
 Sorbet compiler-specific recommendations:
 

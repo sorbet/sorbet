@@ -63,7 +63,7 @@ def cmd_rubysourcemap(debugger, command, result, dict):
     dir_search = re.search('^File: (.*)/main.c', output)
     if dir_search:
         dirname = dir_search.group(1)
-        ruby_path = ('%s/bazel-sorbet_llvm/external/sorbet_ruby_2_7' % project_root)
+        ruby_path = ('%s/bazel-sorbet/external/sorbet_ruby_2_7' % project_root)
         source_map_command = 'settings set -- target.source-map %s %s' % (dirname, ruby_path)
         print('(lldb) %s' % source_map_command)
         ci.HandleCommand(source_map_command, result)
@@ -71,7 +71,7 @@ def cmd_rubysourcemap(debugger, command, result, dict):
 def cmd_llvmsourcemap(debugger, command, result, dict):
     ci = debugger.GetCommandInterpreter()
 
-    llvm_path = ('%s/bazel-sorbet_llvm/external/llvm' % project_root)
+    llvm_path = ('%s/bazel-sorbet/external/llvm' % project_root)
     # TODO(jez) This hardcodes /proc/self/cwd to get it to work on the buildbox.
     # We should probably do something like the `list main` trick for rubysourcemap to make this more portable.
     source_map_command = 'settings set -- target.source-map /proc/self/cwd/external/llvm %s' % llvm_path

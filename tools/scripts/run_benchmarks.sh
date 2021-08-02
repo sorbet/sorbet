@@ -69,7 +69,7 @@ mkdir -p tmp/bench
 
 # TODO(jez) Careful! These must use the same configuration!
 # (Alternatively: be sure to compile the right one right before it's used.)
-./bazel build //main:sorbet @sorbet_ruby_2_7//:ruby -c opt
+./bazel build //compiler:sorbet @sorbet_ruby_2_7//:ruby -c opt
 ./bazel run @sorbet_ruby_2_7//:ruby -c opt -- --version
 
 if [ "${#benchmarks[@]}" -eq 0 ]; then
@@ -86,7 +86,6 @@ fi
 
 
 ruby="${repo_root}/bazel-bin/external/sorbet_ruby_2_7/ruby"
-sorbet="${repo_root}/bazel-sorbet_llvm/external/com_stripe_ruby_typer"
 
 command=()
 
@@ -96,7 +95,7 @@ set_startup() {
     "${ruby}" \
       "--disable=gems" "--disable=did_you_mean" \
       -r "rubygems" \
-      -r "${sorbet}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
+      -r "${repo_root}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
       -e 1 \
   )
 }
@@ -107,7 +106,7 @@ set_interpreted() {
     "${ruby}" \
       "--disable=gems" "--disable=did_you_mean" \
       -r "rubygems" \
-      -r "${sorbet}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
+      -r "${repo_root}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
       ./target.rb \
   )
 }
@@ -118,7 +117,7 @@ set_compiled() {
     "${ruby}" \
       "--disable=gems" "--disable=did_you_mean" \
       -r "rubygems" \
-      -r "${sorbet}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
+      -r "${repo_root}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
       -r "${repo_root}/test/patch_require.rb" \
       -e "\$__sorbet_ruby_realpath='target.rb'; require './target.rb.so'" \
   )

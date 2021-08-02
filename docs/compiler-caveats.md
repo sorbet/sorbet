@@ -19,7 +19,7 @@ to patch `require` to supply this value at runtime, or provide it directly
 before loading the shared object.
 
 In our tests, we patch require and provide this value before loading the shared
-object: https://github.com/stripe/sorbet_llvm/blob/c6f55f98/test/patch_require.rb#L31.
+object: https://github.com/sorbet/sorbet/blob/aa8434150/test/patch_require.rb#L31.
 
 The compiler assumes that you have a monkey patch for `BasicObject#nil?` that
 behaves identically to `Kernel#nil?`. If you do not have this, calling `.nil?`
@@ -29,15 +29,17 @@ to whether the receiver is `nil` or not.
 
 ## Thread safety
 
-The compiler currently assumes that the artifacts it produces are used in a single-threaded context.
-The most significant place that this assumption is leveraged is during shared object
-initialization, where both global values are shared as weak symbols and static
-values linked into the vm are initialized on first access.
+The compiler currently assumes that the artifacts it produces are used in a
+single-threaded context.  The most significant place that this assumption is
+leveraged is during shared object initialization, where both global values are
+shared as weak symbols and static values linked into the vm are initialized on
+first access.
 
-This can be mitigated by ensuring that only one shared object is loaded at a time,
-which Stripe enforces with a lock around `require` statements in the autoloader. As
-this assumption is present in Stripe's environment, we don't currently have plans to
-make initialization of shared objects work in the context of multiple threads.
+This can be mitigated by ensuring that only one shared object is loaded at a
+time, which Stripe enforces with a lock around `require` statements in the
+autoloader. As this assumption is present in Stripe's environment, we don't
+currently have plans to make initialization of shared objects work in the
+context of multiple threads.
 
 ## The ruby stack
 
@@ -62,32 +64,32 @@ but if the function is called directly from some other context a stack frame
 must be pushed to avoid corrupting the caller. This comes up in a few different
 cases:
 
-1. Class and method `<static-init>` functions, which don't correspond to real
-   functions that the vm will ever call, but that get called during compiled
-   module initialization:
-   * https://github.com/stripe/sorbet_llvm/blob/d963311f/compiler/IREmitter/NameBasedIntrinsics.cc#L98-L101
-   * https://github.com/stripe/sorbet_llvm/blob/d963311f/compiler/IREmitter/Payload/codegen-payload.c#L1213-L1219
-2. Final methods that are called directly would edit the frame of the calling
-   context and corrupt any locals of that context if a frame isn't pushed:
-   * https://github.com/stripe/sorbet_llvm/blob/d963311f/compiler/IREmitter/sends.cc#L131
-   * https://github.com/stripe/sorbet_llvm/blob/d963311f/compiler/IREmitter/Payload/codegen-payload.c#L1199-L1211
-3. Blocks that are inlined into the body of intrinsics that support direct block
-   calls will also need their own frames, as raising exceptions from that
-   context without them would put the vm into a strange state.
-   * https://github.com/stripe/sorbet_llvm/blob/d963311f/compiler/IREmitter/Payload/codegen-payload.c#L671-L689
-4. Block functions extracted from `rescue` blocks need to have a special frame
-   pushed that contains enough space for one local that holds `$!`:
-   * https://github.com/stripe/sorbet_llvm/blob/d963311f/compiler/IREmitter/Payload/patches/vm_insnhelper.c#L21-L22
+1.  Class and method `<static-init>` functions, which don't correspond to real
+    functions that the vm will ever call, but that get called during compiled
+    module initialization:
+    - https://github.com/sorbet/sorbet/blob/aa84341504/compiler/IREmitter/NameBasedIntrinsics.cc#L109-L112
+    - https://github.com/sorbet/sorbet/blob/aa84341504/compiler/IREmitter/Payload/codegen-payload.c#L1213-L1219
+2.  Final methods that are called directly would edit the frame of the calling
+    context and corrupt any locals of that context if a frame isn't pushed:
+    - https://github.com/sorbet/sorbet/blob/aa84341504/compiler/IREmitter/sends.cc#L134-L135
+    - https://github.com/sorbet/sorbet/blob/aa84341504/compiler/IREmitter/Payload/codegen-payload.c#L1895-L1907
+3.  Blocks that are inlined into the body of intrinsics that support direct
+    block calls will also need their own frames, as raising exceptions from that
+    context without them would put the vm into a strange state.
+    - https://github.com/sorbet/sorbet/blob/aa84341504/compiler/IREmitter/Payload/codegen-payload.c#L785-L803
+4.  Block functions extracted from `rescue` blocks need to have a special frame
+    pushed that contains enough space for one local that holds `$!`:
+    - https://github.com/sorbet/sorbet/blob/aa84341504/compiler/IREmitter/Payload/patches/vm_insnhelper.c#L21-L22
 
 ## Patches to the Ruby VM
 
 We maintain a set of patches to the Ruby VM, which are necessary to support the
 compiler, in Stripe's Ruby repo:
 
-https://go/git/stripe-private-oss-forks/ruby
+http://go/git/stripe-private-oss-forks/ruby
 
-However, in order to keep the `sorbet_llvm` build self-contained and runnable
-outside of Stripe infrastructure, we do not reference the internal git
+However, in order to keep the the Sorbet Compiler build self-contained and
+runnable outside of Stripe infrastructure, we do not reference the internal git
 repository directly from our build. Instead, we generate diffs against vanilla
 Ruby 2.7.2, and place them in `third-party/ruby`. The patches are applied in
 `third_party/externals.bzl`.

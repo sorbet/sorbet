@@ -1,5 +1,5 @@
-#ifndef COMPILER_NAMES_H
-#define COMPILER_NAMES_H
+#ifndef SORBET_COMPILER_NAMES_H
+#define SORBET_COMPILER_NAMES_H
 
 #include "compiler/Core/ForwardDeclarations.h"
 
