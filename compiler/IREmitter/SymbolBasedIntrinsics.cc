@@ -483,6 +483,52 @@ public:
     }
 } DefineMethodIntrinsic;
 
+class SorbetPrivateStaticResolvedSigIntrinsic : public SymbolBasedIntrinsicMethod {
+public:
+    SorbetPrivateStaticResolvedSigIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
+        auto &irctx = mcctx.irctx;
+        auto &builder = builderCast(mcctx.build);
+        auto *send = mcctx.send;
+        auto rubyBlockId = mcctx.rubyBlockId;
+        // args[0] = originalRecv
+        // args[1] = arg to sig, if present
+        // args[2] = isSelf
+        // args[3] = methodName
+        // args[4..] = originalArgs, if present
+        //
+        // Do nothing for non-self calls (e.g. T::Sig::WithoutRuntime.sig)
+        if (send->args[0].variable != cfg::LocalRef::selfVariable()) {
+            return Payload::rubyNil(mcctx.cs, builder);
+        }
+
+        ENFORCE(mcctx.blkAsFunction() != nullptr);
+        llvm::Value *originalRecv = Payload::varGet(cs, send->args[0].variable, builder, irctx, rubyBlockId);
+        llvm::Value *sigArg;
+        cfg::VariableUseSite *remainingArgs;
+        if (send->args.size() > 3) {
+            sigArg = Payload::varGet(cs, send->args[1].variable, builder, irctx, rubyBlockId);
+            remainingArgs = &send->args[2];
+        } else {
+            sigArg = Payload::rubyNil(cs, builder);
+            remainingArgs = &send->args[1];
+        }
+        llvm::Value *isSelf = Payload::varGet(cs, remainingArgs[0].variable, builder, irctx, rubyBlockId);
+        llvm::Value *methodName = Payload::varGet(cs, remainingArgs[1].variable, builder, irctx, rubyBlockId);
+        builder.CreateCall(cs.getFunction("sorbet_vm_register_sig"),
+                           {isSelf, methodName, originalRecv, sigArg, mcctx.blkAsFunction()});
+        return Payload::rubyNil(mcctx.cs, builder);
+    }
+
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
+        return {core::Symbols::Sorbet_Private_Static_ResolvedSig().data(gs)->lookupSingletonClass(gs)};
+    };
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(const core::GlobalState &gs) const override {
+        return {core::Names::sig()};
+    }
+} SorbetPrivateStaticResolvedSigIntrinsic;
+
 class SorbetPrivateStaticSigIntrinsic : public SymbolBasedIntrinsicMethod {
 public:
     SorbetPrivateStaticSigIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
@@ -492,8 +538,7 @@ public:
     }
 
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
-        return {core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs),
-                core::Symbols::Sorbet_Private_Static_ResolvedSig().data(gs)->lookupSingletonClass(gs)};
+        return {core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs)};
     };
     virtual InlinedVector<core::NameRef, 2> applicableMethods(const core::GlobalState &gs) const override {
         return {core::Names::sig()};
@@ -750,7 +795,12 @@ static const vector<CallCMethodSingleton> knownCMethodsSingleton{
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs(const core::GlobalState &gs) {
     vector<const SymbolBasedIntrinsicMethod *> res{
-        &DefineMethodIntrinsic, &SorbetPrivateStaticSigIntrinsic, &Module_tripleEq, &Regexp_new, &TEnum_new,
+        &DefineMethodIntrinsic,
+        &SorbetPrivateStaticResolvedSigIntrinsic,
+        &SorbetPrivateStaticSigIntrinsic,
+        &Module_tripleEq,
+        &Regexp_new,
+        &TEnum_new,
         &TEnum_abstract,
     };
     for (auto &method : knownCMethodsInstance) {
