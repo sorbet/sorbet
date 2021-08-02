@@ -25,6 +25,16 @@ DispatchResult dispatchCallProxyType(const GlobalState &gs, TypePtr und, Dispatc
     categoryCounterInc("dispatch_call", "proxytype");
     return und.dispatchCall(gs, args.withThisRef(und));
 }
+
+bool allComponentsPresent(DispatchResult &res) {
+    if (!res.main.method.exists()) {
+        return false;
+    }
+    if (!res.secondary || res.secondaryKind == DispatchResult::Combinator::AND) {
+        return true;
+    }
+    return allComponentsPresent(*res.secondary);
+}
 } // namespace
 
 bool LiteralType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
@@ -60,16 +70,6 @@ TypePtr OrType::getCallArguments(const GlobalState &gs, NameRef name) const {
         rargs = Types::untypedUntracked();
     }
     return Types::glb(gs, largs, rargs);
-}
-
-bool allComponentsPresent(DispatchResult &res) {
-    if (!res.main.method.exists()) {
-        return false;
-    }
-    if (!res.secondary || res.secondaryKind == DispatchResult::Combinator::AND) {
-        return true;
-    }
-    return allComponentsPresent(*res.secondary);
 }
 
 DispatchResult AndType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
@@ -210,7 +210,6 @@ unique_ptr<Error> missingArg(const GlobalState &gs, Loc callLoc, Loc receiverLoc
     }
     return nullptr;
 }
-}; // namespace
 
 int getArity(const GlobalState &gs, MethodRef method) {
     ENFORCE(!method.data(gs)->arguments().empty(), "Every method should have at least a block arg.");
@@ -334,7 +333,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         return leftCandidates[0];
     }
     return fallback;
-} // namespace sorbet::core
+}
 
 /**
  * unwrapType is used to take an expression that's parsed at the value-level,
@@ -1196,17 +1195,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         component.sendTp = resultType;
     }
     return result;
-} // namespace sorbet::core
-
-DispatchResult ClassType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
-    categoryCounterInc("dispatch_call", "classtype");
-    vector<TypePtr> empty;
-    return dispatchCallSymbol(gs, args, symbol, empty);
-}
-
-DispatchResult AppliedType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
-    categoryCounterInc("dispatch_call", "appliedType");
-    return dispatchCallSymbol(gs, args, this->klass, this->targs);
 }
 
 TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRef name, const vector<TypePtr> &targs) {
@@ -1233,6 +1221,18 @@ TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRe
         args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner.asClassOrModuleRef(), klass, targs));
     }
     return make_type<TupleType>(move(args));
+}
+} // namespace
+
+DispatchResult ClassType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    categoryCounterInc("dispatch_call", "classtype");
+    vector<TypePtr> empty;
+    return dispatchCallSymbol(gs, args, symbol, empty);
+}
+
+DispatchResult AppliedType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    categoryCounterInc("dispatch_call", "appliedType");
+    return dispatchCallSymbol(gs, args, this->klass, this->targs);
 }
 
 TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) const {
