@@ -334,7 +334,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         return leftCandidates[0];
     }
     return fallback;
-} // namespace sorbet::core
+}
 
 /**
  * unwrapType is used to take an expression that's parsed at the value-level,
