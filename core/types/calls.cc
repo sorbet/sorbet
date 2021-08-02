@@ -210,7 +210,6 @@ unique_ptr<Error> missingArg(const GlobalState &gs, Loc callLoc, Loc receiverLoc
     }
     return nullptr;
 }
-}; // namespace
 
 int getArity(const GlobalState &gs, MethodRef method) {
     ENFORCE(!method.data(gs)->arguments().empty(), "Every method should have at least a block arg.");
@@ -1197,6 +1196,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
     return result;
 }
+} // namespace
 
 DispatchResult ClassType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "classtype");
