@@ -1126,6 +1126,40 @@ def publish_item(name, category = nil)
 end
 ```
 
+## 7013
+
+Sorbet detected that an instance variable was reassigned with different types:
+
+```rb
+class A
+  extend T::Sig
+
+  sig { void }
+  def initialize
+    @x = T.let(0, Integer)
+  end
+
+  sig { void }
+  def foo
+    @x = 'not an integer' # error: Reassigning field with a value of wrong type: `String("not an integer")` is not a subtype of `Integer`
+  end
+end
+```
+
+If the instance variable can hold both an `Integer` and a `String`, maybe the
+type specified with `T.let` should be enlarged:
+
+```
+@x = T.let(0, Object)
+```
+
+Similarly, Sorbet will reject constants reassigned with different types:
+
+```rb
+FOO = 42 # error: Reassigning field with a value of wrong type: `Integer(42)` is not a subtype of `String("Hello, world!")`
+FOO = "Hello, world!"
+```
+
 ## 7014
 
 Sorbet has a special method called `T.reveal_type` which can be useful for
