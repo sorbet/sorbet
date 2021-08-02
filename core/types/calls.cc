@@ -1196,7 +1196,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         component.sendTp = resultType;
     }
     return result;
-} // namespace sorbet::core
+}
 
 DispatchResult ClassType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "classtype");
