@@ -1196,18 +1196,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
     return result;
 }
-} // namespace
-
-DispatchResult ClassType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
-    categoryCounterInc("dispatch_call", "classtype");
-    vector<TypePtr> empty;
-    return dispatchCallSymbol(gs, args, symbol, empty);
-}
-
-DispatchResult AppliedType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
-    categoryCounterInc("dispatch_call", "appliedType");
-    return dispatchCallSymbol(gs, args, this->klass, this->targs);
-}
 
 TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRef name, const vector<TypePtr> &targs) {
     SymbolRef method = klass.data(gs)->findMemberTransitive(gs, name);
@@ -1233,6 +1221,18 @@ TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRe
         args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner.asClassOrModuleRef(), klass, targs));
     }
     return make_type<TupleType>(move(args));
+}
+} // namespace
+
+DispatchResult ClassType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    categoryCounterInc("dispatch_call", "classtype");
+    vector<TypePtr> empty;
+    return dispatchCallSymbol(gs, args, symbol, empty);
+}
+
+DispatchResult AppliedType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    categoryCounterInc("dispatch_call", "appliedType");
+    return dispatchCallSymbol(gs, args, this->klass, this->targs);
 }
 
 TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) const {
