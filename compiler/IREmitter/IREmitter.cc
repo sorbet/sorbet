@@ -498,6 +498,48 @@ llvm::BasicBlock *resolveJumpTarget(cfg::CFG &cfg, const IREmitterContext &irctx
     }
 }
 
+bool shouldEmitLineNumberForLocalAccess(cfg::LocalRef local, const UnorderedMap<cfg::LocalRef, Alias> &aliases) {
+    if (!aliases.contains(local)) {
+        return false;
+    }
+    auto alias = aliases.at(local);
+    if (alias.kind == Alias::AliasKind::Constant) {
+        return true;
+    }
+
+    if (alias.kind == Alias::AliasKind::GlobalField) {
+        // these can call into C
+        return true;
+    }
+    return false;
+}
+
+bool shouldEmitLineNumber(cfg::Binding &bind, const UnorderedMap<cfg::LocalRef, Alias> &aliases) {
+    // all lookups of global state(fields, constants) are proxied via a variable
+    if (shouldEmitLineNumberForLocalAccess(bind.bind.variable, aliases)) {
+        return true;
+    }
+    if (bind.value->isSynthetic) {
+        return false;
+    }
+    if (cfg::isa_instruction<cfg::BlockReturn>(bind.value.get()) ||
+        cfg::isa_instruction<cfg::LoadSelf>(bind.value.get()) || cfg::isa_instruction<cfg::Literal>(bind.value.get()) ||
+        cfg::isa_instruction<cfg::LoadArg>(bind.value.get()) ||
+        cfg::isa_instruction<cfg::LoadYieldParams>(bind.value.get()) ||
+        cfg::isa_instruction<cfg::Return>(bind.value.get()) || cfg::isa_instruction<cfg::Alias>(bind.value.get()) ||
+        cfg::isa_instruction<cfg::SolveConstraint>(bind.value.get())) {
+        // these instructions do not emit ruby exceptions, so no need to emit line number
+        // updates
+        return false;
+    }
+    if (auto i = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
+        // all lookups of global state(fields, constants) are proxied via a variable
+        return shouldEmitLineNumberForLocalAccess(i->what, aliases);
+    }
+
+    return true;
+}
+
 void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(base);
     UnorderedSet<cfg::LocalRef> loadYieldParamsResults; // methods calls on these are ignored
@@ -524,8 +566,10 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
         for (cfg::Binding &bind : bb->exprs) {
             auto loc = core::Loc(cs.file, bind.loc);
 
-            lastLoc = Payload::setLineNumber(cs, builder, loc, startLoc, lastLoc,
-                                             irctx.lineNumberPtrsByFunction[bb->rubyBlockId]);
+            if (shouldEmitLineNumber(bind, irctx.aliases)) {
+                lastLoc = Payload::setLineNumber(cs, builder, loc, startLoc, lastLoc,
+                                                 irctx.lineNumberPtrsByFunction[bb->rubyBlockId]);
+            }
 
             IREmitterHelpers::emitDebugLoc(cs, builder, irctx, bb->rubyBlockId, loc);
 
