@@ -10,7 +10,7 @@
 
 namespace sorbet {
 extern std::shared_ptr<spdlog::logger> fatalLogger;
-class SorbetException : std::logic_error {
+class SorbetException : public std::logic_error {
 public:
     SorbetException(const std::string &message) : logic_error(message) {}
     SorbetException(const char *message) : logic_error(message) {}

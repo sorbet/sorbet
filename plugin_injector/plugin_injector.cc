@@ -14,6 +14,7 @@
 #include "common/typecase.h"
 #include "compiler/Core/AbortCompilation.h"
 #include "compiler/Core/CompilerState.h"
+#include "compiler/Core/OptimizerException.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
@@ -269,6 +270,14 @@ public:
             compiler::IREmitter::buildInitFor(state, cfg.symbol, fileName);
         } catch (sorbet::compiler::AbortCompilation &) {
             threadState->aborted = true;
+        } catch (sorbet::compiler::OptimizerException &oe) {
+            threadState->aborted = true;
+            // This exception is thrown from within an optimizer pass, where GlobalState
+            // is not available, so we need to emit an error here, where we do have
+            // access to GlobalState.
+            if (auto e = gs.beginError(core::Loc(cfg.file, 0, 0), core::errors::Compiler::OptimizerFailure)) {
+                e.setHeader("{}", oe.what());
+            }
         } catch (...) {
             // cleanup
             module = nullptr;
