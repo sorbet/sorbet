@@ -7,6 +7,7 @@
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 
 #include "Passes.h"
+#include "compiler/Core/OptimizerException.h"
 #include "core/core.h"
 #include <string>
 
@@ -84,16 +85,16 @@ public:
                                      llvm::CallInst *instr) const override {
         auto elemPtr = llvm::dyn_cast<llvm::GEPOperator>(instr->getArgOperand(0));
         if (elemPtr == nullptr) {
-            return llvm::UndefValue::get(instr->getType());
+            throw OptimizerException("Unexpected argument to intrinsic");
         }
         auto global = llvm::dyn_cast<llvm::GlobalVariable>(elemPtr->getOperand(0));
 
         if (global == nullptr) {
-            return llvm::UndefValue::get(instr->getType());
+            throw OptimizerException("Unexpected argument to intrinsic");
         }
         auto initializer = llvm::dyn_cast<llvm::ConstantDataArray>(global->getInitializer());
         if (initializer == nullptr) {
-            return llvm::UndefValue::get(instr->getType());
+            throw OptimizerException("Unexpected argument to intrinsic");
         }
 
         llvm::IRBuilder<> builder(instr);
