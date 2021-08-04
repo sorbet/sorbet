@@ -456,6 +456,10 @@ module T::Private::Methods
     end
   end
 
+  def self.all_checked_tests_sigs
+    @signatures_by_method.values.select {|sig| sig.check_level == :tests}
+  end
+
   # the module target is adding the methods from the module source to itself. we need to check that for all instance
   # methods M on source, M is not defined on any of target's ancestors.
   def self._hook_impl(target, singleton_class, source)
