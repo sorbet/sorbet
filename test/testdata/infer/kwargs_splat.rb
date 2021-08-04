@@ -40,3 +40,26 @@ untyped_values_hash = T.let(shaped_hash, T::Hash[Symbol, T.untyped])
 # Ensure that constructing a kwargs hash with untyped keys works
 untyped = T.unsafe(:y)
 f(3, **untyped_hash, untyped => 20)
+
+sig {params(x: Integer, y: Integer, kw_splat: BasicObject).void}
+def h(x, y:, **kw_splat)
+  puts x
+  puts y
+  puts kw_splat
+end
+
+untyped_values_hash = T.let({}, T::Hash[Symbol, T.untyped])
+  h(1, y: 2, **untyped_values_hash)
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Passing a hash where the specific keys are unknown to a method taking keyword arguments
+
+sig {params(kw_splat: T::Hash[Symbol, String]).void}
+def i(**kw_splat)
+  puts kw_splat
+end
+
+string_values_hash = T.let({}, T::Hash[Symbol, String])
+i(**string_values_hash)
+
+integer_values_hash = T.let({}, T::Hash[Symbol, Integer])
+i(**integer_values_hash)
+# ^^^^^^^^^^^^^^^^^^^^^ error: Expected `T::Hash[Symbol, String]` but found `T::Hash[Symbol, Integer]` for argument `kw_splat`
