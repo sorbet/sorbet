@@ -899,13 +899,36 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 ait += numKwargs;
             }
         } else if (kwSplatIsHash) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::UntypedSplat)) {
-                e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
-                            "arguments");
-                auto &kwSplatArg = *aend;
-                auto kwSplatTPO = TypeAndOrigins{kwSplatType, kwSplatArg->origins};
-                e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
-                result.main.errors.emplace_back(e.build());
+            bool hasKwSplatParam = false;
+            bool hasKwParam = false;
+            const ArgInfo *kwSplatParam;
+            for (auto &param : data->arguments()) {
+                if (param.flags.isKeyword && param.flags.isRepeated) {
+                    kwSplatParam = &param;
+                    hasKwSplatParam = true;
+                } else if (param.flags.isKeyword && !param.flags.isRepeated) {
+                    hasKwParam = true;
+                }
+            }
+
+            auto &kwSplatArg = *aend;
+            auto kwSplatTPO = TypeAndOrigins{kwSplatType, kwSplatArg->origins};
+
+            if (hasKwSplatParam && !hasKwParam) {
+                if (auto e = matchArgType(gs, *constr, args.callLoc(), args.receiverLoc(), symbol, method,
+                                          kwSplatTPO, *kwSplatParam, args.selfType, targs, kwargsLoc,
+                                          args.originForUninitialized, args.args.size() == 1)) {
+                    result.main.errors.emplace_back(std::move(e));
+                }
+            } else {
+                // A keyword splat was passed in, but none of the declared arguments are keyword splats,
+                // or there is a keyword splat argument, but there is one ore more keyword non-splat argument
+                if (auto e = gs.beginError(args.callLoc(), errors::Infer::UntypedSplat)) {
+                    e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
+                                "arguments");
+                    e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
+                    result.main.errors.emplace_back(e.build());
+                }
             }
         }
     }
@@ -2179,7 +2202,7 @@ public:
         // args[0] is the receiver
         // args[1] is the method
         // args[2] is the block
-        // args[3...] are the remaining arguements
+        // args[3...] are the remaining arguments
         // equivalent to (args[0]).args[1](*args[3..], &args[2])
 
         if (args.args.size() < 3) {
