@@ -36,16 +36,7 @@ VALUE sorbet_rb_int_minus_slowpath(VALUE recv, VALUE y) {
 
 VALUE sorbet_rb_int_gt_slowpath(VALUE recv, VALUE y) {
     if (LIKELY(FIXNUM_P(recv))) {
-        if (LIKELY(FIXNUM_P(y))) {
-            if (FIX2LONG(recv) > FIX2LONG(y)) {
-                return Qtrue;
-            }
-            return Qfalse;
-        } else if (RB_TYPE_P(y, T_BIGNUM)) {
-            return rb_big_cmp(y, recv) == INT2FIX(-1) ? Qtrue : Qfalse;
-        } else if (RB_TYPE_P(y, T_FLOAT)) {
-            return rb_integer_float_cmp(recv, y) == INT2FIX(+1) ? Qtrue : Qfalse;
-        }
+        return fix_gt(recv, y);
     } else if (RB_TYPE_P(recv, T_BIGNUM)) {
         return rb_big_gt(recv, y);
     }
@@ -54,16 +45,7 @@ VALUE sorbet_rb_int_gt_slowpath(VALUE recv, VALUE y) {
 
 VALUE sorbet_rb_int_lt_slowpath(VALUE recv, VALUE y) {
     if (LIKELY(FIXNUM_P(recv))) {
-        if (LIKELY(FIXNUM_P(y))) {
-            if (FIX2LONG(recv) < FIX2LONG(y)) {
-                return Qtrue;
-            }
-            return Qfalse;
-        } else if (RB_TYPE_P(y, T_BIGNUM)) {
-            return rb_big_cmp(y, recv) == INT2FIX(+1) ? Qtrue : Qfalse;
-        } else if (RB_TYPE_P(y, T_FLOAT)) {
-            return rb_integer_float_cmp(recv, y) == INT2FIX(-1) ? Qtrue : Qfalse;
-        }
+        return fix_lt(recv, y);
     } else if (RB_TYPE_P(recv, T_BIGNUM)) {
         return rb_big_lt(recv, y);
     }
@@ -72,16 +54,7 @@ VALUE sorbet_rb_int_lt_slowpath(VALUE recv, VALUE y) {
 
 VALUE sorbet_rb_int_ge_slowpath(VALUE recv, VALUE y) {
     if (LIKELY(FIXNUM_P(recv))) {
-        if (LIKELY(FIXNUM_P(y))) {
-            if (FIX2LONG(recv) >= FIX2LONG(y)) {
-                return Qtrue;
-            }
-            return Qfalse;
-        } else if (RB_TYPE_P(y, T_BIGNUM)) {
-            return rb_big_cmp(y, recv) == INT2FIX(+1) ? Qfalse : Qtrue;
-        } else if (RB_TYPE_P(y, T_FLOAT)) {
-            return rb_integer_float_cmp(recv, y) == INT2FIX(-1) ? Qfalse : Qtrue;
-        }
+        return fix_ge(recv, y);
     } else if (RB_TYPE_P(recv, T_BIGNUM)) {
         return rb_big_ge(recv, y);
     }
@@ -90,16 +63,7 @@ VALUE sorbet_rb_int_ge_slowpath(VALUE recv, VALUE y) {
 
 VALUE sorbet_rb_int_le_slowpath(VALUE recv, VALUE y) {
     if (LIKELY(FIXNUM_P(recv))) {
-        if (LIKELY(FIXNUM_P(y))) {
-            if (FIX2LONG(recv) <= FIX2LONG(y)) {
-                return Qtrue;
-            }
-            return Qfalse;
-        } else if (RB_TYPE_P(y, T_BIGNUM)) {
-            return rb_big_cmp(y, recv) == INT2FIX(-1) ? Qfalse : Qtrue;
-        } else if (RB_TYPE_P(y, T_FLOAT)) {
-            return rb_integer_float_cmp(recv, y) == INT2FIX(+1) ? Qfalse : Qtrue;
-        }
+        return fix_le(recv, y);
     } else if (RB_TYPE_P(recv, T_BIGNUM)) {
         return rb_big_le(recv, y);
     }
