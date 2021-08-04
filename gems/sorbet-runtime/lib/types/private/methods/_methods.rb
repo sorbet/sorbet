@@ -457,7 +457,7 @@ module T::Private::Methods
   end
 
   def self.all_checked_tests_sigs
-    @signatures_by_method.select {|key, sig| sig.check_level == :tests}.values
+    @signatures_by_method.values.select {|sig| sig.check_level == :tests}
   end
 
   # the module target is adding the methods from the module source to itself. we need to check that for all instance
