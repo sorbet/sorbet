@@ -1047,6 +1047,66 @@ bar(1) # error
 bar(x: 1) # ok
 ```
 
+## 7005
+
+Sorbet detected a mismatch between the declared return type for the method and
+the type of the returned value:
+
+```rb
+sig { returns(Integer) }
+def answer
+  "42" # error: Expected `Integer` but found `String("42")` for method result type
+end
+```
+
+Here we specified in the signature that `find` returns an instance of
+`Configuration`, yet the returned value might be `nil`:
+
+```rb
+sig { params(name: String).returns(Configuration) }
+def find(name)
+  @lookup[name] # error: Expected `Configuration` but found `T.nilable(Configuration)` for method result type
+end
+```
+
+A possible solution, if we are _certain_ that `name` is in the `@lookup` hash,
+is to use `T.must` when returning the value:
+
+```rb
+sig { params(name: String).returns(Configuration) }
+def find(name)
+  T.must(@lookup[name])
+end
+```
+
+In some cases, we're already being cautious and perform some checks before
+returning yet Sorbet still complains about the return type:
+
+```rb
+sig { params(name: String).returns(Configuration) }
+def find(name)
+  raise ArgumentError, "Configuration #{name} not found" unless @lookup.key?(name)
+  @lookup[name] # error: Expected `Configuration` but found `T.nilable(Configuration)` for method result type
+end
+```
+
+While this code is correct, Sorbet cannot assume the state of `@lookup` didn’t
+change between the `key?` check and the `[]` read. To fix this, we can take
+advantage of flow-typing to make the whole method work without inline type
+annotations:
+
+```rb
+sig { params(name: String).returns(Configuration) }
+def find(name)
+  config = @lookup[name]
+  raise ArgumentError, "Configuration #{name} not found" unless config
+  config
+end
+```
+
+By using a local variable, we allow Sorbet to assert that `config` is never
+nilable past the `raise` instruction.
+
 ## 7006
 
 In Sorbet, it is an error to have provably unreachable code. Because Sorbet is
