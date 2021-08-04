@@ -915,9 +915,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto kwSplatTPO = TypeAndOrigins{kwSplatType, kwSplatArg->origins};
 
             if (hasKwSplatParam && !hasKwParam) {
-                if (auto e = matchArgType(gs, *constr, args.callLoc(), args.receiverLoc(), symbol, method,
-                                          kwSplatTPO, *kwSplatParam, args.selfType, targs, kwargsLoc,
-                                          args.originForUninitialized, args.args.size() == 1)) {
+                if (auto e = matchArgType(gs, *constr, args.callLoc(), args.receiverLoc(), symbol, method, kwSplatTPO,
+                                          *kwSplatParam, args.selfType, targs, kwargsLoc, args.originForUninitialized,
+                                          args.args.size() == 1)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
             } else {
