@@ -17,6 +17,8 @@ class A
       Thread.current[:override] = :tweak
       Thread.current[:shortest] = :segment
       yield
+    rescue
+      raise 'should not happen'
     else
       p "running else #{o} #{s}"
       Thread.current[:override] = o
