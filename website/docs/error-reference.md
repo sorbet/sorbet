@@ -1220,6 +1220,38 @@ FOO = 42 # error: Reassigning field with a value of wrong type: `Integer(42)` is
 FOO = "Hello, world!"
 ```
 
+## 7010
+
+Sorbet found a reference to a generic type with the wrong number of type
+arrguments.
+
+Here we defined `MyMap` as a generic class expecting two type parameters
+`KeyType` and `ValueType` but we try to instantiate it with only one type
+argument:
+
+```rb
+class MyMap
+  extend T::Generic
+
+  KeyType = type_member
+  ValueType = type_member
+
+  # ...
+end
+
+MyMap[String].new # error: Wrong number of type parameters for `MyMap`. Expected: `2`, got: `1`
+```
+
+Unless a type member was `fixed`, it is always required to pass the correct
+amount of type arguments. `T.untyped` can also be used if the type is not
+relevant at this point:
+
+```rb
+MyMap[String, Integer].new
+MyMap[String, String].new
+MyMap[String, T.untyped].new
+```
+
 ## 7014
 
 Sorbet has a special method called `T.reveal_type` which can be useful for
