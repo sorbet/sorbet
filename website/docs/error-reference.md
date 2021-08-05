@@ -1420,6 +1420,40 @@ See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
 
+## 7030
+
+This error is consistently used when the user is trying (implicitly or
+explicitly) to call some method on a Sorbet type (e.g. `T::Array[Integer]`)
+which would actually return a Sorbet-runtime representation of a type.
+
+This error generally occurs when generic types are used in pattern matching:
+
+```rb
+def get_value(input)
+  case input
+  when Integer
+    input
+  when T::Array[Integer] # error: Call to method `===` on `T::Array[Integer]` mistakes a type for a value
+    input.first
+  end
+end
+```
+
+Since generic types are erased at runtime, this construct would never work when
+the program executed. Replace the generic type `T::Array[Integer]` by the erased
+type `Array` so the runtime behavior is correct:
+
+```
+def get_value(input)
+  case input
+  when Integer
+    input
+  when Array
+    input.first
+  end
+end
+```
+
 ## 7034
 
 Sorbet detected that the safe navigation operator (`&.`) was being used on a
