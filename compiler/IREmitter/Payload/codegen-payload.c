@@ -110,6 +110,8 @@ SORBET_ALIVE(VALUE, sorbet_rb_array_square_br_slowpath,
              (VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure));
 SORBET_ALIVE(VALUE, rb_ary_compact_bang_forwarder, (VALUE recv));
 
+SORBET_ALIVE(void, sorbet_hashUpdate, (VALUE hash, VALUE other));
+
 SORBET_ALIVE(VALUE, sorbet_rb_int_plus_slowpath, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_rb_int_minus_slowpath, (VALUE, VALUE));
 
@@ -592,12 +594,6 @@ void sorbet_hashStore(VALUE hash, VALUE key, VALUE value) {
 SORBET_INLINE
 VALUE sorbet_hashGet(VALUE hash, VALUE key) {
     return rb_hash_aref(hash, key);
-}
-
-SORBET_INLINE
-void sorbet_hashUpdate(VALUE hash, VALUE other) {
-    // TODO(trevor) inline a definition of `merge!` here
-    rb_funcall(hash, rb_intern2("merge!", 6), 1, other);
 }
 
 // possible return values for `func`:
