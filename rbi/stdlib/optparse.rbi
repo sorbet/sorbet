@@ -1593,8 +1593,8 @@ class OptionParser
     # which caused the error.
     Reason = T.let(nil, T.untyped)
 
-    sig {params(args: T.untyped).void}
-    def initialize(*args); end
+    sig {params(args: T.untyped, additional: T.untyped).void}
+    def initialize(*args, additional: nil); end
 
     sig {returns(T.untyped)}
     def args(); end
