@@ -584,16 +584,78 @@ public:
 
     RemoveUnnecessaryHashDupsPass() : llvm::ModulePass(ID) {}
 
+    bool detectLiteralHash(llvm::Module &mod, llvm::Function *sorbetGlobalConstDupHashFn, llvm::CallInst *toHashCall) {
+        // Checks that the argument to rb_to_hash_type is the result of a sorbet_globalConstDupHash,
+        // and that it only has one user.
+        // This is the case for code written as follows:
+        //   args = { a: 1 }
+        //   foo(**args)
+        ENFORCE(toHashCall->getNumArgOperands() == 1);
+        auto *constDupCall = llvm::dyn_cast<llvm::CallInst>(toHashCall->getOperand(0));
+        if (constDupCall == nullptr || constDupCall->getCalledFunction() != sorbetGlobalConstDupHashFn ||
+            constDupCall->getParent() != toHashCall->getParent() || !constDupCall->hasOneUser()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool detectPassThroughCase(llvm::Module &mod, llvm::Function *rbHashDupFn, llvm::Function *rbHashNewFn,
+                               llvm::CallInst *toHashCall) {
+        // Checks that the argument to rb_to_hash_type is the result of a phi,
+        // where one branch is a call to rb_hash_new, and the other is a call to
+        // rb_hash_dup on the result of a load from the arg array.
+        // This is the case for code written as follows:
+        //   def foo(**args)
+        //     bar(**args)
+        //   end
+
+        auto *phiNode = llvm::dyn_cast<llvm::PHINode>(toHashCall->getOperand(0));
+        if (phiNode == nullptr || phiNode->getParent() != toHashCall->getParent() || !phiNode->hasOneUser()) {
+            return false;
+        }
+        for (auto &u : phiNode->incoming_values()) {
+            auto *phiArg = llvm::dyn_cast<llvm::CallInst>(u);
+            if (phiArg == nullptr) {
+                return false;
+            }
+            if (phiArg->getCalledFunction() == rbHashNewFn) {
+                continue;
+            }
+            if (phiArg->getCalledFunction() != rbHashDupFn) {
+                return false;
+            }
+
+            ENFORCE(phiArg->getNumArgOperands() == 1);
+            auto *loadInst = llvm::dyn_cast<llvm::LoadInst>(phiArg->getOperand(0));
+            if (loadInst == nullptr) {
+                return false;
+            }
+            auto *gepInst = llvm::dyn_cast<llvm::GetElementPtrInst>(loadInst->getOperand(0));
+            if (gepInst == nullptr) {
+                return false;
+            }
+            // Check that the operand to the GEP is the 2nd arg to the function.
+            // gepInst->getParent() returns the basic block the GEP is part of,
+            // and ->getParent() of that returns the function.
+            if (gepInst->getOperand(0) != gepInst->getParent()->getParent()->getArg(1)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     bool runOnModule(llvm::Module &mod) override {
         bool modifiedCode = false;
 
         auto *rbHashDupFn = mod.getFunction("rb_hash_dup");
+        auto *rbHashNewFn = mod.getFunction("rb_hash_new");
         auto *rbToHashTypeFn = mod.getFunction("rb_to_hash_type");
         auto *sorbetGlobalConstDupHashFn = mod.getFunction("sorbet_globalConstDupHash");
         auto *sorbetSendFn = mod.getFunction("sorbet_i_send");
 
-        if (rbHashDupFn == nullptr || rbToHashTypeFn == nullptr || sorbetGlobalConstDupHashFn == nullptr ||
-            sorbetSendFn == nullptr) {
+        if (rbHashDupFn == nullptr || rbHashNewFn == nullptr || rbToHashTypeFn == nullptr ||
+            sorbetGlobalConstDupHashFn == nullptr || sorbetSendFn == nullptr) {
             return false;
         }
 
@@ -606,26 +668,23 @@ public:
                     // the end of the loop body could fail.
                     insn_iter++;
 
+                    // Look for the following instructions:
+                    //   %2 = call i64 @rb_to_hash_type(i64 %1)
+                    //   %3 = call i64 @rb_hash_dup(i64 %2)
+                    // And ensure that both %2 and %3 have exactly one user, and are in the same basic block.
                     auto *hashDupCall = llvm::dyn_cast<llvm::CallInst>(insn);
-                    if (hashDupCall == nullptr || hashDupCall->getCalledFunction() != rbHashDupFn) {
+                    if (hashDupCall == nullptr || hashDupCall->getCalledFunction() != rbHashDupFn ||
+                        !hashDupCall->hasOneUser()) {
                         continue;
                     }
                     ENFORCE(hashDupCall->getNumArgOperands() == 1);
                     auto *toHashCall = llvm::dyn_cast<llvm::CallInst>(hashDupCall->getOperand(0));
                     if (toHashCall == nullptr || toHashCall->getCalledFunction() != rbToHashTypeFn ||
-                        toHashCall->getParent() != hashDupCall->getParent()) {
-                        continue;
-                    }
-                    ENFORCE(toHashCall->getNumArgOperands() == 1);
-                    auto *constDupCall = llvm::dyn_cast<llvm::CallInst>(toHashCall->getOperand(0));
-                    if (constDupCall == nullptr || constDupCall->getCalledFunction() != sorbetGlobalConstDupHashFn ||
-                        constDupCall->getParent() != hashDupCall->getParent()) {
-                        continue;
-                    }
-                    if (!hashDupCall->hasOneUser() || !toHashCall->hasOneUser() || !constDupCall->hasOneUser()) {
+                        toHashCall->getParent() != hashDupCall->getParent() || !toHashCall->hasOneUser()) {
                         continue;
                     }
 
+                    // Get the use for the rb_hash_dup value, and ensure that it is a send, in the same basic block.
                     auto use = hashDupCall->use_begin();
                     llvm::User *user = use->getUser();
                     auto *sendCall = llvm::dyn_cast<llvm::CallInst>(user);
@@ -638,6 +697,11 @@ public:
                     // The last operand is the definition,
                     // which means that getNumOperands - getOperandNo == 2
                     if (user->getNumOperands() - use->getOperandNo() != 2) {
+                        continue;
+                    }
+
+                    if (!detectLiteralHash(mod, sorbetGlobalConstDupHashFn, toHashCall) &&
+                        !detectPassThroughCase(mod, rbHashDupFn, rbHashNewFn, toHashCall)) {
                         continue;
                     }
 
