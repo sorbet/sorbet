@@ -28,6 +28,7 @@
 gems/sorbet/Gemfile.lock
 gems/sorbet-static/Gemfile.lock
 gems/sorbet-runtime/Gemfile.lock
+gems/sorbet-static-and-runtime/Gemfile.lock
 *.gem
 
 # To distribute sorbet, we copy the built C++ binary here.
