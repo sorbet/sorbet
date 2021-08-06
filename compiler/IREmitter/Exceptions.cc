@@ -26,8 +26,14 @@ class ExceptionState {
     llvm::Function *currentFunc;
 
     llvm::Value *previousException = nullptr;
-    llvm::BasicBlock *exceptionEntry = nullptr;
     llvm::Value *exceptionResultPtr = nullptr;
+
+    llvm::BasicBlock *exceptionEntry = nullptr;
+    llvm::BasicBlock *bodyReturn = nullptr;
+    llvm::BasicBlock *handlersBlock = nullptr;
+    llvm::BasicBlock *ensureBlock = nullptr;
+    llvm::BasicBlock *exceptionContinue = nullptr;
+    llvm::BasicBlock *exceptionReturn = nullptr;
 
     ExceptionState(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx, int rubyBlockId,
                    int bodyRubyBlockId, cfg::LocalRef exceptionValue)
@@ -53,8 +59,16 @@ public:
         // Store the last exception state
         state.previousException = state.builder.CreateCall(cs.getFunction("rb_errinfo"), {}, "previousException");
 
+        // Setup all the blocks we are going to need ahead of time.
+        auto *currentFunc = state.currentFunc;
+        state.exceptionEntry = llvm::BasicBlock::Create(cs, "exception-entry", currentFunc);
+        state.bodyReturn = llvm::BasicBlock::Create(cs, "exception-body-return", currentFunc);
+        state.handlersBlock = llvm::BasicBlock::Create(cs, "exception-body-handlers", currentFunc);
+        state.ensureBlock = llvm::BasicBlock::Create(cs, "exception-ensure", currentFunc);
+        state.exceptionContinue = llvm::BasicBlock::Create(cs, "exception-continue", currentFunc);
+        state.exceptionReturn = llvm::BasicBlock::Create(cs, "exception-return", currentFunc);
+
         // Setup the exception handling entry block
-        state.exceptionEntry = llvm::BasicBlock::Create(cs, "exception-entry", state.currentFunc);
         state.builder.CreateBr(state.exceptionEntry);
         state.builder.SetInsertPoint(state.exceptionEntry);
 
@@ -119,8 +133,8 @@ public:
         auto [bodyResult, exceptionResultPtr] = sorbetTry(bodyFunction, previousException);
 
         // Check for an early return from the body.
-        auto *earlyReturnBlock = llvm::BasicBlock::Create(cs, "exception-body-return", currentFunc);
-        auto *continueBlock = llvm::BasicBlock::Create(cs, "exception-body-continue", currentFunc);
+        auto *earlyReturnBlock = this->bodyReturn;
+        auto *continueBlock = this->handlersBlock;
         auto *isReturnValue = builder.CreateICmpNE(bodyResult, Payload::rubyUndef(cs, builder), "isReturnValue");
         builder.CreateCondBr(isReturnValue, earlyReturnBlock, continueBlock);
 
@@ -173,16 +187,15 @@ public:
         // and we ran the rescue block.
         // NOTE: if retry was returned from the handler, we know that no new exceptions were raised (exceptionContext
         // will be nil), and that the previous exception will have been restored.
-        auto *ensureBlock = llvm::BasicBlock::Create(cs, "exception-ensure", currentFunc);
         auto *shouldRetry = builder.CreateAnd(
             exceptionRaised,
             builder.CreateICmpEQ(handlerResult, Payload::retrySingleton(cs, builder, irctx), "shouldRetry"));
-        builder.CreateCondBr(shouldRetry, exceptionEntry, ensureBlock);
+        builder.CreateCondBr(shouldRetry, exceptionEntry, this->ensureBlock);
 
         // the handler didn't retry, run ensure and return its value.
-        builder.SetInsertPoint(ensureBlock);
-        auto *continueBlock = llvm::BasicBlock::Create(cs, "exception-continue", currentFunc);
-        auto *returnBlock = llvm::BasicBlock::Create(cs, "exception-return", currentFunc);
+        builder.SetInsertPoint(this->ensureBlock);
+        auto *continueBlock = this->exceptionContinue;
+        auto *returnBlock = this->exceptionReturn;
         auto *ensureResult = sorbetEnsure(handlerResult);
         auto *isReturnValue = builder.CreateICmpNE(ensureResult, Payload::rubyUndef(cs, builder), "isReturnValue");
         builder.CreateCondBr(isReturnValue, returnBlock, continueBlock);
