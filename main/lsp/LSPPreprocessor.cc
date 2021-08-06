@@ -166,52 +166,55 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
         auto id = *msg.id();
         auto &rawParams = requestMessage.params;
         switch (method) {
+            case LSPMethod::GETCOUNTERS:
+                return make_unique<GetCountersTask>(*config, id);
+            case LSPMethod::Initialize:
+                return make_unique<InitializeTask>(*config, id, move(get<unique_ptr<InitializeParams>>(rawParams)));
+            case LSPMethod::Shutdown:
+                return make_unique<ShutdownTask>(*config, id);
+            case LSPMethod::SorbetError:
+                return make_unique<SorbetErrorTask>(*config, move(get<unique_ptr<SorbetErrorParams>>(rawParams)), id);
+            case LSPMethod::SorbetReadFile:
+                return make_unique<SorbetReadFileTask>(*config, id,
+                                                       move(get<unique_ptr<TextDocumentIdentifier>>(rawParams)));
+            case LSPMethod::SorbetShowSymbol:
+                return make_unique<SorbetShowSymbolTask>(*config, id,
+                                                         move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
+            case LSPMethod::TextDocumentCodeAction:
+                return make_unique<CodeActionTask>(*config, id, move(get<unique_ptr<CodeActionParams>>(rawParams)));
+            case LSPMethod::TextDocumentCompletion:
+                return make_unique<CompletionTask>(*config, id, move(get<unique_ptr<CompletionParams>>(rawParams)));
             case LSPMethod::TextDocumentDefinition:
                 return make_unique<DefinitionTask>(*config, id,
                                                    move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
-            case LSPMethod::Initialize:
-                return make_unique<InitializeTask>(*config, id, move(get<unique_ptr<InitializeParams>>(rawParams)));
             case LSPMethod::TextDocumentDocumentHighlight:
                 return make_unique<DocumentHighlightTask>(*config, id,
                                                           move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
             case LSPMethod::TextDocumentDocumentSymbol:
                 return make_unique<DocumentSymbolTask>(*config, id,
                                                        move(get<unique_ptr<DocumentSymbolParams>>(rawParams)));
+            case LSPMethod::TextDocumentFormatting:
+                return make_unique<DocumentFormattingTask>(*config, id,
+                                                           move(get<unique_ptr<DocumentFormattingParams>>(rawParams)));
             case LSPMethod::TextDocumentHover:
                 return make_unique<HoverTask>(*config, id,
                                               move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
+            case LSPMethod::TextDocumentPrepareRename:
+                return make_unique<PrepareRenameTask>(*config, id,
+                                                      move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
+            case LSPMethod::TextDocumentReferences:
+                return make_unique<ReferencesTask>(*config, id, move(get<unique_ptr<ReferenceParams>>(rawParams)));
+            case LSPMethod::TextDocumentRename:
+                return make_unique<RenameTask>(*config, id, move(get<unique_ptr<RenameParams>>(rawParams)));
+            case LSPMethod::TextDocumentSignatureHelp:
+                return make_unique<SignatureHelpTask>(*config, id,
+                                                      move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
             case LSPMethod::TextDocumentTypeDefinition:
                 return make_unique<TypeDefinitionTask>(*config, id,
                                                        move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
             case LSPMethod::WorkspaceSymbol:
                 return make_unique<WorkspaceSymbolsTask>(*config, id,
                                                          move(get<unique_ptr<WorkspaceSymbolParams>>(rawParams)));
-            case LSPMethod::TextDocumentCompletion:
-                return make_unique<CompletionTask>(*config, id, move(get<unique_ptr<CompletionParams>>(rawParams)));
-            case LSPMethod::TextDocumentCodeAction:
-                return make_unique<CodeActionTask>(*config, id, move(get<unique_ptr<CodeActionParams>>(rawParams)));
-            case LSPMethod::TextDocumentFormatting:
-                return make_unique<DocumentFormattingTask>(*config, id,
-                                                           move(get<unique_ptr<DocumentFormattingParams>>(rawParams)));
-            case LSPMethod::TextDocumentSignatureHelp:
-                return make_unique<SignatureHelpTask>(*config, id,
-                                                      move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
-            case LSPMethod::TextDocumentReferences:
-                return make_unique<ReferencesTask>(*config, id, move(get<unique_ptr<ReferenceParams>>(rawParams)));
-            case LSPMethod::SorbetReadFile:
-                return make_unique<SorbetReadFileTask>(*config, id,
-                                                       move(get<unique_ptr<TextDocumentIdentifier>>(rawParams)));
-            case LSPMethod::Shutdown:
-                return make_unique<ShutdownTask>(*config, id);
-            case LSPMethod::SorbetError:
-                return make_unique<SorbetErrorTask>(*config, move(get<unique_ptr<SorbetErrorParams>>(rawParams)), id);
-            case LSPMethod::GETCOUNTERS:
-                return make_unique<GetCountersTask>(*config, id);
-            case LSPMethod::TextDocumentPrepareRename:
-                return make_unique<PrepareRenameTask>(*config, id,
-                                                      move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
-            case LSPMethod::TextDocumentRename:
-                return make_unique<RenameTask>(*config, id, move(get<unique_ptr<RenameParams>>(rawParams)));
             default:
                 return make_unique<SorbetErrorTask>(
                     *config,

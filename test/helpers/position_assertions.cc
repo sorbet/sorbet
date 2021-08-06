@@ -50,6 +50,7 @@ const UnorderedMap<
         {"no-stdlib", BooleanPropertyAssertion::make},
         {"symbol-search", SymbolSearchAssertion::make},
         {"apply-rename", ApplyRenameAssertion::make},
+        {"show-symbol", ShowSymbolAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -1760,6 +1761,68 @@ void SymbolSearchAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &a
     for (auto entry : queryToAssertionsMap) {
         checkAllForQuery(entry.first, entry.second, sourceFileContents, lspWrapper, nextId, errorPrefix);
     }
+}
+
+shared_ptr<ShowSymbolAssertion> ShowSymbolAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                          int assertionLine, string_view assertionContents,
+                                                          string_view assertionType) {
+    return make_shared<ShowSymbolAssertion>(filename, range, assertionLine, assertionContents);
+}
+ShowSymbolAssertion::ShowSymbolAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                         string_view message)
+    : RangeAssertion(filename, range, assertionLine), message(string(message)) {}
+
+void ShowSymbolAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
+                                   const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                   LSPWrapper &wrapper, int &nextId, string errorPrefix) {
+    for (auto assertion : assertions) {
+        if (auto assertionOfType = dynamic_pointer_cast<ShowSymbolAssertion>(assertion)) {
+            assertionOfType->check(sourceFileContents, wrapper, nextId, errorPrefix);
+        }
+    }
+}
+
+string_view symbolInformationToString(variant<JSONNullObject, unique_ptr<SymbolInformation>> &showSymbolResult) {
+    if (auto nullResp = get_if<JSONNullObject>(&showSymbolResult)) {
+        return NULL_LABEL;
+    } else {
+        auto &symbolInformation = get<unique_ptr<SymbolInformation>>(showSymbolResult);
+        string_view value = symbolInformation->name;
+        if (value.empty()) {
+            return NOTHING_LABEL;
+        }
+        return value;
+    }
+}
+
+void ShowSymbolAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                LSPWrapper &wrapper, int &nextId, string errorPrefix) {
+    const auto &config = wrapper.config();
+    auto uri = filePathToUri(config, filename);
+    auto pos = make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(uri), range->start->copy());
+    auto id = nextId++;
+    auto msg = make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::SorbetShowSymbol, move(pos)));
+    auto responses = getLSPResponsesFor(wrapper, move(msg));
+    REQUIRE_EQ(responses.size(), 1);
+    auto &responseMsg = responses.at(0);
+    REQUIRE(responseMsg->isResponse());
+    auto &response = responseMsg->asResponse();
+    REQUIRE(response.result.has_value());
+    auto &showSymbolResponse = get<variant<JSONNullObject, unique_ptr<SymbolInformation>>>(*response.result);
+    auto showSymbolContents = symbolInformationToString(showSymbolResponse);
+
+    if (!containsLine(showSymbolContents, this->message)) {
+        auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
+        ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,
+                          fmt::format("{}Expected show-symbol contents:\n{}\nFound show-symbol contents:\n{}",
+                                      errorPrefix, prettyPrintRangeComment(sourceLine, *range, toString()),
+                                      prettyPrintRangeComment(sourceLine, *range,
+                                                              fmt::format("show-symbol: {}", showSymbolContents))));
+    }
+}
+
+string ShowSymbolAssertion::toString() const {
+    return fmt::format("show-symbol: {}", message);
 }
 
 } // namespace sorbet::test

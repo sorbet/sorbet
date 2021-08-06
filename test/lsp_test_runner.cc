@@ -533,6 +533,9 @@ TEST_CASE("LSPTest") {
     // Hover assertions
     HoverAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
 
+    // sorbet/showSymbol assertions
+    ShowSymbolAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
+
     // Completion assertions
     CompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
     ApplyCompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);

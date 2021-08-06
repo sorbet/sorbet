@@ -1328,6 +1328,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "sorbet/fence",
                                      "sorbet/readFile",
                                      "sorbet/showOperation",
+                                     "sorbet/showSymbol",
                                      "sorbet/typecheckRunInfo",
                                      "sorbet/watchmanFileChange",
                                      "sorbet/workspaceEdit",
@@ -1373,6 +1374,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"workspace/symbol", WorkspaceSymbolParams},
                                                 {"sorbet/error", SorbetErrorParams},
                                                 {"sorbet/readFile", TextDocumentIdentifier},
+                                                {"sorbet/showSymbol", TextDocumentPositionParams},
                                             });
     auto RequestMessage =
         makeObject("RequestMessage",
@@ -1414,6 +1416,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             {"workspace/symbol", makeVariant({JSONNull, makeArray(SymbolInformation)})},
             {"sorbet/error", SorbetErrorParams},
             {"sorbet/readFile", TextDocumentItem},
+            {"sorbet/showSymbol", makeVariant({JSONNull, SymbolInformation})},
         });
     // N.B.: ResponseMessage.params must be optional, as it is not present when an error occurs.
     // N.B.: We add a 'requestMethod' field to response messages to make the discriminated union work.
