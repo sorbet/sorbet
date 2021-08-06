@@ -436,13 +436,14 @@ class Logger
       progname: T.nilable(String),
       formatter: T.nilable(FormatterProcType),
       datetime_format: T.nilable(String),
-      shift_period_suffix: T.nilable(String)
+      shift_period_suffix: T.nilable(String),
+      binmode: T.untyped,
     ).void
   end
   def initialize(
     logdev, shift_age = 0, shift_size = 1048576, level: DEBUG,
     progname: nil, formatter: nil, datetime_format: nil,
-    shift_period_suffix: '%Y%m%d'
+    shift_period_suffix: '%Y%m%d', binmode: false
   )
     @level = T.let(T.unsafe(nil), T.nilable(Integer))
     @progname = T.let(T.unsafe(nil), T.nilable(String))
@@ -672,7 +673,7 @@ class Logger::LogDevice
   def create_logfile(filename); end
   def dev; end
   def filename; end
-  def initialize(log = nil, shift_age: nil, shift_size: nil, shift_period_suffix: nil); end
+  def initialize(log = nil, shift_age: nil, shift_size: nil, shift_period_suffix: nil, binmode: false); end
   def lock_shift_log; end
   def open_logfile(filename); end
   def reopen(log = nil); end
