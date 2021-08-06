@@ -34,6 +34,14 @@ class ExceptionState {
     llvm::BasicBlock *ensureBlock = nullptr;
     llvm::BasicBlock *exceptionContinue = nullptr;
     llvm::BasicBlock *exceptionReturn = nullptr;
+    llvm::PHINode *ensureValuePhi = nullptr;
+    llvm::PHINode *ensureFromBodyPhi = nullptr;
+    // We need this because we're going to compute a possible exception to throw
+    // after running handlers, but we're going to use that possible exception in
+    // a block that is not dominated by the block in which we compute the
+    // exception.  So we need this somewhat useless phi node to correctly pass
+    // the exception down to the place that needs it.
+    llvm::PHINode *previousExceptionPhi = nullptr;
 
     ExceptionState(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx, int rubyBlockId,
                    int bodyRubyBlockId, cfg::LocalRef exceptionValue)
@@ -56,9 +64,6 @@ public:
         state.exceptionResultPtr = state.builder.CreateAlloca(llvm::Type::getInt64Ty(cs), nullptr, "exceptionValue");
         state.builder.restoreIP(ip);
 
-        // Store the last exception state
-        state.previousException = state.builder.CreateCall(cs.getFunction("rb_errinfo"), {}, "previousException");
-
         // Setup all the blocks we are going to need ahead of time.
         auto *currentFunc = state.currentFunc;
         state.exceptionEntry = llvm::BasicBlock::Create(cs, "exception-entry", currentFunc);
@@ -68,8 +73,18 @@ public:
         state.exceptionContinue = llvm::BasicBlock::Create(cs, "exception-continue", currentFunc);
         state.exceptionReturn = llvm::BasicBlock::Create(cs, "exception-return", currentFunc);
 
-        // Setup the exception handling entry block
+        // Store the last exception state
+        state.previousException = state.builder.CreateCall(cs.getFunction("rb_errinfo"), {}, "previousException");
         state.builder.CreateBr(state.exceptionEntry);
+
+        // Ensure we're not going to insert the phi nodes yet.
+        state.builder.ClearInsertionPoint();
+        // Create these phi nodes for later use.
+        state.ensureValuePhi = state.builder.CreatePHI(state.builder.getInt64Ty(), 2, "ensureValue");
+        state.ensureFromBodyPhi = state.builder.CreatePHI(state.builder.getInt1Ty(), 2, "ensureFromBody");
+        state.previousExceptionPhi = state.builder.CreatePHI(state.builder.getInt64Ty(), 2, "computedPreviousException");
+
+        // Setup the exception handling entry block
         state.builder.SetInsertPoint(state.exceptionEntry);
 
         // Clear out the variable that we store the current exception in
@@ -142,8 +157,15 @@ public:
         // ensure and return the body result.
         builder.SetInsertPoint(earlyReturnBlock);
         builder.CreateCall(cs.getFunction("rb_set_errinfo"), {previousException});
-        auto ensureResult = sorbetEnsure(bodyResult);
-        IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, ensureResult);
+        auto *nil = Payload::rubyNil(cs, builder);
+        builder.CreateBr(this->ensureBlock);
+
+        this->ensureValuePhi->addIncoming(bodyResult, earlyReturnBlock);
+        this->ensureFromBodyPhi->addIncoming(builder.getTrue(), earlyReturnBlock);
+        // This is somewhat bogus, but the value we're passing here will never
+        // actually be used, because there's no actual execution path from a
+        // no-exceptions-raised body to a maybe-raise-exceptions-from-handler.
+        this->previousExceptionPhi->addIncoming(nil, earlyReturnBlock);
 
         // Update the exceptionValue closure variable to hold the exception raised.
         builder.SetInsertPoint(continueBlock);
@@ -192,21 +214,42 @@ public:
             builder.CreateICmpEQ(handlerResult, Payload::retrySingleton(cs, builder, irctx), "shouldRetry"));
         builder.CreateCondBr(shouldRetry, exceptionEntry, this->ensureBlock);
 
+        this->ensureValuePhi->addIncoming(handlerResult, this->handlersBlock);
+        this->ensureFromBodyPhi->addIncoming(builder.getFalse(), this->handlersBlock);
+        this->previousExceptionPhi->addIncoming(exceptionContext, this->handlersBlock);
+
+        // The phi nodes are now completely constructed.
+
         // the handler didn't retry, run ensure and return its value.
         builder.SetInsertPoint(this->ensureBlock);
+        builder.Insert(this->ensureValuePhi);
+        builder.Insert(this->ensureFromBodyPhi);
+        builder.Insert(this->previousExceptionPhi);
+
         auto *continueBlock = this->exceptionContinue;
         auto *returnBlock = this->exceptionReturn;
-        auto *ensureResult = sorbetEnsure(handlerResult);
+
+        // Run the ensure block with whatever value we have produced by running
+        // the body + applicable handlers.
+        auto *ensureResult = sorbetEnsure(this->ensureValuePhi);
+
+        // This compare+branch is a little subtle.  If we returned from the body,
+        // running the ensure will choose the ensure's result (if it is not undef)
+        // or the body's result.  Therefore, arriving here having executed the
+        // body will always choose the return.
+        //
+        // If some handler has returned a value, then the logic is largely the
+        // same as the above.  And if we had an exception, then ensureValuePhi
+        // will be undef, so we rely on whether or not the ensure returned a value.
         auto *isReturnValue = builder.CreateICmpNE(ensureResult, Payload::rubyUndef(cs, builder), "isReturnValue");
         builder.CreateCondBr(isReturnValue, returnBlock, continueBlock);
 
-        // return the result of the ensure
         builder.SetInsertPoint(returnBlock);
         IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, ensureResult);
 
         // Re-raise if an exception was raised by the handler
         builder.SetInsertPoint(continueBlock);
-        raiseIfNotNil(exceptionContext);
+        raiseIfNotNil(this->previousExceptionPhi);
     }
 
     // If no rescue clause handled the exception, the exceptionValue will contain a non-nil value. Test for that at
