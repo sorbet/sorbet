@@ -207,7 +207,7 @@ NameDef names[] = {
     {"instanceVariableSet", "instance_variable_set"},
     {"decorator"},
     {"propGetLogic", "prop_get_logic"},
-    {"softFreezeLogic", "soft_freeze_logic"},
+    {"propFreezeHandler", "prop_freeze_handler"},
     {"computedBy", "computed_by"},
     {"factory"},
     {"InexactStruct", "InexactStruct", true},
@@ -217,7 +217,6 @@ NameDef names[] = {
     {"DeprecatedNumeric", "DeprecatedNumeric", true},
     {"Private", "Private", true},
     {"Types", "Types", true},
-    {"DocumentDecoratorHelper", "DocumentDecoratorHelper", true},
     {"Chalk_ODM_Document", "::Chalk::ODM::Document"},
 
     {"prefix"},
@@ -495,6 +494,7 @@ NameDef names[] = {
     {"NonForcingConstants", "NonForcingConstants", true},
     {"VERSION", "VERSION", true},
     {"Thread", "Thread", true},
+    {"Configuration", "Configuration", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

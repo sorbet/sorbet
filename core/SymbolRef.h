@@ -643,7 +643,7 @@ public:
         return ClassOrModuleRef::fromRaw(49);
     }
 
-    static ClassOrModuleRef Chalk() {
+    static ClassOrModuleRef T_Configuration() {
         return ClassOrModuleRef::fromRaw(50);
     }
 
@@ -805,28 +805,20 @@ public:
         return ClassOrModuleRef::fromRaw(77);
     }
 
-    static ClassOrModuleRef Chalk_ODM() {
-        return ClassOrModuleRef::fromRaw(78);
-    }
-
-    static ClassOrModuleRef Chalk_ODM_DocumentDecoratorHelper() {
-        return ClassOrModuleRef::fromRaw(79);
-    }
-
     static MethodRef SorbetPrivateStaticSingleton_sig() {
         return MethodRef::fromRaw(5);
     }
 
     static ClassOrModuleRef PackageRegistry() {
-        return ClassOrModuleRef::fromRaw(80);
+        return ClassOrModuleRef::fromRaw(78);
     }
 
     static ClassOrModuleRef PackageSpec() {
-        return ClassOrModuleRef::fromRaw(81);
+        return ClassOrModuleRef::fromRaw(79);
     }
 
     static ClassOrModuleRef PackageSpecSingleton() {
-        return ClassOrModuleRef::fromRaw(82);
+        return ClassOrModuleRef::fromRaw(80);
     }
 
     static MethodRef PackageSpec_import() {
@@ -838,11 +830,11 @@ public:
     }
 
     static ClassOrModuleRef Encoding() {
-        return ClassOrModuleRef::fromRaw(83);
+        return ClassOrModuleRef::fromRaw(81);
     }
 
     static ClassOrModuleRef Thread() {
-        return ClassOrModuleRef::fromRaw(84);
+        return ClassOrModuleRef::fromRaw(82);
     }
 
     static MethodRef Class_new() {
@@ -854,11 +846,11 @@ public:
     }
 
     static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
-        return ClassOrModuleRef::fromRaw(85);
+        return ClassOrModuleRef::fromRaw(83);
     }
 
     static ClassOrModuleRef Sorbet_Private_Static_ResolvedSigSingleton() {
-        return ClassOrModuleRef::fromRaw(86);
+        return ClassOrModuleRef::fromRaw(84);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
@@ -887,7 +879,7 @@ public:
     static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 39;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 3;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
-    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 98;
+    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 96;
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {
