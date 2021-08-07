@@ -89,24 +89,21 @@ end
 module Dir::Tmpname
   sig do
     params(
-      basename: ::T.untyped,
-      tmpdir: ::T.untyped,
-      max_try: ::T.untyped,
-      opts: ::T.untyped,
+      basename: T.any(String, T::Array[String]),
+      tmpdir: T.nilable(String),
+      max_try: T.nilable(Integer),
+      opts: T.untyped,
+      blk: T.proc.params(
+        path: String,
+        n: T.nilable(Integer),
+        opts: T::Hash[Symbol, T.untyped],
+        origdir: T.nilable(String)
+      ).void
     )
-    .returns(::T.untyped)
+    .returns(String)
   end
-  def self.create(basename, tmpdir=T.unsafe(nil), max_try: T.unsafe(nil), **opts); end
+  def self.create(basename, tmpdir=nil, max_try: nil, **opts, &blk); end
 
-  sig do
-    params(
-      _: ::T.untyped,
-      n: ::T.untyped,
-    )
-    .returns(::T.untyped)
-  end
-  def self.make_tmpname(_, n); end
-
-  sig {returns(::T.untyped)}
+  sig {returns(String)}
   def self.tmpdir(); end
 end
