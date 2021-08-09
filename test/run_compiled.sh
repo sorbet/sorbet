@@ -63,6 +63,9 @@ if [ -z "${llvmir:-}" ]; then
   # Export llvmir so that run_sorbet picks it up. Real argument parsing in
   # run_sorbet.sh would probably be better.
   export llvmir
+
+  compiled_out_dir=$llvmir
+  export compiled_out_dir
 elif [[ ! -d "$llvmir" ]]; then
   fatal "llvm output directory '${llvmir}' does not exist"
 fi

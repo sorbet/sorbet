@@ -4,7 +4,7 @@
 require 'benchmark'
 require 'fileutils'
 require 'optparse'
-require_relative '../../bazel-sorbet/gems/sorbet-runtime/lib/sorbet-runtime'
+require_relative '../../gems/sorbet-runtime/lib/sorbet-runtime'
 
 class Module
   include T::Sig
@@ -58,7 +58,7 @@ module SorbetBenchmark
 
     target = 'tmp/bench/target.rb'
     FileUtils.cp(benchmark, target)
-    check_call(['bash', 'test/run_sorbet.sh', target], env: {'llvmir' => '.'}, out: "/dev/null", err: "/dev/null")
+    check_call(['bash', 'test/run_sorbet.sh', target], env: {'llvmir' => '.', 'compiled_out_dir' => '.'}, out: "/dev/null", err: "/dev/null")
   end
 
   sig {params(ruby: String, sorbet: String).returns(T::Array[String])}
@@ -146,7 +146,7 @@ module SorbetBenchmark
     pwd = Dir.pwd
 
     ruby = "#{pwd}/bazel-bin/external/sorbet_ruby_2_7/ruby"
-    sorbet = "#{pwd}/bazel-sorbet"
+    sorbet = "#{pwd}"
 
     startup_time = average_runtime(startup_command(ruby, sorbet))
     puts "ruby vm startup time: %.3f" % startup_time
