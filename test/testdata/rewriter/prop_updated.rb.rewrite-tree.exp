@@ -1,4 +1,16 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Chalk>::<C ODM>::<C Document><<C <todo sym>>> < (::<todo sym>)
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.include(<emptyTree>::<C T>::<C Props>::<C Serializable>)
+
+    <self>.include(<emptyTree>::<C T>::<C Props>::<C WeakConstructor>)
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+  end
+
   module <emptyTree>::<C Chalk>::<C ODM><<C <todo sym>>> < ()
     <emptyTree>::<C DeprecatedNumeric> = <emptyTree>::<C Numeric>
   end
@@ -29,11 +41,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def updated=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :updated)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :updated)
         <self>.instance_variable_set(:@updated, arg0)
       end
     end
