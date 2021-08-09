@@ -82,7 +82,8 @@ public:
         // Create these phi nodes for later use.
         state.ensureValuePhi = state.builder.CreatePHI(state.builder.getInt64Ty(), 2, "ensureValue");
         state.ensureFromBodyPhi = state.builder.CreatePHI(state.builder.getInt1Ty(), 2, "ensureFromBody");
-        state.previousExceptionPhi = state.builder.CreatePHI(state.builder.getInt64Ty(), 2, "computedPreviousException");
+        state.previousExceptionPhi =
+            state.builder.CreatePHI(state.builder.getInt64Ty(), 2, "computedPreviousException");
 
         // Setup the exception handling entry block
         state.builder.SetInsertPoint(state.exceptionEntry);
