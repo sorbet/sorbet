@@ -147,9 +147,9 @@ SORBET_ALIVE(VALUE, sorbet_magic_mergeHashHelper, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_vm_getivar, (VALUE obj, ID id, struct iseq_inline_iv_cache_entry *cache));
 SORBET_ALIVE(void, sorbet_vm_setivar, (VALUE obj, ID id, VALUE val, struct iseq_inline_iv_cache_entry *cache));
 
-SORBET_ALIVE(int, sorbet_initializeTag, (struct rb_vm_tag * tag));
+SORBET_ALIVE(enum ruby_tag_type, sorbet_initializeTag, (struct rb_vm_tag * tag));
 SORBET_ALIVE(VALUE, sorbet_processThrowReturnSetJmp,
-             (int setjmp_retval, rb_control_frame_t *cfp, struct rb_vm_tag *tag));
+             (enum ruby_tag_type state, rb_control_frame_t *cfp, struct rb_vm_tag *tag));
 SORBET_ALIVE(void, sorbet_teardownTagForThrowReturn, (struct rb_vm_tag * tag));
 
 SORBET_ALIVE(void, sorbet_vm_register_sig,
@@ -2315,49 +2315,60 @@ void sorbet_throwReturn(VALUE retval) {
     sorbet_ec_jump_tag(ec, ec->tag->state);
 }
 
-// This is invoked at the beginning of a method's body, and is analogous to EC_PUSH_TAG followed by the setjmp in
-// EC_EXEC_TAG:
+// This is invoked at the beginning of a method's body, and is analogous to EC_PUSH_TAG + EC_EXEC_TAG
 // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L130-L135
 // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L181-L182
 SORBET_INLINE
-int sorbet_initializeTag(struct rb_vm_tag *tag) {
-    const rb_execution_context_t *ec = GET_EC();
+enum ruby_tag_type sorbet_initializeTag(struct rb_vm_tag *tag) {
+    rb_execution_context_t *ec = GET_EC();
 
     // inlined from EC_PUSH_TAG
     tag->state = TAG_NONE;
     tag->tag = Qundef;
     tag->prev = ec->tag;
 
-    return RUBY_SETJMP(tag->buf);
-}
-
-// Used by method and static init functions, for setjmp handling for returns from block statements.
-//
-// This is analogous to what comes after return from the setjmp (whether it's the initial setjmp or a longjmp back to
-// it) in EC_EXEC_TAG. For the initial setjmp, we just do something analogous to EC_REPUSH_TAG and return Qundef to the
-// caller, indicating that tag setup is complete and the function should continue as normal. For a longjmp back, we
-// will do subsequent processing: extract the tag state with something analogous to rb_ec_tag_state, inspect the throw
-// data to see if it's a return statement meant for us, pop the tag, then either re-throw (if the return wasn't for us)
-// or return the (non-Qundef) return value to the caller, which should return the return value (applying a type test on
-// the way out if appropriate).
-SORBET_INLINE
-VALUE sorbet_processThrowReturnSetJmp(int setjmp_retval, rb_control_frame_t *cfp, struct rb_vm_tag *tag) {
-    rb_execution_context_t *ec = GET_EC();
-
-    VALUE retval = Qundef;
+    int setjmp_retval = RUBY_SETJMP(tag->buf);
+    enum ruby_tag_type state = TAG_NONE;
 
     if (setjmp_retval) {
         // See rb_ec_tag_state:
         // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L160-L167
-        int state = ec->tag->state;
+        state = ec->tag->state;
         ec->tag->state = TAG_NONE;
+    } else {
+        // See EC_REPUSH_TAG:
+        // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L144
+        ec->tag = tag;
+    }
 
+    // This is subtle, but tags are organized in such a way that TAG_NONE is 0
+    // (i.e. a "normal" return from setjmp) and every other tag is non-zero
+    // (i.e. a "abnormal" return from setjmp).
+    return state;
+}
+
+// Used by method and static init functions, for setjmp handling for returns from block statements.
+//
+// This is analogous to what comes after return from EC_EXEC_TAG (whether it's the initial setjmp
+// or a longjmp back to it). For the initial setjmp, we do nothing, indicating that tag setup is
+// complete and the function should continue as normal. For a longjmp back, we will do subsequent
+// processing: inspect the throw data to see if it's a return statement meant for us, pop the tag,
+// then either re-throw (if the return wasn't for us) or return the (non-Qundef) return value to
+// the caller, which should return the return value (applying a type test on the way out if
+// appropriate).
+SORBET_INLINE
+VALUE sorbet_processThrowReturnSetJmp(enum ruby_tag_type state, rb_control_frame_t *cfp, struct rb_vm_tag *tag) {
+    rb_execution_context_t *ec = GET_EC();
+
+    VALUE retval = Qundef;
+
+    if (state != TAG_NONE) {
         const struct vm_throw_data *const err = (struct vm_throw_data *)ec->errinfo;
         const rb_control_frame_t *const escape_cfp = err->catch_frame;
 
         if (state == TAG_RETURN && cfp == escape_cfp) {
             rb_vm_rewind_cfp(ec, cfp);
-            state = 0;
+            state = TAG_NONE;
 
             ec->errinfo = Qnil;
 
@@ -2368,15 +2379,11 @@ VALUE sorbet_processThrowReturnSetJmp(int setjmp_retval, rb_control_frame_t *cfp
         // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L137-L139
         ec->tag = tag->prev;
 
-        if (state != 0) {
+        if (state != TAG_NONE) {
             // inlined from rb_ec_tag_jump
             ec->tag->state = state;
             RUBY_LONGJMP(ec->tag->buf, 1);
         }
-    } else {
-        // See EC_REPUSH_TAG:
-        // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L144
-        ec->tag = tag;
     }
 
     return retval;
