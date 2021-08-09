@@ -285,8 +285,8 @@ package(default_visibility = ["//visibility:public"])
     http_archive(
         name = "rubyfmt",
         build_file = "@com_stripe_ruby_typer//third_party/rubyfmt:rubyfmt.BUILD",
-        urls = _github_public_urls("penelopezone/rubyfmt/releases/download/v0.6.7/rubyfmt-v0.6.7-sources.tar.gz"),
-        sha256 = "00f494a649420ee1a3e3a25901df3bceb3d994ac61e61adcee7e59bd52830ddd",
+        urls = _github_public_urls("penelopezone/rubyfmt/releases/download/v0.7.6/rubyfmt-v0.7.6-sources.tar.gz"),
+        sha256 = "9d87e16f2705ad94b00e2963de8e3fb5554768f37139371128b68eefddb9e55d",
     )
 
     http_archive(
