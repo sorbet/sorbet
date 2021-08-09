@@ -40,6 +40,7 @@ def f(t_enum, my_enum, other_enum, x, y, z, s, stringy)
   T.reveal_type(x===my_enum)          # error: Revealed type: `T::Boolean`
 
   T.reveal_type(x===y)                # error: Revealed type: `FalseClass`
+  T.reveal_type(x===T.unsafe(y))      # error: Revealed type: `T::Boolean`
 
   T.reveal_type(my_enum===other_enum) # error: Revealed type: `FalseClass`
   T.reveal_type(z===my_enum)          # error: Revealed type: `FalseClass`

@@ -3244,7 +3244,7 @@ public:
         }
         auto rhs = args.args[0]->type;
         if (rhs.isUntyped()) {
-            res.returnType = rhs;
+            res.returnType = Types::Boolean();
             return;
         }
 
