@@ -371,10 +371,6 @@ public:
             cxxopts::value<string>());
         optsBuilder.add_options("compiler")("llvm-ir-dir", "Output LLVM IR to directory, which must already exist",
                                             cxxopts::value<string>());
-        // TODO(aprocter): Remove this once we no longer need it for backwards compatibility in the Stripe codebase.
-        optsBuilder.add_options("compiler")("llvm-ir-folder",
-                                            "(DEPRECATED) Sets the value for both --compiled-out-dir and --llvm-ir-dir",
-                                            cxxopts::value<string>());
         optsBuilder.add_options("compiler")("force-compiled", "Force all files to this compiled level",
                                             cxxopts::value<bool>());
     };
@@ -405,18 +401,6 @@ public:
                 throw EarlyReturnWithCode(1);
             }
 
-            irOutputDir = outputDir;
-        }
-        // TODO(aprocter): Remove this once we no longer need it for backwards compatibility in the Stripe codebase.
-        if (providedOptions.count("llvm-ir-folder") > 0) {
-            auto outputDir = providedOptions["llvm-ir-folder"].as<string>();
-
-            if (!FileOps::dirExists(outputDir)) {
-                fmt::print("Missing output directory {}\n", outputDir);
-                throw EarlyReturnWithCode(1);
-            }
-
-            compiledOutputDir = outputDir;
             irOutputDir = outputDir;
         }
         if (providedOptions.count("force-compiled") > 0) {
