@@ -43,6 +43,17 @@ public:
                                 int rubyBlockId, int bodyRubyBlockId, cfg::LocalRef exceptionValue) {
         ExceptionState state(cs, builder, irctx, rubyBlockId, bodyRubyBlockId, exceptionValue);
 
+#if 1
+        auto [pc, closure, cfp] = state.getExceptionArgs();
+        auto *v = builder.CreateCall(cs.getFunction("sorbet_run_exception_handling"),
+                           {irctx.rubyBlocks2Functions[state.bodyRubyBlockId],
+                                   pc, closure, cfp,
+                                   state.getHandlers(),
+                                   state.getElse(),
+                                   state.getEnsure(),
+                                   Payload::retrySingleton(cs, builder, irctx)});
+        Payload::varSet(cs, exceptionValue, v, builder, irctx, rubyBlockId);
+#else                                   
         // Allocate a place to store the exception result from sorbet_try. This must go in the function init block,
         // otherwise the allocation might happen inside of a loop, causing a stack overflow.
         auto ip = state.builder.saveIP();
@@ -58,6 +69,7 @@ public:
         state.builder.CreateBr(state.exceptionEntry);
         state.builder.SetInsertPoint(state.exceptionEntry);
 
+#endif
         // Clear out the variable that we store the current exception in
         Payload::varSet(cs, exceptionValue, Payload::rubyNil(state.cs, state.builder), builder, irctx, rubyBlockId);
 
@@ -209,11 +221,13 @@ public:
 void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderBase &build,
                                              const IREmitterContext &irctx, int rubyBlockId, int bodyRubyBlockId,
                                              cfg::LocalRef exceptionValue) {
-    auto state = ExceptionState::setup(cs, build, irctx, rubyBlockId, bodyRubyBlockId, exceptionValue);
+    ExceptionState::setup(cs, build, irctx, rubyBlockId, bodyRubyBlockId, exceptionValue);
 
+#if 0
     auto exceptionResult = state.runBody();
     state.runRescueElseEnsure(exceptionResult);
     state.raiseUnhandledException();
+#endif
 
     return;
 }

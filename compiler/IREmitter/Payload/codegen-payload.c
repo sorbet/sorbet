@@ -2273,6 +2273,141 @@ void sorbet_raiseIfNotNil(VALUE exception) {
     rb_exc_raise(exception);
 }
 
+struct EnsureContext {
+    ExceptionFFIType body;
+    VALUE **pc;
+    // The locals offset for the body.
+    VALUE methodClosure;
+    rb_control_frame_t *cfp;
+    VALUE *returnValue;
+
+    VALUE previousException;
+    VALUE currentException;
+
+    // All of these may be NULL;
+    ExceptionFFIType handlers;
+    ExceptionFFIType elseClause;
+
+    ExceptionFFIType ensureClause;
+
+    VALUE retrySingleton;
+};
+
+static VALUE sorbet_run_exception_body(VALUE vctx) {
+    struct EnsureContext *ctx = (struct EnsureContext*) vctx;
+
+ retry:
+    ctx->currentException = Qnil;
+
+    VALUE bodyException = Qnil;
+    VALUE bodyResult = sorbet_try(ctx->body, ctx->pc, ctx->methodClosure, ctx->cfp, ctx->previousException, &bodyException);
+
+    // The body successfully ran, so return that value.
+    if (bodyResult != sorbet_rubyUndef()) {
+        rb_set_errinfo(ctx->previousException);
+        *ctx->returnValue = bodyResult;
+        return bodyResult;
+    }
+
+    // Run the handlers or the else, depending on whether the body raised.
+    bool bodyRaisedException = bodyException != Qnil;
+    ExceptionFFIType toRun = bodyRaisedException ? ctx->handlers : ctx->elseClause;
+
+    // If we actually have a function to run, then do that and record any exceptions
+    // that happened within the function.  If we don't have a function to run (e.g.
+    // the body didn't raise an exception and there was no else handler), then use
+    // undef to indicate the inaction.
+    VALUE handlerException = Qnil;
+    VALUE handlerResult = Qundef;
+    if (toRun != NULL) {
+        handlerResult = sorbet_try(toRun, ctx->pc, ctx->methodClosure, ctx->cfp, ctx->previousException, &handlerException);
+    }
+
+    // We may have run some handler, which may have one of three outcomes:
+    //
+    // 1. It may have raised an exception of its own.
+    // 2. It may have indicated we need to retry the body.
+    // 3. It may have successfully completed and returned a value.
+
+    // There are three exceptions that need to be considered when determining what
+    // our exception state is after any handlers have been applied.  In order of
+    // preference for being raised after any ensure handler has been run:
+    //
+    // 1. An exception raised by the rescue block, including the else if applicable.
+    // 2. The original exception raised by the body, if it wasn't handled by the
+    //    rescue block.
+    // 3. Any previous exception that was present prior to all of this function executing.
+    VALUE exceptionToReraise;
+    bool handlerRaisedException = handlerException != Qnil;
+    if (handlerRaisedException) {
+        exceptionToReraise = handlerException;
+    } else if(bodyRaisedException) {
+        exceptionToReraise = bodyException;
+    } else {
+        exceptionToReraise = ctx->previousException;
+    }
+
+    // Note that handlerResult == retrySingleton, we know that the rescue block(s) did
+    // not raise exceptions on their own and any previous exception must have been restored.
+    if (bodyRaisedException && handlerResult == ctx->retrySingleton) {
+        goto retry;
+    }
+
+    // Handler did not retry.  We might need to re-raise exceptions, though.
+    sorbet_raiseIfNotNil(exceptionToReraise);
+
+    *ctx->returnValue = handlerResult;
+
+    return *ctx->returnValue;
+}
+
+static VALUE sorbet_run_ensure(VALUE vctx) {
+    struct EnsureContext *ctx = (struct EnsureContext*) vctx;
+    ctx->ensureClause(ctx->pc, ctx->methodClosure, ctx->cfp);
+    // We can return whatever we want here; rb_ensure ignores the return value.
+    return Qnil;
+}
+
+static VALUE sorbet_run_ensure_and_body(struct EnsureContext *ctx) {
+    rb_ensure(sorbet_run_exception_body, (VALUE)ctx, sorbet_run_ensure, (VALUE)ctx);
+    return *ctx->returnValue;
+}
+
+VALUE sorbet_run_exception_handling(ExceptionFFIType body,
+                                    VALUE **pc,
+                                    // The locals offset for the body.
+                                    VALUE methodClosure,
+                                    rb_control_frame_t *cfp,
+                                    // May be nullptr.
+                                    ExceptionFFIType handlers,
+                                    // May be nullptr.
+                                    ExceptionFFIType elseClause,
+                                    // May be nullptr.
+                                    ExceptionFFIType ensureClause,
+                                    // The special value indicating that we need to retry.
+                                    VALUE retrySingleton) {
+    VALUE returnValue = Qundef;
+
+    struct EnsureContext ctx;
+    ctx.body = body;
+    ctx.pc = pc;
+    ctx.methodClosure = methodClosure;
+    ctx.cfp = cfp;
+    ctx.previousException = rb_errinfo();;
+    ctx.handlers = handlers;
+    ctx.elseClause = elseClause;
+    ctx.ensureClause = ensureClause;
+    ctx.retrySingleton = retrySingleton;
+
+    if (ensureClause == NULL) {
+        sorbet_run_exception_body((VALUE)&ctx);
+        return returnValue;
+    }
+
+    sorbet_run_ensure_and_body(&ctx);
+    return returnValue;
+}
+
 // Ruby passes the RTLD_LAZY flag to the dlopen(3) call (which is supported by both macOS and Linux).
 // That flag says, "Only resolve symbols as the code that references them is executed. If the symbol
 // is never referenced, then it is never resolved."
