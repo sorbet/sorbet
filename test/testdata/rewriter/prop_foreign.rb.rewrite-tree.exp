@@ -20,11 +20,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def foreign_lazy=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :foreign_lazy)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_lazy)
         <self>.instance_variable_set(:@foreign_lazy, arg0)
       end
     end
@@ -62,11 +58,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def foreign_proc=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :foreign_proc)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_proc)
         <self>.instance_variable_set(:@foreign_proc, arg0)
       end
     end
@@ -104,11 +96,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def foreign_invalid=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :foreign_invalid)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_invalid)
         <self>.instance_variable_set(:@foreign_invalid, arg0)
       end
     end

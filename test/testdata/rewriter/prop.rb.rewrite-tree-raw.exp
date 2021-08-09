@@ -1444,38 +1444,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :foo }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :foo }
+                ]
               }
             ],
             expr = Send{
@@ -1959,38 +1948,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :default }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :default }
+                ]
               }
             ],
             expr = Send{
@@ -2196,38 +2174,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :t_nilable }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :t_nilable }
+                ]
               }
             ],
             expr = Send{
@@ -2400,38 +2367,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :array }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :array }
+                ]
               }
             ],
             expr = Send{
@@ -2646,38 +2602,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :t_array }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :t_array }
+                ]
               }
             ],
             expr = Send{
@@ -2904,38 +2849,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :hash_of }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :hash_of }
+                ]
               }
             ],
             expr = Send{
@@ -3473,38 +3407,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :foreign }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :foreign }
+                ]
               }
             ],
             expr = Send{
@@ -3862,38 +3785,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :foreign_lazy }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :foreign_lazy }
+                ]
               }
             ],
             expr = Send{
@@ -4251,38 +4163,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :foreign_proc }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :foreign_proc }
+                ]
               }
             ],
             expr = Send{
@@ -4640,38 +4541,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :foreign_invalid }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :foreign_invalid }
+                ]
               }
             ],
             expr = Send{
@@ -5002,38 +4892,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :ifunset }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :ifunset }
+                ]
               }
             ],
             expr = Send{
@@ -5209,38 +5088,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :ifunset_nilable }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :ifunset_nilable }
+                ]
               }
             ],
             expr = Send{
@@ -5413,38 +5281,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :empty_hash_rules }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :empty_hash_rules }
+                ]
               }
             ],
             expr = Send{
@@ -6806,38 +6663,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :token }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :token }
+                ]
               }
             ],
             expr = Send{
@@ -7010,38 +6856,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :created }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :created }
+                ]
               }
             ],
             expr = Send{
@@ -7411,38 +7246,27 @@ ClassDef{
             } }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
+              Send{
+                recv = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = (module ::T::NonForcingConstants)
+                    symbol = (module ::T::Configuration)
                   }
-                  fun = <U non_forcing_is_a?>
+                  fun = <U prop_freeze_handler>
                   block = nullptr
-                  pos_args = 2
+                  pos_args = 0
                   args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = "::Chalk::ODM::Document" }
                   ]
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
+                fun = <U call>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  Local{
+                    localVariable = <U <self>>
                   }
-                  fun = <U soft_freeze_logic>
-                  block = nullptr
-                  pos_args = 2
-                  args = [
-                    Local{
-                      localVariable = <U <self>>
-                    }
-                    Literal{ value = :token }
-                  ]
-                }
-                elsep = EmptyTree
+                  Literal{ value = :token }
+                ]
               }
             ],
             expr = Send{
@@ -7880,6 +7704,61 @@ ClassDef{
             Literal{ value = :normal }
           ]
         }
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = UnresolvedConstantLit{
+        scope = UnresolvedConstantLit{
+          scope = UnresolvedConstantLit{
+            scope = EmptyTree
+            cnst = <C <U Chalk>>
+          }
+          cnst = <C <U ODM>>
+        }
+        cnst = <C <U Document>>
+      }<<C <U <todo sym>>>>
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = (class ::<todo sym>)
+        }]
+      rhs = [
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = UnresolvedConstantLit{
+        scope = UnresolvedConstantLit{
+          scope = UnresolvedConstantLit{
+            scope = UnresolvedConstantLit{
+              scope = UnresolvedConstantLit{
+                scope = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U Opus>>
+                }
+                cnst = <C <U DB>>
+              }
+              cnst = <C <U Model>>
+            }
+            cnst = <C <U Mixins>>
+          }
+          cnst = <C <U Encryptable>>
+        }
+        cnst = <C <U EncryptedValue>>
+      }<<C <U <todo sym>>>>
+      ancestors = [UnresolvedConstantLit{
+          scope = UnresolvedConstantLit{
+            scope = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U Chalk>>
+            }
+            cnst = <C <U ODM>>
+          }
+          cnst = <C <U Document>>
+        }]
+      rhs = [
       ]
     }
 
