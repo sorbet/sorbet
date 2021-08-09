@@ -619,9 +619,13 @@ public:
             if (phiArg == nullptr) {
                 return false;
             }
+            // If we see a Hash.new, we can skip processing this branch of the phi, since there's nothing else to follow
+            // backwards.
             if (phiArg->getCalledFunction() == rbHashNewFn) {
                 continue;
             }
+            // If we see a function other than Hash.new or rb_hash_dup, we should abort, and not do anything,
+            // because the expected phi node only has calls to those 2.
             if (phiArg->getCalledFunction() != rbHashDupFn) {
                 return false;
             }
