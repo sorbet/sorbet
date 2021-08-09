@@ -83,7 +83,7 @@ load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
 
 rust_repositories(
     edition = "2018",
-    version = "1.46.0",
+    version = "1.51.0",
 )
 
 load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
