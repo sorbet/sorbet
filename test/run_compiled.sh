@@ -64,11 +64,12 @@ if [ -z "${llvmir:-}" ]; then
   # run_sorbet.sh would probably be better.
   export llvmir
 
-  compiled_out_dir=$llvmir
-  export compiled_out_dir
 elif [[ ! -d "$llvmir" ]]; then
   fatal "llvm output directory '${llvmir}' does not exist"
 fi
+
+compiled_out_dir=$llvmir
+export compiled_out_dir
 
 # ensure that the extension is built
 "test/run_sorbet.sh" -i "$llvmir" "${rb_files[@]}"
