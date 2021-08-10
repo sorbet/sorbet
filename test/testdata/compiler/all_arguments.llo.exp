@@ -366,7 +366,7 @@ sorbet_readKWRestArgs.exit.thread:                ; preds = %33, %sorbet_getKWAr
   store i64 %send, i64* %53, align 8, !dbg !25, !tbaa !4
   %54 = getelementptr inbounds i64, i64* %53, i64 1, !dbg !25
   store i64* %54, i64** %51, align 8, !dbg !25
-  %send112 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts, i64 0), !dbg !25
+  %send112 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_inspect, i64 0), !dbg !25
   ret i64 %send112
 }
 
