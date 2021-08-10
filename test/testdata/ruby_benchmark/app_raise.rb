@@ -2,10 +2,12 @@
 # typed: strict
 # compiled: true
 i = 0
-while i<300000
-  i += 1
+while i < 10_000_000
   begin
     raise
   rescue
   end
+  i += 1
 end
+
+p i
