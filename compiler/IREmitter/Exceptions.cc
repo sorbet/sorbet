@@ -28,6 +28,7 @@ class ExceptionState {
     llvm::Value *previousException = nullptr;
     llvm::Value *exceptionResultPtr = nullptr;
 
+    llvm::BasicBlock *exceptionTagStack = nullptr;
     llvm::BasicBlock *exceptionEntry = nullptr;
     llvm::BasicBlock *bodyReturn = nullptr;
     llvm::BasicBlock *handlersBlock = nullptr;
@@ -42,6 +43,19 @@ class ExceptionState {
     // exception.  So we need this somewhat useless phi node to correctly pass
     // the exception down to the place that needs it.
     llvm::PHINode *previousExceptionPhi = nullptr;
+
+    // setjmp/longjmp bits for ensuring that we execute ensure.
+
+    // Dummy value for the result of executing the exception handling region.
+    // Normally this would come from the body or one of the handlers, but since
+    // we have a path to the ensure handler that doesn't go through either one
+    // of those (i.e. longjmp'ing to this->tag->buf), we need a value that we
+    // can pass to the appropriate phi node.
+    llvm::Value *undefFromRegion = nullptr;
+    // A struct rb_vm_tag.
+    llvm::Value *tag = nullptr;
+    // Return value from sorbet_initializeTag.
+    llvm::Value *tagState = nullptr;
 
     ExceptionState(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx, int rubyBlockId,
                    int bodyRubyBlockId, cfg::LocalRef exceptionValue)
@@ -62,10 +76,13 @@ public:
         auto ip = state.builder.saveIP();
         state.builder.SetInsertPoint(irctx.functionInitializersByFunction[rubyBlockId]);
         state.exceptionResultPtr = state.builder.CreateAlloca(llvm::Type::getInt64Ty(cs), nullptr, "exceptionValue");
+        state.tag =
+            state.builder.CreateAlloca(llvm::StructType::getTypeByName(state.cs, "struct.rb_vm_tag"), nullptr, "ecTag");
         state.builder.restoreIP(ip);
 
         // Setup all the blocks we are going to need ahead of time.
         auto *currentFunc = state.currentFunc;
+        state.exceptionTagStack = llvm::BasicBlock::Create(cs, "exception-tag-stack", currentFunc);
         state.exceptionEntry = llvm::BasicBlock::Create(cs, "exception-entry", currentFunc);
         state.bodyReturn = llvm::BasicBlock::Create(cs, "exception-body-return", currentFunc);
         state.handlersBlock = llvm::BasicBlock::Create(cs, "exception-body-handlers", currentFunc);
@@ -75,7 +92,18 @@ public:
 
         // Store the last exception state
         state.previousException = state.builder.CreateCall(cs.getFunction("rb_errinfo"), {}, "previousException");
-        state.builder.CreateBr(state.exceptionEntry);
+        state.builder.CreateBr(state.exceptionTagStack);
+
+        // Call setjmp to record a point that we can unwind to.
+        // If we longjmp to this point, we are unwinding through the exception region
+        // and we need to ensure that we're going to execute the ensure handler.
+        state.builder.SetInsertPoint(state.exceptionTagStack);
+        state.undefFromRegion = state.builder.CreateCall(cs.getFunction("sorbet_rubyUndef"), {}, "undefValue");
+        state.tagState = state.builder.CreateCall(cs.getFunction("sorbet_initializeTag"), {state.tag}, "tagState");
+        // 0 here is doing double-duty as TAG_NONE but also representing a "normal" return
+        // from calling setjmp.
+        auto *longjmped = state.builder.CreateICmpNE(state.tagState, builder.getInt32(0));
+        builder.CreateCondBr(longjmped, state.ensureBlock, state.exceptionEntry);
 
         // Ensure we're not going to insert the phi nodes yet.
         state.builder.ClearInsertionPoint();
@@ -219,6 +247,10 @@ public:
         this->ensureFromBodyPhi->addIncoming(builder.getFalse(), this->handlersBlock);
         this->previousExceptionPhi->addIncoming(exceptionContext, this->handlersBlock);
 
+        this->ensureValuePhi->addIncoming(this->undefFromRegion, this->exceptionTagStack);
+        this->ensureFromBodyPhi->addIncoming(builder.getFalse(), this->exceptionTagStack);
+        this->previousExceptionPhi->addIncoming(this->previousException, this->exceptionTagStack);
+
         // The phi nodes are now completely constructed.
 
         // the handler didn't retry, run ensure and return its value.
@@ -230,9 +262,17 @@ public:
         auto *continueBlock = this->exceptionContinue;
         auto *returnBlock = this->exceptionReturn;
 
+        // However we got here, we are done with the entry on the tag stack that
+        // we pushed at the start of this process.
+        builder.CreateCall(this->cs.getFunction("sorbet_teardownTagForThrowReturn"), {this->tag});
+
         // Run the ensure block with whatever value we have produced by running
         // the body + applicable handlers.
         auto *ensureResult = sorbetEnsure(this->ensureValuePhi);
+
+        // We might have arrived at running the ensure via unwinding the call stack.
+        // Calling this function will handle resuming that unwind if necessary.
+        builder.CreateCall(this->cs.getFunction("sorbet_maybeContinueUnwind"), {this->tagState});
 
         // This compare+branch is a little subtle.  If we returned from the body,
         // running the ensure will choose the ensure's result (if it is not undef)
