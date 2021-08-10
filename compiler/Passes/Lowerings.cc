@@ -658,8 +658,7 @@ public:
         auto *sorbetGlobalConstDupHashFn = mod.getFunction("sorbet_globalConstDupHash");
         auto *sorbetSendFn = mod.getFunction("sorbet_i_send");
 
-        if (rbHashDupFn == nullptr || rbHashNewFn == nullptr || rbToHashTypeFn == nullptr ||
-            sorbetGlobalConstDupHashFn == nullptr || sorbetSendFn == nullptr) {
+        if (rbHashDupFn == nullptr || rbToHashTypeFn == nullptr || sorbetSendFn == nullptr) {
             return false;
         }
 
@@ -704,8 +703,14 @@ public:
                         continue;
                     }
 
-                    if (!detectLiteralHash(mod, sorbetGlobalConstDupHashFn, toHashCall) &&
-                        !detectPassThroughCase(mod, rbHashDupFn, rbHashNewFn, toHashCall)) {
+                    bool shouldRemoveDup = false;
+                    if (sorbetGlobalConstDupHashFn && detectLiteralHash(mod, sorbetGlobalConstDupHashFn, toHashCall)) {
+                        shouldRemoveDup = true;
+                    }
+                    if (rbHashNewFn && detectPassThroughCase(mod, rbHashDupFn, rbHashNewFn, toHashCall)) {
+                        shouldRemoveDup = true;
+                    }
+                    if (!shouldRemoveDup) {
                         continue;
                     }
 
