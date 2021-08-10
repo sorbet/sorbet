@@ -11,7 +11,7 @@ if ! command -v parallel &> /dev/null; then
   exit 1
 fi
 
-if [ $(uname -s) != Linux ] ; then
+if [ "$(uname -s)" != Linux ] ; then
   echo "This script can only be run on Linux"
   exit 1
 fi
