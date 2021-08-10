@@ -134,7 +134,7 @@ Every compiler test works like this:
 These Ruby file tests live in `test/testdata/`.
 
 Thus, it's very important to **print things** in tests. If a test doesn't print
-anything, then both the interpretted and compiled output will be empty and the
+anything, then both the interpreted and compiled output will be empty and the
 test will pass even if the compiler did something completely wrong.
 
 ### Verifying LLVM IR
