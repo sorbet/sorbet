@@ -2313,6 +2313,12 @@ void sorbet_throwReturn(VALUE retval) {
 // This is invoked at the beginning of a method's body, and is analogous to EC_PUSH_TAG + EC_EXEC_TAG
 // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L130-L135
 // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L181-L182
+//
+// Note that we're calling `setjmp` here, but we're returning from this function and
+// expecting `longjmp`'ing to `tag->buf` to still work correctly.  We can do this
+// because this function will be inlined, meaning that `tag->buf` will reflect the
+// state of this function's caller and `tag->buf` will be valid for the lifetime of
+// this function's caller.
 SORBET_INLINE
 enum ruby_tag_type sorbet_initializeTag(struct rb_vm_tag *tag) {
     rb_execution_context_t *ec = GET_EC();
