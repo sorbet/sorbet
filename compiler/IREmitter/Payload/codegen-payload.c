@@ -2401,6 +2401,17 @@ void sorbet_teardownTagForThrowReturn(struct rb_vm_tag *tag) {
 }
 KEEP_ALIVE(sorbet_teardownTagForThrowReturn)
 
+SORBET_INLINE
+void sorbet_maybeContinueUnwind(enum ruby_tag_type state) {
+    rb_execution_context_t *ec = GET_EC();
+
+    if (state != TAG_NONE) {
+        // inlined from rb_ec_tag_jump
+        ec->tag->state = state;
+        RUBY_LONGJMP(ec->tag->buf, 1);
+    }
+}
+
 // ****
 // ****                       sorbet_ruby version information fallback
 // ****
