@@ -93,6 +93,14 @@ module Opus::Types::Test
         x = T::Types::Simple::Private::Pool.type_for_module(m)
         assert_instance_of(T::Types::Simple, x)
       end
+
+      it 'does not add any instance variables to the module' do
+        m = Module.new
+        ivars = m.instance_variables
+
+        x = T::Types::Simple::Private::Pool.type_for_module(m)
+        assert_equal(ivars, m.instance_variables)
+      end
     end
 
     describe "Union" do
