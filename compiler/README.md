@@ -206,8 +206,8 @@ idea is that you should skim the diffs, make sure they look appropriate given
 what was meant to change, and then record the new exp files with this command:
 
 ```bash
-# Only reproducible if run on Linux, not macOS
-tools/scripts/update_exp_files.sh
+# Can only be run on Linux.
+tools/scripts/update_compiler_exp.sh
 ```
 
 The expectations files are somewhat platform dependent, so they must be recorded
