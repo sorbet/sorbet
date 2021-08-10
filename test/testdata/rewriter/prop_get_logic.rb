@@ -1,5 +1,7 @@
 # typed: strict
 
+class Chalk::ODM::Document; end
+
 class MyModel < Chalk::ODM::Document
 end
 
