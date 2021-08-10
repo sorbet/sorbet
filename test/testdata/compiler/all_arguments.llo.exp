@@ -15,7 +15,7 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 %struct.iseq_insn_info = type { %struct.iseq_insn_info_entry*, i32*, i32, %struct.succ_index_table* }
 %struct.iseq_insn_info_entry = type opaque
 %struct.succ_index_table = type opaque
-%struct.iseq_caught_table = type opaque
+%struct.iseq_catch_table = type opaque
 %union.iseq_inline_storage_entry = type { %struct.iseq_inline_cache_entry }
 %struct.iseq_inline_cache_entry = type { i64, %struct.rb_cref_struct*, i64 }
 %struct.rb_cref_struct = type { i64, i64, i64, %struct.rb_cref_struct*, %struct.rb_scope_visi_struct }
@@ -361,7 +361,7 @@ sorbet_readKWRestArgs.exit.thread:                ; preds = %33, %sorbet_getKWAr
   %send = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_inspect, i64 0), !dbg !21
   %51 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %cfp, i64 0, i32 1, !dbg !25
   %52 = load i64*, i64** %51, align 8, !dbg !25
-  store i64 %selfRaw, i64* %52, align 8, !dbg !25, !tbaa !4
+  store i64 %47, i64* %52, align 8, !dbg !25, !tbaa !4
   %53 = getelementptr inbounds i64, i64* %52, i64 1, !dbg !25
   store i64 %send, i64* %53, align 8, !dbg !25, !tbaa !4
   %54 = getelementptr inbounds i64, i64* %53, i64 1, !dbg !25
@@ -401,9 +401,9 @@ entry:
   %realpath = tail call i64 @sorbet_readRealpath()
   %0 = bitcast i64* %keywords.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %0)
-  %1 = bitcast i64* %keywords5.i to i8*
+  %1 = bitcast i64* %keywords11.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %1)
-  %2 = bitcast i64* %keywords11.i to i8*
+  %2 = bitcast i64* %keywords5.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %2)
   %3 = bitcast i64* %keywords17.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %3)
@@ -1255,28 +1255,6 @@ sorbet_setupParamKeywords.exit.i:                 ; preds = %159, %entry
   store i64 -19, i64* %390, align 8, !dbg !47, !tbaa !4
   %391 = getelementptr inbounds i64, i64* %390, i64 1, !dbg !47
   store i64* %391, i64** %383, align 8, !dbg !47
-  %send42 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_take_arguments.19, i64 0), !dbg !47
-  store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 30), i64** %117, align 8, !dbg !47, !tbaa !12
-  %rubyId_d812.i = load i64, i64* @rubyIdPrecomputed_d, align 8, !dbg !123
-  %rawSym813.i = call i64 @rb_id2sym(i64 %rubyId_d812.i) #10, !dbg !123
-  %rubyId_e815.i = load i64, i64* @rubyIdPrecomputed_e, align 8, !dbg !124
-  %rawSym816.i = call i64 @rb_id2sym(i64 %rubyId_e815.i) #10, !dbg !124
-  %rubyId_baz818.i = load i64, i64* @rubyIdPrecomputed_baz, align 8, !dbg !125
-  %rawSym819.i = call i64 @rb_id2sym(i64 %rubyId_baz818.i) #10, !dbg !125
-  %392 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %109, i64 0, i32 1, !dbg !48
-  %393 = load i64*, i64** %392, align 8, !dbg !48
-  store i64 %106, i64* %393, align 8, !dbg !48, !tbaa !4
-  %394 = getelementptr inbounds i64, i64* %393, i64 1, !dbg !48
-  %395 = getelementptr inbounds i64, i64* %394, i64 1, !dbg !48
-  %396 = getelementptr inbounds i64, i64* %395, i64 1, !dbg !48
-  %397 = getelementptr inbounds i64, i64* %396, i64 1, !dbg !48
-  %398 = bitcast i64* %394 to <4 x i64>*, !dbg !48
-  store <4 x i64> <i64 -1, i64 -15, i64 -17, i64 -19>, <4 x i64>* %398, align 8, !dbg !48, !tbaa !4
-  %399 = getelementptr inbounds i64, i64* %397, i64 1, !dbg !48
-  store i64* %399, i64** %392, align 8, !dbg !48
-  %send44 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_take_arguments.20, i64 0), !dbg !48
-  call void @llvm.lifetime.end.p0i8(i64 32, i8* nonnull %110)
-  call void @llvm.lifetime.end.p0i8(i64 24, i8* nonnull %111)
   ret void
 }
 
