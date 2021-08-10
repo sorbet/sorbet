@@ -80,12 +80,14 @@ for ext in "${exts[@]}"; do
       if ($llvm_diff_path "$exp" "$actual" 2>&1 || true) | "$ruby" "$diff_diff" > "$diff_out" ; then
         if grep "exists only in" "$diff_out" > /dev/null ; then
           cat "$diff_out"
+          info "If this was an expected difference, you need to run tools/scripts/update_compiler_exp.sh"
           fatal "* $(basename "$exp")"
         else
           success "* $(basename "$exp")"
         fi
       else
         cat "$diff_out"
+        info "If this was an expected difference, you need to run tools/scripts/update_compiler_exp.sh"
         fatal "* $(basename "$exp")"
       fi
     fi
