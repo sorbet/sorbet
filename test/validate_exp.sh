@@ -77,7 +77,9 @@ for ext in "${exts[@]}"; do
       # spurious errors from its output. This will also take over returning the
       # correct exit code if it discovers that all of the differences were
       # related to the bug.
-      if ($llvm_diff_path "$exp" "$actual" 2>&1 || true) | "$ruby" "$diff_diff" > "$diff_out" ; then
+      out="${diff_dir}/thing"
+      if ($llvm_diff_path "$exp" "$actual" 2>&1 || true) | tee "$out" | "$ruby" "$diff_diff" > "$diff_out" ; then
+        cat "$diff_out"
         if grep "exists only in" "$diff_out" > /dev/null ; then
           cat "$diff_out"
           info "If this was an expected difference, you need to run tools/scripts/update_compiler_exp.sh"
