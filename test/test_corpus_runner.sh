@@ -207,7 +207,7 @@ else
   filter_stderr < "$rberr" > "$rberr_filtered"
   filter_stderr < "$stderr" > "$stderr_filtered"
   if ! diff -au "$rberr_filtered" "$stderr_filtered" > stderr.diff; then
-    attn  "├─ Diff (interpretted vs compiled, filtered):"
+    attn  "├─ Diff (interpreted vs compiled, filtered):"
     < stderr.diff indent_and_nest
     attn  "├─ Full compiled output (except bazel paths shortened):"
     < "$stderr" shorten_bazel | indent_and_nest
@@ -224,9 +224,9 @@ else
   if [ -z "$expect_fail" ]; then
     echo ""
     success "Test passed."
-    info    "├─ stdout (interpretted):"
+    info    "├─ stdout (interpreted):"
     < "$rbout" indent_and_nest
-    info    "├─ stderr (interpretted):"
+    info    "├─ stderr (interpreted):"
     < "$rberr" shorten_bazel | indent_and_nest
     success "└─ 🎉"
 
@@ -236,9 +236,9 @@ else
     error  "Disabled test did not fail."
     info   "This could mean that a recent change has made this test start passing."
     info   "If that's the case, great! Please move this test out of the disabled folder to catch future regressions."
-    info   "├─ stdout (interpretted):"
+    info   "├─ stdout (interpreted):"
     < "$rbout" indent_and_nest
-    info   "├─ stderr (interpretted):"
+    info   "├─ stderr (interpreted):"
     < "$rberr" shorten_bazel | indent_and_nest
     error "└─ ❌"
 

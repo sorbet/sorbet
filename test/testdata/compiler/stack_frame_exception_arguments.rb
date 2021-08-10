@@ -26,10 +26,10 @@ rescue TypeError => exn
   # former crash we were seeing to happen.
   #
   # But the problem is that the backtrace information will necessarily have
-  # different information in interpretted vs compiled (because there's no
+  # different information in interpreted vs compiled (because there's no
   # runtime sig wrapping code). So the logic below basically says that "this
-  # code doesn't crash both when interpretted and when compiled," rather than
-  # "the interpretted and compiled behavior are identical"
+  # code doesn't crash both when interpreted and when compiled," rather than
+  # "the interpreted and compiled behavior are identical"
   first_line = exn.backtrace&.fetch(0)
   if first_line =~ /call_validation_error_handler_default/
     puts 'ok'
