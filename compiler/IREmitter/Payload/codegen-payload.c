@@ -147,11 +147,6 @@ SORBET_ALIVE(VALUE, sorbet_magic_mergeHashHelper, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_vm_getivar, (VALUE obj, ID id, struct iseq_inline_iv_cache_entry *cache));
 SORBET_ALIVE(void, sorbet_vm_setivar, (VALUE obj, ID id, VALUE val, struct iseq_inline_iv_cache_entry *cache));
 
-SORBET_ALIVE(enum ruby_tag_type, sorbet_initializeTag, (struct rb_vm_tag * tag));
-SORBET_ALIVE(VALUE, sorbet_processThrowReturnSetJmp,
-             (enum ruby_tag_type state, rb_control_frame_t *cfp, struct rb_vm_tag *tag));
-SORBET_ALIVE(void, sorbet_teardownTagForThrowReturn, (struct rb_vm_tag * tag));
-
 SORBET_ALIVE(void, sorbet_vm_register_sig,
              (VALUE isSelf, VALUE method, VALUE self, VALUE arg, rb_block_call_func_t block));
 SORBET_ALIVE(void, sorbet_vm_define_method,
@@ -2346,6 +2341,7 @@ enum ruby_tag_type sorbet_initializeTag(struct rb_vm_tag *tag) {
     // (i.e. a "abnormal" return from setjmp).
     return state;
 }
+KEEP_ALIVE(sorbet_initializeTag)
 
 // Used by method and static init functions, for setjmp handling for returns from block statements.
 //
@@ -2388,6 +2384,7 @@ VALUE sorbet_processThrowReturnSetJmp(enum ruby_tag_type state, rb_control_frame
 
     return retval;
 }
+KEEP_ALIVE(sorbet_processThrowReturnSetJmp)
 
 SORBET_INLINE
 void sorbet_teardownTagForThrowReturn(struct rb_vm_tag *tag) {
@@ -2396,6 +2393,7 @@ void sorbet_teardownTagForThrowReturn(struct rb_vm_tag *tag) {
     // inlined from EC_POP_TAG
     ec->tag = tag->prev;
 }
+KEEP_ALIVE(sorbet_teardownTagForThrowReturn)
 
 // ****
 // ****                       sorbet_ruby version information fallback
