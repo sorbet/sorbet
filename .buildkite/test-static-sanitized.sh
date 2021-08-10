@@ -35,6 +35,7 @@ mkdir -p _out_
   --experimental_generate_json_trace_profile --profile=_out_/profile.json \
   --test_tag_filters=-compiler \
   --build_tag_filters=-compiler \
+  --build_tests_only \
   @gems//... \
   //gems/sorbet/test/snapshot \
   //gems/sorbet/test/hidden-method-finder \
