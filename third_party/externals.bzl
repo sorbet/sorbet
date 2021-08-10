@@ -4,6 +4,13 @@ load("//third_party/cargo:crates.bzl", "raze_fetch_remote_crates")
 # We define our externals here instead of directly in WORKSPACE
 def register_sorbet_dependencies():
     http_archive(
+        name = "platforms",
+        urls = _github_public_urls("bazelbuild/platforms/archive/d4c9d7f51a7c403814b60f66d20eeb425fbaaacb.zip"),
+        sha256 = "a5058ac93023092c406432ec650f30ec5a8c75d8b9d13c73150f60a9050a5663",
+        strip_prefix = "platforms-d4c9d7f51a7c403814b60f66d20eeb425fbaaacb",
+    )
+
+    http_archive(
         name = "doctest",
         urls = _github_public_urls("onqtam/doctest/archive/7d42bd0fab6c44010c8aed9338bd02bea5feba41.zip"),
         sha256 = "b33c8e954d15a146bb744ca29f4ca204b955530f52b2f8a895746a99cee4f2df",
