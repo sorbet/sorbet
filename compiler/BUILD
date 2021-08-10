@@ -31,6 +31,5 @@ cc_binary(
 
 test_suite(
     name = "compiler",
-    tags = ["compiler"],
     tests = ["//test:compiler_oracle"],
 )

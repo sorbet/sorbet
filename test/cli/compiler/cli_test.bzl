@@ -46,7 +46,6 @@ def cli_tests(name, tests = [], tags = []):
     native.test_suite(
         name = name,
         tests = test_names,
-        tags = tags,
     )
 
 CliTestOutput = provider(fields = ["output_file"])
