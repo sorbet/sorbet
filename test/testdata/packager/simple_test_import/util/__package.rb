@@ -4,4 +4,5 @@
 
 class Project::Util < PackageSpec
   export Project::Util::MyUtil
+  export Test::Project::Util::UtilHelper
 end

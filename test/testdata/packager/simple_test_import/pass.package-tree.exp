@@ -20,6 +20,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C MyUtil> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1>::<C Project>::<C Util>::<C MyUtil>
     end
 
+    module <emptyTree>::<C Project_MainLib_Package$1>::<C Test>::<C Project>::<C Util><<C <todo sym>>> < ()
+      <emptyTree>::<C UtilHelper> = <emptyTree>::<C <PackageTests>>::<C Project_Util_Package$1>::<C Test>::<C Project>::<C Util>::<C UtilHelper>
+    end
+
     <emptyTree>::<C Project_MainLib_Package$1>::<C Project>::<C MainLib> = <emptyTree>::<C <PackageRegistry>>::<C Project_MainLib_Package$1>::<C Project>::<C MainLib>
   end
 end
@@ -64,6 +68,8 @@ end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Project>::<C Util><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1>::<C Project>::<C Util>::<C MyUtil>)
+
+    <self>.export(<emptyTree>::<C <PackageTests>>::<C Project_Util_Package$1>::<C Test>::<C Project>::<C Util>::<C UtilHelper>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
@@ -76,6 +82,12 @@ end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Project>::<C Util>::<C MyUtil><<C <todo sym>>> < (::<todo sym>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageTests>>::<C Project_Util_Package$1><<C <todo sym>>> < ()
+    class <emptyTree>::<C Test>::<C Project>::<C Util>::<C UtilHelper><<C <todo sym>>> < (::<todo sym>)
     end
   end
 end

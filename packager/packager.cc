@@ -284,9 +284,21 @@ ast::ExpressionPtr prependScope(ast::ExpressionPtr scope, ast::ExpressionPtr toP
     }
 }
 
-// Prefix a constant reference with a name: `Foo::Bar` -> `<PackageRegistry>::<name>::Foo::Bar`
+// Prefix a constant reference with a name: `Foo::Bar` -> `<REGISTRY>::<name>::Foo::Bar`
+// Registry is either <PackageRegistry> or <PackageTests>. The latter if following the convention
+// that if scope starts with `Test::`.
 ast::ExpressionPtr prependPackageScope(ast::ExpressionPtr scope, core::NameRef mangledName) {
-    return prependScope(move(scope), name2Expr(mangledName, name2Expr(core::Names::Constants::PackageRegistry())));
+    auto *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
+    ENFORCE(lastConstLit != nullptr);
+    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
+        lastConstLit = constLit;
+    }
+    core::NameRef registryName = core::Names::Constants::PackageRegistry();
+    if (lastConstLit->cnst == TEST_NAME) {
+        registryName = core::Names::Constants::PackageTests();
+    }
+    lastConstLit->scope = name2Expr(mangledName, name2Expr(registryName));
+    return scope;
 }
 
 ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
@@ -771,6 +783,10 @@ private:
             return lhs.first.show(ctx) < rhs.first.show(ctx);
         });
         for (auto const &[nameRef, child] : childPairs) {
+            // Ignore the entire `Test::*` part of import tree if we are not in a test context.
+            if (importType != ImportType::Test && parts.empty() && nameRef == TEST_NAME) {
+                continue;
+            }
             parts.emplace_back(nameRef);
             makeModule(ctx, child, parts, modRhs, importType, newParentSrc);
             parts.pop_back();
@@ -811,7 +827,7 @@ private:
         }
     }
 
-    ast::ExpressionPtr importModuleName(vector<core::NameRef> &parts, core::LocOffsets importLoc) {
+    ast::ExpressionPtr importModuleName(vector<core::NameRef> &parts, core::LocOffsets importLoc) const {
         ast::ExpressionPtr name = name2Expr(pkgMangledName);
         for (auto part = parts.begin(); part < parts.end() - 1; part++) {
             name = name2Expr(*part, move(name));
