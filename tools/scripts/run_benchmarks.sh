@@ -139,7 +139,7 @@ compile_benchmark() {
 
   rm tmp/bench/*
   cp "$benchmark" tmp/bench/target.rb
-  llvmir=. test/run_sorbet.sh tmp/bench/target.rb &>/dev/null
+  llvmir=. compiled_out_dir=. test/run_sorbet.sh tmp/bench/target.rb &>/dev/null
 }
 
 
