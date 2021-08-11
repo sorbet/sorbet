@@ -76,7 +76,7 @@ run_cmd() {{
     fi
 }}
 
-run_cmd sed -i.bak -e 's@^COMMONOBJS\( *\)=@COMMONOBJS\\1= {extra_srcs_object_files}@' common.mk
+run_cmd sed -i.bak -e 's@^COMMONOBJS\\( *\\)=@COMMONOBJS\\1= {extra_srcs_object_files}@' common.mk
 run_cmd rm -f common.mk.bak
 
 # This is a hack to get C level backtraces working. (The default autoconf test
@@ -129,7 +129,7 @@ find ccan -type d | while read dir; do
   mkdir -p "$internal_incdir/$dir"
 done
 
-find ccan -type f -name \*.h | while read file; do
+find ccan -type f -name \\*.h | while read file; do
   cp $file "$internal_incdir/$file"
 done
 
@@ -224,9 +224,10 @@ def _build_ruby_impl(ctx):
         for path in cc_info.compilation_context.system_includes.to_list():
             hdrs[path] = True
 
-        for lib in cc_info.linking_context.libraries_to_link.to_list():
-            libs[lib.dynamic_library.dirname] = True
-            deps[lib.dynamic_library] = True
+        for linker_input in cc_info.linking_context.linker_inputs.to_list():
+            for lib in linker_input.libraries:
+                libs[lib.dynamic_library.dirname] = True
+                deps[lib.dynamic_library] = True
 
     hdrs = hdrs.keys()
     libs = libs.keys()

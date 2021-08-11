@@ -90,8 +90,8 @@ load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
 
 bazel_version(name = "bazel_version")
 
-BAZEL_VERSION = "3.7.2"
+BAZEL_VERSION = "4.1.0"
 
-BAZEL_INSTALLER_VERSION_linux_SHA = "8416ff3900075ed588869a5b6dcc97844f56834e5a8344a2e27ec34a1eaf847e"
+BAZEL_INSTALLER_VERSION_linux_SHA = "e3f08054165be0a5e90779654b0e5c68d262ae794407d6347cdc6e8d05fafaaf"
 
-BAZEL_INSTALLER_VERSION_darwin_SHA = "add8392086e3bce99cd01deaf08199c25de0e8d9ef823207e6be47e35750f3ba"
+BAZEL_INSTALLER_VERSION_darwin_SHA = "fddad9367ed8e2687e8b52f5d8de29798de4cc2860d1c70e91128dcbc515d8ca"
