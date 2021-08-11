@@ -3,7 +3,6 @@ load("//third_party/cargo:crates.bzl", "raze_fetch_remote_crates")
 
 # We define our externals here instead of directly in WORKSPACE
 def register_sorbet_dependencies():
-
     # At some point the builtin @platforms package willbe removed, and we'll no longer be able to refer to
     # @platforms//os:macos etc. The long-term workaround for this is to depend directly on bazelbuild/platforms as
     # @platforms. See https://github.com/bazelbuild/bazel/issues/8622 for more information.
