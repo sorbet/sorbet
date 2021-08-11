@@ -1,5 +1,13 @@
 # typed: strict
 
+class Chalk::ODM::Document
+  include T::Props
+  include T::Props::Serializable
+  include T::Props::WeakConstructor
+  extend T::Helpers
+  abstract!
+end
+
 module Chalk::ODM
   DeprecatedNumeric = Numeric
 end

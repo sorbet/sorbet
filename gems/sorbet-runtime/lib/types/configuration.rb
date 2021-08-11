@@ -523,6 +523,16 @@ module T::Configuration
     @legacy_t_enum_migration_mode || false
   end
 
+  @prop_freeze_handler = ->(instance, prop_name) {}
+
+  def self.prop_freeze_handler=(handler)
+    @prop_freeze_handler = handler
+  end
+
+  def self.prop_freeze_handler
+    @prop_freeze_handler
+  end
+
   # @param [Array] sealed_violation_whitelist An array of Regexp to validate
   #   whether inheriting /including a sealed module outside the defining module
   #   should be allowed. Useful to whitelist benign violations, like shim files

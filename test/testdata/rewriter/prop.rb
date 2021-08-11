@@ -83,6 +83,13 @@ class ShardingProp
   merchant_prop
 end
 
+
+# Minimal stub of Chalk implementation to support encrypted_prop
+class Chalk::ODM::Document
+end
+class Opus::DB::Model::Mixins::Encryptable::EncryptedValue < Chalk::ODM::Document
+end
+
 class EncryptedProp
   include T::Props
   def self.encrypted_prop(opts={}); end

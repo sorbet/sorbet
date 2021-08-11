@@ -90,11 +90,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def foo=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :foo)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foo)
         <self>.instance_variable_set(:@foo, arg0)
       end
     end
@@ -151,11 +147,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def default=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :default)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :default)
         <self>.instance_variable_set(:@default, arg0)
       end
     end
@@ -177,11 +169,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def t_nilable=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :t_nilable)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :t_nilable)
         <self>.instance_variable_set(:@t_nilable, arg0)
       end
     end
@@ -203,11 +191,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def array=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :array)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :array)
         <self>.instance_variable_set(:@array, arg0)
       end
     end
@@ -229,11 +213,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def t_array=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :t_array)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :t_array)
         <self>.instance_variable_set(:@t_array, arg0)
       end
     end
@@ -255,11 +235,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def hash_of=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :hash_of)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :hash_of)
         <self>.instance_variable_set(:@hash_of, arg0)
       end
     end
@@ -322,11 +298,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def foreign=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :foreign)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign)
         <self>.instance_variable_set(:@foreign, arg0)
       end
     end
@@ -364,11 +336,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def foreign_lazy=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :foreign_lazy)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_lazy)
         <self>.instance_variable_set(:@foreign_lazy, arg0)
       end
     end
@@ -406,11 +374,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def foreign_proc=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :foreign_proc)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_proc)
         <self>.instance_variable_set(:@foreign_proc, arg0)
       end
     end
@@ -448,11 +412,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def foreign_invalid=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :foreign_invalid)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_invalid)
         <self>.instance_variable_set(:@foreign_invalid, arg0)
       end
     end
@@ -487,11 +447,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def ifunset=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :ifunset)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :ifunset)
         <self>.instance_variable_set(:@ifunset, arg0)
       end
     end
@@ -510,11 +466,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def ifunset_nilable=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :ifunset_nilable)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :ifunset_nilable)
         <self>.instance_variable_set(:@ifunset_nilable, arg0)
       end
     end
@@ -536,11 +488,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def empty_hash_rules=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :empty_hash_rules)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :empty_hash_rules)
         <self>.instance_variable_set(:@empty_hash_rules, arg0)
       end
     end
@@ -691,11 +639,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def token=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :token)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :token)
         <self>.instance_variable_set(:@token, arg0)
       end
     end
@@ -717,11 +661,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def created=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :created)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :created)
         <self>.instance_variable_set(:@created, arg0)
       end
     end
@@ -771,11 +711,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def token=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :token)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :token)
         <self>.instance_variable_set(:@token, arg0)
       end
     end
@@ -831,6 +767,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.merchant_prop(:without_accessors, true)
 
     ::Sorbet::Private::Static.keep_def(<self>, :merchant, :normal)
+  end
+
+  class <emptyTree>::<C Chalk>::<C ODM>::<C Document><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue><<C <todo sym>>> < (<emptyTree>::<C Chalk>::<C ODM>::<C Document>)
   end
 
   class <emptyTree>::<C EncryptedProp><<C <todo sym>>> < (::<todo sym>)

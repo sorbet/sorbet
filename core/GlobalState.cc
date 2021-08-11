@@ -309,8 +309,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::void_());
     id = synthesizeClass(core::Names::Constants::TypeAlias(), 0);
     ENFORCE(id == Symbols::typeAliasTemp());
-    id = synthesizeClass(core::Names::Constants::Chalk(), 0, true);
-    ENFORCE(id == Symbols::Chalk());
+    id = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::Configuration());
+    ENFORCE(id == Symbols::T_Configuration());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Generic());
     ENFORCE(id == Symbols::T_Generic());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Tuple());
@@ -424,12 +424,6 @@ void GlobalState::initEmpty() {
 
     id = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::NonForcingConstants());
     ENFORCE(id == Symbols::T_NonForcingConstants());
-
-    id = enterClassSymbol(Loc::none(), Symbols::Chalk(), Names::Constants::ODM());
-    ENFORCE(id == Symbols::Chalk_ODM());
-
-    id = enterClassSymbol(Loc::none(), Symbols::Chalk_ODM(), Names::Constants::DocumentDecoratorHelper());
-    ENFORCE(id == Symbols::Chalk_ODM_DocumentDecoratorHelper());
 
     method = enterMethod(*this, Symbols::Sorbet_Private_StaticSingleton(), Names::sig())
                  .arg(Names::arg0())
