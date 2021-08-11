@@ -90,7 +90,6 @@ public:
     bool isRBI() const;
     bool isStdlib() const;
     bool isPackage() const;
-    bool isTest() const;
 
     File(std::string &&path_, std::string &&source_, Type sourceType, u4 epoch = 0);
     File(File &&other) = delete;

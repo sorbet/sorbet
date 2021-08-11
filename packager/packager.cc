@@ -21,6 +21,10 @@ namespace {
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 constexpr core::NameRef TEST_NAME = core::Names::Constants::Test();
 
+bool isTestFile(core::File &file) {
+    return absl::EndsWith(file.path(), ".test.rb") || absl::StrContains(file.path(), "/test/");
+}
+
 struct FullyQualifiedName {
     vector<core::NameRef> parts;
     core::Loc loc;
@@ -1000,7 +1004,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                     if (file.sourceType == core::File::Type::Normal) {
                         core::Context ctx(gs, core::Symbols::root(), job.file);
                         if (auto pkg = constPkgDB.getPackageForContext(ctx)) {
-                            job = rewritePackagedFile(ctx, move(job), pkg->name.mangledName, pkg, file.isTest());
+                            job = rewritePackagedFile(ctx, move(job), pkg->name.mangledName, pkg, isTestFile(file));
                         } else {
                             // Don't transform, but raise an error on the first line.
                             if (auto e =

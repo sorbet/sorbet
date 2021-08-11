@@ -190,10 +190,6 @@ bool File::isPackage() const {
     return sourceType == File::Type::Package;
 }
 
-bool File::isTest() const {
-    return absl::EndsWith(path(), ".test.rb") || absl::StrContains(path(), "/test/"); // TODO do we need to pre-compute?
-}
-
 vector<int> &File::lineBreaks() const {
     ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
