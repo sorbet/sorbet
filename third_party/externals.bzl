@@ -1,5 +1,6 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 load("//third_party/cargo:crates.bzl", "raze_fetch_remote_crates")
+load("ruby_patches.bzl", "ruby_patches")
 
 # We define our externals here instead of directly in WORKSPACE
 def register_sorbet_dependencies():
@@ -360,14 +361,7 @@ package(default_visibility = ["//visibility:public"])
                 sha256 = sha256,
                 strip_prefix = strip_prefix,
                 build_file = ruby_patched_build,
-                # If you're trying to use `git diff` to generate this patch, pass the `--no-prefix` flag
-                # (Removes the `a/` and `b/` prefixes that `patch` doesn't understand.)
-                patches = [
-                    "@com_stripe_ruby_typer//third_party/ruby:gc-remove-write-barrier.patch",
-                    "@com_stripe_ruby_typer//third_party/ruby:vm-method-type-sorbet.patch",
-                    "@com_stripe_ruby_typer//third_party/ruby:is-lambda-ifunc.patch",
-                    "@com_stripe_ruby_typer//third_party/ruby:init-sorbet-t-modules.patch",
-                ],
+                patches = ruby_patches(),
                 patch_tool = "patch",
             )
         else:

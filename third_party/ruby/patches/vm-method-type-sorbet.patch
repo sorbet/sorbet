@@ -1,5 +1,5 @@
 diff --git class.c class.c
-index c866d1d..f290b5f 100644
+index c866d1d727..f290b5f522 100644
 --- class.c
 +++ class.c
 @@ -1757,6 +1757,12 @@ rb_define_singleton_method(VALUE obj, const char *name, VALUE (*func)(ANYARGS),
@@ -16,7 +16,7 @@ index c866d1d..f290b5f 100644
  #undef rb_define_module_function
  #endif
 diff --git gc.c gc.c
-index 73faf46..e41d057 100644
+index 73faf46b12..e41d05706f 100644
 --- gc.c
 +++ gc.c
 @@ -4902,6 +4902,7 @@ mark_method_entry(rb_objspace_t *objspace, const rb_method_entry_t *me)
@@ -44,7 +44,7 @@ index 73faf46..e41d057 100644
        case VM_METHOD_TYPE_MISSING:        return "missing";
        case VM_METHOD_TYPE_OPTIMIZED:      return "optimized";
 diff --git method.h method.h
-index b26caaa..842b85c 100644
+index b26caaa92d..842b85c158 100644
 --- method.h
 +++ method.h
 @@ -101,6 +101,7 @@ METHOD_ENTRY_FLAGS_COPY(rb_method_entry_t *dst, const rb_method_entry_t *src)
@@ -158,7 +158,7 @@ index b26caaa..842b85c 100644
  void rb_add_refined_method_entry(VALUE refined_class, ID mid);
  void rb_add_method(VALUE klass, ID mid, rb_method_type_t type, void *option, rb_method_visibility_t visi);
 diff --git proc.c proc.c
-index e189c20..d10ae0c 100644
+index e189c20886..d10ae0c4f4 100644
 --- proc.c
 +++ proc.c
 @@ -1067,6 +1067,22 @@ rb_iseq_min_max_arity(const rb_iseq_t *iseq, int *max)
@@ -340,7 +340,7 @@ index e189c20..d10ae0c 100644
      }
      return rb_iseq_parameters(iseq, 0);
 diff --git vm_backtrace.c vm_backtrace.c
-index f6b4e8e..1c4a7ff 100644
+index f6b4e8e1d6..1c4a7ff278 100644
 --- vm_backtrace.c
 +++ vm_backtrace.c
 @@ -1321,7 +1321,7 @@ rb_profile_frames(int start, int limit, VALUE *buff, int *lines)
@@ -362,7 +362,7 @@ index f6b4e8e..1c4a7ff 100644
  		    return NULL;
  		}
 diff --git vm_eval.c vm_eval.c
-index 76e56fa..52805d3 100644
+index 76e56fac8a..52805d317f 100644
 --- vm_eval.c
 +++ vm_eval.c
 @@ -105,6 +105,62 @@ vm_call0_cfunc(rb_execution_context_t *ec, struct rb_calling_info *calling, stru
@@ -439,7 +439,7 @@ index 76e56fa..52805d3 100644
          if (calling->kw_splat &&
                  calling->argc > 0 &&
 diff --git vm_insnhelper.c vm_insnhelper.c
-index c0d9092..824efb5 100644
+index c0d9092a67..824efb54bd 100644
 --- vm_insnhelper.c
 +++ vm_insnhelper.c
 @@ -1894,6 +1894,7 @@ static VALUE vm_call_method_each_type(rb_execution_context_t *ec, rb_control_fra
@@ -883,7 +883,7 @@ index c0d9092..824efb5 100644
          CALLER_SETUP_ARG(cfp, calling, ci);
          if (calling->argc == 1 && calling->kw_splat && RHASH_EMPTY_P(cfp->sp[-1])) {
 diff --git vm_method.c vm_method.c
-index 4504468..781feb6 100644
+index 4504468789..781feb6557 100644
 --- vm_method.c
 +++ vm_method.c
 @@ -145,6 +145,16 @@ rb_add_method_cfunc(VALUE klass, ID mid, VALUE (*func)(ANYARGS), int argc, rb_me
