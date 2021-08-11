@@ -873,11 +873,8 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
             }
         }
         importedPackages = treeBuilder.makeModule(ctx, ImportType::Normal);
-        testImportedPackages =
-            treeBuilder.makeModule(ctx, ImportType::Test); // TODO Also need to add alias for original pkg
-    }
+        testImportedPackages = treeBuilder.makeModule(ctx, ImportType::Test);
 
-    {
         // In the test namespace for this package add an alias to give tests full access to the
         // packaged code:
         // module <PackageTests>
