@@ -7,4 +7,4 @@
 # this manner wouldn't cause diff-diff.rb to report an error, so this exercises
 # that case to ensure that it's failing properly.
 
-puts "Hello!"
+puts __dir__
