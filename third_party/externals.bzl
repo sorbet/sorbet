@@ -361,14 +361,7 @@ package(default_visibility = ["//visibility:public"])
                 sha256 = sha256,
                 strip_prefix = strip_prefix,
                 build_file = ruby_patched_build,
-                # If you're trying to use `git diff` to generate this patch, pass the `--no-prefix` flag
-                # (Removes the `a/` and `b/` prefixes that `patch` doesn't understand.)
-                patches = [
-                    "@com_stripe_ruby_typer//third_party/ruby:gc-remove-write-barrier.patch",
-                    "@com_stripe_ruby_typer//third_party/ruby:vm-method-type-sorbet.patch",
-                    "@com_stripe_ruby_typer//third_party/ruby:is-lambda-ifunc.patch",
-                    "@com_stripe_ruby_typer//third_party/ruby:init-sorbet-t-modules.patch",
-                ],
+                patches = ["@com_stripe_ruby_typer//third_party/ruby:sorbet_ruby_2_7.patch"],
                 patch_tool = "patch",
             )
         else:

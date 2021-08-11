@@ -1,8 +1,42 @@
 diff --git class.c class.c
-index c866d1d..f290b5f 100644
+index c866d1d727..20def726c8 100644
 --- class.c
 +++ class.c
-@@ -1757,6 +1757,12 @@ rb_define_singleton_method(VALUE obj, const char *name, VALUE (*func)(ANYARGS),
+@@ -826,8 +826,7 @@ rb_include_class_new(VALUE module, VALUE super)
+ {
+     VALUE klass = class_alloc(T_ICLASS, rb_cClass);
+ 
+-    RCLASS_M_TBL(OBJ_WB_UNPROTECT(klass)) =
+-      RCLASS_M_TBL(OBJ_WB_UNPROTECT(module)); /* TODO: unprotected? */
++    RCLASS_M_TBL(klass) = RCLASS_M_TBL(module);
+ 
+     RCLASS_SET_ORIGIN(klass, module == RCLASS_ORIGIN(module) ? klass : RCLASS_ORIGIN(module));
+     if (BUILTIN_TYPE(module) == T_ICLASS) {
+@@ -964,13 +963,12 @@ move_refined_method(ID key, VALUE value, void *data)
+ 	    const rb_method_entry_t *orig_me = me->def->body.refined.orig_me, *new_me;
+ 	    RB_OBJ_WRITE(me, &me->def->body.refined.orig_me, NULL);
+ 	    new_me = rb_method_entry_clone(me);
+-	    rb_id_table_insert(tbl, key, (VALUE)new_me);
+-	    RB_OBJ_WRITTEN(klass, Qundef, new_me);
++            rb_method_table_insert(klass, tbl, key, new_me);
+ 	    rb_method_entry_copy(me, orig_me);
+ 	    return ID_TABLE_CONTINUE;
+ 	}
+ 	else {
+-	    rb_id_table_insert(tbl, key, (VALUE)me);
++            rb_method_table_insert(klass, tbl, key, me);
+ 	    return ID_TABLE_DELETE;
+ 	}
+     }
+@@ -985,7 +983,6 @@ ensure_origin(VALUE klass)
+     VALUE origin = RCLASS_ORIGIN(klass);
+     if (origin == klass) {
+ 	origin = class_alloc(T_ICLASS, klass);
+-	OBJ_WB_UNPROTECT(origin); /* TODO: conservative shading. Need more survey. */
+ 	RCLASS_SET_SUPER(origin, RCLASS_SUPER(klass));
+ 	RCLASS_SET_SUPER(klass, origin);
+ 	RCLASS_SET_ORIGIN(klass, origin);
+@@ -1757,6 +1754,12 @@ rb_define_singleton_method(VALUE obj, const char *name, VALUE (*func)(ANYARGS),
      rb_define_method(singleton_class_of(obj), name, func, argc);
  }
  
@@ -15,8 +49,22 @@ index c866d1d..f290b5f 100644
  #ifdef rb_define_module_function
  #undef rb_define_module_function
  #endif
+diff --git eval.c eval.c
+index 08f7ba97de..8665c45116 100644
+--- eval.c
++++ eval.c
+@@ -1412,8 +1412,7 @@ rb_using_refinement(rb_cref_t *cref, VALUE klass, VALUE module)
+     c = iclass = rb_include_class_new(module, superclass);
+     RB_OBJ_WRITE(c, &RCLASS_REFINED_CLASS(c), klass);
+ 
+-    RCLASS_M_TBL(OBJ_WB_UNPROTECT(c)) =
+-      RCLASS_M_TBL(OBJ_WB_UNPROTECT(module)); /* TODO: check unprotecting */
++    RCLASS_M_TBL(c) = RCLASS_M_TBL(module);
+ 
+     module = RCLASS_SUPER(module);
+     while (module && module != klass) {
 diff --git gc.c gc.c
-index 73faf46..e41d057 100644
+index 73faf46b12..e41d05706f 100644
 --- gc.c
 +++ gc.c
 @@ -4902,6 +4902,7 @@ mark_method_entry(rb_objspace_t *objspace, const rb_method_entry_t *me)
@@ -43,8 +91,20 @@ index 73faf46..e41d057 100644
        case VM_METHOD_TYPE_ZSUPER:         return "zsuper";
        case VM_METHOD_TYPE_MISSING:        return "missing";
        case VM_METHOD_TYPE_OPTIMIZED:      return "optimized";
+diff --git inits.c inits.c
+index 79a6cf014e..8596e416d7 100644
+--- inits.c
++++ inits.c
+@@ -77,6 +77,7 @@ rb_call_inits(void)
+     CALL(vm_trace);
+     CALL(pack);
+     CALL(warning);
++    CALL(Sorbet_T);
+     load_prelude();
+ }
+ #undef CALL
 diff --git method.h method.h
-index b26caaa..842b85c 100644
+index b26caaa92d..75cc5785d2 100644
 --- method.h
 +++ method.h
 @@ -101,6 +101,7 @@ METHOD_ENTRY_FLAGS_COPY(rb_method_entry_t *dst, const rb_method_entry_t *src)
@@ -146,7 +206,16 @@ index b26caaa..842b85c 100644
          rb_method_attr_t attr;
          rb_method_alias_t alias;
          rb_method_refined_t refined;
-@@ -189,6 +267,10 @@ STATIC_ASSERT(sizeof_method_def, offsetof(rb_method_definition_t, body)==8);
+@@ -180,6 +258,8 @@ struct rb_method_definition_struct {
+     uintptr_t method_serial;
+ };
+ 
++struct rb_id_table;
++
+ typedef struct rb_method_definition_struct rb_method_definition_t;
+ STATIC_ASSERT(sizeof_method_def, offsetof(rb_method_definition_t, body)==8);
+ 
+@@ -189,6 +269,10 @@ STATIC_ASSERT(sizeof_method_def, offsetof(rb_method_definition_t, body)==8);
       UNDEFINED_METHOD_ENTRY_P((def)->body.refined.orig_me))
  
  void rb_add_method_cfunc(VALUE klass, ID mid, VALUE (*func)(ANYARGS), int argc, rb_method_visibility_t visi);
@@ -157,8 +226,17 @@ index b26caaa..842b85c 100644
  void rb_add_method_iseq(VALUE klass, ID mid, const rb_iseq_t *iseq, rb_cref_t *cref, rb_method_visibility_t visi);
  void rb_add_refined_method_entry(VALUE refined_class, ID mid);
  void rb_add_method(VALUE klass, ID mid, rb_method_type_t type, void *option, rb_method_visibility_t visi);
+@@ -222,6 +306,8 @@ const rb_method_entry_t *rb_method_entry_clone(const rb_method_entry_t *me);
+ const rb_callable_method_entry_t *rb_method_entry_complement_defined_class(const rb_method_entry_t *src_me, ID called_id, VALUE defined_class);
+ void rb_method_entry_copy(rb_method_entry_t *dst, const rb_method_entry_t *src);
+ 
++void rb_method_table_insert(VALUE klass, struct rb_id_table *table, ID method_id, const rb_method_entry_t *me);
++
+ void rb_scope_visibility_set(rb_method_visibility_t);
+ 
+ VALUE rb_unnamed_parameters(int arity);
 diff --git proc.c proc.c
-index e189c20..d10ae0c 100644
+index e189c20886..d10ae0c4f4 100644
 --- proc.c
 +++ proc.c
 @@ -1067,6 +1067,22 @@ rb_iseq_min_max_arity(const rb_iseq_t *iseq, int *max)
@@ -339,8 +417,30 @@ index e189c20..d10ae0c 100644
  	return rb_unnamed_parameters(method_arity(method));
      }
      return rb_iseq_parameters(iseq, 0);
+diff --git vm.c vm.c
+index fc144be5b6..d52fd4a297 100644
+--- vm.c
++++ vm.c
+@@ -1138,7 +1138,7 @@ invoke_block_from_c_bh(rb_execution_context_t *ec, VALUE block_handler,
+       case block_handler_type_ifunc:
+ 	return vm_yield_with_cfunc(ec, VM_BH_TO_IFUNC_BLOCK(block_handler),
+ 				   VM_BH_TO_IFUNC_BLOCK(block_handler)->self,
+-                                   argc, argv, kw_splat, passed_block_handler, NULL);
++                                   argc, argv, kw_splat, passed_block_handler, is_lambda, NULL, FALSE);
+       case block_handler_type_symbol:
+ 	return vm_yield_with_symbol(ec, VM_BH_TO_SYMBOL(block_handler),
+ 				    argc, argv, kw_splat, passed_block_handler);
+@@ -1219,7 +1219,7 @@ invoke_block_from_c_proc(rb_execution_context_t *ec, const rb_proc_t *proc,
+             argc--;
+             kw_splat = 2;
+         }
+-        return vm_yield_with_cfunc(ec, &block->as.captured, self, argc, argv, kw_splat, passed_block_handler, me);
++        return vm_yield_with_cfunc(ec, &block->as.captured, self, argc, argv, kw_splat, passed_block_handler, is_lambda, me, FALSE);
+       case block_type_symbol:
+ 	return vm_yield_with_symbol(ec, block->as.symbol, argc, argv, kw_splat, passed_block_handler);
+       case block_type_proc:
 diff --git vm_backtrace.c vm_backtrace.c
-index f6b4e8e..1c4a7ff 100644
+index f6b4e8e1d6..1c4a7ff278 100644
 --- vm_backtrace.c
 +++ vm_backtrace.c
 @@ -1321,7 +1321,7 @@ rb_profile_frames(int start, int limit, VALUE *buff, int *lines)
@@ -362,7 +462,7 @@ index f6b4e8e..1c4a7ff 100644
  		    return NULL;
  		}
 diff --git vm_eval.c vm_eval.c
-index 76e56fa..52805d3 100644
+index 76e56fac8a..52805d317f 100644
 --- vm_eval.c
 +++ vm_eval.c
 @@ -105,6 +105,62 @@ vm_call0_cfunc(rb_execution_context_t *ec, struct rb_calling_info *calling, stru
@@ -439,7 +539,7 @@ index 76e56fa..52805d3 100644
          if (calling->kw_splat &&
                  calling->argc > 0 &&
 diff --git vm_insnhelper.c vm_insnhelper.c
-index c0d9092..824efb5 100644
+index c0d9092a67..a891794d0a 100644
 --- vm_insnhelper.c
 +++ vm_insnhelper.c
 @@ -1894,6 +1894,7 @@ static VALUE vm_call_method_each_type(rb_execution_context_t *ec, rb_control_fra
@@ -882,11 +982,122 @@ index c0d9092..824efb5 100644
        case VM_METHOD_TYPE_ATTRSET:
          CALLER_SETUP_ARG(cfp, calling, ci);
          if (calling->argc == 1 && calling->kw_splat && RHASH_EMPTY_P(cfp->sp[-1])) {
+@@ -3182,14 +3594,17 @@ static VALUE
+ vm_yield_with_cfunc(rb_execution_context_t *ec,
+ 		    const struct rb_captured_block *captured,
+                     VALUE self, int argc, const VALUE *argv, int kw_splat, VALUE block_handler,
+-                    const rb_callable_method_entry_t *me)
++                    int is_lambda, const rb_callable_method_entry_t *me, bool args_on_stack)
+ {
+-    int is_lambda = FALSE; /* TODO */
++    /* is_lambda = FALSE; */ /* Unpatched VM hard-wires this to FALSE. We take it as an arg. */
+     VALUE val, arg, blockarg;
+     int frame_flag;
+     const struct vm_ifunc *ifunc = captured->code.ifunc;
+ 
+-    if (is_lambda) {
++    /* In the unpatched VM, is_lambda is hard-wired to FALSE, so this boxing never actually
++       happens. Now that we plumb is_lambda in from the caller, letting the boxing happen causes
++       GC assertions in Ruby's test suite. Not sure why this happens. */
++    if (0 /*is_lambda*/) {
+ 	arg = rb_ary_new4(argc, argv);
+     }
+     else if (argc == 0) {
+@@ -3201,7 +3616,7 @@ vm_yield_with_cfunc(rb_execution_context_t *ec,
+ 
+     blockarg = rb_vm_bh_to_procval(ec, block_handler);
+ 
+-    frame_flag = VM_FRAME_MAGIC_IFUNC | VM_FRAME_FLAG_CFRAME | (me ? VM_FRAME_FLAG_BMETHOD : 0);
++    frame_flag = VM_FRAME_MAGIC_IFUNC | VM_FRAME_FLAG_CFRAME | (me ? VM_FRAME_FLAG_BMETHOD : 0) | (is_lambda ? VM_FRAME_FLAG_LAMBDA : 0);
+     switch (kw_splat) {
+       case 1:
+         frame_flag |= VM_FRAME_FLAG_CFRAME_KW;
+@@ -3216,7 +3631,7 @@ vm_yield_with_cfunc(rb_execution_context_t *ec,
+ 		  self,
+ 		  VM_GUARDED_PREV_EP(captured->ep),
+                   (VALUE)me,
+-		  0, ec->cfp->sp, 0, 0);
++		  0, ec->cfp->sp + (args_on_stack ? argc : 0), 0, 0);
+     val = (*ifunc->func)(arg, (VALUE)ifunc->data, argc, argv, blockarg);
+     rb_vm_pop_frame(ec);
+ 
+@@ -3364,7 +3779,7 @@ vm_invoke_symbol_block(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp,
+ static VALUE
+ vm_invoke_ifunc_block(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp,
+ 		      struct rb_calling_info *calling, const struct rb_call_info *ci,
+-		      const struct rb_captured_block *captured)
++		      int is_lambda, const struct rb_captured_block *captured)
+ {
+     VALUE val;
+     int argc;
+@@ -3378,8 +3793,19 @@ vm_invoke_ifunc_block(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp,
+         kw_splat = calling->kw_splat;
+     }
+     argc = calling->argc;
+-    val = vm_yield_with_cfunc(ec, captured, captured->self, argc, STACK_ADDR_FROM_TOP(argc), kw_splat, calling->block_handler, NULL);
+-    POPN(argc); /* TODO: should put before C/yield? */
++    const VALUE *argv = STACK_ADDR_FROM_TOP(argc);
++    /*
++     * In sorbet_ruby we move this POPN above vm_yield_call_with_cfunc, so that
++     * if compiled code for a block uses EC_JUMP_TAG, the state will be in the
++     * expected state.
++     *
++     * We pass "args_on_stack = TRUE" to vm_yield_with_cfunc to push the
++     * initial stack pointer of the callee frame past the arguments, since it
++     * still needs to be able to read them.
++     */
++    POPN(argc);
++    bool args_on_stack = TRUE;
++    val = vm_yield_with_cfunc(ec, captured, captured->self, argc, argv, kw_splat, calling->block_handler, is_lambda, NULL, args_on_stack);
+     return val;
+ }
+ 
+@@ -3418,7 +3844,7 @@ vm_invoke_block(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp,
+       case block_handler_type_ifunc:
+ 	{
+ 	    const struct rb_captured_block *captured = VM_BH_TO_IFUNC_BLOCK(block_handler);
+-	    return vm_invoke_ifunc_block(ec, reg_cfp, calling, ci, captured);
++	    return vm_invoke_ifunc_block(ec, reg_cfp, calling, ci, is_lambda, captured);
+ 	}
+       case block_handler_type_proc:
+ 	is_lambda = block_proc_is_lambda(VM_BH_TO_PROC(block_handler));
 diff --git vm_method.c vm_method.c
-index 4504468..781feb6 100644
+index 4504468789..948eedf359 100644
 --- vm_method.c
 +++ vm_method.c
-@@ -145,6 +145,16 @@ rb_add_method_cfunc(VALUE klass, ID mid, VALUE (*func)(ANYARGS), int argc, rb_me
+@@ -116,6 +116,31 @@ rb_clear_method_cache_by_class(VALUE klass)
+     }
+ }
+ 
++void
++rb_method_table_insert(VALUE klass, struct rb_id_table *table, ID method_id, const rb_method_entry_t *me)
++{
++    VALUE table_owner = klass;
++    if (RB_TYPE_P(klass, T_ICLASS) && !FL_TEST(klass, RICLASS_IS_ORIGIN)) {
++        bool owner_found = false;
++        VALUE owner = RBASIC(klass)->klass;
++        // Loop in case the owning class has prepended modules
++        while (owner) {
++            if (RCLASS_M_TBL(owner) == table) {
++                owner_found = true;
++                break;
++            }
++            owner = RCLASS_SUPER(owner);
++        }
++        if (!owner_found) rb_bug("failed to find method table owner");
++        table_owner = owner;
++    }
++
++    VM_ASSERT(RB_TYPE_P(table_owner, T_CLASS) || RB_TYPE_P(table_owner, T_ICLASS) || RB_TYPE_P(table_owner, T_MODULE));
++    VM_ASSERT(table == RCLASS_M_TBL(table_owner));
++    rb_id_table_insert(table, method_id, (VALUE)me);
++    RB_OBJ_WRITTEN(table_owner, Qundef, (VALUE)me);
++}
++
+ VALUE
+ rb_f_notimplement(int argc, const VALUE *argv, VALUE obj, VALUE marker)
+ {
+@@ -145,6 +170,16 @@ rb_add_method_cfunc(VALUE klass, ID mid, VALUE (*func)(ANYARGS), int argc, rb_me
      }
  }
  
@@ -903,7 +1114,7 @@ index 4504468..781feb6 100644
  static void
  rb_method_definition_release(rb_method_definition_t *def, int complemented)
  {
-@@ -228,6 +238,14 @@ setup_method_cfunc_struct(rb_method_cfunc_t *cfunc, VALUE (*func)(), int argc)
+@@ -228,6 +263,14 @@ setup_method_cfunc_struct(rb_method_cfunc_t *cfunc, VALUE (*func)(), int argc)
      cfunc->invoker = call_cfunc_invoker_func(argc);
  }
  
@@ -918,7 +1129,7 @@ index 4504468..781feb6 100644
  MJIT_FUNC_EXPORTED void
  rb_method_definition_set(const rb_method_entry_t *me, rb_method_definition_t *def, void *opts)
  {
-@@ -261,6 +279,12 @@ rb_method_definition_set(const rb_method_entry_t *me, rb_method_definition_t *de
+@@ -261,6 +304,12 @@ rb_method_definition_set(const rb_method_entry_t *me, rb_method_definition_t *de
  		setup_method_cfunc_struct(UNALIGNED_MEMBER_PTR(def, body.cfunc), cfunc->func, cfunc->argc);
  		return;
  	    }
@@ -931,7 +1142,7 @@ index 4504468..781feb6 100644
  	  case VM_METHOD_TYPE_ATTRSET:
  	  case VM_METHOD_TYPE_IVAR:
  	    {
-@@ -340,6 +364,7 @@ method_definition_reset(const rb_method_entry_t *me)
+@@ -340,6 +389,7 @@ method_definition_reset(const rb_method_entry_t *me)
        case VM_METHOD_TYPE_OPTIMIZED:
        case VM_METHOD_TYPE_UNDEF:
        case VM_METHOD_TYPE_NOTIMPLEMENTED:
@@ -939,7 +1150,25 @@ index 4504468..781feb6 100644
  	break;
      }
  }
-@@ -1530,6 +1555,8 @@ rb_method_definition_eq(const rb_method_definition_t *d1, const rb_method_defini
+@@ -638,8 +688,7 @@ rb_method_entry_make(VALUE klass, ID mid, VALUE defined_class, rb_method_visibil
+ 	make_method_entry_refined(klass, me);
+     }
+ 
+-    rb_id_table_insert(mtbl, mid, (VALUE)me);
+-    RB_OBJ_WRITTEN(klass, Qundef, (VALUE)me);
++    rb_method_table_insert(klass, mtbl, mid, me);
+ 
+     VM_ASSERT(me->def != NULL);
+ 
+@@ -863,6 +912,7 @@ prepare_callable_method_entry(VALUE defined_class, ID id, const rb_method_entry_
+ 	    }
+ 	    cme = rb_method_entry_complement_defined_class(me, me->called_id, defined_class);
+ 	    rb_id_table_insert(mtbl, id, (VALUE)cme);
++            RB_OBJ_WRITTEN(defined_class, Qundef, (VALUE)cme);
+ 	    VM_ASSERT(callable_method_entry_p(cme));
+ 	}
+     }
+@@ -1530,6 +1580,8 @@ rb_method_definition_eq(const rb_method_definition_t *d1, const rb_method_defini
  	return 1;
        case VM_METHOD_TYPE_OPTIMIZED:
  	return d1->body.optimize_type == d2->body.optimize_type;
@@ -948,7 +1177,7 @@ index 4504468..781feb6 100644
        case VM_METHOD_TYPE_REFINED:
        case VM_METHOD_TYPE_ALIAS:
  	break;
-@@ -1564,6 +1591,8 @@ rb_hash_method_definition(st_index_t hash, const rb_method_definition_t *def)
+@@ -1564,6 +1616,8 @@ rb_hash_method_definition(st_index_t hash, const rb_method_definition_t *def)
  	return hash;
        case VM_METHOD_TYPE_OPTIMIZED:
  	return rb_hash_uint(hash, def->body.optimize_type);
