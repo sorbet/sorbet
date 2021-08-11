@@ -97,7 +97,6 @@ for ext in "${exts[@]}"; do
       # spurious errors from its output. This will also take over returning the
       # correct exit code if it discovers that all of the differences were
       # related to the bug.
-      passed=
       if ($llvm_diff_path "$exp" "$actual" 2>&1 || true) | "$ruby" "$diff_diff" > "$diff_out" ; then
         if grep "exists only in" "$diff_out" > /dev/null ; then
           cat "$diff_out"
