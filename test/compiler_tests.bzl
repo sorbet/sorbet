@@ -120,6 +120,7 @@ def compiler_tests(suite_name, all_paths, extra_args = [], tags = []):
                 name = validate_exp,
                 srcs = sources_name,
                 exp_files = exps_name,
+                expected_failure = tests[name]["disabled"],
                 extension = extension,
                 tags = tags + extra_tags,
                 size = "small",
@@ -335,13 +336,14 @@ def _validate_exp_test_impl(ctx):
 
         cat "{sorbet_log}"
 
-        {validate_exp} --build_dir="{build_dir}" {sources}
+        {validate_exp} --build_dir="{build_dir}" --expected_failure="{expected_failure}" {sources}
         """.format(
             build_log = output.log.short_path,
             sorbet_log = output.stdout.short_path,
             validate_exp = ctx.executable._validate_exp.short_path,
             build_dir = output.build.short_path,
             sources = " ".join([file.short_path for file in ctx.files.srcs]),
+            expected_failure = ctx.attr.expected_failure,
         ),
         is_executable = True,
     )
@@ -357,6 +359,9 @@ validate_exp_test = rule(
         ),
         "exp_files": attr.label(
             mandatory = True,
+        ),
+        "expected_failure": attr.bool(
+            default = False,
         ),
         "extension": attr.label(
             mandatory = True,
