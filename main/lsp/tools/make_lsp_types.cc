@@ -134,6 +134,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto DiagnosticSeverity =
         makeIntEnum("DiagnosticSeverity", {{"Error", 1}, {"Warning", 2}, {"Information", 3}, {"Hint", 4}}, enumTypes);
 
+    auto DiagnosticTag = makeIntEnum("DiagnosticTag", {{"Unnecessary", 1}, {"Deprecated", 2}}, enumTypes);
+
     auto Diagnostic =
         makeObject("Diagnostic",
                    {
@@ -143,6 +145,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        makeField("source", makeOptional(JSONString)),
                        makeField("message", JSONString),
                        makeField("relatedInformation", makeOptional(makeArray(DiagnosticRelatedInformation))),
+                       makeField("tags", makeOptional(makeArray(DiagnosticTag))),
                    },
                    classTypes, {"std::unique_ptr<Diagnostic> copy() const;"});
 
@@ -1287,7 +1290,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        "// Contains the number of individual edit messages merged into this edit.",
                        "u4 mergeCount = 0;",
                        "// Used in multithreaded tests to wait for a cancellation to occur when processing this edit.",
-                       "bool sorbetCancellationExpected = false;"
+                       "bool sorbetCancellationExpected = false;",
                        "// Used in multithreaded tests to wait for a preemption to occur when processing this edit.",
                        "int sorbetPreemptionsExpected = 0;",
                        "// For each edit rolled up into update, contains a timer used to report diagnostic latency.",

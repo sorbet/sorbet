@@ -162,6 +162,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         } else if (unreachableInstruction == nullptr) {
                             unreachableInstruction = expr.value.get();
                             locForUnreachable = expr.loc;
+                        } else {
+                            locForUnreachable = locForUnreachable.join(expr.loc);
                         }
                     }
                 }

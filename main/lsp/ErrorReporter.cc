@@ -1,4 +1,5 @@
 #include "main/lsp/ErrorReporter.h"
+#include "core/errors/infer.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
@@ -124,6 +125,11 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
 
         auto diagnostic = make_unique<Diagnostic>(std::move(range), error->header);
         diagnostic->code = error->what.code;
+        if (error->what.code == sorbet::core::errors::Infer::DeadBranchInferencer.code) {
+            vector<DiagnosticTag> tags;
+            tags.push_back(DiagnosticTag::Unnecessary);
+            diagnostic->tags = move(tags);
+        }
         diagnostic->severity = DiagnosticSeverity::Error;
 
         if (!error->autocorrects.empty()) {
