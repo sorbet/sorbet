@@ -146,24 +146,66 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
     return OrType::make_shared(move(remainingTypes), underlying(gs, t2));
 }
 
-TypePtr lubDistributeOrSquared(const GlobalState &gs, const TypePtr &o1, const TypePtr &t2) {
+TypePtr lubDistributeOrSquared(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+    auto o1 = cast_type_nonnull<OrType>(t1);
+    InlinedVector<TypePtr, 4> original1OrComponents;
+    fillInOrComponents(original1OrComponents, o1.left);
+    fillInOrComponents(original1OrComponents, o1.right);
+
     auto o2 = cast_type_nonnull<OrType>(t2);
     InlinedVector<TypePtr, 4> original2OrComponents;
     fillInOrComponents(original2OrComponents, o2.left);
     fillInOrComponents(original2OrComponents, o2.right);
 
-    TypePtr combined = o1;
-    for (const TypePtr &component : original2OrComponents) {
-        if (isa_type<OrType>(combined)) {
-            TypePtr combined2 = lubDistributeOr(gs, combined, component);
-            combined = move(combined2);
-        } else {
-            // TODO: When do we hit this case?
-            TypePtr combined2 = Types::lub(gs, combined, component);
-            combined = move(combined2);
+    InlinedVector<TypePtr, 4> types1Consumed;
+    InlinedVector<TypePtr, 4> types2Consumed;
+
+    for (const TypePtr &o2Component : original2OrComponents) {
+        auto nextT1Consumed = types1Consumed.begin();
+        for (const TypePtr &o1Component : original1OrComponents) {
+            // Ignore components that have been consumed.
+            // We take advantage of the fact that types1Consumed is in the same order as original1OrComponents.
+            if (nextT1Consumed != types1Consumed.end() && *nextT1Consumed == o1Component) {
+                nextT1Consumed++;
+                continue;
+            }
+
+            auto lubbed = Types::any(gs, o1Component, o2Component);
+            if (lubbed == o1Component) {
+                // lubbed == o1Component, so o2Component <: o1Component and t2 <: t1
+                // Thus, we don't need to include o2Component in the final OrType; it's subsumed by t1.
+                types2Consumed.emplace_back(o2Component);
+                // We don't have to iterate over any more o1Components to find a match for o2.
+                break;
+            } else if (lubbed == o2Component) {
+                // lubbed == o2Component, so o1Component <: t2
+                // Thus, we don't need to include o1Component in the final OrType; it's subsumed by t2.
+                types1Consumed.emplace_back(o1Component);
+            }
         }
     }
-    return combined;
+
+    if (types1Consumed.empty() && types2Consumed.empty()) {
+        categoryCounterInc("lubDistributeOrSquared.outcome", "worst");
+        return OrType::make_shared(t1, underlying(gs, t2));
+    }
+
+    if (types2Consumed.size() == original2OrComponents.size()) {
+        categoryCounterInc("lubDistributeOrSquared.outcome", "t1");
+        // t2 <: t1
+        return t1;
+    }
+
+    if (types1Consumed.size() == original1OrComponents.size()) {
+        categoryCounterInc("lubDistributeOrSquared.outcome", "t2");
+        // t1 <: t2
+        return t2;
+    }
+
+    categoryCounterInc("lubDistributeOr.outcome", "consumedComponent");
+    auto t1Filtered = filterOrComponents(t1, types1Consumed);
+    auto t2Filtered = filterOrComponents(t2, types2Consumed);
+    return OrType::make_shared(t1Filtered, t2Filtered);
 }
 
 TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
