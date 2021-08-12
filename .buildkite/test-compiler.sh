@@ -29,7 +29,7 @@ echo "--- building ruby with gcc"
 ./bazel build @sorbet_ruby_2_7//:ruby --crosstool_top=@bazel_tools//tools/cpp:toolchain
 
 echo "+++ running tests"
-./bazel test //test //test:compiler //test/cli/compiler \
+./bazel test //test:compiler //test/cli/compiler \
   --config=dbg \
   -c opt \
   --test_summary=terse \
