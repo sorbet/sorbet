@@ -40,7 +40,7 @@ echo "--- uploading test results"
 rm -rf _tmp_
 mkdir -p _tmp_/log/junit/
 
-./bazel query '(tests(//test) + tests(//test:compiler) + tests(//test/cli/compiler)) except attr("tags", "manual", //...)' | \
+./bazel query '(tests(//test:compiler) + tests(//test/cli/compiler)) except attr("tags", "manual", //...)' | \
   while read -r line; do
     path="${line/://}"
     path="${path#//}"
