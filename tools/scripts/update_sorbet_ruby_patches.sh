@@ -45,7 +45,7 @@ rm -rf "$sorbet_repo_root/third_party/ruby/patches"
 mkdir -p "$sorbet_repo_root/third_party/ruby/patches"
 
 for patch in "${patches[@]}"; do
-  echo "Renerating $patch.patch from branch sorbet/$patch..."
+  echo "Regenerating $patch.patch from branch sorbet/$patch..."
   git diff --no-prefix v2_7_2 "origin/sorbet/$patch" > "$sorbet_repo_root/third_party/ruby/patches/$patch.patch"
 done
 
