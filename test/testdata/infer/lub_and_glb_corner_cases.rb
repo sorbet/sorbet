@@ -86,7 +86,14 @@ module Main
   T2 = T.type_alias{T.all(Cat, Dog)}
   T3 = T.type_alias{T.any(T1, T2)}
 
+
+  module Boolean
+  end
+  T4 = T.type_alias{T.any(T.all(Boolean, T.nilable(FalseClass)), T.all(Boolean, NilClass), T.all(Boolean, NilClass), T.all(Boolean, NilClass), T.all(Boolean, T.nilable(FalseClass)), FalseClass, T.all(Boolean, NilClass), TrueClass)}
+
   def equivalent_and_types_lub
     T.reveal_type(T3) # error: Revealed type: `<Type: T.all(Main::Cat, Main::Dog)>`
+    T.reveal_type(T4) # error: Revealed type: `<Type: T.any(T.all(Main::Boolean, T.nilable(FalseClass)), T.all(Main::Boolean, NilClass), FalseClass, TrueClass)>`
   end
+  
 end
