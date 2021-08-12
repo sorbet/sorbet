@@ -10,6 +10,34 @@ namespace sorbet::core {
 
 using namespace std;
 
+namespace {
+bool compositeTypeEquivalent(const OrType &o1, const OrType &o2);
+bool compositeTypeEquivalent(const AndType &a1, const AndType &a2);
+bool compositeTypeEquivalent(const TypePtr &t1, const TypePtr &t2) {
+    if (t1 == t2) {
+        return true;
+    }
+    if (t1.tag() != t2.tag()) {
+        return false;
+    }
+    // t1 and t2 are the same kind of type.
+    if (isa_type<OrType>(t1)) {
+        return compositeTypeEquivalent(cast_type_nonnull<OrType>(t1), cast_type_nonnull<OrType>(t2));
+    }
+    if (isa_type<AndType>(t2)) {
+        return compositeTypeEquivalent(cast_type_nonnull<AndType>(t1), cast_type_nonnull<AndType>(t2));
+    }
+    return false;
+}
+
+bool compositeTypeEquivalent(const AndType &a1, const AndType &a2) {
+    return compositeTypeEquivalent(a1.left, a2.left) && compositeTypeEquivalent(a1.right, a2.right);
+}
+bool compositeTypeEquivalent(const OrType &o1, const OrType &o2) {
+    return compositeTypeEquivalent(o1.left, o2.left) && compositeTypeEquivalent(o1.right, o2.right);
+}
+} // namespace
+
 TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
 TypePtr Types::any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
@@ -221,7 +249,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     } else if (auto *a2 = cast_type<AndType>(t2)) { // 2, 4
         if (auto *a1 = cast_type<AndType>(t1)) {
             // Check if a1 and a2 are equivalent. This helps simplify T.all types created during type inference.
-            if ((a1->left == a2->left && a1->right == a2->right) || (a1->left == a2->right && a1->right == a2->left)) {
+            if (compositeTypeEquivalent(*a1, *a2)) {
                 categoryCounterInc("lub", "<and>");
                 return t2;
             }
@@ -232,6 +260,9 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         auto t2filtered = dropLubComponents(gs, t2, t1d);
         if (t2filtered != t2) {
             return lub(gs, t1, t2filtered);
+        }
+        if (isa_type<OrType>(t1)) {
+            return lubDistributeOr(gs, t1, t2);
         }
         return OrType::make_shared(t1, t2filtered);
     } else if (isa_type<OrType>(t1)) {
