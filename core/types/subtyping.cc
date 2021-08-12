@@ -105,7 +105,12 @@ TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<Type
     }
 }
 
+TypePtr lubDistributeOrSquared(const GlobalState &gs, const TypePtr &o1, const OrType &o2);
 TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+    if (auto *o2 = cast_type<OrType>(t2)) {
+        return lubDistributeOrSquared(gs, t1, *o2);
+    }
+
     InlinedVector<TypePtr, 4> originalOrComponents;
     InlinedVector<TypePtr, 4> typesConsumed;
     auto *o1 = cast_type<OrType>(t1);
@@ -139,6 +144,18 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
     }
     categoryCounterInc("lubDistributeOr.outcome", "consumedComponent");
     return OrType::make_shared(move(remainingTypes), underlying(gs, t2));
+}
+
+TypePtr lubDistributeOrSquared(const GlobalState &gs, const TypePtr &o1, const OrType &o2) {
+    InlinedVector<TypePtr, 4> original2OrComponents;
+    fillInOrComponents(original2OrComponents, o2.left);
+    fillInOrComponents(original2OrComponents, o2.right);
+
+    TypePtr combined = o1;
+    for (const TypePtr &component : original2OrComponents) {
+        combined = lubDistributeOr(gs, combined, component);
+    }
+    return combined;
 }
 
 TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
