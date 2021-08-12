@@ -605,7 +605,7 @@ private:
     friend bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                                 const TypePtr &t2, UntypedMode mode);
     friend TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr lubDistributeOrSquared(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr lubDistributeOrs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
