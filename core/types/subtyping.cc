@@ -108,10 +108,9 @@ TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<Type
 TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     InlinedVector<TypePtr, 4> originalOrComponents;
     InlinedVector<TypePtr, 4> typesConsumed;
-    auto *o1 = cast_type<OrType>(t1);
-    ENFORCE(o1 != nullptr);
-    fillInOrComponents(originalOrComponents, o1->left);
-    fillInOrComponents(originalOrComponents, o1->right);
+    const auto o1 = cast_type_nonnull<OrType>(t1);
+    fillInOrComponents(originalOrComponents, o1.left);
+    fillInOrComponents(originalOrComponents, o1.right);
 
     for (auto &component : originalOrComponents) {
         auto lubbed = Types::any(gs, component, t2);
