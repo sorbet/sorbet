@@ -105,7 +105,12 @@ TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<Type
     }
 }
 
+TypePtr lubDistributeOrSquared(const GlobalState &gs, const TypePtr &o1, const TypePtr &t2);
 TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+    if (isa_type<OrType>(t2)) {
+        return lubDistributeOrSquared(gs, t1, t2);
+    }
+
     InlinedVector<TypePtr, 4> originalOrComponents;
     InlinedVector<TypePtr, 4> typesConsumed;
     auto *o1 = cast_type<OrType>(t1);
@@ -141,7 +146,7 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
     return OrType::make_shared(move(remainingTypes), underlying(gs, t2));
 }
 
-TypePtr lubDistributeOrs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+TypePtr lubDistributeOrSquared(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     auto o1 = cast_type_nonnull<OrType>(t1);
     InlinedVector<TypePtr, 4> original1OrComponents;
     fillInOrComponents(original1OrComponents, o1.left);
@@ -181,23 +186,23 @@ TypePtr lubDistributeOrs(const GlobalState &gs, const TypePtr &t1, const TypePtr
     }
 
     if (types1Consumed.empty() && types2Consumed.empty()) {
-        categoryCounterInc("lubDistributeOrs.outcome", "worst");
+        categoryCounterInc("lubDistributeOrSquared.outcome", "worst");
         return OrType::make_shared(t1, underlying(gs, t2));
     }
 
     if (types2Consumed.size() == original2OrComponents.size()) {
-        categoryCounterInc("lubDistributeOrs.outcome", "t1");
+        categoryCounterInc("lubDistributeOrSquared.outcome", "t1");
         // t2 <: t1
         return t1;
     }
 
     if (types1Consumed.size() == original1OrComponents.size()) {
-        categoryCounterInc("lubDistributeOrs.outcome", "t2");
+        categoryCounterInc("lubDistributeOrSquared.outcome", "t2");
         // t1 <: t2
         return t2;
     }
 
-    categoryCounterInc("lubDistributeOrs.outcome", "consumedComponent");
+    categoryCounterInc("lubDistributeOr.outcome", "consumedComponent");
     auto t1Filtered = filterOrComponents(t1, types1Consumed);
     auto t2Filtered = filterOrComponents(t2, types2Consumed);
     return OrType::make_shared(t1Filtered, t2Filtered);
@@ -306,10 +311,6 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     if (auto *o2 = cast_type<OrType>(t2)) { // 3, 5, 6
-        if (auto *o1 = cast_type<OrType>(t1)) {
-            categoryCounterInc("lub", "<or>");
-            return lubDistributeOrs(gs, t2, t1);
-        }
         categoryCounterInc("lub", "or>");
         return lubDistributeOr(gs, t2, t1);
     } else if (auto *a2 = cast_type<AndType>(t2)) { // 2, 4
