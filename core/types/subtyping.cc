@@ -11,9 +11,9 @@ namespace sorbet::core {
 using namespace std;
 
 namespace {
-bool compositeTypeEquivalent(const OrType &o1, const OrType &o2);
-bool compositeTypeEquivalent(const AndType &a1, const AndType &a2);
-bool compositeTypeEquivalent(const TypePtr &t1, const TypePtr &t2) {
+bool compositeTypeDeepRefEqual(const OrType &o1, const OrType &o2);
+bool compositeTypeDeepRefEqual(const AndType &a1, const AndType &a2);
+bool compositeTypeDeepRefEqualHelper(const TypePtr &t1, const TypePtr &t2) {
     if (t1 == t2) {
         return true;
     }
@@ -22,19 +22,22 @@ bool compositeTypeEquivalent(const TypePtr &t1, const TypePtr &t2) {
     }
     // t1 and t2 are the same kind of type.
     if (isa_type<OrType>(t1)) {
-        return compositeTypeEquivalent(cast_type_nonnull<OrType>(t1), cast_type_nonnull<OrType>(t2));
+        return compositeTypeDeepRefEqual(cast_type_nonnull<OrType>(t1), cast_type_nonnull<OrType>(t2));
     }
-    if (isa_type<AndType>(t2)) {
-        return compositeTypeEquivalent(cast_type_nonnull<AndType>(t1), cast_type_nonnull<AndType>(t2));
+    if (isa_type<AndType>(t1)) {
+        return compositeTypeDeepRefEqual(cast_type_nonnull<AndType>(t1), cast_type_nonnull<AndType>(t2));
     }
     return false;
 }
 
-bool compositeTypeEquivalent(const AndType &a1, const AndType &a2) {
-    return compositeTypeEquivalent(a1.left, a2.left) && compositeTypeEquivalent(a1.right, a2.right);
+// Returns 'true' if the tree of types stemming from this AndType are referentially equal.
+bool compositeTypeDeepRefEqual(const AndType &a1, const AndType &a2) {
+    return compositeTypeDeepRefEqualHelper(a1.left, a2.left) && compositeTypeDeepRefEqualHelper(a1.right, a2.right);
 }
-bool compositeTypeEquivalent(const OrType &o1, const OrType &o2) {
-    return compositeTypeEquivalent(o1.left, o2.left) && compositeTypeEquivalent(o1.right, o2.right);
+
+// Returns 'true' if the tree of types stemming from this OrType are referentially equal.
+bool compositeTypeDeepRefEqual(const OrType &o1, const OrType &o2) {
+    return compositeTypeDeepRefEqualHelper(o1.left, o2.left) && compositeTypeDeepRefEqualHelper(o1.right, o2.right);
 }
 } // namespace
 
@@ -248,8 +251,9 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         return lubDistributeOr(gs, t2, t1);
     } else if (auto *a2 = cast_type<AndType>(t2)) { // 2, 4
         if (auto *a1 = cast_type<AndType>(t1)) {
-            // Check if a1 and a2 are equivalent. This helps simplify T.all types created during type inference.
-            if (compositeTypeEquivalent(*a1, *a2)) {
+            // Check if the members of a1 and a2 are referentially equivalent. This helps simplify T.all types created
+            // during type inference.
+            if (compositeTypeDeepRefEqual(*a1, *a2)) {
                 categoryCounterInc("lub", "<and>");
                 return t2;
             }
