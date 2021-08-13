@@ -153,8 +153,7 @@ TypePtr lubDistributeOrSquared(const GlobalState &gs, const TypePtr &o1, const O
 
     TypePtr combined = o1;
     for (const TypePtr &component : original2OrComponents) {
-        TypePtr combined2 = lubDistributeOr(gs, combined, component);
-        combined = move(combined2);
+        combined = lubDistributeOr(gs, combined, component);
     }
     return combined;
 }
