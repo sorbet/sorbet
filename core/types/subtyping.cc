@@ -154,14 +154,8 @@ TypePtr lubDistributeOrSquared(const GlobalState &gs, const TypePtr &o1, const T
 
     TypePtr combined = o1;
     for (const TypePtr &component : original2OrComponents) {
-        if (isa_type<OrType>(combined)) {
-            TypePtr combined2 = lubDistributeOr(gs, combined, component);
-            combined = move(combined2);
-        } else {
-            // TODO: When do we hit this case?
-            TypePtr combined2 = Types::lub(gs, combined, component);
-            combined = move(combined2);
-        }
+        TypePtr combined2 = lubDistributeOr(gs, combined, component);
+        combined = move(combined2);
     }
     return combined;
 }
