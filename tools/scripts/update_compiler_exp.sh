@@ -45,6 +45,12 @@ for this_src in "${rb_src[@]}" DUMMY; do
         continue
     fi
 
+    # Don't update exp files for validate exp tests, as they are hand edited to
+    # produce llvm failures
+    if [[ "$this_base" =~ "/disabled/validate_exp_test" ]]; then
+      continue
+    fi
+
     dir="$(dirname "$this_base")"
     basename="$this_base"
     srcs=("$this_src")
