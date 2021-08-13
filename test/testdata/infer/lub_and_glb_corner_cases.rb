@@ -60,7 +60,7 @@ module Main
     else
       xs = T::Array[T.untyped].new
     end
-
+    
     # T.any(nil, T::Array[T.nilable(String)], T::Array[T.untyped]) => T.nilable(T::Array[T.untyped])
     T.reveal_type(xs) # error: Revealed type: `T.nilable(T::Array[T.untyped])`
   end
