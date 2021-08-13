@@ -91,6 +91,10 @@ public:
         // Clear out the variable that we store the current exception in
         Payload::varSet(cs, exceptionValue, Payload::rubyNil(state.cs, state.builder), builder, irctx, rubyBlockId);
 
+        // We require that the exception value escapes, so that we can read/write it with
+        // sorbet_readLocal/sorbet_writeLocal.
+        ENFORCE(irctx.escapedVariableIndices.contains(exceptionValue));
+
         return state;
     }
 
