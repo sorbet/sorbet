@@ -363,6 +363,7 @@ package(default_visibility = ["//visibility:public"])
                 build_file = ruby_patched_build,
                 patches = ["@com_stripe_ruby_typer//third_party/ruby:sorbet_ruby_2_7.patch"],
                 patch_tool = "patch",
+                patch_args = ["-p1"],
             )
         else:
             http_archive(
