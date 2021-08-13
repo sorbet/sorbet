@@ -216,7 +216,7 @@ public:
  * negative number */
 tuple<UnorderedMap<cfg::LocalRef, int>, UnorderedMap<cfg::LocalRef, int>, bool>
 findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
-             const UnorderedMap<cfg::LocalRef, Alias> &aliases) {
+             const UnorderedMap<cfg::LocalRef, Alias> &aliases, const vector<int> &exceptionHandlingBlockHeaders) {
     TrackCaptures usage(aliases);
 
     int argId = -1;
@@ -250,12 +250,18 @@ findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
                     }
                     usage.trackBlockUsage(bb.get(), i->recv.variable);
                 },
+                [&](cfg::GetCurrentException *i) {
+                    // if the current block is an exception header, record a usage of the variable in the else block
+                    // (the body block of the exception handling) to force it to escape.
+                    if (exceptionHandlingBlockHeaders[bb->id] != 0) {
+                        usage.trackBlockUsage(bb->bexit.elseb, bind.bind.variable);
+                    }
+                },
                 [&](cfg::Return *i) { usage.trackBlockUsage(bb.get(), i->what.variable); },
                 [&](cfg::BlockReturn *i) { usage.trackBlockUsage(bb.get(), i->what.variable); },
                 [&](cfg::LoadSelf *i) { /*nothing*/ /*todo: how does instance exec pass self?*/ },
-                [&](cfg::Literal *i) { /* nothing*/ }, [&](cfg::GetCurrentException *i) { /*nothing*/ },
-                [&](cfg::ArgPresent *i) { /*nothing*/ }, [&](cfg::LoadArg *i) { /*nothing*/ },
-                [&](cfg::LoadYieldParams *i) { /*nothing*/ },
+                [&](cfg::Literal *i) { /* nothing*/ }, [&](cfg::ArgPresent *i) { /*nothing*/ },
+                [&](cfg::LoadArg *i) { /*nothing*/ }, [&](cfg::LoadYieldParams *i) { /*nothing*/ },
                 [&](cfg::Cast *i) { usage.trackBlockUsage(bb.get(), i->value.variable); },
                 [&](cfg::TAbsurd *i) { usage.trackBlockUsage(bb.get(), i->what.variable); });
         }
@@ -577,7 +583,8 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
 
     auto [aliases, symbols] = setupAliasesAndKeywords(cs, cfg);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
-    auto [variablesPrivateToBlocks, escapedVariableIndices, usesBlockArgs] = findCaptures(cs, md, cfg, aliases);
+    auto [variablesPrivateToBlocks, escapedVariableIndices, usesBlockArgs] =
+        findCaptures(cs, md, cfg, aliases, exceptionHandlingBlockHeaders);
     vector<llvm::BasicBlock *> functionInitializersByFunction;
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
