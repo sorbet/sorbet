@@ -70,12 +70,15 @@ pushd "$build_dir/" > /dev/null
 something_failed() {
   if [ -n "${expected_failure}" ]; then
     success "Disabled test failed as expected."
+    info    "* $1"
+    echo ""
     info    "To make this failing test fail the build, move it out of the disabled folder"
     echo ""
     exit 0
   else
     echo ""
-    error "Test failed."
+    error "Test failed:"
+    error "* $1"
     echo ""
     exit 1
   fi
@@ -101,7 +104,7 @@ for ext in "${exts[@]}"; do
         if grep "exists only in" "$diff_out" > /dev/null ; then
           cat "$diff_out"
           info "If this was an expected difference, you need to run tools/scripts/update_compiler_exp.sh"
-          something_failed
+          something_failed "$(basename "$exp")"
         else
           if [ -n "${expected_failure}" ]; then
             echo ""
@@ -117,7 +120,7 @@ for ext in "${exts[@]}"; do
       else
         cat "$diff_out"
         info "If this was an expected difference, you need to run tools/scripts/update_compiler_exp.sh"
-        something_failed
+        something_failed "$(basename "$exp")"
       fi
     fi
   fi
