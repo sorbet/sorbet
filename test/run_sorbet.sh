@@ -32,7 +32,7 @@ else
   compiled_out_dir=''
 fi
 
-while getopts ":hdsi:" opt; do
+while getopts ":hds:i:" opt; do
   case $opt in
     h)
       usage
