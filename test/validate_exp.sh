@@ -35,7 +35,13 @@ source "test/logging.sh"
 
 # Positional arguments
 build_dir=${1/--build_dir=/}
-shift 1
+expected_failure=
+case "${2/--expected_failure=/}" in
+  True) expected_failure=1;;
+  False);;
+  *) fatal "Expected --expected_failure=(True|False), got $2";;
+esac
+shift 2
 
 # sources make up the remaining argumenets
 rb=( "$@" )
@@ -61,6 +67,23 @@ trap cleanup EXIT
 info "Checking Build:"
 pushd "$build_dir/" > /dev/null
 
+something_failed() {
+  if [ -n "${expected_failure}" ]; then
+    success "Disabled test failed as expected."
+    info    "* $1"
+    echo ""
+    info    "To make this failing test fail the build, move it out of the disabled folder"
+    echo ""
+    exit 0
+  else
+    echo ""
+    error "Test failed:"
+    error "* $1"
+    echo ""
+    exit 1
+  fi
+}
+
 exts=("llo")
 for ext in "${exts[@]}"; do
   exp="$root/${rb[0]%.rb}.$ext.exp"
@@ -81,14 +104,23 @@ for ext in "${exts[@]}"; do
         if grep "exists only in" "$diff_out" > /dev/null ; then
           cat "$diff_out"
           info "If this was an expected difference, you need to run tools/scripts/update_compiler_exp.sh"
-          fatal "* $(basename "$exp")"
+          something_failed "$(basename "$exp")"
         else
-          success "* $(basename "$exp")"
+          if [ -n "${expected_failure}" ]; then
+            echo ""
+            error "Disabled test did not fail."
+            info   "This could mean that a recent change has made this test start passing."
+            info   "If that's the case, great! Please move this test out of the disabled folder to catch future regressions."
+            echo ""
+            exit 1
+          else
+            success "* $(basename "$exp")"
+          fi
         fi
       else
         cat "$diff_out"
         info "If this was an expected difference, you need to run tools/scripts/update_compiler_exp.sh"
-        fatal "* $(basename "$exp")"
+        something_failed "$(basename "$exp")"
       fi
     fi
   fi

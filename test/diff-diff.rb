@@ -28,6 +28,8 @@ module DiffDiff
     end
   end
 
+  LINE_ERROR = %r{llvm-diff: [^ ]+:\d+:\d+: error: }
+
   # Determine if this is a real failure, or differences introduced as a result
   # of the `llvm-diff` bug https://bugs.llvm.org/show_bug.cgi?id=48137
   def self.sanitize(io)
@@ -61,6 +63,9 @@ module DiffDiff
         # encountering a function that only exists in one file or the other will
         # cause `llvm-diff` to return a non-zero exit code
         real_failure ||= line.include? 'exists only in'
+
+        # encountering an error when parsing either file
+        real_failure ||= line.match? LINE_ERROR
 
         lines << line
       end
