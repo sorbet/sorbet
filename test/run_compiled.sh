@@ -71,7 +71,7 @@ elif [[ ! -d "$llvmir" ]]; then
 fi
 
 # ensure that the extension is built
-"test/run_sorbet.sh" -i "$llvmir" "${rb_files[@]}"
+"test/run_sorbet.sh" -s "$llvmir" -i "$llvmir" "${rb_files[@]}"
 
 if [[ "$llvmir" != /* ]]; then
   llvmir="$PWD/$llvmir"
