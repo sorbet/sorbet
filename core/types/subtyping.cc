@@ -412,7 +412,12 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                             result = Types::hashOfUntyped();
                         }
                     } else {
-                        result = lub(gs, h1.underlying(gs), t2.underlying(gs));
+                        bool allowProxyInLub = isa_type<TupleType>(t2);
+                        if (allowProxyInLub) {
+                            result = OrType::make_shared(t1, t2);
+                        } else {
+                            result = lub(gs, h1.underlying(gs), t2.underlying(gs));
+                        }
                     }
                 },
                 [&](const LiteralType &l1) {
