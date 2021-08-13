@@ -163,6 +163,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                             unreachableInstruction = expr.value.get();
                             locForUnreachable = expr.loc;
                         } else {
+                            // Expand the loc to cover the entire dead basic block
                             locForUnreachable = locForUnreachable.join(expr.loc);
                         }
                     }
