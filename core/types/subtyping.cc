@@ -404,21 +404,12 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             ENFORCE(result != nullptr);
             return result;
         } else {
-            bool allowProxyInLub = isa_type<TupleType>(t1) || isa_type<ShapeType>(t1);
             // only 1st is proxy
-            TypePtr und = t1.underlying(gs);
-            if (isSubType(gs, und, t2)) {
-                return t2;
-            } else if (allowProxyInLub) {
-                return OrType::make_shared(t1, t2);
-            } else {
-                return lub(gs, t2, und);
-            }
+            return lub(gs, t2, t1);
         }
     } else if (is_proxy_type(t2)) {
         // only 2nd is proxy
         bool allowProxyInLub = isa_type<TupleType>(t2) || isa_type<ShapeType>(t2);
-        // only 1st is proxy
         TypePtr und = t2.underlying(gs);
         if (isSubType(gs, und, t1)) {
             return t1;
