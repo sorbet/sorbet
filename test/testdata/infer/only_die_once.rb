@@ -38,7 +38,7 @@ def test3(x)
     T.absurd(x)
 
     if T.unsafe(nil)
-    #  ^ error: This code is unreachable
+    #  ^^^^^^^^^^^^^ error: This code is unreachable
       do_something
     end
     do_something
