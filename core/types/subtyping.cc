@@ -105,10 +105,10 @@ TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<Type
     }
 }
 
-TypePtr lubDistributeOrSquared(const GlobalState &gs, const TypePtr &o1, const TypePtr &t2);
+TypePtr lubDistributeOrSquared(const GlobalState &gs, const TypePtr &o1, const OrType &o2);
 TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
-    if (isa_type<OrType>(t2)) {
-        return lubDistributeOrSquared(gs, t1, t2);
+    if (auto *o2 = cast_type<OrType>(t2)) {
+        return lubDistributeOrSquared(gs, t1, *o2);
     }
 
     InlinedVector<TypePtr, 4> originalOrComponents;
@@ -146,8 +146,7 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
     return OrType::make_shared(move(remainingTypes), underlying(gs, t2));
 }
 
-TypePtr lubDistributeOrSquared(const GlobalState &gs, const TypePtr &o1, const TypePtr &t2) {
-    auto o2 = cast_type_nonnull<OrType>(t2);
+TypePtr lubDistributeOrSquared(const GlobalState &gs, const TypePtr &o1, const OrType &o2) {
     InlinedVector<TypePtr, 4> original2OrComponents;
     fillInOrComponents(original2OrComponents, o2.left);
     fillInOrComponents(original2OrComponents, o2.right);
