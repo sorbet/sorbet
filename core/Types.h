@@ -159,7 +159,8 @@ public:
 
     static TypePtr arrayOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr rangeOf(const GlobalState &gs, const TypePtr &elem);
-    static TypePtr hashOf(const GlobalState &gs, const TypePtr &elem);
+    static TypePtr hashOf(const GlobalState &gs, const TypePtr &keyType, const TypePtr &valueType);
+    static TypePtr hashOfSymbolKey(const GlobalState &gs, const TypePtr &valueType);
     static TypePtr dropNil(const GlobalState &gs, const TypePtr &from);
 
     /** Recursively replaces proxies with their underlying types */

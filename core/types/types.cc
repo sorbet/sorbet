@@ -286,10 +286,14 @@ TypePtr Types::rangeOf(const GlobalState &gs, const TypePtr &elem) {
     return make_type<AppliedType>(Symbols::Range(), move(targs));
 }
 
-TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &elem) {
-    vector<TypePtr> tupleArgs{Types::Symbol(), elem};
-    vector<TypePtr> targs{Types::Symbol(), elem, make_type<TupleType>(move(tupleArgs))};
+TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &keyType, const TypePtr &valueType) {
+    vector<TypePtr> tupleArgs{keyType, valueType};
+    vector<TypePtr> targs{keyType, valueType, make_type<TupleType>(move(tupleArgs))};
     return make_type<AppliedType>(Symbols::Hash(), move(targs));
+}
+
+TypePtr Types::hashOfSymbolKey(const GlobalState &gs, const TypePtr &valueType) {
+    return hashOf(gs, Types::Symbol(), valueType);
 }
 
 TypePtr Types::dropNil(const GlobalState &gs, const TypePtr &from) {
@@ -427,9 +431,7 @@ TypePtr ShapeType::underlying(const GlobalState &gs) const {
     } else {
         auto keysLub = lubAllDropLiteral(gs, this->keys);
         auto valuesLub = lubAllDropLiteral(gs, this->values);
-        vector<TypePtr> tupleArgs{keysLub, valuesLub};
-        vector<TypePtr> targs{keysLub, valuesLub, make_type<TupleType>(move(tupleArgs))};
-        return make_type<AppliedType>(Symbols::Hash(), targs);
+        return Types::hashOf(gs, keysLub, valuesLub);
     }
 }
 
