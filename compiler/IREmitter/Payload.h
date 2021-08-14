@@ -70,6 +70,10 @@ public:
     static void varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, llvm::IRBuilderBase &builder,
                        const IREmitterContext &irctx, int rubyBlockId);
 
+    static std::tuple<llvm::Value *, llvm::Value *> escapedVariableIndexAndLevel(CompilerState &cs, cfg::LocalRef local,
+                                                                                 const IREmitterContext &irctx,
+                                                                                 int rubyBlockId);
+
     static llvm::Value *retrySingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
     static llvm::Value *voidSingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
 

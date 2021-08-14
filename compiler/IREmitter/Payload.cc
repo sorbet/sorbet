@@ -976,6 +976,14 @@ llvm::Value *buildInstanceVariableCache(CompilerState &cs, std::string_view name
 
 } // namespace
 
+std::tuple<llvm::Value *, llvm::Value *> Payload::escapedVariableIndexAndLevel(CompilerState &cs, cfg::LocalRef local,
+                                                                               const IREmitterContext &irctx,
+                                                                               int rubyBlockId) {
+    auto *index = indexForLocalVariable(cs, irctx, rubyBlockId, irctx.escapedVariableIndices.at(local));
+    auto level = irctx.rubyBlockLevel[rubyBlockId];
+    return {index, llvm::ConstantInt::get(cs, llvm::APInt(64, level, true))};
+}
+
 llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBuilderBase &build,
                              const IREmitterContext &irctx, int rubyBlockId) {
     auto &builder = builderCast(build);
@@ -1015,10 +1023,8 @@ llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBui
     }
     if (irctx.escapedVariableIndices.contains(local)) {
         auto *cfp = getCFPForBlock(cs, builder, irctx, rubyBlockId);
-        auto *index = indexForLocalVariable(cs, irctx, rubyBlockId, irctx.escapedVariableIndices.at(local));
-        auto level = irctx.rubyBlockLevel[rubyBlockId];
-        return builder.CreateCall(cs.getFunction("sorbet_readLocal"),
-                                  {cfp, index, llvm::ConstantInt::get(cs, llvm::APInt(64, level, true))});
+        auto [index, level] = escapedVariableIndexAndLevel(cs, local, irctx, rubyBlockId);
+        return builder.CreateCall(cs.getFunction("sorbet_readLocal"), {cfp, index, level});
     }
 
     // normal local variable
@@ -1073,10 +1079,8 @@ void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, l
     }
     if (irctx.escapedVariableIndices.contains(local)) {
         auto *cfp = getCFPForBlock(cs, builder, irctx, rubyBlockId);
-        auto *index = indexForLocalVariable(cs, irctx, rubyBlockId, irctx.escapedVariableIndices.at(local));
-        auto level = irctx.rubyBlockLevel[rubyBlockId];
-        builder.CreateCall(cs.getFunction("sorbet_writeLocal"),
-                           {cfp, index, llvm::ConstantInt::get(cs, llvm::APInt(64, level, true)), var});
+        auto [index, level] = escapedVariableIndexAndLevel(cs, local, irctx, rubyBlockId);
+        builder.CreateCall(cs.getFunction("sorbet_writeLocal"), {cfp, index, level, var});
         return;
     }
 
