@@ -431,8 +431,10 @@ TypePtr ShapeType::underlying(const GlobalState &gs) const {
     } else {
         auto keysLub = lubAllDropLiteral(gs, this->keys);
         auto valuesLub = lubAllDropLiteral(gs, this->values);
-        if (isa_type<OrType>(valuesLub)) {
-            vt = Types::untypedUntracked();
+        auto valuesOr = cast_type<OrType>(valuesLub);
+        if (valuesOr != nullptr && !(valuesOr->left.isNilClass() && isa_type<ClassType>(valuesOr->right))
+                          && !(valuesOr->right.isNilClass() && isa_type<ClassType>(valuesOr->left))) {
+            valuesLub = Types::untypedUntracked();
         }
         return Types::hashOf(gs, keysLub, valuesLub);
     }
