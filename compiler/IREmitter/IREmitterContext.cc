@@ -554,6 +554,24 @@ vector<int> getBlockLevels(vector<int> &blockParents, vector<FunctionType> &bloc
 
 } // namespace
 
+IREmitterContext::ReturnFromBlockState::ReturnFromBlockState(CompilerState &cs, llvm::IRBuilderBase &build) {
+    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
+
+    this->ecTag = builder.CreateAlloca(llvm::StructType::getTypeByName(cs, "struct.rb_vm_tag"), nullptr, "ecTag");
+    auto *ecType = llvm::StructType::getTypeByName(cs, "struct.rb_execution_context_struct");
+    this->ecPtr = ecType->getPointerTo();
+    this->cachedEC = builder.CreateAlloca(ecPtr, nullptr, "ecCache");
+    auto *ec = builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
+    builder.CreateStore(ec, this->cachedEC);
+}
+
+llvm::Value *IREmitterContext::ReturnFromBlockState::loadEC(CompilerState &cs, llvm::IRBuilderBase &build) const {
+    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
+
+    const bool isVolatile = true;
+    return builder.CreateLoad(this->ecPtr, this->cachedEC, isVolatile, "loadedEC");
+}
+
 IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                                                                     const ast::MethodDef &md,
                                                                     llvm::Function *mainFunc) {
@@ -628,8 +646,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             // TODO(aprocter): I think this is a little bit more conservative than it needs to be, because it will push
             // a tag even if the a return-from-block comes from a lambda, which is not actually necessary.
             if (returnFromBlockIsPresent(cs, cfg, blockTypes)) {
-                returnFromBlockState.emplace();
-                returnFromBlockState->ecTag = builder.CreateAlloca(llvm::StructType::getTypeByName(cs, "struct.rb_vm_tag"), nullptr, "ecTag");
+                returnFromBlockState.emplace(cs, builder);
             }
         }
         i++;
