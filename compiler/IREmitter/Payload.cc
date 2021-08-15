@@ -1187,7 +1187,7 @@ void Payload::setupEcTag(CompilerState &cs, llvm::IRBuilderBase &build, const IR
     auto &builder = builderCast(build);
 
     auto &state = *irctx.returnFromBlockState;
-    auto *setjmpRetval = builder.CreateCall(cs.getFunction("sorbet_initializeTag"), {state.loadEC(cs, builder), state.ecTag}, "setjmpRetval");
+    auto *setjmpRetval = builder.CreateCall(cs.getFunction("sorbet_initializeTag"), {state.cachedEC, state.ecTag}, "setjmpRetval");
 
     auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, 0);
     auto *throwReturnVal = builder.CreateCall(cs.getFunction("sorbet_processThrowReturnSetJmp"),
