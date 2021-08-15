@@ -2377,9 +2377,7 @@ KEEP_ALIVE(sorbet_initializeTag)
 // the caller, which should return the return value (applying a type test on the way out if
 // appropriate).
 SORBET_INLINE
-VALUE sorbet_processThrowReturnSetJmp(enum ruby_tag_type state, rb_control_frame_t *cfp, struct rb_vm_tag *tag) {
-    rb_execution_context_t *ec = GET_EC();
-
+VALUE sorbet_processThrowReturnSetJmp(rb_execution_context_t *ec, enum ruby_tag_type state, rb_control_frame_t *cfp, struct rb_vm_tag *tag) {
     VALUE retval = Qundef;
 
     if (state != TAG_NONE) {

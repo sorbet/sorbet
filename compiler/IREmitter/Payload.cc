@@ -1191,7 +1191,7 @@ void Payload::setupEcTag(CompilerState &cs, llvm::IRBuilderBase &build, const IR
 
     auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, 0);
     auto *throwReturnVal = builder.CreateCall(cs.getFunction("sorbet_processThrowReturnSetJmp"),
-                                              {setjmpRetval, cfp, state.ecTag}, "throwReturnVal");
+                                              {state.loadEC(cs, builder), setjmpRetval, cfp, state.ecTag}, "throwReturnVal");
     auto *throwReturnValIsUndef = testIsUndef(cs, builder, throwReturnVal);
 
     auto *fun = builder.GetInsertBlock()->getParent();
