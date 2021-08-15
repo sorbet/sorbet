@@ -202,7 +202,8 @@ void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBas
     bool needsReturnFromBlock = rubyBlockId == 0 && irctx.returnFromBlockState.has_value();
     if (needsReturnFromBlock) {
         auto &state = *irctx.returnFromBlockState;
-        builder.CreateCall(cs.getFunction("sorbet_teardownTagForThrowReturn"), {state.loadEC(cs, builder), state.ecTag});
+        builder.CreateCall(cs.getFunction("sorbet_teardownTagForThrowReturn"),
+                           {state.loadEC(cs, builder), state.ecTag});
     }
     auto *throwReturnFlag = builder.CreateLoad(irctx.throwReturnFlagByBlock[rubyBlockId]);
     builder.CreateCondBr(throwReturnFlag, throwReturnBlock, normalReturnBlock);
