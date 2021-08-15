@@ -801,7 +801,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
         // which is called here.
         //
         // In other cases, we will just jump directly from the init block to the argument setup block.
-        if (funId == 0 && irctx.ecTag != nullptr) {
+        if (funId == 0 && irctx.returnFromBlockState.has_value()) {
             llvm::BasicBlock *ecTagSetupBlock = llvm::BasicBlock::Create(cs, "ecTagSetup", func);
             builder.SetInsertPoint(ecTagSetupBlock);
             Payload::setupEcTag(cs, builder, irctx);

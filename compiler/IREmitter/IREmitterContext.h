@@ -261,9 +261,13 @@ struct IREmitterContext {
     // idx: ruby block id
     std::vector<llvm::AllocaInst *> throwReturnFlagByBlock;
 
-    // AllocaInst corresponding to the rb_vm_tag-typed local in Ruby block 0. This tag will be pushed onto the
-    // execution context's tag stack, to catch return statements from inside blocks.
-    llvm::AllocaInst *ecTag;
+    struct ReturnFromBlockState {
+        // AllocaInst corresponding to the rb_vm_tag-typed local in Ruby block 0. This tag will be pushed onto the
+        // execution context's tag stack, to catch return statements from inside blocks.
+        llvm::AllocaInst *ecTag;
+    };
+
+    std::optional<ReturnFromBlockState> returnFromBlockState;
 
     static IREmitterContext getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md,
                                                              llvm::Function *mainFunc);

@@ -199,8 +199,8 @@ void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBas
     if (functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId])) {
         builder.CreateCall(cs.getFunction("sorbet_popFrame"), {});
     }
-    if (rubyBlockId == 0 && irctx.ecTag != nullptr) {
-        builder.CreateCall(cs.getFunction("sorbet_teardownTagForThrowReturn"), {irctx.ecTag});
+    if (rubyBlockId == 0 && irctx.returnFromBlockState.has_value()) {
+        builder.CreateCall(cs.getFunction("sorbet_teardownTagForThrowReturn"), {irctx.returnFromBlockState->ecTag});
     }
     auto *throwReturnFlag = builder.CreateLoad(irctx.throwReturnFlagByBlock[rubyBlockId]);
     builder.CreateCondBr(throwReturnFlag, throwReturnBlock, normalReturnBlock);
