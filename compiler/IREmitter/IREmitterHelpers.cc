@@ -199,7 +199,8 @@ void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBas
     if (functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId])) {
         builder.CreateCall(cs.getFunction("sorbet_popFrame"), {});
     }
-    if (rubyBlockId == 0 && irctx.returnFromBlockState.has_value()) {
+    bool needsReturnFromBlock = rubyBlockId == 0 && irctx.returnFromBlockState.has_value();
+    if (needsReturnFromBlock) {
         auto &state = *irctx.returnFromBlockState;
         builder.CreateCall(cs.getFunction("sorbet_teardownTagForThrowReturn"), {state.loadEC(cs, builder), state.ecTag});
     }
@@ -207,7 +208,14 @@ void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBas
     builder.CreateCondBr(throwReturnFlag, throwReturnBlock, normalReturnBlock);
 
     builder.SetInsertPoint(throwReturnBlock);
-    builder.CreateCall(cs.getFunction("sorbet_throwReturn"), {retVal});
+    llvm::Value *ec;
+    if (needsReturnFromBlock) {
+        auto &state = *irctx.returnFromBlockState;
+        ec = state.loadEC(cs, builder);
+    } else {
+        ec = builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
+    }
+    builder.CreateCall(cs.getFunction("sorbet_throwReturn"), {ec, retVal});
     builder.CreateUnreachable();
 
     builder.SetInsertPoint(normalReturnBlock);

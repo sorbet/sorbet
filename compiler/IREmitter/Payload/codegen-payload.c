@@ -2306,9 +2306,7 @@ extern VALUE sorbet_vm_throw(const rb_execution_context_t *ec, rb_control_frame_
 extern void sorbet_ec_jump_tag(rb_execution_context_t *ec, enum ruby_tag_type tt);
 
 SORBET_INLINE
-void sorbet_throwReturn(VALUE retval) {
-    rb_execution_context_t *ec = GET_EC();
-
+void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) {
     VALUE v = sorbet_vm_throw(ec, ec->cfp, TAG_RETURN, retval);
 
     ec->errinfo = v;
