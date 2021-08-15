@@ -188,6 +188,11 @@ VALUE sorbet_rubyTopSelf() {
 }
 
 SORBET_INLINE
+rb_execution_context_t *sorbet_getEC() {
+    return GET_EC();
+}
+
+SORBET_INLINE
 rb_control_frame_t *sorbet_getCFP() {
     return GET_EC()->cfp;
 }
