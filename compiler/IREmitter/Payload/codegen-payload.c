@@ -2340,10 +2340,10 @@ void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) {
 // to force `ec` to (somehow) be allocated to memory.
 //
 // We need a similar hack, but can be slightly more elegant because we cache the
-// execution context across an exception handling region.  A pointer to that cache
-// is passed in here and by making the pointer volatile, we force clang to reload
-// the execution context pointer every time the execution context is needed, thus
-// ensuring that the execution context lives in memory always.
+// execution context across a tag-guarded region.  A pointer to that cache is
+// passed in here and by making the pointer volatile, we force clang to reload
+// the execution context pointer every time the execution context is needed,
+// thus ensuring that the execution context lives in memory always.
 SORBET_INLINE
 enum ruby_tag_type sorbet_initializeTag(volatile rb_execution_context_t **ec, struct rb_vm_tag *tag) {
     // inlined from EC_PUSH_TAG
