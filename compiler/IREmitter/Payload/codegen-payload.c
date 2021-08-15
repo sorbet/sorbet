@@ -2351,7 +2351,6 @@ enum ruby_tag_type sorbet_initializeTag(volatile rb_execution_context_t **ec, st
     tag->prev = (*ec)->tag;
 
     int setjmp_retval = RUBY_SETJMP(tag->buf);
-    enum ruby_tag_type state = TAG_NONE;
 
     if (setjmp_retval) {
         // See rb_ec_tag_state:
