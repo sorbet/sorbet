@@ -2325,8 +2325,11 @@ void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) {
 //
 // The `volatile` here is a bit gross.  If you look at `rb_ec_tag_state` and its
 // accompanying logic, referenced below, you'll notice that it contains some
-// gross hacks to force clang to stick `ec` in memory before accessing it and that
-// its `ec` argument is `rb_execution_context_t *ec`.
+// gross hacks to force clang to stick `ec` in memory (e.g. VAR_FROM_MEMORY:
+//
+// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L146-L158
+//
+// before accessing `ec` and that its `ec` argument is `rb_execution_context_t *ec`.
 //
 // Without those hacks, clang will assume that wherever `ec` got allocated to is where
 // it should be accessed on both sides of the `if`, which is not necessarily valid in
