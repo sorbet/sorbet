@@ -1,4 +1,0 @@
-s(:def, :foo,
-  s(:forward_args),
-  s(:send, nil, :bar,
-    s(:forwarded_args)))

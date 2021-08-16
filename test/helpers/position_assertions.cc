@@ -38,6 +38,8 @@ const UnorderedMap<
         {"disable-fast-path", BooleanPropertyAssertion::make},
         {"disable-stress-incremental", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
+        {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
+        {"enable-suggest-unsafe", BooleanPropertyAssertion::make},
         {"exhaustive-apply-code-action", BooleanPropertyAssertion::make},
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},
@@ -359,7 +361,7 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
             if (findConstructor != assertionConstructors.end()) {
                 assertions.push_back(
                     findConstructor->second(filename, range, lineNum, assertionContents, assertionType));
-            } else if (ignoredAssertionLabels.find(assertionType) == ignoredAssertionLabels.end()) {
+            } else if (!ignoredAssertionLabels.contains(assertionType)) {
                 ADD_FAIL_CHECK_AT(
                     filename.c_str(), lineNum + 1,
                     fmt::format("Found unrecognized assertion of type `{}`. Expected one of {{{}}}.\nIf this is a "

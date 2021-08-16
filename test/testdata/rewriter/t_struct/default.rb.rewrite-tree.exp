@@ -27,13 +27,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @foo = arg0
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize)
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
 
     <self>.prop(:foo, <emptyTree>::<C Integer>, :default, 3, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
   end
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Default>.new().foo())
@@ -53,7 +53,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.super(ZSuperArgs)
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize)
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
 
     <self>.prop(:no_type_on_prop)
 

@@ -1,0 +1,17 @@
+s(:begin,
+  s(:send, nil, :p,
+    s(:xstr,
+      s(:str, "pwd
+"))),
+  s(:send, nil, :puts,
+    s(:xstr,
+      s(:str, "  a
+"),
+      s(:str, "  rather
+"),
+      s(:str, "long command
+"),
+      s(:str, "      with bad
+"),
+      s(:str, "  indentation
+"))))

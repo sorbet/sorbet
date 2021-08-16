@@ -13,9 +13,9 @@ struct ParsedSig {
         core::Loc loc;
         core::NameRef name;
         core::TypePtr type;
-        core::SymbolRef rebind;
+        core::ClassOrModuleRef rebind;
     };
-    core::SymbolRef bind;
+    core::ClassOrModuleRef bind;
     std::vector<ArgSpec> argTypes;
     core::TypePtr returns;
 
@@ -25,6 +25,20 @@ struct ParsedSig {
         core::TypePtr type;
     };
     std::vector<TypeArgSpec> typeArgs;
+
+    // Store the original send that parsed into this structure, so we can modify
+    // it after the sig has been associated with a method.
+    //
+    // The argument for why it is safe to store this runs as follows:
+    //
+    // 1. The phase that parses sigs and associates them with methods doesn't modify
+    //    the AST.
+    // 2. The phase that applies the knowledge from parsing the sigs to the methods
+    //    in the symbol table runs entirely serially and does not modify the AST
+    //    (except for modifying the Send pointed to by this pointer).
+    //
+    // So we don't have to worry about this pointer being dropped from underneath us.
+    ast::Send *origSend;
 
     struct {
         bool sig = false;
@@ -75,11 +89,12 @@ public:
 
     struct ResultType {
         core::TypePtr type;
-        core::SymbolRef rebind;
+        core::ClassOrModuleRef rebind;
     };
-    static ResultType getResultTypeAndBind(core::Context ctx, ast::TreePtr &expr, const ParsedSig &,
+    static ResultType getResultTypeAndBind(core::Context ctx, ast::ExpressionPtr &expr, const ParsedSig &,
                                            TypeSyntaxArgs args);
-    static core::TypePtr getResultType(core::Context ctx, ast::TreePtr &expr, const ParsedSig &, TypeSyntaxArgs args);
+    static core::TypePtr getResultType(core::Context ctx, ast::ExpressionPtr &expr, const ParsedSig &,
+                                       TypeSyntaxArgs args);
 
     TypeSyntax() = delete;
 };

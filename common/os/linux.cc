@@ -37,7 +37,7 @@ string addr2line(string_view programName, void const *const *addr, int count) {
     for (int i = 3; i < count; ++i) {
         char buf[4096];
         symbolize_pc(const_cast<void *>(addr[i]), "%p in %f %s:%l:%c", buf, sizeof(buf));
-        fmt::format_to(os, "  #{} {}\n", i, buf);
+        fmt::format_to(std::back_inserter(os), "  #{} {}\n", i, buf);
     }
     return to_string(os);
 }

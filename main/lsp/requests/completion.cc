@@ -83,7 +83,8 @@ const RubyKeyword rubyKeywords[] = {
     {"yield", "Starts execution of the block sent to the current method."},
 };
 
-vector<core::SymbolRef> ancestorsImpl(const core::GlobalState &gs, core::SymbolRef sym, vector<core::SymbolRef> &&acc) {
+vector<core::ClassOrModuleRef> ancestorsImpl(const core::GlobalState &gs, core::ClassOrModuleRef sym,
+                                             vector<core::ClassOrModuleRef> &&acc) {
     // The implementation here is similar to Symbols::derivesFrom.
     ENFORCE(sym.data(gs)->isClassOrModuleLinearizationComputed());
     acc.emplace_back(sym);
@@ -101,14 +102,14 @@ vector<core::SymbolRef> ancestorsImpl(const core::GlobalState &gs, core::SymbolR
 
 // Basically the same as Module#ancestors from Ruby--but don't depend on it being exactly equal.
 // For us, it's just something that's vaguely ordered from "most specific" to "least specific" ancestor.
-vector<core::SymbolRef> ancestors(const core::GlobalState &gs, core::SymbolRef receiver) {
-    return ancestorsImpl(gs, receiver, vector<core::SymbolRef>{});
+vector<core::ClassOrModuleRef> ancestors(const core::GlobalState &gs, core::ClassOrModuleRef receiver) {
+    return ancestorsImpl(gs, receiver, vector<core::ClassOrModuleRef>{});
 }
 
 struct SimilarMethod final {
     int depth;
-    core::SymbolRef receiver;
-    core::SymbolRef method;
+    core::ClassOrModuleRef receiver;
+    core::MethodRef method;
 
     // Populated later
     core::TypePtr receiverType = nullptr;
@@ -123,14 +124,15 @@ using SimilarMethodsByName = UnorderedMap<core::NameRef, vector<SimilarMethod>>;
 
 // First of pair is "found at this depth in the ancestor hierarchy"
 // Second of pair is method symbol found at that depth, with name similar to prefix.
-SimilarMethodsByName similarMethodsForClass(const core::GlobalState &gs, core::SymbolRef receiver, string_view prefix) {
+SimilarMethodsByName similarMethodsForClass(const core::GlobalState &gs, core::ClassOrModuleRef receiver,
+                                            string_view prefix) {
     auto result = SimilarMethodsByName{};
 
     int depth = -1;
     for (auto ancestor : ancestors(gs, receiver)) {
         depth++;
         for (auto [memberName, memberSymbol] : ancestor.data(gs)->members()) {
-            if (!memberSymbol.data(gs)->isMethod()) {
+            if (!memberSymbol.isMethod()) {
                 continue;
             }
             if (hasAngleBrackets(memberName.shortName(gs))) {
@@ -140,7 +142,7 @@ SimilarMethodsByName similarMethodsForClass(const core::GlobalState &gs, core::S
 
             if (hasSimilarName(gs, memberName, prefix)) {
                 // Creates the the list if it does not exist
-                result[memberName].emplace_back(SimilarMethod{depth, receiver, memberSymbol});
+                result[memberName].emplace_back(SimilarMethod{depth, receiver, memberSymbol.asMethodRef()});
             }
         }
     }
@@ -154,7 +156,7 @@ SimilarMethodsByName mergeSimilarMethods(SimilarMethodsByName left, SimilarMetho
     auto result = SimilarMethodsByName{};
 
     for (auto [methodName, leftSimilarMethods] : left) {
-        if (right.find(methodName) != right.end()) {
+        if (right.contains(methodName)) {
             for (auto similarMethod : leftSimilarMethods) {
                 result[methodName].emplace_back(similarMethod);
             }
@@ -240,11 +242,20 @@ vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const 
     return result;
 }
 
-string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, const core::TypePtr &receiverType,
-                     const core::TypeConstraint *constraint) {
+string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatchResult, core::SymbolRef method,
+                     const core::TypePtr &receiverType, const core::TypeConstraint *constraint, u2 totalArgs) {
     fmt::memory_buffer result;
-    fmt::format_to(result, "{}", method.data(gs)->name.shortName(gs));
+    fmt::format_to(std::back_inserter(result), "{}", method.data(gs)->name.shortName(gs));
     auto nextTabstop = 1;
+
+    /* If we are completing an existing send that either has some arguments
+     * or a block specified already then simply complete the method name
+     * since the rest is likely useless
+     */
+    if (totalArgs > 0 || dispatchResult.main.blockReturnType != nullptr) {
+        fmt::format_to(std::back_inserter(result), "${{0}}");
+        return to_string(result);
+    }
 
     vector<string> typeAndArgNames;
     for (auto &argSym : method.data(gs)->arguments()) {
@@ -260,19 +271,19 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, const 
             continue;
         }
         if (argSym.flags.isKeyword) {
-            fmt::format_to(argBuf, "{}: ", argSym.name.shortName(gs));
+            fmt::format_to(std::back_inserter(argBuf), "{}: ", argSym.name.shortName(gs));
         }
         if (argSym.type) {
             auto resultType = getResultType(gs, argSym.type, method, receiverType, constraint).show(gs);
-            fmt::format_to(argBuf, "${{{}:{}}}", nextTabstop++, resultType);
+            fmt::format_to(std::back_inserter(argBuf), "${{{}:{}}}", nextTabstop++, resultType);
         } else {
-            fmt::format_to(argBuf, "${{{}}}", nextTabstop++);
+            fmt::format_to(std::back_inserter(argBuf), "${{{}}}", nextTabstop++);
         }
         typeAndArgNames.emplace_back(to_string(argBuf));
     }
 
     if (!typeAndArgNames.empty()) {
-        fmt::format_to(result, "({})", fmt::join(typeAndArgNames, ", "));
+        fmt::format_to(std::back_inserter(result), "({})", fmt::join(typeAndArgNames, ", "));
     }
 
     ENFORCE(!method.data(gs)->arguments().empty());
@@ -294,10 +305,10 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, const 
             }
         }
 
-        fmt::format_to(result, " do{}\n  ${{{}}}\nend", blkArgs, nextTabstop++);
+        fmt::format_to(std::back_inserter(result), " do{}\n  ${{{}}}\nend", blkArgs, nextTabstop++);
     }
 
-    fmt::format_to(result, "${{0}}");
+    fmt::format_to(std::back_inserter(result), "${{0}}");
     return to_string(result);
 }
 
@@ -397,7 +408,7 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
         ENFORCE(false, "Unhandled kind of constant in getCompletionItemForConstant");
     }
 
-    item->detail = maybeAlias.data(gs)->show(gs);
+    item->detail = maybeAlias.show(gs);
 
     string replacementText;
     if (supportsSnippets) {
@@ -476,7 +487,7 @@ vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPType
     return result;
 }
 
-core::SymbolRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const core::Loc queryLoc) {
+core::MethodRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{queryLoc.file()};
     auto resolved = typechecker.getResolved(files);
@@ -538,7 +549,7 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
         return nullptr;
     }
 
-    core::SymbolRef receiverSym;
+    core::ClassOrModuleRef receiverSym;
     if (core::isa_type<core::ClassType>(receiverType)) {
         auto classType = core::cast_type_nonnull<core::ClassType>(receiverType);
         receiverSym = classType.symbol;
@@ -644,12 +655,12 @@ CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, uni
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCompletion), params(move(params)) {}
 
 unique_ptr<CompletionItem>
-CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::SymbolRef maybeAlias,
-                                           const core::TypePtr &receiverType, const core::TypeConstraint *constraint,
-                                           core::Loc queryLoc, string_view prefix, size_t sortIdx) const {
+CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::DispatchResult &dispatchResult,
+                                           core::MethodRef maybeAlias, const core::TypePtr &receiverType,
+                                           const core::TypeConstraint *constraint, core::Loc queryLoc,
+                                           string_view prefix, size_t sortIdx, u2 totalArgs) const {
     const auto &gs = typechecker.state();
     ENFORCE(maybeAlias.exists());
-    ENFORCE(maybeAlias.data(gs)->isMethod());
     auto clientConfig = config.getClientConfig();
     auto supportsSnippets = clientConfig.clientCompletionItemSnippetSupport;
     auto markupKind = clientConfig.clientCompletionItemMarkupKind;
@@ -673,12 +684,12 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     item->sortText = fmt::format("{:06d}", sortIdx);
 
     item->kind = CompletionItemKind::Method;
-    item->detail = maybeAlias.data(gs)->show(gs);
+    item->detail = maybeAlias.show(gs);
 
     string replacementText;
     if (supportsSnippets) {
         item->insertTextFormat = InsertTextFormat::Snippet;
-        replacementText = methodSnippet(gs, what, receiverType, constraint);
+        replacementText = methodSnippet(gs, dispatchResult, what, receiverType, constraint, totalArgs);
     } else {
         item->insertTextFormat = InsertTextFormat::PlainText;
         replacementText = label;
@@ -736,7 +747,7 @@ void CompletionTask::findSimilarConstants(const core::GlobalState &gs, const cor
     }
 
     int i = -1;
-    for (auto ancestor : ancestors(gs, resp.scopes[0])) {
+    for (auto ancestor : ancestors(gs, resp.scopes[0].asClassOrModuleRef())) {
         i++;
 
         if (i == 0) {
@@ -792,15 +803,15 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
 
         // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
         auto similarKeywords = sendResp->isPrivateOk ? allSimilarKeywords(prefix) : vector<RubyKeyword>{};
-
-        auto similarMethodsByName = allSimilarMethods(gs, *sendResp->dispatchResult, prefix);
+        auto dispatchResult = sendResp->dispatchResult;
+        auto similarMethodsByName = allSimilarMethods(gs, *dispatchResult, prefix);
         for (auto &[methodName, similarMethods] : similarMethodsByName) {
             fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
                 if (left.depth != right.depth) {
                     return left.depth < right.depth;
                 }
 
-                return left.method.rawId() < right.method.rawId();
+                return left.method.id() < right.method.id();
             });
         }
 
@@ -846,7 +857,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 return leftShortName < rightShortName;
             }
 
-            return left.method.rawId() < right.method.rawId();
+            return left.method.id() < right.method.id();
         });
 
         // TODO(jez) Do something smarter here than "all keywords then all locals then all methods"
@@ -857,8 +868,9 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             items.push_back(getCompletionItemForLocal(gs, config, similarLocal, queryLoc, prefix, items.size()));
         }
         for (auto &similarMethod : deduped) {
-            items.push_back(getCompletionItemForMethod(typechecker, similarMethod.method, similarMethod.receiverType,
-                                                       similarMethod.constr.get(), queryLoc, prefix, items.size()));
+            items.push_back(getCompletionItemForMethod(typechecker, *dispatchResult, similarMethod.method,
+                                                       similarMethod.receiverType, similarMethod.constr.get(), queryLoc,
+                                                       prefix, items.size(), sendResp->totalArgs));
         }
     } else if (auto constantResp = resp->isConstant()) {
         findSimilarConstants(gs, *constantResp, queryLoc, items);

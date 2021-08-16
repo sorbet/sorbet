@@ -1,13 +1,13 @@
 # typed: __STDLIB_INTERNAL
 
-# [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html) is the class
+# [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html) is the class
 # from which all higher-level numeric classes should inherit.
 #
-# [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html) allows
+# [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html) allows
 # instantiation of heap-allocated objects. Other core numeric classes such as
-# [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) are implemented
+# [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) are implemented
 # as immediates, which means that each
-# [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) is a single
+# [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) is a single
 # immutable object which is always passed by value.
 #
 # ```ruby
@@ -25,19 +25,19 @@
 # 1.object_id == 1.dup.object_id   #=> true
 # ```
 #
-# For this reason, [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html)
+# For this reason, [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html)
 # should be used when defining other numeric classes.
 #
 # Classes which inherit from
-# [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html) must implement
+# [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html) must implement
 # `coerce`, which returns a two-member
-# [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) containing an object
+# [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) containing an object
 # that has been coerced into an instance of the new class and `self` (see
-# [`coerce`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html#method-i-coerce)).
+# [`coerce`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html#method-i-coerce)).
 #
 # Inheriting classes should also implement arithmetic operator methods (`+`,
 # `-`, `*` and `/`) and the `<=>` operator (see
-# [`Comparable`](https://docs.ruby-lang.org/en/2.6.0/Comparable.html)). These
+# [`Comparable`](https://docs.ruby-lang.org/en/2.7.0/Comparable.html)). These
 # methods may rely on `coerce` to ensure interoperability with instances of
 # other numeric classes.
 #
@@ -92,7 +92,7 @@ class Numeric < Object
   # Equivalent to `num.divmod(numeric)[1]`.
   #
   # See
-  # [`Numeric#divmod`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html#method-i-divmod).
+  # [`Numeric#divmod`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html#method-i-divmod).
   sig do
     params(
         arg0: Numeric,
@@ -190,9 +190,9 @@ class Numeric < Object
   # -34.56.abs     #=> 34.56
   # ```
   #
-  # [`Numeric#magnitude`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html#method-i-magnitude)
+  # [`Numeric#magnitude`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html#method-i-magnitude)
   # is an alias for
-  # [`Numeric#abs`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html#method-i-abs).
+  # [`Numeric#abs`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html#method-i-abs).
   sig {returns(Numeric)}
   def abs(); end
 
@@ -211,10 +211,10 @@ class Numeric < Object
   # Returns the smallest number greater than or equal to `num` with a precision
   # of `ndigits` decimal digits (default: 0).
   #
-  # [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html) implements
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html) implements
   # this by converting its value to a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) and invoking
-  # [`Float#ceil`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-ceil).
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) and invoking
+  # [`Float#ceil`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-ceil).
   sig {returns(Integer)}
   sig do
     params(
@@ -226,7 +226,7 @@ class Numeric < Object
 
   # If `numeric` is the same type as `num`, returns an array `[numeric, num]`.
   # Otherwise, returns an array with both `numeric` and `num` represented as
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) objects.
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) objects.
   #
   # This coercion mechanism is used by Ruby to handle mixed-type numeric
   # operations: it is intended to find a compatible common type between the two
@@ -261,13 +261,13 @@ class Numeric < Object
   def denominator(); end
 
   # Uses `/` to perform division, then converts the result to an integer.
-  # [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html) does not
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html) does not
   # define the `/` operator; this is left to subclasses.
   #
   # Equivalent to `num.divmod(numeric)[0]`.
   #
   # See
-  # [`Numeric#divmod`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html#method-i-divmod).
+  # [`Numeric#divmod`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html#method-i-divmod).
   sig do
     params(
         arg0: Numeric,
@@ -361,10 +361,10 @@ class Numeric < Object
   # Returns the largest number less than or equal to `num` with a precision of
   # `ndigits` decimal digits (default: 0).
   #
-  # [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html) implements
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html) implements
   # this by converting its value to a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) and invoking
-  # [`Float#floor`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-floor).
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) and invoking
+  # [`Float#floor`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-floor).
   sig {returns(Integer)}
   sig do
     params(
@@ -398,7 +398,7 @@ class Numeric < Object
   def infinite?; end
 
   # Returns `true` if `num` is an
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html).
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html).
   #
   # ```ruby
   # 1.0.integer?   #=> false
@@ -415,9 +415,9 @@ class Numeric < Object
   # -34.56.abs     #=> 34.56
   # ```
   #
-  # [`Numeric#magnitude`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html#method-i-magnitude)
+  # [`Numeric#magnitude`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html#method-i-magnitude)
   # is an alias for
-  # [`Numeric#abs`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html#method-i-abs).
+  # [`Numeric#abs`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html#method-i-abs).
   sig {returns(Numeric)}
   def magnitude(); end
 
@@ -426,7 +426,7 @@ class Numeric < Object
   # Equivalent to `num.divmod(numeric)[1]`.
   #
   # See
-  # [`Numeric#divmod`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html#method-i-divmod).
+  # [`Numeric#divmod`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html#method-i-divmod).
   sig do
     params(
         arg0: Numeric,
@@ -481,7 +481,7 @@ class Numeric < Object
   def real(); end
 
   # Returns `true` if `num` is a real number (i.e. not
-  # [`Complex`](https://docs.ruby-lang.org/en/2.6.0/Complex.html)).
+  # [`Complex`](https://docs.ruby-lang.org/en/2.7.0/Complex.html)).
   sig {returns(Numeric)}
   def real?(); end
 
@@ -496,7 +496,7 @@ class Numeric < Object
   # `x.remainder(y)` means `x-y*(x/y).truncate`.
   #
   # See
-  # [`Numeric#divmod`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html#method-i-divmod).
+  # [`Numeric#divmod`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html#method-i-divmod).
   sig do
     params(
         arg0: Numeric,
@@ -508,10 +508,10 @@ class Numeric < Object
   # Returns `num` rounded to the nearest value with a precision of `ndigits`
   # decimal digits (default: 0).
   #
-  # [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html) implements
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html) implements
   # this by converting its value to a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) and invoking
-  # [`Float#round`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-round).
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) and invoking
+  # [`Float#round`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-round).
   sig do
     params(
         arg0: Numeric,
@@ -552,11 +552,11 @@ class Numeric < Object
   # increments itself using the `+` operator.
   #
   # If no block is given, an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) is
   # returned instead. Especially, the enumerator is an
-  # [`Enumerator::ArithmeticSequence`](https://docs.ruby-lang.org/en/2.6.0/Enumerator/ArithmeticSequence.html)
+  # [`Enumerator::ArithmeticSequence`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/ArithmeticSequence.html)
   # if both `limit` and `step` are kind of
-  # [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html) or `nil`.
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html) or `nil`.
   #
   # For example:
   #
@@ -617,10 +617,10 @@ class Numeric < Object
   # Returns `num` truncated (toward zero) to a precision of `ndigits` decimal
   # digits (default: 0).
   #
-  # [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html) implements
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html) implements
   # this by converting its value to a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) and invoking
-  # [`Float#truncate`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-truncate).
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) and invoking
+  # [`Float#truncate`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-truncate).
   sig {returns(Integer)}
   sig do
     params(

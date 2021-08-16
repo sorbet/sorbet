@@ -1,6 +1,6 @@
 # typed: strict
 
-class Foo
+class RBI::Foo
   extend T::Sig
 
   sig {returns(::Integer)}
@@ -10,6 +10,6 @@ end
 class ::GlobalBar
   extend T::Sig
 
-  sig {returns(Foo)}
+  sig {returns(RBI::Foo)}
   def self.foo(); end
 end

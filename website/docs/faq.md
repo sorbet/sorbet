@@ -252,20 +252,41 @@ bundle exec srb rbi suggest-typed
 
 ## What platforms does Sorbet support?
 
-The `sorbet` and `sorbet-runtime` gems are currently only tested on Ruby 2.5 and
-Ruby 2.6.
+The `sorbet-runtime` gem is currently only tested on Ruby 2.6 and Ruby 2.7. It
+is known to not support Ruby 2.4. Feel free to report runtime issues for any
+current or future Ruby version.
 
-Ruby 2.7 has
-[known issues](https://github.com/sorbet/sorbet/issues?q=is%3Aissue+2.7+) and is
-[not being worked on yet](https://github.com/sorbet/sorbet/issues/2771#issuecomment-599761098)
-(as of May 2020) but PRs are welcome!
+The `sorbet-static` gem is known to support Ruby 2.4, Ruby 2.5, Ruby 2.6, and
+Ruby 2.7 to a minimum level (i.e., it can at least parse syntax introduced in
+those versions). Some language features are typed more strictly than others
+(generally, language features in newer Ruby versions have looser type support).
+This is not by design, just by convenience. Feel free to open feature requests
+that various (new or old) language features be typed more strictly.
 
-The static checker is only tested on macOS 10.14 (Mojave) and Ubuntu 18 (Bionic
-Beaver). We expect it to work on macOS 10.10 (Yosemite) and most Linux
-distributions where `glibc`, `git` and `bash` are present.
+Sorbet bundles [RBI files](rbi.md) for the standard library. In Ruby the
+standard library changes with the Ruby version being used, but Sorbet only ships
+one set of RBI definitions for the standard library. In particular, Sorbet's RBI
+files for the standard library might reflect classes, methods, or APIs that are
+only available in a version of Ruby newer than the one used to run a given
+project. You will have to rely on (runtime) test suites to verify that your
+project does not use new standard library APIs with an old Ruby version.
 
-If you are using one of the official minimal Ruby Docker images you will need to
-install the extra dependencies yourself:
+The `sorbet-static` gem is only tested on macOS 10.14 (Mojave) and Ubuntu 18
+(Bionic Beaver). There is currently no Windows support. We expect
+`sorbet-static` to work as far back as macOS 10.10 (Yosemite), as far forward as
+macOS 11.0 Big Sur, and on most Linux distributions using `glibc`.
+
+We do not test nor publish prebuilt binaries for macOS on Apple Silicon. We have
+reports that it doesn't work, but no one on the Sorbet team has access to Apple
+Silicon-based macOS machines, so we have been unable to diagnose nor fix any
+problems. If you are interested in working on this, feel free to reach out in
+the #internals channel on our [Sorbet Slack](/slack).
+
+The `sorbet` gem has runtime dependencies on `git` and `bash`.
+
+Combined, these points mean that if you are using one of the official minimal
+Ruby Docker images (which are based on Apline Linux), you will need to install
+some support libraries:
 
 ```Dockerfile
 FROM ruby:2.6-alpine
@@ -283,8 +304,6 @@ RUN wget -nv -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/
     rm /etc/apk/keys/sgerrand.rsa.pub && \
     rm glibc-${GLIBC_RELEASE_VERSION}.apk
 ```
-
-There is currently no Windows support.
 
 ## Does Sorbet support ActiveRecord (and Rails?)
 

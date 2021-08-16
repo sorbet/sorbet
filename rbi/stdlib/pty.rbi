@@ -3,10 +3,10 @@
 # Creates and manages pseudo terminals (PTYs). See also
 # http://en.wikipedia.org/wiki/Pseudo\_terminal
 #
-# [`PTY`](https://docs.ruby-lang.org/en/2.6.0/PTY.html) allows you to allocate
+# [`PTY`](https://docs.ruby-lang.org/en/2.7.0/PTY.html) allows you to allocate
 # new terminals using
-# [`::open`](https://docs.ruby-lang.org/en/2.6.0/PTY.html#method-c-open) or
-# [`::spawn`](https://docs.ruby-lang.org/en/2.6.0/PTY.html#method-c-spawn) a new
+# [`::open`](https://docs.ruby-lang.org/en/2.7.0/PTY.html#method-c-open) or
+# [`::spawn`](https://docs.ruby-lang.org/en/2.7.0/PTY.html#method-c-spawn) a new
 # terminal with a specific command.
 #
 # ## Example
@@ -14,9 +14,9 @@
 # In this example we will change the buffering type in the `factor` command,
 # assuming that factor uses stdio for stdout buffering.
 #
-# If [`IO.pipe`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-pipe) is
+# If [`IO.pipe`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-pipe) is
 # used instead of
-# [`PTY.open`](https://docs.ruby-lang.org/en/2.6.0/PTY.html#method-c-open), this
+# [`PTY.open`](https://docs.ruby-lang.org/en/2.7.0/PTY.html#method-c-open), this
 # code deadlocks because factor's stdout is fully buffered.
 #
 # ```ruby
@@ -68,28 +68,28 @@ module PTY
   # the process is still alive.
   #
   # If the process is not alive, and `raise` was true, a
-  # [`PTY::ChildExited`](https://docs.ruby-lang.org/en/2.6.0/PTY/ChildExited.html)
+  # [`PTY::ChildExited`](https://docs.ruby-lang.org/en/2.7.0/PTY/ChildExited.html)
   # exception will be raised. Otherwise it will return a
-  # [`Process::Status`](https://docs.ruby-lang.org/en/2.6.0/Process/Status.html)
+  # [`Process::Status`](https://docs.ruby-lang.org/en/2.7.0/Process/Status.html)
   # instance.
   #
   # `pid`
   # :   The process id of the process to check
   # `raise`
   # :   If `true` and the process identified by `pid` is no longer alive a
-  #     [`PTY::ChildExited`](https://docs.ruby-lang.org/en/2.6.0/PTY/ChildExited.html)
+  #     [`PTY::ChildExited`](https://docs.ruby-lang.org/en/2.7.0/PTY/ChildExited.html)
   #     is raised.
   def self.check(*_); end
 
   # Spawns the specified command on a newly allocated pty. You can also use the
   # alias
-  # [`::getpty`](https://docs.ruby-lang.org/en/2.6.0/PTY.html#method-c-getpty).
+  # [`::getpty`](https://docs.ruby-lang.org/en/2.7.0/PTY.html#method-c-getpty).
   #
   # The command's controlling tty is set to the slave device of the pty and its
   # standard input/output/error is redirected to the slave device.
   #
   # `command` and `command_line` are the full commands to run, given a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). Any additional
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). Any additional
   # `arguments` will be passed to the command.
   #
   # ### Return values
@@ -99,10 +99,10 @@ module PTY
   # In the block form these same values will be yielded to the block:
   #
   # `r`
-  # :   A readable [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) that
+  # :   A readable [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) that
   #     contains the command's standard output and standard error
   # `w`
-  # :   A writable [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) that is
+  # :   A writable [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) that is
   #     the command's standard input
   # `pid`
   # :   The process identifier for the command.
@@ -113,8 +113,8 @@ module PTY
   # In the block form, yields two arguments `master_io, slave_file` and the
   # value of the block is returned from `open`.
   #
-  # The [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) and
-  # [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) are both closed
+  # The [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) and
+  # [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) are both closed
   # after the block completes if they haven't been already closed.
   #
   # ```ruby
@@ -137,14 +137,14 @@ module PTY
   #
   # `master_io`
   # :   the master of the pty, as an
-  #     [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  #     [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   # `slave_file`
   # :   the slave of the pty, as a
-  #     [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html). The path to the
+  #     [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html). The path to the
   #     terminal device is available via `slave_file.path`
   #
   #
-  # [`IO#raw!`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-raw-21) is
+  # [`IO#raw!`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-raw-21) is
   # usable to disable newline conversions:
   #
   # ```
@@ -158,13 +158,13 @@ module PTY
 
   # Spawns the specified command on a newly allocated pty. You can also use the
   # alias
-  # [`::getpty`](https://docs.ruby-lang.org/en/2.6.0/PTY.html#method-c-getpty).
+  # [`::getpty`](https://docs.ruby-lang.org/en/2.7.0/PTY.html#method-c-getpty).
   #
   # The command's controlling tty is set to the slave device of the pty and its
   # standard input/output/error is redirected to the slave device.
   #
   # `command` and `command_line` are the full commands to run, given a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). Any additional
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). Any additional
   # `arguments` will be passed to the command.
   #
   # ### Return values
@@ -174,10 +174,10 @@ module PTY
   # In the block form these same values will be yielded to the block:
   #
   # `r`
-  # :   A readable [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) that
+  # :   A readable [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) that
   #     contains the command's standard output and standard error
   # `w`
-  # :   A writable [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) that is
+  # :   A writable [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) that is
   #     the command's standard input
   # `pid`
   # :   The process identifier for the command.
@@ -185,7 +185,7 @@ module PTY
 end
 
 # Thrown when
-# [`PTY::check`](https://docs.ruby-lang.org/en/2.6.0/PTY.html#method-c-check) is
+# [`PTY::check`](https://docs.ruby-lang.org/en/2.7.0/PTY.html#method-c-check) is
 # called for a pid that represents a process that has exited.
 class PTY::ChildExited < ::RuntimeError
   # Returns the exit status of the child for which PTY#check raised this

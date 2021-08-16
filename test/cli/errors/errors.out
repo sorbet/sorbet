@@ -12,10 +12,11 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
 test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
     .. |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    ...: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+  Expected `String` for argument `arg0` of method `Kernel#raise (overload.1)`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2744:
     .. |        arg0: String,
                   ^^^^
-  Got Integer originating from:
+  Got `Integer` originating from:
     test/cli/errors/errors.rb:13:
     .. |  def foo(arg)
                   ^^^
@@ -23,10 +24,11 @@ test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument
 test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for argument `arg` https://srb.help/7002
     .. |    foo("foo")
                 ^^^^^
-    test/cli/errors/errors.rb:12: Method `ComplexError#foo` has specified `arg` as `Integer`
+  Expected `Integer` for argument `arg` of method `ComplexError#foo`:
+    test/cli/errors/errors.rb:12:
     .. |  sig {params(arg: Integer).returns(NilClass)}
                       ^^^
-  Got String("foo") originating from:
+  Got `String("foo")` originating from:
     test/cli/errors/errors.rb:19:
     .. |    foo("foo")
                 ^^^^^
@@ -34,10 +36,11 @@ test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for a
 test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` for argument `a` https://srb.help/7002
     .. |    bar(a)
             ^^^^^^
-    test/cli/errors/errors.rb:36: Method `ErrorLines#bar` has specified `a` as `Integer`
+  Expected `Integer` for argument `a` of method `ErrorLines#bar`:
+    test/cli/errors/errors.rb:36:
     .. |  sig {params(a: Integer).returns(Integer)}
                       ^
-  Got T.nilable(Integer) originating from:
+  Got `T.nilable(Integer)` originating from:
     test/cli/errors/errors.rb:29:
     .. |          nil
                   ^^^
@@ -66,10 +69,11 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
 test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
     .. |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    ...: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+  Expected `String` for argument `arg0` of method `Kernel#raise (overload.1)`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2744:
     .. |        arg0: String,
                   ^^^^
-  Got Integer originating from:
+  Got `Integer` originating from:
     test/cli/errors/errors.rb:13:
     .. |  def foo(arg)
                   ^^^
@@ -77,10 +81,11 @@ test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument
 test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for argument `arg` https://srb.help/7002
     .. |    foo("foo")
                 ^^^^^
-    test/cli/errors/errors.rb:12: Method `ComplexError#foo` has specified `arg` as `Integer`
+  Expected `Integer` for argument `arg` of method `ComplexError#foo`:
+    test/cli/errors/errors.rb:12:
     .. |  sig {params(arg: Integer).returns(NilClass)}
                       ^^^
-  Got String("foo") originating from:
+  Got `String("foo")` originating from:
     test/cli/errors/errors.rb:19:
     .. |    foo("foo")
                 ^^^^^
@@ -88,10 +93,11 @@ test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for a
 test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` for argument `a` https://srb.help/7002
     .. |    bar(a)
             ^^^^^^
-    test/cli/errors/errors.rb:36: Method `ErrorLines#bar` has specified `a` as `Integer`
+  Expected `Integer` for argument `a` of method `ErrorLines#bar`:
+    test/cli/errors/errors.rb:36:
     .. |  sig {params(a: Integer).returns(Integer)}
                       ^
-  Got T.nilable(Integer) originating from:
+  Got `T.nilable(Integer)` originating from:
     test/cli/errors/errors.rb:29:
     .. |          nil
                   ^^^
@@ -120,10 +126,11 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
 test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
     .. |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    ...: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+  Expected `String` for argument `arg0` of method `Kernel#raise (overload.1)`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2744:
     .. |        arg0: String,
                   ^^^^
-  Got Integer originating from:
+  Got `Integer` originating from:
     test/cli/errors/errors.rb:13:
     .. |  def foo(arg)
                   ^^^
@@ -131,10 +138,11 @@ test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument
 test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for argument `arg` https://srb.help/7002
     .. |    foo("foo")
                 ^^^^^
-    test/cli/errors/errors.rb:12: Method `ComplexError#foo` has specified `arg` as `Integer`
+  Expected `Integer` for argument `arg` of method `ComplexError#foo`:
+    test/cli/errors/errors.rb:12:
     .. |  sig {params(arg: Integer).returns(NilClass)}
                       ^^^
-  Got String("foo") originating from:
+  Got `String("foo")` originating from:
     test/cli/errors/errors.rb:19:
     .. |    foo("foo")
                 ^^^^^
@@ -142,10 +150,11 @@ test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for a
 test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` for argument `a` https://srb.help/7002
     .. |    bar(a)
             ^^^^^^
-    test/cli/errors/errors.rb:36: Method `ErrorLines#bar` has specified `a` as `Integer`
+  Expected `Integer` for argument `a` of method `ErrorLines#bar`:
+    test/cli/errors/errors.rb:36:
     .. |  sig {params(a: Integer).returns(Integer)}
                       ^
-  Got T.nilable(Integer) originating from:
+  Got `T.nilable(Integer)` originating from:
     test/cli/errors/errors.rb:29:
     .. |          nil
                   ^^^

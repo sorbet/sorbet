@@ -5,7 +5,7 @@ using namespace std;
 
 namespace sorbet::ast {
 
-void TreePtr::_sanityCheck() const {
+void ExpressionPtr::_sanityCheck() const {
     auto *ptr = get();
     ENFORCE(ptr != nullptr);
 
@@ -78,7 +78,7 @@ void Cast::_sanityCheck() {
     ENFORCE(arg);
     ENFORCE(type);
     ENFORCE(cast == core::Names::cast() || cast == core::Names::assertType() || cast == core::Names::let() ||
-            cast == core::Names::uncheckedLet());
+            cast == core::Names::uncheckedLet() || cast == core::Names::bind());
 }
 
 void ClassDef::_sanityCheck() {

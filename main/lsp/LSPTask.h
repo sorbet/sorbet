@@ -18,9 +18,9 @@ enum class FieldAccessorType { None, Reader, Writer, Accessor };
 struct AccessorInfo {
     core::NameRef type;
     FieldAccessorType accessorType = FieldAccessorType::None;
-    core::SymbolRef fieldSymbol;
-    core::SymbolRef readerSymbol;
-    core::SymbolRef writerSymbol;
+    core::FieldRef fieldSymbol;
+    core::MethodRef readerSymbol;
+    core::MethodRef writerSymbol;
 };
 
 /**

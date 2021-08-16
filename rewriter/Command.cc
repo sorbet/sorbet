@@ -79,9 +79,13 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
         newArgs.emplace_back(arg.deepCopy());
     }
 
-    auto selfCall =
-        ast::MK::SyntheticMethod(call->loc, call->loc, call->name, std::move(newArgs), ast::MK::UntypedNil(call->loc));
-    ast::cast_tree<ast::MethodDef>(selfCall)->flags.isSelfMethod = true;
+    // This method is only for type checking. It doesn't actually exist at runtime, and instead all
+    // Opus::Command subclasses inherit the `self.call` method from `Opus::Command` directly.
+    ast::MethodDef::Flags flags;
+    flags.isSelfMethod = true;
+    flags.discardDef = true;
+    auto selfCall = ast::MK::SyntheticMethod(call->loc, call->loc, call->name, std::move(newArgs),
+                                             ast::MK::UntypedNil(call->loc), flags);
 
     klass->rhs.insert(klass->rhs.begin() + i + 1, sig->deepCopy());
     klass->rhs.insert(klass->rhs.begin() + i + 2, std::move(selfCall));

@@ -1,5 +1,0 @@
-ruby_extra_args:
-  - "--disable-gems"
-  - "--disable-did-you-mean"
-triggers:
-  hook: test/cli/subprocess-plugin/verify_ruby_options.rb

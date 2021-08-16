@@ -23,7 +23,7 @@
 # ```
 #
 # It also provides an array core extension,
-# [`Array#abbrev`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-abbrev).
+# [`Array#abbrev`](https://docs.ruby-lang.org/en/2.7.0/Array.html#method-i-abbrev).
 #
 # ```ruby
 # pp %w{ summer winter }.abbrev

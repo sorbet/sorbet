@@ -44,7 +44,7 @@ end
 class BadChild1 < Parent
   extend T::Generic
   My = type_member
-  Elem = type_member # error: Type members in wrong order
+  Elem = type_member # error: Type members for `BadChild1` repeated in wrong order
 end
 
 class BadChild2 < Parent # error: must be re-declared

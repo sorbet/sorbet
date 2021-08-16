@@ -36,7 +36,7 @@ class ErrorColors {
 
 public:
     ErrorColors() = delete;
-    template <typename... Args> static std::string format(std::string_view msg, const Args &... args) {
+    template <typename... Args> static std::string format(std::string_view msg, const Args &...args) {
         return fmt::format(replaceAll(msg, coloredPatternSigil, coloredPatternReplace), args...);
     }
     static void enableColors();
@@ -57,14 +57,14 @@ struct ErrorLine {
 
     // Use this (instead of the constructor) if you want `{}` to mean "turn this cyan if should use
     // colors, or just backticks otherwise".
-    template <typename... Args> static ErrorLine from(Loc loc, std::string_view msg, const Args &... args) {
+    template <typename... Args> static ErrorLine from(Loc loc, std::string_view msg, const Args &...args) {
         std::string formatted = ErrorColors::format(msg, args...);
         return ErrorLine(loc, move(formatted));
     }
 
     // You should ALMOST ALWAYS prefer the variant above that takes a Loc.
     // The best error messages show context associated with locations.
-    template <typename... Args> static ErrorLine fromWithoutLoc(std::string_view msg, const Args &... args) {
+    template <typename... Args> static ErrorLine fromWithoutLoc(std::string_view msg, const Args &...args) {
         std::string formatted = ErrorColors::format(msg, args...);
         return ErrorLine(core::Loc::none(), move(formatted), LocDisplay::Hidden);
     }
@@ -99,7 +99,7 @@ public:
           std::vector<AutocorrectSuggestion> autocorrects, bool isSilenced)
         : loc(loc), what(what), header(move(header)), isSilenced(isSilenced), autocorrects(move(autocorrects)),
           sections(sections) {
-        ENFORCE(this->header.empty() || this->header.back() != '.');
+        ENFORCE(this->header.empty() || this->header.back() != '.', "Error headers should not end with a period");
         ENFORCE(this->header.find('\n') == std::string::npos, "{} has a newline in it", this->header);
     }
 };
@@ -148,22 +148,22 @@ public:
         return state == State::WillBuild;
     }
     void addErrorSection(ErrorSection &&section);
-    template <typename... Args> void addErrorLine(Loc loc, ConstExprStr msg, const Args &... args) {
+    template <typename... Args> void addErrorLine(Loc loc, ConstExprStr msg, const Args &...args) {
         std::string formatted = ErrorColors::format(msg.str, args...);
         addErrorSection(ErrorSection({ErrorLine(loc, formatted)}));
     }
-    template <typename... Args> void addErrorNote(ConstExprStr msg, const Args &... args) {
+    template <typename... Args> void addErrorNote(ConstExprStr msg, const Args &...args) {
         addErrorSection(ErrorSection("Note:", {ErrorLine::fromWithoutLoc(msg.str, args...)}));
     }
 
-    template <typename... Args> void setHeader(ConstExprStr msg, const Args &... args) {
+    template <typename... Args> void setHeader(ConstExprStr msg, const Args &...args) {
         std::string formatted = ErrorColors::format(msg.str, args...);
         _setHeader(move(formatted));
     }
 
     void addAutocorrect(AutocorrectSuggestion &&autocorrect);
     template <typename... Args>
-    void replaceWith(const std::string &title, Loc loc, ConstExprStr replacement, const Args &... args) {
+    void replaceWith(const std::string &title, Loc loc, ConstExprStr replacement, const Args &...args) {
         std::string formatted = fmt::format(replacement.str, args...);
         addAutocorrect(AutocorrectSuggestion{title, {AutocorrectSuggestion::Edit{loc, move(formatted)}}});
     }

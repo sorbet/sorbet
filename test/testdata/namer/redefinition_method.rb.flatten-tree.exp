@@ -24,13 +24,13 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.sig(<self>) do ||
+        ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :foo) do ||
           <self>.params(:a, ::Integer).returns(::Integer)
         end
         <self>.extend(::T::Sig)
-        ::Sorbet::Private::Static.keep_def(<self>, :foo)
-        ::Sorbet::Private::Static.keep_def(<self>, :foo)
-        ::Sorbet::Private::Static.keep_def(<self>, :foo)
+        ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
         <emptyTree>
       end
     end

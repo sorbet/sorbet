@@ -30,6 +30,7 @@ NameDef names[] = {
     {"orOr", "||"},
     {"toS", "to_s"},
     {"toA", "to_a"},
+    {"toAry", "to_ary"},
     {"toH", "to_h"},
     {"toHash", "to_hash"},
     {"toProc", "to_proc"},
@@ -98,6 +99,7 @@ NameDef names[] = {
     {"override_", "override"},
     {"overridable"},
     {"allowIncompatible", "allow_incompatible"},
+    {"sigForMethod"},
 
     // Sig builders
     {"bind"},
@@ -107,6 +109,7 @@ NameDef names[] = {
     {"void_", "void"},
     {"VOID", "VOID", true},
     {"checked"},
+    {"never"},
     {"onFailure", "on_failure"},
 
     {"all"},
@@ -138,6 +141,13 @@ NameDef names[] = {
     {"revealType", "reveal_type"},
     {"absurd"},
     {"nonForcingIsA_p", "non_forcing_is_a?"},
+    {"valid_p", "valid?"},
+    {"recursivelyValid_p", "recursively_valid?"},
+    {"subtypeOf_p", "subtype_of?"},
+    {"describeObj", "describe_obj"},
+    {"errorMessageForObj", "error_message_for_obj"},
+    {"errorMessageForObjRecursive", "error_message_for_obj_recursive"},
+    {"validate_bang", "validate!"},
     // end T keywords
 
     // Ruby DSL methods which we understand
@@ -173,10 +183,12 @@ NameDef names[] = {
     {"tokenProp", "token_prop"},
     {"timestampedTokenProp", "timestamped_token_prop"},
     {"createdProp", "created_prop"},
+    {"updatedProp", "updated_prop"},
     {"merchantProp", "merchant_prop"},
     {"encryptedProp", "encrypted_prop"},
     {"array"},
     {"defDelegator", "def_delegator"},
+    {"defDelegators", "def_delegators"},
     {"delegate"},
     {"type"},
     {"optional"},
@@ -186,6 +198,7 @@ NameDef names[] = {
     {"const_", "const"},
     {"token"},
     {"created"},
+    {"updated"},
     {"merchant"},
     {"foreign"},
     {"ifunset"},
@@ -194,16 +207,16 @@ NameDef names[] = {
     {"instanceVariableSet", "instance_variable_set"},
     {"decorator"},
     {"propGetLogic", "prop_get_logic"},
-    {"softFreezeLogic", "soft_freeze_logic"},
+    {"propFreezeHandler", "prop_freeze_handler"},
     {"computedBy", "computed_by"},
     {"factory"},
     {"InexactStruct", "InexactStruct", true},
     {"Chalk", "Chalk", true},
     {"ODM", "ODM", true},
     {"Document", "Document", true},
+    {"DeprecatedNumeric", "DeprecatedNumeric", true},
     {"Private", "Private", true},
     {"Types", "Types", true},
-    {"DocumentDecoratorHelper", "DocumentDecoratorHelper", true},
     {"Chalk_ODM_Document", "::Chalk::ODM::Document"},
 
     {"prefix"},
@@ -256,11 +269,16 @@ NameDef names[] = {
     {"ActiveRecord", "ActiveRecord", true},
     {"Migration", "Migration", true},
     {"Compatibility", "Compatibility", true},
+    {"ActiveSupport", "ActiveSupport", true},
+    {"Concern", "Concern", true},
 
     {"instance"},
+    {"normal"},
 
     {"raise"},
     {"rewriterRaiseUnimplemented", "Sorbet rewriter pass partially unimplemented"},
+
+    {"test"},
     // end DSL methods
 
     // The next two names are used as keys in SymbolInfo::members to store
@@ -275,6 +293,11 @@ NameDef names[] = {
     {"singleton", "<singleton class>"},
     {"attached", "<attached class>"},
 
+    // Requires ancestor
+    {"requiredAncestors", "<required-ancestor>"},
+    {"requiredAncestorsLin", "<required-ancestor-lin>"},
+    {"requiresAncestor", "requires_ancestor"},
+
     // This behaves like the above two names, in the sense that we use a member
     // on a class to lookup an associated symbol with some extra info.
     {"sealedSubclasses", "sealed_subclasses"},
@@ -282,6 +305,8 @@ NameDef names[] = {
     // Used to store arguments to a "mixes_in_class_methods()" call
     {"mixedInClassMethods", "<mixed_in_class_methods>"},
     {"mixesInClassMethods", "mixes_in_class_methods"},
+    {"ClassMethods", "ClassMethods", true},
+    {"classMethods", "class_methods"},
 
     {"blockTemp", "<block>"},
     {"blockRetrunType", "<block-return-type>"},
@@ -308,12 +333,16 @@ NameDef names[] = {
     {"empty", ""},
 
     {"buildHash", "<build-hash>"},
-    {"buildKeywordArgs", "<build-keyword-args>"},
     {"buildArray", "<build-array>"},
     {"buildRange", "<build-range>"},
+    {"mergeHash", "<merge-hash>"},
+    {"mergeHashValues", "<merge-hash-values>"},
+    {"toHashDup", "<to-hash-dup>"},
+    {"toHashNoDup", "<to-hash-nodup>"},
     {"splat", "<splat>"},
     {"expandSplat", "<expand-splat>"},
     {"suggestType", "<suggest-type>"},
+    {"checkMatchArray", "<check-match-array>"},
     {"arg0"},
     {"arg1"},
     {"arg2"},
@@ -363,6 +392,8 @@ NameDef names[] = {
     // Pattern matching
     {"patternMatch", "<pattern-match>"},
 
+    {"regexBackref", "<regex-backref>"},
+
     {"staticInit", "<static-init>"},
 
     {"require"},
@@ -379,9 +410,7 @@ NameDef names[] = {
     {"export_", "export"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageRegistry", "<PackageRegistry>", true},
-    {"exportMethods", "export_methods"},
     {"PackageMethods", "<PackageMethods>", true},
-    {"PkgRoot_Package", "PkgRoot_Package", true},
 
     // GlobalState initEmpty()
     {"Top", "<top>", true},
@@ -404,6 +433,7 @@ NameDef names[] = {
     {"Module", "Module", true},
     {"Todo", "<todo sym>", true},
     {"TodoMethod", "<todo method>", false},
+    {"TodoTypeArgument", "<todo typeargument>", true},
     {"NoSymbol", "<none>", true},
     {"noFieldOrStaticField", "<no-field-or-static-field>", false},
     {"noMethod", "<no-method>", false},
@@ -435,20 +465,16 @@ NameDef names[] = {
     {"StubModule", "StubModule", true},
     {"StubSuperClass", "StubSuperClass", true},
     {"StubMixin", "StubMixin", true},
-    {"Configatron", "Configatron", true},
-    {"Store", "Store", true},
-    {"RootStore", "RootStore", true},
     {"Base", "Base", true},
     {"Void", "Void", true},
     {"TypeAlias", "<TypeAlias>", true},
-    {"Tools", "Tools", true},
-    {"Accessible", "Accessible", true},
     {"Generic", "Generic", true},
     {"Tuple", "Tuple", true},
     {"Shape", "Shape", true},
     {"Subclasses", "SUBCLASSES", true},
     {"Sorbet", "Sorbet", true},
     {"ReturnTypeInference", "ReturnTypeInference", true},
+    {"ResolvedSig", "ResolvedSig", true},
     {"InferredReturnType", "INFERRED_RETURN_TYPE", true},
     {"InferredArgumentType", "INFERRED_ARGUMENT_TYPE", true},
     {"ImplicitModuleSuperclass", "ImplicitModuleSuperclass", true},
@@ -467,6 +493,8 @@ NameDef names[] = {
     {"AttachedClass", "<AttachedClass>", true},
     {"NonForcingConstants", "NonForcingConstants", true},
     {"VERSION", "VERSION", true},
+    {"Thread", "Thread", true},
+    {"Configuration", "Configuration", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

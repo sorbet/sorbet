@@ -7,39 +7,39 @@
 #     => <a>B**<c/>**<b x="y"/></a> a.b.c << "D"                # =>
 #     <a>B**<c>D</c>**<b x="y"/></a>
 #
-# [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) is an
-# [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) toolkit for
+# [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) is an
+# [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) toolkit for
 # [Ruby](http://www.ruby-lang.org), in Ruby.
 #
-# [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) is a *pure* Ruby,
-# [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) 1.0 conforming,
+# [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) is a *pure* Ruby,
+# [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) 1.0 conforming,
 # [non-validating](http://www.w3.org/TR/2004/REC-xml-20040204/#sec-conformance)
 # toolkit with an intuitive API.
-# [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) passes 100% of the
+# [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) passes 100% of the
 # non-validating Oasis
 # [tests](http://www.oasis-open.org/committees/xml-conformance/xml-test-suite.shtml),
 # and provides tree, stream, SAX2, pull, and lightweight APIs.
-# [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) also includes a full
+# [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) also includes a full
 # [XPath](http://www.w3c.org/tr/xpath) 1.0 implementation. Since Ruby 1.8,
-# [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) is included in the
+# [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) is included in the
 # standard Ruby distribution.
 #
 # Main page
 # :   http://www.germane-software.com/software/rexml
 # Author
 # :   Sean Russell <serATgermaneHYPHENsoftwareDOTcom>
-# [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html)
+# [`Date`](https://docs.ruby-lang.org/en/2.7.0/Date.html)
 # :   2008/019
-# [`Version`](https://docs.ruby-lang.org/en/2.6.0/REXML.html#Version)
+# [`Version`](https://docs.ruby-lang.org/en/2.7.0/REXML.html#Version)
 # :   3.1.7.3
 #
 #
 # This API documentation can be downloaded from the
-# [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) home page, or can be
+# [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) home page, or can be
 # accessed [online](http://www.germane-software.com/software/rexml_doc)
 #
 # A tutorial is available in the
-# [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) distribution in
+# [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) distribution in
 # docs/tutorial.html, or can be accessed
 # [online](http://www.germane-software.com/software/rexml/docs/tutorial.html)
 module REXML
@@ -72,13 +72,13 @@ class REXML::AttlistDecl < ::REXML::Child
   Elem = type_member(fixed: REXML::Attribute)
 
   # Create an
-  # [`AttlistDecl`](https://docs.ruby-lang.org/en/2.6.0/REXML/AttlistDecl.html),
+  # [`AttlistDecl`](https://docs.ruby-lang.org/en/2.7.0/REXML/AttlistDecl.html),
   # pulling the information from a Source. Notice that this isn't very
   # convenient; to create an
-  # [`AttlistDecl`](https://docs.ruby-lang.org/en/2.6.0/REXML/AttlistDecl.html),
+  # [`AttlistDecl`](https://docs.ruby-lang.org/en/2.7.0/REXML/AttlistDecl.html),
   # you basically have to format it yourself, and then have the initializer
   # parse it. Sorry, but for the foreseeable future, DTD support in
-  # [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) is pretty weak on
+  # [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) is pretty weak on
   # convenience. Have I mentioned how much I hate DTDs?
   def self.new(source); end
 
@@ -113,12 +113,12 @@ class REXML::AttlistDecl < ::REXML::Child
 end
 
 # Defines an Element
-# [`Attribute`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attribute.html); IE, a
+# [`Attribute`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attribute.html); IE, a
 # attribute=value pair, as in: <element attribute="value"/>. Attributes can be
 # in their own namespaces. General users of
-# [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) will not interact
+# [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) will not interact
 # with the
-# [`Attribute`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attribute.html) class
+# [`Attribute`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attribute.html) class
 # much.
 class REXML::Attribute
   include(::REXML::Namespace)
@@ -134,25 +134,25 @@ class REXML::Attribute
   #
   # first
   # :   Either: an
-  #     [`Attribute`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attribute.html),
+  #     [`Attribute`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attribute.html),
   #     which this new attribute will become a clone of; or a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), which is
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), which is
   #     the name of this attribute
   # second
   # :   If `first` is an
-  #     [`Attribute`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attribute.html),
+  #     [`Attribute`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attribute.html),
   #     then this may be an Element, or nil. If nil, then the Element parent of
   #     this attribute is the parent of the `first`
-  #     [`Attribute`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attribute.html).
+  #     [`Attribute`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attribute.html).
   #     If the first argument is a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), then this
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), then this
   #     must also be a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), and is the
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), and is the
   #     content of the attribute. If this is the content, it must be fully
   #     normalized (contain no illegal characters).
   # parent
   # :   Ignored unless `first` is a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html); otherwise,
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html); otherwise,
   #     may be the Element parent of this attribute, or nil.
   #
   #
@@ -165,7 +165,7 @@ class REXML::Attribute
   def self.new(first, second = _, parent = _); end
 
   # Returns true if other is an
-  # [`Attribute`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attribute.html) and
+  # [`Attribute`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attribute.html) and
   # has the same name and value, false otherwise.
   def ==(other); end
 
@@ -198,6 +198,21 @@ class REXML::Attribute
   # e.attribute("ns:a").namespace # => "http://url"
   # e.attribute("nsx:a").namespace # => nil
   # ```
+  #
+  # This method always returns "" for no namespace attribute. Because the
+  # default namespace doesn't apply to attribute names.
+  #
+  # From https://www.w3.org/TR/xml-names/#uniqAttrs
+  #
+  # > the default namespace does not apply to attribute names
+  #
+  # ```ruby
+  # e = REXML::Element.new("el")
+  # e.add_namespace("", "http://example.com/")
+  # e.namespace # => "http://example.com/"
+  # e.add_attribute("a", "b")
+  # e.attribute("a").namespace # => ""
+  # ```
   def namespace(arg = _); end
 
   def node_type; end
@@ -213,14 +228,14 @@ class REXML::Attribute
   # e.add_attribute( "nsa:a", "aval" )
   # e.add_attribute( "b", "bval" )
   # e.attributes.get_attribute( "a" ).prefix   # -> "nsa"
-  # e.attributes.get_attribute( "b" ).prefix   # -> "elns"
+  # e.attributes.get_attribute( "b" ).prefix   # -> ""
   # a = Attribute.new( "x", "y" )
   # a.prefix                                   # -> ""
   # ```
   def prefix; end
 
   # Removes this
-  # [`Attribute`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attribute.html) from
+  # [`Attribute`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attribute.html) from
   # the tree, and returns true if successful
   #
   # This method is usually not called directly.
@@ -230,7 +245,7 @@ class REXML::Attribute
   def to_s; end
 
   # Returns this attribute out as
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) source, expanding the
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) source, expanding the
   # name
   #
   # ```ruby
@@ -252,7 +267,7 @@ class REXML::Attribute
 end
 
 # A class that defines the set of
-# [`Attributes`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attributes.html) of
+# [`Attributes`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attributes.html) of
 # an Element and provides operations for accessing elements in that set.
 class REXML::Attributes < ::Hash
   K = type_member(fixed: String)
@@ -265,15 +280,15 @@ class REXML::Attributes < ::Hash
   def self.new(element); end
 
   # Alias for:
-  # [`add`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attributes.html#method-i-add)
+  # [`add`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attributes.html#method-i-add)
   def <<(attribute); end
 
   # Fetches an attribute value. If you want to get the Attribute itself, use
-  # [`get_attribute`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attributes.html#method-i-get_attribute)()
+  # [`get_attribute`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attributes.html#method-i-get_attribute)()
   # name
   # :   an XPath attribute name. Namespaces are relevant here.
   # Returns
-  # :   the [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) value of
+  # :   the [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) value of
   #     the matching attribute, or `nil` if no matching attribute was found.
   #     This is the unnormalized value (with entities expanded).
   #
@@ -310,12 +325,12 @@ class REXML::Attributes < ::Hash
   #
   #
   # Also aliased as:
-  # [`<<`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attributes.html#method-i-3C-3C)
+  # [`<<`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attributes.html#method-i-3C-3C)
   def add(attribute); end
 
   # Removes an attribute
   # attribute
-  # :   either a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html),
+  # :   either a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html),
   #     which is the name of the attribute to remove -- namespaces are
   #     significant here -- or the attribute to remove.
   # Returns
@@ -332,11 +347,11 @@ class REXML::Attributes < ::Hash
 
   # Deletes all attributes matching a name. Namespaces are significant.
   # name
-  # :   A [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html); all
+  # :   A [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html); all
   #     attributes that match this path will be removed
   # Returns
-  # :   an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of the
-  #     [`Attributes`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attributes.html)
+  # :   an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of the
+  #     [`Attributes`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attributes.html)
   #     that were removed
   def delete_all(name); end
 
@@ -350,7 +365,7 @@ class REXML::Attributes < ::Hash
   def each; end
 
   # Iterates over the attributes of an Element. Yields actual Attribute nodes,
-  # not [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) values.
+  # not [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) values.
   #
   # ```ruby
   # doc = Document.new '<a x="1" y="2"/>'
@@ -368,7 +383,7 @@ class REXML::Attributes < ::Hash
   # :   The first matching attribute, or nil if there was none. This
   #
   # value is an Attribute node, not the
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) value of the
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) value of the
   # attribute.
   #
   # ```ruby
@@ -380,10 +395,10 @@ class REXML::Attributes < ::Hash
 
   # The `get_attribute_ns` method retrieves a method by its namespace and name.
   # Thus it is possible to reliably identify an attribute even if an
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) processor has changed
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) processor has changed
   # the prefix.
   #
-  # [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) contributed by
+  # [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) contributed by
   # Henrik Martensson
   def get_attribute_ns(namespace, name); end
 
@@ -396,7 +411,7 @@ class REXML::Attributes < ::Hash
   #
   #
   # Also aliased as:
-  # [`size`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attributes.html#method-i-size)
+  # [`size`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attributes.html#method-i-size)
   def length; end
 
   def namespaces; end
@@ -413,7 +428,7 @@ class REXML::Attributes < ::Hash
   def prefixes; end
 
   # Alias for:
-  # [`length`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attributes.html#method-i-length)
+  # [`length`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attributes.html#method-i-length)
   def size; end
 
   def to_a; end
@@ -451,7 +466,7 @@ class REXML::CData < ::REXML::Text
   def clone; end
 
   # Returns the content of this
-  # [`CData`](https://docs.ruby-lang.org/en/2.6.0/REXML/CData.html) object
+  # [`CData`](https://docs.ruby-lang.org/en/2.7.0/REXML/CData.html) object
   #
   # *Examples*
   #
@@ -466,7 +481,7 @@ class REXML::CData < ::REXML::Text
   # ## DEPRECATED
   # See the rexml/formatters package
   #
-  # Generates [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) output of
+  # Generates [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) output of
   # this object
   #
   # output
@@ -488,7 +503,7 @@ class REXML::CData < ::REXML::Text
   def write(output = _, indent = _, transitive = _, ie_hack = _); end
 end
 
-# A [`Child`](https://docs.ruby-lang.org/en/2.6.0/REXML/Child.html) object is
+# A [`Child`](https://docs.ruby-lang.org/en/2.7.0/REXML/Child.html) object is
 # something contained by a parent, and this class contains methods to support
 # that. Most user code will not use this class directly.
 class REXML::Child
@@ -565,7 +580,7 @@ class REXML::Child
   def replace_with(child); end
 end
 
-# Represents an [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) comment;
+# Represents an [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) comment;
 # that is, text between <!-- ... -->
 class REXML::Comment < ::REXML::Child
   include(::Comparable)
@@ -575,21 +590,21 @@ class REXML::Comment < ::REXML::Child
   STOP = T.let(T.unsafe(nil), String)
 
   # Constructor. The first argument can be one of three types: @param first If
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), the contents of
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), the contents of
   # this comment are set to the argument. If
-  # [`Comment`](https://docs.ruby-lang.org/en/2.6.0/REXML/Comment.html), the
+  # [`Comment`](https://docs.ruby-lang.org/en/2.7.0/REXML/Comment.html), the
   # argument is duplicated. If Source, the argument is scanned for a comment.
   # @param second If the first argument is a Source, this argument should be
   # nil, not supplied, or a Parent to be set as the parent of this object
   def self.new(first, second = _); end
 
   # Compares this
-  # [`Comment`](https://docs.ruby-lang.org/en/2.6.0/REXML/Comment.html) to
+  # [`Comment`](https://docs.ruby-lang.org/en/2.7.0/REXML/Comment.html) to
   # another; the contents of the comment are used in the comparison.
   def <=>(other); end
 
   # Compares this
-  # [`Comment`](https://docs.ruby-lang.org/en/2.6.0/REXML/Comment.html) to
+  # [`Comment`](https://docs.ruby-lang.org/en/2.7.0/REXML/Comment.html) to
   # another; the contents of the comment are used in the comparison.
   def ==(other); end
 
@@ -608,7 +623,7 @@ class REXML::Comment < ::REXML::Child
 
   # ## DEPRECATED
   # See
-  # [`REXML::Formatters`](https://docs.ruby-lang.org/en/2.6.0/REXML/Formatters.html)
+  # [`REXML::Formatters`](https://docs.ruby-lang.org/en/2.7.0/REXML/Formatters.html)
   #
   # output
   # :   Where to write the string
@@ -632,11 +647,11 @@ class REXML::Declaration < ::REXML::Child
 
   # ## DEPRECATED
   # See
-  # [`REXML::Formatters`](https://docs.ruby-lang.org/en/2.6.0/REXML/Formatters.html)
+  # [`REXML::Formatters`](https://docs.ruby-lang.org/en/2.7.0/REXML/Formatters.html)
   def write(output, indent); end
 end
 
-# Represents an [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) DOCTYPE
+# Represents an [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) DOCTYPE
 # declaration; that is, the contents of <!DOCTYPE ... >. DOCTYPES can be used to
 # declare the DTD of a document, as well as being used to declare entities used
 # in the document.
@@ -684,24 +699,24 @@ class REXML::DocType < ::REXML::Parent
   def context; end
 
   # name is the name of the doctype
-  # [`external_id`](https://docs.ruby-lang.org/en/2.6.0/REXML/DocType.html#attribute-i-external_id)
+  # [`external_id`](https://docs.ruby-lang.org/en/2.7.0/REXML/DocType.html#attribute-i-external_id)
   # is the referenced DTD, if given
   def entities; end
 
   def entity(name); end
 
   # name is the name of the doctype
-  # [`external_id`](https://docs.ruby-lang.org/en/2.6.0/REXML/DocType.html#attribute-i-external_id)
+  # [`external_id`](https://docs.ruby-lang.org/en/2.7.0/REXML/DocType.html#attribute-i-external_id)
   # is the referenced DTD, if given
   def external_id; end
 
   # name is the name of the doctype
-  # [`external_id`](https://docs.ruby-lang.org/en/2.6.0/REXML/DocType.html#attribute-i-external_id)
+  # [`external_id`](https://docs.ruby-lang.org/en/2.7.0/REXML/DocType.html#attribute-i-external_id)
   # is the referenced DTD, if given
   def name; end
 
   # name is the name of the doctype
-  # [`external_id`](https://docs.ruby-lang.org/en/2.6.0/REXML/DocType.html#attribute-i-external_id)
+  # [`external_id`](https://docs.ruby-lang.org/en/2.7.0/REXML/DocType.html#attribute-i-external_id)
   # is the referenced DTD, if given
   def namespaces; end
 
@@ -710,26 +725,26 @@ class REXML::DocType < ::REXML::Parent
   # Retrieves a named notation. Only notations declared in the internal DTD
   # subset can be retrieved.
   #
-  # [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) contributed by
+  # [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) contributed by
   # Henrik Martensson
   def notation(name); end
 
   # This method returns a list of notations that have been declared in the
   # *internal* DTD subset. Notations in the external DTD subset are not listed.
   #
-  # [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) contributed by
+  # [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) contributed by
   # Henrik Martensson
   def notations; end
 
   # This method retrieves the public identifier identifying the document's DTD.
   #
-  # [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) contributed by
+  # [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) contributed by
   # Henrik Martensson
   def public; end
 
   # This method retrieves the system identifier identifying the document's DTD
   #
-  # [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) contributed by
+  # [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) contributed by
   # Henrik Martensson
   def system; end
 
@@ -746,46 +761,46 @@ class REXML::DocType < ::REXML::Parent
   def write(output, indent = _, transitive = _, ie_hack = _); end
 end
 
-# Represents a full [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html)
+# Represents a full [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html)
 # document, including PIs, a doctype, etc. A
-# [`Document`](https://docs.ruby-lang.org/en/2.6.0/REXML/Document.html) has a
+# [`Document`](https://docs.ruby-lang.org/en/2.7.0/REXML/Document.html) has a
 # single child that can be accessed by root(). Note that if you want to have an
-# [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) declaration written for
+# [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) declaration written for
 # a document you create, you must add one;
-# [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) documents do not
+# [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) documents do not
 # write a default declaration for you. See |DECLARATION| and |write|.
 class REXML::Document < ::REXML::Element
 
   Elem = type_member(fixed: REXML::Child)
 
-  # A convenient default [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html)
+  # A convenient default [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html)
   # declaration. If you want an
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) declaration, the
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) declaration, the
   # easiest way to add one is mydoc << Document::DECLARATION `DEPRECATED` Use:
   # mydoc << XMLDecl.default
   DECLARATION = T.let(T.unsafe(nil), REXML::XMLDecl)
 
   # Constructor @param source if supplied, must be a
-  # [`Document`](https://docs.ruby-lang.org/en/2.6.0/REXML/Document.html),
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), or
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html). Documents have their
+  # [`Document`](https://docs.ruby-lang.org/en/2.7.0/REXML/Document.html),
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), or
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html). Documents have their
   # context and Element attributes cloned. Strings are expected to be valid
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) documents. IOs are
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) documents. IOs are
   # expected to be sources of valid
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) documents. @param
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) documents. @param
   # context if supplied, contains the context of the document; this should be a
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html).
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html).
   def self.new(source = _, context = _); end
 
   # Alias for:
-  # [`add`](https://docs.ruby-lang.org/en/2.6.0/REXML/Document.html#method-i-add)
+  # [`add`](https://docs.ruby-lang.org/en/2.7.0/REXML/Document.html#method-i-add)
   def <<(child); end
 
   # We override this, because XMLDecls and DocTypes must go at the start of the
   # document
   #
   # Also aliased as:
-  # [`<<`](https://docs.ruby-lang.org/en/2.6.0/REXML/Document.html#method-i-3C-3C)
+  # [`<<`](https://docs.ruby-lang.org/en/2.7.0/REXML/Document.html#method-i-3C-3C)
   def add(child); end
 
   def add_element(arg = _, arg2 = _); end
@@ -799,21 +814,21 @@ class REXML::Document < ::REXML::Element
   def document; end
 
   # @return the XMLDecl encoding of this document as an
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) object. If
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) object. If
   # no XMLDecl has been set, returns the default encoding.
   def encoding; end
 
   def entity_expansion_count; end
 
-  # According to the [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) spec,
+  # According to the [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) spec,
   # a root node has no expanded name
   #
   # Also aliased as:
-  # [`name`](https://docs.ruby-lang.org/en/2.6.0/REXML/Document.html#method-i-name)
+  # [`name`](https://docs.ruby-lang.org/en/2.7.0/REXML/Document.html#method-i-name)
   def expanded_name; end
 
   # Alias for:
-  # [`expanded_name`](https://docs.ruby-lang.org/en/2.6.0/REXML/Document.html#method-i-expanded_name)
+  # [`expanded_name`](https://docs.ruby-lang.org/en/2.7.0/REXML/Document.html#method-i-expanded_name)
   def name; end
 
   def node_type; end
@@ -825,34 +840,34 @@ class REXML::Document < ::REXML::Element
   def root; end
 
   # @return the XMLDecl standalone value of this document as a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). If no XMLDecl
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). If no XMLDecl
   # has been set, returns the default setting.
   def stand_alone?; end
 
   # @return the XMLDecl version of this document as a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). If no XMLDecl
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). If no XMLDecl
   # has been set, returns the default version.
   def version; end
 
-  # Write the [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) tree out,
+  # Write the [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) tree out,
   # optionally with indent. This writes out the entire
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) document, including
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) declarations, doctype
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) document, including
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) declarations, doctype
   # declarations, and processing instructions (if any are given).
   #
   # A controversial point is whether
-  # [`Document`](https://docs.ruby-lang.org/en/2.6.0/REXML/Document.html) should
-  # always write the [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html)
+  # [`Document`](https://docs.ruby-lang.org/en/2.7.0/REXML/Document.html) should
+  # always write the [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html)
   # declaration (<?xml version='1.0'?>) whether or not one is given by the user
   # (or source document).
-  # [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) does not write one
+  # [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) does not write one
   # if one was not specified, because it adds unnecessary bandwidth to
   # applications such as XML-RPC.
   #
   # Accept Nth argument style and options
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) style as argument.
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) style as argument.
   # The recommended style is options
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) style for one or
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) style for one or
   # more arguments case.
   #
   # *Examples*
@@ -869,7 +884,7 @@ class REXML::Document < ::REXML::Element
   #
   # See also the classes in the rexml/formatters package for the proper way to
   # change the default formatting of
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) output.
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) output.
   #
   # *Examples*
   #
@@ -896,12 +911,12 @@ class REXML::Document < ::REXML::Element
   # :   This hack inserts a space before the /> on empty tags to address a
   #     limitation of Internet Explorer. Defaults to false
   # encoding
-  # :   [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) name as
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). Change
+  # :   [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) name as
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). Change
   #     output encoding to specified encoding instead of encoding in
-  #     [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) declaration.
+  #     [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) declaration.
   #     Defaults to nil. It means encoding in
-  #     [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) declaration is
+  #     [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) declaration is
   #     used.
   def write(*arguments); end
 
@@ -912,37 +927,37 @@ class REXML::Document < ::REXML::Element
   # Get the entity expansion limit. By default the limit is set to 10000.
   #
   # Deprecated. Use
-  # [`REXML::Security.entity_expansion_limit=`](https://docs.ruby-lang.org/en/2.6.0/REXML/Security.html#method-c-entity_expansion_limit-3D)
+  # [`REXML::Security.entity_expansion_limit=`](https://docs.ruby-lang.org/en/2.7.0/REXML/Security.html#method-c-entity_expansion_limit-3D)
   # instead.
   def self.entity_expansion_limit; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the entity expansion
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the entity expansion
   # limit. By default the limit is set to 10000.
   #
   # Deprecated. Use
-  # [`REXML::Security.entity_expansion_limit=`](https://docs.ruby-lang.org/en/2.6.0/REXML/Security.html#method-c-entity_expansion_limit-3D)
+  # [`REXML::Security.entity_expansion_limit=`](https://docs.ruby-lang.org/en/2.7.0/REXML/Security.html#method-c-entity_expansion_limit-3D)
   # instead.
   def self.entity_expansion_limit=(val); end
 
   # Get the entity expansion limit. By default the limit is set to 10240.
   #
   # Deprecated. Use
-  # [`REXML::Security.entity_expansion_text_limit`](https://docs.ruby-lang.org/en/2.6.0/REXML/Security.html#method-c-entity_expansion_text_limit)
+  # [`REXML::Security.entity_expansion_text_limit`](https://docs.ruby-lang.org/en/2.7.0/REXML/Security.html#method-c-entity_expansion_text_limit)
   # instead.
   def self.entity_expansion_text_limit; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the entity expansion
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the entity expansion
   # limit. By default the limit is set to 10240.
   #
   # Deprecated. Use
-  # [`REXML::Security.entity_expansion_text_limit=`](https://docs.ruby-lang.org/en/2.6.0/REXML/Security.html#method-c-entity_expansion_text_limit-3D)
+  # [`REXML::Security.entity_expansion_text_limit=`](https://docs.ruby-lang.org/en/2.7.0/REXML/Security.html#method-c-entity_expansion_text_limit-3D)
   # instead.
   def self.entity_expansion_text_limit=(val); end
 
   def self.parse_stream(source, listener); end
 end
 
-# Represents a tagged [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html)
+# Represents a tagged [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html)
 # element. Elements are characterized by having children, attributes, and names,
 # and can themselves be children.
 class REXML::Element < ::REXML::Parent
@@ -956,9 +971,9 @@ class REXML::Element < ::REXML::Parent
   # Constructor
   # arg
   # :   if not supplied, will be set to the default value. If a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), the name of
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), the name of
   #     this object will be set to the argument. If an
-  #     [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html), the
+  #     [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html), the
   #     object will be shallowly cloned; name, attributes, and namespaces will
   #     be copied. Children will `not` be copied.
   # parent
@@ -985,13 +1000,13 @@ class REXML::Element < ::REXML::Parent
 
   # Fetches an attribute value or a child.
   #
-  # If [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or
-  # [`Symbol`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html) is specified,
+  # If [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or
+  # [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html) is specified,
   # it's treated as attribute name. Attribute value as
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or `nil` is
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or `nil` is
   # returned. This case is shortcut of +[attributes](name)+.
   #
-  # If [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) is
+  # If [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) is
   # specified, it's treated as the index of child. It returns Nth child.
   #
   # ```ruby
@@ -1006,18 +1021,18 @@ class REXML::Element < ::REXML::Parent
   # same name.
   # key
   # :   can be either an Attribute or a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). If an
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). If an
   #     Attribute, the attribute is added to the list of
-  #     [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html)
+  #     [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html)
   #     attributes. If
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), the
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), the
   #     argument is used as the name of the new attribute, and the value
   #     parameter must be supplied.
   # value
   # :   Required if `key` is a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), and ignored
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), and ignored
   #     if the first argument is an Attribute. This is a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), and is used
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), and is used
   #     as the value of the new Attribute. This should be the unnormalized value
   #     of the attribute (without entities).
   # Returns
@@ -1044,18 +1059,18 @@ class REXML::Element < ::REXML::Parent
   # Adds a child to this element, optionally setting attributes in the element.
   # element
   # :   optional. If
-  #     [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html), the
+  #     [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html), the
   #     element is added. Otherwise, a new
-  #     [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html) is
+  #     [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html) is
   #     constructed with the argument (see Element.initialize).
   # attrs
   # :   If supplied, must be a
-  #     [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) containing
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) name,value
+  #     [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) containing
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) name,value
   #     pairs, which will be used to set the attributes of the new
-  #     [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html).
+  #     [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html).
   # Returns
-  # :   the [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html)
+  # :   the [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html)
   #     that was added
   #
   # ```ruby
@@ -1069,15 +1084,15 @@ class REXML::Element < ::REXML::Parent
   # Adds a namespace to this element.
   # prefix
   # :   the prefix string, or the namespace
-  #     [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) if `uri` is not
+  #     [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) if `uri` is not
   #     supplied
   # uri
-  # :   the namespace [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html). May
+  # :   the namespace [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html). May
   #     be nil, in which `prefix` is used as the
-  #     [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html)
+  #     [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html)
   #
   # Evaluates to: this
-  # [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html)
+  # [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html)
   #
   # ```ruby
   # a = Element.new("a")
@@ -1091,11 +1106,11 @@ class REXML::Element < ::REXML::Parent
   # A helper method to add a Text child. Actual Text instances can be added with
   # regular Parent methods, such as add() and <<()
   # text
-  # :   if a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), a new
+  # :   if a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), a new
   #     Text instance is created and added to the parent. If Text, the object is
   #     added directly.
   # Returns
-  # :   this [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html)
+  # :   this [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html)
   #
   # ```ruby
   # e = Element.new('a')          #-> <e/>
@@ -1138,13 +1153,13 @@ class REXML::Element < ::REXML::Parent
   # Removes an attribute
   # key
   # :   either an Attribute or a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). In either
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). In either
   #     case, the attribute is found by matching the attribute name to the
   #     argument, and then removed. If no attribute is found, no action is
   #     taken.
   # Returns
   # :   the attribute removed, or nil if this
-  #     [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html) did
+  #     [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html) did
   #     not contain a matching attribute
   #
   # ```ruby
@@ -1159,13 +1174,13 @@ class REXML::Element < ::REXML::Parent
   # Deletes a child element.
   # element
   # :   Must be an `Element`, `String`, or `Integer`. If
-  #     [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html), the
+  #     [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html), the
   #     element is removed. If
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), the element
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), the element
   #     is found (via XPath) and removed. <em>This means that any parent can
   #     remove any descendant.<em>  If
-  #     [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html), the
-  #     [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html)
+  #     [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html), the
+  #     [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html)
   #     indexed by that number will be removed.
   # Returns
   # :   the element that was removed.
@@ -1197,11 +1212,11 @@ class REXML::Element < ::REXML::Parent
   def document; end
 
   # Synonym for
-  # [`Element.elements`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html#attribute-i-elements).each
+  # [`Element.elements`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html#attribute-i-elements).each
   def each_element(xpath = _, &block); end
 
   # Iterates through the child elements, yielding for each
-  # [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html) that has
+  # [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html) that has
   # a particular attribute set.
   # key
   # :   the name of the attribute to search for
@@ -1229,7 +1244,7 @@ class REXML::Element < ::REXML::Parent
   def each_element_with_attribute(key, value = _, max = _, name = _, &block); end
 
   # Iterates through the children, yielding for each
-  # [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html) that has
+  # [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html) that has
   # a particular text set.
   # text
   # :   the text to search for. If nil, or not supplied, will iterate over all
@@ -1268,7 +1283,7 @@ class REXML::Element < ::REXML::Parent
 
   # Returns the first child Text node, if any, or `nil` otherwise. This method
   # returns the actual `Text` node, rather than the
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) content.
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) content.
   #
   # ```ruby
   # doc = Document.new "<p>some text <b>this is bold!</b> more text</p>"
@@ -1281,7 +1296,7 @@ class REXML::Element < ::REXML::Parent
   def has_attributes?; end
 
   # Evaluates to `true` if this element has at least one child
-  # [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html)
+  # [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html)
   #
   # ```ruby
   # doc = Document.new "<a><b/><c>Text</c></a>"
@@ -1301,7 +1316,7 @@ class REXML::Element < ::REXML::Parent
   # Get an array of all Instruction children. IMMUTABLE
   def instructions; end
 
-  # Evaluates to the [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) for a
+  # Evaluates to the [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) for a
   # prefix, or the empty string if no such namespace is declared for this
   # element. Evaluates recursively for ancestors. Returns the default namespace,
   # if there is one.
@@ -1309,8 +1324,8 @@ class REXML::Element < ::REXML::Parent
   # :   the prefix to search for. If not supplied, returns the default namespace
   #     if one exists
   # Returns
-  # :   the namespace [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) as a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), or nil if
+  # :   the namespace [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) as a
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), or nil if
   #     no such namespace exists. If the namespace is undefined, returns an
   #     empty string
   #
@@ -1325,7 +1340,7 @@ class REXML::Element < ::REXML::Parent
   def namespaces; end
 
   # Returns the next sibling that is an element, or nil if there is no
-  # [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html) sibling
+  # [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html) sibling
   # after this one
   #
   # ```ruby
@@ -1347,7 +1362,7 @@ class REXML::Element < ::REXML::Parent
   def prefixes; end
 
   # Returns the previous sibling that is an element, or nil if there is no
-  # [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html) sibling
+  # [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html) sibling
   # prior to this one
   #
   # ```ruby
@@ -1369,18 +1384,18 @@ class REXML::Element < ::REXML::Parent
 
   # Evaluates to the root node of the document that this element belongs to. If
   # this element doesn't belong to a document, but does belong to another
-  # [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html), the
+  # [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html), the
   # parent's root will be returned, until the earliest ancestor is found.
   #
   # Note that this is not the same as the document element. In the following
   # example, <a> is the document element, and the root node is the parent node
   # of the document element. You may ask yourself why the root node is useful:
   # consider the doctype and
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) declaration, and any
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) declaration, and any
   # processing instructions before the document element... they are children of
   # the root node, or siblings of the document element. The only time this isn't
   # true is when an
-  # [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html) is
+  # [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html) is
   # created that is not part of any Document. In this case, the ancestor that
   # has no parent acts as the root node.
   #
@@ -1394,7 +1409,7 @@ class REXML::Element < ::REXML::Parent
   def root_node; end
 
   # A convenience method which returns the
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) value of the
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) value of the
   # *first* child text element, if one exists, and `nil` otherwise.
   #
   # *Note that an element may have multiple Text elements, perhaps separated by
@@ -1419,14 +1434,14 @@ class REXML::Element < ::REXML::Parent
   # argument. In this case, the next Text child becomes the first Text child. In
   # no case is the order of any siblings disturbed.
   # text
-  # :   If a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), a new
+  # :   If a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), a new
   #     Text child is created and added to this
-  #     [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html) as
+  #     [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html) as
   #     the first Text child. If Text, the text is set as the first Child
   #     element. If nil, then any existing first Text child is removed.
   # Returns
   # :   this
-  #     [`Element`](https://docs.ruby-lang.org/en/2.6.0/REXML/Element.html).
+  #     [`Element`](https://docs.ruby-lang.org/en/2.7.0/REXML/Element.html).
   #
   # ```ruby
   # doc = Document.new '<a><b/></a>'
@@ -1454,7 +1469,7 @@ class REXML::Element < ::REXML::Parent
 
   # ## DEPRECATED
   # See
-  # [`REXML::Formatters`](https://docs.ruby-lang.org/en/2.6.0/REXML/Formatters.html)
+  # [`REXML::Formatters`](https://docs.ruby-lang.org/en/2.7.0/REXML/Formatters.html)
   #
   # Writes out this element, and recursively, all children.
   # output
@@ -1492,7 +1507,7 @@ class REXML::ElementDecl < ::REXML::Declaration
 end
 
 # A class which provides filtering of children for
-# [`Elements`](https://docs.ruby-lang.org/en/2.6.0/REXML/Elements.html), and
+# [`Elements`](https://docs.ruby-lang.org/en/2.7.0/REXML/Elements.html), and
 # XPath search support. You are expected to only encounter this class as the
 # `element.elements` object. Therefore, you are *not* expected to instantiate
 # this yourself.
@@ -1507,27 +1522,27 @@ class REXML::Elements
   def self.new(parent); end
 
   # Alias for:
-  # [`add`](https://docs.ruby-lang.org/en/2.6.0/REXML/Elements.html#method-i-add)
+  # [`add`](https://docs.ruby-lang.org/en/2.7.0/REXML/Elements.html#method-i-add)
   def <<(element = _); end
 
   # Fetches a child element. Filters only Element children, regardless of the
   # XPath match.
   # index
   # :   the search parameter. This is either an
-  #     [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html), which
+  #     [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html), which
   #     will be used to find the index'th child Element, or an XPath, which will
   #     be used to search for the Element. *Because of the nature of XPath
   #     searches, any element in the connected
-  #     [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) document can be
+  #     [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) document can be
   #     fetched through any other element.*  **The
-  #     [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) index is
+  #     [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) index is
   #     1-based, not 0-based.**  This means that the first child element is at
   #     index 1, not 0, and the +n+th element is at index `n`, not `n-1`. This
   #     is because XPath indexes element children starting from 1, not 0, and
   #     the indexes should be the same.
   # name
   # :   optional, and only used in the first argument is an
-  #     [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html). In that
+  #     [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html). In that
   #     case, the index'th child Element that has the supplied name will be
   #     returned. Note again that the indexes start at 1.
   # Returns
@@ -1563,7 +1578,7 @@ class REXML::Elements
   # Adds an element
   # element
   # :   if supplied, is either an Element,
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), or Source
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), or Source
   #     (see Element.initialize). If not supplied or nil, a new, default Element
   #     will be constructed
   # Returns
@@ -1577,7 +1592,7 @@ class REXML::Elements
   #
   #
   # Also aliased as:
-  # [`<<`](https://docs.ruby-lang.org/en/2.6.0/REXML/Elements.html#method-i-3C-3C)
+  # [`<<`](https://docs.ruby-lang.org/en/2.7.0/REXML/Elements.html#method-i-3C-3C)
   def add(element = _); end
 
   def collect(xpath = _); end
@@ -1586,7 +1601,7 @@ class REXML::Elements
   # element
   # :   Either an Element, which is removed directly; an xpath, where the first
   #     matching child is removed; or an
-  #     [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html), where the
+  #     [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html), where the
   #     n'th Element is removed.
   # Returns
   # :   the removed child
@@ -1604,11 +1619,11 @@ class REXML::Elements
   # matching.
   # xpath
   # :   all elements matching this
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) path are
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) path are
   #     removed.
   # Returns
-  # :   an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
-  #     [`Elements`](https://docs.ruby-lang.org/en/2.6.0/REXML/Elements.html)
+  # :   an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
+  #     [`Elements`](https://docs.ruby-lang.org/en/2.7.0/REXML/Elements.html)
   #     that have been removed
   #
   # ```ruby
@@ -1618,14 +1633,14 @@ class REXML::Elements
   def delete_all(xpath); end
 
   # Iterates through all of the child
-  # [`Elements`](https://docs.ruby-lang.org/en/2.6.0/REXML/Elements.html),
+  # [`Elements`](https://docs.ruby-lang.org/en/2.7.0/REXML/Elements.html),
   # optionally filtering them by a given XPath
   # xpath
   # :   optional. If supplied, this is a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) XPath, and
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) XPath, and
   #     is used to filter the children, so that only matching children are
   #     yielded. Note that XPaths are automatically filtered for
-  #     [`Elements`](https://docs.ruby-lang.org/en/2.6.0/REXML/Elements.html),
+  #     [`Elements`](https://docs.ruby-lang.org/en/2.7.0/REXML/Elements.html),
   #     so that non-Element children will not be yielded
   #
   # ```ruby
@@ -1659,7 +1674,7 @@ class REXML::Elements
   # ```
   def size; end
 
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
+  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # Element children. An XPath may be supplied to filter the children. Only
   # Element children are returned, even if the supplied XPath matches
   # non-Element children.
@@ -1679,7 +1694,7 @@ module REXML::Encoding
   def encode(string); end
 
   # ID --->
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/REXML/Encoding.html) name
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/REXML/Encoding.html) name
   def encoding; end
 
   def encoding=(encoding); end
@@ -1721,7 +1736,7 @@ class REXML::Entity < ::REXML::Child
   # no validation of entity state except when the entity is read from a stream.
   # If you start poking around with the accessors, you can easily create a
   # non-conformant
-  # [`Entity`](https://docs.ruby-lang.org/en/2.6.0/REXML/Entity.html).
+  # [`Entity`](https://docs.ruby-lang.org/en/2.7.0/REXML/Entity.html).
   #
   # ```ruby
   # e = Entity.new( 'amp', '&' )
@@ -1767,12 +1782,11 @@ class REXML::Entity < ::REXML::Child
   def value; end
 
   # Write out a fully formed, correct entity definition (assuming the
-  # [`Entity`](https://docs.ruby-lang.org/en/2.6.0/REXML/Entity.html) object
+  # [`Entity`](https://docs.ruby-lang.org/en/2.7.0/REXML/Entity.html) object
   # itself is valid.)
   #
   # out
-  # :   An object implementing <TT>&lt;&lt;<TT> to which the entity will be
-  #     output
+  # :   An object implementing `&lt;&lt;` to which the entity will be output
   # indent
   # :   **DEPRECATED** and ignored
   def write(out, indent = _); end
@@ -1783,7 +1797,7 @@ class REXML::Entity < ::REXML::Child
 end
 
 # This is a set of entity constants -- the ones defined in the
-# [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) specification. These are
+# [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) specification. These are
 # `gt`, `lt`, `amp`, `quot` and `apos`. CAUTION: these entities does not have
 # parent and document
 module REXML::EntityConst
@@ -1814,13 +1828,13 @@ end
 module REXML::Formatters; end
 
 class REXML::Formatters::Default
-  # Prints out the [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html)
+  # Prints out the [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html)
   # document with no formatting -- except if ie\_hack is set.
   #
   # ie\_hack
   # :   If set to true, then inserts whitespace before the close of an empty
   #     tag, so that IE's bad
-  #     [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) parser doesn't
+  #     [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) parser doesn't
   #     choke.
   def self.new(ie_hack = _); end
 
@@ -1848,7 +1862,7 @@ class REXML::Formatters::Default
   def write_text(node, output); end
 end
 
-# Pretty-prints an [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html)
+# Pretty-prints an [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html)
 # document. This destroys whitespace in text nodes and will insert carriage
 # returns and indentations.
 #
@@ -1857,8 +1871,9 @@ class REXML::Formatters::Pretty < ::REXML::Formatters::Default
   # Create a new pretty printer.
   #
   # output
-  # :   An object implementing '<<(String)', to which the output will be
-  #     written.
+  # :   An object implementing
+  #     '<<([`String`](https://docs.ruby-lang.org/en/2.7.0/String.html))', to
+  #     which the output will be written.
   # indentation
   # :   An integer greater than 0. The indentation of each level will be this
   #     number of spaces. If this is < 1, the behavior of this object is
@@ -1866,7 +1881,7 @@ class REXML::Formatters::Pretty < ::REXML::Formatters::Default
   # ie\_hack
   # :   If true, the printer will insert whitespace before closing empty tags,
   #     thereby allowing Internet Explorer's
-  #     [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) parser to
+  #     [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) parser to
   #     function. Defaults to false.
   def self.new(indentation = _, ie_hack = _); end
 
@@ -1901,9 +1916,9 @@ end
 # always be a list of nodes from which to filter. In the case of context methods
 # (such as position), the function should return an array with a value for each
 # child in the array. (2) all method calls from
-# [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) will have "-" replaced
+# [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) will have "-" replaced
 # with "\_". Therefore, in
-# [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html), "local-name()" is
+# [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html), "local-name()" is
 # identical (and actually becomes) "local\_name()"
 module REXML::Functions
   INTERNAL_METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
@@ -1933,7 +1948,7 @@ module REXML::Functions
   # Helper method.
   def self.get_namespace(node_set = _); end
 
-  # Since [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) is
+  # Since [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) is
   # non-validating, this method is not implemented as it requires a DTD
   def self.id(object); end
 
@@ -2058,7 +2073,7 @@ module REXML::Functions
   def self.variables=(x); end
 end
 
-# A Source that wraps an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+# A Source that wraps an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
 # See the Source class for method documentation
 class REXML::IOSource < ::REXML::Source
   # block\_size has been deprecated
@@ -2080,8 +2095,8 @@ class REXML::IOSource < ::REXML::Source
   def scan(pattern, cons = _); end
 end
 
-# Represents an [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html)
-# [`Instruction`](https://docs.ruby-lang.org/en/2.6.0/REXML/Instruction.html);
+# Represents an [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html)
+# [`Instruction`](https://docs.ruby-lang.org/en/2.7.0/REXML/Instruction.html);
 # IE, <? ... ?> TODO: Add parent arg (3rd arg) to constructor
 class REXML::Instruction < ::REXML::Child
   START = T.let(T.unsafe(nil), String)
@@ -2089,22 +2104,22 @@ class REXML::Instruction < ::REXML::Child
   STOP = T.let(T.unsafe(nil), String)
 
   # Constructs a new
-  # [`Instruction`](https://docs.ruby-lang.org/en/2.6.0/REXML/Instruction.html)
+  # [`Instruction`](https://docs.ruby-lang.org/en/2.7.0/REXML/Instruction.html)
   # @param target can be one of a number of things. If
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), then the target
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), then the target
   # of this instruction is set to this. If an
-  # [`Instruction`](https://docs.ruby-lang.org/en/2.6.0/REXML/Instruction.html),
+  # [`Instruction`](https://docs.ruby-lang.org/en/2.7.0/REXML/Instruction.html),
   # then the
-  # [`Instruction`](https://docs.ruby-lang.org/en/2.6.0/REXML/Instruction.html)
+  # [`Instruction`](https://docs.ruby-lang.org/en/2.7.0/REXML/Instruction.html)
   # is shallowly cloned (target and content are copied). @param content Must be
-  # either a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), or a
+  # either a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), or a
   # Parent. Can only be a Parent if the target argument is a Source. Otherwise,
-  # this [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) is set as
+  # this [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) is set as
   # the content of this instruction.
   def self.new(target, content = _); end
 
   # @return true if other is an
-  # [`Instruction`](https://docs.ruby-lang.org/en/2.6.0/REXML/Instruction.html),
+  # [`Instruction`](https://docs.ruby-lang.org/en/2.7.0/REXML/Instruction.html),
   # and the content and target of the other matches the target and content of
   # this object.
   def ==(other); end
@@ -2112,12 +2127,12 @@ class REXML::Instruction < ::REXML::Child
   def clone; end
 
   # target is the "name" of the
-  # [`Instruction`](https://docs.ruby-lang.org/en/2.6.0/REXML/Instruction.html);
+  # [`Instruction`](https://docs.ruby-lang.org/en/2.7.0/REXML/Instruction.html);
   # IE, the "tag" in <?tag ...?> content is everything else.
   def content; end
 
   # target is the "name" of the
-  # [`Instruction`](https://docs.ruby-lang.org/en/2.6.0/REXML/Instruction.html);
+  # [`Instruction`](https://docs.ruby-lang.org/en/2.7.0/REXML/Instruction.html);
   # IE, the "tag" in <?tag ...?> content is everything else.
   def content=(_); end
 
@@ -2126,12 +2141,12 @@ class REXML::Instruction < ::REXML::Child
   def node_type; end
 
   # target is the "name" of the
-  # [`Instruction`](https://docs.ruby-lang.org/en/2.6.0/REXML/Instruction.html);
+  # [`Instruction`](https://docs.ruby-lang.org/en/2.7.0/REXML/Instruction.html);
   # IE, the "tag" in <?tag ...?> content is everything else.
   def target; end
 
   # target is the "name" of the
-  # [`Instruction`](https://docs.ruby-lang.org/en/2.6.0/REXML/Instruction.html);
+  # [`Instruction`](https://docs.ruby-lang.org/en/2.7.0/REXML/Instruction.html);
   # IE, the "tag" in <?tag ...?> content is everything else.
   def target=(_); end
 
@@ -2178,7 +2193,7 @@ module REXML::Node
   # Visit all subnodes of `self` recursively
   def each_recursive(&block); end
 
-  # [`Find`](https://docs.ruby-lang.org/en/2.6.0/Find.html) (and return) first
+  # [`Find`](https://docs.ruby-lang.org/en/2.7.0/Find.html) (and return) first
   # subnode (recursively) for which the block evaluates to true. Returns `nil`
   # if none was found.
   def find_first_recursive(&block); end
@@ -2199,7 +2214,7 @@ module REXML::Node
 
   # indent
   # :   **DEPRECATED** This parameter is now ignored. See the formatters in the
-  #     [`REXML::Formatters`](https://docs.ruby-lang.org/en/2.6.0/REXML/Formatters.html)
+  #     [`REXML::Formatters`](https://docs.ruby-lang.org/en/2.7.0/REXML/Formatters.html)
   #     package for changing the output style.
   def to_s(indent = _); end
 end
@@ -2209,7 +2224,7 @@ class REXML::NotationDecl < ::REXML::Child
 
   # This method retrieves the name of the notation.
   #
-  # [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) contributed by
+  # [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) contributed by
   # Henrik Martensson
   def name; end
 
@@ -2239,7 +2254,7 @@ class REXML::Output
 end
 
 # A parent has children, and has methods for accessing them. The
-# [`Parent`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parent.html) class is
+# [`Parent`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parent.html) class is
 # never encountered except as the superclass for some other object.
 class REXML::Parent < ::REXML::Child
   include(::Enumerable)
@@ -2251,33 +2266,33 @@ class REXML::Parent < ::REXML::Child
   def self.new(parent = _); end
 
   # Alias for:
-  # [`push`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parent.html#method-i-push)
+  # [`push`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parent.html#method-i-push)
   def <<(object); end
 
   # Fetches a child at a given index @param index the
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) index of the
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) index of the
   # child to fetch
   def [](index); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) an index entry. See
-  # [`Array.[]=`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-5B-5D-3D)
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) an index entry. See
+  # [`Array.[]=`](https://docs.ruby-lang.org/en/2.7.0/MakeMakefile.html#method-c-5B-5D-3D)
   # @param index the index of the element to set @param opt either the object to
-  # set, or an [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html)
+  # set, or an [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html)
   # length @param child if opt is an
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html), this is the
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html), this is the
   # child to set @return the parent (self)
   def []=(*args); end
 
   # Also aliased as:
-  # [`push`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parent.html#method-i-push)
+  # [`push`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parent.html#method-i-push)
   def add(object); end
 
   # Alias for:
-  # [`to_a`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parent.html#method-i-to_a)
+  # [`to_a`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parent.html#method-i-to_a)
   def children; end
 
   # Deeply clones this object. This creates a complete duplicate of this
-  # [`Parent`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parent.html), including
+  # [`Parent`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parent.html), including
   # all descendants.
   def deep_clone; end
 
@@ -2288,11 +2303,11 @@ class REXML::Parent < ::REXML::Child
   def delete_if(&block); end
 
   # Also aliased as:
-  # [`each_child`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parent.html#method-i-each_child)
+  # [`each_child`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parent.html#method-i-each_child)
   def each(&block); end
 
   # Alias for:
-  # [`each`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parent.html#method-i-each)
+  # [`each`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parent.html#method-i-each)
   def each_child(&block); end
 
   def each_index(&block); end
@@ -2317,16 +2332,16 @@ class REXML::Parent < ::REXML::Child
   def insert_before(child1, child2); end
 
   # Alias for:
-  # [`size`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parent.html#method-i-size)
+  # [`size`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parent.html#method-i-size)
   def length; end
 
   def parent?; end
 
   # Also aliased as:
-  # [`<<`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parent.html#method-i-3C-3C)
+  # [`<<`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parent.html#method-i-3C-3C)
   #
   # Alias for:
-  # [`add`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parent.html#method-i-add)
+  # [`add`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parent.html#method-i-add)
   def push(object); end
 
   # Replaces one child with another, making sure the nodelist is correct @param
@@ -2337,11 +2352,11 @@ class REXML::Parent < ::REXML::Child
   # @return the number of children of this parent
   #
   # Also aliased as:
-  # [`length`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parent.html#method-i-length)
+  # [`length`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parent.html#method-i-length)
   def size; end
 
   # Also aliased as:
-  # [`children`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parent.html#method-i-children)
+  # [`children`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parent.html#method-i-children)
   def to_a; end
 
   def unshift(object); end
@@ -2524,7 +2539,7 @@ class REXML::Parsers::BaseParser
   TEXT_PATTERN = T.let(T.unsafe(nil), Regexp)
 
   # Just for backward compatibility. For example, kramdown uses this. It's not
-  # used in [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html).
+  # used in [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html).
   UNAME_STR = T.let(T.unsafe(nil), String)
 
   VERSION = T.let(T.unsafe(nil), Regexp)
@@ -2596,7 +2611,7 @@ end
 class REXML::Parsers::XPathParser
   include(::REXML::XMLTokens)
 
-  # [`RelativeLocationPath`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parsers/XPathParser.html#method-i-RelativeLocationPath)
+  # [`RelativeLocationPath`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parsers/XPathParser.html#method-i-RelativeLocationPath)
   #
   # ```
   # |                                                    Step
@@ -2624,13 +2639,13 @@ class REXML::Parsers::XPathParser
   QNAME = T.let(T.unsafe(nil), Regexp)
 
   # |
-  # [`VARIABLE_REFERENCE`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parsers/XPathParser.html#VARIABLE_REFERENCE)
+  # [`VARIABLE_REFERENCE`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parsers/XPathParser.html#VARIABLE_REFERENCE)
   # | '(' expr ')' |
-  # [`LITERAL`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parsers/XPathParser.html#LITERAL)
+  # [`LITERAL`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parsers/XPathParser.html#LITERAL)
   # |
-  # [`NUMBER`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parsers/XPathParser.html#NUMBER)
+  # [`NUMBER`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parsers/XPathParser.html#NUMBER)
   # |
-  # [`FunctionCall`](https://docs.ruby-lang.org/en/2.6.0/REXML/Parsers/XPathParser.html#method-i-FunctionCall)
+  # [`FunctionCall`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parsers/XPathParser.html#method-i-FunctionCall)
   VARIABLE_REFERENCE = T.let(T.unsafe(nil), Regexp)
 
   def abbreviate(path); end
@@ -2650,7 +2665,7 @@ class REXML::QuickPath
   include(::REXML::XMLTokens)
   include(::REXML::Functions)
 
-  # A base [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) object to be
+  # A base [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) object to be
   # used when initializing a default empty namespaces set.
   EMPTY_HASH = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 
@@ -2698,7 +2713,7 @@ end
 
 # A template for stream parser listeners. Note that the declarations
 # (attlistdecl, elementdecl, etc) are trivially processed;
-# [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) doesn't yet handle
+# [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) doesn't yet handle
 # doctype entity declarations, so you have to parse them out yourself.
 # ### Missing methods from SAX2
 #
@@ -2788,7 +2803,7 @@ module REXML::SAX2Listener
 
   def start_prefix_mapping(prefix, uri); end
 
-  # Called when an [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) PI is
+  # Called when an [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) PI is
   # encountered in the document. EG: <?xml version="1.0" encoding="utf"?> @p
   # version the version attribute value. EG, "1.0" @p encoding the encoding
   # attribute value, or nil. EG, "utf" @p standalone the standalone attribute
@@ -2800,27 +2815,27 @@ module REXML::Security
   # Get the entity expansion limit. By default the limit is set to 10000.
   def self.entity_expansion_limit; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the entity expansion
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the entity expansion
   # limit. By default the limit is set to 10000.
   def self.entity_expansion_limit=(val); end
 
   # Get the entity expansion limit. By default the limit is set to 10240.
   def self.entity_expansion_text_limit; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the entity expansion
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the entity expansion
   # limit. By default the limit is set to 10240.
   def self.entity_expansion_text_limit=(val); end
 end
 
-# A [`Source`](https://docs.ruby-lang.org/en/2.6.0/REXML/Source.html) can be
+# A [`Source`](https://docs.ruby-lang.org/en/2.7.0/REXML/Source.html) can be
 # searched for patterns, and wraps buffers and other objects and provides
 # consumption of text
 class REXML::Source
   include(::REXML::Encoding)
 
   # Constructor @param arg must be a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), and should be a
-  # valid [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) document @param
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), and should be a
+  # valid [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) document @param
   # encoding if non-null, sets the encoding of the source to this value,
   # overriding all encoding detection
   def self.new(arg, encoding = _); end
@@ -2834,14 +2849,14 @@ class REXML::Source
   def current_line; end
 
   # @return true if the
-  # [`Source`](https://docs.ruby-lang.org/en/2.6.0/REXML/Source.html) is
+  # [`Source`](https://docs.ruby-lang.org/en/2.7.0/REXML/Source.html) is
   # exhausted
   def empty?; end
 
   def encoding; end
 
   # Inherited from
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) Overridden
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) Overridden
   # to support optimized en/decoding
   def encoding=(enc); end
 
@@ -2864,17 +2879,17 @@ class REXML::Source
   # Originally, the patterns were easier to construct and this method more
   # robust, because this method generated search regexps on the fly; however,
   # this was computationally expensive and slowed down the entire
-  # [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) package
+  # [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) package
   # considerably, since this is by far the most commonly called method. @param
   # pattern must be a
-  # [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html), and must be in
+  # [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html), and must be in
   # the form of /^s\*(#{your pattern, with no groups})(.\*)/. The first group
   # will be returned; the second group is used if the consume flag is set.
   # @param consume if true, the pattern returned will be consumed, leaving
   # everything after it in the
-  # [`Source`](https://docs.ruby-lang.org/en/2.6.0/REXML/Source.html). @return
+  # [`Source`](https://docs.ruby-lang.org/en/2.7.0/REXML/Source.html). @return
   # the pattern, if found, or nil if the
-  # [`Source`](https://docs.ruby-lang.org/en/2.6.0/REXML/Source.html) is empty
+  # [`Source`](https://docs.ruby-lang.org/en/2.7.0/REXML/Source.html) is empty
   # or the pattern is not found.
   def scan(pattern, cons = _); end
 end
@@ -2882,15 +2897,15 @@ end
 # Generates Source-s. USE THIS CLASS.
 class REXML::SourceFactory
   # Generates a Source object @param arg Either a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), or an
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) @return a Source, or nil
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), or an
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) @return a Source, or nil
   # if a bad argument was given
   def self.create_from(arg); end
 end
 
 # A template for stream parser listeners. Note that the declarations
 # (attlistdecl, elementdecl, etc) are trivially processed;
-# [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) doesn't yet handle
+# [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) doesn't yet handle
 # doctype entity declarations, so you have to parse them out yourself.
 module REXML::StreamListener
   # If a doctype includes an ATTLIST declaration, it will cause this method to
@@ -2950,23 +2965,23 @@ module REXML::StreamListener
   def notationdecl(content); end
 
   # Called when the end tag is reached. In the case of <tag/>,
-  # [`tag_end`](https://docs.ruby-lang.org/en/2.6.0/REXML/StreamListener.html#method-i-tag_end)
+  # [`tag_end`](https://docs.ruby-lang.org/en/2.7.0/REXML/StreamListener.html#method-i-tag_end)
   # will be called immediately after
-  # [`tag_start`](https://docs.ruby-lang.org/en/2.6.0/REXML/StreamListener.html#method-i-tag_start)
+  # [`tag_start`](https://docs.ruby-lang.org/en/2.7.0/REXML/StreamListener.html#method-i-tag_start)
   # @p the name of the tag
   def tag_end(name); end
 
   # Called when a tag is encountered. @p name the tag name @p attrs an array of
   # arrays of attribute/value pairs, suitable for use with assoc or rassoc. IE,
   # <tag attr1="value1" attr2="value2"> will result in
-  # [`tag_start`](https://docs.ruby-lang.org/en/2.6.0/REXML/StreamListener.html#method-i-tag_start)(
+  # [`tag_start`](https://docs.ruby-lang.org/en/2.7.0/REXML/StreamListener.html#method-i-tag_start)(
   # "tag", # [["[attr1","value1"],]("attr2","value2")])
   def tag_start(name, attrs); end
 
   # Called when text is encountered in the document @p text the text content.
   def text(text); end
 
-  # Called when an [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) PI is
+  # Called when an [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) PI is
   # encountered in the document. EG: <?xml version="1.0" encoding="utf"?> @p
   # version the version attribute value. EG, "1.0" @p encoding the encoding
   # attribute value, or nil. EG, "utf" @p standalone the standalone attribute
@@ -3001,7 +3016,7 @@ class REXML::SyncEnumerator
 end
 
 # Represents text nodes in an
-# [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) document
+# [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) document
 class REXML::Text < ::REXML::Child
   include(::Comparable)
 
@@ -3028,9 +3043,9 @@ class REXML::Text < ::REXML::Child
   VALID_XML_CHARS = T.let(T.unsafe(nil), Regexp)
 
   # Constructor `arg` if a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), the content is
-  # set to the [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). If a
-  # [`Text`](https://docs.ruby-lang.org/en/2.6.0/REXML/Text.html), the object is
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), the content is
+  # set to the [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). If a
+  # [`Text`](https://docs.ruby-lang.org/en/2.7.0/REXML/Text.html), the object is
   # shallowly cloned.
   #
   # `respect_whitespace` (boolean, false) if true, whitespace is respected
@@ -3039,16 +3054,16 @@ class REXML::Text < ::REXML::Child
   #
   # `raw` (nil) This argument can be given three values. If true, then the value
   # of used to construct this object is expected to contain no unescaped
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) markup, and
-  # [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) will not change
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) markup, and
+  # [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) will not change
   # the text. If this value is false, the string may contain any characters, and
-  # [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) will escape any
+  # [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) will escape any
   # and all defined entities whose values are contained in the text. If this
   # value is nil (the default), then the raw value of the parent will be used as
   # the raw value for this node. If there is no raw value for the parent, and no
   # value is supplied, the default is false. Use this field if you have entities
   # defined for some text, and you don't want
-  # [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) to escape that
+  # [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) to escape that
   # text in output.
   #
   # ```ruby
@@ -3082,9 +3097,11 @@ class REXML::Text < ::REXML::Child
   # "YYY"'.
   def <<(to_append); end
 
-  # `other` a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or a
-  # [`Text`](https://docs.ruby-lang.org/en/2.6.0/REXML/Text.html) `returns` the
-  # result of (to\_s <=> arg.to\_s)
+  # `other` a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or a
+  # [`Text`](https://docs.ruby-lang.org/en/2.7.0/REXML/Text.html) `returns` the
+  # result of
+  # ([`to_s`](https://docs.ruby-lang.org/en/2.7.0/REXML/Text.html#method-i-to_s)
+  # <=> arg.to\_s)
   def <=>(other); end
 
   def clone; end
@@ -3102,18 +3119,18 @@ class REXML::Text < ::REXML::Child
   def parent=(parent); end
 
   # If `raw` is true, then
-  # [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) leaves the value
+  # [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) leaves the value
   # alone
   def raw; end
 
   # If `raw` is true, then
-  # [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) leaves the value
+  # [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) leaves the value
   # alone
   def raw=(_); end
 
   # Returns the string value of this text node. This string is always escaped,
   # meaning that it is a valid
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) text node string, and
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) text node string, and
   # all entities that can be escaped, have been inserted. This method respects
   # the entity filter set in the constructor.
   #
@@ -3160,13 +3177,13 @@ class REXML::Text < ::REXML::Child
 
   # ## DEPRECATED
   # See
-  # [`REXML::Formatters`](https://docs.ruby-lang.org/en/2.6.0/REXML/Formatters.html)
+  # [`REXML::Formatters`](https://docs.ruby-lang.org/en/2.7.0/REXML/Formatters.html)
   def write(writer, indent = _, transitive = _, ie_hack = _); end
 
   # Writes out text, substituting special characters beforehand. `out` A
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html),
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html), or any other object
-  # supporting <<( [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) )
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html),
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html), or any other object
+  # supporting <<( [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) )
   # `input` the text to substitute and the write out
   #
   # ```ruby
@@ -3236,7 +3253,7 @@ class REXML::XMLDecl < ::REXML::Child
   def dowrite; end
 
   # Also aliased as:
-  # [`old_enc=`](https://docs.ruby-lang.org/en/2.6.0/REXML/XMLDecl.html#method-i-old_enc-3D)
+  # [`old_enc=`](https://docs.ruby-lang.org/en/2.7.0/REXML/XMLDecl.html#method-i-old_enc-3D)
   def encoding=(enc); end
 
   def inspect; end
@@ -3246,7 +3263,7 @@ class REXML::XMLDecl < ::REXML::Child
   def nowrite; end
 
   # Alias for:
-  # [`encoding=`](https://docs.ruby-lang.org/en/2.6.0/REXML/XMLDecl.html#method-i-encoding-3D)
+  # [`encoding=`](https://docs.ruby-lang.org/en/2.7.0/REXML/XMLDecl.html#method-i-encoding-3D)
   def old_enc=(encoding); end
 
   def stand_alone?; end
@@ -3261,7 +3278,7 @@ class REXML::XMLDecl < ::REXML::Child
 
   # indent
   # :   Ignored. There must be no whitespace before an
-  #     [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) declaration
+  #     [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) declaration
   # transitive
   # :   Ignored
   # ie\_hack
@@ -3275,21 +3292,21 @@ class REXML::XMLDecl < ::REXML::Child
   def xmldecl(version, encoding, standalone); end
 
   # Only use this if you do not want the
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) declaration to be
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) declaration to be
   # written; this object is ignored by the
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) writer. Otherwise,
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) writer. Otherwise,
   # instantiate your own
-  # [`XMLDecl`](https://docs.ruby-lang.org/en/2.6.0/REXML/XMLDecl.html) and add
+  # [`XMLDecl`](https://docs.ruby-lang.org/en/2.7.0/REXML/XMLDecl.html) and add
   # it to the document.
   #
-  # Note that [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) 1.1
+  # Note that [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) 1.1
   # documents **must** include an
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) declaration
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) declaration
   def self.default; end
 end
 
 # Defines a number of tokens used for parsing
-# [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html). Not for general
+# [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html). Not for general
 # consumption.
 module REXML::XMLTokens
   NAME = T.let(T.unsafe(nil), String)
@@ -3312,11 +3329,11 @@ module REXML::XMLTokens
 end
 
 # Wrapper class. Use this class to access the
-# [`XPath`](https://docs.ruby-lang.org/en/2.6.0/REXML/XPath.html) functions.
+# [`XPath`](https://docs.ruby-lang.org/en/2.7.0/REXML/XPath.html) functions.
 class REXML::XPath
   include(::REXML::Functions)
 
-  # A base [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) object,
+  # A base [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) object,
   # supposing to be used when initializing a default empty namespaces set, but
   # is currently unused. TODO: either set the namespaces=EMPTY\_HASH, or
   # deprecate this.
@@ -3329,12 +3346,12 @@ class REXML::XPath
   # path
   # :   The xpath to search for. If not supplied or nil, defaults to '\*'
   # namespaces
-  # :   If supplied, a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
+  # :   If supplied, a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
   #     which defines a namespace mapping
   # variables
-  # :   If supplied, a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
+  # :   If supplied, a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
   #     which maps $variables in the query to values. This can be used to avoid
-  #     [`XPath`](https://docs.ruby-lang.org/en/2.6.0/REXML/XPath.html)
+  #     [`XPath`](https://docs.ruby-lang.org/en/2.7.0/REXML/XPath.html)
   #     injection attacks or to automatically handle escaping string values.
   #
   #
@@ -3354,12 +3371,12 @@ class REXML::XPath
   # :   The xpath to search for. If not supplied or nil, returns the first node
   #     matching '\*'.
   # namespaces
-  # :   If supplied, a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
+  # :   If supplied, a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
   #     which defines a namespace mapping.
   # variables
-  # :   If supplied, a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
+  # :   If supplied, a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
   #     which maps $variables in the query to values. This can be used to avoid
-  #     [`XPath`](https://docs.ruby-lang.org/en/2.6.0/REXML/XPath.html)
+  #     [`XPath`](https://docs.ruby-lang.org/en/2.7.0/REXML/XPath.html)
   #     injection attacks or to automatically handle escaping string values.
   #
   #
@@ -3371,8 +3388,29 @@ class REXML::XPath
   # ```
   def self.first(element, path = _, namespaces = _, variables = _, options = _, &block); end
 
-  # Returns an array of nodes matching a given
-  # [`XPath`](https://docs.ruby-lang.org/en/2.6.0/REXML/XPath.html).
+  # Iterates over nodes that match the given path, calling the supplied block
+  # with the match.
+  # element
+  # :   The context element
+  # path
+  # :   The xpath to search for. If not supplied or nil, defaults to '\*'
+  # namespaces
+  # :   If supplied, a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
+  #     which defines a namespace mapping
+  # variables
+  # :   If supplied, a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
+  #     which maps $variables in the query to values. This can be used to avoid
+  #     [`XPath`](https://docs.ruby-lang.org/en/2.7.0/REXML/XPath.html)
+  #     injection attacks or to automatically handle escaping string values.
+  #
+  #
+  # ```
+  # XPath.each( node ) { |el| ... }
+  # XPath.each( node, '/*[@attr='v']' ) { |el| ... }
+  # XPath.each( node, 'ancestor::x' ) { |el| ... }
+  # XPath.each( node, '/book/publisher/text()=$publisher', {}, {"publisher"=>"O'Reilly"}) \
+  #   {|el| ... }
+  # ```
   def self.each(element, path = _, namespaces = _, variables = _, options = _, &block); end
 end
 

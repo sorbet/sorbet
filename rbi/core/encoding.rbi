@@ -1,8 +1,8 @@
 # typed: __STDLIB_INTERNAL
 
-# An [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) instance
+# An [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) instance
 # represents a character encoding usable in Ruby. It is defined as a constant
-# under the [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html)
+# under the [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
 # namespace. It has a name and optionally, aliases:
 #
 # ```ruby
@@ -14,11 +14,11 @@
 # ```
 #
 # Ruby methods dealing with encodings return or accept
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) instances as
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) instances as
 # arguments (when a method accepts an
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) instance as an
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) instance as an
 # argument, it can be passed an
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) name or alias
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) name or alias
 # instead).
 #
 # ```ruby
@@ -34,22 +34,22 @@
 # #=> "some string"
 # ```
 #
-# `Encoding::ASCII_8BIT` is a special encoding that is usually used for a byte
+# Encoding::ASCII\_8BIT is a special encoding that is usually used for a byte
 # string, not a character string. But as the name insists, its characters in the
 # range of ASCII are considered as ASCII characters. This is useful when you use
 # ASCII-8BIT characters with other ASCII compatible characters.
 #
 # ## Changing an encoding
 #
-# The associated [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html)
-# of a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) can be
+# The associated [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
+# of a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) can be
 # changed in two different ways.
 #
 # First, it is possible to set the
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) of a string to
-# a new [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) without
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) of a string to
+# a new [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) without
 # changing the internal byte representation of the string, with
-# [`String#force_encoding`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-force_encoding).
+# [`String#force_encoding`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-force_encoding).
 # This is how you can tell Ruby the correct encoding of a string.
 #
 # ```ruby
@@ -64,9 +64,9 @@
 # Second, it is possible to transcode a string, i.e. translate its internal byte
 # representation to another encoding. Its associated encoding is also set to the
 # other encoding. See
-# [`String#encode`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-encode)
+# [`String#encode`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-encode)
 # for the various forms of transcoding, and the
-# [`Encoding::Converter`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html)
+# [`Encoding::Converter`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html)
 # class for additional control over the transcoding process.
 #
 # ```ruby
@@ -83,15 +83,15 @@
 # ## Script encoding
 #
 # All Ruby script code has an associated
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) which any
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) literal created in
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) which any
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) literal created in
 # the source code will be associated to.
 #
-# The default script encoding is `Encoding::UTF-8` after v2.0, but it can be
+# The default script encoding is Encoding::UTF\_8 after v2.0, but it can be
 # changed by a magic comment on the first line of the source code file (or
 # second line, if there is a shebang line on the first). The comment must
 # contain the word `coding` or `encoding`, followed by a colon, space and the
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) name or alias:
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) name or alias:
 #
 # ```ruby
 # # encoding: UTF-8
@@ -119,8 +119,8 @@
 # The default encoding of the environment. Usually derived from locale.
 #
 # see
-# [`Encoding.locale_charmap`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-locale_charmap),
-# [`Encoding.find`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-find)('locale')
+# [`Encoding.locale_charmap`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-locale_charmap),
+# [`Encoding.find`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-find)('locale')
 #
 # ## Filesystem encoding
 #
@@ -128,17 +128,17 @@
 # is used for strings of file names or paths.
 #
 # see
-# [`Encoding.find`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-find)('filesystem')
+# [`Encoding.find`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-find)('filesystem')
 #
 # ## External encoding
 #
-# Each [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object has an
+# Each [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object has an
 # external encoding which indicates the encoding that Ruby will use to read its
 # data. By default Ruby sets the external encoding of an
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object to the default
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object to the default
 # external encoding. The default external encoding is set by locale encoding or
 # the interpreter `-E` option.
-# [`Encoding.default_external`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-default_external)
+# [`Encoding.default_external`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-default_external)
 # returns the current value of the external encoding.
 #
 # ```
@@ -155,44 +155,44 @@
 # ```
 #
 # The default external encoding may also be set through
-# [`Encoding.default_external=`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-default_external-3D),
+# [`Encoding.default_external=`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-default_external-3D),
 # but you should not do this as strings created before and after the change will
 # have inconsistent encodings. Instead use `ruby -E` to invoke ruby with the
 # correct external encoding.
 #
 # When you know that the actual encoding of the data of an
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object is not the default
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object is not the default
 # external encoding, you can reset its external encoding with
-# [`IO#set_encoding`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-set_encoding)
-# or set it at [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object
+# [`IO#set_encoding`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-set_encoding)
+# or set it at [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object
 # creation (see
-# [`IO.new`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-new) options).
+# [`IO.new`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-new) options).
 #
 # ## Internal encoding
 #
-# To process the data of an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+# To process the data of an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
 # object which has an encoding different from its external encoding, you can set
 # its internal encoding. Ruby will use this internal encoding to transcode the
 # data when it is read from the
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object.
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
 #
 # Conversely, when data is written to the
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object it is transcoded
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object it is transcoded
 # from the internal encoding to the external encoding of the
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object.
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
 #
 # The internal encoding of an
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object can be set with
-# [`IO#set_encoding`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-set_encoding)
-# or at [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object creation (see
-# [`IO.new`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-new) options).
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object can be set with
+# [`IO#set_encoding`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-set_encoding)
+# or at [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object creation (see
+# [`IO.new`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-new) options).
 #
 # The internal encoding is optional and when not set, the Ruby default internal
 # encoding is used. If not explicitly set this default internal encoding is
 # `nil` meaning that by default, no transcoding occurs.
 #
 # The default internal encoding can be set with the interpreter option `-E`.
-# [`Encoding.default_internal`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-default_internal)
+# [`Encoding.default_internal`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-default_internal)
 # returns the current internal encoding.
 #
 # ```
@@ -205,12 +205,12 @@
 # ```
 #
 # The default internal encoding may also be set through
-# [`Encoding.default_internal=`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-default_internal-3D),
+# [`Encoding.default_internal=`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-default_internal-3D),
 # but you should not do this as strings created before and after the change will
 # have inconsistent encodings. Instead use `ruby -E` to invoke ruby with the
 # correct internal encoding.
 #
-# ## [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) encoding example
+# ## [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) encoding example
 #
 # In the following example a UTF-8 encoded string "Ru00E9sumu00E9" is transcoded
 # for output to ISO-8859-1 encoding, then read back in and transcoded to UTF-8:
@@ -458,8 +458,8 @@ class Encoding < Object
   #
   # ```
   # Encoding.aliases
-  # #=> {"BINARY"=>"ASCII-8BIT", "ASCII"=>"US-ASCII", "ANSI_X3.4-1986"=>"US-ASCII",
-  #       "SJIS"=>"Shift_JIS", "eucJP"=>"EUC-JP", "CP932"=>"Windows-31J"}
+  # #=> {"BINARY"=>"ASCII-8BIT", "ASCII"=>"US-ASCII", "ANSI_X3.4-1968"=>"US-ASCII",
+  #       "SJIS"=>"Windows-31J", "eucJP"=>"EUC-JP", "CP932"=>"Windows-31J"}
   # ```
   sig {returns(T::Hash[String, String])}
   def self.aliases(); end
@@ -498,22 +498,22 @@ class Encoding < Object
   # The default external encoding is used by default for strings created from
   # the following locations:
   #
-  # *   [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html)
-  # *   [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) data read from
+  # *   [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html)
+  # *   [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) data read from
   #     disk
-  # *   [`SDBM`](https://docs.ruby-lang.org/en/2.6.0/SDBM.html)
-  # *   [`StringIO`](https://docs.ruby-lang.org/en/2.6.0/StringIO.html)
-  # *   [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
-  # *   [`Zlib::GzipWriter`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipWriter.html)
-  # *   [`String#inspect`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-inspect)
-  # *   [`Regexp#inspect`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-i-inspect)
+  # *   [`SDBM`](https://docs.ruby-lang.org/en/2.7.0/SDBM.html)
+  # *   [`StringIO`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html)
+  # *   [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
+  # *   [`Zlib::GzipWriter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html)
+  # *   [`String#inspect`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-inspect)
+  # *   [`Regexp#inspect`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-inspect)
   #
   #
   # While strings created from these locations will have this encoding, the
   # encoding may not be valid. Be sure to check
-  # [`String#valid_encoding?`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-valid_encoding-3F).
+  # [`String#valid_encoding?`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-valid_encoding-3F).
   #
-  # [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) data written to disk
+  # [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) data written to disk
   # will be transcoded to the default external encoding when written.
   #
   # The default external encoding is initialized by the locale or -E option.
@@ -521,14 +521,14 @@ class Encoding < Object
   def self.default_external(); end
 
   # Sets default external encoding. You should not set
-  # [`Encoding::default_external`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-default_external)
+  # [`Encoding::default_external`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-default_external)
   # in ruby code as strings created before changing the value may have a
   # different encoding from strings created after the value was changed.,
   # instead you should use `ruby -E` to invoke ruby with the correct
   # default\_external.
   #
   # See
-  # [`Encoding::default_external`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-default_external)
+  # [`Encoding::default_external`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-default_external)
   # for information on how the default external encoding is used.
   sig do
     params(
@@ -548,51 +548,51 @@ class Encoding < Object
   # internal encoding in the following places if the default internal encoding
   # is not nil:
   #
-  # *   [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html)
-  # *   [`Etc.sysconfdir`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#method-c-sysconfdir)
+  # *   [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html)
+  # *   [`Etc.sysconfdir`](https://docs.ruby-lang.org/en/2.7.0/Etc.html#method-c-sysconfdir)
   #     and
-  #     [`Etc.systmpdir`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#method-c-systmpdir)
-  # *   [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) data read from
+  #     [`Etc.systmpdir`](https://docs.ruby-lang.org/en/2.7.0/Etc.html#method-c-systmpdir)
+  # *   [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) data read from
   #     disk
-  # *   [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) names from
-  #     [`Dir`](https://docs.ruby-lang.org/en/2.6.0/Dir.html)
-  # *   [`Integer#chr`](https://docs.ruby-lang.org/en/2.6.0/Integer.html#method-i-chr)
-  # *   [`String#inspect`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-inspect)
+  # *   [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) names from
+  #     [`Dir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html)
+  # *   [`Integer#chr`](https://docs.ruby-lang.org/en/2.7.0/Integer.html#method-i-chr)
+  # *   [`String#inspect`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-inspect)
   #     and
-  #     [`Regexp#inspect`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-i-inspect)
+  #     [`Regexp#inspect`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-inspect)
   # *   Strings returned from
-  #     [`Readline`](https://docs.ruby-lang.org/en/2.6.0/Readline.html)
+  #     [`Readline`](https://docs.ruby-lang.org/en/2.7.0/Readline.html)
   # *   Strings returned from
-  #     [`SDBM`](https://docs.ruby-lang.org/en/2.6.0/SDBM.html)
-  # *   [`Time#zone`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-zone)
-  # *   Values from [`ENV`](https://docs.ruby-lang.org/en/2.6.0/ENV.html)
+  #     [`SDBM`](https://docs.ruby-lang.org/en/2.7.0/SDBM.html)
+  # *   [`Time#zone`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-zone)
+  # *   Values from [`ENV`](https://docs.ruby-lang.org/en/2.7.0/ENV.html)
   # *   Values in ARGV including $PROGRAM\_NAME
   #
   #
   # Additionally
-  # [`String#encode`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-encode)
+  # [`String#encode`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-encode)
   # and
-  # [`String#encode!`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-encode-21)
+  # [`String#encode!`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-encode-21)
   # use the default internal encoding if no encoding is given.
   #
-  # The locale encoding (\_\_ENCODING\_\_), not
-  # [`default_internal`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-default_internal),
+  # The script encoding (\_\_ENCODING\_\_), not
+  # [`default_internal`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-default_internal),
   # is used as the encoding of created strings.
   #
-  # [`Encoding::default_internal`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-default_internal)
+  # [`Encoding::default_internal`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-default_internal)
   # is initialized by the source file's internal\_encoding or -E option.
   sig {returns(Encoding)}
   def self.default_internal(); end
 
   # Sets default internal encoding or removes default internal encoding when
   # passed nil. You should not set
-  # [`Encoding::default_internal`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-default_internal)
+  # [`Encoding::default_internal`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-default_internal)
   # in ruby code as strings created before changing the value may have a
   # different encoding from strings created after the change. Instead you should
   # use `ruby -E` to invoke ruby with the correct default\_internal.
   #
   # See
-  # [`Encoding::default_internal`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-default_internal)
+  # [`Encoding::default_internal`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-default_internal)
   # for information on how the default internal encoding is used.
   sig do
     params(
@@ -627,7 +627,7 @@ class Encoding < Object
   # :   filesystem encoding
   #
   #
-  # An [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html)
+  # An [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html)
   # is raised when no encoding with *name*. Only `Encoding.find("internal")`
   # however returns nil when no encoding named "internal", in other words, when
   # Ruby has no default internal encoding.
@@ -674,10 +674,10 @@ class Encoding < Object
   # ```
   #
   # The result is highly platform dependent. So
-  # [`Encoding.find(Encoding.locale_charmap)`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-find)
+  # [`Encoding.find(Encoding.locale_charmap)`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-find)
   # may cause an error. If you need some encoding object even for unknown
   # locale,
-  # [`Encoding.find`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-find)("locale")
+  # [`Encoding.find`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-find)("locale")
   # can be used.
   def self.locale_charmap; end
 
@@ -733,7 +733,7 @@ class Encoding < Object
   # Returns the list of name and aliases of the encoding.
   #
   # ```ruby
-  # Encoding::WINDOWS_31J.names  #=> ["Windows-31J", "CP932", "csWindows31J"]
+  # Encoding::WINDOWS_31J.names  #=> ["Windows-31J", "CP932", "csWindows31J", "SJIS", "PCK"]
   # ```
   sig {returns(T::Array[String])}
   def names(); end
@@ -741,7 +741,7 @@ class Encoding < Object
   # Returns a replicated encoding of *enc* whose name is *name*. The new
   # encoding should have the same byte structure of *enc*. If *name* is used by
   # another encoding, raise
-  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html).
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html).
   sig do
     params(
         name: String,
@@ -759,69 +759,69 @@ class Encoding < Object
   def to_s(); end
 end
 
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) conversion
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) conversion
 # class.
 class Encoding::Converter < Data
-  # [`AFTER_OUTPUT`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#AFTER_OUTPUT)
+  # [`AFTER_OUTPUT`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#AFTER_OUTPUT)
   #
   # Stop converting after some output is complete but before all of the input
   # was consumed. See
-  # [`primitive_convert`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-primitive_convert)
+  # [`primitive_convert`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-primitive_convert)
   # for an example.
   AFTER_OUTPUT = T.let(T.unsafe(nil), Integer)
-  # [`CRLF_NEWLINE_DECORATOR`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#CRLF_NEWLINE_DECORATOR)
+  # [`CRLF_NEWLINE_DECORATOR`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#CRLF_NEWLINE_DECORATOR)
   #
   # Decorator for converting LF to CRLF
   CRLF_NEWLINE_DECORATOR = T.let(T.unsafe(nil), Integer)
-  # [`CR_NEWLINE_DECORATOR`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#CR_NEWLINE_DECORATOR)
+  # [`CR_NEWLINE_DECORATOR`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#CR_NEWLINE_DECORATOR)
   #
   # Decorator for converting LF to CR
   CR_NEWLINE_DECORATOR = T.let(T.unsafe(nil), Integer)
-  # [`INVALID_MASK`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#INVALID_MASK)
+  # [`INVALID_MASK`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#INVALID_MASK)
   #
   # Mask for invalid byte sequences
   INVALID_MASK = T.let(T.unsafe(nil), Integer)
-  # [`INVALID_REPLACE`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#INVALID_REPLACE)
+  # [`INVALID_REPLACE`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#INVALID_REPLACE)
   #
   # Replace invalid byte sequences
   INVALID_REPLACE = T.let(T.unsafe(nil), Integer)
-  # [`PARTIAL_INPUT`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#PARTIAL_INPUT)
+  # [`PARTIAL_INPUT`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#PARTIAL_INPUT)
   #
   # Indicates the source may be part of a larger string. See
-  # [`primitive_convert`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-primitive_convert)
+  # [`primitive_convert`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-primitive_convert)
   # for an example.
   PARTIAL_INPUT = T.let(T.unsafe(nil), Integer)
-  # [`UNDEF_HEX_CHARREF`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#UNDEF_HEX_CHARREF)
+  # [`UNDEF_HEX_CHARREF`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#UNDEF_HEX_CHARREF)
   #
   # Replace byte sequences that are undefined in the destination encoding with
-  # an [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) hexadecimal
+  # an [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) hexadecimal
   # character reference. This is valid for
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) conversion.
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) conversion.
   UNDEF_HEX_CHARREF = T.let(T.unsafe(nil), Integer)
-  # [`UNDEF_MASK`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#UNDEF_MASK)
+  # [`UNDEF_MASK`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#UNDEF_MASK)
   #
   # Mask for a valid character in the source encoding but no related
   # character(s) in destination encoding.
   UNDEF_MASK = T.let(T.unsafe(nil), Integer)
-  # [`UNDEF_REPLACE`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#UNDEF_REPLACE)
+  # [`UNDEF_REPLACE`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#UNDEF_REPLACE)
   #
   # Replace byte sequences that are undefined in the destination encoding.
   UNDEF_REPLACE = T.let(T.unsafe(nil), Integer)
-  # [`UNIVERSAL_NEWLINE_DECORATOR`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#UNIVERSAL_NEWLINE_DECORATOR)
+  # [`UNIVERSAL_NEWLINE_DECORATOR`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#UNIVERSAL_NEWLINE_DECORATOR)
   #
   # Decorator for converting CRLF and CR to LF
   UNIVERSAL_NEWLINE_DECORATOR = T.let(T.unsafe(nil), Integer)
-  # [`XML_ATTR_CONTENT_DECORATOR`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#XML_ATTR_CONTENT_DECORATOR)
+  # [`XML_ATTR_CONTENT_DECORATOR`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#XML_ATTR_CONTENT_DECORATOR)
   #
-  # Escape as [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) AttValue
+  # Escape as [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) AttValue
   XML_ATTR_CONTENT_DECORATOR = T.let(T.unsafe(nil), Integer)
-  # [`XML_ATTR_QUOTE_DECORATOR`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#XML_ATTR_QUOTE_DECORATOR)
+  # [`XML_ATTR_QUOTE_DECORATOR`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#XML_ATTR_QUOTE_DECORATOR)
   #
-  # Escape as [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) AttValue
+  # Escape as [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) AttValue
   XML_ATTR_QUOTE_DECORATOR = T.let(T.unsafe(nil), Integer)
-  # [`XML_TEXT_DECORATOR`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#XML_TEXT_DECORATOR)
+  # [`XML_TEXT_DECORATOR`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#XML_TEXT_DECORATOR)
   #
-  # Escape as [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) CharData
+  # Escape as [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) CharData
   XML_TEXT_DECORATOR = T.let(T.unsafe(nil), Integer)
 
   # possible options elements:
@@ -853,14 +853,14 @@ class Encoding::Converter < Data
   #   Encoding::Converter::XML_ATTR_QUOTE_DECORATOR
   # ```
   #
-  # [`Encoding::Converter.new`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-c-new)
+  # [`Encoding::Converter.new`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-c-new)
   # creates an instance of
-  # [`Encoding::Converter`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html).
+  # [`Encoding::Converter`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html).
   #
   # Source\_encoding and
-  # [`destination_encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-destination_encoding)
+  # [`destination_encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-destination_encoding)
   # should be a string or
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) object.
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) object.
   #
   # opt should be nil, a hash or an integer.
   #
@@ -869,11 +869,11 @@ class Encoding::Converter < Data
   # *   strings representing decorator names.
   #
   #
-  # [`Encoding::Converter.new`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-c-new)
+  # [`Encoding::Converter.new`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-c-new)
   # optionally takes an option. The option should be a hash or an integer. The
   # option hash can contain :invalid => nil, etc. The option integer should be
   # logical-or of constants such as
-  # [`Encoding::Converter::INVALID_REPLACE`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#INVALID_REPLACE),
+  # [`Encoding::Converter::INVALID_REPLACE`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#INVALID_REPLACE),
   # etc.
   #
   # :invalid => nil
@@ -882,11 +882,11 @@ class Encoding::Converter < Data
   # :   Replace invalid byte sequence by replacement string.
   # :undef => nil
   # :   Raise an error if a character in
-  #     [`source_encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-source_encoding)
+  #     [`source_encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-source_encoding)
   #     is not defined in destination\_encoding. This is a default behavior.
   # :undef => :replace
   # :   Replace undefined character in
-  #     [`destination_encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-destination_encoding)
+  #     [`destination_encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-destination_encoding)
   #     with replacement string.
   # :replace => string
   # :   Specify the replacement string. If not specified, "uFFFD" is used for
@@ -898,17 +898,17 @@ class Encoding::Converter < Data
   # :cr\_newline => true
   # :   Convert LF to CR.
   # :xml => :text
-  # :   Escape as [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html)
+  # :   Escape as [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html)
   #     CharData. This form can be used as an HTML 4.0 #PCDATA.
   #     *   '&' -> '&amp;'
   #     *   '<' -> '&lt;'
   #     *   '>' -> '&gt;'
   #     *   undefined characters in
-  #         [`destination_encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-destination_encoding)
+  #         [`destination_encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-destination_encoding)
   #         -> hexadecimal CharRef such as &#xHH;
   #
   # :xml => :attr
-  # :   Escape as [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html)
+  # :   Escape as [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html)
   #     AttValue. The converted result is quoted as "...". This form can be used
   #     as an HTML 4.0 attribute value.
   #     *   '&' -> '&amp;'
@@ -916,7 +916,7 @@ class Encoding::Converter < Data
   #     *   '>' -> '&gt;'
   #     *   '"' -> '&quot;'
   #     *   undefined characters in
-  #         [`destination_encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-destination_encoding)
+  #         [`destination_encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-destination_encoding)
   #         -> hexadecimal CharRef such as &#xHH;
   #
   #
@@ -971,14 +971,14 @@ class Encoding::Converter < Data
   # ```
   #
   # If a conversion error occur,
-  # [`Encoding::UndefinedConversionError`](https://docs.ruby-lang.org/en/2.6.0/Encoding/UndefinedConversionError.html)
+  # [`Encoding::UndefinedConversionError`](https://docs.ruby-lang.org/en/2.7.0/Encoding/UndefinedConversionError.html)
   # or
-  # [`Encoding::InvalidByteSequenceError`](https://docs.ruby-lang.org/en/2.6.0/Encoding/InvalidByteSequenceError.html)
+  # [`Encoding::InvalidByteSequenceError`](https://docs.ruby-lang.org/en/2.7.0/Encoding/InvalidByteSequenceError.html)
   # is raised.
-  # [`Encoding::Converter#convert`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-convert)
+  # [`Encoding::Converter#convert`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-convert)
   # doesn't supply methods to recover or restart from these exceptions. When you
   # want to handle these conversion errors, use
-  # [`Encoding::Converter#primitive_convert`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-primitive_convert).
+  # [`Encoding::Converter#primitive_convert`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-primitive_convert).
   def convert(_); end
 
   # Returns the conversion path of ec.
@@ -1002,7 +1002,7 @@ class Encoding::Converter < Data
   def convpath; end
 
   # Returns the destination encoding as an
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) object.
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) object.
   def destination_encoding; end
 
   # Finishes the converter. It returns the last part of the converted string.
@@ -1055,14 +1055,14 @@ class Encoding::Converter < Data
   # conversion did not produce an error.
   #
   # "error" means that
-  # [`Encoding::InvalidByteSequenceError`](https://docs.ruby-lang.org/en/2.6.0/Encoding/InvalidByteSequenceError.html)
+  # [`Encoding::InvalidByteSequenceError`](https://docs.ruby-lang.org/en/2.7.0/Encoding/InvalidByteSequenceError.html)
   # and
-  # [`Encoding::UndefinedConversionError`](https://docs.ruby-lang.org/en/2.6.0/Encoding/UndefinedConversionError.html)
+  # [`Encoding::UndefinedConversionError`](https://docs.ruby-lang.org/en/2.7.0/Encoding/UndefinedConversionError.html)
   # for
-  # [`Encoding::Converter#convert`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-convert)
+  # [`Encoding::Converter#convert`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-convert)
   # and :invalid\_byte\_sequence, :incomplete\_input and :undefined\_conversion
   # for
-  # [`Encoding::Converter#primitive_convert`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-primitive_convert).
+  # [`Encoding::Converter#primitive_convert`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-primitive_convert).
   #
   # ```ruby
   # ec = Encoding::Converter.new("utf-8", "iso-8859-1")
@@ -1096,7 +1096,7 @@ class Encoding::Converter < Data
   # :finished
   # ```
   #
-  # [`primitive_convert`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-primitive_convert)
+  # [`primitive_convert`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-primitive_convert)
   # converts source\_buffer into destination\_buffer.
   #
   # source\_buffer should be a string or nil. nil means an empty string.
@@ -1112,7 +1112,7 @@ class Encoding::Converter < Data
   # opt should be nil, a hash or an integer. nil means no flags. If it is
   # omitted, nil is assumed.
   #
-  # [`primitive_convert`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-primitive_convert)
+  # [`primitive_convert`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-primitive_convert)
   # converts the content of source\_buffer from beginning and store the result
   # into destination\_buffer.
   #
@@ -1126,13 +1126,13 @@ class Encoding::Converter < Data
   # actually produced number of bytes. Also destination\_buffer's encoding is
   # set to destination\_encoding.
   #
-  # [`primitive_convert`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-primitive_convert)
+  # [`primitive_convert`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-primitive_convert)
   # drops the converted part of source\_buffer. the dropped part is converted in
   # destination\_buffer or buffered in
-  # [`Encoding::Converter`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html)
+  # [`Encoding::Converter`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html)
   # object.
   #
-  # [`primitive_convert`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-primitive_convert)
+  # [`primitive_convert`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-primitive_convert)
   # stops conversion when one of following condition met.
   # *   invalid byte sequence found in source buffer (:invalid\_byte\_sequence)
   #     `primitive_errinfo` and `last_error` methods returns the detail of the
@@ -1171,7 +1171,7 @@ class Encoding::Converter < Data
   # ```
   def primitive_convert(*_); end
 
-  # [`primitive_errinfo`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-primitive_errinfo)
+  # [`primitive_errinfo`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-primitive_errinfo)
   # returns important information regarding the last error as a 5-element array:
   #
   # ```ruby
@@ -1252,9 +1252,9 @@ class Encoding::Converter < Data
   # invalid\_byte\_sequence error, some bytes are discarded and some bytes are
   # buffered to be converted later. The latter bytes can be put back. It can be
   # observed by
-  # [`Encoding::InvalidByteSequenceError#readagain_bytes`](https://docs.ruby-lang.org/en/2.6.0/Encoding/InvalidByteSequenceError.html#method-i-readagain_bytes)
+  # [`Encoding::InvalidByteSequenceError#readagain_bytes`](https://docs.ruby-lang.org/en/2.7.0/Encoding/InvalidByteSequenceError.html#method-i-readagain_bytes)
   # and
-  # [`Encoding::Converter#primitive_errinfo`](https://docs.ruby-lang.org/en/2.6.0/Encoding/Converter.html#method-i-primitive_errinfo).
+  # [`Encoding::Converter#primitive_errinfo`](https://docs.ruby-lang.org/en/2.7.0/Encoding/Converter.html#method-i-primitive_errinfo).
   #
   # ```ruby
   # ec = Encoding::Converter.new("utf-16le", "iso-8859-1")
@@ -1288,7 +1288,7 @@ class Encoding::Converter < Data
   def replacement=(_); end
 
   # Returns the source encoding as an
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) object.
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) object.
   def source_encoding; end
 
   # Returns the corresponding ASCII compatible encoding.
@@ -1331,8 +1331,8 @@ class Encoding::Converter < Data
   def self.search_convpath(*_); end
 end
 
-# Raised by [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) and
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) methods when the
+# Raised by [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) and
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) methods when the
 # source encoding is incompatible with the target encoding.
 class Encoding::CompatibilityError < EncodingError
 end
@@ -1342,8 +1342,8 @@ end
 class Encoding::ConverterNotFoundError < EncodingError
 end
 
-# Raised by [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) and
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) methods when the
+# Raised by [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) and
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) methods when the
 # string being transcoded contains a byte invalid for the either the source or
 # target encoding.
 class Encoding::InvalidByteSequenceError < EncodingError
@@ -1354,7 +1354,7 @@ class Encoding::InvalidByteSequenceError < EncodingError
   def destination_encoding_name; end
 
   # Returns the discarded bytes when
-  # [`Encoding::InvalidByteSequenceError`](https://docs.ruby-lang.org/en/2.6.0/Encoding/InvalidByteSequenceError.html)
+  # [`Encoding::InvalidByteSequenceError`](https://docs.ruby-lang.org/en/2.7.0/Encoding/InvalidByteSequenceError.html)
   # occurs.
   #
   # ```ruby
@@ -1393,7 +1393,7 @@ class Encoding::InvalidByteSequenceError < EncodingError
   def incomplete_input?; end
 
   # Returns the bytes to be read again when
-  # [`Encoding::InvalidByteSequenceError`](https://docs.ruby-lang.org/en/2.6.0/Encoding/InvalidByteSequenceError.html)
+  # [`Encoding::InvalidByteSequenceError`](https://docs.ruby-lang.org/en/2.7.0/Encoding/InvalidByteSequenceError.html)
   # occurs.
   def readagain_bytes; end
 
@@ -1419,8 +1419,8 @@ class Encoding::InvalidByteSequenceError < EncodingError
   def source_encoding_name; end
 end
 
-# Raised by [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) and
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) methods when a
+# Raised by [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) and
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) methods when a
 # transcoding operation fails.
 class Encoding::UndefinedConversionError < EncodingError
   # Returns the destination encoding as an encoding object.
@@ -1430,7 +1430,7 @@ class Encoding::UndefinedConversionError < EncodingError
   def destination_encoding_name; end
 
   # Returns the one-character string which cause
-  # [`Encoding::UndefinedConversionError`](https://docs.ruby-lang.org/en/2.6.0/Encoding/UndefinedConversionError.html).
+  # [`Encoding::UndefinedConversionError`](https://docs.ruby-lang.org/en/2.7.0/Encoding/UndefinedConversionError.html).
   #
   # ```ruby
   # ec = Encoding::Converter.new("ISO-8859-1", "EUC-JP")

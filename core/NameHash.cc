@@ -1,8 +1,8 @@
 #include "core/NameHash.h"
 #include "common/sort.h"
 #include "core/GlobalState.h"
-#include "core/Hashing.h"
 #include "core/Names.h"
+#include "core/hashing/hashing.h"
 
 using namespace std;
 namespace sorbet::core {
@@ -15,5 +15,8 @@ void NameHash::sortAndDedupe(std::vector<core::NameHash> &hashes) {
     fast_sort(hashes);
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
 }
+
+FileHash::FileHash(GlobalStateHash &&definitions, UsageHash &&usages)
+    : definitions(move(definitions)), usages(move(usages)) {}
 
 } // namespace sorbet::core

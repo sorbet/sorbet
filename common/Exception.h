@@ -10,7 +10,7 @@
 
 namespace sorbet {
 extern std::shared_ptr<spdlog::logger> fatalLogger;
-class SorbetException : std::logic_error {
+class SorbetException : public std::logic_error {
 public:
     SorbetException(const std::string &message) : logic_error(message) {}
     SorbetException(const char *message) : logic_error(message) {}
@@ -43,7 +43,7 @@ public:
 
 class Exception final {
 public:
-    template <typename... TArgs>[[noreturn]] static bool raise(const TArgs &... args) __attribute__((noreturn));
+    template <typename... TArgs> [[noreturn]] static bool raise(const TArgs &...args) __attribute__((noreturn));
 
     [[noreturn]] static inline void notImplemented() {
         raise("Not Implemented");
@@ -58,13 +58,13 @@ public:
     }
     template <typename... TArgs>
     [[noreturn]] static inline bool enforce_handler(std::string_view check, std::string_view file, int line,
-                                                    std::string_view message, const TArgs &... args)
+                                                    std::string_view message, const TArgs &...args)
         __attribute__((noreturn)) {
         raise("{}:{} enforced condition {} has failed: {}", file, line, check, fmt::format(message, args...));
     }
 };
 
-template <typename... TArgs>[[noreturn]] bool Exception::raise(const TArgs &... args) {
+template <typename... TArgs> [[noreturn]] bool Exception::raise(const TArgs &...args) {
     Exception::failInFuzzer();
     std::string message = fmt::format(args...);
 

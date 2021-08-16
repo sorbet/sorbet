@@ -1,23 +1,51 @@
-test/cli/suggest_t_must/suggest_t_must.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
+suggest_t_must.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
      4 |foo[0]
         ^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest_t_must/suggest_t_must.rb:4: Replace with `T.must(foo)`
+  Got T.nilable(String) originating from:
+    suggest_t_must.rb:3:
+     3 |foo = T.let(nil, T.nilable(String))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_must.rb:4: Replaced with `T.must(foo)`
      4 |foo[0]
         ^^^
 
-test/cli/suggest_t_must/suggest_t_must.rb:6: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
+suggest_t_must.rb:6: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
      6 |"hi" + foo
         ^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L58: Method `String#+` has specified `arg0` as `String`
-    58 |        arg0: String,
+  Expected `String` for argument `arg0` of method `String#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L68:
+    68 |        arg0: String,
                 ^^^^
-  Got T.nilable(String) originating from:
-    test/cli/suggest_t_must/suggest_t_must.rb:3:
+  Got `T.nilable(String)` originating from:
+    suggest_t_must.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest_t_must/suggest_t_must.rb:6: Replace with `T.must(foo)`
+  Autocorrect: Done
+    suggest_t_must.rb:6: Replaced with `T.must(foo)`
      6 |"hi" + foo
                ^^^
-Errors: 2
+
+suggest_t_must.rb:8: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+     8 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                              ^^^^^^
+  Got T.nilable(Integer) originating from:
+    suggest_t_must.rb:8:
+     8 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                              ^
+  Autocorrect: Done
+    suggest_t_must.rb:8: Replaced with ` {|x| T.must(x).even?}`
+     8 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                            ^^^^^^^^^
+Errors: 3
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+foo = T.let(nil, T.nilable(String))
+T.must(foo)[0]
+
+"hi" + T.must(foo)
+
+T::Array[T.nilable(Integer)].new.map {|x| T.must(x).even?}

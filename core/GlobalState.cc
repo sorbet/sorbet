@@ -3,13 +3,14 @@
 #include "common/Timer.h"
 #include "common/sort.h"
 #include "core/Error.h"
-#include "core/Hashing.h"
 #include "core/NameHash.h"
 #include "core/Names.h"
 #include "core/Names_gen.h"
+#include "core/NullFlusher.h"
 #include "core/Types.h"
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
+#include "core/hashing/hashing.h"
 #include "core/lsp/Task.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include <utility>
@@ -27,6 +28,109 @@ template class std::unique_ptr<sorbet::core::GlobalState>;
 using namespace std;
 
 namespace sorbet::core {
+
+namespace {
+// Hash functions used to determine position in namesByHash.
+
+inline unsigned int hashMixUnique(UniqueNameKind unk, unsigned int num, unsigned int rawId) {
+    return mix(mix(num, static_cast<u4>(unk)), rawId) * HASH_MULT2 + static_cast<u4>(NameKind::UNIQUE);
+}
+
+inline unsigned int hashMixConstant(unsigned int id) {
+    return id * HASH_MULT2 + static_cast<u4>(NameKind::CONSTANT);
+}
+
+inline unsigned int hashNameRef(const GlobalState &gs, NameRef nref) {
+    switch (nref.kind()) {
+        case NameKind::UTF8:
+            return _hash(nref.shortName(gs));
+        case NameKind::CONSTANT:
+            return hashMixConstant(nref.dataCnst(gs)->original.rawId());
+        case NameKind::UNIQUE: {
+            auto data = nref.dataUnique(gs);
+            return hashMixUnique(data->uniqueNameKind, data->num, data->original.rawId());
+        }
+    }
+}
+
+struct MethodBuilder {
+    GlobalState &gs;
+    MethodRef method;
+
+    MethodBuilder(GlobalState &gs, MethodRef m) : gs(gs), method(m) {}
+
+    MethodBuilder &defaultArg(NameRef name) {
+        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        arg.flags.isDefault = true;
+        return *this;
+    }
+
+    MethodBuilder &typedArg(NameRef name, TypePtr &&type) {
+        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        arg.type = std::move(type);
+        return *this;
+    }
+
+    MethodBuilder &arg(NameRef name) {
+        gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        return *this;
+    }
+
+    MethodBuilder &untypedArg(NameRef name) {
+        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        arg.type = Types::untyped(gs, method);
+        return *this;
+    }
+
+    MethodBuilder &repeatedArg(NameRef name) {
+        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        arg.flags.isRepeated = true;
+        return *this;
+    }
+
+    MethodBuilder &repeatedTypedArg(NameRef name, TypePtr &&type) {
+        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        arg.flags.isRepeated = true;
+        arg.type = std::move(type);
+        return *this;
+    }
+
+    MethodBuilder &repeatedUntypedArg(NameRef name) {
+        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        arg.flags.isRepeated = true;
+        arg.type = Types::untyped(gs, method);
+        return *this;
+    }
+
+    MethodBuilder &kwsplatArg(NameRef name) {
+        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        arg.flags.isKeyword = true;
+        arg.flags.isRepeated = true;
+        arg.type = Types::untyped(gs, method);
+        return *this;
+    }
+
+    MethodRef build() {
+        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+        return method;
+    }
+
+    MethodRef buildWithResult(TypePtr &&type) {
+        method.data(gs)->resultType = type;
+        return build();
+    }
+
+    MethodRef buildWithResultUntyped() {
+        return buildWithResult(Types::untyped(gs, method));
+    }
+};
+
+MethodBuilder enterMethod(GlobalState &gs, ClassOrModuleRef klass, NameRef name) {
+    return MethodBuilder{gs, gs.enterMethodSymbol(Loc::none(), klass, name)};
+}
+
+} // namespace
 
 ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule) {
     // This can't use enterClass since there is a chicken and egg problem.
@@ -54,8 +158,12 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
     : GlobalState(move(errorQueue), make_shared<lsp::TypecheckEpochManager>()) {}
 
 GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager)
-    : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(std::move(errorQueue)),
-      lspQuery(lsp::Query::noQuery()), epochManager(move(epochManager)) {
+    : GlobalState(move(errorQueue), move(epochManager), globalStateIdCounter.fetch_add(1)) {}
+
+GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager,
+                         int globalStateId)
+    : globalStateId(globalStateId), errorQueue(std::move(errorQueue)), lspQuery(lsp::Query::noQuery()),
+      epochManager(move(epochManager)) {
     // Reserve memory in internal vectors for the contents of payload.
     utf8Names.reserve(PAYLOAD_MAX_UTF8_NAME_COUNT);
     constantNames.reserve(PAYLOAD_MAX_CONSTANT_NAME_COUNT);
@@ -70,6 +178,16 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::Type
         2 * (PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT + PAYLOAD_MAX_UNIQUE_NAME_COUNT));
     namesByHash.resize(namesByHashSize);
     ENFORCE((namesByHashSize & (namesByHashSize - 1)) == 0, "namesByHashSize is not a power of 2");
+}
+
+unique_ptr<GlobalState> GlobalState::makeEmptyGlobalStateForHashing(spdlog::logger &logger) {
+    // Note: Private constructor.
+    unique_ptr<GlobalState> rv(
+        new GlobalState(make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>()),
+                        make_shared<lsp::TypecheckEpochManager>(), -1));
+    rv->initEmpty();
+    rv->silenceErrors = true;
+    return rv;
 }
 
 void GlobalState::initEmpty() {
@@ -186,23 +304,13 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::T_Range());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Set());
     ENFORCE(id == Symbols::T_Set());
-    id = synthesizeClass(core::Names::Constants::Configatron());
-    ENFORCE(id == Symbols::Configatron());
-    id = enterClassSymbol(Loc::none(), Symbols::Configatron(), core::Names::Constants::Store());
-    ENFORCE(id == Symbols::Configatron_Store());
-    id = enterClassSymbol(Loc::none(), Symbols::Configatron(), core::Names::Constants::RootStore());
-    ENFORCE(id == Symbols::Configatron_RootStore());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Void());
     id.data(*this)->setIsModule(false);
     ENFORCE(id == Symbols::void_());
     id = synthesizeClass(core::Names::Constants::TypeAlias(), 0);
     ENFORCE(id == Symbols::typeAliasTemp());
-    id = synthesizeClass(core::Names::Constants::Chalk(), 0, true);
-    ENFORCE(id == Symbols::Chalk());
-    id = enterClassSymbol(Loc::none(), Symbols::Chalk(), core::Names::Constants::Tools());
-    ENFORCE(id == Symbols::Chalk_Tools());
-    id = enterClassSymbol(Loc::none(), Symbols::Chalk_Tools(), core::Names::Constants::Accessible());
-    ENFORCE(id == Symbols::Chalk_Tools_Accessible());
+    id = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::Configuration());
+    ENFORCE(id == Symbols::T_Configuration());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Generic());
     ENFORCE(id == Symbols::T_Generic());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Tuple());
@@ -216,29 +324,23 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ReturnTypeInference());
     ENFORCE(id == Symbols::Sorbet_Private_Static_ReturnTypeInference());
-    id =
-        enterMethodSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::guessedTypeTypeParameterHolder());
-    ENFORCE(id == Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder());
-    {
-        auto &arg = enterMethodArgumentSymbol(
-            Loc::none(), Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder(),
-            Names::blkArg());
-        arg.flags.isBlock = true;
-    }
-    id = enterTypeArgument(
+    MethodRef method =
+        enterMethod(*this, Symbols::Sorbet_Private_Static(), core::Names::guessedTypeTypeParameterHolder()).build();
+    ENFORCE(method == Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder());
+    auto typeArgument = enterTypeArgument(
         Loc::none(), Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder(),
         freshNameUnique(core::UniqueNameKind::TypeVarName, core::Names::Constants::InferredReturnType(), 1),
         core::Variance::ContraVariant);
-    id.data(*this)->resultType = make_type<core::TypeVar>(id);
+    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
     ENFORCE(
-        id ==
+        typeArgument ==
         Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant());
-    id = enterTypeArgument(
+    typeArgument = enterTypeArgument(
         Loc::none(), Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder(),
         freshNameUnique(core::UniqueNameKind::TypeVarName, core::Names::Constants::InferredArgumentType(), 1),
         core::Variance::CoVariant);
-    id.data(*this)->resultType = make_type<core::TypeVar>(id);
-    ENFORCE(id ==
+    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
+    ENFORCE(typeArgument ==
             Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Sig());
     ENFORCE(id == Symbols::T_Sig());
@@ -248,21 +350,10 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Magic_undeclaredFieldStub());
 
     // Sorbet::Private::Static#badAliasMethodStub(*arg0 : T.untyped) => T.untyped
-    id = enterMethodSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::badAliasMethodStub());
-    ENFORCE(id == Symbols::Sorbet_Private_Static_badAliasMethodStub());
-    id.data(*this)->resultType = Types::untyped(*this, id);
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), Symbols::Sorbet_Private_Static_badAliasMethodStub(),
-                                              core::Names::arg0());
-        arg.flags.isRepeated = true;
-        arg.type = Types::untyped(*this, id);
-    }
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), Symbols::Sorbet_Private_Static_badAliasMethodStub(),
-                                              core::Names::blkArg());
-        arg.flags.isBlock = true;
-        arg.type = Types::untyped(*this, id);
-    }
+    method = enterMethod(*this, Symbols::Sorbet_Private_Static(), core::Names::badAliasMethodStub())
+                 .repeatedUntypedArg(Names::arg0())
+                 .build();
+    ENFORCE(method == Symbols::Sorbet_Private_Static_badAliasMethodStub());
 
     // T::Helpers
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Helpers());
@@ -303,15 +394,7 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::T_Enum());
 
     // T::Sig#sig
-    auto method = enterMethodSymbol(Loc::none(), Symbols::T_Sig(), Names::sig());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.flags.isDefault = true;
-    }
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::T_Sig(), Names::sig()).defaultArg(Names::arg0()).build();
     ENFORCE(method == Symbols::sig());
 
     // Enumerable::Lazy
@@ -335,36 +418,17 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::T_Sig_WithoutRuntimeSingleton());
 
     // T::Sig::WithoutRuntime.sig
-    method = enterMethodSymbol(Loc::none(), Symbols::T_Sig_WithoutRuntimeSingleton(), Names::sig());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.flags.isDefault = true;
-    }
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method =
+        enterMethod(*this, Symbols::T_Sig_WithoutRuntimeSingleton(), Names::sig()).defaultArg(Names::arg0()).build();
     ENFORCE(method == Symbols::sigWithoutRuntime());
 
     id = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::NonForcingConstants());
     ENFORCE(id == Symbols::T_NonForcingConstants());
 
-    id = enterClassSymbol(Loc::none(), Symbols::Chalk(), Names::Constants::ODM());
-    ENFORCE(id == Symbols::Chalk_ODM());
-
-    id = enterClassSymbol(Loc::none(), Symbols::Chalk_ODM(), Names::Constants::DocumentDecoratorHelper());
-    ENFORCE(id == Symbols::Chalk_ODM_DocumentDecoratorHelper());
-
-    method = enterMethodSymbol(Loc::none(), Symbols::Sorbet_Private_StaticSingleton(), Names::sig());
-    { enterMethodArgumentSymbol(Loc::none(), method, Names::arg0()); }
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg1());
-        arg.flags.isDefault = true;
-    }
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::Sorbet_Private_StaticSingleton(), Names::sig())
+                 .arg(Names::arg0())
+                 .defaultArg(Names::arg1())
+                 .build();
     ENFORCE(method == Symbols::SorbetPrivateStaticSingleton_sig());
 
     id = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageRegistry());
@@ -378,51 +442,37 @@ void GlobalState::initEmpty() {
     id = id.data(*this)->singletonClass(*this);
     ENFORCE(id == Symbols::PackageSpecSingleton());
 
-    method = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::import());
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::import())
+                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
+                 .build();
     ENFORCE(method == Symbols::PackageSpec_import());
-    {
-        auto &importArg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        // T.class_of(PackageSpec)
-        importArg.type = make_type<ClassType>(Symbols::PackageSpecSingleton());
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
 
-    method = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::export_());
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::export_()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_export());
-    {
-        enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
-
-    method = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::exportMethods());
-    ENFORCE(method == Symbols::PackageSpec_export_methods());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.flags.isRepeated = true;
-        auto &blkArg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        blkArg.flags.isBlock = true;
-    }
 
     id = synthesizeClass(core::Names::Constants::Encoding());
     ENFORCE(id == Symbols::Encoding());
 
+    id = synthesizeClass(core::Names::Constants::Thread());
+    ENFORCE(id == Symbols::Thread());
+
     // Class#new
-    method = enterMethodSymbol(Loc::none(), Symbols::Class(), Names::new_());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::args());
-        arg.flags.isRepeated = true;
-    }
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::Class(), Names::new_()).repeatedArg(Names::args()).build();
     ENFORCE(method == Symbols::Class_new());
 
     method = enterMethodSymbol(Loc::none(), Symbols::noClassOrModule(), Names::TodoMethod());
     enterMethodArgumentSymbol(Loc::none(), method, Names::args());
     ENFORCE(method == Symbols::todoMethod());
+
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig());
+    ENFORCE(id == Symbols::Sorbet_Private_Static_ResolvedSig());
+    id = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::Sorbet_Private_Static_ResolvedSigSingleton());
+
+    typeArgument =
+        enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
+    ENFORCE(typeArgument == Symbols::todoTypeArgument());
+    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
 
     // Root members
     Symbols::root().data(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
@@ -434,285 +484,141 @@ void GlobalState::initEmpty() {
     id.data(*this)->resultType = make_type<LiteralType>(Symbols::String(), enterNameUTF8(sorbet_full_version_string));
 
     // Synthesize <Magic>.<build-hash>(*vs : T.untyped) => Hash
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildHash());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.flags.isRepeated = true;
-        arg.type = Types::untyped(*this, method);
-    }
-    method.data(*this)->resultType = Types::hashOfUntyped();
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
-    // Synthesize <Magic>#<build-keyword-args>(*vs : T.untyped) => Hash
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildKeywordArgs());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.flags.isRepeated = true;
-        arg.type = Types::untyped(*this, method);
-    }
-    method.data(*this)->resultType = Types::hashOfUntyped();
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::buildHash())
+                 .repeatedUntypedArg(Names::arg0())
+                 .buildWithResult(Types::hashOfUntyped());
     // Synthesize <Magic>.<build-array>(*vs : T.untyped) => Array
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildArray());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.flags.isRepeated = true;
-        arg.type = Types::untyped(*this, method);
-    }
-    method.data(*this)->resultType = Types::arrayOfUntyped();
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::buildArray())
+                 .repeatedUntypedArg(Names::arg0())
+                 .buildWithResult(Types::arrayOfUntyped());
 
     // Synthesize <Magic>.<build-range>(from: T.untyped, to: T.untyped) => Range
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildRange());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-    }
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg1());
-        arg.type = Types::untyped(*this, method);
-    }
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg2());
-        arg.type = Types::untyped(*this, method);
-    }
-    method.data(*this)->resultType = Types::rangeOfUntyped();
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::buildRange())
+                 .untypedArg(Names::arg0())
+                 .untypedArg(Names::arg1())
+                 .untypedArg(Names::arg2())
+                 .buildWithResult(Types::rangeOfUntyped());
 
-    // Synthesize <Magic>.<splat>(a: Array) => Untyped
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::splat());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::arrayOfUntyped();
-    }
-    method.data(*this)->resultType = Types::untyped(*this, method);
+    // Synthesize <Magic>.<regex-backref>(arg0: T.untyped) => T.nilable(String)
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::regexBackref())
+                 .untypedArg(Names::arg0())
+                 .buildWithResult(Types::any(*this, Types::nilClass(), Types::String()));
 
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    // Synthesize <Magic>.<splat>(a: T.untyped) => Untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::splat())
+                 .untypedArg(Names::arg0())
+                 .buildWithResultUntyped();
 
     // Synthesize <Magic>.<defined>(*arg0: String) => Boolean
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::defined_p());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.flags.isRepeated = true;
-        arg.type = Types::String();
-    }
-    method.data(*this)->resultType = Types::any(*this, Types::nilClass(), Types::String());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::defined_p())
+                 .repeatedTypedArg(Names::arg0(), Types::String())
+                 .buildWithResult(Types::any(*this, Types::nilClass(), Types::String()));
 
     // Synthesize <Magic>.<expandSplat>(arg0: T.untyped, arg1: Integer, arg2: Integer) => T.untyped
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::expandSplat());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-    }
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg1());
-        arg.type = Types::Integer();
-    }
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg2());
-        arg.type = Types::Integer();
-    }
-    method.data(*this)->resultType = Types::untyped(*this, method);
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::expandSplat())
+                 .untypedArg(Names::arg0())
+                 .untypedArg(Names::arg1())
+                 .untypedArg(Names::arg2())
+                 .buildWithResultUntyped();
     // Synthesize <Magic>.<call-with-splat>(args: *T.untyped) => T.untyped
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::callWithSplat());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-        arg.flags.isRepeated = true;
-    }
-    method.data(*this)->resultType = Types::untyped(*this, method);
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::callWithSplat())
+                 .repeatedUntypedArg(Names::arg0())
+                 .buildWithResultUntyped();
     // Synthesize <Magic>.<call-with-block>(args: *T.untyped) => T.untyped
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::callWithBlock());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-        arg.flags.isRepeated = true;
-    }
-    method.data(*this)->resultType = Types::untyped(*this, method);
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::callWithBlock())
+                 .repeatedUntypedArg(Names::arg0())
+                 .buildWithResultUntyped();
     // Synthesize <Magic>.<call-with-splat-and-block>(args: *T.untyped) => T.untyped
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::callWithSplatAndBlock());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-        arg.flags.isRepeated = true;
-    }
-    method.data(*this)->resultType = Types::untyped(*this, method);
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::callWithSplatAndBlock())
+                 .repeatedUntypedArg(Names::arg0())
+                 .buildWithResultUntyped();
     // Synthesize <Magic>.<suggest-type>(arg: *T.untyped) => T.untyped
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::suggestType());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-    }
-    method.data(*this)->resultType = Types::untyped(*this, method);
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::suggestType())
+                 .untypedArg(Names::arg0())
+                 .buildWithResultUntyped();
     // Synthesize <Magic>.<self-new>(arg: *T.untyped) => T.untyped
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::selfNew());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-        arg.flags.isRepeated = true;
-    }
-    method.data(*this)->resultType = Types::untyped(*this, method);
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::selfNew())
+                 .repeatedUntypedArg(Names::arg0())
+                 .buildWithResultUntyped();
     // Synthesize <Magic>.<nil-for-safe-navigation>(recv: T.untyped) => NilClass
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::nilForSafeNavigation());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-    }
-    method.data(*this)->resultType = Types::nilClass();
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::nilForSafeNavigation())
+                 .untypedArg(Names::arg0())
+                 .buildWithResult(Types::nilClass());
     // Synthesize <Magic>.<string-interpolate>(arg: *T.untyped) => String
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::stringInterpolate());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-        arg.flags.isRepeated = true;
-    }
-    method.data(*this)->resultType = Types::String();
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::stringInterpolate())
+                 .repeatedUntypedArg(Names::arg0())
+                 .buildWithResult(Types::String());
     // Synthesize <Magic>.<define-top-class-or-module>(arg: T.untyped) => Void
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::defineTopClassOrModule());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-    }
-    method.data(*this)->resultType = Types::void_();
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::defineTopClassOrModule())
+                 .untypedArg(Names::arg0())
+                 .buildWithResult(Types::void_());
     // Synthesize <Magic>.<keep-for-cfg>(arg: T.untyped) => Void
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::keepForCfg());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-    }
-    method.data(*this)->resultType = Types::void_();
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::keepForCfg())
+                 .untypedArg(Names::arg0())
+                 .buildWithResult(Types::void_());
     // Synthesize <Magic>.<retry>() => Void
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::retry());
-    method.data(*this)->resultType = Types::void_();
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::retry()).buildWithResult(Types::void_());
 
     // Synthesize <Magic>.<blockBreak>(args: T.untyped) => T.untyped
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::blockBreak());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-        auto &argBlock = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        argBlock.flags.isBlock = true;
-    }
-    method.data(*this)->resultType = Types::untyped(*this, method);
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::blockBreak())
+                 .untypedArg(Names::arg0())
+                 .buildWithResultUntyped();
 
     // Synthesize <Magic>.<getEncoding>() => Encoding
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::getEncoding());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
-    method.data(*this)->resultType = core::make_type<core::ClassType>(core::Symbols::Encoding());
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::getEncoding())
+                 .buildWithResult(core::make_type<core::ClassType>(core::Symbols::Encoding()));
+
+    // Synthesize <Magic>.mixes_in_class_methods(self: T.untyped, arg: T.untyped) => Void
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::mixesInClassMethods())
+                 .untypedArg(Names::selfLocal())
+                 .untypedArg(Names::arg0())
+                 .buildWithResult(Types::void_());
+
+    // Synthesize <Magic>.<check-match-array>(pattern: T.untyped, splatArray: T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::checkMatchArray())
+                 .untypedArg(Names::arg0())
+                 .untypedArg(Names::arg1())
+                 .buildWithResultUntyped();
+
+    // Synthesize <Magic>.<to-hash-dup>(arg: T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::toHashDup())
+                 .untypedArg(Names::arg0())
+                 .buildWithResultUntyped();
+
+    // Synthesize <Magic>.<to-hash-nodup>(arg: T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::toHashNoDup())
+                 .untypedArg(Names::arg0())
+                 .buildWithResultUntyped();
+
+    // Synthesize <Magic>.<merge-hash>(*arg: T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::mergeHash())
+                 .repeatedUntypedArg(Names::arg0())
+                 .buildWithResultUntyped();
+
+    // Synthesize <Magic>.<merge-hash-values>(arg0: T.untyped, *arg1: T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::mergeHashValues())
+                 .untypedArg(Names::arg0())
+                 .repeatedUntypedArg(Names::arg())
+                 .buildWithResultUntyped();
 
     // Synthesize <DeclBuilderForProcs>.<params>(args: T.untyped) => DeclBuilderForProcs
-    method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.flags.isKeyword = true;
-        arg.flags.isRepeated = true;
-        arg.type = Types::untyped(*this, method);
-    }
-    method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::params())
+                 .kwsplatArg(Names::arg0())
+                 .buildWithResult(Types::declBuilderForProcsSingletonClass());
     // Synthesize <DeclBuilderForProcs>.<bind>(args: T.untyped) =>
     // DeclBuilderForProcs
-    method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::bind());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-    }
-    method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::bind())
+                 .untypedArg(Names::arg0())
+                 .buildWithResult(Types::declBuilderForProcsSingletonClass());
     // Synthesize <DeclBuilderForProcs>.<returns>(args: T.untyped) => DeclBuilderForProcs
-    method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::returns());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-    }
-    method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::returns())
+                 .untypedArg(Names::arg0())
+                 .buildWithResult(Types::declBuilderForProcsSingletonClass());
     // Synthesize <DeclBuilderForProcs>.<type_parameters>(args: T.untyped) =>
     // DeclBuilderForProcs
-    method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::typeParameters());
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::untyped(*this, method);
-    }
-    method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
-    {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
-    }
+    method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::typeParameters())
+                 .untypedArg(Names::arg0())
+                 .buildWithResult(Types::declBuilderForProcsSingletonClass());
     // Some of these are Modules
     Symbols::StubModule().data(*this)->setIsModule(true);
     Symbols::T().data(*this)->setIsModule(true);
@@ -729,17 +635,10 @@ void GlobalState::initEmpty() {
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes
-    // Does it in two passes since the singletonClass will go in the Symbols::root() members which will invalidate the
-    // iterator
-    vector<SymbolRef> needSingletons;
-    for (auto &sym : classAndModules) {
-        auto ref = sym.ref(*this);
-        if (ref.exists()) {
-            needSingletons.emplace_back(ref);
-        }
-    }
-    for (auto sym : needSingletons) {
-        sym.data(*this)->singletonClass(*this);
+    // Collect size prior to loop since singletons will cause vector to grow.
+    size_t classAndModulesSize = classAndModules.size();
+    for (u4 i = 1; i < classAndModulesSize; i++) {
+        classAndModules[i].singletonClass(*this);
     }
 
     // This fills in all the way up to MAX_SYNTHETIC_CLASS_SYMBOLS
@@ -847,7 +746,8 @@ void GlobalState::preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 f
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
-MethodRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const vector<u4> &methodHash) const {
+MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name,
+                                                  const vector<u4> &methodHash) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
@@ -875,8 +775,9 @@ MethodRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name,
 }
 
 // look up a symbol whose flags match the desired flags. This might look through mangled names to discover one whose
-// flags match. If no sych symbol exists, then it will return noSymbol.
-SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const {
+// flags match. If no sych symbol exists, then it will return defaultReturnValue.
+SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags,
+                                             SymbolRef defaultReturnValue) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
@@ -897,7 +798,7 @@ SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 f
         res = ownerScope->members().find(lookupName);
         unique++;
     }
-    return Symbols::noSymbol();
+    return defaultReturnValue;
 }
 
 SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
@@ -971,7 +872,7 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     return ret;
 }
 
-SymbolRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
+TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
     u4 flags;
     ENFORCE(owner.exists() || name == Names::Constants::NoTypeMember());
     ENFORCE(name.exists());
@@ -994,7 +895,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef 
     if (store.exists()) {
         ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
         counterInc("symbols.hit");
-        return store;
+        return store.asTypeMemberRef();
     }
 
     ENFORCE(!symbolTableFrozen);
@@ -1014,11 +915,12 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef 
     if (!absl::c_linear_search(members, result)) {
         members.emplace_back(result);
     }
-    return result;
+    return result.asTypeMemberRef();
 }
 
-SymbolRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance) {
-    ENFORCE(owner.exists() || name == Names::Constants::NoTypeArgument());
+TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance) {
+    ENFORCE(owner.exists() || name == Names::Constants::NoTypeArgument() ||
+            name == Names::Constants::TodoTypeArgument());
     ENFORCE(name.exists());
     u4 flags;
     if (variance == Variance::Invariant) {
@@ -1040,7 +942,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name,
     if (store.exists()) {
         ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
         counterInc("symbols.hit");
-        return store;
+        return store.asTypeArgumentRef();
     }
 
     ENFORCE(!symbolTableFrozen);
@@ -1057,7 +959,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name,
     wasModified_ = true;
 
     core::SymbolRef(owner).dataAllowingNone(*this)->typeArguments().emplace_back(result);
-    return result;
+    return result.asTypeArgumentRef();
 }
 
 MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
@@ -1122,7 +1024,7 @@ MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, co
     return res;
 }
 
-SymbolRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
+FieldRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     ENFORCE(name.exists());
 
     auto flags = Symbol::Flags::FIELD;
@@ -1133,7 +1035,7 @@ SymbolRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef
     if (store.exists()) {
         ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
         counterInc("symbols.hit");
-        return store;
+        return store.asFieldRef();
     }
 
     ENFORCE(!symbolTableFrozen);
@@ -1151,10 +1053,10 @@ SymbolRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef
     DEBUG_ONLY(categoryCounterInc("symbols", "field"));
     wasModified_ = true;
 
-    return result;
+    return result.asFieldRef();
 }
 
-SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
+FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     ENFORCE(name.exists());
 
     SymbolData ownerScope = owner.dataAllowingNone(*this);
@@ -1165,7 +1067,7 @@ SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, N
     if (store.exists()) {
         ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
         counterInc("symbols.hit");
-        return store;
+        return store.asFieldRef();
     }
 
     ENFORCE(!symbolTableFrozen);
@@ -1183,7 +1085,7 @@ SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, N
     DEBUG_ONLY(categoryCounterInc("symbols", "static_field"));
     wasModified_ = true;
 
-    return ret;
+    return ret.asFieldRef();
 }
 
 ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name) {
@@ -1222,6 +1124,14 @@ string_view GlobalState::enterString(string_view nm) {
         if (strings.size() > 1) {
             // last page wasn't full, keep it in the end
             swap(*(strings.end() - 1), *(strings.end() - 2));
+
+            // NOTE: we do not update `stringsLastPageUsed` here because it refers to the offset into the last page,
+            // which is swapped in by the line above.
+        } else {
+            // Insert a new empty page at the end to enforce the invariant that inserting a huge string will always
+            // leave a page that can be written to at the end of the table.
+            strings.emplace_back(make_unique<vector<char>>(GlobalState::STRINGS_PAGE_SIZE));
+            stringsLastPageUsed = 0;
         }
     } else {
         if (stringsLastPageUsed + nm.size() > GlobalState::STRINGS_PAGE_SIZE) {
@@ -1230,11 +1140,11 @@ string_view GlobalState::enterString(string_view nm) {
             stringsLastPageUsed = 0;
         }
         from = strings.back()->data() + stringsLastPageUsed;
+        stringsLastPageUsed += nm.size();
     }
 
     counterInc("strings");
     memcpy(from, nm.data(), nm.size());
-    stringsLastPageUsed += nm.size();
     return string_view(from, nm.size());
 }
 
@@ -1306,7 +1216,7 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
     bucket.second = name.rawId();
     utf8Names.emplace_back(UTF8Name{enterString(nm)});
 
-    ENFORCE(name.hash(*this) == hs);
+    ENFORCE(hashNameRef(*this, name) == hs);
     categoryCounterInc("names", "utf8");
 
     wasModified_ = true;
@@ -1315,12 +1225,9 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
 
 NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-existing name");
-    ENFORCE(original.kind() == NameKind::UTF8 ||
-                original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
-                original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::TEnum,
-            "making a constant name over wrong name kind");
+    ENFORCE(original.isValidConstantName(*this), "making a constant name over wrong name kind");
 
-    const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.rawId());
+    const auto hs = hashMixConstant(original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1364,7 +1271,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     bucket.second = name.rawId();
 
     constantNames.emplace_back(ConstantName{original});
-    ENFORCE(name.hash(*this) == hs);
+    ENFORCE(hashNameRef(*this, name) == hs);
     wasModified_ = true;
     categoryCounterInc("names", "constant");
     return name;
@@ -1378,12 +1285,9 @@ NameRef GlobalState::lookupNameConstant(NameRef original) const {
     if (!original.exists()) {
         return core::NameRef::noName();
     }
-    ENFORCE(original.kind() == NameKind::UTF8 ||
-                original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
-                original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::TEnum,
-            "looking up a constant name over wrong name kind");
+    ENFORCE(original.isValidConstantName(*this), "looking up a constant name over wrong name kind");
 
-    const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.rawId());
+    const auto hs = hashMixConstant(original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1451,7 +1355,7 @@ void GlobalState::expandNames(u4 utf8NameSize, u4 constantNameSize, u4 uniqueNam
 
 NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) const {
     ENFORCE(num > 0, "num == 0, name overflow");
-    const auto hs = _hash_mix_unique((u2)uniqueNameKind, NameKind::UNIQUE, num, original.rawId());
+    const auto hs = hashMixUnique(uniqueNameKind, num, original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1477,7 +1381,7 @@ NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef ori
 
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) {
     ENFORCE(num > 0, "num == 0, name overflow");
-    const auto hs = _hash_mix_unique((u2)uniqueNameKind, NameKind::UNIQUE, num, original.rawId());
+    const auto hs = hashMixUnique(uniqueNameKind, num, original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1522,7 +1426,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     bucket.second = name.rawId();
 
     uniqueNames.emplace_back(UniqueName{original, num, uniqueNameKind});
-    ENFORCE(name.hash(*this) == hs);
+    ENFORCE(hashNameRef(*this, name) == hs);
     wasModified_ = true;
     categoryCounterInc("names", "unique");
     return name;
@@ -1637,7 +1541,7 @@ unsigned int GlobalState::symbolsUsedTotal() const {
 }
 
 string GlobalState::toStringWithOptions(bool showFull, bool showRaw) const {
-    return Symbols::root().data(*this)->toStringWithOptions(*this, 0, showFull, showRaw);
+    return Symbols::root().toStringWithOptions(*this, 0, showFull, showRaw);
 }
 
 void GlobalState::sanityCheck() const {
@@ -1715,7 +1619,8 @@ void GlobalState::sanityCheck() const {
         if (ent.second == 0) {
             continue;
         }
-        ENFORCE_NO_TIMER(ent.first == NameRef::fromRaw(*this, ent.second).hash(*this), "name hash table corruption");
+        ENFORCE_NO_TIMER(ent.first == hashNameRef(*this, NameRef::fromRaw(*this, ent.second)),
+                         "name hash table corruption");
     }
 }
 
@@ -1766,6 +1671,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->runningUnderAutogen = this->runningUnderAutogen;
     result->censorForSnapshotTests = this->censorForSnapshotTests;
     result->sleepInSlowPath = this->sleepInSlowPath;
+    result->requiresAncestorEnabled = this->requiresAncestorEnabled;
 
     if (keepId) {
         result->globalStateId = this->globalStateId;
@@ -1782,11 +1688,11 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->kvstoreUuid = this->kvstoreUuid;
     result->lspTypecheckCount = this->lspTypecheckCount;
     result->errorUrlBase = this->errorUrlBase;
+    result->includeErrorSections = this->includeErrorSections;
     result->ignoredForSuggestTypedErrorClasses = this->ignoredForSuggestTypedErrorClasses;
     result->suppressedErrorClasses = this->suppressedErrorClasses;
     result->onlyErrorClasses = this->onlyErrorClasses;
-    result->dslPlugins = this->dslPlugins;
-    result->dslRubyExtraArgs = this->dslRubyExtraArgs;
+    result->suggestUnsafe = this->suggestUnsafe;
     result->utf8Names.reserve(this->utf8Names.capacity());
     result->constantNames.reserve(this->constantNames.capacity());
     result->uniqueNames.reserve(this->uniqueNames.capacity());
@@ -1892,28 +1798,6 @@ void GlobalState::suppressErrorClass(int code) {
 void GlobalState::onlyShowErrorClass(int code) {
     ENFORCE(suppressedErrorClasses.empty());
     onlyErrorClasses.insert(code);
-}
-
-void GlobalState::addDslPlugin(string_view method, string_view command) {
-    auto ref = enterNameUTF8(method);
-    auto [it, inserted] = dslPlugins.try_emplace(ref, command);
-    if (!inserted) {
-        if (auto e = beginError(Loc::none(), errors::Internal::InternalError)) {
-            e.setHeader("Duplicate plugin trigger \"{}\". Previous definition: \"{}\"", method, it->second);
-        }
-    }
-}
-
-optional<string_view> GlobalState::findDslPlugin(NameRef method) const {
-    const auto it = dslPlugins.find(method);
-    if (it != dslPlugins.end()) {
-        return it->second;
-    }
-    return nullopt;
-}
-
-bool GlobalState::hasAnyDslPlugin() const {
-    return !dslPlugins.empty();
 }
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
@@ -2071,7 +1955,7 @@ MethodRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
 MethodRef GlobalState::lookupStaticInitForClass(ClassOrModuleRef klass) const {
     auto classData = klass.data(*this);
     auto ref = classData->lookupSingletonClass(*this).data(*this)->findMember(*this, core::Names::staticInit());
-    ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.data(*this)->toString(*this));
+    ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.toString(*this));
     return ref.asMethodRef();
 }
 
@@ -2097,4 +1981,5 @@ MethodRef GlobalState::lookupStaticInitForFile(Loc loc) const {
 spdlog::logger &GlobalState::tracer() const {
     return errorQueue->tracer;
 }
+
 } // namespace sorbet::core

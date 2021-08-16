@@ -1,6 +1,7 @@
 # typed: __STDLIB_INTERNAL
 
-# The global value `true` is the only instance of class `TrueClass` and
+# The global value `true` is the only instance of class
+# [`TrueClass`](https://docs.ruby-lang.org/en/2.7.0/TrueClass.html) and
 # represents a logically true value in boolean expressions. The class provides
 # operators allowing `true` to be used in logical expressions.
 class TrueClass

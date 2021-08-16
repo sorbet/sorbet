@@ -1,9 +1,9 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
-    def self.each<<todo method>>(&<blk>)
+    def self.each<<todo method>>(&blk)
       begin
-        <blk>.call(1, 2, 3, 4, 5)
-        <blk>.call(6, 7, 8, 9, 0)
+        blk.call(1, 2, 3, 4, 5)
+        blk.call(6, 7, 8, 9, 0)
       end
     end
   end
@@ -27,7 +27,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C A>.each() do |*forTemp|
           begin
             begin
-              <assignTemp>$2 = forTemp.to_a()
+              <assignTemp>$2 = ::<Magic>.<splat>(forTemp)
               <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 1, 0)
               a = <assignTemp>$3.[](0)
               <assignTemp>$2
@@ -44,7 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C A>.each() do |*forTemp|
           begin
             begin
-              <assignTemp>$4 = forTemp.to_a()
+              <assignTemp>$4 = ::<Magic>.<splat>(forTemp)
               <assignTemp>$5 = ::<Magic>.<expand-splat>(<assignTemp>$4, 2, 0)
               a = <assignTemp>$5.[](0)
               b = <assignTemp>$5.[](1)
@@ -79,7 +79,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C A>.each() do |*forTemp|
           begin
             begin
-              <assignTemp>$9 = forTemp.to_a()
+              <assignTemp>$9 = ::<Magic>.<splat>(forTemp)
               <assignTemp>$10 = ::<Magic>.<expand-splat>(<assignTemp>$9, 5, 0)
               @a = <assignTemp>$10.[](0)
               @@b = <assignTemp>$10.[](1)

@@ -1,0 +1,12 @@
+test/cli/no-error-sections/no-error-sections-2.rb:3: Method `pouts` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     3 |pouts
+        ^^^^^
+
+test/cli/no-error-sections/no-error-sections-3.rb:3: Method `pouts` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     3 |pouts
+        ^^^^^
+
+test/cli/no-error-sections/no-error-sections.rb:3: Method `pouts` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     3 |pouts
+        ^^^^^
+Errors: 3

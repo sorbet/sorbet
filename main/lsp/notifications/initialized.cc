@@ -13,8 +13,8 @@ void InitializedTask::preprocess(LSPPreprocessor &preprocessor) {
 }
 
 void InitializedTask::index(LSPIndexer &indexer) {
-    // Hacky: We need to use the indexer, but with the WorkerPool from runSpecial. This is the only task to have this
-    // special requirement.
+    // Hacky: We need to use the indexer, but with the WorkerPool from runSpecial. This + SorbetWorkspaceEdit are the
+    // only tasks to have this special requirement.
     this->indexer = &indexer;
 }
 

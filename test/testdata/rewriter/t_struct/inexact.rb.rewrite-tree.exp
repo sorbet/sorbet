@@ -34,15 +34,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
 
     <self>.prop(:bar, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar)
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :attr_reader)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar=)
+    ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
   end
 
   <emptyTree>::<C Inexact>.new()
@@ -69,19 +69,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def qux=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :qux)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :qux)
         <self>.instance_variable_set(:@qux, arg0)
       end
     end
 
     <self>.prop(:qux, <emptyTree>::<C Symbol>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :qux)
+    ::Sorbet::Private::Static.keep_def(<self>, :qux, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :qux=)
+    ::Sorbet::Private::Static.keep_def(<self>, :qux=, :normal)
   end
 end

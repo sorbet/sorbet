@@ -251,12 +251,15 @@ public:
     }
 
     Variance variance() const {
-        if (isInvariant())
+        if (isInvariant()) {
             return Variance::Invariant;
-        if (isCovariant())
+        }
+        if (isCovariant()) {
             return Variance::CoVariant;
-        if (isContravariant())
+        }
+        if (isContravariant()) {
             return Variance::ContraVariant;
+        }
         Exception::raise("Should not happen");
     }
 
@@ -289,10 +292,12 @@ public:
 
     inline bool isClassOrModuleModule() const {
         ENFORCE_NO_TIMER(isClassOrModule());
-        if (flags & Symbol::Flags::CLASS_OR_MODULE_MODULE)
+        if (flags & Symbol::Flags::CLASS_OR_MODULE_MODULE) {
             return true;
-        if (flags & Symbol::Flags::CLASS_OR_MODULE_CLASS)
+        }
+        if (flags & Symbol::Flags::CLASS_OR_MODULE_CLASS) {
             return false;
+        }
         Exception::raise("Should never happen");
     }
 
@@ -544,27 +549,8 @@ public:
 
     std::vector<FuzzySearchResult> findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
 
-    std::string toStringFullName(const GlobalState &gs) const;
-    std::string showFullName(const GlobalState &gs) const;
-
     // Returns true if the symbol or any of its children are not in the symbol table. False otherwise.
     bool isPrintable(const GlobalState &gs) const;
-
-    std::string showRaw(const GlobalState &gs) const {
-        bool showFull = false;
-        bool showRaw = true;
-        return toStringWithOptions(gs, 0, showFull, showRaw);
-    }
-    std::string toString(const GlobalState &gs) const {
-        bool showFull = false;
-        bool showRaw = false;
-        return toStringWithOptions(gs, 0, showFull, showRaw);
-    }
-    std::string toJSON(const GlobalState &gs, int tabs = 0) const;
-    // Renders the full name of this Symbol in a form suitable for user display.
-    std::string show(const GlobalState &gs) const;
-
-    std::string_view showKind(const GlobalState &gs) const;
 
     // Returns the singleton class for this class, lazily instantiating it if it
     // doesn't exist.
@@ -579,8 +565,34 @@ public:
     ClassOrModuleRef topAttachedClass(const GlobalState &gs) const;
 
     void recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass);
+
+    // Returns the locations that are allowed to subclass the sealed class.
     const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs) const;
+
     TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
+
+    bool hasSingleSealedSubclass(const GlobalState &ctx) const;
+
+    // Record a required ancestor for this class of module
+    void recordRequiredAncestor(GlobalState &gs, ClassOrModuleRef ancestor, Loc loc);
+
+    // Associate a required ancestor with the loc it's required at
+    struct RequiredAncestor {
+        ClassOrModuleRef origin; // The class or module that required `symbol`
+        ClassOrModuleRef symbol; // The symbol required
+        Loc loc;                 // The location it was required at
+
+        RequiredAncestor(ClassOrModuleRef origin, ClassOrModuleRef symbol, Loc loc)
+            : origin(origin), symbol(symbol), loc(loc) {}
+    };
+
+    void computeRequiredAncestorLinearization(GlobalState &gs);
+
+    // Locally required ancestors by this class or module
+    std::vector<RequiredAncestor> requiredAncestors(const GlobalState &gs) const;
+
+    // All required ancestors by this class or module
+    std::vector<RequiredAncestor> requiredAncestorsTransitive(const GlobalState &gs) const;
 
     // if dealiasing fails here, then we return Untyped instead
     SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const {
@@ -598,11 +610,11 @@ public:
     bool ignoreInHashing(const GlobalState &gs) const;
 
     SymbolRef owner;
-    SymbolRef superClassOrRebind; // method arguments store rebind here
+    ClassOrModuleRef superClassOrRebind; // method arguments store rebind here
 
     inline ClassOrModuleRef superClass() const {
         ENFORCE_NO_TIMER(isClassOrModule());
-        return superClassOrRebind.asClassOrModuleRef();
+        return superClassOrRebind;
     }
 
     inline void setSuperClass(ClassOrModuleRef claz) {
@@ -610,12 +622,12 @@ public:
         superClassOrRebind = claz;
     }
 
-    inline void setReBind(SymbolRef rebind) {
+    inline void setReBind(ClassOrModuleRef rebind) {
         ENFORCE(isMethod());
         superClassOrRebind = rebind;
     }
 
-    SymbolRef rebind() const {
+    ClassOrModuleRef rebind() const {
         ENFORCE_NO_TIMER(isMethod());
         return superClassOrRebind;
     }
@@ -656,8 +668,6 @@ public:
     Symbol deepCopy(const GlobalState &to, bool keepGsId = false) const;
     void sanityCheck(const GlobalState &gs) const;
 
-    ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
-
     // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
     // why raw pointers are safe.
     const IntrinsicMethod *intrinsic = nullptr;
@@ -665,12 +675,6 @@ public:
 private:
     friend class serialize::SerializerImpl;
     friend class GlobalState;
-
-    // Not printed when showing symbol table
-    bool isHiddenFromPrinting(const GlobalState &gs) const;
-
-    std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
-                                    bool showRaw = false) const;
 
     FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, int betterThan = -1) const;
     std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
@@ -692,6 +696,15 @@ private:
      */
     InlinedVector<SymbolRef, 4> typeParams;
     InlinedVector<Loc, 2> locs_;
+
+    // Record a required ancestor for this class of module in a magic property
+    void recordRequiredAncestorInternal(GlobalState &gs, RequiredAncestor &ancestor, NameRef prop);
+
+    // Read required ancestors for this class of module from a magic property
+    std::vector<RequiredAncestor> readRequiredAncestorsInternal(const GlobalState &gs, NameRef prop) const;
+
+    std::vector<RequiredAncestor> requiredAncestorsTransitiveInternal(GlobalState &gs,
+                                                                      std::vector<ClassOrModuleRef> &seen);
 
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
                                            int maxDepth = 100) const;

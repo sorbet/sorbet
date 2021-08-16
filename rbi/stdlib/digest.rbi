@@ -3,12 +3,12 @@
 # This module provides a framework for message digest libraries.
 #
 # You may want to look at
-# [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html)
+# [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html)
 # as it supports more algorithms.
 #
 # A cryptographic hash function is a procedure that takes data and returns a
 # fixed bit string: the hash value, also known as *digest*.
-# [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) functions are also
+# [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) functions are also
 # called one-way functions, it is easy to compute a digest from a message, but
 # it is infeasible to generate a message from a digest.
 #
@@ -52,7 +52,7 @@
 # See the bubble babble specification at
 # http://web.mit.edu/kenta/www/one/bubblebabble/spec/jrtrjwzi/draft-huima-01.txt.
 #
-# ## [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html) algorithms
+# ## [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html) algorithms
 #
 # Different digest algorithms (or hash functions) are available:
 #
@@ -60,14 +60,14 @@
 # :   See RFC 1321 The MD5 Message-Digest Algorithm
 # RIPEMD-160
 # :   As
-#     [`Digest::RMD160`](https://docs.ruby-lang.org/en/2.6.0/Digest/RMD160.html).
+#     [`Digest::RMD160`](https://docs.ruby-lang.org/en/2.7.0/Digest/RMD160.html).
 #     See http://homes.esat.kuleuven.be/~bosselae/ripemd160.html.
 # SHA1
 # :   See FIPS 180 Secure
-#     [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) Standard.
+#     [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) Standard.
 # SHA2 family
 # :   See FIPS 180 Secure
-#     [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) Standard which
+#     [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) Standard which
 #     defines the following algorithms:
 #     *   SHA512
 #     *   SHA384
@@ -102,8 +102,8 @@ end
 # This abstract class provides a common interface to message digest
 # implementation classes written in C.
 #
-# ## Write a [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html) subclass in C
-# [`Digest::Base`](https://docs.ruby-lang.org/en/2.6.0/Digest/Base.html)
+# ## Write a [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html) subclass in C
+# [`Digest::Base`](https://docs.ruby-lang.org/en/2.7.0/Digest/Base.html)
 # provides a common interface to message digest classes written in C. These
 # classes must provide a struct of type rb\_digest\_metadata\_t:
 #
@@ -190,7 +190,7 @@ class Digest::Class
   def self.base64digest(str, *args); end
 
   # Returns the hash value of a given *string*. This is equivalent to
-  # [`Digest::Class.new(*parameters)`](https://docs.ruby-lang.org/en/2.6.0/Digest/Instance.html#method-i-new).digest(string),
+  # [`Digest::Class.new(*parameters)`](https://docs.ruby-lang.org/en/2.7.0/Digest/Instance.html#method-i-new).digest(string),
   # where extra *parameters*, if any, are passed through to the constructor and
   # the *string* is passed to digest().
   sig do
@@ -219,7 +219,7 @@ class Digest::Class
 
   # Returns the hex-encoded hash value of a given *string*. This is almost
   # equivalent to
-  # [`Digest.hexencode`](https://docs.ruby-lang.org/en/2.6.0/Digest.html#method-c-hexencode)(Digest::Class.new(\*parameters).digest(string)).
+  # [`Digest.hexencode`](https://docs.ruby-lang.org/en/2.7.0/Digest.html#method-c-hexencode)([`Digest::Class.new(*parameters)`](https://docs.ruby-lang.org/en/2.7.0/Digest/Instance.html#method-i-new).digest(string)).
   sig do
     params(
       _: ::T.untyped,
@@ -376,11 +376,11 @@ module Digest::Instance
 end
 
 # A class for calculating message digests using the
-# [`MD5`](https://docs.ruby-lang.org/en/2.6.0/Digest/MD5.html) Message-Digest
-# Algorithm by RSA [`Data`](https://docs.ruby-lang.org/en/2.6.0/Data.html)
+# [`MD5`](https://docs.ruby-lang.org/en/2.7.0/Digest/MD5.html) Message-Digest
+# Algorithm by RSA [`Data`](https://docs.ruby-lang.org/en/2.7.0/Data.html)
 # Security, Inc., described in RFC1321.
 #
-# [`MD5`](https://docs.ruby-lang.org/en/2.6.0/Digest/MD5.html) calculates a
+# [`MD5`](https://docs.ruby-lang.org/en/2.7.0/Digest/MD5.html) calculates a
 # digest of 128 bits (16 bytes).
 #
 # ## Examples
@@ -406,12 +406,12 @@ class Digest::MD5 < Digest::Base
 end
 
 # A class for calculating message digests using the SHA-1 Secure
-# [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) Algorithm by NIST (the
+# [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) Algorithm by NIST (the
 # US' National Institute of Standards and Technology), described in FIPS PUB
 # 180-1.
 #
 # See
-# [`Digest::Instance`](https://docs.ruby-lang.org/en/2.6.0/Digest/Instance.html)
+# [`Digest::Instance`](https://docs.ruby-lang.org/en/2.7.0/Digest/Instance.html)
 # for digest API.
 #
 # SHA-1 calculates a digest of 160 bits (20 bytes).

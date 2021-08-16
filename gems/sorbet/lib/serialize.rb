@@ -4,7 +4,7 @@
 require 'bigdecimal'
 
 class Sorbet::Private::Serialize
-  BLACKLIST_CONSTANTS = [
+  DENYLIST_CONSTANTS = [
     ['DidYouMean', :NameErrorCheckers], # https://github.com/yuki24/did_you_mean/commit/b72fdbe194401f1be21f8ad7b6e3f784a0ad197d
     ['Net', :OpenSSL], # https://github.com/yuki24/did_you_mean/commit/b72fdbe194401f1be21f8ad7b6e3f784a0ad197d
   ]
@@ -112,7 +112,7 @@ class Sorbet::Private::Serialize
       [const_sym, value]
     end
     constants += get_constants(klass, false).uniq.map do |const_sym|
-      next if BLACKLIST_CONSTANTS.include?([class_name, const_sym])
+      next if DENYLIST_CONSTANTS.include?([class_name, const_sym])
       next if Sorbet::Private::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
       begin
         value = klass.const_get(const_sym, false)
@@ -160,9 +160,9 @@ class Sorbet::Private::Serialize
         ret << "# #{e}\n"
         next
       end
-      next if blacklisted_method(method)
+      next if denylisted_method(method)
       next if ancestor_has_method(method, klass)
-      serialize_method(method)
+      serialize_method(method, with_sig: false)
     end
     # uniq is not required here, but added to be on the safe side
     methods += Sorbet::Private::RealStdlib.real_singleton_methods(klass, false).sort.uniq.map do |method_sym|
@@ -172,9 +172,9 @@ class Sorbet::Private::Serialize
         ret << "# #{e}\n"
         next
       end
-      next if blacklisted_method(method)
+      next if denylisted_method(method)
       next if ancestor_has_method(method, Sorbet::Private::RealStdlib.real_singleton_class(klass))
-      serialize_method(method, true)
+      serialize_method(method, true, with_sig: false)
     end
     ret << methods.join("\n")
     ret << "end\n"
@@ -195,7 +195,7 @@ class Sorbet::Private::Serialize
     true
   end
 
-  def blacklisted_method(method)
+  def denylisted_method(method)
     method.name =~ /__validator__[0-9]{8}/ || method.name =~ /.*:.*/
   end
 
@@ -223,9 +223,9 @@ class Sorbet::Private::Serialize
     if KEYWORDS.include?(const.to_sym)
       return "# Illegal constant name: #{const}"
     end
-    if defined?(T::Types) && Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeMember)
+    if defined?(T::Types::TypeMember) && Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeMember)
       value.variance == :invariant ? "  #{const} = type_member" : "  #{const} = type_member(#{value.variance.inspect})"
-    elsif defined?(T::Types) && Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeTemplate)
+    elsif defined?(T::Types::TypeTemplate) && Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeTemplate)
       value.variance == :invariant ? "  #{const} = type_template" : "  #{const} = type_template(#{value.variance.inspect})"
     else
       "  #{const} = ::T.let(nil, ::T.untyped)"

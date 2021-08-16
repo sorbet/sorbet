@@ -6,7 +6,7 @@
 using namespace std;
 namespace sorbet::realmain::lsp {
 
-ast::TreePtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
@@ -49,7 +49,7 @@ ast::TreePtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr
     return tree;
 }
 
-ast::TreePtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr tree) {
     auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
     if (id.kind == ast::UnresolvedIdent::Kind::Instance || id.kind == ast::UnresolvedIdent::Kind::Class) {
         core::ClassOrModuleRef klass;
@@ -59,7 +59,7 @@ ast::TreePtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::T
             klass = ctx.owner.data(ctx)->owner.asClassOrModuleRef();
         } else {
             // Class var.
-            klass = ctx.owner.data(ctx)->enclosingClass(ctx);
+            klass = ctx.owner.enclosingClass(ctx);
             while (klass.data(ctx)->attachedClass(ctx).exists()) {
                 klass = klass.data(ctx)->attachedClass(ctx);
             }
@@ -67,12 +67,13 @@ ast::TreePtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::T
 
         auto sym = klass.data(ctx)->findMemberTransitive(ctx, id.name);
         const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-        if (sym.exists() && (lspQuery.matchesSymbol(sym) || lspQuery.matchesLoc(core::Loc(ctx.file, id.loc)))) {
+        if (sym.exists() && sym.isFieldOrStaticField() &&
+            (lspQuery.matchesSymbol(sym) || lspQuery.matchesLoc(core::Loc(ctx.file, id.loc)))) {
             core::TypeAndOrigins tp;
             tp.type = sym.data(ctx)->resultType;
             tp.origins.emplace_back(sym.data(ctx)->loc());
             core::lsp::QueryResponse::pushQueryResponse(
-                ctx, core::lsp::FieldResponse(sym, core::Loc(ctx.file, id.loc), id.name, tp));
+                ctx, core::lsp::FieldResponse(sym.asFieldRef(), core::Loc(ctx.file, id.loc), id.name, tp));
         }
     }
     return tree;
@@ -111,7 +112,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
     }
 }
 
-ast::TreePtr DefLocSaver::postTransformConstantLit(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr DefLocSaver::postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
     auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     auto symbol = lit.symbol.data(ctx)->dealias(ctx);

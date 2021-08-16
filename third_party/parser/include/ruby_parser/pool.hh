@@ -1,6 +1,7 @@
 #ifndef RUBY_PARSER_POOL_HH
 #define RUBY_PARSER_POOL_HH
 
+#include <cassert>
 #include <type_traits>
 #include <utility>
 #include <vector>

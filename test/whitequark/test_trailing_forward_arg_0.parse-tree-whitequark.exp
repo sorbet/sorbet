@@ -1,0 +1,9 @@
+s(:def, :foo,
+  s(:args,
+    s(:arg, :a),
+    s(:arg, :b),
+    s(:forward_arg)),
+  s(:send, nil, :bar,
+    s(:lvar, :a),
+    s(:int, "42"),
+    s(:forwarded_args)))

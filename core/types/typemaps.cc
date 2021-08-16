@@ -59,7 +59,7 @@ TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc) c
 namespace {
 
 template <typename... MethodArgs>
-optional<vector<TypePtr>> instantiateElems(const vector<TypePtr> &elems, const MethodArgs &... methodArgs) {
+optional<vector<TypePtr>> instantiateElems(const vector<TypePtr> &elems, const MethodArgs &...methodArgs) {
     optional<vector<TypePtr>> newElems;
     int i = -1;
     for (auto &e : elems) {

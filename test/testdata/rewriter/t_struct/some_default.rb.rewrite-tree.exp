@@ -44,19 +44,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @bar = arg0
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize)
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
 
     <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
 
     <self>.prop(:bar, <emptyTree>::<C T>::<C Boolean>, :default, false, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar)
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :attr_reader)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar=)
+    ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
   end
 
   <emptyTree>::<C SomeDefault>.new(:foo, 1)

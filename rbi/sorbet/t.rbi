@@ -30,6 +30,9 @@ module T
   def self.let(value, type, checked: true); end
 
   sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
+  def self.bind(value, type, checked: true); end
+
+  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
   def self.assert_type!(value, type, checked: true); end
 
   sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
@@ -87,7 +90,24 @@ module T::Helpers
   def final!; end
   sig {void}
   def sealed!; end
+
+  # We do not use signatures on the following methods as to not duplicate errors
+  # between the `namer` phase and typechecking for calls.
+  #
+  # With the following example:
+  #
+  # ```
+  # class A
+  #   requires_ancestor "A"
+  # end
+  # ```
+  #
+  # Using a signature would mean we would generate two errors:
+  # 1. error: `requires_ancestor` must only contain constant literals (from namer)
+  # 2. error: Expected `Module` but found `NilClass` for argument `mod` (from calls)
+
   def mixes_in_class_methods(mod, *mods); end
+  def requires_ancestor(mod, *mods); end
 end
 
 module T::Array
@@ -125,12 +145,18 @@ module T::Configuration
   def self.exclude_value_in_type_errors; end
   sig {void}
   def self.include_value_in_type_errors; end
+  def self.can_enable_vm_prop_serde?; end
+  def self.use_vm_prop_serde?; end
+  def self.enable_vm_prop_serde; end
+  def self.disable_vm_prop_serde; end
   def self.hard_assert_handler(str, extra); end
   def self.hard_assert_handler=(value); end
   def self.inline_type_error_handler(error); end
   def self.inline_type_error_handler=(value); end
   def self.log_info_handler(str, extra); end
   def self.log_info_handler=(value); end
+  def self.module_name_mangler; end
+  def self.module_name_mangler=(value); end
   def self.scalar_types; end
   def self.scalar_types=(values); end
   def self.sealed_violation_whitelist; end
@@ -141,18 +167,17 @@ module T::Configuration
   def self.sig_validation_error_handler=(value); end
   def self.soft_assert_handler(str, extra); end
   def self.soft_assert_handler=(value); end
-end
+  def self.normalize_sensitivity_and_pii_handler=(handler); end
+  def self.normalize_sensitivity_and_pii_handler; end
+  def self.redaction_handler=(handler); end
+  def self.redaction_handler; end
+  def self.class_owner_finder=(handler); end
+  def self.class_owner_finder; end
 
-module T::Profile
-  def self.reset; end
-  def self.typecheck_count_estimate; end
-  def self.typecheck_duration; end
-  def self.typecheck_duration=(arg0); end
-  def self.typecheck_duration_estimate; end
-  def self.typecheck_sample_attempts; end
-  def self.typecheck_sample_attempts=(arg0); end
-  def self.typecheck_samples; end
-  def self.typecheck_samples=(arg0); end
+  sig {params(handler: T.proc.params(arg0: T::Props::Decorator::DecoratedInstance, arg1: Symbol).void).void}
+  def self.prop_freeze_handler=(handler); end
+  sig {returns(T.proc.params(arg0: T::Props::Decorator::DecoratedInstance, arg1: Symbol).void)}
+  def self.prop_freeze_handler; end
 end
 
 module T::Utils
@@ -160,14 +185,13 @@ module T::Utils
   def self.coerce(val); end
   def self.resolve_alias(type); end
   def self.run_all_sig_blocks; end
+  def self.signature_for_method(method); end
   def self.signature_for_instance_method(mod, method_name); end
   def self.unwrap_nilable(type); end
   def self.wrap_method_with_call_validation_if_needed(mod, method_sig, original_method); end
 
   # only one caller; delete
   def self.methods_excluding_object(mod); end
-  # only one caller; delete
-  def self.register_forwarder(from_method, to_method, remove_first_param: nil); end
 end
 
 

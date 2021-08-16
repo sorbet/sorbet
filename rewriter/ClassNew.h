@@ -19,7 +19,7 @@ namespace sorbet::rewriter {
  */
 class ClassNew final {
 public:
-    static std::vector<ast::TreePtr> run(core::MutableContext ctx, ast::Assign *asgn);
+    static std::vector<ast::ExpressionPtr> run(core::MutableContext ctx, ast::Assign *asgn);
 
     ClassNew() = delete;
 };

@@ -57,6 +57,9 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
                 case UniqueNameKind::TEnum:
                     protoName.set_unique(com::stripe::rubytyper::Name::OPUS_ENUM);
                     break;
+                case UniqueNameKind::Packager:
+                    protoName.set_unique(com::stripe::rubytyper::Name::PACKAGER);
+                    break;
             }
             break;
         case NameKind::CONSTANT:
@@ -171,7 +174,7 @@ com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, const TypePtr
         typ,
         [&](const ClassType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::CLASS);
-            proto.set_class_full_name(t.symbol.data(gs)->show(gs));
+            proto.set_class_full_name(t.symbol.show(gs));
         },
         [&](const AndType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::AND);
@@ -185,7 +188,7 @@ com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, const TypePtr
         },
         [&](const AppliedType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::APPLIED);
-            proto.mutable_applied()->set_symbol_full_name(t.klass.data(gs)->show(gs));
+            proto.mutable_applied()->set_symbol_full_name(t.klass.show(gs));
             for (auto &a : t.targs) {
                 *proto.mutable_applied()->add_type_args() = toProto(gs, a);
             }

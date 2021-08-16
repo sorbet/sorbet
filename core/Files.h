@@ -4,6 +4,7 @@
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include <string>
+#include <string_view>
 
 namespace sorbet::core {
 class GlobalState;
@@ -19,6 +20,7 @@ public:
     FileRef() : _id(0){};
     FileRef(unsigned int id);
 
+    FileRef(FileRef &f) = default;
     FileRef(const FileRef &f) = default;
     FileRef(FileRef &&f) = default;
     FileRef &operator=(const FileRef &f) = default;
@@ -71,7 +73,6 @@ public:
 
     bool cached = false;         // If 'true', file is completely cached in kvstore.
     bool hasParseErrors = false; // some reasonable invariants don't hold for invalid files
-    bool pluginGenerated = false;
     // Epoch is _only_ used in LSP mode. Do not depend on it elsewhere.
     // TODO(jvilk): Delurk epoch usage and use something like pointer equality to check if a file has changed.
     const u4 epoch;
@@ -104,6 +105,9 @@ public:
 
     void setFileHash(std::unique_ptr<const FileHash> hash);
     const std::shared_ptr<const FileHash> &getFileHash() const;
+
+    static constexpr std::string_view URL_PREFIX = "https://github.com/sorbet/sorbet/tree/master/";
+    static std::string censorFilePathForSnapshotTests(std::string_view orig);
 
 private:
     const std::string path_;

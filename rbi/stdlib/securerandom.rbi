@@ -18,6 +18,27 @@
 # *   Win32
 #
 #
+# [`SecureRandom`](https://docs.ruby-lang.org/en/2.7.0/SecureRandom.html) is
+# extended by the
+# [`Random::Formatter`](https://docs.ruby-lang.org/en/2.7.0/Random/Formatter.html)
+# module which defines the following methods:
+#
+# *   alphanumeric
+# *   base64
+# *   choose
+# *   [`gen_random`](https://docs.ruby-lang.org/en/2.7.0/SecureRandom.html#method-c-gen_random)
+# *   hex
+# *   rand
+# *   random\_bytes
+# *   random\_number
+# *   urlsafe\_base64
+# *   uuid
+#
+#
+# These methods are usable as class methods of
+# [`SecureRandom`](https://docs.ruby-lang.org/en/2.7.0/SecureRandom.html) such
+# as `SecureRandom.hex`.
+#
 # ### Examples
 #
 # Generate random hexadecimal strings:

@@ -1,10 +1,10 @@
 # typed: __STDLIB_INTERNAL
 
-# [`ARGV`](https://docs.ruby-lang.org/en/2.6.0/Object.html#ARGV) contains the
+# [`ARGV`](https://docs.ruby-lang.org/en/2.7.0/Object.html#ARGV) contains the
 # command line arguments used to run ruby.
 #
 # A library like
-# [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html) can be
+# [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html) can be
 # used to process command-line arguments.
 ::ARGV = T.let(T.unsafe(nil), T::Array[T.untyped])
 ::CROSS_COMPILING = T.let(T.unsafe(nil), NilClass)
@@ -27,7 +27,7 @@
 ::RUBY_PLATFORM = T.let(T.unsafe(nil), String)
 # The date this ruby was released
 ::RUBY_RELEASE_DATE = T.let(T.unsafe(nil), String)
-# The SVN revision for this ruby.
+# The GIT commit hash for this ruby.
 ::RUBY_REVISION = T.let(T.unsafe(nil), Integer)
 # The running version of ruby
 ::RUBY_VERSION = T.let(T.unsafe(nil), String)
@@ -37,7 +37,7 @@
 ::STDIN = T.let(T.unsafe(nil), IO)
 # Holds the original stdout
 ::STDOUT = T.let(T.unsafe(nil), IO)
-# The [`Binding`](https://docs.ruby-lang.org/en/2.6.0/Binding.html) of the top
+# The [`Binding`](https://docs.ruby-lang.org/en/2.7.0/Binding.html) of the top
 # level scope
 ::TOPLEVEL_BINDING = T.let(T.unsafe(nil), Binding)
 # An obsolete alias of `true`

@@ -26,7 +26,7 @@ optional<core::NameRef> getFieldName(core::MutableContext ctx, ast::Send &send) 
     return nullopt;
 }
 
-ast::Send *asFlatfileDo(ast::TreePtr &stat) {
+ast::Send *asFlatfileDo(ast::ExpressionPtr &stat) {
     auto *send = ast::cast_tree<ast::Send>(stat);
     if (send != nullptr && send->block != nullptr && send->fun == core::Names::flatfile()) {
         return send;
@@ -35,7 +35,7 @@ ast::Send *asFlatfileDo(ast::TreePtr &stat) {
     }
 }
 
-void handleFieldDefinition(core::MutableContext ctx, ast::TreePtr &stat, vector<ast::TreePtr> &methods) {
+void handleFieldDefinition(core::MutableContext ctx, ast::ExpressionPtr &stat, vector<ast::ExpressionPtr> &methods) {
     if (auto send = ast::cast_tree<ast::Send>(stat)) {
         if ((send->fun != core::Names::from() && send->fun != core::Names::field() &&
              send->fun != core::Names::pattern()) ||
@@ -63,7 +63,7 @@ void Flatfiles::run(core::MutableContext ctx, ast::ClassDef *klass) {
         return;
     }
 
-    vector<ast::TreePtr> methods;
+    vector<ast::ExpressionPtr> methods;
     for (auto &stat : klass->rhs) {
         if (auto flatfileBlock = asFlatfileDo(stat)) {
             auto &block = ast::cast_tree_nonnull<ast::Block>(flatfileBlock->block);

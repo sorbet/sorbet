@@ -18,9 +18,9 @@ module T::Props
 end
 
 module T::Props::ClassMethods
-  sig {params(name: T.any(Symbol, String), cls_or_args: T.untyped, args: T::Hash[Symbol, T.untyped]).void}
+  sig {params(name: Symbol, cls_or_args: T.untyped, args: T::Hash[Symbol, T.untyped]).void}
   def const(name, cls_or_args, args={}, &blk); end
-  sig {params(name: T.any(Symbol, String), cls: T.untyped, rules: T.untyped).void}
+  sig {params(name: Symbol, cls: T.untyped, rules: T.untyped).void}
   def prop(name, cls, rules = nil); end
   def decorator; end
   def decorator_class; end
@@ -90,6 +90,10 @@ end
 module T::Props::Plugin
   extend T::Helpers
   include T::Props
+  mixes_in_class_methods(T::Props::Plugin::ClassMethods)
+end
+
+module T::Props::Plugin::ClassMethods
 end
 
 module T::Props::Utils
@@ -145,6 +149,7 @@ module T::Props::Serializable
   def deserialize(hash, strict = nil); end
   def recursive_stringify_keys(obj); end
   def serialize(strict = nil); end
+  sig {params(changed_props: T.untyped).returns(T.self_type)}
   def with(changed_props); end
   def with_existing_hash(changed_props, existing_hash:); end
   include T::Props::Optional

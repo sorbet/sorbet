@@ -162,7 +162,16 @@ module T::Props
         exceptions.children.each {|c| assert_equal(:const, c.type)}
         assert_equal(:lvasgn, assignment.type)
         assert_equal([:e], assignment.children)
-        validate_lack_of_side_effects(handler, whitelisted_methods_for_deserialize)
+
+        deserialization_error, val_return = handler.children
+
+        assert_equal(:send, deserialization_error.type)
+        receiver, method, *args = deserialization_error.children
+        assert_equal(nil, receiver)
+        assert_equal(:raise_deserialization_error, method)
+        args.each {|a| validate_lack_of_side_effects(a, whitelisted_methods_for_deserialize)}
+
+        validate_lack_of_side_effects(val_return, whitelisted_methods_for_deserialize)
       else
         validate_lack_of_side_effects(else_body, whitelisted_methods_for_deserialize)
       end
@@ -261,7 +270,7 @@ module T::Props
     private_class_method def self.whitelisted_methods_for_deserialize
       @whitelisted_methods_for_deserialize ||= {
         lvar: %i{dup map transform_values transform_keys each_with_object nil? []= to_f},
-        const: %i[deserialize from_hash deep_clone_object soft_assert_handler],
+        const: %i[deserialize from_hash deep_clone_object],
       }
     end
   end

@@ -1,6 +1,6 @@
 # typed: true
 
-module Yabba::Dabba
+module RootPackage::Yabba::Dabba
   class Bar2
     p 'x'
   end

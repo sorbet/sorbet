@@ -1,3 +1,3 @@
-module Foo
+module RootPackage::Foo
   p 1
 end

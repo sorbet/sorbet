@@ -107,10 +107,12 @@ private:
     struct ResolutionItem {
         shared_ptr<Nesting> scope;
         core::FileRef file;
-        ast::ConstantLit *out;
         bool resolutionFailed = false;
+        ast::ConstantLit *out;
 
         ResolutionItem() = default;
+        ResolutionItem(const shared_ptr<Nesting> &scope, core::FileRef file, ast::ConstantLit *lit)
+            : scope(scope), file(file), out(lit) {}
         ResolutionItem(ResolutionItem &&rhs) noexcept = default;
         ResolutionItem &operator=(ResolutionItem &&rhs) noexcept = default;
 
@@ -149,7 +151,7 @@ private:
     struct TypeAliasResolutionItem {
         core::SymbolRef lhs;
         core::FileRef file;
-        ast::TreePtr *rhs;
+        ast::ExpressionPtr *rhs;
 
         TypeAliasResolutionItem(TypeAliasResolutionItem &&) noexcept = default;
         TypeAliasResolutionItem &operator=(TypeAliasResolutionItem &&rhs) noexcept = default;
@@ -170,13 +172,26 @@ private:
         const ClassMethodsResolutionItem &operator=(const ClassMethodsResolutionItem &) = delete;
     };
 
+    struct RequireAncestorResolutionItem {
+        core::FileRef file;
+        core::SymbolRef owner;
+        ast::Send *send;
+
+        RequireAncestorResolutionItem(RequireAncestorResolutionItem &&) noexcept = default;
+        RequireAncestorResolutionItem &operator=(RequireAncestorResolutionItem &&rhs) noexcept = default;
+
+        RequireAncestorResolutionItem(const RequireAncestorResolutionItem &) = delete;
+        const RequireAncestorResolutionItem &operator=(const RequireAncestorResolutionItem &) = delete;
+    };
+
     vector<ResolutionItem> todo_;
     vector<AncestorResolutionItem> todoAncestors_;
     vector<ClassAliasResolutionItem> todoClassAliases_;
     vector<TypeAliasResolutionItem> todoTypeAliases_;
     vector<ClassMethodsResolutionItem> todoClassMethods_;
+    vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
 
-    static core::SymbolRef resolveLhs(core::Context ctx, shared_ptr<Nesting> nesting, core::NameRef name) {
+    static core::SymbolRef resolveLhs(core::Context ctx, const shared_ptr<Nesting> &nesting, core::NameRef name) {
         Nesting *scope = nesting.get();
         while (scope != nullptr) {
             auto lookup = scope->scope.data(ctx)->findMember(ctx, name);
@@ -205,23 +220,23 @@ private:
     public:
         bool seenUnresolved = false;
 
-        ast::TreePtr postTransformConstantLit(core::Context ctx, ast::TreePtr tree) {
+        ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
             auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
             seenUnresolved |= !isAlreadyResolved(ctx, original);
             return tree;
         };
     };
 
-    static bool isFullyResolved(core::Context ctx, const ast::TreePtr &expression) {
+    static bool isFullyResolved(core::Context ctx, const ast::ExpressionPtr &expression) {
         ResolutionChecker checker;
-        ast::TreePtr dummy(expression.getTagged());
+        ast::ExpressionPtr dummy(expression.getTagged());
         dummy = ast::TreeMap::apply(ctx, checker, std::move(dummy));
         ENFORCE(dummy == expression);
         dummy.release();
         return !checker.seenUnresolved;
     }
 
-    static core::SymbolRef resolveConstant(core::Context ctx, shared_ptr<Nesting> nesting,
+    static core::SymbolRef resolveConstant(core::Context ctx, const shared_ptr<Nesting> &nesting,
                                            const ast::UnresolvedConstantLit &c, bool &resolutionFailed) {
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             core::SymbolRef result = resolveLhs(ctx, nesting, c.cnst);
@@ -249,8 +264,7 @@ private:
                  (result.isStaticField(ctx) && result.data(ctx)->isStaticFieldPrivate())) &&
                 !ctx.file.data(ctx).isRBI()) {
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::PrivateConstantReferenced)) {
-                    e.setHeader("Non-private reference to private constant `{}` referenced",
-                                result.data(ctx)->show(ctx));
+                    e.setHeader("Non-private reference to private constant `{}` referenced", result.show(ctx));
                 }
             }
             return result;
@@ -275,7 +289,7 @@ private:
                 // This is actually a use-site error, but we limit ourselves to emitting it once by checking resultType
                 auto loc = resolved.data(ctx)->loc();
                 if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
-                    e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.data(ctx)->show(ctx));
+                    e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
                     e.addErrorLine(core::Loc(ctx.file, job.out->original.loc()), "Type alias used here");
                 }
                 resolved.data(ctx)->resultType =
@@ -378,15 +392,15 @@ private:
     }
 
     static bool resolveTypeAliasJob(core::MutableContext ctx, TypeAliasResolutionItem &job) {
-        core::SymbolRef enclosingTypeMember;
-        core::SymbolRef enclosingClass = job.lhs.data(ctx)->enclosingClass(ctx);
+        core::TypeMemberRef enclosingTypeMember;
+        core::ClassOrModuleRef enclosingClass = job.lhs.enclosingClass(ctx);
         while (enclosingClass != core::Symbols::root()) {
             auto typeMembers = enclosingClass.data(ctx)->typeMembers();
             if (!typeMembers.empty()) {
-                enclosingTypeMember = typeMembers[0];
+                enclosingTypeMember = typeMembers[0].asTypeMemberRef();
                 break;
             }
-            enclosingClass = enclosingClass.data(ctx)->owner.data(ctx)->enclosingClass(ctx);
+            enclosingClass = enclosingClass.data(ctx)->owner.enclosingClass(ctx);
         }
         auto &rhs = *job.rhs;
         if (enclosingTypeMember.exists()) {
@@ -417,8 +431,10 @@ private:
             if (auto e = ctx.beginError(it.rhs->loc, core::errors::Resolver::ReassignsTypeAlias)) {
                 e.setHeader("Reassigning a type alias is not allowed");
                 e.addErrorLine(rhsData->loc(), "Originally defined here");
-                e.replaceWith("Declare as type alias", core::Loc(ctx.file, it.rhs->loc), "T.type_alias {{{}}}",
-                              core::Loc(ctx.file, it.rhs->loc).source(ctx));
+                auto rhsLoc = core::Loc{ctx.file, it.rhs->loc};
+                if (rhsLoc.exists()) {
+                    e.replaceWith("Declare as type alias", rhsLoc, "T.type_alias {{{}}}", rhsLoc.source(ctx).value());
+                }
             }
             it.lhs.data(ctx)->resultType = core::Types::untypedUntracked();
             return true;
@@ -502,14 +518,14 @@ private:
 
         if (resolvedClass == job.klass) {
             if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
-                e.setHeader("Circular dependency: `{}` is a parent of itself", job.klass.data(ctx)->show(ctx));
+                e.setHeader("Circular dependency: `{}` is a parent of itself", job.klass.show(ctx));
                 e.addErrorLine(resolvedClass.data(ctx)->loc(), "Class definition");
             }
             resolvedClass = stubSymbolForAncestor(job);
         } else if (resolvedClass.data(ctx)->derivesFrom(ctx, job.klass)) {
             if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
-                            job.klass.data(ctx)->show(ctx), resolvedClass.data(ctx)->show(ctx));
+                            job.klass.show(ctx), resolvedClass.show(ctx));
                 e.addErrorLine(job.klass.data(ctx)->loc(), "One definition");
                 e.addErrorLine(resolvedClass.data(ctx)->loc(), "Other definition");
             }
@@ -527,18 +543,17 @@ private:
                 job.klass.data(ctx)->setSuperClass(resolvedClass);
             } else {
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
-                    e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.data(ctx)->show(ctx),
-                                job.klass.data(ctx)->superClass().data(ctx)->show(ctx),
-                                resolvedClass.data(ctx)->show(ctx));
+                    e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
+                                job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
                 }
             }
         } else {
             if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass)) {
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::IncludesNonModule)) {
                     e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
-                                resolvedClass.data(ctx)->show(ctx));
+                                resolvedClass.show(ctx));
                     e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
-                                   resolvedClass.data(ctx)->show(ctx));
+                                   resolvedClass.show(ctx));
                 }
             }
         }
@@ -567,6 +582,14 @@ private:
 
         auto encounteredError = false;
         for (auto &arg : send->args) {
+            if (arg.isSelfReference()) {
+                auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
+                if (recv != nullptr && recv->symbol == core::Symbols::Magic()) {
+                    // This is the first argument of a Magic.mixes_in_class_methods() call
+                    continue;
+                }
+            }
+
             auto *id = ast::cast_tree<ast::ConstantLit>(arg);
 
             if (id == nullptr || !id->symbol.exists()) {
@@ -586,8 +609,7 @@ private:
             if (id->symbol.data(gs)->isClassOrModuleClass()) {
                 if (auto e =
                         gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                    e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
-                                id->symbol.data(gs)->show(gs));
+                    e.setHeader("`{}` is a class, not a module; Only modules may be mixins", id->symbol.show(gs));
                 }
                 encounteredError = true;
             }
@@ -627,6 +649,45 @@ private:
         }
     }
 
+    static void resolveRequiredAncestorsJob(core::GlobalState &gs, const RequireAncestorResolutionItem &todo) {
+        auto owner = todo.owner;
+        auto send = todo.send;
+        auto loc = core::Loc(todo.file, send->loc);
+
+        if (!owner.data(gs)->isClassOrModuleModule() && !owner.data(gs)->isClassOrModuleAbstract()) {
+            if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidRequiredAncestor)) {
+                e.setHeader("`{}` can only be declared inside a module or an abstract class", send->fun.show(gs));
+            }
+            return;
+        }
+
+        if (send->args.empty()) {
+            return; // The arity mismatch error will be emitted later by infer.
+        }
+
+        for (auto &arg : send->args) {
+            auto argLoc = core::Loc(todo.file, arg.loc());
+            auto *id = ast::cast_tree<ast::ConstantLit>(arg);
+
+            if (id == nullptr || !id->symbol.exists() || !id->symbol.data(gs)->isClassOrModule()) {
+                if (auto e = gs.beginError(argLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
+                    e.setHeader("Argument to `{}` must be statically resolvable to a class or a module",
+                                send->fun.show(gs));
+                }
+                return;
+            }
+
+            if (id->symbol == owner) {
+                if (auto e = gs.beginError(argLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
+                    e.setHeader("Must not pass yourself to `{}`", send->fun.show(gs));
+                }
+                return;
+            }
+
+            owner.data(gs)->recordRequiredAncestor(gs, id->symbol.asClassOrModuleRef(), argLoc);
+        }
+    }
+
     static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {
         ENFORCE(job.ancestor->symbol.exists(), "Ancestor must exist, or we can't check whether it's sealed.");
         auto ancestorSym = job.ancestor->symbol.data(ctx)->dealias(ctx);
@@ -639,8 +700,8 @@ private:
         ancestorSym.data(ctx)->recordSealedSubclass(ctx, job.klass);
     }
 
-    void transformAncestor(core::Context ctx, core::ClassOrModuleRef klass, ast::TreePtr &ancestor, bool isInclude,
-                           bool isSuperclass = false) {
+    void transformAncestor(core::Context ctx, core::ClassOrModuleRef klass, ast::ExpressionPtr &ancestor,
+                           bool isInclude, bool isSuperclass = false) {
         if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(ancestor)) {
             auto scopeTmp = nesting_;
             if (isSuperclass) {
@@ -669,14 +730,15 @@ private:
                     ast::isa_tree<ast::EmptyTree>(
                         ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original).scope));
             if (isSuperclass && sym == core::Symbols::todo()) {
+                // This is the case where the superclass is empty, for example: `class A; end`
                 return;
             }
             job.ancestor = cnst;
         } else if (ancestor.isSelfReference()) {
             auto loc = ancestor.loc();
-            auto enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
+            auto enclosingClass = ctx.owner.enclosingClass(ctx);
             auto nw = ast::MK::UnresolvedConstant(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
-            auto out = ast::make_tree<ast::ConstantLit>(loc, enclosingClass, std::move(nw));
+            auto out = ast::make_expression<ast::ConstantLit>(loc, enclosingClass, std::move(nw));
             job.ancestor = ast::cast_tree<ast::ConstantLit>(out);
             ancestor = std::move(out);
         } else if (ast::isa_tree<ast::EmptyTree>(ancestor)) {
@@ -691,18 +753,18 @@ private:
 public:
     ResolveConstantsWalk() : nesting_(nullptr) {}
 
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         nesting_ = make_unique<Nesting>(std::move(nesting_), ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
         return tree;
     }
 
-    ast::TreePtr postTransformUnresolvedConstantLit(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
         auto &c = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree);
         if (ast::isa_tree<ast::UnresolvedConstantLit>(c.scope)) {
             c.scope = postTransformUnresolvedConstantLit(ctx, std::move(c.scope));
         }
         auto loc = c.loc;
-        auto out = ast::make_tree<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
+        auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
         ResolutionItem job{nesting_, ctx.file, ast::cast_tree<ast::ConstantLit>(out)};
         if (resolveJob(ctx, job)) {
             categoryCounterInc("resolve.constants.nonancestor", "firstpass");
@@ -712,7 +774,7 @@ public:
         return out;
     }
 
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         auto klass = original.symbol;
@@ -735,7 +797,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
@@ -784,11 +846,25 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (send.recv.isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
-            auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
-            this->todoClassMethods_.emplace_back(move(item));
+        if (send.recv.isSelfReference()) {
+            if (send.fun == core::Names::mixesInClassMethods()) {
+                auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
+                this->todoClassMethods_.emplace_back(move(item));
+            } else if (send.fun == core::Names::requiresAncestor()) {
+                if (ctx.state.requiresAncestorEnabled) {
+                    auto item = RequireAncestorResolutionItem{ctx.file, ctx.owner, &send};
+                    this->todoRequiredAncestors_.emplace_back(move(item));
+                }
+            }
+        } else {
+            auto recvAsConstantLit = ast::cast_tree<ast::ConstantLit>(send.recv);
+            if (recvAsConstantLit != nullptr && recvAsConstantLit->symbol == core::Symbols::Magic() &&
+                send.fun == core::Names::mixesInClassMethods()) {
+                auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
+                this->todoClassMethods_.emplace_back(move(item));
+            }
         }
         return tree;
     }
@@ -832,6 +908,7 @@ public:
         vector<ClassAliasResolutionItem> todoClassAliases_;
         vector<TypeAliasResolutionItem> todoTypeAliases_;
         vector<ClassMethodsResolutionItem> todoClassMethods_;
+        vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
         vector<ast::ParsedFile> trees;
     };
 
@@ -879,6 +956,7 @@ public:
                                          move(constants.todoClassAliases_),
                                          move(constants.todoTypeAliases_),
                                          move(constants.todoClassMethods_),
+                                         move(constants.todoRequiredAncestors_),
                                          move(partiallyResolvedTrees)};
                 auto computedTreesCount = result.trees.size();
                 resultq->push(move(result), computedTreesCount);
@@ -890,6 +968,7 @@ public:
         vector<ClassAliasResolutionItem> todoClassAliases;
         vector<TypeAliasResolutionItem> todoTypeAliases;
         vector<ClassMethodsResolutionItem> todoClassMethods;
+        vector<RequireAncestorResolutionItem> todoRequiredAncestors;
 
         {
             ResolveWalkResult threadResult;
@@ -910,6 +989,9 @@ public:
                     todoClassMethods.insert(todoClassMethods.end(),
                                             make_move_iterator(threadResult.todoClassMethods_.begin()),
                                             make_move_iterator(threadResult.todoClassMethods_.end()));
+                    todoRequiredAncestors.insert(todoRequiredAncestors.end(),
+                                                 make_move_iterator(threadResult.todoRequiredAncestors_.begin()),
+                                                 make_move_iterator(threadResult.todoRequiredAncestors_.end()));
                     trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
                                  make_move_iterator(threadResult.trees.end()));
                 }
@@ -931,6 +1013,11 @@ public:
         fast_sort(todoClassMethods, [](const auto &lhs, const auto &rhs) -> bool {
             return locCompare(core::Loc(lhs.file, lhs.send->loc), core::Loc(rhs.file, rhs.send->loc));
         });
+        fast_sort(todoRequiredAncestors, [](const auto &lhs, const auto &rhs) -> bool {
+            return locCompare(core::Loc(lhs.file, lhs.send->loc), core::Loc(rhs.file, rhs.send->loc));
+        });
+
+        ENFORCE(todoRequiredAncestors.empty() || gs.requiresAncestorEnabled);
         fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool {
             return locCompare(core::Loc(lhs.file, lhs.tree.loc()), core::Loc(rhs.file, rhs.tree.loc()));
         });
@@ -1010,6 +1097,14 @@ public:
                 resolveClassMethodsJob(gs, todo);
             }
             todoClassMethods.clear();
+        }
+
+        {
+            Timer timeit(gs.tracer(), "resolver.requires_ancestor");
+            for (auto &todo : todoRequiredAncestors) {
+                resolveRequiredAncestorsJob(gs, todo);
+            }
+            todoRequiredAncestors.clear();
         }
 
         // We can no longer resolve new constants. All the code below reports errors
@@ -1101,7 +1196,7 @@ class ResolveTypeMembersAndFieldsWalk {
     struct ResolveCastItem {
         core::FileRef file;
         core::SymbolRef owner;
-        ast::TreePtr *typeArg;
+        ast::ExpressionPtr *typeArg;
         ast::Cast *cast;
     };
 
@@ -1114,13 +1209,13 @@ class ResolveTypeMembersAndFieldsWalk {
     };
 
     struct ResolveSimpleStaticFieldItem {
-        core::SymbolRef sym;
+        core::FieldRef sym;
         core::TypePtr resultType;
     };
 
     struct ResolveStaticFieldItem {
         core::FileRef file;
-        core::SymbolRef sym;
+        core::FieldRef sym;
         ast::Assign *asgn;
     };
 
@@ -1167,7 +1262,7 @@ class ResolveTypeMembersAndFieldsWalk {
         }
     }
 
-    static bool isT(const ast::TreePtr &expr) {
+    static bool isT(const ast::ExpressionPtr &expr) {
         auto *tMod = ast::cast_tree<ast::ConstantLit>(expr);
         return tMod && tMod->symbol == core::Symbols::T();
     }
@@ -1245,7 +1340,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 }
             }
 
-            scope = ctx.owner.data(ctx)->enclosingClass(ctx);
+            scope = ctx.owner.enclosingClass(ctx);
         } else {
             // we need to check nested block counts because we want all fields to be declared on top level of either
             // class or body, rather then nested in some block
@@ -1299,7 +1394,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 return;
             }
         }
-        core::SymbolRef var;
+        core::FieldRef var;
 
         if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
             var = ctx.state.enterStaticFieldSymbol(core::Loc(job.file, uid->loc), scope, uid->name);
@@ -1316,7 +1411,7 @@ class ResolveTypeMembersAndFieldsWalk {
     //
     // We don't handle array or hash literals, because intuiting the element
     // type (once we have generics) will be nontrivial.
-    [[nodiscard]] static core::TypePtr resolveConstantType(core::Context ctx, const ast::TreePtr &expr) {
+    [[nodiscard]] static core::TypePtr resolveConstantType(core::Context ctx, const ast::ExpressionPtr &expr) {
         core::TypePtr result;
         typecase(
             expr, [&](const ast::Literal &a) { result = a.value; },
@@ -1333,7 +1428,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 result = cast.type;
             },
             [&](const ast::InsSeq &outer) { result = resolveConstantType(ctx, outer.expr); },
-            [&](const ast::TreePtr &expr) {});
+            [&](const ast::ExpressionPtr &expr) {});
         return result;
     }
 
@@ -1382,20 +1477,32 @@ class ResolveTypeMembersAndFieldsWalk {
         return data->resultType;
     }
 
-    static void resolveTypeMember(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs,
+    static void resolveTypeMember(core::MutableContext ctx, core::TypeMemberRef lhs, ast::Send *rhs,
                                   vector<bool> &resolvedAttachedClasses) {
         auto data = lhs.data(ctx);
         auto owner = data->owner;
 
         core::LambdaParam *parentType = nullptr;
-        auto parentMember = owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
+        core::SymbolRef parentMember = core::Symbols::noSymbol();
+        parentMember = owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
+
+        // check mixins if the type member doesn't exist in the parent
+        if (!parentMember.exists()) {
+            for (auto mixin : owner.data(ctx)->mixins()) {
+                parentMember = mixin.data(ctx)->findMember(ctx, data->name);
+                if (parentMember.exists()) {
+                    break;
+                }
+            }
+        }
+
         if (parentMember.exists()) {
             if (parentMember.isTypeMember()) {
                 parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType);
                 ENFORCE(parentType != nullptr);
             } else if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
-                const auto parentShow = parentMember.data(ctx)->show(ctx);
-                e.setHeader("`{}` is a type member but `{}` is not a type member", data->show(ctx), parentShow);
+                const auto parentShow = parentMember.show(ctx);
+                e.setHeader("`{}` is a type member but `{}` is not a type member", lhs.show(ctx), parentShow);
                 e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` definition", parentShow);
             }
         }
@@ -1558,12 +1665,7 @@ class ResolveTypeMembersAndFieldsWalk {
             return false;
         }
         if (job.lhs.isTypeMember()) {
-            auto superclass = job.lhs.data(ctx)->owner.data(ctx)->superClass();
-            if (!isGenericResolved(ctx, superclass)) {
-                return false;
-            }
-
-            resolveTypeMember(ctx.withOwner(job.owner), job.lhs, job.rhs, resolvedAttachedClasses);
+            resolveTypeMember(ctx.withOwner(job.owner), job.lhs.asTypeMemberRef(), job.rhs, resolvedAttachedClasses);
         } else {
             resolveTypeAlias(ctx.withOwner(job.owner), job.lhs, job.rhs);
         }
@@ -1592,12 +1694,11 @@ class ResolveTypeMembersAndFieldsWalk {
             if (auto e = ctx.beginError(job.loc, core::errors::Resolver::BadAliasMethod)) {
                 auto dealiased = fromMethod.data(ctx)->dealiasMethod(ctx);
                 if (fromMethod == dealiased) {
-                    e.setHeader("Redefining the existing method `{}` as a method alias",
-                                fromMethod.data(ctx)->show(ctx));
+                    e.setHeader("Redefining the existing method `{}` as a method alias", fromMethod.show(ctx));
                     e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous definition");
                 } else {
-                    e.setHeader("Redefining method alias `{}` from `{}` to `{}`", fromMethod.data(ctx)->show(ctx),
-                                dealiased.data(ctx)->show(ctx), toMethod.data(ctx)->show(ctx));
+                    e.setHeader("Redefining method alias `{}` from `{}` to `{}`", fromMethod.show(ctx),
+                                dealiased.show(ctx), toMethod.show(ctx));
                     e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous alias definition");
                     e.addErrorLine(dealiased.data(ctx)->loc(), "Previous alias pointed to");
                     e.addErrorLine(toMethod.data(ctx)->loc(), "Redefining alias to");
@@ -1637,6 +1738,14 @@ class ResolveTypeMembersAndFieldsWalk {
         } else if (cast->cast != core::Names::let()) {
             if (auto e = ctx.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
                 e.setHeader("Use `{}` to specify the type of constants", "T.let");
+                auto rhsLoc = core::Loc(ctx.file, asgn.rhs.loc());
+                auto argSource = core::Loc(ctx.file, cast->arg.loc()).source(ctx).value();
+                e.replaceWith("Replace with `T.let`", rhsLoc, "T.let({}, {})", argSource, cast->type.show(ctx));
+                if (cast->cast == core::Names::cast()) {
+                    e.addErrorNote("If you really want to use `{}`, assign to an intermediate variable first and then "
+                                   "assign that variable to `{}`",
+                                   "T.cast", asgn.lhs.toString(ctx));
+                }
             }
         }
 
@@ -1788,7 +1897,7 @@ class ResolveTypeMembersAndFieldsWalk {
             auto member = ctx.state.lookupNameConstant(part);
             if (!member.exists()) {
                 if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
+                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.show(ctx);
                     auto pretty = fmt::format("{}::{}", prettyCurrent, part);
                     e.setHeader("Unable to resolve constant `{}`", pretty);
                 }
@@ -1798,7 +1907,7 @@ class ResolveTypeMembersAndFieldsWalk {
             auto newCurrent = current.data(ctx)->findMember(ctx, member);
             if (!newCurrent.exists()) {
                 if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
+                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.show(ctx);
                     auto pretty = fmt::format("{}::{}", prettyCurrent, part);
                     e.setHeader("Unable to resolve constant `{}`", pretty);
                 }
@@ -1819,7 +1928,7 @@ class ResolveTypeMembersAndFieldsWalk {
     }
 
     core::ClassOrModuleRef methodOwner(core::Context ctx) {
-        core::ClassOrModuleRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+        core::ClassOrModuleRef owner = ctx.owner.enclosingClass(ctx);
         if (owner == core::Symbols::root()) {
             // Root methods end up going on object
             owner = core::Symbols::Object();
@@ -1832,7 +1941,7 @@ public:
         nestedBlockCounts.emplace_back(0);
     }
 
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         nestedBlockCounts.emplace_back(0);
 
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
@@ -1847,34 +1956,34 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         nestedBlockCounts.pop_back();
         return tree;
     }
 
-    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         nestedBlockCounts.emplace_back(0);
         return tree;
     }
 
-    ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         nestedBlockCounts.pop_back();
         return tree;
     }
 
-    ast::TreePtr preTransformBlock(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformBlock(core::Context ctx, ast::ExpressionPtr tree) {
         ENFORCE_NO_TIMER(!nestedBlockCounts.empty());
         nestedBlockCounts.back() += 1;
         return tree;
     }
 
-    ast::TreePtr postTransformBlock(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformBlock(core::Context ctx, ast::ExpressionPtr tree) {
         ENFORCE_NO_TIMER(!nestedBlockCounts.empty());
         nestedBlockCounts.back() -= 1;
         return tree;
     }
 
-    ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         switch (send.fun.rawId()) {
             case core::Names::typeAlias().rawId():
@@ -1901,7 +2010,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformConstantLit(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
 
         if (trackDependencies_) {
@@ -1911,6 +2020,23 @@ public:
             }
 
             if (symbol.isClassOrModule()) {
+                // This is the same as the implementation of T::Generic.[] in calls.cc
+                // NOTE: the type members of these symbols will only be depended on during payload construction, as
+                // after that their bounds will have been fully resolved.
+                if (symbol == core::Symbols::T_Array()) {
+                    symbol = core::Symbols::Array();
+                } else if (symbol == core::Symbols::T_Hash()) {
+                    symbol = core::Symbols::Hash();
+                } else if (symbol == core::Symbols::T_Enumerable()) {
+                    symbol = core::Symbols::Enumerable();
+                } else if (symbol == core::Symbols::T_Enumerator()) {
+                    symbol = core::Symbols::Enumerator();
+                } else if (symbol == core::Symbols::T_Range()) {
+                    symbol = core::Symbols::Range();
+                } else if (symbol == core::Symbols::T_Set()) {
+                    symbol = core::Symbols::Set();
+                }
+
                 // crawl up uses of `T.class_of` to find the right singleton symbol.
                 // This is for cases like `T.class_of(T.class_of(A))`.
                 for (auto it = classOfDepth_.rbegin(); it != classOfDepth_.rend() && *it; ++it) {
@@ -1934,7 +2060,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         switch (send.fun.rawId()) {
@@ -1958,6 +2084,7 @@ public:
 
             switch (send.fun.rawId()) {
                 case core::Names::let().rawId():
+                case core::Names::bind().rawId():
                 case core::Names::uncheckedLet().rawId():
                 case core::Names::assertType().rawId():
                 case core::Names::cast().rawId(): {
@@ -1971,11 +2098,12 @@ public:
                     // Compute the containing class when translating the type,
                     // as there's a very good chance this has been called from a
                     // method context.
-                    item.owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+                    item.owner = ctx.owner.enclosingClass(ctx);
 
                     auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.args[1]));
                     auto expr = std::move(send.args[0]);
-                    auto cast = ast::make_tree<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), send.fun);
+                    auto cast =
+                        ast::make_expression<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), send.fun);
                     item.cast = ast::cast_tree<ast::Cast>(cast);
                     item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).args[0];
 
@@ -2054,7 +2182,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
         if (handleFieldDeclaration(ctx, asgn)) {
             return tree;
@@ -2088,12 +2216,21 @@ public:
             ENFORCE(send->fun == core::Names::typeAlias() || send->fun == core::Names::typeMember() ||
                     send->fun == core::Names::typeTemplate());
 
-            todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, send, dependencies_, ctx.file});
+            auto owner = sym.data(ctx)->owner;
+
+            dependencies_.emplace_back(owner.data(ctx)->superClass());
+
+            for (auto mixin : owner.data(ctx)->mixins()) {
+                dependencies_.emplace_back(mixin);
+            }
+
+            todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, send, std::move(dependencies_), ctx.file});
         } else if (data->isStaticField()) {
-            ResolveStaticFieldItem job{ctx.file, sym, &asgn};
+            ResolveStaticFieldItem job{ctx.file, sym.asFieldRef(), &asgn};
             auto resultType = tryResolveStaticField(ctx, job);
             if (resultType != core::Types::todo()) {
-                todoResolveSimpleStaticFieldItems_.emplace_back(ResolveSimpleStaticFieldItem{sym, resultType});
+                todoResolveSimpleStaticFieldItems_.emplace_back(
+                    ResolveSimpleStaticFieldItem{sym.asFieldRef(), resultType});
             } else {
                 todoResolveStaticFieldItems_.emplace_back(move(job));
             }
@@ -2237,7 +2374,8 @@ public:
                     auto data = job.lhs.data(gs);
 
                     if (data->isTypeMember()) {
-                        data->resultType = core::make_type<core::LambdaParam>(job.lhs, core::Types::untypedUntracked(),
+                        data->resultType = core::make_type<core::LambdaParam>(job.lhs.asTypeMemberRef(),
+                                                                              core::Types::untypedUntracked(),
                                                                               core::Types::untypedUntracked());
                     } else {
                         data->resultType = core::Types::untypedUntracked();
@@ -2245,7 +2383,7 @@ public:
 
                     if (auto e = gs.beginError(data->loc(), core::errors::Resolver::TypeMemberCycle)) {
                         auto flavor = data->isTypeAlias() ? "alias" : "member";
-                        e.setHeader("Type {} `{}` is involved in a cycle", flavor, data->show(gs));
+                        e.setHeader("Type {} `{}` is involved in a cycle", flavor, job.lhs.show(gs));
                     }
                 }
             }
@@ -2289,7 +2427,6 @@ public:
 class ResolveSignaturesWalk {
 public:
     struct ResolveSignatureJob {
-        core::FileRef file;
         core::ClassOrModuleRef owner;
         ast::MethodDef *mdef;
         core::LocOffsets loc;
@@ -2304,16 +2441,20 @@ public:
     };
 
     struct ResolveMultiSignatureJob {
-        core::FileRef file;
         core::ClassOrModuleRef owner;
         ast::MethodDef *mdef;
         bool isOverloaded;
         InlinedVector<OverloadedMethodSignature, 2> sigs;
     };
 
+    struct ResolveFileSignatures {
+        core::FileRef file;
+        vector<ResolveSignatureJob> sigs;
+        vector<ResolveMultiSignatureJob> multiSigs;
+    };
+
     struct ResolveSignaturesWalkResult {
-        vector<ResolveSignatureJob> signatureJobs;
-        vector<ResolveMultiSignatureJob> multiSignatureJobs;
+        vector<ResolveFileSignatures> fileSigs;
         vector<ast::ParsedFile> trees;
     };
 
@@ -2347,7 +2488,7 @@ private:
 
                 mdef.rhs = ast::MK::EmptyTree();
             }
-            if (!mdef.symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleAbstract()) {
+            if (!mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleAbstract()) {
                 if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
                     e.setHeader("Before declaring an abstract method, you must mark your class/module "
                                 "as abstract using `abstract!` or `interface!`");
@@ -2386,7 +2527,7 @@ private:
 
             auto self = ast::MK::Self(mdef.loc);
             mdef.rhs = ast::MK::Send(mdef.loc, std::move(self), core::Names::super(), numPosArgs, std::move(args));
-        } else if (mdef.symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
+        } else if (mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
             if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                 e.setHeader("All methods in an interface must be declared abstract");
             }
@@ -2394,7 +2535,7 @@ private:
     }
 
     static void fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
-                                  ParsedSig sig, bool isOverloaded, const ast::MethodDef &mdef) {
+                                  ParsedSig &sig, bool isOverloaded, const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
         ENFORCE(isOverloaded || method.data(ctx)->arguments().size() == mdef.args.size());
 
@@ -2444,29 +2585,27 @@ private:
         auto methodInfo = method.data(ctx);
 
         // Is this a signature for a method defined with argument forwarding syntax?
-        if (methodInfo->arguments().size() == 3) {
-            // To match, the definition must have been desugared in exaclty 3 parameters named
+        if (methodInfo->arguments().size() >= 3) {
+            // To match, the definition must have been desugared with at least 3 parameters named
             // `<fwd-args>`, `<fwd-kwargs>` and `<fwd-block>`
-            auto l1 = getArgLocal(ctx, methodInfo->arguments()[0], mdef, 0, isOverloaded)->localVariable;
-            auto l2 = getArgLocal(ctx, methodInfo->arguments()[1], mdef, 1, isOverloaded)->localVariable;
-            auto l3 = getArgLocal(ctx, methodInfo->arguments()[2], mdef, 2, isOverloaded)->localVariable;
+            auto len = methodInfo->arguments().size();
+            auto l1 = getArgLocal(ctx, methodInfo->arguments()[len - 3], mdef, len - 3, isOverloaded)->localVariable;
+            auto l2 = getArgLocal(ctx, methodInfo->arguments()[len - 2], mdef, len - 2, isOverloaded)->localVariable;
+            auto l3 = getArgLocal(ctx, methodInfo->arguments()[len - 1], mdef, len - 1, isOverloaded)->localVariable;
             if (l1._name == core::Names::fwdArgs() && l2._name == core::Names::fwdKwargs() &&
                 l3._name == core::Names::fwdBlock()) {
                 if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
                     e.setHeader("Unsupported `{}` for argument forwarding syntax", "sig");
                     e.addErrorLine(methodInfo->loc(), "Method declares argument forwarding here");
                     e.addErrorNote("Rewrite the method as `def {}(*args, **kwargs, &blk)` to use a signature",
-                                   method.data(ctx)->show(ctx));
+                                   method.show(ctx));
                 }
                 return;
             }
         }
 
         // Get the parameters order from the signature
-        vector<ParsedSig::ArgSpec> sigParams;
-        for (auto &spec : sig.argTypes) {
-            sigParams.push_back(spec);
-        }
+        vector<ParsedSig::ArgSpec> sigParams(sig.argTypes);
 
         vector<ast::Local const *> defParams; // Parameters order from the method declaration
         bool seenOptional = false;
@@ -2498,7 +2637,7 @@ private:
 
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
-                arg.type = spec->type;
+                arg.type = std::move(spec->type);
                 arg.loc = spec->loc;
                 arg.rebind = spec->rebind;
                 sig.argTypes.erase(spec);
@@ -2527,7 +2666,7 @@ private:
             }
         }
 
-        for (auto spec : sig.argTypes) {
+        for (const auto &spec : sig.argTypes) {
             if (auto e = ctx.state.beginError(spec.loc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unknown argument name `{}`", spec.name.show(ctx));
             }
@@ -2536,8 +2675,8 @@ private:
         // Check params ordering match between signature and definition
         if (sig.argTypes.empty()) {
             int j = 0;
-            for (auto spec : sigParams) {
-                auto param = defParams[j];
+            for (const auto &spec : sigParams) {
+                auto *param = defParams[j];
                 auto sname = spec.name;
                 auto dname = param->localVariable._name;
                 // TODO(jvilk): Do we need to check .show? Typically NameRef equality is equal to string equality.
@@ -2551,6 +2690,36 @@ private:
                 j++;
             }
         }
+
+        // Later passes are going to separate the sig and the method definition.
+        // Record some information in the sig call itself so that we can reassociate
+        // them later.
+        //
+        // Note that the sig still needs to send to a method called "sig" so that
+        // code completion in LSP works.  We change the receiver, below, so that
+        // sigs that don't pass through here still reflect the user's intent.
+        auto *send = sig.origSend;
+        auto &origArgs = send->args;
+        auto *self = ast::cast_tree<ast::Local>(send->args[0]);
+        if (self == nullptr) {
+            return;
+        }
+
+        // We distinguish "user-written" sends by checking for self.
+        // T::Sig::WithoutRuntime.sig wouldn't have any runtime effect that we need
+        // to record later.
+        if (self->localVariable != core::LocalVariable::selfVariable()) {
+            return;
+        }
+
+        auto *cnst = ast::cast_tree<ast::ConstantLit>(send->recv);
+        ENFORCE(cnst != nullptr, "sig send receiver must be a ConstantLit if we got a ParsedSig from the send");
+
+        cnst->symbol = core::Symbols::Sorbet_Private_Static_ResolvedSig();
+
+        origArgs.emplace_back(mdef.flags.isSelfMethod ? ast::MK::True(send->loc) : ast::MK::False(send->loc));
+        origArgs.emplace_back(ast::MK::Symbol(send->loc, method.data(ctx)->name));
+        send->numPosArgs += 2;
     }
 
     // Force errors from any signatures that didn't attach to methods.
@@ -2584,8 +2753,8 @@ private:
 
         processLeftoverSigs(ctx, lastSigs);
 
-        auto toRemove =
-            remove_if(klass.rhs.begin(), klass.rhs.end(), [](ast::TreePtr &stat) -> bool { return stat == nullptr; });
+        auto toRemove = remove_if(klass.rhs.begin(), klass.rhs.end(),
+                                  [](ast::ExpressionPtr &stat) -> bool { return stat == nullptr; });
         klass.rhs.erase(toRemove, klass.rhs.end());
     }
 
@@ -2593,7 +2762,7 @@ private:
         InlinedVector<ast::Send *, 1> lastSigs;
 
         // Explicitly check in the contxt of the class, not <static-init>
-        auto classCtx = ctx.withOwner(ctx.owner.data(ctx)->enclosingClass(ctx));
+        auto classCtx = ctx.withOwner(ctx.owner.enclosingClass(ctx));
 
         for (auto &stat : seq.stats) {
             processStatement(classCtx, stat, lastSigs);
@@ -2604,8 +2773,8 @@ private:
 
         processLeftoverSigs(classCtx, lastSigs);
 
-        auto toRemove =
-            remove_if(seq.stats.begin(), seq.stats.end(), [](ast::TreePtr &stat) -> bool { return stat == nullptr; });
+        auto toRemove = remove_if(seq.stats.begin(), seq.stats.end(),
+                                  [](ast::ExpressionPtr &stat) -> bool { return stat == nullptr; });
         seq.stats.erase(toRemove, seq.stats.end());
     }
 
@@ -2617,7 +2786,7 @@ private:
                                     TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef.symbol});
     }
 
-    void processStatement(core::Context ctx, ast::TreePtr &stat, InlinedVector<ast::Send *, 1> &lastSigs) {
+    void processStatement(core::Context ctx, ast::ExpressionPtr &stat, InlinedVector<ast::Send *, 1> &lastSigs) {
         typecase(
             stat,
 
@@ -2695,7 +2864,7 @@ private:
 
                     if (lastSigs.size() == 1) {
                         auto &lastSig = lastSigs.front();
-                        signatureJobs.emplace_back(ResolveSignatureJob{ctx.file, ctx.owner.asClassOrModuleRef(), &mdef,
+                        signatureJobs.emplace_back(ResolveSignatureJob{ctx.owner.asClassOrModuleRef(), &mdef,
                                                                        lastSig->loc,
                                                                        parseSig(ctx, sigOwner, *lastSig, mdef)});
                     } else {
@@ -2717,8 +2886,8 @@ private:
                             sigs.emplace_back(OverloadedMethodSignature{lastSig->loc, move(sig), move(argsToKeep)});
                         }
 
-                        multiSignatureJobs.emplace_back(ResolveMultiSignatureJob{
-                            ctx.file, ctx.owner.asClassOrModuleRef(), &mdef, isOverloaded, std::move(sigs)});
+                        multiSignatureJobs.emplace_back(ResolveMultiSignatureJob{ctx.owner.asClassOrModuleRef(), &mdef,
+                                                                                 isOverloaded, std::move(sigs)});
                     }
 
                     lastSigs.clear();
@@ -2732,11 +2901,11 @@ private:
 
             [&](const ast::EmptyTree &e) { stat.reset(nullptr); },
 
-            [&](const ast::TreePtr &e) {});
+            [&](const ast::ExpressionPtr &e) {});
     }
 
 public:
-    static void resolveMultiSignatureJob(core::MutableContext ctx, const ResolveMultiSignatureJob &job) {
+    static void resolveMultiSignatureJob(core::MutableContext ctx, ResolveMultiSignatureJob &job) {
         auto &sigs = job.sigs;
         auto &mdef = *job.mdef;
         ENFORCE_NO_TIMER(sigs.size() > 1);
@@ -2763,25 +2932,25 @@ public:
             } else {
                 overloadSym = mdef.symbol;
             }
-            fillInInfoFromSig(ctx, overloadSym, sig.loc, move(sig.sig), isOverloaded, mdef);
+            fillInInfoFromSig(ctx, overloadSym, sig.loc, sig.sig, isOverloaded, mdef);
         }
         handleAbstractMethod(ctx, mdef);
     }
-    static void resolveSignatureJob(core::MutableContext ctx, const ResolveSignatureJob &job) {
+    static void resolveSignatureJob(core::MutableContext ctx, ResolveSignatureJob &job) {
         prodCounterInc("types.sig.count");
         auto &mdef = *job.mdef;
         bool isOverloaded = false;
-        fillInInfoFromSig(ctx, mdef.symbol, job.loc, move(job.sig), isOverloaded, mdef);
+        fillInInfoFromSig(ctx, mdef.symbol, job.loc, job.sig, isOverloaded, mdef);
         handleAbstractMethod(ctx, mdef);
     }
 
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         processClassBody(ctx.withOwner(klass.symbol), klass);
         return tree;
     }
 
-    ast::TreePtr postTransformInsSeq(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformInsSeq(core::Context ctx, ast::ExpressionPtr tree) {
         processInSeq(ctx, ast::cast_tree_nonnull<ast::InsSeq>(tree));
         return tree;
     }
@@ -2789,7 +2958,7 @@ public:
 
 class ResolveSanityCheckWalk {
 public:
-    ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 tree.toString(ctx));
@@ -2800,23 +2969,23 @@ public:
         }
         return tree;
     }
-    ast::TreePtr postTransformMethodDef(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todoMethod(), "These should have all been resolved: {}",
                 tree.toString(ctx));
         return tree;
     }
-    ast::TreePtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::ExpressionPtr tree) {
         ENFORCE(false, "These should have all been removed: {}", tree.toString(ctx));
         return tree;
     }
-    ast::TreePtr postTransformUnresolvedIdent(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformUnresolvedIdent(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         ENFORCE(original.kind != ast::UnresolvedIdent::Kind::Local, "{} should have been removed by local_vars",
                 tree.toString(ctx));
         return tree;
     }
-    ast::TreePtr postTransformConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformConstantLit(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
         ENFORCE(ResolveConstantsWalk::isAlreadyResolved(ctx, original));
         return tree;
@@ -2870,21 +3039,20 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
             if (result.gotItem()) {
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::ShallowMap::apply(ctx, walk, std::move(job.tree));
+                if (!walk.signatureJobs.empty() || !walk.multiSignatureJobs.empty()) {
+                    output.fileSigs.emplace_back(ResolveSignaturesWalk::ResolveFileSignatures{
+                        job.file, move(walk.signatureJobs), move(walk.multiSignatureJobs)});
+                }
                 output.trees.emplace_back(move(job));
             }
         }
         if (!output.trees.empty()) {
-            output.signatureJobs = move(walk.signatureJobs);
-            output.multiSignatureJobs = move(walk.multiSignatureJobs);
             auto count = output.trees.size();
             outputq->push(move(output), count);
         }
     });
 
-    // Note: We don't flatten these into one array because it's an expensive operation (a flat array has # of sigs
-    // elements in it!)
-    vector<vector<ResolveSignaturesWalk::ResolveSignatureJob>> combinedSignatures;
-    vector<vector<ResolveSignaturesWalk::ResolveMultiSignatureJob>> combinedMultiSignatures;
+    vector<ResolveSignaturesWalk::ResolveFileSignatures> combinedFileJobs;
     vector<ast::ParsedFile> combinedTrees;
     {
         ResolveSignaturesWalk::ResolveSignaturesWalkResult threadResult;
@@ -2894,23 +3062,28 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
             if (result.gotItem()) {
                 combinedTrees.insert(combinedTrees.end(), make_move_iterator(threadResult.trees.begin()),
                                      make_move_iterator(threadResult.trees.end()));
-                combinedSignatures.emplace_back(move(threadResult.signatureJobs));
-                combinedMultiSignatures.emplace_back(move(threadResult.multiSignatureJobs));
+                combinedFileJobs.insert(combinedFileJobs.end(), make_move_iterator(threadResult.fileSigs.begin()),
+                                        make_move_iterator(threadResult.fileSigs.end()));
             }
         }
     }
 
+    // We need to define sigs in a stable order since, when there are conflicting sigs in multiple RBI files, the last
+    // sig 'wins'.
+    fast_sort(
+        combinedFileJobs,
+        [&](const ResolveSignaturesWalk::ResolveFileSignatures &left,
+            const ResolveSignaturesWalk::ResolveFileSignatures &right) -> bool { return left.file < right.file; });
+
     {
         Timer timeit(gs.tracer(), "resolver.resolve_sigs");
-        for (auto &threadSignatures : combinedSignatures) {
-            for (auto &job : threadSignatures) {
-                core::MutableContext ctx(gs, job.owner, job.file);
+        for (auto &file : combinedFileJobs) {
+            for (auto &job : file.sigs) {
+                core::MutableContext ctx(gs, job.owner, file.file);
                 ResolveSignaturesWalk::resolveSignatureJob(ctx, job);
             }
-        }
-        for (auto &threadMultiSignatures : combinedMultiSignatures) {
-            for (auto &job : threadMultiSignatures) {
-                core::MutableContext ctx(gs, job.owner, job.file);
+            for (auto &job : file.multiSigs) {
+                core::MutableContext ctx(gs, job.owner, file.file);
                 ResolveSignaturesWalk::resolveMultiSignatureJob(ctx, job);
             }
         }
@@ -2935,7 +3108,7 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
     DEBUG_ONLY(for (auto i = 1; i < gs.classAndModulesUsed(); i++) {
-        core::SymbolRef sym(gs, core::SymbolRef::Kind::ClassOrModule, i);
+        core::ClassOrModuleRef sym(gs, i);
         // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
         ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), sym.toString(gs));
     })

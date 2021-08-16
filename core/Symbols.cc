@@ -7,10 +7,10 @@
 #include "common/sort.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
-#include "core/Hashing.h"
 #include "core/Names.h"
 #include "core/Types.h"
 #include "core/errors/internal.h"
+#include "core/hashing/hashing.h"
 #include <string>
 
 template class std::vector<sorbet::core::TypeAndOrigins>;
@@ -18,6 +18,9 @@ template class std::vector<std::pair<sorbet::core::NameRef, sorbet::core::Symbol
 template class std::vector<const sorbet::core::Symbol *>;
 
 namespace sorbet::core {
+
+
+using namespace std;
 
 namespace {
 
@@ -42,9 +45,20 @@ bool isSubclassOrMixin(const core::GlobalState &gs, core::ClassOrModuleRef root,
 
     return memoized[s.id()];
 }
-}
+} // namespace
 
-using namespace std;
+namespace {
+constexpr string_view COLON_SEPARATOR = "::"sv;
+constexpr string_view HASH_SEPARATOR = "#"sv;
+
+string showInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name, string_view separator) {
+    if (!owner.exists() || owner == Symbols::root() || owner.data(gs)->name.isPackagerName(gs)) {
+        return name.show(gs);
+    }
+    ENFORCE(owner != core::Symbols::PackageRegistry());
+    return absl::StrCat(owner.show(gs), separator, name.show(gs));
+}
+} // namespace
 
 bool SymbolRef::operator==(const SymbolRef &rhs) const {
     return _id == rhs._id;
@@ -87,6 +101,30 @@ bool MethodRef::operator!=(const MethodRef &rhs) const {
     return rhs._id != this->_id;
 }
 
+bool FieldRef::operator==(const FieldRef &rhs) const {
+    return rhs._id == this->_id;
+}
+
+bool FieldRef::operator!=(const FieldRef &rhs) const {
+    return rhs._id != this->_id;
+}
+
+bool TypeMemberRef::operator==(const TypeMemberRef &rhs) const {
+    return rhs._id == this->_id;
+}
+
+bool TypeMemberRef::operator!=(const TypeMemberRef &rhs) const {
+    return rhs._id != this->_id;
+}
+
+bool TypeArgumentRef::operator==(const TypeArgumentRef &rhs) const {
+    return rhs._id == this->_id;
+}
+
+bool TypeArgumentRef::operator!=(const TypeArgumentRef &rhs) const {
+    return rhs._id != this->_id;
+}
+
 vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClassOrModule()); // should be removed when we have generic methods
     vector<TypePtr> targs;
@@ -114,6 +152,12 @@ TypePtr Symbol::selfType(const GlobalState &gs) const {
 
 TypePtr Symbol::externalType() const {
     ENFORCE_NO_TIMER(resultType);
+    if (resultType == nullptr) {
+        // Don't return nullptr in prod builds, which would cause a disruptive crash
+        // Emit a metric and return untyped instead.
+        prodCounterInc("symbol.externalType.nullptr");
+        return Types::untypedUntracked();
+    }
     return resultType;
 }
 
@@ -302,6 +346,46 @@ ConstSymbolData MethodRef::data(const GlobalState &gs) const {
     return ConstSymbolData(gs.methods[_id], gs);
 }
 
+SymbolData FieldRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.fieldsUsed());
+    return SymbolData(gs.fields[_id], gs);
+}
+
+ConstSymbolData FieldRef::dataAllowingNone(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(_id < gs.fieldsUsed());
+    return ConstSymbolData(gs.fields[_id], gs);
+}
+
+ConstSymbolData FieldRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    return dataAllowingNone(gs);
+}
+
+SymbolData TypeMemberRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.typeMembersUsed());
+    return SymbolData(gs.typeMembers[_id], gs);
+}
+
+ConstSymbolData TypeMemberRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.typeMembersUsed());
+    return ConstSymbolData(gs.typeMembers[_id], gs);
+}
+
+SymbolData TypeArgumentRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.typeArgumentsUsed());
+    return SymbolData(gs.typeArguments[_id], gs);
+}
+
+ConstSymbolData TypeArgumentRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.typeArgumentsUsed());
+    return ConstSymbolData(gs.typeArguments[_id], gs);
+}
+
 bool SymbolRef::isSynthetic() const {
     switch (this->kind()) {
         case Kind::ClassOrModule:
@@ -319,41 +403,119 @@ bool SymbolRef::isSynthetic() const {
 
 void printTabs(fmt::memory_buffer &to, int count) {
     string ident(count * 2, ' ');
-    fmt::format_to(to, "{}", ident);
+    fmt::format_to(std::back_inserter(to), "{}", ident);
 }
 
 SymbolRef::SymbolRef(const GlobalState &from, SymbolRef::Kind kind, u4 id)
-    : _id(id | (static_cast<u4>(kind) << ID_BITS)) {
+    : _id((id << KIND_BITS) | static_cast<u4>(kind)) {
     // If this fails, the symbol table is too big :(
-    ENFORCE_NO_TIMER(id <= ID_MASK);
+    ENFORCE_NO_TIMER(id <= MAX_ID);
 }
 SymbolRef::SymbolRef(GlobalState const *from, SymbolRef::Kind kind, u4 id)
-    : _id(id | (static_cast<u4>(kind) << ID_BITS)) {
+    : _id((id << KIND_BITS) | static_cast<u4>(kind)) {
     // If this fails, the symbol table is too big :(
-    ENFORCE_NO_TIMER(id <= ID_MASK);
+    ENFORCE_NO_TIMER(id <= MAX_ID);
 }
 
 SymbolRef::SymbolRef(ClassOrModuleRef kls) : SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, kls.id()) {}
 
 SymbolRef::SymbolRef(MethodRef kls) : SymbolRef(nullptr, SymbolRef::Kind::Method, kls.id()) {}
 
+SymbolRef::SymbolRef(FieldRef field) : SymbolRef(nullptr, SymbolRef::Kind::FieldOrStaticField, field.id()) {}
+
+SymbolRef::SymbolRef(TypeMemberRef typeMember) : SymbolRef(nullptr, SymbolRef::Kind::TypeMember, typeMember.id()) {}
+
+SymbolRef::SymbolRef(TypeArgumentRef typeArg) : SymbolRef(nullptr, SymbolRef::Kind::TypeArgument, typeArg.id()) {}
+
 ClassOrModuleRef::ClassOrModuleRef(const GlobalState &from, u4 id) : _id(id) {}
 
 MethodRef::MethodRef(const GlobalState &from, u4 id) : _id(id) {}
 
-string SymbolRef::showRaw(const GlobalState &gs) const {
-    return dataAllowingNone(gs)->showRaw(gs);
-}
-string SymbolRef::toString(const GlobalState &gs) const {
-    return dataAllowingNone(gs)->toString(gs);
-}
+FieldRef::FieldRef(const GlobalState &from, u4 id) : _id(id) {}
+
+TypeMemberRef::TypeMemberRef(const GlobalState &from, u4 id) : _id(id) {}
+
+TypeArgumentRef::TypeArgumentRef(const GlobalState &from, u4 id) : _id(id) {}
+
 string SymbolRef::show(const GlobalState &gs) const {
-    return dataAllowingNone(gs)->show(gs);
+    switch (kind()) {
+        case Kind::ClassOrModule:
+            return asClassOrModuleRef().show(gs);
+        case Kind::Method:
+            return asMethodRef().show(gs);
+        case Kind::FieldOrStaticField:
+            return asFieldRef().show(gs);
+        case Kind::TypeArgument:
+            return asTypeArgumentRef().show(gs);
+        case Kind::TypeMember:
+            return asTypeMemberRef().show(gs);
+    }
+}
+
+string ClassOrModuleRef::show(const GlobalState &gs) const {
+    auto sym = dataAllowingNone(gs);
+    if (sym->isSingletonClass(gs)) {
+        auto attached = sym->attachedClass(gs);
+        if (attached.exists()) {
+            return fmt::format("T.class_of({})", attached.show(gs));
+        }
+    }
+
+    // Make sure that we get nice error messages for things involving the proc sig builders.
+    if (sym->name == core::Names::Constants::DeclBuilderForProcs()) {
+        return "T.proc";
+    }
+
+    if (sym->owner == core::Symbols::PackageRegistry()) {
+        // Pretty print package name (only happens when `--stripe-packages` is enabled)
+        if (sym->name.isPackagerName(gs)) {
+            auto nameStr = sym->name.shortName(gs);
+            constexpr size_t packageSuffix = char_traits<char>::length("_Package");
+            // Foo_Bar_Package => Foo::Bar
+            return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - packageSuffix), {{"_", "::"}});
+        }
+    }
+
+    if (sym->name == core::Names::Constants::AttachedClass()) {
+        auto attached = sym->owner.data(gs)->attachedClass(gs);
+        ENFORCE(attached.exists());
+        return fmt::format("T.attached_class (of {})", attached.show(gs));
+    }
+
+    return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
+}
+
+string MethodRef::show(const GlobalState &gs) const {
+    auto sym = data(gs);
+    if (sym->owner.isClassOrModule() && sym->owner.data(gs)->isSingletonClass(gs)) {
+        return absl::StrCat(sym->owner.data(gs)->attachedClass(gs).show(gs), ".", sym->name.show(gs));
+    }
+    return showInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
+}
+
+string FieldRef::show(const GlobalState &gs) const {
+    auto sym = dataAllowingNone(gs);
+    return showInternal(gs, sym->owner, sym->name, sym->isStaticField() ? COLON_SEPARATOR : HASH_SEPARATOR);
+}
+
+string TypeArgumentRef::show(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return showInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
+}
+
+string TypeMemberRef::show(const GlobalState &gs) const {
+    auto sym = data(gs);
+    if (sym->name == core::Names::Constants::AttachedClass()) {
+        auto attached = sym->owner.data(gs)->attachedClass(gs);
+        ENFORCE(attached.exists());
+        return fmt::format("T.attached_class (of {})", attached.show(gs));
+    }
+    return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
 }
 
 TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner;
-    auto klass = owner.data(ctx)->enclosingClass(ctx);
+    auto klass = owner.enclosingClass(ctx);
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
     if (instantiated == nullptr) {
         instantiated = core::Types::untyped(ctx, owner);
@@ -440,18 +602,18 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
     if (maxDepth == 0) {
         if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
             e.setHeader("findMemberTransitive hit a loop while resolving `{}` in `{}`. Parents are: ", name.show(gs),
-                        this->showFullName(gs));
+                        ref(gs).showFullName(gs));
         }
         int i = -1;
         for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
             i++;
             if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
-                e.setHeader("`{}`:- `{}`", i, it->data(gs)->showFullName(gs));
+                e.setHeader("`{}`:- `{}`", i, it->showFullName(gs));
             }
             int j = 0;
             for (auto it2 = it->data(gs)->mixins().rbegin(); it2 != it->data(gs)->mixins().rend(); ++it2) {
                 if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
-                    e.setHeader("`{}`:`{}` `{}`", i, j, it2->data(gs)->showFullName(gs));
+                    e.setHeader("`{}`:`{}` `{}`", i, j, it2->showFullName(gs));
                 }
                 j++;
             }
@@ -564,6 +726,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
 
             // find scopes that would be considered for search
             vector<ClassOrModuleRef> candidateScopes;
+            vector<Symbol::FuzzySearchResult> scopeBest;
             candidateScopes.emplace_back(base.asClassOrModuleRef());
             int i = 0;
             // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
@@ -582,17 +745,33 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                 i++;
             }
             for (const auto scope : candidateScopes) {
-                for (auto member : scope.data(gs)->membersStableOrderSlow(gs)) {
+                scopeBest.clear();
+                for (auto member : scope.data(gs)->members()) {
                     if (member.first.kind() == NameKind::CONSTANT &&
                         member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
                         auto thisDistance = Levenstein::distance(
                             currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                         if (thisDistance <= best.distance) {
+                            if (thisDistance < best.distance) {
+                                scopeBest.clear();
+                            }
                             best.distance = thisDistance;
                             best.symbol = member.second;
                             best.name = member.first;
-                            result.emplace_back(best);
+                            scopeBest.emplace_back(best);
                         }
+                    }
+                }
+                if (!scopeBest.empty()) {
+                    // NOTE: Iteration order over members is nondeterministic, so we use SymbolId to deterministically
+                    // order the recommendations from this scope.
+                    // We order in decreasing symbol ID order because `result` is later reversed and we want earlier
+                    // ID'd symbols to be recommended first.
+                    fast_sort(scopeBest, [&](const auto &lhs, const auto &rhs) -> bool {
+                        return lhs.symbol._id > rhs.symbol._id;
+                    });
+                    for (auto &item : scopeBest) {
+                        result.emplace_back(item);
                     }
                 }
             }
@@ -601,10 +780,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
         } while (best.distance > 0 && base.data(gs)->owner.exists() && base != Symbols::root());
     }
 
-    // make sure we have a stable order
-    fast_sort(result, [&](auto lhs, auto rhs) -> bool {
-        return lhs.distance < rhs.distance || (lhs.distance == rhs.distance && lhs.symbol._id < rhs.symbol._id);
-    });
+    // At this point, `result` is in a deterministic order, and is ordered with _decreasing_ edit distance
 
     if (best.distance > 0) {
         // find the closest by global dfs.
@@ -615,7 +791,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
         while (!yetToGoDeeper.empty()) {
             const ClassOrModuleRef thisIter = yetToGoDeeper.back();
             yetToGoDeeper.pop_back();
-            for (auto member : thisIter.data(gs)->membersStableOrderSlow(gs)) {
+            for (auto member : thisIter.data(gs)->members()) {
                 if (member.second.exists() && member.first.exists() && member.first.kind() == NameKind::CONSTANT &&
                     member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {
                     if (member.second.isClassOrModule() &&
@@ -640,10 +816,20 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                 }
             }
         }
+        // globalBest is nondeterministically ordered since iteration over `members()` is non deterministic.
+        // Everything in globalBest has the same edit distance, so we just have to sort by symbol ID to get a
+        // deterministic order.
+        // We order in decreasing symbol ID order because `result` is later reversed and we want earlier
+        // ID'd symbols to be recommended first.
+        fast_sort(globalBest,
+                  [&](const auto &lhs, const auto &rhs) -> bool { return lhs.symbol._id > rhs.symbol._id; });
         for (auto &e : globalBest) {
             result.emplace_back(e);
         }
     }
+
+    // result is ordered in decreasing edit distance order. We want to flip the order so the items w/ the smallest edit
+    // distance are first.
     absl::c_reverse(result);
     return result;
 }
@@ -695,40 +881,15 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
     return result;
 }
 
-string Symbol::toStringFullName(const GlobalState &gs) const {
-    bool includeOwner = this->owner.exists() && this->owner != Symbols::root();
-    string owner = includeOwner ? this->owner.data(gs)->toStringFullName(gs) : "";
-
-    return fmt::format("{}{}", owner, this->name.showRaw(gs));
-}
-
-string Symbol::showFullName(const GlobalState &gs) const {
-    if (this->owner == core::Symbols::PackageRegistry()) {
-        // Pretty print package name (only happens when `--stripe-packages` is enabled)
-        auto nameStr = this->name.show(gs);
-        constexpr string_view packageNameSuffix = "_Package"sv;
-        if (absl::EndsWith(nameStr, packageNameSuffix)) {
-            // Foo_Bar_Package => Foo::Bar
-            return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - packageNameSuffix.size()), {{"_", "::"}});
-        }
-    }
-    bool includeOwner = this->owner.exists() && this->owner != Symbols::root();
-    string owner = includeOwner ? this->owner.data(gs)->showFullName(gs) : "";
-
-    bool needsColonColon = this->isClassOrModule() || this->isStaticField() || this->isTypeMember();
-    string separator = needsColonColon ? "::" : "#";
-
-    return fmt::format("{}{}{}", owner, separator, this->name.show(gs));
-}
-
-bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
-    if (ref(gs).isSynthetic()) {
+namespace {
+bool isHiddenFromPrinting(const GlobalState &gs, const Symbol &symbol) {
+    if (symbol.ref(gs).isSynthetic()) {
         return true;
     }
-    if (locs_.empty()) {
+    if (symbol.locs().empty()) {
         return true;
     }
-    for (auto loc : locs_) {
+    for (auto loc : symbol.locs()) {
         if (loc.file().data(gs).sourceType == File::Type::Payload) {
             return true;
         }
@@ -736,8 +897,150 @@ bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
     return false;
 }
 
+void printLocs(const GlobalState &gs, fmt::memory_buffer &buf, const InlinedVector<Loc, 2> &locs, bool showRaw) {
+    if (!locs.empty()) {
+        fmt::format_to(std::back_inserter(buf), " @ ");
+        if (locs.size() > 1) {
+            fmt::format_to(std::back_inserter(buf), "(");
+        }
+        fmt::format_to(std::back_inserter(buf), "{}", fmt::map_join(locs, ", ", [&](auto loc) {
+                           return showRaw ? loc.showRaw(gs) : loc.filePosToString(gs);
+                       }));
+        if (locs.size() > 1) {
+            fmt::format_to(std::back_inserter(buf), ")");
+        }
+    }
+}
+
+string_view getVariance(ConstSymbolData &sym) {
+    if (sym->isCovariant()) {
+        return "(+)"sv;
+    } else if (sym->isContravariant()) {
+        return "(-)"sv;
+    } else if (sym->isInvariant()) {
+        return "(=)"sv;
+    } else {
+        Exception::raise("type without variance");
+    }
+}
+
+void printResultType(const GlobalState &gs, fmt::memory_buffer &buf, const TypePtr &resultType, int tabs,
+                     bool showRaw) {
+    if (resultType) {
+        string printed;
+        if (showRaw) {
+            printed = absl::StrReplaceAll(resultType.toStringWithTabs(gs, tabs), {{"\n", " "}});
+        } else {
+            printed = resultType.show(gs);
+        }
+        fmt::format_to(std::back_inserter(buf), " -> {}", printed);
+    }
+}
+
+string showFullNameInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name, string_view separator) {
+    bool includeOwner = owner.exists() && owner != Symbols::root();
+    string ownerStr = includeOwner ? owner.showFullName(gs) : "";
+    return absl::StrCat(ownerStr, separator, name.show(gs));
+}
+
+string toStringFullNameInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name) {
+    bool includeOwner = owner.exists() && owner != Symbols::root();
+    string ownerStr = includeOwner ? owner.toStringFullName(gs) : "";
+    return absl::StrCat(ownerStr, name.showRaw(gs));
+}
+} // namespace
+
+string SymbolRef::showFullName(const GlobalState &gs) const {
+    switch (kind()) {
+        case Kind::ClassOrModule:
+            return asClassOrModuleRef().showFullName(gs);
+        case Kind::Method:
+            return asMethodRef().showFullName(gs);
+        case Kind::FieldOrStaticField:
+            return asFieldRef().showFullName(gs);
+        case Kind::TypeArgument:
+            return asTypeArgumentRef().showFullName(gs);
+        case Kind::TypeMember:
+            return asTypeMemberRef().showFullName(gs);
+    }
+}
+
+string ClassOrModuleRef::showFullName(const GlobalState &gs) const {
+    auto sym = dataAllowingNone(gs);
+    if (sym->owner == core::Symbols::PackageRegistry()) {
+        // Pretty print package name (only happens when `--stripe-packages` is enabled)
+        if (sym->name.isPackagerName(gs)) {
+            auto nameStr = sym->name.shortName(gs);
+            constexpr size_t packageSuffix = char_traits<char>::length("_Package");
+            // Foo_Bar_Package => Foo::Bar
+            return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - packageSuffix), {{"_", "::"}});
+        }
+    }
+    return showFullNameInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
+}
+
+string MethodRef::showFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return showFullNameInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
+}
+
+string FieldRef::showFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return showFullNameInternal(gs, sym->owner, sym->name, sym->isStaticField() ? COLON_SEPARATOR : HASH_SEPARATOR);
+}
+
+string TypeArgumentRef::showFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return showFullNameInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
+}
+
+string TypeMemberRef::showFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return showFullNameInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
+}
+
+string SymbolRef::toStringFullName(const GlobalState &gs) const {
+    switch (kind()) {
+        case Kind::ClassOrModule:
+            return asClassOrModuleRef().toStringFullName(gs);
+        case Kind::Method:
+            return asMethodRef().toStringFullName(gs);
+        case Kind::FieldOrStaticField:
+            return asFieldRef().toStringFullName(gs);
+        case Kind::TypeArgument:
+            return asTypeArgumentRef().toStringFullName(gs);
+        case Kind::TypeMember:
+            return asTypeMemberRef().toStringFullName(gs);
+    }
+}
+
+string ClassOrModuleRef::toStringFullName(const GlobalState &gs) const {
+    auto sym = dataAllowingNone(gs);
+    return toStringFullNameInternal(gs, sym->owner, sym->name);
+}
+
+string MethodRef::toStringFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return toStringFullNameInternal(gs, sym->owner, sym->name);
+}
+
+string FieldRef::toStringFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return toStringFullNameInternal(gs, sym->owner, sym->name);
+}
+
+string TypeArgumentRef::toStringFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return toStringFullNameInternal(gs, sym->owner, sym->name);
+}
+
+string TypeMemberRef::toStringFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return toStringFullNameInternal(gs, sym->owner, sym->name);
+}
+
 bool Symbol::isPrintable(const GlobalState &gs) const {
-    if (!this->isHiddenFromPrinting(gs)) {
+    if (!isHiddenFromPrinting(gs, *this)) {
         return true;
     }
 
@@ -755,161 +1058,98 @@ bool Symbol::isPrintable(const GlobalState &gs) const {
     return false;
 }
 
-string_view Symbol::showKind(const GlobalState &gs) const {
-    string_view type = "unknown"sv;
-    if (this->isClassOrModule()) {
-        if (this->isClassOrModuleClass()) {
-            type = "class"sv;
-        } else {
-            type = "module"sv;
-        }
-    } else if (this->isStaticField()) {
-        if (this->isTypeAlias()) {
-            type = "static-field-type-alias"sv;
-        } else {
-            type = "static-field"sv;
-        }
-    } else if (this->isField()) {
-        type = "field"sv;
-    } else if (this->isMethod()) {
-        type = "method"sv;
-    } else if (this->isTypeMember()) {
-        type = "type-member"sv;
-    } else if (this->isTypeArgument()) {
-        type = "type-argument"sv;
+string_view SymbolRef::showKind(const GlobalState &gs) const {
+    switch (this->kind()) {
+        case Kind::ClassOrModule:
+            return asClassOrModuleRef().showKind(gs);
+        case Kind::FieldOrStaticField:
+            return asFieldRef().showKind(gs);
+        case Kind::Method:
+            return asMethodRef().showKind(gs);
+        case Kind::TypeArgument:
+            return asTypeArgumentRef().showKind(gs);
+        case Kind::TypeMember:
+            return asTypeMemberRef().showKind(gs);
     }
-
-    return type;
 }
 
-string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+string_view ClassOrModuleRef::showKind(const GlobalState &gs) const {
+    if (dataAllowingNone(gs)->isClassOrModuleClass()) {
+        return "class"sv;
+    } else {
+        return "module"sv;
+    }
+}
+
+string_view FieldRef::showKind(const GlobalState &gs) const {
+    auto sym = dataAllowingNone(gs);
+    if (sym->isStaticField()) {
+        if (sym->isTypeAlias()) {
+            return "static-field-type-alias"sv;
+        } else {
+            return "static-field"sv;
+        }
+    }
+    return "field"sv;
+}
+
+string_view MethodRef::showKind(const GlobalState &gs) const {
+    return "method"sv;
+}
+
+string_view TypeMemberRef::showKind(const GlobalState &gs) const {
+    return "type-member"sv;
+}
+
+string_view TypeArgumentRef::showKind(const GlobalState &gs) const {
+    return "type-argument"sv;
+}
+
+string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
     fmt::memory_buffer buf;
 
     printTabs(buf, tabs);
 
-    string_view type = this->showKind(gs);
+    auto sym = data(gs);
 
-    string_view variance = ""sv;
+    fmt::format_to(std::back_inserter(buf), "{} {}", showKind(gs), showRaw ? toStringFullName(gs) : showFullName(gs));
 
-    if (this->isTypeArgument() || this->isTypeMember()) {
-        if (this->isCovariant()) {
-            variance = "(+)"sv;
-        } else if (this->isContravariant()) {
-            variance = "(-)"sv;
-        } else if (this->isInvariant()) {
-            variance = "(=)"sv;
-        } else {
-            Exception::raise("type without variance");
-        }
-    }
-
-    fmt::format_to(buf, "{}{} {}", type, variance, showRaw ? this->toStringFullName(gs) : this->showFullName(gs));
-
-    if (this->isClassOrModule() || this->isMethod()) {
-        if (this->isMethod()) {
-            auto methodFlags = InlinedVector<string, 3>{};
-
-            if (this->isMethodPrivate()) {
-                methodFlags.emplace_back("private");
-            } else if (this->isMethodProtected()) {
-                methodFlags.emplace_back("protected");
-            }
-
-            if (this->isAbstract()) {
-                methodFlags.emplace_back("abstract");
-            }
-            if (this->isOverridable()) {
-                methodFlags.emplace_back("overridable");
-            }
-            if (this->isOverride()) {
-                methodFlags.emplace_back("override");
-            }
-            if (this->isIncompatibleOverride()) {
-                methodFlags.emplace_back("allow_incompatible");
-            }
-            if (this->isFinalMethod()) {
-                methodFlags.emplace_back("final");
-            }
-
-            if (!methodFlags.empty()) {
-                fmt::format_to(buf, " : {}", fmt::map_join(methodFlags, "|", [](const auto &flag) { return flag; }));
-            }
-        }
-
-        auto typeMembers = this->isClassOrModule() ? this->typeMembers() : this->typeArguments();
-        auto it = remove_if(typeMembers.begin(), typeMembers.end(),
-                            [&gs](auto &sym) -> bool { return sym.data(gs)->isFixed(); });
-        typeMembers.erase(it, typeMembers.end());
-        if (!typeMembers.empty()) {
-            fmt::format_to(buf, "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
-                               auto name = symb.data(gs)->name;
-                               return showRaw ? name.showRaw(gs) : name.show(gs);
-                           }));
-        }
-
-        if (this->isClassOrModule() && this->superClass().exists()) {
-            auto superClass = this->superClass().data(gs);
-            fmt::format_to(buf, " < {}", showRaw ? superClass->toStringFullName(gs) : superClass->showFullName(gs));
-        }
-
-        if (this->isClassOrModule()) {
-            fmt::format_to(buf, " ({})", fmt::map_join(this->mixins(), ", ", [&](auto symb) {
-                               auto name = symb.data(gs)->name;
-                               return showRaw ? name.showRaw(gs) : name.show(gs);
-                           }));
-
-        } else {
-            fmt::format_to(buf, " ({})", fmt::map_join(this->arguments(), ", ", [&](const auto &symb) {
-                               return symb.argumentName(gs);
-                           }));
-        }
-
-        if (this->isClassOrModule() && this->isClassOrModulePrivate()) {
-            fmt::format_to(buf, " : private");
-        }
-    } else if (this->isStaticField() && this->isStaticFieldPrivate()) {
-        fmt::format_to(buf, " : private");
-    }
-    if (this->resultType && !isClassOrModule()) {
-        string resultType;
-        if (showRaw) {
-            resultType = absl::StrReplaceAll(this->resultType.toStringWithTabs(gs, tabs), {{"\n", " "}});
-        } else {
-            resultType = this->resultType.show(gs);
-        }
-        fmt::format_to(buf, " -> {}", resultType);
-    }
-    if (!locs_.empty()) {
-        // root should have no locs. We used to have special handling here to hide locs on root
-        // when censorForSnapshotTests was passed, but it's not needed anymore.
-        ENFORCE(ref(gs) != core::Symbols::root());
-
-        fmt::format_to(buf, " @ ");
-        if (locs_.size() > 1) {
-            fmt::format_to(buf, "(");
-        }
-        fmt::format_to(buf, "{}", fmt::map_join(locs_, ", ", [&](auto loc) {
-                           return showRaw ? loc.showRaw(gs) : loc.filePosToString(gs);
+    auto typeMembers = sym->typeMembers();
+    auto it =
+        remove_if(typeMembers.begin(), typeMembers.end(), [&gs](auto &sym) -> bool { return sym.data(gs)->isFixed(); });
+    typeMembers.erase(it, typeMembers.end());
+    if (!typeMembers.empty()) {
+        fmt::format_to(std::back_inserter(buf), "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
+                           auto name = symb.data(gs)->name;
+                           return showRaw ? name.showRaw(gs) : name.show(gs);
                        }));
-        if (locs_.size() > 1) {
-            fmt::format_to(buf, ")");
-        }
     }
 
-    if (this->isMethod()) {
-        if (this->rebind().exists()) {
-            fmt::format_to(buf, " rebindTo {}",
-                           showRaw ? this->rebind().data(gs)->toStringFullName(gs)
-                                   : this->rebind().data(gs)->showFullName(gs));
-        }
+    if (sym->superClass().exists()) {
+        auto superClass = sym->superClass();
+        fmt::format_to(std::back_inserter(buf), " < {}",
+                       showRaw ? superClass.toStringFullName(gs) : superClass.showFullName(gs));
     }
+
+    fmt::format_to(std::back_inserter(buf), " ({})", fmt::map_join(sym->mixins(), ", ", [&](auto symb) {
+                       auto name = symb.data(gs)->name;
+                       return showRaw ? name.showRaw(gs) : name.show(gs);
+                   }));
+
+    if (sym->isClassOrModulePrivate()) {
+        fmt::format_to(std::back_inserter(buf), " : private");
+    }
+    // root should have no locs. We used to have special handling here to hide locs on root
+    // when censorForSnapshotTests was passed, but it's not needed anymore.
+    ENFORCE(!(*this == core::Symbols::root() && !sym->locs().empty()));
+
+    printLocs(gs, buf, sym->locs(), showRaw);
 
     ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
-
-    fmt::format_to(buf, "\n");
-    for (auto pair : membersStableOrderSlow(gs)) {
+    fmt::format_to(std::back_inserter(buf), "\n");
+    for (auto pair : sym->membersStableOrderSlow(gs)) {
         if (!pair.second.exists()) {
-            ENFORCE(ref(gs) == core::Symbols::root());
+            ENFORCE(*this == core::Symbols::root());
             continue;
         }
 
@@ -922,20 +1162,179 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
             continue;
         }
 
-        auto str = pair.second.data(gs)->toStringWithOptions(gs, tabs + 1, showFull, showRaw);
+        auto str = pair.second.toStringWithOptions(gs, tabs + 1, showFull, showRaw);
         ENFORCE(!str.empty());
-        fmt::format_to(buf, "{}", move(str));
-    }
-    if (isMethod()) {
-        for (auto &arg : arguments()) {
-            auto str = arg.toString(gs);
-            ENFORCE(!str.empty());
-            printTabs(buf, tabs + 1);
-            fmt::format_to(buf, "{}\n", move(str));
-        }
+        fmt::format_to(std::back_inserter(buf), "{}", move(str));
     }
 
     return to_string(buf);
+}
+
+string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+    fmt::memory_buffer buf;
+
+    printTabs(buf, tabs);
+
+    auto sym = data(gs);
+
+    fmt::format_to(std::back_inserter(buf), "{} {}", showKind(gs), showRaw ? toStringFullName(gs) : showFullName(gs));
+
+    auto methodFlags = InlinedVector<string, 3>{};
+
+    if (sym->isMethodPrivate()) {
+        methodFlags.emplace_back("private");
+    } else if (sym->isMethodProtected()) {
+        methodFlags.emplace_back("protected");
+    }
+
+    if (sym->isAbstract()) {
+        methodFlags.emplace_back("abstract");
+    }
+    if (sym->isOverridable()) {
+        methodFlags.emplace_back("overridable");
+    }
+    if (sym->isOverride()) {
+        methodFlags.emplace_back("override");
+    }
+    if (sym->isIncompatibleOverride()) {
+        methodFlags.emplace_back("allow_incompatible");
+    }
+    if (sym->isFinalMethod()) {
+        methodFlags.emplace_back("final");
+    }
+
+    if (!methodFlags.empty()) {
+        fmt::format_to(std::back_inserter(buf), " : {}",
+                       fmt::map_join(methodFlags, "|", [](const auto &flag) { return flag; }));
+    }
+
+    auto typeMembers = sym->typeArguments();
+    auto it =
+        remove_if(typeMembers.begin(), typeMembers.end(), [&gs](auto &sym) -> bool { return sym.data(gs)->isFixed(); });
+    typeMembers.erase(it, typeMembers.end());
+    if (!typeMembers.empty()) {
+        fmt::format_to(std::back_inserter(buf), "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
+                           auto name = symb.data(gs)->name;
+                           return showRaw ? name.showRaw(gs) : name.show(gs);
+                       }));
+    }
+    fmt::format_to(std::back_inserter(buf), " ({})",
+                   fmt::map_join(sym->arguments(), ", ", [&](const auto &symb) { return symb.argumentName(gs); }));
+
+    printResultType(gs, buf, sym->resultType, tabs, showRaw);
+    printLocs(gs, buf, sym->locs(), showRaw);
+
+    if (sym->rebind().exists()) {
+        fmt::format_to(std::back_inserter(buf), " rebindTo {}",
+                       showRaw ? sym->rebind().toStringFullName(gs) : sym->rebind().showFullName(gs));
+    }
+
+    ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
+    fmt::format_to(std::back_inserter(buf), "\n");
+    for (auto pair : sym->membersStableOrderSlow(gs)) {
+        ENFORCE_NO_TIMER(pair.second.exists());
+        // These should only show up in classes.
+        ENFORCE_NO_TIMER(pair.first != Names::singleton() && pair.first != Names::attached() &&
+                         pair.first != Names::mixedInClassMethods());
+
+        if (!showFull && !pair.second.data(gs)->isPrintable(gs)) {
+            continue;
+        }
+
+        auto str = pair.second.toStringWithOptions(gs, tabs + 1, showFull, showRaw);
+        ENFORCE(!str.empty());
+        fmt::format_to(std::back_inserter(buf), "{}", move(str));
+    }
+
+    for (auto &arg : sym->arguments()) {
+        auto str = arg.toString(gs);
+        ENFORCE(!str.empty());
+        printTabs(buf, tabs + 1);
+        fmt::format_to(std::back_inserter(buf), "{}\n", move(str));
+    }
+
+    return to_string(buf);
+}
+
+string FieldRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+    fmt::memory_buffer buf;
+
+    printTabs(buf, tabs);
+
+    auto sym = data(gs);
+
+    string_view type = showKind(gs);
+
+    string_view access;
+    if (sym->isStaticField() && sym->isStaticFieldPrivate()) {
+        access = " : private"sv;
+    }
+
+    fmt::format_to(std::back_inserter(buf), "{} {}{}", type, showRaw ? toStringFullName(gs) : showFullName(gs), access);
+
+    printResultType(gs, buf, sym->resultType, tabs, showRaw);
+    printLocs(gs, buf, sym->locs(), showRaw);
+
+    ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
+
+    fmt::format_to(std::back_inserter(buf), "\n");
+
+    return to_string(buf);
+}
+
+string TypeMemberRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+    fmt::memory_buffer buf;
+
+    printTabs(buf, tabs);
+
+    auto sym = data(gs);
+
+    fmt::format_to(std::back_inserter(buf), "{}{} {}", showKind(gs), getVariance(sym),
+                   showRaw ? toStringFullName(gs) : showFullName(gs));
+
+    printResultType(gs, buf, sym->resultType, tabs, showRaw);
+    printLocs(gs, buf, sym->locs(), showRaw);
+
+    ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
+    fmt::format_to(std::back_inserter(buf), "\n");
+    ENFORCE_NO_TIMER(sym->members().empty());
+
+    return to_string(buf);
+}
+
+string TypeArgumentRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+    fmt::memory_buffer buf;
+
+    printTabs(buf, tabs);
+
+    auto sym = data(gs);
+
+    fmt::format_to(std::back_inserter(buf), "{}{} {}", showKind(gs), getVariance(sym),
+                   showRaw ? toStringFullName(gs) : showFullName(gs));
+
+    printResultType(gs, buf, sym->resultType, tabs, showRaw);
+    printLocs(gs, buf, sym->locs(), showRaw);
+
+    ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
+    fmt::format_to(std::back_inserter(buf), "\n");
+    ENFORCE_NO_TIMER(sym->members().empty());
+
+    return to_string(buf);
+}
+
+string SymbolRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().toStringWithOptions(gs, tabs, showFull, showRaw);
+        case SymbolRef::Kind::Method:
+            return asMethodRef().toStringWithOptions(gs, tabs, showFull, showRaw);
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().toStringWithOptions(gs, tabs, showFull, showRaw);
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().toStringWithOptions(gs, tabs, showFull, showRaw);
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().toStringWithOptions(gs, tabs, showFull, showRaw);
+    }
 }
 
 string ArgInfo::show(const GlobalState &gs) const {
@@ -944,7 +1343,7 @@ string ArgInfo::show(const GlobalState &gs) const {
 
 string ArgInfo::toString(const GlobalState &gs) const {
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "argument {}", show(gs));
+    fmt::format_to(std::back_inserter(buf), "argument {}", show(gs));
     vector<string_view> flagTexts;
     if (flags.isDefault) {
         flagTexts.emplace_back("optional"sv);
@@ -961,60 +1360,18 @@ string ArgInfo::toString(const GlobalState &gs) const {
     if (flags.isShadow) {
         flagTexts.emplace_back("shadow"sv);
     }
-    fmt::format_to(buf, "<{}>", fmt::join(flagTexts, ", "));
+    fmt::format_to(std::back_inserter(buf), "<{}>", fmt::join(flagTexts, ", "));
     if (this->type) {
-        fmt::format_to(buf, " -> {}", this->type.show(gs));
+        fmt::format_to(std::back_inserter(buf), " -> {}", this->type.show(gs));
     }
 
-    fmt::format_to(buf, " @ {}", loc.showRaw(gs));
+    fmt::format_to(std::back_inserter(buf), " @ {}", loc.showRaw(gs));
 
     if (this->rebind.exists()) {
-        fmt::format_to(buf, " rebindTo {}", this->rebind.data(gs)->showFullName(gs));
+        fmt::format_to(std::back_inserter(buf), " rebindTo {}", this->rebind.showFullName(gs));
     }
 
     return to_string(buf);
-}
-
-string Symbol::show(const GlobalState &gs) const {
-    if (isClassOrModule() && isSingletonClass(gs)) {
-        auto attached = this->attachedClass(gs);
-        if (attached.exists()) {
-            return fmt::format("T.class_of({})", attached.data(gs)->show(gs));
-        }
-    }
-
-    // Make sure that we get nice error messages for things involving the proc sig builders.
-    if (this->name == core::Names::Constants::DeclBuilderForProcs()) {
-        return "T.proc";
-    }
-
-    if (!this->owner.exists() || this->owner == Symbols::root()) {
-        return this->name.show(gs);
-    }
-
-    if (this->owner == core::Symbols::PackageRegistry()) {
-        // Pretty print package name (only happens when `--stripe-packages` is enabled)
-        auto nameStr = this->name.show(gs);
-        constexpr string_view packageNameSuffix = "_Package"sv;
-        if (absl::EndsWith(nameStr, packageNameSuffix)) {
-            // Foo_Bar_Package => Foo::Bar
-            return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - packageNameSuffix.size()), {{"_", "::"}});
-        }
-    }
-
-    if (this->name == core::Names::Constants::AttachedClass()) {
-        auto attached = this->owner.data(gs)->attachedClass(gs);
-        ENFORCE(attached.exists());
-        return fmt::format("T.attached_class (of {})", attached.data(gs)->show(gs));
-    }
-
-    if (this->isMethod() && this->owner.isClassOrModule() && this->owner.data(gs)->isSingletonClass(gs)) {
-        return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs), this->name.show(gs));
-    }
-
-    auto needsColonColon = this->isClassOrModule() || this->isStaticField() || this->isTypeMember();
-
-    return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), needsColonColon ? "::" : "#", this->name.show(gs));
 }
 
 string ArgInfo::argumentName(const GlobalState &gs) const {
@@ -1022,8 +1379,8 @@ string ArgInfo::argumentName(const GlobalState &gs) const {
         return (string)name.shortName(gs);
     } else {
         // positional arg
-        if (loc.exists()) {
-            return loc.source(gs);
+        if (auto source = loc.source(gs)) {
+            return source.value();
         } else {
             return (string)name.shortName(gs);
         }
@@ -1121,8 +1478,8 @@ ClassOrModuleRef Symbol::topAttachedClass(const GlobalState &gs) const {
 }
 
 void Symbol::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass) {
-    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(ctx));
-    ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", this->show(ctx));
+    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(ctx).show(ctx));
+    ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", ref(ctx).show(ctx));
 
     // Avoid using a clobbered `this` pointer, as `singletonClass` can cause the symbol table to move.
     auto selfRef = this->ref(ctx);
@@ -1164,7 +1521,7 @@ void Symbol::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass)
 }
 
 const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
-    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(gs));
+    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(gs).show(gs));
     auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
     auto &result = sealedSubclasses.data(gs)->locs();
     ENFORCE(result.size() > 0);
@@ -1172,7 +1529,7 @@ const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
 }
 
 TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
-    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(gs));
+    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(gs).show(gs));
 
     auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
 
@@ -1207,6 +1564,166 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
     return result;
 }
 
+bool Symbol::hasSingleSealedSubclass(const GlobalState &gs) const {
+    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(gs).show(gs));
+
+    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
+
+    // When the sealed type is a class, it must also be abstract for there to be a single subclass.
+    if (this->isClassOrModuleClass() && !this->isClassOrModuleAbstract()) {
+        return false;
+    }
+
+    auto data = sealedSubclasses.data(gs);
+    ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
+    auto appliedType = cast_type<AppliedType>(data->resultType);
+    ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
+    ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
+
+    // There is exactly one subclass when the sealedSubclasses field is a set with a single non-bottom type in it
+    auto currentClasses = appliedType->targs[0];
+    return !currentClasses.isBottom() && !isa_type<OrType>(currentClasses);
+}
+
+// Record a required ancestor for this class of module
+//
+// Each RequiredAncestor is stored into a magic method referenced by `prop` where:
+// * RequiredAncestor.symbol goes into the return type tuple
+// * RequiredAncestor.origin goes into the first argument type tuple
+// * RequiredAncestor.loc goes into the symbol loc
+// All fields for the same RequiredAncestor are stored at the same index.
+void Symbol::recordRequiredAncestorInternal(GlobalState &gs, Symbol::RequiredAncestor &ancestor, NameRef prop) {
+    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", ref(gs).show(gs));
+
+    // We store the required ancestors into a fake property called `<required-ancestors>`
+    auto ancestors = this->findMember(gs, prop);
+    if (!ancestors.exists()) {
+        ancestors = gs.enterMethodSymbol(ancestor.loc, this->ref(gs).asClassOrModuleRef(), prop);
+        ancestors.data(gs)->locs_.clear(); // Remove the original location
+
+        // Create the return type tuple to store RequiredAncestor.symbol
+        vector<TypePtr> tsymbols;
+        ancestors.data(gs)->resultType = make_type<TupleType>(move(tsymbols));
+
+        // Create the first argument typed as a tuple to store RequiredAncestor.origin
+        auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), ancestors.asMethodRef(), core::Names::arg());
+        vector<TypePtr> torigins;
+        arg.type = make_type<TupleType>(move(torigins));
+    }
+
+    // Do not require the same ancestor twice
+    auto &elems = (cast_type<TupleType>(ancestors.data(gs)->resultType))->elems;
+    bool alreadyRecorded = absl::c_any_of(elems, [ancestor](auto elem) {
+        ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
+        return cast_type_nonnull<ClassType>(elem).symbol == ancestor.symbol;
+    });
+    if (alreadyRecorded) {
+        return;
+    }
+
+    // Store the RequiredAncestor.symbol
+    auto tSymbol = core::make_type<ClassType>(ancestor.symbol);
+    (cast_type<TupleType>(ancestors.data(gs)->resultType))->elems.emplace_back(tSymbol);
+
+    // Store the RequiredAncestor.origin
+    auto tOrigin = core::make_type<ClassType>(ancestor.origin);
+    (cast_type<TupleType>(ancestors.data(gs)->arguments()[0].type))->elems.emplace_back(tOrigin);
+
+    // Store the RequiredAncestor.loc
+    ancestors.data(gs)->locs_.emplace_back(ancestor.loc);
+}
+
+// Locally required ancestors by this class or module
+vector<Symbol::RequiredAncestor> Symbol::readRequiredAncestorsInternal(const GlobalState &gs, NameRef prop) const {
+    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", ref(gs).show(gs));
+
+    vector<RequiredAncestor> res;
+
+    auto ancestors = this->findMember(gs, prop);
+    if (!ancestors.exists()) {
+        // No ancestor was recorded for this class or module
+        return res;
+    }
+
+    auto data = ancestors.data(gs);
+    auto tSymbols = cast_type<TupleType>(data->resultType);
+    auto tOrigins = cast_type<TupleType>(data->arguments()[0].type);
+    auto index = 0;
+    for (auto elem : tSymbols->elems) {
+        ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
+        ENFORCE(isa_type<ClassType>(tOrigins->elems[index]), "Bad origin in requiredAncestors");
+        ENFORCE(index < data->locs().size(), "Missing loc in requiredAncestors");
+        auto &origin = cast_type_nonnull<ClassType>(tOrigins->elems[index]).symbol;
+        auto &symbol = cast_type_nonnull<ClassType>(elem).symbol;
+        auto &loc = data->locs()[index];
+        res.emplace_back(origin, symbol, loc);
+        index++;
+    }
+
+    return res;
+}
+
+// Record a required ancestor for this class of module
+void Symbol::recordRequiredAncestor(GlobalState &gs, ClassOrModuleRef ancestor, Loc loc) {
+    RequiredAncestor req = {this->ref(gs).asClassOrModuleRef(), ancestor, loc};
+    recordRequiredAncestorInternal(gs, req, Names::requiredAncestors());
+}
+
+// Locally required ancestors by this class or module
+vector<Symbol::RequiredAncestor> Symbol::requiredAncestors(const GlobalState &gs) const {
+    return readRequiredAncestorsInternal(gs, Names::requiredAncestors());
+}
+
+// All required ancestors by this class or module
+std::vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitiveInternal(GlobalState &gs,
+                                                                                  std::vector<ClassOrModuleRef> &seen) {
+    if (absl::c_find(seen, this->ref(gs).asClassOrModuleRef()) != seen.end()) {
+        return requiredAncestors(gs); // Break recursive loops if we already visited this ancestor
+    }
+    seen.emplace_back(this->ref(gs).asClassOrModuleRef());
+
+    for (auto ancst : requiredAncestors(gs)) {
+        recordRequiredAncestorInternal(gs, ancst, Names::requiredAncestorsLin());
+        for (auto sancst : ancst.symbol.data(gs)->requiredAncestorsTransitiveInternal(gs, seen)) {
+            if (sancst.symbol != this->ref(gs).asClassOrModuleRef()) {
+                recordRequiredAncestorInternal(gs, sancst, Names::requiredAncestorsLin());
+            }
+        }
+    }
+
+    auto parent = superClass();
+    if (parent.exists()) {
+        for (auto ancst : parent.data(gs)->requiredAncestorsTransitiveInternal(gs, seen)) {
+            if (ancst.symbol != this->ref(gs).asClassOrModuleRef()) {
+                recordRequiredAncestorInternal(gs, ancst, Names::requiredAncestorsLin());
+            }
+        }
+    }
+
+    for (auto mixin : mixins()) {
+        for (auto ancst : mixin.data(gs)->requiredAncestors(gs)) {
+            if (ancst.symbol != this->ref(gs).asClassOrModuleRef()) {
+                recordRequiredAncestorInternal(gs, ancst, Names::requiredAncestorsLin());
+            }
+        }
+    }
+
+    return requiredAncestorsTransitive(gs);
+}
+
+// All required ancestors by this class or module
+vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitive(const GlobalState &gs) const {
+    ENFORCE(gs.requiresAncestorEnabled);
+    return readRequiredAncestorsInternal(gs, Names::requiredAncestorsLin());
+}
+
+void Symbol::computeRequiredAncestorLinearization(GlobalState &gs) {
+    ENFORCE(gs.requiresAncestorEnabled);
+    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", ref(gs).show(gs));
+    std::vector<ClassOrModuleRef> seen;
+    requiredAncestorsTransitiveInternal(gs, seen);
+}
+
 SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const {
     if (isa_type<AliasType>(resultType)) {
         auto alias = cast_type_nonnull<AliasType>(resultType);
@@ -1214,7 +1731,7 @@ SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, Symb
             if (auto e = gs.beginError(loc(), errors::Internal::CyclicReferenceError)) {
                 e.setHeader("Too many alias expansions for symbol {}, the alias is either too long or infinite. Next "
                             "expansion would have been to {}",
-                            showFullName(gs), alias.symbol.data(gs)->showFullName(gs));
+                            ref(gs).showFullName(gs), alias.symbol.showFullName(gs));
             }
             return def;
         }
@@ -1350,20 +1867,34 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
         if (isa_type<AliasType>(this->resultType)) {
             // If we have an alias method, we should never look at it's arguments;
             // we should instead look at the arguments of whatever we're aliasing.
-            ENFORCE_NO_TIMER(this->arguments().empty(), this->show(gs));
+            ENFORCE_NO_TIMER(this->arguments().empty(), ref(gs).show(gs));
         } else {
-            ENFORCE_NO_TIMER(!this->arguments().empty(), this->show(gs));
+            ENFORCE_NO_TIMER(!this->arguments().empty(), ref(gs).show(gs));
         }
     }
 }
 
-ClassOrModuleRef Symbol::enclosingClass(const GlobalState &gs) const {
-    SymbolRef owner = ref(gs);
-    while (!owner.isClassOrModule()) {
-        ENFORCE(owner.exists(), "non-existing owner in enclosingClass");
-        owner = owner.data(gs)->owner;
+ClassOrModuleRef MethodRef::enclosingClass(const GlobalState &gs) const {
+    // Methods can only be owned by classes or modules.
+    return data(gs)->owner.asClassOrModuleRef();
+}
+
+ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef();
+        case SymbolRef::Kind::Method:
+            return asMethodRef().enclosingClass(gs);
+        case SymbolRef::Kind::FieldOrStaticField:
+            // Fields can only be owned by classes or modules.
+            return asFieldRef().data(gs)->owner.asClassOrModuleRef();
+        case SymbolRef::Kind::TypeArgument:
+            // Typeargs are owned by methods.
+            return asTypeArgumentRef().data(gs)->owner.asMethodRef().enclosingClass(gs);
+        case SymbolRef::Kind::TypeMember:
+            // TypeMembers are only owned by classes or modules.
+            return asTypeMemberRef().data(gs)->owner.asClassOrModuleRef();
     }
-    return owner.asClassOrModuleRef();
 }
 
 u4 Symbol::hash(const GlobalState &gs) const {
@@ -1371,11 +1902,21 @@ u4 Symbol::hash(const GlobalState &gs) const {
     result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
-    result = mix(result, this->superClassOrRebind._id);
+    result = mix(result, this->superClassOrRebind.id());
     // argumentsOrMixins, typeParams, typeAliases
-    for (auto e : membersStableOrderSlow(gs)) {
-        if (e.second.exists() && !e.second.data(gs)->ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.second.data(gs)->name.shortName(gs)));
+    if (!members().empty()) {
+        // Rather than use membersStableOrderSlow, which is... slow..., use an order dictated by symbol ref ID.
+        // It's faster to sort, and SymbolRef IDs are stable during hashing.
+        vector<core::SymbolRef> membersToHash;
+        membersToHash.reserve(this->members().size());
+        for (auto e : this->members()) {
+            if (e.second.exists() && !e.second.data(gs)->ignoreInHashing(gs)) {
+                membersToHash.emplace_back(e.second);
+            }
+        }
+        fast_sort(membersToHash, [](const auto &a, const auto &b) -> bool { return a.rawId() < b.rawId(); });
+        for (auto member : membersToHash) {
+            result = mix(result, _hash(member.data(gs)->name.shortName(gs)));
         }
     }
     for (const auto &e : mixins_) {
@@ -1407,7 +1948,7 @@ u4 Symbol::methodShapeHash(const GlobalState &gs) const {
     u4 result = _hash(name.shortName(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
-    result = mix(result, this->superClassOrRebind._id);
+    result = mix(result, this->superClassOrRebind.id());
     result = mix(result, this->hasSig());
     for (auto &arg : this->methodArgumentHash(gs)) {
         result = mix(result, arg);

@@ -12,34 +12,6 @@ namespace sorbet::core {
 
 using namespace std;
 
-constexpr auto EXTERNAL_PREFIX = "external/com_stripe_ruby_typer/"sv;
-constexpr auto URL_PREFIX = "https://github.com/sorbet/sorbet/tree/master/"sv;
-
-namespace {
-string censorFilePathForSnapshotTests(string_view orig) {
-    string_view result = orig;
-    if (absl::StartsWith(result, EXTERNAL_PREFIX)) {
-        // When running tests from outside of the sorbet repo, the files have a different path in the sandbox.
-        result.remove_prefix(EXTERNAL_PREFIX.size());
-    }
-
-    if (absl::StartsWith(result, URL_PREFIX)) {
-        // This is so that changing RBIs doesn't mean invalidating every symbol-table exp test.
-        result.remove_prefix(URL_PREFIX.size());
-        if (absl::StartsWith(result, EXTERNAL_PREFIX)) {
-            result.remove_prefix(EXTERNAL_PREFIX.size());
-        }
-    }
-
-    if (absl::StartsWith(orig, URL_PREFIX)) {
-        return fmt::format("{}{}", URL_PREFIX, result);
-    } else {
-        return string(result);
-    }
-}
-
-} // namespace
-
 LocOffsets LocOffsets::join(LocOffsets other) const {
     if (!this->exists()) {
         return other;
@@ -204,6 +176,20 @@ string LocOffsets::showRaw(const Context ctx) const {
 string LocOffsets::showRaw(const MutableContext ctx) const {
     return Loc(ctx.file, *this).showRaw(ctx);
 }
+string LocOffsets::showRaw(const GlobalState &gs, const FileRef file) const {
+    return Loc(file, *this).showRaw(gs);
+}
+string LocOffsets::showRaw() const {
+    return fmt::format("LocOffsets {{beginPos={}, endPos={}}}", beginPos(), endPos());
+}
+
+bool LocOffsets::operator==(const LocOffsets &rhs) const {
+    return this->beginLoc == rhs.beginLoc && this->endLoc == rhs.endLoc;
+}
+
+bool LocOffsets::operator!=(const LocOffsets &rhs) const {
+    return !(rhs == *this);
+}
 
 string Loc::showRaw(const GlobalState &gs) const {
     string_view path;
@@ -215,8 +201,8 @@ string Loc::showRaw(const GlobalState &gs) const {
 
     string censored;
     if (gs.censorForSnapshotTests) {
-        censored = censorFilePathForSnapshotTests(path);
-        if (absl::StartsWith(path, URL_PREFIX)) {
+        censored = File::censorFilePathForSnapshotTests(path);
+        if (absl::StartsWith(path, File::URL_PREFIX)) {
             return fmt::format("Loc {{file={} start=removed end=removed}}", censored);
         }
         path = censored;
@@ -237,7 +223,7 @@ string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
     } else {
         auto path = gs.getPrintablePath(file().data(gs).path());
         if (gs.censorForSnapshotTests) {
-            buf << censorFilePathForSnapshotTests(path);
+            buf << File::censorFilePathForSnapshotTests(path);
         } else {
             buf << path;
         }
@@ -266,9 +252,13 @@ string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
     return buf.str();
 }
 
-string Loc::source(const GlobalState &gs) const {
-    auto source = this->file().data(gs).source();
-    return string(source.substr(beginPos(), endPos() - beginPos()));
+optional<string> Loc::source(const GlobalState &gs) const {
+    if (!exists()) {
+        return nullopt;
+    } else {
+        auto source = this->file().data(gs).source();
+        return string(source.substr(beginPos(), endPos() - beginPos()));
+    }
 }
 
 bool Loc::contains(const Loc &other) const {
@@ -276,12 +266,40 @@ bool Loc::contains(const Loc &other) const {
 }
 
 bool Loc::operator==(const Loc &rhs) const {
-    return storage.offsets.endLoc == rhs.storage.offsets.endLoc &&
-           storage.offsets.beginLoc == rhs.storage.offsets.beginLoc && storage.fileRef == rhs.storage.fileRef;
+    return storage.offsets == rhs.storage.offsets && storage.fileRef == rhs.storage.fileRef;
 }
 
 bool Loc::operator!=(const Loc &rhs) const {
     return !(rhs == *this);
+}
+
+Loc Loc::adjust(const GlobalState &gs, int32_t beginAdjust, int32_t endAdjust) const {
+    if (!this->exists()) {
+        return Loc::none(this->file());
+    }
+
+    // Upcast these to signed, 64-bit ints, so we don't have to worry about underflow / overflow.
+    int64_t begin = this->beginPos();
+    int64_t end = this->endPos();
+
+    uint64_t fileLength = this->file().data(gs).source().size();
+
+    if (begin + beginAdjust < 0) {
+        return Loc::none(this->file());
+    }
+
+    if (begin + beginAdjust > end + endAdjust) {
+        return Loc::none(this->file());
+    }
+
+    if (end + endAdjust > fileLength) {
+        return Loc::none(this->file());
+    }
+
+    u4 newBegin = begin + beginAdjust;
+    u4 newEnd = end + endAdjust;
+
+    return Loc{this->file(), newBegin, newEnd};
 }
 
 pair<Loc, u4> Loc::findStartOfLine(const GlobalState &gs) const {

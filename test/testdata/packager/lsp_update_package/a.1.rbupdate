@@ -1,6 +1,6 @@
 # typed: strict
 
-class A
+class Package::A
   extend T::Sig
 
   sig {returns(Dep::ExportedItem)}

@@ -1,9 +1,18 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
 load("//third_party/cargo:crates.bzl", "raze_fetch_remote_crates")
 
 # We define our externals here instead of directly in WORKSPACE
 def register_sorbet_dependencies():
+    # At some point the builtin @platforms package willbe removed, and we'll no longer be able to refer to
+    # @platforms//os:macos etc. The long-term workaround for this is to depend directly on bazelbuild/platforms as
+    # @platforms. See https://github.com/bazelbuild/bazel/issues/8622 for more information.
+    http_archive(
+        name = "platforms",
+        urls = _github_public_urls("bazelbuild/platforms/archive/d4c9d7f51a7c403814b60f66d20eeb425fbaaacb.zip"),
+        sha256 = "a5058ac93023092c406432ec650f30ec5a8c75d8b9d13c73150f60a9050a5663",
+        strip_prefix = "platforms-d4c9d7f51a7c403814b60f66d20eeb425fbaaacb",
+    )
+
     http_archive(
         name = "doctest",
         urls = _github_public_urls("onqtam/doctest/archive/7d42bd0fab6c44010c8aed9338bd02bea5feba41.zip"),
@@ -30,10 +39,20 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "spdlog",
-        urls = _github_public_urls("gabime/spdlog/archive/c2b47430fb210c8822177407b9e4b82d4ef7455d.zip"),  # v1.3.1
-        sha256 = "08b7e0f1d7c62a56dfbac5678979967690ccd9e074acd3762a2a49d8731961e6",
+        urls = _github_public_urls("gabime/spdlog/archive/61ed2a670e40e9a865edc20b088422a469bdab9e.zip"),  # v1.9.0
+        sha256 = "0ec124d1bb4bb57a7f43f814622f7c907619e3cacbb6e04c62634a98880f5971",
         build_file = "@com_stripe_ruby_typer//third_party:spdlog.BUILD",
-        strip_prefix = "spdlog-c2b47430fb210c8822177407b9e4b82d4ef7455d",
+        strip_prefix = "spdlog-61ed2a670e40e9a865edc20b088422a469bdab9e",
+    )
+
+    # We don't use this directly, but protobuf will skip defining its own
+    # `@zlib` if it's present.
+    http_archive(
+        name = "zlib",
+        urls = _github_public_urls("madler/zlib/archive/cacf7f1d4e3d44d871b605da3b647f07d718623f.zip"),
+        build_file = "@com_stripe_ruby_typer//third_party:zlib.BUILD",
+        sha256 = "1cce3828ec2ba80ff8a4cac0ab5aa03756026517154c4b450e617ede751d41bd",
+        strip_prefix = "zlib-cacf7f1d4e3d44d871b605da3b647f07d718623f",
     )
 
     # proto_library, cc_proto_library, and java_proto_library rules implicitly
@@ -41,9 +60,9 @@ def register_sorbet_dependencies():
     # This statement defines the @com_google_protobuf repo.
     http_archive(
         name = "com_google_protobuf",
-        urls = _github_public_urls("protocolbuffers/protobuf/archive/v3.11.4.zip"),
-        sha256 = "9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564",
-        strip_prefix = "protobuf-3.11.4",
+        urls = _github_public_urls("protocolbuffers/protobuf/archive/v3.14.0.zip"),
+        sha256 = "bf0e5070b4b99240183b29df78155eee335885e53a8af8683964579c214ad301",
+        strip_prefix = "protobuf-3.14.0",
     )
 
     http_archive(
@@ -71,11 +90,11 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
-        name = "lizard",
-        urls = _github_public_urls("inikep/lizard/archive/dda3b335e92ecd5caceccc9c577b39dd4e3c9950.zip"),
-        sha256 = "1d4e8c17d40ec56b7ecad60bcf4a9065df73d7e5997f78e75dbe5fc662ce6aa8",
-        build_file = "@com_stripe_ruby_typer//third_party:lizard.BUILD",
-        strip_prefix = "lizard-dda3b335e92ecd5caceccc9c577b39dd4e3c9950",
+        name = "lz4",
+        urls = _github_public_urls("lz4/lz4/archive/v1.9.3.zip"),
+        sha256 = "4ec935d99aa4950eadfefbd49c9fad863185ac24c32001162c44a683ef61b580",
+        build_file = "@com_stripe_ruby_typer//third_party:lz4.BUILD",
+        strip_prefix = "lz4-1.9.3",
     )
 
     http_archive(
@@ -104,10 +123,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "statsd",
-        urls = _github_public_urls("romanbsd/statsd-c-client/archive/0caa5ef05d6a786bb4695394534a7182a3c94427.zip"),
-        sha256 = "0c67e994fb809ac9b0fd2216333b0dff5592401f81dc04fb7a0c2179d6b76dca",
+        urls = _github_public_urls("romanbsd/statsd-c-client/archive/08ecca678345f157e72a1db1446facb403cbeb65.zip"),
+        sha256 = "825395556fb553383173e47dbce98165981d100587993292ec9d174ec40a7ba1",
         build_file = "@com_stripe_ruby_typer//third_party:statsd.BUILD",
-        strip_prefix = "statsd-c-client-0caa5ef05d6a786bb4695394534a7182a3c94427",
+        strip_prefix = "statsd-c-client-08ecca678345f157e72a1db1446facb403cbeb65",
     )
 
     http_archive(
@@ -127,10 +146,19 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
+        name = "xxhash",
+        urls = _github_public_urls("Cyan4973/xxHash/archive/v0.8.0.zip"),
+        sha256 = "064333c754f166837bbefefa497642a60b3f8035e54bae52eb304d3cb3ceb655",
+        build_file = "@com_stripe_ruby_typer//third_party:xxhash.BUILD",
+        strip_prefix = "xxHash-0.8.0",
+    )
+
+    http_archive(
         name = "com_google_absl",
-        urls = _github_public_urls("abseil/abseil-cpp/archive/62f05b1f57ad660e9c09e02ce7d591dcc4d0ca08.zip"),
-        sha256 = "afcab9f226ac4ca6b6b7c9ec704a995fe32a6b555d6935b0de247ae6ac6940e0",
-        strip_prefix = "abseil-cpp-62f05b1f57ad660e9c09e02ce7d591dcc4d0ca08",
+        urls = _github_public_urls("abseil/abseil-cpp/archive/b699707f0bfeae034e36cdfd909b66b0fcab696c.zip"),
+        sha256 = "29a165fcbf802f3cdb6d7a17327ede0af2c799a11f88611c005867e994b984e2",
+        strip_prefix = "abseil-cpp-b699707f0bfeae034e36cdfd909b66b0fcab696c",
+        patches = ["@com_stripe_ruby_typer//third_party:abseil-platforms.patch"],
     )
 
     http_archive(
@@ -145,13 +173,12 @@ package(default_visibility = ["//visibility:public"])
         strip_prefix = "bazel-compilation-database-0ae6349c52700f060c9a87c5ed2b04b75f94a26f",
     )
 
-    # NOTE: using this branch:
-    # https://github.com/DarkDimius/bazel-toolchain/tree/dp-srb-now
+    # NOTE: we use the sorbet branch for development to keep our changes rebasable on grailio/bazel-toolchain
     http_archive(
         name = "com_grail_bazel_toolchain",
-        urls = _github_public_urls("DarkDimius/bazel-toolchain/archive/00214e00edc69982d9236782d5d0e4847eaf8827.zip"),
-        sha256 = "d7c8f74886e59ea407bfb5a53c4d9e6cc66976c2c3dd7ec788825f9f79462949",
-        strip_prefix = "bazel-toolchain-00214e00edc69982d9236782d5d0e4847eaf8827",
+        urls = _github_public_urls("sorbet/bazel-toolchain/archive/a685e1e6bd1e7cc9a5b84f832539585bb68d8ab4.zip"),
+        sha256 = "90c59f14cada755706a38bdd0f5ad8f0402cbf766387929cfbee9c3f1b4c82d7",
+        strip_prefix = "bazel-toolchain-a685e1e6bd1e7cc9a5b84f832539585bb68d8ab4",
     )
 
     http_archive(
@@ -235,8 +262,9 @@ package(default_visibility = ["//visibility:public"])
 
     http_archive(
         name = "rules_bison",
-        urls = _github_public_urls("jmillikin/rules_bison/releases/download/v0.2/rules_bison-v0.2.tar.xz"),
-        sha256 = "6ee9b396f450ca9753c3283944f9a6015b61227f8386893fb59d593455141481",
+        urls = _github_public_urls("jmillikin/rules_bison/archive/478079b28605a38000eaf83719568d756b3383a0.zip"),
+        sha256 = "d662d200f4e2a868f6873d666402fa4d413f07ba1a433591c5f60ac601157fb9",
+        strip_prefix = "rules_bison-478079b28605a38000eaf83719568d756b3383a0",
     )
 
     http_archive(
@@ -251,28 +279,6 @@ package(default_visibility = ["//visibility:public"])
         sha256 = "1810d1ec80f3c319dcbb530443b264b9a32a449b5a5d3630076e473648bba8cc",
         build_file = "@com_stripe_ruby_typer//third_party:cpp_subprocess.BUILD",
         strip_prefix = "cpp-subprocess-9c624ce4e3423cce9f148bafbae56abfd6437ea0",
-    )
-
-    http_file(
-        name = "bundler_2_1_4",
-        urls = _rubygems_urls("bundler-2.1.4.gem"),
-        sha256 = "50014d21d6712079da4d6464de12bb93c278f87c9200d0b60ba99f32c25af489",
-    )
-
-    http_archive(
-        name = "ruby_2_5",
-        urls = _ruby_urls("2.5/ruby-2.5.8.tar.gz"),
-        sha256 = "6c0bdf07876c69811a9e7dc237c43d40b1cb6369f68e0e17953d7279b524ad9a",
-        strip_prefix = "ruby-2.5.8",
-        build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
-    )
-
-    http_archive(
-        name = "ruby_2_6",
-        urls = _ruby_urls("2.6/ruby-2.6.5.tar.gz"),
-        sha256 = "66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d",
-        strip_prefix = "ruby-2.6.5",
-        build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
     )
 
     native.new_local_repository(
@@ -290,7 +296,8 @@ package(default_visibility = ["//visibility:public"])
     http_archive(
         name = "rubyfmt",
         build_file = "@com_stripe_ruby_typer//third_party/rubyfmt:rubyfmt.BUILD",
-        urls = _github_public_urls("penelopezone/rubyfmt/releases/download/v0.5.0/rubyfmt-v0.5.0-sources.tar.gz"),
+        urls = _github_public_urls("penelopezone/rubyfmt/releases/download/v0.7.6/rubyfmt-v0.7.6-sources.tar.gz"),
+        sha256 = "3642469b42d86d82ee58f87b82f10eac9c14112a2d03291def86f0851568cd5f",
     )
 
     http_archive(
@@ -308,6 +315,64 @@ package(default_visibility = ["//visibility:public"])
         strip_prefix = "bazel-skylib-1.0.0",
         urls = _github_public_urls("bazelbuild/bazel-skylib/archive/1.0.0.tar.gz"),
     )
+
+    http_archive(
+        name = "llvm",
+
+        # llvm 12.0.0
+        urls = _github_public_urls("llvm/llvm-project/archive/0cbbf06b625605fff83d89b17c2187c7ccfcecd5.tar.gz"),
+        build_file = "@com_stripe_ruby_typer//third_party/llvm:llvm.autogenerated.BUILD",
+        sha256 = "cd4964439e7b4a2a22176ec2de70c3b67771c515eacaf88fb82a3a52fed7592a",
+        strip_prefix = "llvm-project-0cbbf06b625605fff83d89b17c2187c7ccfcecd5/llvm",
+    )
+
+    http_file(
+        name = "bundler_stripe",
+        urls = _rubygems_urls("bundler-1.17.3.gem"),
+        sha256 = "bc4bf75b548b27451aa9f443b18c46a739dd22ad79f7a5f90b485376a67dc352",
+    )
+
+    http_file(
+        name = "rubygems_update_stripe",
+        urls = _rubygems_urls("rubygems-update-3.1.2.gem"),
+        sha256 = "7bfe4e5e274191e56da8d127c79df10d9120feb8650e4bad29238f4b2773a661",
+    )
+
+    ruby_unpatched_build = "@com_stripe_ruby_typer//third_party/ruby:ruby_unpatched.BUILD"
+    ruby_patched_build = "@com_stripe_ruby_typer//third_party/ruby:ruby_patched.BUILD"
+
+    http_archive(
+        name = "sorbet_ruby_2_6",
+        urls = _ruby_urls("2.6/ruby-2.6.5.tar.gz"),
+        sha256 = "66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d",
+        strip_prefix = "ruby-2.6.5",
+        build_file = ruby_unpatched_build,
+    )
+
+    for apply_patch in [True, False]:
+        urls = _ruby_urls("2.7/ruby-2.7.2.tar.gz")
+        sha256 = "6e5706d0d4ee4e1e2f883db9d768586b4d06567debea353c796ec45e8321c3d4"
+        strip_prefix = "ruby-2.7.2"
+
+        if apply_patch:
+            http_archive(
+                name = "sorbet_ruby_2_7",
+                urls = urls,
+                sha256 = sha256,
+                strip_prefix = strip_prefix,
+                build_file = ruby_patched_build,
+                patches = ["@com_stripe_ruby_typer//third_party/ruby:sorbet_ruby_2_7.patch"],
+                patch_tool = "patch",
+                patch_args = ["-p1"],
+            )
+        else:
+            http_archive(
+                name = "sorbet_ruby_2_7_unpatched",
+                urls = urls,
+                sha256 = sha256,
+                strip_prefix = strip_prefix,
+                build_file = ruby_unpatched_build,
+            )
 
     raze_fetch_remote_crates()
 

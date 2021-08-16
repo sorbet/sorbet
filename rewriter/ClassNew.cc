@@ -10,8 +10,8 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-vector<ast::TreePtr> ClassNew::run(core::MutableContext ctx, ast::Assign *asgn) {
-    vector<ast::TreePtr> empty;
+vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *asgn) {
+    vector<ast::ExpressionPtr> empty;
     auto loc = asgn->loc;
 
     if (ctx.state.runningUnderAutogen) {
@@ -77,7 +77,7 @@ vector<ast::TreePtr> ClassNew::run(core::MutableContext ctx, ast::Assign *asgn) 
         ancestors.emplace_back(ast::MK::Constant(send->loc, core::Symbols::todo()));
     }
 
-    vector<ast::TreePtr> stats;
+    vector<ast::ExpressionPtr> stats;
     stats.emplace_back(ast::MK::Class(loc, loc, std::move(asgn->lhs), std::move(ancestors), std::move(body)));
     return stats;
 }

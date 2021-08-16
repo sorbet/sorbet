@@ -17,11 +17,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def array_of_explicit=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :array_of_explicit)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :array_of_explicit)
         <self>.instance_variable_set(:@array_of_explicit, arg0)
       end
     end
@@ -34,9 +30,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:array_of_explicit, <emptyTree>::<C Array>, :array, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :array_of_explicit)
+    ::Sorbet::Private::Static.keep_def(<self>, :array_of_explicit, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :array_of_explicit=)
+    ::Sorbet::Private::Static.keep_def(<self>, :array_of_explicit=, :normal)
 
     <self>.prop(:no_class_arg, :type, <emptyTree>::<C Array>, :immutable, true, :array, <emptyTree>::<C String>)
 

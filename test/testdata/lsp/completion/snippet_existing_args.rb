@@ -1,0 +1,20 @@
+# typed: true
+
+class Test
+  extend T::Sig
+
+  def test_method_args(foo, bar); end
+
+  sig {params(blk: T.proc.void).void}
+  def test_method_block(&blk); end
+end
+
+Test.new.test_method_a(1, 2) # error: does not exist
+#                     ^ apply-completion: [A] item: 0
+
+Test.new.test_method_b { } # error: does not exist
+#                     ^ apply-completion: [B] item: 0
+
+Test.new.test_method_b do # error: does not exist
+#                     ^ apply-completion: [C] item: 0
+end

@@ -85,7 +85,7 @@ module Opus::Types::Test
           @mod.sig {returns(Symbol)}
         end
         assert_equal(
-          "You called sig twice without declaring a method inbetween",
+          "You called sig twice without declaring a method in between",
           err.message
         )
       end
@@ -126,7 +126,45 @@ module Opus::Types::Test
                      ex.message)
       end
 
-      it "does not allocate much" do
+      it "does not allocate too much for complex sig" do
+        @mod.sig do
+          params(
+            x: String,
+            y: T::Array[Symbol],
+            z: T::Hash[Symbol, String]
+          )
+          .returns(T::Array[Symbol])
+        end
+        def @mod.foo(x, y, z:)
+          y
+        end
+        test_data = {
+          x: "foo",
+          y: Array.new(50) do |i|
+            "foo_#{i}".to_sym
+          end,
+          z: Array.new(50) do |i|
+            ["bar_#{i}".to_sym, i.to_s]
+          end.to_h,
+        }.freeze
+
+        Critic::Extensions::TypeExt.unpatch_types
+        @mod.foo(test_data[:x], test_data[:y], z: test_data[:z]) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way
+        @mod.foo(test_data[:x], test_data[:y], z: test_data[:z]) # warmup, second run runs in real mode
+        before = GC.stat(:total_allocated_objects)
+        @mod.foo(test_data[:x], test_data[:y], z: test_data[:z])
+        allocated = GC.stat(:total_allocated_objects) - before
+        Critic::Extensions::TypeExt.patch_types
+        if Gem::Version.new('2.6') <= Gem::Version.new(RUBY_VERSION)
+          assert_equal(5, allocated)
+        else
+          assert_equal(6, allocated)
+        end
+        # see https://git.corp.stripe.com/stripe-internal/pay-server/pull/103670 for where 4 of those allocations come from
+        # the others come from test harness in this test.
+      end
+
+      it "allocates little for medium-complexity sig" do
         @mod.sig do
           params(
             x: String,
@@ -138,7 +176,7 @@ module Opus::Types::Test
         def @mod.foo(x, y, z)
           y
         end
-        TEST_DATA = {
+        test_data = {
           x: "foo",
           y: Array.new(50) do |i|
             "foo_#{i}".to_sym
@@ -149,19 +187,14 @@ module Opus::Types::Test
         }.freeze
 
         Critic::Extensions::TypeExt.unpatch_types
-        @mod.foo(TEST_DATA[:x], TEST_DATA[:y], TEST_DATA[:z]) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way
-        @mod.foo(TEST_DATA[:x], TEST_DATA[:y], TEST_DATA[:z]) # warmup, second run runs in real mode
+        @mod.foo(test_data[:x], test_data[:y], test_data[:z]) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way
+        @mod.foo(test_data[:x], test_data[:y], test_data[:z]) # warmup, second run runs in real mode
         before = GC.stat(:total_allocated_objects)
-        @mod.foo(TEST_DATA[:x], TEST_DATA[:y], TEST_DATA[:z])
+        @mod.foo(test_data[:x], test_data[:y], test_data[:z])
         allocated = GC.stat(:total_allocated_objects) - before
         Critic::Extensions::TypeExt.patch_types
-        if Gem::Version.new('2.6') <= Gem::Version.new(RUBY_VERSION)
-          assert_equal(3, allocated)
-        else
-          assert_equal(4, allocated)
-        end
-        # see https://git.corp.stripe.com/stripe-internal/pay-server/pull/103670 for where 4 of those allocations come from
-        # the others come from test harness in this test.
+        expected_allocations = T::Configuration::AT_LEAST_RUBY_2_7 ? 1 : 2
+        assert_equal(expected_allocations, allocated)
       end
 
       it "allocates little for simple sig" do
@@ -181,11 +214,23 @@ module Opus::Types::Test
         before = GC.stat(:total_allocated_objects)
         @mod.foo("foo", 1)
         allocated = GC.stat(:total_allocated_objects) - before
-        assert_equal(2, allocated) # dmitry: for some reason, when run locally this numeber is 0, in CI it's 2. IDK why.
+
+        expected_allocations = T::Configuration::AT_LEAST_RUBY_2_7 ? 1 : 2
+        assert_equal(expected_allocations, allocated) # dmitry: for some reason, when run locally this numeber is 0, in CI it's 2. IDK why.
       end
     end
 
     describe "validation" do
+      it "accepts built-in method overrides" do
+        klass = Class.new do
+          extend T::Sig
+          sig {params(m: Symbol, include_private: T::Boolean).returns(T::Boolean)}
+          def respond_to_missing?(m, include_private=false); true; end
+        end
+
+        klass.new.respond_to?(:foo)
+      end
+
       it "raises an error when the return value is the wrong type" do
         @mod.sig {returns(String)}
         def @mod.foo
@@ -510,6 +555,52 @@ module Opus::Types::Test
 
         lines = err.message.split("\n")
         assert_equal("The declaration for `bar` has arguments with duplicate names", lines[0])
+      end
+    end
+
+    describe 'secretly-defined methods with sigs' do
+      # The behavior of methods defined via this interface is special: we expect
+      # that the methods themselves will perform argument validation.  The sig
+      # itself should only be registered to the method so that the rest of sorbet-runtime
+      # continues to work "normally".
+      it 'should not raise errors on return type mismatch' do
+        c = Class.new do
+          extend T::Sig
+
+          built_sig = T::Private::Methods._declare_sig(self) do
+            returns(Integer)
+          end
+
+          T::Private::Methods._with_declared_signature(self, built_sig) do
+            def bad_return
+              "ok"
+            end
+          end
+        end
+        assert_equal("ok", c.new.bad_return)
+        # Force the sig block to be actually run.
+        T::Utils.signature_for_method(c.instance_method(:bad_return))
+        assert_equal("ok", c.new.bad_return)
+      end
+
+      it 'should not raise errors on argument type mismatch' do
+        c = Class.new do
+          extend T::Sig
+
+          built_sig = T::Private::Methods._declare_sig(self) do
+            params(x: Integer).returns(Symbol)
+          end
+
+          T::Private::Methods._with_declared_signature(self, built_sig) do
+            def bad_arg(x)
+              :ok
+            end
+          end
+        end
+        assert_equal(:ok, c.new.bad_arg("wrong arg type"))
+        # Force the sig block to be actually run.
+        T::Utils.signature_for_method(c.instance_method(:bad_arg))
+        assert_equal(:ok, c.new.bad_arg("wrong arg type"))
       end
     end
 

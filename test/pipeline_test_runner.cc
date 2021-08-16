@@ -27,6 +27,7 @@
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "main/autogen/autogen.h"
+#include "main/autogen/crc_builder.h"
 #include "namer/namer.h"
 #include "packager/packager.h"
 #include "parser/parser.h"
@@ -56,7 +57,7 @@ string singleTest;
 class CFGCollectorAndTyper {
 public:
     vector<unique_ptr<cfg::CFG>> cfgs;
-    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
         if (m.symbol.data(ctx)->isOverloaded()) {
@@ -75,35 +76,21 @@ public:
     }
 };
 
-UnorderedSet<string> knownExpectations = {"parse-tree",
-                                          "parse-tree-json",
-                                          "parse-tree-whitequark",
-                                          "desugar-tree",
-                                          "desugar-tree-raw",
-                                          "rewrite-tree",
-                                          "rewrite-tree-raw",
-                                          "index-tree",
-                                          "index-tree-raw",
-                                          "symbol-table",
-                                          "symbol-table-raw",
-                                          "name-tree",
-                                          "name-tree-raw",
-                                          "resolve-tree",
-                                          "resolve-tree-raw",
-                                          "flatten-tree",
-                                          "flatten-tree-raw",
-                                          "cfg",
-                                          "cfg-raw",
-                                          "autogen",
-                                          "document-symbols",
-                                          "package-tree",
-                                          "document-formatting-rubyfmt"};
+UnorderedSet<string> knownExpectations = {"parse-tree",       "parse-tree-json",  "parse-tree-whitequark",
+                                          "desugar-tree",     "desugar-tree-raw", "rewrite-tree",
+                                          "rewrite-tree-raw", "index-tree",       "index-tree-raw",
+                                          "symbol-table",     "symbol-table-raw", "name-tree",
+                                          "name-tree-raw",    "resolve-tree",     "resolve-tree-raw",
+                                          "flatten-tree",     "flatten-tree-raw", "cfg",
+                                          "cfg-raw",          "cfg-text",         "autogen",
+                                          "document-symbols", "package-tree",     "document-formatting-rubyfmt",
+                                          "autocorrects"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
-    auto saved = core::serialize::Serializer::storeFile(savedFile, expr);
-    auto restored = core::serialize::Serializer::loadFile(gs, expr.file, saved.data());
-    return {move(restored.tree), expr.file};
+    auto saved = core::serialize::Serializer::storeTree(savedFile, expr);
+    auto restored = core::serialize::Serializer::loadTree(gs, savedFile, saved.data());
+    return {move(restored), expr.file};
 }
 
 /** Converts a Sorbet Error object into an equivalent LSP Diagnostic object. */
@@ -194,20 +181,33 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     auto workers = WorkerPool::create(0, gs->tracer());
 
     auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+
+    gs->requiresAncestorEnabled =
+        BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
+
     if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
         gs->initEmpty();
     } else {
         core::serialize::Serializer::loadGlobalState(*gs, getNameTablePayload);
     }
+
+    if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
+        gs->suggestUnsafe = "T.unsafe";
+    }
+
     // Parser
     vector<core::FileRef> files;
     constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
+    constexpr string_view packageFileName = "__package.rb"sv;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
 
         for (auto &sourceFile : test.sourceFiles) {
             auto fref = gs->enterFile(test.sourceFileContents[test.folder + sourceFile]);
             if (FileOps::getFileName(sourceFile) == whitelistedTypedNoneTest) {
+                fref.data(*gs).strictLevel = core::StrictLevel::False;
+            }
+            if (FileOps::getFileName(sourceFile) == packageFileName && fref.data(*gs).source().empty()) {
                 fref.data(*gs).strictLevel = core::StrictLevel::False;
             }
             files.emplace_back(fref);
@@ -217,7 +217,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     ExpectationHandler handler(test, errorQueue, errorCollector);
 
     for (auto file : files) {
-        if (FileOps::getFileName(file.data(*gs).path()) != whitelistedTypedNoneTest &&
+        auto fileName = FileOps::getFileName(file.data(*gs).path());
+        if (fileName != whitelistedTypedNoneTest && (fileName != packageFileName || !file.data(*gs).source().empty()) &&
             file.data(*gs).source().find("# typed:") == string::npos) {
             ADD_FAIL_CHECK_AT(file.data(*gs).path().data(), 1, "Add a `# typed: strict` line to the top of this file");
         }
@@ -314,15 +315,19 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             *gs, "autogen",
             [&]() {
                 stringstream payload;
+                auto crcBuilder = autogen::CRCBuilder::create();
                 for (auto &tree : trees) {
                     core::Context ctx(*gs, core::Symbols::root(), tree.file);
-                    auto pf = autogen::Autogen::generate(ctx, move(tree));
+                    auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder);
                     tree = move(pf.tree);
                     payload << pf.toString(ctx);
                 }
                 return payload.str();
             },
             false);
+
+        handler.checkExpectations();
+
         // Autogen forces you to to put --stop-after=namer so lets not run
         // anything else
         return;
@@ -462,6 +467,47 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
         ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
     }
+
+    // Check autocorrects
+    {
+        auto autocorrects = vector<core::AutocorrectSuggestion>{};
+        for (const auto &error : handler.errors) {
+            if (error->isSilenced) {
+                continue;
+            }
+
+            for (const auto &autocorrect : error->autocorrects) {
+                autocorrects.push_back(autocorrect);
+            }
+        }
+
+        auto fs = OSFileSystem{};
+        auto applied = core::AutocorrectSuggestion::apply(*gs, fs, autocorrects);
+
+        auto toWrite = vector<pair<core::FileRef, string>>{};
+        for (const auto &[file, editedSource] : applied) {
+            toWrite.emplace_back(file, move(editedSource));
+        }
+
+        fast_sort(toWrite, [&](const auto &lhs, const auto &rhs) {
+            return lhs.first.data(*gs).path() < rhs.first.data(*gs).path();
+        });
+
+        auto addNewline = false;
+        handler.addObserved(
+            *gs, "autocorrects",
+            [&]() {
+                fmt::memory_buffer buf;
+                for (const auto &[file, editedSource] : toWrite) {
+                    fmt::format_to(std::back_inserter(buf), "# -- {} --\n{}# ------------------------------\n",
+                                   core::File::censorFilePathForSnapshotTests(file.data(*gs).path()), editedSource);
+                }
+                return to_string(buf);
+            },
+            addNewline);
+    }
+
+    handler.checkExpectations();
 
     // Allow later phases to have errors that we didn't test for
     errorQueue->flushAllErrors(*gs);

@@ -3,12 +3,13 @@ id: type-assertions
 title: Type Assertions
 ---
 
-There are four ways to assert the types of expressions in Sorbet:
+There are five ways to assert the types of expressions in Sorbet:
 
 - `T.let(expr, Type)`
 - `T.cast(expr, Type)`
 - `T.must(expr)`
 - `T.assert_type!(expr, Type)`
+- `T.bind(self, Type)`
 
 > There is also `T.unsafe` which is not a "type assertion" so much as an
 > [Escape Hatch](troubleshooting.md#escape-hatches).
@@ -157,6 +158,43 @@ end
   → View on sorbet.run
 </a>
 
+## `T.bind`
+
+`T.bind` works like `T.cast`, except with special syntactic sugar for `self`.
+Like `T.cast`, it is unchecked statically but checked at runtime. Unlike
+`T.cast`, it does not require assigning the result to a variable.
+
+Sometimes we would like to use `T.cast` to ascribe a type for `self`. One option
+is to assign the cast result to a variable, perhaps called `this`:
+
+```ruby
+this = T.cast(self, MyClass)
+this.method_on_my_class
+```
+
+This is annoying:
+
+- It requires replacing `self` with `this` everywhere it's used.
+- It prevents calling private methods.
+
+If we tried to clean this up with something like `self = T.cast(self, ...)`, the
+Ruby VM rejects our code with a syntax error: `self` is not a variable, and
+can't be used as the name of one.
+
+Thus, Sorbet provides `T.bind` for this specific usecase instead:
+
+```ruby
+T.bind(self, MyClass)
+self.method_on_my_class
+```
+
+`T.bind` is the only type assertion that does not require assigning the
+assertion result into a variable, and it can only be used on `self`.
+
+`T.bind` can be used anywhere `self` is used (i.e., methods, blocks, lambdas,
+etc.), though it is most usually useful within blocks. See
+[Blocks, Procs, and Lambda Types](procs.md) for more real-world usage examples.
+
 ## Comparison of type assertions
 
 Here are some other ways to think of the behavior of the individual type
@@ -197,3 +235,17 @@ assertions:
   ```ruby
   T.must(nil_or_string)
   ```
+
+- `T.bind` is like `T.cast`, but only for `self`,
+
+  ```ruby
+  T.bind(self, String)
+  ```
+
+  behaves like
+
+  ```ruby
+  self = T.cast(self, String)
+  ```
+
+  if it were valid in Ruby to assign to `self`.

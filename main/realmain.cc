@@ -9,6 +9,7 @@
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/autoloader.h"
+#include "main/autogen/crc_builder.h"
 #include "main/autogen/packages.h"
 #include "main/autogen/subclasses.h"
 #include "main/lsp/LSPInput.h"
@@ -28,6 +29,7 @@
 #include "core/errors/errors.h"
 #include "core/lsp/QueryResponse.h"
 #include "core/serialize/serialize.h"
+#include "hashing/hashing.h"
 #include "main/cache/cache.h"
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
@@ -213,11 +215,13 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
 
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
+    vector<AutogenResult::Serialized> merged(indexed.size());
     for (int i = 0; i < indexed.size(); ++i) {
         fileq->push(move(i), 1);
     }
+    auto crcBuilder = autogen::CRCBuilder::create();
 
-    workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, fileq, resultq]() {
+    workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, crcBuilder, fileq, resultq]() {
         AutogenResult out;
         int n = 0;
         {
@@ -232,7 +236,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 }
 
                 core::Context ctx(gs, core::Symbols::root(), tree.file);
-                auto pf = autogen::Autogen::generate(ctx, move(tree));
+                auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder);
                 tree = move(pf.tree);
 
                 AutogenResult::Serialized serialized;
@@ -269,27 +273,30 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
 
     autogen::DefTree root;
     AutogenResult out;
-    vector<pair<int, AutogenResult::Serialized>> merged;
-    for (auto res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger); !res.done();
-         res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger)) {
+    for (auto res = resultq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), *logger); !res.done();
+         res = resultq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), *logger)) {
         if (!res.gotItem()) {
             continue;
         }
         counterConsume(move(out.counters));
-        merged.insert(merged.end(), make_move_iterator(out.prints.begin()), make_move_iterator(out.prints.end()));
+        for (auto &print : out.prints) {
+            merged[print.first] = move(print.second);
+        }
         if (opts.print.AutogenAutoloader.enabled) {
             Timer timeit(logger, "autogenAutoloaderDefTreeMerge");
             root = autogen::DefTreeBuilder::merge(gs, move(root), move(*out.defTree));
         }
     }
-    fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
 
-    for (auto &elem : merged) {
-        if (opts.print.Autogen.enabled) {
-            opts.print.Autogen.print(elem.second.strval);
-        }
-        if (opts.print.AutogenMsgPack.enabled) {
-            opts.print.AutogenMsgPack.print(elem.second.msgpack);
+    {
+        Timer timeit(logger, "autogenDependencyDBPrint");
+        for (auto &elem : merged) {
+            if (opts.print.Autogen.enabled) {
+                opts.print.Autogen.print(elem.strval);
+            }
+            if (opts.print.AutogenMsgPack.enabled) {
+                opts.print.AutogenMsgPack.print(elem.msgpack);
+            }
         }
     }
     if (opts.print.AutogenAutoloader.enabled) {
@@ -299,7 +306,8 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         }
         {
             Timer timeit(logger, "autogenAutoloaderWrite");
-            autogen::AutoloadWriter::writeAutoloads(gs, autoloaderCfg, opts.print.AutogenAutoloader.outputPath, root);
+            autogen::AutoloadWriter::writeAutoloads(gs, workers, autoloaderCfg, opts.print.AutogenAutoloader.outputPath,
+                                                    root);
         }
     }
 
@@ -307,7 +315,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         Timer timeit(logger, "autogenClasslistPrint");
         vector<string> mergedClasslist;
         for (auto &el : merged) {
-            auto &v = el.second.classlist;
+            auto &v = el.classlist;
             mergedClasslist.insert(mergedClasslist.end(), make_move_iterator(v.begin()), make_move_iterator(v.end()));
         }
         fast_sort(mergedClasslist);
@@ -320,12 +328,12 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         // Merge the {Parent: Set{Child1, Child2}} maps from each thread
         autogen::Subclasses::Map childMap;
         for (const auto &el : merged) {
-            if (!el.second.subclasses) {
+            if (!el.subclasses) {
                 // File doesn't define any Child < Parent relationships
                 continue;
             }
 
-            for (const auto &[parentName, children] : *el.second.subclasses) {
+            for (const auto &[parentName, children] : *el.subclasses) {
                 if (!parentName.empty()) {
                     childMap[parentName].entries.insert(children.entries.begin(), children.entries.end());
                     childMap[parentName].classKind = children.classKind;
@@ -341,6 +349,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     }
 
     if (opts.autoloaderConfig.packagedAutoloader) {
+        Timer timeit(logger, "autogenPackageAutoloads");
         autogen::AutoloadWriter::writePackageAutoloads(gs, autoloaderCfg, opts.print.AutogenAutoloader.outputPath,
                                                        packageq);
     }
@@ -441,6 +450,8 @@ int realmain(int argc, char *argv[]) {
     gs->semanticExtensions = move(extensions);
     vector<ast::ParsedFile> indexed;
 
+    gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
+
     logger->trace("building initial global state");
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(opts);
     payload::createInitialGlobalState(gs, opts, kvstore);
@@ -463,21 +474,19 @@ int realmain(int argc, char *argv[]) {
                           opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
                           opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
                           opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
-    for (auto code : opts.errorCodeWhiteList) {
+    for (auto code : opts.isolateErrorCode) {
         gs->onlyShowErrorClass(code);
     }
-    for (auto code : opts.errorCodeBlackList) {
+    for (auto code : opts.suppressErrorCode) {
         gs->suppressErrorClass(code);
     }
-    gs->ruby3KeywordArgs = opts.ruby3KeywordArgs;
-    for (auto &plugin : opts.dslPluginTriggers) {
-        core::UnfreezeNameTable nameTableAccess(*gs);
-        gs->addDslPlugin(plugin.first, plugin.second);
+    if (opts.noErrorSections) {
+        gs->includeErrorSections = false;
     }
-    gs->dslRubyExtraArgs = opts.dslRubyExtraArgs;
+    gs->ruby3KeywordArgs = opts.ruby3KeywordArgs;
     if (!opts.stripeMode) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
-        if (opts.errorCodeWhiteList.empty()) {
+        if (opts.isolateErrorCode.empty()) {
             gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
         }
     }
@@ -488,6 +497,7 @@ int realmain(int argc, char *argv[]) {
             gs->ignoreErrorClassForSuggestTyped(core::errors::Namer::MultipleBehaviorDefs.code);
         }
     }
+    gs->suggestUnsafe = opts.suggestUnsafe;
 
     logger->trace("done building initial global state");
 
@@ -513,6 +523,11 @@ int realmain(int argc, char *argv[]) {
         vector<core::FileRef> inputFiles;
         logger->trace("Files: ");
 
+        if (!opts.storeState.empty()) {
+            // Compute file hashes for payload files (which aren't part of inputFiles) for LSP
+            hashing::Hashing::computeFileHashes(gs->getFiles(), *logger, *workers, opts);
+        }
+
         { inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames); }
 
         {
@@ -532,7 +547,12 @@ int realmain(int argc, char *argv[]) {
         }
 
         {
-            indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore);
+            if (!opts.storeState.empty() || opts.forceHashing) {
+                // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
+                indexed = hashing::Hashing::indexAndComputeFileHashes(gs, opts, *logger, inputFiles, *workers, kvstore);
+            } else {
+                indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore);
+            }
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
@@ -616,8 +636,6 @@ int realmain(int argc, char *argv[]) {
 
         if (!opts.storeState.empty()) {
             gs->markAsPayload();
-            // Store file hashes for LSP.
-            pipeline::computeFileHashes(gs->getFiles(), *logger, *workers);
             FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
         }
 
@@ -627,8 +645,7 @@ int realmain(int argc, char *argv[]) {
             vector<pair<string, int>> withNames;
             long sum = 0;
             for (auto e : untypedSources) {
-                withNames.emplace_back(core::SymbolRef::fromRaw(e.first).dataAllowingNone(*gs)->showFullName(*gs),
-                                       e.second);
+                withNames.emplace_back(core::SymbolRef::fromRaw(e.first).showFullName(*gs), e.second);
                 sum += e.second;
             }
             fast_sort(withNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second > rhs.second; });

@@ -139,8 +139,8 @@ def main
       # ^^^^^^ hover: The docs for BigFoo
 
   foo = BigFoo.new
-  #            ^^^ hover: sig {params(args: T.untyped).returns(BigFoo)}
-  #            ^^^ hover: def new(*args); end
+  #            ^^^ hover: sig {params(args: T.untyped, blk: T.untyped).returns(BigFoo)}
+  #            ^^^ hover: def new(*args, &blk); end
   hoo = BigFoo::LittleFoo1.new
                          # ^^^ hover: sig {returns(BigFoo::LittleFoo1)}
   raise "error message"

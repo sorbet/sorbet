@@ -1,23 +1,23 @@
 # typed: __STDLIB_INTERNAL
 
-# ## [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html)
+# ## [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html)
 #
-# A subclass of [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html) that
+# A subclass of [`Date`](https://docs.ruby-lang.org/en/2.7.0/Date.html) that
 # easily handles date, hour, minute, second, and offset.
 #
-# [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) does not
+# [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) does not
 # consider any leap seconds, does not track any summer time rules.
 #
-# A [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) object is
+# A [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) object is
 # created with
-# [`DateTime::new`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html#method-c-new),
-# [`DateTime::jd`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html#method-c-jd),
-# [`DateTime::ordinal`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html#method-c-ordinal),
-# [`DateTime::commercial`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html#method-c-commercial),
-# [`DateTime::parse`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html#method-c-parse),
-# [`DateTime::strptime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html#method-c-strptime),
-# [`DateTime::now`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html#method-c-now),
-# [`Time#to_datetime`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-to_datetime),
+# [`DateTime::new`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html#method-c-new),
+# [`DateTime::jd`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html#method-c-jd),
+# [`DateTime::ordinal`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html#method-c-ordinal),
+# [`DateTime::commercial`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html#method-c-commercial),
+# [`DateTime::parse`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html#method-c-parse),
+# [`DateTime::strptime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html#method-c-strptime),
+# [`DateTime::now`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html#method-c-now),
+# [`Time#to_datetime`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-to_datetime),
 # etc.
 #
 # ```ruby
@@ -57,7 +57,7 @@
 # day number, which should be 2298874 to 2426355 or negative/positive infinity.
 # The default value is `Date::ITALY` (2299161=1582-10-15).
 #
-# A [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) object has
+# A [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) object has
 # various methods. See each reference.
 #
 # ```ruby
@@ -78,7 +78,7 @@
 #                     #=> true
 # ```
 #
-# ### When should you use [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) and when should you use [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html)?
+# ### When should you use [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) and when should you use [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html)?
 #
 # It's a common misconception that [William
 # Shakespeare](http://en.wikipedia.org/wiki/William_Shakespeare) and [Miguel de
@@ -90,12 +90,12 @@
 # wouldn't until
 # [1752](http://en.wikipedia.org/wiki/Calendar_(New_Style)_Act_1750)) their
 # deaths are actually 10 days apart. Since Ruby's
-# [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) class implements a
+# [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) class implements a
 # [proleptic Gregorian
 # calendar](http://en.wikipedia.org/wiki/Proleptic_Gregorian_calendar) and has
 # no concept of calendar reform there's no way to express this with
-# [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) objects. This is where
-# [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) steps in:
+# [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) objects. This is where
+# [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) steps in:
 #
 # ```ruby
 # shakespeare = DateTime.iso8601('1616-04-23', Date::ENGLAND)
@@ -117,7 +117,7 @@
 # This shows that in fact they died 10 days apart (in reality 11 days since
 # Cervantes died a day earlier but was buried on the 23rd). We can see the
 # actual date of Shakespeare's death by using the
-# [`gregorian`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-i-gregorian)
+# [`gregorian`](https://docs.ruby-lang.org/en/2.7.0/Date.html#method-i-gregorian)
 # method to convert it:
 #
 # ```ruby
@@ -150,13 +150,13 @@
 # 23rd April.
 #
 # So when should you use
-# [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) in Ruby and
-# when should you use [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html)?
+# [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) in Ruby and
+# when should you use [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html)?
 # Almost certainly you'll want to use
-# [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) since your app is
+# [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) since your app is
 # probably dealing with current dates and times. However, if you need to deal
 # with dates and times in a historical context you'll want to use
-# [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) to avoid
+# [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) to avoid
 # making the same mistakes as UNESCO. If you also have to deal with timezones
 # then best of luck - just bear in mind that you'll probably be dealing with
 # [local solar times](http://en.wikipedia.org/wiki/Solar_time), since it wasn't
@@ -420,7 +420,7 @@ class DateTime < Date
   # ```
   #
   # See also strftime(3) and
-  # [`::strptime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html#method-c-strptime).
+  # [`::strptime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html#method-c-strptime).
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def strftime(*arg0); end
 
@@ -506,12 +506,12 @@ class DateTime < Date
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def new_offset(*arg0); end
 
-  # Returns a [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) object
+  # Returns a [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) object
   # which denotes self.
   sig {returns(Time)}
   def to_time(); end
 
-  # Returns a [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html) object
+  # Returns a [`Date`](https://docs.ruby-lang.org/en/2.7.0/Date.html) object
   # which denotes self.
   sig {returns(Date)}
   def to_date(); end
@@ -535,7 +535,7 @@ class DateTime < Date
   end
   def localize(locale=T.unsafe(nil), options=T.unsafe(nil)); end
 
-  # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html)
+  # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html)
   # object denoting the present time.
   #
   # ```ruby
@@ -545,7 +545,7 @@ class DateTime < Date
   def self.now(*arg0); end
 
   # Parses the given representation of date and time, and creates a
-  # [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) object. This
+  # [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) object. This
   # method does not function as a validator.
   #
   # If the optional second argument is true and the detected year is in the
@@ -562,7 +562,7 @@ class DateTime < Date
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def self.parse(*arg0); end
 
-  # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html)
+  # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html)
   # object denoting the given chronological Julian day number.
   #
   # ```ruby
@@ -574,7 +574,7 @@ class DateTime < Date
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def self.jd(*arg0); end
 
-  # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html)
+  # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html)
   # object denoting the given ordinal date.
   #
   # ```ruby
@@ -587,7 +587,7 @@ class DateTime < Date
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def self.ordinal(*arg0); end
 
-  # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html)
+  # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html)
   # object denoting the given calendar date.
   #
   # ```ruby
@@ -600,7 +600,7 @@ class DateTime < Date
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def self.civil(*arg0); end
 
-  # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html)
+  # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html)
   # object denoting the given week date.
   #
   # ```ruby
@@ -617,7 +617,7 @@ class DateTime < Date
   # specification of flags and width unlike strftime.
   #
   # See also strptime(3) and
-  # [`strftime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html#method-i-strftime).
+  # [`strftime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html#method-i-strftime).
   sig do
     params(
       arg0: String,
@@ -629,7 +629,7 @@ class DateTime < Date
 
   # Parses the given representation of date and time with the given template,
   # and creates a
-  # [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) object.
+  # [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) object.
   # strptime does not support specification of flags and width unlike strftime.
   #
   # ```ruby
@@ -652,12 +652,12 @@ class DateTime < Date
   # ```
   #
   # See also strptime(3) and
-  # [`strftime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html#method-i-strftime).
+  # [`strftime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html#method-i-strftime).
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def self.strptime(*arg0); end
 
   # Creates a new
-  # [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) object by
+  # [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) object by
   # parsing from a string according to some typical ISO 8601 formats.
   #
   # ```ruby
@@ -672,7 +672,7 @@ class DateTime < Date
   def self.iso8601(*arg0); end
 
   # Creates a new
-  # [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) object by
+  # [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) object by
   # parsing from a string according to some typical RFC 3339 formats.
   #
   # ```ruby
@@ -683,9 +683,9 @@ class DateTime < Date
   def self.rfc3339(*arg0); end
 
   # Creates a new
-  # [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) object by
+  # [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) object by
   # parsing from a string according to some typical
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) Schema formats.
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) Schema formats.
   #
   # ```ruby
   # DateTime.xmlschema('2001-02-03T04:05:06+07:00')
@@ -695,7 +695,7 @@ class DateTime < Date
   def self.xmlschema(*arg0); end
 
   # Creates a new
-  # [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) object by
+  # [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) object by
   # parsing from a string according to some typical RFC 2822 formats.
   #
   # ```ruby
@@ -706,7 +706,7 @@ class DateTime < Date
   def self.rfc2822(*arg0); end
 
   # Creates a new
-  # [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) object by
+  # [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) object by
   # parsing from a string according to some typical RFC 2822 formats.
   #
   # ```ruby
@@ -717,7 +717,7 @@ class DateTime < Date
   def self.rfc822(*arg0); end
 
   # Creates a new
-  # [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) object by
+  # [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) object by
   # parsing from a string according to some RFC 2616 format.
   #
   # ```ruby
@@ -728,7 +728,7 @@ class DateTime < Date
   def self.httpdate(*arg0); end
 
   # Creates a new
-  # [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) object by
+  # [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) object by
   # parsing from a string according to some typical JIS X 0301 formats.
   #
   # ```ruby

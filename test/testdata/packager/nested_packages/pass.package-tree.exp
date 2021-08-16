@@ -2,18 +2,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Package><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C Package>::<C Subpackage>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Package_Package>::<C PackageClass>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>)
   end
 
-  module <emptyTree>::<C <PackageRegistry>>::<C Package_Package><<C <todo sym>>> < ()
-    module <emptyTree>::<C Package>::<C Subpackage><<C <todo sym>>> < ()
-      <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package>::<C SubpackageClass>
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Package_Package$1>::<C Package>::<C Subpackage><<C <todo sym>>> < ()
+      <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>::<C SubpackageClass>
     end
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Package_Package><<C <todo sym>>> < ()
-    class <emptyTree>::<C PackageClass><<C <todo sym>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1><<C <todo sym>>> < ()
+    class <emptyTree>::<C Package>::<C PackageClass><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.returns(<emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass>)
       end
@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_self_def(<self>, :subpkg_class)
+      ::Sorbet::Private::Static.keep_self_def(<self>, :subpkg_class, :normal)
     end
   end
 end
@@ -32,18 +32,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Package>::<C Subpackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C Package>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package>::<C SubpackageClass>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>::<C SubpackageClass>)
   end
 
-  module <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package><<C <todo sym>>> < ()
-    module <emptyTree>::<C Package><<C <todo sym>>> < ()
-      <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package>::<C PackageClass>
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Package_Subpackage_Package$1>::<C Package><<C <todo sym>>> < ()
+      <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>
     end
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package><<C <todo sym>>> < ()
-    class <emptyTree>::<C SubpackageClass><<C <todo sym>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1><<C <todo sym>>> < ()
+    class <emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.returns(<emptyTree>::<C Package>::<C PackageClass>)
       end
@@ -54,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_self_def(<self>, :package_class)
+      ::Sorbet::Private::Static.keep_self_def(<self>, :package_class, :normal)
     end
   end
 end

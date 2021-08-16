@@ -1,2 +1,0 @@
-triggers:
-  bad: test/cli/subprocess-plugin/bad_plugin.rb

@@ -1,8 +1,10 @@
 # typed: __STDLIB_INTERNAL
 
-# A `Regexp` holds a regular expression, used to match a pattern against
-# strings. Regexps are created using the `/.../` and `%r{...}` literals, and by
-# the `Regexp::new` constructor.
+# A [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) holds a regular
+# expression, used to match a pattern against strings. Regexps are created using
+# the `/.../` and `%r{...}` literals, and by the
+# [`Regexp::new`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-new)
+# constructor.
 #
 # Regular expressions (*regexp*s) are patterns which describe the contents of a
 # string. They're used for testing whether a string contains a given pattern, or
@@ -34,10 +36,10 @@
 # Specifically, `/st/` requires that the string contains the letter *s* followed
 # by the letter *t*, so it matches *haystack*, also.
 #
-# ## `=~` and [`Regexp#match`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-i-match)
+# ## `=~` and [`Regexp#match`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-match)
 #
 # Pattern matching may be achieved by using `=~` operator or
-# [`Regexp#match`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-i-match)
+# [`Regexp#match`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-match)
 # method.
 #
 # ### `=~` operator
@@ -45,10 +47,10 @@
 # `=~` is Ruby's basic pattern-matching operator. When one operand is a regular
 # expression and the other is a string then the regular expression is used as a
 # pattern to match against the string. (This operator is equivalently defined by
-# [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) and
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) so the order of
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) and
-# [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) do not matter.
+# [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) and
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) so the order of
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) and
+# [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) do not matter.
 # Other classes may have different implementations of `=~`.)  If a match is
 # found, the operator returns index of first match in string, otherwise it
 # returns `nil`.
@@ -61,18 +63,18 @@
 # ```
 #
 # Using `=~` operator with a
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) and
-# [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) the `$~` global
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) and
+# [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) the `$~` global
 # variable is set after a successful match. `$~` holds a
-# [`MatchData`](https://docs.ruby-lang.org/en/2.6.0/MatchData.html) object.
-# [`Regexp.last_match`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-c-last_match)
+# [`MatchData`](https://docs.ruby-lang.org/en/2.7.0/MatchData.html) object.
+# [`Regexp.last_match`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-last_match)
 # is equivalent to `$~`.
 #
-# ### [`Regexp#match`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-i-match) method
+# ### [`Regexp#match`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-match) method
 #
-# The [`match`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-i-match)
+# The [`match`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-match)
 # method returns a
-# [`MatchData`](https://docs.ruby-lang.org/en/2.6.0/MatchData.html) object:
+# [`MatchData`](https://docs.ruby-lang.org/en/2.7.0/MatchData.html) object:
 #
 # ```ruby
 # /st/.match('haystack')   #=> #<MatchData "st">
@@ -90,8 +92,9 @@
 # /a\\\\b/.match('a\\\\b')                    #=> #<MatchData "a\\b">
 # ```
 #
-# Patterns behave like double-quoted strings so can contain the same backslash
-# escapes.
+# Patterns behave like double-quoted strings and can contain the same backslash
+# escapes (the meaning of `\s` is different, however, see
+# [below](#label-Character+Classes)).
 #
 # ```ruby
 # /\s\u{6771 4eac 90fd}/.match("Go to 東京都")
@@ -164,6 +167,8 @@
 # *   `/\H/` - A non-hexdigit character (`[^0-9a-fA-F]`)
 # *   `/\s/` - A whitespace character: `/[ \t\r\n\f\v]/`
 # *   `/\S/` - A non-whitespace character: `/[^ \t\r\n\f\v]/`
+# *   `/\R/` - A linebreak: `\n`, `\v`, `\f`, `\r` `\u0085` (NEXT LINE),
+#     `\u2028` (LINE SEPARATOR), `\u2029` (PARAGRAPH SEPARATOR) or `\r\n`.
 #
 #
 # POSIX *bracket expressions* are also similar to character classes. They
@@ -226,8 +231,11 @@
 #
 # Repetition is *greedy* by default: as many occurrences as possible are matched
 # while still allowing the overall match to succeed. By contrast, *lazy*
-# matching makes the minimal amount of matches necessary for overall success. A
-# greedy metacharacter can be made lazy by following it with `?`.
+# matching makes the minimal amount of matches necessary for overall success.
+# Most greedy metacharacters can be made lazy by following them with `?`. For
+# the `{n}` pattern, because it specifies an exact number of characters to match
+# and not a variable number of characters, the `?` metacharacter instead makes
+# the repeated pattern optional.
 #
 # Both patterns below match the string. The first uses a greedy quantifier so
 # '.+' matches '<a><b>'; the second uses a lazy quantifier so '.+?' matches
@@ -258,8 +266,8 @@
 #     #=> #<MatchData "cat sat in" 1:"at">
 # ```
 #
-# [`Regexp#match`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-i-match)
-# returns a [`MatchData`](https://docs.ruby-lang.org/en/2.6.0/MatchData.html)
+# [`Regexp#match`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-match)
+# returns a [`MatchData`](https://docs.ruby-lang.org/en/2.7.0/MatchData.html)
 # object which makes the captured text available with its [] method:
 #
 # ```ruby
@@ -284,7 +292,17 @@
 # ```
 #
 # **Note**: A regexp can't use named backreferences and numbered backreferences
-# simultaneously.
+# simultaneously. Also, if a named capture is used in a regexp, then parentheses
+# used for grouping which would otherwise result in a unnamed capture are
+# treated as non-capturing.
+#
+# ```ruby
+# /(\w)(\w)/.match("ab").captures # => ["a", "b"]
+# /(\w)(\w)/.match("ab").named_captures # => {}
+#
+# /(?<c>\w)(\w)/.match("ab").captures # => ["a"]
+# /(?<c>\w)(\w)/.match("ab").named_captures # => {"c"=>"a"}
+# ```
 #
 # When named capture groups are used with a literal regexp on the left-hand side
 # of an expression and the `=~` operator, the captured text is also assigned to
@@ -667,7 +685,7 @@
 #
 # Comments in regexp literals cannot include unescaped terminator characters.
 #
-# ## [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html)
+# ## [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
 #
 # Regular expressions are assumed to use the source encoding. This can be
 # overridden with one of the following modifiers.
@@ -701,7 +719,7 @@
 #
 # Pattern matching sets some global variables :
 # *   `$~` is equivalent to
-#     [`Regexp.last_match`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-c-last_match);
+#     [`Regexp.last_match`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-last_match);
 # *   `$&` contains the complete matched text;
 # *   `$`` contains string before match;
 # *   `$'` contains string after match;
@@ -802,34 +820,35 @@
 # ```
 class Regexp < Object
   # see
-  # [`Regexp.options`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-i-options)
+  # [`Regexp.options`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-options)
   # and
-  # [`Regexp.new`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-c-new)
+  # [`Regexp.new`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-new)
   EXTENDED = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Regexp.options`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-i-options)
+  # [`Regexp.options`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-options)
   # and
-  # [`Regexp.new`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-c-new)
+  # [`Regexp.new`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-new)
   FIXEDENCODING = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Regexp.options`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-i-options)
+  # [`Regexp.options`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-options)
   # and
-  # [`Regexp.new`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-c-new)
+  # [`Regexp.new`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-new)
   IGNORECASE = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Regexp.options`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-i-options)
+  # [`Regexp.options`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-options)
   # and
-  # [`Regexp.new`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-c-new)
+  # [`Regexp.new`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-new)
   MULTILINE = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Regexp.options`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-i-options)
+  # [`Regexp.options`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-options)
   # and
-  # [`Regexp.new`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-c-new)
+  # [`Regexp.new`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-new)
   NOENCODING = T.let(T.unsafe(nil), Integer)
 
   # Escapes any characters that would have special meaning in a regular
-  # expression. Returns a new escaped string, or self if no characters are
-  # escaped. For any string, `Regexp.new(Regexp.escape(str))=~str` will be true.
+  # expression. Returns a new escaped string with the same or compatible
+  # encoding. For any string, `Regexp.new(Regexp.escape(str))=~str` will be
+  # true.
   #
   # ```ruby
   # Regexp.escape('\*?{}.')   #=> \\\*\?\{\}\.
@@ -843,17 +862,17 @@ class Regexp < Object
   def self.escape(arg0); end
 
   # The first form returns the
-  # [`MatchData`](https://docs.ruby-lang.org/en/2.6.0/MatchData.html) object
+  # [`MatchData`](https://docs.ruby-lang.org/en/2.7.0/MatchData.html) object
   # generated by the last successful pattern match. Equivalent to reading the
   # special global variable `$~` (see Special global variables in
-  # [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) for details).
+  # [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) for details).
   #
   # The second form returns the *n*th field in this
-  # [`MatchData`](https://docs.ruby-lang.org/en/2.6.0/MatchData.html) object.
+  # [`MatchData`](https://docs.ruby-lang.org/en/2.7.0/MatchData.html) object.
   # *n* can be a string or symbol to reference a named capture.
   #
   # Note that the
-  # [`last_match`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-c-last_match)
+  # [`last_match`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-last_match)
   # is local to the thread and method scope of the method that did the pattern
   # match.
   #
@@ -879,7 +898,7 @@ class Regexp < Object
   def self.last_match(arg0=T.unsafe(nil)); end
 
   # Try to convert *obj* into a
-  # [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html), using
+  # [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html), using
   # to\_regexp method. Returns converted regexp or nil if *obj* cannot be
   # converted for any reason.
   #
@@ -930,9 +949,9 @@ class Regexp < Object
   # ```
   #
   # Following a regular expression literal with the
-  # [`===`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-i-3D-3D-3D)
+  # [`===`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-3D-3D-3D)
   # operator allows you to compare against a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   #
   # ```ruby
   # /^[a-z]*$/ === "HELLO" #=> false
@@ -1016,7 +1035,7 @@ class Regexp < Object
   sig {returns(T::Boolean)}
   def casefold?(); end
 
-  # Returns the [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html)
+  # Returns the [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
   # object that represents the encoding of obj.
   sig {returns(Encoding)}
   def encoding(); end
@@ -1050,7 +1069,8 @@ class Regexp < Object
 
   # Produce a hash based on the text and options of this regular expression.
   #
-  # See also Object#hash.
+  # See also
+  # [`Object#hash`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-hash).
   sig {returns(Integer)}
   def hash(); end
 
@@ -1080,10 +1100,11 @@ class Regexp < Object
   sig {returns(String)}
   def inspect(); end
 
-  # Returns a `MatchData` object describing the match, or `nil` if there was no
-  # match. This is equivalent to retrieving the value of the special variable
-  # `$~` following a normal match. If the second parameter is present, it
-  # specifies the position in the string to begin the search.
+  # Returns a [`MatchData`](https://docs.ruby-lang.org/en/2.7.0/MatchData.html)
+  # object describing the match, or `nil` if there was no match. This is
+  # equivalent to retrieving the value of the special variable `$~` following a
+  # normal match. If the second parameter is present, it specifies the position
+  # in the string to begin the search.
   #
   # ```ruby
   # /(.)(.)(.)/.match("abc")[2]   #=> "b"
@@ -1091,7 +1112,7 @@ class Regexp < Object
   # ```
   #
   # If a block is given, invoke the block with
-  # [`MatchData`](https://docs.ruby-lang.org/en/2.6.0/MatchData.html) if match
+  # [`MatchData`](https://docs.ruby-lang.org/en/2.7.0/MatchData.html) if match
   # succeed, so that you can write
   #
   # ```ruby
@@ -1129,11 +1150,16 @@ class Regexp < Object
   end
   def match(arg0, arg1=T.unsafe(nil), &blk); end
 
-  # Returns a true or false indicates whether the regexp is matched or
-  # not without updating $~ and other related variables. If the second
-  # parameter is present, it specifies the position in the string to
-  # begin the search.
-  # https://ruby-doc.org/core-2.7.0/Regexp.html#method-i-match-3F
+  # Returns a `true` or `false` indicates whether the regexp is matched or not
+  # without updating $~ and other related variables. If the second parameter is
+  # present, it specifies the position in the string to begin the search.
+  #
+  # ```ruby
+  # /R.../.match?("Ruby")    #=> true
+  # /R.../.match?("Ruby", 1) #=> false
+  # /P.../.match?("Ruby")    #=> false
+  # $&                       #=> nil
+  # ```
   sig do
     params(
         arg0: T.nilable(T.any(String, Symbol)),
@@ -1181,10 +1207,12 @@ class Regexp < Object
   def names(); end
 
   # Returns the set of bits corresponding to the options used when creating this
-  # [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) (see
-  # `Regexp::new` for details. Note that additional bits may be set in the
-  # returned options: these are used internally by the regular expression code.
-  # These extra bits are ignored if the options are passed to `Regexp::new`.
+  # [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) (see
+  # [`Regexp::new`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-new)
+  # for details. Note that additional bits may be set in the returned options:
+  # these are used internally by the regular expression code. These extra bits
+  # are ignored if the options are passed to
+  # [`Regexp::new`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-new).
   #
   # ```ruby
   # Regexp::IGNORECASE                  #=> 1
@@ -1218,11 +1246,12 @@ class Regexp < Object
 
   # Returns a string containing the regular expression and its options (using
   # the `(?opts:source)` notation. This string can be fed back in to
-  # `Regexp::new` to a regular expression with the same semantics as the
-  # original. (However, `Regexp#==` may not return true when comparing the two,
-  # as the source of the regular expression itself may differ, as the example
-  # shows). `Regexp#inspect` produces a generally more readable version of
-  # *rxp*.
+  # [`Regexp::new`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-new)
+  # to a regular expression with the same semantics as the original. (However,
+  # `Regexp#==` may not return true when comparing the two, as the source of the
+  # regular expression itself may differ, as the example shows).
+  # [`Regexp#inspect`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-inspect)
+  # produces a generally more readable version of *rxp*.
   #
   # ```ruby
   # r1 = /ab+c/ix           #=> /ab+c/ix
@@ -1245,7 +1274,8 @@ class Regexp < Object
   sig {returns(T.nilable(Integer))}
   def ~(); end
 
-  # Alias for `Regexp.new`
+  # Alias for
+  # [`Regexp.new`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-new)
   sig do
     params(
         arg0: String,
@@ -1263,8 +1293,9 @@ class Regexp < Object
   def self.compile(arg0, options=T.unsafe(nil), kcode=T.unsafe(nil)); end
 
   # Escapes any characters that would have special meaning in a regular
-  # expression. Returns a new escaped string, or self if no characters are
-  # escaped. For any string, `Regexp.new(Regexp.escape(str))=~str` will be true.
+  # expression. Returns a new escaped string with the same or compatible
+  # encoding. For any string, `Regexp.new(Regexp.escape(str))=~str` will be
+  # true.
   #
   # ```ruby
   # Regexp.escape('\*?{}.')   #=> \\\*\?\{\}\.
@@ -1294,24 +1325,26 @@ class Regexp < Object
   end
   def eql?(other); end
 
-  # Return a `Regexp` object that is the union of the given *patterns*, i.e.,
-  # will match any of its parts. The *patterns* can be
-  # [Regexp](https://ruby-doc.org/core-2.4.1/Regexp.html) objects, in which case
-  # their options will be preserved, or Strings. If no patterns are given,
-  # returns `/(?!)/`. The behavior is unspecified if any given *pattern*
+  # Return a [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) object
+  # that is the union of the given *pattern*s, i.e., will match any of its
+  # parts. The *pattern*s can be
+  # [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) objects, in
+  # which case their options will be preserved, or Strings. If no patterns are
+  # given, returns `/(?!)/`. The behavior is unspecified if any given *pattern*
   # contains capture.
   #
-  # ~~~ruby
+  # ```ruby
   # Regexp.union                         #=> /(?!)/
   # Regexp.union("penzance")             #=> /penzance/
   # Regexp.union("a+b*c")                #=> /a\+b\*c/
   # Regexp.union("skiing", "sledding")   #=> /skiing|sledding/
   # Regexp.union(["skiing", "sledding"]) #=> /skiing|sledding/
   # Regexp.union(/dogs/, /cats/i)        #=> /(?-mix:dogs)|(?i-mx:cats)/
-  # ~~~
+  # ```
   #
-  # Note: the arguments for `::union` will try to be converted into a regular
-  # expression literal via to_regexp.
+  # Note: the arguments for
+  # [`::union`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-union)
+  # will try to be converted into a regular expression literal via to\_regexp.
   sig do
     params(pats: T.untyped).returns(Regexp)
   end

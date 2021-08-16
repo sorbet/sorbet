@@ -10,5 +10,5 @@ end
 
 test(
   a: 10
-# ^^^^^ error: Expected `String` but found `Integer(10)`
+#    ^^ error: Expected `String` but found `Integer(10)`
 )

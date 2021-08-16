@@ -49,6 +49,7 @@ const vector<PrintOptions> print_options({
     {"ast-raw", &Printers::ASTRaw, true},
     {"cfg", &Printers::CFG, true},
     {"cfg-raw", &Printers::CFGRaw, true},
+    {"cfg-text", &Printers::CFGText, true},
     {"symbol-table", &Printers::SymbolTable, true},
     {"symbol-table-raw", &Printers::SymbolTableRaw, true},
     {"symbol-table-json", &Printers::SymbolTableJson, true},
@@ -63,7 +64,6 @@ const vector<PrintOptions> print_options({
     {"file-table-proto", &Printers::FileTableProto, true},
     {"file-table-messagepack", &Printers::FileTableMessagePack, true, false},
     {"missing-constants", &Printers::MissingConstants, true},
-    {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
     {"autogen", &Printers::Autogen, true},
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},
     {"autogen-classlist", &Printers::AutogenClasslist, true},
@@ -80,7 +80,7 @@ void PrinterConfig::print(const string_view &contents) const {
         fmt::print("{}", contents);
     } else {
         absl::MutexLock lck(&state->mutex);
-        fmt::format_to(state->buf, "{}", contents);
+        fmt::format_to(std::back_inserter(state->buf), "{}", contents);
     }
 };
 
@@ -113,6 +113,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         AST,
         ASTRaw,
         CFG,
+        CFGText,
         CFGRaw,
         SymbolTable,
         SymbolTableRaw,
@@ -128,7 +129,6 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         FileTableProto,
         FileTableMessagePack,
         MissingConstants,
-        PluginGeneratedCode,
         Autogen,
         AutogenMsgPack,
         AutogenClasslist,
@@ -225,73 +225,6 @@ UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileNam
     return result;
 }
 
-static vector<string> extractExtraSubprocessOptions(const YAML::Node &config, const string &filePath,
-                                                    shared_ptr<spdlog::logger> logger) {
-    auto extraArgNode = config["ruby_extra_args"];
-    vector<string> extraArgs;
-    if (!extraArgNode) {
-        return extraArgs;
-    }
-    if (extraArgNode.IsSequence()) {
-        for (const auto &arg : extraArgNode) {
-            if (arg.IsScalar()) {
-                extraArgs.emplace_back(arg.as<string>());
-            } else {
-                logger->error("{}: An element of `ruby_extra_args` is not a string", filePath);
-                throw EarlyReturnWithCode(1);
-            }
-        }
-        return extraArgs;
-    } else {
-        logger->error("{}: `ruby_extra_args` must be an array of strings", filePath);
-        throw EarlyReturnWithCode(1);
-    }
-}
-
-struct DslConfiguration {
-    UnorderedMap<string, string> triggers;
-    vector<string> rubyExtraArgs;
-};
-
-DslConfiguration extractDslPlugins(string filePath, shared_ptr<spdlog::logger> logger) {
-    bool good = true;
-    YAML::Node config;
-    try {
-        config = YAML::LoadFile(filePath);
-    } catch (YAML::BadFile) {
-        logger->error("Failed to open DSL specification file \"{}\"", filePath);
-        throw EarlyReturnWithCode(1);
-    }
-    if (!config.IsMap()) {
-        logger->error("{}: Cannot parse DSL plugin format. Map is expected at top level", filePath);
-        throw EarlyReturnWithCode(1);
-    }
-    UnorderedMap<string, string> triggers;
-    if (auto triggersNode = config["triggers"]; triggersNode.IsMap()) {
-        for (const auto &child : triggersNode) {
-            auto key = child.first.as<string>();
-            if (child.second.Type() == YAML::NodeType::Scalar) {
-                auto value = child.second.as<string>();
-                auto [_, inserted] = triggers.emplace(move(key), move(value));
-                if (!inserted) {
-                    logger->error("{}: Duplicate plugin trigger \"{}\"", filePath, key);
-                    good = false;
-                }
-            } else {
-                logger->error("{}: Plugin trigger \"{}\" must map to a command that is a string", filePath, key);
-                good = false;
-            }
-        }
-    } else {
-        logger->error("{}: Required key `triggers` must be a map", filePath);
-        good = false;
-    }
-    if (!good) {
-        throw EarlyReturnWithCode(1);
-    }
-    return {triggers, extractExtraSubprocessOptions(config, filePath, logger)};
-}
-
 cxxopts::Options
 buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders) {
     // Used to populate default options.
@@ -312,10 +245,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     fmt::memory_buffer all_prints;
     fmt::memory_buffer all_stop_after;
 
-    fmt::format_to(all_prints, "Print: [{}]",
+    fmt::format_to(std::back_inserter(all_prints), "Print: [{}]",
                    fmt::map_join(
                        print_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
-    fmt::format_to(all_stop_after, "Stop After: [{}]",
+    fmt::format_to(std::back_inserter(all_stop_after), "Stop After: [{}]",
                    fmt::map_join(
                        stop_after_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
 
@@ -323,10 +256,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("dir", "Input directory", cxxopts::value<vector<string>>());
     options.add_options("advanced")("file", "Input file", cxxopts::value<vector<string>>());
     options.add_options("advanced")("allowed-extension", "Allowed extension", cxxopts::value<vector<string>>());
-    options.add_options("advanced")("configatron-dir", "Path to configatron yaml folders",
-                                    cxxopts::value<vector<string>>(), "path");
-    options.add_options("advanced")("configatron-file", "Path to configatron yaml files",
-                                    cxxopts::value<vector<string>>(), "path");
     options.add_options("advanced")("web-trace-file", "Web trace file. For use with chrome about://tracing",
                                     cxxopts::value<string>()->default_value(empty.webTraceFile), "file");
     options.add_options("advanced")("debug-log-file", "Path to debug log file",
@@ -384,12 +313,19 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Enable experimental LSP feature: Signature Help");
     options.add_options("advanced")("enable-experimental-lsp-go-to-implementation",
                                     "Enable experimental LSP feature: Go To Implementation");
+    options.add_options("advanced")("enable-experimental-requires-ancestor",
+                                    "Enable experimental `requires_ancestor` annotation");
+
     options.add_options("advanced")(
         "enable-all-experimental-lsp-features",
         "Enable every experimental LSP feature. (WARNING: can be crashy; for developer use only. "
         "End users should prefer to use `--enable-all-beta-lsp-features`, instead.)");
     options.add_options("advanced")("enable-all-beta-lsp-features",
                                     "Enable (expected-to-be-non-crashy) early-access LSP features.");
+    options.add_options("advanced")("lsp-error-cap",
+                                    "Caps the maximum number of errors that LSP reports to the editor. Can prevent "
+                                    "editor slowdown triggered by large error lists. A cap of 0 means 'no cap'.",
+                                    cxxopts::value<int>()->default_value(to_string(empty.lspErrorCap)), "cap");
     options.add_options("advanced")(
         "ignore",
         "Ignores input files that contain the given string in their paths (relative to the input path passed to "
@@ -465,16 +401,23 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
     options.add_options("dev")("censor-for-snapshot-tests",
                                "When printing raw location information, don't show line numbers");
-    options.add_options("dev")("error-white-list",
-                               "Error code to whitelist into reporting. "
+    options.add_options("dev")("isolate-error-code",
+                               "Error code to include in reporting. "
                                "Errors not mentioned will be silenced. "
                                "This option can be passed multiple times.",
                                cxxopts::value<vector<int>>(), "errorCode");
-    options.add_options("dev")("error-black-list",
-                               "Error code to blacklist from reporting. "
+    options.add_options("dev")("suppress-error-code",
+                               "Error code to exclude from reporting. "
                                "Errors mentioned will be silenced. "
                                "This option can be passed multiple times.",
                                cxxopts::value<vector<int>>(), "errorCode");
+    options.add_options("dev")("error-white-list",
+                               "(DEPRECATED) Alias for --isolate-error-code. Will be removed in a later release.",
+                               cxxopts::value<vector<int>>(), "errorCode");
+    options.add_options("dev")("error-black-list",
+                               "(DEPRECATED) Alias for --suppress-error-code. Will be removed in a later release.",
+                               cxxopts::value<vector<int>>(), "errorCode");
+    options.add_options("dev")("no-error-sections", "Do not print error sections.");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
                                cxxopts::value<string>()->default_value("auto"), "{false,true,strict,strong,[auto]}");
     options.add_options("dev")("typed-override", "Yaml config that overrides strictness levels on files",
@@ -484,8 +427,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("cache-dir", "Use the specified folder to cache data",
                                cxxopts::value<string>()->default_value(empty.cacheDir), "dir");
     options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
-    options.add_options("dev")("dsl-plugins", "YAML config that configures external DSL plugins",
-                               cxxopts::value<string>()->default_value(""), "filepath.yaml");
 
     int defaultThreads = thread::hardware_concurrency();
     if (defaultThreads == 0) {
@@ -502,6 +443,11 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         options.add_options("dev")("suggest-sig", "Report typing candidates. Only supported in debug builds");
     }
     options.add_options("dev")("suggest-typed", "Suggest which typed: sigils to add or upgrade");
+    options.add_options("dev")("suggest-unsafe",
+                               "In as many errors as possible, suggest autocorrects to wrap problem code with "
+                               "<method>. Omit the =<method> to default to wrapping with T.unsafe. "
+                               "This supercedes certain autocorrects, especially T.must.",
+                               cxxopts::value<std::string>()->implicit_value("T.unsafe"), "<method>");
     options.add_options("dev")("statsd-prefix", "StatsD prefix",
                                cxxopts::value<string>()->default_value(empty.statsdPrefix), "prefix");
     options.add_options("dev")("statsd-port", "StatsD server port",
@@ -518,6 +464,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                cxxopts::value<string>()->default_value(empty.metricsRepo), "repo");
     options.add_options("dev")("metrics-extra-tags", "Extra tags to report, comma separated",
                                cxxopts::value<string>()->default_value(""), "key1=value1,key2=value2");
+    options.add_options("dev")(
+        "force-hashing", "Forces Sorbet to calculate file hashes when run from CLI. Useful for profiling purposes.");
 
     for (auto &provider : semanticExtensionProviders) {
         provider->injectOptions(options);
@@ -644,6 +592,11 @@ bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_pt
     cfg.registryModule = raw["autogen-registry-module"].as<string>();
     cfg.rootDir = stripTrailingSlashes(raw["autogen-autoloader-root"].as<string>());
     cfg.packagedAutoloader = raw["autogen-autoloader-packaged"].as<bool>();
+    if (cfg.packagedAutoloader) {
+        // TODO(ngroman) Multi-package autoloader runtime support
+        logger->error("Flag --autogen-autoloader-packaged is currently not supported.");
+        throw EarlyReturnWithCode(1);
+    }
     cfg.rootObject = raw["autogen-root-object"].as<string>();
     return true;
 }
@@ -731,6 +684,8 @@ void readOptions(Options &opts,
         opts.inputFileNames.erase(unique(opts.inputFileNames.begin(), opts.inputFileNames.end()),
                                   opts.inputFileNames.end());
 
+        opts.requiresAncestorEnabled = raw["enable-experimental-requires-ancestor"].as<bool>();
+
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
         opts.lspDocumentSymbolEnabled =
@@ -754,6 +709,8 @@ void readOptions(Options &opts,
                 opts.lspDirsMissingFromClient.push_back(pNormalized);
             }
         }
+
+        opts.lspErrorCap = raw["lsp-error-cap"].as<int>();
 
         opts.cacheDir = raw["cache-dir"].as<string>();
         if (!extractPrinters(raw, opts, logger)) {
@@ -808,9 +765,12 @@ void readOptions(Options &opts,
         opts.noErrorCount = raw["no-error-count"].as<bool>();
         opts.noStdlib = raw["no-stdlib"].as<bool>();
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
+        opts.storeState = raw["store-state"].as<string>();
+        opts.forceHashing = raw["force-hashing"].as<bool>();
 
-        opts.threads = opts.runLSP ? raw["max-threads"].as<int>()
-                                   : min(raw["max-threads"].as<int>(), int(opts.inputFileNames.size() / 2));
+        opts.threads = (opts.runLSP || !opts.storeState.empty())
+                           ? raw["max-threads"].as<int>()
+                           : min(raw["max-threads"].as<int>(), int(opts.inputFileNames.size() / 2));
 
         if (raw["h"].as<bool>()) {
             logger->info("{}", options.help({""}));
@@ -834,15 +794,11 @@ void readOptions(Options &opts,
         }
 
         opts.showProgress = raw["P"].as<bool>();
-        if (raw.count("configatron-dir") > 0) {
-            opts.configatronDirs = raw["configatron-dir"].as<vector<string>>();
-        }
-        if (raw.count("configatron-file")) {
-            opts.configatronFiles = raw["configatron-file"].as<vector<string>>();
-        }
         opts.skipRewriterPasses = raw["skip-rewriter-passes"].as<bool>();
-        opts.storeState = raw["store-state"].as<string>();
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
+        if (raw.count("suggest-unsafe") > 0) {
+            opts.suggestUnsafe = raw["suggest-unsafe"].as<string>();
+        }
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
         opts.stressIncrementalResolver = raw["stress-incremental-resolver"].as<bool>();
         opts.sleepInSlowPath = raw["sleep-in-slow-path"].as<bool>();
@@ -887,19 +843,33 @@ void readOptions(Options &opts,
         opts.stripePackages = raw["stripe-packages"].as<bool>();
         extractAutoloaderConfig(raw, opts, logger);
         opts.errorUrlBase = raw["error-url-base"].as<string>();
+        opts.noErrorSections = raw["no-error-sections"].as<bool>();
         opts.ruby3KeywordArgs = raw["ruby3-keyword-args"].as<bool>();
         if (raw.count("error-white-list") > 0) {
+            logger->error("`{}` is deprecated; please use `{}` instead", "--error-white-list", "--isolate-error-code");
             auto rawList = raw["error-white-list"].as<vector<int>>();
-            opts.errorCodeWhiteList = set<int>(rawList.begin(), rawList.end());
+            opts.isolateErrorCode.insert(rawList.begin(), rawList.end());
         }
+        if (raw.count("isolate-error-code") > 0) {
+            auto rawList = raw["isolate-error-code"].as<vector<int>>();
+            opts.isolateErrorCode.insert(rawList.begin(), rawList.end());
+        }
+
         if (raw.count("error-black-list") > 0) {
-            if (raw.count("error-white-list") > 0) {
-                logger->error("You can't pass both `{}` and `{}`", "--error-black-list", "--error-white-list");
-                throw EarlyReturnWithCode(1);
-            }
+            logger->error("`{}` is deprecated; please use `{}` instead", "--error-black-list", "--suppress-error-code");
             auto rawList = raw["error-black-list"].as<vector<int>>();
-            opts.errorCodeBlackList = set<int>(rawList.begin(), rawList.end());
+            opts.suppressErrorCode.insert(rawList.begin(), rawList.end());
         }
+        if (raw.count("suppress-error-code") > 0) {
+            auto rawList = raw["suppress-error-code"].as<vector<int>>();
+            opts.suppressErrorCode.insert(rawList.begin(), rawList.end());
+        }
+
+        if (!opts.isolateErrorCode.empty() && !opts.suppressErrorCode.empty()) {
+            logger->error("You can't pass both `{}` and `{}`", "--isolate-error-code", "--suppress-error-code");
+            throw EarlyReturnWithCode(1);
+        }
+
         if (sorbet::debug_mode) {
             opts.suggestSig = raw["suggest-sig"].as<bool>();
         }
@@ -922,20 +892,20 @@ void readOptions(Options &opts,
         }
 
         if (opts.suggestTyped) {
-            if (opts.errorCodeWhiteList != set<int>{core::errors::Infer::SuggestTyped.code} &&
+            if (opts.isolateErrorCode != set<int>{core::errors::Infer::SuggestTyped.code} &&
                 raw["typed"].as<string>() != "strict") {
-                logger->error(
-                    "--suggest-typed must also include `{}`",
-                    fmt::format("{}{}", "--typed=strict --error-white-list=", core::errors::Infer::SuggestTyped.code));
-                throw EarlyReturnWithCode(1);
-            }
-            if (opts.errorCodeWhiteList != set<int>{core::errors::Infer::SuggestTyped.code}) {
                 logger->error("--suggest-typed must also include `{}`",
-                              fmt::format("{}{}", "--error-white-list=", core::errors::Infer::SuggestTyped.code));
+                              fmt::format("{}{}", "--typed=strict --isolate-error-code=",
+                                          core::errors::Infer::SuggestTyped.code));
                 throw EarlyReturnWithCode(1);
             }
-            if (!opts.errorCodeBlackList.empty()) {
-                logger->error("--suggest-typed can't include `{}`", "--error-black-list");
+            if (opts.isolateErrorCode != set<int>{core::errors::Infer::SuggestTyped.code}) {
+                logger->error("--suggest-typed must also include `{}`",
+                              fmt::format("{}{}", "--isolate-error-code=", core::errors::Infer::SuggestTyped.code));
+                throw EarlyReturnWithCode(1);
+            }
+            if (!opts.suppressErrorCode.empty()) {
+                logger->error("--suggest-typed can't include `{}`", "--suppress-error-code");
                 throw EarlyReturnWithCode(1);
             }
             if (raw["typed"].as<string>() != "strict") {
@@ -947,11 +917,6 @@ void readOptions(Options &opts,
         opts.supressNonCriticalErrors = raw["suppress-non-critical"].as<bool>();
         if (!raw["typed-override"].as<string>().empty()) {
             opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>(), logger);
-        }
-        if (!raw["dsl-plugins"].as<string>().empty()) {
-            auto dslConfig = extractDslPlugins(raw["dsl-plugins"].as<string>(), logger);
-            opts.dslPluginTriggers = std::move(dslConfig.triggers);
-            opts.dslRubyExtraArgs = std::move(dslConfig.rubyExtraArgs);
         }
 
         for (auto &provider : semanticExtensionProviders) {

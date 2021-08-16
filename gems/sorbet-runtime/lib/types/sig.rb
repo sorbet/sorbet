@@ -25,6 +25,6 @@ module T::Sig
   # {T::Helpers}
   T::Sig::WithoutRuntime.sig {params(arg0: T.nilable(Symbol), blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
   def sig(arg0=nil, &blk)
-    T::Private::Methods.declare_sig(self, arg0, &blk)
+    T::Private::Methods.declare_sig(self, Kernel.caller_locations(1, 1)&.first, arg0, &blk)
   end
 end

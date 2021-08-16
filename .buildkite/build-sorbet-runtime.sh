@@ -6,11 +6,24 @@ pushd gems/sorbet-runtime
 
 echo "--- setup :ruby:"
 eval "$(rbenv init -)"
-rbenv shell 2.6.3
-rbenv exec bundle install --path vendor/bundle
 
-echo "+++ tests"
-rbenv exec bundle exec rake test
+runtime_versions=(2.6.3 2.7.2)
+
+for runtime_version in "${runtime_versions[@]}"; do
+  rbenv install --skip-existing "$runtime_version"
+  rbenv shell "$runtime_version"
+  rbenv exec bundle config set path 'vendor/bundle'
+  rbenv exec bundle install
+done
+
+for runtime_version in "${runtime_versions[@]}"; do
+  echo "+++ tests ($runtime_version)"
+  rbenv shell "$runtime_version"
+
+  rbenv exec ruby --version
+
+  rbenv exec bundle exec rake test
+done
 
 echo "--- build"
 git_commit_count=$(git rev-list --count HEAD)

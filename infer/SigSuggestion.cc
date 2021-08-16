@@ -11,17 +11,17 @@ namespace sorbet::infer {
 
 namespace {
 
-bool extendsTSig(core::Context ctx, core::SymbolRef enclosingClass) {
+bool extendsTSig(core::Context ctx, core::ClassOrModuleRef enclosingClass) {
     ENFORCE(enclosingClass.exists());
     auto enclosingSingletonClass = enclosingClass.data(ctx)->lookupSingletonClass(ctx);
     ENFORCE(enclosingSingletonClass.exists());
     return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Sig());
 }
 
-optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context ctx, core::SymbolRef methodSymbol) {
+optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context ctx, core::MethodRef methodSymbol) {
     auto method = methodSymbol.data(ctx);
 
-    auto enclosingClass = method->enclosingClass(ctx).data(ctx)->topAttachedClass(ctx);
+    auto enclosingClass = methodSymbol.enclosingClass(ctx).data(ctx)->topAttachedClass(ctx);
     if (extendsTSig(ctx, enclosingClass)) {
         // No need to suggest here, because it already has 'extend T::Sig'
         return nullopt;
@@ -56,16 +56,41 @@ optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context
     return core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend T::Sig\n", prefix)};
 }
 
-core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component, int argId) {
+core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component,
+                             optional<core::NameRef> keyword, int argId) {
     ENFORCE(component.method.exists());
     const auto &args = component.method.data(ctx)->arguments();
     if (argId >= args.size()) {
         return nullptr;
     }
-    const auto &to = args[argId].type;
+
+    core::TypePtr to = nullptr;
+    if (keyword.has_value()) {
+        auto name = *keyword;
+        for (auto &argInfo : args) {
+            if (argInfo.flags.isKeyword && argInfo.name == name) {
+                to = argInfo.type;
+                break;
+            }
+        }
+        if (to == nullptr) {
+            return nullptr;
+        }
+    } else {
+        auto &argInfo = args[argId];
+        if (argInfo.flags.isKeyword) {
+            // TODO(trevor) this is possibly due to the argument being a keyword args splat. Right now we ignore this
+            // case, but it would be great to give a hash or shape suggestion instead.
+            return nullptr;
+        }
+
+        to = argInfo.type;
+    }
+
     if (!to || !to.isFullyDefined()) {
         return nullptr;
     }
+
     return to;
 }
 
@@ -89,29 +114,59 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
         snd->receiverLoc,
         snd->argLocs,
     };
+
+    auto numPosArgs = snd->numPosArgs;
+    auto numKwArgs = snd->args.size() - numPosArgs;
+    bool hasKwSplat = numKwArgs % 2 == 1;
+
     // Since this is a "fake" dispatch and we are not going to display the errors anyway,
     // core::Loc::none() should be okay here.
     auto originForUninitialized = core::Loc::none();
-    core::DispatchArgs dispatchArgs{snd->fun,       locs,           snd->numPosArgs,
-                                    args,           snd->recv.type, snd->recv.type,
-                                    snd->recv.type, snd->link,      originForUninitialized};
+    auto originForFullType = core::Loc::none();
+    core::DispatchArgs dispatchArgs{snd->fun,
+                                    locs,
+                                    numPosArgs,
+                                    args,
+                                    snd->recv.type,
+                                    {snd->recv.type, {originForFullType}},
+                                    snd->recv.type,
+                                    snd->link,
+                                    originForUninitialized,
+                                    snd->isPrivateOk};
     auto dispatchInfo = snd->recv.type.dispatchCall(ctx, dispatchArgs);
 
-    int i = -1;
-
     // See if we can learn what types should they have
-    for (auto &arg : snd->args) {
-        i++;
+    bool inKwArgs = false;
+    for (int i = 0, argIdx = 0; i < snd->args.size(); i++, argIdx++) {
+        inKwArgs = inKwArgs || (i >= numPosArgs && !hasKwSplat);
+
+        // extract the keyword argument name when the send contains inlined keyword arguments
+        optional<core::NameRef> keyword;
+        if (inKwArgs) {
+            if (core::isa_type<core::LiteralType>(snd->args[i].type)) {
+                auto lit = core::cast_type_nonnull<core::LiteralType>(snd->args[i].type);
+                if (lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol) {
+                    keyword = lit.asName(ctx);
+                }
+            }
+
+            // increment over the keyword argument symbol
+            i++;
+        }
+
+        auto &arg = snd->args[i];
+
         // See if we can learn about what functions are expected to exist on arguments
         auto fnd = blockLocals.find(arg.variable);
         if (fnd == blockLocals.end()) {
             continue;
         }
+
         core::TypePtr thisType;
         auto iter = &dispatchInfo;
         while (iter != nullptr) {
             if (iter->main.method.exists()) {
-                auto argType = extractArgType(ctx, *snd, iter->main, i);
+                auto argType = extractArgType(ctx, *snd, iter->main, keyword, argIdx);
                 if (argType && !argType.isUntyped()) {
                     if (!thisType) {
                         thisType = argType;
@@ -139,7 +194,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
     }
 }
 
-UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol,
+UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx, core::MethodRef methodSymbol,
                                                               unique_ptr<cfg::CFG> &cfg) {
     // What variables by the end of basic block could plausibly contain what arguments.
     vector<UnorderedMap<cfg::LocalRef, InlinedVector<core::NameRef, 1>>> localsStoringArguments;
@@ -272,7 +327,7 @@ core::MethodRef closestOverridenMethod(core::Context ctx, core::ClassOrModuleRef
     }
 }
 
-bool childNeedsOverride(core::Context ctx, core::SymbolRef childSymbol, core::SymbolRef parentSymbol) {
+bool childNeedsOverride(core::Context ctx, core::MethodRef childSymbol, core::MethodRef parentSymbol) {
     return
         // We're overriding a method...
         parentSymbol.exists() &&
@@ -297,7 +352,7 @@ bool childNeedsOverride(core::Context ctx, core::SymbolRef childSymbol, core::Sy
 optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Context ctx, unique_ptr<cfg::CFG> &cfg,
                                                                      const core::TypePtr &methodReturnType,
                                                                      core::TypeConstraint &constr) {
-    core::SymbolRef methodSymbol = cfg->symbol;
+    core::MethodRef methodSymbol = cfg->symbol;
 
     bool guessedSomethingUseful = false;
 
@@ -339,7 +394,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
 
     auto guessedArgumentTypes = guessArgumentTypes(ctx, methodSymbol, cfg);
 
-    auto enclosingClass = methodSymbol.data(ctx)->enclosingClass(ctx);
+    auto enclosingClass = methodSymbol.enclosingClass(ctx);
     auto closestMethod = closestOverridenMethod(ctx, enclosingClass, methodSymbol.data(ctx)->name);
 
     fmt::memory_buffer ss;
@@ -363,7 +418,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         return nullopt;
     }
 
-    fmt::format_to(ss, "sig {{");
+    fmt::format_to(std::back_inserter(ss), "sig {{");
 
     ENFORCE(!methodSymbol.data(ctx)->arguments().empty(), "There should always be at least one arg (the block arg).");
     bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->arguments().size() == 1 &&
@@ -373,13 +428,13 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         // Only need override / implementation if the parent has a sig
         if (closestMethod.exists() && closestMethod.data(ctx)->resultType != nullptr) {
             if (closestMethod.data(ctx)->isAbstract() || childNeedsOverride(ctx, methodSymbol, closestMethod)) {
-                fmt::format_to(ss, "override.");
+                fmt::format_to(std::back_inserter(ss), "override.");
             }
         }
     }
 
     if (!onlyArgumentIsBlkArg) {
-        fmt::format_to(ss, "params(");
+        fmt::format_to(std::back_inserter(ss), "params(");
 
         bool first = true;
         for (auto &argSym : methodSymbol.data(ctx)->arguments()) {
@@ -393,7 +448,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                 continue;
             }
             if (!first) {
-                fmt::format_to(ss, ", ");
+                fmt::format_to(std::back_inserter(ss), ", ");
             }
             first = false;
             auto argType = guessedArgumentTypes[argSym.name];
@@ -411,9 +466,9 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                 // TODO: maybe combine the old and new types in some way?
                 chosenType = oldType;
             }
-            fmt::format_to(ss, "{}: {}", argSym.argumentName(ctx), chosenType.show(ctx));
+            fmt::format_to(std::back_inserter(ss), "{}: {}", argSym.argumentName(ctx), chosenType.show(ctx));
         }
-        fmt::format_to(ss, ").");
+        fmt::format_to(std::back_inserter(ss), ").");
     }
     if (!guessedSomethingUseful) {
         return nullopt;
@@ -424,9 +479,9 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                          !guessedReturnType.isUntyped() && !guessedReturnType.isBottom());
 
     if (suggestsVoid) {
-        fmt::format_to(ss, "void}}");
+        fmt::format_to(std::back_inserter(ss), "void}}");
     } else {
-        fmt::format_to(ss, "returns({})}}", guessedReturnType.show(ctx));
+        fmt::format_to(std::back_inserter(ss), "returns({})}}", guessedReturnType.show(ctx));
     }
 
     auto [replacementLoc, padding] = loc.findStartOfLine(ctx);

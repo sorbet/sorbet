@@ -12,10 +12,12 @@ constexpr ErrorClass PackageNotFound{3704, StrictLevel::False};
 constexpr ErrorClass UnpackagedFile{3705, StrictLevel::False};
 constexpr ErrorClass InvalidImportOrExport{3706, StrictLevel::False};
 constexpr ErrorClass MultiplePackagesInOneFile{3707, StrictLevel::False};
-constexpr ErrorClass MultipleExportMethodsCalls{3708, StrictLevel::False};
+// 3708 MultipleExportMethodsCalls
 constexpr ErrorClass NoSelfImport{3709, StrictLevel::False};
 constexpr ErrorClass InvalidPackageExpression{3710, StrictLevel::False};
 constexpr ErrorClass PackageFileMustBeStrict{3711, StrictLevel::False};
 constexpr ErrorClass InvalidPackageName{3712, StrictLevel::False};
+constexpr ErrorClass DefinitionPackageMismatch{3713, StrictLevel::False};
+constexpr ErrorClass ImportConflict{3714, StrictLevel::False};
 } // namespace sorbet::core::errors::Packager
 #endif

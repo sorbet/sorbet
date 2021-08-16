@@ -4,11 +4,11 @@
 # unit; a+bi. Where a is real part, b is imaginary part and i is imaginary unit.
 # Real a equals complex a+0i mathematically.
 #
-# [`Complex`](https://docs.ruby-lang.org/en/2.6.0/Complex.html) object can be
+# [`Complex`](https://docs.ruby-lang.org/en/2.7.0/Complex.html) object can be
 # created as literal, and also by using Kernel#Complex,
-# [`Complex::rect`](https://docs.ruby-lang.org/en/2.6.0/Complex.html#method-c-rect),
-# [`Complex::polar`](https://docs.ruby-lang.org/en/2.6.0/Complex.html#method-c-polar)
-# or [`to_c`](https://docs.ruby-lang.org/en/2.6.0/Complex.html#method-i-to_c)
+# [`Complex::rect`](https://docs.ruby-lang.org/en/2.7.0/Complex.html#method-c-rect),
+# [`Complex::polar`](https://docs.ruby-lang.org/en/2.7.0/Complex.html#method-c-polar)
+# or [`to_c`](https://docs.ruby-lang.org/en/2.7.0/Complex.html#method-i-to_c)
 # method.
 #
 # ```ruby
@@ -273,6 +273,26 @@ class Complex < Numeric
   end
   def ==(arg0); end
 
+  # If `cmp`'s imaginary part is zero, and `object` is also a real number (or a
+  # [`Complex`](https://docs.ruby-lang.org/en/2.7.0/Complex.html) number where
+  # the imaginary part is zero), compare the real part of `cmp` to object.
+  # Otherwise, return nil.
+  #
+  # ```ruby
+  # Complex(2, 3)  <=> Complex(2, 3)   #=> nil
+  # Complex(2, 3)  <=> 1               #=> nil
+  # Complex(2)     <=> 1               #=> 1
+  # Complex(2)     <=> 2               #=> 0
+  # Complex(2)     <=> 3               #=> -1
+  # ```
+  sig do
+    params(
+      arg0: Object,
+    )
+    .returns(T.nilable(Integer))
+  end
+  def <=>(arg0); end
+
   # Returns the absolute part of its polar form.
   #
   # ```ruby
@@ -527,7 +547,7 @@ class Complex < Numeric
   sig {returns(T.any(Integer, Float, Rational, BigDecimal))}
   def real(); end
 
-  # Returns false.
+  # Returns false, even if the complex number has no imaginary part.
   sig {returns(FalseClass)}
   def real?(); end
 

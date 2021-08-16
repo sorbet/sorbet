@@ -27,7 +27,7 @@ Query Query::createVarQuery(core::SymbolRef owner, core::LocalVariable variable)
     return Query(Query::Kind::VAR, core::Loc::none(), owner, variable);
 }
 
-Query Query::createSuggestSigQuery(core::SymbolRef method) {
+Query Query::createSuggestSigQuery(core::MethodRef method) {
     ENFORCE(method.exists());
     return Query(Query::Kind::SUGGEST_SIG, core::Loc::none(), method, core::LocalVariable());
 }

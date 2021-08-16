@@ -71,7 +71,7 @@ constexpr int MAX_PRETTY_SIG_ARGS = 4;
 // iff a `def` would be this wide or wider, expand it to be a multi-line def.
 constexpr int MAX_PRETTY_WIDTH = 80;
 
-string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, const core::TypePtr &receiver,
+string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
                           core::TypePtr retType, const core::TypeConstraint *constraint) {
     ENFORCE(method.exists());
     ENFORCE(method.data(gs)->dealias(gs) == method);
@@ -136,7 +136,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
     return fmt::format("{} do\n  {}{}{}\nend", sigCall, flagString, paramsString, methodReturnType);
 }
 
-string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
+string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method) {
     ENFORCE(method.exists());
     // handle this case anyways so that we don't crash in prod when this method is mis-used
     if (!method.exists()) {
@@ -213,10 +213,11 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
     return result;
 }
 
-string prettyTypeForMethod(const core::GlobalState &gs, core::SymbolRef method, const core::TypePtr &receiver,
+string prettyTypeForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
                            const core::TypePtr &retType, const core::TypeConstraint *constraint) {
-    return fmt::format("{}\n{}", prettySigForMethod(gs, method.data(gs)->dealias(gs), receiver, retType, constraint),
-                       prettyDefForMethod(gs, method));
+    return fmt::format(
+        "{}\n{}", prettySigForMethod(gs, method.data(gs)->dealias(gs).asMethodRef(), receiver, retType, constraint),
+        prettyDefForMethod(gs, method));
 }
 
 string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant) {
@@ -251,8 +252,8 @@ core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &ty
     }
     if (auto *applied = core::cast_type<core::AppliedType>(receiver)) {
         /* instantiate generic classes */
-        resultType = core::Types::resultTypeAsSeenFrom(gs, resultType, inWhat.data(gs)->enclosingClass(gs),
-                                                       applied->klass, applied->targs);
+        resultType = core::Types::resultTypeAsSeenFrom(gs, resultType, inWhat.enclosingClass(gs), applied->klass,
+                                                       applied->targs);
     }
     if (!resultType) {
         resultType = core::Types::untypedUntracked();

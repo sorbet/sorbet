@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: strict
 
-class BClass
+class B::BClass
   extend T::Sig
 
   sig {returns(A::AClass)}

@@ -1,13 +1,13 @@
 # typed: __STDLIB_INTERNAL
 
-# [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) provides SSL,
+# [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) provides SSL,
 # TLS and general purpose cryptography. It wraps the
 # [OpenSSL](https://www.openssl.org/) library.
 #
 # # Examples
 #
 # All examples assume you have loaded
-# [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) with:
+# [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) with:
 #
 # ```ruby
 # require 'openssl'
@@ -47,7 +47,7 @@
 # end
 # ```
 #
-# [`OpenSSL::Cipher.ciphers`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-c-ciphers)
+# [`OpenSSL::Cipher.ciphers`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-c-ciphers)
 # returns a list of available ciphers.
 #
 # ### Loading a Key
@@ -70,7 +70,7 @@
 #
 # ### Loading an Encrypted Key
 #
-# [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) will prompt you
+# [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) will prompt you
 # for your pass phrase when loading an encrypted key. If you will not be able to
 # type in the pass phrase you may provide it when loading the key:
 #
@@ -116,7 +116,7 @@
 # equivalent to applying a digital signature to the data. A verifying party may
 # validate the signature by comparing the result of decrypting the signature
 # with "public\_decrypt" to the original data. However,
-# [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html)
+# [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html)
 # already has methods "sign" and "verify" that handle digital signatures in a
 # standardized way - "private\_encrypt" and "public\_decrypt" shouldn't be used
 # in practice.
@@ -145,7 +145,7 @@
 # ## PBKDF2 Password-based Encryption
 #
 # If supported by the underlying
-# [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) version used,
+# [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) version used,
 # Password-based Encryption should use the features of PKCS5. If not supported
 # or if required by legacy applications, the older, less secure methods
 # specified in RFC 2898 are also supported (see below).
@@ -298,12 +298,12 @@
 #
 # The list of supported extensions (and in some cases their possible values) can
 # be derived from the "objects.h" file in the
-# [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) source code.
+# [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) source code.
 #
 # ### Signing a Certificate
 #
 # To sign a certificate set the issuer and use
-# [`OpenSSL::X509::Certificate#sign`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Certificate.html#method-i-sign)
+# [`OpenSSL::X509::Certificate#sign`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Certificate.html#method-i-sign)
 # with a digest algorithm. This creates a self-signed cert because we're using
 # the same name and key to sign the certificate as was used to create the
 # certificate.
@@ -527,7 +527,7 @@
 # certificate are not required for the client socket.
 #
 # Note that SSLSocket#close doesn't close the underlying socket by default.
-# [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) SSLSocket#sync\_close to
+# [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) SSLSocket#sync\_close to
 # true if you want.
 #
 # ```ruby
@@ -568,28 +568,28 @@
 #
 # If the server certificate is invalid or `context.ca_file` is not set when
 # verifying peers an
-# [`OpenSSL::SSL::SSLError`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLError.html)
+# [`OpenSSL::SSL::SSLError`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLError.html)
 # will be raised.
 module OpenSSL
   # Boolean indicating whether
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) is
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) is
   # FIPS-capable or not
   OPENSSL_FIPS = ::T.let(nil, ::T.untyped)
   OPENSSL_LIBRARY_VERSION = ::T.let(nil, ::T.untyped)
-  # Version of [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) the
-  # ruby [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) extension
+  # Version of [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) the
+  # ruby [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) extension
   # was built with
   OPENSSL_VERSION = ::T.let(nil, ::T.untyped)
   # Version number of
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) the ruby
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) extension was
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) the ruby
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) extension was
   # built with (base 16)
   OPENSSL_VERSION_NUMBER = ::T.let(nil, ::T.untyped)
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) ruby extension
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) ruby extension
   # version
   VERSION = ::T.let(nil, ::T.untyped)
 
-  # Returns a [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html)
+  # Returns a [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html)
   # subclass by *name*
   #
   # ```ruby
@@ -613,7 +613,7 @@ module OpenSSL
   def self.debug(); end
 
   # Turns on or off debug mode. With debug mode, all erros added to the
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) error queue
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) error queue
   # will be printed to stderr.
   sig do
     params(
@@ -626,14 +626,14 @@ module OpenSSL
   # See any remaining errors held in queue.
   #
   # Any errors you see here are probably due to a bug in Ruby's
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # implementation.
   sig {returns(::T.untyped)}
   def self.errors(); end
 
   # Turns FIPS mode on or off. Turning on FIPS mode will obviously only have an
   # effect for FIPS-capable installations of the
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) library.
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) library.
   # Trying to do so otherwise will result in an error.
   #
   # ### Examples
@@ -655,19 +655,19 @@ end
 # structures and is defined in ITU-T X.680. ASN.1 itself does not mandate any
 # encoding or parsing rules, but usually ASN.1 data structures are encoded using
 # the Distinguished
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) Rules (DER) or
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) Rules (DER) or
 # less often the Basic
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) Rules (BER)
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) Rules (BER)
 # described in ITU-T X.690. DER and BER encodings are binary Tag-Length-Value
 # (TLV) encodings that are quite concise compared to other popular data
 # description formats such as
-# [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html),
-# [`JSON`](https://docs.ruby-lang.org/en/2.6.0/JSON.html) etc. ASN.1 data
+# [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html),
+# [`JSON`](https://docs.ruby-lang.org/en/2.7.0/JSON.html) etc. ASN.1 data
 # structures are very common in cryptographic applications, e.g. X.509 public
 # key certificates or certificate revocation lists (CRLs) are all defined in
 # ASN.1 and DER-encoded. ASN.1, DER and BER are the building blocks of applied
 # cryptography. The
-# [`ASN1`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1.html) module
+# [`ASN1`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1.html) module
 # provides the necessary classes that allow generation of ASN.1 data structures
 # and the methods to encode them using a DER encoding. The decode method allows
 # parsing arbitrary BER-/DER-encoded data to a Ruby object that can then be
@@ -689,7 +689,7 @@ end
 # Constructive is, as its name implies, the base class for all constructed
 # encodings, i.e. those that consist of several values, opposed to "primitive"
 # encodings with just one single value. The value of an Constructive is always
-# an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html).
+# an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html).
 #
 # #### ASN1::Set and ASN1::Sequence
 #
@@ -752,9 +752,9 @@ end
 # *   OpenSSL::ASN1::BMPSTRING (30)
 #
 #
-# ## [`UNIVERSAL_TAG_NAME`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1.html#UNIVERSAL_TAG_NAME) constant
+# ## [`UNIVERSAL_TAG_NAME`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1.html#UNIVERSAL_TAG_NAME) constant
 #
-# An [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) that stores the
+# An [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) that stores the
 # name of a given tag number. These names are the same as the name of the tag
 # constant that is additionally defined, e.g. [UNIVERSAL\_TAG\_NAME](2) =
 # "INTEGER" and OpenSSL::ASN1::INTEGER = 2.
@@ -809,7 +809,7 @@ module OpenSSL::ASN1
   SET = ::T.let(nil, ::T.untyped)
   T61STRING = ::T.let(nil, ::T.untyped)
   UNIVERSALSTRING = ::T.let(nil, ::T.untyped)
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) storing tag names
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) storing tag names
   # at the tag's index.
   UNIVERSAL_TAG_NAME = ::T.let(nil, ::T.untyped)
   UTCTIME = ::T.let(nil, ::T.untyped)
@@ -1001,7 +1001,7 @@ module OpenSSL::ASN1
   def self.VideotexString(*_); end
 
   # Decodes a BER- or DER-encoded value and creates an ASN1Data instance. *der*
-  # may be a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or any
+  # may be a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or any
   # object that features a `.to_der` method transforming it into a
   # BER-/DER-encoded String+
   #
@@ -1040,14 +1040,19 @@ module OpenSSL::ASN1
   # If a block is given, it prints out each of the elements encountered. Block
   # parameters are (in that order):
   # *   depth: The recursion depth, plus one with each constructed value being
-  #     encountered (Integer)
-  # *   offset: Current byte offset (Integer)
+  #     encountered
+  #     ([`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html))
+  # *   offset: Current byte offset
+  #     ([`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html))
   # *   header length: Combined length in bytes of the Tag and Length headers.
-  #     (Integer)
-  # *   length: The overall remaining length of the entire data (Integer)
+  #     ([`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html))
+  # *   length: The overall remaining length of the entire data
+  #     ([`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html))
   # *   constructed: Whether this value is constructed or not (Boolean)
-  # *   tag\_class: Current tag class (Symbol)
-  # *   tag: The current tag number (Integer)
+  # *   tag\_class: Current tag class
+  #     ([`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html))
+  # *   tag: The current tag number
+  #     ([`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html))
   #
   #
   # ## Example
@@ -1069,29 +1074,29 @@ module OpenSSL::ASN1
 end
 
 # The top-level class representing any ASN.1 object. When parsed by
-# [`ASN1.decode`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1.html#method-c-decode),
+# [`ASN1.decode`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1.html#method-c-decode),
 # tagged values are always represented by an instance of
-# [`ASN1Data`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ASN1Data.html).
+# [`ASN1Data`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ASN1Data.html).
 #
-# ## The role of [`ASN1Data`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ASN1Data.html) for parsing tagged values
+# ## The role of [`ASN1Data`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ASN1Data.html) for parsing tagged values
 #
 # When encoding an ASN.1 type it is inherently clear what original type (e.g.
 # INTEGER, OCTET STRING etc.) this value has, regardless of its tagging. But
 # opposed to the time an ASN.1 type is to be encoded, when parsing them it is
 # not possible to deduce the "real type" of tagged values. This is why tagged
 # values are generally parsed into
-# [`ASN1Data`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ASN1Data.html)
+# [`ASN1Data`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ASN1Data.html)
 # instances, but with a different outcome for implicit and explicit tagging.
 #
 # ### Example of a parsed implicitly tagged value
 #
 # An implicitly 1-tagged INTEGER value will be parsed as an
-# [`ASN1Data`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ASN1Data.html)
+# [`ASN1Data`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ASN1Data.html)
 # with
 # *   *tag* equal to 1
 # *   *tag\_class* equal to `:CONTEXT_SPECIFIC`
 # *   *value* equal to a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) that carries
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) that carries
 #     the raw encoding of the INTEGER.
 #
 # This implies that a subsequent decoding step is required to completely decode
@@ -1100,16 +1105,16 @@ end
 # ### Example of a parsed explicitly tagged value
 #
 # An explicitly 1-tagged INTEGER value will be parsed as an
-# [`ASN1Data`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ASN1Data.html)
+# [`ASN1Data`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ASN1Data.html)
 # with
 # *   *tag* equal to 1
 # *   *tag\_class* equal to `:CONTEXT_SPECIFIC`
 # *   *value* equal to an
-#     [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) with one single
+#     [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) with one single
 #     element, an instance of OpenSSL::ASN1::Integer, i.e. the inner element is
 #     the non-tagged primitive value, and the tagging is represented in the
 #     outer
-#     [`ASN1Data`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ASN1Data.html)
+#     [`ASN1Data`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ASN1Data.html)
 #
 #
 # ## Example - Decoding an implicitly tagged INTEGER
@@ -1213,16 +1218,16 @@ class OpenSSL::ASN1::ASN1Data
   end
   def initialize(_, _1, _2); end
 
-  # An [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html)
+  # An [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html)
   # representing the tag number of this
-  # [`ASN1Data`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ASN1Data.html).
+  # [`ASN1Data`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ASN1Data.html).
   # Never `nil`.
   sig {returns(::T.untyped)}
   def tag(); end
 
-  # An [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html)
+  # An [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html)
   # representing the tag number of this
-  # [`ASN1Data`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ASN1Data.html).
+  # [`ASN1Data`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ASN1Data.html).
   # Never `nil`.
   sig do
     params(
@@ -1232,20 +1237,20 @@ class OpenSSL::ASN1::ASN1Data
   end
   def tag=(tag); end
 
-  # A [`Symbol`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html) representing
+  # A [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html) representing
   # the tag class of this
-  # [`ASN1Data`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ASN1Data.html).
+  # [`ASN1Data`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ASN1Data.html).
   # Never `nil`. See
-  # [`ASN1Data`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ASN1Data.html)
+  # [`ASN1Data`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ASN1Data.html)
   # for possible values.
   sig {returns(::T.untyped)}
   def tag_class(); end
 
-  # A [`Symbol`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html) representing
+  # A [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html) representing
   # the tag class of this
-  # [`ASN1Data`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ASN1Data.html).
+  # [`ASN1Data`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ASN1Data.html).
   # Never `nil`. See
-  # [`ASN1Data`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ASN1Data.html)
+  # [`ASN1Data`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ASN1Data.html)
   # for possible values.
   sig do
     params(
@@ -1256,9 +1261,9 @@ class OpenSSL::ASN1::ASN1Data
   def tag_class=(tag_class); end
 
   # Encodes this
-  # [`ASN1Data`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ASN1Data.html)
+  # [`ASN1Data`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ASN1Data.html)
   # into a DER-encoded
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) value. The
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) value. The
   # result is DER-encoded except for the possibility of indefinite length forms.
   # Indefinite length forms are not allowed in strict DER, so strictly speaking
   # the result of such an encoding would be a BER-encoding.
@@ -1282,7 +1287,7 @@ class OpenSSL::ASN1::ASN1Data
 end
 
 # Generic error class for all errors raised in
-# [`ASN1`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1.html) and any of the
+# [`ASN1`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1.html) and any of the
 # classes defined in it.
 class OpenSSL::ASN1::ASN1Error < OpenSSL::OpenSSLError
 end
@@ -1307,8 +1312,8 @@ class OpenSSL::ASN1::Boolean < OpenSSL::ASN1::Primitive
 end
 
 # The parent class for all constructed encodings. The *value* attribute of a
-# [`Constructive`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/Constructive.html)
-# is always an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html).
+# [`Constructive`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/Constructive.html)
+# is always an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html).
 # Attributes are the same as for ASN1Data, with the addition of *tagging*.
 #
 # ## SET and SEQUENCE
@@ -1319,7 +1324,7 @@ end
 # *   OpenSSL::ASN1::Sequence
 #
 # Please note that tagged sequences and sets are still parsed as instances of
-# ASN1Data. [`Find`](https://docs.ruby-lang.org/en/2.6.0/Find.html) further
+# ASN1Data. [`Find`](https://docs.ruby-lang.org/en/2.7.0/Find.html) further
 # details on tagged values there.
 #
 # ### Example - constructing a SEQUENCE
@@ -1364,14 +1369,14 @@ class OpenSSL::ASN1::Constructive < OpenSSL::ASN1::ASN1Data
   # May be used as a hint for encoding a value either implicitly or explicitly
   # by setting it either to `:IMPLICIT` or to `:EXPLICIT`. *tagging* is not set
   # when a ASN.1 structure is parsed using
-  # [`OpenSSL::ASN1.decode`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1.html#method-c-decode).
+  # [`OpenSSL::ASN1.decode`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1.html#method-c-decode).
   sig {returns(::T.untyped)}
   def tagging(); end
 
   # May be used as a hint for encoding a value either implicitly or explicitly
   # by setting it either to `:IMPLICIT` or to `:EXPLICIT`. *tagging* is not set
   # when a ASN.1 structure is parsed using
-  # [`OpenSSL::ASN1.decode`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1.html#method-c-decode).
+  # [`OpenSSL::ASN1.decode`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1.html#method-c-decode).
   sig do
     params(
       tagging: ::T.untyped,
@@ -1418,49 +1423,49 @@ class OpenSSL::ASN1::NumericString < OpenSSL::ASN1::Primitive
 end
 
 # Represents the primitive object id for
-# [`OpenSSL::ASN1`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1.html)
+# [`OpenSSL::ASN1`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1.html)
 class OpenSSL::ASN1::ObjectId < OpenSSL::ASN1::Primitive
   # The long name of the
-  # [`ObjectId`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ObjectId.html),
+  # [`ObjectId`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ObjectId.html),
   # as defined in <openssl/objects.h>.
   #
   # Also aliased as:
-  # [`long_name`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ObjectId.html#method-i-long_name)
+  # [`long_name`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ObjectId.html#method-i-long_name)
   sig {returns(::T.untyped)}
   def ln(); end
 
   # Alias for:
-  # [`ln`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ObjectId.html#method-i-ln)
+  # [`ln`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ObjectId.html#method-i-ln)
   sig {returns(::T.untyped)}
   def long_name(); end
 
-  # Returns a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
-  # representing the [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html)
+  # Returns a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
+  # representing the [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html)
   # Identifier in the dot notation, e.g. "1.2.3.4.5"
   sig {returns(::T.untyped)}
   def oid(); end
 
   # Alias for:
-  # [`sn`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ObjectId.html#method-i-sn)
+  # [`sn`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ObjectId.html#method-i-sn)
   sig {returns(::T.untyped)}
   def short_name(); end
 
   # The short name of the
-  # [`ObjectId`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ObjectId.html),
+  # [`ObjectId`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ObjectId.html),
   # as defined in <openssl/objects.h>.
   #
   # Also aliased as:
-  # [`short_name`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ObjectId.html#method-i-short_name)
+  # [`short_name`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ObjectId.html#method-i-short_name)
   sig {returns(::T.untyped)}
   def sn(); end
 
   # This adds a new
-  # [`ObjectId`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ObjectId.html)
+  # [`ObjectId`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ObjectId.html)
   # to the internal tables. Where *object\_id* is the numerical form,
   # *short\_name* is the short name, and *long\_name* is the long name.
   #
   # Returns `true` if successful. Raises an
-  # [`OpenSSL::ASN1::ASN1Error`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ASN1Error.html)
+  # [`OpenSSL::ASN1::ASN1Error`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ASN1Error.html)
   # if it fails.
   sig do
     params(
@@ -1478,52 +1483,52 @@ end
 
 # The parent class for all primitive encodings. Attributes are the same as for
 # ASN1Data, with the addition of *tagging*.
-# [`Primitive`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/Primitive.html)
+# [`Primitive`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/Primitive.html)
 # values can never be encoded with indefinite length form, thus it is not
 # possible to set the *indefinite\_length* attribute for
-# [`Primitive`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/Primitive.html)
+# [`Primitive`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/Primitive.html)
 # and its sub-classes.
 #
-# ## [`Primitive`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/Primitive.html) sub-classes and their mapping to Ruby classes
+# ## [`Primitive`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/Primitive.html) sub-classes and their mapping to Ruby classes
 # *   OpenSSL::ASN1::EndOfContent    <=> *value* is always `nil`
 # *   OpenSSL::ASN1::Boolean         <=> *value* is `true` or `false`
 # *   OpenSSL::ASN1::Integer         <=> *value* is an
-#     [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html)
+#     [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html)
 # *   OpenSSL::ASN1::BitString       <=> *value* is a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
 # *   OpenSSL::ASN1::OctetString     <=> *value* is a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
 # *   OpenSSL::ASN1::Null            <=> *value* is always `nil`
 # *   OpenSSL::ASN1::Object          <=> *value* is a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
 # *   OpenSSL::ASN1::Enumerated      <=> *value* is an
-#     [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html)
+#     [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html)
 # *   OpenSSL::ASN1::UTF8String      <=> *value* is a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
 # *   OpenSSL::ASN1::NumericString   <=> *value* is a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
 # *   OpenSSL::ASN1::PrintableString <=> *value* is a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
 # *   OpenSSL::ASN1::T61String       <=> *value* is a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
 # *   OpenSSL::ASN1::VideotexString  <=> *value* is a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
 # *   OpenSSL::ASN1::IA5String       <=> *value* is a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
 # *   OpenSSL::ASN1::UTCTime         <=> *value* is a
-#     [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html)
+#     [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html)
 # *   OpenSSL::ASN1::GeneralizedTime <=> *value* is a
-#     [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html)
+#     [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html)
 # *   OpenSSL::ASN1::GraphicString   <=> *value* is a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
 # *   OpenSSL::ASN1::ISO64String     <=> *value* is a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
 # *   OpenSSL::ASN1::GeneralString   <=> *value* is a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
 # *   OpenSSL::ASN1::UniversalString <=> *value* is a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
 # *   OpenSSL::ASN1::BMPString       <=> *value* is a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
 #
 #
 # ## OpenSSL::ASN1::BitString
@@ -1533,28 +1538,28 @@ end
 # *unused\_bits* is 0. Otherwise *unused\_bits* indicates the number of bits
 # that are to be ignored in the final octet of the BitString's *value*.
 #
-# ## [`OpenSSL::ASN1::ObjectId`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/ObjectId.html)
+# ## [`OpenSSL::ASN1::ObjectId`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/ObjectId.html)
 #
 # NOTE: While
-# [`OpenSSL::ASN1::ObjectId.new`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/Primitive.html#method-c-new)
+# [`OpenSSL::ASN1::ObjectId.new`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/Primitive.html#method-c-new)
 # will allocate a new ObjectId, it is not typically allocated this way, but
 # rather that are received from parsed
-# [`ASN1`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1.html) encodings.
+# [`ASN1`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1.html) encodings.
 #
 # ### Additional attributes
 # *   *sn*: the short name as defined in <openssl/objects.h>.
 # *   *ln*: the long name as defined in <openssl/objects.h>.
 # *   *oid*: the object identifier as a
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), e.g.
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), e.g.
 #     "1.2.3.4.5"
 # *   *short\_name*: alias for *sn*.
 # *   *long\_name*: alias for *ln*.
 #
 #
 # ## Examples
-# With the [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) of
+# With the [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html) of
 # OpenSSL::ASN1::EndOfContent, each
-# [`Primitive`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/Primitive.html)
+# [`Primitive`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/Primitive.html)
 # class constructor takes at least one parameter, the *value*.
 #
 # ### Creating EndOfContent
@@ -1563,7 +1568,7 @@ end
 # eoc = OpenSSL::ASN1::EndOfContent.new
 # ```
 #
-# ### Creating any other [`Primitive`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1/Primitive.html)
+# ### Creating any other [`Primitive`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1/Primitive.html)
 #
 # ```
 # prim = <class>.new(value) # <class> being one of the sub-classes except EndOfContent
@@ -1582,14 +1587,14 @@ class OpenSSL::ASN1::Primitive < OpenSSL::ASN1::ASN1Data
   # May be used as a hint for encoding a value either implicitly or explicitly
   # by setting it either to `:IMPLICIT` or to `:EXPLICIT`. *tagging* is not set
   # when a ASN.1 structure is parsed using
-  # [`OpenSSL::ASN1.decode`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1.html#method-c-decode).
+  # [`OpenSSL::ASN1.decode`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1.html#method-c-decode).
   sig {returns(::T.untyped)}
   def tagging(); end
 
   # May be used as a hint for encoding a value either implicitly or explicitly
   # by setting it either to `:IMPLICIT` or to `:EXPLICIT`. *tagging* is not set
   # when a ASN.1 structure is parsed using
-  # [`OpenSSL::ASN1.decode`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/ASN1.html#method-c-decode).
+  # [`OpenSSL::ASN1.decode`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/ASN1.html#method-c-decode).
   sig do
     params(
       tagging: ::T.untyped,
@@ -1681,7 +1686,7 @@ class OpenSSL::BN
   def <<(_); end
 
   # Alias for:
-  # [`cmp`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html#method-i-cmp)
+  # [`cmp`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html#method-i-cmp)
   sig do
     params(
       _: ::T.untyped,
@@ -1691,12 +1696,12 @@ class OpenSSL::BN
   def <=>(_); end
 
   # Returns `true` only if *obj* has the same value as *bn*. Contrast this with
-  # [`OpenSSL::BN#eql?`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html#method-i-eql-3F),
+  # [`OpenSSL::BN#eql?`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html#method-i-eql-3F),
   # which requires obj to be
-  # [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html).
+  # [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html).
   #
   # Also aliased as:
-  # [`===`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html#method-i-3D-3D-3D)
+  # [`===`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html#method-i-3D-3D-3D)
   sig do
     params(
       _: ::T.untyped,
@@ -1706,7 +1711,7 @@ class OpenSSL::BN
   def ==(_); end
 
   # Alias for:
-  # [`==`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html#method-i-3D-3D)
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html#method-i-3D-3D)
   sig do
     params(
       _: ::T.untyped,
@@ -1741,7 +1746,7 @@ class OpenSSL::BN
   def clear_bit!(_); end
 
   # Also aliased as:
-  # [`<=>`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html#method-i-3C-3D-3E)
+  # [`<=>`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html#method-i-3C-3D-3E)
   sig do
     params(
       _: ::T.untyped,
@@ -1786,7 +1791,8 @@ class OpenSSL::BN
 
   # Returns a hash code for this object.
   #
-  # See also Object#hash.
+  # See also
+  # [`Object#hash`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-hash).
   sig {returns(::T.untyped)}
   def hash(); end
 
@@ -1901,7 +1907,7 @@ class OpenSSL::BN
   def prime?(*_); end
 
   # Performs a Miller-Rabin primality test. This is same as
-  # [`prime?`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html#method-i-prime-3F)
+  # [`prime?`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html#method-i-prime-3F)
   # except this first attempts trial divisions with some small primes.
   #
   # ### Parameters
@@ -1938,17 +1944,17 @@ class OpenSSL::BN
   def to_bn(); end
 
   # Also aliased as:
-  # [`to_int`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html#method-i-to_int)
+  # [`to_int`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html#method-i-to_int)
   sig {returns(::T.untyped)}
   def to_i(); end
 
   # Alias for:
-  # [`to_i`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html#method-i-to_i)
+  # [`to_i`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html#method-i-to_i)
   sig {returns(::T.untyped)}
   def to_int(); end
 
   # ### Parameters
-  # *   *base* - [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html)
+  # *   *base* - [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html)
   #     Valid values:
   #     *   0 - MPI
   #     *   2 - binary
@@ -1980,8 +1986,8 @@ class OpenSSL::BN
   # ### Parameters
   # *   *bits* - integer
   # *   *safe* - boolean
-  # *   *add* - [`BN`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html)
-  # *   *rem* - [`BN`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html)
+  # *   *add* - [`BN`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html)
+  # *   *rem* - [`BN`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html)
   sig do
     params(
       _: ::T.untyped,
@@ -2023,20 +2029,20 @@ class OpenSSL::BN
   def self.rand_range(_); end
 end
 
-# Generic Error for all of
-# [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html) (big num)
+# Generic [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) for all of
+# [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html) (big num)
 class OpenSSL::BNError < OpenSSL::OpenSSLError
 end
 
-# [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) buffering mix-in module.
+# [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) buffering mix-in module.
 #
 # This module allows an
-# [`OpenSSL::SSL::SSLSocket`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLSocket.html)
-# to behave like an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+# [`OpenSSL::SSL::SSLSocket`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html)
+# to behave like an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
 #
 # You typically won't use this module directly, you can see it implemented in
-# [`OpenSSL::SSL::SSLSocket`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLSocket.html).
+# [`OpenSSL::SSL::SSLSocket`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html).
 module OpenSSL::Buffering
   include ::Enumerable
   Elem = type_member(fixed: T.untyped)
@@ -2045,7 +2051,7 @@ module OpenSSL::Buffering
   BLOCK_SIZE = ::T.let(nil, ::T.untyped)
 
   # Writes *s* to the stream. *s* will be converted to a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) using `.to_s`
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) using `.to_s`
   # method.
   sig do
     params(
@@ -2063,10 +2069,10 @@ module OpenSSL::Buffering
   # *eol*.
   #
   # See also
-  # [`gets`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-gets)
+  # [`gets`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-gets)
   #
   # Also aliased as:
-  # [`each_line`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-each_line)
+  # [`each_line`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-each_line)
   sig do
     params(
       eol: ::T.untyped,
@@ -2080,7 +2086,7 @@ module OpenSSL::Buffering
   def each_byte(); end
 
   # Alias for:
-  # [`each`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-each)
+  # [`each`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-each)
   sig do
     params(
       eol: ::T.untyped,
@@ -2090,7 +2096,7 @@ module OpenSSL::Buffering
   def each_line(eol=T.unsafe(nil)); end
 
   # Alias for:
-  # [`eof?`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-eof-3F)
+  # [`eof?`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-eof-3F)
   sig {returns(::T.untyped)}
   def eof(); end
 
@@ -2098,7 +2104,7 @@ module OpenSSL::Buffering
   # be read.
   #
   # Also aliased as:
-  # [`eof`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-eof)
+  # [`eof`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-eof)
   sig {returns(::T.untyped)}
   def eof?(); end
 
@@ -2114,15 +2120,15 @@ module OpenSSL::Buffering
   # *limit* is provided the result will not be longer than the given number of
   # bytes.
   #
-  # *eol* may be a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
-  # or [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html).
+  # *eol* may be a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
+  # or [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html).
   #
   # Unlike
-  # [`IO#gets`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-gets) the
+  # [`IO#gets`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-gets) the
   # line read will not be assigned to +$\_+.
   #
   # Unlike
-  # [`IO#gets`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-gets) the
+  # [`IO#gets`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-gets) the
   # separator must be provided if a limit is provided.
   sig do
     params(
@@ -2143,7 +2149,7 @@ module OpenSSL::Buffering
 
   # Writes *args* to the stream.
   #
-  # See [`IO#print`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-print)
+  # See [`IO#print`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-print)
   # for full details.
   sig do
     params(
@@ -2157,7 +2163,7 @@ module OpenSSL::Buffering
   # format string.
   #
   # See
-  # [`Kernel#sprintf`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-sprintf)
+  # [`Kernel#sprintf`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-sprintf)
   # for format string details.
   sig do
     params(
@@ -2170,7 +2176,7 @@ module OpenSSL::Buffering
 
   # Writes *args* to the stream along with a record separator.
   #
-  # See [`IO#puts`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-puts)
+  # See [`IO#puts`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-puts)
   # for full details.
   sig do
     params(
@@ -2183,7 +2189,7 @@ module OpenSSL::Buffering
   # Reads *size* bytes from the stream. If *buf* is provided it must reference a
   # string which will receive the data.
   #
-  # See [`IO#read`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-read)
+  # See [`IO#read`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-read)
   # for full details.
   sig do
     params(
@@ -2197,25 +2203,25 @@ module OpenSSL::Buffering
   # Reads at most *maxlen* bytes in the non-blocking manner.
   #
   # When no data can be read without blocking it raises
-  # [`OpenSSL::SSL::SSLError`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLError.html)
+  # [`OpenSSL::SSL::SSLError`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLError.html)
   # extended by
-  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitReadable.html)
+  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitReadable.html)
   # or
-  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitWritable.html).
+  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitWritable.html).
   #
-  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitReadable.html)
+  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitReadable.html)
   # means SSL needs to read internally so
-  # [`read_nonblock`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-read_nonblock)
+  # [`read_nonblock`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-read_nonblock)
   # should be called again when the underlying
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) is readable.
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) is readable.
   #
-  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitWritable.html)
+  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitWritable.html)
   # means SSL needs to write internally so
-  # [`read_nonblock`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-read_nonblock)
+  # [`read_nonblock`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-read_nonblock)
   # should be called again after the underlying
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) is writable.
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) is writable.
   #
-  # [`OpenSSL::Buffering#read_nonblock`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-read_nonblock)
+  # [`OpenSSL::Buffering#read_nonblock`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-read_nonblock)
   # needs two rescue clause as follows:
   #
   # ```ruby
@@ -2232,18 +2238,18 @@ module OpenSSL::Buffering
   # ```
   #
   # Note that one reason that
-  # [`read_nonblock`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-read_nonblock)
-  # writes to the underlying [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # [`read_nonblock`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-read_nonblock)
+  # writes to the underlying [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # is when the peer requests a new TLS/SSL handshake. See openssl the FAQ for
   # more details. http://www.openssl.org/support/faq.html
   #
   # By specifying a keyword argument *exception* to `false`, you can indicate
   # that
-  # [`read_nonblock`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-read_nonblock)
+  # [`read_nonblock`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-read_nonblock)
   # should not raise an IO::Wait\*able exception, but return the symbol
   # `:wait_writable` or `:wait_readable` instead. At EOF, it will return `nil`
   # instead of raising
-  # [`EOFError`](https://docs.ruby-lang.org/en/2.6.0/EOFError.html).
+  # [`EOFError`](https://docs.ruby-lang.org/en/2.7.0/EOFError.html).
   sig do
     params(
       maxlen: ::T.untyped,
@@ -2255,14 +2261,14 @@ module OpenSSL::Buffering
   def read_nonblock(maxlen, buf=T.unsafe(nil), exception: T.unsafe(nil)); end
 
   # Reads a one-character string from the stream. Raises an
-  # [`EOFError`](https://docs.ruby-lang.org/en/2.6.0/EOFError.html) at end of
+  # [`EOFError`](https://docs.ruby-lang.org/en/2.7.0/EOFError.html) at end of
   # file.
   sig {returns(::T.untyped)}
   def readchar(); end
 
   # Reads a line from the stream which is separated by *eol*.
   #
-  # Raises [`EOFError`](https://docs.ruby-lang.org/en/2.6.0/EOFError.html) if at
+  # Raises [`EOFError`](https://docs.ruby-lang.org/en/2.7.0/EOFError.html) if at
   # end of file.
   sig do
     params(
@@ -2275,7 +2281,7 @@ module OpenSSL::Buffering
   # Reads lines from the stream which are separated by *eol*.
   #
   # See also
-  # [`gets`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-gets)
+  # [`gets`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-gets)
   sig do
     params(
       eol: ::T.untyped,
@@ -2288,7 +2294,7 @@ module OpenSSL::Buffering
   # reference a string which will receive the data.
   #
   # See
-  # [`IO#readpartial`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-readpartial)
+  # [`IO#readpartial`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-readpartial)
   # for full details.
   sig do
     params(
@@ -2301,14 +2307,14 @@ module OpenSSL::Buffering
 
   # The "sync mode" of the SSLSocket.
   #
-  # See [`IO#sync`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-sync)
+  # See [`IO#sync`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sync)
   # for full details.
   sig {returns(::T.untyped)}
   def sync(); end
 
   # The "sync mode" of the SSLSocket.
   #
-  # See [`IO#sync`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-sync)
+  # See [`IO#sync`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sync)
   # for full details.
   sig do
     params(
@@ -2322,7 +2328,7 @@ module OpenSSL::Buffering
   # character read will return it.
   #
   # Unlike
-  # [`IO#getc`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-getc)
+  # [`IO#getc`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-getc)
   # multiple bytes may be pushed back onto the stream.
   #
   # Has no effect on unbuffered reads (such as sysread).
@@ -2335,7 +2341,7 @@ module OpenSSL::Buffering
   def ungetc(c); end
 
   # Writes *s* to the stream. If the argument is not a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) it will be
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) it will be
   # converted using `.to_s` method. Returns the number of bytes written.
   sig do
     params(
@@ -2349,30 +2355,30 @@ module OpenSSL::Buffering
   #
   # If there is buffered data, it is flushed first. This may block.
   #
-  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-write_nonblock)
+  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-write_nonblock)
   # returns number of bytes written to the SSL connection.
   #
   # When no data can be written without blocking it raises
-  # [`OpenSSL::SSL::SSLError`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLError.html)
+  # [`OpenSSL::SSL::SSLError`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLError.html)
   # extended by
-  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitReadable.html)
+  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitReadable.html)
   # or
-  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitWritable.html).
+  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitWritable.html).
   #
-  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitReadable.html)
+  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitReadable.html)
   # means SSL needs to read internally so
-  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-write_nonblock)
+  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-write_nonblock)
   # should be called again after the underlying
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) is readable.
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) is readable.
   #
-  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitWritable.html)
+  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitWritable.html)
   # means SSL needs to write internally so
-  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-write_nonblock)
+  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-write_nonblock)
   # should be called again after underlying
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) is writable.
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) is writable.
   #
   # So
-  # [`OpenSSL::Buffering#write_nonblock`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-write_nonblock)
+  # [`OpenSSL::Buffering#write_nonblock`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-write_nonblock)
   # needs two rescue clause as follows.
   #
   # ```ruby
@@ -2389,15 +2395,15 @@ module OpenSSL::Buffering
   # ```
   #
   # Note that one reason that
-  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-write_nonblock)
+  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-write_nonblock)
   # reads from the underlying
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) is when the peer
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) is when the peer
   # requests a new TLS/SSL handshake. See the openssl FAQ for more details.
   # http://www.openssl.org/support/faq.html
   #
   # By specifying a keyword argument *exception* to `false`, you can indicate
   # that
-  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Buffering.html#method-i-write_nonblock)
+  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-write_nonblock)
   # should not raise an IO::Wait\*able exception, but return the symbol
   # `:wait_writable` or `:wait_readable` instead.
   sig do
@@ -2412,7 +2418,7 @@ end
 
 # Provides symmetric algorithms for encryption and decryption. The algorithms
 # that are available depend on the particular version of
-# [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) that is
+# [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) that is
 # installed.
 #
 # ### Listing all supported algorithms
@@ -2423,15 +2429,15 @@ end
 # puts OpenSSL::Cipher.ciphers
 # ```
 #
-# ### Instantiating a [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html)
+# ### Instantiating a [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html)
 #
 # There are several ways to create a
-# [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html) instance.
+# [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html) instance.
 # Generally, a
-# [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html) algorithm
+# [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html) algorithm
 # is categorized by its name, the key length in bits and the cipher mode to be
 # used. The most generic way to create a
-# [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html) is the
+# [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html) is the
 # following
 #
 # ```ruby
@@ -2447,7 +2453,7 @@ end
 # ```
 #
 # For each algorithm supported, there is a class defined under the
-# [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html) class that
+# [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html) class that
 # goes by the name of the cipher, e.g. to obtain an instance of AES, you could
 # also use
 #
@@ -2473,7 +2479,7 @@ end
 # algorithms, this is reflected by not having to choose different classes for
 # either operation, both can be done using the same class. Still, after
 # obtaining a
-# [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html) instance,
+# [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html) instance,
 # we need to tell the instance what it is that we intend to do with it, so we
 # need to call either
 #
@@ -2487,7 +2493,7 @@ end
 # cipher.decrypt
 # ```
 #
-# on the [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html)
+# on the [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html)
 # instance. This should be the first call after creating the instance, otherwise
 # configuration that has already been set could get lost in the process.
 #
@@ -2498,7 +2504,7 @@ end
 # private information. There are a lot of ways to create insecure keys, the most
 # notable is to simply take a password as the key without processing the
 # password further. A simple and secure way to create a key for a particular
-# [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html) is
+# [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html) is
 #
 # ```ruby
 # cipher = OpenSSL::AES256.new(:CFB)
@@ -2509,12 +2515,12 @@ end
 # If you absolutely need to use passwords as encryption keys, you should use
 # Password-Based Key Derivation Function 2 (PBKDF2) by generating the key with
 # the help of the functionality provided by
-# [`OpenSSL::PKCS5.pbkdf2_hmac_sha1`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKCS5.html#method-i-pbkdf2_hmac_sha1)
+# [`OpenSSL::PKCS5.pbkdf2_hmac_sha1`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKCS5.html#method-i-pbkdf2_hmac_sha1)
 # or
-# [`OpenSSL::PKCS5.pbkdf2_hmac`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKCS5.html#method-i-pbkdf2_hmac).
+# [`OpenSSL::PKCS5.pbkdf2_hmac`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKCS5.html#method-i-pbkdf2_hmac).
 #
 # Although there is
-# [`Cipher#pkcs5_keyivgen`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-pkcs5_keyivgen),
+# [`Cipher#pkcs5_keyivgen`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-pkcs5_keyivgen),
 # its use is deprecated and it should only be used in legacy applications
 # because it does not use the newer PKCS#5 v2 algorithms.
 #
@@ -2534,13 +2540,13 @@ end
 # prevent certain kinds of attacks. Therefore, ideally
 #
 # **Always create a secure random IV for every encryption of your
-# [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html)**
+# [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html)**
 #
 # A new, random IV should be created for every encryption of data. Think of the
 # IV as a nonce (number used once) - it's public but random and unpredictable. A
 # secure random IV can be created as follows
 #
-# ```
+# ```ruby
 # cipher = ...
 # cipher.encrypt
 # key = cipher.random_key
@@ -2552,26 +2558,26 @@ end
 # As a general rule of thumb, exposing the key directly or indirectly should be
 # avoided at all cost and exceptions only be made with good reason.
 #
-# ### Calling [`Cipher#final`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-final)
+# ### Calling [`Cipher#final`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-final)
 #
 # ECB (which should not be used) and CBC are both block-based modes. This means
 # that unlike for the other streaming-based modes, they operate on fixed-size
 # blocks of data, and therefore they require a "finalization" step to produce or
 # correctly decrypt the last block of data by appropriately handling some form
 # of padding. Therefore it is essential to add the output of
-# [`OpenSSL::Cipher#final`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-final)
+# [`OpenSSL::Cipher#final`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-final)
 # to your encryption/decryption buffer or you will end up with decryption errors
 # or truncated data.
 #
 # Although this is not really necessary for streaming-mode ciphers, it is still
 # recommended to apply the same pattern of adding the output of
-# [`Cipher#final`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-final)
+# [`Cipher#final`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-final)
 # there as well - it also enables you to switch between modes more easily in the
 # future.
 #
 # ### Encrypting and decrypting some data
 #
-# ```
+# ```ruby
 # data = "Very, very confidential data"
 #
 # cipher = OpenSSL::Cipher::AES.new(128, :CBC)
@@ -2591,14 +2597,14 @@ end
 # puts data == plain #=> true
 # ```
 #
-# ### Authenticated Encryption and Associated [`Data`](https://docs.ruby-lang.org/en/2.6.0/Data.html) (AEAD)
+# ### Authenticated Encryption and Associated [`Data`](https://docs.ruby-lang.org/en/2.7.0/Data.html) (AEAD)
 #
-# If the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) version
+# If the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) version
 # used supports it, an Authenticated Encryption mode (such as GCM or CCM) should
 # always be preferred over any unauthenticated mode. Currently,
-# [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) supports AE only
+# [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) supports AE only
 # in combination with Associated
-# [`Data`](https://docs.ruby-lang.org/en/2.6.0/Data.html) (AEAD) where
+# [`Data`](https://docs.ruby-lang.org/en/2.7.0/Data.html) (AEAD) where
 # additional associated data is included in the encryption process to compute a
 # tag at the end of the encryption. This tag will also be used in the decryption
 # process and by verifying its validity, the authenticity of a given ciphertext
@@ -2612,7 +2618,7 @@ end
 # An associated data is used where there is additional information, such as
 # headers or some metadata, that must be also authenticated but not necessarily
 # need to be encrypted. If no associated data is needed for encryption and later
-# decryption, the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+# decryption, the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
 # library still requires a value to be set - "" may be used in case none is
 # available.
 #
@@ -2660,19 +2666,19 @@ class OpenSSL::Cipher
   #
   # The AAD must be set prior to encryption or decryption. In encryption mode,
   # it must be set after calling
-  # [`Cipher#encrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-encrypt)
+  # [`Cipher#encrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-encrypt)
   # and setting
-  # [`Cipher#key=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-key-3D)
+  # [`Cipher#key=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-key-3D)
   # and
-  # [`Cipher#iv=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-iv-3D).
+  # [`Cipher#iv=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-iv-3D).
   # When decrypting, the authenticated data must be set after key, iv and
   # especially **after** the authentication tag has been set. I.e. set it only
   # after calling
-  # [`Cipher#decrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-decrypt),
-  # [`Cipher#key=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-key-3D),
-  # [`Cipher#iv=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-iv-3D)
+  # [`Cipher#decrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-decrypt),
+  # [`Cipher#key=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-key-3D),
+  # [`Cipher#iv=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-iv-3D)
   # and
-  # [`Cipher#auth_tag=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-auth_tag-3D)
+  # [`Cipher#auth_tag=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-auth_tag-3D)
   # first.
   sig do
     params(
@@ -2683,17 +2689,17 @@ class OpenSSL::Cipher
   def auth_data=(auth_data); end
 
   # Gets the authentication tag generated by Authenticated Encryption
-  # [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html) modes
+  # [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html) modes
   # (GCM for example). This tag may be stored along with the ciphertext, then
   # set on the decryption cipher to authenticate the contents of the ciphertext
   # against changes. If the optional integer parameter *tag\_len* is given, the
   # returned tag will be *tag\_len* bytes long. If the parameter is omitted, the
   # default length of 16 bytes or the length previously set by
-  # [`auth_tag_len=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-auth_tag_len-3D)
+  # [`auth_tag_len=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-auth_tag_len-3D)
   # will be used. For maximum security, the longest possible should be chosen.
   #
   # The tag may only be retrieved after calling
-  # [`Cipher#final`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-final).
+  # [`Cipher#final`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-final).
   sig do
     params(
       _: ::T.untyped,
@@ -2705,18 +2711,18 @@ class OpenSSL::Cipher
   # Sets the authentication tag to verify the integrity of the ciphertext. This
   # can be called only when the cipher supports AE. The tag must be set after
   # calling
-  # [`Cipher#decrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-decrypt),
-  # [`Cipher#key=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-key-3D)
+  # [`Cipher#decrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-decrypt),
+  # [`Cipher#key=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-key-3D)
   # and
-  # [`Cipher#iv=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-iv-3D),
+  # [`Cipher#iv=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-iv-3D),
   # but before calling
-  # [`Cipher#final`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-final).
+  # [`Cipher#final`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-final).
   # After all decryption is performed, the tag is verified automatically in the
   # call to
-  # [`Cipher#final`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-final).
+  # [`Cipher#final`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-final).
   #
   # For OCB mode, the tag length must be supplied with
-  # [`auth_tag_len=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-auth_tag_len-3D)
+  # [`auth_tag_len=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-auth_tag_len-3D)
   # beforehand.
   sig do
     params(
@@ -2741,28 +2747,28 @@ class OpenSSL::Cipher
   def auth_tag_len=(auth_tag_len); end
 
   # Indicated whether this
-  # [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html) instance
+  # [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html) instance
   # uses an Authenticated Encryption mode.
   sig {returns(::T.untyped)}
   def authenticated?(); end
 
   # Returns the size in bytes of the blocks on which this
-  # [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html) operates
+  # [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html) operates
   # on.
   sig {returns(::T.untyped)}
   def block_size(); end
 
   # Initializes the
-  # [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html) for
+  # [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html) for
   # decryption.
   #
   # Make sure to call
-  # [`Cipher#encrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-encrypt)
+  # [`Cipher#encrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-encrypt)
   # or
-  # [`Cipher#decrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-decrypt)
+  # [`Cipher#decrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-decrypt)
   # before using any of the following methods:
   #
-  #     [`key=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-key-3D), [`iv=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-iv-3D), [`random_key`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-random_key), [`random_iv`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-random_iv), [`pkcs5_keyivgen`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-pkcs5_keyivgen)
+  #     [`key=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-key-3D), [`iv=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-iv-3D), [`random_key`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-random_key), [`random_iv`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-random_iv), [`pkcs5_keyivgen`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-pkcs5_keyivgen)
   # :
   #
   # Internally calls EVP\_CipherInit\_ex(ctx, NULL, NULL, NULL, NULL, 0).
@@ -2775,16 +2781,16 @@ class OpenSSL::Cipher
   def decrypt(*_); end
 
   # Initializes the
-  # [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html) for
+  # [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html) for
   # encryption.
   #
   # Make sure to call
-  # [`Cipher#encrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-encrypt)
+  # [`Cipher#encrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-encrypt)
   # or
-  # [`Cipher#decrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-decrypt)
+  # [`Cipher#decrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-decrypt)
   # before using any of the following methods:
   #
-  #     [`key=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-key-3D), [`iv=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-iv-3D), [`random_key`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-random_key), [`random_iv`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-random_iv), [`pkcs5_keyivgen`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-pkcs5_keyivgen)
+  #     [`key=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-key-3D), [`iv=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-iv-3D), [`random_key`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-random_key), [`random_iv`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-random_iv), [`pkcs5_keyivgen`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-pkcs5_keyivgen)
   # :
   #
   # Internally calls EVP\_CipherInit\_ex(ctx, NULL, NULL, NULL, NULL, 1).
@@ -2797,13 +2803,13 @@ class OpenSSL::Cipher
   def encrypt(*_); end
 
   # Returns the remaining data held in the cipher object. Further calls to
-  # [`Cipher#update`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-update)
+  # [`Cipher#update`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-update)
   # or
-  # [`Cipher#final`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-final)
+  # [`Cipher#final`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-final)
   # will return garbage. This call should always be made as the last call of an
   # encryption or decryption operation, after having fed the entire plaintext or
   # ciphertext to the
-  # [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html)
+  # [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html)
   # instance.
   #
   # If an authenticated cipher was used, a CipherError is raised if the tag
@@ -2825,13 +2831,13 @@ class OpenSSL::Cipher
   # mode, an IV is always explicitly required and should be set prior to
   # encryption. The IV itself can be safely transmitted in public, but it should
   # be unpredictable to prevent certain kinds of attacks. You may use
-  # [`Cipher#random_iv`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-random_iv)
+  # [`Cipher#random_iv`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-random_iv)
   # to create a secure random IV.
   #
   # Only call this method after calling
-  # [`Cipher#encrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-encrypt)
+  # [`Cipher#encrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-encrypt)
   # or
-  # [`Cipher#decrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-decrypt).
+  # [`Cipher#decrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-decrypt).
   sig do
     params(
       iv: ::T.untyped,
@@ -2841,12 +2847,12 @@ class OpenSSL::Cipher
   def iv=(iv); end
 
   # Returns the expected length in bytes for an IV for this
-  # [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html).
+  # [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html).
   sig {returns(::T.untyped)}
   def iv_len(); end
 
   # Sets the IV/nonce length of the
-  # [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html).
+  # [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html).
   # Normally block ciphers don't allow changing the IV length, but some make use
   # of IV for 'nonce'. You may need this for interoperability with other
   # applications.
@@ -2861,15 +2867,15 @@ class OpenSSL::Cipher
   # Sets the cipher key. To generate a key, you should either use a secure
   # random byte string or, if the key is to be derived from a password, you
   # should rely on PBKDF2 functionality provided by
-  # [`OpenSSL::PKCS5`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKCS5.html).
+  # [`OpenSSL::PKCS5`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKCS5.html).
   # To generate a secure random-based key,
-  # [`Cipher#random_key`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-random_key)
+  # [`Cipher#random_key`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-random_key)
   # may be used.
   #
   # Only call this method after calling
-  # [`Cipher#encrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-encrypt)
+  # [`Cipher#encrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-encrypt)
   # or
-  # [`Cipher#decrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-decrypt).
+  # [`Cipher#decrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-decrypt).
   sig do
     params(
       key: ::T.untyped,
@@ -2879,7 +2885,7 @@ class OpenSSL::Cipher
   def key=(key); end
 
   # Returns the key length in bytes of the
-  # [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html).
+  # [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html).
   sig {returns(::T.untyped)}
   def key_len(); end
 
@@ -2924,17 +2930,17 @@ class OpenSSL::Cipher
   # **WARNING**: This method is only PKCS5 v1.5 compliant when using RC2,
   # RC4-40, or DES with MD5 or SHA1. Using anything else (like AES) will
   # generate the key/iv using an
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) specific
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) specific
   # method. This method is deprecated and should no longer be used. Use a PKCS5
   # v2 key generation method from
-  # [`OpenSSL::PKCS5`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKCS5.html)
+  # [`OpenSSL::PKCS5`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKCS5.html)
   # instead.
   #
   # ### Parameters
   # *   *salt* must be an 8 byte string if provided.
   # *   *iterations* is an integer with a default of 2048.
   # *   *digest* is a
-  #     [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html) object that
+  #     [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html) object that
   #     defaults to 'MD5'
   #
   #
@@ -2948,33 +2954,33 @@ class OpenSSL::Cipher
   def pkcs5_keyivgen(*_); end
 
   # Generate a random IV with
-  # [`OpenSSL::Random.random_bytes`](https://docs.ruby-lang.org/en/2.6.0/Random.html#method-c-random_bytes)
+  # [`OpenSSL::Random.random_bytes`](https://docs.ruby-lang.org/en/2.7.0/Random.html#method-c-random_bytes)
   # and sets it to the cipher, and returns it.
   #
   # You must call
-  # [`encrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-encrypt)
+  # [`encrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-encrypt)
   # or
-  # [`decrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-decrypt)
+  # [`decrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-decrypt)
   # before calling this method.
   sig {returns(::T.untyped)}
   def random_iv(); end
 
   # Generate a random key with
-  # [`OpenSSL::Random.random_bytes`](https://docs.ruby-lang.org/en/2.6.0/Random.html#method-c-random_bytes)
+  # [`OpenSSL::Random.random_bytes`](https://docs.ruby-lang.org/en/2.7.0/Random.html#method-c-random_bytes)
   # and sets it to the cipher, and returns it.
   #
   # You must call
-  # [`encrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-encrypt)
+  # [`encrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-encrypt)
   # or
-  # [`decrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-decrypt)
+  # [`decrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-decrypt)
   # before calling this method.
   sig {returns(::T.untyped)}
   def random_key(); end
 
   # Fully resets the internal state of the
-  # [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html). By
+  # [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html). By
   # using this, the same
-  # [`Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html) instance
+  # [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html) instance
   # may be used several times for encryption or decryption tasks.
   #
   # Internally calls EVP\_CipherInit\_ex(ctx, NULL, NULL, NULL, NULL, -1).
@@ -2982,10 +2988,10 @@ class OpenSSL::Cipher
   def reset(); end
 
   # Encrypts data in a streaming fashion. Hand consecutive blocks of data to the
-  # [`update`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-update)
+  # [`update`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-update)
   # method in order to encrypt it. Returns the encrypted data chunk. When done,
   # the output of
-  # [`Cipher#final`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html#method-i-final)
+  # [`Cipher#final`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-final)
   # should be additionally added to the result.
   #
   # If *buffer* is given, the encryption/decryption result will be written to
@@ -3116,13 +3122,13 @@ class OpenSSL::Cipher::RC5 < OpenSSL::Cipher
   def initialize(*args); end
 end
 
-# # [`OpenSSL::Config`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Config.html)
+# # [`OpenSSL::Config`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Config.html)
 #
 # Configuration for the openssl library.
 #
 # Many system's installation of openssl library will depend on your system
 # configuration. See the value of
-# [`OpenSSL::Config::DEFAULT_CONFIG_FILE`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Config.html#DEFAULT_CONFIG_FILE)
+# [`OpenSSL::Config::DEFAULT_CONFIG_FILE`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Config.html#DEFAULT_CONFIG_FILE)
 # for the location of the file for your host.
 #
 # See also http://www.openssl.org/docs/apps/config.html
@@ -3160,7 +3166,7 @@ class OpenSSL::Config
   def [](section); end
 
   # Sets a specific *section* name with a
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) *pairs*.
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) *pairs*.
   #
   # Given the following configuration being created:
   #
@@ -3195,7 +3201,7 @@ class OpenSSL::Config
   end
   def []=(section, pairs); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the target *key* with
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the target *key* with
   # a given *value* under a specific *section*.
   #
   # Given the following configurating file being loaded:
@@ -3278,7 +3284,7 @@ class OpenSSL::Config
   end
   def initialize(filename=T.unsafe(nil)); end
 
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) representation
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) representation
   # of this configuration object, including the class name and its sections.
   sig {returns(::T.untyped)}
   def inspect(); end
@@ -3311,7 +3317,7 @@ class OpenSSL::Config
   # ```
   #
   # You can parse get the serialized configuration using
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Config.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Config.html#method-i-to_s)
   # and then parse it later:
   #
   # ```ruby
@@ -3355,9 +3361,9 @@ class OpenSSL::Config
   def self.load(*_); end
 
   # Parses a given *string* as a blob that contains configuration for
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html).
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html).
   #
-  # If the source of the [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) is
+  # If the source of the [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) is
   # a file, then consider using parse\_config.
   sig do
     params(
@@ -3384,10 +3390,10 @@ end
 class OpenSSL::ConfigError < OpenSSL::OpenSSLError
 end
 
-# [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html)
+# [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html)
 # allows you to compute message digests (sometimes interchangeably called
 # "hashes") of arbitrary data that are cryptographically secure, i.e. a
-# [`Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html) implements
+# [`Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html) implements
 # a secure one-way function.
 #
 # One-way functions offer some useful properties. E.g. given two distinct inputs
@@ -3419,14 +3425,14 @@ end
 #
 #
 # For each of these algorithms, there is a sub-class of
-# [`Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html) that can
+# [`Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html) that can
 # be instantiated as simply as e.g.
 #
 # ```ruby
 # digest = OpenSSL::Digest::SHA1.new
 # ```
 #
-# ### Mapping between [`Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html) class and sn/ln
+# ### Mapping between [`Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html) class and sn/ln
 #
 # The sn (short names) and ln (long names) are defined in <openssl/object.h> and
 # <openssl/obj\_mac.h>. They are textual representations of ASN.1 OBJECT
@@ -3499,7 +3505,7 @@ end
 # digest = sha256.digest
 # ```
 #
-# ### Reuse a [`Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html) instance
+# ### Reuse a [`Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html) instance
 #
 # ```ruby
 # data1 = File.read('file1')
@@ -3555,7 +3561,7 @@ class OpenSSL::Digest < Digest::Class
   def initialize(*_); end
 
   # Returns the sn of this
-  # [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html) algorithm.
+  # [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html) algorithm.
   #
   # ### Example
   #
@@ -3566,9 +3572,9 @@ class OpenSSL::Digest < Digest::Class
   sig {returns(::T.untyped)}
   def name(); end
 
-  # Resets the [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html) in
+  # Resets the [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html) in
   # the sense that any Digest#update that has been performed is abandoned and
-  # the [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html) is set to
+  # the [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html) is set to
   # its initial state again.
   sig {returns(::T.untyped)}
   def reset(); end
@@ -3576,7 +3582,7 @@ class OpenSSL::Digest < Digest::Class
   # Not every message digest can be computed in one single pass. If a message
   # digest is to be computed from several subsequent sources, then each may be
   # passed individually to the
-  # [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html) instance.
+  # [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html) instance.
   #
   # ### Example
   #
@@ -3598,7 +3604,7 @@ class OpenSSL::Digest < Digest::Class
   def update(_); end
 
   # Return the hash value computed with *name*
-  # [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html). *name* is
+  # [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html). *name* is
   # either the long name or short name of a supported digest algorithm.
   #
   # ### Examples
@@ -3674,9 +3680,9 @@ class OpenSSL::Digest::DSS1 < OpenSSL::Digest
   def self.hexdigest(data); end
 end
 
-# Generic [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html)
+# Generic [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html)
 # class that is raised if an error occurs during a
-# [`Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html) operation.
+# [`Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html) operation.
 class OpenSSL::Digest::DigestError < OpenSSL::OpenSSLError
 end
 
@@ -3981,7 +3987,7 @@ class OpenSSL::Engine
   METHOD_RSA = ::T.let(nil, ::T.untyped)
 
   # Returns a new instance of
-  # [`OpenSSL::Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html)
+  # [`OpenSSL::Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html)
   # by *name*, if it is available in this engine.
   #
   # An EngineError will be raised if the cipher is unavailable.
@@ -4016,7 +4022,7 @@ class OpenSSL::Engine
   def ctrl_cmd(*_); end
 
   # Returns a new instance of
-  # [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html)
+  # [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html)
   # by *name*.
   #
   # Will raise an EngineError if the digest is unavailable.
@@ -4061,7 +4067,7 @@ class OpenSSL::Engine
   # Loads the given private key identified by *id* and *data*.
   #
   # An EngineError is raised of the
-  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html) is
+  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html) is
   # unavailable.
   sig do
     params(
@@ -4074,7 +4080,7 @@ class OpenSSL::Engine
   # Loads the given public key identified by *id* and *data*.
   #
   # An EngineError is raised of the
-  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html) is
+  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html) is
   # unavailable.
   sig do
     params(
@@ -4095,7 +4101,7 @@ class OpenSSL::Engine
   sig {returns(::T.untyped)}
   def name(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the defaults for this
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the defaults for this
   # engine with the given *flag*.
   #
   # These flags are used to control combinations of algorithm methods.
@@ -4119,7 +4125,7 @@ class OpenSSL::Engine
   def set_default(_); end
 
   # Fetches the engine as specified by the *id*
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   #
   # ```
   # OpenSSL::Engine.by_id("openssl")
@@ -4127,7 +4133,7 @@ class OpenSSL::Engine
   # ```
   #
   # See
-  # [`OpenSSL::Engine.engines`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Engine.html#method-c-engines)
+  # [`OpenSSL::Engine.engines`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Engine.html#method-c-engines)
   # for the currently loaded engines.
   sig do
     params(
@@ -4138,11 +4144,11 @@ class OpenSSL::Engine
   def self.by_id(_); end
 
   # It is only necessary to run cleanup when engines are loaded via
-  # [`OpenSSL::Engine.load`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Engine.html#method-c-load).
+  # [`OpenSSL::Engine.load`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Engine.html#method-c-load).
   # However, running cleanup before exit is recommended.
   #
   # Note that this is needed and works only in
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) < 1.1.0.
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) < 1.1.0.
   sig {returns(::T.untyped)}
   def self.cleanup(); end
 
@@ -4152,7 +4158,7 @@ class OpenSSL::Engine
 
   # This method loads engines. If *name* is nil, then all builtin engines are
   # loaded. Otherwise, the given *name*, as a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html),  is loaded if
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html),  is loaded if
   # available to your runtime, and returns true. If *name* is not found, then
   # nil is returned.
   sig do
@@ -4165,7 +4171,7 @@ class OpenSSL::Engine
 end
 
 # This is the generic exception for
-# [`OpenSSL::Engine`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Engine.html)
+# [`OpenSSL::Engine`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Engine.html)
 # related errors
 class OpenSSL::Engine::EngineError < OpenSSL::OpenSSLError
 end
@@ -4174,7 +4180,7 @@ end
 # example if socket support is enabled, or the host name TLS extension is
 # enabled. Constants in this module will always be defined, but contain `true`
 # or `false` values depending on the configuration of your
-# [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) installation.
+# [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) installation.
 module OpenSSL::ExtConfig
   HAVE_TLSEXT_HOST_NAME = ::T.let(nil, ::T.untyped)
   OPENSSL_NO_SOCK = ::T.let(nil, ::T.untyped)
@@ -4182,15 +4188,17 @@ module OpenSSL::ExtConfig
 
 end
 
-# [`OpenSSL::HMAC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/HMAC.html)
-# allows computing Hash-based Message Authentication Code (HMAC). It is a type
-# of message authentication code (MAC) involving a hash function in combination
-# with a key. [`HMAC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/HMAC.html)
-# can be used to verify the integrity of a message as well as the authenticity.
+# [`OpenSSL::HMAC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html)
+# allows computing Hash-based Message Authentication Code
+# ([`HMAC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html)). It is a
+# type of message authentication code (MAC) involving a hash function in
+# combination with a key.
+# [`HMAC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html) can be used to
+# verify the integrity of a message as well as the authenticity.
 #
-# [`OpenSSL::HMAC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/HMAC.html) has a
+# [`OpenSSL::HMAC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html) has a
 # similar interface to
-# [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html).
+# [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html).
 #
 # ### HMAC-SHA256 using one-shot interface
 #
@@ -4215,7 +4223,7 @@ end
 # ```
 class OpenSSL::HMAC
   # Alias for:
-  # [`update`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/HMAC.html#method-i-update)
+  # [`update`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html#method-i-update)
   sig do
     params(
       _: ::T.untyped,
@@ -4241,8 +4249,8 @@ class OpenSSL::HMAC
   # string.
   #
   # Also aliased as:
-  # [`inspect`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/HMAC.html#method-i-inspect),
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/HMAC.html#method-i-to_s)
+  # [`inspect`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html#method-i-inspect),
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html#method-i-to_s)
   sig {returns(::T.untyped)}
   def hexdigest(); end
 
@@ -4256,7 +4264,7 @@ class OpenSSL::HMAC
   def initialize(_, _1); end
 
   # Alias for:
-  # [`hexdigest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/HMAC.html#method-i-hexdigest)
+  # [`hexdigest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html#method-i-hexdigest)
   sig {returns(::T.untyped)}
   def inspect(); end
 
@@ -4279,7 +4287,7 @@ class OpenSSL::HMAC
   def reset(); end
 
   # Alias for:
-  # [`hexdigest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/HMAC.html#method-i-hexdigest)
+  # [`hexdigest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html#method-i-hexdigest)
   sig {returns(::T.untyped)}
   def to_s(); end
 
@@ -4300,7 +4308,7 @@ class OpenSSL::HMAC
   #
   #
   # Also aliased as:
-  # [`<<`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/HMAC.html#method-i-3C-3C)
+  # [`<<`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html#method-i-3C-3C)
   sig do
     params(
       _: ::T.untyped,
@@ -4311,9 +4319,9 @@ class OpenSSL::HMAC
 
   # Returns the authentication code as a binary string. The *digest* parameter
   # specifies the digest algorithm to use. This may be a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) representing the
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) representing the
   # algorithm name or an instance of
-  # [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html).
+  # [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html).
   #
   # ### Example
   #
@@ -4336,9 +4344,9 @@ class OpenSSL::HMAC
 
   # Returns the authentication code as a hex-encoded string. The *digest*
   # parameter specifies the digest algorithm to use. This may be a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) representing the
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) representing the
   # algorithm name or an instance of
-  # [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html).
+  # [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html).
   #
   # ### Example
   #
@@ -4361,17 +4369,17 @@ class OpenSSL::HMAC
 end
 
 # Document-class:
-# [`OpenSSL::HMAC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/HMAC.html)
+# [`OpenSSL::HMAC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html)
 #
-# [`OpenSSL::HMAC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/HMAC.html)
+# [`OpenSSL::HMAC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html)
 # allows computing Hash-based Message Authentication Code (HMAC). It is a type
 # of message authentication code (MAC) involving a hash function in combination
 # with a key. HMAC can be used to verify the integrity of a message as well as
 # the authenticity.
 #
-# [`OpenSSL::HMAC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/HMAC.html) has a
+# [`OpenSSL::HMAC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html) has a
 # similar interface to
-# [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html).
+# [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html).
 #
 # ### HMAC-SHA256 using one-shot interface
 #
@@ -4397,7 +4405,7 @@ end
 class OpenSSL::HMACError < OpenSSL::OpenSSLError
 end
 
-# [`OpenSSL::Netscape`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape.html)
+# [`OpenSSL::Netscape`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape.html)
 # is a namespace for SPKI (Simple Public Key Infrastructure) which implements
 # Signed Public Key and Challenge. See [RFC
 # 2692](http://tools.ietf.org/html/rfc2692) and [RFC
@@ -4423,13 +4431,13 @@ end
 #
 # where the definitions of SubjectPublicKeyInfo and AlgorithmIdentifier can be
 # found in RFC5280.
-# [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html) is
+# [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html) is
 # typically used in browsers for generating a public/private key pair and a
 # subsequent certificate request, using the HTML <keygen> element.
 #
 # ## Examples
 #
-# ### Creating an [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html)
+# ### Creating an [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html)
 #
 # ```ruby
 # key = OpenSSL::PKey::RSA.new 2048
@@ -4440,7 +4448,7 @@ end
 # #send a request containing this to a server generating a certificate
 # ```
 #
-# ### Verifying an [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html) request
+# ### Verifying an [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html) request
 #
 # ```ruby
 # request = #...
@@ -4452,7 +4460,7 @@ end
 # ```
 class OpenSSL::Netscape::SPKI
   # Returns the challenge string associated with this
-  # [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html).
+  # [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html).
   sig {returns(::T.untyped)}
   def challenge(); end
 
@@ -4461,7 +4469,7 @@ class OpenSSL::Netscape::SPKI
   #
   #
   # Sets the challenge to be associated with the
-  # [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html).
+  # [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html).
   # May be used by the server, e.g. to prevent replay.
   sig do
     params(
@@ -4480,9 +4488,9 @@ class OpenSSL::Netscape::SPKI
   def initialize(*_); end
 
   # Returns the public key associated with the
-  # [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html), an
+  # [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html), an
   # instance of
-  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html).
+  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html).
   sig {returns(::T.untyped)}
   def public_key(); end
 
@@ -4491,12 +4499,12 @@ class OpenSSL::Netscape::SPKI
   #
   #
   # Sets the public key to be associated with the
-  # [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html), an
+  # [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html), an
   # instance of
-  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html).
+  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html).
   # This should be the public key corresponding to the private key used for
   # signing the
-  # [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html).
+  # [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html).
   sig do
     params(
       public_key: ::T.untyped,
@@ -4511,12 +4519,12 @@ class OpenSSL::Netscape::SPKI
   #
   #
   # To sign an
-  # [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html),
+  # [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html),
   # the private key corresponding to the public key set for this instance should
   # be used, in addition to a digest algorithm in the form of an
-  # [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html).
+  # [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html).
   # The private key should be an instance of
-  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html).
+  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html).
   sig do
     params(
       _: ::T.untyped,
@@ -4527,39 +4535,39 @@ class OpenSSL::Netscape::SPKI
   def sign(_, _1); end
 
   # Returns the DER encoding of this
-  # [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html).
+  # [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html).
   sig {returns(::T.untyped)}
   def to_der(); end
 
   # Returns the PEM encoding of this
-  # [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html).
+  # [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html).
   #
   # Also aliased as:
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html#method-i-to_s)
   sig {returns(::T.untyped)}
   def to_pem(); end
 
   # Alias for:
-  # [`to_pem`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html#method-i-to_pem)
+  # [`to_pem`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html#method-i-to_pem)
   sig {returns(::T.untyped)}
   def to_s(); end
 
   # Returns a textual representation of this
-  # [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html),
+  # [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html),
   # useful for debugging purposes.
   sig {returns(::T.untyped)}
   def to_text(); end
 
   # ### Parameters
   # *   *key* - the public key to be used for verifying the
-  #     [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html)
+  #     [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html)
   #     signature
   #
   #
   # Returns `true` if the signature is valid, `false` otherwise. To verify an
-  # [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html),
+  # [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html),
   # the public key contained within the
-  # [`SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html)
+  # [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html)
   # should be used.
   sig do
     params(
@@ -4570,19 +4578,19 @@ class OpenSSL::Netscape::SPKI
   def verify(_); end
 end
 
-# Generic [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html)
+# Generic [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html)
 # class that is raised if an error occurs during an operation on an instance of
-# [`OpenSSL::Netscape::SPKI`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Netscape/SPKI.html).
+# [`OpenSSL::Netscape::SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html).
 class OpenSSL::Netscape::SPKIError < OpenSSL::OpenSSLError
 end
 
-# [`OpenSSL::OCSP`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP.html)
+# [`OpenSSL::OCSP`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP.html)
 # implements Online Certificate Status Protocol requests and responses.
 #
 # Creating and sending an
-# [`OCSP`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP.html) request
+# [`OCSP`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP.html) request
 # requires a subject certificate that contains an
-# [`OCSP`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP.html) URL in an
+# [`OCSP`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP.html) URL in an
 # authorityInfoAccess extension and the issuer certificate for the subject
 # certificate. First, load the issuer and subject certificates:
 #
@@ -4615,8 +4623,8 @@ end
 # ```
 #
 # To submit the request to the CA for verification we need to extract the
-# [`OCSP`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP.html)
-# [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) from the subject
+# [`OCSP`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP.html)
+# [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) from the subject
 # certificate:
 #
 # ```ruby
@@ -4635,8 +4643,8 @@ end
 # ```
 #
 # To submit the request we'll POST the request to the
-# [`OCSP`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP.html)
-# [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) (per RFC 2560). Note
+# [`OCSP`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP.html)
+# [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) (per RFC 2560). Note
 # that we only handle HTTP requests and don't handle any redirects in this
 # example, so this is insufficient for serious use.
 #
@@ -4710,7 +4718,7 @@ end
 # ```
 module OpenSSL::OCSP
   # (This flag is not used by
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) 1.0.1g)
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) 1.0.1g)
   NOCASIGN = ::T.let(nil, ::T.untyped)
   # Do not include certificates in the response
   NOCERTS = ::T.let(nil, ::T.untyped)
@@ -4719,7 +4727,7 @@ module OpenSSL::OCSP
   # Do not make additional signing certificate checks
   NOCHECKS = ::T.let(nil, ::T.untyped)
   # (This flag is not used by
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) 1.0.1g)
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) 1.0.1g)
   NODELEGATED = ::T.let(nil, ::T.untyped)
   # Do not check trust
   NOEXPLICIT = ::T.let(nil, ::T.untyped)
@@ -4783,11 +4791,11 @@ module OpenSSL::OCSP
 end
 
 # An
-# [`OpenSSL::OCSP::BasicResponse`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/BasicResponse.html)
+# [`OpenSSL::OCSP::BasicResponse`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/BasicResponse.html)
 # contains the status of a certificate check which is created from an
-# [`OpenSSL::OCSP::Request`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/Request.html).
+# [`OpenSSL::OCSP::Request`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/Request.html).
 # A
-# [`BasicResponse`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/BasicResponse.html)
+# [`BasicResponse`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/BasicResponse.html)
 # is more detailed than a Response.
 class OpenSSL::OCSP::BasicResponse
   # Adds *nonce* to this response. If no nonce was provided a random nonce will
@@ -4817,16 +4825,16 @@ class OpenSSL::OCSP::BasicResponse
   # verified to be correct and the time at or before which newer information
   # will be available, respectively. *next\_update* is optional.
   #
-  # *extensions* is an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  # *extensions* is an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   # of
-  # [`OpenSSL::X509::Extension`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Extension.html)
+  # [`OpenSSL::X509::Extension`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Extension.html)
   # to be included in the SingleResponse. This is also optional.
   #
   # Note that the times, *revocation\_time*, *this\_update* and *next\_update*
   # can be specified in either of
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) or
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) object. If they are
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html), it is treated
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) or
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) object. If they are
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html), it is treated
   # as the relative seconds from the current time.
   sig do
     params(
@@ -4854,7 +4862,7 @@ class OpenSSL::OCSP::BasicResponse
 
   # Returns a SingleResponse whose CertId matches with *certificate\_id*, or
   # `nil` if this
-  # [`BasicResponse`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/BasicResponse.html)
+  # [`BasicResponse`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/BasicResponse.html)
   # does not contain it.
   sig do
     params(
@@ -4872,16 +4880,16 @@ class OpenSSL::OCSP::BasicResponse
   end
   def initialize(*_); end
 
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
+  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # SingleResponse for this
-  # [`BasicResponse`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/BasicResponse.html).
+  # [`BasicResponse`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/BasicResponse.html).
   sig {returns(::T.untyped)}
   def responses(); end
 
-  # Signs this [`OCSP`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP.html)
+  # Signs this [`OCSP`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP.html)
   # response using the *cert*, *key* and optional *digest*. This behaves in the
   # similar way as
-  # [`OpenSSL::OCSP::Request#sign`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/Request.html#method-i-sign).
+  # [`OpenSSL::OCSP::Request#sign`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/Request.html#method-i-sign).
   #
   # *flags* can include:
   # OpenSSL::OCSP::NOCERTS
@@ -4898,17 +4906,17 @@ class OpenSSL::OCSP::BasicResponse
   end
   def sign(*_); end
 
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
+  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # statuses for this response. Each status contains a CertificateId, the status
   # (0 for good, 1 for revoked, 2 for unknown), the reason for the status, the
   # revocation time, the time of this update, the time for the next update and a
   # list of
-  # [`OpenSSL::X509::Extension`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Extension.html).
+  # [`OpenSSL::X509::Extension`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Extension.html).
   #
   # This should be superseded by
-  # [`BasicResponse#responses`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/BasicResponse.html#method-i-responses)
+  # [`BasicResponse#responses`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/BasicResponse.html#method-i-responses)
   # and
-  # [`find_response`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/BasicResponse.html#method-i-find_response)
+  # [`find_response`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/BasicResponse.html#method-i-find_response)
   # that return SingleResponse.
   sig {returns(::T.untyped)}
   def status(); end
@@ -4919,7 +4927,7 @@ class OpenSSL::OCSP::BasicResponse
 
   # Verifies the signature of the response using the given *certificates* and
   # *store*. This works in the similar way as
-  # [`OpenSSL::OCSP::Request#verify`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/Request.html#method-i-verify).
+  # [`OpenSSL::OCSP::Request#verify`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/Request.html#method-i-verify).
   sig do
     params(
       _: ::T.untyped,
@@ -4930,7 +4938,7 @@ class OpenSSL::OCSP::BasicResponse
 end
 
 # An
-# [`OpenSSL::OCSP::CertificateId`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/CertificateId.html)
+# [`OpenSSL::OCSP::CertificateId`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/CertificateId.html)
 # identifies a certificate to the CA so that a status check can be performed.
 class OpenSSL::OCSP::CertificateId
   # Compares this certificate id with *other* and returns `true` if they are the
@@ -4986,15 +4994,15 @@ class OpenSSL::OCSP::CertificateId
   def to_der(); end
 end
 
-# [`OCSP`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP.html) error class.
+# [`OCSP`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP.html) error class.
 class OpenSSL::OCSP::OCSPError < OpenSSL::OpenSSLError
 end
 
 # An
-# [`OpenSSL::OCSP::Request`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/Request.html)
+# [`OpenSSL::OCSP::Request`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/Request.html)
 # contains the certificate information for determining if a certificate has been
 # revoked or not. A
-# [`Request`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/Request.html) can
+# [`Request`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/Request.html) can
 # be created for a certificate or from a DER-encoded request created elsewhere.
 class OpenSSL::OCSP::Request
   # Adds *certificate\_id* to the request.
@@ -5007,7 +5015,7 @@ class OpenSSL::OCSP::Request
   def add_certid(_); end
 
   # Adds a *nonce* to the
-  # [`OCSP`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP.html) request. If
+  # [`OCSP`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP.html) request. If
   # no nonce is given a random one will be generated.
   #
   # The nonce is used to prevent replay attacks but some servers do not support
@@ -5059,10 +5067,10 @@ class OpenSSL::OCSP::Request
   end
   def initialize(*_); end
 
-  # Signs this [`OCSP`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP.html)
+  # Signs this [`OCSP`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP.html)
   # request using *cert*, *key* and optional *digest*. If *digest* is not
   # specified, SHA-1 is used. *certs* is an optional
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of additional
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of additional
   # certificates which are included in the request in addition to the signer
   # certificate. Note that if *certs* is `nil` or not given, flag
   # OpenSSL::OCSP::NOCERTS is enabled. Pass an empty array to include only the
@@ -5086,12 +5094,12 @@ class OpenSSL::OCSP::Request
 
   # Verifies this request using the given *certificates* and *store*.
   # *certificates* is an array of
-  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Certificate.html),
+  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Certificate.html),
   # *store* is an
-  # [`OpenSSL::X509::Store`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Store.html).
+  # [`OpenSSL::X509::Store`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Store.html).
   #
   # Note that `false` is returned if the request does not have a signature. Use
-  # [`signed?`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/Request.html#method-i-signed-3F)
+  # [`signed?`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/Request.html#method-i-signed-3F)
   # to check whether the request is signed or not.
   sig do
     params(
@@ -5103,9 +5111,9 @@ class OpenSSL::OCSP::Request
 end
 
 # An
-# [`OpenSSL::OCSP::Response`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/Response.html)
+# [`OpenSSL::OCSP::Response`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/Response.html)
 # contains the status of a certificate check which is created from an
-# [`OpenSSL::OCSP::Request`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/Request.html).
+# [`OpenSSL::OCSP::Request`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/Request.html).
 class OpenSSL::OCSP::Response
   # Returns a BasicResponse for this response
   sig {returns(::T.untyped)}
@@ -5132,7 +5140,7 @@ class OpenSSL::OCSP::Response
   def to_der(); end
 
   # Creates an
-  # [`OpenSSL::OCSP::Response`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/Response.html)
+  # [`OpenSSL::OCSP::Response`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/Response.html)
   # from *status* and *basic\_response*.
   sig do
     params(
@@ -5145,9 +5153,9 @@ class OpenSSL::OCSP::Response
 end
 
 # An
-# [`OpenSSL::OCSP::SingleResponse`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/SingleResponse.html)
-# represents an [`OCSP`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP.html)
-# [`SingleResponse`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/SingleResponse.html)
+# [`OpenSSL::OCSP::SingleResponse`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/SingleResponse.html)
+# represents an [`OCSP`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP.html)
+# [`SingleResponse`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/SingleResponse.html)
 # structure, which contains the basic information of the status of the
 # certificate.
 class OpenSSL::OCSP::SingleResponse
@@ -5161,22 +5169,22 @@ class OpenSSL::OCSP::SingleResponse
   #
   # When the status is V\_CERTSTATUS\_REVOKED, the time at which the certificate
   # was revoked can be retrieved by
-  # [`revocation_time`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/SingleResponse.html#method-i-revocation_time).
+  # [`revocation_time`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/SingleResponse.html#method-i-revocation_time).
   sig {returns(::T.untyped)}
   def cert_status(); end
 
   # Returns the CertificateId for which this
-  # [`SingleResponse`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/SingleResponse.html)
+  # [`SingleResponse`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/SingleResponse.html)
   # is.
   sig {returns(::T.untyped)}
   def certid(); end
 
   # Checks the validity of thisUpdate and nextUpdate fields of this
-  # [`SingleResponse`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/SingleResponse.html).
+  # [`SingleResponse`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/SingleResponse.html).
   # This checks the current time is within the range thisUpdate to nextUpdate.
   #
   # It is possible that the
-  # [`OCSP`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP.html) request
+  # [`OCSP`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP.html) request
   # takes a few seconds or the time is not accurate. To avoid rejecting a valid
   # response, this method allows the times to be within *nsec* seconds of the
   # current time.
@@ -5216,14 +5224,14 @@ class OpenSSL::OCSP::SingleResponse
   def this_update(); end
 
   # Encodes this
-  # [`SingleResponse`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/OCSP/SingleResponse.html)
+  # [`SingleResponse`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/SingleResponse.html)
   # into a DER-encoded string.
   sig {returns(::T.untyped)}
   def to_der(); end
 end
 
 # Generic error, common for all classes under
-# [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) module
+# [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) module
 class OpenSSL::OpenSSLError < StandardError
 end
 
@@ -5268,9 +5276,9 @@ class OpenSSL::PKCS12
   #
   #
   # Any optional arguments may be supplied as `nil` to preserve the
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) defaults.
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) defaults.
   #
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for PKCS12\_create().
   sig do
     params(
@@ -5341,7 +5349,7 @@ class OpenSSL::PKCS7
   def add_crl(_); end
 
   # Also aliased as:
-  # [`data=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKCS7.html#method-i-data-3D)
+  # [`data=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKCS7.html#method-i-data-3D)
   sig do
     params(
       _: ::T.untyped,
@@ -5400,7 +5408,7 @@ class OpenSSL::PKCS7
   def data(); end
 
   # Alias for:
-  # [`add_data`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKCS7.html#method-i-add_data)
+  # [`add_data`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKCS7.html#method-i-add_data)
   sig do
     params(
       data: ::T.untyped,
@@ -5460,12 +5468,12 @@ class OpenSSL::PKCS7
   def to_der(); end
 
   # Also aliased as:
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKCS7.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKCS7.html#method-i-to_s)
   sig {returns(::T.untyped)}
   def to_pem(); end
 
   # Alias for:
-  # [`to_pem`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKCS7.html#method-i-to_pem)
+  # [`to_pem`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKCS7.html#method-i-to_pem)
   sig {returns(::T.untyped)}
   def to_s(); end
 
@@ -5555,12 +5563,12 @@ class OpenSSL::PKCS7::SignerInfo
   def initialize(_, _1, _2); end
 
   # Also aliased as:
-  # [`name`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKCS7/SignerInfo.html#method-i-name)
+  # [`name`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKCS7/SignerInfo.html#method-i-name)
   sig {returns(::T.untyped)}
   def issuer(); end
 
   # Alias for:
-  # [`issuer`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKCS7/SignerInfo.html#method-i-issuer)
+  # [`issuer`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKCS7/SignerInfo.html#method-i-issuer)
   sig {returns(::T.untyped)}
   def name(); end
 
@@ -5581,7 +5589,7 @@ end
 # Messages encrypted with a public key can only be decrypted by recipients that
 # are in possession of the associated private key. Since public key algorithms
 # are considerably slower than symmetric key algorithms (cf.
-# [`OpenSSL::Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html))
+# [`OpenSSL::Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html))
 # they are often used to establish a symmetric key shared between two parties
 # that are in possession of each other's public key.
 #
@@ -5589,7 +5597,7 @@ end
 # different areas. A very common application is the creation and validation of
 # digital signatures. To sign a document, the signatory generally uses a message
 # digest algorithm (cf.
-# [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html))
+# [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html))
 # to compute a digest of the document that is then encrypted (i.e. signed) using
 # the private key. Anyone in possession of the public key may then verify the
 # signature by computing the message digest of the original document on their
@@ -5597,22 +5605,25 @@ end
 # the result to the message digest they previously computed. The signature is
 # valid if and only if the decrypted signature is equal to this message digest.
 #
-# The [`PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html) module
+# The [`PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html) module
 # offers support for three popular public/private key algorithms:
-# *   RSA (OpenSSL::PKey::RSA)
-# *   DSA (OpenSSL::PKey::DSA)
-# *   Elliptic Curve Cryptography (OpenSSL::PKey::EC)
+# *   RSA
+#     ([`OpenSSL::PKey::RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html))
+# *   DSA
+#     ([`OpenSSL::PKey::DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html))
+# *   Elliptic Curve Cryptography
+#     ([`OpenSSL::PKey::EC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html))
 #
 # Each of these implementations is in fact a sub-class of the abstract
-# [`PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html) class which
+# [`PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html) class which
 # offers the interface for supporting digital signatures in the form of
 # PKey#sign and PKey#verify.
 #
 # ## Diffie-Hellman Key Exchange
 #
-# Finally [`PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html) also
+# Finally [`PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html) also
 # features
-# [`OpenSSL::PKey::DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html),
+# [`OpenSSL::PKey::DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html),
 # an implementation of the Diffie-Hellman key exchange protocol based on
 # discrete logarithms in finite fields, the same basis that DSA is built on. The
 # Diffie-Hellman protocol can be used to exchange (symmetric) keys over insecure
@@ -5620,20 +5631,20 @@ end
 # parties. As the security of DH demands relatively long "public keys" (i.e. the
 # part that is overtly transmitted between participants) DH tends to be quite
 # slow. If security or speed is your primary concern,
-# [`OpenSSL::PKey::EC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html)
+# [`OpenSSL::PKey::EC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html)
 # offers another implementation of the Diffie-Hellman protocol.
 module OpenSSL::PKey
   DEFAULT_TMP_DH_CALLBACK = ::T.let(nil, ::T.untyped)
 
   # Reads a DER or PEM encoded string from *string* or *io* and returns an
   # instance of the appropriate
-  # [`PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html) class.
+  # [`PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html) class.
   #
   # ### Parameters
   # *   \_string+ is a DER- or PEM-encoded string containing an arbitrary
   #     private or public key.
   # *   *io* is an instance of
-  #     [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) containing a DER- or
+  #     [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) containing a DER- or
   #     PEM-encoded arbitrary private or public key.
   # *   *pwd* is an optional password in case *string* or *io* is an encrypted
   #     PEM resource.
@@ -5650,22 +5661,22 @@ end
 # discrete logarithms in finite fields, the same basis that DSA is built on.
 #
 # ### Accessor methods for the Diffie-Hellman parameters
-# [`DH#p`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-p)
+# [`DH#p`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-p)
 # :   The prime (an
-#     [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html)) of
+#     [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html)) of
 #     the Diffie-Hellman parameters.
 # DH#g
 # :   The generator (an
-#     [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html)) g of
+#     [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html)) g of
 #     the Diffie-Hellman parameters.
 # DH#pub\_key
 # :   The per-session public key (an
-#     [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html))
+#     [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html))
 #     matching the private key. This needs to be passed to
-#     [`DH#compute_key`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html#method-i-compute_key).
+#     [`DH#compute_key`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html#method-i-compute_key).
 # DH#priv\_key
 # :   The per-session private key, an
-#     [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html).
+#     [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html).
 #
 #
 # ### Example of a key exchange
@@ -5684,19 +5695,19 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   DEFAULT_1024 = ::T.let(nil, ::T.untyped)
   DEFAULT_2048 = ::T.let(nil, ::T.untyped)
 
-  # Returns a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # Returns a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   # containing a shared secret computed from the other party's public value. See
   # DH\_compute\_key() for further information.
   #
   # ### Parameters
   # *   *pub\_bn* is a
-  #     [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html),
+  #     [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html),
   #     **not** the
-  #     [`DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html)
+  #     [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html)
   #     instance returned by
-  #     [`DH#public_key`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html#method-i-public_key)
+  #     [`DH#public_key`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html#method-i-public_key)
   #     as that contains the
-  #     [`DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html)
+  #     [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html)
   #     parameters only.
   sig do
     params(
@@ -5707,13 +5718,13 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   def compute_key(_); end
 
   # Encodes this
-  # [`DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html) to its PEM
+  # [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html) to its PEM
   # encoding. Note that any existing per-session public/private keys will
   # **not** get encoded, just the Diffie-Hellman parameters will be encoded.
   #
   # Also aliased as:
-  # [`to_pem`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html#method-i-to_pem),
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html#method-i-to_s)
+  # [`to_pem`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html#method-i-to_pem),
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html#method-i-to_s)
   sig {returns(::T.untyped)}
   def export(); end
 
@@ -5729,11 +5740,11 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   def g=(g); end
 
   # Generates a private and public key unless a private key already exists. If
-  # this [`DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html)
+  # this [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html)
   # instance was generated from public
-  # [`DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html) parameters
+  # [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html) parameters
   # (e.g. by encoding the result of
-  # [`DH#public_key`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html#method-i-public_key)),
+  # [`DH#public_key`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html#method-i-public_key)),
   # then this method needs to be called first in order to generate the
   # per-session keys before performing the actual key exchange.
   #
@@ -5790,7 +5801,7 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   def priv_key=(priv_key); end
 
   # Indicates whether this
-  # [`DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html) instance
+  # [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html) instance
   # has a private key associated with it or not. The private key may be
   # retrieved with DH#priv\_key.
   sig {returns(::T.untyped)}
@@ -5808,26 +5819,26 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   def pub_key=(pub_key); end
 
   # Indicates whether this
-  # [`DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html) instance
+  # [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html) instance
   # has a public key associated with it or not. The public key may be retrieved
   # with DH#pub\_key.
   sig {returns(::T.untyped)}
   def public?(); end
 
   # Returns a new
-  # [`DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html) instance
+  # [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html) instance
   # that carries just the public information, i.e. the prime *p* and the
   # generator *g*, but no public/private key yet. Such a pair may be generated
   # using
-  # [`DH#generate_key!`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html#method-i-generate_key-21).
+  # [`DH#generate_key!`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html#method-i-generate_key-21).
   # The "public key" needed for a key exchange with
-  # [`DH#compute_key`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html#method-i-compute_key)
+  # [`DH#compute_key`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html#method-i-compute_key)
   # is considered as per-session information and may be retrieved with
   # DH#pub\_key once a key pair has been generated. If the current instance
   # already contains private information (and thus a valid public/private key
   # pair), this information will no longer be present in the new instance
   # generated by
-  # [`DH#public_key`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html#method-i-public_key).
+  # [`DH#public_key`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html#method-i-public_key).
   # This feature is helpful for publishing the Diffie-Hellman parameters without
   # leaking any of the private per-session information.
   #
@@ -5853,7 +5864,7 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   def q=(q); end
 
   # Sets *pub\_key* and *priv\_key* for the
-  # [`DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html) instance.
+  # [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html) instance.
   # *priv\_key* may be `nil`.
   sig do
     params(
@@ -5865,7 +5876,7 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   def set_key(_, _1); end
 
   # Sets *p*, *q*, *g* to the
-  # [`DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html) instance.
+  # [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html) instance.
   sig do
     params(
       _: ::T.untyped,
@@ -5877,19 +5888,19 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   def set_pqg(_, _1, _2); end
 
   # Encodes this
-  # [`DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html) to its DER
+  # [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html) to its DER
   # encoding. Note that any existing per-session public/private keys will
   # **not** get encoded, just the Diffie-Hellman parameters will be encoded.
   sig {returns(::T.untyped)}
   def to_der(); end
 
   # Alias for:
-  # [`export`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html#method-i-export)
+  # [`export`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html#method-i-export)
   sig {returns(::T.untyped)}
   def to_pem(); end
 
   # Alias for:
-  # [`export`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html#method-i-export)
+  # [`export`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html#method-i-export)
   sig {returns(::T.untyped)}
   def to_s(); end
 
@@ -5899,7 +5910,7 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   def to_text(); end
 
   # Creates a new
-  # [`DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html) instance
+  # [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html) instance
   # from scratch by generating the private and public components alike.
   #
   # ### Parameters
@@ -5916,23 +5927,23 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
 end
 
 # Generic exception that is raised if an operation on a DH
-# [`PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html) fails
+# [`PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html) fails
 # unexpectedly or in case an instantiation of an instance of DH fails due to
 # non-conformant input data.
 class OpenSSL::PKey::DHError < OpenSSL::PKey::PKeyError
 end
 
-# [`DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html), the
+# [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html), the
 # Digital Signature Algorithm, is specified in NIST's FIPS 186-3. It is an
 # asymmetric public key algorithm that may be used similar to e.g. RSA.
 class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   # Encodes this
-  # [`DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html) to its
+  # [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html) to its
   # PEM encoding.
   #
   # ### Parameters
   # *   *cipher* is an
-  #     [`OpenSSL::Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html).
+  #     [`OpenSSL::Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html).
   # *   *password* is a string containing your password.
   #
   #
@@ -5945,8 +5956,8 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   #
   #
   # Also aliased as:
-  # [`to_pem`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html#method-i-to_pem),
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html#method-i-to_s)
+  # [`to_pem`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html#method-i-to_pem),
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html#method-i-to_s)
   sig do
     params(
       _: ::T.untyped,
@@ -6002,7 +6013,7 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   def priv_key=(priv_key); end
 
   # Indicates whether this
-  # [`DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html) instance
+  # [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html) instance
   # has a private key associated with it or not. The private key may be
   # retrieved with DSA#private\_key.
   sig {returns(::T.untyped)}
@@ -6020,15 +6031,15 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   def pub_key=(pub_key); end
 
   # Indicates whether this
-  # [`DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html) instance
+  # [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html) instance
   # has a public key associated with it or not. The public key may be retrieved
   # with
-  # [`DSA#public_key`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html#method-i-public_key).
+  # [`DSA#public_key`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html#method-i-public_key).
   sig {returns(::T.untyped)}
   def public?(); end
 
   # Returns a new
-  # [`DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html) instance
+  # [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html) instance
   # that carries just the public key information. If the current instance has
   # also private key information, this will no longer be present in the new
   # instance. This feature is helpful for publishing the public key information
@@ -6056,7 +6067,7 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   def q=(q); end
 
   # Sets *pub\_key* and *priv\_key* for the
-  # [`DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html) instance.
+  # [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html) instance.
   # *priv\_key* may be `nil`.
   sig do
     params(
@@ -6068,7 +6079,7 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   def set_key(_, _1); end
 
   # Sets *p*, *q*, *g* to the
-  # [`DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html) instance.
+  # [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html) instance.
   sig do
     params(
       _: ::T.untyped,
@@ -6080,11 +6091,11 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   def set_pqg(_, _1, _2); end
 
   # Computes and returns the
-  # [`DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html) signature
+  # [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html) signature
   # of *string*, where *string* is expected to be an already-computed message
   # digest of the original input data. The signature is issued using the private
   # key of this
-  # [`DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html) instance.
+  # [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html) instance.
   #
   # ### Parameters
   # *   *string* is a message digest of the original input data to be signed.
@@ -6108,12 +6119,12 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
 
   # Verifies whether the signature is valid given the message digest input. It
   # does so by validating *sig* using the public key of this
-  # [`DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html) instance.
+  # [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html) instance.
   #
   # ### Parameters
   # *   *digest* is a message digest of the original input data to be signed
   # *   *sig* is a
-  #     [`DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html)
+  #     [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html)
   #     signature value
   #
   #
@@ -6136,13 +6147,13 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   def sysverify(_, _1); end
 
   # Encodes this
-  # [`DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html) to its
+  # [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html) to its
   # DER encoding.
   sig {returns(::T.untyped)}
   def to_der(); end
 
   # Alias for:
-  # [`export`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html#method-i-export)
+  # [`export`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html#method-i-export)
   sig do
     params(
       _: ::T.untyped,
@@ -6152,7 +6163,7 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   def to_pem(*_); end
 
   # Alias for:
-  # [`export`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html#method-i-export)
+  # [`export`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html#method-i-export)
   sig do
     params(
       _: ::T.untyped,
@@ -6167,7 +6178,7 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   def to_text(); end
 
   # Creates a new
-  # [`DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html) instance
+  # [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html) instance
   # by generating a private/public key pair from scratch.
   #
   # ### Parameters
@@ -6182,13 +6193,13 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
 end
 
 # Generic exception that is raised if an operation on a DSA
-# [`PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html) fails
+# [`PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html) fails
 # unexpectedly or in case an instantiation of an instance of DSA fails due to
 # non-conformant input data.
 class OpenSSL::PKey::DSAError < OpenSSL::PKey::PKeyError
 end
 
-# [`OpenSSL::PKey::EC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html)
+# [`OpenSSL::PKey::EC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html)
 # provides access to Elliptic Curve Digital Signature Algorithm (ECDSA) and
 # Elliptic Curve Diffie-Hellman (ECDH).
 #
@@ -6208,12 +6219,12 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
 
   # Raises an exception if the key is invalid.
   #
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_KEY\_check\_key()
   sig {returns(::T.untyped)}
   def check_key(); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for ECDH\_compute\_key()
   sig do
     params(
@@ -6223,7 +6234,7 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   end
   def dh_compute_key(_); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for ECDSA\_sign()
   sig do
     params(
@@ -6233,7 +6244,7 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   end
   def dsa_sign_asn1(_); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for ECDSA\_verify()
   sig do
     params(
@@ -6244,15 +6255,15 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   end
   def dsa_verify_asn1(_, _1); end
 
-  # Outputs the [`EC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html)
+  # Outputs the [`EC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html)
   # key in PEM encoding. If *cipher* and *pass\_phrase* are given they will be
   # used to encrypt the key. *cipher* must be an
-  # [`OpenSSL::Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html)
+  # [`OpenSSL::Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html)
   # instance. Note that encryption will only be effective for a private key,
   # public keys will always be encoded in plain text.
   #
   # Also aliased as:
-  # [`to_pem`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html#method-i-to_pem)
+  # [`to_pem`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html#method-i-to_pem)
   sig do
     params(
       _: ::T.untyped,
@@ -6262,13 +6273,13 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   def export(*_); end
 
   # Alias for:
-  # [`generate_key!`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html#method-i-generate_key-21)
+  # [`generate_key!`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html#method-i-generate_key-21)
   sig {returns(::T.untyped)}
   def generate_key(); end
 
   # Generates a new random private and public key.
   #
-  # See also the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See also the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_KEY\_generate\_key()
   #
   # ### Example
@@ -6282,19 +6293,19 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   #
   #
   # Also aliased as:
-  # [`generate_key`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html#method-i-generate_key)
+  # [`generate_key`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html#method-i-generate_key)
   sig {returns(::T.untyped)}
   def generate_key!(); end
 
   # Returns the
-  # [`EC::Group`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC/Group.html)
+  # [`EC::Group`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Group.html)
   # that the key is associated with. Modifying the returned group does not
   # affect *key*.
   sig {returns(::T.untyped)}
   def group(); end
 
   # Sets the
-  # [`EC::Group`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC/Group.html)
+  # [`EC::Group`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Group.html)
   # for the key. The group structure is internally copied so modification to
   # *group* after assigning to a key has no effect on the key.
   sig do
@@ -6314,21 +6325,21 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   def initialize(*_); end
 
   # Returns whether this
-  # [`EC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html) instance
+  # [`EC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html) instance
   # has a private key. The private key (BN) can be retrieved with
-  # [`EC#private_key`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html#method-i-private_key).
+  # [`EC#private_key`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html#method-i-private_key).
   #
   # Also aliased as:
-  # [`private_key?`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html#method-i-private_key-3F)
+  # [`private_key?`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html#method-i-private_key-3F)
   sig {returns(::T.untyped)}
   def private?(); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_KEY\_get0\_private\_key()
   sig {returns(::T.untyped)}
   def private_key(); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_KEY\_set\_private\_key()
   sig do
     params(
@@ -6339,26 +6350,28 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   def private_key=(private_key); end
 
   # Alias for:
-  # [`private?`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html#method-i-private-3F)
+  # [`private?`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html#method-i-private-3F)
   sig {returns(::T.untyped)}
   def private_key?(); end
 
   # Returns whether this
-  # [`EC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html) instance
-  # has a public key. The public key (EC::Point) can be retrieved with
-  # [`EC#public_key`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html#method-i-public_key).
+  # [`EC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html) instance
+  # has a public key. The public key
+  # ([`EC::Point`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Point.html))
+  # can be retrieved with
+  # [`EC#public_key`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html#method-i-public_key).
   #
   # Also aliased as:
-  # [`public_key?`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html#method-i-public_key-3F)
+  # [`public_key?`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html#method-i-public_key-3F)
   sig {returns(::T.untyped)}
   def public?(); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_KEY\_get0\_public\_key()
   sig {returns(::T.untyped)}
   def public_key(); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_KEY\_set\_public\_key()
   sig do
     params(
@@ -6369,17 +6382,17 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   def public_key=(public_key); end
 
   # Alias for:
-  # [`public?`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html#method-i-public-3F)
+  # [`public?`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html#method-i-public-3F)
   sig {returns(::T.untyped)}
   def public_key?(); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for i2d\_ECPrivateKey\_bio()
   sig {returns(::T.untyped)}
   def to_der(); end
 
   # Alias for:
-  # [`export`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html#method-i-export)
+  # [`export`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html#method-i-export)
   sig do
     params(
       _: ::T.untyped,
@@ -6388,22 +6401,22 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   end
   def to_pem(*_); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_KEY\_print()
   sig {returns(::T.untyped)}
   def to_text(); end
 
   # Obtains a list of all predefined curves by the
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html). Curve names
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html). Curve names
   # are returned as sn.
   #
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_get\_builtin\_curves().
   sig {returns(::T.untyped)}
   def self.builtin_curves(); end
 
   # Creates a new
-  # [`EC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html) instance
+  # [`EC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html) instance
   # with a new random private and public key.
   sig do
     params(
@@ -6416,7 +6429,7 @@ end
 
 class OpenSSL::PKey::EC::Group
   # Alias for:
-  # [`eql?`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC/Group.html#method-i-eql-3F)
+  # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Group.html#method-i-eql-3F)
   sig do
     params(
       _: ::T.untyped,
@@ -6428,7 +6441,7 @@ class OpenSSL::PKey::EC::Group
   # Returns the flags set on the group.
   #
   # See also
-  # [`asn1_flag=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC/Group.html#method-i-asn1_flag-3D).
+  # [`asn1_flag=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Group.html#method-i-asn1_flag-3D).
   sig {returns(::T.untyped)}
   def asn1_flag(); end
 
@@ -6441,7 +6454,7 @@ class OpenSSL::PKey::EC::Group
   # *   EC::EXPLICIT\_CURVE
   #
   #
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_GROUP\_set\_asn1\_flag().
   sig do
     params(
@@ -6453,19 +6466,19 @@ class OpenSSL::PKey::EC::Group
 
   # Returns the cofactor of the group.
   #
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_GROUP\_get\_cofactor()
   sig {returns(::T.untyped)}
   def cofactor(); end
 
   # Returns the curve name (sn).
   #
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_GROUP\_get\_curve\_name()
   sig {returns(::T.untyped)}
   def curve_name(); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_GROUP\_get\_degree()
   sig {returns(::T.untyped)}
   def degree(); end
@@ -6474,7 +6487,7 @@ class OpenSSL::PKey::EC::Group
   # parameters, `false` otherwise.
   #
   # Also aliased as:
-  # [`==`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC/Group.html#method-i-3D-3D)
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Group.html#method-i-3D-3D)
   sig do
     params(
       _: ::T.untyped,
@@ -6485,7 +6498,7 @@ class OpenSSL::PKey::EC::Group
 
   # Returns the generator of the group.
   #
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_GROUP\_get0\_generator()
   sig {returns(::T.untyped)}
   def generator(); end
@@ -6500,22 +6513,22 @@ class OpenSSL::PKey::EC::Group
 
   # Returns the order of the group.
   #
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_GROUP\_get\_order()
   sig {returns(::T.untyped)}
   def order(); end
 
   # Returns the form how
-  # [`EC::Point`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC/Point.html)
+  # [`EC::Point`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Point.html)
   # data is encoded as ASN.1.
   #
   # See also
-  # [`point_conversion_form=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC/Group.html#method-i-point_conversion_form-3D).
+  # [`point_conversion_form=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Group.html#method-i-point_conversion_form-3D).
   sig {returns(::T.untyped)}
   def point_conversion_form(); end
 
   # Sets the form how
-  # [`EC::Point`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC/Point.html)
+  # [`EC::Point`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Point.html)
   # data is encoded as ASN.1 as defined in X9.62.
   #
   # *format* can be one of these:
@@ -6530,7 +6543,7 @@ class OpenSSL::PKey::EC::Group
   #     equation y is. z will be 0x06 or 0x07.
   #
   #
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_GROUP\_set\_point\_conversion\_form()
   sig do
     params(
@@ -6540,12 +6553,12 @@ class OpenSSL::PKey::EC::Group
   end
   def point_conversion_form=(point_conversion_form); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_GROUP\_get0\_seed()
   sig {returns(::T.untyped)}
   def seed(); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_GROUP\_set\_seed()
   sig do
     params(
@@ -6556,10 +6569,10 @@ class OpenSSL::PKey::EC::Group
   def seed=(seed); end
 
   # Sets the curve parameters. *generator* must be an instance of
-  # [`EC::Point`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC/Point.html)
+  # [`EC::Point`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Point.html)
   # that is on the curve. *order* and *cofactor* are integers.
   #
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_GROUP\_set\_generator()
   sig do
     params(
@@ -6571,17 +6584,17 @@ class OpenSSL::PKey::EC::Group
   end
   def set_generator(_, _1, _2); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for i2d\_ECPKParameters\_bio()
   sig {returns(::T.untyped)}
   def to_der(); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for PEM\_write\_bio\_ECPKParameters()
   sig {returns(::T.untyped)}
   def to_pem(); end
 
-  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for ECPKParameters\_print()
   sig {returns(::T.untyped)}
   def to_text(); end
@@ -6592,7 +6605,7 @@ end
 
 class OpenSSL::PKey::EC::Point
   # Alias for:
-  # [`eql?`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC/Point.html#method-i-eql-3F)
+  # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Point.html#method-i-eql-3F)
   sig do
     params(
       _: ::T.untyped,
@@ -6602,7 +6615,7 @@ class OpenSSL::PKey::EC::Point
   def ==(_); end
 
   # Also aliased as:
-  # [`==`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC/Point.html#method-i-3D-3D)
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Point.html#method-i-3D-3D)
   sig do
     params(
       _: ::T.untyped,
@@ -6640,9 +6653,9 @@ class OpenSSL::PKey::EC::Point
   # The second form calculates `bns[0] * point + bns[1] * points[0] + ... +
   # bns[-1] * points[-1] + bn2 * G`. *bn2* may be omitted. *bns* must be an
   # array of
-  # [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html).
+  # [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html).
   # *points* must be an array of
-  # [`OpenSSL::PKey::EC::Point`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC/Point.html).
+  # [`OpenSSL::PKey::EC::Point`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Point.html).
   # Please note that `points[0]` is not multiplied by `bns[0]`, but `bns[1]`.
   sig do
     params(
@@ -6659,15 +6672,15 @@ class OpenSSL::PKey::EC::Point
   def set_to_infinity!(); end
 
   # Returns the octet string representation of the
-  # [`EC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html) point as an
+  # [`EC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html) point as an
   # instance of
-  # [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/BN.html).
+  # [`OpenSSL::BN`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html).
   #
   # If *conversion\_form* is not given, the *point\_conversion\_form* attribute
   # set to the group is used.
   #
   # See
-  # [`to_octet_string`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC/Point.html#method-i-to_octet_string)
+  # [`to_octet_string`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Point.html#method-i-to_octet_string)
   # for more information.
   sig do
     params(
@@ -6684,23 +6697,26 @@ end
 class OpenSSL::PKey::ECError < OpenSSL::PKey::PKeyError
 end
 
-# An abstract class that bundles signature creation (PKey#sign) and validation
-# (PKey#verify) that is common to all implementations except
-# [`OpenSSL::PKey::DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html)
-# *   [`OpenSSL::PKey::RSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html)
-# *   [`OpenSSL::PKey::DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html)
-# *   [`OpenSSL::PKey::EC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html)
+# An abstract class that bundles signature creation
+# ([`PKey#sign`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/PKey.html#method-i-sign))
+# and validation
+# ([`PKey#verify`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/PKey.html#method-i-verify))
+# that is common to all implementations except
+# [`OpenSSL::PKey::DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html)
+# *   [`OpenSSL::PKey::RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html)
+# *   [`OpenSSL::PKey::DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html)
+# *   [`OpenSSL::PKey::EC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html)
 class OpenSSL::PKey::PKey
   sig {returns(::T.untyped)}
   def initialize(); end
 
-  # To sign the [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # To sign the [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   # *data*, *digest*, an instance of
-  # [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html),
+  # [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html),
   # must be provided. The return value is again a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) containing the
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) containing the
   # signature. A PKeyError is raised should errors occur. Any previous state of
-  # the [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html) instance is
+  # the [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html) instance is
   # irrelevant to the signature outcome, the digest instance is reset to its
   # initial state during the operation.
   #
@@ -6721,14 +6737,14 @@ class OpenSSL::PKey::PKey
   end
   def sign(_, _1); end
 
-  # To verify the [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # To verify the [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   # *signature*, *digest*, an instance of
-  # [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Digest.html),
+  # [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html),
   # must be provided to re-compute the message digest of the original *data*,
-  # also a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). The
+  # also a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). The
   # return value is `true` if the signature is valid, `false` otherwise. A
   # PKeyError is raised should errors occur. Any previous state of the
-  # [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html) instance is
+  # [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html) instance is
   # irrelevant to the validation outcome, the digest instance is reset to its
   # initial state during the operation.
   #
@@ -6757,13 +6773,13 @@ end
 class OpenSSL::PKey::PKeyError < OpenSSL::OpenSSLError
 end
 
-# [`RSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html) is an
+# [`RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html) is an
 # asymmetric public key algorithm that has been formalized in RFC 3447. It is in
 # widespread use in public key infrastructures (PKI) where certificates (cf.
-# [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Certificate.html))
+# [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Certificate.html))
 # often are issued on the basis of a public/private
-# [`RSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html) key pair.
-# [`RSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html) is used in
+# [`RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html) key pair.
+# [`RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html) is used in
 # a wide field of applications such as secure (symmetric) key exchange, e.g.
 # when establishing a secure TLS/SSL connection. It is also used in various
 # digital signature schemes.
@@ -6819,12 +6835,12 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
 
   # Outputs this keypair in PEM encoding. If *cipher* and *pass\_phrase* are
   # given they will be used to encrypt the key. *cipher* must be an
-  # [`OpenSSL::Cipher`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/Cipher.html)
+  # [`OpenSSL::Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html)
   # instance.
   #
   # Also aliased as:
-  # [`to_pem`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html#method-i-to_pem),
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html#method-i-to_s)
+  # [`to_pem`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html#method-i-to_pem),
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html#method-i-to_s)
   sig do
     params(
       _: ::T.untyped,
@@ -6899,7 +6915,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
 
   # Encrypt *string* with the private key. *padding* defaults to PKCS1\_PADDING.
   # The encrypted string output can be decrypted using
-  # [`public_decrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html#method-i-public_decrypt).
+  # [`public_decrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html#method-i-public_decrypt).
   sig do
     params(
       _: ::T.untyped,
@@ -6925,7 +6941,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
 
   # Encrypt *string* with the public key. *padding* defaults to PKCS1\_PADDING.
   # The encrypted string output can be decrypted using
-  # [`private_decrypt`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html#method-i-private_decrypt).
+  # [`private_decrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html#method-i-private_decrypt).
   sig do
     params(
       _: ::T.untyped,
@@ -6934,7 +6950,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def public_encrypt(*_); end
 
-  # Makes new [`RSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html)
+  # Makes new [`RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html)
   # instance containing the public key from the private key.
   sig {returns(::T.untyped)}
   def public_key(); end
@@ -6951,7 +6967,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   def q=(q); end
 
   # Sets *dmp1*, *dmq1*, *iqmp* for the
-  # [`RSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html) instance.
+  # [`RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html) instance.
   # They are calculated by `d mod (p - 1)`, `d mod (q - 1)` and `q^(-1) mod p`
   # respectively.
   sig do
@@ -6965,7 +6981,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   def set_crt_params(_, _1, _2); end
 
   # Sets *p*, *q* for the
-  # [`RSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html) instance.
+  # [`RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html) instance.
   sig do
     params(
       _: ::T.untyped,
@@ -6976,7 +6992,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   def set_factors(_, _1); end
 
   # Sets *n*, *e*, *d* for the
-  # [`RSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html) instance.
+  # [`RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html) instance.
   sig do
     params(
       _: ::T.untyped,
@@ -6993,15 +7009,15 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   # RSAError will be raised if an error occurs.
   #
   # See
-  # [`verify_pss`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html#method-i-verify_pss)
+  # [`verify_pss`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html#method-i-verify_pss)
   # for the verification operation.
   #
   # ### Parameters
   # *digest*
-  # :   A [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) containing
+  # :   A [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) containing
   #     the message digest algorithm name.
   # *data*
-  # :   A [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). The data
+  # :   A [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). The data
   #     to be signed.
   # *salt\_length*
   # :   The length in octets of the salt. Two special values are reserved:
@@ -7038,7 +7054,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   def to_der(); end
 
   # Alias for:
-  # [`export`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html#method-i-export)
+  # [`export`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html#method-i-export)
   sig do
     params(
       _: ::T.untyped,
@@ -7048,7 +7064,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   def to_pem(*_); end
 
   # Alias for:
-  # [`export`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html#method-i-export)
+  # [`export`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html#method-i-export)
   sig do
     params(
       _: ::T.untyped,
@@ -7060,14 +7076,14 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   # THIS METHOD IS INSECURE, PRIVATE INFORMATION CAN LEAK OUT!!!
   #
   # Dumps all parameters of a keypair to a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   #
   # Don't use :-)) (It's up to you)
   sig {returns(::T.untyped)}
   def to_text(); end
 
   # Generates an
-  # [`RSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html) keypair.
+  # [`RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html) keypair.
   # *size* is an integer representing the desired key size. Keys smaller than
   # 1024 should be considered insecure. *exponent* is an odd number normally 3,
   # 17, or 65537.
@@ -7085,15 +7101,15 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   # RSAError will be raised if an error occurs.
   #
   # See
-  # [`sign_pss`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html#method-i-sign_pss)
+  # [`sign_pss`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html#method-i-sign_pss)
   # for the signing operation and an example code.
   #
   # ### Parameters
   # *digest*
-  # :   A [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) containing
+  # :   A [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) containing
   #     the message digest algorithm name.
   # *data*
-  # :   A [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). The data
+  # :   A [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). The data
   #     to be signed.
   # *salt\_length*
   # :   The length in octets of the salt. Two special values are reserved:
@@ -7114,7 +7130,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
 end
 
 # Generic exception that is raised if an operation on an RSA
-# [`PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html) fails
+# [`PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html) fails
 # unexpectedly or in case an instantiation of an instance of RSA fails due to
 # non-conformant input data.
 class OpenSSL::PKey::RSAError < OpenSSL::PKey::PKeyError
@@ -7133,7 +7149,7 @@ module OpenSSL::Random
   # Queries the entropy gathering daemon EGD on socket path given by *filename*.
   #
   # Fetches *length* number of bytes and uses ::add to seed the
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) built-in PRNG.
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) built-in PRNG.
   sig do
     params(
       _: ::T.untyped,
@@ -7152,7 +7168,7 @@ module OpenSSL::Random
   end
   def self.load_random_file(_); end
 
-  # Generates a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) with
+  # Generates a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) with
   # *length* number of pseudo-random bytes.
   #
   # Pseudo-random byte sequences generated by ::pseudo\_bytes will be unique if
@@ -7173,7 +7189,7 @@ module OpenSSL::Random
   def self.pseudo_bytes(_); end
 
   # Mixes the bytes from *str* into the Pseudo
-  # [`Random`](https://docs.ruby-lang.org/en/2.6.0/Random.html) Number
+  # [`Random`](https://docs.ruby-lang.org/en/2.7.0/Random.html) Number
   # Generator(PRNG) state.
   #
   # Thus, if the data from *str* are unpredictable to an adversary, this
@@ -7201,7 +7217,7 @@ module OpenSSL::Random
   end
   def self.random_add(_, _1); end
 
-  # Generates a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) with
+  # Generates a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) with
   # *length* number of cryptographically strong pseudo-random bytes.
   #
   # ### Example
@@ -7248,7 +7264,7 @@ class OpenSSL::Random::RandomError < OpenSSL::OpenSSLError
 end
 
 # Use SSLContext to set up the parameters for a TLS (former
-# [`SSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL.html)) connection.
+# [`SSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL.html)) connection.
 # Both client and server TLS connections are supported, SSLSocket and SSLServer
 # may be used in conjunction with an instance of SSLContext to set up
 # connections.
@@ -7256,33 +7272,33 @@ module OpenSSL::SSL
   OP_ALL = ::T.let(nil, ::T.untyped)
   OP_CIPHER_SERVER_PREFERENCE = ::T.let(nil, ::T.untyped)
   OP_DONT_INSERT_EMPTY_FRAGMENTS = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.0.1k and 1.0.2.
   OP_EPHEMERAL_RSA = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.1.0.
   OP_MICROSOFT_BIG_SSLV3_BUFFER = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.1.0.
   OP_MICROSOFT_SESS_ID_BUG = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 0.9.7h and 0.9.8b.
   OP_MSIE_SSLV2_RSA_PADDING = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.1.0.
   OP_NETSCAPE_CA_DN_BUG = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.1.0.
   OP_NETSCAPE_CHALLENGE_BUG = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.1.0.
   OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 0.9.8q and 1.0.0c.
   OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG = ::T.let(nil, ::T.untyped)
   OP_NO_COMPRESSION = ::T.let(nil, ::T.untyped)
   OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.1.0.
   OP_NO_SSLv2 = ::T.let(nil, ::T.untyped)
   OP_NO_SSLv3 = ::T.let(nil, ::T.untyped)
@@ -7290,28 +7306,28 @@ module OpenSSL::SSL
   OP_NO_TLSv1 = ::T.let(nil, ::T.untyped)
   OP_NO_TLSv1_1 = ::T.let(nil, ::T.untyped)
   OP_NO_TLSv1_2 = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.0.1.
   OP_PKCS1_CHECK_1 = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.0.1.
   OP_PKCS1_CHECK_2 = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.1.0.
   OP_SINGLE_DH_USE = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.1.0.
   OP_SINGLE_ECDH_USE = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.1.0.
   OP_SSLEAY_080_CLIENT_DH_BUG = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.0.1h and 1.0.2.
   OP_SSLREF2_REUSE_CERT_TYPE_BUG = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.1.0.
   OP_TLS_BLOCK_PADDING_BUG = ::T.let(nil, ::T.untyped)
-  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Deprecated in [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # 1.1.0.
   OP_TLS_D5_BUG = ::T.let(nil, ::T.untyped)
   OP_TLS_ROLLBACK_BUG = ::T.let(nil, ::T.untyped)
@@ -7349,14 +7365,14 @@ module OpenSSL::SSL
 end
 
 # An
-# [`SSLContext`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html)
+# [`SSLContext`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html)
 # is used to set various options regarding certificates, algorithms,
 # verification, session caching, etc. The
-# [`SSLContext`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html)
+# [`SSLContext`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html)
 # is used to create an SSLSocket.
 #
 # All attributes must be set before creating an SSLSocket as the
-# [`SSLContext`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html)
+# [`SSLContext`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html)
 # will be frozen afterward.
 class OpenSSL::SSL::SSLContext
   DEFAULT_CERT_STORE = ::T.let(nil, ::T.untyped)
@@ -7368,13 +7384,13 @@ class OpenSSL::SSL::SSLContext
   # Normally the session cache is checked for expired sessions every 255
   # connections. Since this may lead to a delay that cannot be controlled, the
   # automatic flushing may be disabled and
-  # [`flush_sessions`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-flush_sessions)
+  # [`flush_sessions`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-flush_sessions)
   # can be called explicitly.
   SESSION_CACHE_NO_AUTO_CLEAR = ::T.let(nil, ::T.untyped)
   # Enables both
-  # [`SESSION_CACHE_NO_INTERNAL_LOOKUP`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#SESSION_CACHE_NO_INTERNAL_LOOKUP)
+  # [`SESSION_CACHE_NO_INTERNAL_LOOKUP`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#SESSION_CACHE_NO_INTERNAL_LOOKUP)
   # and
-  # [`SESSION_CACHE_NO_INTERNAL_STORE`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#SESSION_CACHE_NO_INTERNAL_STORE).
+  # [`SESSION_CACHE_NO_INTERNAL_STORE`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#SESSION_CACHE_NO_INTERNAL_STORE).
   SESSION_CACHE_NO_INTERNAL = ::T.let(nil, ::T.untyped)
   # Always perform external lookups of sessions even if they are in the internal
   # cache.
@@ -7387,6 +7403,16 @@ class OpenSSL::SSL::SSLContext
   SESSION_CACHE_OFF = ::T.let(nil, ::T.untyped)
   # Server sessions are added to the session cache
   SESSION_CACHE_SERVER = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      certificate: ::OpenSSL::X509::Certificate,
+      pkey: ::OpenSSL::PKey::PKey,
+      extra_certs: ::T.nilable(T::Array[::OpenSSL::X509::Certificate])
+    )
+    .returns(::OpenSSL::SSL::SSLContext)
+  end
+  def add_certificate(certificate, pkey, extra_certs = nil); end
 
   # The path to a file containing a PEM-format CA certificate
   sig {returns(::T.untyped)}
@@ -7422,7 +7448,7 @@ class OpenSSL::SSL::SSLContext
   #
   # The *cert*, *key*, and *extra\_chain\_cert* attributes are deprecated. It is
   # recommended to use
-  # [`add_certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-add_certificate)
+  # [`add_certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-add_certificate)
   # instead.
   sig {returns(::T.untyped)}
   def cert(); end
@@ -7431,7 +7457,7 @@ class OpenSSL::SSL::SSLContext
   #
   # The *cert*, *key*, and *extra\_chain\_cert* attributes are deprecated. It is
   # recommended to use
-  # [`add_certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-add_certificate)
+  # [`add_certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-add_certificate)
   # instead.
   sig do
     params(
@@ -7442,13 +7468,13 @@ class OpenSSL::SSL::SSLContext
   def cert=(cert); end
 
   # An
-  # [`OpenSSL::X509::Store`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Store.html)
+  # [`OpenSSL::X509::Store`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Store.html)
   # used for certificate verification.
   sig {returns(::T.untyped)}
   def cert_store(); end
 
   # An
-  # [`OpenSSL::X509::Store`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Store.html)
+  # [`OpenSSL::X509::Store`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Store.html)
   # used for certificate verification.
   sig do
     params(
@@ -7473,12 +7499,12 @@ class OpenSSL::SSL::SSLContext
   end
   def ciphers=(ciphers); end
 
-  # A certificate or [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  # A certificate or [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   # of certificates that will be sent to the client.
   sig {returns(::T.untyped)}
   def client_ca(); end
 
-  # A certificate or [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  # A certificate or [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   # of certificates that will be sent to the client.
   sig do
     params(
@@ -7492,10 +7518,10 @@ class OpenSSL::SSL::SSLContext
   # certificate has been set.
   #
   # The callback is invoked with a Session and must return an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) containing an
-  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Certificate.html)
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) containing an
+  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Certificate.html)
   # and an
-  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html). If
+  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html). If
   # any other value is returned the handshake is suspended.
   sig {returns(::T.untyped)}
   def client_cert_cb(); end
@@ -7504,10 +7530,10 @@ class OpenSSL::SSL::SSLContext
   # certificate has been set.
   #
   # The callback is invoked with a Session and must return an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) containing an
-  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Certificate.html)
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) containing an
+  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Certificate.html)
   # and an
-  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html). If
+  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html). If
   # any other value is returned the handshake is suspended.
   sig do
     params(
@@ -7521,13 +7547,13 @@ class OpenSSL::SSL::SSLContext
   #
   # For a TLS client, the list is directly used in the Supported Elliptic Curves
   # Extension. For a server, the list is used by
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) to determine
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) to determine
   # the set of shared curves.
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) will pick the
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) will pick the
   # most appropriate one from it.
   #
   # Note that this works differently with old
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) (<= 1.0.1).
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) (<= 1.0.1).
   # Only one curve can be set, and this has no effect for TLS clients.
   #
   # ### Example
@@ -7554,22 +7580,22 @@ class OpenSSL::SSL::SSLContext
   end
   def ecdh_curves=(ecdh_curves); end
 
-  # An [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of extra X509
+  # An [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of extra X509
   # certificates to be added to the certificate chain.
   #
   # The *cert*, *key*, and *extra\_chain\_cert* attributes are deprecated. It is
   # recommended to use
-  # [`add_certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-add_certificate)
+  # [`add_certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-add_certificate)
   # instead.
   sig {returns(::T.untyped)}
   def extra_chain_cert(); end
 
-  # An [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of extra X509
+  # An [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of extra X509
   # certificates to be added to the certificate chain.
   #
   # The *cert*, *key*, and *extra\_chain\_cert* attributes are deprecated. It is
   # recommended to use
-  # [`add_certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-add_certificate)
+  # [`add_certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-add_certificate)
   # instead.
   sig do
     params(
@@ -7589,7 +7615,7 @@ class OpenSSL::SSL::SSLContext
   def flush_sessions(*_); end
 
   # Alias for:
-  # [`setup`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-setup)
+  # [`setup`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-setup)
   sig {returns(::T.untyped)}
   def freeze(); end
 
@@ -7605,7 +7631,7 @@ class OpenSSL::SSL::SSLContext
   #
   # The *cert*, *key*, and *extra\_chain\_cert* attributes are deprecated. It is
   # recommended to use
-  # [`add_certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-add_certificate)
+  # [`add_certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-add_certificate)
   # instead.
   sig {returns(::T.untyped)}
   def key(); end
@@ -7614,7 +7640,7 @@ class OpenSSL::SSL::SSLContext
   #
   # The *cert*, *key*, and *extra\_chain\_cert* attributes are deprecated. It is
   # recommended to use
-  # [`add_certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-add_certificate)
+  # [`add_certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-add_certificate)
   # instead.
   sig do
     params(
@@ -7624,11 +7650,11 @@ class OpenSSL::SSL::SSLContext
   end
   def key=(key); end
 
-  # An [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html) of
-  # Strings. Each [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # An [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html) of
+  # Strings. Each [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   # represents a protocol to be advertised as the list of supported protocols
   # for Next Protocol Negotiation. Supported in
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) 1.0.1 and
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) 1.0.1 and
   # higher. Has no effect on the client side. If not set explicitly, the NPN
   # extension will not be sent by the server in the handshake.
   #
@@ -7640,11 +7666,11 @@ class OpenSSL::SSL::SSLContext
   sig {returns(::T.untyped)}
   def npn_protocols(); end
 
-  # An [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html) of
-  # Strings. Each [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # An [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html) of
+  # Strings. Each [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   # represents a protocol to be advertised as the list of supported protocols
   # for Next Protocol Negotiation. Supported in
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) 1.0.1 and
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) 1.0.1 and
   # higher. Has no effect on the client side. If not set explicitly, the NPN
   # extension will not be sent by the server in the handshake.
   #
@@ -7663,7 +7689,7 @@ class OpenSSL::SSL::SSLContext
 
   # A callback invoked on the client side when the client needs to select a
   # protocol from the list sent by the server. Supported in
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) 1.0.1 and
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) 1.0.1 and
   # higher. The client MUST select a protocol of those advertised by the server.
   # If none is acceptable, raising an error in the callback will cause the
   # handshake to fail. Not setting this callback explicitly means not supporting
@@ -7683,7 +7709,7 @@ class OpenSSL::SSL::SSLContext
 
   # A callback invoked on the client side when the client needs to select a
   # protocol from the list sent by the server. Supported in
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) 1.0.1 and
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) 1.0.1 and
   # higher. The client MUST select a protocol of those advertised by the server.
   # If none is acceptable, raising an error in the callback will cause the
   # handshake to fail. Not setting this callback explicitly means not supporting
@@ -7706,12 +7732,12 @@ class OpenSSL::SSL::SSLContext
   end
   def npn_select_cb=(npn_select_cb); end
 
-  # Gets various [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Gets various [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # options.
   sig {returns(::T.untyped)}
   def options(); end
 
-  # Sets various [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html)
+  # Sets various [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # options.
   sig do
     params(
@@ -7727,7 +7753,8 @@ class OpenSSL::SSL::SSLContext
   # The callback is invoked with the active SSLSocket. The callback's return
   # value is irrelevant, normal return indicates "approval" of the renegotiation
   # and will continue the process. To forbid renegotiation and to cancel the
-  # process, an Error may be raised within the callback.
+  # process, an [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) may be
+  # raised within the callback.
   #
   # ### Disable client renegotiation
   #
@@ -7750,7 +7777,8 @@ class OpenSSL::SSL::SSLContext
   # The callback is invoked with the active SSLSocket. The callback's return
   # value is irrelevant, normal return indicates "approval" of the renegotiation
   # and will continue the process. To forbid renegotiation and to cancel the
-  # process, an Error may be raised within the callback.
+  # process, an [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) may be
+  # raised within the callback.
   #
   # ### Disable client renegotiation
   #
@@ -7775,12 +7803,12 @@ class OpenSSL::SSL::SSLContext
   # Returns the security level for the context.
   #
   # See also
-  # [`OpenSSL::SSL::SSLContext#security_level=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-security_level-3D).
+  # [`OpenSSL::SSL::SSLContext#security_level=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-security_level-3D).
   sig {returns(::T.untyped)}
   def security_level(); end
 
   # Sets the security level for the context.
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) limits
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) limits
   # parameters according to the level. The "parameters" include: ciphersuites,
   # curves, key sizes, certificate signature algorithms, protocol version and so
   # on. For example, level 1 rejects parameters offering below 80 bits of
@@ -7791,11 +7819,11 @@ class OpenSSL::SSL::SSLContext
   # also blocked. You need to lower the level first.
   #
   # This feature is not supported in
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) < 1.1.0, and
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) < 1.1.0, and
   # setting the level to other than 0 will raise
-  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.6.0/NotImplementedError.html).
+  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.7.0/NotImplementedError.html).
   # Level 0 means everything is permitted, the same behavior as previous
-  # versions of [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html).
+  # versions of [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html).
   #
   # See the manpage of SSL\_CTX\_set\_security\_level(3) for details.
   sig do
@@ -7811,7 +7839,7 @@ class OpenSSL::SSL::SSLContext
   #
   # The callback is invoked with an SSLSocket and a server name. The callback
   # must return an
-  # [`SSLContext`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html)
+  # [`SSLContext`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html)
   # for the server name or nil.
   sig {returns(::T.untyped)}
   def servername_cb(); end
@@ -7821,7 +7849,7 @@ class OpenSSL::SSL::SSLContext
   #
   # The callback is invoked with an SSLSocket and a server name. The callback
   # must return an
-  # [`SSLContext`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html)
+  # [`SSLContext`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html)
   # for the server name or nil.
   sig do
     params(
@@ -7844,7 +7872,7 @@ class OpenSSL::SSL::SSLContext
   sig {returns(::T.untyped)}
   def session_cache_mode(); end
 
-  # Sets the [`SSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL.html)
+  # Sets the [`SSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL.html)
   # session cache mode. Bitwise-or together the desired SESSION\_CACHE\_\*
   # constants to set. See SSL\_CTX\_set\_session\_cache\_mode(3) for details.
   sig do
@@ -7870,7 +7898,7 @@ class OpenSSL::SSL::SSLContext
   end
   def session_cache_size=(session_cache_size); end
 
-  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) containing
+  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) containing
   # the following keys:
   #
   # :accept
@@ -7968,7 +7996,7 @@ class OpenSSL::SSL::SSLContext
   # A callback invoked when a session is removed from the internal cache.
   #
   # The callback is invoked with an
-  # [`SSLContext`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html)
+  # [`SSLContext`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html)
   # and a Session.
   #
   # IMPORTANT NOTE: It is currently not possible to use this safely in a
@@ -7980,7 +8008,7 @@ class OpenSSL::SSL::SSLContext
   # A callback invoked when a session is removed from the internal cache.
   #
   # The callback is invoked with an
-  # [`SSLContext`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html)
+  # [`SSLContext`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html)
   # and a Session.
   #
   # IMPORTANT NOTE: It is currently not possible to use this safely in a
@@ -7996,18 +8024,18 @@ class OpenSSL::SSL::SSLContext
 
   # Sets saner defaults optimized for the use with HTTP-like protocols.
   #
-  # If a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) *params* is
+  # If a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) *params* is
   # given, the parameters are overridden with it. The keys in *params* must be
   # assignment methods on
-  # [`SSLContext`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html).
+  # [`SSLContext`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html).
   #
   # If the
-  # [`verify_mode`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#attribute-i-verify_mode)
+  # [`verify_mode`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#attribute-i-verify_mode)
   # is not VERIFY\_NONE and
-  # [`ca_file`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#attribute-i-ca_file),
-  # [`ca_path`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#attribute-i-ca_path)
+  # [`ca_file`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#attribute-i-ca_file),
+  # [`ca_path`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#attribute-i-ca_path)
   # and
-  # [`cert_store`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#attribute-i-cert_store)
+  # [`cert_store`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#attribute-i-cert_store)
   # are not set then the system default certificate store is used.
   sig do
     params(
@@ -8022,7 +8050,7 @@ class OpenSSL::SSL::SSLContext
   # objects in a multi-threaded program.
   #
   # Also aliased as:
-  # [`freeze`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-freeze)
+  # [`freeze`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-freeze)
   sig {returns(::T.untyped)}
   def setup(); end
 
@@ -8042,20 +8070,20 @@ class OpenSSL::SSL::SSLContext
   # Sets the SSL/TLS protocol version for the context. This forces connections
   # to use only the specified protocol version. This is deprecated and only
   # provided for backwards compatibility. Use
-  # [`min_version=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-min_version-3D)
+  # [`min_version=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-min_version-3D)
   # and
-  # [`max_version=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-max_version-3D)
+  # [`max_version=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-max_version-3D)
   # instead.
   #
   # ### History
   # As the name hints, this used to call the SSL\_CTX\_set\_ssl\_version()
   # function which sets the
-  # [`SSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL.html) method used
+  # [`SSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL.html) method used
   # for connections created from the context. As of Ruby/OpenSSL 2.1, this
   # accessor method is implemented to call
-  # [`min_version=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-min_version-3D)
+  # [`min_version=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-min_version-3D)
   # and
-  # [`max_version=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-max_version-3D)
+  # [`max_version=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-max_version-3D)
   # instead.
   sig do
     params(
@@ -8084,7 +8112,7 @@ class OpenSSL::SSL::SSLContext
   # indicating the use of an export cipher and the keylength required.
   #
   # The callback must return an
-  # [`OpenSSL::PKey::DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html)
+  # [`OpenSSL::PKey::DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html)
   # instance of the correct key length.
   sig {returns(::T.untyped)}
   def tmp_dh_callback(); end
@@ -8095,7 +8123,7 @@ class OpenSSL::SSL::SSLContext
   # indicating the use of an export cipher and the keylength required.
   #
   # The callback must return an
-  # [`OpenSSL::PKey::DH`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DH.html)
+  # [`OpenSSL::PKey::DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html)
   # instance of the correct key length.
   sig do
     params(
@@ -8111,8 +8139,8 @@ class OpenSSL::SSL::SSLContext
   # indicating the use of an export cipher and the keylength required.
   #
   # The callback is deprecated. This does not work with recent versions of
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html). Use
-  # [`OpenSSL::SSL::SSLContext#ecdh_curves=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-ecdh_curves-3D)
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html). Use
+  # [`OpenSSL::SSL::SSLContext#ecdh_curves=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-ecdh_curves-3D)
   # instead.
   sig {returns(::T.untyped)}
   def tmp_ecdh_callback(); end
@@ -8123,8 +8151,8 @@ class OpenSSL::SSL::SSLContext
   # indicating the use of an export cipher and the keylength required.
   #
   # The callback is deprecated. This does not work with recent versions of
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html). Use
-  # [`OpenSSL::SSL::SSLContext#ecdh_curves=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-ecdh_curves-3D)
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html). Use
+  # [`OpenSSL::SSL::SSLContext#ecdh_curves=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-ecdh_curves-3D)
   # instead.
   sig do
     params(
@@ -8140,7 +8168,7 @@ class OpenSSL::SSL::SSLContext
   # The callback is invoked with two values. *preverify\_ok* indicates indicates
   # if the verification was passed (`true`) or not (`false`). *store\_context*
   # is an
-  # [`OpenSSL::X509::StoreContext`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/StoreContext.html)
+  # [`OpenSSL::X509::StoreContext`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/StoreContext.html)
   # containing the context used for certificate verification.
   #
   # If the callback returns `false`, the chain verification is immediately
@@ -8154,7 +8182,7 @@ class OpenSSL::SSL::SSLContext
   # The callback is invoked with two values. *preverify\_ok* indicates indicates
   # if the verification was passed (`true`) or not (`false`). *store\_context*
   # is an
-  # [`OpenSSL::X509::StoreContext`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/StoreContext.html)
+  # [`OpenSSL::X509::StoreContext`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/StoreContext.html)
   # containing the context used for certificate verification.
   #
   # If the callback returns `false`, the chain verification is immediately
@@ -8183,18 +8211,18 @@ class OpenSSL::SSL::SSLContext
   # Whether to check the server certificate is valid for the hostname.
   #
   # In order to make this work,
-  # [`verify_mode`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#attribute-i-verify_mode)
+  # [`verify_mode`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#attribute-i-verify_mode)
   # must be set to VERIFY\_PEER and the server hostname must be given by
-  # [`OpenSSL::SSL::SSLSocket#hostname=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLSocket.html#method-i-hostname-3D).
+  # [`OpenSSL::SSL::SSLSocket#hostname=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html#method-i-hostname-3D).
   sig {returns(::T.untyped)}
   def verify_hostname(); end
 
   # Whether to check the server certificate is valid for the hostname.
   #
   # In order to make this work,
-  # [`verify_mode`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#attribute-i-verify_mode)
+  # [`verify_mode`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#attribute-i-verify_mode)
   # must be set to VERIFY\_PEER and the server hostname must be given by
-  # [`OpenSSL::SSL::SSLSocket#hostname=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLSocket.html#method-i-hostname-3D).
+  # [`OpenSSL::SSL::SSLSocket#hostname=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html#method-i-hostname-3D).
   sig do
     params(
       verify_hostname: ::T.untyped,
@@ -8207,7 +8235,7 @@ class OpenSSL::SSL::SSLContext
   #
   # Valid modes are VERIFY\_NONE, VERIFY\_PEER, VERIFY\_CLIENT\_ONCE,
   # VERIFY\_FAIL\_IF\_NO\_PEER\_CERT and defined on
-  # [`OpenSSL::SSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL.html)
+  # [`OpenSSL::SSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL.html)
   #
   # The default mode is VERIFY\_NONE, which does not perform any verification at
   # all.
@@ -8220,7 +8248,7 @@ class OpenSSL::SSL::SSLContext
   #
   # Valid modes are VERIFY\_NONE, VERIFY\_PEER, VERIFY\_CLIENT\_ONCE,
   # VERIFY\_FAIL\_IF\_NO\_PEER\_CERT and defined on
-  # [`OpenSSL::SSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL.html)
+  # [`OpenSSL::SSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL.html)
   #
   # The default mode is VERIFY\_NONE, which does not perform any verification at
   # all.
@@ -8247,16 +8275,16 @@ class OpenSSL::SSL::SSLErrorWaitWritable < OpenSSL::SSL::SSLError
   include ::IO::WaitWritable
 end
 
-# [`SSLServer`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLServer.html)
+# [`SSLServer`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLServer.html)
 # represents a TCP/IP server socket with Secure Sockets Layer.
 class OpenSSL::SSL::SSLServer
   include ::OpenSSL::SSL::SocketForwarder
   # Works similar to
-  # [`TCPServer#accept`](https://docs.ruby-lang.org/en/2.6.0/TCPServer.html#method-i-accept).
+  # [`TCPServer#accept`](https://docs.ruby-lang.org/en/2.7.0/TCPServer.html#method-i-accept).
   sig {returns(::T.untyped)}
   def accept(); end
 
-  # See [`IO#close`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-close)
+  # See [`IO#close`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-close)
   # for details.
   sig {returns(::T.untyped)}
   def close(); end
@@ -8271,7 +8299,7 @@ class OpenSSL::SSL::SSLServer
   def initialize(svr, ctx); end
 
   # See
-  # [`TCPServer#listen`](https://docs.ruby-lang.org/en/2.6.0/TCPServer.html#method-i-listen)
+  # [`TCPServer#listen`](https://docs.ruby-lang.org/en/2.7.0/TCPServer.html#method-i-listen)
   # for details.
   sig do
     params(
@@ -8282,7 +8310,7 @@ class OpenSSL::SSL::SSLServer
   def listen(backlog=T.unsafe(nil)); end
 
   # See
-  # [`BasicSocket#shutdown`](https://docs.ruby-lang.org/en/2.6.0/BasicSocket.html#method-i-shutdown)
+  # [`BasicSocket#shutdown`](https://docs.ruby-lang.org/en/2.7.0/BasicSocket.html#method-i-shutdown)
   # for details.
   sig do
     params(
@@ -8293,16 +8321,16 @@ class OpenSSL::SSL::SSLServer
   def shutdown(how=T.unsafe(nil)); end
 
   # When true then
-  # [`accept`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLServer.html#method-i-accept)
+  # [`accept`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLServer.html#method-i-accept)
   # works exactly the same as
-  # [`TCPServer#accept`](https://docs.ruby-lang.org/en/2.6.0/TCPServer.html#method-i-accept)
+  # [`TCPServer#accept`](https://docs.ruby-lang.org/en/2.7.0/TCPServer.html#method-i-accept)
   sig {returns(::T.untyped)}
   def start_immediately(); end
 
   # When true then
-  # [`accept`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLServer.html#method-i-accept)
+  # [`accept`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLServer.html#method-i-accept)
   # works exactly the same as
-  # [`TCPServer#accept`](https://docs.ruby-lang.org/en/2.6.0/TCPServer.html#method-i-accept)
+  # [`TCPServer#accept`](https://docs.ruby-lang.org/en/2.7.0/TCPServer.html#method-i-accept)
   sig do
     params(
       start_immediately: ::T.untyped,
@@ -8312,9 +8340,9 @@ class OpenSSL::SSL::SSLServer
   def start_immediately=(start_immediately); end
 
   # Returns the
-  # [`TCPServer`](https://docs.ruby-lang.org/en/2.6.0/TCPServer.html) passed to
+  # [`TCPServer`](https://docs.ruby-lang.org/en/2.7.0/TCPServer.html) passed to
   # the
-  # [`SSLServer`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLServer.html)
+  # [`SSLServer`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLServer.html)
   # when initialized.
   sig {returns(::T.untyped)}
   def to_io(); end
@@ -8348,11 +8376,11 @@ class OpenSSL::SSL::SSLSocket
   #
   # By specifying a keyword argument *exception* to `false`, you can indicate
   # that
-  # [`accept_nonblock`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLSocket.html#method-i-accept_nonblock)
+  # [`accept_nonblock`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html#method-i-accept_nonblock)
   # should not raise an
-  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitReadable.html)
+  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitReadable.html)
   # or
-  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitWritable.html)
+  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitWritable.html)
   # exception, but return the symbol `:wait_readable` or `:wait_writable`
   # instead.
   sig do
@@ -8403,11 +8431,11 @@ class OpenSSL::SSL::SSLSocket
   #
   # By specifying a keyword argument *exception* to `false`, you can indicate
   # that
-  # [`connect_nonblock`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLSocket.html#method-i-connect_nonblock)
+  # [`connect_nonblock`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html#method-i-connect_nonblock)
   # should not raise an
-  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitReadable.html)
+  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitReadable.html)
   # or
-  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitWritable.html)
+  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitWritable.html)
   # exception, but return the symbol `:wait_readable` or `:wait_writable`
   # instead.
   sig do
@@ -8426,7 +8454,7 @@ class OpenSSL::SSL::SSLSocket
   def hostname(); end
 
   # Sets the server hostname used for SNI. This needs to be set before
-  # [`SSLSocket#connect`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLSocket.html#method-i-connect).
+  # [`SSLSocket#connect`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html#method-i-connect).
   sig do
     params(
       hostname: ::T.untyped,
@@ -8443,7 +8471,7 @@ class OpenSSL::SSL::SSLSocket
   end
   def initialize(*_); end
 
-  # The underlying [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object.
+  # The underlying [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
   sig {returns(::T.untyped)}
   def io(); end
 
@@ -8467,7 +8495,7 @@ class OpenSSL::SSL::SSLSocket
   # Perform hostname verification following RFC 6125.
   #
   # This method MUST be called after calling
-  # [`connect`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLSocket.html#method-i-connect)
+  # [`connect`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html#method-i-connect)
   # to ensure that the hostname of a remote peer has been verified.
   sig do
     params(
@@ -8495,7 +8523,7 @@ class OpenSSL::SSL::SSLSocket
   sig {returns(::T.untyped)}
   def session_reused?(); end
 
-  # Returns a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # Returns a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   # representing the SSL/TLS version that was negotiated for the connection, for
   # example "TLSv1.2".
   sig {returns(::T.untyped)}
@@ -8522,18 +8550,18 @@ class OpenSSL::SSL::SSLSocket
   def sync_close=(sync_close); end
 
   # Sends "close notify" to the peer and tries to shut down the
-  # [`SSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL.html) connection
+  # [`SSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL.html) connection
   # gracefully.
   #
   # If
-  # [`sync_close`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLSocket.html#attribute-i-sync_close)
+  # [`sync_close`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html#attribute-i-sync_close)
   # is set to `true`, the underlying
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) is also closed.
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) is also closed.
   sig {returns(::T.untyped)}
   def sysclose(); end
 
   # Reads *length* bytes from the
-  # [`SSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL.html) connection. If
+  # [`SSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL.html) connection. If
   # a pre-allocated *buffer* is provided the data will be written into it.
   sig do
     params(
@@ -8544,7 +8572,7 @@ class OpenSSL::SSL::SSLSocket
   def sysread(*_); end
 
   # Writes *string* to the
-  # [`SSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL.html) connection.
+  # [`SSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL.html) connection.
   sig do
     params(
       _: ::T.untyped,
@@ -8553,7 +8581,7 @@ class OpenSSL::SSL::SSLSocket
   end
   def syswrite(_); end
 
-  # The underlying [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object.
+  # The underlying [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
   sig {returns(::T.untyped)}
   def to_io(); end
 
@@ -8567,7 +8595,7 @@ end
 
 class OpenSSL::SSL::Session
   # Returns `true` if the two
-  # [`Session`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/Session.html) is
+  # [`Session`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/Session.html) is
   # the same, `false` if not.
   sig do
     params(
@@ -8578,7 +8606,7 @@ class OpenSSL::SSL::Session
   def ==(_); end
 
   # Returns the
-  # [`Session`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/Session.html)
+  # [`Session`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/Session.html)
   # ID.
   sig {returns(::T.untyped)}
   def id(); end
@@ -8596,7 +8624,7 @@ class OpenSSL::SSL::Session
   def time(); end
 
   # Sets start time of the session.
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) resolution is in
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) resolution is in
   # seconds.
   sig do
     params(
@@ -8621,23 +8649,23 @@ class OpenSSL::SSL::Session
   def timeout=(timeout); end
 
   # Returns an ASN1 encoded
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) that contains
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) that contains
   # the
-  # [`Session`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/Session.html)
+  # [`Session`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/Session.html)
   # object.
   sig {returns(::T.untyped)}
   def to_der(); end
 
   # Returns a PEM encoded
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) that contains
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) that contains
   # the
-  # [`Session`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/Session.html)
+  # [`Session`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/Session.html)
   # object.
   sig {returns(::T.untyped)}
   def to_pem(); end
 
   # Shows everything in the
-  # [`Session`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/Session.html)
+  # [`Session`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/Session.html)
   # object. This is for diagnostic purposes.
   sig {returns(::T.untyped)}
   def to_text(); end
@@ -8902,12 +8930,12 @@ class OpenSSL::X509::CRL
   def to_der(); end
 
   # Also aliased as:
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/CRL.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/CRL.html#method-i-to_s)
   sig {returns(::T.untyped)}
   def to_pem(); end
 
   # Alias for:
-  # [`to_pem`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/CRL.html#method-i-to_pem)
+  # [`to_pem`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/CRL.html#method-i-to_pem)
   sig {returns(::T.untyped)}
   def to_s(); end
 
@@ -8943,7 +8971,7 @@ end
 #
 # ### Reading a certificate from a file
 #
-# [`Certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Certificate.html)
+# [`Certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Certificate.html)
 # is capable of handling DER-encoded certificates and certificates encoded in
 # OpenSSL's PEM format.
 #
@@ -8956,27 +8984,27 @@ end
 #
 # A certificate may be encoded in DER format
 #
-# ```
+# ```ruby
 # cert = ...
 # File.open("cert.cer", "wb") { |f| f.print cert.to_der }
 # ```
 #
 # or in PEM format
 #
-# ```
+# ```ruby
 # cert = ...
 # File.open("cert.pem", "wb") { |f| f.print cert.to_pem }
 # ```
 #
 # X.509 certificates are associated with a private/public key pair, typically a
 # RSA, DSA or ECC key (see also
-# [`OpenSSL::PKey::RSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html),
-# [`OpenSSL::PKey::DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html)
+# [`OpenSSL::PKey::RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html),
+# [`OpenSSL::PKey::DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html)
 # and
-# [`OpenSSL::PKey::EC`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/EC.html)),
+# [`OpenSSL::PKey::EC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html)),
 # the public key itself is stored within the certificate and can be accessed in
 # form of an
-# [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html).
+# [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html).
 # Certificates are typically used to be able to associate some form of identity
 # with a key pair, for example web servers serving pages over HTTPs use
 # certificates to authenticate themselves to the user.
@@ -8986,7 +9014,7 @@ end
 # to base their trust just on a selected few authorities that themselves again
 # vouch for subordinate CAs issuing their certificates to end users.
 #
-# The [`OpenSSL::X509`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509.html)
+# The [`OpenSSL::X509`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509.html)
 # module provides the tools to set up an independent PKI, similar to scenarios
 # where the 'openssl' command line tool is used for issuing certificates in a
 # private PKI.
@@ -9170,12 +9198,12 @@ class OpenSSL::X509::Certificate
   def to_der(); end
 
   # Also aliased as:
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Certificate.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Certificate.html#method-i-to_s)
   sig {returns(::T.untyped)}
   def to_pem(); end
 
   # Alias for:
-  # [`to_pem`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Certificate.html#method-i-to_pem)
+  # [`to_pem`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Certificate.html#method-i-to_pem)
   sig {returns(::T.untyped)}
   def to_s(); end
 
@@ -9184,7 +9212,7 @@ class OpenSSL::X509::Certificate
 
   # Verifies the signature of the certificate, with the public key *key*. *key*
   # must be an instance of
-  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey.html).
+  # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html).
   sig do
     params(
       _: ::T.untyped,
@@ -9279,7 +9307,7 @@ class OpenSSL::X509::ExtensionFactory
   def config=(config); end
 
   # Creates a new
-  # [`X509::Extension`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Extension.html)
+  # [`X509::Extension`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Extension.html)
   # with passed values. See also x509v3\_config(5).
   sig do
     params(
@@ -9378,11 +9406,11 @@ end
 # with a public key.
 #
 # You can create a
-# [`Name`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html) by
+# [`Name`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html) by
 # parsing a distinguished name
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or by supplying
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or by supplying
 # the distinguished name as an
-# [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html).
+# [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html).
 #
 # ```ruby
 # name = OpenSSL::X509::Name.parse 'CN=nobody/DC=example'
@@ -9392,35 +9420,35 @@ end
 class OpenSSL::X509::Name
   include ::Comparable
   # A flag for
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#method-i-to_s).
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#method-i-to_s).
   #
   # Breaks the name returned into multiple lines if longer than 80 characters.
   COMPAT = ::T.let(nil, ::T.untyped)
   # The default object type for name entries.
   DEFAULT_OBJECT_TYPE = ::T.let(nil, ::T.untyped)
   # A flag for
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#method-i-to_s).
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#method-i-to_s).
   #
   # Returns a multiline format.
   MULTILINE = ::T.let(nil, ::T.untyped)
   # The default object type template for name entries.
   OBJECT_TYPE_TEMPLATE = ::T.let(nil, ::T.untyped)
   # A flag for
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#method-i-to_s).
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#method-i-to_s).
   #
   # Returns a more readable format than
-  # [`RFC2253`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#RFC2253).
+  # [`RFC2253`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#RFC2253).
   ONELINE = ::T.let(nil, ::T.untyped)
   # A flag for
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#method-i-to_s).
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#method-i-to_s).
   #
   # Returns an
-  # [`RFC2253`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#RFC2253)
+  # [`RFC2253`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#RFC2253)
   # format name.
   RFC2253 = ::T.let(nil, ::T.untyped)
 
   # Alias for:
-  # [`cmp`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#method-i-cmp)
+  # [`cmp`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#method-i-cmp)
   sig do
     params(
       _: ::T.untyped,
@@ -9434,21 +9462,21 @@ class OpenSSL::X509::Name
   #
   # C
   # :   Country
-  #     [`Name`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html)
+  #     [`Name`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html)
   # CN
   # :   Common
-  #     [`Name`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html)
+  #     [`Name`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html)
   # DC
   # :   Domain Component
   # O
   # :   Organization
-  #     [`Name`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html)
+  #     [`Name`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html)
   # OU
   # :   Organizational Unit
-  #     [`Name`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html)
+  #     [`Name`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html)
   # ST
   # :   State or Province
-  #     [`Name`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html)
+  #     [`Name`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html)
   #
   #
   # The optional keyword parameters *loc* and *set* specify where to insert the
@@ -9464,12 +9492,12 @@ class OpenSSL::X509::Name
   def add_entry(*_); end
 
   # Compares this
-  # [`Name`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html) with
+  # [`Name`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html) with
   # *other* and returns `0` if they are the same and `-1` or +`1` if they are
   # greater or less than each other respectively.
   #
   # Also aliased as:
-  # [`<=>`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#method-i-3C-3D-3E)
+  # [`<=>`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#method-i-3C-3D-3E)
   sig do
     params(
       _: ::T.untyped,
@@ -9493,7 +9521,7 @@ class OpenSSL::X509::Name
   def hash(); end
 
   # Returns an MD5 based hash used in
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) 0.9.X.
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) 0.9.X.
   sig {returns(::T.untyped)}
   def hash_old(); end
 
@@ -9513,9 +9541,9 @@ class OpenSSL::X509::Name
   end
   def pretty_print(q); end
 
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   # representation of the distinguished name suitable for passing to
-  # [`::new`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#method-c-new)
+  # [`::new`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#method-c-new)
   sig {returns(::T.untyped)}
   def to_a(); end
 
@@ -9523,19 +9551,19 @@ class OpenSSL::X509::Name
   sig {returns(::T.untyped)}
   def to_der(); end
 
-  # Returns a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # Returns a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   # representation of the Distinguished
-  # [`Name`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html).
+  # [`Name`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html).
   # *format* is one of:
   #
-  # *   [`OpenSSL::X509::Name::COMPAT`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#COMPAT)
-  # *   [`OpenSSL::X509::Name::RFC2253`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#RFC2253)
-  # *   [`OpenSSL::X509::Name::ONELINE`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#ONELINE)
-  # *   [`OpenSSL::X509::Name::MULTILINE`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#MULTILINE)
+  # *   [`OpenSSL::X509::Name::COMPAT`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#COMPAT)
+  # *   [`OpenSSL::X509::Name::RFC2253`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#RFC2253)
+  # *   [`OpenSSL::X509::Name::ONELINE`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#ONELINE)
+  # *   [`OpenSSL::X509::Name::MULTILINE`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#MULTILINE)
   #
   #
   # If *format* is omitted, the largely broken and traditional
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) format is
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) format is
   # used.
   sig do
     params(
@@ -9546,7 +9574,7 @@ class OpenSSL::X509::Name
   def to_s(*_); end
 
   # Alias for:
-  # [`parse_openssl`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#method-c-parse_openssl)
+  # [`parse_openssl`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#method-c-parse_openssl)
   sig do
     params(
       str: ::T.untyped,
@@ -9557,7 +9585,7 @@ class OpenSSL::X509::Name
   def self.parse(str, template=T.unsafe(nil)); end
 
   # Also aliased as:
-  # [`parse`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Name.html#method-c-parse)
+  # [`parse`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#method-c-parse)
   sig do
     params(
       str: ::T.untyped,
@@ -9693,12 +9721,12 @@ class OpenSSL::X509::Request
   def to_der(); end
 
   # Also aliased as:
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Request.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Request.html#method-i-to_s)
   sig {returns(::T.untyped)}
   def to_pem(); end
 
   # Alias for:
-  # [`to_pem`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Request.html#method-i-to_pem)
+  # [`to_pem`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Request.html#method-i-to_pem)
   sig {returns(::T.untyped)}
   def to_s(); end
 
@@ -9785,7 +9813,7 @@ end
 class OpenSSL::X509::RevokedError < OpenSSL::OpenSSLError
 end
 
-# The [`X509`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509.html)
+# The [`X509`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509.html)
 # certificate store holds trusted CA certificates used to verify peer
 # certificates.
 #
@@ -9825,7 +9853,7 @@ end
 # ```
 class OpenSSL::X509::Store
   # Adds the
-  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Certificate.html)
+  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Certificate.html)
   # *cert* to the certificate store.
   sig do
     params(
@@ -9836,7 +9864,7 @@ class OpenSSL::X509::Store
   def add_cert(_); end
 
   # Adds the
-  # [`OpenSSL::X509::CRL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/CRL.html)
+  # [`OpenSSL::X509::CRL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/CRL.html)
   # *crl* to the store.
   sig do
     params(
@@ -9867,22 +9895,22 @@ class OpenSSL::X509::Store
   def add_path(_); end
 
   # The certificate chain constructed by the last call of
-  # [`verify`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Store.html#method-i-verify).
+  # [`verify`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Store.html#method-i-verify).
   sig {returns(::T.untyped)}
   def chain(); end
 
   # The error code set by the last call of
-  # [`verify`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Store.html#method-i-verify).
+  # [`verify`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Store.html#method-i-verify).
   sig {returns(::T.untyped)}
   def error(); end
 
   # The description for the error code set by the last call of
-  # [`verify`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Store.html#method-i-verify).
+  # [`verify`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Store.html#method-i-verify).
   sig {returns(::T.untyped)}
   def error_string(); end
 
   # Sets *flags* to the
-  # [`Store`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Store.html).
+  # [`Store`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Store.html).
   # *flags* consists of zero or more of the constants defined in with name
   # V\_FLAG\_\* or'ed together.
   sig do
@@ -9949,21 +9977,21 @@ class OpenSSL::X509::Store
   def trust=(trust); end
 
   # Performs a certificate verification on the
-  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Certificate.html)
+  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Certificate.html)
   # *cert*.
   #
   # *chain* can be an array of
-  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Certificate.html)
+  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Certificate.html)
   # that is used to construct the certificate chain.
   #
   # If a block is given, it overrides the callback set by
-  # [`verify_callback=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Store.html#method-i-verify_callback-3D).
+  # [`verify_callback=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Store.html#method-i-verify_callback-3D).
   #
   # After finishing the verification, the error information can be retrieved by
-  # [`error`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Store.html#attribute-i-error),
-  # [`error_string`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Store.html#attribute-i-error_string),
+  # [`error`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Store.html#attribute-i-error),
+  # [`error_string`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Store.html#attribute-i-error_string),
   # and the resulting complete certificate chain can be retrieved by
-  # [`chain`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Store.html#attribute-i-chain).
+  # [`chain`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Store.html#attribute-i-chain).
   sig do
     params(
       _: ::T.untyped,
@@ -9977,14 +10005,14 @@ class OpenSSL::X509::Store
   #
   # The callback is invoked with two values, a boolean that indicates if the
   # pre-verification by
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) has succeeded
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) has succeeded
   # or not, and the StoreContext in use. The callback must return either true or
   # false.
   sig {returns(::T.untyped)}
   def verify_callback(); end
 
   # General callback for
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) verify
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) verify
   sig do
     params(
       verify_callback: ::T.untyped,
@@ -9995,7 +10023,7 @@ class OpenSSL::X509::Store
 end
 
 # A
-# [`StoreContext`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/StoreContext.html)
+# [`StoreContext`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/StoreContext.html)
 # is used while validating a single certificate and holds the status involved.
 class OpenSSL::X509::StoreContext
   sig {returns(::T.untyped)}
@@ -10025,7 +10053,7 @@ class OpenSSL::X509::StoreContext
   def error_depth(); end
 
   # Returns the error string corresponding to the error code retrieved by
-  # [`error`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/StoreContext.html#method-i-error).
+  # [`error`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/StoreContext.html#method-i-error).
   sig {returns(::T.untyped)}
   def error_string(); end
 

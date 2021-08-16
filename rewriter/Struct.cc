@@ -14,7 +14,7 @@ namespace sorbet::rewriter {
 
 namespace {
 
-bool isKeywordInitKey(const core::GlobalState &gs, const ast::TreePtr &node) {
+bool isKeywordInitKey(const core::GlobalState &gs, const ast::ExpressionPtr &node) {
     if (auto *lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isSymbol(gs) && lit->asSymbol(gs) == core::Names::keywordInit();
     }
@@ -23,8 +23,8 @@ bool isKeywordInitKey(const core::GlobalState &gs, const ast::TreePtr &node) {
 
 } // namespace
 
-vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
-    vector<ast::TreePtr> empty;
+vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
+    vector<ast::ExpressionPtr> empty;
 
     if (ctx.state.runningUnderAutogen) {
         return empty;
@@ -45,7 +45,7 @@ vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
         return empty;
     }
 
-    if (!ast::isa_tree<ast::EmptyTree>(recv->scope) || recv->cnst != core::Symbols::Struct().data(ctx)->name ||
+    if (!ast::MK::isRootScope(recv->scope) || recv->cnst != core::Symbols::Struct().data(ctx)->name ||
         send->fun != core::Names::new_() || send->args.empty()) {
         return empty;
     }
@@ -94,7 +94,8 @@ vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
         }
         core::NameRef name = sym->asSymbol(ctx);
         auto symLoc = sym->loc;
-        if (symLoc.exists() && absl::StartsWith(core::Loc(ctx.file, symLoc).source(ctx), ":")) {
+        // TODO(jez) Use Loc::adjust here
+        if (symLoc.exists() && absl::StartsWith(core::Loc(ctx.file, symLoc).source(ctx).value(), ":")) {
             symLoc = core::LocOffsets{symLoc.beginPos() + 1, symLoc.endPos()};
         }
 
@@ -102,7 +103,7 @@ vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
         sigArgs.emplace_back(ast::MK::Constant(symLoc, core::Symbols::BasicObject()));
         auto argName = ast::MK::Local(symLoc, name);
         if (keywordInit) {
-            argName = ast::MK::KeywordArg(symLoc, move(argName));
+            argName = ast::make_expression<ast::KeywordArg>(symLoc, move(argName));
         }
         newArgs.emplace_back(ast::MK::OptionalArg(symLoc, move(argName), ast::MK::Nil(symLoc)));
 
@@ -121,6 +122,10 @@ vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
                             std::move(typeMember)));
     }
 
+    body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
+    body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
+                                               ast::MK::RaiseUnimplemented(loc)));
+
     if (send->block != nullptr) {
         auto &block = ast::cast_tree_nonnull<ast::Block>(send->block);
 
@@ -137,15 +142,11 @@ vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
         // NOTE: the code in this block _STEALS_ trees. No _return empty_'s should go after it
     }
 
-    body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
-    body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
-                                               ast::MK::RaiseUnimplemented(loc)));
-
     ast::ClassDef::ANCESTORS_store ancestors;
     ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
                                                        core::Names::Constants::Struct()));
 
-    vector<ast::TreePtr> stats;
+    vector<ast::ExpressionPtr> stats;
     stats.emplace_back(ast::MK::Class(loc, loc, std::move(asgn->lhs), std::move(ancestors), std::move(body)));
     return stats;
 }

@@ -18,6 +18,9 @@ class Symbol;
 class SymbolRef;
 class ClassOrModuleRef;
 class MethodRef;
+class FieldRef;
+class TypeArgumentRef;
+class TypeMemberRef;
 class GlobalSubstitution;
 class ErrorQueue;
 struct GlobalStateHash;
@@ -38,6 +41,9 @@ class GlobalState final {
     friend SymbolRef;
     friend ClassOrModuleRef;
     friend MethodRef;
+    friend TypeMemberRef;
+    friend TypeArgumentRef;
+    friend FieldRef;
     friend File;
     friend FileRef;
     friend GlobalSubstitution;
@@ -49,9 +55,18 @@ class GlobalState final {
     friend class UnfreezeFileTable;
     friend struct NameRefDebugCheck;
 
+    // Private constructor that allows a specific globalStateId. Used in `makeEmptyGlobalStateForHashing` to avoid
+    // contention on the global state ID atomic.
+    GlobalState(std::shared_ptr<ErrorQueue> errorQueue, std::shared_ptr<lsp::TypecheckEpochManager> epochManager,
+                int globalStateId);
+
 public:
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue, std::shared_ptr<lsp::TypecheckEpochManager> epochManager);
+
+    // Creates an empty global state for hashing. Bypasses important sanity checks that are used for other types of
+    // global states.
+    static std::unique_ptr<GlobalState> makeEmptyGlobalStateForHashing(spdlog::logger &logger);
 
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload. Enforced in payload.cc.
@@ -77,39 +92,35 @@ public:
     ~GlobalState() = default;
 
     ClassOrModuleRef enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
-    SymbolRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
-    SymbolRef enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance);
+    TypeMemberRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
+    TypeArgumentRef enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance);
     MethodRef enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     MethodRef enterNewMethodOverload(Loc loc, MethodRef original, core::NameRef originalName, u4 num,
                                      const std::vector<bool> &argsToKeep);
-    SymbolRef enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
-    SymbolRef enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    FieldRef enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    FieldRef enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     ArgInfo &enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name);
 
     SymbolRef lookupSymbol(SymbolRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, 0);
+        return lookupSymbolWithFlags(owner, name, 0, Symbols::noSymbol());
     }
-    SymbolRef lookupTypeMemberSymbol(ClassOrModuleRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::TYPE_MEMBER);
+    TypeMemberRef lookupTypeMemberSymbol(ClassOrModuleRef owner, NameRef name) const {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::TYPE_MEMBER, Symbols::noTypeMember())
+            .asTypeMemberRef();
     }
     ClassOrModuleRef lookupClassSymbol(ClassOrModuleRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE).asClassOrModuleRef();
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE, Symbols::noClassOrModule())
+            .asClassOrModuleRef();
     }
-    MethodRef lookupMethodSymbol(SymbolRef owner, NameRef name) const {
-        // TODO: Maybe lookupSymbolWithFlags should accept a default symbol argument?
-        auto sym = lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
-        if (!sym.exists()) {
-            return Symbols::noMethod();
-        } else {
-            return sym.asMethodRef();
-        }
+    MethodRef lookupMethodSymbol(ClassOrModuleRef owner, NameRef name) const {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD, Symbols::noMethod()).asMethodRef();
     }
-    MethodRef lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const std::vector<u4> &methodHash) const;
-    SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD);
+    MethodRef lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, const std::vector<u4> &methodHash) const;
+    FieldRef lookupStaticFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD, Symbols::noField()).asFieldRef();
     }
-    SymbolRef lookupFieldSymbol(SymbolRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::FIELD);
+    FieldRef lookupFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::FIELD, Symbols::noField()).asFieldRef();
     }
     SymbolRef findRenamedSymbol(SymbolRef owner, SymbolRef name) const;
 
@@ -240,6 +251,9 @@ public:
     // The error code is appended to this string.
     std::string errorUrlBase;
 
+    // If 'true', print error sections
+    bool includeErrorSections = true;
+
     // If 'true', enforce use of Ruby 3.0-style keyword args.
     bool ruby3KeywordArgs = false;
 
@@ -247,12 +261,11 @@ public:
     void suppressErrorClass(int code);
     void onlyShowErrorClass(int code);
 
-    std::vector<std::string> dslRubyExtraArgs;
-    void addDslPlugin(std::string_view method, std::string_view command);
-    std::optional<std::string_view> findDslPlugin(NameRef method) const;
-    bool hasAnyDslPlugin() const;
+    std::optional<std::string> suggestUnsafe;
 
     std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> semanticExtensions;
+
+    bool requiresAncestorEnabled = false;
 
 private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
@@ -282,7 +295,6 @@ private:
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
-    UnorderedMap<NameRef, std::string> dslPlugins;
     bool wasModified_ = false;
 
     bool freezeSymbolTable();
@@ -299,8 +311,7 @@ private:
 
     ClassOrModuleRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().id(), bool isModule = false);
 
-    SymbolRef lookupSymbolSuchThat(SymbolRef owner, NameRef name, std::function<bool(SymbolRef)> pred) const;
-    SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const;
+    SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags, SymbolRef defaultReturnValue) const;
 
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
 };

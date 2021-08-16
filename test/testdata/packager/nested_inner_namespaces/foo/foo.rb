@@ -1,6 +1,6 @@
 # typed: strict
 
-module Foo
+module RootPackage::Foo
   Constant = "Foo"
   module Bar
     Constant = "Bar"

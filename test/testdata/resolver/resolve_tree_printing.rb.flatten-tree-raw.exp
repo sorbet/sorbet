@@ -249,12 +249,13 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
-                pos_args = 2
+                pos_args = 3
                 args = [
                   Local{
                     localVariable = <U <self>>
                   }
                   Literal{ value = :has_while }
+                  Literal{ value = :normal }
                 ]
               }
               Send{
@@ -264,12 +265,13 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
-                pos_args = 2
+                pos_args = 3
                 args = [
                   Local{
                     localVariable = <U <self>>
                   }
                   Literal{ value = :has_constant_with_resolution_scope }
+                  Literal{ value = :normal }
                 ]
               }
               Send{
@@ -279,12 +281,13 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
-                pos_args = 2
+                pos_args = 3
                 args = [
                   Local{
                     localVariable = <U <self>>
                   }
                   Literal{ value = :has_global_field }
+                  Literal{ value = :normal }
                 ]
               }
               Send{
@@ -294,12 +297,13 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
-                pos_args = 2
+                pos_args = 3
                 args = [
                   Local{
                     localVariable = <U <self>>
                   }
                   Literal{ value = :has_class_field }
+                  Literal{ value = :normal }
                 ]
               }
               Send{
@@ -309,12 +313,13 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
-                pos_args = 2
+                pos_args = 3
                 args = [
                   Local{
                     localVariable = <U <self>>
                   }
                   Literal{ value = :has_next }
+                  Literal{ value = :normal }
                 ]
               }
               Send{
@@ -324,12 +329,13 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
-                pos_args = 2
+                pos_args = 3
                 args = [
                   Local{
                     localVariable = <U <self>>
                   }
                   Literal{ value = :has_break }
+                  Literal{ value = :normal }
                 ]
               }
               Send{
@@ -339,12 +345,13 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
-                pos_args = 2
+                pos_args = 3
                 args = [
                   Local{
                     localVariable = <U <self>>
                   }
                   Literal{ value = :has_return }
+                  Literal{ value = :normal }
                 ]
               }
               Send{
@@ -354,12 +361,13 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
-                pos_args = 2
+                pos_args = 3
                 args = [
                   Local{
                     localVariable = <U <self>>
                   }
                   Literal{ value = :has_cast }
+                  Literal{ value = :normal }
                 ]
               }
             ],

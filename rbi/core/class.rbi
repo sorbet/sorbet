@@ -1,9 +1,9 @@
 # typed: __STDLIB_INTERNAL
 
-# Extends any [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) to
+# Extends any [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) to
 # include *json\_creatable?* method.
 # Classes in Ruby are first-class objects---each is an instance of class
-# `Class`.
+# [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html).
 #
 # Typically, you create a new class by using:
 #
@@ -14,11 +14,14 @@
 # ```
 #
 # When a new class is created, an object of type
-# [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) is initialized and
-# assigned to a global constant (`Name` in this case).
+# [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) is initialized and
+# assigned to a global constant (Name in this case).
 #
-# When `Name.new` is called to create a new object, the `new` method in `Class`
-# is run by default. This can be demonstrated by overriding `new` in `Class`:
+# When `Name.new` is called to create a new object, the
+# [`new`](https://docs.ruby-lang.org/en/2.7.0/Class.html#method-i-new) method in
+# [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) is run by default.
+# This can be demonstrated by overriding
+# [`new`](https://docs.ruby-lang.org/en/2.7.0/Class.html#method-i-new) in Class:
 #
 # ```ruby
 # class Class
@@ -89,11 +92,13 @@ class Class < Module
   ### Sorbet hijacks Class#new to re-use the sig from MyClass#initialize when creating new instances of a class.
   ### This method must be here so that all calls to MyClass.new aren't forced to take 0 arguments.
 
-  # Calls `allocate` to create a new object of *class*'s class, then invokes
-  # that object's `initialize` method, passing it *args*. This is the method
-  # that ends up getting called whenever an object is constructed using .new.
-  sig {params(args: T.untyped).returns(T.untyped)}
-  def new(*args); end
+  # Calls
+  # [`allocate`](https://docs.ruby-lang.org/en/2.7.0/Class.html#method-i-allocate)
+  # to create a new object of *class*'s class, then invokes that object's
+  # initialize method, passing it *args*. This is the method that ends up
+  # getting called whenever an object is constructed using `.new`.
+  sig {params(args: T.untyped, blk: T.untyped).returns(T.untyped)}
+  def new(*args, &blk); end
 
   # Callback invoked whenever a subclass of the current class is created.
   #

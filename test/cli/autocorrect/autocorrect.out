@@ -6,6 +6,10 @@
 < "hi" + foo
 ---
 > "hi" + T.must(foo)
+10c10
+< int(a: foo)
+---
+> int(a: T.must(foo))
 12,15c12,15
 < foo.bar ||= "a"
 < foo.bar &&= "a"

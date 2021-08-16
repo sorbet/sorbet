@@ -1,23 +1,29 @@
 # typed: __STDLIB_INTERNAL
 
-# The [`RubyVM`](https://docs.ruby-lang.org/en/2.6.0/RubyVM.html) module
-# provides some access to Ruby internals. This module is for very limited
+# for ast.c
+# The [`RubyVM`](https://docs.ruby-lang.org/en/2.7.0/RubyVM.html) module only
+# exists on MRI. `RubyVM` is not defined in other Ruby implementations such as
+# JRuby and TruffleRuby.
+#
+# The [`RubyVM`](https://docs.ruby-lang.org/en/2.7.0/RubyVM.html) module
+# provides some access to MRI internals. This module is for very limited
 # purposes, such as debugging, prototyping, and research. Normal users must not
-# use it.
+# use it. This module is not portable between Ruby implementations.
 class RubyVM < Object
-  # [`DEFAULT_PARAMS`](https://docs.ruby-lang.org/en/2.6.0/RubyVM.html#DEFAULT_PARAMS)
-  # This constant variable shows VM's default parameters. Note that changing
-  # these values does not affect VM execution. Specification is not stable and
-  # you should not depend on this value. Of course, this constant is MRI
-  # specific.
+  # [`DEFAULT_PARAMS`](https://docs.ruby-lang.org/en/2.7.0/RubyVM.html#DEFAULT_PARAMS)
+  # This constant exposes the VM's default parameters. Note that changing these
+  # values does not affect VM execution. Specification is not stable and you
+  # should not depend on this value. Of course, this constant is MRI specific.
   DEFAULT_PARAMS = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
-  # [`INSTRUCTION_NAMES`](https://docs.ruby-lang.org/en/2.6.0/RubyVM.html#INSTRUCTION_NAMES)
+  # [`INSTRUCTION_NAMES`](https://docs.ruby-lang.org/en/2.7.0/RubyVM.html#INSTRUCTION_NAMES)
+  # A list of bytecode instruction names in MRI. This constant is MRI specific.
   INSTRUCTION_NAMES = T.let(T.unsafe(nil), T::Array[T.untyped])
-  # [`OPTS`](https://docs.ruby-lang.org/en/2.6.0/RubyVM.html#OPTS), which shows
-  # vm build options
+  # [`OPTS`](https://docs.ruby-lang.org/en/2.7.0/RubyVM.html#OPTS) An
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of VM build
+  # options. This constant is MRI specific.
   OPTS = T.let(T.unsafe(nil), T::Array[T.untyped])
 
-  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) containing
+  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) containing
   # implementation-dependent counters inside the VM.
   #
   # This hash includes information about method/constant cache serials:
@@ -37,58 +43,75 @@ class RubyVM < Object
   def self.stat(*_); end
 end
 
-# [`AbstractSyntaxTree`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/AbstractSyntaxTree.html)
+# [`AbstractSyntaxTree`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/AbstractSyntaxTree.html)
 # provides methods to parse Ruby code into abstract syntax trees. The nodes in
 # the tree are instances of
-# [`RubyVM::AbstractSyntaxTree::Node`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/AbstractSyntaxTree/Node.html).
+# [`RubyVM::AbstractSyntaxTree::Node`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/AbstractSyntaxTree/Node.html).
+#
+# This class is MRI specific as it exposes implementation details of the MRI
+# abstract syntax tree.
+#
+# This class is experimental and its API is not stable, therefore it might
+# change without notice. As examples, the order of children nodes is not
+# guaranteed, the number of children nodes might change, there is no way to
+# access children nodes by name, etc.
+#
+# If you are looking for a stable API or an API working under multiple Ruby
+# implementations, consider using the *parser* gem or
+# [`Ripper`](https://docs.ruby-lang.org/en/2.7.0/Ripper.html). If you would like
+# to make
+# [`RubyVM::AbstractSyntaxTree`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/AbstractSyntaxTree.html)
+# stable, please join the discussion at https://bugs.ruby-lang.org/issues/14844.
 module RubyVM::AbstractSyntaxTree
-  # Returns AST nodes of the given proc or method.
+  # Returns AST nodes of the given *proc* or *method*.
   #
   # ```ruby
   # RubyVM::AbstractSyntaxTree.of(proc {1 + 2})
-  # # => #<RubyVM::AbstractSyntaxTree::Node(NODE_SCOPE(0) 1:35, 1:42): >
+  # # => #<RubyVM::AbstractSyntaxTree::Node:SCOPE@1:35-1:42>
   #
   # def hello
   #   puts "hello, world"
   # end
   #
   # RubyVM::AbstractSyntaxTree.of(method(:hello))
-  # # => #<RubyVM::AbstractSyntaxTree::Node(NODE_SCOPE(0) 1:0, 3:3): >
+  # # => #<RubyVM::AbstractSyntaxTree::Node:SCOPE@1:0-3:3>
   # ```
   sig { params(arg: T.any(T::proc.void, Method)).returns(RubyVM::AbstractSyntaxTree::Node) }
   def self.of(arg); end
 
-  # Parses the given string into an abstract syntax tree, returning the root
+  # Parses the given *string* into an abstract syntax tree, returning the root
   # node of that tree.
   #
-  # [`SyntaxError`](https://docs.ruby-lang.org/en/2.6.0/SyntaxError.html) is
-  # raised if the given string is invalid syntax.
+  # [`SyntaxError`](https://docs.ruby-lang.org/en/2.7.0/SyntaxError.html) is
+  # raised if the given *string* is invalid syntax.
   #
   # ```ruby
   # RubyVM::AbstractSyntaxTree.parse("x = 1 + 2")
-  # # => #<RubyVM::AbstractSyntaxTree::Node(NODE_SCOPE(0) 1:0, 1:9): >
+  # # => #<RubyVM::AbstractSyntaxTree::Node:SCOPE@1:0-1:9>
   # ```
   sig { params(string: String).returns(RubyVM::AbstractSyntaxTree::Node) }
   def self.parse(string); end
 
-  # Reads the file from `pathname`, then parses it like
-  # [`::parse`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/AbstractSyntaxTree.html#method-c-parse),
+  # Reads the file from *pathname*, then parses it like
+  # [`::parse`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/AbstractSyntaxTree.html#method-c-parse),
   # returning the root node of the abstract syntax tree.
   #
-  # [`SyntaxError`](https://docs.ruby-lang.org/en/2.6.0/SyntaxError.html) is
-  # raised if `pathname`'s contents are not valid Ruby syntax.
+  # [`SyntaxError`](https://docs.ruby-lang.org/en/2.7.0/SyntaxError.html) is
+  # raised if *pathname*'s contents are not valid Ruby syntax.
   #
   # ```ruby
   # RubyVM::AbstractSyntaxTree.parse_file("my-app/app.rb")
-  # # => #<RubyVM::AbstractSyntaxTree::Node(NODE_SCOPE(0) 1:0, 31:3): >
+  # # => #<RubyVM::AbstractSyntaxTree::Node:SCOPE@1:0-31:3>
   # ```
   sig { params(pathname: String).returns(RubyVM::AbstractSyntaxTree::Node) }
   def self.parse_file(pathname); end
 end
 
-# [`RubyVM::AbstractSyntaxTree::Node`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/AbstractSyntaxTree/Node.html)
+# [`RubyVM::AbstractSyntaxTree::Node`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/AbstractSyntaxTree/Node.html)
 # instances are created by parse methods in
-# [`RubyVM::AbstractSyntaxTree`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/AbstractSyntaxTree.html).
+# [`RubyVM::AbstractSyntaxTree`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/AbstractSyntaxTree.html).
+#
+# This class is MRI specific.
 class RubyVM::AbstractSyntaxTree::Node
   # Returns AST nodes under this one. Each kind of node has different children,
   # depending on what kind of node it is.
@@ -126,14 +149,16 @@ class RubyVM::AbstractSyntaxTree::Node
 end
 
 # The
-# [`InstructionSequence`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html)
-# class represents a compiled sequence of instructions for the Ruby Virtual
-# Machine.
+# [`InstructionSequence`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html)
+# class represents a compiled sequence of instructions for the Virtual Machine
+# used in MRI. Not all implementations of Ruby may implement this class, and for
+# the implementations that implement it, the methods defined and behavior of the
+# methods can change in any version.
 #
 # With it, you can get a handle to the instructions that make up a method or a
 # proc, compile strings of Ruby code down to VM instructions, and disassemble
 # instruction sequences to strings for easy inspection. It is mostly useful if
-# you want to learn how the Ruby VM works, but it also lets you control various
+# you want to learn how YARV works, but it also lets you control various
 # settings for the Ruby iseq compiler.
 #
 # You can find the source for the VM instructions in `insns.def` in the Ruby
@@ -141,13 +166,15 @@ end
 #
 # The instruction sequence results will almost certainly change as Ruby changes,
 # so example output in this documentation may be different from what you see.
+#
+# Of course, this class is MRI specific.
 class RubyVM::InstructionSequence < Object
   # Returns the absolute path of this instruction sequence.
   #
   # `nil` if the iseq was evaluated from a string.
   #
   # For example, using
-  # [`::compile_file`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-c-compile_file):
+  # [`::compile_file`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-c-compile_file):
   #
   # ```
   # # /tmp/method.rb
@@ -173,7 +200,7 @@ class RubyVM::InstructionSequence < Object
   # ```
   #
   # Using
-  # [`::compile_file`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-c-compile_file):
+  # [`::compile_file`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-c-compile_file):
   #
   # ```
   # # /tmp/method.rb
@@ -249,9 +276,9 @@ class RubyVM::InstructionSequence < Object
 
   # Returns a human-readable string representation of this instruction sequence,
   # including the
-  # [`label`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-i-label)
+  # [`label`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-i-label)
   # and
-  # [`path`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-i-path).
+  # [`path`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-i-path).
   def inspect; end
 
   # Returns the label of this instruction sequence.
@@ -269,7 +296,7 @@ class RubyVM::InstructionSequence < Object
   # ```
   #
   # Using
-  # [`::compile_file`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-c-compile_file):
+  # [`::compile_file`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-c-compile_file):
   #
   # ```
   # # /tmp/method.rb
@@ -297,7 +324,7 @@ class RubyVM::InstructionSequence < Object
   # ```
   #
   # Using
-  # [`::compile_file`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-c-compile_file):
+  # [`::compile_file`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-c-compile_file):
   #
   # ```
   # # /tmp/method.rb
@@ -311,7 +338,7 @@ class RubyVM::InstructionSequence < Object
   # ```
   def path; end
 
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) with 14
+  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) with 14
   # elements representing the instruction sequence with the following data:
   #
   # magic
@@ -337,30 +364,30 @@ class RubyVM::InstructionSequence < Object
   # :       the number of local variables + 1
   #     `:stack_max`
   # :       used in calculating the stack depth at which a
-  #         [`SystemStackError`](https://docs.ruby-lang.org/en/2.6.0/SystemStackError.html)
+  #         [`SystemStackError`](https://docs.ruby-lang.org/en/2.7.0/SystemStackError.html)
   #         is thrown.
   #
   #
-  # [`label`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-i-label)
+  # [`label`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-i-label)
   # :   The name of the context (block, method, class, module, etc.) that this
   #     instruction sequence belongs to.
   #
   #     `<main>` if it's at the top level, `<compiled>` if it was evaluated from
   #     a string.
   #
-  # [`path`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-i-path)
+  # [`path`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-i-path)
   # :   The relative path to the Ruby file where the instruction sequence was
   #     loaded from.
   #
   #     `<compiled>` if the iseq was evaluated from a string.
   #
-  # [`absolute_path`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-i-absolute_path)
+  # [`absolute_path`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-i-absolute_path)
   # :   The absolute path to the Ruby file where the instruction sequence was
   #     loaded from.
   #
   #     `nil` if the iseq was evaluated from a string.
   #
-  # [`first_lineno`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-i-first_lineno)
+  # [`first_lineno`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-i-first_lineno)
   # :   The number of the first source line where the instruction sequence was
   #     loaded from.
   #
@@ -375,7 +402,7 @@ class RubyVM::InstructionSequence < Object
   #     symbols.
   #
   # params
-  # :   An [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) object
+  # :   An [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) object
   #     containing parameter information.
   #
   #     More info about these values can be found in `vm_core.h`.
@@ -393,14 +420,14 @@ class RubyVM::InstructionSequence < Object
   def to_a; end
 
   # Returns serialized iseq binary format data as a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) object. A
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) object. A
   # corresponding iseq object is created by
-  # [`RubyVM::InstructionSequence.load_from_binary()`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-c-load_from_binary)
+  # [`RubyVM::InstructionSequence.load_from_binary()`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-c-load_from_binary)
   # method.
   #
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) extra\_data will
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) extra\_data will
   # be saved with binary data. You can access this data with
-  # [`RubyVM::InstructionSequence.load_from_binary_extra_data(binary)`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-c-load_from_binary_extra_data).
+  # [`RubyVM::InstructionSequence.load_from_binary_extra_data(binary)`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-c-load_from_binary_extra_data).
   #
   # Note that the translated binary data is not portable. You can not move this
   # binary data to another machine. You can not use the binary data which is
@@ -412,37 +439,49 @@ class RubyVM::InstructionSequence < Object
   def trace_points; end
 
   # Takes `source`, a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) of Ruby code and
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) of Ruby code and
   # compiles it to an
-  # [`InstructionSequence`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html).
+  # [`InstructionSequence`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html).
   #
-  # Optionally takes `file`, `path`, and `line` which describe the filename,
-  # absolute path and first line number of the ruby code in `source` which are
+  # Optionally takes `file`, `path`, and `line` which describe the file path,
+  # real path and first line number of the ruby code in `source` which are
   # metadata attached to the returned `iseq`.
+  #
+  # `file` is used for `\_\_FILE\_\_` and exception backtrace. `path` is used
+  # for `require_relative` base. It is recommended these should be the same full
+  # path.
   #
   # `options`, which can be `true`, `false` or a `Hash`, is used to modify the
   # default behavior of the Ruby iseq compiler.
   #
   # For details regarding valid compile options see
-  # [`::compile_option=`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-c-compile_option-3D).
+  # [`::compile_option=`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-c-compile_option-3D).
   #
   # ```ruby
   # RubyVM::InstructionSequence.compile("a = 1 + 2")
   # #=> <RubyVM::InstructionSequence:<compiled>@<compiled>>
+  #
+  # path = "test.rb"
+  # RubyVM::InstructionSequence.compile(File.read(path), path, File.expand_path(path))
+  # #=> <RubyVM::InstructionSequence:<compiled>@test.rb:1>
+  #
+  # path = File.expand_path("test.rb")
+  # RubyVM::InstructionSequence.compile(File.read(path), path, path)
+  # #=> <RubyVM::InstructionSequence:<compiled>@/absolute/path/to/test.rb:1>
   # ```
   def self.compile(*_); end
 
-  # Takes `file`, a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # Takes `file`, a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   # with the location of a Ruby source file, reads, parses and compiles the
   # file, and returns `iseq`, the compiled
-  # [`InstructionSequence`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html)
+  # [`InstructionSequence`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html)
   # with source location metadata set.
   #
   # Optionally takes `options`, which can be `true`, `false` or a `Hash`, to
   # modify the default behavior of the Ruby iseq compiler.
   #
   # For details regarding valid compile options see
-  # [`::compile_option=`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-c-compile_option-3D).
+  # [`::compile_option=`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-c-compile_option-3D).
   #
   # ```ruby
   # # /tmp/hello.rb
@@ -457,7 +496,7 @@ class RubyVM::InstructionSequence < Object
   # Returns a hash of default options used by the Ruby iseq compiler.
   #
   # For details, see
-  # [`InstructionSequence.compile_option=`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-c-compile_option-3D).
+  # [`InstructionSequence.compile_option=`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-c-compile_option-3D).
   def self.compile_option; end
 
   # Sets the default values for various optimizations in the Ruby iseq compiler.
@@ -485,18 +524,18 @@ class RubyVM::InstructionSequence < Object
   #
   # These default options can be overwritten for a single run of the iseq
   # compiler by passing any of the above values as the `options` parameter to
-  # [`::new`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-c-new),
-  # [`::compile`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-c-compile)
+  # [`::new`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-c-new),
+  # [`::compile`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-c-compile)
   # and
-  # [`::compile_file`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-c-compile_file).
+  # [`::compile_file`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-c-compile_file).
   def self.compile_option=(_); end
 
-  # Takes `body`, a [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html)
-  # or [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) object, and
-  # returns a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) with
+  # Takes `body`, a [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html)
+  # or [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html) object, and
+  # returns a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) with
   # the human readable instructions for `body`.
   #
-  # For a [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) object:
+  # For a [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) object:
   #
   # ```ruby
   # # /tmp/method.rb
@@ -548,12 +587,12 @@ class RubyVM::InstructionSequence < Object
   # ```
   def self.disasm(_); end
 
-  # Takes `body`, a [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html)
-  # or [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) object, and
-  # returns a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) with
+  # Takes `body`, a [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html)
+  # or [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html) object, and
+  # returns a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) with
   # the human readable instructions for `body`.
   #
-  # For a [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) object:
+  # For a [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) object:
   #
   # ```ruby
   # # /tmp/method.rb
@@ -606,9 +645,9 @@ class RubyVM::InstructionSequence < Object
   def self.disassemble(_); end
 
   # Load an iseq object from binary format
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) object created
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) object created
   # by
-  # [`RubyVM::InstructionSequence.to_binary`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-i-to_binary).
+  # [`RubyVM::InstructionSequence.to_binary`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-i-to_binary).
   #
   # This loader does not have a verifier, so that loading broken/modified binary
   # causes critical problem.
@@ -618,27 +657,39 @@ class RubyVM::InstructionSequence < Object
   def self.load_from_binary(_); end
 
   # Load extra data embed into binary format
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) object.
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) object.
   def self.load_from_binary_extra_data(_); end
 
   # Takes `source`, a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) of Ruby code and
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) of Ruby code and
   # compiles it to an
-  # [`InstructionSequence`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html).
+  # [`InstructionSequence`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html).
   #
-  # Optionally takes `file`, `path`, and `line` which describe the filename,
-  # absolute path and first line number of the ruby code in `source` which are
+  # Optionally takes `file`, `path`, and `line` which describe the file path,
+  # real path and first line number of the ruby code in `source` which are
   # metadata attached to the returned `iseq`.
+  #
+  # `file` is used for `\_\_FILE\_\_` and exception backtrace. `path` is used
+  # for `require_relative` base. It is recommended these should be the same full
+  # path.
   #
   # `options`, which can be `true`, `false` or a `Hash`, is used to modify the
   # default behavior of the Ruby iseq compiler.
   #
   # For details regarding valid compile options see
-  # [`::compile_option=`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-c-compile_option-3D).
+  # [`::compile_option=`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-c-compile_option-3D).
   #
   # ```ruby
   # RubyVM::InstructionSequence.compile("a = 1 + 2")
   # #=> <RubyVM::InstructionSequence:<compiled>@<compiled>>
+  #
+  # path = "test.rb"
+  # RubyVM::InstructionSequence.compile(File.read(path), path, File.expand_path(path))
+  # #=> <RubyVM::InstructionSequence:<compiled>@test.rb:1>
+  #
+  # path = File.expand_path("test.rb")
+  # RubyVM::InstructionSequence.compile(File.read(path), path, path)
+  # #=> <RubyVM::InstructionSequence:<compiled>@/absolute/path/to/test.rb:1>
   # ```
   def self.new(*_); end
 
@@ -659,7 +710,7 @@ class RubyVM::InstructionSequence < Object
   # ```
   #
   # Using
-  # [`::compile_file`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html#method-c-compile_file):
+  # [`::compile_file`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/InstructionSequence.html#method-c-compile_file):
   #
   # ```
   # # /tmp/iseq_of.rb

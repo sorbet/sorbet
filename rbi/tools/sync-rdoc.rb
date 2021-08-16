@@ -147,6 +147,11 @@ class DocParser
         walk_scope(scope, &blk)
         assert_clean!
       end
+    when :SCLASS
+      # There are a handful of places in RBIs where we have to use `class <<
+      # self` because both a class and it's singleton class need to register a
+      # type_member/type_template with the name Elem
+      puts 'skipping :SCLASS node, documentation will not be generated'
     when :SCOPE, :BLOCK, :BEGIN
       assert_clean!
       node.children
@@ -497,7 +502,7 @@ class SyncRDoc
   private def render_comment(code_obj, indentation)
     context = code_obj.is_a?(RDoc::Context) ? code_obj : code_obj.parent
 
-    formatter = ToMarkdownRef.new(options, "https://docs.ruby-lang.org/en/2.6.0/", "/", context)
+    formatter = ToMarkdownRef.new(options, "https://docs.ruby-lang.org/en/2.7.0/", "/", context)
     formatter.width -= indentation.gsub("\t", '  ').length # account for indentation (assuming tabstop is 2)
     code_obj.comment.accept(formatter)
     formatter.add_alias_info(code_obj) if code_obj.is_a?(RDoc::MethodAttr)
@@ -581,6 +586,12 @@ class SyncRDoc
     if argv.empty?
       puts parser
       return -1
+    end
+
+    if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.7')
+      puts "Warning! Detected RUBY_VERSION=#{RUBY_VERSION}."
+      puts "This script uses the current Ruby version to parse documentation from."
+      puts "If you're seeing a large diff, it might be because all existing docstrings were generated using Ruby 2.7."
     end
 
     store.load_all # ensure cross-referencing can find everything

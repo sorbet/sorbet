@@ -13,7 +13,7 @@ title: Shapes
 
 This creates a fixed hash type (also referred to as a record), which is a hash
 with known keys and known types for each key. For example,
-`{foo: String, bar: T.nilable(Float)}` validates that an object is an hash with
+`{foo: String, bar: T.nilable(Float)}` validates that an object is a hash with
 exactly those 2 keys as Ruby symbols, with `foo` being a `String` and `bar`
 being a `Float` or `nil`. For example: `{foo: 'hello', bar: 3.14}`.
 
@@ -59,5 +59,5 @@ y[:a] = '' # ok (!)
   → View on sorbet.run
 </a>
 
-sorbet internals note: the `underlying()` of a shape is an Hash where the key
+sorbet internals note: the `underlying()` of a shape is a Hash where the key
 type is the union of all keys and the value type is the union of all the values.

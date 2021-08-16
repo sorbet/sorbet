@@ -80,6 +80,36 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     )
   end
 
+  class DefaultArrayStruct
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+
+    prop :arrayprop, T::Array[String], default: []
+  end
+
+  class DefaultHashStruct
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+
+    prop :hashprop, T::Hash[String, String], default: {}
+  end
+
+  describe 'default: with literals' do
+    it 'does not share structure for arrays' do
+      a = DefaultArrayStruct.new
+      b = DefaultArrayStruct.new
+
+      refute_equal(a.arrayprop.object_id, b.arrayprop.object_id)
+    end
+
+    it 'does not share structure for hashes' do
+      a = DefaultHashStruct.new
+      b = DefaultHashStruct.new
+
+      refute_equal(a.hashprop.object_id, b.hashprop.object_id)
+    end
+  end
+
   class ParentWithNoDefault < T::InexactStruct
     prop :prop, String
   end
@@ -260,6 +290,10 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class NilSingleFieldStruct < T::Struct
+    prop :foo, T.nilable(Integer), raise_on_nil_write: true
+  end
+
   class NilFieldStruct < T::Struct
     prop :foo, T.nilable(Integer), raise_on_nil_write: true
     prop :bar, T.nilable(String), raise_on_nil_write: true
@@ -318,6 +352,39 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'does not assert when strict=false' do
       foo = NilFieldStruct.allocate
       foo.serialize(false)
+    end
+
+    it 'records the non-presence of required properties on deserialize' do
+      struct = NilSingleFieldStruct.from_hash({})
+      assert_nil(struct.foo)
+      missing_props = struct.instance_variable_get(:@_required_props_missing_from_deserialize)
+      refute_nil(missing_props)
+      refute(missing_props.empty?)
+      assert_equal(1, missing_props.length)
+      assert(missing_props.include?(:foo))
+    end
+
+    it 'round-trips when required properties are not provided to deserialize' do
+      struct = NilSingleFieldStruct.from_hash({})
+      assert_nil(struct.foo)
+
+      msg_string = nil
+      extra_hash = nil
+
+      T::Configuration.log_info_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      h = struct.serialize
+
+      assert_instance_of(Hash, h)
+      assert(h.empty?)
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      assert_includes(msg_string, "missing required property in serialize")
+      assert_equal(:foo, extra_hash[:prop])
+      assert_includes(extra_hash[:class], "NilSingleFieldStruct")
     end
 
     describe 'with weak constructor' do
@@ -470,6 +537,82 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class StructWithTuples < T::Struct
+    prop :unary_tuple, [Symbol]
+    prop :tuple, [Integer, String]
+    prop :triple, [Float, TrueClass, FalseClass]
+    prop :array_of_tuple, T::Array[[Integer, String]]
+    prop :tuple_with_combinator, [T.nilable(String)]
+    prop :combinator_with_tuple, T.nilable([Symbol, Float])
+  end
+
+  describe 'tuples' do
+    it 'typechecks' do
+      exn = assert_raises(TypeError) do
+        StructWithTuples.new(
+          unary_tuple: ['not a symbol'],
+          tuple: [0, ''],
+          triple: [0.0, true, false],
+          array_of_tuple: [[0, '']],
+          tuple_with_combinator: [nil]
+        )
+      end
+      assert_includes(exn.message, '.unary_tuple to ["not a symbol"] (instance of Array) - need a [Symbol]')
+    end
+
+    it 'roundtrips' do
+      expected = StructWithTuples.new(
+        unary_tuple: [:hello],
+        tuple: [0, ''],
+        triple: [0.0, true, false],
+        array_of_tuple: [[0, '']],
+        tuple_with_combinator: [nil]
+      )
+
+      actual = StructWithTuples.from_hash(expected.serialize)
+
+      assert_equal(expected.unary_tuple, actual.unary_tuple)
+      assert_equal(expected.tuple, actual.tuple)
+      assert_equal(expected.triple, actual.triple)
+      assert_equal(expected.array_of_tuple, actual.array_of_tuple)
+      assert_equal(expected.tuple_with_combinator, actual.tuple_with_combinator)
+      assert_nil(actual.combinator_with_tuple)
+    end
+  end
+
+  class StructWithShapes < T::Struct
+    prop :empty_shape, {}
+    prop :symbol_key_shape, {foo: Integer}
+    prop :string_key_shape, {'foo' => Integer}
+  end
+
+  describe 'shapes' do
+    it 'typechecks' do
+      exn = assert_raises(TypeError) do
+        StructWithShapes.new(
+          empty_shape: {},
+          symbol_key_shape: {foo: 0},
+          string_key_shape: {:not_a_string => 0}
+        )
+      end
+      assert_includes(exn.message, '.string_key_shape to {:not_a_string=>0} (instance of Hash) - need a {"foo" => Integer}')
+    end
+
+    it 'roundtrips' do
+      expected = StructWithShapes.new(
+        empty_shape: {},
+        symbol_key_shape: {foo: 0},
+        string_key_shape: {'foo' => 0}
+      )
+
+      actual = StructWithShapes.from_hash(expected.serialize)
+
+      assert_equal(expected.empty_shape, actual.empty_shape)
+      assert_equal(expected.symbol_key_shape, actual.symbol_key_shape)
+      assert_equal(expected.string_key_shape, actual.string_key_shape)
+    end
+  end
+
   class CustomType
     extend T::Props::CustomType
 
@@ -494,25 +637,281 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :hash_both, T::Hash[CustomType, CustomType], default: {}
   end
 
+  class CustomTypeWrapper
+    include T::Props::Serializable
+    prop :struct, CustomTypeStruct
+  end
+
   describe 'custom type' do
     it 'round trips as plain value' do
       assert_equal('foo', CustomTypeStruct.from_hash({'single' => 'foo'}).serialize['single'])
+    end
+
+    it 'round trips with arrays' do
+      a = ['bar', 'baz']
+      assert_equal(a, CustomTypeStruct.from_hash({'array' => a}).serialize['array'])
+    end
+
+    it 'raises serialize errors when props with a custom subtype store the wrong datatype' do
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@single, 'not a serializable thing')
+      e = assert_raises(TypeError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "Expected type T::Props::CustomType")
+    end
+
+    # It's hard to write tests for a CustomType with a custom deserialize method, so skip that.
+
+    it 'raises serialize errors when props with a serializable subtype store the wrong datatype' do
+      struct = CustomTypeWrapper.new
+      struct.instance_variable_set(:@struct, 'not a serializable thing')
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `serialize'")
+    end
+
+    it 'raises deserialize errors when props with a serializable subtype store the wrong datatype' do
+      obj = 'not a serializable thing'
+      e = assert_raises(TypeError) do
+        CustomTypeWrapper.from_hash({'struct' => obj})
+      end
+
+      assert_includes(e.message, 'provided to from_hash')
     end
 
     it 'round trips as array value' do
       assert_equal(['foo'], CustomTypeStruct.from_hash({'array' => ['foo']}).serialize['array'])
     end
 
+    it 'raises serialize errors when props with an array of a custom subtype store the wrong datatype' do
+      obj = CustomType.new
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@array, obj)
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `map'")
+    end
+
+    it 'raises deserialize errors when props with an array of a custom subtype store the wrong datatype' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = CustomType.new
+      result = CustomTypeStruct.from_hash({'array' => obj})
+      assert_equal(obj, result.array)
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      storytime = extra_hash[:storytime]
+      assert_equal(CustomTypeStruct, storytime[:klass])
+      assert_equal(:array, storytime[:prop])
+      assert_equal(obj, storytime[:value])
+      assert_includes(storytime[:error], "undefined method `map'")
+    end
+
     it 'round trips as hash key' do
       assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_key' => {'foo' => 'bar'}}).serialize['hash_key'])
+    end
+
+    it 'raises serialize errors when props with a hash with keys of a custom subtype store the wrong datatype' do
+      obj = CustomType.new
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@hash_key, obj)
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `transform_keys'")
+    end
+
+    it 'raises deserialize errors when props with a hash with keys of a custom subtype store the wrong datatype' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = 'not a hash'
+      result = CustomTypeStruct.from_hash({'hash_key' => obj})
+      assert_equal('not a hash', result.hash_key)
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      storytime = extra_hash[:storytime]
+      assert_equal(CustomTypeStruct, storytime[:klass])
+      assert_equal(:hash_key, storytime[:prop])
+      assert_equal(obj, storytime[:value])
+      assert_includes(storytime[:error], "undefined method `transform_keys'")
     end
 
     it 'round trips as hash value' do
       assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_value' => {'foo' => 'bar'}}).serialize['hash_value'])
     end
 
+    it 'raises serialize errors when props with a hash with values of a custom subtype store the wrong datatype' do
+      obj = CustomType.new
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@hash_value, obj)
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `transform_values'")
+    end
+
+    it 'raises deserialize errors when props with a hash with values of a custom subtype store the wrong datatype' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = 'not a hash'
+      result = CustomTypeStruct.from_hash({'hash_value' => obj})
+      assert_equal('not a hash', result.hash_value)
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      storytime = extra_hash[:storytime]
+      assert_equal(CustomTypeStruct, storytime[:klass])
+      assert_equal(:hash_value, storytime[:prop])
+      assert_equal(obj, storytime[:value])
+      assert_includes(storytime[:error], "undefined method `transform_values'")
+    end
+
     it 'round trips as hash key and value' do
       assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_both' => {'foo' => 'bar'}}).serialize['hash_both'])
+    end
+
+    it 'raises serialize errors when props with a hash with keys/values of a custom subtype store the wrong datatype' do
+      obj = CustomType.new
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@hash_both, obj)
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `each_with_object'")
+    end
+
+    it 'raises deserialize errors when props with a hash with keys/values of a custom subtype store the wrong datatype' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = 'not a hash'
+      result = CustomTypeStruct.from_hash({'hash_both' => obj})
+      assert_equal('not a hash', result.hash_both)
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      storytime = extra_hash[:storytime]
+      assert_equal(CustomTypeStruct, storytime[:klass])
+      assert_equal(:hash_both, storytime[:prop])
+      assert_equal(obj, storytime[:value])
+      assert_includes(storytime[:error], "undefined method `each_with_object'")
+    end
+  end
+
+  class SetPropStruct
+    include T::Props::Serializable
+    prop :set, T::Set[String]
+  end
+
+  describe 'set props' do
+    it 'round trips' do
+      set = Set['foo']
+      struct = SetPropStruct.new
+      struct.set = set
+
+      h = struct.serialize
+      assert_equal(set, h['set'])
+
+      roundtripped = SetPropStruct.from_hash(h)
+      assert_equal(roundtripped.set, set)
+    end
+
+    it 'does not share structure on serialize' do
+      set = Set['foo']
+      struct = SetPropStruct.new
+      struct.set = set
+      h = struct.serialize
+      refute_equal(struct.set.object_id, h['set'].object_id, "`set` is the same object")
+    end
+
+    it 'does not share structure on deserialize' do
+      set = Set['foo']
+      h = {
+        'set' => set,
+      }
+      struct = SetPropStruct.from_hash(h)
+      refute_equal(struct.set.object_id, h['set'].object_id, "`set` is the same object")
+    end
+  end
+
+  class CustomSetPropStruct
+    include T::Props::Serializable
+    prop :set, T::Set[CustomType]
+  end
+
+  describe 'custom set props' do
+    it 'round trips' do
+      array = [3]
+      obj = CustomType.new
+      obj.value = array 
+      set = Set[obj]
+      struct = CustomSetPropStruct.new
+      struct.set = set
+      h = struct.serialize
+      assert_equal(1, h['set'].length)
+      assert(h['set'].include?(array))
+
+      roundtripped = CustomSetPropStruct.from_hash(h)
+      assert_equal(1, roundtripped.set.length)
+      value = roundtripped.set.to_a[0].value
+      assert_equal(array, value)
+    end
+
+    it 'raises serialize errors' do
+      not_a_set = 1234
+      struct = CustomSetPropStruct.new
+      struct.instance_variable_set(:@set, not_a_set)
+      e = assert_raises(TypeError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "value must be enumerable")
+    end
+
+    it 'raises deserialize errors' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = CustomType.new
+      e = assert_raises(TypeError) do
+        result = CustomSetPropStruct.from_hash({'set' => obj})
+      end
+
+      assert_includes(e.message, "value must be enumerable")
     end
   end
 
@@ -714,6 +1113,53 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class Hashlike < Hash
+    def initialize
+      @called = false
+      super()
+    end
+
+    def [](key)
+      @called = true
+      super(key)
+    end
+
+    def was_called
+      @called
+    end
+  end
+
+  class StructForHashlike
+    include T::Props::Serializable
+
+    prop :stringprop, String
+  end
+
+  describe 'with a custom hash-like type' do
+    it 'calls the overridden aref method' do
+      h = Hashlike['stringprop', 'foo']
+      assert_instance_of(Hashlike, h)
+      obj = StructForHashlike.from_hash(h)
+      assert_equal("foo", obj.stringprop)
+      assert(h.was_called)
+    end
+  end
+
+  class DefaultStringProp
+    include T::Props::Serializable
+
+    prop :stringprop, String, default: "default"
+  end
+
+  describe 'with defaulted string props' do
+    it 'does not share structure' do
+      h = {}
+      obj1 = DefaultStringProp.from_hash(h)
+      obj2 = DefaultStringProp.from_hash(h)
+      refute_equal(obj1.stringprop.object_id, obj2.stringprop.object_id)
+    end
+  end
+
   class ComplexStruct < T::Struct
     prop :primitive, Integer
     prop :nilable, T.nilable(Integer)
@@ -844,5 +1290,111 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
     assert_instance_of(Float, swf2.my_float)
     assert_in_delta(1.0, swf2.my_float, 0.0001)
+  end
+
+  class DynamicProps
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+
+    prop :nilstring, T.nilable(String)
+  end
+
+  describe 'dynamic props' do
+    it 'serializes when new props are added' do
+      obj = DynamicProps.new(nilstring: 'foo')
+      h = obj.serialize
+
+      assert_equal('foo', h['nilstring'])
+
+      DynamicProps.prop(:arrayprop, T::Array[String], default: ['default'])
+
+      assert_raises(TypeError) do
+        obj.serialize
+      end
+
+      obj.arrayprop = ['bar']
+      h = obj.serialize
+      assert_equal(['bar'], h['arrayprop'])
+    end
+  end
+
+  class MuckAboutWithPropInternals
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+
+    prop :nilstring, T.nilable(String)
+  end
+
+  # These tests are gross, but they are the only way certain exceptions are ever
+  # going to be raised from the {de,}serialization generation process.
+  #
+  # Safe names are (currently) defined as /\A[A-Za-z_][A-Za-z0-9_-]*\z/.
+  # We can't test everything outside of this set, but we can make a pass over
+  # non-letter ASCII and get some coverage.
+  DISALLOWED_CHARS = '!@#$%^&*()[{}]\|;:\'",<.>/?`~'.chars
+  DISALLOWED_PREFIXES = DISALLOWED_CHARS + DISALLOWED_CHARS.map {|c| "a#{c}"}
+
+  describe 'prop name safety checks' do
+    it "catches when a prop name doesn't pass safe name checks" do
+      DISALLOWED_PREFIXES.each do |c|
+        bad_prop_name = :"#{c}nilstring"
+        props = MuckAboutWithPropInternals.decorator.instance_variable_get(:@props)
+        refute_nil(props)
+        refute_nil(props[:nilstring])
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props.merge(bad_prop_name => props[:nilstring]))
+        assert_raises(RuntimeError) do
+          MuckAboutWithPropInternals.from_hash({})
+        end
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props)
+      end
+    end
+
+    it "catches when a hash key doesn't pass safe name checks" do
+      DISALLOWED_PREFIXES.each do |c|
+        ok_prop_name = :nilstring2
+        bad_hash_key = "#{c}nilstring"
+        props = MuckAboutWithPropInternals.decorator.instance_variable_get(:@props)
+        refute_nil(props)
+        refute_nil(props[:nilstring])
+        bad_rules = props[:nilstring].merge(:serialized_form => bad_hash_key)
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props.merge(ok_prop_name => bad_rules))
+        assert_raises(RuntimeError) do
+          MuckAboutWithPropInternals.from_hash({})
+        end
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props)
+      end
+    end
+
+    it "catches when the accessor key doesn't begin with @" do
+      DISALLOWED_PREFIXES.select {|c| c != "@" }.each do |c|
+        ok_prop_name = :nilstring2
+        bad_accessor_key = :"#{c}nilstring"
+        props = MuckAboutWithPropInternals.decorator.instance_variable_get(:@props)
+        refute_nil(props)
+        refute_nil(props[:nilstring])
+        bad_rules = props[:nilstring].merge(:accessor_key => bad_accessor_key)
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props.merge(ok_prop_name => bad_rules))
+        assert_raises(RuntimeError) do
+          MuckAboutWithPropInternals.from_hash({})
+        end
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props)
+      end
+    end
+
+    it "catches when the accessor key doesn't pass safe name checks" do
+      DISALLOWED_PREFIXES.each do |c|
+        ok_prop_name = :nilstring2
+        bad_accessor_key = :"@!nilstring"
+        props = MuckAboutWithPropInternals.decorator.instance_variable_get(:@props)
+        refute_nil(props)
+        refute_nil(props[:nilstring])
+        bad_rules = props[:nilstring].merge(:accessor_key => bad_accessor_key)
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props.merge(ok_prop_name => bad_rules))
+        assert_raises(RuntimeError) do
+          MuckAboutWithPropInternals.from_hash({})
+        end
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props)
+      end
+    end
   end
 end

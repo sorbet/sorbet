@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 # typed: strict
 
-class ExportedItem
+class Dep::ExportedItem
 
 end

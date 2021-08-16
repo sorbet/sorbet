@@ -89,7 +89,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
         // VSCode does its own internal ranking based on comparing the query string against the result name.
         // Therefore have the name be the fully qualified name if it makes sense (e.g. Foo::Bar instead of Bar)
         auto result =
-            make_unique<SymbolInformation>(sym->show(gs), symbolRef2SymbolKind(gs, symRef), std::move(location));
+            make_unique<SymbolInformation>(symRef.show(gs), symbolRef2SymbolKind(gs, symRef), std::move(location));
         auto container = sym->owner;
         if (container != core::Symbols::root()) {
             result->containerName = container.show(gs);

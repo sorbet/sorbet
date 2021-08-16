@@ -13,10 +13,10 @@ namespace sorbet::resolver {
 // Forward declarations for the local versions of getResultType, getResultTypeAndBind, and parseSig that skolemize type
 // members.
 namespace {
-core::TypePtr getResultTypeWithSelfTypeParams(core::Context ctx, const ast::TreePtr &expr,
+core::TypePtr getResultTypeWithSelfTypeParams(core::Context ctx, const ast::ExpressionPtr &expr,
                                               const ParsedSig &sigBeingParsed, TypeSyntaxArgs args);
 
-TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx, const ast::TreePtr &expr,
+TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx, const ast::ExpressionPtr &expr,
                                                               const ParsedSig &sigBeingParsed, TypeSyntaxArgs args);
 
 ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
@@ -38,24 +38,24 @@ ParsedSig TypeSyntax::parseSig(core::Context ctx, const ast::Send &sigSend, cons
     return result;
 }
 
-core::TypePtr TypeSyntax::getResultType(core::Context ctx, ast::TreePtr &expr, const ParsedSig &sigBeingParsed,
+core::TypePtr TypeSyntax::getResultType(core::Context ctx, ast::ExpressionPtr &expr, const ParsedSig &sigBeingParsed,
                                         TypeSyntaxArgs args) {
     return core::Types::unwrapSelfTypeParam(
         ctx, getResultTypeWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()));
 }
 
-TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::Context ctx, ast::TreePtr &expr,
+TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::Context ctx, ast::ExpressionPtr &expr,
                                                         const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     auto result = getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args);
     result.type = core::Types::unwrapSelfTypeParam(ctx, result.type);
     return result;
 }
 
-core::TypePtr getResultLiteral(core::Context ctx, const ast::TreePtr &expr) {
+core::TypePtr getResultLiteral(core::Context ctx, const ast::ExpressionPtr &expr) {
     core::TypePtr result;
     typecase(
         expr, [&](const ast::Literal &lit) { result = lit.value; },
-        [&](const ast::TreePtr &e) {
+        [&](const ast::ExpressionPtr &e) {
             if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Unsupported type literal");
             }
@@ -85,6 +85,10 @@ bool TypeSyntax::isSig(core::Context ctx, const ast::Send &send) {
     if (send.block.get() == nullptr) {
         return false;
     }
+    // NB: this only needs to check for Sorbet::Private::Static.sig and not
+    // Sorbet::Private::Static::ResolvedSig.sig, because this function is only
+    // used during resolver to identify potential sigs.  We don't create
+    // Sorbet::Private::Static::ResolvedSig.sig until after resolver is run.
     auto nargs = send.args.size();
     if (!(nargs == 1 || nargs == 2)) {
         return false;
@@ -103,6 +107,7 @@ namespace {
 ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
                                      TypeSyntaxArgs args) {
     ParsedSig sig;
+    sig.origSend = const_cast<ast::Send *>(&sigSend);
 
     vector<const ast::Send *> sends;
 
@@ -168,7 +173,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                                                 name.show(ctx));
                                 }
                             }
-                            typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todo());
+                            typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todoTypeArgument());
                             typeArgSpec.loc = core::Loc(ctx.file, arg.loc());
                         } else {
                             if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
@@ -202,7 +207,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Malformed `{}`: Multiple calls to `.bind`", send->fun.show(ctx));
                         }
-                        sig.bind = core::Symbols::noSymbol();
+                        sig.bind = core::Symbols::noClassOrModule();
                     }
                     sig.seen.bind = true;
 
@@ -254,12 +259,13 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                             e.setHeader("`{}` must be given arguments", paramsStr);
 
                             core::Loc loc{ctx.file, send->loc};
-                            auto orig = loc.source(ctx);
-                            auto dot = orig.rfind(".");
-                            if (orig.rfind(".") == string::npos) {
-                                e.replaceWith("Remove this use of `params`", loc, "");
-                            } else {
-                                e.replaceWith("Remove this use of `params`", loc, "{}", orig.substr(0, dot));
+                            if (auto orig = loc.source(ctx)) {
+                                auto dot = orig->rfind(".");
+                                if (orig->rfind(".") == string::npos) {
+                                    e.replaceWith("Remove this use of `params`", loc, "");
+                                } else {
+                                    e.replaceWith("Remove this use of `params`", loc, "{}", orig->substr(0, dot));
+                                }
                             }
                         }
                         break;
@@ -276,10 +282,12 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                             // when the first argument is a hash, emit an autocorrect to remove the braces
                             if (send->numPosArgs == 1) {
                                 if (auto *hash = ast::cast_tree<ast::Hash>(send->args.front())) {
+                                    // TODO(jez) Use Loc::adjust here
                                     auto loc = core::Loc(ctx.file, hash->loc.beginPos(), hash->loc.endPos());
-                                    auto source = loc.source(ctx);
-                                    e.replaceWith("Remove braces from keyword args", loc, "{}",
-                                                  source.substr(1, source.size() - 2));
+                                    if (auto locSource = loc.source(ctx)) {
+                                        e.replaceWith("Remove braces from keyword args", loc, "{}",
+                                                      locSource->substr(1, locSource->size() - 2));
+                                    }
                                 }
                             }
                         }
@@ -358,11 +366,14 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                 case core::Names::implementation().rawId():
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::ImplementationDeprecated)) {
                         e.setHeader("Use of `{}` has been replaced by `{}`", "implementation", "override");
+                        auto loc = core::Loc(ctx.file, send->loc);
                         if (send->recv.isSelfReference()) {
-                            e.replaceWith("Replace with `override`", core::Loc(ctx.file, send->loc), "override");
+                            e.replaceWith("Replace with `override`", loc, "override");
                         } else {
-                            e.replaceWith("Replace with `override`", core::Loc(ctx.file, send->loc), "{}.override",
-                                          core::Loc(ctx.file, send->recv.loc()).source(ctx));
+                            auto recvLoc = core::Loc{ctx.file, send->recv.loc()};
+                            if (auto source = recvLoc.source(ctx)) {
+                                e.replaceWith("Replace with `override`", loc, "{}.override", source.value());
+                            }
                         }
                     }
                     break;
@@ -384,8 +395,10 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                                 auto start = send->args[send->numPosArgs].loc();
                                 auto end = send->args.back().loc();
                                 core::Loc argsLoc(ctx.file, start.beginPos(), end.endPos());
-                                e.replaceWith("Wrap in braces to make a shape type", argsLoc, "{{{}}}",
-                                              argsLoc.source(ctx));
+                                if (argsLoc.exists()) {
+                                    e.replaceWith("Wrap in braces to make a shape type", argsLoc, "{{{}}}",
+                                                  argsLoc.source(ctx).value());
+                                }
                             }
                         }
                         break;
@@ -450,13 +463,26 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
     return sig;
 }
 
+// This function recurses through an OrType, and accumlates all the class names,
+// wrapped in T.class_of, and checks if the type is only made up of Classes and OrTypes
+bool recurseOrType(core::Context ctx, core::TypePtr type, std::vector<std::string> &v) {
+    if (auto *o = core::cast_type<core::OrType>(type)) {
+        return recurseOrType(ctx, o->left, v) && recurseOrType(ctx, o->right, v);
+    } else if (core::isa_type<core::ClassType>(type)) {
+        v.push_back(fmt::format("T.class_of({})", type.show(ctx)));
+        return true;
+    } else {
+        return false;
+    }
+}
+
 TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                             TypeSyntaxArgs args) {
     switch (send.fun.rawId()) {
         case core::Names::nilable().rawId(): {
             if (send.numPosArgs != 1 || send.hasKwArgs()) {
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(),
-                                              core::Symbols::noSymbol()}; // error will be reported in infer.
+                                              core::Symbols::noClassOrModule()}; // error will be reported in infer.
             }
             auto result = getResultTypeAndBindWithSelfTypeParams(ctx, send.args.front(), sig, args);
             return TypeSyntax::ResultType{core::Types::any(ctx, result.type, core::Types::nilClass()), result.rebind};
@@ -464,7 +490,7 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
         case core::Names::all().rawId(): {
             if (send.args.empty()) {
                 // Error will be reported in infer
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto result = getResultTypeWithSelfTypeParams(ctx, send.args[0], sig, args);
             int i = 1;
@@ -472,12 +498,12 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 result = core::Types::all(ctx, result, getResultTypeWithSelfTypeParams(ctx, send.args[i], sig, args));
                 i++;
             }
-            return TypeSyntax::ResultType{result, core::Symbols::noSymbol()};
+            return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
         case core::Names::any().rawId(): {
             if (send.args.empty()) {
                 // Error will be reported in infer
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto result = getResultTypeWithSelfTypeParams(ctx, send.args[0], sig, args);
             int i = 1;
@@ -485,48 +511,48 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 result = core::Types::any(ctx, result, getResultTypeWithSelfTypeParams(ctx, send.args[i], sig, args));
                 i++;
             }
-            return TypeSyntax::ResultType{result, core::Symbols::noSymbol()};
+            return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
         case core::Names::typeParameter().rawId(): {
             if (send.args.size() != 1) {
                 // Error will be reported in infer
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto arr = ast::cast_tree<ast::Literal>(send.args[0]);
             if (!arr || !arr->isSymbol(ctx)) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("type_parameter requires a symbol");
                 }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto fnd = sig.findTypeArgByName(arr->asSymbol(ctx));
             if (!fnd.type) {
                 if (auto e = ctx.beginError(arr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Unspecified type parameter");
                 }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            return TypeSyntax::ResultType{fnd.type, core::Symbols::noSymbol()};
+            return TypeSyntax::ResultType{fnd.type, core::Symbols::noClassOrModule()};
         }
         case core::Names::enum_().rawId(): {
             if (send.args.size() != 1) {
                 // Error will be reported in infer
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto arr = ast::cast_tree<ast::Array>(send.args[0]);
             if (arr == nullptr) {
                 // TODO(pay-server) unsilence this error and support enums from pay-server
-                { return TypeSyntax::ResultType{core::Types::Object(), core::Symbols::noSymbol()}; }
+                { return TypeSyntax::ResultType{core::Types::Object(), core::Symbols::noClassOrModule()}; }
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("enum must be passed a literal array. e.g. enum([1,\"foo\",MyClass])");
                 }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             if (arr->elems.empty()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("enum([]) is invalid");
                 }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto result = getResultLiteral(ctx, arr->elems[0]);
             int i = 1;
@@ -534,40 +560,50 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 result = core::Types::any(ctx, result, getResultLiteral(ctx, arr->elems[i]));
                 i++;
             }
-            return TypeSyntax::ResultType{result, core::Symbols::noSymbol()};
+            return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
         case core::Names::classOf().rawId(): {
             if (send.args.size() != 1) {
                 // Error will be reported in infer
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
 
             auto *obj = ast::cast_tree<ast::ConstantLit>(send.args[0]);
             if (!obj) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("T.class_of needs a Class as its argument");
+                    auto type = getResultTypeWithSelfTypeParams(ctx, send.args.front(), sig, args);
+                    std::vector<std::string> classes;
+                    auto shouldAutoCorrect = recurseOrType(ctx, type, classes);
+                    if (core::isa_type<core::OrType>(type) && shouldAutoCorrect) {
+                        auto autocorrect = fmt::format("T.any({})", fmt::join(classes, ", "));
+                        e.setHeader("`{}` must wrap each individual class type, not the outer `{}`", "T.class_of",
+                                    "T.any");
+                        e.replaceWith("Distribute `T.class_of`", core::Loc(ctx.file, send.loc), "{}", autocorrect);
+                    } else {
+                        e.setHeader("`{}` needs a class or module as its argument", "T.class_of");
+                    }
                 }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto maybeAliased = obj->symbol;
             if (maybeAliased.data(ctx)->isTypeAlias()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a T.type_alias");
                 }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             if (maybeAliased.isTypeMember()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a T.type_member");
                 }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto sym = maybeAliased.data(ctx)->dealias(ctx);
             if (sym.isStaticField(ctx)) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a constant field");
                 }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
 
             auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
@@ -575,20 +611,21 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Unknown class");
                 }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            return TypeSyntax::ResultType{singleton.data(ctx)->externalType(), core::Symbols::noSymbol()};
+            return TypeSyntax::ResultType{singleton.data(ctx)->externalType(), core::Symbols::noClassOrModule()};
         }
         case core::Names::untyped().rawId():
-            return TypeSyntax::ResultType{core::Types::untyped(ctx, args.untypedBlame), core::Symbols::noSymbol()};
+            return TypeSyntax::ResultType{core::Types::untyped(ctx, args.untypedBlame),
+                                          core::Symbols::noClassOrModule()};
         case core::Names::selfType().rawId():
             if (args.allowSelfType) {
-                return TypeSyntax::ResultType{core::make_type<core::SelfType>(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::make_type<core::SelfType>(), core::Symbols::noClassOrModule()};
             }
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Only top-level T.self_type is supported");
             }
-            return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+            return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
         case core::Names::experimentalAttachedClass().rawId():
         case core::Names::attachedClass().rawId():
             if (send.fun == core::Names::experimentalAttachedClass()) {
@@ -604,30 +641,30 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                     e.setHeader("`{}` may only be used in a singleton class method context",
                                 "T." + core::Names::attachedClass().show(ctx));
                 }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             } else {
                 // All singletons have an AttachedClass type member, created by
                 // `singletonClass`
                 auto attachedClass = ctx.owner.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
-                return TypeSyntax::ResultType{attachedClass.data(ctx)->resultType, core::Symbols::noSymbol()};
+                return TypeSyntax::ResultType{attachedClass.data(ctx)->resultType, core::Symbols::noClassOrModule()};
             }
         case core::Names::noreturn().rawId():
-            return TypeSyntax::ResultType{core::Types::bottom(), core::Symbols::noSymbol()};
+            return TypeSyntax::ResultType{core::Types::bottom(), core::Symbols::noClassOrModule()};
 
         default:
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Unsupported method `{}`", "T." + send.fun.show(ctx));
             }
-            return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noSymbol()};
+            return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
     }
 }
 
-core::TypePtr getResultTypeWithSelfTypeParams(core::Context ctx, const ast::TreePtr &expr,
+core::TypePtr getResultTypeWithSelfTypeParams(core::Context ctx, const ast::ExpressionPtr &expr,
                                               const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     return getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()).type;
 }
 
-TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx, const ast::TreePtr &expr,
+TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx, const ast::ExpressionPtr &expr,
                                                               const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     // Ensure that we only check types from a class context
     auto ctxOwnerData = ctx.owner.data(ctx);
@@ -710,21 +747,24 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                         // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to
                         // if we're already looking at `T::Array` instead.
                         auto typePrefix = isBuiltinGeneric ? "" : "T::";
-                        if (sym == core::Symbols::Hash() || sym == core::Symbols::T_Hash()) {
-                            // Hash is special because it has arity 3 but you're only supposed to write the first 2
-                            e.replaceWith("Add type arguments", core::Loc(ctx.file, i.loc),
-                                          "{}{}[T.untyped, T.untyped]", typePrefix,
-                                          core::Loc(ctx.file, i.loc).source(ctx));
-                        } else if (isStdlibWhitelisted || isBuiltinGeneric) {
-                            // the default provided here for builtin generic types is 1, and that might need to change
-                            // if we add other builtin generics (but ideally we should never need to do so!)
-                            auto numTypeArgs = isBuiltinGeneric ? 1 : sym.data(ctx)->typeArity(ctx);
-                            vector<string> untypeds;
-                            for (int i = 0; i < numTypeArgs; i++) {
-                                untypeds.emplace_back("T.untyped");
+
+                        auto loc = core::Loc{ctx.file, i.loc};
+                        if (auto locSource = loc.source(ctx)) {
+                            if (sym == core::Symbols::Hash() || sym == core::Symbols::T_Hash()) {
+                                // Hash is special because it has arity 3 but you're only supposed to write the first 2
+                                e.replaceWith("Add type arguments", loc, "{}{}[T.untyped, T.untyped]", typePrefix,
+                                              locSource.value());
+                            } else if (isStdlibWhitelisted || isBuiltinGeneric) {
+                                // the default provided here for builtin generic types is 1, and that might need to
+                                // change if we add other builtin generics (but ideally we should never need to do so!)
+                                auto numTypeArgs = isBuiltinGeneric ? 1 : sym.data(ctx)->typeArity(ctx);
+                                vector<string> untypeds;
+                                for (int i = 0; i < numTypeArgs; i++) {
+                                    untypeds.emplace_back("T.untyped");
+                                }
+                                e.replaceWith("Add type arguments", loc, "{}{}[{}]", typePrefix, locSource.value(),
+                                              absl::StrJoin(untypeds, ", "));
                             }
-                            e.replaceWith("Add type arguments", core::Loc(ctx.file, i.loc), "{}{}[{}]", typePrefix,
-                                          core::Loc(ctx.file, i.loc).source(ctx), absl::StrJoin(untypeds, ", "));
                         }
                     }
                 }
@@ -778,12 +818,25 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                             string typeStr = sym.show(ctx);
 
                             if (usedOnSourceClass) {
+                                // Autocorrects here are awkward, because we want to offer the autocorrect at the
+                                // definition of the type_member or type_template and we only have access to the use of
+                                // the type_member or type_template here.  We could examine the source and attempt to
+                                // identify the location for the autocorrect, but that gets messy.
+                                //
+                                // Plus, it's not absolutely clear that the definition is really at fault: it might be
+                                // that the user is using the wrong type_member/type_template constant for the given
+                                // context, or they need to change the definition of the method this use is associated
+                                // with.  Try to give them enough of a hint to decide what to do on their own.
                                 if (ctxIsSingleton) {
                                     e.setHeader("`{}` type `{}` used in a singleton method definition", typeSource,
                                                 typeStr);
+                                    e.addErrorNote("Only a `{}` can be used in a singleton method definition.",
+                                                   "type_template");
                                 } else {
                                     e.setHeader("`{}` type `{}` used in an instance method definition", typeSource,
                                                 typeStr);
+                                    e.addErrorNote("Only a `{}` can be used in an instance method definition.",
+                                                   "type_member");
                                 }
                             } else {
                                 e.setHeader("`{}` type `{}` used outside of the class definition", typeSource, typeStr);
@@ -928,14 +981,13 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             }
             if (corrected.exists()) {
                 if (auto e = ctx.beginError(s.loc, core::errors::Resolver::BadStdlibGeneric)) {
-                    e.setHeader("Use `{}`, not `{}` to declare a typed `{}`", corrected.data(ctx)->show(ctx) + "[...]",
-                                recvi->symbol.data(ctx)->show(ctx) + "[...]", recvi->symbol.data(ctx)->show(ctx));
+                    e.setHeader("Use `{}`, not `{}` to declare a typed `{}`", corrected.show(ctx) + "[...]",
+                                recvi->symbol.show(ctx) + "[...]", recvi->symbol.show(ctx));
                     e.addErrorNote(
                         "`{}` will raise at runtime because this generic was defined in the standard library",
-                        recvi->symbol.data(ctx)->show(ctx) + "[...]");
-                    e.replaceWith(fmt::format("Change `{}` to `{}`", recvi->symbol.data(ctx)->show(ctx),
-                                              corrected.data(ctx)->show(ctx)),
-                                  core::Loc(ctx.file, recvi->loc), "{}", corrected.data(ctx)->show(ctx));
+                        recvi->symbol.show(ctx) + "[...]");
+                    e.replaceWith(fmt::format("Change `{}` to `{}`", recvi->symbol.show(ctx), corrected.show(ctx)),
+                                  core::Loc(ctx.file, recvi->loc), "{}", corrected.show(ctx));
                 }
                 result.type = core::Types::untypedUntracked();
                 return;
@@ -955,6 +1007,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             auto correctedSingleton = corrected.data(ctx)->lookupSingletonClass(ctx);
             ENFORCE_NO_TIMER(correctedSingleton.exists());
             auto ctype = core::make_type<core::ClassType>(correctedSingleton);
+            auto ctypeAndOrigins = core::TypeAndOrigins{ctype, {core::Loc(ctx.file, s.loc)}};
             // In `dispatchArgs` this is ordinarily used to specify the origin tag for
             // uninitialized variables. Inside of a signature we shouldn't need this:
             auto originForUninitialized = core::Loc::none();
@@ -964,9 +1017,16 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 recvi->loc,
                 argLocs,
             };
-            core::DispatchArgs dispatchArgs{
-                core::Names::squareBrackets(), locs, s.numPosArgs, targs, ctype, ctype, ctype, nullptr,
-                originForUninitialized};
+            core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),
+                                            locs,
+                                            s.numPosArgs,
+                                            targs,
+                                            ctype,
+                                            ctypeAndOrigins,
+                                            ctype,
+                                            nullptr,
+                                            originForUninitialized,
+                                            s.flags.isPrivateOk};
             auto out = core::Types::dispatchCallWithoutBlock(ctx, ctype, dispatchArgs);
 
             if (out.isUntyped()) {
@@ -1010,7 +1070,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             }
             result.type = underlying;
         },
-        [&](const ast::TreePtr &e) {
+        [&](const ast::ExpressionPtr &e) {
             if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Unsupported type syntax");
             }

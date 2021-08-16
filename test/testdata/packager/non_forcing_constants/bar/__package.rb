@@ -5,6 +5,5 @@
 class Project::Bar < PackageSpec
   import Project::Foo
 
-  export Bar
-  export_methods BarMethods
+  export Project::Bar::Bar
 end

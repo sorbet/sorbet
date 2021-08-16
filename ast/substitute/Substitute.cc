@@ -6,11 +6,12 @@
 namespace sorbet::ast {
 
 namespace {
-class SubstWalk {
+// Is used with GlobalSubstitution and LazyGlobalSubstitution, which implement the same interface.
+template <typename T> class SubstWalk {
 private:
-    const core::GlobalSubstitution &subst;
+    T &subst;
 
-    TreePtr substClassName(core::MutableContext ctx, TreePtr node) {
+    ExpressionPtr substClassName(core::MutableContext ctx, ExpressionPtr node) {
         auto *constLit = cast_tree<UnresolvedConstantLit>(node);
         if (constLit == nullptr) { // uncommon case. something is strange
             if (isa_tree<EmptyTree>(node)) {
@@ -20,13 +21,13 @@ private:
         }
 
         auto scope = substClassName(ctx, std::move(constLit->scope));
-        auto cnst = subst.substitute(constLit->cnst);
+        auto cnst = subst.substituteSymbolName(constLit->cnst);
 
-        return make_tree<UnresolvedConstantLit>(constLit->loc, std::move(scope), cnst);
+        return make_expression<UnresolvedConstantLit>(constLit->loc, std::move(scope), cnst);
     }
 
-    TreePtr substArg(core::MutableContext ctx, TreePtr argp) {
-        TreePtr *arg = &argp;
+    ExpressionPtr substArg(core::MutableContext ctx, ExpressionPtr argp) {
+        ExpressionPtr *arg = &argp;
         while (arg != nullptr) {
             typecase(
                 *arg, [&](RestArg &rest) { arg = &rest.expr; }, [&](KeywordArg &kw) { arg = &kw.expr; },
@@ -42,53 +43,59 @@ private:
     }
 
 public:
-    SubstWalk(const core::GlobalSubstitution &subst) : subst(subst) {}
+    SubstWalk(T &subst) : subst(subst) {}
 
-    TreePtr preTransformClassDef(core::MutableContext ctx, TreePtr tree) {
-        auto *original = cast_tree<ClassDef>(tree);
-        original->name = substClassName(ctx, std::move(original->name));
-        for (auto &anc : original->ancestors) {
+    ExpressionPtr preTransformClassDef(core::MutableContext ctx, ExpressionPtr tree) {
+        auto &original = cast_tree_nonnull<ClassDef>(tree);
+        original.name = substClassName(ctx, std::move(original.name));
+        for (auto &anc : original.ancestors) {
             anc = substClassName(ctx, std::move(anc));
         }
         return tree;
     }
 
-    TreePtr preTransformMethodDef(core::MutableContext ctx, TreePtr tree) {
-        auto *original = cast_tree<MethodDef>(tree);
-        original->name = subst.substitute(original->name);
-        for (auto &arg : original->args) {
+    ExpressionPtr preTransformMethodDef(core::MutableContext ctx, ExpressionPtr tree) {
+        auto &original = cast_tree_nonnull<MethodDef>(tree);
+        original.name = subst.substituteSymbolName(original.name);
+        for (auto &arg : original.args) {
             arg = substArg(ctx, std::move(arg));
         }
         return tree;
     }
 
-    TreePtr preTransformBlock(core::MutableContext ctx, TreePtr tree) {
-        auto *original = cast_tree<Block>(tree);
-        for (auto &arg : original->args) {
+    ExpressionPtr preTransformBlock(core::MutableContext ctx, ExpressionPtr tree) {
+        auto &original = cast_tree_nonnull<Block>(tree);
+        for (auto &arg : original.args) {
             arg = substArg(ctx, std::move(arg));
         }
         return tree;
     }
 
-    TreePtr postTransformUnresolvedIdent(core::MutableContext ctx, TreePtr original) {
-        cast_tree<UnresolvedIdent>(original)->name = subst.substitute(cast_tree<UnresolvedIdent>(original)->name);
+    ExpressionPtr postTransformUnresolvedIdent(core::MutableContext ctx, ExpressionPtr original) {
+        auto &id = cast_tree_nonnull<UnresolvedIdent>(original);
+        if (id.kind != ast::UnresolvedIdent::Kind::Local) {
+            id.name = subst.substituteSymbolName(cast_tree<UnresolvedIdent>(original)->name);
+        } else {
+            id.name = subst.substitute(cast_tree<UnresolvedIdent>(original)->name);
+        }
         return original;
     }
 
-    TreePtr postTransformLocal(core::MutableContext ctx, TreePtr local) {
-        cast_tree<Local>(local)->localVariable._name = subst.substitute(cast_tree<Local>(local)->localVariable._name);
+    ExpressionPtr postTransformLocal(core::MutableContext ctx, ExpressionPtr local) {
+        cast_tree_nonnull<Local>(local).localVariable._name =
+            subst.substitute(cast_tree_nonnull<Local>(local).localVariable._name);
         return local;
     }
 
-    TreePtr preTransformSend(core::MutableContext ctx, TreePtr original) {
-        cast_tree<Send>(original)->fun = subst.substitute(cast_tree<Send>(original)->fun);
+    ExpressionPtr preTransformSend(core::MutableContext ctx, ExpressionPtr original) {
+        cast_tree_nonnull<Send>(original).fun = subst.substituteSend(cast_tree_nonnull<Send>(original).fun);
         return original;
     }
 
-    TreePtr postTransformLiteral(core::MutableContext ctx, TreePtr tree) {
-        auto *original = cast_tree<Literal>(tree);
-        if (original->isString(ctx)) {
-            auto nameRef = original->asString(ctx);
+    ExpressionPtr postTransformLiteral(core::MutableContext ctx, ExpressionPtr tree) {
+        auto &original = cast_tree_nonnull<Literal>(tree);
+        if (original.isString(ctx)) {
+            auto nameRef = original.asString(ctx);
             // The 'from' and 'to' GlobalState in this substitution will always be the same,
             // because the newly created nameRef reuses our current GlobalState id
             bool allowSameFromTo = true;
@@ -96,10 +103,10 @@ public:
             if (newName == nameRef) {
                 return tree;
             }
-            return MK::String(original->loc, newName);
+            return MK::String(original.loc, newName);
         }
-        if (original->isSymbol(ctx)) {
-            auto nameRef = original->asSymbol(ctx);
+        if (original.isSymbol(ctx)) {
+            auto nameRef = original.asSymbol(ctx);
             // The 'from' and 'to' GlobalState in this substitution will always be the same,
             // because the newly created nameRef reuses our current GlobalState id
             bool allowSameFromTo = true;
@@ -107,24 +114,30 @@ public:
             if (newName == nameRef) {
                 return tree;
             }
-            return MK::Symbol(original->loc, newName);
+            return MK::Symbol(original.loc, newName);
         }
         return tree;
     }
 
-    TreePtr postTransformUnresolvedConstantLit(core::MutableContext ctx, TreePtr tree) {
-        auto *original = cast_tree<UnresolvedConstantLit>(tree);
-        original->cnst = subst.substitute(original->cnst);
-        original->scope = substClassName(ctx, std::move(original->scope));
+    ExpressionPtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ExpressionPtr tree) {
+        auto &original = cast_tree_nonnull<UnresolvedConstantLit>(tree);
+        original.cnst = subst.substituteSymbolName(original.cnst);
+        original.scope = substClassName(ctx, std::move(original.scope));
         return tree;
     }
 };
 } // namespace
 
-TreePtr Substitute::run(core::MutableContext ctx, const core::GlobalSubstitution &subst, TreePtr what) {
+ExpressionPtr Substitute::run(core::MutableContext ctx, const core::GlobalSubstitution &subst, ExpressionPtr what) {
     if (subst.useFastPath()) {
         return what;
     }
+    SubstWalk walk(subst);
+    what = TreeMap::apply(ctx, walk, std::move(what));
+    return what;
+}
+
+ExpressionPtr Substitute::run(core::MutableContext ctx, core::LazyGlobalSubstitution &subst, ExpressionPtr what) {
     SubstWalk walk(subst);
     what = TreeMap::apply(ctx, walk, std::move(what));
     return what;

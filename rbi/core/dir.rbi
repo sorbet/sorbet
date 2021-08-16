@@ -1,8 +1,9 @@
 # typed: __STDLIB_INTERNAL
 
-# Objects of class `Dir` are directory streams representing directories in the
-# underlying file system. They provide a variety of ways to list directories and
-# their contents. See also `File`.
+# Objects of class [`Dir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html) are
+# directory streams representing directories in the underlying file system. They
+# provide a variety of ways to list directories and their contents. See also
+# [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html).
 #
 # The directory used in these examples contains the two regular files
 # (`config.h` and `main.rb`), the parent directory (`..`), and the directory
@@ -15,8 +16,9 @@ class Dir < Object
 
   # Changes the current working directory of the process to the given string.
   # When called without an argument, changes the directory to the value of the
-  # environment variable `HOME`, or `LOGDIR`. `SystemCallError` (probably
-  # `Errno::ENOENT`) if the target directory does not exist.
+  # environment variable `HOME`, or `LOGDIR`.
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
+  # (probably Errno::ENOENT) if the target directory does not exist.
   #
   # If a block is given, it is passed the name of the new current directory, and
   # the block is executed with that as the current directory. The original
@@ -63,8 +65,9 @@ class Dir < Object
   def self.chdir(arg0=T.unsafe(nil), &blk); end
 
   # Returns an array containing all of the filenames except for "." and ".." in
-  # the given directory. Will raise a `SystemCallError` if the named directory
-  # doesn't exist.
+  # the given directory. Will raise a
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
+  # if the named directory doesn't exist.
   #
   # The optional *encoding* keyword argument specifies the encoding of the
   # directory. If not specified, the filesystem encoding is used.
@@ -85,8 +88,9 @@ class Dir < Object
   end
   def self.chroot(arg0); end
 
-  # Deletes the named directory. Raises a subclass of `SystemCallError` if the
-  # directory isn't empty.
+  # Deletes the named directory. Raises a subclass of
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
+  # if the directory isn't empty.
   sig do
     params(
         arg0: String,
@@ -110,14 +114,16 @@ class Dir < Object
   # Got config.h
   # Got main.rb
   # ```
-  def self.each_child(*_); end
+  def self.each_child(*_, &blk); end
 
   # Returns `true` if the named file is an empty directory, `false` if it is not
   # a directory or non-empty.
   def self.empty?(_); end
 
   # Returns an array containing all of the filenames in the given directory.
-  # Will raise a `SystemCallError` if the named directory doesn't exist.
+  # Will raise a
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
+  # if the named directory doesn't exist.
   #
   # The optional *encoding* keyword argument specifies the encoding of the
   # directory. If not specified, the filesystem encoding is used.
@@ -189,7 +195,7 @@ class Dir < Object
   def self.getwd(); end
 
   # Expands `pattern`, which is a pattern string or an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of pattern
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of pattern
   # strings, and returns an array containing the matching filenames. If a block
   # is given, calls the block once for each matching filename, passing the
   # filename as a parameter to the block.
@@ -200,7 +206,7 @@ class Dir < Object
   # will need to prepend the base directory name if you want real paths.
   #
   # Note that the pattern is not a regexp, it's closer to a shell glob. See
-  # [`File::fnmatch`](https://docs.ruby-lang.org/en/2.6.0/File.html#method-c-fnmatch)
+  # [`File::fnmatch`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-fnmatch)
   # for the meaning of the `flags` parameter. Case sensitivity depends on your
   # system (File::FNM\_CASEFOLD is ignored), as does the order in which the
   # results are returned.
@@ -232,7 +238,7 @@ class Dir < Object
   #
   # `[set]`
   # :   Matches any one character in `set`. Behaves exactly like character sets
-  #     in [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html),
+  #     in [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html),
   #     including set negation (`[^a-z]`).
   #
   # `{p,q}`
@@ -325,16 +331,20 @@ class Dir < Object
 
   # Makes a new directory named by *string*, with permissions specified by the
   # optional parameter *anInteger*. The permissions may be modified by the value
-  # of `File::umask`, and are ignored on NT. Raises a `SystemCallError` if the
-  # directory cannot be created. See also the discussion of permissions in the
-  # class documentation for `File`.
+  # of
+  # [`File::umask`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-umask),
+  # and are ignored on NT. Raises a
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
+  # if the directory cannot be created. See also the discussion of permissions
+  # in the class documentation for
+  # [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html).
   #
   # ```ruby
   # Dir.mkdir(File.join(Dir.home, ".foo"), 0700) #=> 0
   # ```
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, Pathname),
         arg1: Integer,
     )
     .returns(Integer)
@@ -344,9 +354,12 @@ class Dir < Object
   # The optional *encoding* keyword argument specifies the encoding of the
   # directory. If not specified, the filesystem encoding is used.
   #
-  # With no block, `open` is a synonym for `Dir::new`. If a block is present, it
-  # is passed *aDir* as a parameter. The directory is closed at the end of the
-  # block, and `Dir::open` returns the value of the block.
+  # With no block, `open` is a synonym for
+  # [`Dir::new`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-new). If
+  # a block is present, it is passed *aDir* as a parameter. The directory is
+  # closed at the end of the block, and
+  # [`Dir::open`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-open)
+  # returns the value of the block.
   sig do
     params(
         arg0: T.any(String, Pathname),
@@ -375,8 +388,9 @@ class Dir < Object
   sig {returns(String)}
   def self.pwd(); end
 
-  # Deletes the named directory. Raises a subclass of `SystemCallError` if the
-  # directory isn't empty.
+  # Deletes the named directory. Raises a subclass of
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
+  # if the directory isn't empty.
   sig do
     params(
         arg0: T.any(String, Pathname),
@@ -388,8 +402,9 @@ class Dir < Object
   # Returns the operating system's temporary file path.
   def self.tmpdir; end
 
-  # Deletes the named directory. Raises a subclass of `SystemCallError` if the
-  # directory isn't empty.
+  # Deletes the named directory. Raises a subclass of
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
+  # if the directory isn't empty.
   sig do
     params(
         arg0: T.any(String, Pathname),
@@ -399,7 +414,7 @@ class Dir < Object
   def self.unlink(arg0); end
 
   # Closes the directory stream. Calling this method on closed
-  # [`Dir`](https://docs.ruby-lang.org/en/2.6.0/Dir.html) object is ignored
+  # [`Dir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html) object is ignored
   # since Ruby 2.3.
   #
   # ```ruby
@@ -444,7 +459,7 @@ class Dir < Object
   # ```
   #
   # This method uses dirfd() function defined by POSIX 2008.
-  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.6.0/NotImplementedError.html)
+  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.7.0/NotImplementedError.html)
   # is raised on other platforms, such as Windows, which doesn't provide the
   # function.
   sig {returns(Integer)}
@@ -460,7 +475,7 @@ class Dir < Object
   def initialize(arg0, arg1=T.unsafe(nil)); end
 
   # Return a string describing this
-  # [`Dir`](https://docs.ruby-lang.org/en/2.6.0/Dir.html) object.
+  # [`Dir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html) object.
   sig {returns(String)}
   def inspect(); end
 
@@ -473,7 +488,8 @@ class Dir < Object
   sig {returns(T.nilable(String))}
   def path(); end
 
-  # Returns the current position in *dir*. See also `Dir#seek`.
+  # Returns the current position in *dir*. See also
+  # [`Dir#seek`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-seek).
   #
   # ```ruby
   # d = Dir.new("testdir")
@@ -484,7 +500,9 @@ class Dir < Object
   sig {returns(Integer)}
   def pos(); end
 
-  # Synonym for `Dir#seek`, but returns the position parameter.
+  # Synonym for
+  # [`Dir#seek`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-seek),
+  # but returns the position parameter.
   #
   # ```ruby
   # d = Dir.new("testdir")   #=> #<Dir:0x401b3c40>
@@ -526,7 +544,7 @@ class Dir < Object
   def rewind(); end
 
   # Seeks to a particular location in *dir*. *integer* must be a value returned
-  # by `Dir#tell`.
+  # by [`Dir#tell`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-tell).
   #
   # ```ruby
   # d = Dir.new("testdir")   #=> #<Dir:0x401b3c40>
@@ -544,7 +562,8 @@ class Dir < Object
   end
   def seek(arg0); end
 
-  # Returns the current position in *dir*. See also `Dir#seek`.
+  # Returns the current position in *dir*. See also
+  # [`Dir#seek`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-seek).
   #
   # ```ruby
   # d = Dir.new("testdir")

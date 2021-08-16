@@ -38,6 +38,7 @@ end
 
 class SomeClass < AnotherModule::NestedModule
                 # ^ usage: AnotherModule
+                # error: The super class `AnotherModule::NestedModule` of `SomeClass` does not derive from `Class`
   extend AnotherModule2::NestedModule
        # ^ usage: AnotherModule2
   include AnotherModule3::NestedModule

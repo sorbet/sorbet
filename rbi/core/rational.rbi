@@ -2,11 +2,11 @@
 
 # A rational number can be represented as a pair of integer numbers: a/b (b>0),
 # where a is the numerator and b is the denominator.
-# [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) a equals
+# [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) a equals
 # rational a/1 mathematically.
 #
 # In Ruby, you can create rational objects with the Kernel#Rational,
-# [`to_r`](https://docs.ruby-lang.org/en/2.6.0/Rational.html#method-i-to_r), or
+# [`to_r`](https://docs.ruby-lang.org/en/2.7.0/Rational.html#method-i-to_r), or
 # rationalize methods or by suffixing `r` to a literal. The return values will
 # be irreducible fractions.
 #
@@ -457,9 +457,9 @@ class Rational < Numeric
   # (-1/2r).abs   #=> (1/2)
   # ```
   #
-  # [`Rational#magnitude`](https://docs.ruby-lang.org/en/2.6.0/Rational.html#method-i-magnitude)
+  # [`Rational#magnitude`](https://docs.ruby-lang.org/en/2.7.0/Rational.html#method-i-magnitude)
   # is an alias for
-  # [`Rational#abs`](https://docs.ruby-lang.org/en/2.6.0/Rational.html#method-i-abs).
+  # [`Rational#abs`](https://docs.ruby-lang.org/en/2.7.0/Rational.html#method-i-abs).
   sig {returns(Rational)}
   def abs(); end
 
@@ -587,7 +587,7 @@ class Rational < Numeric
   def equal?(arg0); end
 
   # Performs division and returns the value as a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html).
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html).
   #
   # ```ruby
   # Rational(2, 3).fdiv(1)       #=> 0.6666666666666666
@@ -681,9 +681,9 @@ class Rational < Numeric
   # (-1/2r).abs   #=> (1/2)
   # ```
   #
-  # [`Rational#magnitude`](https://docs.ruby-lang.org/en/2.6.0/Rational.html#method-i-magnitude)
+  # [`Rational#magnitude`](https://docs.ruby-lang.org/en/2.7.0/Rational.html#method-i-magnitude)
   # is an alias for
-  # [`Rational#abs`](https://docs.ruby-lang.org/en/2.6.0/Rational.html#method-i-abs).
+  # [`Rational#abs`](https://docs.ruby-lang.org/en/2.7.0/Rational.html#method-i-abs).
   def magnitude; end
 
   sig do
@@ -819,7 +819,7 @@ class Rational < Numeric
   # ```
   #
   # The optional `half` keyword argument is available similar to
-  # [`Float#round`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-round).
+  # [`Float#round`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-round).
   #
   # ```ruby
   # Rational(25, 100).round(1, half: :up)    #=> (3/10)
@@ -845,7 +845,7 @@ class Rational < Numeric
   def to_c(); end
 
   # Returns the value as a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html).
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html).
   #
   # ```ruby
   # Rational(2).to_f      #=> 2.0
@@ -859,7 +859,7 @@ class Rational < Numeric
   # Returns the truncated value as an integer.
   #
   # Equivalent to
-  # [`Rational#truncate`](https://docs.ruby-lang.org/en/2.6.0/Rational.html#method-i-truncate).
+  # [`Rational#truncate`](https://docs.ruby-lang.org/en/2.7.0/Rational.html#method-i-truncate).
   #
   # ```ruby
   # Rational(2, 3).to_i    #=> 0

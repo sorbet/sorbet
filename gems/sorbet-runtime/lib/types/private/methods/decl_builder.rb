@@ -2,7 +2,7 @@
 # typed: true
 
 module T::Private::Methods
-  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters)
+  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :raw)
 
   class DeclBuilder
     attr_reader :decl
@@ -15,7 +15,7 @@ module T::Private::Methods
       end
     end
 
-    def initialize(mod)
+    def initialize(mod, raw)
       # TODO RUBYPLAT-1278 - with ruby 2.5, use kwargs here
       @decl = Declaration.new(
         mod,
@@ -28,6 +28,7 @@ module T::Private::Methods
         ARG_NOT_PROVIDED, # on_failure
         nil, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
+        raw
       )
     end
 

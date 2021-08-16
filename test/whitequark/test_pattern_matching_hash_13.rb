@@ -1,7 +1,6 @@
 # typed: true
 
 case foo; 
-        in {a:
-        }
-          true
+        in a: {b:}, c:
+          p c
       ; end

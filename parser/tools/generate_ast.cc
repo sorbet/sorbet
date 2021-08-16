@@ -211,6 +211,15 @@ NodeDef nodes[] = {
                           {"args", FieldType::Node},
                           {"body", FieldType::Node}}),
     },
+    // def <expr>.name singleton-class name method def
+    {
+        "DefsHead",
+        "defshead",
+        vector<FieldDef>({
+            {"definee", FieldType::Node},
+            {"name", FieldType::Name},
+        }),
+    },
     // string with an interpolation, all nodes are concatenated in a single string
     {
         "DString",
@@ -259,6 +268,12 @@ NodeDef nodes[] = {
         "false",
         vector<FieldDef>(),
     },
+    // Find pattern
+    {
+        "FindPattern",
+        "find_pattern",
+        vector<FieldDef>({{"elements", FieldType::NodeVec}}),
+    },
     // __FILE__
     {
         "FileLiteral",
@@ -273,8 +288,8 @@ NodeDef nodes[] = {
     },
     // "..." argument forwarding in definition site
     {
-        "ForwardArgs",
-        "forward_args",
+        "ForwardArg",
+        "forward_arg",
         vector<FieldDef>(),
     },
     // "..." argument forwarding in call site
@@ -331,12 +346,6 @@ NodeDef nodes[] = {
         "IFlipflop",
         "iflipflop",
         vector<FieldDef>({{"left", FieldType::Node}, {"right", FieldType::Node}}),
-    },
-    // Pattern matching pattern   sion
-    {
-        "InMatch",
-        "in_match",
-        vector<FieldDef>({{"lhs", FieldType::Node}, {"rhs", FieldType::Node}}),
     },
     // Pattern matching pattern: `in x`
     {
@@ -451,6 +460,18 @@ NodeDef nodes[] = {
         "MatchNilPattern",
         "match_nil_pattern",
         vector<FieldDef>(),
+    },
+    // Pattern matching pattern with `=`
+    {
+        "MatchPattern",
+        "match_pattern",
+        vector<FieldDef>({{"lhs", FieldType::Node}, {"rhs", FieldType::Node}}),
+    },
+    // Pattern matching pattern with `in`
+    {
+        "MatchPatternP",
+        "match_pattern_p",
+        vector<FieldDef>({{"lhs", FieldType::Node}, {"rhs", FieldType::Node}}),
     },
     // Pattern matching pattern variable with rest
     {
@@ -807,7 +828,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
 
     out << "  std::string " << node.name << "::toStringWithTabs(const core::GlobalState &gs, int tabs) const {" << '\n'
         << "    fmt::memory_buffer buf;" << '\n';
-    out << "    fmt::format_to(buf, \"" << node.name << " {{\\n\");" << '\n';
+    out << "    fmt::format_to(std::back_inserter(buf), \"" << node.name << " {{\\n\");" << '\n';
     // Generate fields
     for (auto &arg : node.fields) {
         if (arg.type == FieldType::Loc) {
@@ -816,39 +837,42 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
         out << "    printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
             case FieldType::Name:
-                out << "    fmt::format_to(buf, \"" << arg.name << " = {}\\n\", " << arg.name << ".showRaw(gs));"
-                    << '\n';
+                out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = {}\\n\", " << arg.name
+                    << ".showRaw(gs));" << '\n';
                 break;
             case FieldType::Node:
-                out << "    fmt::format_to(buf, \"" << arg.name << " = \");\n";
+                out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = \");\n";
                 out << "    printNode(buf, " << arg.name << ", gs, tabs + 1);\n";
                 break;
             case FieldType::NodeVec:
-                out << "    fmt::format_to(buf, \"" << arg.name << " = [\\n\");\n";
+                out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = [\\n\");\n";
                 out << "    for (auto &&a: " << arg.name << ") {\n";
                 out << "      printTabs(buf, tabs + 2);\n";
                 out << "      printNode(buf, a, gs, tabs + 2);\n";
                 out << "    }" << '\n';
                 out << "    printTabs(buf, tabs + 1);\n";
-                out << "    fmt::format_to(buf, \"]\\n\");\n";
+                out << "    fmt::format_to(std::back_inserter(buf), \"]\\n\");\n";
                 break;
             case FieldType::String:
-                out << "    fmt::format_to(buf, \"" << arg.name << " = \\\"{}\\\"\\n\", " << arg.name << ");\n";
+                out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = \\\"{}\\\"\\n\", "
+                    << arg.name << ");\n";
                 break;
             case FieldType::Uint:
-                out << "    fmt::format_to(buf, \"" << arg.name << " = {}\\n\", " << arg.name << ");\n";
+                out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = {}\\n\", " << arg.name
+                    << ");\n";
                 break;
             case FieldType::Loc:
                 // Placate the compiler; we skip these
                 abort();
                 break;
             case FieldType::Bool:
-                out << "    fmt::format_to(buf, \"" << arg.name << " = {}\\n\", " << arg.name << ");\n";
+                out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = {}\\n\", " << arg.name
+                    << ");\n";
                 break;
         }
     }
     out << "    printTabs(buf, tabs);\n";
-    out << "    fmt::format_to(buf, \"}}\");\n";
+    out << "    fmt::format_to(std::back_inserter(buf), \"}}\");\n";
     out << "    return to_string(buf);\n";
     out << "  }" << '\n';
     out << '\n';
@@ -858,13 +882,14 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     // (See tracing.cc and/or any of the proto stuff)
     out << "  std::string " << node.name << "::toJSON(const core::GlobalState &gs, int tabs) {" << '\n'
         << "    fmt::memory_buffer buf;" << '\n';
-    out << "    fmt::format_to(buf,  \"{{\\n\");\n";
+    out << "    fmt::format_to(std::back_inserter(buf),  \"{{\\n\");\n";
     out << "    printTabs(buf, tabs + 1);" << '\n';
     auto maybeComma = "";
     if (!node.fields.empty()) {
         maybeComma = ",";
     }
-    out << R"(    fmt::format_to(buf,  "\"type\" : \")" << node.name << "\\\"" << maybeComma << "\\n\");\n";
+    out << R"(    fmt::format_to(std::back_inserter(buf),  "\"type\" : \")" << node.name << "\\\"" << maybeComma
+        << "\\n\");\n";
     int i = -1;
     // Generate fields
     for (auto &arg : node.fields) {
@@ -882,47 +907,48 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
         out << "    printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
             case FieldType::Name:
-                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \\\"{}\\\"" << maybeComma
-                    << "\\n\", JSON::escape(" << arg.name << ".show(gs)));\n";
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
+                    << maybeComma << "\\n\", JSON::escape(" << arg.name << ".show(gs)));\n";
                 break;
             case FieldType::Node:
-                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \");\n";
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \");\n";
                 out << "    printNodeJSON(buf, " << arg.name << ", gs, tabs + 1);\n";
-                out << "    fmt::format_to(buf,  \"" << maybeComma << "\\n\");\n";
+                out << "    fmt::format_to(std::back_inserter(buf),  \"" << maybeComma << "\\n\");\n";
                 break;
             case FieldType::NodeVec:
-                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : [\\n\");\n";
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : [\\n\");\n";
                 out << "    int i = -1;" << '\n';
                 out << "    for (auto &&a: " << arg.name << ") { \n";
                 out << "      i++;\n";
                 out << "      printTabs(buf, tabs + 2);\n";
                 out << "      printNodeJSON(buf, a, gs, tabs + 2);\n";
                 out << "      if (i + 1 < " << arg.name << ".size()) {\n";
-                out << "        fmt::format_to(buf,  \",\");" << '\n';
+                out << "        fmt::format_to(std::back_inserter(buf),  \",\");" << '\n';
                 out << "      }" << '\n';
-                out << "      fmt::format_to(buf,  \"\\n\");\n";
+                out << "      fmt::format_to(std::back_inserter(buf),  \"\\n\");\n";
                 out << "    }" << '\n';
                 out << "    printTabs(buf, tabs + 1);\n";
-                out << "    fmt::format_to(buf,  \"]" << maybeComma << "\\n\")\n;";
+                out << "    fmt::format_to(std::back_inserter(buf),  \"]" << maybeComma << "\\n\")\n;";
                 break;
             case FieldType::String:
-                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \\\"{}\\\"" << maybeComma << "\\n\", "
-                    << arg.name << ");\n";
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
+                    << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
             case FieldType::Uint:
-                out << R"(    fmt::format_to(buf,  "\")" << arg.name << R"(\" : \"{}\")" << maybeComma << "\\n\", "
-                    << arg.name << ");\n";
+                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                    << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
             case FieldType::Loc:
                 // quiet the compiler; we skip Loc fields above
                 abort();
             case FieldType::Bool:
-                out << "    fmt::format_to(buf, \"" << arg.name << " = {}\\n\", " << arg.name << ");\n";
+                out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = {}\\n\", " << arg.name
+                    << ");\n";
                 break;
         }
     }
     out << "    printTabs(buf, tabs);" << '\n';
-    out << "    fmt::format_to(buf,  \"}}\");\n";
+    out << "    fmt::format_to(std::back_inserter(buf),  \"}}\");\n";
     out << "    return to_string(buf);\n";
     out << "  }" << '\n';
     out << '\n';
@@ -931,13 +957,14 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     out << "  std::string " << node.name
         << "::toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs) {" << '\n'
         << "    fmt::memory_buffer buf;" << '\n';
-    out << "    fmt::format_to(buf,  \"{{\\n\");\n";
+    out << "    fmt::format_to(std::back_inserter(buf),  \"{{\\n\");\n";
     out << "    printTabs(buf, tabs + 1);" << '\n';
     maybeComma = "";
     if (!node.fields.empty()) {
         maybeComma = ",";
     }
-    out << R"(    fmt::format_to(buf,  "\"type\" : \")" << node.name << "\\\"" << maybeComma << "\\n\");\n";
+    out << R"(    fmt::format_to(std::back_inserter(buf),  "\"type\" : \")" << node.name << "\\\"" << maybeComma
+        << "\\n\");\n";
     i = -1;
     // Generate fields
     for (auto &arg : node.fields) {
@@ -949,50 +976,50 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
         out << "    printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
             case FieldType::Name:
-                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \\\"{}\\\"" << maybeComma
-                    << "\\n\", JSON::escape(" << arg.name << ".show(gs)));\n";
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
+                    << maybeComma << "\\n\", JSON::escape(" << arg.name << ".show(gs)));\n";
                 break;
             case FieldType::Node:
-                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \");\n";
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \");\n";
                 out << "    printNodeJSONWithLocs(buf, " << arg.name << ", gs, file, tabs + 1);\n";
-                out << "    fmt::format_to(buf,  \"" << maybeComma << "\\n\");\n";
+                out << "    fmt::format_to(std::back_inserter(buf),  \"" << maybeComma << "\\n\");\n";
                 break;
             case FieldType::NodeVec:
-                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : [\\n\");\n";
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : [\\n\");\n";
                 out << "    int i = -1;" << '\n';
                 out << "    for (auto &&a: " << arg.name << ") { \n";
                 out << "      i++;\n";
                 out << "      printTabs(buf, tabs + 2);\n";
                 out << "      printNodeJSONWithLocs(buf, a, gs, file, tabs + 2);\n";
                 out << "      if (i + 1 < " << arg.name << ".size()) {\n";
-                out << "        fmt::format_to(buf,  \",\");" << '\n';
+                out << "        fmt::format_to(std::back_inserter(buf),  \",\");" << '\n';
                 out << "      }" << '\n';
-                out << "      fmt::format_to(buf,  \"\\n\");\n";
+                out << "      fmt::format_to(std::back_inserter(buf),  \"\\n\");\n";
                 out << "    }" << '\n';
                 out << "    printTabs(buf, tabs + 1);\n";
-                out << "    fmt::format_to(buf,  \"]" << maybeComma << "\\n\")\n;";
+                out << "    fmt::format_to(std::back_inserter(buf),  \"]" << maybeComma << "\\n\")\n;";
                 break;
             case FieldType::String:
-                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \\\"{}\\\"" << maybeComma << "\\n\", "
-                    << arg.name << ");\n";
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
+                    << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
             case FieldType::Uint:
-                out << R"(    fmt::format_to(buf,  "\")" << arg.name << R"(\" : \"{}\")" << maybeComma << "\\n\", "
-                    << arg.name << ");\n";
+                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                    << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
             case FieldType::Loc:
                 out << "      bool showFull = true;";
-                out << R"(    fmt::format_to(buf,  "\"loc\" : \"{}\")" << maybeComma << "\\n\", "
+                out << R"(    fmt::format_to(std::back_inserter(buf),  "\"loc\" : \"{}\")" << maybeComma << "\\n\", "
                     << "core::Loc(file, " << arg.name << ").filePosToString(gs, showFull));\n";
                 break;
             case FieldType::Bool:
-                out << R"(    fmt::format_to(buf,  "\")" << arg.name << R"(\" : \"{}\")" << maybeComma << "\\n\", "
-                    << arg.name << ");\n";
+                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                    << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
         }
     }
     out << "    printTabs(buf, tabs);" << '\n';
-    out << "    fmt::format_to(buf,  \"}}\");\n";
+    out << "    fmt::format_to(std::back_inserter(buf),  \"}}\");\n";
     out << "    return to_string(buf);\n";
     out << "  }" << '\n';
     out << '\n';
@@ -1000,44 +1027,46 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     // toWhitequark
     out << "  std::string " << node.name << "::toWhitequark(const core::GlobalState &gs, int tabs) {" << '\n'
         << "    fmt::memory_buffer buf;" << '\n';
-    out << "    fmt::format_to(buf, \"s(:" << node.whitequarkName << "\");" << '\n';
+    out << "    fmt::format_to(std::back_inserter(buf), \"s(:" << node.whitequarkName << "\");" << '\n';
     // Generate fields
     for (auto &arg : node.fields) {
         switch (arg.type) {
             case FieldType::Name:
                 if (node.whitequarkName == "str") {
-                    out << "    fmt::format_to(buf, \", \\\"{}\\\"\", " << arg.name << ".toString(gs));\n";
+                    out << "    fmt::format_to(std::back_inserter(buf), \", \\\"{}\\\"\", " << arg.name
+                        << ".toString(gs));\n";
                 } else {
-                    out << "    fmt::format_to(buf, \", :\" + JSON::escape(" << arg.name << ".show(gs)));\n";
+                    out << "    fmt::format_to(std::back_inserter(buf), \", :\" + JSON::escape(" << arg.name
+                        << ".show(gs)));\n";
                 }
                 break;
             case FieldType::Node:
-                out << "    fmt::format_to(buf, \",\");\n";
+                out << "    fmt::format_to(std::back_inserter(buf), \",\");\n";
                 out << "    if (" << arg.name << ") {\n";
-                out << "     fmt::format_to(buf, \"\\n\");\n";
+                out << "     fmt::format_to(std::back_inserter(buf), \"\\n\");\n";
                 out << "     printTabs(buf, tabs + 1);" << '\n';
                 out << "     printNodeWhitequark(buf, " << arg.name << ", gs, tabs + 1);\n";
                 out << "    } else {\n";
-                out << "      fmt::format_to(buf, \" nil\");\n";
+                out << "      fmt::format_to(std::back_inserter(buf), \" nil\");\n";
                 out << "    }\n";
                 break;
             case FieldType::NodeVec:
                 out << "    for (auto &&a: " << arg.name << ") {\n";
-                out << "      fmt::format_to(buf, \",\");\n";
+                out << "      fmt::format_to(std::back_inserter(buf), \",\");\n";
                 out << "      if (a) {\n";
-                out << "        fmt::format_to(buf, \"\\n\");\n";
+                out << "        fmt::format_to(std::back_inserter(buf), \"\\n\");\n";
                 out << "        printTabs(buf, tabs + 1);" << '\n';
                 out << "        printNodeWhitequark(buf, a, gs, tabs + 1);\n";
                 out << "      } else {\n";
-                out << "        fmt::format_to(buf, \" nil\");\n";
+                out << "        fmt::format_to(std::back_inserter(buf), \" nil\");\n";
                 out << "      }\n";
                 out << "    }\n";
                 break;
             case FieldType::String:
-                out << "    fmt::format_to(buf, \", \\\"{}\\\"\", " << arg.name << ");\n";
+                out << "    fmt::format_to(std::back_inserter(buf), \", \\\"{}\\\"\", " << arg.name << ");\n";
                 break;
             case FieldType::Uint:
-                out << "    fmt::format_to(buf, \", {}\", " << arg.name << ");\n";
+                out << "    fmt::format_to(std::back_inserter(buf), \", {}\", " << arg.name << ");\n";
                 break;
             case FieldType::Loc:
                 continue;
@@ -1046,7 +1075,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
         }
     }
 
-    out << "    fmt::format_to(buf, \")\");";
+    out << "    fmt::format_to(std::back_inserter(buf), \")\");";
     out << "    return to_string(buf);\n"
         << "  }\n";
     out << '\n';

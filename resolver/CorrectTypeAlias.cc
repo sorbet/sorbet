@@ -35,20 +35,24 @@ void CorrectTypeAlias::eagerToLazy(core::Context ctx, core::ErrorBuilder &e, ast
     auto &back = send->args.back();
     core::Loc argsLoc{ctx.file, front.loc().join(back.loc())};
 
+    if (!argsLoc.exists()) {
+        return;
+    }
+
     auto [start, end] = core::Loc(ctx.file, send->loc).position(ctx);
 
     if (start.line == end.line) {
         if (wrapHash) {
             e.replaceWith("Convert to lazy type alias", core::Loc(ctx.file, send->loc), "T.type_alias {{{{{}}}}}",
-                          argsLoc.source(ctx));
+                          argsLoc.source(ctx).value());
         } else {
             e.replaceWith("Convert to lazy type alias", core::Loc(ctx.file, send->loc), "T.type_alias {{{}}}",
-                          argsLoc.source(ctx));
+                          argsLoc.source(ctx).value());
         }
     } else {
         core::Loc endLoc(argsLoc.file(), argsLoc.endPos(), argsLoc.endPos());
         string argIndent = getIndent(ctx, endLoc);
-        string argSrc = fmt::format("{}{}", argIndent, argsLoc.source(ctx));
+        string argSrc = fmt::format("{}{}", argIndent, argsLoc.source(ctx).value());
         if (wrapHash) {
             argSrc = fmt::format("{}{{\n{}\n{}}}", argIndent, indented(argSrc), argIndent);
         }

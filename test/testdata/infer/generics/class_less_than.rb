@@ -13,7 +13,7 @@ class Test
   sig {params(arg: T.any(T.class_of(A), T.class_of(Integer))).void}
   def test(arg)
     if arg < A
-      T.cast(arg, T.class_of(A)) # error: Useless cast
+      T.cast(arg, T.class_of(A)) # error: `T.cast` is useless
     end
   end
 end

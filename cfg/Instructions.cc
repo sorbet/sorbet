@@ -16,13 +16,13 @@ namespace {
 string spacesForTabLevel(int tabs) {
     fmt::memory_buffer ss;
     for (int i = 0; i < tabs; i++) {
-        fmt::format_to(ss, "&nbsp;");
+        fmt::format_to(std::back_inserter(ss), "&nbsp;");
     }
     return to_string(ss);
 }
 } // namespace
 
-Return::Return(LocalRef what) : what(what) {
+Return::Return(LocalRef what, core::LocOffsets whatLoc) : what(what), whatLoc(whatLoc) {
     categoryCounterInc("cfg", "return");
 }
 
@@ -145,7 +145,7 @@ string Alias::toString(const core::GlobalState &gs, const CFG &cfg) const {
 }
 
 string Alias::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format("Alias {{ what = {} }}", this->what.data(gs)->show(gs));
+    return fmt::format("Alias {{ what = {} }}", this->what.show(gs));
 }
 
 string Send::toString(const core::GlobalState &gs, const CFG &cfg) const {

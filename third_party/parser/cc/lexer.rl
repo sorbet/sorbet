@@ -1080,7 +1080,7 @@ void lexer::set_state_expr_value() {
         // treat '\' as a line continuation, but still dedent the body, so the heredoc above becomes "12\n".
         // This information is emitted as is, without escaping,
         // later this escape sequence (\\\n) gets handled manually in the dedenter
-        std::string str = gsub(tok(), "\\\n", "");
+        auto str = tok();
         current_literal.extend_string(str, ts, te);
       } else if (current_literal.support_line_continuation_via_slash() && escaped_char == '\n') {
         // Heredocs, regexp and a few other types of literals support line
@@ -2312,6 +2312,37 @@ void lexer::set_state_expr_value() {
       };
 
       #
+      # RUBY 2.7 BEGINLESS RANGE
+
+      '..'
+      => {
+        auto ident = tok(ts, te - 2);
+        if (version >= ruby_version::RUBY_27) {
+          emit(token_type::tBDOT2, ident, ts, te);
+        } else {
+          emit(token_type::tDOT2, ident, ts, te);
+        }
+
+        fnext expr_beg; fbreak;
+      };
+
+      '...'
+      => {
+        auto ident = tok(ts, te - 2);
+        if (version >= ruby_version::RUBY_27) {
+          emit(token_type::tBDOT3, ident, ts, te);
+        } else {
+          if (!lambda_stack.empty() && lambda_stack.top() == paren_nest) {
+            emit(token_type::tDOT3, ident, ts, te);
+          } else {
+            emit(token_type::tBDOT3, ident, ts, te);
+          }
+        }
+
+        fnext expr_beg; fbreak;
+      };
+
+      #
       # CONTEXT-DEPENDENT VARIABLE LOOKUP OR COMMAND INVOCATION
       #
 
@@ -2656,7 +2687,7 @@ void lexer::set_state_expr_value() {
       '*' | '=>'
       => {
         emit_table(PUNCTUATION);
-        fgoto expr_value;
+        fnext expr_value; fbreak;
       };
 
       # When '|', '~', '!', '=>' are used as operators

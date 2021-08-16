@@ -14,5 +14,5 @@ end
 def main
   puts Helo.new
   #    ^^^^ error: Unable to resolve constant `Helo`
-  #    ^^^^ apply-code-action: [A] Replace with `Gem`
+  #    ^^^^ apply-code-action: [A] Replace with `Hello`
 end

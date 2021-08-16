@@ -7,4 +7,5 @@ class A < T::Struct
 
 end
 
-A.new(0) # error: Too many arguments
+  A.new(0)
+# ^^^^^^^^ error: Too many arguments

@@ -94,6 +94,20 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
     assert_match(/^#<Module:0x[0-9a-f]+> was declared as final but its method `foo` was not declared as final$/, err.message)
   end
 
+  it "forbids declaring a module as final but secretly declaring an instance method as not final" do
+    err = assert_raises(RuntimeError) do
+      Module.new do
+        extend T::Helpers
+        final!
+
+        T::Private::Methods._with_declared_signature(self, nil) do
+          def foo; end
+        end
+      end
+    end
+    assert_match(/^#<Module:0x[0-9a-f]+> was declared as final but its method `foo` was not declared as final$/, err.message)
+  end
+
   it "forbids declaring a module as final but not its class method as final" do
     err = assert_raises(RuntimeError) do
       Module.new do
@@ -101,6 +115,20 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
         final!
         extend T::Sig
         def self.foo; end
+      end
+    end
+    assert_match(/^#<Class:#<Module:0x[0-9a-f]+>> was declared as final but its method `foo` was not declared as final$/, err.message)
+  end
+
+  it "forbids declaring a module as final but secretly declaring a class method as not final" do
+    err = assert_raises(RuntimeError) do
+      Module.new do
+        extend T::Helpers
+        final!
+
+        T::Private::Methods._with_declared_signature(self, nil) do
+          def self.foo; end
+        end
       end
     end
     assert_match(/^#<Class:#<Module:0x[0-9a-f]+>> was declared as final but its method `foo` was not declared as final$/, err.message)
@@ -207,5 +235,41 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       extend T::Helpers
       final!
     end
+  end
+
+  it "can use secret helpers to declare final class methods without sigs" do
+    c = Class.new do
+      extend T::Helpers
+      final!
+
+      built_sig = T::Private::Methods._declare_sig(self, :final) do
+        returns(Integer)
+      end
+
+      T::Private::Methods._with_declared_signature(self, built_sig) do
+        def self.i_am_secretly_final
+          4242
+        end
+      end
+    end
+    assert_equal(4242, c.i_am_secretly_final)
+  end
+
+  it "can use secret helpers to declare final instance methods without sigs" do
+    c = Class.new do
+      extend T::Helpers
+      final!
+
+      built_sig = T::Private::Methods._declare_sig(self, :final) do
+        returns(Integer)
+      end
+
+      T::Private::Methods._with_declared_signature(self, built_sig) do
+        def i_am_secretly_final
+          1337
+        end
+      end
+    end
+    assert_equal(1337, c.new.i_am_secretly_final)
   end
 end

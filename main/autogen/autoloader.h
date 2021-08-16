@@ -5,6 +5,10 @@
 #include "main/options/options.h"
 #include <string_view>
 
+namespace sorbet {
+class WorkerPool;
+}
+
 namespace sorbet::autogen {
 
 // Contains same information as `realmain::options::AutoloaderConfig` except with `core::NameRef`s
@@ -55,7 +59,8 @@ struct NamedDefinition {
     Definition def;
     QualifiedName qname;
     QualifiedName parentName;
-    std::vector<core::NameRef> requires;
+    std::vector<core::NameRef>
+    requires;
     core::FileRef fileRef;
     u4 pathDepth;
 
@@ -122,15 +127,11 @@ private:
 
 class AutoloadWriter {
 public:
-    static void writeAutoloads(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path,
-                               const DefTree &root);
+    static void writeAutoloads(const core::GlobalState &gs, WorkerPool &workers, const AutoloaderConfig &,
+                               const std::string &path, const DefTree &root);
 
     static void writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path,
                                       const std::vector<Package> &packages);
-
-private:
-    static void write(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path,
-                      UnorderedSet<std::string> &toDelete, const DefTree &node);
 };
 
 } // namespace sorbet::autogen

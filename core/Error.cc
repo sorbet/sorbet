@@ -112,9 +112,12 @@ string Error::toString(const GlobalState &gs) const {
         buf << '\n' << loc.toStringWithTabs(gs, 2);
     }
 
-    for (auto &section : this->sections) {
-        buf << '\n' << section.toString(gs);
+    if (gs.includeErrorSections) {
+        for (auto &section : this->sections) {
+            buf << '\n' << section.toString(gs);
+        }
     }
+
     return buf.str();
 }
 

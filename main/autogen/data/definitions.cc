@@ -1,6 +1,7 @@
 #include "main/autogen/data/definitions.h"
 #include "ast/ast.h"
 #include "common/formatting.h"
+#include "core/Files.h"
 #include "core/GlobalState.h"
 #include "main/autogen/data/msgpack.h"
 
@@ -8,7 +9,7 @@ using namespace std;
 
 namespace sorbet::autogen {
 
-QualifiedName QualifiedName::fromFullName(vector<core::NameRef> name) {
+QualifiedName QualifiedName::fromFullName(vector<core::NameRef> &&name) {
     if (name.size() < 3 || name.front() != core::Names::Constants::PackageRegistry()) {
         return {move(name), nullopt};
     }
@@ -75,11 +76,11 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer out;
     auto nameToString = [&](const auto &nm) -> string { return nm.show(gs); };
 
-    fmt::format_to(out,
+    fmt::format_to(std::back_inserter(out),
                    "# ParsedFile: {}\n"
                    "requires: [{}]\n"
                    "## defs:\n",
-                   path, fmt::map_join(requires, ", ", nameToString));
+                   core::File::censorFilePathForSnapshotTests(path), fmt::map_join(requires, ", ", nameToString));
 
     for (auto &def : defs) {
         string_view type;
@@ -98,7 +99,7 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
                 break;
         }
 
-        fmt::format_to(out,
+        fmt::format_to(std::back_inserter(out),
                        "[def id={}]\n"
                        " type={}\n"
                        " defines_behavior={}\n"
@@ -108,20 +109,23 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
         if (def.defining_ref.exists()) {
             auto &ref = def.defining_ref.data(*this);
             if (ref.name.package) {
-                fmt::format_to(out, " defining_pkg=[{}]\n", nameToString(*ref.name.package));
+                fmt::format_to(std::back_inserter(out), " defining_pkg=[{}]\n", nameToString(*ref.name.package));
             }
-            fmt::format_to(out, " defining_ref=[{}]\n", fmt::map_join(ref.name.nameParts, " ", nameToString));
+            fmt::format_to(std::back_inserter(out), " defining_ref=[{}]\n",
+                           fmt::map_join(ref.name.nameParts, " ", nameToString));
         }
         if (def.parent_ref.exists()) {
             auto &ref = def.parent_ref.data(*this);
-            fmt::format_to(out, " parent_ref=[{}]\n", fmt::map_join(ref.name.nameParts, " ", nameToString));
+            fmt::format_to(std::back_inserter(out), " parent_ref=[{}]\n",
+                           fmt::map_join(ref.name.nameParts, " ", nameToString));
         }
         if (def.aliased_ref.exists()) {
             auto &ref = def.aliased_ref.data(*this);
-            fmt::format_to(out, " aliased_ref=[{}]\n", fmt::map_join(ref.name.nameParts, " ", nameToString));
+            fmt::format_to(std::back_inserter(out), " aliased_ref=[{}]\n",
+                           fmt::map_join(ref.name.nameParts, " ", nameToString));
         }
     }
-    fmt::format_to(out, "## refs:\n");
+    fmt::format_to(std::back_inserter(out), "## refs:\n");
     for (auto &ref : refs) {
         vector<string> nestingStrings;
         for (auto &scope : ref.nesting) {
@@ -130,7 +134,7 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
         }
 
         auto refFullName = showFullName(gs, ref.scope);
-        fmt::format_to(out,
+        fmt::format_to(std::back_inserter(out),
                        "[ref id={}]\n"
                        " scope=[{}]\n"
                        " name=[{}]\n"
@@ -141,12 +145,13 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
 
                        ref.id.id(), fmt::map_join(refFullName, " ", nameToString),
                        fmt::map_join(ref.name.nameParts, " ", nameToString), fmt::join(nestingStrings, " "),
-                       fmt::map_join(ref.resolved.nameParts, " ", nameToString), ref.loc.filePosToString(gs),
-                       (int)ref.is_defining_ref);
+                       fmt::map_join(ref.resolved.nameParts, " ", nameToString),
+                       core::Loc(tree.file, ref.loc).filePosToString(gs), (int)ref.is_defining_ref);
 
         if (ref.parent_of.exists()) {
             auto parentOfFullName = showFullName(gs, ref.parent_of);
-            fmt::format_to(out, " parent_of=[{}]\n", fmt::map_join(parentOfFullName, " ", nameToString));
+            fmt::format_to(std::back_inserter(out), " parent_of=[{}]\n",
+                           fmt::map_join(parentOfFullName, " ", nameToString));
         }
     }
     return to_string(out);

@@ -47,8 +47,6 @@ Usage:
       --dir arg                 Input directory
       --file arg                Input file
       --allowed-extension arg   Allowed extension
-      --configatron-dir path    Path to configatron yaml folders
-      --configatron-file path   Path to configatron yaml files
       --web-trace-file file     Web trace file. For use with chrome
                                 about://tracing (default: "")
       --debug-log-file file     Path to debug log file (default: "")
@@ -109,6 +107,9 @@ Usage:
       --enable-experimental-lsp-go-to-implementation
                                 Enable experimental LSP feature: Go To
                                 Implementation
+      --enable-experimental-requires-ancestor
+                                Enable experimental `requires_ancestor`
+                                annotation
       --enable-all-experimental-lsp-features
                                 Enable every experimental LSP feature.
                                 (WARNING: can be crashy; for developer use only. End
@@ -117,6 +118,10 @@ Usage:
       --enable-all-beta-lsp-features
                                 Enable (expected-to-be-non-crashy)
                                 early-access LSP features.
+      --lsp-error-cap cap       Caps the maximum number of errors that LSP
+                                reports to the editor. Can prevent editor
+                                slowdown triggered by large error lists. A cap of 0
+                                means 'no cap'. (default: 1000)
       --ignore string           Ignores input files that contain the given
                                 string in their paths (relative to the input
                                 path passed to Sorbet). Strings beginning with /
@@ -181,16 +186,16 @@ Usage:
                                 rewrite-tree-raw, index-tree, index-tree-raw,
                                 name-tree, name-tree-raw, resolve-tree,
                                 resolve-tree-raw, flatten-tree, flatten-tree-raw, ast,
-                                ast-raw, cfg, cfg-raw, symbol-table,
-                                symbol-table-raw, symbol-table-json, symbol-table-proto,
-                                symbol-table-messagepack, symbol-table-full,
-                                symbol-table-full-raw, symbol-table-full-json,
-                                symbol-table-full-proto,
-                                symbol-table-full-messagepack, file-table-json, file-table-proto,
-                                file-table-messagepack, missing-constants,
-                                plugin-generated-code, autogen, autogen-msgpack,
-                                autogen-classlist, autogen-autoloader,
-                                autogen-subclasses, package-tree]
+                                ast-raw, cfg, cfg-raw, cfg-text, symbol-table,
+                                symbol-table-raw, symbol-table-json,
+                                symbol-table-proto, symbol-table-messagepack,
+                                symbol-table-full, symbol-table-full-raw,
+                                symbol-table-full-json, symbol-table-full-proto,
+                                symbol-table-full-messagepack, file-table-json,
+                                file-table-proto, file-table-messagepack,
+                                missing-constants, autogen, autogen-msgpack,
+                                autogen-classlist, autogen-autoloader, autogen-subclasses,
+                                package-tree]
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of
                                 subclasses. This option must be used in
@@ -215,14 +220,21 @@ Usage:
       --censor-for-snapshot-tests
                                 When printing raw location information, don't
                                 show line numbers
-      --error-white-list errorCode
-                                Error code to whitelist into reporting.
-                                Errors not mentioned will be silenced. This option
-                                can be passed multiple times.
-      --error-black-list errorCode
-                                Error code to blacklist from reporting.
-                                Errors mentioned will be silenced. This option can
+      --isolate-error-code errorCode
+                                Error code to include in reporting. Errors
+                                not mentioned will be silenced. This option can
                                 be passed multiple times.
+      --suppress-error-code errorCode
+                                Error code to exclude from reporting. Errors
+                                mentioned will be silenced. This option can be
+                                passed multiple times.
+      --error-white-list errorCode
+                                (DEPRECATED) Alias for --isolate-error-code.
+                                Will be removed in a later release.
+      --error-black-list errorCode
+                                (DEPRECATED) Alias for --suppress-error-code.
+                                Will be removed in a later release.
+      --no-error-sections       Do not print error sections.
       --typed {false,true,strict,strong,[auto]}
                                 Force all code to specified strictness level
                                 (default: auto)
@@ -233,13 +245,16 @@ Usage:
       --cache-dir dir           Use the specified folder to cache data
                                 (default: "")
       --suppress-non-critical   Exit 0 unless there was a critical error
-      --dsl-plugins filepath.yaml
-                                YAML config that configures external DSL
-                                plugins (default: "")
       --counter counter         Print internal counter
       --statsd-host host        StatsD sever hostname (default: "")
       --counters                Print all internal counters
       --suggest-typed           Suggest which typed: sigils to add or upgrade
+      --suggest-unsafe [=<method>(=T.unsafe)]
+                                In as many errors as possible, suggest
+                                autocorrects to wrap problem code with <method>.
+                                Omit the =<method> to default to wrapping with
+                                T.unsafe. This supercedes certain autocorrects,
+                                especially T.must.
       --statsd-prefix prefix    StatsD prefix (default: ruby_typer.unknown)
       --statsd-port port        StatsD server port (default: 8200)
       --metrics-file file       File to export metrics to (default: "")
@@ -254,5 +269,7 @@ Usage:
       --metrics-extra-tags key1=value1,key2=value2
                                 Extra tags to report, comma separated
                                 (default: "")
+      --force-hashing           Forces Sorbet to calculate file hashes when
+                                run from CLI. Useful for profiling purposes.
 
 --------------------------------------------------------------------------

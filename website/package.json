@@ -10,7 +10,8 @@
     "version": "docusaurus-version",
     "rename-version": "docusaurus-rename-version",
     "prettier": "prettier --write './**/*.js' './**/*.css' './**/*.md'",
-    "prettier-check": "prettier --check './**/*.js' './**/*.css' './**/*.md'"
+    "prettier-check": "prettier --check './**/*.js' './**/*.css' './**/*.md'",
+    "prettier-lint": "prettier --list-different './**/*.js' './**/*.css' './**/*.md'"
   },
   "devDependencies": {
     "docusaurus": "^1.14.0",

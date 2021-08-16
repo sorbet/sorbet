@@ -23,6 +23,8 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
         gs.suppressErrorClass(sorbet::core::errors::Namer::MultipleBehaviorDefs.code);
     }
 
+    gs.requiresAncestorEnabled = options.requiresAncestorEnabled;
+
     // Ensure LSP is enabled.
     options.runLSP = true;
 }
@@ -82,7 +84,7 @@ LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Opt
                        bool disableFastPath)
     : logger(logger), workers(WorkerPool::create(opts->threads, *logger)), stderrColorSink(move(stderrColorSink)),
       typeErrorsConsole(move(typeErrorsConsole)), output(make_shared<LSPOutputToVector>()),
-      config_(make_shared<LSPConfiguration>(*opts, output, move(logger), true, disableFastPath)),
+      config_(make_shared<LSPConfiguration>(*opts, output, move(logger), disableFastPath)),
       lspLoop(make_shared<LSPLoop>(std::move(gs), *workers, config_, move(kvstore))), opts(move(opts)) {}
 
 LSPWrapper::~LSPWrapper() = default;

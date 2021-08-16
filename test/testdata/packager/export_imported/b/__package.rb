@@ -2,5 +2,5 @@
 # typed: strict
 
 class B < PackageSpec
-  export BClass
+  export B::BClass
 end

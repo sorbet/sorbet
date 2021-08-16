@@ -49,6 +49,9 @@ vector<ErrorLine> TypeAndOrigins::origins2Explanations(const GlobalState &gs, Lo
         if (o == last) {
             continue;
         }
+        if (!o.exists()) {
+            continue;
+        }
         last = o;
 
         if (originForUninitialized.exists() && o == originForUninitialized) {
@@ -58,6 +61,16 @@ vector<ErrorLine> TypeAndOrigins::origins2Explanations(const GlobalState &gs, Lo
         }
     }
     return result;
+}
+
+ErrorSection TypeAndOrigins::explainExpected(const GlobalState &gs, TypePtr type, Loc origin, const string &for_) {
+    auto header = ErrorColors::format("Expected `{}` for {}:", type.show(gs), for_);
+    return ErrorSection(header, {ErrorLine{origin, ""}});
+}
+
+ErrorSection TypeAndOrigins::explainGot(const GlobalState &gs, Loc originForUninitialized) const {
+    auto header = ErrorColors::format("Got `{}` originating from:", this->type.showWithMoreInfo(gs));
+    return ErrorSection(header, this->origins2Explanations(gs, originForUninitialized));
 }
 
 TypeAndOrigins::~TypeAndOrigins() noexcept {

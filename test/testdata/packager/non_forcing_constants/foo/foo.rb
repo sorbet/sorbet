@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: strict
 
-class Foo
+class Project::Foo::Foo
   extend T::Sig
   sig {params(value: Integer).void}
   def initialize(value)

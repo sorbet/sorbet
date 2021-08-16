@@ -1,0 +1,32 @@
+# typed: true
+# assert-slow-path: true
+
+module A
+  def foo_a; end
+end
+
+module B
+  extend T::Helpers
+
+  # requires_ancestor A
+
+  def foo_b
+    foo_a # error: Method `foo_a` does not exist on `B`
+  end
+end
+
+class C
+  include D
+  include E
+end
+
+module D
+  extend T::Helpers
+  requires_ancestor E
+end
+
+module E
+  def foo_e; end
+end
+
+C.new.foo_e

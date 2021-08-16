@@ -9,6 +9,7 @@
 
 .idea/
 .vscode/
+.vim/
 
 /website/lib/core/metadata.js
 /website/lib/core/MetadataBlog.js
@@ -31,6 +32,17 @@ gems/sorbet-runtime/Gemfile.lock
 
 # To distribute sorbet, we copy the built C++ binary here.
 /gems/sorbet-static/libexec/sorbet
+
+# Used by tools/scripts/run_benchmarks.sh
+/tmp
+
+# Used by tools/scripts/ll-view.sh
+/ll-view.out
+
+compiler/IREmitter/Intrinsics/PayloadIntrinsics.c
+compiler/IREmitter/Intrinsics/PayloadIntrinsics.formatted.c
+compiler/IREmitter/Intrinsics/WrappedIntrinsics.h
+compiler/IREmitter/Intrinsics/WrappedIntrinsics.formatted.h
 
 # clangd caches data in this folder.
 /.clangd

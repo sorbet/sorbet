@@ -11,21 +11,6 @@
 namespace sorbet::core {
 class GlobalState;
 
-inline int _NameKind2Id_UTF8(NameKind nm) {
-    ENFORCE(nm == NameKind::UTF8);
-    return 1;
-}
-
-inline int _NameKind2Id_UNIQUE(NameKind nm) {
-    ENFORCE(nm == NameKind::UNIQUE);
-    return 2;
-}
-
-inline int _NameKind2Id_CONSTANT(NameKind nm) {
-    ENFORCE(nm == NameKind::CONSTANT);
-    return 3;
-}
-
 struct UTF8Name final {
     std::string_view utf8;
 
@@ -46,6 +31,7 @@ enum class UniqueNameKind : u1 {
     ResolverMissingClass, // used by resolver when we want to enter a stub class into a static field. see
                           // test/resolver/stub_missing_class_alias.rb
     TEnum,
+    Packager,
 };
 
 struct UniqueName final {

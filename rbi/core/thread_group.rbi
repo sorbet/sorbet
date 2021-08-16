@@ -1,18 +1,18 @@
 # typed: __STDLIB_INTERNAL
 
-# [`ThreadGroup`](https://docs.ruby-lang.org/en/2.6.0/ThreadGroup.html) provides
+# [`ThreadGroup`](https://docs.ruby-lang.org/en/2.7.0/ThreadGroup.html) provides
 # a means of keeping track of a number of threads as a group.
 #
-# A given [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) object can
+# A given [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) object can
 # only belong to one
-# [`ThreadGroup`](https://docs.ruby-lang.org/en/2.6.0/ThreadGroup.html) at a
+# [`ThreadGroup`](https://docs.ruby-lang.org/en/2.7.0/ThreadGroup.html) at a
 # time; adding a thread to a new group will remove it from any previous group.
 #
 # Newly created threads belong to the same group as the thread from which they
 # were created.
 class ThreadGroup < Object
   # The default
-  # [`ThreadGroup`](https://docs.ruby-lang.org/en/2.6.0/ThreadGroup.html)
+  # [`ThreadGroup`](https://docs.ruby-lang.org/en/2.7.0/ThreadGroup.html)
   # created when Ruby starts; all Threads belong to it by default.
   Default = T.let(T.unsafe(nil), ThreadGroup)
 
@@ -44,10 +44,10 @@ class ThreadGroup < Object
   def add(thread); end
 
   # Prevents threads from being added to or removed from the receiving
-  # [`ThreadGroup`](https://docs.ruby-lang.org/en/2.6.0/ThreadGroup.html).
+  # [`ThreadGroup`](https://docs.ruby-lang.org/en/2.7.0/ThreadGroup.html).
   #
   # New threads can still be started in an enclosed
-  # [`ThreadGroup`](https://docs.ruby-lang.org/en/2.6.0/ThreadGroup.html).
+  # [`ThreadGroup`](https://docs.ruby-lang.org/en/2.7.0/ThreadGroup.html).
   #
   # ```ruby
   # ThreadGroup::Default.enclose        #=> #<ThreadGroup:0x4029d914>
@@ -60,12 +60,12 @@ class ThreadGroup < Object
   def enclose; end
 
   # Returns `true` if the `thgrp` is enclosed. See also
-  # [`ThreadGroup#enclose`](https://docs.ruby-lang.org/en/2.6.0/ThreadGroup.html#method-i-enclose).
+  # [`ThreadGroup#enclose`](https://docs.ruby-lang.org/en/2.7.0/ThreadGroup.html#method-i-enclose).
   sig {returns(T::Boolean)}
   def enclosed?; end
 
   # Returns an array of all existing
-  # [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) objects that
+  # [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) objects that
   # belong to this group.
   #
   # ```ruby

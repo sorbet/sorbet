@@ -7,7 +7,7 @@ namespace sorbet::rewriter {
 
 namespace {
 
-bool isTSigWithoutRuntime(ast::TreePtr &expr) {
+bool isTSigWithoutRuntime(ast::ExpressionPtr &expr) {
     if (auto *cnst = ast::cast_tree<ast::ConstantLit>(expr)) {
         return cnst->symbol == core::Symbols::T_Sig_WithoutRuntime();
     } else {

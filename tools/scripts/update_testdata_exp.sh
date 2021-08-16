@@ -35,9 +35,11 @@ passes=(
   ast-raw
   cfg
   cfg-raw
+  cfg-text
   autogen
   document-symbols
   package-tree
+  autocorrects
 )
 
 ./bazel build //main:sorbet //test:print_document_symbols -c opt
@@ -83,21 +85,31 @@ for this_src in "${rb_src[@]}" DUMMY; do
       if ! [ -e "$candidate" ]; then
         continue
       fi
-      if [ "$pass" = "document-symbols" ]; then
-        echo bazel-bin/test/print_document_symbols \
-          "${srcs[@]}" \
-          \> "$candidate" \
-          2\>/dev/null \
-          >>"$COMMAND_FILE"
-      else
-        echo bazel-bin/main/sorbet \
-          --silence-dev-message --suppress-non-critical --censor-for-snapshot-tests \
-          --print "$pass" --max-threads 0 \
-          "${args[@]}" "${srcs[@]}" \
-          \> "$candidate" \
-          2\>/dev/null \
-          >>"$COMMAND_FILE"
-      fi
+      case "$pass" in
+        document-symbols)
+          echo bazel-bin/test/print_document_symbols \
+            "${srcs[@]}" \
+            \> "$candidate" \
+            2\>/dev/null \
+            >>"$COMMAND_FILE"
+          ;;
+        autocorrects)
+          echo tools/scripts/print_autocorrects_exp.sh \
+            "${srcs[@]}" \
+            \> "$candidate" \
+            2\> /dev/null \
+            >>"$COMMAND_FILE"
+          ;;
+        *)
+          echo bazel-bin/main/sorbet \
+            --silence-dev-message --suppress-non-critical --censor-for-snapshot-tests \
+            --print "$pass" --max-threads 0 \
+            "${args[@]}" "${srcs[@]}" \
+            \> "$candidate" \
+            2\>/dev/null \
+            >>"$COMMAND_FILE"
+          ;;
+      esac
     done
   fi
 
@@ -105,4 +117,6 @@ for this_src in "${rb_src[@]}" DUMMY; do
   srcs=("$this_src")
 done
 
-parallel --joblog - < "$COMMAND_FILE"
+if ! parallel --joblog - < "$COMMAND_FILE"; then
+  echo 'WARN: parallel exiited non-zero'
+fi

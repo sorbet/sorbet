@@ -93,7 +93,8 @@ void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
     // TODO(jvilk): Make it preemptible.
     auto committed = false;
     {
-        ErrorEpoch epoch(*errorReporter, updates.epoch, {});
+        const bool isIncremental = false;
+        ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         committed = runSlowPath(move(updates), workers, /* cancelable */ false);
         epoch.committed = committed;
     }
@@ -138,7 +139,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     const bool isFastPath = updates.canTakeFastPath;
     sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, isFastPath, {});
     {
-        ErrorEpoch epoch(*errorReporter, updates.epoch, move(diagnosticLatencyTimers));
+        ErrorEpoch epoch(*errorReporter, updates.epoch, isFastPath, move(diagnosticLatencyTimers));
 
         if (isFastPath) {
             filesTypechecked =
@@ -384,7 +385,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         if (gs->sleepInSlowPath) {
             Timer::timedSleep(3000ms, *logger, "slow_path.resolve.sleep");
         }
-        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers, config->skipConfigatron);
+        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers);
         if (!maybeResolved.hasResult()) {
             return;
         }

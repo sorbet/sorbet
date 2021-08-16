@@ -2,6 +2,7 @@
 #define SORBET_CORE_GLOBAL_SUBSTITUTION_H
 
 #include "common/common.h"
+#include "core/NameHash.h"
 #include "core/NameRef.h"
 #include "core/SymbolRef.h"
 #include <vector>
@@ -9,6 +10,13 @@
 namespace sorbet::core {
 class GlobalState;
 
+/**
+ * With the ast::substitute pass, GlobalSubstitution makes it possible to rewrite ASTs from one GlobalState into ASTs
+ * from a second GlobalState.
+ *
+ * The constructor builds up a lookup table from every NameRef in `from` to an equivalent NameRef in `to`, inserting new
+ * names into `to` where needed. Then, that table can be used to rewrite multiple ASTs from `from`.
+ */
 class GlobalSubstitution {
 public:
     GlobalSubstitution(const GlobalState &from, GlobalState &to, const GlobalState *optionalCommonParent = nullptr);
@@ -36,6 +44,14 @@ public:
         }
     }
 
+    NameRef substituteSymbolName(NameRef from, bool allowSameFromTo = false) const {
+        return substitute(from, allowSameFromTo);
+    }
+
+    NameRef substituteSend(NameRef from, bool allowSameFromTo = false) const {
+        return substitute(from, allowSameFromTo);
+    }
+
     bool useFastPath() const;
 
 private:
@@ -48,6 +64,53 @@ private:
     bool fastPath;
 
     const int toGlobalStateId;
+};
+
+/**
+ * GlobalSubstitution, but lazily populates `nameSubstitution` _and_ builds up a UsageHash for the file.
+ * Used in the hashing package as a part of the AST hashing process, which rewrites ASTs from the main GlobalState into
+ * ASTs for new and empty GlobalStates.
+ *
+ * Unlike the GlobalSubstitution case, LazyGlobalSubstitution is intended to be used for rewriting a single AST. Hence,
+ * the `nameSubstitution` map is sparse and built up lazily, since a single AST will only reference a small subset of
+ * names in GlobalState.
+ */
+class LazyGlobalSubstitution final {
+    const core::GlobalState &fromGS;
+    core::GlobalState &toGS;
+
+    UnorderedMap<core::NameRef, core::NameRef> nameSubstitution;
+    core::UsageHash acc;
+
+    NameRef defineName(NameRef from, bool allowSameFromTo);
+
+public:
+    LazyGlobalSubstitution(const GlobalState &fromGS, GlobalState &toGS);
+    ~LazyGlobalSubstitution() = default;
+
+    NameRef substitute(NameRef from, bool allowSameFromTo = false) {
+        if (&fromGS == &toGS) {
+            return from;
+        }
+
+        auto it = nameSubstitution.find(from);
+        if (it == nameSubstitution.end()) {
+            return defineName(from, allowSameFromTo);
+        }
+        return it->second;
+    }
+
+    NameRef substituteSymbolName(NameRef from, bool allowSameFromTo = false) {
+        acc.symbols.emplace_back(fromGS, from);
+        return substitute(from, allowSameFromTo);
+    }
+
+    NameRef substituteSend(NameRef from, bool allowSameFromTo = false) {
+        acc.sends.emplace_back(fromGS, from);
+        return substitute(from, allowSameFromTo);
+    }
+
+    core::UsageHash getAllNames();
 };
 
 } // namespace sorbet::core

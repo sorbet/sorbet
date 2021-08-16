@@ -1,0 +1,8 @@
+# typed: true
+# assert-fast-path: not_enough_files__main.rb,not_enough_files__1.rb,not_enough_files__2.rb,not_enough_files__3.rb,not_enough_files__4.rb,not_enough_files__5.rb,not_enough_files__6.rb,not_enough_files__7.rb,not_enough_files__8.rb,not_enough_files__9.rb
+
+class MyClass
+  def my_method
+    a = T.let(10, Float) # error: Argument does not have asserted type `Float`
+  end
+end

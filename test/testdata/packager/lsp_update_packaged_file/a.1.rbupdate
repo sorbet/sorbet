@@ -1,7 +1,7 @@
 # typed: strict
 # assert-fast-path: a.rb
 
-class A
+class Package::A
   extend T::Sig
 
   sig {returns(Dep::ExportedItem)}

@@ -1298,12 +1298,28 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         }
     }
 
+    // For these two cases, we have special cases if we are determining subtyping
+    // with respect to a TypeVar.  The rationale is that the non-TypeVar type has
+    // some structure that we wish to record: it's not correct to record each member
+    // individually in a recursive call to isSubTypeUnderConstraint since a) the
+    // recursive calls to isSubTypeUnderConstraint on each member would short-circuit
+    // and therefore not examine some members and b) we lose the structure of the
+    // original type.  But we only want to special-case TypeVars when recording type
+    // constraints prior to solving; once we have solved the type constraints, we
+    // want to look at each member individually and short-circuit as appropriate.
+
     // This order matters
     if (o2 != nullptr) { // 3
+        if (isa_type<TypeVar>(t1) && !constr.isSolved()) {
+            return constr.rememberIsSubtype(gs, t1, t2);
+        }
         return Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode) ||
                Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode);
     }
     if (a1 != nullptr) { // 4
+        if (isa_type<TypeVar>(t2) && !constr.isSolved()) {
+            return constr.rememberIsSubtype(gs, t1, t2);
+        }
         return Types::isSubTypeUnderConstraint(gs, constr, a1->left, t2, mode) ||
                Types::isSubTypeUnderConstraint(gs, constr, a1->right, t2, mode);
     }

@@ -4,17 +4,21 @@ load("//third_party:externals.bzl", "register_sorbet_dependencies")
 
 register_sorbet_dependencies()
 
+load("@com_grail_bazel_toolchain//toolchain:deps.bzl", "bazel_toolchain_dependencies")
+
+bazel_toolchain_dependencies()
+
 load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
 
 llvm_toolchain(
-    name = "llvm_toolchain",
+    name = "llvm_toolchain_12_0_0",
     absolute_paths = True,
     llvm_mirror_prefixes = [
         "https://sorbet-deps.s3-us-west-2.amazonaws.com/",
         "https://artifactory-content.stripe.build/artifactory/github-archives/llvm/llvm-project/releases/download/llvmorg-",
         "https://github.com/llvm/llvm-project/releases/download/llvmorg-",
     ],
-    llvm_version = "9.0.0",
+    llvm_version = "12.0.0",
 )
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
@@ -33,7 +37,11 @@ m4_register_toolchains()
 
 load("@rules_bison//bison:bison.bzl", "bison_register_toolchains")
 
-bison_register_toolchains()
+bison_register_toolchains(
+    # Clang 12+ introduced this flag. All versions of Bison at time of writing
+    # (up to 3.7.6) include code flagged by this warning.
+    extra_copts = ["-Wno-implicit-const-int-float-conversion"],
+)
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
@@ -53,15 +61,12 @@ gemfile_lock_deps(
         for test in [
             "partial/bad-hash",
             "partial/bad-t",
-            "partial/codecov",
             "partial/create-config",
             "partial/explosive-object",
             "partial/fake-object",
             "partial/fake-rails",
             "partial/local_gem",
             "partial/non-utf-8-file",
-            "partial/rails6",
-            "partial/rails-double-require",
             "partial/real_singleton_class",
             "partial/rspec-lots",
             "partial/stack_master",
@@ -78,15 +83,15 @@ load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
 
 rust_repositories(
     edition = "2018",
-    version = "1.46.0",
+    version = "1.51.0",
 )
 
 load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
 
 bazel_version(name = "bazel_version")
 
-BAZEL_VERSION = "3.4.1"
+BAZEL_VERSION = "4.1.0"
 
-BAZEL_INSTALLER_VERSION_linux_SHA = "9808adad931ac652e8ff5022a74507c532250c2091d21d6aebc7064573669cc5"
+BAZEL_INSTALLER_VERSION_linux_SHA = "e3f08054165be0a5e90779654b0e5c68d262ae794407d6347cdc6e8d05fafaaf"
 
-BAZEL_INSTALLER_VERSION_darwin_SHA = "b168b9c4186916cd07922b1155bca14eecc812729669f1fdbab141f3f4eee2a0"
+BAZEL_INSTALLER_VERSION_darwin_SHA = "fddad9367ed8e2687e8b52f5d8de29798de4cc2860d1c70e91128dcbc515d8ca"

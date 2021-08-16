@@ -2,8 +2,8 @@
 
 # A module to implement the Linda distributed computing paradigm in Ruby.
 #
-# [`Rinda`](https://docs.ruby-lang.org/en/2.6.0/Rinda.html) is part of
-# [`DRb`](https://docs.ruby-lang.org/en/2.6.0/DRb.html) (dRuby).
+# [`Rinda`](https://docs.ruby-lang.org/en/2.7.0/Rinda.html) is part of
+# [`DRb`](https://docs.ruby-lang.org/en/2.7.0/DRb.html) (dRuby).
 #
 # ## Example(s)
 #
@@ -13,12 +13,12 @@ module Rinda; end
 # *Documentation?*
 class Rinda::DRbObjectTemplate
   # Creates a new
-  # [`DRbObjectTemplate`](https://docs.ruby-lang.org/en/2.6.0/Rinda/DRbObjectTemplate.html)
+  # [`DRbObjectTemplate`](https://docs.ruby-lang.org/en/2.7.0/Rinda/DRbObjectTemplate.html)
   # that will match against `uri` and `ref`.
   def self.new(uri = _, ref = _); end
 
   # This
-  # [`DRbObjectTemplate`](https://docs.ruby-lang.org/en/2.6.0/Rinda/DRbObjectTemplate.html)
+  # [`DRbObjectTemplate`](https://docs.ruby-lang.org/en/2.7.0/Rinda/DRbObjectTemplate.html)
   # matches `ro` if the remote object's drburi and drbref are the same. `nil` is
   # used as a wildcard.
   def ===(ro); end
@@ -28,7 +28,7 @@ end
 class Rinda::InvalidHashTupleKey < ::Rinda::RindaError; end
 
 # A
-# [`NotifyTemplateEntry`](https://docs.ruby-lang.org/en/2.6.0/Rinda/NotifyTemplateEntry.html)
+# [`NotifyTemplateEntry`](https://docs.ruby-lang.org/en/2.7.0/Rinda/NotifyTemplateEntry.html)
 # is returned by TupleSpace#notify and is notified of TupleSpace changes. You
 # may receive either your subscribed event or the 'close' event when iterating
 # over notifications.
@@ -57,22 +57,22 @@ class Rinda::InvalidHashTupleKey < ::Rinda::RindaError; end
 # ```
 class Rinda::NotifyTemplateEntry < ::Rinda::TemplateEntry
   # Creates a new
-  # [`NotifyTemplateEntry`](https://docs.ruby-lang.org/en/2.6.0/Rinda/NotifyTemplateEntry.html)
+  # [`NotifyTemplateEntry`](https://docs.ruby-lang.org/en/2.7.0/Rinda/NotifyTemplateEntry.html)
   # that watches `place` for +event+s that match `tuple`.
   def self.new(place, event, tuple, expires = _); end
 
   # Yields event/tuple pairs until this
-  # [`NotifyTemplateEntry`](https://docs.ruby-lang.org/en/2.6.0/Rinda/NotifyTemplateEntry.html)
+  # [`NotifyTemplateEntry`](https://docs.ruby-lang.org/en/2.7.0/Rinda/NotifyTemplateEntry.html)
   # expires.
   def each; end
 
   # Called by TupleSpace to notify this
-  # [`NotifyTemplateEntry`](https://docs.ruby-lang.org/en/2.6.0/Rinda/NotifyTemplateEntry.html)
+  # [`NotifyTemplateEntry`](https://docs.ruby-lang.org/en/2.7.0/Rinda/NotifyTemplateEntry.html)
   # of a new event.
   def notify(ev); end
 
   # Retrieves a notification. Raises RequestExpiredError when this
-  # [`NotifyTemplateEntry`](https://docs.ruby-lang.org/en/2.6.0/Rinda/NotifyTemplateEntry.html)
+  # [`NotifyTemplateEntry`](https://docs.ruby-lang.org/en/2.7.0/Rinda/NotifyTemplateEntry.html)
   # expires.
   def pop; end
 end
@@ -83,13 +83,13 @@ class Rinda::RequestCanceledError < ::ThreadError; end
 # Raised when trying to use an expired tuple.
 class Rinda::RequestExpiredError < ::ThreadError; end
 
-# [`Rinda`](https://docs.ruby-lang.org/en/2.6.0/Rinda.html) error base class
+# [`Rinda`](https://docs.ruby-lang.org/en/2.7.0/Rinda.html) error base class
 class Rinda::RindaError < ::RuntimeError; end
 
-# [`RingFinger`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html) is
+# [`RingFinger`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html) is
 # used by RingServer clients to discover the RingServer's TupleSpace. Typically,
 # all a client needs to do is call
-# [`RingFinger.primary`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html#method-c-primary)
+# [`RingFinger.primary`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html#method-c-primary)
 # to retrieve the remote TupleSpace, which it can then begin using.
 #
 # To find the first available remote TupleSpace:
@@ -99,7 +99,7 @@ class Rinda::RindaError < ::RuntimeError; end
 # ```
 #
 # To create a
-# [`RingFinger`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html) that
+# [`RingFinger`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html) that
 # broadcasts to a custom list:
 #
 # ```ruby
@@ -107,7 +107,7 @@ class Rinda::RindaError < ::RuntimeError; end
 # rf.primary
 # ```
 #
-# [`Rinda::RingFinger`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html)
+# [`Rinda::RingFinger`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html)
 # also understands multicast addresses and sets them up properly. This allows
 # you to run multiple RingServers on the same host:
 #
@@ -117,7 +117,7 @@ class Rinda::RindaError < ::RuntimeError; end
 # ```
 #
 # You can set the hop count (or TTL) for multicast searches using
-# [`multicast_hops`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html#attribute-i-multicast_hops).
+# [`multicast_hops`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html#attribute-i-multicast_hops).
 #
 # If you use IPv6 multicast you may need to set both an address and the outbound
 # interface index:
@@ -131,23 +131,23 @@ class Rinda::RindaError < ::RuntimeError; end
 # At this time there is no easy way to get an interface index by name.
 class Rinda::RingFinger
   # Creates a new
-  # [`RingFinger`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html)
+  # [`RingFinger`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html)
   # that will look for RingServers at `port` on the addresses in
   # `broadcast_list`.
   #
   # If `broadcast_list` contains a multicast address then multicast queries will
   # be made using the given
-  # [`multicast_hops`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html#attribute-i-multicast_hops)
+  # [`multicast_hops`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html#attribute-i-multicast_hops)
   # and multicast\_interface.
   def self.new(broadcast_list = _, port = _); end
 
   # The list of addresses where
-  # [`RingFinger`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html)
+  # [`RingFinger`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html)
   # will send query packets.
   def broadcast_list; end
 
   # The list of addresses where
-  # [`RingFinger`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html)
+  # [`RingFinger`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html)
   # will send query packets.
   def broadcast_list=(_); end
 
@@ -179,22 +179,22 @@ class Rinda::RingFinger
   def multicast_interface=(_); end
 
   # The port that
-  # [`RingFinger`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html)
+  # [`RingFinger`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html)
   # will send query packets to.
   def port; end
 
   # The port that
-  # [`RingFinger`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html)
+  # [`RingFinger`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html)
   # will send query packets to.
   def port=(_); end
 
   # Contain the first advertised TupleSpace after
-  # [`lookup_ring_any`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html#method-i-lookup_ring_any)
+  # [`lookup_ring_any`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html#method-i-lookup_ring_any)
   # is called.
   def primary; end
 
   # Contain the first advertised TupleSpace after
-  # [`lookup_ring_any`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html#method-i-lookup_ring_any)
+  # [`lookup_ring_any`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html#method-i-lookup_ring_any)
   # is called.
   def primary=(_); end
 
@@ -204,9 +204,9 @@ class Rinda::RingFinger
   def to_a; end
 
   # Creates a singleton
-  # [`RingFinger`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html)
+  # [`RingFinger`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html)
   # and looks for a RingServer. Returns the created
-  # [`RingFinger`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingFinger.html).
+  # [`RingFinger`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html).
   def self.finger; end
 
   # Returns the first advertised TupleSpace.
@@ -216,7 +216,7 @@ class Rinda::RingFinger
   def self.to_a; end
 end
 
-# [`RingProvider`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingProvider.html)
+# [`RingProvider`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingProvider.html)
 # uses a RingServer advertised TupleSpace as a name service. TupleSpace clients
 # can register themselves with the remote TupleSpace and look up other provided
 # services via the remote TupleSpace.
@@ -225,7 +225,7 @@ end
 # description].
 class Rinda::RingProvider
   # Creates a
-  # [`RingProvider`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingProvider.html)
+  # [`RingProvider`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingProvider.html)
   # that will provide a `klass` service running on `front`, with a
   # `description`. `renewer` is optional.
   def self.new(klass, front, desc, renewer = _); end
@@ -234,28 +234,28 @@ class Rinda::RingProvider
   def provide; end
 end
 
-# A [`RingServer`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingServer.html)
+# A [`RingServer`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingServer.html)
 # allows a
-# [`Rinda::TupleSpace`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleSpace.html)
+# [`Rinda::TupleSpace`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleSpace.html)
 # to be located via UDP broadcasts. Default service location uses the following
 # steps:
 #
 # 1.  A
-#     [`RingServer`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingServer.html)
+#     [`RingServer`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingServer.html)
 #     begins listening on the network broadcast UDP address.
 # 2.  A RingFinger sends a UDP packet containing the
-#     [`DRb`](https://docs.ruby-lang.org/en/2.6.0/DRb.html)
-#     [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) where it will listen
+#     [`DRb`](https://docs.ruby-lang.org/en/2.7.0/DRb.html)
+#     [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) where it will listen
 #     for a reply.
 # 3.  The
-#     [`RingServer`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingServer.html)
+#     [`RingServer`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingServer.html)
 #     receives the UDP packet and connects back to the provided
-#     [`DRb`](https://docs.ruby-lang.org/en/2.6.0/DRb.html)
-#     [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) with the
-#     [`DRb`](https://docs.ruby-lang.org/en/2.6.0/DRb.html) service.
+#     [`DRb`](https://docs.ruby-lang.org/en/2.7.0/DRb.html)
+#     [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) with the
+#     [`DRb`](https://docs.ruby-lang.org/en/2.7.0/DRb.html) service.
 #
 #
-# A [`RingServer`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingServer.html)
+# A [`RingServer`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingServer.html)
 # requires a TupleSpace:
 #
 # ```ruby
@@ -263,7 +263,7 @@ end
 # rs = Rinda::RingServer.new
 # ```
 #
-# [`RingServer`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingServer.html) can
+# [`RingServer`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingServer.html) can
 # also listen on multicast addresses for announcements. This allows multiple
 # RingServers to run on the same host. To use network broadcast and multicast:
 #
@@ -280,7 +280,7 @@ class Rinda::RingServer
   #
   # `addresses` can contain multiple addresses. If a multicast address is given
   # in `addresses` then the
-  # [`RingServer`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingServer.html)
+  # [`RingServer`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingServer.html)
   # will listen for multicast queries.
   #
   # If you use IPv4 multicast you may need to set an address of the inbound
@@ -292,9 +292,9 @@ class Rinda::RingServer
   # ```
   #
   # You can set addresses as an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
-  # [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html). The first
-  # element of the [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) is
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
+  # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html). The first
+  # element of the [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) is
   # a multicast address and the second is an inbound interface address. If the
   # second is omitted then '0.0.0.0' is used.
   #
@@ -315,11 +315,11 @@ class Rinda::RingServer
   def self.new(ts, addresses = _, port = _); end
 
   # Pulls lookup tuples out of the TupleSpace and sends their
-  # [`DRb`](https://docs.ruby-lang.org/en/2.6.0/DRb.html) object the address of
+  # [`DRb`](https://docs.ruby-lang.org/en/2.7.0/DRb.html) object the address of
   # the local TupleSpace.
   def do_reply; end
 
-  # Extracts the response [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html)
+  # Extracts the response [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html)
   # from `msg` and adds it to TupleSpace where it will be picked up by
   # `reply_service` for notification.
   def do_write(msg); end
@@ -342,11 +342,11 @@ class Rinda::RingServer
   def reply_service; end
 
   # Shuts down the
-  # [`RingServer`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingServer.html)
+  # [`RingServer`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingServer.html)
   def shutdown; end
 
   # Creates threads that pick up UDP packets and passes them to
-  # [`do_write`](https://docs.ruby-lang.org/en/2.6.0/Rinda/RingServer.html#method-i-do_write)
+  # [`do_write`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingServer.html#method-i-do_write)
   # for decoding.
   def write_services; end
 end
@@ -365,13 +365,13 @@ end
 Rinda::Ring_PORT = T.let(T.unsafe(nil), Integer)
 
 # An
-# [`SimpleRenewer`](https://docs.ruby-lang.org/en/2.6.0/Rinda/SimpleRenewer.html)
+# [`SimpleRenewer`](https://docs.ruby-lang.org/en/2.7.0/Rinda/SimpleRenewer.html)
 # allows a TupleSpace to check if a TupleEntry is still alive.
 class Rinda::SimpleRenewer
   include(::DRb::DRbUndumped)
 
   # Creates a new
-  # [`SimpleRenewer`](https://docs.ruby-lang.org/en/2.6.0/Rinda/SimpleRenewer.html)
+  # [`SimpleRenewer`](https://docs.ruby-lang.org/en/2.7.0/Rinda/SimpleRenewer.html)
   # that keeps an object alive for another `sec` seconds.
   def self.new(sec = _); end
 
@@ -380,17 +380,17 @@ class Rinda::SimpleRenewer
 end
 
 # Templates are used to match tuples in
-# [`Rinda`](https://docs.ruby-lang.org/en/2.6.0/Rinda.html).
+# [`Rinda`](https://docs.ruby-lang.org/en/2.7.0/Rinda.html).
 class Rinda::Template < ::Rinda::Tuple
   # Alias for
-  # [`match`](https://docs.ruby-lang.org/en/2.6.0/Rinda/Template.html#method-i-match).
+  # [`match`](https://docs.ruby-lang.org/en/2.7.0/Rinda/Template.html#method-i-match).
   def ===(tuple); end
 
   # Matches this template against `tuple`. The `tuple` must be the same size as
   # the template. An element with a `nil` value in a template acts as a
   # wildcard, matching any value in the corresponding position in the tuple.
   # Elements of the template match the `tuple` if the are #== or
-  # [`===`](https://docs.ruby-lang.org/en/2.6.0/Rinda/Template.html#method-i-3D-3D-3D).
+  # [`===`](https://docs.ruby-lang.org/en/2.7.0/Rinda/Template.html#method-i-3D-3D-3D).
   #
   # ```ruby
   # Template.new([:foo, 5]).match   Tuple.new([:foo, 5]) # => true
@@ -406,35 +406,35 @@ class Rinda::Template < ::Rinda::Tuple
 end
 
 # A
-# [`TemplateEntry`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TemplateEntry.html)
+# [`TemplateEntry`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TemplateEntry.html)
 # is a Template together with expiry and cancellation data.
 class Rinda::TemplateEntry < ::Rinda::TupleEntry
   # Alias for:
-  # [`match`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TemplateEntry.html#method-i-match)
+  # [`match`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TemplateEntry.html#method-i-match)
   def ===(tuple); end
 
   def make_tuple(ary); end
 
   # Matches this
-  # [`TemplateEntry`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TemplateEntry.html)
+  # [`TemplateEntry`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TemplateEntry.html)
   # against `tuple`. See Template#match for details on how a Template matches a
   # Tuple.
   #
   # Also aliased as:
-  # [`===`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TemplateEntry.html#method-i-3D-3D-3D)
+  # [`===`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TemplateEntry.html#method-i-3D-3D-3D)
   def match(tuple); end
 end
 
 # A tuple is the elementary object in
-# [`Rinda`](https://docs.ruby-lang.org/en/2.6.0/Rinda.html) programming. Tuples
+# [`Rinda`](https://docs.ruby-lang.org/en/2.7.0/Rinda.html) programming. Tuples
 # may be matched against templates if the tuple and the template are the same
 # size.
 class Rinda::Tuple
   # Creates a new
-  # [`Tuple`](https://docs.ruby-lang.org/en/2.6.0/Rinda/Tuple.html) from
+  # [`Tuple`](https://docs.ruby-lang.org/en/2.7.0/Rinda/Tuple.html) from
   # `ary_or_hash` which must be an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) or
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html).
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) or
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html).
   def self.new(ary_or_hash); end
 
   # Accessor method for elements of the tuple.
@@ -454,17 +454,17 @@ class Rinda::Tuple
   def value; end
 end
 
-# [`TupleBag`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleBag.html) is an
+# [`TupleBag`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleBag.html) is an
 # unordered collection of tuples. It is the basis of Tuplespace.
 class Rinda::TupleBag
   def self.new; end
 
   # Removes `tuple` from the
-  # [`TupleBag`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleBag.html).
+  # [`TupleBag`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleBag.html).
   def delete(tuple); end
 
   # Delete tuples which dead tuples from the
-  # [`TupleBag`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleBag.html),
+  # [`TupleBag`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleBag.html),
   # returning the deleted tuples.
   def delete_unless_alive; end
 
@@ -475,17 +475,17 @@ class Rinda::TupleBag
   def find_all(template); end
 
   # Finds all tuples in the
-  # [`TupleBag`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleBag.html) which
+  # [`TupleBag`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleBag.html) which
   # when treated as templates, match `tuple` and are alive.
   def find_all_template(tuple); end
 
   # `true` if the
-  # [`TupleBag`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleBag.html) to see
+  # [`TupleBag`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleBag.html) to see
   # if it has any expired entries.
   def has_expires?; end
 
   # Add `tuple` to the
-  # [`TupleBag`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleBag.html).
+  # [`TupleBag`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleBag.html).
   def push(tuple); end
 end
 
@@ -509,29 +509,30 @@ class Rinda::TupleBag::TupleBin
   def find_all(*args, &block); end
 end
 
-# A [`TupleEntry`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleEntry.html) is
+# A [`TupleEntry`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleEntry.html) is
 # a Tuple (i.e. a possible entry in some Tuplespace) together with expiry and
 # cancellation data.
 class Rinda::TupleEntry
   include(::DRb::DRbUndumped)
 
   # Creates a
-  # [`TupleEntry`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleEntry.html)
+  # [`TupleEntry`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleEntry.html)
   # based on `ary` with an optional renewer or expiry time `sec`.
   #
-  # A renewer must implement the `renew` method which returns a Numeric, nil, or
-  # true to indicate when the tuple has expired.
+  # A renewer must implement the `renew` method which returns a
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html), nil, or true
+  # to indicate when the tuple has expired.
   def self.new(ary, sec = _); end
 
   # Retrieves `key` from the tuple.
   def [](key); end
 
-  # A [`TupleEntry`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleEntry.html)
+  # A [`TupleEntry`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleEntry.html)
   # is dead when it is canceled or expired.
   def alive?; end
 
   # Marks this
-  # [`TupleEntry`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleEntry.html) as
+  # [`TupleEntry`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleEntry.html) as
   # canceled.
   def cancel; end
 
@@ -551,20 +552,20 @@ class Rinda::TupleEntry
   # Fetches `key` from the tuple.
   def fetch(key); end
 
-  # Returns an expiry [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html)
+  # Returns an expiry [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html)
   # based on `sec` which can be one of:
-  # Numeric
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html)
   # :   `sec` seconds into the future
   # `true`
   # :   the expiry time is the start of 1970 (i.e. expired)
   # `nil`
   # :   it is  Tue Jan 19 03:14:07 GMT Standard
-  #     [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) 2038 (i.e. when
+  #     [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) 2038 (i.e. when
   #     UNIX clocks will die)
   def make_expires(sec = _); end
 
   # Creates a
-  # [`Rinda::Tuple`](https://docs.ruby-lang.org/en/2.6.0/Rinda/Tuple.html) for
+  # [`Rinda::Tuple`](https://docs.ruby-lang.org/en/2.7.0/Rinda/Tuple.html) for
   # `ary`.
   def make_tuple(ary); end
 
@@ -574,7 +575,7 @@ class Rinda::TupleEntry
   # :   it is set to expire in the far future.
   # `true`
   # :   it has expired.
-  # Numeric
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html)
   # :   it will expire in that many seconds.
   #
   #
@@ -586,8 +587,8 @@ class Rinda::TupleEntry
   def size; end
 
   # Return the object which makes up the tuple itself: the
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) or
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html).
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) or
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html).
   def value; end
 end
 
@@ -601,14 +602,14 @@ class Rinda::TupleSpace
   include(::DRb::DRbUndumped)
 
   # Creates a new
-  # [`TupleSpace`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleSpace.html).
+  # [`TupleSpace`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleSpace.html).
   # `period` is used to control how often to look for dead tuples after
   # modifications to the
-  # [`TupleSpace`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleSpace.html).
+  # [`TupleSpace`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleSpace.html).
   #
   # If no dead tuples are found `period` seconds after the last modification,
   # the
-  # [`TupleSpace`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleSpace.html)
+  # [`TupleSpace`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleSpace.html)
   # will stop looking for dead tuples.
   def self.new(period = _); end
 
@@ -628,7 +629,7 @@ class Rinda::TupleSpace
   #
   #
   # The
-  # [`TupleSpace`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleSpace.html)
+  # [`TupleSpace`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleSpace.html)
   # will also notify you of the 'close' event when the NotifyTemplateEntry has
   # expired.
   def notify(event, tuple, sec = _); end
@@ -646,11 +647,11 @@ class Rinda::TupleSpace
   def write(tuple, sec = _); end
 end
 
-# [`TupleSpaceProxy`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleSpaceProxy.html)
+# [`TupleSpaceProxy`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleSpaceProxy.html)
 # allows a remote Tuplespace to appear as local.
 class Rinda::TupleSpaceProxy
   # Creates a new
-  # [`TupleSpaceProxy`](https://docs.ruby-lang.org/en/2.6.0/Rinda/TupleSpaceProxy.html)
+  # [`TupleSpaceProxy`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleSpaceProxy.html)
   # to wrap `ts`.
   def self.new(ts); end
 

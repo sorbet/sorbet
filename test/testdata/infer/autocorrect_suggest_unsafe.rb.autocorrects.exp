@@ -1,0 +1,10 @@
+# -- test/testdata/infer/autocorrect_suggest_unsafe.rb --
+# typed: true
+# enable-suggest-unsafe: true
+extend T::Sig
+
+sig {returns(String)}
+def wrap_in_unsafe
+  T.unsafe(nil) # error: Expected `String` but found `NilClass` for method result type
+end
+# ------------------------------

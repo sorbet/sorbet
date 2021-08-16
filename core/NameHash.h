@@ -47,12 +47,15 @@ struct GlobalStateHash {
 
 struct UsageHash {
     std::vector<core::NameHash> sends;
-    std::vector<core::NameHash> constants;
+    std::vector<core::NameHash> symbols;
 };
 
 struct FileHash {
     GlobalStateHash definitions;
     UsageHash usages;
+
+    FileHash() = default;
+    FileHash(GlobalStateHash &&definitions, UsageHash &&usages);
 };
 
 }; // namespace sorbet::core

@@ -79,7 +79,7 @@ public:
     /**
      * Computes all possible implications of this knowledge holding as an exit from environment env in block bb
      */
-    KnowledgeRef under(core::Context ctx, const Environment &env, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb,
+    KnowledgeRef under(core::Context ctx, const Environment &env, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                        bool isNeeded) const;
 
     void removeReferencesToVar(cfg::LocalRef ref);
@@ -171,10 +171,6 @@ class Environment {
 
     bool getKnownTruthy(cfg::LocalRef var) const;
 
-    // NB: you can't call this function on vars in the first basic block since
-    // their type will be nullptr
-    const core::TypeAndOrigins &getTypeAndOrigin(core::Context ctx, cfg::LocalRef symbol) const;
-
     /* propagate knowledge on `to = from` */
     void propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::LocalRef from, KnowledgeFilter &knowledgeFilter);
 
@@ -214,6 +210,10 @@ public:
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 
+    // NB: you can't call this function on vars in the first basic block since
+    // their type will be nullptr
+    const core::TypeAndOrigins &getTypeAndOrigin(core::Context ctx, cfg::LocalRef symbol) const;
+
     const core::TypeAndOrigins &getAndFillTypeAndOrigin(core::Context ctx, cfg::VariableUseSite &symbol) const;
 
     /*
@@ -228,7 +228,7 @@ public:
     static const Environment &withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
                                        const UnorderedMap<cfg::LocalRef, VariableState> &filter);
 
-    void mergeWith(core::Context ctx, const Environment &other, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb,
+    void mergeWith(core::Context ctx, const Environment &other, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                    KnowledgeFilter &knowledgeFilter);
 
     void computePins(core::Context ctx, const std::vector<Environment> &envs, const cfg::CFG &inWhat,

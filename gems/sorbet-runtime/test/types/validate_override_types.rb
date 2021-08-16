@@ -69,7 +69,7 @@ module Opus::Types::Test
         klass.new.foo
       end
 
-      assert_includes(err.message, "Incompatible type for arg #1 (`pos`) in override of method `foo`")
+      assert_includes(err.message, "Incompatible type for arg #1 (`pos`) in signature for override of method `foo`")
     end
 
     it "raises if a keyword param type is covariant" do
@@ -83,7 +83,7 @@ module Opus::Types::Test
         klass.new.foo
       end
 
-      assert_includes(err.message, "Incompatible type for arg `kw` in override of method `foo`")
+      assert_includes(err.message, "Incompatible type for arg `kw` in signature for override of method `foo`")
     end
 
     it "raises if the return type is contravariant" do
@@ -97,7 +97,7 @@ module Opus::Types::Test
         klass.new.foo
       end
 
-      assert_includes(err.message, "Incompatible return type in override of method `foo`")
+      assert_includes(err.message, "Incompatible return type in signature for override of method `foo`")
     end
 
   end

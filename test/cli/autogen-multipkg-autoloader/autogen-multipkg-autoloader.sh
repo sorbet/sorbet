@@ -7,11 +7,12 @@ preamble="# frozen_string_literal: true
 
 rm -rf output
 mkdir -p output
+echo "TODO: fix this test once autogen-autoloader-packaged is supported"
 
 main/sorbet --silence-dev-message --stop-after=namer \
   --stripe-packages \
   -p autogen-autoloader:output \
-  --autogen-autoloader-modules={Foo,FooMethods,Bar,BarMethods} \
+  --autogen-autoloader-modules=Project \
   --autogen-autoloader-ignore=scripts/ \
   --autogen-autoloader-preamble "$preamble" \
   --autogen-autoloader-packaged \

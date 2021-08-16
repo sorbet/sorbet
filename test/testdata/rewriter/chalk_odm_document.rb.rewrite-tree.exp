@@ -1,4 +1,16 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Chalk>::<C ODM>::<C Document><<C <todo sym>>> < (::<todo sym>)
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.include(<emptyTree>::<C T>::<C Props>::<C Serializable>)
+
+    <self>.include(<emptyTree>::<C T>::<C Props>::<C WeakConstructor>)
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+  end
+
   class <emptyTree>::<C MyParentDocument><<C <todo sym>>> < (<emptyTree>::<C Chalk>::<C ODM>::<C Document>)
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
@@ -14,20 +26,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def my_parent_method=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :my_parent_method)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :my_parent_method)
         <self>.instance_variable_set(:@my_parent_method, arg0)
       end
     end
 
     <self>.prop(:my_parent_method, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method)
+    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method, :attr_reader)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method=)
+    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method=, :normal)
   end
 
   class <emptyTree>::<C MyChildDocument><<C <todo sym>>> < (<emptyTree>::<C MyParentDocument>)
@@ -48,20 +56,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def my_child_method=<<todo method>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :my_child_method)
-        else
-          <emptyTree>
-        end
+        ::T::Configuration.prop_freeze_handler().call(<self>, :my_child_method)
         <self>.instance_variable_set(:@my_child_method, arg0)
       end
     end
 
     <self>.prop(:my_child_method, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method)
+    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method=)
+    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method=, :normal)
   end
 
   <emptyTree>::<C MyParentDocument>.new()

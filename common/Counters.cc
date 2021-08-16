@@ -304,7 +304,7 @@ string getCounterStatistics() {
 
     fmt::memory_buffer buf;
 
-    fmt::format_to(buf, "Counters and Histograms: \n");
+    fmt::format_to(std::back_inserter(buf), "Counters and Histograms: \n");
 
     for (auto &cat : counterState.countersByCategory) {
         CounterImpl::CounterType sum = 0;
@@ -315,7 +315,7 @@ string getCounterStatistics() {
         }
         fast_sort(sorted, [](const auto &e1, const auto &e2) -> bool { return e1.first > e2.first; });
 
-        fmt::format_to(buf, " {}\n{:<36.36} Total :{:15}\n", cat.first, "", sum);
+        fmt::format_to(std::back_inserter(buf), " {}\n{:<36.36} Total :{:15}\n", cat.first, "", sum);
 
         if (sum == 0) {
             sum = 1;
@@ -323,9 +323,10 @@ string getCounterStatistics() {
         for (auto &e : sorted) {
             auto perc = e.first * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * e.first / sum), '#');
-            fmt::format_to(buf, "  {:>40.40} :{:15}, {:3.1f}% {}\n", e.second, e.first, perc, hashes);
+            fmt::format_to(std::back_inserter(buf), "  {:>40.40} :{:15}, {:3.1f}% {}\n", e.second, e.first, perc,
+                           hashes);
         }
-        fmt::format_to(buf, "\n");
+        fmt::format_to(std::back_inserter(buf), "\n");
     }
 
     for (auto &hist : counterState.histograms) {
@@ -337,7 +338,7 @@ string getCounterStatistics() {
         }
         fast_sort(sorted, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
-        fmt::format_to(buf, " {}\n{:<36.36} Total :{:15}\n", hist.first, "", sum);
+        fmt::format_to(std::back_inserter(buf), " {}\n{:<36.36} Total :{:15}\n", hist.first, "", sum);
 
         CounterImpl::CounterType header = 0;
         auto it = sorted.begin();
@@ -349,27 +350,29 @@ string getCounterStatistics() {
         if (it != sorted.begin()) {
             auto perc = header * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * header / sum), '#');
-            fmt::format_to(buf, "  <{:>39.39} :{:15}, {:5.1f}% {}\n", to_string(it->first), header, perc, hashes);
+            fmt::format_to(std::back_inserter(buf), "  <{:>39.39} :{:15}, {:5.1f}% {}\n", to_string(it->first), header,
+                           perc, hashes);
         }
 
         while (it != sorted.end() && (sum - header) * 1.0 / sum > cutoff) {
             header += it->second;
             auto perc = it->second * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * it->second / sum), '#');
-            fmt::format_to(buf, "  {:>40.40} :{:15}, {:5.1f}% {}\n", to_string(it->first), it->second, perc, hashes);
+            fmt::format_to(std::back_inserter(buf), "  {:>40.40} :{:15}, {:5.1f}% {}\n", to_string(it->first),
+                           it->second, perc, hashes);
             it++;
         }
         if (it != sorted.end()) {
             auto perc = (sum - header) * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * (sum - header) / sum), '#');
-            fmt::format_to(buf, "  >={:>38.38} :{:15}, {:5.1f}% {}\n", to_string(it->first), sum - header, perc,
-                           hashes);
+            fmt::format_to(std::back_inserter(buf), "  >={:>38.38} :{:15}, {:5.1f}% {}\n", to_string(it->first),
+                           sum - header, perc, hashes);
         }
-        fmt::format_to(buf, "\n");
+        fmt::format_to(std::back_inserter(buf), "\n");
     }
 
     {
-        fmt::format_to(buf, "Timings: \n");
+        fmt::format_to(std::back_inserter(buf), "Timings: \n");
         vector<pair<string, string>> sortedTimings;
         UnorderedMap<string, vector<double>> timings;
         for (const auto &e : counterState.timings) {
@@ -394,13 +397,13 @@ string getCounterStatistics() {
         }
         fast_sort(sortedTimings, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
-        fmt::format_to(buf, "{}",
+        fmt::format_to(std::back_inserter(buf), "{}",
                        fmt::map_join(
                            sortedTimings, "", [](const auto &el) -> auto { return el.second; }));
     }
 
     {
-        fmt::format_to(buf, "Counters: \n");
+        fmt::format_to(std::back_inserter(buf), "Counters: \n");
 
         vector<pair<string, string>> sortedOther;
         for (auto &e : counterState.counters) {
@@ -410,7 +413,7 @@ string getCounterStatistics() {
 
         fast_sort(sortedOther, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
-        fmt::format_to(buf, "{}",
+        fmt::format_to(std::back_inserter(buf), "{}",
                        fmt::map_join(
                            sortedOther, "", [](const auto &el) -> auto { return el.second; }));
     }

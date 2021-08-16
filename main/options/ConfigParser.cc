@@ -1,11 +1,33 @@
 #include "ConfigParser.h"
+#include "absl/algorithm/container.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "options.h"
+#include <cctype> // for isspace
 
 using namespace std;
 namespace sorbet::realmain::options {
+
+namespace {
+
+// Returns true when the line starts with a '#', ignoring leading space.
+//
+// NOTE: we don't handle trailing comments because it would be difficult to handle the following case without a more
+// complicated parser:
+//
+// > -e 'puts "hello" # this is a comment' -p parse-tree
+bool isComment(string_view line) {
+    auto hashPos = line.find('#');
+    if (hashPos == string_view::npos) {
+        return false;
+    }
+
+    auto prefix = line.substr(0, hashPos);
+    return absl::c_all_of(prefix, [](auto c) { return isspace(c); });
+}
+
+} // namespace
 
 void ConfigParser::readArgsFromFile(std::shared_ptr<spdlog::logger> logger, string_view filename,
                                     std::vector<std::string> &stringArgs) {
@@ -16,8 +38,8 @@ void ConfigParser::readArgsFromFile(std::shared_ptr<spdlog::logger> logger, stri
             argsPView = argsPView.substr(0, argsPView.size() - 1);
         }
         for (string_view arg : absl::StrSplit(argsPView, '\n')) {
-            if (arg.size() == 0) {
-                // skip empty line
+            if (arg.size() == 0 || isComment(arg)) {
+                // skip empty lines and comments
                 continue;
             } else if (arg[0] == '@') {
                 readArgsFromFile(logger, arg.substr(min(arg.find_first_not_of("@"), arg.size())), stringArgs);

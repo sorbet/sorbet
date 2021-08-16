@@ -29,12 +29,11 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
 
         auto selfClaz = md.symbol.data(ctx)->rebind();
         if (!selfClaz.exists()) {
-            selfClaz = md.symbol;
+            selfClaz = md.symbol.enclosingClass(ctx);
         }
-        synthesizeExpr(entry, LocalRef::selfVariable(), md.loc,
-                       make_unique<Cast>(LocalRef::selfVariable(),
-                                         selfClaz.data(ctx)->enclosingClass(ctx).data(ctx)->selfType(ctx),
-                                         core::Names::cast()));
+        synthesizeExpr(
+            entry, LocalRef::selfVariable(), core::LocOffsets::none(),
+            make_unique<Cast>(LocalRef::selfVariable(), selfClaz.data(ctx)->selfType(ctx), core::Names::cast()));
 
         BasicBlock *presentCont = entry;
         BasicBlock *defaultCont = nullptr;
@@ -89,10 +88,20 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
 
     LocalRef retSym1 = LocalRef::finalReturn();
 
-    auto rvLoc = cont->exprs.empty() || isa_instruction<LoadArg>(cont->exprs.back().value.get())
-                     ? md.loc
-                     : cont->exprs.back().loc;
-    synthesizeExpr(cont, retSym1, rvLoc, make_unique<Return>(retSym)); // dead assign.
+    core::LocOffsets rvLoc;
+    if (cont->exprs.empty() || isa_instruction<LoadArg>(cont->exprs.back().value.get())) {
+        auto beginAdjust = md.loc.endPos() - md.loc.beginPos() - 3;
+        auto endLoc = core::Loc(ctx.file, md.loc).adjust(ctx, beginAdjust, 0);
+        if (endLoc.source(ctx) == "end") {
+            rvLoc = endLoc.offsets();
+            res->implicitReturnLoc = rvLoc;
+        } else {
+            rvLoc = md.loc;
+        }
+    } else {
+        rvLoc = cont->exprs.back().loc;
+    }
+    synthesizeExpr(cont, retSym1, rvLoc, make_unique<Return>(retSym, rvLoc)); // dead assign.
     jumpToDead(cont, *res.get(), rvLoc);
 
     vector<Binding> aliasesPrefix;
@@ -100,7 +109,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         core::SymbolRef global = kv.first;
         LocalRef local = kv.second;
         aliasesPrefix.emplace_back(local, core::LocOffsets::none(), make_unique<Alias>(global));
-        if (global.isField(ctx) || global.isStaticField(ctx)) {
+        if (global.isFieldOrStaticField()) {
             res->minLoops[local.id()] = CFG::MIN_LOOP_FIELD;
         } else {
             res->minLoops[local.id()] = CFG::MIN_LOOP_GLOBAL;

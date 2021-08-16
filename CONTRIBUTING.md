@@ -33,16 +33,16 @@ Documentation improvements are very welcome. The source of [sorbet.org](https://
 # Submitting a PR
 * Create small PRs that are narrowly focused on addressing a single concern. We often receive PRs that are trying to fix several things at a time, but if only one fix is considered acceptable, nothing gets merged and both author's & review's time is wasted. Create more PRs to address different concerns and everyone will be happy.
 * Bug fixes should include regression tests -- in the same commit as the fix. If testing isn't feasible, the commit message should explain why.
-* New features and enhancements must be motivated by adding common usage as tests.
+* New features and enhancements must be motivated by adding common usage as tests. Please reach out to the team on the `#internals` channel of the [sorbet-slack](https://sorbet.org/slack) before starting on new features.
 * Follow the Boy Scout Rule: "Always leave the code behind in a better state than you found it"
 * We will **not** merge any PR that is not passing tests.
 * Your PR description should have details on what the PR does. If it fixes an existing issue it should end with "Fixes #XXX".
 * When all of the tests are passing and all other conditions described herein are satisfied, a maintainer will be assigned to review and merge the PR.
-* We expect that once a PR is opened, it will be actively worked on until it is merged or closed. We reserve the right to close PRs that are not making progress. This is generally defined as no changes for 7 days. Obviously PRs that are closed due to lack of activity can be reopened later. Closing stale PRs helps us to keep on top of all of the work currently in flight.
+* We expect that once a PR is opened, it will be actively worked on until it is merged or closed. We reserve the right to close PRs that are not making progress (no changes for 7 days), or that include functionality the core team isn't aligned on supporting. PRs that are closed due to lack of activity can be reopened later. Closing stale PRs helps us to keep on top of all of the work currently in flight.
 * Please consider joining the [sorbet-slack](https://sorbet.org/slack).
 
 # PR review policy for maintainers
-* Typically we try to turn around reviews within two business days.
+* We try to turn around reviews within one week, though sometimes we slip up. If you feel like your PR has gotten lost and it's been open for more than a week, please reach out on the `#internals` channel on the [sorbet-slack](https://sorbet.org/slack).
 * It is generally expected that at least a single maintainer should review every PR.
 * If there is a question on who should review a PR please discuss in Slack.
 * Anyone is welcome to review any PR that they want, whether they are a maintainer or not.

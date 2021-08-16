@@ -2,6 +2,6 @@
 # typed: strict
 
 class Project::Foo < PackageSpec
-  export Foo
-  export_methods FooMethods
+  export Project::Foo::Foo
+  export Project::Foo::FooNonForcing
 end

@@ -1,6 +1,6 @@
 # typed: __STDLIB_INTERNAL
 
-# [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) objects represent
+# [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) objects represent
 # inexact real numbers using the native architecture's double-precision floating
 # point representation.
 #
@@ -46,7 +46,7 @@ class Float < Numeric
   # Usually defaults to 2.2250738585072014e-308.
   #
   # If the platform supports denormalized numbers, there are numbers between
-  # zero and [`Float::MIN`](https://docs.ruby-lang.org/en/2.6.0/Float.html#MIN).
+  # zero and [`Float::MIN`](https://docs.ruby-lang.org/en/2.7.0/Float.html#MIN).
   # 0.0.next\_float returns the smallest positive floating point number
   # including denormalized numbers.
   MIN = T.let(T.unsafe(nil), Float)
@@ -67,7 +67,9 @@ class Float < Numeric
   # Usually defaults to 2 on most systems, which would represent a base-10
   # decimal.
   RADIX = T.let(T.unsafe(nil), Integer)
-  # Represents the rounding mode for floating point addition.
+  # Deprecated, do not use.
+  #
+  # Represents the rounding mode for floating point addition at the start time.
   #
   # Usually defaults to 1, rounding to the nearest number.
   #
@@ -117,7 +119,7 @@ class Float < Numeric
   end
   def %(arg0); end
 
-  # Returns a new [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html)
+  # Returns a new [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html)
   # which is the product of `float` and `other`.
   sig do
     params(
@@ -194,7 +196,7 @@ class Float < Numeric
   end
   def **(arg0); end
 
-  # Returns a new [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html)
+  # Returns a new [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html)
   # which is the sum of `float` and `other`.
   sig do
     params(
@@ -237,7 +239,7 @@ class Float < Numeric
   sig {returns(Float)}
   def +@(); end
 
-  # Returns a new [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html)
+  # Returns a new [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html)
   # which is the difference of `float` and `other`.
   sig do
     params(
@@ -281,7 +283,7 @@ class Float < Numeric
   sig {returns(Float)}
   def -@(); end
 
-  # Returns a new [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html)
+  # Returns a new [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html)
   # which is the result of dividing `float` by `other`.
   sig do
     params(
@@ -327,25 +329,7 @@ class Float < Numeric
   # is returned.
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(T::Boolean)
   end
@@ -357,25 +341,7 @@ class Float < Numeric
   # value is returned.
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(T::Boolean)
   end
@@ -383,7 +349,7 @@ class Float < Numeric
 
   # Returns -1, 0, or +1 depending on whether `float` is less than, equal to, or
   # greater than `real`. This is the basis for the tests in the
-  # [`Comparable`](https://docs.ruby-lang.org/en/2.6.0/Comparable.html) module.
+  # [`Comparable`](https://docs.ruby-lang.org/en/2.7.0/Comparable.html) module.
   #
   # The result of `NaN <=> NaN` is undefined, so an implementation-dependent
   # value is returned.
@@ -391,25 +357,7 @@ class Float < Numeric
   # `nil` is returned if the two values are incomparable.
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(Integer)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(Integer)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(Integer)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(Integer)
   end
@@ -417,9 +365,9 @@ class Float < Numeric
 
   # Returns `true` only if `obj` has the same value as `float`. Contrast this
   # with
-  # [`Float#eql?`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-eql-3F),
+  # [`Float#eql?`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-eql-3F),
   # which requires `obj` to be a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html).
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html).
   #
   # ```ruby
   # 1.0 == 1   #=> true
@@ -437,9 +385,9 @@ class Float < Numeric
 
   # Returns `true` only if `obj` has the same value as `float`. Contrast this
   # with
-  # [`Float#eql?`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-eql-3F),
+  # [`Float#eql?`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-eql-3F),
   # which requires `obj` to be a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html).
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html).
   #
   # ```ruby
   # 1.0 == 1   #=> true
@@ -461,25 +409,7 @@ class Float < Numeric
   # is returned.
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(T::Boolean)
   end
@@ -491,25 +421,7 @@ class Float < Numeric
   # value is returned.
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(T::Boolean)
   end
@@ -523,9 +435,9 @@ class Float < Numeric
   # 34.56.abs      #=> 34.56
   # ```
   #
-  # [`Float#magnitude`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-magnitude)
+  # [`Float#magnitude`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-magnitude)
   # is an alias for
-  # [`Float#abs`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-abs).
+  # [`Float#abs`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-abs).
   sig {returns(Float)}
   def abs(); end
 
@@ -587,10 +499,10 @@ class Float < Numeric
   def ceil(digits=0); end
 
   # Returns an array with both `numeric` and `float` represented as
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) objects.
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) objects.
   #
   # This is achieved by converting `numeric` to a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html).
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html).
   #
   # ```ruby
   # 1.2.coerce(3)       #=> [3.0, 1.2]
@@ -619,7 +531,7 @@ class Float < Numeric
   # Returns the denominator (always positive). The result is machine dependent.
   #
   # See also
-  # [`Float#numerator`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-numerator).
+  # [`Float#numerator`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-numerator).
   sig {returns(Integer)}
   def denominator(); end
 
@@ -650,7 +562,7 @@ class Float < Numeric
   def div(arg0); end
 
   # See
-  # [`Numeric#divmod`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html#method-i-divmod).
+  # [`Numeric#divmod`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html#method-i-divmod).
   #
   # ```ruby
   # 42.0.divmod(6)   #=> [7, 0.0]
@@ -665,7 +577,7 @@ class Float < Numeric
   def divmod(arg0); end
 
   # Returns `true` only if `obj` is a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) with the same
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) with the same
   # value as `float`. Contrast this with Float#==, which performs type
   # conversions.
   #
@@ -726,7 +638,7 @@ class Float < Numeric
 
   # Returns `true` if `float` is a valid IEEE floating point number, i.e. it is
   # not infinite and
-  # [`Float#nan?`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-nan-3F)
+  # [`Float#nan?`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-nan-3F)
   # is `false`.
   sig {returns(T::Boolean)}
   def finite?(); end
@@ -779,7 +691,8 @@ class Float < Numeric
 
   # Returns a hash code for this float.
   #
-  # See also Object#hash.
+  # See also
+  # [`Object#hash`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-hash).
   sig {returns(Integer)}
   def hash(); end
 
@@ -801,7 +714,7 @@ class Float < Numeric
   def infinite?(); end
 
   # Alias for:
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-to_s)
   sig {returns(String)}
   def inspect(); end
 
@@ -813,9 +726,9 @@ class Float < Numeric
   # 34.56.abs      #=> 34.56
   # ```
   #
-  # [`Float#magnitude`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-magnitude)
+  # [`Float#magnitude`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-magnitude)
   # is an alias for
-  # [`Float#abs`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-abs).
+  # [`Float#abs`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-abs).
   sig {returns(Float)}
   def magnitude(); end
 
@@ -868,10 +781,10 @@ class Float < Numeric
   # Returns the next representable floating point number.
   #
   # Float::MAX.next\_float and Float::INFINITY.next\_float is
-  # [`Float::INFINITY`](https://docs.ruby-lang.org/en/2.6.0/Float.html#INFINITY).
+  # [`Float::INFINITY`](https://docs.ruby-lang.org/en/2.7.0/Float.html#INFINITY).
   #
   # Float::NAN.next\_float is
-  # [`Float::NAN`](https://docs.ruby-lang.org/en/2.6.0/Float.html#NAN).
+  # [`Float::NAN`](https://docs.ruby-lang.org/en/2.7.0/Float.html#NAN).
   #
   # For example:
   #
@@ -928,7 +841,7 @@ class Float < Numeric
   # ```
   #
   # See also
-  # [`Float#denominator`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-denominator).
+  # [`Float#denominator`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-denominator).
   sig {returns(Integer)}
   def numerator(); end
 
@@ -945,7 +858,7 @@ class Float < Numeric
   # -Float::INFINITY.
   #
   # Float::NAN.prev\_float is
-  # [`Float::NAN`](https://docs.ruby-lang.org/en/2.6.0/Float.html#NAN).
+  # [`Float::NAN`](https://docs.ruby-lang.org/en/2.7.0/Float.html#NAN).
   #
   # For example:
   #
@@ -1027,7 +940,7 @@ class Float < Numeric
   # ```
   #
   # See also
-  # [`Float#to_r`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-to_r).
+  # [`Float#to_r`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-to_r).
   sig {returns(Rational)}
   sig do
     params(
@@ -1106,12 +1019,12 @@ class Float < Numeric
   def to_c(); end
 
   # Since `float` is already a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html), returns `self`.
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html), returns `self`.
   sig {returns(Float)}
   def to_f(); end
 
   # Returns the `float` truncated to an
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html).
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html).
   #
   # ```ruby
   # 1.2.to_i      #=> 1
@@ -1125,14 +1038,14 @@ class Float < Numeric
   # (0.3 / 0.1).to_i  #=> 2 (!)
   # ```
   #
-  # [`to_int`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-to_int)
+  # [`to_int`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-to_int)
   # is an alias for
-  # [`to_i`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-to_i).
+  # [`to_i`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-to_i).
   sig {returns(Integer)}
   def to_i(); end
 
   # Returns the `float` truncated to an
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html).
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html).
   #
   # ```ruby
   # 1.2.to_i      #=> 1
@@ -1146,9 +1059,9 @@ class Float < Numeric
   # (0.3 / 0.1).to_i  #=> 2 (!)
   # ```
   #
-  # [`to_int`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-to_int)
+  # [`to_int`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-to_int)
   # is an alias for
-  # [`to_i`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-to_i).
+  # [`to_i`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-to_i).
   sig {returns(Integer)}
   def to_int(); end
 
@@ -1171,7 +1084,7 @@ class Float < Numeric
   # ```
   #
   # See also
-  # [`Float#rationalize`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-rationalize).
+  # [`Float#rationalize`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-rationalize).
   sig {returns(Rational)}
   def to_r(); end
 
@@ -1180,7 +1093,7 @@ class Float < Numeric
   # and `-Infinity`.
   #
   # Also aliased as:
-  # [`inspect`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-inspect)
+  # [`inspect`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-inspect)
   sig {returns(String)}
   def to_s(); end
 

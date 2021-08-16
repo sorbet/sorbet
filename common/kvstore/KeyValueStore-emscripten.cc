@@ -36,11 +36,15 @@ void OwnedKeyValueStore::abort() const {
     throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
 }
 
+void OwnedKeyValueStore::writeInternal(string_view key, void *data, size_t len) {
+    throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
+}
+
 void OwnedKeyValueStore::write(string_view key, const vector<u1> &value) {
     throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
 }
 
-u1 *OwnedKeyValueStore::read(string_view key) const {
+KeyValueStoreValue OwnedKeyValueStore::read(string_view key) const {
     throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
 }
 

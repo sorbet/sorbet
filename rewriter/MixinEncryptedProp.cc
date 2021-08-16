@@ -11,24 +11,24 @@ namespace sorbet::rewriter {
 
 namespace {
 
-ast::TreePtr mkNilableEncryptedValue(core::MutableContext ctx, core::LocOffsets loc) {
-    auto opus = ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Opus());
-    auto db = ast::MK::UnresolvedConstant(loc, move(opus), core::Names::Constants::DB());
-    auto model = ast::MK::UnresolvedConstant(loc, move(db), core::Names::Constants::Model());
-    auto mixins = ast::MK::UnresolvedConstant(loc, move(model), core::Names::Constants::Mixins());
-    auto enc = ast::MK::UnresolvedConstant(loc, move(mixins), core::Names::Constants::Encryptable());
-    auto ev = ast::MK::UnresolvedConstant(loc, move(enc), core::Names::Constants::EncryptedValue());
-    return ASTUtil::mkNilable(loc, move(ev));
+ast::ExpressionPtr mkNilableEncryptedValue(core::MutableContext ctx, core::LocOffsets loc) {
+    auto parts = vector<core::NameRef>{
+        core::Names::Constants::Opus(),        core::Names::Constants::DB(),
+        core::Names::Constants::Model(),       core::Names::Constants::Mixins(),
+        core::Names::Constants::Encryptable(), core::Names::Constants::EncryptedValue(),
+    };
+
+    return ASTUtil::mkNilable(loc, ast::MK::UnresolvedConstantParts(loc, ast::MK::EmptyTree(), parts));
 }
 
-ast::TreePtr mkNilableString(core::LocOffsets loc) {
+ast::ExpressionPtr mkNilableString(core::LocOffsets loc) {
     return ASTUtil::mkNilable(loc, ast::MK::Constant(loc, core::Symbols::String()));
 }
 
 } // namespace
 
-vector<ast::TreePtr> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send *send) {
-    vector<ast::TreePtr> empty;
+vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send *send) {
+    vector<ast::ExpressionPtr> empty;
 
     if (ctx.state.runningUnderAutogen) {
         return empty;
@@ -51,12 +51,13 @@ vector<ast::TreePtr> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send
         return empty;
     }
     name = sym->asSymbol(ctx);
-    ENFORCE(core::Loc(ctx.file, sym->loc).source(ctx).size() > 1 &&
-            core::Loc(ctx.file, sym->loc).source(ctx)[0] == ':');
+    ENFORCE(core::Loc(ctx.file, sym->loc).exists());
+    ENFORCE(core::Loc(ctx.file, sym->loc).source(ctx).value().size() > 1 &&
+            core::Loc(ctx.file, sym->loc).source(ctx).value()[0] == ':');
     auto nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
     enc_name = name.prepend(ctx, "encrypted_");
 
-    ast::TreePtr rules;
+    ast::ExpressionPtr rules;
     if (!send->args.empty()) {
         rules = ASTUtil::mkKwArgsHash(send);
     }
@@ -67,7 +68,7 @@ vector<ast::TreePtr> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send
         }
     }
 
-    vector<ast::TreePtr> stats;
+    vector<ast::ExpressionPtr> stats;
 
     // Compute the getters
 

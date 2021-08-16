@@ -19,10 +19,10 @@ void ErrorFlusherStdout::flushErrors(spdlog::logger &logger, const GlobalState &
 
             auto &out = error->error->isCritical() ? critical : nonCritical;
             if (out.size() != 0) {
-                fmt::format_to(out, "\n\n");
+                fmt::format_to(std::back_inserter(out), "\n\n");
             }
             ENFORCE(error->text.has_value());
-            fmt::format_to(out, "{}", error->text.value_or(""));
+            fmt::format_to(std::back_inserter(out), "{}", error->text.value_or(""));
 
             for (auto &autocorrect : error->error->autocorrects) {
                 autocorrects.emplace_back(move(autocorrect));
@@ -57,19 +57,9 @@ void ErrorFlusherStdout::flushErrorCount(spdlog::logger &logger, int count) {
 }
 
 void ErrorFlusherStdout::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
-    UnorderedMap<FileRef, string> sources;
-    for (auto &autocorrect : autocorrects) {
-        for (auto &edit : autocorrect.edits) {
-            auto file = edit.loc.file();
-            if (!sources.count(file)) {
-                sources[file] = fs.readFile(file.data(gs).path());
-            }
-        }
-    }
-
-    auto toWrite = AutocorrectSuggestion::apply(autocorrects, sources);
-    for (auto &entry : toWrite) {
-        fs.writeFile(entry.first.data(gs).path(), entry.second);
+    auto toWrite = AutocorrectSuggestion::apply(gs, fs, this->autocorrects);
+    for (auto &[file, contents] : toWrite) {
+        fs.writeFile(file.data(gs).path(), contents);
     }
     autocorrects.clear();
 }

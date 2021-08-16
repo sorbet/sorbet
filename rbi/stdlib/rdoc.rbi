@@ -1,88 +1,88 @@
 # typed: __STDLIB_INTERNAL
 
 # Gem::RDoc provides methods to generate
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) and ri data for
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) and ri data for
 # installed gems upon gem installation.
 #
 # This file is automatically required by RubyGems 1.9 and newer.
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) produces documentation
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) produces documentation
 # for Ruby source files by parsing the source and extracting the definition for
 # classes, modules, methods, includes and requires. It associates these with
 # optional documentation contained in an immediately preceding comment block
 # then renders the result using an output formatter.
 #
 # For a simple introduction to writing or generating documentation using
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) see the
-# [README](https://docs.ruby-lang.org/en/2.6.0/README_md.html).
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) see the
+# [README](https://docs.ruby-lang.org/en/2.7.0/README_md.html).
 #
 # ## Roadmap
 #
 # If you think you found a bug in
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) see [Bugs at
-# `CONTRIBUTING`](https://docs.ruby-lang.org/en/2.6.0/CONTRIBUTING_md.html#label-Bugs)
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) see [Bugs at
+# `CONTRIBUTING`](https://docs.ruby-lang.org/en/2.7.0/CONTRIBUTING_md.html#label-Bugs)
 #
-# If you want to use [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) to
+# If you want to use [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) to
 # create documentation for your Ruby source files, see
-# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html) and
+# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html) and
 # refer to `rdoc --help` for command line usage.
 #
 # If you want to set the default markup format see [Supported Formats at
-# `RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html#label-Supported+Formats)
+# `RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html#class-RDoc::Markup-label-Supported+Formats)
 #
 # If you want to store rdoc configuration in your gem (such as the default
 # markup format) see [Saved Options at
-# `RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#label-Saved+Options)
+# `RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#class-RDoc::Options-label-Saved+Options)
 #
 # If you want to write documentation for Ruby files see
-# [`RDoc::Parser::Ruby`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/Ruby.html)
+# [`RDoc::Parser::Ruby`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/Ruby.html)
 #
 # If you want to write documentation for extensions written in C see
-# [`RDoc::Parser::C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html)
+# [`RDoc::Parser::C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html)
 #
 # If you want to generate documentation using `rake` see
-# [`RDoc::Task`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Task.html).
+# [`RDoc::Task`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Task.html).
 #
-# If you want to drive [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
+# If you want to drive [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
 # programmatically, see
-# [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RDoc.html).
+# [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RDoc.html).
 #
 # If you want to use the library to format text blocks into HTML or other
 # formats, look at
-# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html).
+# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html).
 #
-# If you want to make an [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
+# If you want to make an [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
 # plugin such as a generator or directive handler see
-# [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RDoc.html).
+# [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RDoc.html).
 #
 # If you want to write your own output generator see
-# [`RDoc::Generator`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Generator.html).
+# [`RDoc::Generator`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Generator.html).
 #
 # If you want an overview of how
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) works see
-# [CONTRIBUTING](https://docs.ruby-lang.org/en/2.6.0/CONTRIBUTING_md.html)
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) works see
+# [CONTRIBUTING](https://docs.ruby-lang.org/en/2.7.0/CONTRIBUTING_md.html)
 #
 # ## Credits
 #
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) is currently being
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) is currently being
 # maintained by Eric Hodel <drbrain@segment7.net>.
 #
 # Dave Thomas <dave@pragmaticprogrammer.com> is the original author of
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html).
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html).
 #
 # *   The Ruby parser in rdoc/parse.rb is based heavily on the outstanding work
 #     of Keiju ISHITSUKA of Nippon
-#     [`Rational`](https://docs.ruby-lang.org/en/2.6.0/Rational.html) Inc, who
+#     [`Rational`](https://docs.ruby-lang.org/en/2.7.0/Rational.html) Inc, who
 #     produced the Ruby parser for irb and the rtags package.
 module RDoc
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) modifiers for
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) modifiers for
   # attributes
   ATTR_MODIFIERS = T.let(T.unsafe(nil), T::Array[T.untyped])
 
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) modifiers for
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) modifiers for
   # classes
   CLASS_MODIFIERS = T.let(T.unsafe(nil), T::Array[T.untyped])
 
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) modifiers for
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) modifiers for
   # constants
   CONSTANT_MODIFIERS = T.let(T.unsafe(nil), T::Array[T.untyped])
 
@@ -90,40 +90,40 @@ module RDoc
   # in the current directory
   DOT_DOC_FILENAME = T.let(T.unsafe(nil), String)
 
-  # General [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) modifiers
+  # General [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) modifiers
   GENERAL_MODIFIERS = T.let(T.unsafe(nil), T::Array[T.untyped])
 
   # Ruby's built-in classes, modules and exceptions
   KNOWN_CLASSES = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) modifiers for
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) modifiers for
   # methods
   METHOD_MODIFIERS = T.let(T.unsafe(nil), T::Array[T.untyped])
 
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) version you are
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) version you are
   # using
   VERSION = T.let(T.unsafe(nil), String)
 
-  # [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) visibilities
+  # [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) visibilities
   VISIBILITIES = T.let(T.unsafe(nil), T::Array[T.untyped])
 
   # Loads the best available
-  # [`YAML`](https://docs.ruby-lang.org/en/2.6.0/YAML.html) library.
+  # [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) library.
   def self.load_yaml; end
 end
 
 # Represent an alias, which is an old\_name/new\_name pair associated with a
 # particular context
 class RDoc::Alias < ::RDoc::CodeObject
-  # Creates a new [`Alias`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Alias.html)
+  # Creates a new [`Alias`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Alias.html)
   # with a token stream of `text` that aliases `old_name` to `new_name`, has
   # `comment` and is a `singleton` context.
   def self.new(text, old_name, new_name, comment, singleton = _); end
 
   # Order by
-  # [`singleton`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Alias.html#attribute-i-singleton)
+  # [`singleton`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Alias.html#attribute-i-singleton)
   # then
-  # [`new_name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Alias.html#attribute-i-new_name)
+  # [`new_name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Alias.html#attribute-i-new_name)
   def <=>(other); end
 
   # HTML fragment reference for this alias
@@ -150,13 +150,13 @@ class RDoc::Alias < ::RDoc::CodeObject
   def old_name; end
 
   # Alias for:
-  # [`pretty_new_name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Alias.html#method-i-pretty_new_name)
+  # [`pretty_new_name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Alias.html#method-i-pretty_new_name)
   def pretty_name; end
 
   # New name with prefix '::' or '#'.
   #
   # Also aliased as:
-  # [`pretty_name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Alias.html#method-i-pretty_name)
+  # [`pretty_name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Alias.html#method-i-pretty_name)
   def pretty_new_name; end
 
   # Old name with prefix '::' or '#'.
@@ -180,11 +180,11 @@ end
 # c = Class.new do end
 # ```
 #
-# [`AnonClass`](https://docs.ruby-lang.org/en/2.6.0/RDoc/AnonClass.html) is
+# [`AnonClass`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnonClass.html) is
 # currently not used.
 class RDoc::AnonClass < ::RDoc::ClassModule; end
 
-# [`AnyMethod`](https://docs.ruby-lang.org/en/2.6.0/RDoc/AnyMethod.html) is the
+# [`AnyMethod`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnyMethod.html) is the
 # base class for objects representing methods
 class RDoc::AnyMethod < ::RDoc::MethodAttr
   include(::RDoc::TokenStream)
@@ -192,7 +192,7 @@ class RDoc::AnyMethod < ::RDoc::MethodAttr
   MARSHAL_VERSION = T.let(T.unsafe(nil), Integer)
 
   # Creates a new
-  # [`AnyMethod`](https://docs.ruby-lang.org/en/2.6.0/RDoc/AnyMethod.html) with
+  # [`AnyMethod`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnyMethod.html) with
   # a token stream `text` and `name`
   def self.new(text, name); end
 
@@ -203,9 +203,9 @@ class RDoc::AnyMethod < ::RDoc::MethodAttr
   def aref_prefix; end
 
   # The
-  # [`call_seq`](https://docs.ruby-lang.org/en/2.6.0/RDoc/AnyMethod.html#attribute-i-call_seq)
+  # [`call_seq`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnyMethod.html#attribute-i-call_seq)
   # or the
-  # [`param_seq`](https://docs.ruby-lang.org/en/2.6.0/RDoc/AnyMethod.html#method-i-param_seq)
+  # [`param_seq`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnyMethod.html#method-i-param_seq)
   # with method name, if there is no call\_seq.
   #
   # Use this for displaying a method's argument lists.
@@ -224,7 +224,7 @@ class RDoc::AnyMethod < ::RDoc::MethodAttr
   # given nil is assumed.
   #
   # See also
-  # [`param_seq`](https://docs.ruby-lang.org/en/2.6.0/RDoc/AnyMethod.html#method-i-param_seq)
+  # [`param_seq`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnyMethod.html#method-i-param_seq)
   def call_seq=(call_seq); end
 
   # If true this method uses `super` to call a superclass version
@@ -242,25 +242,25 @@ class RDoc::AnyMethod < ::RDoc::MethodAttr
   def is_alias_for; end
 
   # Dumps this
-  # [`AnyMethod`](https://docs.ruby-lang.org/en/2.6.0/RDoc/AnyMethod.html) for
+  # [`AnyMethod`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnyMethod.html) for
   # use by ri. See also
-  # [`marshal_load`](https://docs.ruby-lang.org/en/2.6.0/RDoc/AnyMethod.html#method-i-marshal_load)
+  # [`marshal_load`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnyMethod.html#method-i-marshal_load)
   def marshal_dump; end
 
   # Loads this
-  # [`AnyMethod`](https://docs.ruby-lang.org/en/2.6.0/RDoc/AnyMethod.html) from
+  # [`AnyMethod`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnyMethod.html) from
   # `array`. For a loaded
-  # [`AnyMethod`](https://docs.ruby-lang.org/en/2.6.0/RDoc/AnyMethod.html) the
+  # [`AnyMethod`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnyMethod.html) the
   # following methods will return cached values:
   #
-  # *   [`full_name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/MethodAttr.html#method-i-full_name)
-  # *   [`parent_name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/MethodAttr.html#method-i-parent_name)
+  # *   [`full_name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MethodAttr.html#method-i-full_name)
+  # *   [`parent_name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MethodAttr.html#method-i-parent_name)
   def marshal_load(array); end
 
-  # [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) name
+  # [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) name
   #
   # If the method has no assigned name, it extracts it from
-  # [`call_seq`](https://docs.ruby-lang.org/en/2.6.0/RDoc/AnyMethod.html#attribute-i-call_seq).
+  # [`call_seq`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnyMethod.html#attribute-i-call_seq).
   def name; end
 
   # A list of this method's method and yield parameters. `call-seq` params are
@@ -288,7 +288,7 @@ end
 class RDoc::Attr < ::RDoc::MethodAttr
   MARSHAL_VERSION = T.let(T.unsafe(nil), Integer)
 
-  # Creates a new [`Attr`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Attr.html)
+  # Creates a new [`Attr`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Attr.html)
   # with body `text`, `name`, read/write status `rw` and `comment`. `singleton`
   # marks this as a class attribute.
   def self.new(text, name, rw, comment, singleton = _); end
@@ -300,7 +300,7 @@ class RDoc::Attr < ::RDoc::MethodAttr
   def add_alias(an_alias, context); end
 
   # The
-  # [`aref`](https://docs.ruby-lang.org/en/2.6.0/RDoc/MethodAttr.html#method-i-aref)
+  # [`aref`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MethodAttr.html#method-i-aref)
   # prefix for attributes
   def aref_prefix; end
 
@@ -311,18 +311,18 @@ class RDoc::Attr < ::RDoc::MethodAttr
 
   def inspect; end
 
-  # Dumps this [`Attr`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Attr.html) for
+  # Dumps this [`Attr`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Attr.html) for
   # use by ri. See also
-  # [`marshal_load`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Attr.html#method-i-marshal_load)
+  # [`marshal_load`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Attr.html#method-i-marshal_load)
   def marshal_dump; end
 
-  # Loads this [`Attr`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Attr.html) from
+  # Loads this [`Attr`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Attr.html) from
   # `array`. For a loaded
-  # [`Attr`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Attr.html) the following
+  # [`Attr`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Attr.html) the following
   # methods will return cached values:
   #
-  # *   [`full_name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/MethodAttr.html#method-i-full_name)
-  # *   [`parent_name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/MethodAttr.html#method-i-parent_name)
+  # *   [`full_name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MethodAttr.html#method-i-full_name)
+  # *   [`parent_name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MethodAttr.html#method-i-parent_name)
   def marshal_load(array); end
 
   def pretty_print(q); end
@@ -338,13 +338,13 @@ class RDoc::Attr < ::RDoc::MethodAttr
   def token_stream; end
 end
 
-# [`ClassModule`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html) is
+# [`ClassModule`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html) is
 # the base class for objects representing either a class or a module.
 class RDoc::ClassModule < ::RDoc::Context
   MARSHAL_VERSION = T.let(T.unsafe(nil), Integer)
 
   # Creates a new
-  # [`ClassModule`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html)
+  # [`ClassModule`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html)
   # with `name` with optional `superclass`
   #
   # This is a constructor for subclasses, and must never be called directly.
@@ -352,7 +352,7 @@ class RDoc::ClassModule < ::RDoc::Context
 
   # Adds `comment` to this ClassModule's list of comments at `location`. This
   # method is preferred over
-  # [`comment=`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#method-i-comment-3D)
+  # [`comment=`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#method-i-comment-3D)
   # since it allows ri data to be updated across multiple runs.
   def add_comment(comment, location); end
 
@@ -363,23 +363,23 @@ class RDoc::ClassModule < ::RDoc::Context
   #
   # Returns the included classes or modules, not the includes themselves. The
   # returned values are either
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or
-  # [`RDoc::NormalModule`](https://docs.ruby-lang.org/en/2.6.0/RDoc/NormalModule.html)
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or
+  # [`RDoc::NormalModule`](https://docs.ruby-lang.org/en/2.7.0/RDoc/NormalModule.html)
   # instances (see
-  # [`RDoc::Include#module`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Mixin.html#method-i-module)).
+  # [`RDoc::Include#module`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Mixin.html#method-i-module)).
   #
   # The values are returned in reverse order of their inclusion, which is the
   # order suitable for searching methods/attributes in the ancestors. The
   # superclass, if any, comes last.
   #
   # Also aliased as:
-  # [`direct_ancestors`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html#method-i-direct_ancestors)
+  # [`direct_ancestors`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html#method-i-direct_ancestors)
   def ancestors; end
 
   # HTML fragment reference for this module or class. See
-  # [`RDoc::NormalClass#aref`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html#method-i-aref)
+  # [`RDoc::NormalClass#aref`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html#method-i-aref)
   # and
-  # [`RDoc::NormalModule#aref`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html#method-i-aref)
+  # [`RDoc::NormalModule#aref`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html#method-i-aref)
   def aref; end
 
   def aref_prefix; end
@@ -390,21 +390,21 @@ class RDoc::ClassModule < ::RDoc::Context
   def comment=(comment); end
 
   # Comment and the location it came from. Use
-  # [`add_comment`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html#method-i-add_comment)
+  # [`add_comment`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html#method-i-add_comment)
   # to add comments
   def comment_location; end
 
   # Comment and the location it came from. Use
-  # [`add_comment`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html#method-i-add_comment)
+  # [`add_comment`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html#method-i-add_comment)
   # to add comments
   def comment_location=(_); end
 
   # Prepares this
-  # [`ClassModule`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html)
+  # [`ClassModule`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html)
   # for use by a generator.
   #
   # See
-  # [`RDoc::Store#complete`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html#method-i-complete)
+  # [`RDoc::Store#complete`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html#method-i-complete)
   def complete(min_visibility); end
 
   # Constants that are aliases for this class or module
@@ -423,26 +423,26 @@ class RDoc::ClassModule < ::RDoc::Context
   # Ancestors of this class or module only
   #
   # Alias for:
-  # [`ancestors`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html#method-i-ancestors)
+  # [`ancestors`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html#method-i-ancestors)
   def direct_ancestors; end
 
   # Does this
-  # [`ClassModule`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html)
+  # [`ClassModule`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html)
   # or any of its methods have document\_self set?
   def document_self_or_methods; end
 
   # Does this class or module have a comment with content or is
-  # [`received_nodoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#attribute-i-received_nodoc)
+  # [`received_nodoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#attribute-i-received_nodoc)
   # true?
   def documented?; end
 
   # Iterates the ancestors of this class or module for which an
-  # [`RDoc::ClassModule`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html)
+  # [`RDoc::ClassModule`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html)
   # exists.
   def each_ancestor; end
 
   # Looks for a symbol in the
-  # [`ancestors`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html#method-i-ancestors).
+  # [`ancestors`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html#method-i-ancestors).
   # See Context#find\_local\_symbol.
   def find_ancestor_local_symbol(symbol); end
 
@@ -452,11 +452,11 @@ class RDoc::ClassModule < ::RDoc::Context
   # Return the fully qualified name of this class or module
   def full_name; end
 
-  # [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) or module this
+  # [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) or module this
   # constant is an alias for
   def is_alias_for; end
 
-  # [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) or module this
+  # [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) or module this
   # constant is an alias for
   def is_alias_for=(_); end
 
@@ -465,7 +465,7 @@ class RDoc::ClassModule < ::RDoc::Context
   def marshal_load(array); end
 
   # Merges `class_module` into this
-  # [`ClassModule`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html).
+  # [`ClassModule`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html).
   #
   # The data in `class_module` is preferred over the receiver.
   def merge(class_module); end
@@ -490,9 +490,8 @@ class RDoc::ClassModule < ::RDoc::Context
   # class or module. For use by formatters only (caches its result).
   def non_aliases; end
 
-  # Parses `comment_location` into an
-  # [`RDoc::Markup::Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html)
-  # composed of multiple RDoc::Markup::Documents with their file set.
+  # Parses `comment_location` into an RDoc::Markup::Document composed of
+  # multiple RDoc::Markup::Documents with their file set.
   def parse(comment_location); end
 
   # Path to this class or module for use with HTML generator output.
@@ -507,8 +506,7 @@ class RDoc::ClassModule < ::RDoc::Context
 
   def remove_things(my_things, other_files); end
 
-  # Search record used by
-  # [`RDoc::Generator::JsonIndex`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Generator/JsonIndex.html)
+  # Search record used by RDoc::Generator::JsonIndex
   def search_record; end
 
   # Sets the store for this class or module and its contained code objects.
@@ -518,7 +516,7 @@ class RDoc::ClassModule < ::RDoc::Context
   # object, returns the name if it is not known.
   def superclass; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the superclass of this
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the superclass of this
   # class to `superclass`
   def superclass=(superclass); end
 
@@ -531,75 +529,75 @@ class RDoc::ClassModule < ::RDoc::Context
   # through a constant.
   #
   # The aliased module/class is replaced in the children and in
-  # [`RDoc::Store#modules_hash`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html#method-i-modules_hash)
+  # [`RDoc::Store#modules_hash`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html#method-i-modules_hash)
   # or
-  # [`RDoc::Store#classes_hash`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html#method-i-classes_hash)
+  # [`RDoc::Store#classes_hash`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html#method-i-classes_hash)
   # by a copy that has `RDoc::ClassModule#is_alias_for` set to the aliased
   # module/class, and this copy is added to `#aliases` of the aliased
   # module/class.
   #
   # Formatters can use the
-  # [`non_aliases`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html#method-i-non_aliases)
+  # [`non_aliases`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html#method-i-non_aliases)
   # method to retrieve children that are not aliases, for instance to list the
   # namespace content, since the aliased modules are included in the constants
   # of the class/module, that are listed separately.
   def update_aliases; end
 
   # Deletes from
-  # [`extends`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html#attribute-i-extends)
+  # [`extends`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#attribute-i-extends)
   # those whose module has been removed from the documentation.
   def update_extends; end
 
   # Deletes from
-  # [`includes`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html#attribute-i-includes)
+  # [`includes`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#attribute-i-includes)
   # those whose module has been removed from the documentation.
   def update_includes; end
 
   # Return a
-  # [`RDoc::ClassModule`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html)
+  # [`RDoc::ClassModule`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html)
   # of class `class_type` that is a copy of module `module`. Used to promote
   # modules to classes.
   def self.from_module(class_type, mod); end
 end
 
-# Base class for the [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
+# Base class for the [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
 # code tree.
 #
 # We contain the common stuff for contexts (which are containers) and other
 # elements (methods, attributes and so on)
 #
 # Here's the tree of the
-# [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html)
+# [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html)
 # subclasses:
 #
-# *   [`RDoc::Context`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html)
-#     *   [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
-#     *   [`RDoc::ClassModule`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html)
-#         *   [`RDoc::AnonClass`](https://docs.ruby-lang.org/en/2.6.0/RDoc/AnonClass.html)
+# *   [`RDoc::Context`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html)
+#     *   [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
+#     *   [`RDoc::ClassModule`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html)
+#         *   [`RDoc::AnonClass`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnonClass.html)
 #             (never used so far)
-#         *   [`RDoc::NormalClass`](https://docs.ruby-lang.org/en/2.6.0/RDoc/NormalClass.html)
-#         *   [`RDoc::NormalModule`](https://docs.ruby-lang.org/en/2.6.0/RDoc/NormalModule.html)
-#         *   [`RDoc::SingleClass`](https://docs.ruby-lang.org/en/2.6.0/RDoc/SingleClass.html)
+#         *   [`RDoc::NormalClass`](https://docs.ruby-lang.org/en/2.7.0/RDoc/NormalClass.html)
+#         *   [`RDoc::NormalModule`](https://docs.ruby-lang.org/en/2.7.0/RDoc/NormalModule.html)
+#         *   [`RDoc::SingleClass`](https://docs.ruby-lang.org/en/2.7.0/RDoc/SingleClass.html)
 #
 #
-# *   [`RDoc::MethodAttr`](https://docs.ruby-lang.org/en/2.6.0/RDoc/MethodAttr.html)
-#     *   [`RDoc::Attr`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Attr.html)
-#     *   [`RDoc::AnyMethod`](https://docs.ruby-lang.org/en/2.6.0/RDoc/AnyMethod.html)
-#         *   [`RDoc::GhostMethod`](https://docs.ruby-lang.org/en/2.6.0/RDoc/GhostMethod.html)
-#         *   [`RDoc::MetaMethod`](https://docs.ruby-lang.org/en/2.6.0/RDoc/MetaMethod.html)
+# *   [`RDoc::MethodAttr`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MethodAttr.html)
+#     *   [`RDoc::Attr`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Attr.html)
+#     *   [`RDoc::AnyMethod`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnyMethod.html)
+#         *   [`RDoc::GhostMethod`](https://docs.ruby-lang.org/en/2.7.0/RDoc/GhostMethod.html)
+#         *   [`RDoc::MetaMethod`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MetaMethod.html)
 #
 #
-# *   [`RDoc::Alias`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Alias.html)
-# *   [`RDoc::Constant`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Constant.html)
-# *   [`RDoc::Mixin`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Mixin.html)
-#     *   [`RDoc::Require`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Require.html)
-#     *   [`RDoc::Include`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Include.html)
+# *   [`RDoc::Alias`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Alias.html)
+# *   [`RDoc::Constant`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Constant.html)
+# *   [`RDoc::Mixin`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Mixin.html)
+#     *   [`RDoc::Require`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Require.html)
+#     *   [`RDoc::Include`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Include.html)
 class RDoc::CodeObject
   include(::RDoc::Generator::Markup)
   include(::RDoc::Text)
 
   # Creates a new
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html)
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html)
   # that will document itself and its children
   def self.new; end
 
@@ -610,7 +608,7 @@ class RDoc::CodeObject
   def comment=(comment); end
 
   # Should this
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html) be
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html) be
   # displayed in output?
   #
   # A code object should be displayed if:
@@ -631,13 +629,13 @@ class RDoc::CodeObject
   def document_self; end
 
   # Enables or disables documentation of this
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html)
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html)
   # unless it has been turned off by :enddoc:. If the argument is `nil` it means
   # the documentation is turned off by `:nodoc:`.
   def document_self=(document_self); end
 
   # Does this object have a comment with content or is
-  # [`received_nodoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#attribute-i-received_nodoc)
+  # [`received_nodoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#attribute-i-received_nodoc)
   # true?
   def documented?; end
 
@@ -645,38 +643,38 @@ class RDoc::CodeObject
   def done_documenting; end
 
   # Turns documentation on/off, and turns on/off
-  # [`document_self`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#attribute-i-document_self)
+  # [`document_self`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#attribute-i-document_self)
   # and
-  # [`document_children`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#attribute-i-document_children).
+  # [`document_children`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#attribute-i-document_children).
   #
   # Once documentation has been turned off (by `:enddoc:`), the object will
   # refuse to turn
-  # [`document_self`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#attribute-i-document_self)
+  # [`document_self`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#attribute-i-document_self)
   # or
-  # [`document_children`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#attribute-i-document_children)
+  # [`document_children`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#attribute-i-document_children)
   # on, so `:doc:` and `:start_doc:` directives will have no effect in the
   # current file.
   def done_documenting=(value); end
 
   # Yields each parent of this
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html).
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html).
   # See also
-  # [`RDoc::ClassModule#each_ancestor`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html#method-i-each_ancestor)
+  # [`RDoc::ClassModule#each_ancestor`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html#method-i-each_ancestor)
   def each_parent; end
 
   # Which file this code object was defined in
   def file; end
 
-  # [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) name where this
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html) was
+  # [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) name where this
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html) was
   # found.
   #
   # See also
-  # [`RDoc::Context#in_files`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html#attribute-i-in_files)
+  # [`RDoc::Context#in_files`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#attribute-i-in_files)
   def file_name; end
 
   # Force documentation of this
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html)
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html)
   def force_documentation; end
 
   # Force the documentation of this object unless documentation has been turned
@@ -685,20 +683,21 @@ class RDoc::CodeObject
 
   # Sets the full\_name overriding any computed full name.
   #
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) to `nil` to clear
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) to `nil` to clear
   # RDoc's cached value
   def full_name=(full_name); end
 
   # Use this to ignore a
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html) and
-  # all its children until found again (#record\_location is called). An ignored
-  # item will not be displayed in documentation.
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html) and
+  # all its children until found again
+  # ([`record_location`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#method-i-record_location)
+  # is called). An ignored item will not be displayed in documentation.
   #
   # See github issue #55
   #
   # The ignored status is temporary in order to allow implementation details to
   # be hidden. At the end of processing a file
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) allows all classes
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) allows all classes
   # and modules to add new documentation to previously created classes.
   #
   # If a class was ignored (via stopdoc) then reopened later with additional
@@ -709,48 +708,48 @@ class RDoc::CodeObject
   # Has this class been ignored?
   #
   # See also
-  # [`ignore`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#method-i-ignore)
+  # [`ignore`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#method-i-ignore)
   def ignored?; end
 
   def self.new_visibility; end
 
   # Line in
-  # [`file`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#attribute-i-file)
+  # [`file`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#attribute-i-file)
   # where this
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html) was
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html) was
   # defined
   def line; end
 
   # Line in
-  # [`file`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#attribute-i-file)
+  # [`file`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#attribute-i-file)
   # where this
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html) was
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html) was
   # defined
   def line=(_); end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of arbitrary
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of arbitrary
   # metadata for this
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html)
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html)
   def metadata; end
 
   # The options instance from the store this
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html) is
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html) is
   # attached to, or a default options instance if the
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html) is
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html) is
   # not attached.
   #
   # This is used by Text#snippet
   def options; end
 
   # Sets the parent
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html)
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html)
   def parent; end
 
   # Sets the parent
   # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html)
   def parent=(_); end
 
-  # [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) name of our parent
+  # [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) name of our parent
   def parent_file_name; end
 
   # Name of our parent
@@ -760,12 +759,12 @@ class RDoc::CodeObject
   def received_nodoc; end
 
   # Records the
-  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # (file) where this code object was defined
   def record_location(top_level); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the section this
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html) is
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the section this
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html) is
   # in
   def section; end
 
@@ -781,16 +780,16 @@ class RDoc::CodeObject
   # Disable capture of documentation
   def stop_doc; end
 
-  # The [`RDoc::Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html) for
+  # The [`RDoc::Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html) for
   # this object.
   def store; end
 
   # Sets the `store` that contains this
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html)
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html)
   def store=(store); end
 
   # Use this to suppress a
-  # [`CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html) and
+  # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html) and
   # all its children until the next file it is seen in or documentation is
   # discovered. A suppressed item with documentation will be displayed while an
   # ignored item with documentation may not be displayed.
@@ -799,7 +798,7 @@ class RDoc::CodeObject
   # Has this class been suppressed?
   #
   # See also
-  # [`suppress`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#method-i-suppress)
+  # [`suppress`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#method-i-suppress)
   def suppressed?; end
 
   # We are the model of the code, but we know that at some point we will be
@@ -814,23 +813,23 @@ class RDoc::CodeObject
 end
 
 # A comment holds the text comment for a
-# [`RDoc::CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html)
+# [`RDoc::CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html)
 # and provides a unified way of cleaning it up and parsing it into an
-# [`RDoc::Markup::Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html).
+# RDoc::Markup::Document.
 #
 # Each comment may have a different markup format set by
-# [`format=`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Comment.html#method-i-format-3D).
+# [`format=`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Comment.html#method-i-format-3D).
 # By default 'rdoc' is used. The :markup: directive tells
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) which format to use.
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) which format to use.
 #
 # See [Other directives at
-# `RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html#label-Other+directives)
+# `RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html#class-RDoc::Markup-label-Other+directives)
 # for instructions on adding an alternate format.
 class RDoc::Comment
   include(::RDoc::Text)
 
   # Creates a new comment with `text` that is found in the
-  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # `location`.
   def self.new(text = _, location = _); end
 
@@ -844,7 +843,7 @@ class RDoc::Comment
   def document=(_); end
 
   # A comment is empty if its text
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) is empty.
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) is empty.
   def empty?; end
 
   # HACK dubious
@@ -869,12 +868,12 @@ class RDoc::Comment
   def extract_call_seq(method); end
 
   # The
-  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # this comment was found in
   def file; end
 
   # The format of this comment. Defaults to
-  # [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html)
+  # [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html)
   def format; end
 
   # Sets the format of this comment and resets any parsed document
@@ -883,25 +882,24 @@ class RDoc::Comment
   def inspect; end
 
   # The
-  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # this comment was found in
   def location; end
 
   # The
-  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # this comment was found in
   def location=(_); end
 
   # Normalizes the text. See
-  # [`RDoc::Text#normalize_comment`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Text.html#method-i-normalize_comment)
+  # [`RDoc::Text#normalize_comment`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Text.html#method-i-normalize_comment)
   # for details
   def normalize; end
 
   def normalized?; end
 
-  # Parses the comment into an
-  # [`RDoc::Markup::Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html).
-  # The parsed document is cached until the text is changed.
+  # Parses the comment into an RDoc::Markup::Document. The parsed document is
+  # cached until the text is changed.
   def parse; end
 
   # Removes private sections from this comment. Private sections are flush to
@@ -909,10 +907,12 @@ class RDoc::Comment
   # comments, a private marker may not start at the opening of the comment.
   #
   # ```
-  # *--
-  # * private
-  # *++
-  # * public
+  # /*
+  #  *--
+  #  * private
+  #  *++
+  #  * public
+  #  */
   # ```
   def remove_private; end
 
@@ -939,9 +939,9 @@ class RDoc::Constant < ::RDoc::CodeObject
   def <=>(other); end
 
   # Constants are equal when their
-  # [`parent`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#attribute-i-parent)
+  # [`parent`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#attribute-i-parent)
   # and
-  # [`name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Constant.html#attribute-i-name)
+  # [`name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Constant.html#attribute-i-name)
   # is the same
   def ==(other); end
 
@@ -961,19 +961,19 @@ class RDoc::Constant < ::RDoc::CodeObject
   def is_alias_for=(_); end
 
   # Dumps this
-  # [`Constant`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Constant.html) for use
+  # [`Constant`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Constant.html) for use
   # by ri. See also
-  # [`marshal_load`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Constant.html#method-i-marshal_load)
+  # [`marshal_load`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Constant.html#method-i-marshal_load)
   def marshal_dump; end
 
   # Loads this
-  # [`Constant`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Constant.html) from
+  # [`Constant`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Constant.html) from
   # `array`. For a loaded
-  # [`Constant`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Constant.html) the
+  # [`Constant`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Constant.html) the
   # following methods will return cached values:
   #
-  # *   [`full_name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Constant.html#method-i-full_name)
-  # *   [`parent_name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#method-i-parent_name)
+  # *   [`full_name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Constant.html#method-i-full_name)
+  # *   [`parent_name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#method-i-parent_name)
   def marshal_load(array); end
 
   # The constant's name
@@ -1005,7 +1005,7 @@ class RDoc::Constant < ::RDoc::CodeObject
   def visibility=(_); end
 end
 
-# A [`Context`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html) is
+# A [`Context`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html) is
 # something that can hold modules, classes, methods, attributes, aliases,
 # requires, and includes. Classes, modules, and files are all Contexts.
 class RDoc::Context < ::RDoc::CodeObject
@@ -1022,15 +1022,15 @@ class RDoc::Context < ::RDoc::CodeObject
   def self.new; end
 
   # Contexts are sorted by
-  # [`full_name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html#method-i-full_name)
+  # [`full_name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#method-i-full_name)
   def <=>(other); end
 
   # Adds an item of type `klass` with the given `name` and `comment` to the
   # context.
   #
   # Currently only
-  # [`RDoc::Extend`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Extend.html) and
-  # [`RDoc::Include`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Include.html) are
+  # [`RDoc::Extend`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Extend.html) and
+  # [`RDoc::Include`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Include.html) are
   # supported.
   def add(klass, name, comment); end
 
@@ -1060,22 +1060,22 @@ class RDoc::Context < ::RDoc::CodeObject
   # ```
   #
   # Given `class Container::Item`
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) assumes `Container`
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) assumes `Container`
   # is a module unless it later sees `class Container`. `add_class`
   # automatically upgrades `given_name` to a class in this case.
   def add_class(class_type, given_name, superclass = _); end
 
   # Adds the class or module `mod` to the modules or classes
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) `self_hash`, and to
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) `self_hash`, and to
   # `all_hash` (either `TopLevel::modules_hash` or `TopLevel::classes_hash`),
   # unless
-  # [`done_documenting`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#attribute-i-done_documenting)
+  # [`done_documenting`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#attribute-i-done_documenting)
   # is `true`. Sets the
-  # [`parent`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#attribute-i-parent)
+  # [`parent`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#attribute-i-parent)
   # of `mod` to `self`, and its
-  # [`section`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#attribute-i-section)
+  # [`section`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#attribute-i-section)
   # to
-  # [`current_section`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html#attribute-i-current_section).
+  # [`current_section`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#attribute-i-current_section).
   # Returns `mod`.
   def add_class_or_module(mod, self_hash, all_hash); end
 
@@ -1084,11 +1084,11 @@ class RDoc::Context < ::RDoc::CodeObject
   def add_constant(constant); end
 
   # Adds extension module `ext` which should be an
-  # [`RDoc::Extend`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Extend.html)
+  # [`RDoc::Extend`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Extend.html)
   def add_extend(ext); end
 
   # Adds included module `include` which should be an
-  # [`RDoc::Include`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Include.html)
+  # [`RDoc::Include`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Include.html)
   def add_include(include); end
 
   # Adds `method` if not already there. If it is (as method or attribute),
@@ -1096,9 +1096,9 @@ class RDoc::Context < ::RDoc::CodeObject
   def add_method(method); end
 
   # Adds a module named `name`. If
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) already knows `name`
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) already knows `name`
   # is a class then that class is returned instead. See also
-  # [`add_class`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html#method-i-add_class).
+  # [`add_class`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#method-i-add_class).
   def add_module(class_type, name); end
 
   # Adds an alias from `from` (a class or module) to `name` which was defined in
@@ -1113,8 +1113,7 @@ class RDoc::Context < ::RDoc::CodeObject
   #
   # A section with a `title` of `nil` will return the default section.
   #
-  # See also
-  # [`RDoc::Context::Section`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context/Section.html)
+  # See also RDoc::Context::Section
   def add_section(title, comment = _); end
 
   # Adds `thing` to the collection `array`
@@ -1143,27 +1142,27 @@ class RDoc::Context < ::RDoc::CodeObject
   # Creates the full name for a child with `name`
   def child_name(name); end
 
-  # [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) attributes
+  # [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) attributes
   def class_attributes; end
 
-  # [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) methods
+  # [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) methods
   def class_method_list; end
 
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of classes in this
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of classes in this
   # context
   def classes; end
 
   # All classes and modules in this namespace
   def classes_and_modules; end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of classes keyed by
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of classes keyed by
   # class name
   def classes_hash; end
 
   # Constants defined
   def constants; end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of registered
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of registered
   # constants.
   def constants_hash; end
 
@@ -1206,7 +1205,7 @@ class RDoc::Context < ::RDoc::CodeObject
   # `constants` and `attributes` collections are sorted.
   #
   # To retrieve methods in a section use
-  # [`methods_by_type`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html#method-i-methods_by_type)
+  # [`methods_by_type`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#method-i-methods_by_type)
   # with the optional `section` parameter.
   #
   # NOTE: Do not edit collections yielded by this method
@@ -1230,7 +1229,7 @@ class RDoc::Context < ::RDoc::CodeObject
   # Finds a constant with `name` in this context
   def find_constant_named(name); end
 
-  # [`Find`](https://docs.ruby-lang.org/en/2.6.0/Find.html) a module at a higher
+  # [`Find`](https://docs.ruby-lang.org/en/2.7.0/Find.html) a module at a higher
   # scope
   def find_enclosing_module_named(name); end
 
@@ -1256,7 +1255,7 @@ class RDoc::Context < ::RDoc::CodeObject
   # Finds a instance or module method with `name` in this context
   def find_method_named(name); end
 
-  # [`Find`](https://docs.ruby-lang.org/en/2.6.0/Find.html) a module with `name`
+  # [`Find`](https://docs.ruby-lang.org/en/2.7.0/Find.html) a module with `name`
   # using ruby's scoping rules
   def find_module_named(name); end
 
@@ -1295,32 +1294,31 @@ class RDoc::Context < ::RDoc::CodeObject
   def method_list; end
 
   # Breaks
-  # [`method_list`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html#attribute-i-method_list)
+  # [`method_list`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#attribute-i-method_list)
   # into a nested hash by type (`'class'` or `'instance'`) and visibility
   # (`:public`, `:protected`, `:private`).
   #
-  # If `section` is provided only methods in that
-  # [`RDoc::Context::Section`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context/Section.html)
-  # will be returned.
+  # If `section` is provided only methods in that RDoc::Context::Section will be
+  # returned.
   def methods_by_type(section = _); end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of registered
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of registered
   # methods. Attributes are also registered here, twice if they are RW.
   def methods_hash; end
 
   # Yields AnyMethod and Attr entries matching the list of names in `methods`.
   def methods_matching(methods, singleton = _, &block); end
 
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of modules in this
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of modules in this
   # context
   def modules; end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of modules keyed by
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of modules keyed by
   # module name
   def modules_hash; end
 
   # Name of this class excluding namespace. See also
-  # [`full_name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html#method-i-full_name)
+  # [`full_name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#method-i-full_name)
   def name; end
 
   # Name to use to generate the url. `#full_name` by default.
@@ -1341,12 +1339,12 @@ class RDoc::Context < ::RDoc::CodeObject
   # Should we remove this context from the documentation?
   #
   # The answer is yes if:
-  # *   [`received_nodoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#attribute-i-received_nodoc)
+  # *   [`received_nodoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#attribute-i-received_nodoc)
   #     is `true`
-  # *   [`any_content`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html#method-i-any_content)
+  # *   [`any_content`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#method-i-any_content)
   #     is `false` (not counting includes)
   # *   All
-  #     [`includes`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html#attribute-i-includes)
+  #     [`includes`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#attribute-i-includes)
   #     are modules (not a string), and their module has
   #     `#remove_from_documentation? == true`
   # *   All classes and modules have `#remove_from_documentation? == true`
@@ -1364,9 +1362,8 @@ class RDoc::Context < ::RDoc::CodeObject
   # added.
   def resolve_aliases(added); end
 
-  # Returns
-  # [`RDoc::Context::Section`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context/Section.html)
-  # objects referenced in this context for use in a table of contents.
+  # Returns RDoc::Context::Section objects referenced in this context for use in
+  # a table of contents.
   def section_contents; end
 
   # Sections in this context
@@ -1379,7 +1376,7 @@ class RDoc::Context < ::RDoc::CodeObject
   def set_constant_visibility_for(names, visibility); end
 
   # Sets the current section to a section with `title`. See also
-  # [`add_section`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html#method-i-add_section)
+  # [`add_section`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#method-i-add_section)
   def set_current_section(title, comment); end
 
   # Given an array `methods` of method names, set the visibility of each to
@@ -1401,12 +1398,12 @@ class RDoc::Context < ::RDoc::CodeObject
   # Return the TopLevel that owns us
   def top_level; end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) `old_name =>
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) `old_name =>
   # [aliases]`, for aliases that haven't (yet) been resolved to a
   # method/attribute. (Not to be confused with the aliases of the context.)
   def unmatched_alias_lists; end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) `old_name =>
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) `old_name =>
   # [aliases]`, for aliases that haven't (yet) been resolved to a
   # method/attribute. (Not to be confused with the aliases of the context.)
   def unmatched_alias_lists=(_); end
@@ -1520,11 +1517,11 @@ class RDoc::Context::Section
   def title; end
 end
 
-# [`RDoc::CrossReference`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CrossReference.html)
+# [`RDoc::CrossReference`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CrossReference.html)
 # is a reusable way to create cross references for names.
 class RDoc::CrossReference
   # Version of
-  # [`CROSSREF_REGEXP`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CrossReference.html#CROSSREF_REGEXP)
+  # [`CROSSREF_REGEXP`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CrossReference.html#CROSSREF_REGEXP)
   # used when `--hyperlink-all` is specified.
   ALL_CROSSREF_REGEXP = T.let(T.unsafe(nil), Regexp)
 
@@ -1546,11 +1543,11 @@ class RDoc::CrossReference
   # Regular expression to match method references.
   #
   # See
-  # [`CLASS_REGEXP_STR`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CrossReference.html#CLASS_REGEXP_STR)
+  # [`CLASS_REGEXP_STR`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CrossReference.html#CLASS_REGEXP_STR)
   METHOD_REGEXP_STR = T.let(T.unsafe(nil), String)
 
   # Allows cross-references to be created based on the given `context`
-  # (RDoc::Context).
+  # ([`RDoc::Context`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html)).
   def self.new(context); end
 
   # Returns a reference to `name`.
@@ -1560,17 +1557,17 @@ class RDoc::CrossReference
   # `text` is returned.
   def resolve(name, text); end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of references that
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of references that
   # have been looked-up to their replacements
   def seen; end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of references that
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of references that
   # have been looked-up to their replacements
   def seen=(_); end
 end
 
-# A subclass of [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html) that
-# writes directly to an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+# A subclass of [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html) that
+# writes directly to an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
 # Credit to Aaron Patterson and Masatoshi SEKI.
 #
 # To use:
@@ -1592,9 +1589,9 @@ class RDoc::ERBIO < ::ERB
   def set_eoutvar(compiler, io_variable); end
 end
 
-# Allows an [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html) template to be
+# Allows an [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html) template to be
 # rendered in the context (binding) of an existing
-# [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html) template evaluation.
+# [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html) template evaluation.
 class RDoc::ERBPartial < ::ERB
   # Overrides `compiler` startup to set the `eoutvar` to an empty string only if
   # it isn't already set.
@@ -1602,10 +1599,10 @@ class RDoc::ERBPartial < ::ERB
 end
 
 # This class is a wrapper around
-# [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html)
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) and
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Encoding.html) that
-# helps [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) load files and
+# [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html)
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) and
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Encoding.html) that
+# helps [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) load files and
 # convert them to the correct encoding.
 module RDoc::Encoding
   # Changes encoding based on `encoding` without converting and returns new
@@ -1627,33 +1624,31 @@ module RDoc::Encoding
   def self.set_encoding(string); end
 end
 
-# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) thrown by
+# [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html) thrown by
 # any rdoc error.
 class RDoc::Error < ::RuntimeError; end
 
-# A [`Module`](https://docs.ruby-lang.org/en/2.6.0/Module.html) extension to a
+# A [`Module`](https://docs.ruby-lang.org/en/2.7.0/Module.html) extension to a
 # class with
-# [`extend`](https://docs.ruby-lang.org/en/2.6.0/Object.html#method-i-extend)
+# [`extend`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-extend)
 #
 # ```ruby
 # RDoc::Extend.new 'Enumerable', 'comment ...'
 # ```
 class RDoc::Extend < ::RDoc::Mixin; end
 
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) uses generators to
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) uses generators to
 # turn parsed source code in the form of an
-# [`RDoc::CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html)
+# [`RDoc::CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html)
 # tree into some form of output.
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) comes with the HTML
-# generator
-# [`RDoc::Generator::Darkfish`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Generator/Darkfish.html)
-# and an ri data generator
-# [`RDoc::Generator::RI`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Generator/RI.html).
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) comes with the HTML
+# generator RDoc::Generator::Darkfish and an ri data generator
+# RDoc::Generator::RI.
 #
-# ## Registering a [`Generator`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Generator.html)
+# ## Registering a [`Generator`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Generator.html)
 #
 # Generators are registered by calling
-# [`RDoc::RDoc.add_generator`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html#method-c-add_generator)
+# [`RDoc::RDoc.add_generator`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html#method-c-add_generator)
 # with the class of the generator:
 #
 # ```ruby
@@ -1665,46 +1660,46 @@ class RDoc::Extend < ::RDoc::Mixin; end
 # ## Adding Options to `rdoc`
 #
 # Before option processing in `rdoc`,
-# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html) will
+# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html) will
 # call ::setup\_options on the generator class with an
-# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html)
+# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html)
 # instance. The generator can use
-# [`RDoc::Options#option_parser`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#attribute-i-option_parser)
+# [`RDoc::Options#option_parser`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#attribute-i-option_parser)
 # to add command-line options to the `rdoc` tool. See [Custom Options at
-# `RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#label-Custom+Options)
+# `RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#class-RDoc::Options-label-Custom+Options)
 # for an example and see
-# [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html) for
+# [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html) for
 # details on how to add options.
 #
 # You can extend the
-# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html)
+# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html)
 # instance with additional accessors for your generator.
 #
-# ## [`Generator`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Generator.html) Instantiation
+# ## [`Generator`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Generator.html) Instantiation
 #
 # After parsing,
-# [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RDoc.html) will
+# [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RDoc.html) will
 # instantiate a generator by calling initialize with an
-# [`RDoc::Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html) instance
+# [`RDoc::Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html) instance
 # and an
-# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html)
+# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html)
 # instance.
 #
-# The [`RDoc::Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html)
+# The [`RDoc::Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html)
 # instance holds documentation for parsed source code. In
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) 3 and earlier the
-# [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) 3 and earlier the
+# [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
 # class held this data. When upgrading a generator from
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) 3 and earlier you
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) 3 and earlier you
 # should only need to replace
-# [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+# [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
 # with the store instance.
 #
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) will then call
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) will then call
 # generate on the generator instance. You can use the various methods on
-# [`RDoc::Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html) and in
+# [`RDoc::Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html) and in
 # the
-# [`RDoc::CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html)
+# [`RDoc::CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html)
 # tree to create your desired output format.
 module RDoc::Generator; end
 
@@ -2232,7 +2227,7 @@ class RDoc::Generator::RI
   def generate; end
 end
 
-# [`GhostMethod`](https://docs.ruby-lang.org/en/2.6.0/RDoc/GhostMethod.html)
+# [`GhostMethod`](https://docs.ruby-lang.org/en/2.7.0/RDoc/GhostMethod.html)
 # represents a method referenced only by a comment
 class RDoc::GhostMethod < ::RDoc::AnyMethod; end
 
@@ -2322,7 +2317,7 @@ class RDoc::I18n::Text
   def translate(locale); end
 end
 
-# A [`Module`](https://docs.ruby-lang.org/en/2.6.0/Module.html) included in a
+# A [`Module`](https://docs.ruby-lang.org/en/2.7.0/Module.html) included in a
 # class with include
 #
 # ```ruby
@@ -2330,15 +2325,15 @@ end
 # ```
 class RDoc::Include < ::RDoc::Mixin; end
 
-# [`RDoc::Markdown`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markdown.html) as
+# [`RDoc::Markdown`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markdown.html) as
 # described by the [markdown
 # syntax](http://daringfireball.net/projects/markdown/syntax).
-# To choose [`Markdown`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markdown.html)
+# To choose [`Markdown`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markdown.html)
 # as your only default format
 # see
 # [Saved
 # Options at
-# `RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#label-Saved+Options)
+# `RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#class-RDoc::Options-label-Saved+Options)
 # for instructions on setting up a
 # `.doc_options`
 # file
@@ -2358,11 +2353,11 @@ class RDoc::Include < ::RDoc::Mixin; end
 # The following markdown extensions are supported by the parser, but not
 # all
 # are
-# used in [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) output by
+# used in [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) output by
 # default.
-# ### [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
-# The [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
-# [`Markdown`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markdown.html) parser
+# ### [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
+# The [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
+# [`Markdown`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markdown.html) parser
 # has the following built-in behaviors that cannot
 # be
 # disabled.
@@ -2372,13 +2367,13 @@ class RDoc::Include < ::RDoc::Mixin; end
 # dingus](http://daringfireball.net/projects/markdown/dingus) emphasizes in-word
 # underscores, neither
 # the
-# [`Markdown`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markdown.html)
+# [`Markdown`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markdown.html)
 # syntax nor MarkdownTest mention this behavior.)
-# For HTML output, [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
+# For HTML output, [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
 # always auto-links bare URLs.
 # ### Break on Newline
 # The
-# [`break_on_newline`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markdown.html#method-i-break_on_newline)
+# [`break_on_newline`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markdown.html#method-i-break_on_newline)
 # extension converts all newlines into hard line
 # breaks
 # as
@@ -2389,12 +2384,12 @@ class RDoc::Include < ::RDoc::Mixin; end
 # default.
 # ### CSS
 # The
-# [`css`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markdown.html#method-i-css)
+# [`css`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markdown.html#method-i-css)
 # extension enables CSS blocks to be included in the output, but
 # they
 # are
 # not used for any built-in
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) output format. This
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) output format. This
 # extension is
 # disabled
 # by
@@ -2409,7 +2404,7 @@ class RDoc::Include < ::RDoc::Mixin; end
 #
 # ### Definition Lists
 # The
-# [`definition_lists`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markdown.html#method-i-definition_lists)
+# [`definition_lists`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markdown.html#method-i-definition_lists)
 # extension allows definition lists using the [PHP Markdown Extra
 # syntax](http://michelf.com/projects/php-markdown/extra/#def-list), but only
 # one label and definition are
@@ -2451,7 +2446,7 @@ class RDoc::Include < ::RDoc::Mixin; end
 # This is ~striked~.
 # ### Github
 # The
-# [`github`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markdown.html#method-i-github)
+# [`github`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markdown.html#method-i-github)
 # extension enables a partial set of [Github Flavored
 # Markdown](http://github.github.com/github-flavored-markdown/). This extension
 # is enabled by default.
@@ -2477,7 +2472,7 @@ class RDoc::Include < ::RDoc::Mixin; end
 #
 # ### Notes
 # The
-# [`notes`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markdown.html#method-i-notes)
+# [`notes`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markdown.html#method-i-notes)
 # extension enables footnote support. This extension is enabled
 # by
 # default.
@@ -3116,9 +3111,7 @@ class RDoc::Markdown
   # the linking `text` (usually whitespace).
   def link_to(content, label = _, text = _); end
 
-  # Creates an
-  # [`RDoc::Markup::ListItem`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/ListItem.html)
-  # by parsing the `unparsed` content
+  # Creates an RDoc::Markup::ListItem by parsing the `unparsed` content
   # from
   # the
   # first parsing pass.
@@ -3139,9 +3132,7 @@ class RDoc::Markdown
 
   def notes?; end
 
-  # Creates an
-  # [`RDoc::Markup::Paragraph`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Paragraph.html)
-  # from `parts` and
+  # Creates an RDoc::Markup::Paragraph from `parts` and
   # including
   # extension-specific
   # behavior
@@ -3150,13 +3141,13 @@ class RDoc::Markdown
   # Parses `markdown` into an RDoc::Document
   #
   # Also aliased as:
-  # [`peg_parse`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markdown.html#method-i-peg_parse)
+  # [`peg_parse`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markdown.html#method-i-peg_parse)
   def parse(markdown); end
 
   # The internal kpeg parse method
   #
   # Alias for:
-  # [`parse`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markdown.html#method-i-parse)
+  # [`parse`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markdown.html#method-i-parse)
   def peg_parse(rule = _); end
 
   def pos; end
@@ -3351,7 +3342,7 @@ class RDoc::Markdown::RuleInfo
   def rendered; end
 end
 
-# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html) parses
+# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html) parses
 # plain text documents and attempts to decompose them into their constituent
 # parts. Some of these parts are high-level: paragraphs, chunks of verbatim
 # text, list entries and the like. Other parts happen at the character level: a
@@ -3359,29 +3350,28 @@ end
 # that used on WikiWiki webs, where folks create web pages using a simple set of
 # formatting rules.
 #
-# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html) and
+# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html) and
 # other markup formats do no output formatting, this is handled by the
-# [`RDoc::Markup::Formatter`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Formatter.html)
-# subclasses.
+# RDoc::Markup::Formatter subclasses.
 #
 # # Supported Formats
 #
 # Besides the
-# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html) format,
+# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html) format,
 # the following formats are built in to RDoc:
 #
 # markdown
 # :   The markdown format as described by
 #     http://daringfireball.net/projects/markdown/. See
-#     [`RDoc::Markdown`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markdown.html)
+#     [`RDoc::Markdown`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markdown.html)
 #     for details on the parser and supported extensions.
 # rd
 # :   The rdtool format. See
-#     [`RDoc::RD`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD.html) for details
+#     [`RDoc::RD`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RD.html) for details
 #     on the parser and format.
 # tomdoc
 # :   The TomDoc format as described by http://tomdoc.org/. See
-#     [`RDoc::TomDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TomDoc.html) for
+#     [`RDoc::TomDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TomDoc.html) for
 #     details on the parser and supported extensions.
 #
 #
@@ -3389,7 +3379,7 @@ end
 #
 # per project
 # :   If you build your documentation with rake use
-#     [`RDoc::Task#markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Task.html#attribute-i-markup).
+#     [`RDoc::Task#markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Task.html#attribute-i-markup).
 #
 #     If you build your documentation by hand run:
 #
@@ -3406,27 +3396,27 @@ end
 #     a different format.
 #
 #
-# # [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html)
+# # [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html)
 #
-# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html) is
+# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html) is
 # extensible at runtime: you can add new markup elements to be recognized in the
 # documents that
-# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html) parses.
+# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html) parses.
 #
-# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html) is
+# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html) is
 # intended to be the basis for a family of tools which share the common
 # requirement that simple, plain-text should be rendered in a variety of
 # different output formats and media. It is envisaged that
-# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html) could
+# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html) could
 # be the basis for formatting
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) style comment blocks,
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) style comment blocks,
 # Wiki entries, and online FAQs.
 #
 # ## Synopsis
 #
 # This code converts `input_string` to HTML. The conversion takes place in the
 # `convert` method, so you can use the same
-# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html)
+# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html)
 # converter to convert multiple input strings.
 #
 # ```ruby
@@ -3438,7 +3428,7 @@ end
 # ```
 #
 # You can extend the
-# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html) parser
+# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html) parser
 # to recognize new markup sequences, and to add regexp handling. Here we make
 # WikiWords significant to the parser, and also make the sequences {word} and
 # <no>text...</no> signify strike-through text. We then subclass the HTML output
@@ -3465,19 +3455,19 @@ end
 # puts "<body>#{wh.convert ARGF.read}</body>"
 # ```
 #
-# ## [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html)
+# ## [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
 #
-# Where [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) support
-# is available, [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) will
+# Where [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) support
+# is available, [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) will
 # automatically convert all documents to the same output encoding. The output
 # encoding can be set via
-# [`RDoc::Options#encoding`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#attribute-i-encoding)
+# [`RDoc::Options#encoding`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#attribute-i-encoding)
 # and defaults to
-# [`Encoding.default_external`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-default_external).
+# [`Encoding.default_external`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-default_external).
 #
-# # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) [`Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html) Reference
+# # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) [`Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html) Reference
 #
-# ## Block [`Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html)
+# ## Block [`Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html)
 #
 # ### Paragraphs and Verbatim
 #
@@ -3508,7 +3498,7 @@ end
 # removed. In addition, the verbatim text has been shifted left, so the amount
 # of indentation of verbatim text is unimportant.
 #
-# For HTML output [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) makes
+# For HTML output [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) makes
 # a small effort to determine if a verbatim section contains Ruby source code.
 # If so, the verbatim block will be marked up as HTML. Triggers include "def",
 # "class", "module", "require", the "hash rocket"# (=>) or a block call with a
@@ -3709,13 +3699,13 @@ end
 #
 # regular paragraph after the list
 #
-# ## Text [`Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html)
+# ## Text [`Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html)
 #
 # ### Bold, Italic, Typewriter Text
 #
 # You can use markup within text (except verbatim) to change the appearance of
 # parts of that text. Out of the box,
-# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html)
+# [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html)
 # supports word-based and general markup.
 #
 # Word-based markup uses flag characters around individual words:
@@ -3742,7 +3732,7 @@ end
 # Unlike conventional Wiki markup, general markup can cross line boundaries. You
 # can turn off the interpretation of markup by preceding the first character
 # with a backslash (see *Escaping Text
-# [`Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html)*, below).
+# [`Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html)*, below).
 #
 # ### Links
 #
@@ -3757,17 +3747,17 @@ end
 #
 # Single-word methods can be linked by using the `#` character for instance
 # methods or `::` for class methods. For example, `#convert` links to
-# [`convert`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html#method-i-convert).
+# [`convert`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html#method-i-convert).
 # A class or method may be combined like `RDoc::Markup#convert`.
 #
 # A heading inside the documentation can be linked by following the class or
 # method by an `@` then the heading name. `RDoc::Markup@Links` will link to this
 # section like this: [Links at
-# `RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html#label-Links).
+# `RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html#class-RDoc::Markup-label-Links).
 # Spaces in headings with multiple words must be escaped with `+` like
 # `RDoc::Markup@Escaping+Text+Markup`. Punctuation and other special characters
 # must be escaped like
-# [`CGI.escape`](https://docs.ruby-lang.org/en/2.6.0/CGI/Util.html#method-i-escape).
+# [`CGI.escape`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escape).
 #
 # The `@` can also be used to link to sections. If a section and a heading share
 # the same name the section is preferred for the link.
@@ -3791,9 +3781,9 @@ end
 #
 # Links starting with `link:` refer to local files whose path is relative to the
 # `--op` directory. Use `rdoc-ref:` instead of `link:` to link to files
-# generated by [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) as the
+# generated by [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) as the
 # link target may be different across
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) generators.
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) generators.
 #
 # Example links:
 #
@@ -3804,7 +3794,7 @@ end
 # {RDoc Markup}[rdoc-ref:RDoc::Markup]
 # ```
 #
-# ### Escaping Text [`Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html)
+# ### Escaping Text [`Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html)
 #
 # Text markup can be escaped with a backslash, as in <tt>, which was obtained
 # with `\<tt>`. Except in verbatim sections and between <tt> tags, to produce a
@@ -3824,12 +3814,12 @@ end
 #
 # *   The \\ must be doubled if not followed by white space: \\.
 # *   But not in <tt> tags: in a
-#     [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html), `\S` matches
+#     [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html), `\S` matches
 #     non-space.
 # *   This is a link to [ruby-lang](www.ruby-lang.org)
 # *   This is not a link, however: {ruby-lang.org}[www.ruby-lang.org]
 # *   This will not be linked to
-#     [`RDoc::RDoc#document`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html#method-i-document)
+#     [`RDoc::RDoc#document`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html#method-i-document)
 #
 #
 # Inside <tt> tags, more precisely, leading backslashes are removed only if
@@ -3839,9 +3829,9 @@ end
 # context.
 #
 # This behavior is inherited from
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) version 1, and has
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) version 1, and has
 # been kept for compatibility with existing
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) documentation.
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) documentation.
 #
 # ### Conversion of characters
 #
@@ -3892,7 +3882,7 @@ end
 # =end
 # ```
 #
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) stops processing
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) stops processing
 # comments if it finds a comment line starting with `--` right after the `#`
 # character (otherwise, it will be treated as a rule if it has three dashes or
 # more). This can be used to separate external from internal comments, or to
@@ -3917,7 +3907,7 @@ end
 # their description. This linking works inside the current class or module, and
 # with ancestor methods (in included modules or in the superclass).
 #
-# [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) parameter lists
+# [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) parameter lists
 # are extracted and displayed with the method description. If a method calls
 # `yield`, then the parameters passed to yield will also be displayed:
 #
@@ -3952,7 +3942,7 @@ end
 # `:yields:` is an example of a documentation directive. These appear
 # immediately after the start of the document element they are modifying.
 #
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) automatically
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) automatically
 # cross-references words with underscores or camel-case. To suppress
 # cross-references, prefix the word with a \\ character. To include special
 # characters like "`\n`", you'll need to use two \\ characters in normal text,
@@ -4018,14 +4008,14 @@ end
 #
 # `:notnew:` / `:not_new:` / `:not-new:`
 # :   Only applicable to the `initialize` instance method. Normally
-#     [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) assumes that the
+#     [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) assumes that the
 #     documentation and parameters for `initialize` are actually for the `new`
 #     method, and so fakes out a `new` for the class. The `:notnew:` directive
 #     stops this. Remember that `initialize` is private, so you won't see the
 #     documentation unless you use the `-a` command line option.
 #
 #
-# ### [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) arguments
+# ### [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) arguments
 #
 # `:arg:` or `:args:` *parameters*
 # :   Overrides the default argument handling with exactly these parameters.
@@ -4082,7 +4072,7 @@ end
 # `:category:` *section*
 # :   Adds this item to the named `section` overriding the current section. Use
 #     this to group methods by section in
-#     [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) output while
+#     [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) output while
 #     maintaining a sensible ordering (like alphabetical).
 #
 # ```ruby
@@ -4115,7 +4105,7 @@ end
 #
 # `:section:` *title*
 # :   Provides section introductory text in
-#     [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) output. The title
+#     [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) output. The title
 #     following `:section:` is used as the section name and the remainder of the
 #     comment containing the section is used as introductory text. A section's
 #     comment block must be separated from following comment blocks. Use an
@@ -4159,7 +4149,7 @@ end
 #     Unless you are converting between markup formats you should use a
 #     `.rdoc_options` file to specify the default documentation format for your
 #     entire project. See [Saved Options at
-#     `RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#label-Saved+Options)
+#     `RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#class-RDoc::Options-label-Saved+Options)
 #     for instructions.
 #
 #     At the top of a file the `:markup:` directive applies to the entire file:
@@ -4189,7 +4179,7 @@ end
 # ```
 #
 #     See [CONTRIBUTING at
-#     `Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html#label-CONTRIBUTING)
+#     `Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html#class-RDoc::Markup-label-CONTRIBUTING)
 #     for instructions on adding a new markup format.
 #
 # `:include:` *filename*
@@ -4209,7 +4199,6 @@ end
 #
 # `:main:` *name*
 # :   Equivalent to the `--main` command line parameter.
-#
 class RDoc::Markup
   # Take a block of text and use various heuristics to determine its structure
   # (paragraphs, lists, and so on). Invoke an event handler as we identify
@@ -4233,8 +4222,7 @@ class RDoc::Markup
   # using a Visitor to render the result.
   def convert(input, formatter); end
 
-  # Parses `str` into an
-  # [`RDoc::Markup::Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html).
+  # Parses `str` into an RDoc::Markup::Document.
   def self.parse(str); end
 end
 
@@ -5784,7 +5772,7 @@ class RDoc::Markup::Verbatim < ::RDoc::Markup::Raw
   def text; end
 end
 
-# [`MetaMethod`](https://docs.ruby-lang.org/en/2.6.0/RDoc/MetaMethod.html)
+# [`MetaMethod`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MetaMethod.html)
 # represents a meta-programmed method
 class RDoc::MetaMethod < ::RDoc::AnyMethod; end
 
@@ -5793,16 +5781,16 @@ class RDoc::MethodAttr < ::RDoc::CodeObject
   include(::Comparable)
 
   # Creates a new
-  # [`MethodAttr`](https://docs.ruby-lang.org/en/2.6.0/RDoc/MethodAttr.html)
+  # [`MethodAttr`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MethodAttr.html)
   # from token stream `text` and method or attribute name `name`.
   #
   # Usually this is called by super from a subclass.
   def self.new(text, name); end
 
   # Order by
-  # [`singleton`](https://docs.ruby-lang.org/en/2.6.0/RDoc/MethodAttr.html#attribute-i-singleton)
+  # [`singleton`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MethodAttr.html#attribute-i-singleton)
   # then
-  # [`name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/MethodAttr.html#attribute-i-name)
+  # [`name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MethodAttr.html#attribute-i-name)
   def <=>(other); end
 
   def ==(other); end
@@ -5813,7 +5801,7 @@ class RDoc::MethodAttr < ::RDoc::CodeObject
   # *   creates a new AnyMethod/Attribute named `an_alias.new_name`;
   # *   adds `self` as an alias for the new method or attribute
   # *   adds the method or attribute to
-  #     [`aliases`](https://docs.ruby-lang.org/en/2.6.0/RDoc/MethodAttr.html#attribute-i-aliases)
+  #     [`aliases`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MethodAttr.html#attribute-i-aliases)
   # *   adds the method or attribute to `context`.
   def add_alias(an_alias, context); end
 
@@ -5828,7 +5816,7 @@ class RDoc::MethodAttr < ::RDoc::CodeObject
   # dddd` portion of the comment is removed.
   def add_line_numbers(src); end
 
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of other names for
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of other names for
   # this method/attribute
   def aliases; end
 
@@ -5839,9 +5827,9 @@ class RDoc::MethodAttr < ::RDoc::CodeObject
   def aref_prefix; end
 
   # The
-  # [`call_seq`](https://docs.ruby-lang.org/en/2.6.0/RDoc/MethodAttr.html#attribute-i-call_seq)
+  # [`call_seq`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MethodAttr.html#attribute-i-call_seq)
   # or the
-  # [`param_seq`](https://docs.ruby-lang.org/en/2.6.0/RDoc/MethodAttr.html#attribute-i-param_seq)
+  # [`param_seq`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MethodAttr.html#attribute-i-param_seq)
   # with method name, if there is no call\_seq.
   def arglists; end
 
@@ -5927,16 +5915,14 @@ class RDoc::MethodAttr < ::RDoc::CodeObject
 
   def pretty_print(q); end
 
-  # Used by
-  # [`RDoc::Generator::JsonIndex`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Generator/JsonIndex.html)
-  # to create a record for the search engine.
+  # Used by RDoc::Generator::JsonIndex to create a record for the search engine.
   def search_record; end
 
   # A method/attribute to look at, in particular if this method/attribute has no
   # documentation.
   #
   # It can be a method/attribute of the superclass or of an included module,
-  # including the [`Kernel`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html)
+  # including the [`Kernel`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html)
   # module, which is always appended to the included modules.
   #
   # Returns `nil` if there is no such method/attribute. The `#is_alias_for`
@@ -5974,13 +5960,13 @@ class RDoc::MethodAttr < ::RDoc::CodeObject
   def self.add_line_numbers=(_); end
 end
 
-# A [`Mixin`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Mixin.html) adds features
+# A [`Mixin`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Mixin.html) adds features
 # from a module into another context.
-# [`RDoc::Include`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Include.html) and
-# [`RDoc::Extend`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Extend.html) are
+# [`RDoc::Include`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Include.html) and
+# [`RDoc::Extend`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Extend.html) are
 # both mixins.
 class RDoc::Mixin < ::RDoc::CodeObject
-  # Creates a new [`Mixin`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Mixin.html)
+  # Creates a new [`Mixin`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Mixin.html)
   # for `name` with `comment`
   def self.new(name, comment); end
 
@@ -5992,7 +5978,7 @@ class RDoc::Mixin < ::RDoc::CodeObject
   def eql?(other); end
 
   # Full name based on
-  # [`module`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Mixin.html#method-i-module)
+  # [`module`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Mixin.html#method-i-module)
   def full_name; end
 
   def hash; end
@@ -6011,7 +5997,7 @@ class RDoc::Mixin < ::RDoc::CodeObject
   #
   # This method has `O(n!)` behavior when the module calling include is
   # referencing nonexistent modules. Avoid calling
-  # [`module`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Mixin.html#method-i-module)
+  # [`module`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Mixin.html#method-i-module)
   # until after all the files are parsed. This behavior is due to ruby's
   # constant lookup behavior.
   #
@@ -6033,7 +6019,7 @@ end
 # A normal class, neither singleton nor anonymous
 class RDoc::NormalClass < ::RDoc::ClassModule
   # The ancestors of this class including modules. Unlike
-  # [`Module#ancestors`](https://docs.ruby-lang.org/en/2.6.0/Module.html#method-i-ancestors),
+  # [`Module#ancestors`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-ancestors),
   # this class is not included in the result. The result will contain both
   # RDoc::ClassModules and Strings.
   def ancestors; end
@@ -6067,14 +6053,14 @@ class RDoc::NormalModule < ::RDoc::ClassModule
   def pretty_print(q); end
 
   # Modules don't have one, raises
-  # [`NoMethodError`](https://docs.ruby-lang.org/en/2.6.0/NoMethodError.html)
+  # [`NoMethodError`](https://docs.ruby-lang.org/en/2.7.0/NoMethodError.html)
   def superclass; end
 end
 
-# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html)
+# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html)
 # handles the parsing and storage of options
 #
-# ## Saved [`Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html)
+# ## Saved [`Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html)
 #
 # You can save some options like the markup format in the `.rdoc_options` file
 # in your gem. The easiest way to do this is:
@@ -6100,16 +6086,16 @@ end
 # *   `--verbose`
 #
 #
-# ## Custom [`Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html)
+# ## Custom [`Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html)
 #
 # Generators can hook into
-# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html) to
+# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html) to
 # add generator-specific command line options.
 #
 # When `--format` is encountered in ARGV,
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) calls ::setup\_options
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) calls ::setup\_options
 # on the generator class to add extra options to the option parser.
-# [`Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html) for custom
+# [`Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html) for custom
 # generators must occur after `--format`. `rdoc --help` will list options for
 # all installed generators.
 #
@@ -6131,7 +6117,7 @@ end
 # ```
 #
 # Of course,
-# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html) does
+# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html) does
 # not respond to `spell_dictionary` by default so you will need to add it:
 #
 # ```ruby
@@ -6147,50 +6133,51 @@ end
 #
 # ## Option Validators
 #
-# [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html)
+# [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html)
 # validators will validate and cast user input values. In addition to the
 # validators that ship with
-# [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html)
-# (String, [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html),
-# [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html),
-# [`TrueClass`](https://docs.ruby-lang.org/en/2.6.0/TrueClass.html),
-# [`FalseClass`](https://docs.ruby-lang.org/en/2.6.0/FalseClass.html),
-# [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html),
-# [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html),
-# [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html),
-# [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html),
-# [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html), etc.),
-# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html) adds
-# [`Path`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#Path),
-# [`PathArray`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#PathArray)
+# [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html)
+# ([`String`](https://docs.ruby-lang.org/en/2.7.0/String.html),
+# [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html),
+# [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html),
+# [`TrueClass`](https://docs.ruby-lang.org/en/2.7.0/TrueClass.html),
+# [`FalseClass`](https://docs.ruby-lang.org/en/2.7.0/FalseClass.html),
+# [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html),
+# [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html),
+# [`Date`](https://docs.ruby-lang.org/en/2.7.0/Date.html),
+# [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html),
+# [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html), etc.),
+# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html) adds
+# [`Path`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#Path),
+# [`PathArray`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#PathArray)
 # and
-# [`Template`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#Template).
+# [`Template`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#Template).
 class RDoc::Options
   # The deprecated options.
   DEPRECATED = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 
   # Option validator for
-  # [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html) that
+  # [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html) that
   # matches a directory that exists on the filesystem.
   Directory = T.let(T.unsafe(nil), Object)
 
   # Option validator for
-  # [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html) that
+  # [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html) that
   # matches a file or directory that exists on the filesystem.
   Path = T.let(T.unsafe(nil), Object)
 
   # Option validator for
-  # [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html) that
+  # [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html) that
   # matches a comma-separated list of files or directories that exist on the
   # filesystem.
   PathArray = T.let(T.unsafe(nil), Object)
 
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) options ignored (or
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) options ignored (or
   # handled specially) by --write-options
   SPECIAL = T.let(T.unsafe(nil), T::Array[T.untyped])
 
   # Option validator for
-  # [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html) that
+  # [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html) that
   # matches a template directory for an installed generator that lives in
   # `"rdoc/generator/template/#{template_name}"`
   Template = T.let(T.unsafe(nil), Object)
@@ -6200,15 +6187,15 @@ class RDoc::Options
   def ==(other); end
 
   # Character-set for HTML output.
-  # [`encoding`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#attribute-i-encoding)
+  # [`encoding`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#attribute-i-encoding)
   # is preferred over
-  # [`charset`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#attribute-i-charset)
+  # [`charset`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#attribute-i-charset)
   def charset; end
 
   # Character-set for HTML output.
-  # [`encoding`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#attribute-i-encoding)
+  # [`encoding`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#attribute-i-encoding)
   # is preferred over
-  # [`charset`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#attribute-i-charset)
+  # [`charset`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#attribute-i-charset)
   def charset=(_); end
 
   # Check that the files on the command line exist
@@ -6223,16 +6210,16 @@ class RDoc::Options
   # If true, only report on undocumented files
   def coverage_report=(_); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the title, but only if
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the title, but only if
   # not already set. Used to set the title from a source file, so that a title
   # set from the command line will have the priority.
   def default_title=(string); end
 
-  # If true, [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) will not
+  # If true, [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) will not
   # write any files.
   def dry_run; end
 
-  # If true, [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) will not
+  # If true, [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) will not
   # write any files.
   def dry_run=(_); end
 
@@ -6262,15 +6249,15 @@ class RDoc::Options
 
   # Completes any unfinished option setup business such as filtering for
   # existent files, creating a regexp for
-  # [`exclude`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#attribute-i-exclude)
+  # [`exclude`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#attribute-i-exclude)
   # and setting a default
-  # [`template`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#attribute-i-template).
+  # [`template`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#attribute-i-template).
   def finish; end
 
   # Fixes the
-  # [`page_dir`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#attribute-i-page_dir)
+  # [`page_dir`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#attribute-i-page_dir)
   # to be relative to the root\_dir and adds the
-  # [`page_dir`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#attribute-i-page_dir)
+  # [`page_dir`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#attribute-i-page_dir)
   # to the files list.
   def finish_page_dir; end
 
@@ -6365,11 +6352,11 @@ class RDoc::Options
   # The name of the output directory
   def op_dir=(_); end
 
-  # The [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html)
+  # The [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html)
   # for this instance
   def option_parser; end
 
-  # The [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html)
+  # The [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html)
   # for this instance
   def option_parser=(_); end
 
@@ -6379,12 +6366,12 @@ class RDoc::Options
   # Output heading decorations?
   def output_decoration=(_); end
 
-  # [`Directory`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#Directory)
+  # [`Directory`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#Directory)
   # where guides, FAQ, and other pages not associated with a class live. You may
   # leave this unset if these are at the root of your project.
   def page_dir; end
 
-  # [`Directory`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#Directory)
+  # [`Directory`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#Directory)
   # where guides, FAQ, and other pages not associated with a class live. You may
   # leave this unset if these are at the root of your project.
   def page_dir=(_); end
@@ -6392,34 +6379,34 @@ class RDoc::Options
   # Parses command line options.
   def parse(argv); end
 
-  # Is [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) in pipe mode?
+  # Is [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) in pipe mode?
   def pipe; end
 
-  # Is [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) in pipe mode?
+  # Is [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) in pipe mode?
   def pipe=(_); end
 
   # Don't display progress as we process the files
   def quiet; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) quietness to `bool`
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) quietness to `bool`
   def quiet=(bool); end
 
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of directories to
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of directories to
   # search for files to satisfy an :include:
   def rdoc_include; end
 
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of directories to
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of directories to
   # search for files to satisfy an :include:
   def rdoc_include=(_); end
 
   # Root of the source documentation will be generated for.
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) this when building
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) this when building
   # documentation outside the source directory. Defaults to the current
   # directory.
   def root; end
 
   # Root of the source documentation will be generated for.
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) this when building
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) this when building
   # documentation outside the source directory. Defaults to the current
   # directory.
   def root=(_); end
@@ -6427,7 +6414,7 @@ class RDoc::Options
   # Removes directories from `path` that are outside the current directory
   def sanitize_path(path); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) up an output generator
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) up an output generator
   # for the named `generator_name`.
   #
   # If the found generator responds to :setup\_options it will be called with
@@ -6441,11 +6428,11 @@ class RDoc::Options
   # Include the '#' at the front of hyperlinked instance method names
   def show_hash=(_); end
 
-  # [`Directory`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#Directory)
+  # [`Directory`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#Directory)
   # to copy static files from
   def static_path; end
 
-  # [`Directory`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#Directory)
+  # [`Directory`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#Directory)
   # to copy static files from
   def static_path=(_); end
 
@@ -6455,19 +6442,19 @@ class RDoc::Options
   # The number of columns in a tab
   def tab_width=(_); end
 
-  # [`Template`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#Template)
+  # [`Template`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#Template)
   # to be used when generating output
   def template; end
 
-  # [`Template`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#Template)
+  # [`Template`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#Template)
   # to be used when generating output
   def template=(_); end
 
-  # [`Directory`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#Directory)
+  # [`Directory`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#Directory)
   # the template lives in
   def template_dir; end
 
-  # [`Directory`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#Directory)
+  # [`Directory`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#Directory)
   # the template lives in
   def template_dir=(_); end
 
@@ -6486,11 +6473,11 @@ class RDoc::Options
   # Documentation title
   def title=(_); end
 
-  # Should [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) update the
+  # Should [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) update the
   # timestamps in the output dir?
   def update_output_dir; end
 
-  # Should [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) update the
+  # Should [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) update the
   # timestamps in the output dir?
   def update_output_dir=(_); end
 
@@ -6514,12 +6501,12 @@ class RDoc::Options
   #
   # When `:all` is passed, visibility is set to `:private`, similarly to
   # RDOCOPT="--all", see
-  # [`visibility`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#attribute-i-visibility)
+  # [`visibility`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#attribute-i-visibility)
   # for more information.
   def visibility=(visibility); end
 
   # Displays a warning using
-  # [`Kernel#warn`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-warn)
+  # [`Kernel#warn`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-warn)
   # if we're being verbose
   def warn(message); end
 
@@ -6529,7 +6516,7 @@ class RDoc::Options
   # URL of web cvs frontend
   def webcvs=(_); end
 
-  # Writes the [`YAML`](https://docs.ruby-lang.org/en/2.6.0/YAML.html) file
+  # Writes the [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) file
   # .rdoc\_options to the current directory containing the parsed options.
   def write_options; end
 
@@ -6537,26 +6524,26 @@ class RDoc::Options
 end
 
 # A parser is simple a class that subclasses
-# [`RDoc::Parser`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser.html) and
+# [`RDoc::Parser`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser.html) and
 # implements scan to fill in an
-# [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+# [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
 # with parsed data.
 #
 # The initialize method takes an
-# [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html) to
+# [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html) to
 # fill with parsed content, the name of the file to be parsed, the content of
 # the file, an
-# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html)
+# [`RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html)
 # object and an
-# [`RDoc::Stats`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Stats.html) object to
+# [`RDoc::Stats`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Stats.html) object to
 # inform the user of parsed items. The scan method is then called to parse the
 # file and must return the
-# [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+# [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
 # object. By calling super these items will be set for you.
 #
-# In order to be used by [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
+# In order to be used by [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
 # the parser needs to register the file extensions it can parse. Use
-# [`::parse_files_matching`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser.html#method-c-parse_files_matching)
+# [`::parse_files_matching`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser.html#method-c-parse_files_matching)
 # to register extensions.
 #
 # ```ruby
@@ -6578,11 +6565,10 @@ end
 # ```
 class RDoc::Parser
   # Creates a new
-  # [`Parser`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser.html) storing
+  # [`Parser`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser.html) storing
   # `top_level`, `file_name`, `content`, `options` and `stats` in instance
-  # variables. In +@preprocess+ an
-  # [`RDoc::Markup::PreProcess`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/PreProcess.html)
-  # object is created which allows processing of directives.
+  # variables. In +@preprocess+ an RDoc::Markup::PreProcess object is created
+  # which allows processing of directives.
   def self.new(top_level, file_name, content, options, stats); end
 
   # The name of the file being parsed
@@ -6593,7 +6579,7 @@ class RDoc::Parser
   def self.alias_extension(old_ext, new_ext); end
 
   # Determines if the file is a "binary" file which basically means it has
-  # content that an [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
+  # content that an [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
   # parser shouldn't try to consume.
   def self.binary?(file); end
 
@@ -6616,12 +6602,12 @@ class RDoc::Parser
   # It is ok to call this multiple times.
   def self.parse_files_matching(regexp); end
 
-  # An [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of arrays that
+  # An [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of arrays that
   # maps file extension (or name) regular expressions to parser classes that
   # will parse matching filenames.
   #
   # Use
-  # [`parse_files_matching`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser.html#method-c-parse_files_matching)
+  # [`parse_files_matching`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser.html#method-c-parse_files_matching)
   # to register a parser's file extensions.
   def self.parsers; end
 
@@ -6652,55 +6638,55 @@ class RDoc::Parser
   def self.zip?(file); end
 end
 
-# [`RDoc::Parser::C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html)
+# [`RDoc::Parser::C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html)
 # attempts to parse
-# [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) extension files.
+# [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) extension files.
 # It looks for the standard patterns that you find in extensions:
-# `rb_define_class, rb_define_method` and so on. It tries to find the
-# corresponding [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html)
+# `rb_define_class`, `rb_define_method` and so on. It tries to find the
+# corresponding [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html)
 # source for the methods and extract comments, but if we fail we don't worry too
 # much.
 #
 # The comments associated with a Ruby method are extracted from the
-# [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) comment block
+# [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) comment block
 # associated with the routine that *implements* that method, that is to say the
 # method whose name is given in the `rb_define_method` call. For example, you
 # might write:
 #
 # ```
-#   Returns a new array that is a one-dimensional flattening of this
-#   array (recursively). That is, for every element that is an array,
-#   extract its elements into the new array.
+# /*
+#  * Returns a new array that is a one-dimensional flattening of this
+#  * array (recursively). That is, for every element that is an array,
+#  * extract its elements into the new array.
+#  *
+#  *    s = [ 1, 2, 3 ]           #=> [1, 2, 3]
+#  *    t = [ 4, 5, 6, [7, 8] ]   #=> [4, 5, 6, [7, 8]]
+#  *    a = [ s, t, 9, 10 ]       #=> [[1, 2, 3], [4, 5, 6, [7, 8]], 9, 10]
+#  *    a.flatten                 #=> [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+#  */
+#  static VALUE
+#  rb_ary_flatten(VALUE ary)
+#  {
+#      ary = rb_obj_dup(ary);
+#      rb_ary_flatten_bang(ary);
+#      return ary;
+#  }
 #
-#      s = [ 1, 2, 3 ]           #=> [1, 2, 3]
-#      t = [ 4, 5, 6, [7, 8] ]   #=> [4, 5, 6, [7, 8]]
-#      a = [ s, t, 9, 10 ]       #=> [[1, 2, 3], [4, 5, 6, [7, 8]], 9, 10]
-#      a.flatten                 #=> [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+#  ...
 #
-# static VALUE
-# rb_ary_flatten(ary)
-#     VALUE ary;
-# {
-#     ary = rb_obj_dup(ary);
-#     rb_ary_flatten_bang(ary);
-#     return ary;
-# }
-#
-# ...
-#
-# void
-# Init_Array()
-# {
-#   ...
-#   rb_define_method(rb_cArray, "flatten", rb_ary_flatten, 0);
+#  void
+#  Init_Array(void)
+#  {
+#    ...
+#    rb_define_method(rb_cArray, "flatten", rb_ary_flatten, 0);
 # ```
 #
-# Here [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) will determine
-# from the rb\_define\_method line that there's a method called "flatten" in
-# class [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html), and will look
-# for the implementation in the method rb\_ary\_flatten. It will then use the
+# Here [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) will determine
+# from the `rb_define_method` line that there's a method called "flatten" in
+# class [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html), and will look
+# for the implementation in the method `rb_ary_flatten`. It will then use the
 # comment from that method in the HTML output. This method must be in the same
-# source file as the rb\_define\_method.
+# source file as the `rb_define_method`.
 #
 # The comment blocks may include special directives:
 #
@@ -6716,7 +6702,7 @@ end
 #     Constant values can be supplied on the first line of the comment like so:
 #
 # ```
-#    300: The highest possible score in bowling
+# /* 300: The highest possible score in bowling */
 # rb_define_const(cFoo, "PERFECT", INT2FIX(300));
 # ```
 #
@@ -6733,11 +6719,11 @@ end
 # :   Documentation for the named method. Use this when the method name is
 #     unambiguous.
 #
-# Document-method: <tt>ClassName::method\_name<tt>
+# Document-method: `ClassName::method_name`
 # :   Documentation for a singleton method in the given class. Use this when the
 #     method name alone is ambiguous.
 #
-# Document-method: <tt>ClassName#method\_name<tt>
+# Document-method: `ClassName#method_name`
 # :   Documentation for a instance method in the given class. Use this when the
 #     method name alone is ambiguous.
 #
@@ -6745,14 +6731,14 @@ end
 # :   Documentation for the named attribute.
 #
 # call-seq:  *text up to an empty line*
-# :   Because [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html)
+# :   Because [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html)
 #     source doesn't give descriptive names to Ruby-level parameters, you need
 #     to document the calling sequence explicitly
 #
 #
-# In addition, [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) assumes
+# In addition, [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) assumes
 # by default that the
-# [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) method
+# [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) method
 # implementing a Ruby function is in the same source file as the
 # rb\_define\_method call. If this isn't the case, add the comment:
 #
@@ -6765,40 +6751,41 @@ end
 #
 # ```
 # /*
-#    Document-class:  MyClass
-#
-#    Encapsulate the writing and reading of the configuration
-#    file. ...
-#   /
+#  * Document-class:  MyClass
+#  *
+#  * Encapsulate the writing and reading of the configuration
+#  * file. ...
+#  */
 #
 # /*
-#
-#    call-seq:
-#      cfg.read_value(key)            -> value
-#      cfg.read_value(key} { |key| }  -> value
-#
-#    Return the value corresponding to +key+ from the configuration.
-#    In the second form, if the key isn't found, invoke the
-#    block and return its value.
-#   /
+#  * Document-method: read_value
+#  *
+#  * call-seq:
+#  *   cfg.read_value(key)            -> value
+#  *   cfg.read_value(key} { |key| }  -> value
+#  *
+#  * Return the value corresponding to +key+ from the configuration.
+#  * In the second form, if the key isn't found, invoke the
+#  * block and return its value.
+#  */
 # ```
 class RDoc::Parser::C < ::RDoc::Parser
   include(::RDoc::Text)
 
   # Prepares for parsing a
-  # [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) file. See
+  # [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) file. See
   # RDoc::Parser#initialize for details on the arguments.
   def self.new(top_level, file_name, content, options, stats); end
 
-  # Maps [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) variable
+  # Maps [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) variable
   # names to names of Ruby classes or modules
   def classes; end
 
-  # [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) file the
+  # [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) file the
   # parser is parsing
   def content; end
 
-  # [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) file the
+  # [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) file the
   # parser is parsing
   def content=(_); end
 
@@ -6809,17 +6796,17 @@ class RDoc::Parser::C < ::RDoc::Parser
   def deduplicate_method_name(class_obj, method_name); end
 
   # Scans
-  # [`content`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html#attribute-i-content)
+  # [`content`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html#attribute-i-content)
   # for rb\_define\_alias
   def do_aliases; end
 
   # Scans
-  # [`content`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html#attribute-i-content)
+  # [`content`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html#attribute-i-content)
   # for rb\_attr and rb\_define\_attr
   def do_attrs; end
 
   # Scans
-  # [`content`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html#attribute-i-content)
+  # [`content`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html#attribute-i-content)
   # for boot\_defclass
   def do_boot_defclass; end
 
@@ -6830,7 +6817,7 @@ class RDoc::Parser::C < ::RDoc::Parser
   def do_classes; end
 
   # Scans
-  # [`content`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html#attribute-i-content)
+  # [`content`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html#attribute-i-content)
   # for rb\_define\_variable, rb\_define\_readonly\_variable, rb\_define\_const
   # and rb\_define\_global\_const
   def do_constants; end
@@ -6856,12 +6843,12 @@ class RDoc::Parser::C < ::RDoc::Parser
   def do_define_module_under; end
 
   # Scans
-  # [`content`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html#attribute-i-content)
+  # [`content`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html#attribute-i-content)
   # for rb\_include\_module
   def do_includes; end
 
   # Scans
-  # [`content`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html#attribute-i-content)
+  # [`content`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html#attribute-i-content)
   # for rb\_define\_method, rb\_define\_singleton\_method,
   # rb\_define\_module\_function, rb\_define\_private\_method,
   # rb\_define\_global\_function and define\_filetest\_function
@@ -6887,7 +6874,7 @@ class RDoc::Parser::C < ::RDoc::Parser
   def do_struct_define_without_accessor; end
 
   # Dependencies from a missing enclosing class to the classes in
-  # [`missing_dependencies`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html#attribute-i-missing_dependencies)
+  # [`missing_dependencies`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html#attribute-i-missing_dependencies)
   # that depend upon it.
   def enclosure_dependencies; end
 
@@ -6897,22 +6884,22 @@ class RDoc::Parser::C < ::RDoc::Parser
   # Finds a comment for rb\_define\_attr, rb\_attr or Document-attr.
   #
   # `var_name` is the
-  # [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) class variable
+  # [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) class variable
   # the attribute is defined on. `attr_name` is the attribute's name.
   #
   # `read` and `write` are the read/write flags ('1' or '0'). Either both or
   # neither must be provided.
   def find_attr_comment(var_name, attr_name, read = _, write = _); end
 
-  # [`Find`](https://docs.ruby-lang.org/en/2.6.0/Find.html) the
-  # [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) code
+  # [`Find`](https://docs.ruby-lang.org/en/2.7.0/Find.html) the
+  # [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) code
   # corresponding to a Ruby method
   def find_body(class_name, meth_name, meth_obj, file_content, quiet = _); end
 
   # Finds a
-  # [`RDoc::NormalClass`](https://docs.ruby-lang.org/en/2.6.0/RDoc/NormalClass.html)
+  # [`RDoc::NormalClass`](https://docs.ruby-lang.org/en/2.7.0/RDoc/NormalClass.html)
   # or
-  # [`RDoc::NormalModule`](https://docs.ruby-lang.org/en/2.6.0/RDoc/NormalModule.html)
+  # [`RDoc::NormalModule`](https://docs.ruby-lang.org/en/2.7.0/RDoc/NormalModule.html)
   # for `raw_name`
   def find_class(raw_name, name); end
 
@@ -6922,22 +6909,24 @@ class RDoc::Parser::C < ::RDoc::Parser
   # Init\_ and a rb\_define\_class the Init\_ comment is used.
   #
   # ```
-  #    This is a comment for Foo
-  #
+  # /*
+  #  * This is a comment for Foo
+  #  */
   # Init_Foo(void) {
   #     VALUE cFoo = rb_define_class("Foo", rb_cObject);
   # }
   #
-  #    Document-class: Foo
-  #    This is a comment for Foo
-  #
+  # /*
+  #  * Document-class: Foo
+  #  * This is a comment for Foo
+  #  */
   # Init_foo(void) {
   #     VALUE cFoo = rb_define_class("Foo", rb_cObject);
   # }
   #
   # /*
-  #    This is a comment for Foo
-  #   /
+  #  * This is a comment for Foo
+  #  */
   # VALUE cFoo = rb_define_class("Foo", rb_cObject);
   # ```
   def find_class_comment(class_name, class_mod); end
@@ -6959,30 +6948,30 @@ class RDoc::Parser::C < ::RDoc::Parser
   def gen_const_table(file_content); end
 
   # Creates a new
-  # [`RDoc::Attr`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Attr.html)
+  # [`RDoc::Attr`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Attr.html)
   # `attr_name` on class `var_name` that is either `read`, `write` or both
   def handle_attr(var_name, attr_name, read, write); end
 
   # Creates a new
-  # [`RDoc::NormalClass`](https://docs.ruby-lang.org/en/2.6.0/RDoc/NormalClass.html)
+  # [`RDoc::NormalClass`](https://docs.ruby-lang.org/en/2.7.0/RDoc/NormalClass.html)
   # or
-  # [`RDoc::NormalModule`](https://docs.ruby-lang.org/en/2.6.0/RDoc/NormalModule.html)
+  # [`RDoc::NormalModule`](https://docs.ruby-lang.org/en/2.7.0/RDoc/NormalModule.html)
   # based on `type` named `class_name` in `parent` which was assigned to the
-  # [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) `var_name`.
+  # [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) `var_name`.
   def handle_class_module(var_name, type, class_name, parent, in_module); end
 
   # Adds constants. By providing some\_value: at the start of the comment you
   # can override the
-  # [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) value of the
+  # [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) value of the
   # comment to give a friendly definition.
   #
   # ```
-  #    300: The perfect score in bowling
-  # rb_define_const(cFoo, "PERFECT", INT2FIX(300);
+  # /* 300: The perfect score in bowling */
+  # rb_define_const(cFoo, "PERFECT", INT2FIX(300));
   # ```
   #
   # Will override `INT2FIX(300)` with the value `300` in the output
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html). Values may include
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html). Values may include
   # quotes and escaped colons (:).
   def handle_constants(type, var_name, const_name, definition); end
 
@@ -6990,7 +6979,7 @@ class RDoc::Parser::C < ::RDoc::Parser
   def handle_ifdefs_in(body); end
 
   # Adds an
-  # [`RDoc::AnyMethod`](https://docs.ruby-lang.org/en/2.6.0/RDoc/AnyMethod.html)
+  # [`RDoc::AnyMethod`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnyMethod.html)
   # `meth_name` defined on a class or module assigned to `var_name`. `type` is
   # the type of method definition function used. `singleton_method` and
   # `module_function` create a singleton method.
@@ -7002,33 +6991,35 @@ class RDoc::Parser::C < ::RDoc::Parser
   # Normalizes tabs in `body`
   def handle_tab_width(body); end
 
-  # Maps [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) variable
+  # Maps [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) variable
   # names to names of Ruby classes (and singleton classes)
   def known_classes; end
 
   # Loads the variable map with the given `name` from the
-  # [`RDoc::Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html), if
+  # [`RDoc::Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html), if
   # present.
   def load_variable_map(map_name); end
 
   # Look for directives in a normal comment block:
   #
   # ```
-  # * :title: My Awesome Project
+  # /*
+  #  * :title: My Awesome Project
+  #  */
   # ```
   #
   # This method modifies the `comment`
   def look_for_directives_in(context, comment); end
 
   # Classes found while parsing the
-  # [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) file that were
+  # [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) file that were
   # not yet registered due to a missing enclosing class. These are processed by
-  # [`do_missing`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html#method-i-do_missing)
+  # [`do_missing`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html#method-i-do_missing)
   def missing_dependencies; end
 
   # Extracts parameters from the `method_body` and returns a method parameter
   # string. Follows 1.9.3dev's scan-arg-spec, see
-  # [README](https://docs.ruby-lang.org/en/2.6.0/README_md.html).EXT
+  # [README](https://docs.ruby-lang.org/en/2.7.0/README_md.html).EXT
   def rb_scan_args(method_body); end
 
   # Removes lines that are commented out that might otherwise get picked up when
@@ -7036,13 +7027,13 @@ class RDoc::Parser::C < ::RDoc::Parser
   def remove_commented_out_lines; end
 
   # Extracts the classes, modules, methods, attributes, constants and aliases
-  # from a [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) file
+  # from a [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) file
   # and returns an
-  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # for this file
   def scan; end
 
-  # Maps [`C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html) variable
+  # Maps [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) variable
   # names to names of Ruby singleton classes
   def singleton_classes; end
 
@@ -7051,20 +7042,18 @@ class RDoc::Parser::C < ::RDoc::Parser
 end
 
 # A
-# [`ChangeLog`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/ChangeLog.html)
+# [`ChangeLog`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/ChangeLog.html)
 # file parser.
 #
 # This parser converts a
-# [`ChangeLog`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/ChangeLog.html)
-# into an
-# [`RDoc::Markup::Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html).
-# When viewed as HTML a
-# [`ChangeLog`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/ChangeLog.html)
+# [`ChangeLog`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/ChangeLog.html)
+# into an RDoc::Markup::Document. When viewed as HTML a
+# [`ChangeLog`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/ChangeLog.html)
 # page will have an entry for each day's entries in the sidebar table of
 # contents.
 #
 # This parser is meant to parse the MRI
-# [`ChangeLog`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/ChangeLog.html),
+# [`ChangeLog`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/ChangeLog.html),
 # but can be used to parse any [GNU style Change
 # Log](http://www.gnu.org/prep/standards/html_node/Style-of-Change-Logs.html).
 class RDoc::Parser::ChangeLog < ::RDoc::Parser
@@ -7076,44 +7065,40 @@ class RDoc::Parser::ChangeLog < ::RDoc::Parser
   # descriptions are joined to make a single paragraph.
   def continue_entry_body(entry_body, continuation); end
 
-  # Creates an
-  # [`RDoc::Markup::Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html)
-  # given the `groups` of
-  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/ChangeLog.html)
+  # Creates an RDoc::Markup::Document given the `groups` of
+  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/ChangeLog.html)
   # entries.
   def create_document(groups); end
 
   # Returns a list of
-  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/ChangeLog.html)
+  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/ChangeLog.html)
   # entries an
-  # [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html) nodes
+  # [`RDoc::Markup`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html) nodes
   # for the given `entries`.
   def create_entries(entries); end
 
-  # Returns an
-  # [`RDoc::Markup::List`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/List.html)
-  # containing the given `items` in the
-  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/ChangeLog.html)
+  # Returns an RDoc::Markup::List containing the given `items` in the
+  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/ChangeLog.html)
   def create_items(items); end
 
   # Groups `entries` by date.
   def group_entries(entries); end
 
   # Parses the entries in the
-  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/ChangeLog.html).
+  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/ChangeLog.html).
   #
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of each
-  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/ChangeLog.html)
+  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of each
+  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/ChangeLog.html)
   # entry in order of parsing.
   #
   # A
-  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/ChangeLog.html)
-  # entry is an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/ChangeLog.html)
+  # entry is an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   # containing the
-  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/ChangeLog.html)
+  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/ChangeLog.html)
   # title (date and committer) and an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
-  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/ChangeLog.html)
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
+  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/ChangeLog.html)
   # items (file and function changed with description).
   #
   # An example result would be:
@@ -7126,17 +7111,14 @@ class RDoc::Parser::ChangeLog < ::RDoc::Parser
   def parse_entries; end
 
   # Converts the
-  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/ChangeLog.html)
-  # into an
-  # [`RDoc::Markup::Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html)
+  # [`ChangeLog`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/ChangeLog.html)
+  # into an RDoc::Markup::Document
   def scan; end
 end
 
 # Parse a
-# [`Markdown`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/Markdown.html)
-# format file. The parsed
-# [`RDoc::Markup::Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html)
-# is attached as a file comment.
+# [`Markdown`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/Markdown.html)
+# format file. The parsed RDoc::Markup::Document is attached as a file comment.
 class RDoc::Parser::Markdown < ::RDoc::Parser
   include(::RDoc::Parser::Text)
 
@@ -7144,10 +7126,8 @@ class RDoc::Parser::Markdown < ::RDoc::Parser
   def scan; end
 end
 
-# Parse a [`RD`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/RD.html) format
-# file. The parsed
-# [`RDoc::Markup::Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html)
-# is attached as a file comment.
+# Parse a [`RD`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/RD.html) format
+# file. The parsed RDoc::Markup::Document is attached as a file comment.
 class RDoc::Parser::RD < ::RDoc::Parser
   include(::RDoc::Parser::Text)
 
@@ -7159,16 +7139,16 @@ class RDoc::Parser::Ruby < ::RDoc::Parser
   include(::RDoc::Parser::RubyTools)
   include(::RDoc::TokenStream)
 
-  # [`RDoc::NormalClass`](https://docs.ruby-lang.org/en/2.6.0/RDoc/NormalClass.html)
+  # [`RDoc::NormalClass`](https://docs.ruby-lang.org/en/2.7.0/RDoc/NormalClass.html)
   # type
   NORMAL = T.let(T.unsafe(nil), String)
 
-  # [`RDoc::SingleClass`](https://docs.ruby-lang.org/en/2.6.0/RDoc/SingleClass.html)
+  # [`RDoc::SingleClass`](https://docs.ruby-lang.org/en/2.7.0/RDoc/SingleClass.html)
   # type
   SINGLE = T.let(T.unsafe(nil), String)
 
   # Creates a new
-  # [`Ruby`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/Ruby.html) parser.
+  # [`Ruby`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/Ruby.html) parser.
   def self.new(top_level, file_name, content, options, stats); end
 
   # Look for the first comment in a file that isn't a shebang line.
@@ -7234,12 +7214,12 @@ class RDoc::Parser::Ruby < ::RDoc::Parser
   def parse_alias(context, single, tk, comment); end
 
   # Creates an
-  # [`RDoc::Attr`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Attr.html) for the
+  # [`RDoc::Attr`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Attr.html) for the
   # name following `tk`, setting the comment to `comment`.
   def parse_attr(context, single, tk, comment); end
 
   # Creates an
-  # [`RDoc::Attr`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Attr.html) for each
+  # [`RDoc::Attr`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Attr.html) for each
   # attribute listed after `tk`, setting the comment for each to `comment`.
   def parse_attr_accessor(context, single, tk, comment); end
 
@@ -7254,7 +7234,7 @@ class RDoc::Parser::Ruby < ::RDoc::Parser
   def parse_class_singleton(container, name, comment); end
 
   # Generates an RDoc::Method or
-  # [`RDoc::Attr`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Attr.html) from
+  # [`RDoc::Attr`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Attr.html) from
   # `comment` by looking for :method: or :attr: directives in `comment`.
   def parse_comment(container, tk, comment); end
 
@@ -7268,15 +7248,15 @@ class RDoc::Parser::Ruby < ::RDoc::Parser
 
   # Parses a constant in `context` with `comment`. If `ignore_constants` is
   # true, no found constants will be added to
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html).
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html).
   def parse_constant(container, tk, comment, ignore_constants = _); end
 
   def parse_constant_body(container, constant, is_array_or_hash); end
 
   # Parses a
-  # [`Module#private_constant`](https://docs.ruby-lang.org/en/2.6.0/Module.html#method-i-private_constant)
+  # [`Module#private_constant`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-private_constant)
   # or
-  # [`Module#public_constant`](https://docs.ruby-lang.org/en/2.6.0/Module.html#method-i-public_constant)
+  # [`Module#public_constant`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-public_constant)
   # call from `tk`.
   def parse_constant_visibility(container, single, tk); end
 
@@ -7285,7 +7265,7 @@ class RDoc::Parser::Ruby < ::RDoc::Parser
   def parse_identifier(container, single, tk, comment); end
 
   # Parses a meta-programmed attribute and creates an
-  # [`RDoc::Attr`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Attr.html).
+  # [`RDoc::Attr`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Attr.html).
   #
   # To create foo and bar attributes on class C with comment "My attributes":
   #
@@ -7354,12 +7334,12 @@ class RDoc::Parser::Ruby < ::RDoc::Parser
   def parse_method_params_and_body(container, single, meth, added_container); end
 
   # Parses an
-  # [`RDoc::NormalModule`](https://docs.ruby-lang.org/en/2.6.0/RDoc/NormalModule.html)
+  # [`RDoc::NormalModule`](https://docs.ruby-lang.org/en/2.7.0/RDoc/NormalModule.html)
   # in `container` with `comment`
   def parse_module(container, single, tk, comment); end
 
   # Parses an
-  # [`RDoc::Require`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Require.html) in
+  # [`RDoc::Require`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Require.html) in
   # `context` containing `comment`
   def parse_require(context, comment); end
 
@@ -7367,7 +7347,7 @@ class RDoc::Parser::Ruby < ::RDoc::Parser
   def parse_rescue; end
 
   # The core of the
-  # [`Ruby`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/Ruby.html) parser.
+  # [`Ruby`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/Ruby.html) parser.
   def parse_statements(container, single = _, current_method = _, comment = _); end
 
   # Parse up to `no` symbol arguments
@@ -7408,18 +7388,17 @@ class RDoc::Parser::Ruby < ::RDoc::Parser
   def read_directive(allowed); end
 
   # Handles directives following the definition for `context` (any
-  # [`RDoc::CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html))
+  # [`RDoc::CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html))
   # if the directives are `allowed` at this point.
   #
-  # See also
-  # [`RDoc::Markup::PreProcess#handle_directive`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/PreProcess.html#method-i-handle_directive)
+  # See also RDoc::Markup::PreProcess#handle\_directive
   def read_documentation_modifiers(context, allowed); end
 
   def record_location(container); end
 
   # Scans this
-  # [`Ruby`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/Ruby.html) file for
-  # [`Ruby`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/Ruby.html)
+  # [`Ruby`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/Ruby.html) file for
+  # [`Ruby`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/Ruby.html)
   # constructs
   def scan; end
 
@@ -7448,7 +7427,7 @@ end
 # Collection of methods for writing parsers
 module RDoc::Parser::RubyTools
   # Adds a token listener `obj`, but you should probably use
-  # [`token_listener`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/RubyTools.html#method-i-token_listener)
+  # [`token_listener`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/RubyTools.html#method-i-token_listener)
   def add_token_listener(obj); end
 
   # Fetches the next token from the scanner
@@ -7458,12 +7437,12 @@ module RDoc::Parser::RubyTools
   # in the token list.
   def get_tk_until(*tokens); end
 
-  # Retrieves a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # Retrieves a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   # representation of the read tokens
   def get_tkread; end
 
   # Peek equivalent for
-  # [`get_tkread`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/RubyTools.html#method-i-get_tkread)
+  # [`get_tkread`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/RubyTools.html#method-i-get_tkread)
   def peek_read; end
 
   # Peek at the next token, but don't remove it from the stream
@@ -7502,7 +7481,7 @@ class RDoc::Parser::Simple < ::RDoc::Parser
   # Removes private comments.
   #
   # Unlike
-  # [`RDoc::Comment#remove_private`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Comment.html#method-i-remove_private)
+  # [`RDoc::Comment#remove_private`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Comment.html#method-i-remove_private)
   # this implementation only looks for two dashes at the beginning of the line.
   # Three or more dashes are considered to be a rule and ignored.
   def remove_private_comment(comment); end
@@ -7514,28 +7493,25 @@ end
 # Indicates this parser is text and doesn't contain code constructs.
 #
 # Include this module in a
-# [`RDoc::Parser`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser.html)
+# [`RDoc::Parser`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser.html)
 # subclass to make it show up as a file, not as part of a class or module.
 module RDoc::Parser::Text; end
 
-# [`RDoc::RD`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD.html) implements the
-# [`RD`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD.html) format from the
+# [`RDoc::RD`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RD.html) implements the
+# [`RD`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RD.html) format from the
 # rdtool gem.
 #
-# To choose [`RD`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD.html) as your
+# To choose [`RD`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RD.html) as your
 # only default format see [Saved Options at
-# `RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#label-Saved+Options)
+# `RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#class-RDoc::Options-label-Saved+Options)
 # for instructions on setting up a `.doc_options` file to store your project
 # default.
 #
-# ## [LICENSE](https://docs.ruby-lang.org/en/2.6.0/gems/2_6_0/gems/CFPropertyList-2_3_6/LICENSE.html)
+# ## LICENSE
 #
-# The grammar that produces
-# [`RDoc::RD::BlockParser`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD/BlockParser.html)
-# and
-# [`RDoc::RD::InlineParser`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD/InlineParser.html)
-# is included in [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) under
-# the Ruby License.
+# The grammar that produces RDoc::RD::BlockParser and RDoc::RD::InlineParser is
+# included in [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) under the
+# Ruby License.
 #
 # You can find the original source for rdtool at
 # https://github.com/uwabami/rdtool/
@@ -7584,7 +7560,7 @@ module RDoc::Parser::Text; end
 #     written by the author, so that they are not under these terms.
 #
 #     For the list of those files and their copying conditions, see the file
-#     LEGAL.
+#     [LEGAL](https://docs.ruby-lang.org/en/2.7.0/LEGAL.html).
 #
 # 5.  The scripts and library files supplied as input to or produced as output
 #     from the software do not automatically fall under the copyright of the
@@ -7595,9 +7571,8 @@ module RDoc::Parser::Text; end
 #     WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
 #     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 class RDoc::RD
-  # Parses `rd` source and returns an
-  # [`RDoc::Markup::Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html).
-  # If the `=begin` or `=end` lines are missing they will be added.
+  # Parses `rd` source and returns an RDoc::Markup::Document. If the `=begin` or
+  # `=end` lines are missing they will be added.
   def self.parse(rd); end
 end
 
@@ -8042,11 +8017,11 @@ class RDoc::RD::InlineParser < ::Racc::Parser
 end
 
 # This is the driver for generating
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RDoc.html) output. It
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RDoc.html) output. It
 # handles file parsing and generation of output.
 #
 # To use this class to generate
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RDoc.html) output via the
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RDoc.html) output via the
 # API, the recommended way is:
 #
 # ```ruby
@@ -8064,32 +8039,29 @@ end
 # ```
 #
 # Where `argv` is an array of strings, each corresponding to an argument you'd
-# give rdoc on the command line. See <tt>rdoc --help<tt> for details.
+# give rdoc on the command line. See `rdoc --help` for details.
 class RDoc::RDoc
   # This is the list of supported output generators
   GENERATORS = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 
   # Creates a new
-  # [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RDoc.html) instance.
-  # Call
-  # [`document`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html#method-i-document)
-  # to parse files and generate documentation.
+  # [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RDoc.html) instance.
+  # Call document to parse files and generate documentation.
   def self.new; end
 
   # Generates documentation or a coverage report depending upon the settings in
   # `options`.
   #
   # `options` can be either an
-  # [`RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html)
+  # [`RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html)
   # instance or an array of strings equivalent to the strings that would be
-  # passed on the command line like `%w[-q -o doc -t My\ Doc\ Title]`.
-  # [`document`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html#method-i-document)
+  # passed on the command line like `%w[-q -o doc -t My\ Doc\ Title]`. document
   # will automatically call
-  # [`RDoc::Options#finish`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#method-i-finish)
+  # [`RDoc::Options#finish`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#method-i-finish)
   # if an options instance was given.
   #
   # For a list of options, see either
-  # [`RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html) or
+  # [`RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html) or
   # `rdoc --help`.
   #
   # By default, output will be stored in a directory called "doc" below the
@@ -8109,7 +8081,7 @@ class RDoc::RDoc
 
   # Generates documentation for `file_info` (from parse\_files) into the output
   # dir using the generator selected by the
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) options
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) options
   def generate; end
 
   # Generator instance used for creating output
@@ -8118,14 +8090,14 @@ class RDoc::RDoc
   # Generator instance used for creating output
   def generator=(_); end
 
-  # Turns [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) from stdin
+  # Turns [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) from stdin
   # into HTML
   def handle_pipe; end
 
   # Installs a siginfo handler that prints the current filename.
   def install_siginfo_handler; end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of files and their
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of files and their
   # last modified times.
   def last_modified; end
 
@@ -8136,7 +8108,7 @@ class RDoc::RDoc
   def list_files_in_directory(dir); end
 
   # Loads options from .rdoc\_options if the file exists, otherwise creates a
-  # new [`RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html)
+  # new [`RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html)
   # instance.
   def load_options; end
 
@@ -8151,10 +8123,10 @@ class RDoc::RDoc
   # parsed, you must name it explicitly.
   def normalized_file_list(relative_files, force_doc = _, exclude_pattern = _); end
 
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RDoc.html) options
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RDoc.html) options
   def options; end
 
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RDoc.html) options
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RDoc.html) options
   def options=(_); end
 
   # Return the path name of the flag file in an output directory.
@@ -8166,7 +8138,7 @@ class RDoc::RDoc
   def parse_dot_doc_file(in_dir, filename); end
 
   # Parses `filename` and returns an
-  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   def parse_file(filename); end
 
   # Parse each file on the command line, recursively entering directories.
@@ -8185,7 +8157,7 @@ class RDoc::RDoc
   def setup_output_dir(dir, force); end
 
   # Accessor for statistics. Available after each call to
-  # [`parse_files`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html#method-i-parse_files)
+  # [`parse_files`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html#method-i-parse_files)
   def stats; end
 
   # The current documentation store
@@ -8201,12 +8173,12 @@ class RDoc::RDoc
   # Add `klass` that can generate output after parsing
   def self.add_generator(klass); end
 
-  # Active [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RDoc.html)
+  # Active [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RDoc.html)
   # instance
   def self.current; end
 
   # Sets the active
-  # [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RDoc.html) instance
+  # [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RDoc.html) instance
   def self.current=(rdoc); end
 end
 
@@ -8488,7 +8460,7 @@ class RDoc::RI::Driver::NotFoundError < ::RDoc::RI::Driver::Error
   def name; end
 end
 
-# Base [`RI`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RI.html) error class
+# Base [`RI`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RI.html) error class
 class RDoc::RI::Error < ::RDoc::Error; end
 
 # The directories where ri data lives.
@@ -8571,10 +8543,10 @@ module RDoc::RI::Paths
 end
 
 # A file loaded by
-# [`require`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-require)
+# [`require`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-require)
 class RDoc::Require < ::RDoc::CodeObject
   # Creates a new
-  # [`Require`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Require.html) that
+  # [`Require`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Require.html) that
   # loads `name` with `comment`
   def self.new(name, comment); end
 
@@ -8589,7 +8561,7 @@ class RDoc::Require < ::RDoc::CodeObject
   def to_s; end
 
   # The
-  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # corresponding to this require, or `nil` if not found.
   def top_level; end
 end
@@ -8650,7 +8622,7 @@ class RDoc::RipperStateLex::InnerStateLex < ::Ripper::Filter
   def on_default(event, tok, data); end
 end
 
-# This is a [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html)
+# This is a [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html)
 # servlet that allows you to browse ri documentation.
 #
 # You can show documentation through either `ri --server` or, with RubyGems 2.0
@@ -8658,7 +8630,7 @@ end
 # RubyGems the server runs on port 8808 by default.
 #
 # You can use this servlet in your own project by mounting it on a
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) server:
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) server:
 #
 # ```ruby
 # require 'webrick'
@@ -8675,7 +8647,7 @@ end
 # server.mount '/rdoc', RDoc::Servlet, '/rdoc'
 # ```
 class RDoc::Servlet < ::WEBrick::HTTPServlet::AbstractServlet
-  # Creates a new [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html)
+  # Creates a new [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html)
   # servlet.
   #
   # Use `mount_path` when mounting the servlet somewhere other than /.
@@ -8683,7 +8655,7 @@ class RDoc::Servlet < ::WEBrick::HTTPServlet::AbstractServlet
   # Use `extra_doc_dirs` for additional documentation directories.
   #
   # `server` is provided automatically by
-  # [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) when mounting.
+  # [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) when mounting.
   # `stores` and `cache` are provided automatically by the servlet.
   def self.new(server, stores, cache, mount_path = _, extra_doc_dirs = _); end
 
@@ -8700,17 +8672,17 @@ class RDoc::Servlet < ::WEBrick::HTTPServlet::AbstractServlet
   #
   # `path` is relative to the mount\_path and is used to determine the class,
   # module or page name (/RDoc/Servlet.html becomes
-  # [`RDoc::Servlet`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Servlet.html)).
+  # [`RDoc::Servlet`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Servlet.html)).
   # `generator` is used to create the page.
   def documentation_page(store, generator, path, req, res); end
 
-  # Creates the [`JSON`](https://docs.ruby-lang.org/en/2.6.0/JSON.html) search
+  # Creates the [`JSON`](https://docs.ruby-lang.org/en/2.7.0/JSON.html) search
   # index on `res` for the given `store`. `generator` must respond to
   # json\_index to build. `req` is ignored.
   def documentation_search(store, generator, req, res); end
 
   # Returns the
-  # [`RDoc::Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html) and
+  # [`RDoc::Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html) and
   # path relative to `mount_path` for documentation at `path`.
   def documentation_source(path); end
 
@@ -8725,21 +8697,21 @@ class RDoc::Servlet < ::WEBrick::HTTPServlet::AbstractServlet
   # been modified a Last-Modified header is added to `res`.
   def if_modified_since(req, res, path = _); end
 
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
+  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # installed documentation.
   #
   # Each entry contains the documentation name (gem name, 'Ruby Documentation',
   # etc.), the path relative to the mount point, whether the documentation
   # exists, the type of documentation (See RDoc::RI::Paths#each) and the
   # filesystem to the
-  # [`RDoc::Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html) for the
+  # [`RDoc::Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html) for the
   # documentation.
   def installed_docs; end
 
   # Returns a 404 page built by `generator` for `req` on `res`.
   def not_found(generator, req, res, message = _); end
 
-  # An [`RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html)
+  # An [`RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html)
   # instance used for rendering options
   def options; end
 
@@ -8757,14 +8729,13 @@ class RDoc::Servlet < ::WEBrick::HTTPServlet::AbstractServlet
   def show_documentation(req, res); end
 
   # Returns an
-  # [`RDoc::Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html) for the
+  # [`RDoc::Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html) for the
   # given `source_name` ('ruby' or a gem name).
   def store_for(source_name); end
 
   def self.get_instance(server, *options); end
 end
 
-# A singleton class
 # A singleton class
 class RDoc::SingleClass < ::RDoc::ClassModule
   # Adds the superclass to the included modules.
@@ -8776,15 +8747,14 @@ class RDoc::SingleClass < ::RDoc::ClassModule
   def definition; end
 end
 
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) statistics collector
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) statistics collector
 # which prints a summary and report of a project's documentation totals.
 class RDoc::Stats
   include(::RDoc::Text)
 
-  # Creates a new [`Stats`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Stats.html)
+  # Creates a new [`Stats`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Stats.html)
   # that will have `num_files`. `verbosity` defaults to 1 which will create an
-  # [`RDoc::Stats::Normal`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Stats/Normal.html)
-  # outputter.
+  # RDoc::Stats::Normal outputter.
   def self.new(store, num_files, verbosity = _); end
 
   # Records the parsing of an alias `as`.
@@ -8840,8 +8810,8 @@ class RDoc::Stats
   # The documentation status of this project. `true` when 100%, `false` when
   # less than 100% and `nil` when unknown.
   #
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) by calling
-  # [`calculate`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Stats.html#method-i-calculate)
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) by calling
+  # [`calculate`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Stats.html#method-i-calculate)
   def fully_documented?; end
 
   # A report that says you did a great job!
@@ -8873,7 +8843,7 @@ class RDoc::Stats
 
   # Determines which parameters in `method` were not documented. Returns a total
   # parameter count and an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of undocumented
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of undocumented
   # methods.
   def undoc_params(method); end
 end
@@ -8952,10 +8922,10 @@ end
 # cache of methods, classes and ancestors in the store.
 #
 # The store maintains a
-# [`cache`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html#attribute-i-cache)
+# [`cache`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html#attribute-i-cache)
 # of its contents for faster lookup. After adding items to the store it must be
 # flushed using
-# [`save_cache`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html#method-i-save_cache).
+# [`save_cache`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html#method-i-save_cache).
 # The cache contains the following structures:
 #
 # ```ruby
@@ -8969,7 +8939,7 @@ end
 # }
 # ```
 class RDoc::Store
-  # Creates a new [`Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html)
+  # Creates a new [`Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html)
   # of `type` that will load or save to `path`
   def self.new(path = _, type = _); end
 
@@ -8978,41 +8948,41 @@ class RDoc::Store
   def add_c_enclosure(variable, namespace); end
 
   # Adds C variables from an
-  # [`RDoc::Parser::C`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Parser/C.html)
+  # [`RDoc::Parser::C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html)
   def add_c_variables(c_parser); end
 
   # Adds the file with `name` as an
-  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # to the store. Returns the created
-  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html).
+  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html).
   def add_file(absolute_name, relative_name = _); end
 
   # Returns all classes discovered by
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
   def all_classes; end
 
   # Returns all classes and modules discovered by
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
   def all_classes_and_modules; end
 
   # All TopLevels known to
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
   def all_files; end
 
   # Returns all modules discovered by
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
   def all_modules; end
 
   # Ancestors cache accessor. Maps a klass name to an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of its ancestors
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of its ancestors
   # in this store. If Foo in this store inherits from
-  # [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html),
-  # [`Kernel`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html) won't be listed
+  # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html),
+  # [`Kernel`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html) won't be listed
   # (it will be included from ruby's ri store).
   def ancestors; end
 
   # Attributes cache accessor. Maps a class to an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of its attributes.
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of its attributes.
   def attributes; end
 
   # Maps C variables to class or module names for each parsed C file.
@@ -9026,7 +8996,7 @@ class RDoc::Store
   def c_singleton_class_variables; end
 
   # The contents of the
-  # [`Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html)
+  # [`Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html)
   def cache; end
 
   # Path to the cache file
@@ -9035,31 +9005,31 @@ class RDoc::Store
   # Path to the ri data for `klass_name`
   def class_file(klass_name); end
 
-  # [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) methods cache
+  # [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) methods cache
   # accessor. Maps a class to an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of its class
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of its class
   # methods (not full name).
   def class_methods; end
 
   # Path where data for `klass_name` will be stored (methods or class data)
   def class_path(klass_name); end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of all classes known
-  # to [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of all classes known
+  # to [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
   def classes_hash; end
 
   def clean_cache_collection(collection); end
 
-  # Prepares the [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) code
+  # Prepares the [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) code
   # object tree for use by a generator.
   #
   # It finds unique classes/modules defined, and replaces classes/modules that
   # are aliases for another one by a copy with
-  # [`RDoc::ClassModule#is_alias_for`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html#attribute-i-is_alias_for)
+  # [`RDoc::ClassModule#is_alias_for`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html#attribute-i-is_alias_for)
   # set.
   #
   # It updates the
-  # [`RDoc::ClassModule#constant_aliases`](https://docs.ruby-lang.org/en/2.6.0/RDoc/ClassModule.html#attribute-i-constant_aliases)
+  # [`RDoc::ClassModule#constant_aliases`](https://docs.ruby-lang.org/en/2.7.0/RDoc/ClassModule.html#attribute-i-constant_aliases)
   # attribute of "real" classes or modules.
   #
   # It also completely removes the classes and modules that should be removed
@@ -9067,27 +9037,27 @@ class RDoc::Store
   # `min_visibility`, which is the `--visibility` option.
   #
   # See also
-  # [`RDoc::Context#remove_from_documentation?`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html#method-i-remove_from_documentation-3F)
+  # [`RDoc::Context#remove_from_documentation?`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#method-i-remove_from_documentation-3F)
   def complete(min_visibility); end
 
-  # If true this [`Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html)
+  # If true this [`Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html)
   # will not write any files
   def dry_run; end
 
-  # If true this [`Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html)
+  # If true this [`Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html)
   # will not write any files
   def dry_run=(_); end
 
   # The encoding of the contents in the
-  # [`Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html)
+  # [`Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html)
   def encoding; end
 
   # The encoding of the contents in the
-  # [`Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html)
+  # [`Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html)
   def encoding=(_); end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of all files known
-  # to [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of all files known
+  # to [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
   def files_hash; end
 
   # Finds the enclosure (namespace) for the given C `variable`.
@@ -9109,7 +9079,7 @@ class RDoc::Store
   def find_module_named(name); end
 
   # Returns the
-  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # that is a text file and has the given `file_name`
   def find_text_page(file_name); end
 
@@ -9120,21 +9090,21 @@ class RDoc::Store
   # Fixes the erroneous `BasicObject < Object` in 1.9.
   #
   # Because we assumed all classes without a stated superclass inherit from
-  # [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html), we have the
+  # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html), we have the
   # above wrong inheritance.
   #
-  # We fix [`BasicObject`](https://docs.ruby-lang.org/en/2.6.0/BasicObject.html)
+  # We fix [`BasicObject`](https://docs.ruby-lang.org/en/2.7.0/BasicObject.html)
   # right away if we are running in a Ruby version >= 1.9.
   def fix_basic_object_inheritance; end
 
   # Friendly rendition of
-  # [`path`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html#attribute-i-path)
+  # [`path`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html#attribute-i-path)
   def friendly_path; end
 
   def inspect; end
 
   # Instance methods cache accessor. Maps a class to an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of its instance
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of its instance
   # methods (not full name).
   def instance_methods; end
 
@@ -9158,13 +9128,13 @@ class RDoc::Store
   def load_page(page_name); end
 
   # Gets the main page for this
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) store. This page is
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) store. This page is
   # used as the root of the
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) server.
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) server.
   def main; end
 
   # Sets the main page for this
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) store.
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) store.
   def main=(page); end
 
   # Converts the variable => ClassModule map `variables` from a C parser into a
@@ -9175,16 +9145,16 @@ class RDoc::Store
   def method_file(klass_name, method_name); end
 
   # Modules cache accessor. An
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of all the module
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of all the module
   # (and class) names in the store.
   def module_names; end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of all modules known
-  # to [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of all modules known
+  # to [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
   def modules_hash; end
 
   # Returns the
-  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # that is a text file and has the given `name`
   def page(name); end
 
@@ -9197,12 +9167,12 @@ class RDoc::Store
   # Path this store reads or writes
   def path=(_); end
 
-  # The [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RDoc.html)
+  # The [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RDoc.html)
   # driver for this parse tree. This allows classes consulting the documentation
   # tree to access user-set options, for example.
   def rdoc; end
 
-  # The [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RDoc.html)
+  # The [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RDoc.html)
   # driver for this parse tree. This allows classes consulting the documentation
   # tree to access user-set options, for example.
   def rdoc=(_); end
@@ -9210,7 +9180,7 @@ class RDoc::Store
   # Removes from `all_hash` the contexts that are nodoc or have no content.
   #
   # See
-  # [`RDoc::Context#remove_from_documentation?`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context.html#method-i-remove_from_documentation-3F)
+  # [`RDoc::Context#remove_from_documentation?`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#method-i-remove_from_documentation-3F)
   def remove_nodoc(all_hash); end
 
   # Saves all entries in the store
@@ -9234,42 +9204,40 @@ class RDoc::Store
   # directory the source is "home". For system ri store (the standard library
   # documentation) the source is"ruby". For a store from the site ri directory
   # the store is "site". For other stores the source is the
-  # [`path`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html#attribute-i-path).
+  # [`path`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html#attribute-i-path).
   def source; end
 
   # Gets the title for this
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) store. This is used
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) store. This is used
   # as the title in each page on the
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) server
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) server
   def title; end
 
   # Sets the title page for this
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) store.
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) store.
   def title=(title); end
 
-  # Type of ri datastore this was loaded from. See
-  # [`RDoc::RI::Driver`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RI/Driver.html),
-  # [`RDoc::RI::Paths`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RI/Paths.html).
+  # Type of ri datastore this was loaded from. See RDoc::RI::Driver,
+  # RDoc::RI::Paths.
   def type; end
 
-  # Type of ri datastore this was loaded from. See
-  # [`RDoc::RI::Driver`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RI/Driver.html),
-  # [`RDoc::RI::Paths`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RI/Paths.html).
+  # Type of ri datastore this was loaded from. See RDoc::RI::Driver,
+  # RDoc::RI::Paths.
   def type=(_); end
 
   # Returns the unique classes discovered by
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html).
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html).
   #
   # ::complete must have been called prior to using this method.
   def unique_classes; end
 
   # Returns the unique classes and modules discovered by
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html). ::complete must
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html). ::complete must
   # have been called prior to using this method.
   def unique_classes_and_modules; end
 
   # Returns the unique modules discovered by
-  # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html). ::complete must
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html). ::complete must
   # have been called prior to using this method.
   def unique_modules; end
 end
@@ -9280,20 +9248,20 @@ class RDoc::Store::Error < ::RDoc::Error; end
 # Raised when a stored file for a class, module, page or method is missing.
 class RDoc::Store::MissingFileError < ::RDoc::Store::Error
   # Creates a new
-  # [`MissingFileError`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store/MissingFileError.html)
+  # [`MissingFileError`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store/MissingFileError.html)
   # for the missing `file` for the given `name` that should have been in the
   # `store`.
   def self.new(store, file, name); end
 
   # The file the
-  # [`name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store/MissingFileError.html#attribute-i-name)
+  # [`name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store/MissingFileError.html#attribute-i-name)
   # should be saved as
   def file; end
 
   def message; end
 
   # The name of the object the
-  # [`file`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store/MissingFileError.html#attribute-i-file)
+  # [`file`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store/MissingFileError.html#attribute-i-file)
   # would be loaded from
   def name; end
 
@@ -9308,7 +9276,7 @@ module RDoc::Text
   MARKUP_FORMAT = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 
   # Maps an encoding to a
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of characters
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of characters
   # properly transcoded for that encoding.
   #
   # See also encode\_fallback.
@@ -9328,9 +9296,7 @@ module RDoc::Text
   # Strips hashes, expands tabs then flushes `text` to the left
   def normalize_comment(text); end
 
-  # Normalizes `text` then builds a
-  # [`RDoc::Markup::Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html)
-  # from it
+  # Normalizes `text` then builds a RDoc::Markup::Document from it
   def parse(text, format = _); end
 
   # The first `limit` characters of `text` as HTML
@@ -9342,7 +9308,7 @@ module RDoc::Text
   # Strips leading and trailing n characters from `text`
   def strip_newlines(text); end
 
-  # Strips       style comments
+  # Strips /\* \*/ style comments
   def strip_stars(text); end
 
   # Converts ampersand, dashes, ellipsis, quotes, copyright and registered
@@ -9356,38 +9322,34 @@ module RDoc::Text
   def self.encode_fallback(character, encoding, fallback); end
 end
 
-# A [`TokenStream`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TokenStream.html)
+# A [`TokenStream`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TokenStream.html)
 # is a list of tokens, gathered during the parse of some entity (say a method).
 # Entities populate these streams by being registered with the lexer. Any class
 # can collect tokens by including
-# [`TokenStream`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TokenStream.html).
+# [`TokenStream`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TokenStream.html).
 # From the outside, you use such an object by calling the
-# [`start_collecting_tokens`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TokenStream.html#method-i-start_collecting_tokens)
+# [`start_collecting_tokens`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TokenStream.html#method-i-start_collecting_tokens)
 # method, followed by calls to
-# [`add_token`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TokenStream.html#method-i-add_token)
+# [`add_token`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TokenStream.html#method-i-add_token)
 # and pop\_token.
 module RDoc::TokenStream
-  # Alias for:
-  # [`add_tokens`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TokenStream.html#method-i-add_tokens)
+  # Adds one `token` to the collected tokens
   def add_token(*tokens); end
 
   # Adds `tokens` to the collected tokens
-  #
-  # Also aliased as:
-  # [`add_token`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TokenStream.html#method-i-add_token)
   def add_tokens(*tokens); end
 
   # Starts collecting tokens
   #
   # Also aliased as:
-  # [`start_collecting_tokens`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TokenStream.html#method-i-start_collecting_tokens)
+  # [`start_collecting_tokens`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TokenStream.html#method-i-start_collecting_tokens)
   def collect_tokens; end
 
   # Remove the last token from the collected tokens
   def pop_token; end
 
   # Alias for:
-  # [`collect_tokens`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TokenStream.html#method-i-collect_tokens)
+  # [`collect_tokens`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TokenStream.html#method-i-collect_tokens)
   def start_collecting_tokens; end
 
   # Current token stream
@@ -9402,24 +9364,24 @@ module RDoc::TokenStream
   def self.to_html(token_stream); end
 end
 
-# A parser for [`TomDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TomDoc.html)
-# based on [`TomDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TomDoc.html)
+# A parser for [`TomDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TomDoc.html)
+# based on [`TomDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TomDoc.html)
 # 1.0.0-rc1 (02adef9b5a)
 #
-# The [`TomDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TomDoc.html)
+# The [`TomDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TomDoc.html)
 # specification can be found at:
 #
 # http://tomdoc.org
 #
 # The latest version of the
-# [`TomDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TomDoc.html) specification
+# [`TomDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TomDoc.html) specification
 # can be found at:
 #
 # https://github.com/mojombo/tomdoc/blob/master/tomdoc.md
 #
-# To choose [`TomDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TomDoc.html) as
+# To choose [`TomDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TomDoc.html) as
 # your only default format see [Saved Options at
-# `RDoc::Options`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Options.html#label-Saved+Options)
+# `RDoc::Options`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Options.html#class-RDoc::Options-label-Saved+Options)
 # for instructions on setting up a `.rdoc_options` file to store your project
 # default.
 #
@@ -9427,12 +9389,12 @@ end
 # best-effort was made to follow the specification as closely as possible but
 # some choices to deviate were made.
 #
-# A future version of [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html)
+# A future version of [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
 # will warn when a MUST or MUST NOT is violated and may warn when a SHOULD or
 # SHOULD NOT is violated.
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) will always try to
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) will always try to
 # emit documentation even if given invalid
-# [`TomDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TomDoc.html).
+# [`TomDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TomDoc.html).
 #
 # Here are some implementation choices this parser currently makes:
 #
@@ -9447,15 +9409,15 @@ end
 # precede the Arguments section.
 #
 # This class is documented in
-# [`TomDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TomDoc.html) format. Since
+# [`TomDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TomDoc.html) format. Since
 # this is a subclass of the
-# [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) markup parser there
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) markup parser there
 # isn't much to see here, unfortunately.
 class RDoc::TomDoc < ::RDoc::Markup::Parser
   # Creates a new
-  # [`TomDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TomDoc.html) parser. See
+  # [`TomDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TomDoc.html) parser. See
   # also
-  # [`RDoc::Markup::parse`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup.html#method-c-parse)
+  # [`RDoc::Markup::parse`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html#method-c-parse)
   def self.new; end
 
   # Builds a heading from the token stream
@@ -9477,8 +9439,7 @@ class RDoc::TomDoc < ::RDoc::Markup::Parser
   #
   # ### Returns
   #
-  # Returns an
-  # [`RDoc::Markup::Paragraph`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Paragraph.html).
+  # Returns an RDoc::Markup::Paragraph.
   def build_paragraph(margin); end
 
   # Builds a verbatim from the token stream. A verbatim in the Examples section
@@ -9491,17 +9452,16 @@ class RDoc::TomDoc < ::RDoc::Markup::Parser
   #
   # ### Returns
   #
-  # Returns an
-  # [`RDoc::Markup::Verbatim`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Verbatim.html)
+  # Returns an RDoc::Markup::Verbatim
   def build_verbatim(margin); end
 
   def parse_text(parent, indent); end
 
-  # Turns text into an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  # Turns text into an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   # of tokens
   #
   # text
-  # :   A [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) containing
+  # :   A [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) containing
   #     TomDoc-format text.
   #
   #
@@ -9515,11 +9475,11 @@ class RDoc::TomDoc < ::RDoc::Markup::Parser
 
   def self.add_post_processor; end
 
-  # Parses [`TomDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TomDoc.html) from
+  # Parses [`TomDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TomDoc.html) from
   # text
   #
   # text
-  # :   A [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) containing
+  # :   A [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) containing
   #     TomDoc-format text.
   #
   #
@@ -9536,45 +9496,43 @@ class RDoc::TomDoc < ::RDoc::Markup::Parser
   #
   # ### Returns
   #
-  # Returns an
-  # [`RDoc::Markup::Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html)
-  # representing the
-  # [`TomDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TomDoc.html) format.
+  # Returns an RDoc::Markup::Document representing the
+  # [`TomDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TomDoc.html) format.
   def self.parse(text); end
 
   # Extracts the Signature section's method signature
   #
   # comment
   # :   An
-  #     [`RDoc::Comment`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Comment.html)
+  #     [`RDoc::Comment`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Comment.html)
   #     that will be parsed and have the signature extracted
   #
   #
   # ### Returns
   #
-  # Returns a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # Returns a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   # containing the signature and nil if not
   def self.signature(comment); end
 end
 
-# A [`TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html) context
+# A [`TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html) context
 # is a representation of the contents of a single file
 class RDoc::TopLevel < ::RDoc::Context
   MARSHAL_VERSION = T.let(T.unsafe(nil), Integer)
 
   # Creates a new
-  # [`TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html) for the
+  # [`TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html) for the
   # file at `absolute_name`. If documentation is being generated outside the
   # source dir `relative_name` is relative to the source directory.
   def self.new(absolute_name, relative_name = _); end
 
   # An
-  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # is equal to another with the same
-  # [`relative_name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html#attribute-i-relative_name)
+  # [`relative_name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html#attribute-i-relative_name)
   #
   # Also aliased as:
-  # [`eql?`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html#method-i-eql-3F)
+  # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html#method-i-eql-3F)
   def ==(other); end
 
   # Absolute name of this file
@@ -9599,9 +9557,6 @@ class RDoc::TopLevel < ::RDoc::Context
   def add_to_classes_or_modules(mod); end
 
   # Base name of this file
-  #
-  # Also aliased as:
-  # [`name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html#method-i-name)
   def base_name; end
 
   # All the classes or modules that were declared in this file. These are
@@ -9617,21 +9572,21 @@ class RDoc::TopLevel < ::RDoc::Context
 
   def diagram=(_); end
 
-  # Only a [`TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # Only a [`TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # that contains text file) will be displayed. See also
-  # [`RDoc::CodeObject#display?`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html#method-i-display-3F)
+  # [`RDoc::CodeObject#display?`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html#method-i-display-3F)
   def display?; end
 
   # Alias for:
-  # [`==`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html#method-i-3D-3D)
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html#method-i-3D-3D)
   def eql?(other); end
 
   # This TopLevel's
-  # [`File::Stat`](https://docs.ruby-lang.org/en/2.6.0/File/Stat.html) struct
+  # [`File::Stat`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html) struct
   def file_stat; end
 
   # This TopLevel's
-  # [`File::Stat`](https://docs.ruby-lang.org/en/2.6.0/File/Stat.html) struct
+  # [`File::Stat`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html) struct
   def file_stat=(_); end
 
   # See RDoc::TopLevel::find\_class\_or\_module
@@ -9647,9 +9602,9 @@ class RDoc::TopLevel < ::RDoc::Context
   def full_name; end
 
   # An
-  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # has the same hash as another with the same
-  # [`relative_name`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html#attribute-i-relative_name)
+  # [`relative_name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html#attribute-i-relative_name)
   def hash; end
 
   # URL for this with a `prefix`
@@ -9657,12 +9612,12 @@ class RDoc::TopLevel < ::RDoc::Context
 
   def inspect; end
 
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) this file was last
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) this file was last
   # modified, if known
   def last_modified; end
 
   # Dumps this
-  # [`TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html) for use
+  # [`TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html) for use
   # by ri. See also marshal\_load
   def marshal_dump; end
 
@@ -9696,11 +9651,10 @@ class RDoc::TopLevel < ::RDoc::Context
   # Relative name of this file
   def relative_name=(_); end
 
-  # Search record used by
-  # [`RDoc::Generator::JsonIndex`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Generator/JsonIndex.html)
+  # Search record used by RDoc::Generator::JsonIndex
   def search_record; end
 
-  # Is this [`TopLevel`](https://docs.ruby-lang.org/en/2.6.0/RDoc/TopLevel.html)
+  # Is this [`TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # from a text file instead of a source code file?
   def text?; end
 

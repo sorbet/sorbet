@@ -1,11 +1,13 @@
 # typed: strict
 
-class SubpackageClass
-  extend T::Sig
+module MainPackage::Subpackage
+  class SubpackageClass
+    extend T::Sig
 
-  sig {returns(Integer)}
-  def self.calls_method
-    # Tests that the import from a root package works.
-    MainPackage::ClassWithMethod.method
+    sig {returns(Integer)}
+    def self.calls_method
+      # Tests that the import from a root package works.
+      MainPackage::ClassWithMethod.method
+    end
   end
 end

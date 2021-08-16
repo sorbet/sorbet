@@ -15,8 +15,8 @@ struct EpochTimers {
 struct ErrorStatus {
     // The epoch at which we last sent diagnostics for this file.
     u4 lastReportedEpoch = 0;
-    // If true, the client believes this file has errors.
-    bool hasErrors = false;
+    // The number of errors reported for this file during the last reported epoch.
+    u4 errorCount = 0;
 };
 
 class ErrorReporter {
@@ -25,6 +25,11 @@ class ErrorReporter {
     std::vector<ErrorStatus> fileErrorStatuses;
     ErrorStatus &getFileErrorStatus(core::FileRef file);
     UnorderedMap<u4, EpochTimers> epochTimers;
+    // The number of errors currently displayed in the editor. Reset whenever Sorbet begins a non-incremental epoch,
+    // which promises to retypecheck every file. Used to implement a global error limit.
+    u4 clientErrorCount = 0;
+    // Tracks the last epoch that was a full typecheck. Used to sanity check clientErrorCount.
+    u4 lastFullTypecheckEpoch = 0;
 
 public:
     ErrorReporter(std::shared_ptr<const LSPConfiguration> config);
@@ -37,9 +42,12 @@ public:
     void pushDiagnostics(u4 epoch, core::FileRef file, const std::vector<std::unique_ptr<core::Error>> &errors,
                          const core::GlobalState &gs);
 
-    void beginEpoch(u4 epoch, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
+    void beginEpoch(u4 epoch, bool isIncremental, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
     void endEpoch(u4 epoch, bool committed = true);
     u4 lastDiagnosticEpochForFile(core::FileRef file);
+
+    // Sanity checks error count data.
+    void sanityCheck() const;
 };
 
 class ErrorEpoch final {
@@ -47,7 +55,8 @@ class ErrorEpoch final {
     u4 epoch;
 
 public:
-    ErrorEpoch(ErrorReporter &errorReporter, u4 epoch, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
+    ErrorEpoch(ErrorReporter &errorReporter, u4 epoch, bool isIncremental,
+               std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
 
     ~ErrorEpoch();
 

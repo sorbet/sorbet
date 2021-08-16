@@ -1,0 +1,229 @@
+suggest_t_unsafe.rb:25: Expected `String` but found `T.nilable(String)` for argument `str` https://srb.help/7002
+    25 |  takes_string_kw(str: nilable_string)
+                               ^^^^^^^^^^^^^^
+  Expected `String` for argument `str` of method `Object#takes_string_kw`:
+    suggest_t_unsafe.rb:19:
+    19 |sig {params(str: String).void}
+                    ^^^
+  Got `T.nilable(String)` originating from:
+    suggest_t_unsafe.rb:25:
+    25 |  takes_string_kw(str: nilable_string)
+                               ^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:25: Replaced with `T.unsafe(nilable_string)`
+    25 |  takes_string_kw(str: nilable_string)
+                               ^^^^^^^^^^^^^^
+
+suggest_t_unsafe.rb:8: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
+     8 |foo[0]
+        ^^^^^^
+  Got T.nilable(String) originating from:
+    suggest_t_unsafe.rb:7:
+     7 |foo = T.let(nil, T.nilable(String))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:8: Replaced with `T.unsafe(foo)`
+     8 |foo[0]
+        ^^^
+
+suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
+    10 |"hi" + foo
+        ^^^^^^^^^^
+  Expected `String` for argument `arg0` of method `String#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L68:
+    68 |        arg0: String,
+                ^^^^
+  Got `T.nilable(String)` originating from:
+    suggest_t_unsafe.rb:7:
+     7 |foo = T.let(nil, T.nilable(String))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:10: Replaced with `T.unsafe(foo)`
+    10 |"hi" + foo
+               ^^^
+
+suggest_t_unsafe.rb:13: Method `even?` does not exist on `String` component of `T.any(Integer, String)` https://srb.help/7003
+    13 |bar.even?
+        ^^^^^^^^^
+  Got T.any(Integer, String) originating from:
+    suggest_t_unsafe.rb:12:
+    12 |bar = T.let(1, T.any(Integer, String))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:13: Replaced with `T.unsafe(bar)`
+    13 |bar.even?
+        ^^^
+
+suggest_t_unsafe.rb:15: Expected `String` but found `Integer(1)` for argument `arg0` https://srb.help/7002
+    15 |"hi" + 1
+               ^
+  Expected `String` for argument `arg0` of method `String#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L68:
+    68 |        arg0: String,
+                ^^^^
+  Got `Integer(1)` originating from:
+    suggest_t_unsafe.rb:15:
+    15 |"hi" + 1
+               ^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:15: Replaced with `T.unsafe(1)`
+    15 |"hi" + 1
+               ^
+
+suggest_t_unsafe.rb:17: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    17 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                              ^^^^^^
+  Got T.nilable(Integer) originating from:
+    suggest_t_unsafe.rb:17:
+    17 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                              ^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:17: Replaced with ` {|x| T.unsafe(x).even?}`
+    17 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                            ^^^^^^^^^
+Errors: 6
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+extend T::Sig
+
+def custom_wrapper(arg0); end
+
+foo = T.let(nil, T.nilable(String))
+T.unsafe(foo)[0]
+
+"hi" + T.unsafe(foo)
+
+bar = T.let(1, T.any(Integer, String))
+T.unsafe(bar).even?
+
+"hi" + T.unsafe(1)
+
+T::Array[T.nilable(Integer)].new.map {|x| T.unsafe(x).even?}
+
+sig {params(str: String).void}
+def takes_string_kw(str:); end
+
+sig {params(nilable_string: T.nilable(String)).void}
+def takes_nilable_string(nilable_string)
+  # This used to crash Sorbet, because there was no Loc for the `str` argument
+  takes_string_kw(str: T.unsafe(nilable_string))
+end
+
+--------------------------------------------------------------------------
+
+suggest_t_unsafe.rb:25: Expected `String` but found `T.nilable(String)` for argument `str` https://srb.help/7002
+    25 |  takes_string_kw(str: nilable_string)
+                               ^^^^^^^^^^^^^^
+  Expected `String` for argument `str` of method `Object#takes_string_kw`:
+    suggest_t_unsafe.rb:19:
+    19 |sig {params(str: String).void}
+                    ^^^
+  Got `T.nilable(String)` originating from:
+    suggest_t_unsafe.rb:25:
+    25 |  takes_string_kw(str: nilable_string)
+                               ^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:25: Replaced with `custom_wrapper(nilable_string)`
+    25 |  takes_string_kw(str: nilable_string)
+                               ^^^^^^^^^^^^^^
+
+suggest_t_unsafe.rb:8: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
+     8 |foo[0]
+        ^^^^^^
+  Got T.nilable(String) originating from:
+    suggest_t_unsafe.rb:7:
+     7 |foo = T.let(nil, T.nilable(String))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:8: Replaced with `custom_wrapper(foo)`
+     8 |foo[0]
+        ^^^
+
+suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
+    10 |"hi" + foo
+        ^^^^^^^^^^
+  Expected `String` for argument `arg0` of method `String#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L68:
+    68 |        arg0: String,
+                ^^^^
+  Got `T.nilable(String)` originating from:
+    suggest_t_unsafe.rb:7:
+     7 |foo = T.let(nil, T.nilable(String))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:10: Replaced with `custom_wrapper(foo)`
+    10 |"hi" + foo
+               ^^^
+
+suggest_t_unsafe.rb:13: Method `even?` does not exist on `String` component of `T.any(Integer, String)` https://srb.help/7003
+    13 |bar.even?
+        ^^^^^^^^^
+  Got T.any(Integer, String) originating from:
+    suggest_t_unsafe.rb:12:
+    12 |bar = T.let(1, T.any(Integer, String))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:13: Replaced with `custom_wrapper(bar)`
+    13 |bar.even?
+        ^^^
+
+suggest_t_unsafe.rb:15: Expected `String` but found `Integer(1)` for argument `arg0` https://srb.help/7002
+    15 |"hi" + 1
+               ^
+  Expected `String` for argument `arg0` of method `String#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L68:
+    68 |        arg0: String,
+                ^^^^
+  Got `Integer(1)` originating from:
+    suggest_t_unsafe.rb:15:
+    15 |"hi" + 1
+               ^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:15: Replaced with `custom_wrapper(1)`
+    15 |"hi" + 1
+               ^
+
+suggest_t_unsafe.rb:17: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    17 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                              ^^^^^^
+  Got T.nilable(Integer) originating from:
+    suggest_t_unsafe.rb:17:
+    17 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                              ^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:17: Replaced with ` {|x| custom_wrapper(x).even?}`
+    17 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                            ^^^^^^^^^
+Errors: 6
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+extend T::Sig
+
+def custom_wrapper(arg0); end
+
+foo = T.let(nil, T.nilable(String))
+custom_wrapper(foo)[0]
+
+"hi" + custom_wrapper(foo)
+
+bar = T.let(1, T.any(Integer, String))
+custom_wrapper(bar).even?
+
+"hi" + custom_wrapper(1)
+
+T::Array[T.nilable(Integer)].new.map {|x| custom_wrapper(x).even?}
+
+sig {params(str: String).void}
+def takes_string_kw(str:); end
+
+sig {params(nilable_string: T.nilable(String)).void}
+def takes_nilable_string(nilable_string)
+  # This used to crash Sorbet, because there was no Loc for the `str` argument
+  takes_string_kw(str: custom_wrapper(nilable_string))
+end

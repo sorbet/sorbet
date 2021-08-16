@@ -32,7 +32,7 @@ module BigMath
   # digits of precision, `numeric`.
   #
   # If `decimal` is zero or negative, raises
-  # [`Math::DomainError`](https://docs.ruby-lang.org/en/2.6.0/Math/DomainError.html).
+  # [`Math::DomainError`](https://docs.ruby-lang.org/en/2.7.0/Math/DomainError.html).
   #
   # If `decimal` is positive infinity, returns Infinity.
   #

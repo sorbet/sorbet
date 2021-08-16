@@ -2,12 +2,12 @@
 
 # ## Introduction
 #
-# The [`DBM`](https://docs.ruby-lang.org/en/2.6.0/DBM.html) class provides a
+# The [`DBM`](https://docs.ruby-lang.org/en/2.7.0/DBM.html) class provides a
 # wrapper to a Unix-style [dbm](http://en.wikipedia.org/wiki/Dbm) or Database
 # Manager library.
 #
 # Dbm databases do not have tables or columns; they are simple key-value data
-# stores, like a Ruby [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
+# stores, like a Ruby [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
 # except not resident in RAM. Keys and values must be strings.
 #
 # The exact library used depends on how Ruby was compiled. It could be any of
@@ -31,7 +31,7 @@
 # ## Cautions
 #
 # Before you decide to use
-# [`DBM`](https://docs.ruby-lang.org/en/2.6.0/DBM.html), there are some issues
+# [`DBM`](https://docs.ruby-lang.org/en/2.7.0/DBM.html), there are some issues
 # you should consider:
 #
 # *   Each implementation of dbm has its own file format. Generally, dbm
@@ -44,10 +44,10 @@
 #
 # *   Different versions of Berkeley DB use different file formats. A change to
 #     the OS may therefore break
-#     [`DBM`](https://docs.ruby-lang.org/en/2.6.0/DBM.html) access to existing
+#     [`DBM`](https://docs.ruby-lang.org/en/2.7.0/DBM.html) access to existing
 #     files.
 #
-# *   [`Data`](https://docs.ruby-lang.org/en/2.6.0/Data.html) size limits vary
+# *   [`Data`](https://docs.ruby-lang.org/en/2.7.0/Data.html) size limits vary
 #     between implementations. Original Berkeley DB was limited to 2GB of data.
 #     Dbm libraries also sometimes limit the total size of a key/value pair, and
 #     the total size of all the keys that hash to the same value. These limits
@@ -56,9 +56,9 @@
 #
 #
 # Given the above cautions,
-# [`DBM`](https://docs.ruby-lang.org/en/2.6.0/DBM.html) is not a good choice for
+# [`DBM`](https://docs.ruby-lang.org/en/2.7.0/DBM.html) is not a good choice for
 # long term storage of important data. It is probably best used as a fast and
-# easy alternative to a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
+# easy alternative to a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
 # for processing large amounts of data.
 #
 # ## Example
@@ -140,7 +140,7 @@ class DBM
 
   # Return a value from the database by locating the key string provided. If the
   # key is not found, returns `ifnone`. If `ifnone` is not given, raises
-  # [`IndexError`](https://docs.ruby-lang.org/en/2.6.0/IndexError.html).
+  # [`IndexError`](https://docs.ruby-lang.org/en/2.7.0/IndexError.html).
   def fetch(key, if_none = nil); end
 
   # Returns true if the database contains the specified key, false otherwise.
@@ -153,8 +153,8 @@ class DBM
   # Returns true if the database contains the specified key, false otherwise.
   def include?(key); end
 
-  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) (not a
-  # [`DBM`](https://docs.ruby-lang.org/en/2.6.0/DBM.html) database) created by
+  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) (not a
+  # [`DBM`](https://docs.ruby-lang.org/en/2.7.0/DBM.html) database) created by
   # using each value in the database as a key, with the corresponding key as its
   # value.
   def invert; end
@@ -175,10 +175,10 @@ class DBM
   def member?(key); end
 
   # Converts the contents of the database to an in-memory
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html), then calls
-  # [`Hash#reject`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-reject)
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html), then calls
+  # [`Hash#reject`](https://docs.ruby-lang.org/en/2.7.0/Hash.html#method-i-reject)
   # with the specified code block, returning a new
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html).
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html).
   def reject(&blk); end
 
   # Deletes all entries for which the code block returns true. Returns self.
@@ -186,9 +186,9 @@ class DBM
 
   # Replaces the contents of the database with the contents of the specified
   # object. Takes any object which implements the
-  # [`each_pair`](https://docs.ruby-lang.org/en/2.6.0/DBM.html#method-i-each_pair)
-  # method, including [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
-  # and [`DBM`](https://docs.ruby-lang.org/en/2.6.0/DBM.html) objects.
+  # [`each_pair`](https://docs.ruby-lang.org/en/2.7.0/DBM.html#method-i-each_pair)
+  # method, including [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
+  # and [`DBM`](https://docs.ruby-lang.org/en/2.7.0/DBM.html) objects.
   def replace(_); end
 
   # Returns a new array consisting of the [key, value] pairs for which the code
@@ -212,15 +212,15 @@ class DBM
   def to_a; end
 
   # Converts the contents of the database to an in-memory
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) object, and returns
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) object, and returns
   # it.
   def to_hash; end
 
   # Updates the database with multiple values from the specified object. Takes
   # any object which implements the
-  # [`each_pair`](https://docs.ruby-lang.org/en/2.6.0/DBM.html#method-i-each_pair)
-  # method, including [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
-  # and [`DBM`](https://docs.ruby-lang.org/en/2.6.0/DBM.html) objects.
+  # [`each_pair`](https://docs.ruby-lang.org/en/2.7.0/DBM.html#method-i-each_pair)
+  # method, including [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
+  # and [`DBM`](https://docs.ruby-lang.org/en/2.7.0/DBM.html) objects.
   def update(_); end
 
   # Returns true if the database contains the specified string value, false
@@ -241,16 +241,16 @@ class DBM
   # The mode should be an integer, as for Unix chmod.
   #
   # Flags should be one of
-  # [`READER`](https://docs.ruby-lang.org/en/2.6.0/DBM.html#READER),
-  # [`WRITER`](https://docs.ruby-lang.org/en/2.6.0/DBM.html#WRITER),
-  # [`WRCREAT`](https://docs.ruby-lang.org/en/2.6.0/DBM.html#WRCREAT) or
-  # [`NEWDB`](https://docs.ruby-lang.org/en/2.6.0/DBM.html#NEWDB).
+  # [`READER`](https://docs.ruby-lang.org/en/2.7.0/DBM.html#READER),
+  # [`WRITER`](https://docs.ruby-lang.org/en/2.7.0/DBM.html#WRITER),
+  # [`WRCREAT`](https://docs.ruby-lang.org/en/2.7.0/DBM.html#WRCREAT) or
+  # [`NEWDB`](https://docs.ruby-lang.org/en/2.7.0/DBM.html#NEWDB).
   def self.new(*_); end
 
   # Open a dbm database and yields it if a block is given. See also `DBM.new`.
   def self.open(*_); end
 end
 
-# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) class used
+# [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html) class used
 # to return errors from the dbm library.
 class DBMError < ::StandardError; end

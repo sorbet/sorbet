@@ -3,7 +3,7 @@ set -e
 
 cd "$(dirname "$0")/../.."
 
-targets="$(bazel query 'kind("cc_(library|binary|test)", //...)')"
+targets="$(bazel query --curses=no --noshow_progress 'kind("cc_(library|binary|test)", //...)' 2>/dev/null)"
 
 buildifier=$(mktemp -t buildifier.XXXXXX)
 cleanup() {
@@ -12,7 +12,11 @@ cleanup() {
 }
 trap cleanup exit
 
-bazel run --script_path "$buildifier" @com_github_bazelbuild_buildtools//buildifier
+bazel run \
+  --ui_event_filters=-info,-stdout,-stderr \
+  --noshow_progress \
+  --script_path "$buildifier" \
+  @com_github_bazelbuild_buildtools//buildifier &> /dev/null
 
 (
     sed -n '1,/BEGIN compile_commands/p' tools/BUILD
@@ -21,11 +25,14 @@ bazel run --script_path "$buildifier" @com_github_bazelbuild_buildtools//buildif
 ) | "$buildifier" > tools/BUILD.tmp
 
 if [ "$1" == "-t" ]; then
-    if ! diff -u tools/BUILD tools/BUILD.tmp; then
-        echo "tools/BUILD needs to be updated." >&2
-        echo "Please re-run:" >&2
-        echo -e "  \\e[97;1;42mtools/scripts/generate_compdb_targets.sh\\e[0m" >&2
-        echo "And commit the result." >&2
+    trap "rm diff.output" exit
+    if ! diff -u tools/BUILD tools/BUILD.tmp > diff.output; then
+        echo "The tools/BUILD file needs to be updated."
+        echo "\`\`\`"
+        cat diff.output
+        echo "\`\`\`"
+        echo ""
+        echo "Please run \`tools/scripts/generate_compdb_targets.sh\` and commit the result."
         exit 1
     fi
 else

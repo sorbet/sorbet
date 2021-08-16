@@ -2,6 +2,8 @@
 #include "absl/strings/match.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
+#include "common/concurrency/ConcurrentQueue.h"
+#include "common/concurrency/WorkerPool.h"
 #include "common/formatting.h"
 #include "common/sort.h"
 #include "core/GlobalState.h"
@@ -19,8 +21,7 @@ namespace sorbet::autogen {
 // converts it to a `DefTree`, and then emits the autoloader files based on passed-in string fragments
 
 bool AutoloaderConfig::include(const NamedDefinition &nd) const {
-    return !nd.qname.nameParts.empty() &&
-           topLevelNamespaceRefs.find(nd.qname.nameParts[0]) != topLevelNamespaceRefs.end();
+    return !nd.qname.nameParts.empty() && topLevelNamespaceRefs.contains(nd.qname.nameParts[0]);
 }
 
 bool AutoloaderConfig::includePath(string_view path) const {
@@ -30,11 +31,11 @@ bool AutoloaderConfig::includePath(string_view path) const {
 }
 
 bool AutoloaderConfig::includeRequire(core::NameRef req) const {
-    return excludedRequireRefs.find(req) == excludedRequireRefs.end();
+    return !excludedRequireRefs.contains(req);
 }
 
 bool AutoloaderConfig::sameFileCollapsable(const vector<core::NameRef> &module) const {
-    return nonCollapsableModuleNames.find(module) == nonCollapsableModuleNames.end();
+    return !nonCollapsableModuleNames.contains(module);
 }
 
 string_view AutoloaderConfig::normalizePath(const core::GlobalState &gs, core::FileRef file) const {
@@ -107,11 +108,11 @@ bool NamedDefinition::preferredTo(const core::GlobalState &gs, const NamedDefini
 
 void showHelper(const core::GlobalState &gs, fmt::memory_buffer &buf, const DefTree &node, int level) {
     auto fileRefToString = [&](const NamedDefinition &nd) -> string_view { return nd.fileRef.data(gs).path(); };
-    fmt::format_to(buf, "{} [{}]\n", node.root() ? "<ROOT>" : node.name().show(gs),
+    fmt::format_to(std::back_inserter(buf), "{} [{}]\n", node.root() ? "<ROOT>" : node.name().show(gs),
                    fmt::map_join(node.namedDefs, ", ", fileRefToString));
     for (const auto &[name, tree] : node.children) {
         for (int i = 0; i < level; ++i) {
-            fmt::format_to(buf, "  ");
+            fmt::format_to(std::back_inserter(buf), "  ");
         }
         showHelper(gs, buf, *tree, level + 1);
     }
@@ -124,13 +125,13 @@ string DefTree::show(const core::GlobalState &gs, int level) const {
 }
 
 string DefTree::fullName(const core::GlobalState &gs) const {
-    return fmt::format(
-        "{}", fmt::map_join(qname.nameParts, "::", [&](core::NameRef nr) -> string_view { return nr.show(gs); }));
+    return fmt::format("{}",
+                       fmt::map_join(qname.nameParts, "::", [&](core::NameRef nr) -> string { return nr.show(gs); }));
 }
 
-string join(string path, string file) {
+string join(string_view path, string file) {
     if (file.empty()) {
-        return path;
+        return string(path);
     }
     return fmt::format("{}/{}", path, file);
 }
@@ -185,7 +186,7 @@ core::NameRef DefTree::name() const {
 
 string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "{}\n", alCfg.preamble);
+    fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
 
     core::FileRef definingFile;
     if (!namedDefs.empty()) {
@@ -206,20 +207,20 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
                                             return nr.show(gs);
                                         }));
         if (!root()) {
-            fmt::format_to(buf, "{}.on_autoload('{}')\n", alCfg.registryModule, fullName);
+            fmt::format_to(std::back_inserter(buf), "{}.on_autoload('{}')\n", alCfg.registryModule, fullName);
             predeclare(gs, fullName, buf);
         }
         if (!children.empty()) {
-            fmt::format_to(buf, "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
+            fmt::format_to(std::back_inserter(buf), "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
             vector<pair<core::NameRef, string>> childNames;
             std::transform(children.begin(), children.end(), back_inserter(childNames),
                            [&gs](const auto &pair) { return make_pair(pair.first, pair.first.show(gs)); });
             fast_sort(childNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second < rhs.second; });
             for (const auto &pair : childNames) {
-                fmt::format_to(buf, "  {}: \"{}/{}\",\n", pair.second, alCfg.rootDir,
+                fmt::format_to(std::back_inserter(buf), "  {}: \"{}/{}\",\n", pair.second, alCfg.rootDir,
                                children.at(pair.first)->path(gs));
             }
-            fmt::format_to(buf, "}})\n", fullName);
+            fmt::format_to(std::back_inserter(buf), "}})\n", fullName);
         }
     } else if (type == Definition::Type::Casgn || type == Definition::Type::Alias) {
         ENFORCE(qname.size() > 1);
@@ -230,7 +231,7 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
     }
 
     if (definingFile.exists()) {
-        fmt::format_to(buf, "\n{}.for_autoload({}, \"{}\"{})\n", alCfg.registryModule, fullName,
+        fmt::format_to(std::back_inserter(buf), "\n{}.for_autoload({}, \"{}\"{})\n", alCfg.registryModule, fullName,
                        alCfg.normalizePath(gs, definingFile), casgnArg);
     }
     return to_string(buf);
@@ -251,24 +252,24 @@ void DefTree::requires(const core::GlobalState &gs, const AutoloaderConfig &alCf
     fast_sort(reqs);
     auto last = unique(reqs.begin(), reqs.end());
     for (auto it = reqs.begin(); it != last; ++it) {
-        fmt::format_to(buf, "require '{}'\n", *it);
+        fmt::format_to(std::back_inserter(buf), "require '{}'\n", *it);
     }
 }
 
 void DefTree::predeclare(const core::GlobalState &gs, string_view fullName, fmt::memory_buffer &buf) const {
     if (hasDef() && definitionType(gs) == Definition::Type::Class) {
-        fmt::format_to(buf, "\nclass {}", fullName);
+        fmt::format_to(std::back_inserter(buf), "\nclass {}", fullName);
         auto &def = definition(gs);
         if (!def.parentName.empty()) {
-            fmt::format_to(buf, " < {}", fmt::map_join(def.parentName.nameParts, "::", [&](const auto &nr) -> string {
-                               return nr.show(gs);
-                           }));
+            fmt::format_to(
+                std::back_inserter(buf), " < {}",
+                fmt::map_join(def.parentName.nameParts, "::", [&](const auto &nr) -> string { return nr.show(gs); }));
         }
     } else {
-        fmt::format_to(buf, "\nmodule {}", fullName);
+        fmt::format_to(std::back_inserter(buf), "\nmodule {}", fullName);
     }
     // TODO aliases? casgn?
-    fmt::format_to(buf, "\nend\n");
+    fmt::format_to(std::back_inserter(buf), "\nend\n");
 }
 
 string DefTree::path(const core::GlobalState &gs) const {
@@ -389,31 +390,26 @@ void DefTreeBuilder::collapseSameFileDefs(const core::GlobalState &gs, const Aut
     }
 }
 
-void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const std::string &path,
-                                    const DefTree &root) {
-    UnorderedSet<string> toDelete; // Remove from this set as we write files
-    if (FileOps::exists(path)) {
-        vector<string> existingFiles = FileOps::listFilesInDir(path, {".rb"}, true, {}, {});
-        toDelete.insert(make_move_iterator(existingFiles.begin()), make_move_iterator(existingFiles.end()));
-    }
-    write(gs, alCfg, path, toDelete, root);
-    for (const auto &file : toDelete) {
-        FileOps::removeFile(file);
-    }
-}
+namespace {
+struct RenderAutoloadTask {
+    string filePath;
+    const DefTree &node;
+};
 
-void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const std::string &path,
-                           UnorderedSet<std::string> &toDelete, const DefTree &node) {
+// This function has two duties:
+// * It creates autoload rendering tasks which will occur in a later parallel phase.
+// * It creates subdirectories when needed, as they are required to write the autoloader output.
+void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vector<RenderAutoloadTask> &tasks,
+                                               const AutoloaderConfig &alCfg, string_view path, const DefTree &node) {
     string name = node.root() ? "root" : node.name().show(gs);
     string filePath = join(path, fmt::format("{}.rb", name));
     if (!alCfg.packagedAutoloader || !node.root()) {
-        FileOps::writeIfDifferent(filePath, node.renderAutoloadSrc(gs, alCfg));
+        tasks.emplace_back(RenderAutoloadTask{filePath, node});
     }
-    toDelete.erase(filePath);
     if (!node.children.empty()) {
         auto subdir = join(path, node.root() ? "" : name);
-        if (!node.root() && !FileOps::dirExists(subdir)) {
-            FileOps::createDir(subdir);
+        if (!node.root()) {
+            FileOps::ensureDir(subdir);
         }
         for (auto &[_, child] : node.children) {
             if (alCfg.packagedAutoloader && node.root()) {
@@ -421,16 +417,68 @@ void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &
                 ENFORCE(child->qname.package);
                 auto namespaceName = child->qname.package->show(gs);
                 // this package name will include the suffix _Package on the end, and we want to remove that
-                constexpr int suffixLen = "_Package"sv.length();
+                constexpr int suffixLen = char_traits<char>::length("_Package");
                 ENFORCE(namespaceName.size() > suffixLen);
                 string packageName = namespaceName.substr(0, namespaceName.size() - suffixLen);
                 auto pkgSubdir = join(subdir, packageName);
                 FileOps::ensureDir(pkgSubdir);
-                write(gs, alCfg, pkgSubdir, toDelete, *child);
+                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, pkgSubdir, *child);
             } else {
-                write(gs, alCfg, subdir, toDelete, *child);
+                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, subdir, *child);
             }
         }
+    }
+}
+}; // namespace
+
+void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &workers, const AutoloaderConfig &alCfg,
+                                    const std::string &path, const DefTree &root) {
+    vector<RenderAutoloadTask> tasks;
+    populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, path, root);
+
+    if (FileOps::exists(path)) {
+        // Clear out files that we do not plan to write.
+        vector<string> existingFiles = FileOps::listFilesInDir(path, {".rb"}, true, {}, {});
+        UnorderedSet<string> existingFilesSet(make_move_iterator(existingFiles.begin()),
+                                              make_move_iterator(existingFiles.end()));
+        for (auto &task : tasks) {
+            existingFilesSet.erase(task.filePath);
+        }
+        for (const auto &file : existingFilesSet) {
+            FileOps::removeFile(file);
+        }
+    }
+
+    // Parallelize writing the files.
+    auto inputq = make_shared<ConcurrentBoundedQueue<int>>(tasks.size());
+    auto outputq = make_shared<BlockingBoundedQueue<CounterState>>(tasks.size());
+    for (int i = 0; i < tasks.size(); ++i) {
+        inputq->push(move(i), 1);
+    }
+
+    workers.multiplexJob("runAutogenWriteAutoloads", [&gs, &tasks, &alCfg, inputq, outputq]() {
+        int n = 0;
+        {
+            Timer timeit(gs.tracer(), "autogenWriteAutoloadsWorker");
+            int idx = 0;
+
+            for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
+                ++n;
+                auto &task = tasks[idx];
+                FileOps::writeIfDifferent(task.filePath, task.node.renderAutoloadSrc(gs, alCfg));
+            }
+        }
+
+        outputq->push(getAndClearThreadCounters(), n);
+    });
+
+    CounterState out;
+    for (auto res = outputq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), gs.tracer()); !res.done();
+         res = outputq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+        if (!res.gotItem()) {
+            continue;
+        }
+        counterConsume(move(out));
     }
 }
 
@@ -438,21 +486,14 @@ namespace {
 string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const Package &pkg,
                                 const string_view mangledName) {
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "{}\n", alCfg.preamble);
-
-    // TODO: what will the export_methods autoload actually look like? no idea, but this shows that the data is there
-    if (pkg.exportMethods) {
-        fmt::format_to(buf, "require_relative \"{}/{}.rb\"\n", mangledName, pkg.exportMethods->join(gs, "/"));
-        fmt::format_to(buf, "module ::PackageRoot::{}\n", mangledName);
-        fmt::format_to(buf, "  extend ::PackageRoot::{}::{}\n", mangledName, pkg.exportMethods->join(gs, "::"));
-        fmt::format_to(buf, "end\n");
-    }
-    fmt::format_to(buf, "{}.autoload_map(::PackageRoot::{}, {{\n", alCfg.registryModule, mangledName);
+    fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
+    fmt::format_to(std::back_inserter(buf), "{}.autoload_map(::PackageRoot::{}, {{\n", alCfg.registryModule,
+                   mangledName);
     for (auto expt : pkg.exports) {
         auto name = expt.join(gs, "::");
-        fmt::format_to(buf, "  {}: \"{}/{}.rb\",\n", name, mangledName, name);
+        fmt::format_to(std::back_inserter(buf), "  {}: \"{}/{}.rb\",\n", name, mangledName, name);
     }
-    fmt::format_to(buf, "}})\n");
+    fmt::format_to(std::back_inserter(buf), "}})\n");
 
     return to_string(buf);
 }
@@ -462,8 +503,8 @@ void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const Au
                                            const std::string &path, const vector<Package> &packages) {
     // we're going to be building up the root package map as we walk all the other packages, so make that first
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "{}\n", alCfg.preamble);
-    fmt::format_to(buf, "{}.autoload_map(::PackageRoot, {{\n", alCfg.registryModule);
+    fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
+    fmt::format_to(std::back_inserter(buf), "{}.autoload_map(::PackageRoot, {{\n", alCfg.registryModule);
 
     // walk over all the packages
     for (auto &pkg : packages) {
@@ -480,10 +521,10 @@ void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const Au
         FileOps::writeIfDifferent(targetPath, source);
 
         // and add the entry for this file to the root autoload
-        fmt::format_to(buf, "  {}: \"{}\",\n", pkgName, join(mangledName, "_root.rb"));
+        fmt::format_to(std::back_inserter(buf), "  {}: \"{}\",\n", pkgName, join(mangledName, "_root.rb"));
     }
 
-    fmt::format_to(buf, "}})\n");
+    fmt::format_to(std::back_inserter(buf), "}})\n");
     auto rootSrc = to_string(buf);
     FileOps::writeIfDifferent(join(path, "_root.rb"), rootSrc);
 }

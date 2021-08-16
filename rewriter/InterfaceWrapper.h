@@ -5,9 +5,9 @@
 namespace sorbet::rewriter {
 
 /**
- * This class desugars `wrap_interface` into a simple cast:
+ * This class desugars `wrap_instance` into a simple cast:
  *
- *    SomeClass.wrap_interface(obj)
+ *    SomeClass.wrap_instance(obj)
  *
  * =>
  *
@@ -22,7 +22,7 @@ namespace sorbet::rewriter {
  */
 class InterfaceWrapper final {
 public:
-    static ast::TreePtr run(core::MutableContext ctx, ast::Send *send);
+    static ast::ExpressionPtr run(core::MutableContext ctx, ast::Send *send);
 
     InterfaceWrapper() = delete;
 };

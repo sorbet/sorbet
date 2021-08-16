@@ -9,12 +9,12 @@
 module RbConfig
   # The hash configurations stored.
   CONFIG = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
-  # [`DESTDIR`](https://docs.ruby-lang.org/en/2.6.0/RbConfig.html#DESTDIR) on
+  # [`DESTDIR`](https://docs.ruby-lang.org/en/2.7.0/RbConfig.html#DESTDIR) on
   # make install.
   DESTDIR = T.let(T.unsafe(nil), String)
   # Almost same with
-  # [`CONFIG`](https://docs.ruby-lang.org/en/2.6.0/RbConfig.html#CONFIG).
-  # [`MAKEFILE_CONFIG`](https://docs.ruby-lang.org/en/2.6.0/RbConfig.html#MAKEFILE_CONFIG)
+  # [`CONFIG`](https://docs.ruby-lang.org/en/2.7.0/RbConfig.html#CONFIG).
+  # [`MAKEFILE_CONFIG`](https://docs.ruby-lang.org/en/2.7.0/RbConfig.html#MAKEFILE_CONFIG)
   # has other variable reference like below.
   #
   # ```ruby
@@ -37,7 +37,7 @@ module RbConfig
   #    bindir = $(exec_prefix)/bin  MAKEFILE_CONFIG = {}
   # ```
   #
-  # [`RbConfig.expand`](https://docs.ruby-lang.org/en/2.6.0/RbConfig.html#method-c-expand)
+  # [`RbConfig.expand`](https://docs.ruby-lang.org/en/2.7.0/RbConfig.html#method-c-expand)
   # is used for resolving references like above in rbconfig.
   #
   # ```ruby

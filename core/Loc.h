@@ -13,8 +13,8 @@ class MutableContext;
 
 constexpr int INVALID_POS_LOC = 0xffffff;
 struct LocOffsets {
-    u4 beginLoc;
-    u4 endLoc;
+    u4 beginLoc = INVALID_POS_LOC;
+    u4 endLoc = INVALID_POS_LOC;
     u4 beginPos() const {
         return beginLoc;
     };
@@ -36,6 +36,12 @@ struct LocOffsets {
 
     std::string showRaw(const Context ctx) const;
     std::string showRaw(const MutableContext ctx) const;
+    std::string showRaw(const GlobalState &gs, const FileRef file) const;
+    std::string showRaw() const;
+
+    bool operator==(const LocOffsets &rhs) const;
+
+    bool operator!=(const LocOffsets &rhs) const;
 };
 CheckSize(LocOffsets, 8, 4);
 
@@ -113,7 +119,7 @@ public:
     }
     std::string showRaw(const GlobalState &gs) const;
     std::string filePosToString(const GlobalState &gs, bool showFull = false) const;
-    std::string source(const GlobalState &gs) const;
+    std::optional<std::string> source(const GlobalState &gs) const;
 
     bool operator==(const Loc &rhs) const;
 
@@ -121,6 +127,21 @@ public:
     static std::optional<u4> pos2Offset(const File &file, Detail pos);
     static Detail offset2Pos(const File &file, u4 off);
     static std::optional<Loc> fromDetails(const GlobalState &gs, FileRef fileRef, Detail begin, Detail end);
+
+    // Create a new Loc by adjusting the beginPos and endPos of this Loc, like this:
+    //
+    //     Loc{file(), beginPos() + beginAdjust, endPos() + endAdjust}
+    //
+    // but takes care to check that the resulting Loc is a valid slice of the source() buffer,
+    // taking care to avoid integer overflow / underflow.
+    //
+    // For example:
+    //
+    //     `loc.adjust(gs, -1, 0).exists() == false` if `loc.beginPos() == 0`
+    //     `loc.adjust(gs, 0, 1).exists() == false` if `loc.endPos() == loc.file().data(gs).source().size()`
+    //
+    // etc.
+    Loc adjust(const GlobalState &gs, int32_t beginAdjust, int32_t endAdjust) const;
 
     // For a given Loc, returns
     //

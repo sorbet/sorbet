@@ -7,6 +7,7 @@
 #include "core/StrictLevel.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "spdlog/spdlog.h"
+#include <optional>
 
 namespace sorbet::realmain::options {
 
@@ -17,7 +18,7 @@ public:
     bool supportsFlush = false;
 
     void print(const std::string_view &contents) const;
-    template <typename... Args> void fmt(const ConstExprStr msg, Args &&... args) const {
+    template <typename... Args> void fmt(const ConstExprStr msg, Args &&...args) const {
         print(fmt::format(msg.str, std::forward<Args>(args)...));
     }
     void flush();
@@ -56,6 +57,7 @@ struct Printers {
     PrinterConfig AST;
     PrinterConfig ASTRaw;
     PrinterConfig CFG;
+    PrinterConfig CFGText;
     PrinterConfig CFGRaw;
     PrinterConfig TypedSource;
     PrinterConfig SymbolTable;
@@ -72,7 +74,6 @@ struct Printers {
     PrinterConfig FileTableProto;
     PrinterConfig FileTableMessagePack;
     PrinterConfig MissingConstants;
-    PrinterConfig PluginGeneratedCode;
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
     PrinterConfig AutogenClasslist;
@@ -129,6 +130,7 @@ struct Options {
 
     bool showProgress = false;
     bool suggestTyped = false;
+    std::optional<std::string> suggestUnsafe = std::nullopt;
     bool silenceErrors = false;
     bool silenceDevMessage = false;
     bool suggestSig = false;
@@ -143,6 +145,7 @@ struct Options {
     bool waitForDebugger = false;
     bool skipRewriterPasses = false;
     bool censorForSnapshotTests = false;
+    bool forceHashing = false;
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
@@ -150,17 +153,14 @@ struct Options {
     bool stripePackages = false;
     std::string typedSource = "";
     std::string cacheDir = "";
-    std::vector<std::string> configatronDirs;
-    std::vector<std::string> configatronFiles;
     UnorderedMap<std::string, core::StrictLevel> strictnessOverrides;
-    UnorderedMap<std::string, std::string> dslPluginTriggers;
-    std::vector<std::string> dslRubyExtraArgs;
     std::string storeState = "";
     bool enableCounters = false;
     std::string errorUrlBase = "https://srb.help/";
     bool ruby3KeywordArgs = false;
-    std::set<int> errorCodeWhiteList;
-    std::set<int> errorCodeBlackList;
+    std::set<int> isolateErrorCode;
+    std::set<int> suppressErrorCode;
+    bool noErrorSections = false;
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
 
@@ -172,6 +172,13 @@ struct Options {
     u4 reserveUtf8NameTableCapacity = 0;
     u4 reserveConstantNameTableCapacity = 0;
     u4 reserveUniqueNameTableCapacity = 0;
+
+    /* The maximum number of files that are permitted to typecheck on the fast path concurrently. Not exposed on CLI.
+     * Placed on Options for convenience so tests can override. */
+    u4 lspMaxFilesOnFastPath = 50;
+    /* The maximum number of errors to report to the client when in LSP mode. Prevents editor UI slowdown
+     * related to large error lists. 0 means no limit. */
+    u4 lspErrorCap = 1000;
 
     std::string statsdHost;
     std::string statsdPrefix = "ruby_typer.unknown";
@@ -213,6 +220,9 @@ struct Options {
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
     bool lspGoToImplementationEnabled = false;
+
+    // Experimental feature `requires_ancestor`
+    bool requiresAncestorEnabled = false;
 
     std::string inlineInput; // passed via -e
     std::string debugLogFile;

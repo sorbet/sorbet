@@ -1,9 +1,11 @@
 # typed: __STDLIB_INTERNAL
 
-# `FileTest` implements file test operations similar to those used in
-# `File::Stat`. It exists as a standalone module, and its methods are also
-# insinuated into the `File` class. (Note that this is not done by inclusion:
-# the interpreter cheats).
+# [`FileTest`](https://docs.ruby-lang.org/en/2.7.0/FileTest.html) implements
+# file test operations similar to those used in
+# [`File::Stat`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html). It exists
+# as a standalone module, and its methods are also insinuated into the
+# [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) class. (Note that this
+# is not done by inclusion: the interpreter cheats).
 module FileTest
   sig {params(file_name: T.any(String, IO)).returns(T::Boolean)}
   def self.blockdev?(file_name); end

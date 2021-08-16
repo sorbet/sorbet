@@ -2,5 +2,5 @@
 # typed: strict
 
 class Dep < PackageSpec
-  export ExportedItem
+  export Dep::ExportedItem
 end

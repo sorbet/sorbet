@@ -2,6 +2,9 @@
 # frozen_string_literal: true
 
 module T::Configuration
+  # Cache this comparisonn to avoid two allocations all over the place.
+  AT_LEAST_RUBY_2_7 = Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
+
   # Announces to Sorbet that we are currently in a test environment, so it
   # should treat any sigs which are marked `.checked(:tests)` as if they were
   # just a normal sig.
@@ -68,6 +71,37 @@ module T::Configuration
   # (Including values in type errors is the default)
   def self.include_value_in_type_errors
     @include_value_in_type_errors = true
+  end
+
+  # Whether VM-defined prop serialization/deserialization routines can be enabled.
+  #
+  # @return [T::Boolean]
+  def self.can_enable_vm_prop_serde?
+    T::Props::Private::DeserializerGenerator.respond_to?(:generate2)
+  end
+
+  # Whether to use VM-defined prop serialization/deserialization routines.
+  #
+  # The default is to use runtime codegen inside sorbet-runtime itself.
+  #
+  # @return [T::Boolean]
+  def self.use_vm_prop_serde?
+    @use_vm_prop_serde || false
+  end
+
+  # Enable using VM-defined prop serialization/deserialization routines.
+  #
+  # This method is likely to break things outside of Stripe's systems.
+  def self.enable_vm_prop_serde
+    if !can_enable_vm_prop_serde?
+      hard_assert_handler('Ruby VM is not setup to use VM-defined prop serde')
+    end
+    @use_vm_prop_serde = true
+  end
+
+  # Disable using VM-defined prop serialization/deserialization routines.
+  def self.disable_vm_prop_serde
+    @use_vm_prop_serde = false
   end
 
   # Configure the default checked level for a sig with no explicit `.checked`
@@ -395,7 +429,12 @@ module T::Configuration
   MODULE_NAME = Module.instance_method(:name)
   private_constant :MODULE_NAME
 
-  @default_module_name_mangler = ->(type) {MODULE_NAME.bind(type).call}
+  if T::Configuration::AT_LEAST_RUBY_2_7
+    @default_module_name_mangler = ->(type) {MODULE_NAME.bind_call(type)}
+  else
+    @default_module_name_mangler = ->(type) {MODULE_NAME.bind(type).call}
+  end
+
   @module_name_mangler = nil
 
   def self.module_name_mangler
@@ -410,6 +449,48 @@ module T::Configuration
   #   to a String (pass nil to reset to default behavior)
   def self.module_name_mangler=(handler)
     @module_name_mangler = handler
+  end
+
+  # Set to a PII handler function. This will be called with the `sensitivity:`
+  # annotations on things that use `T::Props` and can modify them ahead-of-time.
+  #
+  # @param [Lambda, Proc, nil] value Proc that takes a hash mapping symbols to the
+  # prop values. Pass nil to avoid changing `sensitivity:` annotations.
+  def self.normalize_sensitivity_and_pii_handler=(handler)
+    @sensitivity_and_pii_handler = handler
+  end
+
+  def self.normalize_sensitivity_and_pii_handler
+    @sensitivity_and_pii_handler
+  end
+
+  @redaction_handler = nil
+  # Set to a redaction handling function. This will be called when the
+  # `_redacted` version of a prop reader is used. By default this is set to
+  # `nil` and will raise an exception when the redacted version of a prop is
+  # accessed.
+  #
+  # @param [Lambda, Proc, nil] value Proc that converts a value into its
+  # redacted version according to the spec passed as the second argument.
+  def self.redaction_handler=(handler)
+    @redaction_handler = handler
+  end
+
+  def self.redaction_handler
+    @redaction_handler
+  end
+
+  # Set to a function which can get the 'owner' of a class. This is
+  # used in reporting deserialization errors
+  #
+  # @param [Lambda, Proc, nil] value Proc that takes a class and
+  # produces its owner, or `nil` if it does not have one.
+  def self.class_owner_finder=(handler)
+    @class_owner_finder = handler
+  end
+
+  def self.class_owner_finder
+    @class_owner_finder
   end
 
   # Temporarily disable ruby warnings while executing the given block. This is
@@ -440,6 +521,16 @@ module T::Configuration
   end
   def self.legacy_t_enum_migration_mode?
     @legacy_t_enum_migration_mode || false
+  end
+
+  @prop_freeze_handler = ->(instance, prop_name) {}
+
+  def self.prop_freeze_handler=(handler)
+    @prop_freeze_handler = handler
+  end
+
+  def self.prop_freeze_handler
+    @prop_freeze_handler
   end
 
   # @param [Array] sealed_violation_whitelist An array of Regexp to validate

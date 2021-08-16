@@ -3,7 +3,6 @@
 #include "common/Timer.h"
 #include "common/common.h"
 #include "core/GlobalSubstitution.h"
-#include "core/Hashing.h"
 #include "core/Types.h"
 #include "core/Unfreeze.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
@@ -19,11 +18,10 @@ using namespace std;
 namespace sorbet::core {
 
 ClassOrModuleRef MutableContext::selfClass() {
-    SymbolData data = this->owner.data(this->state);
     if (this->owner.isClassOrModule()) {
-        return data->singletonClass(this->state);
+        return this->owner.asClassOrModuleRef().data(this->state)->singletonClass(this->state);
     }
-    return data->enclosingClass(this->state);
+    return this->owner.enclosingClass(this->state);
 }
 
 bool Context::permitOverloadDefinitions(const core::GlobalState &gs, FileRef sigLoc, core::SymbolRef owner) {

@@ -4,7 +4,7 @@
 # command-line arguments or passed in via STDIN.
 #
 # The arguments passed to your script are stored in the `ARGV`
-# [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html), one argument per
+# [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html), one argument per
 # element. `ARGF` assumes that any arguments that aren't filenames have been
 # removed from `ARGV`. For example:
 #
@@ -21,7 +21,7 @@
 # by the contents of *file2*.
 #
 # After a file in `ARGV` has been read `ARGF` removes it from the
-# [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html). Thus, after all
+# [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html). Thus, after all
 # files have been read `ARGV` will be empty.
 #
 # You can manipulate `ARGV` yourself to control what `ARGF` operates on. If you
@@ -48,7 +48,7 @@ module ARGF
   include Enumerable
 
   extend T::Generic
-  Elem = type_member(:out)
+  Elem = type_member(fixed: String)
 
   # ARGF.to_s  -> String
   #
@@ -168,11 +168,9 @@ module ARGF
   #      puts ARGF.filename if ARGF.lineno == 1
   #      puts "#{ARGF.lineno}: #{line}"
   #    end
-  sig do
-    params(several_variants: T.any(Integer, String))
-      .returns(T::Enumerator[String])
-  end
-  def self.each_line(*several_variants); end
+  sig {params(several_variants: T.any(Integer, String), blk: T.nilable(T.proc.params(arg: String).void)).returns(ARGF)}
+  sig {returns(T::Enumerator[String])}
+  def self.each_line(*several_variants, &blk); end
 
   # ARGF.bytes     {|byte| block }  -> ARGF
   # ARGF.bytes                      -> an_enumerator
@@ -193,7 +191,7 @@ module ARGF
   # For example:
   #
   #    ARGF.bytes.to_a  #=> [35, 32, ... 95, 10]
-  def self.each_byte(*several_variants)
+  def self.each_byte(*several_variants, &blk)
     #This is a stub, used for indexing
   end
   # ARGF.each_char {|char| block }  -> ARGF
@@ -209,7 +207,7 @@ module ARGF
   # appears.
   #
   # If no block is given, an enumerator is returned instead.
-  def self.each_char(*several_variants)
+  def self.each_char(*several_variants, &blk)
     #This is a stub, used for indexing
   end
   # ARGF.each_codepoint {|codepoint| block }  -> ARGF
@@ -225,23 +223,23 @@ module ARGF
   # appears.
   #
   # If no block is given, an enumerator is returned instead.
-  def self.each_codepoint(*several_variants)
+  def self.each_codepoint(*several_variants, &blk)
     #This is a stub, used for indexing
   end
   # This is a deprecated alias for <code>each_line</code>.
-  def self.lines(*args)
+  def self.lines(*args, &blk)
     #This is a stub, used for indexing
   end
   # This is a deprecated alias for <code>each_byte</code>.
-  def self.bytes()
+  def self.bytes(&blk)
     #This is a stub, used for indexing
   end
   # This is a deprecated alias for <code>each_char</code>.
-  def self.chars()
+  def self.chars(&blk)
     #This is a stub, used for indexing
   end
   # This is a deprecated alias for <code>each_codepoint</code>.
-  def self.codepoints()
+  def self.codepoints(&blk)
     #This is a stub, used for indexing
   end
   # ARGF.read([length [, outbuf]])    -> string, outbuf, or nil

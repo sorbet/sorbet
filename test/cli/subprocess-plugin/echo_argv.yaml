@@ -1,2 +1,0 @@
-triggers:
-  hook: test/cli/subprocess-plugin/echo_argv.rb

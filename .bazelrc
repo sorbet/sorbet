@@ -12,7 +12,7 @@ common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 ##
 ##  Custom toolchain.
 ##
-build --crosstool_top=@llvm_toolchain//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
+build --crosstool_top=@llvm_toolchain_12_0_0//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
 
 ##
 ##  Common build options across all build configurations
@@ -25,14 +25,14 @@ build --crosstool_top=@llvm_toolchain//:toolchain --copt=-D_LIBCPP_ENABLE_NODISC
 # this flag here once flipped in Bazel again.
 build --incompatible_strict_action_env
 
+# Enforce that we don't rely on `@bazel_tools//platforms` and instead use the
+# `@platforms` repository for constraint resolution.  See
+# https://github.com/bazelbuild/bazel/issues/8622 for more information.
+build --incompatible_use_platforms_repo_for_constraints
+
 # C / C++ Options
 # Don't depend on system compiler
 build --cxxopt=-std=c++17 --host_cxxopt=-std=c++17
-
-
-# Developer laptops run skylake, devboxes run skylake-avx512
-# however some AWS instances in our fleet still run Sandy Bridge (Skylake predecessor)
-build --copt=-march=sandybridge
 
 build --copt=-fno-omit-frame-pointer
 
@@ -84,6 +84,17 @@ build:release-debug-common --config=skipslowenforce
 # harden: mark relocation sections read-only
 build:release-linux --linkopt=-Wl,-z,relro,-z,now
 build:release-linux --config=lto-linux --config=release-common
+
+# This is to turn on vector instructions where available.
+# We used to do this unconditionally, but Rosetta 2 doesn't translate all vector instructions well.
+#
+# If we ever start making universal x86-64 + aarch64 binaries for macOS, we
+# could think about re-enabling the vector instructions for x86-64.
+#
+# At Stripe: developer laptops run skylake, devboxes run skylake-avx512
+# however some AWS instances in our fleet still run Sandy Bridge (Skylake predecessor), as of 2018.
+build:release-linux           --copt=-march=sandybridge
+build:release-sanitized-linux --copt=-march=sandybridge
 
 build:release-mac --config=release-common
 
@@ -186,9 +197,9 @@ build:ubsan --define unsanitized=false
 build:ubsan --copt=-DHAS_SANITIZER
 
 # Bazel links C++ files with $CC, not $CXX, this breaks UBSan
-build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/9.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
-build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/9.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
-build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/9.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain_12_0_0/lib/clang/12.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain_12_0_0/lib/clang/12.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain_12_0_0/lib/clang/12.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
 build:sanitize-linux --config=sanitize
 
 build:sanitize-mac --config=sanitize
@@ -237,7 +248,7 @@ build:webasm --compilation_mode=opt
 build:webasm --copt=-DNDEBUG --linkopt=-DNDEBUG # for some reason emscripten doesn't pass those when -O2\-Oz are specified
 build:webasm --copt=--llvm-lto --copt=3 --linkopt=--llvm-lto --linkopt=3
 # Specify a "sane" C++ toolchain for the host platform.
-build:webasm --host_crosstool_top=@llvm_toolchain//:toolchain
+build:webasm --host_crosstool_top=@llvm_toolchain_12_0_0//:toolchain
 
 ##
 ## Stripe's ci passes --config=ci, we need it to exist

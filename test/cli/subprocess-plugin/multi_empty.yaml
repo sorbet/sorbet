@@ -1,5 +1,0 @@
-triggers:
-  gen: test/cli/subprocess-plugin/no_output.rb
-  foo_gen: test/cli/subprocess-plugin/no_output.rb
-  bar_gen: test/cli/subprocess-plugin/no_output.rb
-  baz_gen: test/cli/subprocess-plugin/no_output.rb

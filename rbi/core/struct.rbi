@@ -1,13 +1,13 @@
 # typed: __STDLIB_INTERNAL
 
-# A [`Struct`](https://docs.ruby-lang.org/en/2.6.0/Struct.html) is a convenient
+# A [`Struct`](https://docs.ruby-lang.org/en/2.7.0/Struct.html) is a convenient
 # way to bundle a number of attributes together, using accessor methods, without
 # having to write an explicit class.
 #
-# The [`Struct`](https://docs.ruby-lang.org/en/2.6.0/Struct.html) class
+# The [`Struct`](https://docs.ruby-lang.org/en/2.7.0/Struct.html) class
 # generates new subclasses that hold a set of members and their values. For each
 # member a reader and writer method is created similar to
-# [`Module#attr_accessor`](https://docs.ruby-lang.org/en/2.6.0/Module.html#method-i-attr_accessor).
+# [`Module#attr_accessor`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-attr_accessor).
 #
 # ```ruby
 # Customer = Struct.new(:name, :address) do
@@ -22,12 +22,12 @@
 # ```
 #
 # See
-# [`Struct::new`](https://docs.ruby-lang.org/en/2.6.0/Struct.html#method-c-new)
+# [`Struct::new`](https://docs.ruby-lang.org/en/2.7.0/Struct.html#method-c-new)
 # for further examples of creating struct subclasses and instances.
 #
 # In the method descriptions that follow, a "member" parameter refers to a
 # struct member which is either a quoted string (`"name"`) or a
-# [`Symbol`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html) (`:name`).
+# [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html) (`:name`).
 class Struct < Object
   include Enumerable
 
@@ -39,10 +39,11 @@ class Struct < Object
         arg0: T.any(Symbol, String),
         arg1: T.any(Symbol, String),
         keyword_init: T::Boolean,
+        blk: T.untyped,
     )
     .void
   end
-  def initialize(arg0, *arg1, keyword_init: false); end
+  def initialize(arg0, *arg1, keyword_init: false, &blk); end
 
   # Equality---Returns `true` if `other` has the same struct subclass and has
   # equal member values (according to Object#==).
@@ -59,9 +60,9 @@ class Struct < Object
 
   # Attribute Reference---Returns the value of the given struct `member` or the
   # member at the given `index`.  Raises
-  # [`NameError`](https://docs.ruby-lang.org/en/2.6.0/NameError.html) if the
+  # [`NameError`](https://docs.ruby-lang.org/en/2.7.0/NameError.html) if the
   # `member` does not exist and
-  # [`IndexError`](https://docs.ruby-lang.org/en/2.6.0/IndexError.html) if the
+  # [`IndexError`](https://docs.ruby-lang.org/en/2.7.0/IndexError.html) if the
   # `index` is out of range.
   #
   # ```ruby
@@ -76,9 +77,9 @@ class Struct < Object
 
   # Attribute Assignment---Sets the value of the given struct `member` or the
   # member at the given `index`. Raises
-  # [`NameError`](https://docs.ruby-lang.org/en/2.6.0/NameError.html) if the
+  # [`NameError`](https://docs.ruby-lang.org/en/2.7.0/NameError.html) if the
   # `member` does not exist and
-  # [`IndexError`](https://docs.ruby-lang.org/en/2.6.0/IndexError.html) if the
+  # [`IndexError`](https://docs.ruby-lang.org/en/2.7.0/IndexError.html) if the
   # `index` is out of range.
   #
   # ```ruby
@@ -150,21 +151,22 @@ class Struct < Object
   # ```
   def each_pair; end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) equality---`other`
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) equality---`other`
   # and `struct` refer to the same hash key if they have the same struct
   # subclass and have equal member values (according to
-  # [`Object#eql?`](https://docs.ruby-lang.org/en/2.6.0/Object.html#method-i-eql-3F)).
+  # [`Object#eql?`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-eql-3F)).
   def eql?(_); end
 
   # Returns a hash value based on this struct's contents.
   #
-  # See also Object#hash.
+  # See also
+  # [`Object#hash`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-hash).
   def hash; end
 
   # Returns a description of this struct as a string.
   #
   # Also aliased as:
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/Struct.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/Struct.html#method-i-to_s)
   def inspect; end
 
   # Returns the number of struct members.
@@ -207,10 +209,10 @@ class Struct < Object
   def new(*args); end
 
   # Yields each member value from the struct to the block and returns an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) containing the
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) containing the
   # member values from the `struct` for which the given block returns a true
   # value (equivalent to
-  # [`Enumerable#select`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-select)).
+  # [`Enumerable#select`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-select)).
   #
   # ```ruby
   # Lots = Struct.new(:a, :b, :c, :d, :e, :f)
@@ -218,9 +220,9 @@ class Struct < Object
   # l.select {|v| v.even? }   #=> [22, 44, 66]
   # ```
   #
-  # [`Struct#filter`](https://docs.ruby-lang.org/en/2.6.0/Struct.html#method-i-filter)
+  # [`Struct#filter`](https://docs.ruby-lang.org/en/2.7.0/Struct.html#method-i-filter)
   # is an alias for
-  # [`Struct#select`](https://docs.ruby-lang.org/en/2.6.0/Struct.html#method-i-select).
+  # [`Struct#select`](https://docs.ruby-lang.org/en/2.7.0/Struct.html#method-i-select).
   def select(*_); end
 
   # Returns the number of struct members.
@@ -233,7 +235,7 @@ class Struct < Object
   def size; end
 
   # Returns the values for this struct as an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html).
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html).
   #
   # ```ruby
   # Customer = Struct.new(:name, :address, :zip)
@@ -242,7 +244,7 @@ class Struct < Object
   # ```
   def to_a; end
 
-  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) containing
+  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) containing
   # the names and values for the struct's members.
   #
   # If a block is given, the results of the block on each pair of the receiver
@@ -258,11 +260,11 @@ class Struct < Object
   def to_h; end
 
   # Alias for:
-  # [`inspect`](https://docs.ruby-lang.org/en/2.6.0/Struct.html#method-i-inspect)
+  # [`inspect`](https://docs.ruby-lang.org/en/2.7.0/Struct.html#method-i-inspect)
   def to_s; end
 
   # Returns the values for this struct as an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html).
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html).
   #
   # ```ruby
   # Customer = Struct.new(:name, :address, :zip)
@@ -272,11 +274,11 @@ class Struct < Object
   def values; end
 
   # Returns the struct member values for each `selector` as an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html). A `selector` may
-  # be either an [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html)
-  # offset or a [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html) of
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html). A `selector` may
+  # be either an [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html)
+  # offset or a [`Range`](https://docs.ruby-lang.org/en/2.7.0/Range.html) of
   # offsets (as in
-  # [`Array#values_at`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-values_at)).
+  # [`Array#values_at`](https://docs.ruby-lang.org/en/2.7.0/Array.html#method-i-values_at)).
   #
   # ```ruby
   # Customer = Struct.new(:name, :address, :zip)

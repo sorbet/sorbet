@@ -1,27 +1,27 @@
 # typed: __STDLIB_INTERNAL
 
-# The [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) module provides an
+# The [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) module provides an
 # interface to Ruby's mark and sweep garbage collection mechanism.
 #
 # Some of the underlying methods are also available via the
-# [`ObjectSpace`](https://docs.ruby-lang.org/en/2.6.0/ObjectSpace.html) module.
+# [`ObjectSpace`](https://docs.ruby-lang.org/en/2.7.0/ObjectSpace.html) module.
 #
 # You may obtain information about the operation of the
-# [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) through
-# [`GC::Profiler`](https://docs.ruby-lang.org/en/2.6.0/GC/Profiler.html).
+# [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) through
+# [`GC::Profiler`](https://docs.ruby-lang.org/en/2.7.0/GC/Profiler.html).
 module GC
   # internal constants
   INTERNAL_CONSTANTS = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
-  # [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) build options
+  # [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) build options
   OPTS = T.let(T.unsafe(nil), T::Array[T.untyped])
 
   def self.compact; end
 
-  # The number of times [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html)
+  # The number of times [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html)
   # occurred.
   #
   # It returns the number of times
-  # [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) occurred since the
+  # [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) occurred since the
   # process started.
   sig {returns(Integer)}
   def self.count(); end
@@ -50,7 +50,7 @@ module GC
   # Returns information about the most recent garbage collection.
   def self.latest_gc_info(*_); end
 
-  # Initiates garbage collection, unless manually disabled.
+  # Initiates garbage collection, even if manually disabled.
   #
   # This method is defined with keyword arguments that default to true:
   #
@@ -59,7 +59,7 @@ module GC
   # ```
   #
   # Use full\_mark: false to perform a minor
-  # [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html). Use immediate\_sweep:
+  # [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html). Use immediate\_sweep:
   # false to defer sweeping (use lazy sweep).
   #
   # Note: These keyword arguments are implementation and version dependent. They
@@ -74,11 +74,11 @@ module GC
   end
   def self.start(full_mark: T.unsafe(nil), immediate_sweep: T.unsafe(nil)); end
 
-  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) containing
-  # information about the [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html).
+  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) containing
+  # information about the [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html).
   #
   # The hash includes information about internal statistics about
-  # [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) such as:
+  # [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) such as:
   #
   # ```ruby
   # {
@@ -119,15 +119,15 @@ module GC
   def self.stat(arg0={}); end
 
   # Returns current status of
-  # [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) stress mode.
+  # [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) stress mode.
   sig {returns(T.any(Integer, TrueClass, FalseClass))}
   def self.stress(); end
 
-  # Updates the [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) stress mode.
+  # Updates the [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) stress mode.
   #
   # When stress mode is enabled, the
-  # [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) is invoked at every
-  # [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) opportunity: all memory
+  # [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) is invoked at every
+  # [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) opportunity: all memory
   # and object allocations.
   #
   # Enabling stress mode will degrade performance, it is only for debugging.
@@ -143,15 +143,17 @@ module GC
 
   # Verify compaction reference consistency.
   #
-  # This method is implementation specific. During compaction, objects that
-  # were moved are replaced with T_MOVED objects. No object should have a
-  # reference to a T_MOVED object after compaction.
+  # This method is implementation specific. During compaction, objects that were
+  # moved are replaced with T\_MOVED objects. No object should have a reference
+  # to a T\_MOVED object after compaction.
   #
   # This function doubles the heap to ensure room to move all objects, compacts
   # the heap to make sure everything moves, updates all references, then
-  # performs a full GC. If any object contains a reference to a T_MOVED object,
-  # that object should be pushed on the mark stack, and will make a SEGV.
-  def self.verify_compaction_references; end
+  # performs a full [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html). If any
+  # object contains a reference to a T\_MOVED object, that object should be
+  # pushed on the mark stack, and will make a SEGV.
+  sig {params(toward: T.nilable(Symbol), double_heap: T::Boolean).void}
+  def self.verify_compaction_references(toward: nil, double_heap: false); end
 
   # Verify internal consistency.
   #
@@ -160,8 +162,8 @@ module GC
   def self.verify_internal_consistency; end
 end
 
-# The [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) profiler provides
-# access to information on [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html)
+# The [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) profiler provides
+# access to information on [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html)
 # runs including time, length and object space size.
 #
 # Example:
@@ -177,30 +179,30 @@ end
 # ```
 #
 # See also
-# [`GC.count`](https://docs.ruby-lang.org/en/2.6.0/GC.html#method-c-count),
-# [`GC.malloc_allocated_size`](https://docs.ruby-lang.org/en/2.6.0/GC.html#method-c-malloc_allocated_size)
+# [`GC.count`](https://docs.ruby-lang.org/en/2.7.0/GC.html#method-c-count),
+# [`GC.malloc_allocated_size`](https://docs.ruby-lang.org/en/2.7.0/GC.html#method-c-malloc_allocated_size)
 # and
-# [`GC.malloc_allocations`](https://docs.ruby-lang.org/en/2.6.0/GC.html#method-c-malloc_allocations)
+# [`GC.malloc_allocations`](https://docs.ruby-lang.org/en/2.7.0/GC.html#method-c-malloc_allocations)
 module GC::Profiler
-  # Clears the [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) profiler
+  # Clears the [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) profiler
   # data.
   sig {void}
   def self.clear(); end
 
-  # Stops the [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) profiler.
+  # Stops the [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) profiler.
   sig {void}
   def self.disable(); end
 
-  # Starts the [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) profiler.
+  # Starts the [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) profiler.
   sig {void}
   def self.enable(); end
 
-  # The current status of [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html)
+  # The current status of [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html)
   # profile mode.
   sig {returns(T::Boolean)}
   def self.enabled?(); end
 
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
+  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # individual raw profile data Hashes ordered from earliest to latest by
   # `:GC_INVOKE_TIME`.
   #
@@ -223,12 +225,12 @@ module GC::Profiler
   # The keys mean:
   #
   # `:GC_TIME`
-  # :   [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) elapsed in
-  #     seconds for this [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) run
+  # :   [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) elapsed in
+  #     seconds for this [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) run
   # `:GC_INVOKE_TIME`
-  # :   [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) elapsed in
+  # :   [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) elapsed in
   #     seconds from startup to when the
-  #     [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) was invoked
+  #     [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) was invoked
   # `:HEAP_USE_SIZE`
   # :   Total bytes of heap used
   # `:HEAP_TOTAL_SIZE`
@@ -237,7 +239,7 @@ module GC::Profiler
   # :   Total number of objects
   # `:GC_IS_MARKED`
   # :   Returns `true` if the
-  #     [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) is in mark phase
+  #     [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) is in mark phase
   #
   #
   # If ruby was built with `GC_PROFILE_MORE_DETAIL`, you will also have access
@@ -256,9 +258,9 @@ module GC::Profiler
   def self.raw_data(); end
 
   # Writes the
-  # [`GC::Profiler.result`](https://docs.ruby-lang.org/en/2.6.0/GC/Profiler.html#method-c-result)
+  # [`GC::Profiler.result`](https://docs.ruby-lang.org/en/2.7.0/GC/Profiler.html#method-c-result)
   # to `$stdout` or the given
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object.
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
   sig do
     params(
       io: IO

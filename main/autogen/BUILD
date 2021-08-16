@@ -3,12 +3,14 @@ cc_library(
     srcs = [
         "autogen.cc",
         "autoloader.cc",
+        "crc_builder.cc",
         "packages.cc",
         "subclasses.cc",
     ],
     hdrs = [
         "autogen.h",
         "autoloader.h",
+        "crc_builder.h",
         "packages.h",
         "subclasses.h",
     ],

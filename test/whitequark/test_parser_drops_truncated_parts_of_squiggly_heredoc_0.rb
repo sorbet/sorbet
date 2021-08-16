@@ -1,0 +1,5 @@
+# typed: true
+
+<<~HERE
+  #{}
+HERE

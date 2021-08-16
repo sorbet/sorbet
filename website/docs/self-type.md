@@ -34,6 +34,21 @@ class Child < Parent; end
 
 T.reveal_type(Parent.new.foo) # Revealed type: Parent
 T.reveal_type(Child.new.foo) # Revealed type: Child
+
+module Mixin
+  extend T::Sig
+
+  sig {returns(T.self_type)}
+  def bar
+    self
+  end
+end
+
+class UsesMixin
+  extend Mixin
+end
+
+T.reveal_type(UsesMixin.bar) # Revealed type: T.class_of(UsesMixin)
 ```
 
 Certain advanced use cases of `T.self_type` are not supported:

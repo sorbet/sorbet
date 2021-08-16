@@ -170,14 +170,14 @@ LSPQueryResult LSPTask::queryBySymbol(LSPTypecheckerDelegate &typechecker, core:
         ENFORCE(file->getFileHash() != nullptr);
         const auto &hash = *file->getFileHash();
         const auto &usedSends = hash.usages.sends;
-        const auto &usedConstants = hash.usages.constants;
+        const auto &usedSymbolNames = hash.usages.symbols;
         auto ref = core::FileRef(i);
 
         const bool fileIsValid = ref.exists() && (ref.data(gs).sourceType == core::File::Type::Normal ||
                                                   ref.data(gs).sourceType == core::File::Type::Package);
         if (fileIsValid &&
             (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
-             std::find(usedConstants.begin(), usedConstants.end(), symNameHash) != usedConstants.end())) {
+             std::find(usedSymbolNames.begin(), usedSymbolNames.end(), symNameHash) != usedSymbolNames.end())) {
             frefs.emplace_back(ref);
         }
     }
@@ -319,22 +319,25 @@ void populateFieldAccessorType(const core::GlobalState &gs, AccessorInfo &info) 
     // Check definition site of method for `prop`, `const`, etc. The loc for the method should begin with
     // `def|prop|const|...`.
     auto methodSource = method.data(gs)->loc().source(gs);
+    if (!methodSource.has_value()) {
+        return;
+    }
     // Common case: ordinary `def`. Fast reject.
-    if (absl::StartsWith(methodSource, "def")) {
+    if (absl::StartsWith(methodSource.value(), "def")) {
         info.accessorType = FieldAccessorType::None;
         return;
     }
 
     if (absl::c_any_of(accessorNames, [&methodSource, &gs](auto name) -> bool {
-            return absl::StartsWith(methodSource, name.toString(gs));
+            return absl::StartsWith(methodSource.value(), name.toString(gs));
         })) {
         info.accessorType = FieldAccessorType::Accessor;
     } else if (absl::c_any_of(writerNames, [&methodSource, &gs](auto name) -> bool {
-                   return absl::StartsWith(methodSource, name.toString(gs));
+                   return absl::StartsWith(methodSource.value(), name.toString(gs));
                })) {
         info.accessorType = FieldAccessorType::Writer;
     } else if (absl::c_any_of(readerNames, [&methodSource, &gs](auto name) -> bool {
-                   return absl::StartsWith(methodSource, name.toString(gs));
+                   return absl::StartsWith(methodSource.value(), name.toString(gs));
                })) {
         info.accessorType = FieldAccessorType::Reader;
     } else {
@@ -369,9 +372,10 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
     AccessorInfo info;
 
     core::SymbolRef owner = symbol.data(gs)->owner;
-    if (!owner.exists()) {
+    if (!owner.exists() || !owner.isClassOrModule()) {
         return info;
     }
+    core::ClassOrModuleRef ownerCls = owner.asClassOrModuleRef();
 
     string_view baseName;
 
@@ -381,19 +385,19 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
         if (!symbol.isField(gs)) {
             return info;
         }
-        info.fieldSymbol = symbol;
+        info.fieldSymbol = symbol.asFieldRef();
         baseName = string_view(symbolName).substr(1);
     } else if (absl::EndsWith(symbolName, "=")) {
         if (!symbol.data(gs)->isMethod()) {
             return info;
         }
-        info.writerSymbol = symbol;
+        info.writerSymbol = symbol.asMethodRef();
         baseName = string_view(symbolName).substr(0, symbolName.length() - 1);
     } else {
         if (!symbol.data(gs)->isMethod()) {
             return info;
         }
-        info.readerSymbol = symbol;
+        info.readerSymbol = symbol.asMethodRef();
         baseName = symbolName;
     }
 
@@ -405,7 +409,7 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
             // Field is not optional.
             return info;
         }
-        info.fieldSymbol = gs.lookupFieldSymbol(owner, fieldName);
+        info.fieldSymbol = gs.lookupFieldSymbol(ownerCls, fieldName);
         if (!info.fieldSymbol.exists()) {
             // field symbol does not exist, so `symbol` must not be an accessor.
             return info;
@@ -415,7 +419,7 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
     if (!info.readerSymbol.exists()) {
         auto readerName = gs.lookupNameUTF8(baseName);
         if (readerName.exists()) {
-            info.readerSymbol = gs.lookupMethodSymbol(owner, readerName);
+            info.readerSymbol = gs.lookupMethodSymbol(ownerCls, readerName);
         }
     }
 
@@ -423,7 +427,7 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
         auto writerNameStr = absl::StrCat(baseName, "=");
         auto writerName = gs.lookupNameUTF8(writerNameStr);
         if (writerName.exists()) {
-            info.writerSymbol = gs.lookupMethodSymbol(owner, writerName);
+            info.writerSymbol = gs.lookupMethodSymbol(ownerCls, writerName);
         }
     }
 

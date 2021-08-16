@@ -1,0 +1,6 @@
+s(:defs,
+  s(:self), :foo, nil,
+  s(:rescue,
+    s(:int, "42"),
+    s(:resbody, nil, nil,
+      s(:nil)), nil))

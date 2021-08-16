@@ -85,7 +85,7 @@ void addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symb
     // We have to check for methods as part of a class hierarchy: Follow superClass() links till we find the root;
     // then find the full tree; then look for methods with the same name as ours; then find all references to all
     // those methods and rename them.
-    auto symbolClass = symbolData->enclosingClass(gs);
+    auto symbolClass = symbol.enclosingClass(gs);
 
     // We have to be careful to follow superclass links only as long as we find a method that `symbol` overrides.
     // Otherwise we will find unrelated methods and rename them even though they don't need to be (see the
@@ -205,11 +205,14 @@ public:
         }
 
         auto source = loc.source(gs);
+        if (!source.has_value()) {
+            return;
+        }
         string newsrc;
         if (auto sendResp = response->isSend()) {
-            newsrc = replaceMethodNameInSend(source, sendResp);
+            newsrc = replaceMethodNameInSend(source.value(), sendResp);
         } else if (auto defResp = response->isDefinition()) {
-            newsrc = replaceMethodNameInDef(source);
+            newsrc = replaceMethodNameInDef(source.value());
         } else {
             ENFORCE(0, "Unexpected query response type while renaming method");
             return;
@@ -239,6 +242,7 @@ private:
             }
             return "";
         }
+        // TODO(jez) Use Loc::adjust here?
         string::size_type methodNameOffset = methodNameLoc->beginPos() - sendResp->termLoc.beginPos();
         auto newsrc = replaceAt(source, methodNameOffset);
         return newsrc;
@@ -290,7 +294,10 @@ public:
     void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
         auto loc = response->getLoc();
         auto source = loc.source(gs);
-        vector<string> strs = absl::StrSplit(source, "::");
+        if (!source.has_value()) {
+            return;
+        }
+        vector<string> strs = absl::StrSplit(source.value(), "::");
         strs[strs.size() - 1] = string(newName);
         auto newsrc = absl::StrJoin(strs, "::");
         edits[loc] = newsrc;

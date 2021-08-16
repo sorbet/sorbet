@@ -2,31 +2,31 @@
 
 # # WEB server toolkit.
 #
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) is an HTTP
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) is an HTTP
 # server toolkit that can be configured as an HTTPS server, a proxy server, and
 # a virtual-host server.
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) features
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) features
 # complete logging of both server operations and HTTP access.
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) supports both
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) supports both
 # basic and digest authentication in addition to algorithms not in RFC 2617.
 #
-# A [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) server can be
+# A [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) server can be
 # composed of multiple
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) servers or
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) servers or
 # servlets to provide differing behavior on a per-host or per-path basis.
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) includes
-# servlets for handling [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html)
-# scripts, [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html) pages, Ruby
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) includes
+# servlets for handling [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html)
+# scripts, [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html) pages, Ruby
 # blocks and directory listings.
 #
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) also includes
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) also includes
 # tools for daemonizing a process and starting a process at a higher privilege
 # level and dropping permissions.
 #
 # ## Starting an HTTP server
 #
 # To create a new
-# [`WEBrick::HTTPServer`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServer.html)
+# [`WEBrick::HTTPServer`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServer.html)
 # that will listen to connections on port 8000 and serve documents from the
 # current user's public\_html folder:
 #
@@ -49,11 +49,11 @@
 # ## Custom Behavior
 #
 # The easiest way to have a server perform custom operations is through
-# [`WEBrick::HTTPServer#mount_proc`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServer.html#method-i-mount_proc).
+# [`WEBrick::HTTPServer#mount_proc`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServer.html#method-i-mount_proc).
 # The block given will be called with a
-# [`WEBrick::HTTPRequest`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPRequest.html)
+# [`WEBrick::HTTPRequest`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPRequest.html)
 # with request info and a
-# [`WEBrick::HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPResponse.html)
+# [`WEBrick::HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPResponse.html)
 # which must be filled in appropriately:
 #
 # ```ruby
@@ -67,7 +67,7 @@
 # ## Servlets
 #
 # Advanced custom behavior can be obtained through mounting a subclass of
-# [`WEBrick::HTTPServlet::AbstractServlet`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServlet/AbstractServlet.html).
+# [`WEBrick::HTTPServlet::AbstractServlet`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServlet/AbstractServlet.html).
 # Servlets provide more modularity when writing an HTTP server than mount\_proc
 # allows. Here is a simple servlet:
 #
@@ -90,7 +90,7 @@
 # ```
 #
 # See
-# [`WEBrick::HTTPServlet::AbstractServlet`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServlet/AbstractServlet.html)
+# [`WEBrick::HTTPServlet::AbstractServlet`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServlet/AbstractServlet.html)
 # for more details.
 #
 # ## Virtual Hosts
@@ -152,7 +152,7 @@
 #
 # ## Proxy Server
 #
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) can act as a
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) can act as a
 # proxy server:
 #
 # ```ruby
@@ -167,31 +167,31 @@
 # See WEBrick::HTTPProxy for further details including modifying proxied
 # responses.
 #
-# ## Basic and [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html) authentication
+# ## Basic and [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html) authentication
 #
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) provides both
-# Basic and [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html)
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) provides both
+# Basic and [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html)
 # authentication for regular and proxy servers. See
-# [`WEBrick::HTTPAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth.html),
-# [`WEBrick::HTTPAuth::BasicAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/BasicAuth.html)
+# [`WEBrick::HTTPAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth.html),
+# [`WEBrick::HTTPAuth::BasicAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/BasicAuth.html)
 # and
-# [`WEBrick::HTTPAuth::DigestAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/DigestAuth.html).
+# [`WEBrick::HTTPAuth::DigestAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/DigestAuth.html).
 #
-# ## [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) as a Production Web Server
+# ## [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) as a Production Web Server
 #
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) can be run as a
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) can be run as a
 # production server for small loads.
 #
 # ### Daemonizing
 #
-# To start a [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html)
+# To start a [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html)
 # server as a daemon simple run
-# [`WEBrick::Daemon.start`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/Daemon.html#method-c-start)
+# [`WEBrick::Daemon.start`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/Daemon.html#method-c-start)
 # before starting the server.
 #
 # ### Dropping Permissions
 #
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) can be started
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) can be started
 # as one user to gain permission to bind to port 80 or 443 for serving HTTP or
 # HTTPS traffic then can drop these permissions for regular operation. To listen
 # on all interfaces for HTTP traffic:
@@ -220,7 +220,7 @@
 #
 # ### Logging
 #
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) can separately
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) can separately
 # log server operations and end-user access. For server operations:
 #
 # ```ruby
@@ -239,13 +239,13 @@
 # ```
 #
 # See
-# [`WEBrick::AccessLog`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/AccessLog.html)
+# [`WEBrick::AccessLog`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/AccessLog.html)
 # for further log formats.
 #
 # ### Log Rotation
 #
 # To rotate logs in
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) on a HUP signal
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) on a HUP signal
 # (like syslogd can send), open the log file in 'a+' mode (as above) and trap
 # 'HUP' to reopen the log file:
 #
@@ -263,11 +263,11 @@ module WEBrick
   CR = T.let(nil, T.untyped)
   CRLF = T.let(nil, T.untyped)
   LF = T.let(nil, T.untyped)
-  # The [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) version
+  # The [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) version
   VERSION = T.let(nil, T.untyped)
 end
 
-# [`AccessLog`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/AccessLog.html)
+# [`AccessLog`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/AccessLog.html)
 # provides logging to various files in various formats.
 #
 # Multiple logs may be written to at the same time:
@@ -282,7 +282,7 @@ end
 # ```
 #
 # Custom log formats may be defined.
-# [`WEBrick::AccessLog`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/AccessLog.html)
+# [`WEBrick::AccessLog`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/AccessLog.html)
 # provides a subset of the formatting from Apache's mod\_log\_config
 # http://httpd.apache.org/docs/mod/mod\_log\_config.html#formats. See
 # AccessLog::setup\_params for a list of supported options
@@ -332,17 +332,20 @@ end
 class WEBrick::BasicLog
   # Debugging error level for messages used in server development or debugging
   DEBUG = T.let(nil, T.untyped)
-  # Error log level which indicates a recoverable error
+  # [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) log level which
+  # indicates a recoverable error
   ERROR = T.let(nil, T.untyped)
   # Fatal log level which indicates a server crash
   FATAL = T.let(nil, T.untyped)
   # Information log level which indicates possibly useful information
   INFO = T.let(nil, T.untyped)
-  # [`Warning`](https://docs.ruby-lang.org/en/2.6.0/Warning.html) log level
+  # [`Warning`](https://docs.ruby-lang.org/en/2.7.0/Warning.html) log level
   # which indicates a possible problem
   WARN = T.let(nil, T.untyped)
 
-  # Synonym for log(INFO, obj.to\_s)
+  # Synonym for
+  # log([`INFO`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/BasicLog.html#INFO),
+  # obj.to\_s)
   sig do
     params(
       obj: T.untyped,
@@ -356,7 +359,7 @@ class WEBrick::BasicLog
   def close(); end
 
   # Shortcut for logging a
-  # [`DEBUG`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/BasicLog.html#DEBUG)
+  # [`DEBUG`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/BasicLog.html#DEBUG)
   # message
   sig do
     params(
@@ -367,13 +370,13 @@ class WEBrick::BasicLog
   def debug(msg); end
 
   # Will the logger output
-  # [`DEBUG`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/BasicLog.html#DEBUG)
+  # [`DEBUG`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/BasicLog.html#DEBUG)
   # messages?
   sig {returns(T.untyped)}
   def debug?(); end
 
   # Shortcut for logging an
-  # [`ERROR`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/BasicLog.html#ERROR)
+  # [`ERROR`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/BasicLog.html#ERROR)
   # message
   sig do
     params(
@@ -384,13 +387,13 @@ class WEBrick::BasicLog
   def error(msg); end
 
   # Will the logger output
-  # [`ERROR`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/BasicLog.html#ERROR)
+  # [`ERROR`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/BasicLog.html#ERROR)
   # messages?
   sig {returns(T.untyped)}
   def error?(); end
 
   # Shortcut for logging a
-  # [`FATAL`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/BasicLog.html#FATAL)
+  # [`FATAL`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/BasicLog.html#FATAL)
   # message
   sig do
     params(
@@ -401,13 +404,13 @@ class WEBrick::BasicLog
   def fatal(msg); end
 
   # Will the logger output
-  # [`FATAL`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/BasicLog.html#FATAL)
+  # [`FATAL`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/BasicLog.html#FATAL)
   # messages?
   sig {returns(T.untyped)}
   def fatal?(); end
 
   # Shortcut for logging an
-  # [`INFO`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/BasicLog.html#INFO)
+  # [`INFO`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/BasicLog.html#INFO)
   # message
   sig do
     params(
@@ -418,7 +421,7 @@ class WEBrick::BasicLog
   def info(msg); end
 
   # Will the logger output
-  # [`INFO`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/BasicLog.html#INFO)
+  # [`INFO`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/BasicLog.html#INFO)
   # messages?
   sig {returns(T.untyped)}
   def info?(); end
@@ -456,7 +459,7 @@ class WEBrick::BasicLog
   def log(level, data); end
 
   # Shortcut for logging a
-  # [`WARN`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/BasicLog.html#WARN)
+  # [`WARN`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/BasicLog.html#WARN)
   # message
   sig do
     params(
@@ -467,31 +470,32 @@ class WEBrick::BasicLog
   def warn(msg); end
 
   # Will the logger output
-  # [`WARN`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/BasicLog.html#WARN)
+  # [`WARN`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/BasicLog.html#WARN)
   # messages?
   sig {returns(T.untyped)}
   def warn?(); end
 end
 
+# Raised if a parameter such as %e, %i, %o or %n is used without fetching a
 # specific field.
 class WEBrick::AccessLog::AccessLogError < ::StandardError
 end
 
 module WEBrick::Config
   # Default configuration for
-  # [`WEBrick::HTTPAuth::BasicAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/BasicAuth.html)
+  # [`WEBrick::HTTPAuth::BasicAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/BasicAuth.html)
   #
   # :AutoReloadUserDB
   # :   Reload the user database provided by :UserDB automatically?
   BasicAuth = T.let(T.unsafe(nil), T::Hash[Symbol, T.untyped])
 
   # Default configuration for
-  # [`WEBrick::HTTPAuth::DigestAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/DigestAuth.html).
+  # [`WEBrick::HTTPAuth::DigestAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/DigestAuth.html).
   #
   # :Algorithm
   # :   MD5, MD5-sess (default), SHA1, SHA1-sess
   # :Domain
-  # :   An [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of URIs
+  # :   An [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of URIs
   #     that define the protected space
   # :Qop
   # :   'auth' for authentication, 'auth-int' for integrity protection or both
@@ -516,10 +520,10 @@ module WEBrick::Config
   DigestAuth = T.let(T.unsafe(nil), T::Hash[Symbol, T.untyped])
 
   # Default configuration for
-  # [`WEBrick::HTTPServlet::FileHandler`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServlet/FileHandler.html)
+  # [`WEBrick::HTTPServlet::FileHandler`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServlet/FileHandler.html)
   #
   # :AcceptableLanguages
-  # :   [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of languages
+  # :   [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of languages
   #     allowed for accept-language. There is no default
   # :DirectoryCallback
   # :   Allows preprocessing of directory requests. There is no default
@@ -579,13 +583,13 @@ class WEBrick::Cookie
   def domain=(_); end
 
   # Retrieves the expiration time as a
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html)
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html)
   sig {returns(T.untyped)}
   def expires(); end
 
   # Sets the cookie expiration to the time `t`. The expiration time may be a
   # false value to disable expiration or a
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) or HTTP format time
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) or HTTP format time
   # string to set the expiration date.
   sig do
     params(
@@ -677,7 +681,7 @@ class WEBrick::Cookie
   end
   def version=(_); end
 
-  # Parses a [`Cookie`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/Cookie.html)
+  # Parses a [`Cookie`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/Cookie.html)
   # field sent from the user-agent. Returns an array of cookies.
   sig do
     params(
@@ -715,9 +719,9 @@ class WEBrick::Daemon
 end
 
 # Base TCP server class. You must subclass
-# [`GenericServer`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/GenericServer.html)
+# [`GenericServer`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/GenericServer.html)
 # and provide a
-# [`run`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/GenericServer.html#method-i-run)
+# [`run`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/GenericServer.html#method-i-run)
 # method.
 class WEBrick::GenericServer
   # Retrieves `key` from the configuration
@@ -743,7 +747,7 @@ class WEBrick::GenericServer
   def initialize(config=T.unsafe(nil), default=T.unsafe(nil)); end
 
   # Adds listeners from `address` and `port` to the server. See
-  # [`WEBrick::Utils::create_listeners`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/Utils.html#method-c-create_listeners)
+  # [`WEBrick::Utils::create_listeners`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/Utils.html#method-c-create_listeners)
   # for details.
   sig do
     params(
@@ -763,9 +767,9 @@ class WEBrick::GenericServer
   def logger(); end
 
   # You must subclass
-  # [`GenericServer`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/GenericServer.html)
+  # [`GenericServer`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/GenericServer.html)
   # and implement
-  # [`run`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/GenericServer.html#method-i-run)
+  # [`run`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/GenericServer.html#method-i-run)
   # which accepts a TCP client socket
   sig do
     params(
@@ -783,20 +787,20 @@ class WEBrick::GenericServer
   # Starts the server and runs the `block` for each connection. This method does
   # not return until the server is stopped from a signal handler or another
   # thread using
-  # [`stop`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/GenericServer.html#method-i-stop)
+  # [`stop`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/GenericServer.html#method-i-stop)
   # or
-  # [`shutdown`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/GenericServer.html#method-i-shutdown).
+  # [`shutdown`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/GenericServer.html#method-i-shutdown).
   #
   # If the block raises a subclass of
-  # [`StandardError`](https://docs.ruby-lang.org/en/2.6.0/StandardError.html)
+  # [`StandardError`](https://docs.ruby-lang.org/en/2.7.0/StandardError.html)
   # the exception is logged and ignored. If an
-  # [`IOError`](https://docs.ruby-lang.org/en/2.6.0/IOError.html) or
+  # [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html) or
   # Errno::EBADF exception is raised the exception is ignored. If an
-  # [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) subclass
+  # [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html) subclass
   # is raised the exception is logged and re-raised which stops the server.
   #
   # To completely shut down a server call
-  # [`shutdown`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/GenericServer.html#method-i-shutdown)
+  # [`shutdown`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/GenericServer.html#method-i-shutdown)
   # from ensure:
   #
   # ```ruby
@@ -839,11 +843,11 @@ module WEBrick::HTMLUtils
   def self.escape(string); end
 end
 
-# [`HTTPAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth.html)
+# [`HTTPAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth.html)
 # provides both basic and digest authentication.
 #
 # To enable authentication for requests in
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) you will need a
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) you will need a
 # user database and an authenticator. To start, here's an Htpasswd database for
 # use with a DigestAuth authenticator:
 #
@@ -879,7 +883,7 @@ end
 #
 # For digest authentication the authenticator must not be created every request,
 # it must be passed in as an option via
-# [`WEBrick::HTTPServer#mount`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServer.html#method-i-mount).
+# [`WEBrick::HTTPServer#mount`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServer.html#method-i-mount).
 module WEBrick::HTTPAuth
   sig do
     params(
@@ -916,11 +920,11 @@ module WEBrick::HTTPAuth
   def self.proxy_basic_auth(req, res, realm); end
 end
 
-# [`Module`](https://docs.ruby-lang.org/en/2.6.0/Module.html) providing generic
-# support for both [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html)
+# [`Module`](https://docs.ruby-lang.org/en/2.7.0/Module.html) providing generic
+# support for both [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html)
 # and Basic authentication schemes.
 module WEBrick::HTTPAuth::Authenticator
-  # [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) of
+  # [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) of
   # authentication, must be overridden by the including class
   AuthScheme = T.let(nil, T.untyped)
   RequestField = T.let(nil, T.untyped)
@@ -941,10 +945,10 @@ module WEBrick::HTTPAuth::Authenticator
 end
 
 # Basic Authentication for
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html)
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html)
 #
 # Use this class to add basic authentication to a
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) servlet.
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) servlet.
 #
 # Here is an example of how to set up a BasicAuth:
 #
@@ -1014,12 +1018,12 @@ class WEBrick::HTTPAuth::BasicAuth
   def self.make_passwd(realm, user, pass); end
 end
 
-# RFC 2617 [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html) Access
+# RFC 2617 [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html) Access
 # Authentication for
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html)
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html)
 #
 # Use this class to add digest authentication to a
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) servlet.
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) servlet.
 #
 # Here is an example of how to set up DigestAuth:
 #
@@ -1036,11 +1040,11 @@ end
 # ```
 #
 # When using this as with a servlet be sure not to create a new
-# [`DigestAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/DigestAuth.html)
+# [`DigestAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/DigestAuth.html)
 # object in the servlet's initialize. By default
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) creates a new
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) creates a new
 # servlet instance for every request and the
-# [`DigestAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/DigestAuth.html)
+# [`DigestAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/DigestAuth.html)
 # object must be used across requests.
 class WEBrick::HTTPAuth::DigestAuth
   include WEBrick::HTTPAuth::Authenticator
@@ -1048,7 +1052,7 @@ class WEBrick::HTTPAuth::DigestAuth
   MustParams = T.let(nil, T.untyped)
   MustParamsAuth = T.let(nil, T.untyped)
 
-  # [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html) authentication
+  # [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html) authentication
   # algorithm
   sig {returns(T.untyped)}
   def algorithm(); end
@@ -1156,14 +1160,14 @@ class WEBrick::HTTPAuth::DigestAuth::OpaqueInfo < Struct
   def self.new(*_); end
 end
 
-# [`Htdigest`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/Htdigest.html)
+# [`Htdigest`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/Htdigest.html)
 # accesses apache-compatible digest password files. Passwords are matched to a
 # realm where they are valid. For security, the path for a digest password
 # database should be stored outside of the paths available to the HTTP server.
 #
-# [`Htdigest`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/Htdigest.html)
+# [`Htdigest`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/Htdigest.html)
 # is intended for use with
-# [`WEBrick::HTTPAuth::DigestAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/DigestAuth.html)
+# [`WEBrick::HTTPAuth::DigestAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/DigestAuth.html)
 # and stores passwords using cryptographic hashes.
 #
 # ```ruby
@@ -1233,13 +1237,13 @@ class WEBrick::HTTPAuth::Htdigest
   def set_passwd(realm, user, pass); end
 end
 
-# [`Htgroup`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/Htgroup.html)
+# [`Htgroup`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/Htgroup.html)
 # accesses apache-compatible group files.
-# [`Htgroup`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/Htgroup.html)
+# [`Htgroup`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/Htgroup.html)
 # can be used to provide group-based authentication for users. Currently
-# [`Htgroup`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/Htgroup.html)
+# [`Htgroup`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/Htgroup.html)
 # is not directly integrated with any authenticators in
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html). For security,
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html). For security,
 # the path for a digest password database should be stored outside of the paths
 # available to the HTTP server.
 #
@@ -1252,7 +1256,7 @@ end
 # htgroup.members('superheroes').include? 'magneto' # => false
 # ```
 class WEBrick::HTTPAuth::Htgroup
-  # Add an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
+  # Add an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # `members` to `group`
   sig do
     params(
@@ -1295,17 +1299,17 @@ class WEBrick::HTTPAuth::Htgroup
   def reload(); end
 end
 
-# [`Htpasswd`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/Htpasswd.html)
+# [`Htpasswd`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/Htpasswd.html)
 # accesses apache-compatible password files. Passwords are matched to a realm
 # where they are valid. For security, the path for a password database should be
 # stored outside of the paths available to the HTTP server.
 #
-# [`Htpasswd`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/Htpasswd.html)
+# [`Htpasswd`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/Htpasswd.html)
 # is intended for use with
-# [`WEBrick::HTTPAuth::BasicAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/BasicAuth.html).
+# [`WEBrick::HTTPAuth::BasicAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/BasicAuth.html).
 #
 # To create an
-# [`Htpasswd`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/Htpasswd.html)
+# [`Htpasswd`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/Htpasswd.html)
 # database with a single user:
 #
 # ```ruby
@@ -1354,10 +1358,11 @@ class WEBrick::HTTPAuth::Htpasswd
   sig do
     params(
       path: T.untyped,
+      password_hash: T.untyped,
     )
     .returns(T.untyped)
   end
-  def initialize(path); end
+  def initialize(path, password_hash: T.unsafe(nil)); end
 
   # Reload passwords from the database
   sig {returns(T.untyped)}
@@ -1375,8 +1380,8 @@ class WEBrick::HTTPAuth::Htpasswd
   def set_passwd(realm, user, pass); end
 end
 
-# [`Module`](https://docs.ruby-lang.org/en/2.6.0/Module.html) providing generic
-# support for both [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html)
+# [`Module`](https://docs.ruby-lang.org/en/2.7.0/Module.html) providing generic
+# support for both [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html)
 # and Basic authentication schemes for proxies.
 module WEBrick::HTTPAuth::ProxyAuthenticator
   InfoField = T.let(nil, T.untyped)
@@ -1390,32 +1395,32 @@ class WEBrick::HTTPAuth::ProxyBasicAuth < WEBrick::HTTPAuth::BasicAuth
   include WEBrick::HTTPAuth::ProxyAuthenticator
 end
 
-# [`Digest`](https://docs.ruby-lang.org/en/2.6.0/Digest.html) authentication for
+# [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html) authentication for
 # proxy servers. See DigestAuth for details.
 class WEBrick::HTTPAuth::ProxyDigestAuth < WEBrick::HTTPAuth::DigestAuth
   include WEBrick::HTTPAuth::ProxyAuthenticator
 end
 
 # User database mixin for
-# [`HTTPAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth.html). This
+# [`HTTPAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth.html). This
 # mixin dispatches user record access to the underlying
-# [`auth_type`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/UserDB.html#attribute-i-auth_type)
+# [`auth_type`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/UserDB.html#attribute-i-auth_type)
 # for this database.
 module WEBrick::HTTPAuth::UserDB
   # The authentication type.
   #
-  # [`WEBrick::HTTPAuth::BasicAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/BasicAuth.html)
+  # [`WEBrick::HTTPAuth::BasicAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/BasicAuth.html)
   # or
-  # [`WEBrick::HTTPAuth::DigestAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/DigestAuth.html)
+  # [`WEBrick::HTTPAuth::DigestAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/DigestAuth.html)
   # are built-in.
   sig {returns(T.untyped)}
   def auth_type(); end
 
   # The authentication type.
   #
-  # [`WEBrick::HTTPAuth::BasicAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/BasicAuth.html)
+  # [`WEBrick::HTTPAuth::BasicAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/BasicAuth.html)
   # or
-  # [`WEBrick::HTTPAuth::DigestAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/DigestAuth.html)
+  # [`WEBrick::HTTPAuth::DigestAuth`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/DigestAuth.html)
   # are built-in.
   sig do
     params(
@@ -1426,7 +1431,7 @@ module WEBrick::HTTPAuth::UserDB
   def auth_type=(_); end
 
   # Retrieves a password in `realm` for `user` for the
-  # [`auth_type`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/UserDB.html#attribute-i-auth_type)
+  # [`auth_type`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/UserDB.html#attribute-i-auth_type)
   # of this database. `reload_db` is a dummy value.
   sig do
     params(
@@ -1439,7 +1444,7 @@ module WEBrick::HTTPAuth::UserDB
   def get_passwd(realm, user, reload_db=T.unsafe(nil)); end
 
   # Creates an obscured password in `realm` with `user` and `password` using the
-  # [`auth_type`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/UserDB.html#attribute-i-auth_type)
+  # [`auth_type`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/UserDB.html#attribute-i-auth_type)
   # of this database.
   sig do
     params(
@@ -1452,7 +1457,7 @@ module WEBrick::HTTPAuth::UserDB
   def make_passwd(realm, user, pass); end
 
   # Sets a password in `realm` with `user` and `password` for the
-  # [`auth_type`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/UserDB.html#attribute-i-auth_type)
+  # [`auth_type`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/UserDB.html#attribute-i-auth_type)
   # of this database.
   sig do
     params(
@@ -1466,7 +1471,7 @@ module WEBrick::HTTPAuth::UserDB
 end
 
 # An HTTP request. This is consumed by service and do\_\* methods in
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) servlets
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) servlets
 class WEBrick::HTTPRequest
   BODY_CONTAINABLE_METHODS = T.let(nil, T.untyped)
   MAX_URI_LENGTH = T.let(nil, T.untyped)
@@ -1501,7 +1506,7 @@ class WEBrick::HTTPRequest
   sig {returns(T.untyped)}
   def addr(); end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of request
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of request
   # attributes
   sig {returns(T.untyped)}
   def attributes(); end
@@ -1564,13 +1569,13 @@ class WEBrick::HTTPRequest
 
   # This method provides the metavariables defined by the revision 3 of "The WWW
   # Common Gateway Interface Version 1.1" To browse the current document of
-  # [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html) Version 1.1, see
+  # [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html) Version 1.1, see
   # below: http://tools.ietf.org/html/rfc3875
   sig {returns(T.untyped)}
   def meta_vars(); end
 
   # Parses a request from `socket`. This is called internally by
-  # [`WEBrick::HTTPServer`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServer.html).
+  # [`WEBrick::HTTPServer`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServer.html).
   sig do
     params(
       socket: T.untyped,
@@ -1583,11 +1588,13 @@ class WEBrick::HTTPRequest
   sig {returns(T.untyped)}
   def path(); end
 
-  # The path info (CGI variable)
+  # The path info ([`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html)
+  # variable)
   sig {returns(T.untyped)}
   def path_info(); end
 
-  # The path info (CGI variable)
+  # The path info ([`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html)
+  # variable)
   sig do
     params(
       _: T.untyped,
@@ -1604,16 +1611,16 @@ class WEBrick::HTTPRequest
   sig {returns(T.untyped)}
   def port(); end
 
-  # Request query as a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
+  # Request query as a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
   sig {returns(T.untyped)}
   def query(); end
 
-  # The query from the [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) of
+  # The query from the [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) of
   # the request
   sig {returns(T.untyped)}
   def query_string(); end
 
-  # The query from the [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) of
+  # The query from the [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) of
   # the request
   sig do
     params(
@@ -1647,16 +1654,18 @@ class WEBrick::HTTPRequest
   sig {returns(T.untyped)}
   def request_time(); end
 
-  # The parsed [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) of the
+  # The parsed [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) of the
   # request
   sig {returns(T.untyped)}
   def request_uri(); end
 
-  # The script name (CGI variable)
+  # The script name ([`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html)
+  # variable)
   sig {returns(T.untyped)}
   def script_name(); end
 
-  # The script name (CGI variable)
+  # The script name ([`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html)
+  # variable)
   sig do
     params(
       _: T.untyped,
@@ -1676,16 +1685,18 @@ class WEBrick::HTTPRequest
   sig {returns(T.untyped)}
   def to_s(); end
 
-  # The unparsed [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) of the
+  # The unparsed [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) of the
   # request
   sig {returns(T.untyped)}
   def unparsed_uri(); end
 
-  # The remote user (CGI variable)
+  # The remote user ([`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html)
+  # variable)
   sig {returns(T.untyped)}
   def user(); end
 
-  # The remote user (CGI variable)
+  # The remote user ([`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html)
+  # variable)
   sig do
     params(
       _: T.untyped,
@@ -1696,7 +1707,7 @@ class WEBrick::HTTPRequest
 end
 
 # An HTTP response. This is filled in by the service or do\_\* methods of a
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html) HTTP Servlet.
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) HTTP Servlet.
 class WEBrick::HTTPResponse
   # Retrieves the response header `field`
   sig do
@@ -1717,13 +1728,47 @@ class WEBrick::HTTPResponse
   end
   def []=(field, value); end
 
-  # Body may be a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or
-  # IO-like object that responds to read and readpartial.
+  # Body may be:
+  # *   a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html);
+  # *   an IO-like object that responds to `#read` and `#readpartial`;
+  # *   a Proc-like object that responds to `#call`.
+  #
+  #
+  # In the latter case, either
+  # [`chunked=`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPResponse.html#method-i-chunked-3D)
+  # should be set to `true`, or `header['content-length']` explicitly provided.
+  # Example:
+  #
+  # ```ruby
+  # server.mount_proc '/' do |req, res|
+  #   res.chunked = true
+  #   # or
+  #   # res.header['content-length'] = 10
+  #   res.body = proc { |out| out.write(Time.now.to_s) }
+  # end
+  # ```
   sig {returns(T.untyped)}
   def body(); end
 
-  # Body may be a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or
-  # IO-like object that responds to read and readpartial.
+  # Body may be:
+  # *   a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html);
+  # *   an IO-like object that responds to `#read` and `#readpartial`;
+  # *   a Proc-like object that responds to `#call`.
+  #
+  #
+  # In the latter case, either
+  # [`chunked=`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPResponse.html#method-i-chunked-3D)
+  # should be set to `true`, or `header['content-length']` explicitly provided.
+  # Example:
+  #
+  # ```ruby
+  # server.mount_proc '/' do |req, res|
+  #   res.chunked = true
+  #   # or
+  #   # res.header['content-length'] = 10
+  #   res.body = proc { |out| out.write(Time.now.to_s) }
+  # end
+  # ```
   sig do
     params(
       _: T.untyped,
@@ -1870,12 +1915,12 @@ class WEBrick::HTTPResponse
   end
   def request_method=(_); end
 
-  # Request [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) for this
+  # Request [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) for this
   # response
   sig {returns(T.untyped)}
   def request_uri(); end
 
-  # Request [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) for this
+  # Request [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) for this
   # response
   sig do
     params(
@@ -1924,7 +1969,7 @@ class WEBrick::HTTPResponse
   def set_error(ex, backtrace=T.unsafe(nil)); end
 
   # Redirects to `url` with a
-  # [`WEBrick::HTTPStatus::Redirect`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPStatus/Redirect.html)
+  # [`WEBrick::HTTPStatus::Redirect`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPStatus/Redirect.html)
   # `status`.
   #
   # Example:
@@ -2022,9 +2067,9 @@ class WEBrick::HTTPServer < WEBrick::GenericServer
   def mount(dir, servlet, *options); end
 
   # Mounts `proc` or `block` on `dir` and calls it with a
-  # [`WEBrick::HTTPRequest`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPRequest.html)
+  # [`WEBrick::HTTPRequest`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPRequest.html)
   # and
-  # [`WEBrick::HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPResponse.html)
+  # [`WEBrick::HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPResponse.html)
   sig do
     params(
       dir: T.untyped,
@@ -2063,7 +2108,7 @@ class WEBrick::HTTPServer < WEBrick::GenericServer
   def service(req, res); end
 
   # Alias for:
-  # [`unmount`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServer.html#method-i-unmount)
+  # [`unmount`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServer.html#method-i-unmount)
   sig do
     params(
       dir: T.untyped,
@@ -2075,7 +2120,7 @@ class WEBrick::HTTPServer < WEBrick::GenericServer
   # Unmounts `dir`
   #
   # Also aliased as:
-  # [`umount`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServer.html#method-i-umount)
+  # [`umount`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServer.html#method-i-umount)
   sig do
     params(
       dir: T.untyped,
@@ -2136,7 +2181,7 @@ class WEBrick::HTTPServerError < ::WEBrick::ServerError; end
 
 module WEBrick::HTTPServlet; end
 
-# [`AbstractServlet`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServlet/AbstractServlet.html)
+# [`AbstractServlet`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServlet/AbstractServlet.html)
 # allows HTTP server modules to be reused across multiple servers and allows
 # encapsulation of functionality.
 #
@@ -2145,9 +2190,9 @@ module WEBrick::HTTPServlet; end
 #
 # By default a new servlet is initialized for every request. A servlet instance
 # can be reused by overriding
-# [`::get_instance`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServlet/AbstractServlet.html#method-c-get_instance)
+# [`::get_instance`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServlet/AbstractServlet.html#method-c-get_instance)
 # in the
-# [`AbstractServlet`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServlet/AbstractServlet.html)
+# [`AbstractServlet`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServlet/AbstractServlet.html)
 # subclass.
 #
 # ## A Simple Servlet
@@ -2214,7 +2259,7 @@ class WEBrick::HTTPServlet::AbstractServlet
   def do_GET(req, res); end
 
   # Dispatches to
-  # [`do_GET`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServlet/AbstractServlet.html#method-i-do_GET)
+  # [`do_GET`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServlet/AbstractServlet.html#method-i-do_GET)
   sig do
     params(
       req: T.untyped,
@@ -2268,7 +2313,7 @@ class WEBrick::HTTPServlet::AbstractServlet
   def self.get_instance(server, *options); end
 end
 
-# Servlet for handling [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html)
+# Servlet for handling [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html)
 # scripts
 #
 # Example:
@@ -2320,7 +2365,7 @@ end
 # ```
 #
 # This servlet handles If-Modified-Since and
-# [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html) requests.
+# [`Range`](https://docs.ruby-lang.org/en/2.7.0/Range.html) requests.
 class WEBrick::HTTPServlet::DefaultFileHandler < WEBrick::HTTPServlet::AbstractServlet
   sig do
     params(
@@ -2372,19 +2417,19 @@ class WEBrick::HTTPServlet::DefaultFileHandler < WEBrick::HTTPServlet::AbstractS
   def prepare_range(range, filesize); end
 end
 
-# [`ERBHandler`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServlet/ERBHandler.html)
-# evaluates an [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html) file and
+# [`ERBHandler`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServlet/ERBHandler.html)
+# evaluates an [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html) file and
 # returns the result. This handler is automatically used if there are .rhtml
 # files in a directory served by the FileHandler.
 #
-# [`ERBHandler`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServlet/ERBHandler.html)
+# [`ERBHandler`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServlet/ERBHandler.html)
 # supports GET and POST methods.
 #
-# The [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html) file is evaluated
+# The [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html) file is evaluated
 # with the local variables `servlet_request` and `servlet_response` which are a
-# [`WEBrick::HTTPRequest`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPRequest.html)
+# [`WEBrick::HTTPRequest`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPRequest.html)
 # and
-# [`WEBrick::HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPResponse.html)
+# [`WEBrick::HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPResponse.html)
 # respectively.
 #
 # Example .rhtml file:
@@ -2398,7 +2443,7 @@ class WEBrick::HTTPServlet::ERBHandler < WEBrick::HTTPServlet::AbstractServlet
   # Handles GET requests
   #
   # Also aliased as:
-  # [`do_POST`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServlet/ERBHandler.html#method-i-do_POST)
+  # [`do_POST`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServlet/ERBHandler.html#method-i-do_POST)
   sig do
     params(
       req: T.untyped,
@@ -2411,7 +2456,7 @@ class WEBrick::HTTPServlet::ERBHandler < WEBrick::HTTPServlet::AbstractServlet
   # Handles POST requests
   #
   # Alias for:
-  # [`do_GET`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServlet/ERBHandler.html#method-i-do_GET)
+  # [`do_GET`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServlet/ERBHandler.html#method-i-do_GET)
   sig do
     params(
       req: T.untyped,
@@ -2512,9 +2557,9 @@ end
 # Mounts a proc at a path that accepts a request and response.
 #
 # Instead of mounting this servlet with
-# [`WEBrick::HTTPServer#mount`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServer.html#method-i-mount)
+# [`WEBrick::HTTPServer#mount`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServer.html#method-i-mount)
 # use
-# [`WEBrick::HTTPServer#mount_proc`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServer.html#method-i-mount_proc):
+# [`WEBrick::HTTPServer#mount_proc`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPServer.html#method-i-mount_proc):
 #
 # ```ruby
 # server.mount_proc '/' do |req, res|
@@ -2857,7 +2902,7 @@ class WEBrick::HTTPStatus::Status < StandardError
   # Returns the HTTP status code
   #
   # Also aliased as:
-  # [`to_i`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPStatus/Status.html#method-i-to_i)
+  # [`to_i`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPStatus/Status.html#method-i-to_i)
   sig {returns(T.untyped)}
   def code(); end
 
@@ -2866,7 +2911,7 @@ class WEBrick::HTTPStatus::Status < StandardError
   def reason_phrase(); end
 
   # Alias for:
-  # [`code`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPStatus/Status.html#method-i-code)
+  # [`code`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPStatus/Status.html#method-i-code)
   sig {returns(T.untyped)}
   def to_i(); end
 
@@ -2908,11 +2953,11 @@ end
 class WEBrick::HTTPStatus::UseProxy < WEBrick::HTTPStatus::Redirect
 end
 
-# [`HTTPUtils`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPUtils.html)
+# [`HTTPUtils`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPUtils.html)
 # provides utility methods for working with the HTTP protocol.
 #
 # This module is generally used internally by
-# [`WEBrick`](https://docs.ruby-lang.org/en/2.6.0/WEBrick.html)
+# [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html)
 module WEBrick::HTTPUtils
   # Default mime types
   DefaultMimeTypes = T.let(nil, T.untyped)
@@ -3038,7 +3083,7 @@ module WEBrick::HTTPUtils
   def self.parse_form_data(io, boundary); end
 
   # Parses an HTTP header `raw` into a hash of header fields with an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of values.
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of values.
   sig do
     params(
       raw: T.untyped,
@@ -3048,7 +3093,7 @@ module WEBrick::HTTPUtils
   def self.parse_header(raw); end
 
   # Parses the query component of a
-  # [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) in `str`
+  # [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) in `str`
   sig do
     params(
       str: T.untyped,
@@ -3066,7 +3111,7 @@ module WEBrick::HTTPUtils
   end
   def self.parse_qvalues(value); end
 
-  # Parses a [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html) header
+  # Parses a [`Range`](https://docs.ruby-lang.org/en/2.7.0/Range.html) header
   # value `ranges_specifier`
   sig do
     params(
@@ -3112,20 +3157,20 @@ module WEBrick::HTTPUtils
 end
 
 # Stores multipart form data.
-# [`FormData`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPUtils/FormData.html)
+# [`FormData`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPUtils/FormData.html)
 # objects are created when
-# [`WEBrick::HTTPUtils.parse_form_data`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPUtils.html#method-c-parse_form_data)
+# [`WEBrick::HTTPUtils.parse_form_data`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPUtils.html#method-c-parse_form_data)
 # is called.
 class WEBrick::HTTPUtils::FormData < String
   EmptyHeader = T.let(nil, T.untyped)
   EmptyRawHeader = T.let(nil, T.untyped)
 
   # Adds `str` to this
-  # [`FormData`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPUtils/FormData.html)
+  # [`FormData`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPUtils/FormData.html)
   # which may be the body, a header or a header entry.
   #
   # This is called by
-  # [`WEBrick::HTTPUtils.parse_form_data`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPUtils.html#method-c-parse_form_data)
+  # [`WEBrick::HTTPUtils.parse_form_data`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPUtils.html#method-c-parse_form_data)
   # for you
   sig do
     params(
@@ -3147,7 +3192,7 @@ class WEBrick::HTTPUtils::FormData < String
   # Adds `data` at the end of the chain of entries
   #
   # This is called by
-  # [`WEBrick::HTTPUtils.parse_form_data`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPUtils.html#method-c-parse_form_data)
+  # [`WEBrick::HTTPUtils.parse_form_data`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPUtils.html#method-c-parse_form_data)
   # for you.
   sig do
     params(
@@ -3158,7 +3203,7 @@ class WEBrick::HTTPUtils::FormData < String
   def append_data(data); end
 
   # Yields each entry in this
-  # [`FormData`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPUtils/FormData.html)
+  # [`FormData`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPUtils/FormData.html)
   sig {returns(T.untyped)}
   def each_data(); end
 
@@ -3184,11 +3229,11 @@ class WEBrick::HTTPUtils::FormData < String
   def initialize(*args); end
 
   # Returns all the
-  # [`FormData`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPUtils/FormData.html)
-  # as an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  # [`FormData`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPUtils/FormData.html)
+  # as an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   #
   # Also aliased as:
-  # [`to_ary`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPUtils/FormData.html#method-i-to_ary)
+  # [`to_ary`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPUtils/FormData.html#method-i-to_ary)
   sig {returns(T.untyped)}
   def list(); end
 
@@ -3217,12 +3262,12 @@ class WEBrick::HTTPUtils::FormData < String
   def next_data=(_); end
 
   # A
-  # [`FormData`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPUtils/FormData.html)
+  # [`FormData`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPUtils/FormData.html)
   # will behave like an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   #
   # Alias for:
-  # [`list`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPUtils/FormData.html#method-i-list)
+  # [`list`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPUtils/FormData.html#method-i-list)
   sig {returns(T.untyped)}
   def to_ary(); end
 
@@ -3284,7 +3329,7 @@ class WEBrick::HTTPVersion
   def to_s(); end
 
   # Converts `version` into an
-  # [`HTTPVersion`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPVersion.html)
+  # [`HTTPVersion`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPVersion.html)
   sig do
     params(
       version: T.untyped,
@@ -3337,7 +3382,7 @@ class WEBrick::ServerError < ::StandardError; end
 # Base server class
 class WEBrick::SimpleServer
   # A
-  # [`SimpleServer`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/SimpleServer.html)
+  # [`SimpleServer`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/SimpleServer.html)
   # only yields when you start it
   sig {returns(T.untyped)}
   def self.start(); end
@@ -3381,7 +3426,7 @@ module WEBrick::Utils
   end
   def self.set_close_on_exec(io); end
 
-  # Sets [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) operations on `io`
+  # Sets [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) operations on `io`
   # to be non-blocking
   sig do
     params(
@@ -3414,10 +3459,10 @@ module WEBrick::Utils
   def self.timeout(seconds, exception=T.unsafe(nil)); end
 end
 
-# [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) used to manage
+# [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) used to manage
 # timeout handlers across multiple threads.
 #
-# [`Timeout`](https://docs.ruby-lang.org/en/2.6.0/Timeout.html) handlers should
+# [`Timeout`](https://docs.ruby-lang.org/en/2.7.0/Timeout.html) handlers should
 # be managed by using the class methods which are synchronized.
 #
 # ```ruby
@@ -3431,7 +3476,7 @@ end
 # ```
 #
 # will raise
-# [`Timeout::Error`](https://docs.ruby-lang.org/en/2.6.0/Timeout/Error.html)
+# [`Timeout::Error`](https://docs.ruby-lang.org/en/2.7.0/Timeout/Error.html)
 #
 # ```ruby
 # id = TimeoutHandler.register(10, Timeout::Error)
@@ -3499,9 +3544,9 @@ class WEBrick::Utils::TimeoutHandler
   # Registers a new timeout handler
   #
   # `time`
-  # :   [`Timeout`](https://docs.ruby-lang.org/en/2.6.0/Timeout.html) in seconds
+  # :   [`Timeout`](https://docs.ruby-lang.org/en/2.7.0/Timeout.html) in seconds
   # `exception`
-  # :   [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) to
+  # :   [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html) to
   #     raise when timeout elapsed
   sig do
     params(

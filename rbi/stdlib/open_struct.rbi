@@ -81,10 +81,10 @@ class OpenStruct
   InspectKey = ::T.let(nil, ::T.untyped)
 
   # Compares this object and `other` for equality. An
-  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html) is equal
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html) is equal
   # to `other` when `other` is an
-  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html) and the
-  # two objects' [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) tables
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html) and the
+  # two objects' [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) tables
   # are equal.
   #
   # ```ruby
@@ -100,7 +100,7 @@ class OpenStruct
     params(
       other: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .returns(::T::Boolean)
   end
   def ==(other); end
 
@@ -196,20 +196,26 @@ class OpenStruct
   # data = OpenStruct.new("country" => "Australia", :capital => "Canberra")
   # data.each_pair.to_a   # => [[:country, "Australia"], [:capital, "Canberra"]]
   # ```
-  sig {returns(::T.untyped)}
-  def each_pair(); end
+  sig do
+    params(
+        blk: T.proc.params(arg0: Symbol, arg1: ::T.untyped).returns(BasicObject),
+    )
+    .returns(T::Array[[Symbol, ::T.untyped]])
+  end
+  sig {returns(T::Enumerator[[Symbol,::T.untyped]])}
+  def each_pair(&blk); end
 
   # Compares this object and `other` for equality. An
-  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html) is eql?
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html) is eql?
   # to `other` when `other` is an
-  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html) and the
-  # two objects' [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) tables
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html) and the
+  # two objects' [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) tables
   # are eql?.
   sig do
     params(
       other: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .returns(::T::Boolean)
   end
   def eql?(other); end
 
@@ -217,13 +223,14 @@ class OpenStruct
   def freeze(); end
 
   # Computes a hash code for this
-  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html). Two
-  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html) objects
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html). Two
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html) objects
   # with the same content will have the same hash code (and will compare using
-  # [`eql?`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html#method-i-eql-3F)).
+  # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html#method-i-eql-3F)).
   #
-  # See also Object#hash.
-  sig {returns(::T.untyped)}
+  # See also
+  # [`Object#hash`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-hash).
+  sig {returns(Integer)}
   def hash(); end
 
   sig do
@@ -237,17 +244,17 @@ class OpenStruct
   # Returns a string containing a detailed summary of the keys and values.
   #
   # Also aliased as:
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html#method-i-to_s)
-  sig {returns(::T.untyped)}
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html#method-i-to_s)
+  sig {returns(String)}
   def inspect(); end
 
   # Provides marshalling support for use by the
-  # [`Marshal`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html) library.
+  # [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html) library.
   sig {returns(::T.untyped)}
   def marshal_dump(); end
 
   # Provides marshalling support for use by the
-  # [`Marshal`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html) library.
+  # [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html) library.
   sig do
     params(
       x: ::T.untyped,
@@ -283,7 +290,7 @@ class OpenStruct
   def table!(); end
 
   # Converts the
-  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html) to a
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html) to a
   # hash with keys representing each attribute (as symbols) and their
   # corresponding values.
   #
@@ -297,11 +304,11 @@ class OpenStruct
   # data.to_h {|name, value| [name.to_s, value.upcase] }
   #             # => {"country" => "AUSTRALIA", "capital" => "CANBERRA" }
   # ```
-  sig {returns(::T.untyped)}
+  sig {returns(::T::Hash[Symbol, ::T.untyped])}
   def to_h(); end
 
   # Alias for:
-  # [`inspect`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html#method-i-inspect)
-  sig {returns(::T.untyped)}
+  # [`inspect`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html#method-i-inspect)
+  sig {returns(String)}
   def to_s(); end
 end

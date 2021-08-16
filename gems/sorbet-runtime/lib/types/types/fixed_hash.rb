@@ -2,7 +2,7 @@
 # typed: true
 
 module T::Types
-  # Takes a hash of types. Validates each item in an hash using the type in the same position
+  # Takes a hash of types. Validates each item in a hash using the type in the same position
   # in the list.
   class FixedHash < Base
     attr_reader :types
@@ -13,7 +13,15 @@ module T::Types
 
     # @override Base
     def name
-      "{#{@types.map {|(k, v)| "#{k}: #{v}"}.join(', ')}}"
+      entries = @types.map do |(k, v)|
+        if Symbol === k && ":#{k}" == k.inspect
+          "#{k}: #{v}"
+        else
+          "#{k.inspect} => #{v}"
+        end
+      end
+
+      "{#{entries.join(', ')}}"
     end
 
     # @override Base

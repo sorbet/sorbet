@@ -42,7 +42,7 @@ public:
     };
     ArgFlags flags;
     NameRef name;
-    SymbolRef rebind;
+    ClassOrModuleRef rebind;
     Loc loc;
     TypePtr type;
 
@@ -64,7 +64,7 @@ public:
 };
 CheckSize(ArgInfo, 48, 8);
 
-template <class T, class... Args> TypePtr make_type(Args &&... args) {
+template <class T, class... Args> TypePtr make_type(Args &&...args) {
     static_assert(!TypePtr::TypeToIsInlined<T>::value, "Inlined types must specialize `make_type` for each combination "
                                                        "of argument types; is one specialization missing?");
     return TypePtr(TypePtr::TypeToTag<T>::value, new T(std::forward<Args>(args)...));
@@ -173,7 +173,7 @@ public:
     // Given a type, return a SymbolRef for the Ruby class that has that type, or no symbol if no such class exists.
     // This is an internal method for implementing intrinsics. In the future we should make all updateKnowledge methods
     // be intrinsics so that this can become an anonymous helper function in calls.cc.
-    static core::SymbolRef getRepresentedClass(const GlobalState &gs, const core::TypePtr &ty);
+    static core::ClassOrModuleRef getRepresentedClass(const GlobalState &gs, const core::TypePtr &ty);
 };
 
 struct Intrinsic {
@@ -330,6 +330,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
@@ -362,16 +363,17 @@ template <> inline ClassType cast_type_nonnull<ClassType>(const TypePtr &what) {
  */
 TYPE(LambdaParam) final {
 public:
-    SymbolRef definition;
+    TypeMemberRef definition;
 
     // The type bounds provided in the definition of the type_member or
     // type_template.
     TypePtr lowerBound;
     TypePtr upperBound;
 
-    LambdaParam(SymbolRef definition, TypePtr lower, TypePtr upper);
+    LambdaParam(TypeMemberRef definition, TypePtr lower, TypePtr upper);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
@@ -389,6 +391,7 @@ public:
     SelfTypeParam(const SymbolRef definition);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
@@ -411,6 +414,7 @@ public:
     AliasType(SymbolRef other);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
     const SymbolRef symbol;
@@ -441,6 +445,7 @@ public:
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     std::string showValue(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
 
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 
@@ -483,6 +488,7 @@ public:
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     std::string showValue(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
 
     bool equals(const LiteralType &rhs) const;
     void _sanityCheck(const GlobalState &gs) const;
@@ -547,10 +553,11 @@ template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &wha
  */
 TYPE(TypeVar) final {
 public:
-    SymbolRef sym;
-    TypeVar(SymbolRef sym);
+    TypeArgumentRef sym;
+    TypeVar(TypeArgumentRef sym);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
     void _sanityCheck(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
@@ -567,6 +574,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
@@ -617,6 +625,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
@@ -659,6 +668,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
     std::string showWithMoreInfo(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
@@ -683,6 +693,7 @@ public:
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     std::string showWithMoreInfo(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
@@ -705,6 +716,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
@@ -734,6 +746,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
@@ -764,7 +777,12 @@ class TypeAndOrigins final {
 public:
     TypePtr type;
     InlinedVector<Loc, 1> origins;
+
     std::vector<ErrorLine> origins2Explanations(const GlobalState &gs, Loc originForUninitialized) const;
+
+    static ErrorSection explainExpected(const GlobalState &gs, TypePtr type, Loc origin, const std::string &for_);
+    ErrorSection explainGot(const GlobalState &gs, Loc originForUninitialized) const;
+
     ~TypeAndOrigins() noexcept;
     TypeAndOrigins() = default;
     TypeAndOrigins(const TypeAndOrigins &) = default;
@@ -804,14 +822,25 @@ struct DispatchArgs {
     u2 numPosArgs;
     InlinedVector<const TypeAndOrigins *, 2> &args;
     const TypePtr &selfType;
-    const TypePtr &fullType;
+    const TypeAndOrigins fullType;
     const TypePtr &thisType;
     const std::shared_ptr<const SendAndBlockLink> &block;
     Loc originForUninitialized;
+    bool isPrivateOk;
     // Do not produce dispatch-related errors while evaluating the call. This is a performance optimization, as there
     // are cases where we call dispatchCall with no intention of showing the errors to the user. Producing those
     // unreported errors is expensive!
     bool suppressErrors = false;
+
+    Loc callLoc() const {
+        return core::Loc(locs.file, locs.call);
+    }
+    Loc receiverLoc() const {
+        return core::Loc(locs.file, locs.receiver);
+    }
+    Loc argLoc(size_t i) const {
+        return core::Loc(locs.file, locs.args[i]);
+    }
 
     DispatchArgs withSelfRef(const TypePtr &newSelfRef) const;
     DispatchArgs withThisRef(const TypePtr &newThisRef) const;
@@ -847,6 +876,9 @@ struct DispatchResult {
                    Combinator secondaryKind)
         : returnType(std::move(returnType)), main(std::move(comp)), secondary(std::move(secondary)),
           secondaryKind(secondaryKind){};
+
+    // Combine two dispatch results, preferring the left as the `main`.
+    static DispatchResult merge(const GlobalState &gs, Combinator kind, DispatchResult &&left, DispatchResult &&right);
 };
 
 TYPE_INLINED(BlamedUntyped) final : public ClassType {
@@ -871,19 +903,21 @@ public:
     const core::SymbolRef scope;
     const std::vector<core::NameRef> names;
     UnresolvedClassType(SymbolRef scope, std::vector<core::NameRef> names)
-        : ClassType(core::Symbols::untyped()), scope(scope), names(names){};
+        : ClassType(core::Symbols::untyped()), scope(scope), names(std::move(names)){};
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
 };
 
 TYPE(UnresolvedAppliedType) final : public ClassType {
 public:
-    const core::SymbolRef klass;
+    const core::ClassOrModuleRef klass;
     const std::vector<TypePtr> targs;
-    UnresolvedAppliedType(SymbolRef klass, std::vector<TypePtr> targs)
+    UnresolvedAppliedType(ClassOrModuleRef klass, std::vector<TypePtr> targs)
         : ClassType(core::Symbols::untyped()), klass(klass), targs(std::move(targs)){};
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
 };
 
 } // namespace sorbet::core

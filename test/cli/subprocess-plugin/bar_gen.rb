@@ -1,1 +1,0 @@
-puts "def bar; end"

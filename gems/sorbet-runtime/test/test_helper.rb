@@ -27,38 +27,6 @@ module Critic::Extensions::TypeExt
 end
 
 module Opus; end
-
-module Chalk; end
-module Chalk::Tools; end
-module Chalk::Tools::RedactionUtils
-  def self.redact_with_directive(value, opts = [])
-    opts = Array(opts)
-    case opts[0]
-    when :redact_digits
-      value.gsub(/\d/, '*')
-    when :truncate
-      T::Utils.string_truncate_middle(value, opts[1], 0)
-    else
-      value
-    end
-  end
-end
-Chalk::Tools::RedactionUtils::RedactionDirectiveSpec = T.type_alias do
-  T.any(
-    T.enum(%i[
-      redact_digits
-      redact_digits_except_last4
-      redact_card
-      redact_all
-      truncate
-    ]),
-    [T.enum([:truncate]), Integer],
-    [T.enum([:truncate_middle]), Integer, Integer],
-    [T.enum([:redact_middle]), Integer, Integer],
-    [T.enum([:replace]), String],
-  )
-end
-
 module Opus::Types; end
 module Opus::Types::Test; end
 class Opus::Types::Test::TypesTest < Critic::Unit::UnitTest; end

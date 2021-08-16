@@ -1,0 +1,270 @@
+suggest_unsafe_dead.rb:24: This code is unreachable https://srb.help/7006
+    24 |  x || do_something
+               ^^^^^^^^^^^^
+    suggest_unsafe_dead.rb:24: This condition was always `truthy` (`Integer`)
+    24 |  x || do_something
+          ^
+  Autocorrect: Done
+    suggest_unsafe_dead.rb:24: Replaced with `T.unsafe(x)`
+    24 |  x || do_something
+          ^
+  Got `Integer` originating from:
+    suggest_unsafe_dead.rb:23:
+    23 |def test1_variable_or(x)
+                              ^
+
+suggest_unsafe_dead.rb:29: This code is unreachable https://srb.help/7006
+    29 |  x && do_something
+               ^^^^^^^^^^^^
+    suggest_unsafe_dead.rb:29: This condition was always `falsy` (`NilClass`)
+    29 |  x && do_something
+          ^
+  Autocorrect: Done
+    suggest_unsafe_dead.rb:29: Replaced with `T.unsafe(x)`
+    29 |  x && do_something
+          ^
+  Got `NilClass` originating from:
+    suggest_unsafe_dead.rb:28:
+    28 |def test2_variable_and(x)
+                               ^
+
+suggest_unsafe_dead.rb:35: This code is unreachable https://srb.help/7006
+    35 |  returns_integer || do_something
+                             ^^^^^^^^^^^^
+    suggest_unsafe_dead.rb:35: This condition was always `truthy` (`Integer`)
+    35 |  returns_integer || do_something
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_unsafe_dead.rb:35: Replaced with `T.unsafe(returns_integer || do_something)`
+    35 |  returns_integer || do_something
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `Integer` originating from:
+    suggest_unsafe_dead.rb:35:
+    35 |  returns_integer || do_something
+          ^^^^^^^^^^^^^^^
+
+suggest_unsafe_dead.rb:47: This code is unreachable https://srb.help/7006
+    47 |    do_something
+            ^^^^^^^^^^^^
+    suggest_unsafe_dead.rb:45: This condition was always `truthy` (`TrueClass`)
+    45 |  when String then puts 'str'
+               ^^^^^^
+  Autocorrect: Done
+    suggest_unsafe_dead.rb:45: Replaced with `T.unsafe(String)`
+    45 |  when String then puts 'str'
+               ^^^^^^
+  Got `TrueClass` originating from:
+    suggest_unsafe_dead.rb:45:
+    45 |  when String then puts 'str'
+               ^^^^^^
+
+suggest_unsafe_dead.rb:56: This code is unreachable https://srb.help/7006
+    56 |    do_something
+            ^^^^^^^^^^^^
+    suggest_unsafe_dead.rb:53: This condition was always `truthy` (`Integer`)
+    53 |  if returns_integer
+             ^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_unsafe_dead.rb:53: Replaced with `T.unsafe(returns_integer)`
+    53 |  if returns_integer
+             ^^^^^^^^^^^^^^^
+  Got `Integer` originating from:
+    suggest_unsafe_dead.rb:53:
+    53 |  if returns_integer
+             ^^^^^^^^^^^^^^^
+
+suggest_unsafe_dead.rb:70: This code is unreachable https://srb.help/7006
+    70 |    do_something
+            ^^^^^^^^^^^^
+    suggest_unsafe_dead.rb:69: This condition was always `falsy` (`NilClass`)
+    69 |  elsif x
+                ^
+  Autocorrect: Done
+    suggest_unsafe_dead.rb:69: Replaced with `T.unsafe(x)`
+    69 |  elsif x
+                ^
+  Got `NilClass` originating from:
+    suggest_unsafe_dead.rb:67:
+    67 |  if x
+             ^
+    suggest_unsafe_dead.rb:62: Possibly uninitialized (`NilClass`) in:
+    62 |def test6_possibly_uninitialized
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+suggest_unsafe_dead.rb:98: This code is unreachable https://srb.help/7006
+      98 |    begin
+      99 |      puts 3
+     100 |    end while T.unsafe(nil)
+    suggest_unsafe_dead.rb:96: This condition was always `falsy` (`FalseClass`)
+    96 |  if false
+             ^^^^^
+  Autocorrect: Done
+    suggest_unsafe_dead.rb:96: Replaced with `T.unsafe(false)`
+    96 |  if false
+             ^^^^^
+  Got `FalseClass` originating from:
+    suggest_unsafe_dead.rb:96:
+    96 |  if false
+             ^^^^^
+
+suggest_unsafe_dead.rb:15: This code is unreachable https://srb.help/7006
+    15 |  puts x
+          ^^^^^^
+    suggest_unsafe_dead.rb:14: This condition was always `truthy` (`Integer`)
+    14 |unless x
+               ^
+  Autocorrect: Done
+    suggest_unsafe_dead.rb:14: Replaced with `T.unsafe(x)`
+    14 |unless x
+               ^
+  Got `Integer` originating from:
+    suggest_unsafe_dead.rb:11:
+    11 |x = T.let(0, Integer)
+            ^^^^^^^^^^^^^^^^^
+
+suggest_unsafe_dead.rb:19: This code is unreachable https://srb.help/7006
+    19 |  puts y
+          ^^^^^^
+    suggest_unsafe_dead.rb:18: This condition was always `falsy` (`NilClass`)
+    18 |if y
+           ^
+  Autocorrect: Done
+    suggest_unsafe_dead.rb:18: Replaced with `T.unsafe(y)`
+    18 |if y
+           ^
+  Got `NilClass` originating from:
+    suggest_unsafe_dead.rb:12:
+    12 |y = T.let(nil, NilClass)
+            ^^^^^^^^^^^^^^^^^^^^
+
+suggest_unsafe_dead.rb:81: This code is unreachable https://srb.help/7006
+    81 |      do_something
+              ^^^^^^^^^^^^
+    suggest_unsafe_dead.rb:80: This condition was always `truthy` (`A`)
+    80 |    unless self
+                   ^^^^
+  Autocorrect: Done
+    suggest_unsafe_dead.rb:80: Replaced with `T.unsafe(self)`
+    80 |    unless self
+                   ^^^^
+  Got `A` originating from:
+
+suggest_unsafe_dead.rb:89: This code is unreachable https://srb.help/7006
+    89 |      do_something
+              ^^^^^^^^^^^^
+    suggest_unsafe_dead.rb:88: This condition was always `truthy` (`A`)
+    88 |    unless this
+                   ^^^^
+  Autocorrect: Done
+    suggest_unsafe_dead.rb:88: Replaced with `T.unsafe(this)`
+    88 |    unless this
+                   ^^^^
+  Got `A` originating from:
+Errors: 11
+
+--------------------------------------------------------------------------
+
+# typed: true
+extend T::Sig
+
+def do_something; end
+
+sig {returns(Integer)}
+def returns_integer
+  0
+end
+
+x = T.let(0, Integer)
+y = T.let(nil, NilClass)
+
+unless T.unsafe(x)
+  puts x
+end
+
+if T.unsafe(y)
+  puts y
+end
+
+sig {params(x: Integer).void}
+def test1_variable_or(x)
+  T.unsafe(x) || do_something
+end
+
+sig {params(x: NilClass).void}
+def test2_variable_and(x)
+  T.unsafe(x) && do_something
+end
+
+sig {void}
+def test3_method_or_method
+  # For some reason, this behaves different from when the LHS of `||` is a variable.
+  T.unsafe(returns_integer || do_something)
+end
+
+sig {params(x: T.any(Integer, String)).void}
+def test4_exhaustive_case(x)
+  # This test case points the blame back to the `when String` comparison, which
+  # is not "wrong" per se. Maybe the user was expecting to see the error blame
+  # to `case x`, or perhaps say something like "the case was exhaustive"
+  case x
+  when Integer then puts 'int'
+  when T.unsafe(String) then puts 'str'
+  else
+    do_something
+  end
+end
+
+sig {void}
+def test5_if_else
+  if T.unsafe(returns_integer)
+    do_something
+  else
+    do_something
+  end
+end
+
+
+sig {void}
+def test6_possibly_uninitialized
+  if T.unsafe(nil)
+    x = 1
+  end
+
+  if x
+    do_something
+  elsif T.unsafe(x)
+    do_something
+  end
+end
+
+# Can't write this test at the top level because at top level `self` is
+# `Object` which is possibly nil and thus possibly falsy 🙃
+class A
+  extend T::Sig
+  sig {void}
+  def test7_self
+    unless T.unsafe(self)
+      do_something
+    end
+  end
+
+  sig {void}
+  def test8_self_this
+    this = self
+    unless T.unsafe(this)
+      do_something
+    end
+  end
+end
+
+sig {void}
+def test8_cyclic_cfg
+  if T.unsafe(false)
+    # This begin/while is the way Ruby encodes do/while.
+    begin
+      puts 3
+    end while T.unsafe(nil)
+  end
+
+  puts 5
+end

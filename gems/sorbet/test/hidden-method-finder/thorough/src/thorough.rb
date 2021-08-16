@@ -13,3 +13,13 @@ end
 
 class C3; end
 C3.const_set('X', 5)
+
+C4 = Class.new do
+  define_method(:m_five) do; end
+end
+C4.alias_method(:m_six, :m_five)
+
+C5 = Class.new do
+  define_singleton_method(:m_seven) do; end
+end
+C5.singleton_class.alias_method(:m_eight, :m_seven)

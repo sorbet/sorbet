@@ -318,11 +318,11 @@ public:
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
-    unsigned int hash(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
 
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
 
-    template <class T, class... Args> friend TypePtr make_type(Args &&... args);
+    template <class T, class... Args> friend TypePtr make_type(Args &&...args);
     template <class To> friend To const *cast_type(const TypePtr &what);
     template <class To>
     friend typename TypeToCastType<To, TypeToIsInlined<To>::value>::type cast_type_nonnull(const TypePtr &what);

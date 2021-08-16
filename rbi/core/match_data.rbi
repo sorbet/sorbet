@@ -1,13 +1,14 @@
 # typed: __STDLIB_INTERNAL
 
-# `MatchData` encapsulates the result of matching a
-# [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) against string. It
+# [`MatchData`](https://docs.ruby-lang.org/en/2.7.0/MatchData.html) encapsulates
+# the result of matching a
+# [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) against string. It
 # is returned by
-# [`Regexp#match`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-i-match)
+# [`Regexp#match`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-i-match)
 # and
-# [`String#match`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-match),
+# [`String#match`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-match),
 # and also stored in a global variable returned by
-# [`Regexp.last_match`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-c-last_match).
+# [`Regexp.last_match`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-last_match).
 #
 # Usage:
 #
@@ -39,20 +40,29 @@
 #
 # ## Global variables equivalence
 #
-# Parts of last `MatchData` (returned by
-# [`Regexp.last_match`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-c-last_match))
+# Parts of last
+# [`MatchData`](https://docs.ruby-lang.org/en/2.7.0/MatchData.html) (returned by
+# [`Regexp.last_match`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-last_match))
 # are also aliased as global variables:
 #
-# *   `$~` is `Regexp.last_match`;
-# *   `$&` is `Regexp.last_match[0]`;
-# *   `$1`, `$2`, and so on are `Regexp.last_match[i]` (captures by number);
-# *   `$`` is `Regexp.last_match.pre_match`;
-# *   `$'` is `Regexp.last_match.post_match`;
-# *   `$+` is `Regexp.last_match[-1]` (the last capture).
+# *   `$~` is
+#     [`Regexp.last_match`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-last_match);
+# *   `$&` is
+#     [`[Regexp.last_match](0)`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-last_match);
+# *   `$1`, `$2`, and so on are
+#     [`[Regexp.last_match](i)`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-last_match)
+#     (captures by number);
+# *   `$`` is
+#     [`Regexp.last_match`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-last_match)`.pre_match`;
+# *   `$'` is
+#     [`Regexp.last_match`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-last_match)`.post_match`;
+# *   `$+` is
+#     [`[Regexp.last_match](-1)`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-last_match)
+#     (the last capture).
 #
 #
 # See also "Special global variables" section in
-# [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) documentation.
+# [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) documentation.
 class MatchData < Object
   # Equality---Two matchdata are equal if their target strings, patterns, and
   # matched positions are identical.
@@ -64,11 +74,12 @@ class MatchData < Object
   end
   def ==(arg0); end
 
-  # Match Reference -- `MatchData` acts as an array, and may be accessed using
-  # the normal array indexing techniques. `mtch[0]` is equivalent to the special
-  # variable `$&`, and returns the entire matched string. `mtch[1]`, `mtch[2]`,
-  # and so on return the values of the matched backreferences (portions of the
-  # pattern between parentheses).
+  # Match Reference --
+  # [`MatchData`](https://docs.ruby-lang.org/en/2.7.0/MatchData.html) acts as an
+  # array, and may be accessed using the normal array indexing techniques.
+  # `mtch[0]` is equivalent to the special variable `$&`, and returns the entire
+  # matched string. `mtch[1]`, `mtch[2]`, and so on return the values of the
+  # matched backreferences (portions of the pattern between parentheses).
   #
   # ```ruby
   # m = /(.)(.)(\d+)(\d)/.match("THX1138.")
@@ -176,7 +187,8 @@ class MatchData < Object
   # Produce a hash based on the target string, regexp and matched positions of
   # this matchdata.
   #
-  # See also Object#hash.
+  # See also
+  # [`Object#hash`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-hash).
   sig {returns(Integer)}
   def hash(); end
 
@@ -208,7 +220,7 @@ class MatchData < Object
   sig {returns(Integer)}
   def length(); end
 
-  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) using
+  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) using
   # named capture.
   #
   # A key of the hash is a name of the named captures. A value of the hash is a

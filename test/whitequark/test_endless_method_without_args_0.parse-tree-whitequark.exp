@@ -1,0 +1,2 @@
+s(:def, :foo, nil,
+  s(:int, "42"))

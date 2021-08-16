@@ -41,16 +41,12 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.autogenVersion, opts.autogenVersion);
     CHECK_EQ(empty.typedSource, opts.typedSource);
     CHECK_EQ(empty.cacheDir, opts.cacheDir);
-    CHECK_EQ(empty.configatronDirs.size(), opts.configatronDirs.size());
-    CHECK_EQ(empty.configatronFiles.size(), opts.configatronFiles.size());
     CHECK_EQ(empty.strictnessOverrides.size(), opts.strictnessOverrides.size());
-    CHECK_EQ(empty.dslPluginTriggers.size(), opts.dslPluginTriggers.size());
-    CHECK_EQ(empty.dslRubyExtraArgs.size(), opts.dslRubyExtraArgs.size());
     CHECK_EQ(empty.storeState, opts.storeState);
     CHECK_EQ(empty.enableCounters, opts.enableCounters);
     CHECK_EQ(empty.errorUrlBase, opts.errorUrlBase);
-    CHECK_EQ(empty.errorCodeWhiteList, opts.errorCodeWhiteList);
-    CHECK_EQ(empty.errorCodeBlackList, opts.errorCodeBlackList);
+    CHECK_EQ(empty.isolateErrorCode, opts.isolateErrorCode);
+    CHECK_EQ(empty.suppressErrorCode, opts.suppressErrorCode);
     CHECK_EQ(empty.pathPrefix, opts.pathPrefix);
     CHECK_EQ(empty.reserveUtf8NameTableCapacity, opts.reserveUtf8NameTableCapacity);
     CHECK_EQ(empty.reserveConstantNameTableCapacity, opts.reserveConstantNameTableCapacity);
@@ -83,4 +79,6 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.webTraceFile, opts.webTraceFile);
     CHECK_EQ(empty.stripeMode, opts.stripeMode);
     CHECK_EQ(empty.stripePackages, opts.stripePackages);
+    CHECK_EQ(empty.forceHashing, opts.forceHashing);
+    CHECK_EQ(empty.lspErrorCap, opts.lspErrorCap);
 }

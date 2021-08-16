@@ -184,7 +184,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassO
             auto cdata = c.symbol.data(gs);
             if (c.symbol == core::Symbols::untyped()) {
                 result = from;
-            } else if (SymbolRef(c.symbol) == klass || c.derivesFrom(gs, klass)) {
+            } else if (c.symbol == klass || c.derivesFrom(gs, klass)) {
                 result = Types::bottom();
             } else if (c.symbol.data(gs)->isClassOrModuleClass() && klass.data(gs)->isClassOrModuleClass() &&
                        !klass.data(gs)->derivesFrom(gs, c.symbol)) {
@@ -217,7 +217,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassO
         });
     SLOW_ENFORCE(Types::isSubType(gs, result, from),
                  "dropSubtypesOf({}, {}) returned {}, which is not a subtype of the input", from.toString(gs),
-                 klass.data(gs)->showFullName(gs), result.toString(gs));
+                 klass.showFullName(gs), result.toString(gs));
     return result;
 }
 
@@ -540,7 +540,7 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
 
     ENFORCE(inWhat == fromWhat || inWhat.data(gs)->derivesFrom(gs, fromWhat) ||
                 fromWhat.data(gs)->derivesFrom(gs, inWhat),
-            "\n{}\nis unrelated to\n\n{}", fromWhat.data(gs)->toString(gs), inWhat.data(gs)->toString(gs));
+            "\n{}\nis unrelated to\n\n{}", fromWhat.toString(gs), inWhat.toString(gs));
 
     auto currentAlignment = alignBaseTypeArgs(gs, originalOwner, targs, inWhat);
 
@@ -571,7 +571,7 @@ bool TypeVar::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     Exception::raise("should never happen. You're missing a call to either Types::approximate or Types::instantiate");
 }
 
-TypeVar::TypeVar(SymbolRef sym) : sym(sym) {
+TypeVar::TypeVar(TypeArgumentRef sym) : sym(sym) {
     categoryCounterInc("types.allocated", "typevar");
 }
 
@@ -597,7 +597,7 @@ bool AppliedType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) con
     return und.derivesFrom(gs, klass);
 }
 
-LambdaParam::LambdaParam(const SymbolRef definition, TypePtr lowerBound, TypePtr upperBound)
+LambdaParam::LambdaParam(const TypeMemberRef definition, TypePtr lowerBound, TypePtr upperBound)
     : definition(definition), lowerBound(lowerBound), upperBound(upperBound) {
     categoryCounterInc("types.allocated", "lambdatypeparam");
 }
@@ -750,18 +750,18 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
     return ret;
 }
 
-core::SymbolRef Types::getRepresentedClass(const GlobalState &gs, const TypePtr &ty) {
+core::ClassOrModuleRef Types::getRepresentedClass(const GlobalState &gs, const TypePtr &ty) {
     if (!ty.derivesFrom(gs, core::Symbols::Module())) {
-        return core::Symbols::noSymbol();
+        return core::Symbols::noClassOrModule();
     }
-    core::SymbolRef singleton;
+    core::ClassOrModuleRef singleton;
     if (isa_type<ClassType>(ty)) {
         auto s = cast_type_nonnull<ClassType>(ty);
         singleton = s.symbol;
     } else {
         auto *at = cast_type<AppliedType>(ty);
         if (at == nullptr) {
-            return core::Symbols::noSymbol();
+            return core::Symbols::noClassOrModule();
         }
 
         singleton = at->klass;
@@ -783,4 +783,33 @@ DispatchArgs DispatchArgs::withErrorsSuppressed() const {
     return DispatchArgs{name, locs, numPosArgs, args, selfType, fullType, thisType, block, originForUninitialized,
                         true};
 }
+
+DispatchResult DispatchResult::merge(const GlobalState &gs, DispatchResult::Combinator kind, DispatchResult &&left,
+                                     DispatchResult &&right) {
+    DispatchResult res;
+
+    switch (kind) {
+        case DispatchResult::Combinator::OR:
+            res.returnType = Types::any(gs, left.returnType, right.returnType);
+            break;
+
+        case DispatchResult::Combinator::AND:
+            res.returnType = Types::all(gs, left.returnType, right.returnType);
+            break;
+    }
+
+    res.main = std::move(left.main);
+    res.secondary = std::move(left.secondary);
+    res.secondaryKind = kind;
+
+    auto *it = &res;
+    while (it->secondary != nullptr) {
+        it = it->secondary.get();
+    }
+
+    it->secondary = make_unique<DispatchResult>(std::move(right));
+
+    return res;
+}
+
 } // namespace sorbet::core

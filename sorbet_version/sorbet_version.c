@@ -4,7 +4,7 @@
 #include <time.h>
 /**
  * This file is *MAGIC*
- * When we compile if from Bazel, we do magical substitutions to some variables defined in CAPS in this file.
+ * When we compile it from Bazel, we do magical substitutions to some variables defined in CAPS in this file.
  * See `sorbet_version/BUILD` for up-to-date list of substitutions.
  *
  *  This file takes them and packages them to a API that is more pleasant to work with.
@@ -30,8 +30,8 @@ const int sorbet_is_release_build = 0;
 #define Q(x) #x
 #define QUOTED(x) Q(x)
 
-const char *sorbet_build_scm_clean = STABLE_BUILD_SCM_CLEAN;
-const char *sorbet_build_scm_revision = STABLE_BUILD_SCM_REVISION;
+const char sorbet_build_scm_clean[] = STABLE_BUILD_SCM_CLEAN;
+const char sorbet_build_scm_revision[] = STABLE_BUILD_SCM_REVISION;
 const int sorbet_build_scm_commit_count = STABLE_BUILD_SCM_COMMIT_COUNT;
 const long sorbet_build_timestamp = BUILD_TIMESTAMP;
 
@@ -43,10 +43,10 @@ const int sorbet_is_with_debug_symbols = 1;
 const int sorbet_is_with_debug_symbols = 0;
 #endif
 
-const char *sorbet_version = "0.5"; // 0.01 alpha
-const char *sorbet_codename = "";   // We Try Furiously
+const char sorbet_version[] = "0.5"; // 0.01 alpha
+const char sorbet_codename[] = "";   // We Try Furiously
 
-const char *sorbet_full_version_string = SORBET_VERSION "." QUOTED(STABLE_BUILD_SCM_COMMIT_COUNT)
+const char sorbet_full_version_string[] = SORBET_VERSION "." QUOTED(STABLE_BUILD_SCM_COMMIT_COUNT)
 #if BUILD_RELEASE
     " git " STABLE_BUILD_SCM_REVISION
 #else

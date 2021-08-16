@@ -62,8 +62,9 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
             fmt::format("{}", fmt::map_join(pf.showFullName(ctx, defn),
                                             "::", [&ctx](const core::NameRef &nm) -> string { return nm.show(ctx); }));
 
-        out[parentName].entries.insert(make_pair(childName, defn.data(pf).type));
-        out[parentName].classKind = ref.parentKind;
+        auto &mapEntry = out[parentName];
+        mapEntry.entries.insert(make_pair(childName, defn.data(pf).type));
+        mapEntry.classKind = ref.parentKind;
     }
 
     return out;
@@ -77,7 +78,7 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
     if (fnd == childMap.end()) {
         return nullopt;
     }
-    const Subclasses::Entries children = fnd->second.entries;
+    const Subclasses::Entries &children = fnd->second.entries;
 
     Subclasses::Entries out;
     out.insert(children.begin(), children.end());
@@ -88,7 +89,7 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
         }
     }
 
-    return SubclassInfo(fnd->second.classKind, out);
+    return SubclassInfo(fnd->second.classKind, std::move(out));
 }
 
 // Manually patch the child map to account for inheritance that happens at runtime `self.included`
@@ -112,19 +113,17 @@ vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendan
         auto type = children.classKind == ClassKind::Class ? "class" : "module";
         descendantsMapSerialized.emplace_back(fmt::format("{} {}", type, parentName));
 
-        vector<string> serializedChildren;
+        auto subclassesStart = descendantsMapSerialized.size();
         for (const auto &[name, type] : children.entries) {
             // Ignore Modules
             if (type == autogen::Definition::Type::Class) {
-                serializedChildren.emplace_back(fmt::format(" class {}", name));
+                descendantsMapSerialized.emplace_back(fmt::format(" class {}", name));
             } else {
-                serializedChildren.emplace_back(fmt::format(" module {}", name));
+                descendantsMapSerialized.emplace_back(fmt::format(" module {}", name));
             }
         }
 
-        fast_sort(serializedChildren);
-        descendantsMapSerialized.insert(descendantsMapSerialized.end(), make_move_iterator(serializedChildren.begin()),
-                                        make_move_iterator(serializedChildren.end()));
+        fast_sort_range(descendantsMapSerialized.begin() + subclassesStart, descendantsMapSerialized.end());
     }
 
     return descendantsMapSerialized;
@@ -157,10 +156,11 @@ vector<string> Subclasses::genDescendantsMap(Subclasses::Map &childMap, vector<s
 
         auto descendants = Subclasses::descendantsOf(childMap, parentName);
         if (!descendants) {
+            // Initialize an empty entry associated with parentName.
             descendantsMap[parentName];
+        } else {
+            descendantsMap.emplace(parentName, std::move(*descendants));
         }
-
-        descendantsMap.emplace(parentName, *descendants);
     }
 
     return Subclasses::serializeSubclassMap(descendantsMap, parentNames);

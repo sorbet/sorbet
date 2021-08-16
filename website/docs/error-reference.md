@@ -53,6 +53,61 @@ and should not be reported.
 
 [#1993]: https://github.com/sorbet/sorbet/pull/1993
 
+## 3001
+
+Sorbet doesn’t support singleton definitions outside of the class itself:
+
+```rb
+class << MyClass # error: `class << EXPRESSION` is only supported for `class << self`
+  def foo
+    # ...
+  end
+end
+```
+
+The workaround is to move the definition inside the `MyClass` class itself:
+
+```rb
+class MyClass
+  class << self
+    def foo
+      # ...
+    end
+  end
+end
+```
+
+Sometimes, `EXPRESSION` is not a constant literal like in what follows:
+
+```rb
+class << some_variable
+  include Foo
+end
+```
+
+In this case, it is possible to directly call `include` on the the singleton
+class of `EXPRESSION`, but it should be done with **utmost caution**, as Sorbet
+will not consider the include and provide a less accurate analysis (see also
+[#4002](#4002)):
+
+```rb
+some_variable.singleton_class.include(Foo)
+```
+
+## 3002
+
+Sorbet is limited to C++ `INT_MAX`:
+
+```rb
+puts 11377327221391349843 + 1 # error: Unsupported integer literal: 11377327221391349843
+```
+
+A possible workaround is to use a string and `to_i`:
+
+```rb
+puts "11377327221391349843".to_i + 1
+```
+
 ## 3011
 
 There was a Hash literal with duplicated keys.
@@ -90,7 +145,7 @@ def x
   rand.round == 0 ? A : B
 end
 
-class Main
+class C
   include x  # error: `include` must be passed a constant literal
 end
 ```
@@ -100,9 +155,9 @@ inheritance hierarchy in a codebase. Sorbet must know the complete inheritance
 hierarchy of a codebase in order to check that a variable is a valid instance of
 a type.
 
-It is possible to silence this error, but it should be done with **utmost
-caution**, as Sorbet will fail in strange ways and make far less accurate
-predictions about a codebase. To silence this error, use `T.unsafe`:
+It is possible to silence this error with `T.unsafe`, but it should be done with
+**utmost caution**, as Sorbet will not consider the include and provide a less
+accurate analysis:
 
 ```ruby
 module A; end
@@ -112,9 +167,21 @@ def x
   rand.round == 0 ? A : B
 end
 
-class Main
+class C
   T.unsafe(self).include x
 end
+```
+
+Which might create unexpected errors:
+
+```ruby
+c = C.new
+
+c.a # error: Method `a` does not exist on `C`
+c.b # error: Method `b` does not exist on `C`
+
+T.let(C, A) # error: Argument does not have asserted type `A`
+T.let(C, B) # error: Argument does not have asserted type `B`
 ```
 
 ## 4010
@@ -185,6 +252,38 @@ where `...` is some expression which computes a class or module. Sorbet can't
 know statically what this `...` code does (and for example even if could assume
 that it's defining a class, Sorbet can't know what methods or constants it has).
 Therefore, Sorbet does not support this pattern.
+
+## 5001
+
+Sorbet cannot resolve references to dynamic constants. The common case occurs
+when a constant is dynamically referenced through the singleton class of `self`:
+
+```rb
+class MyCachable < Cachable
+  CACHE_KEY_PREFIX = "my_cachable_"
+
+  def cache_key
+    self.class::CACHE_KEY_PREFIX + identifier
+  end
+end
+```
+
+This code can by made statically analysable by using a singleton method to
+reference the constant:
+
+```rb
+class MyCachable < Cachable
+  def cache_key
+    self.class.cache_key_prefix + identifier
+  end
+
+  class << self
+    def cache_key_prefix
+      "my_cachable_"
+    end
+  end
+end
+```
 
 ## 5002
 
@@ -339,6 +438,17 @@ end
 
 For how to fix, see [Type Annotations](type-annotations.md).
 
+To instead use `T.cast` as a runtime-only type check (that is, neither as a
+statically-checked assertion nor as an instance variable declaration), assign
+the cast result to an intermediate variable:
+
+```ruby
+class A
+  x = T.cast(10, Integer)
+  @@x = x
+end
+```
+
 ## 5014
 
 Given code like this:
@@ -433,11 +543,96 @@ B = T.type_alias {A}
 Basically, Sorbet can emit more reliable warnings when users declare their
 intent to create a new type alias.)
 
+## 5035
+
+A method was marked `override`, but sorbet was unable to find a method in the
+class's ancestors that would be overridden. Ensure that the method being
+overridden exists in the ancestors of the class defining the `override` method,
+or remove `override` from the signature that's raising the error. See
+[Override Checking](override-checking) for more information about `override`.
+
+If the parent method definitely exists at runtime, it might be hidden in a
+[`# typed: ignore`](static#file-level-granularity-strictness-levels) file.
+Sorbet will not see it and this error will be raised. In that case you will need
+to either raise the `typed` sigil of that file above `ignore`, or generate an
+[RBI file](rbi) that contains signatures for the classes and methods that file
+defines.
+
 ## 5036
 
 See [5014](#5014). 5036 is the same error as [5014](#5014) but slightly modified
 to allow more common Ruby idioms to pass by in `# typed: true` (5036 is only
 reported in `# typed: strict`).
+
+## 5037
+
+Sorbet must be able to statically resolve a method to create an alias to it.
+
+Here, the method is created through a DSL called `data_accessor` which defines
+methods at runtime through meta-programming:
+
+```rb
+class Base
+  def self.data_accessor(key)
+    define_method(key) do
+      data[key]
+    end
+  end
+
+  # ...
+end
+
+class Foo < Base
+  data_accessor :foo
+
+  alias_method :bar, :foo # error: Can't make method alias from `bar` to non existing method `foo`
+end
+```
+
+One way to make those methods visible statically is to add a declaration for
+them in an [RBI file](https://sorbet.org/docs/rbi). For example, we can write
+our definitions as RBI under `sorbet/rbi/shims/foo.rbi`:
+
+```rb
+# sorbet/rbi/shims/foo.rbi
+# typed: true
+
+module Foo
+  def foo; end
+end
+```
+
+Sometimes, Sorbet will complain about an alias to a method coming from an
+included modules. For example, here `bar` is coming from the inclusion of `Bar`
+but Sorbet will complain about the method not existing anyway:
+
+```rb
+module Bar
+  def bar; end
+end
+
+class Foo
+  include Bar
+
+  alias_method :foo, :bar # error: Can't make method alias from `foo` to non existing method `bar`
+end
+```
+
+It's because Sorbet resolves method aliases before it resolves includes. You can
+see an example of this behaviour
+[here](https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Bar%0A%20%20def%20bar%3B%20end%0Aend%0A%0Amodule%20Foo%0A%20%20include%20Bar%0A%0A%20%20alias_method%20%3Afoo%2C%20%3Abar%20%23%20aliases%20are%20resolved%20before%20includes%2C%20so%20%60bar%60%20is%20not%20found%20yet%0A%0A%20%20def%20baz%0A%20%20%20%20bar%20%23%20includes%20are%20resolved%20when%20we%20analyze%20this%20code%0A%20%20end%0Aend).
+To workaround this limitation, we can replace the `alias_method` by a real
+method definition:
+
+```rb
+class Foo
+  include Bar
+
+  def foo
+    bar
+  end
+end
+```
 
 ## 5041
 
@@ -530,6 +725,13 @@ end
 
 Use of `implementation` has been replaced by `override`.
 
+## 5056
+
+The `generated` annotation in method signatures is deprecated.
+
+For alternatives, see [Enabling Runtime Checks](runtime.md) which talks about
+how to change the runtime behavior when method signatures encounter a problem.
+
 ## 5057
 
 Static methods (like `self.foo`) can never be mixed into another class or
@@ -569,6 +771,85 @@ It's an error to use `T.attached_class` to describe the type of method
 parameters. See the
 [T.attached_class](attached-class.md#tattached_class-as-an-argument)
 documentation for a more thorough description of why this is.
+
+## 5064
+
+Using the `requires_ancestor` method, module `Bar` has indicated to Sorbet that
+it can only work properly if it is explicitly included along module `Foo`. In
+this example, we see that while module `Bar` is included in `MyClass`, `MyClass`
+does not include `Foo`.
+
+```rb
+module Foo
+  def foo; end
+end
+
+module Bar
+  extend T::Helpers
+
+  requires_ancestor Foo
+
+  def bar
+    foo
+  end
+end
+
+class MyClass # error: `MyClass` must include `Foo` (required by `Bar`)
+  include Bar
+end
+```
+
+The solution is to include `Foo` in `MyClass`:
+
+```rb
+class MyClass
+  include Foo
+  include Bar
+end
+```
+
+Other potential (albeit less common) sources of this error code are classes that
+are required to have some class as an ancestor:
+
+```
+class Foo
+  def foo; end
+end
+
+module Bar
+  extend T::Helpers
+
+  requires_ancestor Foo
+
+  def bar
+    foo
+  end
+end
+
+class MySuperClass
+  extend T::Helpers
+  include Bar
+
+  abstract!
+end
+
+class MyClass < MySuperClass # error: `MyClass` must inherit `Foo` (required by `Bar`)
+end
+```
+
+Ensuring `MyClass` inherits from `Foo` at some point will fix the error:
+
+```rb
+class MySuperClass < Foo
+  extend T::Helpers
+  include Bar
+
+  abstract!
+end
+
+class MyClass < MySuperClass
+end
+```
 
 ## 6002
 
@@ -643,13 +924,6 @@ list.each do |elem|
   found_valid = true if valid?(elem) # ok
 end
 ```
-
-## 5056
-
-The `generated` annotation in method signatures is deprecated.
-
-For alternatives, see [Enabling Runtime Checks](runtime.md) which talks about
-how to change the runtime behavior when method signatures encounter a problem.
 
 ## 7002
 
@@ -773,6 +1047,66 @@ bar(1) # error
 bar(x: 1) # ok
 ```
 
+## 7005
+
+Sorbet detected a mismatch between the declared return type for the method and
+the type of the returned value:
+
+```rb
+sig { returns(Integer) }
+def answer
+  "42" # error: Expected `Integer` but found `String("42")` for method result type
+end
+```
+
+Here we specified in the signature that `find` returns an instance of
+`Configuration`, yet the returned value might be `nil`:
+
+```rb
+sig { params(name: String).returns(Configuration) }
+def find(name)
+  @lookup[name] # error: Expected `Configuration` but found `T.nilable(Configuration)` for method result type
+end
+```
+
+A possible solution, if we are _certain_ that `name` is in the `@lookup` hash,
+is to use `T.must` when returning the value:
+
+```rb
+sig { params(name: String).returns(Configuration) }
+def find(name)
+  T.must(@lookup[name])
+end
+```
+
+In some cases, we're already being cautious and perform some checks before
+returning yet Sorbet still complains about the return type:
+
+```rb
+sig { params(name: String).returns(Configuration) }
+def find(name)
+  raise ArgumentError, "Configuration #{name} not found" unless @lookup.key?(name)
+  @lookup[name] # error: Expected `Configuration` but found `T.nilable(Configuration)` for method result type
+end
+```
+
+While this code is correct, Sorbet cannot assume the state of `@lookup` didn’t
+change between the `key?` check and the `[]` read. To fix this, we can take
+advantage of flow-typing to make the whole method work without inline type
+annotations:
+
+```rb
+sig { params(name: String).returns(Configuration) }
+def find(name)
+  config = @lookup[name]
+  raise ArgumentError, "Configuration #{name} not found" unless config
+  config
+end
+```
+
+By using a local variable, we allow Sorbet to assert that `config` is never
+nilable past the `raise` instruction.
+
 ## 7006
 
 In Sorbet, it is an error to have provably unreachable code. Because Sorbet is
@@ -818,6 +1152,105 @@ and so our `puts` within the first `if` is never reachable. On the other hand,
 Sorbet allows the second `if` because we've explicitly made `x` unanalyzable
 with `T.unsafe(...)`. T.unsafe is one of a handful of
 [escape hatches](troubleshooting.md#escape-hatches) built into Sorbet.
+
+## 7007
+
+Sorbet can statically assert that the value passed into a `T.let` does not match
+the expected type:
+
+```rb
+x = T.let(1, String) # error: Argument does not have asserted type `String`
+```
+
+Because of the way default values are desugared by Sorbet, this error also
+occurs when Sorbet finds a mistmatch between the type specified for a parameter
+in the signature and the default value provided in the method.
+
+In this case, the signature states that `category` type is a `Category`, yet we
+try to use `nil` as default value:
+
+```rb
+sig { params(name: String, category: Category).void }
+def publish_item(name, category = nil) # error: Argument does not have asserted type `Category`
+  # ...
+end
+```
+
+If `category` value is `nil` by default, maybe we should make it so its type is
+nilable:
+
+```rb
+sig { params(name: String, category: T.nilable(Category)).void }
+def publish_item(name, category = nil)
+  # ...
+end
+```
+
+## 7013
+
+Sorbet detected that an instance variable was reassigned with different types:
+
+```rb
+class A
+  extend T::Sig
+
+  sig { void }
+  def initialize
+    @x = T.let(0, Integer)
+  end
+
+  sig { void }
+  def foo
+    @x = 'not an integer' # error: Reassigning field with a value of wrong type: `String("not an integer")` is not a subtype of `Integer`
+  end
+end
+```
+
+If the instance variable can hold both an `Integer` and a `String`, maybe the
+type specified with `T.let` should be enlarged:
+
+```ruby
+@x = T.let(0, Object)
+```
+
+Similarly, Sorbet will reject constants reassigned with different types:
+
+```rb
+FOO = 42 # error: Reassigning field with a value of wrong type: `Integer(42)` is not a subtype of `String("Hello, world!")`
+FOO = "Hello, world!"
+```
+
+## 7010
+
+Sorbet found a reference to a generic type with the wrong number of type
+arguments.
+
+Here we defined `MyMap` as a generic class expecting two type parameters
+`KeyType` and `ValueType` but we try to instantiate it with only one type
+argument:
+
+```rb
+class MyMap
+  extend T::Generic
+
+  KeyType = type_member
+  ValueType = type_member
+
+  # ...
+end
+
+MyMap[String].new # error: Wrong number of type parameters for `MyMap`. Expected: `2`, got: `1`
+```
+
+Unless a type member was `fixed`, it is always required to pass the correct
+amount of type arguments. `T.untyped` can also be used if the type is not
+relevant at this point:
+
+```rb
+MyMap[String, Integer].new
+MyMap[String, String].new
+MyMap[String, T.untyped].new
+```
 
 ## 7014
 
@@ -986,6 +1419,40 @@ did not cover all the cases.
 See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
+
+## 7030
+
+This error is consistently used when the user is trying (implicitly or
+explicitly) to call some method on a Sorbet type (e.g. `T::Array[Integer]`)
+which would actually return a Sorbet-runtime representation of a type.
+
+This error generally occurs when generic types are used in pattern matching:
+
+```rb
+def get_value(input)
+  case input
+  when Integer
+    input
+  when T::Array[Integer] # error: Call to method `===` on `T::Array[Integer]` mistakes a type for a value
+    input.first
+  end
+end
+```
+
+Since generic types are erased at runtime, this construct would never work when
+the program executed. Replace the generic type `T::Array[Integer]` by the erased
+type `Array` so the runtime behavior is correct:
+
+```
+def get_value(input)
+  case input
+  when Integer
+    input
+  when Array
+    input.first
+  end
+end
+```
 
 ## 7034
 

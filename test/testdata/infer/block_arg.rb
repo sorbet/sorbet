@@ -23,9 +23,9 @@ class A
   def badnext
     yields do
       if _
-        4 # error: Returning value that does not conform to block result type
+        4 # error: Expected `String` but found `Integer(4)` for block result type
       else
-        next 5 # error: Returning value that does not conform to block result type
+        next 5 # error: Expected `String` but found `Integer(5)` for block result type
       end
     end
 
