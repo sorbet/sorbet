@@ -210,7 +210,7 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
     auto &cs = mcctx.cs;
     auto &builder = builderCast(mcctx.build);
 
-    auto [argc, argv, _] = IREmitterHelpers::fillSendArgArray(mcctx);
+    auto args = IREmitterHelpers::fillSendArgArray(mcctx);
 
     llvm::Value *recv;
     if (takesReceiver == TakesReceiver) {
@@ -229,7 +229,8 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
     llvm::Value *offset = Payload::buildLocalsOffset(cs);
 
     auto fun = Payload::idIntern(cs, builder, mcctx.send->fun.shortName(cs));
-    auto *value = builder.CreateCall(cs.getFunction(cMethod), {recv, fun, argc, argv, blkPtr, offset}, "rawSendResult");
+    auto *value =
+        builder.CreateCall(cs.getFunction(cMethod), {recv, fun, args.argc, args.argv, blkPtr, offset}, "rawSendResult");
     if (klass.exists()) {
         Payload::assumeType(cs, builder, value, klass);
     }
