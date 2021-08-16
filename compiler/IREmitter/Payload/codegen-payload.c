@@ -2393,6 +2393,8 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
             // This case is the non-obvious case: something in the handler we were executing
             // threw.  We need to clean up and execute the ensure.
 
+            rb_vm_rewind_cfp((rb_execution_context_t *)*ec, cfp);
+
             // TODO(froydnj): this is where we would handle TAG_RETRY if we were implementing
             // `retry` in terms of Ruby's non-local exit handling rather than our current
             // retry singleton mechanism.
