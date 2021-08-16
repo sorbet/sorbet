@@ -2365,6 +2365,8 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
                 // which avoids a little bit of overhead.  But we do need to tell the
                 // handlers what the exception value *is*.
                 bodyException = (*ec)->errinfo;
+            } else {
+              goto execute_ensure;
             }
 
             // For all non-local exit types, we need to run the rescue or else handlers,
@@ -2428,6 +2430,7 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
         rb_set_errinfo(postRescueExceptionContext);
     }
 
+ execute_ensure:
     // However we arrived at this state, we are done with our entry on the tag stack.
     (*ec)->tag = tag.prev;
 
