@@ -57,6 +57,40 @@ public:
                                 int rubyBlockId, int bodyRubyBlockId, cfg::LocalRef exceptionValue) {
         ExceptionState state(cs, builder, irctx, rubyBlockId, bodyRubyBlockId, exceptionValue);
 
+#if 1
+        auto ip = state.builder.saveIP();
+        state.builder.SetInsertPoint(irctx.functionInitializersByFunction[rubyBlockId]);
+        auto *ecType = llvm::StructType::getTypeByName(state.cs, "struct.rb_execution_context_struct");
+        auto *ecPtr = ecType->getPointerTo();
+        auto *ecAlloca = state.builder.CreateAlloca(ecPtr, nullptr, "ecCache");
+        state.builder.restoreIP(ip);
+
+        auto *ec = state.builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
+        state.builder.CreateStore(ec, ecAlloca);
+
+        auto [pc, closure, cfp] = state.getExceptionArgs();
+        auto [index, level] = Payload::escapedVariableIndexAndLevel(cs, exceptionValue, irctx, bodyRubyBlockId);
+        auto *v = builder.CreateCall(cs.getFunction("sorbet_run_exception_handling"),
+                                     {ecAlloca, irctx.rubyBlocks2Functions[state.bodyRubyBlockId],
+                                   pc, closure, cfp,
+                                   state.getHandlers(),
+                                   state.getElse(),
+                                   state.getEnsure(),
+                                   Payload::retrySingleton(cs, builder, irctx),
+                                   index,
+                                   level});
+
+        state.exceptionContinue = llvm::BasicBlock::Create(cs, "exception-continue", state.currentFunc);
+        state.exceptionReturn = llvm::BasicBlock::Create(cs, "exception-return", state.currentFunc);
+
+        auto *notUndef = state.builder.CreateICmpNE(v, Payload::rubyUndef(cs, builder), "ensureReturnValue");
+        state.builder.CreateCondBr(notUndef, state.exceptionReturn, state.exceptionContinue);
+
+        state.builder.SetInsertPoint(state.exceptionReturn);
+        IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, v);
+
+        state.builder.SetInsertPoint(state.exceptionContinue);
+#else
         // Allocate a place to store the exception result from sorbet_try. This must go in the function init block,
         // otherwise the allocation might happen inside of a loop, causing a stack overflow.
         auto ip = state.builder.saveIP();
@@ -88,6 +122,7 @@ public:
         // Setup the exception handling entry block
         state.builder.SetInsertPoint(state.exceptionEntry);
 
+#endif
         // Clear out the variable that we store the current exception in
         Payload::varSet(cs, exceptionValue, Payload::rubyNil(state.cs, state.builder), builder, irctx, rubyBlockId);
 
@@ -270,11 +305,13 @@ public:
 void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderBase &build,
                                              const IREmitterContext &irctx, int rubyBlockId, int bodyRubyBlockId,
                                              cfg::LocalRef exceptionValue) {
-    auto state = ExceptionState::setup(cs, build, irctx, rubyBlockId, bodyRubyBlockId, exceptionValue);
+    ExceptionState::setup(cs, build, irctx, rubyBlockId, bodyRubyBlockId, exceptionValue);
 
+#if 0
     auto exceptionResult = state.runBody();
     state.runRescueElseEnsure(exceptionResult);
     state.raiseUnhandledException();
+#endif
 
     return;
 }
