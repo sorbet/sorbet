@@ -24,6 +24,6 @@ class Child < Parent
   def foo(which)
     self["foo"] || self["bar"]
 #        ^^^^^ error: Expected `Child::A` but found `String("foo")` for argument `k`
-#                       ^^^^^ error: This code is unreachable
+#                  ^^^^^^^^^^^ error: This code is unreachable
   end
 end
