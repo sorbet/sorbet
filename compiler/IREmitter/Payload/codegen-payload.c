@@ -2273,6 +2273,146 @@ void sorbet_raiseIfNotNil(VALUE exception) {
     rb_exc_raise(exception);
 }
 
+// Ruby passes the RTLD_LAZY flag to the dlopen(3) call (which is supported by both macOS and Linux).
+// That flag says, "Only resolve symbols as the code that references them is executed. If the symbol
+// is never referenced, then it is never resolved."
+//
+// Thus, by putting our version check first before any other code in the C extension runs, and backing
+// up the symbols our version check relies on with weak symbols, we can guarantee that the user never
+// sees a symbol resolution error from loading a shared object when they shouldn't have.
+SORBET_INLINE
+void sorbet_ensureSorbetRuby(int compile_time_is_release_build, char *compile_time_build_scm_revision) {
+    if (!compile_time_is_release_build) {
+        // Skipping version check: This shared object was compiled by a non-release version of SorbetLLVM
+        return;
+    }
+
+    const int runtime_is_release_build = sorbet_getIsReleaseBuild();
+    if (!runtime_is_release_build) {
+        // Skipping version check: sorbet_ruby is a non-release version
+        return;
+    }
+
+    const char *runtime_build_scm_revision = sorbet_getBuildSCMRevision();
+    if (strcmp(compile_time_build_scm_revision, runtime_build_scm_revision) != 0) {
+        rb_raise(rb_eRuntimeError,
+                 "SorbetLLVM runtime version mismatch: sorbet_ruby compiled with %s but shared object compiled with %s",
+                 runtime_build_scm_revision, compile_time_build_scm_revision);
+    }
+}
+
+extern VALUE sorbet_vm_throw(const rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, rb_num_t throw_state,
+                             VALUE throwobj);
+extern void sorbet_ec_jump_tag(rb_execution_context_t *ec, enum ruby_tag_type tt);
+
+SORBET_INLINE
+void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) {
+    VALUE v = sorbet_vm_throw(ec, ec->cfp, TAG_RETURN, retval);
+
+    ec->errinfo = v;
+    sorbet_ec_jump_tag(ec, ec->tag->state);
+}
+
+// This is invoked at the beginning of a method's body, and is analogous to EC_PUSH_TAG + EC_EXEC_TAG
+// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L130-L135
+// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L181-L182
+//
+// Note that we're calling `setjmp` here, but we're returning from this function and
+// expecting `longjmp`'ing to `tag->buf` to still work correctly.  We can do this
+// because this function will be inlined, meaning that `tag->buf` will reflect the
+// state of this function's caller and `tag->buf` will be valid for the lifetime of
+// this function's caller.
+//
+// The `volatile` here is a bit gross.  If you look at `rb_ec_tag_state` and its
+// accompanying logic, referenced below, you'll notice that it contains some
+// gross hacks to force clang to stick `ec` in memory (e.g. VAR_FROM_MEMORY:
+//
+// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L146-L158
+//
+// before accessing `ec` and that its `ec` argument is `rb_execution_context_t *ec`.
+//
+// Without those hacks, clang will assume that wherever `ec` got allocated to is where
+// it should be accessed on both sides of the `if`, which is not necessarily valid in
+// the case of `longjmp`'ing back to the `if`.  (clang would presumably get this
+// right if the default implementation of RUBY_SETJMP was the C library's `setjmp`,
+// which gets annotated as "returns_twice", but the default implementation is
+// `__builtin_setjmp`, which is not so annotated.)  So the point of the hacks is
+// to force `ec` to (somehow) be allocated to memory.
+//
+// We need a similar hack, but can be slightly more elegant because we cache the
+// execution context across a tag-guarded region.  A pointer to that cache is
+// passed in here and by making the pointer volatile, we force clang to reload
+// the execution context pointer every time the execution context is needed,
+// thus ensuring that the execution context lives in memory always.
+SORBET_INLINE
+enum ruby_tag_type sorbet_initializeTag(volatile rb_execution_context_t **ec, struct rb_vm_tag *tag) {
+    // inlined from EC_PUSH_TAG
+    tag->state = TAG_NONE;
+    tag->tag = Qundef;
+    tag->prev = (*ec)->tag;
+
+    if (RUBY_SETJMP(tag->buf) != 0) {
+        // See rb_ec_tag_state:
+        // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L160-L167
+        enum ruby_tag_type *statePtr = &(*ec)->tag->state;
+        enum ruby_tag_type state = *statePtr;
+        *statePtr = TAG_NONE;
+        return state;
+    } else {
+        (*ec)->tag = tag;
+        return TAG_NONE;
+    }
+}
+KEEP_ALIVE(sorbet_initializeTag)
+
+// Used by method and static init functions, for setjmp handling for returns from block statements.
+//
+// This is analogous to what comes after return from EC_EXEC_TAG (whether it's the initial setjmp
+// or a longjmp back to it). For the initial setjmp, we do nothing, indicating that tag setup is
+// complete and the function should continue as normal. For a longjmp back, we will do subsequent
+// processing: inspect the throw data to see if it's a return statement meant for us, pop the tag,
+// then either re-throw (if the return wasn't for us) or return the (non-Qundef) return value to
+// the caller, which should return the return value (applying a type test on the way out if
+// appropriate).
+SORBET_INLINE
+VALUE sorbet_processThrowReturnSetJmp(rb_execution_context_t *ec, enum ruby_tag_type state, rb_control_frame_t *cfp, struct rb_vm_tag *tag) {
+    VALUE retval = Qundef;
+
+    if (state != TAG_NONE) {
+        const struct vm_throw_data *const err = (struct vm_throw_data *)ec->errinfo;
+        const rb_control_frame_t *const escape_cfp = err->catch_frame;
+
+        if (state == TAG_RETURN && cfp == escape_cfp) {
+            rb_vm_rewind_cfp(ec, cfp);
+            state = TAG_NONE;
+
+            ec->errinfo = Qnil;
+
+            retval = err->throw_obj;
+        }
+
+        // See EC_POP_TAG:
+        // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L137-L139
+        ec->tag = tag->prev;
+
+        if (state != TAG_NONE) {
+            // inlined from rb_ec_tag_jump
+            ec->tag->state = state;
+            RUBY_LONGJMP(ec->tag->buf, 1);
+        }
+    }
+
+    return retval;
+}
+KEEP_ALIVE(sorbet_processThrowReturnSetJmp)
+
+SORBET_INLINE
+void sorbet_teardownTagForThrowReturn(rb_execution_context_t *ec, struct rb_vm_tag *tag) {
+    // inlined from EC_POP_TAG
+    ec->tag = tag->prev;
+}
+KEEP_ALIVE(sorbet_teardownTagForThrowReturn)
+
 static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb_execution_context_t **ec,
                                            ExceptionFFIType body,
                                     VALUE **pc,
@@ -2461,146 +2601,6 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
     return ensureResult;
 }
 KEEP_ALIVE(sorbet_run_exception_handling);
-
-// Ruby passes the RTLD_LAZY flag to the dlopen(3) call (which is supported by both macOS and Linux).
-// That flag says, "Only resolve symbols as the code that references them is executed. If the symbol
-// is never referenced, then it is never resolved."
-//
-// Thus, by putting our version check first before any other code in the C extension runs, and backing
-// up the symbols our version check relies on with weak symbols, we can guarantee that the user never
-// sees a symbol resolution error from loading a shared object when they shouldn't have.
-SORBET_INLINE
-void sorbet_ensureSorbetRuby(int compile_time_is_release_build, char *compile_time_build_scm_revision) {
-    if (!compile_time_is_release_build) {
-        // Skipping version check: This shared object was compiled by a non-release version of SorbetLLVM
-        return;
-    }
-
-    const int runtime_is_release_build = sorbet_getIsReleaseBuild();
-    if (!runtime_is_release_build) {
-        // Skipping version check: sorbet_ruby is a non-release version
-        return;
-    }
-
-    const char *runtime_build_scm_revision = sorbet_getBuildSCMRevision();
-    if (strcmp(compile_time_build_scm_revision, runtime_build_scm_revision) != 0) {
-        rb_raise(rb_eRuntimeError,
-                 "SorbetLLVM runtime version mismatch: sorbet_ruby compiled with %s but shared object compiled with %s",
-                 runtime_build_scm_revision, compile_time_build_scm_revision);
-    }
-}
-
-extern VALUE sorbet_vm_throw(const rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, rb_num_t throw_state,
-                             VALUE throwobj);
-extern void sorbet_ec_jump_tag(rb_execution_context_t *ec, enum ruby_tag_type tt);
-
-SORBET_INLINE
-void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) {
-    VALUE v = sorbet_vm_throw(ec, ec->cfp, TAG_RETURN, retval);
-
-    ec->errinfo = v;
-    sorbet_ec_jump_tag(ec, ec->tag->state);
-}
-
-// This is invoked at the beginning of a method's body, and is analogous to EC_PUSH_TAG + EC_EXEC_TAG
-// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L130-L135
-// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L181-L182
-//
-// Note that we're calling `setjmp` here, but we're returning from this function and
-// expecting `longjmp`'ing to `tag->buf` to still work correctly.  We can do this
-// because this function will be inlined, meaning that `tag->buf` will reflect the
-// state of this function's caller and `tag->buf` will be valid for the lifetime of
-// this function's caller.
-//
-// The `volatile` here is a bit gross.  If you look at `rb_ec_tag_state` and its
-// accompanying logic, referenced below, you'll notice that it contains some
-// gross hacks to force clang to stick `ec` in memory (e.g. VAR_FROM_MEMORY:
-//
-// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L146-L158
-//
-// before accessing `ec` and that its `ec` argument is `rb_execution_context_t *ec`.
-//
-// Without those hacks, clang will assume that wherever `ec` got allocated to is where
-// it should be accessed on both sides of the `if`, which is not necessarily valid in
-// the case of `longjmp`'ing back to the `if`.  (clang would presumably get this
-// right if the default implementation of RUBY_SETJMP was the C library's `setjmp`,
-// which gets annotated as "returns_twice", but the default implementation is
-// `__builtin_setjmp`, which is not so annotated.)  So the point of the hacks is
-// to force `ec` to (somehow) be allocated to memory.
-//
-// We need a similar hack, but can be slightly more elegant because we cache the
-// execution context across a tag-guarded region.  A pointer to that cache is
-// passed in here and by making the pointer volatile, we force clang to reload
-// the execution context pointer every time the execution context is needed,
-// thus ensuring that the execution context lives in memory always.
-SORBET_INLINE
-enum ruby_tag_type sorbet_initializeTag(volatile rb_execution_context_t **ec, struct rb_vm_tag *tag) {
-    // inlined from EC_PUSH_TAG
-    tag->state = TAG_NONE;
-    tag->tag = Qundef;
-    tag->prev = (*ec)->tag;
-
-    if (RUBY_SETJMP(tag->buf) != 0) {
-        // See rb_ec_tag_state:
-        // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L160-L167
-        enum ruby_tag_type *statePtr = &(*ec)->tag->state;
-        enum ruby_tag_type state = *statePtr;
-        *statePtr = TAG_NONE;
-        return state;
-    } else {
-        (*ec)->tag = tag;
-        return TAG_NONE;
-    }
-}
-KEEP_ALIVE(sorbet_initializeTag)
-
-// Used by method and static init functions, for setjmp handling for returns from block statements.
-//
-// This is analogous to what comes after return from EC_EXEC_TAG (whether it's the initial setjmp
-// or a longjmp back to it). For the initial setjmp, we do nothing, indicating that tag setup is
-// complete and the function should continue as normal. For a longjmp back, we will do subsequent
-// processing: inspect the throw data to see if it's a return statement meant for us, pop the tag,
-// then either re-throw (if the return wasn't for us) or return the (non-Qundef) return value to
-// the caller, which should return the return value (applying a type test on the way out if
-// appropriate).
-SORBET_INLINE
-VALUE sorbet_processThrowReturnSetJmp(rb_execution_context_t *ec, enum ruby_tag_type state, rb_control_frame_t *cfp, struct rb_vm_tag *tag) {
-    VALUE retval = Qundef;
-
-    if (state != TAG_NONE) {
-        const struct vm_throw_data *const err = (struct vm_throw_data *)ec->errinfo;
-        const rb_control_frame_t *const escape_cfp = err->catch_frame;
-
-        if (state == TAG_RETURN && cfp == escape_cfp) {
-            rb_vm_rewind_cfp(ec, cfp);
-            state = TAG_NONE;
-
-            ec->errinfo = Qnil;
-
-            retval = err->throw_obj;
-        }
-
-        // See EC_POP_TAG:
-        // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L137-L139
-        ec->tag = tag->prev;
-
-        if (state != TAG_NONE) {
-            // inlined from rb_ec_tag_jump
-            ec->tag->state = state;
-            RUBY_LONGJMP(ec->tag->buf, 1);
-        }
-    }
-
-    return retval;
-}
-KEEP_ALIVE(sorbet_processThrowReturnSetJmp)
-
-SORBET_INLINE
-void sorbet_teardownTagForThrowReturn(rb_execution_context_t *ec, struct rb_vm_tag *tag) {
-    // inlined from EC_POP_TAG
-    ec->tag = tag->prev;
-}
-KEEP_ALIVE(sorbet_teardownTagForThrowReturn)
 
 // ****
 // ****                       sorbet_ruby version information fallback
