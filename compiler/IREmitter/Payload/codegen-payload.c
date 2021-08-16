@@ -2451,10 +2451,8 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
     if ((nleType = sorbet_initializeTag(ec, &tag)) == TAG_NONE) {
     execute_body:
         state = RunningBody;
-
-        // Establish the tag stack (cf. EC_REPUSH_TAG).  Note that this is idempotent
-        // in the face of `retry` from the `rescue` handler.
-        (*ec)->tag = &tag;
+        // tag.state will have been reset appropriately if we got here via `retry`,
+        // but not this variable.
         nleType = TAG_NONE;
 
         // Clear out the local variable shared across exception handling regions
