@@ -2364,11 +2364,10 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
                 // handlers what the exception value *is*.
                 bodyException = (*ec)->errinfo;
             } else {
-              goto execute_ensure;
+                // Any other kind of non-local exit will skip the rescue/else handlers.
+                goto execute_ensure;
             }
 
-            // For all non-local exit types, we need to run the rescue or else handlers,
-            // depending on exactly how the body exited.
         run_else_handler:
 
             rb_vm_rewind_cfp((rb_execution_context_t *)*ec, cfp);
