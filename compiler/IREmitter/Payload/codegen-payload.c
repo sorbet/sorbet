@@ -2356,8 +2356,6 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
             //
             // The significant difference from that function is that we're handling all
             // the non-local exits directly.
-            rb_vm_rewind_cfp((rb_execution_context_t *)*ec, cfp);
-
             if (nleType == TAG_RAISE) {
                 // rb_rescue2/rb_vrescue2 would check ec->errinfo here to determine if it
                 // was the "right" kind of error.  Sorbet has already generated code to check
@@ -2372,6 +2370,8 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
             // For all non-local exit types, we need to run the rescue or else handlers,
             // depending on exactly how the body exited.
         run_else_handler:
+
+            rb_vm_rewind_cfp((rb_execution_context_t *)*ec, cfp);
 
             // Any exception that got thrown needs to be set for the handler.
             sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, bodyException);
