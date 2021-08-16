@@ -2430,9 +2430,6 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
                                     long exceptionValueIndex,
                                     long exceptionValueLevel) {
     struct rb_vm_tag tag;
-    tag.state = TAG_NONE;
-    tag.tag = Qundef;
-    tag.prev = (*ec)->tag;
 
     // `volatile` is not used in polite C programming, but here it's very important:
     // it ensures that the requisite variables are stored in memory across the setjmp
@@ -2448,10 +2445,10 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
     volatile enum {
         RunningBody,
         RunningHandlers,
-    } state;
-    volatile enum ruby_tag_type nleType = TAG_NONE;
+    } state = RunningBody;
+    volatile enum ruby_tag_type nleType;
 
-    if (RUBY_SETJMP(tag.buf) == 0) {
+    if ((nleType = sorbet_initializeTag(ec, &tag)) == TAG_NONE) {
     execute_body:
         state = RunningBody;
 
@@ -2482,11 +2479,7 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
             goto run_else_handler;
         }
     } else {
-        // If we get here, setjmp has returned a non-zero value.  Record what kind of
-        // non-local exit kind we're dealing with (cf. EC_EXEC_TAG).
-        enum ruby_tag_type *p = &(*ec)->tag->state;  // hoist the load from ec.
-        nleType = *p;
-        *p = TAG_NONE;
+        // If we get here, setjmp has returned a non-zero value.
 
         // This case is the "obvious" case: something in the body threw; we need to handle
         // exceptions directly here.
