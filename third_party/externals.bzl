@@ -153,9 +153,6 @@ def register_sorbet_dependencies():
         strip_prefix = "xxHash-0.8.0",
     )
 
-    # NOTE: 8910297baf87e1777c4fd30fb0693eecf9f2c134 is the first revision that starts including an explicit dependency
-    # on the `@platforms` repo. Rolling back before that commit will require patching abseil before building. We did
-    # this previously in https://github.com/sorbet/sorbet/pull/4486.
     http_archive(
         name = "com_google_absl",
         urls = _github_public_urls("abseil/abseil-cpp/archive/8910297baf87e1777c4fd30fb0693eecf9f2c134.zip"),
