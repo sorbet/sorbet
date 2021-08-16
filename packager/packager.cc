@@ -67,7 +67,7 @@ class PackageDB final {
 private:
     // The only thread that is allowed write access to this class.
     const std::thread::id owner;
-    vector<shared_ptr<const PackageInfo>> packages;
+    UnorderedMap<std::string, shared_ptr<const PackageInfo>> packageInfoByPathPrefix;
     bool finalized = false;
     UnorderedMap<core::FileRef, shared_ptr<const PackageInfo>> packageInfoByFile;
     UnorderedMap<core::NameRef, shared_ptr<const PackageInfo>> packageInfoByMangledName;
@@ -97,16 +97,11 @@ public:
         }
 
         packageInfoByFile[ctx.file] = pkg;
-        packages.emplace_back(pkg);
+        packageInfoByPathPrefix[pkg->packagePathPrefix] = pkg;
     }
 
     void finalizePackages() {
         ENFORCE(owner == this_thread::get_id());
-        // Sort packages so that packages with the longest/most specific paths are first.
-        // That way, the first package to match a file's path is the most specific package match.
-        fast_sort(packages, [](const auto &a, const auto &b) -> bool {
-            return a->packagePathPrefix.size() > b->packagePathPrefix.size();
-        });
         finalized = true;
     }
 
@@ -140,13 +135,20 @@ public:
         if (!finalized) {
             Exception::raise("Cannot map files to packages until all packages are added and PackageDB is finalized");
         }
-        // TODO(jvilk): Could use a prefix array to make this lookup more efficient.
         auto path = ctx.file.data(ctx).path();
-        for (const auto &pkg : packages) {
-            if (absl::StartsWith(path, pkg->packagePathPrefix)) {
-                return pkg.get();
+        auto curPrefixPos = path.find_last_of('/');
+
+        while (curPrefixPos != std::string::npos) {
+            path = path.substr(0, curPrefixPos + 1);
+            const auto &it = packageInfoByPathPrefix.find(path);
+
+            if (it != packageInfoByPathPrefix.end()) {
+                return it->second.get();
             }
+
+            curPrefixPos = path.find_last_of('/', curPrefixPos - 1);
         }
+
         return nullptr;
     }
 };
