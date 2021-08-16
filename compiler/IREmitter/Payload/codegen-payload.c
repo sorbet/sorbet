@@ -188,6 +188,11 @@ VALUE sorbet_rubyTopSelf() {
 }
 
 SORBET_INLINE
+rb_execution_context_t *sorbet_getEC() {
+    return GET_EC();
+}
+
+SORBET_INLINE
 rb_control_frame_t *sorbet_getCFP() {
     return GET_EC()->cfp;
 }
@@ -2301,9 +2306,7 @@ extern VALUE sorbet_vm_throw(const rb_execution_context_t *ec, rb_control_frame_
 extern void sorbet_ec_jump_tag(rb_execution_context_t *ec, enum ruby_tag_type tt);
 
 SORBET_INLINE
-void sorbet_throwReturn(VALUE retval) {
-    rb_execution_context_t *ec = GET_EC();
-
+void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) {
     VALUE v = sorbet_vm_throw(ec, ec->cfp, TAG_RETURN, retval);
 
     ec->errinfo = v;
@@ -2319,33 +2322,46 @@ void sorbet_throwReturn(VALUE retval) {
 // because this function will be inlined, meaning that `tag->buf` will reflect the
 // state of this function's caller and `tag->buf` will be valid for the lifetime of
 // this function's caller.
+//
+// The `volatile` here is a bit gross.  If you look at `rb_ec_tag_state` and its
+// accompanying logic, referenced below, you'll notice that it contains some
+// gross hacks to force clang to stick `ec` in memory (e.g. VAR_FROM_MEMORY:
+//
+// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L146-L158
+//
+// before accessing `ec` and that its `ec` argument is `rb_execution_context_t *ec`.
+//
+// Without those hacks, clang will assume that wherever `ec` got allocated to is where
+// it should be accessed on both sides of the `if`, which is not necessarily valid in
+// the case of `longjmp`'ing back to the `if`.  (clang would presumably get this
+// right if the default implementation of RUBY_SETJMP was the C library's `setjmp`,
+// which gets annotated as "returns_twice", but the default implementation is
+// `__builtin_setjmp`, which is not so annotated.)  So the point of the hacks is
+// to force `ec` to (somehow) be allocated to memory.
+//
+// We need a similar hack, but can be slightly more elegant because we cache the
+// execution context across a tag-guarded region.  A pointer to that cache is
+// passed in here and by making the pointer volatile, we force clang to reload
+// the execution context pointer every time the execution context is needed,
+// thus ensuring that the execution context lives in memory always.
 SORBET_INLINE
-enum ruby_tag_type sorbet_initializeTag(struct rb_vm_tag *tag) {
-    rb_execution_context_t *ec = GET_EC();
-
+enum ruby_tag_type sorbet_initializeTag(volatile rb_execution_context_t **ec, struct rb_vm_tag *tag) {
     // inlined from EC_PUSH_TAG
     tag->state = TAG_NONE;
     tag->tag = Qundef;
-    tag->prev = ec->tag;
+    tag->prev = (*ec)->tag;
 
-    int setjmp_retval = RUBY_SETJMP(tag->buf);
-    enum ruby_tag_type state = TAG_NONE;
-
-    if (setjmp_retval) {
+    if (RUBY_SETJMP(tag->buf) != 0) {
         // See rb_ec_tag_state:
         // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L160-L167
-        state = ec->tag->state;
-        ec->tag->state = TAG_NONE;
+        enum ruby_tag_type *statePtr = &(*ec)->tag->state;
+        enum ruby_tag_type state = *statePtr;
+        *statePtr = TAG_NONE;
+        return state;
     } else {
-        // See EC_REPUSH_TAG:
-        // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L144
-        ec->tag = tag;
+        (*ec)->tag = tag;
+        return TAG_NONE;
     }
-
-    // This is subtle, but tags are organized in such a way that TAG_NONE is 0
-    // (i.e. a "normal" return from setjmp) and every other tag is non-zero
-    // (i.e. a "abnormal" return from setjmp).
-    return state;
 }
 KEEP_ALIVE(sorbet_initializeTag)
 
@@ -2359,9 +2375,7 @@ KEEP_ALIVE(sorbet_initializeTag)
 // the caller, which should return the return value (applying a type test on the way out if
 // appropriate).
 SORBET_INLINE
-VALUE sorbet_processThrowReturnSetJmp(enum ruby_tag_type state, rb_control_frame_t *cfp, struct rb_vm_tag *tag) {
-    rb_execution_context_t *ec = GET_EC();
-
+VALUE sorbet_processThrowReturnSetJmp(rb_execution_context_t *ec, enum ruby_tag_type state, rb_control_frame_t *cfp, struct rb_vm_tag *tag) {
     VALUE retval = Qundef;
 
     if (state != TAG_NONE) {
@@ -2393,9 +2407,7 @@ VALUE sorbet_processThrowReturnSetJmp(enum ruby_tag_type state, rb_control_frame
 KEEP_ALIVE(sorbet_processThrowReturnSetJmp)
 
 SORBET_INLINE
-void sorbet_teardownTagForThrowReturn(struct rb_vm_tag *tag) {
-    rb_execution_context_t *ec = GET_EC();
-
+void sorbet_teardownTagForThrowReturn(rb_execution_context_t *ec, struct rb_vm_tag *tag) {
     // inlined from EC_POP_TAG
     ec->tag = tag->prev;
 }

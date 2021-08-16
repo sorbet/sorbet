@@ -1182,13 +1182,18 @@ llvm::Value *Payload::buildLocalsOffset(CompilerState &cs) {
 }
 
 void Payload::setupEcTag(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx) {
+    ENFORCE(irctx.returnFromBlockState.has_value());
+
     auto &builder = builderCast(build);
 
-    auto *setjmpRetval = builder.CreateCall(cs.getFunction("sorbet_initializeTag"), {irctx.ecTag}, "setjmpRetval");
+    auto &state = *irctx.returnFromBlockState;
+    auto *setjmpRetval =
+        builder.CreateCall(cs.getFunction("sorbet_initializeTag"), {state.cachedEC, state.ecTag}, "setjmpRetval");
 
     auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, 0);
-    auto *throwReturnVal = builder.CreateCall(cs.getFunction("sorbet_processThrowReturnSetJmp"),
-                                              {setjmpRetval, cfp, irctx.ecTag}, "throwReturnVal");
+    auto *throwReturnVal =
+        builder.CreateCall(cs.getFunction("sorbet_processThrowReturnSetJmp"),
+                           {state.loadEC(cs, builder), setjmpRetval, cfp, state.ecTag}, "throwReturnVal");
     auto *throwReturnValIsUndef = testIsUndef(cs, builder, throwReturnVal);
 
     auto *fun = builder.GetInsertBlock()->getParent();

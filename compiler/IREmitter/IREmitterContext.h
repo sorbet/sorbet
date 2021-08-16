@@ -4,6 +4,10 @@
 #include "compiler/Core/ForwardDeclarations.h"
 #include "core/core.h"
 
+namespace llvm {
+class IRBuilderBase;
+} // namespace llvm
+
 namespace sorbet::compiler {
 
 class CompilerState;
@@ -261,9 +265,24 @@ struct IREmitterContext {
     // idx: ruby block id
     std::vector<llvm::AllocaInst *> throwReturnFlagByBlock;
 
-    // AllocaInst corresponding to the rb_vm_tag-typed local in Ruby block 0. This tag will be pushed onto the
-    // execution context's tag stack, to catch return statements from inside blocks.
-    llvm::AllocaInst *ecTag;
+    struct ReturnFromBlockState {
+        // AllocaInst corresponding to the rb_vm_tag-typed local in Ruby block 0. This tag will be pushed onto the
+        // execution context's tag stack, to catch return statements from inside blocks.
+        llvm::AllocaInst *ecTag;
+
+        // Type corresponding to rb_execution_context_t *.
+        llvm::Type *ecPtr;
+
+        // AllocaInst for the cached execution context pointer that needs to be live
+        // across the initialization of the tag stack.
+        llvm::AllocaInst *cachedEC;
+
+        ReturnFromBlockState(CompilerState &cs, llvm::IRBuilderBase &build);
+
+        llvm::Value *loadEC(CompilerState &cs, llvm::IRBuilderBase &build) const;
+    };
+
+    std::optional<ReturnFromBlockState> returnFromBlockState;
 
     static IREmitterContext getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md,
                                                              llvm::Function *mainFunc);
