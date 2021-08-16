@@ -1630,16 +1630,17 @@ public:
         if (isNumberedParameterName(name)) {
             core::Loc location = core::Loc(file_, loc);
 
-            if (auto e = gs_.beginError(location, core::errors::Parser::ParserError)) {
+            if (auto e = gs_.beginError(location, core::errors::Parser::ReservedForNumparamError)) {
                 std::string replacement = fmt::format("arg{}", name[1]);
 
                 e.setHeader("{} is reserved for numbered parameter", name);
                 e.addAutocorrect(
                     core::AutocorrectSuggestion{fmt::format("Replace `{}` with `{}`", name, replacement),
                                                 {core::AutocorrectSuggestion::Edit{location, replacement}}});
+                e.addErrorNote("Reserved numbered parameter names are not allowed starting with Ruby 3.0. Use {} to "
+                               "disable this check",
+                               "--suppress-error-code=2002");
             }
-
-            error(ruby_parser::dclass::ReservedForNumparam, loc, name);
         }
     }
 
