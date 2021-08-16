@@ -2365,23 +2365,27 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
                 // which avoids a little bit of overhead.  But we do need to tell the
                 // handlers what the exception value *is*.
                 bodyException = (*ec)->errinfo;
+            }
 
-            run_else_handler:
-                sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, bodyException);
+            // For all non-local exit types, we need to run the rescue or else handlers,
+            // depending on exactly how the body exited.
+        run_else_handler:
 
-                ExceptionFFIType handler = (bodyException != Qnil) ? handlers : elseClause;
+            // Any exception that got thrown needs to be set for the handler.
+            sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, bodyException);
 
-                // Indicate that we are handling the exception.
-                nleType = TAG_NONE;
-                state = RunningHandlers;
+            ExceptionFFIType handler = (bodyException != Qnil) ? handlers : elseClause;
 
-                executionResult = handler(pc, methodClosure, cfp);
+            // Indicate that we are running the appropriate handler.
+            nleType = TAG_NONE;
+            state = RunningHandlers;
 
-                // If execution has reached this point, the handler did not throw any
-                // kind of non-local exit.
-                if (bodyException != Qnil && executionResult == retrySingleton) {
-                    goto execute_body;
-                }
+            executionResult = handler(pc, methodClosure, cfp);
+
+            // If execution has reached this point, the handler did not throw any
+            // kind of non-local exit.
+            if (bodyException != Qnil && executionResult == retrySingleton) {
+                goto execute_body;
             }
         } else {
             // This case is the non-obvious case: something in the handler we were executing
