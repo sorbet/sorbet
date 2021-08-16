@@ -2442,7 +2442,7 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
     //
     // cf. EC_JUMP_TAG for the code here.
     if (nleType) {
-        (*ec)->tag->state = state;
+        (*ec)->tag->state = nleType;
         RUBY_LONGJMP((*ec)->tag->buf, 1);
     }
 
