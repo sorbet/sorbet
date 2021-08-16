@@ -36,8 +36,8 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
     // were empty and/or not useful so that we could eliminate dealing with
     // them from the exception handling logic.
     ENFORCE(irctx.rubyBlockType[handlersRubyBlockId] != FunctionType::Unused);
-    //ENFORCE(irctx.rubyBlockType[ensureRubyBlockId] != FunctionType::Unused);
-    //ENFORCE(irctx.rubyBlockType[elseRubyBlockId] != FunctionType::Unused);
+    // ENFORCE(irctx.rubyBlockType[ensureRubyBlockId] != FunctionType::Unused);
+    // ENFORCE(irctx.rubyBlockType[elseRubyBlockId] != FunctionType::Unused);
     auto *handlersFunc = getExceptionFunc(cs, irctx, handlersRubyBlockId);
     auto *ensureFunc = getExceptionFunc(cs, irctx, ensureRubyBlockId);
     auto *elseFunc = getExceptionFunc(cs, irctx, elseRubyBlockId);
@@ -61,14 +61,8 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
 
     auto [index, level] = Payload::escapedVariableIndexAndLevel(cs, exceptionValue, irctx, bodyRubyBlockId);
     auto *v = builder.CreateCall(cs.getFunction("sorbet_run_exception_handling"),
-                                 {ecAlloca, irctx.rubyBlocks2Functions[bodyRubyBlockId],
-                                         pc, closure, cfp,
-                                         handlersFunc,
-                                         elseFunc,
-                                         ensureFunc,
-                                         Payload::retrySingleton(cs, builder, irctx),
-                                         index,
-                                         level});
+                                 {ecAlloca, irctx.rubyBlocks2Functions[bodyRubyBlockId], pc, closure, cfp, handlersFunc,
+                                  elseFunc, ensureFunc, Payload::retrySingleton(cs, builder, irctx), index, level});
 
     auto *exceptionContinue = llvm::BasicBlock::Create(cs, "exception-continue", currentFunc);
     auto *exceptionReturn = llvm::BasicBlock::Create(cs, "exception-return", currentFunc);
