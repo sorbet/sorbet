@@ -2474,7 +2474,11 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
         if (executionResult != Qundef) {
             rb_set_errinfo(previousException);
         } else {
-            goto run_else_handler;
+            state = RunningHandlers;
+
+            executionResult = elseClause(pc, methodClosure, cfp);
+
+            rb_set_errinfo(previousException);
         }
     } else {
         // If we get here, setjmp has returned a non-zero value.
@@ -2498,8 +2502,6 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
                 // Any other kind of non-local exit will skip the rescue/else handlers.
                 goto execute_ensure;
             }
-
-        run_else_handler:
 
             rb_vm_rewind_cfp((rb_execution_context_t *)*ec, cfp);
 
