@@ -43,5 +43,3 @@ baz(xz)
 xnz = {a: nil, b: Baz.new}
 T.reveal_type(xnz) # error: Revealed type: `{a: NilClass, b: Baz} (shape of T::Hash[Symbol, T.nilable(Baz)])`
 baz(xnz)
-
-T.reveal_type({nil => 0, a: 1}) # error: Revealed type: `{NilClass => Integer(0), Symbol(a) => Integer(1)} (shape of T::Hash[T.nilable(Symbol), Integer])`
