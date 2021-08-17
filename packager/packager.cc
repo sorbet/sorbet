@@ -139,8 +139,7 @@ public:
         auto curPrefixPos = path.find_last_of('/');
 
         while (curPrefixPos != std::string::npos) {
-            path = path.substr(0, curPrefixPos + 1);
-            const auto &it = packageInfoByPathPrefix.find(path);
+            const auto &it = packageInfoByPathPrefix.find(path.substr(0, curPrefixPos + 1));
 
             if (it != packageInfoByPathPrefix.end()) {
                 return it->second.get();
