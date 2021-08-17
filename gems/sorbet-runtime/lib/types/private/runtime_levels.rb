@@ -12,6 +12,8 @@ module T::Private::RuntimeLevels
     # Don't even validate in tests, b/c too expensive,
     # or b/c we fully trust the static typing
     :never,
+    # Only validate when compiled. Equivalent to :never in sorbet-runtime
+    :compiled,
   ].freeze
 
   @check_tests = false
