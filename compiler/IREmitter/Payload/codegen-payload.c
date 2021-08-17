@@ -2534,6 +2534,8 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
                 nleType = TAG_NONE;
 
                 handlerException = (*ec)->errinfo;
+            } else {
+                goto execute_ensure;
             }
         }
 
