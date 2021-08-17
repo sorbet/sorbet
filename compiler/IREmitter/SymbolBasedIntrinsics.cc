@@ -177,7 +177,7 @@ public:
         auto *offset = Payload::buildLocalsOffset(cs);
 
         // kwsplat is used by the vm only, and we don't use the vm's api for calling an intrinsic directly.
-        auto [argc, argv, _kwSplat] = IREmitterHelpers::fillSendArgArray(mcctx);
+        auto args = IREmitterHelpers::fillSendArgArray(mcctx);
 
         llvm::Value *res{nullptr};
         if (auto *blk = mcctx.blkAsFunction()) {
@@ -192,7 +192,8 @@ public:
             bool usesBreak = mcctx.irctx.blockUsesBreak[mcctx.blk.value()];
             if (usesBreak) {
                 res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock"),
-                                         {forwarder, recv, id, argc, argv, blk, offset}, "rawSendResultWithBlock");
+                                         {forwarder, recv, id, args.argc, args.argv, blk, offset},
+                                         "rawSendResultWithBlock");
             } else {
                 // Since the block doesn't use break we can make two optimizations:
                 //
@@ -201,12 +202,14 @@ public:
                 // 2. Emit a type assertion on the result of the function, as we know that there won't be non-local
                 //    control flow based on the use of `break` that could change the type of the returned value
                 res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock_noBreak"),
-                                         {forwarder, recv, id, argc, argv, blk, offset}, "rawSendResultWithBlock");
+                                         {forwarder, recv, id, args.argc, args.argv, blk, offset},
+                                         "rawSendResultWithBlock");
                 cMethodWithBlock->assertResultType(cs, builder, res);
             }
         } else {
             auto *blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
-            res = builder.CreateCall(cMethod.getFunction(cs), {recv, id, argc, argv, blkPtr, offset}, "rawSendResult");
+            res = builder.CreateCall(cMethod.getFunction(cs), {recv, id, args.argc, args.argv, blkPtr, offset},
+                                     "rawSendResult");
             cMethod.assertResultType(cs, builder, res);
         }
 
