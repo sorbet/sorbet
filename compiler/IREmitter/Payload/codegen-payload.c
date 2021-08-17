@@ -2414,21 +2414,21 @@ void sorbet_teardownTagForThrowReturn(rb_execution_context_t *ec, struct rb_vm_t
 KEEP_ALIVE(sorbet_teardownTagForThrowReturn)
 
 static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb_execution_context_t **ec,
-                                           ExceptionFFIType body,
-                                    VALUE **pc,
+                                           volatile ExceptionFFIType body,
+                                    VALUE ** volatile pc,
                                     // The locals offset for the body.
-                                    VALUE methodClosure,
-                                    rb_control_frame_t *cfp,
+                                    volatile VALUE methodClosure,
+                                    rb_control_frame_t * volatile cfp,
                                     // May be nullptr.
-                                    ExceptionFFIType handlers,
+                                    volatile ExceptionFFIType handlers,
                                     // May be nullptr.
-                                    ExceptionFFIType elseClause,
+                                    volatile ExceptionFFIType elseClause,
                                     // May be nullptr.
-                                    ExceptionFFIType ensureClause,
+                                    volatile ExceptionFFIType ensureClause,
                                     // The special value indicating that we need to retry.
-                                    VALUE retrySingleton,
-                                    long exceptionValueIndex,
-                                    long exceptionValueLevel) {
+                                    volatile VALUE retrySingleton,
+                                    volatile long exceptionValueIndex,
+                                    volatile long exceptionValueLevel) {
     struct rb_vm_tag tag;
 
     // `volatile` is not used in polite C programming, but here it's very important:
