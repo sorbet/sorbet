@@ -135,17 +135,20 @@ public:
         if (!finalized) {
             Exception::raise("Cannot map files to packages until all packages are added and PackageDB is finalized");
         }
+
         auto path = ctx.file.data(ctx).path();
-        auto curPrefixPos = path.find_last_of('/');
+        string pathStr = path.data();
+        auto curPrefixPos = pathStr.find_last_of('/');
 
         while (curPrefixPos != std::string::npos) {
-            const auto &it = packageInfoByPathPrefix.find(path.substr(0, curPrefixPos + 1));
+            pathStr.resize(curPrefixPos + 1);
 
+            const auto &it = packageInfoByPathPrefix.find(pathStr);
             if (it != packageInfoByPathPrefix.end()) {
                 return it->second.get();
             }
 
-            curPrefixPos = path.find_last_of('/', curPrefixPos - 1);
+            curPrefixPos = pathStr.find_last_of('/', curPrefixPos - 1);
         }
 
         return nullptr;
