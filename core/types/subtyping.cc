@@ -10,6 +10,37 @@ namespace sorbet::core {
 
 using namespace std;
 
+namespace {
+bool compositeTypeDeepRefEqual(const OrType &o1, const OrType &o2);
+bool compositeTypeDeepRefEqual(const AndType &a1, const AndType &a2);
+bool compositeTypeDeepRefEqualHelper(const TypePtr &t1, const TypePtr &t2) {
+    if (t1 == t2) {
+        return true;
+    }
+    if (t1.tag() != t2.tag()) {
+        return false;
+    }
+    // t1 and t2 are the same kind of type.
+    if (isa_type<OrType>(t1)) {
+        return compositeTypeDeepRefEqual(cast_type_nonnull<OrType>(t1), cast_type_nonnull<OrType>(t2));
+    }
+    if (isa_type<AndType>(t1)) {
+        return compositeTypeDeepRefEqual(cast_type_nonnull<AndType>(t1), cast_type_nonnull<AndType>(t2));
+    }
+    return false;
+}
+
+// Returns 'true' if the tree of types stemming from this AndType are referentially equal.
+bool compositeTypeDeepRefEqual(const AndType &a1, const AndType &a2) {
+    return compositeTypeDeepRefEqualHelper(a1.left, a2.left) && compositeTypeDeepRefEqualHelper(a1.right, a2.right);
+}
+
+// Returns 'true' if the tree of types stemming from this OrType are referentially equal.
+bool compositeTypeDeepRefEqual(const OrType &o1, const OrType &o2) {
+    return compositeTypeDeepRefEqualHelper(o1.left, o2.left) && compositeTypeDeepRefEqualHelper(o1.right, o2.right);
+}
+} // namespace
+
 TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
 TypePtr Types::any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
@@ -219,11 +250,23 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         categoryCounterInc("lub", "or>");
         return lubDistributeOr(gs, t2, t1);
     } else if (auto *a2 = cast_type<AndType>(t2)) { // 2, 4
+        if (auto *a1 = cast_type<AndType>(t1)) {
+            // Check if the members of a1 and a2 are referentially equivalent. This helps simplify T.all types created
+            // during type inference.
+            if (compositeTypeDeepRefEqual(*a1, *a2)) {
+                categoryCounterInc("lub", "<and>");
+                return t2;
+            }
+        }
+
         categoryCounterInc("lub", "and>");
         auto t1d = underlying(gs, t1);
         auto t2filtered = dropLubComponents(gs, t2, t1d);
         if (t2filtered != t2) {
             return lub(gs, t1, t2filtered);
+        }
+        if (isa_type<OrType>(t1)) {
+            return lubDistributeOr(gs, t1, t2);
         }
         return OrType::make_shared(t1, t2filtered);
     } else if (isa_type<OrType>(t1)) {
