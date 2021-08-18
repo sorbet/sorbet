@@ -2587,7 +2587,7 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
 
     // Put the error back.  We already have nleType, which was ec->tag->state prior
     // to running the ensure handler, for resetting ec->tag->state if appropriate.
-    //(*ec)->errinfo = pendingException;
+    (*ec)->errinfo = pendingException;
 
     // If we had a non-local exit from the region above, propagating that takes precedence
     // over whatever the ensure handler did.
