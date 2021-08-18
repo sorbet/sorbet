@@ -140,6 +140,25 @@ public:
     std::string toString() const override;
 };
 
+// # some-property: foo
+class StringPropertyAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<StringPropertyAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                          int assertionLine, std::string_view assertionContents,
+                                                          std::string_view assertionType);
+
+    static std::optional<std::string> getValue(std::string_view type,
+                    const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
+
+    const std::string assertionType;
+    const std::string value;
+
+    StringPropertyAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string value,
+                             std::string_view assertionType);
+
+    std::string toString() const override;
+};
+
 // # ^^^ type-def: symbol
 class TypeDefAssertion final : public RangeAssertion {
 public:

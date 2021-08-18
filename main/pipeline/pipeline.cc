@@ -223,7 +223,7 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
 #ifndef SORBET_REALMAIN_MIN
         if (opts.stripePackages) {
             Timer timeit(gs.tracer(), "incremental_packager");
-            what = packager::Packager::runIncremental(gs, move(what));
+            what = packager::Packager::runIncremental(gs, move(what), opts.extraPackageFilesDirectoryPrefixes);
         }
 #endif
         {
@@ -595,7 +595,7 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
 #ifndef SORBET_REALMAIN_MIN
     if (opts.stripePackages) {
         Timer timeit(gs.tracer(), "package");
-        what = packager::Packager::run(gs, workers, move(what));
+        what = packager::Packager::run(gs, workers, move(what), opts.extraPackageFilesDirectoryPrefixes);
         if (opts.print.Packager.enabled) {
             for (auto &f : what) {
                 opts.print.Packager.fmt("{}\n", f.tree.toStringWithTabs(gs, 0));

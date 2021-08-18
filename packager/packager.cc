@@ -48,8 +48,8 @@ struct PackageName {
 };
 
 struct PackageInfo {
-    // The path prefix before every file in the package, including path separator at end.
-    std::string packagePathPrefix;
+    // The possible path prefixes associated with files in the package, including path separator at end.
+    vector<std::string> packagePathPrefixes;
     PackageName name;
     // loc for the package definition. Used for error messages.
     core::Loc loc;
@@ -95,7 +95,9 @@ public:
             packageInfoByMangledName[pkg->name.mangledName] = pkg;
         }
 
-        packageInfoByPathPrefix[pkg->packagePathPrefix] = pkg;
+        for (std::string packagePathPrefix : pkg->packagePathPrefixes) {
+            packageInfoByPathPrefix[packagePathPrefix] = pkg;
+        }
     }
 
     void finalizePackages() {
@@ -137,7 +139,6 @@ public:
 
         std::string_view path = ctx.file.data(ctx).path();
         int curPrefixPos = path.find_last_of('/');
-
         while (curPrefixPos != std::string::npos) {
             const auto &it = packageInfoByPathPrefix.find(path.substr(0, curPrefixPos + 1));
             if (it != packageInfoByPathPrefix.end()) {
@@ -194,8 +195,10 @@ PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit 
 
     // Foo::Bar => Foo_Bar_Package
     auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx)), "_Package");
+
     auto utf8Name = ctx.state.enterNameUTF8(mangledName);
     auto packagerName = ctx.state.freshNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
+
     pName.mangledName = ctx.state.enterNameConstant(packagerName);
 
     return pName;
@@ -591,7 +594,7 @@ struct PackageInfoFinder {
 
 // Sanity checks package files, mutates arguments to export / export_methods to point to item in namespace,
 // builds up the expression injected into packages that import the package, and codegens the <PackagedMethods>  module.
-unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile &package) {
+unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile &package, vector<std::string> extraPackageFilesDirectoryPrefixes) {
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(ctx).sourceType == core::File::Type::Package);
     // Assumption: Root of AST is <root> class.
@@ -603,7 +606,12 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
     package.tree = ast::TreeMap::apply(ctx, finder, move(package.tree));
     finder.finalize(ctx);
     if (finder.info) {
-        finder.info->packagePathPrefix = packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1);
+        finder.info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
+        for (string prefix : extraPackageFilesDirectoryPrefixes) {
+            string_view shortName = finder.info->name.mangledName.shortName(ctx.state);
+            string additionalDirPath = absl::StrCat(prefix, shortName.substr(0, shortName.find("_Package")), "/");
+            finder.info->packagePathPrefixes.emplace_back(additionalDirPath);
+        }
     }
     return move(finder.info);
 }
@@ -837,7 +845,7 @@ bool checkContainsAllPackages(const core::GlobalState &gs, const vector<ast::Par
 
 } // namespace
 
-vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files) {
+vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files, vector<std::string> extraPackageFilesDirectoryPrefixes) {
     Timer timeit(gs.tracer(), "packager");
     // Ensure files are in canonical order.
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
@@ -851,7 +859,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
             if (FileOps::getFileName(file.file.data(gs).path()) == PACKAGE_FILE_NAME) {
                 file.file.data(gs).sourceType = core::File::Type::Package;
                 core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-                packageDB.addPackage(ctx, getPackageInfo(ctx, file));
+                packageDB.addPackage(ctx, getPackageInfo(ctx, file, extraPackageFilesDirectoryPrefixes));
             }
         }
         // We're done adding packages.
@@ -930,14 +938,14 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
     return files;
 }
 
-vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
+vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files, vector<std::string> extraPackageFilesDirectoryPrefixes) {
     // Just run all packages w/ the changed files through Packager again. It should not define any new names.
     // TODO(jvilk): This incremental pass reprocesses every package file in the project. It should instead only process
     // the packages needed to understand file changes.
     ENFORCE(checkContainsAllPackages(gs, files));
     auto namesUsed = gs.namesUsedTotal();
     auto emptyWorkers = WorkerPool::create(0, gs.tracer());
-    files = Packager::run(gs, *emptyWorkers, move(files));
+    files = Packager::run(gs, *emptyWorkers, move(files), extraPackageFilesDirectoryPrefixes);
     ENFORCE(gs.namesUsedTotal() == namesUsed);
     return files;
 }

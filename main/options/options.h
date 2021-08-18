@@ -151,6 +151,7 @@ struct Options {
     int autogenVersion = 0;
     bool stripeMode = false;
     bool stripePackages = false;
+    std::vector<std::string> extraPackageFilesDirectoryPrefixes;
     std::string typedSource = "";
     std::string cacheDir = "";
     UnorderedMap<std::string, core::StrictLevel> strictnessOverrides;
