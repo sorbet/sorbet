@@ -10,7 +10,7 @@ def wrap(&blk)
     p "running raise #{$!}"
     yield :in_raise
   ensure
-    p "running ensure"
+    p "running ensure #{$!}"
     raise
   end
 end
@@ -25,10 +25,13 @@ begin
     end
     :late_return
   end
-rescue
+  p "got after v"
+rescue Exception => e
   p "rescued outer exception"
   p "have #{$!}"
+  p "actually rescued #{e}"
 end
 
 p "exception outside #{$!.inspect}"
 p v
+Process.kill 5, Process.pid
