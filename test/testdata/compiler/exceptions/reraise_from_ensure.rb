@@ -34,4 +34,3 @@ end
 
 p "exception outside #{$!.inspect}"
 p v
-Process.kill 5, Process.pid
