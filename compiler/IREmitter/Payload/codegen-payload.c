@@ -2470,16 +2470,14 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
         executionResult = body(pc, methodClosure, cfp);
 
         // If we get to this point, then we know the body has succeeded without throwing
-        // an exception.  We may need to run the `else` handler.
-        if (executionResult != Qundef) {
-            rb_set_errinfo(previousException);
-        } else {
+        // an exception.  We may need to run the `else` handler if the body didn't
+        // return a value that we need to propagate.
+        if (executionResult == Qundef) {
             state = RunningHandlers;
 
             executionResult = elseClause(pc, methodClosure, cfp);
-
-            rb_set_errinfo(previousException);
         }
+        rb_set_errinfo(previousException);
     } else {
         // If we get here, setjmp has returned a non-zero value.
 
