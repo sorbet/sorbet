@@ -1,0 +1,57 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C M><<C <todo sym>>> < ()
+    class <emptyTree>::<C <describe 'describe'>><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <it 'adds a method'><<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      begin
+        begin
+          "adds a method"
+          ::Sorbet::Private::Static.keep_def(<self>, :"<it \'adds a method\'>", :normal)
+        end
+        class <emptyTree>::<C <describe 'inner'>><<C <todo sym>>> < (<self>)
+          ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+            <self>.void()
+          end
+
+          def <it 'inner test'><<todo method>>(&<blk>)
+            <emptyTree>
+          end
+
+          begin
+            "inner test"
+            ::Sorbet::Private::Static.keep_def(<self>, :"<it \'inner test\'>", :normal)
+          end
+        end
+      end
+    end
+  end
+
+  class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
+    def test_method<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :test_method, :normal)
+
+    class <emptyTree>::<C <describe 'describe'>><<C <todo sym>>> < (<self>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <it 'adds a method'><<todo method>>(&<blk>)
+        <self>.test_method()
+      end
+
+      begin
+        "adds a method"
+        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'adds a method\'>", :normal)
+      end
+    end
+  end
+end
