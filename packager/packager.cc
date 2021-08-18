@@ -69,7 +69,6 @@ private:
     const std::thread::id owner;
     UnorderedMap<std::string, shared_ptr<const PackageInfo>> packageInfoByPathPrefix;
     bool finalized = false;
-    UnorderedMap<core::FileRef, shared_ptr<const PackageInfo>> packageInfoByFile;
     UnorderedMap<core::NameRef, shared_ptr<const PackageInfo>> packageInfoByMangledName;
 
 public:
@@ -96,7 +95,6 @@ public:
             packageInfoByMangledName[pkg->name.mangledName] = pkg;
         }
 
-        packageInfoByFile[ctx.file] = pkg;
         packageInfoByPathPrefix[pkg->packagePathPrefix] = pkg;
     }
 
@@ -108,9 +106,10 @@ public:
     /**
      * Given a file of type PACKAGE, return its PackageInfo or nullptr if one does not exist.
      */
-    const PackageInfo *getPackageByFile(core::FileRef packageFile) const {
-        const auto &it = packageInfoByFile.find(packageFile);
-        if (it == packageInfoByFile.end()) {
+    const PackageInfo *getPackageByFile(core::Context ctx, core::FileRef packageFile) const {
+        const auto path = packageFile.data(ctx).path();
+        const auto &it = packageInfoByPathPrefix.find(path.substr(0, path.find_last_of('/') + 1));
+        if (it == packageInfoByPathPrefix.end()) {
             return nullptr;
         }
         return it->second.get();
@@ -749,7 +748,7 @@ private:
 ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const PackageDB &packageDB) {
     ast::ClassDef::RHS_store importedPackages;
 
-    auto package = packageDB.getPackageByFile(file.file);
+    auto package = packageDB.getPackageByFile(ctx, file.file);
     if (package == nullptr) {
         // We already produced an error on this package when producing its package info.
         // The correct course of action is to abort the transform.
