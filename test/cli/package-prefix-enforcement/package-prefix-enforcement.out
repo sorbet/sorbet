@@ -1,3 +1,16 @@
+nested/nested.test.rb:9: Constants may not be defined outside of the enclosing package namespace `Test::Root::Nested` https://srb.help/3713
+     9 |  NOT_IN_MODULE = nil
+          ^^^^^^^^^^^^^
+
+nested/nested.test.rb:16: Can't nest `ShouldBeInTestPrefix` under `Root::Nested` because `Root::Nested` is not a class or module https://srb.help/4015
+    16 |module Root::Nested::ShouldBeInTestPrefix
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    nested/__package.rb: `Root::Nested` defined here
+
+nested/nested.test.rb:16: Class or method definition must match enclosing package namespace `Test::Root::Nested` https://srb.help/3713
+    16 |module Root::Nested::ShouldBeInTestPrefix
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 nested/nested.rb:5: Class or method definition must match enclosing package namespace `Root::Nested` https://srb.help/3713
      5 |module Wrong
                ^^^^^
@@ -17,4 +30,4 @@ nested/nested.rb:54: Class or method definition must match enclosing package nam
 nested/nested.rb:57: Class or method definition must match enclosing package namespace `Root::Nested` https://srb.help/3713
     57 |class Root::ClassNotInPackage
               ^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 5
+Errors: 8
