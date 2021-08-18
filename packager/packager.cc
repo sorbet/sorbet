@@ -48,8 +48,8 @@ struct PackageName {
 };
 
 struct PackageInfo {
-    // The path prefix before every file in the package, including path separator at end.
-    std::string packagePathPrefix;
+    // The possible path prefixes associated with files in the package, including path separator at end.
+    vector<std::string> packagePathPrefixes;
     PackageName name;
     // loc for the package definition. Used for error messages.
     core::Loc loc;
@@ -95,7 +95,9 @@ public:
             packageInfoByMangledName[pkg->name.mangledName] = pkg;
         }
 
-        packageInfoByPathPrefix[pkg->packagePathPrefix] = pkg;
+        for (std::string packagePathPrefix : pkg->packagePathPrefixes) {
+            packageInfoByPathPrefix[packagePathPrefix] = pkg;
+        }
     }
 
     void finalizePackages() {
@@ -603,7 +605,7 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
     package.tree = ast::TreeMap::apply(ctx, finder, move(package.tree));
     finder.finalize(ctx);
     if (finder.info) {
-        finder.info->packagePathPrefix = packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1);
+        finder.info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
     }
     return move(finder.info);
 }
