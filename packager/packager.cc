@@ -794,12 +794,16 @@ private:
 
         if (node->source.exists()) {
             if (parentSrc.exists()) {
-                if (auto e = ctx.beginError(node->source.importLoc, core::errors::Packager::ImportConflict)) {
-                    // TODO Fix flaky ordering of errors. This is strange...not being done in parallel,
-                    // and the file processing order is consistent.
-                    e.setHeader("Conflicting import sources for `{}`",
-                                fmt::map_join(parts, "::", [&](const auto &nr) { return nr.show(ctx); }));
-                    e.addErrorLine(core::Loc(ctx.file, parentSrc.importLoc), "Conflict from");
+                // A conflicting import exist. Only report errors while constructing the test output
+                // to avoid duplicate errors because test imports are a superset of normal imports.
+                if (importType == ImportType::Test) {
+                    if (auto e = ctx.beginError(node->source.importLoc, core::errors::Packager::ImportConflict)) {
+                        // TODO Fix flaky ordering of errors. This is strange...not being done in parallel,
+                        // and the file processing order is consistent.
+                        e.setHeader("Conflicting import sources for `{}`",
+                                    fmt::map_join(parts, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                        e.addErrorLine(core::Loc(ctx.file, parentSrc.importLoc), "Conflict from");
+                    }
                 }
             } else if (importType == ImportType::Test || node->source.importType == ImportType::Normal) {
                 // Construct a module containing an assignment for an imported name:
@@ -888,7 +892,17 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 treeBuilder.mergeImports(*importedPackage, import);
             }
         }
+
         importedPackages = treeBuilder.makeModule(ctx, ImportType::Normal);
+        // Include an empty class definition <Mangled_Pkg_A>::Pkg::A::<Magic> in <PackageRegistry>.
+        // This ensures that the refernce to <PackageRegistry>::<Mangled_Pkg_A>::Pkg::A always
+        // exists.
+        auto stubName = prependScope(
+            name2Expr(core::Names::Constants::Magic(), package->name.fullName.toLiteral(core::LocOffsets::none())),
+            name2Expr(package->name.mangledName));
+        auto stubClass = ast::MK::Class(core::LocOffsets::none(), core::LocOffsets::none(), move(stubName), {}, {});
+        importedPackages.emplace_back(move(stubClass));
+
         testImportedPackages = treeBuilder.makeModule(ctx, ImportType::Test);
 
         // In the test namespace for this package add an alias to give tests full access to the
