@@ -107,7 +107,7 @@ public:
      * Given a file of type PACKAGE, return its PackageInfo or nullptr if one does not exist.
      */
     const PackageInfo *getPackageByFile(core::Context ctx, core::FileRef packageFile) const {
-        const auto path = packageFile.data(ctx).path();
+        const std::string_view path = packageFile.data(ctx).path();
         const auto &it = packageInfoByPathPrefix.find(path.substr(0, path.find_last_of('/') + 1));
         if (it == packageInfoByPathPrefix.end()) {
             return nullptr;
@@ -135,8 +135,8 @@ public:
             Exception::raise("Cannot map files to packages until all packages are added and PackageDB is finalized");
         }
 
-        auto path = ctx.file.data(ctx).path();
-        auto curPrefixPos = path.find_last_of('/');
+        std::string_view path = ctx.file.data(ctx).path();
+        int curPrefixPos = path.find_last_of('/');
 
         while (curPrefixPos != std::string::npos) {
             const auto &it = packageInfoByPathPrefix.find(path.substr(0, curPrefixPos + 1));
