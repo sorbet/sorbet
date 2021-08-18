@@ -31,10 +31,19 @@ struct FullyQualifiedName {
     ast::ExpressionPtr toLiteral(core::LocOffsets loc) const;
 
     FullyQualifiedName() = default;
+    FullyQualifiedName(vector<core::NameRef> parts, core::Loc loc) : parts(parts), loc(loc) {}
     explicit FullyQualifiedName(const FullyQualifiedName &) = default;
     FullyQualifiedName(FullyQualifiedName &&) = default;
     FullyQualifiedName &operator=(const FullyQualifiedName &) = delete;
     FullyQualifiedName &operator=(FullyQualifiedName &&) = default;
+
+    FullyQualifiedName withPrefix(core::NameRef prefix) const {
+        vector<core::NameRef> prefixed(parts.size() + 1);
+        prefixed[0] = prefix;
+        std::copy(parts.begin(), parts.end(), prefixed.begin() + 1);
+        ENFORCE(prefixed.size() == parts.size() + 1);
+        return {move(prefixed), loc};
+    }
 };
 
 class NameFormatter final {
@@ -217,8 +226,7 @@ PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit 
     PackageName pName;
     pName.loc = constantLit->loc;
     pName.fullName = getFullyQualifiedName(ctx, constantLit);
-    pName.fullTestPkgName = FullyQualifiedName(pName.fullName);
-    pName.fullTestPkgName.parts.insert(pName.fullTestPkgName.parts.begin(), TEST_NAME);
+    pName.fullTestPkgName = pName.fullName.withPrefix(TEST_NAME);
 
     // Foo::Bar => Foo_Bar_Package
     auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx)), "_Package");
