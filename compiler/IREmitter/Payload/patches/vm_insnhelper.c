@@ -24,6 +24,9 @@ void sorbet_setExceptionStackFrame(rb_execution_context_t *ec, rb_control_frame_
     // NOTE: there's no explicit check for stack overflow, because `vm_push_frame` will do that check
     cfp = vm_push_frame(ec, iseq, VM_FRAME_MAGIC_RESCUE, self, blockHandler, me, iseq->body->iseq_encoded, sp,
                         num_locals, iseq->body->stack_max);
+
+    ec->tag->state = TAG_NONE;
+    ec->errinfo = Qnil;
 }
 
 rb_control_frame_t *sorbet_pushStaticInitFrame(VALUE recv) {
