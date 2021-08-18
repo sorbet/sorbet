@@ -137,18 +137,15 @@ public:
         }
 
         auto path = ctx.file.data(ctx).path();
-        string pathStr = path.data();
-        auto curPrefixPos = pathStr.find_last_of('/');
+        auto curPrefixPos = path.find_last_of('/');
 
         while (curPrefixPos != std::string::npos) {
-            pathStr.resize(curPrefixPos + 1);
-
-            const auto &it = packageInfoByPathPrefix.find(pathStr);
+            const auto &it = packageInfoByPathPrefix.find(path.substr(0, curPrefixPos + 1));
             if (it != packageInfoByPathPrefix.end()) {
                 return it->second.get();
             }
 
-            curPrefixPos = pathStr.find_last_of('/', curPrefixPos - 1);
+            curPrefixPos = path.find_last_of('/', curPrefixPos - 1);
         }
 
         return nullptr;
