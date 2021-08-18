@@ -43,7 +43,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_5" [
         shape = rectangle;
         color = black;
-        label = "block[id=5, rubyBlockId=1](<self>: Object, <selfRestore>$9: Object)\louterLoops: 1\l<self>: Object = loadSelf\l<blk>$10: [Integer] = load_yield_params(map)\l<blk>$11: Integer(0) = 0\lx$1: Integer = <blk>$10: [Integer].[](<blk>$11: Integer(0))\l<returnTemp>$15: Integer = x$1\l<block-break-assign>$16: Integer = x$1\ltarget: Integer = <block-break-assign>$16\l<magic>$17: T.class_of(<Magic>) = alias <C <Magic>>\l<block-break>$18: T.untyped = <magic>$17: T.class_of(<Magic>).<block-break>(<returnTemp>$15: Integer)\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=1](<self>: Object, <selfRestore>$9: Object)\louterLoops: 1\l<self>: Object = loadSelf\l<blk>$10: [Integer] = load_yield_params(map)\l<blk>$11: Integer(0) = 0\lx$1: Integer = <blk>$10: [Integer].[](<blk>$11: Integer(0))\l<returnTemp>$15: Integer = x$1\l<block-break-assign>$16: Integer = x$1\l<magic>$17: T.class_of(<Magic>) = alias <C <Magic>>\l<block-break>$18: T.untyped = <magic>$17: T.class_of(<Magic>).<block-break>(<returnTemp>$15: Integer)\ltarget: Integer = <block-break-assign>$16\l<unconditional>\l"
     ];
 
     "bb::Object#foo_5" -> "bb::Object#foo_4" [style="bold"];
@@ -145,7 +145,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_10" [
         shape = rectangle;
         color = black;
-        label = "block[id=10, rubyBlockId=2](<selfRestore>$55: T.class_of(<root>))\louterLoops: 1\l<returnTemp>$63: Integer(10) = 10\l<block-break-assign>$64: Integer(10) = <returnTemp>$63\la: Integer(10) = <block-break-assign>$64\l<magic>$65: T.class_of(<Magic>) = alias <C <Magic>>\l<block-break>$66: T.untyped = <magic>$65: T.class_of(<Magic>).<block-break>(<returnTemp>$63: Integer(10))\l<unconditional>\l"
+        label = "block[id=10, rubyBlockId=2](<selfRestore>$55: T.class_of(<root>))\louterLoops: 1\l<returnTemp>$63: Integer(10) = 10\l<block-break-assign>$64: Integer(10) = <returnTemp>$63\l<magic>$65: T.class_of(<Magic>) = alias <C <Magic>>\l<block-break>$66: T.untyped = <magic>$65: T.class_of(<Magic>).<block-break>(<returnTemp>$63: Integer(10))\la: Integer(10) = <block-break-assign>$64\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_10" -> "bb::<Class:<root>>#<static-init>_8" [style="bold"];
@@ -191,7 +191,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_16" [
         shape = rectangle;
         color = black;
-        label = "block[id=16, rubyBlockId=3](<selfRestore>$75: T.class_of(<root>))\louterLoops: 1\l<block-break-assign>$84: NilClass = <returnTemp>$83\lb: NilClass = <block-break-assign>$84\l<magic>$85: T.class_of(<Magic>) = alias <C <Magic>>\l<block-break>$86: T.untyped = <magic>$85: T.class_of(<Magic>).<block-break>(<returnTemp>$83: NilClass)\l<unconditional>\l"
+        label = "block[id=16, rubyBlockId=3](<selfRestore>$75: T.class_of(<root>))\louterLoops: 1\l<block-break-assign>$84: NilClass = <returnTemp>$83\l<magic>$85: T.class_of(<Magic>) = alias <C <Magic>>\l<block-break>$86: T.untyped = <magic>$85: T.class_of(<Magic>).<block-break>(<returnTemp>$83: NilClass)\lb: NilClass = <block-break-assign>$84\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_16" -> "bb::<Class:<root>>#<static-init>_14" [style="bold"];
@@ -237,7 +237,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_22" [
         shape = rectangle;
         color = black;
-        label = "block[id=22, rubyBlockId=0]()\louterLoops: 1\l<returnTemp>$102: Symbol(:abc) = :abc\l<block-break-assign>$103: Symbol(:abc) = <returnTemp>$102\lc: Symbol(:abc) = <block-break-assign>$103\l<magic>$104: T.class_of(<Magic>) = alias <C <Magic>>\l<block-break>$105: T.untyped = <magic>$104: T.class_of(<Magic>).<block-break>(<returnTemp>$102: Symbol(:abc))\l<unconditional>\l"
+        label = "block[id=22, rubyBlockId=0]()\louterLoops: 1\l<returnTemp>$102: Symbol(:abc) = :abc\l<block-break-assign>$103: Symbol(:abc) = <returnTemp>$102\l<magic>$104: T.class_of(<Magic>) = alias <C <Magic>>\l<block-break>$105: T.untyped = <magic>$104: T.class_of(<Magic>).<block-break>(<returnTemp>$102: Symbol(:abc))\lc: Symbol(:abc) = <block-break-assign>$103\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_22" -> "bb::<Class:<root>>#<static-init>_20" [style="bold"];

@@ -574,7 +574,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 // This is a temporary hack until we change how pining works to handle this case.
                 auto blockBreakAssign = cctx.newTemporary(core::Names::blockBreakAssign());
                 afterBreak->exprs.emplace_back(blockBreakAssign, a.loc, make_unique<Ident>(exprSym));
-                afterBreak->exprs.emplace_back(cctx.blockBreakTarget, a.loc, make_unique<Ident>(blockBreakAssign));
 
                 // call intrinsic for break
                 auto magic = cctx.newTemporary(core::Names::magic());
@@ -584,9 +583,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 InlinedVector<core::LocOffsets, 2> locs{core::LocOffsets::none()};
                 auto isPrivateOk = false;
 
+                // This represents the throw in the Ruby VM to the appropriate control frame.
+                // It needs to come prior to the assignment (which shouldn't really be here,
+                // but see above for the rationale) because the actual assignment is a) done
+                // by the VM itself; and b) may not actually happen depending on the frames
+                // that the break unwinds through.
                 synthesizeExpr(afterBreak, ignored, core::LocOffsets::none(),
                                make_unique<Send>(magic, core::Names::blockBreak(), core::LocOffsets::none(),
                                                  args.size(), args, locs, isPrivateOk));
+
+                afterBreak->exprs.emplace_back(cctx.blockBreakTarget, a.loc, make_unique<Ident>(blockBreakAssign));
 
                 if (cctx.breakScope == nullptr) {
                     if (auto e = cctx.ctx.beginError(a.loc, core::errors::CFG::NoNextScope)) {
