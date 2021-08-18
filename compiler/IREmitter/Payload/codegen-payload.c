@@ -2489,6 +2489,12 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
             //
             // The significant difference from that function is that we're handling all
             // the non-local exits directly.
+
+            // Whatever kind of non-local exit we have, we need to make sure that
+            // the Ruby control frame for the handler (or the ensure) we're going
+            // to run lives directly under whatever frame we started this process with.
+            rb_vm_rewind_cfp((rb_execution_context_t *)*ec, cfp);
+
             if (nleType == TAG_RAISE) {
                 // rb_rescue2/rb_vrescue2 would check ec->errinfo here to determine if it
                 // was the "right" kind of error.  Sorbet has already generated code to check
@@ -2500,8 +2506,6 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
                 // Any other kind of non-local exit will skip the rescue/else handlers.
                 goto execute_ensure;
             }
-
-            rb_vm_rewind_cfp((rb_execution_context_t *)*ec, cfp);
 
             // Any exception that got thrown needs to be set for the handler.
             sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, bodyException);
