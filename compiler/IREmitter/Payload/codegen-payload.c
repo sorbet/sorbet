@@ -2568,30 +2568,41 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
     // However we arrived at this state, we are done with our entry on the tag stack.
     (*ec)->tag = tag.prev;
 
-    // Run the actual ensure handler.
+    // Ruby's running of ensure handlers passes in rb_errinfo() as an argument on the
+    // stack ; ensure handlers then exit via the bytecode instruction `throw 0 local[0]`,
+    // which eventually winds its way into vm_throw_continue.  We don't codegen things
+    // that way -- perhaps we should, but this emulates that behavior.
+    VALUE pendingException = (*ec)->errinfo;
+
+    // Running the ensure handler will push an VM_FRAME_MAGIC_RESCUE control frame
+    // and also have the side effect of clearing out ec->errinfo and ec->tag->state.
     VALUE ensureResult = ensureClause(pc, methodClosure, cfp);
+
+    // Anything the ensure returned takes precedence over a pending non-local exit.
+    if (ensureResult != Qundef) {
+        return ensureResult;
+    }
+
+    // Put the error back.  We already have nleType, which was ec->tag->state prior
+    // to running the ensure handler, for resetting ec->tag->state if appropriate.
+    //(*ec)->errinfo = pendingException;
 
     // If we had a non-local exit from the region above, propagating that takes precedence
     // over whatever the ensure handler did.
     //
     // cf. EC_JUMP_TAG for the code here.
-    if (nleType) {
+    if (nleType != TAG_NONE) {
         (*ec)->tag->state = nleType;
         RUBY_LONGJMP((*ec)->tag->buf, 1);
     }
 
     // executionResult is the result from running either the body or the handlers,
     // depending on what path we took through the code above.
-    //
-    // Assuming ensureResult is defined, it takes precedence over either.
-    if (ensureResult == Qundef) {
-        ensureResult = executionResult;
-    }
 
     sorbet_raiseIfNotNil(handlerException);
     sorbet_raiseIfNotNil(sorbet_readLocal(cfp, exceptionValueIndex, exceptionValueLevel));
 
-    return ensureResult;
+    return executionResult;
 }
 KEEP_ALIVE(sorbet_run_exception_handling);
 
