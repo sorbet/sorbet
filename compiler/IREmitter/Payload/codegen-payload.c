@@ -2553,6 +2553,10 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
             // Case 1.
             postRescueExceptionContext = handlerException;
         } else {
+            // The exception value local was set for the purposes of the rescue
+            // handler (it will be `nil` if the body didn't raise an exception).
+            // The rescue handler will have nil'd out this variable if an
+            // appropriate handler was run.
             VALUE bodyException = sorbet_readLocal(cfp, exceptionValueIndex, exceptionValueLevel);
             if (bodyException != Qnil) {
                 // Case 2.
