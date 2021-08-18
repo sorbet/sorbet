@@ -11,6 +11,12 @@ module M
     it "adds a method" do
     end
 
+    # This class should have a superclass of the describe block from line 9
+    describe "inner" do
+      it "inner test" do
+      end
+    end
+
   end
 
 end
