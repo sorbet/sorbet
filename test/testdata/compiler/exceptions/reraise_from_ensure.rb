@@ -11,7 +11,7 @@ def wrap(&blk)
     yield :in_raise
   ensure
     p "running ensure #{$!}"
-    raise
+    raise 'from ensure'
   end
 end
 
