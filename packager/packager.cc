@@ -747,10 +747,10 @@ public:
     }
 
     ast::ClassDef::RHS_store makeModule(core::Context ctx,
-                                        ImportType importType) { // TODO TODO better name for importType
+                                        ImportType moduleType) {
         vector<core::NameRef> parts;
         ast::ClassDef::RHS_store modRhs;
-        makeModule(ctx, &root, parts, modRhs, importType, ImportTree::Source());
+        makeModule(ctx, &root, parts, modRhs, moduleType, ImportTree::Source());
         return modRhs;
     }
 
@@ -769,7 +769,7 @@ private:
     }
 
     void makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts, ast::ClassDef::RHS_store &modRhs,
-                    ImportType importType, ImportTree::Source parentSrc) {
+                    ImportType moduleType, ImportTree::Source parentSrc) {
         auto newParentSrc = parentSrc;
         if (node->source.exists() && !parentSrc.exists()) {
             newParentSrc = node->source;
@@ -784,11 +784,11 @@ private:
         });
         for (auto const &[nameRef, child] : childPairs) {
             // Ignore the entire `Test::*` part of import tree if we are not in a test context.
-            if (importType != ImportType::Test && parts.empty() && nameRef == TEST_NAME) {
+            if (moduleType != ImportType::Test && parts.empty() && nameRef == TEST_NAME) {
                 continue;
             }
             parts.emplace_back(nameRef);
-            makeModule(ctx, child, parts, modRhs, importType, newParentSrc);
+            makeModule(ctx, child, parts, modRhs, moduleType, newParentSrc);
             parts.pop_back();
         }
 
@@ -796,7 +796,7 @@ private:
             if (parentSrc.exists()) {
                 // A conflicting import exist. Only report errors while constructing the test output
                 // to avoid duplicate errors because test imports are a superset of normal imports.
-                if (importType == ImportType::Test) {
+                if (moduleType == ImportType::Test) {
                     if (auto e = ctx.beginError(node->source.importLoc, core::errors::Packager::ImportConflict)) {
                         // TODO Fix flaky ordering of errors. This is strange...not being done in parallel,
                         // and the file processing order is consistent.
@@ -805,7 +805,7 @@ private:
                         e.addErrorLine(core::Loc(ctx.file, parentSrc.importLoc), "Conflict from");
                     }
                 }
-            } else if (importType == ImportType::Test || node->source.importType == ImportType::Normal) {
+            } else if (moduleType == ImportType::Test || node->source.importType == ImportType::Normal) {
                 // Construct a module containing an assignment for an imported name:
                 // For name `A::B::C::D` imported from package `A::B` construct:
                 // module A::B::C
