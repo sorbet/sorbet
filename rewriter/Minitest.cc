@@ -288,7 +288,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         }
 
         ast::ClassDef::RHS_store rhs;
-        rhs.emplace_back(prepareBody(ctx, true, std::move(block->body)));
+        const bool bodyIsClass = true;
+        rhs.emplace_back(prepareBody(ctx, bodyIsClass, std::move(block->body)));
         auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
                                                 ctx.state.enterNameConstant("<describe '" + argString + "'>"));
         return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs));
@@ -296,8 +297,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         ConstantMover constantMover;
         block->body = ast::TreeMap::apply(ctx, constantMover, move(block->body));
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+        const bool bodyIsClass = false;
         auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, send->loc, std::move(name),
-                                                           prepareBody(ctx, false, std::move(block->body))));
+                                                           prepareBody(ctx, bodyIsClass, std::move(block->body))));
         method = ast::MK::InsSeq1(send->loc, send->args.front().deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
