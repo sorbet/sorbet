@@ -746,8 +746,7 @@ public:
         }
     }
 
-    ast::ClassDef::RHS_store makeModule(core::Context ctx,
-                                        ImportType moduleType) {
+    ast::ClassDef::RHS_store makeModule(core::Context ctx, ImportType moduleType) {
         vector<core::NameRef> parts;
         ast::ClassDef::RHS_store modRhs;
         makeModule(ctx, &root, parts, modRhs, moduleType, ImportTree::Source());
