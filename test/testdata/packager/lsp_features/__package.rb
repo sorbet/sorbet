@@ -8,7 +8,6 @@ class Simpsons < PackageSpec
     # package.
     import Bart
     #      ^^^^ symbol-search: "Bart", name = "Bart", container = "Simpsons"
-    #      ^^^^ def: bart 1 not-def-of-self
     #      ^^^^ usage: bartpkg
     #      ^^^^ hover: Bart package description
     export Simpsons::Family
