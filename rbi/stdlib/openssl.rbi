@@ -818,187 +818,187 @@ module OpenSSL::ASN1
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.BMPString(*_); end
+  def self.BMPString(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.BitString(*_); end
+  def self.BitString(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.Boolean(*_); end
+  def self.Boolean(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.EndOfContent(*_); end
+  def self.EndOfContent(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.Enumerated(*_); end
+  def self.Enumerated(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.GeneralString(*_); end
+  def self.GeneralString(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.GeneralizedTime(*_); end
+  def self.GeneralizedTime(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.GraphicString(*_); end
+  def self.GraphicString(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.IA5String(*_); end
+  def self.IA5String(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.ISO64String(*_); end
+  def self.ISO64String(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.Integer(*_); end
+  def self.Integer(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.Null(*_); end
+  def self.Null(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.NumericString(*_); end
+  def self.NumericString(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.ObjectId(*_); end
+  def self.ObjectId(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.OctetString(*_); end
+  def self.OctetString(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.PrintableString(*_); end
+  def self.PrintableString(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.Sequence(*_); end
+  def self.Sequence(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.Set(*_); end
+  def self.Set(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.T61String(*_); end
+  def self.T61String(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.UTCTime(*_); end
+  def self.UTCTime(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.UTF8String(*_); end
+  def self.UTF8String(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.UniversalString(*_); end
+  def self.UniversalString(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.VideotexString(*_); end
+  def self.VideotexString(*arg0); end
 
   # Decodes a BER- or DER-encoded value and creates an ASN1Data instance. *der*
   # may be a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or any
@@ -1013,11 +1013,11 @@ module OpenSSL::ASN1
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.decode(_); end
+  def self.decode(arg0); end
 
   # Similar to decode with the difference that decode expects one distinct value
   # represented in *der*. decode\_all on the contrary decodes a sequence of
@@ -1031,11 +1031,11 @@ module OpenSSL::ASN1
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.decode_all(_); end
+  def self.decode_all(arg0); end
 
   # If a block is given, it prints out each of the elements encountered. Block
   # parameters are (in that order):
@@ -1066,11 +1066,11 @@ module OpenSSL::ASN1
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.traverse(_); end
+  def self.traverse(arg0); end
 end
 
 # The top-level class representing any ASN.1 object. When parsed by
@@ -1210,13 +1210,13 @@ class OpenSSL::ASN1::ASN1Data
 
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(_, _1, _2); end
+  def initialize(arg0, arg1, arg2); end
 
   # An [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html)
   # representing the tag number of this
@@ -1360,11 +1360,11 @@ class OpenSSL::ASN1::Constructive < OpenSSL::ASN1::ASN1Data
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # May be used as a hint for encoding a value either implicitly or explicitly
   # by setting it either to `:IMPLICIT` or to `:EXPLICIT`. *tagging* is not set
@@ -1469,13 +1469,13 @@ class OpenSSL::ASN1::ObjectId < OpenSSL::ASN1::Primitive
   # if it fails.
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.register(_, _1, _2); end
+  def self.register(arg0, arg1, arg2); end
 end
 
 class OpenSSL::ASN1::OctetString < OpenSSL::ASN1::Primitive
@@ -1578,11 +1578,11 @@ end
 class OpenSSL::ASN1::Primitive < OpenSSL::ASN1::ASN1Data
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # May be used as a hint for encoding a value either implicitly or explicitly
   # by setting it either to `:IMPLICIT` or to `:EXPLICIT`. *tagging* is not set
@@ -1638,62 +1638,62 @@ class OpenSSL::BN
   include ::Comparable
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def %(_); end
+  def %(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def *(_); end
+  def *(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def **(_); end
+  def **(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def +(_); end
+  def +(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def -(_); end
+  def -(arg0); end
 
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def <<(_); end
+  def <<(arg0); end
 
   # Alias for:
   # [`cmp`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html#method-i-cmp)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def <=>(_); end
+  def <=>(arg0); end
 
   # Returns `true` only if *obj* has the same value as *bn*. Contrast this with
   # [`OpenSSL::BN#eql?`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html#method-i-eql-3F),
@@ -1704,90 +1704,90 @@ class OpenSSL::BN
   # [`===`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html#method-i-3D-3D-3D)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def ==(_); end
+  def ==(arg0); end
 
   # Alias for:
   # [`==`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html#method-i-3D-3D)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def ===(_); end
+  def ===(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def >>(_); end
+  def >>(arg0); end
 
   # Tests bit *bit* in *bn* and returns `true` if set, `false` if not set.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def bit_set?(_); end
+  def bit_set?(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def clear_bit!(_); end
+  def clear_bit!(arg0); end
 
   # Also aliased as:
   # [`<=>`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html#method-i-3C-3D-3E)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def cmp(_); end
+  def cmp(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def coerce(_); end
+  def coerce(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def copy(_); end
+  def copy(arg0); end
 
   # Returns `true` only if *obj* is a `OpenSSL::BN` with the same value as *bn*.
   # Contrast this with OpenSSL::BN#==, which performs type conversions.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def eql?(_); end
+  def eql?(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def gcd(_); end
+  def gcd(arg0); end
 
   # Returns a hash code for this object.
   #
@@ -1798,79 +1798,79 @@ class OpenSSL::BN
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def lshift!(_); end
+  def lshift!(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def mask_bits!(_); end
+  def mask_bits!(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def mod_add(_, _1); end
+  def mod_add(arg0, arg1); end
 
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def mod_exp(_, _1); end
+  def mod_exp(arg0, arg1); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def mod_inverse(_); end
+  def mod_inverse(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def mod_mul(_, _1); end
+  def mod_mul(arg0, arg1); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def mod_sqr(_); end
+  def mod_sqr(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def mod_sub(_, _1); end
+  def mod_sub(arg0, arg1); end
 
   sig {returns(::T.untyped)}
   def num_bits(); end
@@ -1900,11 +1900,11 @@ class OpenSSL::BN
   # *   *checks* - integer
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def prime?(*_); end
+  def prime?(*arg0); end
 
   # Performs a Miller-Rabin primality test. This is same as
   # [`prime?`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html#method-i-prime-3F)
@@ -1915,27 +1915,27 @@ class OpenSSL::BN
   # *   *trial\_div* - boolean
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def prime_fasttest?(*_); end
+  def prime_fasttest?(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def rshift!(_); end
+  def rshift!(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def set_bit!(_); end
+  def set_bit!(arg0); end
 
   sig {returns(::T.untyped)}
   def sqr(); end
@@ -1962,19 +1962,19 @@ class OpenSSL::BN
   #     *   16 - hex
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def to_s(*_); end
+  def to_s(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def ucmp(_); end
+  def ucmp(arg0); end
 
   sig {returns(::T.untyped)}
   def zero?(); end
@@ -1990,43 +1990,43 @@ class OpenSSL::BN
   # *   *rem* - [`BN`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/BN.html)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.generate_prime(*_); end
+  def self.generate_prime(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.pseudo_rand(*_); end
+  def self.pseudo_rand(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.pseudo_rand_range(_); end
+  def self.pseudo_rand_range(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.rand(*_); end
+  def self.rand(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.rand_range(_); end
+  def self.rand_range(arg0); end
 end
 
 # Generic [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) for all of
@@ -2141,11 +2141,11 @@ module OpenSSL::Buffering
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # Writes *args* to the stream.
   #
@@ -2702,11 +2702,11 @@ class OpenSSL::Cipher
   # [`Cipher#final`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-final).
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def auth_tag(*_); end
+  def auth_tag(*arg0); end
 
   # Sets the authentication tag to verify the integrity of the ciphertext. This
   # can be called only when the cipher supports AE. The tag must be set after
@@ -2774,11 +2774,11 @@ class OpenSSL::Cipher
   # Internally calls EVP\_CipherInit\_ex(ctx, NULL, NULL, NULL, NULL, 0).
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def decrypt(*_); end
+  def decrypt(*arg0); end
 
   # Initializes the
   # [`Cipher`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html) for
@@ -2796,11 +2796,11 @@ class OpenSSL::Cipher
   # Internally calls EVP\_CipherInit\_ex(ctx, NULL, NULL, NULL, NULL, 1).
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def encrypt(*_); end
+  def encrypt(*arg0); end
 
   # Returns the remaining data held in the cipher object. Further calls to
   # [`Cipher#update`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Cipher.html#method-i-update)
@@ -2821,11 +2821,11 @@ class OpenSSL::Cipher
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(_); end
+  def initialize(arg0); end
 
   # Sets the cipher IV. Please note that since you should never be using ECB
   # mode, an IV is always explicitly required and should be set prior to
@@ -2947,11 +2947,11 @@ class OpenSSL::Cipher
   # A minimum of 1000 iterations is recommended.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def pkcs5_keyivgen(*_); end
+  def pkcs5_keyivgen(*arg0); end
 
   # Generate a random IV with
   # [`OpenSSL::Random.random_bytes`](https://docs.ruby-lang.org/en/2.7.0/Random.html#method-c-random_bytes)
@@ -2998,11 +2998,11 @@ class OpenSSL::Cipher
   # it. *buffer* will be resized automatically.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def update(*_); end
+  def update(*arg0); end
 
   # Returns the names of all available ciphers in an array.
   sig {returns(::T.untyped)}
@@ -3354,11 +3354,11 @@ class OpenSSL::Config
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.load(*_); end
+  def self.load(*arg0); end
 
   # Parses a given *string* as a blob that contains configuration for
   # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html).
@@ -3520,11 +3520,11 @@ class OpenSSL::Digest < Digest::Class
   # Alias for: update
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def <<(_); end
+  def <<(arg0); end
 
   # Returns the block length of the digest algorithm, i.e. the length in bytes
   # of an individual block. Most modern algorithms partition a message to be
@@ -3554,11 +3554,11 @@ class OpenSSL::Digest < Digest::Class
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # Returns the sn of this
   # [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html) algorithm.
@@ -3597,11 +3597,11 @@ class OpenSSL::Digest < Digest::Class
   # Also aliased as: <<
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def update(_); end
+  def update(arg0); end
 
   # Return the hash value computed with *name*
   # [`Digest`](https://docs.ruby-lang.org/en/2.7.0/Digest.html). *name* is
@@ -4000,11 +4000,11 @@ class OpenSSL::Engine
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def cipher(_); end
+  def cipher(arg0); end
 
   # Returns an array of command definitions for the current engine
   sig {returns(::T.untyped)}
@@ -4015,11 +4015,11 @@ class OpenSSL::Engine
   # Raises an EngineError if the command fails.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def ctrl_cmd(*_); end
+  def ctrl_cmd(*arg0); end
 
   # Returns a new instance of
   # [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html)
@@ -4037,11 +4037,11 @@ class OpenSSL::Engine
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def digest(_); end
+  def digest(arg0); end
 
   # Releases all internal structural references for this engine.
   #
@@ -4071,11 +4071,11 @@ class OpenSSL::Engine
   # unavailable.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def load_private_key(*_); end
+  def load_private_key(*arg0); end
 
   # Loads the given public key identified by *id* and *data*.
   #
@@ -4084,11 +4084,11 @@ class OpenSSL::Engine
   # unavailable.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def load_public_key(*_); end
+  def load_public_key(*arg0); end
 
   # Get the descriptive name for this engine.
   #
@@ -4118,11 +4118,11 @@ class OpenSSL::Engine
   # See also <openssl/engine.h>
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def set_default(_); end
+  def set_default(arg0); end
 
   # Fetches the engine as specified by the *id*
   # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
@@ -4137,11 +4137,11 @@ class OpenSSL::Engine
   # for the currently loaded engines.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.by_id(_); end
+  def self.by_id(arg0); end
 
   # It is only necessary to run cleanup when engines are loaded via
   # [`OpenSSL::Engine.load`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Engine.html#method-c-load).
@@ -4163,11 +4163,11 @@ class OpenSSL::Engine
   # nil is returned.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.load(*_); end
+  def self.load(*arg0); end
 end
 
 # This is the generic exception for
@@ -4226,11 +4226,11 @@ class OpenSSL::HMAC
   # [`update`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html#method-i-update)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def <<(_); end
+  def <<(arg0); end
 
   # Returns the authentication code an instance represents as a binary string.
   #
@@ -4256,12 +4256,12 @@ class OpenSSL::HMAC
 
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(_, _1); end
+  def initialize(arg0, arg1); end
 
   # Alias for:
   # [`hexdigest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html#method-i-hexdigest)
@@ -4311,11 +4311,11 @@ class OpenSSL::HMAC
   # [`<<`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/HMAC.html#method-i-3C-3C)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def update(_); end
+  def update(arg0); end
 
   # Returns the authentication code as a binary string. The *digest* parameter
   # specifies the digest algorithm to use. This may be a
@@ -4334,13 +4334,13 @@ class OpenSSL::HMAC
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.digest(_, _1, _2); end
+  def self.digest(arg0, arg1, arg2); end
 
   # Returns the authentication code as a hex-encoded string. The *digest*
   # parameter specifies the digest algorithm to use. This may be a
@@ -4359,13 +4359,13 @@ class OpenSSL::HMAC
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.hexdigest(_, _1, _2); end
+  def self.hexdigest(arg0, arg1, arg2); end
 end
 
 # Document-class:
@@ -4481,11 +4481,11 @@ class OpenSSL::Netscape::SPKI
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # Returns the public key associated with the
   # [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html), an
@@ -4527,12 +4527,12 @@ class OpenSSL::Netscape::SPKI
   # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html).
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def sign(_, _1); end
+  def sign(arg0, arg1); end
 
   # Returns the DER encoding of this
   # [`SPKI`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Netscape/SPKI.html).
@@ -4571,11 +4571,11 @@ class OpenSSL::Netscape::SPKI
   # should be used.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def verify(_); end
+  def verify(arg0); end
 end
 
 # Generic [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html)
@@ -4802,11 +4802,11 @@ class OpenSSL::OCSP::BasicResponse
   # be added.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_nonce(*_); end
+  def add_nonce(*arg0); end
 
   # Adds a certificate status for *certificate\_id*. *status* is the status, and
   # must be one of these:
@@ -4838,27 +4838,27 @@ class OpenSSL::OCSP::BasicResponse
   # as the relative seconds from the current time.
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
-      _3: ::T.untyped,
-      _4: ::T.untyped,
-      _5: ::T.untyped,
-      _6: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
+      arg3: ::T.untyped,
+      arg4: ::T.untyped,
+      arg5: ::T.untyped,
+      arg6: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_status(_, _1, _2, _3, _4, _5, _6); end
+  def add_status(arg0, arg1, arg2, arg3, arg4, arg5, arg6); end
 
   # Copies the nonce from *request* into this response. Returns 1 on success and
   # 0 on failure.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def copy_nonce(_); end
+  def copy_nonce(arg0); end
 
   # Returns a SingleResponse whose CertId matches with *certificate\_id*, or
   # `nil` if this
@@ -4866,19 +4866,19 @@ class OpenSSL::OCSP::BasicResponse
   # does not contain it.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def find_response(_); end
+  def find_response(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # SingleResponse for this
@@ -4900,11 +4900,11 @@ class OpenSSL::OCSP::BasicResponse
   # :   use signer's public key hash as responderID
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def sign(*_); end
+  def sign(*arg0); end
 
   # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # statuses for this response. Each status contains a CertificateId, the status
@@ -4930,11 +4930,11 @@ class OpenSSL::OCSP::BasicResponse
   # [`OpenSSL::OCSP::Request#verify`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP/Request.html#method-i-verify).
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def verify(*_); end
+  def verify(*arg0); end
 end
 
 # An
@@ -4945,21 +4945,21 @@ class OpenSSL::OCSP::CertificateId
   # same.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def cmp(_); end
+  def cmp(arg0); end
 
   # Compares this certificate id's issuer with *other* and returns `true` if
   # they are the same.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def cmp_issuer(_); end
+  def cmp_issuer(arg0); end
 
   # Returns the ln (long name) of the hash algorithm used to generate the
   # issuerNameHash and the issuerKeyHash values.
@@ -4968,11 +4968,11 @@ class OpenSSL::OCSP::CertificateId
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # Returns the issuerKeyHash of this certificate ID, the hash of the issuer's
   # public key.
@@ -5008,11 +5008,11 @@ class OpenSSL::OCSP::Request
   # Adds *certificate\_id* to the request.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_certid(_); end
+  def add_certid(arg0); end
 
   # Adds a *nonce* to the
   # [`OCSP`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP.html) request. If
@@ -5022,11 +5022,11 @@ class OpenSSL::OCSP::Request
   # it.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_nonce(*_); end
+  def add_nonce(*arg0); end
 
   # Returns all certificate IDs in this request.
   sig {returns(::T.untyped)}
@@ -5053,19 +5053,19 @@ class OpenSSL::OCSP::Request
   # an error.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def check_nonce(_); end
+  def check_nonce(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # Signs this [`OCSP`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/OCSP.html)
   # request using *cert*, *key* and optional *digest*. If *digest* is not
@@ -5082,11 +5082,11 @@ class OpenSSL::OCSP::Request
   # :   Don't include any certificates in the request. *certs* will be ignored.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def sign(*_); end
+  def sign(*arg0); end
 
   # Returns this request as a DER-encoded string
   sig {returns(::T.untyped)}
@@ -5103,11 +5103,11 @@ class OpenSSL::OCSP::Request
   # to check whether the request is signed or not.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def verify(*_); end
+  def verify(*arg0); end
 end
 
 # An
@@ -5121,11 +5121,11 @@ class OpenSSL::OCSP::Response
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # Returns the status of the response.
   sig {returns(::T.untyped)}
@@ -5144,12 +5144,12 @@ class OpenSSL::OCSP::Response
   # from *status* and *basic\_response*.
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.create(_, _1); end
+  def self.create(arg0, arg1); end
 end
 
 # An
@@ -5194,22 +5194,22 @@ class OpenSSL::OCSP::SingleResponse
   # the age of responses.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def check_validity(*_); end
+  def check_validity(*arg0); end
 
   sig {returns(::T.untyped)}
   def extensions(); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(_); end
+  def initialize(arg0); end
 
   sig {returns(::T.untyped)}
   def next_update(); end
@@ -5246,11 +5246,11 @@ class OpenSSL::PKCS12
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def key(); end
@@ -5282,11 +5282,11 @@ class OpenSSL::PKCS12
   # documentation for PKCS12\_create().
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.create(*_); end
+  def self.create(*arg0); end
 end
 
 class OpenSSL::PKCS12::PKCS12Error < OpenSSL::OpenSSLError
@@ -5295,26 +5295,26 @@ end
 module OpenSSL::PKCS5
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
-      _3: ::T.untyped,
-      _4: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
+      arg3: ::T.untyped,
+      arg4: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.pbkdf2_hmac(_, _1, _2, _3, _4); end
+  def self.pbkdf2_hmac(arg0, arg1, arg2, arg3, arg4); end
 
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
-      _3: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
+      arg3: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.pbkdf2_hmac_sha1(_, _1, _2, _3); end
+  def self.pbkdf2_hmac_sha1(arg0, arg1, arg2, arg3); end
 end
 
 class OpenSSL::PKCS5::PKCS5Error < OpenSSL::OpenSSLError
@@ -5334,45 +5334,45 @@ class OpenSSL::PKCS7
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_certificate(_); end
+  def add_certificate(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_crl(_); end
+  def add_crl(arg0); end
 
   # Also aliased as:
   # [`data=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKCS7.html#method-i-data-3D)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_data(_); end
+  def add_data(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_recipient(_); end
+  def add_recipient(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_signer(_); end
+  def add_signer(arg0); end
 
   sig {returns(::T.untyped)}
   def certificates(); end
@@ -5419,11 +5419,11 @@ class OpenSSL::PKCS7
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def decrypt(*_); end
+  def decrypt(*arg0); end
 
   sig {returns(::T.untyped)}
   def detached(); end
@@ -5452,11 +5452,11 @@ class OpenSSL::PKCS7
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def recipients(); end
@@ -5490,43 +5490,43 @@ class OpenSSL::PKCS7
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def verify(*_); end
+  def verify(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.encrypt(*_); end
+  def self.encrypt(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.read_smime(_); end
+  def self.read_smime(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.sign(*_); end
+  def self.sign(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.write_smime(*_); end
+  def self.write_smime(*arg0); end
 end
 
 class OpenSSL::PKCS7::PKCS7Error < OpenSSL::OpenSSLError
@@ -5538,11 +5538,11 @@ class OpenSSL::PKCS7::RecipientInfo
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(_); end
+  def initialize(arg0); end
 
   sig {returns(::T.untyped)}
   def issuer(); end
@@ -5554,13 +5554,13 @@ end
 class OpenSSL::PKCS7::SignerInfo
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(_, _1, _2); end
+  def initialize(arg0, arg1, arg2); end
 
   # Also aliased as:
   # [`name`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKCS7/SignerInfo.html#method-i-name)
@@ -5650,11 +5650,11 @@ module OpenSSL::PKey
   #     PEM resource.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.read(*_); end
+  def self.read(*arg0); end
 end
 
 # An implementation of the Diffie-Hellman key exchange protocol based on
@@ -5711,11 +5711,11 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   #     parameters only.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def compute_key(_); end
+  def compute_key(arg0); end
 
   # Encodes this
   # [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html) to its PEM
@@ -5761,11 +5761,11 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def p(); end
@@ -5868,24 +5868,24 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   # *priv\_key* may be `nil`.
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def set_key(_, _1); end
+  def set_key(arg0, arg1); end
 
   # Sets *p*, *q*, *g* to the
   # [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html) instance.
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def set_pqg(_, _1, _2); end
+  def set_pqg(arg0, arg1, arg2); end
 
   # Encodes this
   # [`DH`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DH.html) to its DER
@@ -5919,11 +5919,11 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
   # *   *generator* is a small number > 1, typically 2 or 5.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.generate(*_); end
+  def self.generate(*arg0); end
 end
 
 # Generic exception that is raised if an operation on a DH
@@ -5960,11 +5960,11 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html#method-i-to_s)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def export(*_); end
+  def export(*arg0); end
 
   sig {returns(::T.untyped)}
   def g(); end
@@ -5979,11 +5979,11 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def p(); end
@@ -6071,24 +6071,24 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   # *priv\_key* may be `nil`.
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def set_key(_, _1); end
+  def set_key(arg0, arg1); end
 
   # Sets *p*, *q*, *g* to the
   # [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html) instance.
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def set_pqg(_, _1, _2); end
+  def set_pqg(arg0, arg1, arg2); end
 
   # Computes and returns the
   # [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html) signature
@@ -6111,11 +6111,11 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def syssign(_); end
+  def syssign(arg0); end
 
   # Verifies whether the signature is valid given the message digest input. It
   # does so by validating *sig* using the public key of this
@@ -6139,12 +6139,12 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def sysverify(_, _1); end
+  def sysverify(arg0, arg1); end
 
   # Encodes this
   # [`DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html) to its
@@ -6156,21 +6156,21 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   # [`export`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html#method-i-export)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def to_pem(*_); end
+  def to_pem(*arg0); end
 
   # Alias for:
   # [`export`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html#method-i-export)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def to_s(*_); end
+  def to_s(*arg0); end
 
   # Prints all parameters of key to buffer INSECURE: PRIVATE INFORMATIONS CAN
   # LEAK OUT!!! Don't use :-)) (I's up to you)
@@ -6185,11 +6185,11 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
   # *   *size* is an integer representing the desired key size.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.generate(_); end
+  def self.generate(arg0); end
 end
 
 # Generic exception that is raised if an operation on a DSA
@@ -6228,32 +6228,32 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   # documentation for ECDH\_compute\_key()
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def dh_compute_key(_); end
+  def dh_compute_key(arg0); end
 
   # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for ECDSA\_sign()
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def dsa_sign_asn1(_); end
+  def dsa_sign_asn1(arg0); end
 
   # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for ECDSA\_verify()
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def dsa_verify_asn1(_, _1); end
+  def dsa_verify_asn1(arg0, arg1); end
 
   # Outputs the [`EC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html)
   # key in PEM encoding. If *cipher* and *pass\_phrase* are given they will be
@@ -6266,11 +6266,11 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   # [`to_pem`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html#method-i-to_pem)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def export(*_); end
+  def export(*arg0); end
 
   # Alias for:
   # [`generate_key!`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html#method-i-generate_key-21)
@@ -6318,11 +6318,11 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # Returns whether this
   # [`EC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html) instance
@@ -6395,11 +6395,11 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   # [`export`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html#method-i-export)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def to_pem(*_); end
+  def to_pem(*arg0); end
 
   # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for EC\_KEY\_print()
@@ -6420,11 +6420,11 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
   # with a new random private and public key.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.generate(_); end
+  def self.generate(arg0); end
 end
 
 class OpenSSL::PKey::EC::Group
@@ -6432,11 +6432,11 @@ class OpenSSL::PKey::EC::Group
   # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Group.html#method-i-eql-3F)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def ==(_); end
+  def ==(arg0); end
 
   # Returns the flags set on the group.
   #
@@ -6490,11 +6490,11 @@ class OpenSSL::PKey::EC::Group
   # [`==`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Group.html#method-i-3D-3D)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def eql?(_); end
+  def eql?(arg0); end
 
   # Returns the generator of the group.
   #
@@ -6505,11 +6505,11 @@ class OpenSSL::PKey::EC::Group
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # Returns the order of the group.
   #
@@ -6576,13 +6576,13 @@ class OpenSSL::PKey::EC::Group
   # documentation for EC\_GROUP\_set\_generator()
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def set_generator(_, _1, _2); end
+  def set_generator(arg0, arg1, arg2); end
 
   # See the [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html)
   # documentation for i2d\_ECPKParameters\_bio()
@@ -6608,21 +6608,21 @@ class OpenSSL::PKey::EC::Point
   # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Point.html#method-i-eql-3F)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def ==(_); end
+  def ==(arg0); end
 
   # Also aliased as:
   # [`==`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC/Point.html#method-i-3D-3D)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def eql?(_); end
+  def eql?(arg0); end
 
   sig {returns(::T.untyped)}
   def group(); end
@@ -6632,11 +6632,11 @@ class OpenSSL::PKey::EC::Point
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def invert!(); end
@@ -6659,11 +6659,11 @@ class OpenSSL::PKey::EC::Point
   # Please note that `points[0]` is not multiplied by `bns[0]`, but `bns[1]`.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def mul(*_); end
+  def mul(*arg0); end
 
   sig {returns(::T.untyped)}
   def on_curve?(); end
@@ -6684,11 +6684,11 @@ class OpenSSL::PKey::EC::Point
   # for more information.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def to_bn(*_); end
+  def to_bn(*arg0); end
 end
 
 class OpenSSL::PKey::EC::Point::Error < OpenSSL::OpenSSLError
@@ -6730,12 +6730,12 @@ class OpenSSL::PKey::PKey
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def sign(_, _1); end
+  def sign(arg0, arg1); end
 
   # To verify the [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   # *signature*, *digest*, an instance of
@@ -6760,13 +6760,13 @@ class OpenSSL::PKey::PKey
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def verify(_, _1, _2); end
+  def verify(arg0, arg1, arg2); end
 end
 
 # Raised when errors occur during PKey#sign or PKey#verify.
@@ -6843,19 +6843,19 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html#method-i-to_s)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def export(*_); end
+  def export(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def iqmp(); end
@@ -6907,22 +6907,22 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   # private key. *padding* defaults to PKCS1\_PADDING.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def private_decrypt(*_); end
+  def private_decrypt(*arg0); end
 
   # Encrypt *string* with the private key. *padding* defaults to PKCS1\_PADDING.
   # The encrypted string output can be decrypted using
   # [`public_decrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html#method-i-public_decrypt).
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def private_encrypt(*_); end
+  def private_encrypt(*arg0); end
 
   # The return value is always `true` since every private key is also a public
   # key.
@@ -6933,22 +6933,22 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   # public key. *padding* defaults to PKCS1\_PADDING.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def public_decrypt(*_); end
+  def public_decrypt(*arg0); end
 
   # Encrypt *string* with the public key. *padding* defaults to PKCS1\_PADDING.
   # The encrypted string output can be decrypted using
   # [`private_decrypt`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html#method-i-private_decrypt).
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def public_encrypt(*_); end
+  def public_encrypt(*arg0); end
 
   # Makes new [`RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html)
   # instance containing the public key from the private key.
@@ -6972,36 +6972,36 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   # respectively.
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def set_crt_params(_, _1, _2); end
+  def set_crt_params(arg0, arg1, arg2); end
 
   # Sets *p*, *q* for the
   # [`RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html) instance.
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def set_factors(_, _1); end
+  def set_factors(arg0, arg1); end
 
   # Sets *n*, *e*, *d* for the
   # [`RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html) instance.
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def set_key(_, _1, _2); end
+  def set_key(arg0, arg1, arg2); end
 
   # Signs *data* using the Probabilistic Signature Scheme (RSA-PSS) and returns
   # the calculated signature.
@@ -7057,21 +7057,21 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   # [`export`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html#method-i-export)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def to_pem(*_); end
+  def to_pem(*arg0); end
 
   # Alias for:
   # [`export`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html#method-i-export)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def to_s(*_); end
+  def to_s(*arg0); end
 
   # THIS METHOD IS INSECURE, PRIVATE INFORMATION CAN LEAK OUT!!!
   #
@@ -7089,11 +7089,11 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   # 17, or 65537.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.generate(*_); end
+  def self.generate(*arg0); end
 
   # Verifies *data* using the Probabilistic Signature Scheme (RSA-PSS).
   #
@@ -7140,11 +7140,11 @@ module OpenSSL::Random
   # Same as ::egd\_bytes but queries 255 bytes by default.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.egd(_); end
+  def self.egd(arg0); end
 
   # Queries the entropy gathering daemon EGD on socket path given by *filename*.
   #
@@ -7152,21 +7152,21 @@ module OpenSSL::Random
   # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) built-in PRNG.
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.egd_bytes(_, _1); end
+  def self.egd_bytes(arg0, arg1); end
 
   # Reads bytes from *filename* and adds them to the PRNG.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.load_random_file(_); end
+  def self.load_random_file(arg0); end
 
   # Generates a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) with
   # *length* number of pseudo-random bytes.
@@ -7182,11 +7182,11 @@ module OpenSSL::Random
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.pseudo_bytes(_); end
+  def self.pseudo_bytes(arg0); end
 
   # Mixes the bytes from *str* into the Pseudo
   # [`Random`](https://docs.ruby-lang.org/en/2.7.0/Random.html) Number
@@ -7210,12 +7210,12 @@ module OpenSSL::Random
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.random_add(_, _1); end
+  def self.random_add(arg0, arg1); end
 
   # Generates a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) with
   # *length* number of cryptographically strong pseudo-random bytes.
@@ -7228,20 +7228,20 @@ module OpenSSL::Random
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.random_bytes(_); end
+  def self.random_bytes(arg0); end
 
   # ::seed is equivalent to ::add where *entropy* is length of *str*.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.seed(_); end
+  def self.seed(arg0); end
 
   # Return `true` if the PRNG has been seeded with enough data, `false`
   # otherwise.
@@ -7253,11 +7253,11 @@ module OpenSSL::Random
   # a later session.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.write_random_file(_); end
+  def self.write_random_file(arg0); end
 end
 
 class OpenSSL::Random::RandomError < OpenSSL::OpenSSLError
@@ -7608,11 +7608,11 @@ class OpenSSL::SSL::SSLContext
   # Removes sessions in the internal cache that have expired at *time*.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def flush_sessions(*_); end
+  def flush_sessions(*arg0); end
 
   # Alias for:
   # [`setup`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-setup)
@@ -7862,11 +7862,11 @@ class OpenSSL::SSL::SSLContext
   # Adds *session* to the session cache.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def session_add(_); end
+  def session_add(arg0); end
 
   # The current session cache mode.
   sig {returns(::T.untyped)}
@@ -7987,11 +7987,11 @@ class OpenSSL::SSL::SSLContext
   # Removes *session* from the session cache.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def session_remove(_); end
+  def session_remove(arg0); end
 
   # A callback invoked when a session is removed from the internal cache.
   #
@@ -8385,11 +8385,11 @@ class OpenSSL::SSL::SSLSocket
   # instead.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def accept_nonblock(*_); end
+  def accept_nonblock(*arg0); end
 
   # The X509 certificate for this socket endpoint.
   sig {returns(::T.untyped)}
@@ -8440,11 +8440,11 @@ class OpenSSL::SSL::SSLSocket
   # instead.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def connect_nonblock(*_); end
+  def connect_nonblock(*arg0); end
 
   # The SSLContext object used in this connection.
   sig {returns(::T.untyped)}
@@ -8465,11 +8465,11 @@ class OpenSSL::SSL::SSLSocket
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # The underlying [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
   sig {returns(::T.untyped)}
@@ -8565,21 +8565,21 @@ class OpenSSL::SSL::SSLSocket
   # a pre-allocated *buffer* is provided the data will be written into it.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def sysread(*_); end
+  def sysread(*arg0); end
 
   # Writes *string* to the
   # [`SSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL.html) connection.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def syswrite(_); end
+  def syswrite(arg0); end
 
   # The underlying [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
   sig {returns(::T.untyped)}
@@ -8599,11 +8599,11 @@ class OpenSSL::SSL::Session
   # the same, `false` if not.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def ==(_); end
+  def ==(arg0); end
 
   # Returns the
   # [`Session`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/Session.html)
@@ -8613,11 +8613,11 @@ class OpenSSL::SSL::Session
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(_); end
+  def initialize(arg0); end
 
   # Returns the time at which the session was established.
   sig {returns(::T.untyped)}
@@ -8797,11 +8797,11 @@ end
 class OpenSSL::X509::Attribute
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def oid(); end
@@ -8835,19 +8835,19 @@ end
 class OpenSSL::X509::CRL
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_extension(_); end
+  def add_extension(arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_revoked(_); end
+  def add_revoked(arg0); end
 
   # Gets X509v3 extensions as array of X509Ext objects
   sig {returns(::T.untyped)}
@@ -8864,11 +8864,11 @@ class OpenSSL::X509::CRL
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def issuer(); end
@@ -8916,12 +8916,12 @@ class OpenSSL::X509::CRL
 
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def sign(_, _1); end
+  def sign(arg0, arg1); end
 
   sig {returns(::T.untyped)}
   def signature_algorithm(); end
@@ -8944,11 +8944,11 @@ class OpenSSL::X509::CRL
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def verify(_); end
+  def verify(arg0); end
 
   sig {returns(::T.untyped)}
   def version(); end
@@ -9070,21 +9070,21 @@ end
 class OpenSSL::X509::Certificate
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_extension(_); end
+  def add_extension(arg0); end
 
   # Returns `true` if *key* is the corresponding private key to the Subject
   # Public Key Information, `false` otherwise.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def check_private_key(_); end
+  def check_private_key(arg0); end
 
   sig {returns(::T.untyped)}
   def extensions(); end
@@ -9099,11 +9099,11 @@ class OpenSSL::X509::Certificate
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def inspect(); end
@@ -9173,12 +9173,12 @@ class OpenSSL::X509::Certificate
 
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def sign(_, _1); end
+  def sign(arg0, arg1); end
 
   sig {returns(::T.untyped)}
   def signature_algorithm(); end
@@ -9215,11 +9215,11 @@ class OpenSSL::X509::Certificate
   # [`OpenSSL::PKey`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey.html).
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def verify(_); end
+  def verify(arg0); end
 
   sig {returns(::T.untyped)}
   def version(); end
@@ -9250,11 +9250,11 @@ class OpenSSL::X509::Extension
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def oid(); end
@@ -9311,11 +9311,11 @@ class OpenSSL::X509::ExtensionFactory
   # with passed values. See also x509v3\_config(5).
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def create_ext(*_); end
+  def create_ext(*arg0); end
 
   sig do
     params(
@@ -9362,11 +9362,11 @@ class OpenSSL::X509::ExtensionFactory
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def issuer_certificate(); end
@@ -9451,11 +9451,11 @@ class OpenSSL::X509::Name
   # [`cmp`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#method-i-cmp)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def <=>(_); end
+  def <=>(arg0); end
 
   # Adds a new entry with the given *oid* and *value* to this name. The *oid* is
   # an object identifier defined in ASN.1. Some common OIDs are:
@@ -9485,11 +9485,11 @@ class OpenSSL::X509::Name
   # single-valued RDN to the end.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_entry(*_); end
+  def add_entry(*arg0); end
 
   # Compares this
   # [`Name`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html) with
@@ -9500,20 +9500,20 @@ class OpenSSL::X509::Name
   # [`<=>`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#method-i-3C-3D-3E)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def cmp(_); end
+  def cmp(arg0); end
 
   # Returns true if *name* and *other* refer to the same hash key.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def eql?(_); end
+  def eql?(arg0); end
 
   # The hash value returned is suitable for use as a certificate's filename in a
   # CA path.
@@ -9527,11 +9527,11 @@ class OpenSSL::X509::Name
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig do
     params(
@@ -9567,11 +9567,11 @@ class OpenSSL::X509::Name
   # used.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def to_s(*_); end
+  def to_s(*arg0); end
 
   # Alias for:
   # [`parse_openssl`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Name.html#method-c-parse_openssl)
@@ -9658,11 +9658,11 @@ end
 class OpenSSL::X509::Request
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_attribute(_); end
+  def add_attribute(arg0); end
 
   sig {returns(::T.untyped)}
   def attributes(); end
@@ -9677,11 +9677,11 @@ class OpenSSL::X509::Request
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def public_key(); end
@@ -9696,12 +9696,12 @@ class OpenSSL::X509::Request
 
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def sign(_, _1); end
+  def sign(arg0, arg1); end
 
   sig {returns(::T.untyped)}
   def signature_algorithm(); end
@@ -9736,11 +9736,11 @@ class OpenSSL::X509::Request
   # Checks that cert signature is made with PRIVversion of this PUBLIC 'key'
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def verify(_); end
+  def verify(arg0); end
 
   sig {returns(::T.untyped)}
   def version(); end
@@ -9760,11 +9760,11 @@ end
 class OpenSSL::X509::Revoked
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_extension(_); end
+  def add_extension(arg0); end
 
   # Gets X509v3 extensions as array of X509Ext objects
   sig {returns(::T.untyped)}
@@ -9781,11 +9781,11 @@ class OpenSSL::X509::Revoked
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   sig {returns(::T.untyped)}
   def serial(); end
@@ -9857,42 +9857,42 @@ class OpenSSL::X509::Store
   # *cert* to the certificate store.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_cert(_); end
+  def add_cert(arg0); end
 
   # Adds the
   # [`OpenSSL::X509::CRL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/CRL.html)
   # *crl* to the store.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_crl(_); end
+  def add_crl(arg0); end
 
   # Adds the certificates in *file* to the certificate store. *file* is the path
   # to the file, and the file contains one or more certificates in PEM format
   # concatenated together.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_file(_); end
+  def add_file(arg0); end
 
   # Adds *path* as the hash dir to be looked up by the store.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def add_path(_); end
+  def add_path(arg0); end
 
   # The certificate chain constructed by the last call of
   # [`verify`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Store.html#method-i-verify).
@@ -9923,11 +9923,11 @@ class OpenSSL::X509::Store
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # Sets the store's purpose to *purpose*. If specified, the verifications on
   # the store will check every untrusted certificate's extensions are consistent
@@ -9994,11 +9994,11 @@ class OpenSSL::X509::Store
   # [`chain`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Store.html#attribute-i-chain).
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def verify(*_); end
+  def verify(*arg0); end
 
   # The callback for additional certificate verification. It is invoked for each
   # untrusted certificate in the chain.
@@ -10068,11 +10068,11 @@ class OpenSSL::X509::StoreContext
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # Sets the purpose of the context. See Store#purpose=.
   sig do

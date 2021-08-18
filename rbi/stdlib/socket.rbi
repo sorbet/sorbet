@@ -172,19 +172,19 @@ class Addrinfo < Data
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def getnameinfo(*_); end
+  def getnameinfo(*arg0); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # returns a string which shows addrinfo in human-readable form.
   #
@@ -369,11 +369,11 @@ class Addrinfo < Data
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def marshal_load(_); end
+  def marshal_load(arg0); end
 
   # returns the protocol family as an integer.
   #
@@ -503,11 +503,11 @@ class Addrinfo < Data
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.getaddrinfo(*_); end
+  def self.getaddrinfo(*arg0); end
 
   # returns an addrinfo object for IP address.
   #
@@ -519,11 +519,11 @@ class Addrinfo < Data
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.ip(_); end
+  def self.ip(arg0); end
 
   # returns an addrinfo object for TCP address.
   #
@@ -532,12 +532,12 @@ class Addrinfo < Data
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.tcp(_, _1); end
+  def self.tcp(arg0, arg1); end
 
   # returns an addrinfo object for UDP address.
   #
@@ -546,12 +546,12 @@ class Addrinfo < Data
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.udp(_, _1); end
+  def self.udp(arg0, arg1); end
 
   # returns an addrinfo object for UNIX socket address.
   #
@@ -563,11 +563,11 @@ class Addrinfo < Data
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.unix(*_); end
+  def self.unix(*arg0); end
 end
 
 # [`BasicSocket`](https://docs.ruby-lang.org/en/2.7.0/BasicSocket.html) is the
@@ -784,12 +784,12 @@ class BasicSocket < IO
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def getsockopt(_, _1); end
+  def getsockopt(arg0, arg1); end
 
   # Returns an [`Addrinfo`](https://docs.ruby-lang.org/en/2.7.0/Addrinfo.html)
   # object for local address obtained by getsockname.
@@ -828,11 +828,11 @@ class BasicSocket < IO
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def recv(*_); end
+  def recv(*arg0); end
 
   # Receives up to *maxlen* bytes from `socket` using recvfrom(2) after
   # O\_NONBLOCK is set for the underlying file descriptor. *flags* is zero or
@@ -1031,11 +1031,11 @@ class BasicSocket < IO
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def send(*_); end
+  def send(*arg0); end
 
   # sendmsg sends a message using sendmsg(2) system call in blocking manner.
   #
@@ -1174,11 +1174,11 @@ class BasicSocket < IO
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def setsockopt(*_); end
+  def setsockopt(*arg0); end
 
   # Calls shutdown(2) system call.
   #
@@ -1209,11 +1209,11 @@ class BasicSocket < IO
   #     }
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def shutdown(*_); end
+  def shutdown(*arg0); end
 
   # Gets the global
   # [`do_not_reverse_lookup`](https://docs.ruby-lang.org/en/2.7.0/BasicSocket.html#method-c-do_not_reverse_lookup)
@@ -1258,11 +1258,11 @@ class BasicSocket < IO
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.for_fd(_); end
+  def self.for_fd(arg0); end
 end
 
 # [`IPSocket`](https://docs.ruby-lang.org/en/2.7.0/IPSocket.html) is the super
@@ -1291,11 +1291,11 @@ class IPSocket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def addr(*_); end
+  def addr(*arg0); end
 
   # Returns the remote address as an array which contains address\_family, port,
   # hostname and numeric\_address. It is defined for connection oriented socket
@@ -1317,11 +1317,11 @@ class IPSocket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def peeraddr(*_); end
+  def peeraddr(*arg0); end
 
   # Receives a message and return the message as a string and an address which
   # the message come from.
@@ -1341,11 +1341,11 @@ class IPSocket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def recvfrom(*_); end
+  def recvfrom(*arg0); end
 
   # Lookups the IP address of *host*.
   #
@@ -1361,11 +1361,11 @@ class IPSocket < BasicSocket
   # [`getaddress_orig`](https://docs.ruby-lang.org/en/2.7.0/IPSocket.html#method-c-getaddress_orig)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.getaddress(_); end
+  def self.getaddress(arg0); end
 end
 
 # [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) `Socket` provides
@@ -2264,11 +2264,11 @@ class Socket < BasicSocket
   # *   bind function in Microsoft's Winsock functions reference
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def bind(_); end
+  def bind(arg0); end
 
   # Requests a connection to be made on the given `remote_sockaddr`. Returns 0
   # if successful, otherwise an exception is raised.
@@ -2392,11 +2392,11 @@ class Socket < BasicSocket
   # *   connect function in Microsoft's Winsock functions reference
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def connect(_); end
+  def connect(arg0); end
 
   # Requests a connection to be made on the given `remote_sockaddr` after
   # O\_NONBLOCK is set for the underlying file descriptor. Returns 0 if
@@ -2467,11 +2467,11 @@ class Socket < BasicSocket
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # enable the socket option
   # [`IPV6_V6ONLY`](https://docs.ruby-lang.org/en/2.7.0/Socket.html#IPV6_V6ONLY)
@@ -2559,11 +2559,11 @@ class Socket < BasicSocket
   # *   listen function in Microsoft's Winsock functions reference
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def listen(_); end
+  def listen(arg0); end
 
   # Receives up to *maxlen* bytes from `socket`. *flags* is zero or more of the
   # `MSG_` options. The first element of the results, *mesg*, is the data
@@ -2682,11 +2682,11 @@ class Socket < BasicSocket
   #     operation resulted in an ICMP Port Unreachable message.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def recvfrom(*_); end
+  def recvfrom(*arg0); end
 
   # Receives up to *maxlen* bytes from `socket` using recvfrom(2) after
   # O\_NONBLOCK is set for the underlying file descriptor. *flags* is zero or
@@ -2871,11 +2871,11 @@ class Socket < BasicSocket
   # [`Addrinfo.getaddrinfo`](https://docs.ruby-lang.org/en/2.7.0/Addrinfo.html#method-c-getaddrinfo).
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.getaddrinfo(*_); end
+  def self.getaddrinfo(*arg0); end
 
   # Use
   # [`Addrinfo#getnameinfo`](https://docs.ruby-lang.org/en/2.7.0/Addrinfo.html#method-i-getnameinfo)
@@ -2902,11 +2902,11 @@ class Socket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.gethostbyaddr(*_); end
+  def self.gethostbyaddr(*arg0); end
 
   # Use
   # [`Addrinfo.getaddrinfo`](https://docs.ruby-lang.org/en/2.7.0/Addrinfo.html#method-c-getaddrinfo)
@@ -2929,11 +2929,11 @@ class Socket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.gethostbyname(_); end
+  def self.gethostbyname(arg0); end
 
   # Returns the hostname.
   #
@@ -3020,11 +3020,11 @@ class Socket < BasicSocket
   # [`Addrinfo#getnameinfo`](https://docs.ruby-lang.org/en/2.7.0/Addrinfo.html#method-i-getnameinfo).
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.getnameinfo(*_); end
+  def self.getnameinfo(*arg0); end
 
   # Obtains the port number for *service\_name*.
   #
@@ -3037,11 +3037,11 @@ class Socket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.getservbyname(*_); end
+  def self.getservbyname(*arg0); end
 
   # Obtains the port number for *port*.
   #
@@ -3054,11 +3054,11 @@ class Socket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.getservbyport(*_); end
+  def self.getservbyport(*arg0); end
 
   # Returns local IP addresses as an array.
   #
@@ -3086,12 +3086,12 @@ class Socket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.pack_sockaddr_in(_, _1); end
+  def self.pack_sockaddr_in(arg0, arg1); end
 
   # Packs *path* as an
   # [`AF_UNIX`](https://docs.ruby-lang.org/en/2.7.0/Socket.html#AF_UNIX)
@@ -3102,11 +3102,11 @@ class Socket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.pack_sockaddr_un(_); end
+  def self.pack_sockaddr_un(arg0); end
 
   # Creates a pair of sockets connected each other.
   #
@@ -3135,11 +3135,11 @@ class Socket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.pair(*_); end
+  def self.pair(*arg0); end
 
   # Packs *port* and *host* as an AF\_INET/AF\_INET6 sockaddr string.
   #
@@ -3152,12 +3152,12 @@ class Socket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.sockaddr_in(_, _1); end
+  def self.sockaddr_in(arg0, arg1); end
 
   # Packs *path* as an
   # [`AF_UNIX`](https://docs.ruby-lang.org/en/2.7.0/Socket.html#AF_UNIX)
@@ -3168,11 +3168,11 @@ class Socket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.sockaddr_un(_); end
+  def self.sockaddr_un(arg0); end
 
   # Creates a pair of sockets connected each other.
   #
@@ -3201,11 +3201,11 @@ class Socket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.socketpair(*_); end
+  def self.socketpair(*arg0); end
 
   # creates a new socket object connected to host:port using TCP/IP.
   #
@@ -3540,11 +3540,11 @@ class Socket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.unpack_sockaddr_in(_); end
+  def self.unpack_sockaddr_in(arg0); end
 
   # Unpacks *sockaddr* into path.
   #
@@ -3557,11 +3557,11 @@ class Socket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.unpack_sockaddr_un(_); end
+  def self.unpack_sockaddr_un(arg0); end
 end
 
 # [`Socket::AncillaryData`](https://docs.ruby-lang.org/en/2.7.0/Socket/AncillaryData.html)
@@ -3586,12 +3586,12 @@ class Socket::AncillaryData
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def cmsg_is?(_, _1); end
+  def cmsg_is?(arg0, arg1); end
 
   # returns the cmsg data as a string.
   #
@@ -3613,14 +3613,14 @@ class Socket::AncillaryData
 
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
-      _3: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
+      arg3: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(_, _1, _2, _3); end
+  def initialize(arg0, arg1, arg2, arg3); end
 
   # returns a string which shows ancillarydata in human-readable form.
   #
@@ -3792,14 +3792,14 @@ class Socket::AncillaryData
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
-      _3: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
+      arg3: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.int(_, _1, _2, _3); end
+  def self.int(arg0, arg1, arg2, arg3); end
 
   # Returns new ancillary data for IP\_PKTINFO.
   #
@@ -3818,11 +3818,11 @@ class Socket::AncillaryData
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.ip_pktinfo(*_); end
+  def self.ip_pktinfo(*arg0); end
 
   # Returns new ancillary data for IPV6\_PKTINFO.
   #
@@ -3836,12 +3836,12 @@ class Socket::AncillaryData
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.ipv6_pktinfo(_, _1); end
+  def self.ipv6_pktinfo(arg0, arg1); end
 
   # Creates a new
   # [`Socket::AncillaryData`](https://docs.ruby-lang.org/en/2.7.0/Socket/AncillaryData.html)
@@ -3853,11 +3853,11 @@ class Socket::AncillaryData
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.unix_rights(*_); end
+  def self.unix_rights(*arg0); end
 end
 
 # [`Socket::Constants`](https://docs.ruby-lang.org/en/2.7.0/Socket/Constants.html)
@@ -4535,14 +4535,14 @@ class Socket::Option
 
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
-      _3: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
+      arg3: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(_, _1, _2, _3); end
+  def initialize(arg0, arg1, arg2, arg3); end
 
   # Returns a string which shows sockopt in human-readable form.
   #
@@ -4633,11 +4633,11 @@ class Socket::Option
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def unpack(_); end
+  def unpack(arg0); end
 
   # Creates a new
   # [`Socket::Option`](https://docs.ruby-lang.org/en/2.7.0/Socket/Option.html)
@@ -4654,14 +4654,14 @@ class Socket::Option
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
-      _3: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
+      arg3: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.bool(_, _1, _2, _3); end
+  def self.bool(arg0, arg1, arg2, arg3); end
 
   # Creates a new
   # [`Socket::Option`](https://docs.ruby-lang.org/en/2.7.0/Socket/Option.html)
@@ -4673,14 +4673,14 @@ class Socket::Option
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
-      _3: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
+      arg3: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.byte(_, _1, _2, _3); end
+  def self.byte(arg0, arg1, arg2, arg3); end
 
   # Creates a new
   # [`Socket::Option`](https://docs.ruby-lang.org/en/2.7.0/Socket/Option.html)
@@ -4694,14 +4694,14 @@ class Socket::Option
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
-      _2: ::T.untyped,
-      _3: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
+      arg3: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.int(_, _1, _2, _3); end
+  def self.int(arg0, arg1, arg2, arg3); end
 
   # Creates a new
   # [`Socket::Option`](https://docs.ruby-lang.org/en/2.7.0/Socket/Option.html)
@@ -4718,11 +4718,11 @@ class Socket::Option
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.ipv4_multicast_loop(_); end
+  def self.ipv4_multicast_loop(arg0); end
 
   # Creates a new
   # [`Socket::Option`](https://docs.ruby-lang.org/en/2.7.0/Socket/Option.html)
@@ -4736,11 +4736,11 @@ class Socket::Option
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.ipv4_multicast_ttl(_); end
+  def self.ipv4_multicast_ttl(arg0); end
 
   # Creates a new
   # [`Socket::Option`](https://docs.ruby-lang.org/en/2.7.0/Socket/Option.html)
@@ -4756,12 +4756,12 @@ class Socket::Option
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.linger(_, _1); end
+  def self.linger(arg0, arg1); end
 end
 
 # [`SocketError`](https://docs.ruby-lang.org/en/2.7.0/SocketError.html) is the
@@ -4911,11 +4911,11 @@ class TCPServer < TCPSocket
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # Listens for connections, using the specified `int` as the backlog. A call to
   # *listen* only applies if the `socket` is of type SOCK\_STREAM or
@@ -4993,11 +4993,11 @@ class TCPServer < TCPSocket
   # *   listen function in Microsoft's Winsock functions reference
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def listen(_); end
+  def listen(arg0); end
 
   # Returns a file descriptor of a accepted connection.
   #
@@ -5090,11 +5090,11 @@ class TCPSocket < IPSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.gethostbyname(_); end
+  def self.gethostbyname(arg0); end
 
   sig {returns(::T.untyped)}
   def self.socks_ignores(); end
@@ -5179,12 +5179,12 @@ class UDPSocket < IPSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def bind(_, _1); end
+  def bind(arg0, arg1); end
 
   # Connects *udpsocket* to *host*:*port*.
   #
@@ -5200,20 +5200,20 @@ class UDPSocket < IPSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
-      _1: ::T.untyped,
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def connect(_, _1); end
+  def connect(arg0, arg1); end
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # Receives up to *maxlen* bytes from `udpsocket` using recvfrom(2) after
   # O\_NONBLOCK is set for the underlying file descriptor. *flags* is zero or
@@ -5305,11 +5305,11 @@ class UDPSocket < IPSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def send(*_); end
+  def send(*arg0); end
 end
 
 # [`UNIXServer`](https://docs.ruby-lang.org/en/2.7.0/UNIXServer.html) represents
@@ -5391,11 +5391,11 @@ class UNIXServer < UNIXSocket
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(_); end
+  def initialize(arg0); end
 
   # Listens for connections, using the specified `int` as the backlog. A call to
   # *listen* only applies if the `socket` is of type SOCK\_STREAM or
@@ -5473,11 +5473,11 @@ class UNIXServer < UNIXSocket
   # *   listen function in Microsoft's Winsock functions reference
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def listen(_); end
+  def listen(arg0); end
 
   # Accepts a new connection. It returns the new file descriptor which is an
   # integer.
@@ -5517,11 +5517,11 @@ class UNIXSocket < BasicSocket
 
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(_); end
+  def initialize(arg0); end
 
   # Returns the path of the local address of unixsocket.
   #
@@ -5572,11 +5572,11 @@ class UNIXSocket < BasicSocket
   # [`IO.for_fd`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-for_fd)
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def recv_io(*_); end
+  def recv_io(*arg0); end
 
   # Receives a message via *unixsocket*.
   #
@@ -5602,11 +5602,11 @@ class UNIXSocket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def recvfrom(*_); end
+  def recvfrom(*arg0); end
 
   # Sends *io* as file descriptor passing.
   #
@@ -5626,11 +5626,11 @@ class UNIXSocket < BasicSocket
   # object or integer file descriptor.
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def send_io(_); end
+  def send_io(arg0); end
 
   # Creates a pair of sockets connected to each other.
   #
@@ -5647,11 +5647,11 @@ class UNIXSocket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.pair(*_); end
+  def self.pair(*arg0); end
 
   # Creates a pair of sockets connected to each other.
   #
@@ -5668,9 +5668,9 @@ class UNIXSocket < BasicSocket
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      arg0: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.socketpair(*_); end
+  def self.socketpair(*arg0); end
 end
