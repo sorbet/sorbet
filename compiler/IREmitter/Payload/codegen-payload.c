@@ -2532,10 +2532,8 @@ static __attribute__((noinline)) VALUE sorbet_run_exception_handling(volatile rb
             // retry singleton mechanism.
 
             if (nleType == TAG_RAISE) {
-                // Don't re-raise the exception via EC_JUMP_TAG or moral equivalent.
-                nleType = TAG_NONE;
-
                 handlerException = (*ec)->errinfo;
+                sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, handlerException);
             } else {
                 goto execute_ensure;
             }
