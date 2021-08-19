@@ -408,6 +408,7 @@ NameDef names[] = {
     // Packager
     {"import"},
     {"export_", "export"},
+    {"strict_exports"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageRegistry", "<PackageRegistry>", true},
     {"PackageMethods", "<PackageMethods>", true},

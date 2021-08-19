@@ -3,4 +3,5 @@
 
 class RootPackage < PackageSpec
   export RootPackage::Yabba
+  strict_exports true
 end
