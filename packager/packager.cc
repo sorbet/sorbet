@@ -58,6 +58,8 @@ struct PackageInfo {
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
     vector<FullyQualifiedName> exports;
+    // hkhkhk
+    bool strict_exports = false;
 };
 
 /**
@@ -439,6 +441,14 @@ struct PackageInfoFinder {
             }
         }
 
+        if (send.fun == core::Names::strict_exports() && send.args.size() == 1) {
+            if (auto *literal = ast::cast_tree<ast::Literal>(send.args[0])) {
+                if (literal->isTrue(ctx)) {
+                    info->strict_exports = true;
+                }
+            }
+        }
+
         return tree;
     }
 
@@ -486,6 +496,16 @@ struct PackageInfoFinder {
                 }
             }
             return;
+        }
+
+        if (!info->strict_exports && !exported.empty()) {
+            if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::InvalidPackageDefinition)) {
+                e.setHeader("Explicit exports are not allowed for packages without `strict_exports`");
+            }
+        }
+
+        if (!info->strict_exports) {
+            exported.emplace_back(info->name.fullName);
         }
 
         if (exported.empty()) {
