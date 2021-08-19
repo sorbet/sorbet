@@ -38,6 +38,7 @@ public:
 
 struct PackageName {
     core::LocOffsets loc;
+    std::string packageNameWithUnderscores;
     core::NameRef mangledName = core::NameRef::noName();
     FullyQualifiedName fullName;
 
@@ -139,7 +140,6 @@ public:
 
         std::string_view path = ctx.file.data(ctx).path();
         int curPrefixPos = path.find_last_of('/');
-
         while (curPrefixPos != std::string::npos) {
             const auto &it = packageInfoByPathPrefix.find(path.substr(0, curPrefixPos + 1));
             if (it != packageInfoByPathPrefix.end()) {
@@ -194,10 +194,14 @@ PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit 
     pName.loc = constantLit->loc;
     pName.fullName = getFullyQualifiedName(ctx, constantLit);
 
-    // Foo::Bar => Foo_Bar_Package
-    auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx)), "_Package");
+    // Foo::Bar => Foo_Bar
+    pName.packageNameWithUnderscores = absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx));
+    // Foo_Bar => Foo_Bar_Package
+    auto mangledName = absl::StrCat(pName.packageNameWithUnderscores, "_Package");
+
     auto utf8Name = ctx.state.enterNameUTF8(mangledName);
     auto packagerName = ctx.state.freshNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
+
     pName.mangledName = ctx.state.enterNameConstant(packagerName);
 
     return pName;
@@ -593,7 +597,7 @@ struct PackageInfoFinder {
 
 // Sanity checks package files, mutates arguments to export / export_methods to point to item in namespace,
 // builds up the expression injected into packages that import the package, and codegens the <PackagedMethods>  module.
-unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile &package) {
+unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile &package, vector<std::string> extraPackageFilesDirectoryPrefixes) {
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(ctx).sourceType == core::File::Type::Package);
     // Assumption: Root of AST is <root> class.
@@ -606,6 +610,10 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
     finder.finalize(ctx);
     if (finder.info) {
         finder.info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
+        for (string prefix : extraPackageFilesDirectoryPrefixes) {
+            string additionalDirPath = absl::StrCat(prefix, finder.info->name.packageNameWithUnderscores, "/");
+            finder.info->packagePathPrefixes.emplace_back(additionalDirPath);
+        }
     }
     return move(finder.info);
 }
@@ -853,7 +861,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
             if (FileOps::getFileName(file.file.data(gs).path()) == PACKAGE_FILE_NAME) {
                 file.file.data(gs).sourceType = core::File::Type::Package;
                 core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-                packageDB.addPackage(ctx, getPackageInfo(ctx, file));
+                packageDB.addPackage(ctx, getPackageInfo(ctx, file, extraPackageFilesDirectoryPrefixes));
             }
         }
         // We're done adding packages.
