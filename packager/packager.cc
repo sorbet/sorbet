@@ -447,6 +447,7 @@ struct PackageInfoFinder {
                     info->strict_exports = true;
                 }
             }
+            return ast::MK::EmptyTree();
         }
 
         return tree;
