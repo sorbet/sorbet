@@ -839,7 +839,7 @@ bool checkContainsAllPackages(const core::GlobalState &gs, const vector<ast::Par
 
 } // namespace
 
-vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files) {
+vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files, vector<std::string> extraPackageFilesDirectoryPrefixes) {
     Timer timeit(gs.tracer(), "packager");
     // Ensure files are in canonical order.
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
@@ -932,14 +932,14 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
     return files;
 }
 
-vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
+vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files, vector<std::string> extraPackageFilesDirectoryPrefixes) {
     // Just run all packages w/ the changed files through Packager again. It should not define any new names.
     // TODO(jvilk): This incremental pass reprocesses every package file in the project. It should instead only process
     // the packages needed to understand file changes.
     ENFORCE(checkContainsAllPackages(gs, files));
     auto namesUsed = gs.namesUsedTotal();
     auto emptyWorkers = WorkerPool::create(0, gs.tracer());
-    files = Packager::run(gs, *emptyWorkers, move(files));
+    files = Packager::run(gs, *emptyWorkers, move(files), extraPackageFilesDirectoryPrefixes);
     ENFORCE(gs.namesUsedTotal() == namesUsed);
     return files;
 }

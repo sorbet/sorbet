@@ -341,6 +341,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("stripe-mode", "Enable Stripe specific error enforcement", cxxopts::value<bool>());
     options.add_options("advanced")("stripe-packages", "Enable support for Stripe's internal Ruby package system",
                                     cxxopts::value<bool>());
+    options.add_options("dev")("extra-package-files-directory-prefix",
+                               "Extra parent directories which contain package files"
+                               "This option must be used in conjunction with --stripe-packages",
+                               cxxopts::value<vector<string>>(), "string");
 
     options.add_options("advanced")(
         "autogen-autoloader-exclude-require",
@@ -837,6 +841,16 @@ void readOptions(Options &opts,
         }
         opts.stripeMode = raw["stripe-mode"].as<bool>();
         opts.stripePackages = raw["stripe-packages"].as<bool>();
+        if (raw.count("extra-package-files-directory-prefix")) {
+            if (!opts.stripePackages) {
+                logger->error("--extra-package-files-directory-prefix can only be specified in --stripe-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+            for (string dirName : raw["extra-package-files-directory-prefix"].as<vector<string>>()) {
+                opts.extraPackageFilesDirectoryPrefixes.emplace_back(dirName);
+            }
+        }
+
         extractAutoloaderConfig(raw, opts, logger);
         opts.errorUrlBase = raw["error-url-base"].as<string>();
         opts.noErrorSections = raw["no-error-sections"].as<bool>();

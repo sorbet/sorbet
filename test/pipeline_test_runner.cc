@@ -279,8 +279,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
     if (enablePackager) {
+        vector<std::string> extraPackageFilesDirectoryPrefixes;
         // Packager runs over all trees.
-        trees = packager::Packager::run(*gs, *workers, move(trees));
+        trees = packager::Packager::run(*gs, *workers, move(trees), extraPackageFilesDirectoryPrefixes);
         for (auto &tree : trees) {
             handler.addObserved(*gs, "package-tree", [&]() { return tree.tree.toString(*gs); });
         }
@@ -558,7 +559,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     trees = move(newTrees);
     if (enablePackager) {
-        trees = packager::Packager::runIncremental(*gs, move(trees));
+        vector<std::string> extraPackageFilesDirectoryPrefixes;
+        trees = packager::Packager::runIncremental(*gs, move(trees), extraPackageFilesDirectoryPrefixes);
         for (auto &tree : trees) {
             handler.addObserved(*gs, "package-tree", [&]() { return tree.tree.toString(*gs); });
         }
