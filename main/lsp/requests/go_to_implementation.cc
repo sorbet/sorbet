@@ -2,30 +2,47 @@
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
+#include <memory>
 
 using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-variant<vector<core::Loc>, unique_ptr<ResponseError>> findMethodImplementations(const core::GlobalState &gs,
+namespace {
+    struct MethodImplementationResults {
+        vector<core::Loc> locations;
+        unique_ptr<ResponseError> error;
+    };
+} // namespace
+
+unique_ptr<ResponseError> makeInvalidParamsError(std::string error) {
+    return make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams, error);
+}
+
+const MethodImplementationResults findMethodImplementations(const core::GlobalState &gs,
                                                                                 core::SymbolRef method) {
-    vector<core::Loc> locations;
-    auto owningClassSymbolRef = method.data(gs)->superClass();
-    auto isAbstract = owningClassSymbolRef.data(gs)->isClassOrModuleAbstract();
-    if (!isAbstract) {
-        return make_unique<ResponseError>(
-            (int)LSPErrorCodes::InvalidParams,
-            "Go to implementation can be used only for methods or references of abstract classes");
+    if (!method.data(gs)->isMethod() || !method.data(gs)->isAbstract()) {
+        return {
+            .error={makeInvalidParamsError("Go to implementation can be used only for methods or references of abstract classes")}
+        };
     }
 
-    auto childClasses = owningClassSymbolRef.getSubclasses(gs);
+    vector<core::Loc> locations;
+    auto owner = method.data(gs)->owner;
+    if (!owner.isClassOrModule())
+        return {
+            .error={makeInvalidParamsError("Abstract method can only be inside a class or module")}
+        };
+
+    auto owningClassSymbolRef = owner.asClassOrModuleRef();
+    auto childClasses = owningClassSymbolRef.getSubclasses(gs, false);
     auto methodName = method.data(gs)->name;
     for (const auto &childClass : childClasses) {
         auto methodImplementation = childClass.data(gs)->findMember(gs, methodName);
         locations.push_back(methodImplementation.data(gs)->loc());
     }
 
-    return locations;
+    return {.locations={locations}};
 }
 
 GoToImplementationTask::GoToImplementationTask(const LSPConfiguration &config, MessageId id,
@@ -54,13 +71,18 @@ unique_ptr<ResponseMessage> GoToImplementationTask::runRequest(LSPTypecheckerDel
     if (auto def = queryResponse->isDefinition()) {
         // User called "Go to Implementation" from the abstract function definition
         core::SymbolRef method = def->symbol;
+        if (!method.data(gs)->isMethod())
+            response->error = make_unique<ResponseError>(
+                (int)LSPErrorCodes::InvalidParams,
+                "Go to implementation can be used only for methods or references of abstract classes");
+
         auto locationsOrError = findMethodImplementations(gs, method);
 
-        if (auto error = get_if<unique_ptr<ResponseError>>(&locationsOrError)) {
-            response->error = move(*error);
+        if (locationsOrError.error != nullptr) {
+            response->error = move(locationsOrError.error);
             return response;
-        } else if (auto locations = get_if<vector<core::Loc>>(&locationsOrError)) {
-            for (const auto &location : *locations) {
+        } else {
+            for (const auto &location : locationsOrError.locations) {
                 addLocIfExists(gs, result, location);
             }
         }
@@ -68,16 +90,19 @@ unique_ptr<ResponseMessage> GoToImplementationTask::runRequest(LSPTypecheckerDel
         // User called "Go to Implementation" from the abstract class reference
         auto classSymbol = constant->symbol;
 
-        if (!classSymbol.data(gs)->isClassOrModuleAbstract()) {
+        if (!classSymbol.data(gs)->isClassOrModule() || !classSymbol.data(gs)->isClassOrModuleAbstract()) {
             response->error = make_unique<ResponseError>(
                 (int)LSPErrorCodes::InvalidParams,
                 "Go to implementation can be used only for methods or references of abstract classes");
             return response;
         }
 
-        auto childClasses = classSymbol.asClassOrModuleRef().getSubclasses(gs);
+        auto classOrModuleRef = classSymbol.asClassOrModuleRef();
+        auto childClasses = classOrModuleRef.getSubclasses(gs, false);
         for (const auto &childClass : childClasses) {
-            addLocIfExists(gs, result, childClass.data(gs)->loc());
+            for (auto loc : childClass.data(gs)->allLocs()) {
+              addLocIfExists(gs, result, loc);
+            }
         }
 
     } else if (auto send = queryResponse->isSend()) {
@@ -85,11 +110,11 @@ unique_ptr<ResponseMessage> GoToImplementationTask::runRequest(LSPTypecheckerDel
         auto calledMethod = send->dispatchResult->main.method;
         auto locationsOrError = findMethodImplementations(gs, calledMethod);
 
-        if (auto error = get_if<unique_ptr<ResponseError>>(&locationsOrError)) {
-            response->error = move(*error);
+        if (locationsOrError.error != nullptr) {
+            response->error = move(locationsOrError.error);
             return response;
-        } else if (auto locations = get_if<vector<core::Loc>>(&locationsOrError)) {
-            for (const auto &location : *locations) {
+        } else {
+            for (const auto &location : locationsOrError.locations) {
                 addLocIfExists(gs, result, location);
             }
         }

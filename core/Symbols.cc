@@ -12,6 +12,7 @@
 #include "core/errors/internal.h"
 #include "core/hashing/hashing.h"
 #include <string>
+#include <vector>
 
 template class std::vector<sorbet::core::TypeAndOrigins>;
 template class std::vector<std::pair<sorbet::core::NameRef, sorbet::core::SymbolRef>>;
@@ -77,7 +78,7 @@ bool ClassOrModuleRef::operator!=(const ClassOrModuleRef &rhs) const {
 }
 
 // Returns all subclasses of ClassOrModuleRef (including itself)
-vector<core::ClassOrModuleRef> ClassOrModuleRef::getSubclasses(const core::GlobalState &gs) {
+vector<core::ClassOrModuleRef> ClassOrModuleRef::getSubclasses(const core::GlobalState &gs, bool withSelf) {
     vector<bool> memoized(gs.classAndModulesUsed());
     vector<bool> visited(gs.classAndModulesUsed());
     memoized[this->id()] = true;
@@ -86,6 +87,9 @@ vector<core::ClassOrModuleRef> ClassOrModuleRef::getSubclasses(const core::Globa
     vector<core::ClassOrModuleRef> subclasses;
     for (u4 i = 1; i < gs.classAndModulesUsed(); ++i) {
         auto s = core::ClassOrModuleRef(gs, i);
+        if (!withSelf && s == *this) {
+            continue;
+        }
         if (isSubclassOrMixin(gs, *this, s, memoized, visited)) {
             subclasses.emplace_back(s);
         }
@@ -1998,6 +2002,10 @@ const InlinedVector<Loc, 2> &Symbol::locs() const {
     return locs_;
 }
 
+const std::vector<Loc> &Symbol::allLocs() const {
+    return allLocs_;
+}
+
 void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
     if (!loc.file().exists()) {
         return;
@@ -2017,6 +2025,7 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
         }
     }
 
+    allLocs_.emplace_back(loc);
     if (locs_.empty() || (loc.file().data(gs).sourceType == core::File::Type::Normal && !loc.file().data(gs).isRBI())) {
         if (this->loc().exists() && loc.file().data(gs).strictLevel >= this->loc().file().data(gs).strictLevel) {
             // The new loc is stricter; make it the new canonical loc.

@@ -112,6 +112,7 @@ public:
     Loc loc() const;
     const InlinedVector<Loc, 2> &locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
+    const std::vector<Loc> &allLocs() const;
 
     u4 hash(const GlobalState &gs) const;
     u4 methodShapeHash(const GlobalState &gs) const;
@@ -696,6 +697,7 @@ private:
      */
     InlinedVector<SymbolRef, 4> typeParams;
     InlinedVector<Loc, 2> locs_;
+    std::vector<Loc> allLocs_;
 
     // Record a required ancestor for this class of module in a magic property
     void recordRequiredAncestorInternal(GlobalState &gs, RequiredAncestor &ancestor, NameRef prop);
