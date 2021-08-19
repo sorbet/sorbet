@@ -244,11 +244,11 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     }
 
     if ((send->fun == core::Names::testEach() || send->fun == core::Names::testEachHash()) && send->args.size() == 1) {
-        if ((send->fun == core::Names::testEach() && block->args.size() != 1) ||
+        if ((send->fun == core::Names::testEach() && block->args.size() < 1) ||
             (send->fun == core::Names::testEachHash() && block->args.size() != 2)) {
             if (auto e = ctx.beginError(send->block.loc(), core::errors::Rewriter::BadTestEach)) {
                 e.setHeader("Wrong number of parameters for `{}` block: expected `{}`, got `{}`", send->fun.show(ctx),
-                            1, block->args.size());
+                            send->fun == core::Names::testEach() ? "at least 1" : "2", block->args.size());
             }
             return nullptr;
         }
