@@ -1,0 +1,11 @@
+foo/foo.rb:12: Unable to resolve constant `BardClass` https://srb.help/5002
+    12 |    Project::Bar::BardClass
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    foo/foo.rb:12: Replace with `Project::Bar::BarClass`
+    12 |    Project::Bar::BardClass
+            ^^^^^^^^^^^^^^^^^^^^^^^
+    bar/bar.rb:5: Did you mean: `Project::Bar::BarClass`?
+     5 |  class BarClass
+          ^^^^^^^^^^^^^^
+Errors: 1
