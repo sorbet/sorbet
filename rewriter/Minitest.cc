@@ -178,7 +178,8 @@ ast::ExpressionPtr getIteratee(ast::ExpressionPtr &exp) {
 
 // this applies to each statement contained within a `test_each`: if it's an `it`-block, then convert it appropriately,
 // otherwise flag an error about it
-ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr stmt,
+ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName,
+                                const ast::InsSeq::STATS_store &destructuringStmts, ast::ExpressionPtr stmt,
                                 ast::MethodDef::ARGS_store &args, ast::ExpressionPtr &iteratee) {
     // this statement must be a send
     if (auto *send = ast::cast_tree<ast::Send>(stmt)) {
@@ -199,6 +200,16 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             for (auto &arg : args) {
                 new_args.emplace_back(arg.deepCopy());
             }
+
+            // add the destructuring statements to the block if they're present
+            if (!destructuringStmts.empty()) {
+                ast::InsSeq::STATS_store stmts;
+                for (auto &stmt : destructuringStmts) {
+                    stmts.emplace_back(stmt.deepCopy());
+                }
+                body = ast::MK::InsSeq(body.loc(), std::move(stmts), std::move(body));
+            }
+
             auto blk = ast::MK::Block(send->loc, move(body), std::move(new_args));
             auto each = ast::MK::Send0Block(send->loc, iteratee.deepCopy(), core::Names::each(), move(blk));
             // put that into a method def named the appropriate thing
@@ -207,6 +218,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             return constantMover.addConstantsToExpression(send->loc, move(method));
         }
     }
+
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
     if (auto e = ctx.beginError(stmt.loc(), core::errors::Rewriter::BadTestEach)) {
         e.setHeader("Only valid `{}`-blocks can appear within `{}`", "it", eachName.show(ctx));
@@ -215,18 +227,58 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
     return stmt;
 }
 
-// this just walks the body of a `test_each` and tries to transform every statement
-ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
-                                       ast::MethodDef::ARGS_store &args, ast::ExpressionPtr &iteratee) {
-    auto *bodySeq = ast::cast_tree<ast::InsSeq>(body);
-    if (bodySeq) {
-        for (auto &exp : bodySeq->stats) {
-            exp = runUnderEach(ctx, eachName, std::move(exp), args, iteratee);
+bool isDestructuringArg(core::GlobalState &gs, const ast::MethodDef::ARGS_store &args, const ast::ExpressionPtr &expr) {
+    auto *local = ast::cast_tree<ast::UnresolvedIdent>(expr);
+    if (local == nullptr || local->kind != ast::UnresolvedIdent::Kind::Local) {
+        return false;
+    }
+
+    auto name = local->name;
+    if (name.kind() != core::NameKind::UNIQUE || name.dataUnique(gs)->original != core::Names::destructureArg()) {
+        return false;
+    }
+
+    return absl::c_find_if(args, [name](auto &argExpr) {
+               auto *arg = ast::cast_tree<ast::UnresolvedIdent>(argExpr);
+               return arg && arg->name == name;
+           }) != args.end();
+}
+
+// Destructuring blocks are added to method/block entries as an InsSeq where the method body is the distinguished final
+// statement, and the statements of the InsSeq are all individual InsSeq expressions that make up the destructuring for
+// a specific argument.
+bool isDestructuringInsSeq(core::GlobalState &gs, const ast::MethodDef::ARGS_store &args, ast::InsSeq *body) {
+    return absl::c_all_of(body->stats, [&gs, &args](auto &stat) {
+        auto *insSeq = ast::cast_tree<ast::InsSeq>(stat);
+        if (insSeq == nullptr) {
+            return false;
         }
 
-        bodySeq->expr = runUnderEach(ctx, eachName, std::move(bodySeq->expr), args, iteratee);
+        auto *assign = ast::cast_tree<ast::Assign>(insSeq->stats.front());
+        return assign && isDestructuringArg(gs, args, assign->rhs);
+    });
+}
+
+// this just walks the body of a `test_each` and tries to transform every statement
+ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
+                                       ast::MethodDef::ARGS_store &args, ast::InsSeq::STATS_store destructuringStmts,
+                                       ast::ExpressionPtr &iteratee) {
+    if (auto *bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
+        if (isDestructuringInsSeq(ctx, args, bodySeq)) {
+            ENFORCE(destructuringStmts.empty(), "Nested destructuring statements");
+            destructuringStmts.reserve(bodySeq->stats.size());
+            std::move(bodySeq->stats.begin(), bodySeq->stats.end(), std::back_inserter(destructuringStmts));
+            return prepareTestEachBody(ctx, eachName, std::move(bodySeq->expr), args, std::move(destructuringStmts),
+                                       iteratee);
+        }
+
+        for (auto &exp : bodySeq->stats) {
+            exp = runUnderEach(ctx, eachName, destructuringStmts, std::move(exp), args, iteratee);
+        }
+
+        bodySeq->expr = runUnderEach(ctx, eachName, destructuringStmts, std::move(bodySeq->expr), args, iteratee);
     } else {
-        body = runUnderEach(ctx, eachName, std::move(body), args, iteratee);
+        body = runUnderEach(ctx, eachName, destructuringStmts, std::move(body), args, iteratee);
     }
 
     return body;
@@ -259,7 +311,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         return ast::MK::Send(
             send->loc, ast::MK::Self(send->loc), send->fun, 1, ast::MK::SendArgs(move(send->args.front())), send->flags,
             ast::MK::Block(send->block.loc(),
-                           prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args, iteratee),
+                           prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args, {}, iteratee),
                            std::move(block->args)));
     }
 
