@@ -832,6 +832,14 @@ struct DispatchArgs {
     // unreported errors is expensive!
     bool suppressErrors = false;
 
+    DispatchArgs(NameRef name, const CallLocs &locs, u2 numPosArgs, InlinedVector<const TypeAndOrigins *, 2> &args,
+                 const TypePtr &selfType, const TypeAndOrigins &fullType, const TypePtr &thisType,
+                 const std::shared_ptr<const SendAndBlockLink> &block, Loc originForUninitialized, bool isPrivateOk);
+    DispatchArgs(NameRef name, const CallLocs &locs, u2 numPosArgs, InlinedVector<const TypeAndOrigins *, 2> &args,
+                 const TypePtr &selfType, const TypeAndOrigins &fullType, const TypePtr &thisType,
+                 const std::shared_ptr<const SendAndBlockLink> &block, Loc originForUninitialized, bool isPrivateOk,
+                 bool suppressErrors);
+
     Loc callLoc() const {
         return core::Loc(locs.file, locs.call);
     }

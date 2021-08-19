@@ -769,6 +769,25 @@ core::ClassOrModuleRef Types::getRepresentedClass(const GlobalState &gs, const T
     return singleton.data(gs)->attachedClass(gs);
 }
 
+DispatchArgs::DispatchArgs(NameRef name, const CallLocs &locs, u2 numPosArgs,
+                           InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &selfType,
+                           const TypeAndOrigins &fullType, const TypePtr &thisType,
+                           const std::shared_ptr<const SendAndBlockLink> &block, Loc originForUninitialized,
+                           bool isPrivateOk)
+    : DispatchArgs(name, locs, numPosArgs, args, selfType, fullType, thisType, block, originForUninitialized,
+                   isPrivateOk, false) {}
+
+DispatchArgs::DispatchArgs(NameRef name, const CallLocs &locs, u2 numPosArgs,
+                           InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &selfType,
+                           const TypeAndOrigins &fullType, const TypePtr &thisType,
+                           const std::shared_ptr<const SendAndBlockLink> &block, Loc originForUninitialized,
+                           bool isPrivateOk, bool suppressErrors)
+    : name(name), locs(locs), numPosArgs(numPosArgs), args(args), selfType(selfType), fullType(fullType),
+      thisType(thisType), block(block), originForUninitialized(originForUninitialized), isPrivateOk(isPrivateOk),
+      suppressErrors(suppressErrors) {
+    ENFORCE(this->args.size() == this->locs.args.size(), "Should have a loc for every arg");
+}
+
 DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) const {
     return DispatchArgs{
         name, locs, numPosArgs, args, newSelfRef, fullType, newSelfRef, block, originForUninitialized, suppressErrors};
