@@ -67,9 +67,8 @@ class PackageDB final {
 private:
     // The only thread that is allowed write access to this class.
     const std::thread::id owner;
-    vector<shared_ptr<const PackageInfo>> packages;
+    UnorderedMap<std::string, shared_ptr<const PackageInfo>> packageInfoByPathPrefix;
     bool finalized = false;
-    UnorderedMap<core::FileRef, shared_ptr<const PackageInfo>> packageInfoByFile;
     UnorderedMap<core::NameRef, shared_ptr<const PackageInfo>> packageInfoByMangledName;
 
 public:
@@ -96,26 +95,21 @@ public:
             packageInfoByMangledName[pkg->name.mangledName] = pkg;
         }
 
-        packageInfoByFile[ctx.file] = pkg;
-        packages.emplace_back(pkg);
+        packageInfoByPathPrefix[pkg->packagePathPrefix] = pkg;
     }
 
     void finalizePackages() {
         ENFORCE(owner == this_thread::get_id());
-        // Sort packages so that packages with the longest/most specific paths are first.
-        // That way, the first package to match a file's path is the most specific package match.
-        fast_sort(packages, [](const auto &a, const auto &b) -> bool {
-            return a->packagePathPrefix.size() > b->packagePathPrefix.size();
-        });
         finalized = true;
     }
 
     /**
      * Given a file of type PACKAGE, return its PackageInfo or nullptr if one does not exist.
      */
-    const PackageInfo *getPackageByFile(core::FileRef packageFile) const {
-        const auto &it = packageInfoByFile.find(packageFile);
-        if (it == packageInfoByFile.end()) {
+    const PackageInfo *getPackageByFile(core::Context ctx, core::FileRef packageFile) const {
+        const std::string_view path = packageFile.data(ctx).path();
+        const auto &it = packageInfoByPathPrefix.find(path.substr(0, path.find_last_of('/') + 1));
+        if (it == packageInfoByPathPrefix.end()) {
             return nullptr;
         }
         return it->second.get();
@@ -140,13 +134,19 @@ public:
         if (!finalized) {
             Exception::raise("Cannot map files to packages until all packages are added and PackageDB is finalized");
         }
-        // TODO(jvilk): Could use a prefix array to make this lookup more efficient.
-        auto path = ctx.file.data(ctx).path();
-        for (const auto &pkg : packages) {
-            if (absl::StartsWith(path, pkg->packagePathPrefix)) {
-                return pkg.get();
+
+        std::string_view path = ctx.file.data(ctx).path();
+        int curPrefixPos = path.find_last_of('/');
+
+        while (curPrefixPos != std::string::npos) {
+            const auto &it = packageInfoByPathPrefix.find(path.substr(0, curPrefixPos + 1));
+            if (it != packageInfoByPathPrefix.end()) {
+                return it->second.get();
             }
+
+            curPrefixPos = path.find_last_of('/', curPrefixPos - 1);
         }
+
         return nullptr;
     }
 };
@@ -748,7 +748,7 @@ private:
 ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const PackageDB &packageDB) {
     ast::ClassDef::RHS_store importedPackages;
 
-    auto package = packageDB.getPackageByFile(file.file);
+    auto package = packageDB.getPackageByFile(ctx, file.file);
     if (package == nullptr) {
         // We already produced an error on this package when producing its package info.
         // The correct course of action is to abort the transform.
