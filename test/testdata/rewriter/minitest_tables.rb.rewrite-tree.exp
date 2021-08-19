@@ -116,6 +116,138 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
+    def <it 'blocks get padded with NilClass arguments'><<todo method>>(&<blk>)
+      [1, 2, 3].each() do |k, v|
+        begin
+          <emptyTree>::<C T>.reveal_type(k)
+          <emptyTree>::<C T>.reveal_type(v)
+        end
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it 'multiple it blocks are ok with multiple arguments'><<todo method>>(&<blk>)
+      [1, 2, 3].each() do |k, v|
+        begin
+          <emptyTree>::<C T>.reveal_type(k)
+          <emptyTree>::<C T>.reveal_type(v)
+        end
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it 'destructured blocks get padded with NilClass arguments'><<todo method>>(&<blk>)
+      [1, 2, 3].each() do |<destructure>$4|
+        begin
+          begin
+            <assignTemp>$5 = <destructure>$4
+            <assignTemp>$6 = ::<Magic>.<expand-splat>(<assignTemp>$5, 2, 0)
+            k = <assignTemp>$6.[](0)
+            v = <assignTemp>$6.[](1)
+            <assignTemp>$5
+          end
+          begin
+            <emptyTree>::<C T>.reveal_type(k)
+            <emptyTree>::<C T>.reveal_type(v)
+          end
+        end
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it 'multiple it blocks are ok with multiple destructured arguments'><<todo method>>(&<blk>)
+      [1, 2, 3].each() do |<destructure>$4|
+        begin
+          begin
+            <assignTemp>$5 = <destructure>$4
+            <assignTemp>$6 = ::<Magic>.<expand-splat>(<assignTemp>$5, 2, 0)
+            k = <assignTemp>$6.[](0)
+            v = <assignTemp>$6.[](1)
+            <assignTemp>$5
+          end
+          begin
+            <emptyTree>::<C T>.reveal_type(k)
+            <emptyTree>::<C T>.reveal_type(v)
+          end
+        end
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it 'handles mixed destructuring and positional arguments'><<todo method>>(&<blk>)
+      [[1, ["hi", false]], [2, ["bye", true]]].each() do |i, <destructure>$7, <destructure>$10|
+        begin
+          begin
+            <assignTemp>$8 = <destructure>$7
+            <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8, 2, 0)
+            s = <assignTemp>$9.[](0)
+            b = <assignTemp>$9.[](1)
+            <assignTemp>$8
+          end
+          begin
+            <assignTemp>$11 = <destructure>$10
+            <assignTemp>$12 = ::<Magic>.<expand-splat>(<assignTemp>$11, 2, 0)
+            x = <assignTemp>$12.[](0)
+            y = <assignTemp>$12.[](1)
+            <assignTemp>$11
+          end
+          begin
+            <emptyTree>::<C T>.reveal_type(i)
+            <emptyTree>::<C T>.reveal_type(s)
+            <emptyTree>::<C T>.reveal_type(b)
+            <emptyTree>::<C T>.reveal_type(x)
+            <emptyTree>::<C T>.reveal_type(y)
+          end
+        end
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it 'multiple it blocks are ok with mixed argument styles'><<todo method>>(&<blk>)
+      [[1, ["hi", false]], [2, ["bye", true]]].each() do |i, <destructure>$7, <destructure>$10|
+        begin
+          begin
+            <assignTemp>$8 = <destructure>$7
+            <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8, 2, 0)
+            s = <assignTemp>$9.[](0)
+            b = <assignTemp>$9.[](1)
+            <assignTemp>$8
+          end
+          begin
+            <assignTemp>$11 = <destructure>$10
+            <assignTemp>$12 = ::<Magic>.<expand-splat>(<assignTemp>$11, 2, 0)
+            x = <assignTemp>$12.[](0)
+            y = <assignTemp>$12.[](1)
+            <assignTemp>$11
+          end
+          begin
+            <emptyTree>::<C T>.reveal_type(i)
+            <emptyTree>::<C T>.reveal_type(s)
+            <emptyTree>::<C T>.reveal_type(b)
+          end
+        end
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <it 'handles lists with several types'><<todo method>>(&<blk>)
       {:foo => 1, :bar => 2, :baz => 3}.each() do |k, v|
         begin
@@ -187,13 +319,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     <self>.test_each([1, 2, 3]) do |k, v|
-      <self>.it("does not handle more than one argument") do ||
-        <emptyTree>
+      begin
+        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'blocks get padded with NilClass arguments\'>", :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'multiple it blocks are ok with multiple arguments\'>", :normal)
+      end
+    end
+
+    <self>.test_each([1, 2, 3]) do |<destructure>$4|
+      begin
+        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'destructured blocks get padded with NilClass arguments\'>", :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'multiple it blocks are ok with multiple destructured arguments\'>", :normal)
+      end
+    end
+
+    <self>.test_each([[1, ["hi", false]], [2, ["bye", true]]]) do |i, <destructure>$7, <destructure>$10|
+      begin
+        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'handles mixed destructuring and positional arguments\'>", :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'multiple it blocks are ok with mixed argument styles\'>", :normal)
       end
     end
 
     <self>.test_each([1, 2, 3]) do ||
-      <self>.it("does not handle more than one argument") do ||
+      <self>.it("does not handle zero argument blocks") do ||
         <emptyTree>
       end
     end

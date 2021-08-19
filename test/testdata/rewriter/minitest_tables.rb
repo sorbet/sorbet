@@ -86,13 +86,48 @@ class MyTest
   end
 
 
-  test_each [1, 2, 3] do |k, v| # error: Wrong number of parameters for `test_each` block
-    it "does not handle more than one argument" do
+  test_each [1, 2, 3] do |k, v|
+    it "blocks get padded with NilClass arguments" do
+      T.reveal_type(k) # error: Revealed type: `Integer`
+      T.reveal_type(v) # error: Revealed type: `NilClass`
+    end
+
+    it "multiple it blocks are ok with multiple arguments" do
+      T.reveal_type(k) # error: Revealed type: `Integer`
+      T.reveal_type(v) # error: Revealed type: `NilClass`
+    end
+  end
+
+  test_each [1, 2, 3] do |(k, v)|
+    it "destructured blocks get padded with NilClass arguments" do
+      T.reveal_type(k) # error: Revealed type: `Integer`
+      T.reveal_type(v) # error: Revealed type: `NilClass`
+    end
+
+    it "multiple it blocks are ok with multiple destructured arguments" do
+      T.reveal_type(k) # error: Revealed type: `Integer`
+      T.reveal_type(v) # error: Revealed type: `NilClass`
+    end
+  end
+
+  test_each [[1, ['hi', false]], [2, ['bye', true]]] do |i, (s,b), (x, y)|
+    it "handles mixed destructuring and positional arguments" do
+      T.reveal_type(i) # error: Revealed type: `Integer`
+      T.reveal_type(s) # error: Revealed type: `String`
+      T.reveal_type(b) # error: Revealed type: `T::Boolean`
+      T.reveal_type(x) # error: Revealed type: `NilClass`
+      T.reveal_type(y) # error: Revealed type: `NilClass`
+    end
+
+    it "multiple it blocks are ok with mixed argument styles" do
+      T.reveal_type(i) # error: Revealed type: `Integer`
+      T.reveal_type(s) # error: Revealed type: `String`
+      T.reveal_type(b) # error: Revealed type: `T::Boolean`
     end
   end
 
   test_each [1, 2, 3] do # error: Wrong number of parameters for `test_each` block
-    it "does not handle more than one argument" do
+    it "does not handle zero argument blocks" do
     end
   end
 
