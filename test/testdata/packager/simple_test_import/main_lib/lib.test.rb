@@ -8,4 +8,9 @@ class Test::Project::MainLib::LibTest
   Project::Util::MyUtil.new
   # Tests can access `test_import` names
   Project::TestOnly::SomeHelper.new # access via test_import
+
+  Test::Project::Util::UtilHelper # allowd by import
+
+  Test::Project::Util::Unexported
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `Unexported`
 end

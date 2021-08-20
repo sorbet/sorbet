@@ -7,4 +7,10 @@ class Project::MainLib::Lib
   # Normal code is not allowed to access names from `test_import`
   Project::TestOnly::SomeHelper.new
 # ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `TestOnly`
+
+  Test::Project::Util::UtilHelper
+# ^^^^ error: Unable to resolve constant `Test`
+
+  Test::Project::Util::Unexported
+# ^^^^ error: Unable to resolve constant `Test`
 end

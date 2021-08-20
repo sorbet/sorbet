@@ -36,6 +36,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C Project>::<C Util>::<C MyUtil>.new()
 
       <emptyTree>::<C Project>::<C TestOnly>::<C SomeHelper>.new()
+
+      <emptyTree>::<C Test>::<C Project>::<C Util>::<C UtilHelper>
+
+      <emptyTree>::<C Test>::<C Project>::<C Util>::<C Unexported>
     end
   end
 end
@@ -47,6 +51,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C Project>::<C Util>::<C MyUtil>.new()
 
       <emptyTree>::<C Project>::<C TestOnly>::<C SomeHelper>.new()
+
+      <emptyTree>::<C Test>::<C Project>::<C Util>::<C UtilHelper>
+
+      <emptyTree>::<C Test>::<C Project>::<C Util>::<C Unexported>
     end
   end
 end
@@ -89,6 +97,12 @@ end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Project>::<C Util>::<C MyUtil><<C <todo sym>>> < (::<todo sym>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageTests>>::<C Project_Util_Package$1><<C <todo sym>>> < ()
+    class <emptyTree>::<C Test>::<C Project>::<C Util>::<C Unexported><<C <todo sym>>> < (::<todo sym>)
     end
   end
 end
