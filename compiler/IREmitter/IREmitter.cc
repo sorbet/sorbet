@@ -4,6 +4,7 @@
 #include "llvm/IR/DerivedTypes.h" // FunctionType, StructType
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/Transforms/Utils/Cloning.h"
 
 #include "ast/Helpers.h"
 #include "ast/ast.h"
@@ -792,25 +793,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
 
     // Link the function initializer blocks.
     for (int funId = 0; funId < irctx.functionInitializersByFunction.size(); funId++) {
-        llvm::BasicBlock *nextBlock;
-
-        // Block 0 (the root Ruby block) is a special case: rather than jumping straight to argument setup, we may need
-        // to push an EC tag and execute setjmp. (If irctx.ecTag is nullptr, that means that we detected statically in
-        // IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping that the EC tag is actually unnecessary.) The EC tag
-        // setup will subsequently branch to the argument setup block; that branch is built in Payload::setupEcTag,
-        // which is called here.
-        //
-        // In other cases, we will just jump directly from the init block to the argument setup block.
-        if (funId == 0 && irctx.returnFromBlockState.has_value()) {
-            llvm::BasicBlock *ecTagSetupBlock = llvm::BasicBlock::Create(cs, "ecTagSetup", func);
-            builder.SetInsertPoint(ecTagSetupBlock);
-            Payload::setupEcTag(cs, builder, irctx);
-
-            nextBlock = ecTagSetupBlock;
-        } else {
-            nextBlock = irctx.argumentSetupBlocksByFunction[funId];
-        }
-
+        llvm::BasicBlock *nextBlock =  irctx.argumentSetupBlocksByFunction[funId];
         builder.SetInsertPoint(irctx.functionInitializersByFunction[funId]);
         builder.CreateBr(nextBlock);
     }
@@ -818,6 +801,41 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     cs.debug->finalize();
 
     /* run verifier */
+    if (debug_mode && llvm::verifyFunction(*func, &llvm::errs())) {
+        fmt::print("failed to verify:\n");
+        func->dump();
+        ENFORCE(false);
+    }
+    cs.runCheapOptimizations(func);
+
+    // If we are ever returning across blocks, we need to wrap the entire execution
+    // of the function in an unwind-protect region that knows about the return.
+    if (!irctx.returnFromBlockState.has_value()) {
+        return;
+    }
+
+    llvm::ValueToValueMapTy VMap;
+    auto *implementationFunction = llvm::CloneFunction(func, VMap);
+
+    // Completely delete the function body.
+    func->dropAllReferences();
+
+    // Turn the original function into a trampoline for this new function.
+    auto *entryBlock = llvm::BasicBlock::Create(cs, "entry", func);
+    builder.SetInsertPoint(entryBlock);
+
+    auto *wrapper = cs.getFunction("sorbet_vm_return_from_block_wrapper");
+    // Keeping the args in the same order and adding the function argument at the
+    // end means that the original function should just be a PC-relative load
+    // plus a jump.
+    auto *retval = builder.CreateCall(wrapper, {func->arg_begin(),
+                func->arg_begin() + 1,
+                func->arg_begin() + 2,
+                func->arg_begin() + 3,
+                implementationFunction}, "returnedFromBlock");
+    builder.CreateRet(retval);
+
+    // Redo verifier on our new function.
     if (debug_mode && llvm::verifyFunction(*func, &llvm::errs())) {
         fmt::print("failed to verify:\n");
         func->dump();
