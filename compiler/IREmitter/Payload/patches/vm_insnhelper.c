@@ -486,3 +486,282 @@ VALUE sorbet_vm_throw(const rb_execution_context_t *ec, rb_control_frame_t *reg_
 void sorbet_ec_jump_tag(rb_execution_context_t *ec, enum ruby_tag_type tt) {
     EC_JUMP_TAG(ec, tt);
 }
+
+#define SORBET_INLINE __attribute__((always_inline))
+
+// This is invoked at the beginning of a method's body, and is analogous to EC_PUSH_TAG + EC_EXEC_TAG
+// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L130-L135
+// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L181-L182
+//
+// Note that we're calling `setjmp` here, but we're returning from this function and
+// expecting `longjmp`'ing to `tag->buf` to still work correctly.  We can do this
+// because this function will be inlined, meaning that `tag->buf` will reflect the
+// state of this function's caller and `tag->buf` will be valid for the lifetime of
+// this function's caller.
+//
+// The `volatile` here is a bit gross.  If you look at `rb_ec_tag_state` and its
+// accompanying logic, referenced below, you'll notice that it contains some
+// gross hacks to force clang to stick `ec` in memory (e.g. VAR_FROM_MEMORY:
+//
+// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L146-L158
+//
+// before accessing `ec` and that its `ec` argument is `rb_execution_context_t *ec`.
+//
+// Without those hacks, clang will assume that wherever `ec` got allocated to is where
+// it should be accessed on both sides of the `if`, which is not necessarily valid in
+// the case of `longjmp`'ing back to the `if`.  (clang would presumably get this
+// right if the default implementation of RUBY_SETJMP was the C library's `setjmp`,
+// which gets annotated as "returns_twice", but the default implementation is
+// `__builtin_setjmp`, which is not so annotated.)  So the point of the hacks is
+// to force `ec` to (somehow) be allocated to memory.
+//
+// We need a similar hack, but can be slightly more elegant because we cache the
+// execution context across a tag-guarded region.  A pointer to that cache is
+// passed in here and by making the pointer volatile, we force clang to reload
+// the execution context pointer every time the execution context is needed,
+// thus ensuring that the execution context lives in memory always.
+static SORBET_INLINE enum ruby_tag_type sorbet_initializeTag(volatile rb_execution_context_t **ec, struct rb_vm_tag *tag) {
+    // inlined from EC_PUSH_TAG
+    tag->state = TAG_NONE;
+    tag->tag = Qundef;
+    tag->prev = (*ec)->tag;
+
+    if (RUBY_SETJMP(tag->buf) != 0) {
+        // See rb_ec_tag_state:
+        // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L160-L167
+        enum ruby_tag_type *statePtr = &(*ec)->tag->state;
+        enum ruby_tag_type state = *statePtr;
+        *statePtr = TAG_NONE;
+        return state;
+    } else {
+        (*ec)->tag = tag;
+        return TAG_NONE;
+    }
+}
+
+SORBET_INLINE
+static int computeLocalIndex(long index) {
+    // Local offset calculation needs to take into account the fixed values that
+    // are present on the stack:
+    // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/compile.c#L1509
+    return index + VM_ENV_DATA_SIZE;
+}
+
+SORBET_INLINE
+static VALUE sorbet_readLocal(rb_control_frame_t *cfp, long index, long level) {
+    int offset = computeLocalIndex(index);
+    return *(vm_get_ep(cfp->ep, level) - offset);
+}
+SORBET_INLINE
+static void sorbet_writeLocal(rb_control_frame_t *cfp, long index, long level, VALUE value) {
+    int offset = computeLocalIndex(index);
+    vm_env_write(vm_get_ep(cfp->ep, level), -offset, value);
+}
+
+typedef VALUE (*ExceptionFFIType)(VALUE **pc, VALUE closure, rb_control_frame_t *);
+
+SORBET_INLINE
+static void sorbet_raiseIfNotNil(VALUE exception) {
+    if (exception == RUBY_Qnil) {
+        return;
+    }
+
+    rb_exc_raise(exception);
+}
+VALUE sorbet_run_exception_handling(volatile rb_execution_context_t **ec,
+                                    volatile ExceptionFFIType body,
+                                    VALUE ** volatile pc,
+                                    // The locals offset for the body.
+                                    volatile VALUE methodClosure,
+                                    rb_control_frame_t * volatile cfp,
+                                    // May be nullptr.
+                                    volatile ExceptionFFIType handlers,
+                                    // May be nullptr.
+                                    volatile ExceptionFFIType elseClause,
+                                    // May be nullptr.
+                                    volatile ExceptionFFIType ensureClause,
+                                    // The special value indicating that we need to retry.
+                                    volatile VALUE retrySingleton,
+                                    volatile long exceptionValueIndex,
+                                    volatile long exceptionValueLevel) {
+    struct rb_vm_tag tag;
+
+    // `volatile` is not used in polite C programming, but here it's very important:
+    // it ensures that the requisite variables are stored in memory across the setjmp
+    // below and therefore will still be valid upon a return via longjmp.  All such
+    // variables that need to be live "on both sides" of the setjmp need to be
+    // declared with `volatile`.
+    //
+    // Temporary variables used on the "longjmp side" only can be declared as normal.
+    volatile VALUE executionResult = Qundef;
+    volatile VALUE previousException = (*ec)->errinfo;
+    volatile VALUE bodyException = Qnil;
+    volatile VALUE handlerException = Qnil;
+    volatile enum {
+        RunningBody,
+        RunningHandlers,
+    } state = RunningBody;
+    volatile enum ruby_tag_type nleType;
+
+    if ((nleType = sorbet_initializeTag(ec, &tag)) == TAG_NONE) {
+    execute_body:
+        state = RunningBody;
+        // tag.state will have been reset appropriately if we got here via `retry`,
+        // but not this variable.
+        nleType = TAG_NONE;
+
+        // Clear out the local variable shared across exception handling regions
+        // where we store the current exception value.
+        sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, Qnil);
+
+        // We're also done with whatever exceptions might have gotten thrown along the way.
+        bodyException = Qnil;
+        handlerException = Qnil;
+
+        // Likewise with any results we accumulated along the way.
+        executionResult = Qundef;
+
+        // Run the body.
+        executionResult = body(pc, methodClosure, cfp);
+
+        // If we get to this point, then we know the body has succeeded without throwing
+        // an exception.  We may need to run the `else` handler if the body didn't
+        // return a value that we need to propagate.
+        if (executionResult == Qundef) {
+            state = RunningHandlers;
+
+            executionResult = elseClause(pc, methodClosure, cfp);
+        }
+        rb_set_errinfo(previousException);
+    } else {
+        // If we get here, setjmp has returned a non-zero value.
+
+        // This case is the "obvious" case: something in the body threw; we need to handle
+        // exceptions directly here.
+        if (state == RunningBody) {
+            // We're handling things very similarly to rb_rescue2/rb_vrescue2:
+            // <add-link-here>
+            //
+            // The significant difference from that function is that we're handling all
+            // the non-local exits directly.
+
+            // Whatever kind of non-local exit we have, we need to make sure that
+            // the Ruby control frame for the handler (or the ensure) we're going
+            // to run lives directly under whatever frame we started this process with.
+            rb_vm_rewind_cfp((rb_execution_context_t *)*ec, cfp);
+
+            if (nleType == TAG_RAISE) {
+                // rb_rescue2/rb_vrescue2 would check ec->errinfo here to determine if it
+                // was the "right" kind of error.  Sorbet has already generated code to check
+                // the exception value for us, we can dispatch directly to the handlers here,
+                // which avoids a little bit of overhead.  But we do need to tell the
+                // handlers what the exception value *is*.
+                bodyException = (*ec)->errinfo;
+            } else {
+                // Any other kind of non-local exit will skip the rescue/else handlers.
+                goto execute_ensure;
+            }
+
+            // Any exception that got thrown needs to be set for the handler.
+            sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, bodyException);
+
+            ExceptionFFIType handler = (bodyException != Qnil) ? handlers : elseClause;
+
+            // Indicate that we are running the appropriate handler.
+            nleType = TAG_NONE;
+            state = RunningHandlers;
+
+            executionResult = handler(pc, methodClosure, cfp);
+
+            // If execution has reached this point, the handler did not throw any
+            // kind of non-local exit.
+            if (bodyException != Qnil && executionResult == retrySingleton) {
+                goto execute_body;
+            }
+        } else {
+            // This case is the non-obvious case: something in the handler we were executing
+            // threw.  We need to clean up and execute the ensure.
+
+            rb_vm_rewind_cfp((rb_execution_context_t *)*ec, cfp);
+
+            // TODO(froydnj): this is where we would handle TAG_RETRY if we were implementing
+            // `retry` in terms of Ruby's non-local exit handling rather than our current
+            // retry singleton mechanism.
+
+            if (nleType == TAG_RAISE) {
+                handlerException = (*ec)->errinfo;
+                sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, handlerException);
+            } else {
+                goto execute_ensure;
+            }
+        }
+
+        // We need to determine what the value of the "current" exception is for the
+        // ensure handler.  There are three possibilities, in order of preference:
+        //
+        // 1. An exception raised by the rescue block.
+        // 2. The original exception raised by the body, that wasn't handled by the rescue block.
+        // 3. The ambient previous exception present prior to exception handling.
+        VALUE postRescueExceptionContext;
+
+        if (handlerException != Qnil) {
+            // Case 1.
+            postRescueExceptionContext = handlerException;
+        } else {
+            // The exception value local was set for the purposes of the rescue
+            // handler (it will be `nil` if the body didn't raise an exception).
+            // The rescue handler will have nil'd out this variable if an
+            // appropriate handler was run.
+            VALUE bodyException = sorbet_readLocal(cfp, exceptionValueIndex, exceptionValueLevel);
+            if (bodyException != Qnil) {
+                // Case 2.
+                postRescueExceptionContext = bodyException;
+            } else {
+                // Case 3.
+                postRescueExceptionContext = previousException;
+            }
+        }
+
+        rb_set_errinfo(postRescueExceptionContext);
+    }
+
+ execute_ensure:
+    // However we arrived at this state, we are done with our entry on the tag stack.
+    (*ec)->tag = tag.prev;
+
+    // Ruby's running of ensure handlers passes in rb_errinfo() as an argument on the
+    // stack ; ensure handlers then exit via the bytecode instruction `throw 0 local[0]`,
+    // which eventually winds its way into vm_throw_continue.  We don't codegen things
+    // that way -- perhaps we should, but this emulates that behavior.
+    VALUE pendingException = (*ec)->errinfo;
+
+    // Running the ensure handler will push an VM_FRAME_MAGIC_RESCUE control frame
+    // and also have the side effect of clearing out ec->errinfo and ec->tag->state.
+    VALUE ensureResult = ensureClause(pc, methodClosure, cfp);
+
+    // Anything the ensure returned takes precedence over a pending non-local exit.
+    if (ensureResult != Qundef) {
+        return ensureResult;
+    }
+
+    // Put the error back.  We already have nleType, which was ec->tag->state prior
+    // to running the ensure handler, for resetting ec->tag->state if appropriate.
+    (*ec)->errinfo = pendingException;
+
+    // If we had a non-local exit from the region above, propagating that takes precedence
+    // over whatever the ensure handler did.
+    //
+    // cf. EC_JUMP_TAG for the code here.
+    if (nleType != TAG_NONE) {
+        (*ec)->tag->state = nleType;
+        RUBY_LONGJMP((*ec)->tag->buf, 1);
+    }
+
+    // executionResult is the result from running either the body or the handlers,
+    // depending on what path we took through the code above.
+
+    sorbet_raiseIfNotNil(handlerException);
+    sorbet_raiseIfNotNil(sorbet_readLocal(cfp, exceptionValueIndex, exceptionValueLevel));
+
+    return executionResult;
+}
