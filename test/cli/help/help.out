@@ -177,6 +177,10 @@ Usage:
                                 arguments
 
  dev options:
+      --extra-package-files-directory-prefix string
+                                Extra parent directories which contain
+                                package files. This option must be used in
+                                conjunction with --stripe-packages
   -p, --print type              Print: [parse-tree, parse-tree-json,
                                 parse-tree-json-with-locs, parse-tree-whitequark,
                                 desugar-tree, desugar-tree-raw, rewrite-tree,
