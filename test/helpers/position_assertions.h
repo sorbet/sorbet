@@ -144,17 +144,17 @@ public:
 class StringPropertyAssertion final : public RangeAssertion {
 public:
     static std::shared_ptr<StringPropertyAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
-                                                          int assertionLine, std::string_view assertionContents,
-                                                          std::string_view assertionType);
+                                                         int assertionLine, std::string_view assertionContents,
+                                                         std::string_view assertionType);
 
     static std::optional<std::string> getValue(std::string_view type,
-                    const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
+                                               const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
 
     const std::string assertionType;
     const std::string value;
 
-    StringPropertyAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string value,
-                             std::string_view assertionType);
+    StringPropertyAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                            std::string value, std::string_view assertionType);
 
     std::string toString() const override;
 };

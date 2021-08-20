@@ -592,7 +592,8 @@ struct PackageInfoFinder {
 
 // Sanity checks package files, mutates arguments to export / export_methods to point to item in namespace,
 // builds up the expression injected into packages that import the package, and codegens the <PackagedMethods>  module.
-unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile &package, vector<std::string> extraPackageFilesDirectoryPrefixes) {
+unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile &package,
+                                       vector<std::string> extraPackageFilesDirectoryPrefixes) {
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(ctx).sourceType == core::File::Type::Package);
     // Assumption: Root of AST is <root> class.
@@ -843,7 +844,8 @@ bool checkContainsAllPackages(const core::GlobalState &gs, const vector<ast::Par
 
 } // namespace
 
-vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files, vector<std::string> extraPackageFilesDirectoryPrefixes) {
+vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files,
+                                      vector<std::string> extraPackageFilesDirectoryPrefixes) {
     Timer timeit(gs.tracer(), "packager");
     // Ensure files are in canonical order.
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
@@ -936,7 +938,8 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
     return files;
 }
 
-vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files, vector<std::string> extraPackageFilesDirectoryPrefixes) {
+vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files,
+                                                 vector<std::string> extraPackageFilesDirectoryPrefixes) {
     // Just run all packages w/ the changed files through Packager again. It should not define any new names.
     // TODO(jvilk): This incremental pass reprocesses every package file in the project. It should instead only process
     // the packages needed to understand file changes.

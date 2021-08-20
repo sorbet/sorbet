@@ -80,8 +80,7 @@ public:
                                             std::vector<std::string> extraPackageFilesDirectoryPrefixes);
 
     // Run packager incrementally. Note: `files` must contain all packages files. Does not support package changes.
-    static std::vector<ast::ParsedFile> runIncremental(core::GlobalState &gs,
-                                                       std::vector<ast::ParsedFile> files,
+    static std::vector<ast::ParsedFile> runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> files,
                                                        std::vector<std::string> extraPackageFilesDirectoryPrefixes);
 
     Packager() = delete;

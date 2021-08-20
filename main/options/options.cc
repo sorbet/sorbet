@@ -848,7 +848,8 @@ void readOptions(Options &opts,
             }
             for (string dirName : raw["extra-package-files-directory-prefix"].as<vector<string>>()) {
                 if (dirName.back() != '/') {
-                    logger->error("--extra-package-files-directory-prefix directory path must have slash (/) at the end");
+                    logger->error(
+                        "--extra-package-files-directory-prefix directory path must have slash (/) at the end");
                     throw EarlyReturnWithCode(1);
                 }
                 opts.extraPackageFilesDirectoryPrefixes.emplace_back(dirName);

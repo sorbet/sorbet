@@ -960,14 +960,14 @@ string BooleanPropertyAssertion::toString() const {
 }
 
 shared_ptr<StringPropertyAssertion> StringPropertyAssertion::make(string_view filename, unique_ptr<Range> &range,
-                                                                    int assertionLine, string_view assertionContents,
-                                                                    string_view assertionType) {
+                                                                  int assertionLine, string_view assertionContents,
+                                                                  string_view assertionType) {
     return make_shared<StringPropertyAssertion>(filename, range, assertionLine, assertionContents.data(),
-                                                 assertionType);
+                                                assertionType);
 }
 
 optional<std::string> StringPropertyAssertion::getValue(string_view type,
-                                                  const vector<shared_ptr<RangeAssertion>> &assertions) {
+                                                        const vector<shared_ptr<RangeAssertion>> &assertions) {
     {
         INFO("Unrecognized string property assertion: " << type);
         CHECK_NE(assertionConstructors.find(string(type)), assertionConstructors.end());
