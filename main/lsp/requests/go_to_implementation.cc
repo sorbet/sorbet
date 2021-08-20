@@ -9,30 +9,26 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 namespace {
-    struct MethodImplementationResults {
-        vector<core::Loc> locations;
-        unique_ptr<ResponseError> error;
-    };
+struct MethodImplementationResults {
+    vector<core::Loc> locations;
+    unique_ptr<ResponseError> error;
+};
 } // namespace
 
 unique_ptr<ResponseError> makeInvalidParamsError(std::string error) {
     return make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams, error);
 }
 
-const MethodImplementationResults findMethodImplementations(const core::GlobalState &gs,
-                                                                                core::SymbolRef method) {
+const MethodImplementationResults findMethodImplementations(const core::GlobalState &gs, core::SymbolRef method) {
     if (!method.data(gs)->isMethod() || !method.data(gs)->isAbstract()) {
-        return {
-            .error={makeInvalidParamsError("Go to implementation can be used only for methods or references of abstract classes")}
-        };
+        return {.error = {makeInvalidParamsError(
+                    "Go to implementation can be used only for methods or references of abstract classes")}};
     }
 
     vector<core::Loc> locations;
     auto owner = method.data(gs)->owner;
     if (!owner.isClassOrModule())
-        return {
-            .error={makeInvalidParamsError("Abstract method can only be inside a class or module")}
-        };
+        return {.error = {makeInvalidParamsError("Abstract method can only be inside a class or module")}};
 
     auto owningClassSymbolRef = owner.asClassOrModuleRef();
     auto childClasses = owningClassSymbolRef.getSubclasses(gs, false);
@@ -42,7 +38,7 @@ const MethodImplementationResults findMethodImplementations(const core::GlobalSt
         locations.push_back(methodImplementation.data(gs)->loc());
     }
 
-    return {.locations={locations}};
+    return {.locations = {locations}};
 }
 
 GoToImplementationTask::GoToImplementationTask(const LSPConfiguration &config, MessageId id,
@@ -101,7 +97,7 @@ unique_ptr<ResponseMessage> GoToImplementationTask::runRequest(LSPTypecheckerDel
         auto childClasses = classOrModuleRef.getSubclasses(gs, false);
         for (const auto &childClass : childClasses) {
             for (auto loc : childClass.data(gs)->allLocs()) {
-              addLocIfExists(gs, result, loc);
+                addLocIfExists(gs, result, loc);
             }
         }
 

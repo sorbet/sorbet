@@ -20,7 +20,6 @@ template class std::vector<const sorbet::core::Symbol *>;
 
 namespace sorbet::core {
 
-
 using namespace std;
 
 namespace {
