@@ -878,7 +878,6 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
         packageDB.finalizePackages();
     }
 
-
     {
         Timer timeit(gs.tracer(), "packager.rewritePackages");
         // Step 2: Rewrite packages. Can be done in parallel (and w/ step 3) if this becomes a bottleneck.
