@@ -250,13 +250,6 @@ build:webasm --copt=--llvm-lto --copt=3 --linkopt=--llvm-lto --linkopt=3
 # Specify a "sane" C++ toolchain for the host platform.
 build:webasm --host_crosstool_top=@llvm_toolchain_12_0_0//:toolchain
 
-# Our version of emscripten doesn't provide the offset converter that the
-# debugging library from absl is looking for. As a result, it will log an INFO
-# message to stdout when it starts up suggesting how to work around this. As we
-# can't fix that with emscripten-1.38.25, we'll need to upgrade to support it.
-# TODO(trevor) remove this when we upgrade emscripten
-build:webasm --copt=-DABSL_MIN_LOG_LEVEL=1
-
 ##
 ## Stripe's ci passes --config=ci, we need it to exist
 ##

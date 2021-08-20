@@ -109,4 +109,8 @@ bool bindThreadToCore(pthread_t handle, int coreId) {
     int rc = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpuset);
     return rc == 0;
 }
+
+void initializeSymbolizer(char *argv0) {
+    absl::InitializeSymbolizer(argv0);
+}
 #endif
