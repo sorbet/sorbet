@@ -18,6 +18,16 @@ if [ "$1" == "-t" ]; then
     bazel run "${bazel_args[@]}" //test/lint/buildifier:diff 2> /dev/null || true
     echo "\`\`\`"
     echo -e "Run \`./tools/scripts/format_build_files.sh\` to format them."
+    echo
+    echo "To set up your editor to format on save, run:"
+    echo
+    echo "\`\`\`"
+    echo "bazel build @com_github_bazelbuild_buildtools//buildifier:buildifier"
+    echo "\`\`\`"
+    echo
+    echo "then copy the resulting binary out of bazel-bin/ onto your PATH, and configure your editor to run this executable on save."
+    echo
+    echo "(The bazel-bin/ PATH is not stable, and might get blown away for various reasons, so copying it out ensures that it's always available.)"
     exit 1
   fi
 else
