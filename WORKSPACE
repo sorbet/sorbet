@@ -87,7 +87,6 @@ rust_repositories(
 )
 
 load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
-
 load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories")
 
 node_repositories()
