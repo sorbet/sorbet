@@ -469,6 +469,11 @@ void GlobalState::initEmpty() {
     id = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);
     ENFORCE(id == Symbols::Sorbet_Private_Static_ResolvedSigSingleton());
 
+    id = enterClassSymbol(Loc::none(), Symbols::T_Private(), core::Names::Constants::Compiler());
+    ENFORCE(id == Symbols::T_Private_Compiler());
+    id = Symbols::T_Private_Compiler().data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::T_Private_CompilerSingleton());
+
     typeArgument =
         enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
     ENFORCE(typeArgument == Symbols::todoTypeArgument());
