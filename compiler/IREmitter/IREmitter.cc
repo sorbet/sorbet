@@ -726,6 +726,28 @@ void emitBlockExits(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &
     }
 }
 
+llvm::Value *maybeCheckReturnValue(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+                                   llvm::Value *returnValue) {
+    llvm::IRBuilder<> &builder = static_cast<llvm::IRBuilder<> &>(build);
+    auto expectedType = cfg.symbol.data(cs)->resultType;
+    if (expectedType == nullptr) {
+        return returnValue;
+    }
+
+    if (core::isa_type<core::ClassType>(expectedType) &&
+        core::cast_type_nonnull<core::ClassType>(expectedType).symbol == core::Symbols::void_()) {
+        return Payload::voidSingleton(cs, builder, irctx);
+    }
+
+    // sorbet-runtime doesn't check this type for abstract methods, so we won't either.
+    // TODO(froydnj): we should check this type.
+    if (!cfg.symbol.data(cs)->isAbstract()) {
+        IREmitterHelpers::emitTypeTest(cs, builder, returnValue, expectedType, "Return value");
+    }
+
+    return returnValue;
+}
+
 void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(irctx.postProcessBlock);
@@ -734,24 +756,9 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
     auto rubyBlockId = 0;
 
     auto var = Payload::varGet(cs, returnValue(cfg, cs), builder, irctx, rubyBlockId);
-    auto expectedType = cfg.symbol.data(cs)->resultType;
-    if (expectedType == nullptr) {
-        IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyBlockId, var);
-        return;
-    }
+    auto *maybeChecked = maybeCheckReturnValue(cs, cfg, builder, irctx, var);
 
-    if (core::isa_type<core::ClassType>(expectedType) &&
-        core::cast_type_nonnull<core::ClassType>(expectedType).symbol == core::Symbols::void_()) {
-        auto void_ = Payload::voidSingleton(cs, builder, irctx);
-        IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyBlockId, void_);
-        return;
-    }
-    // sorbet-runtime doesn't check this type for abstract methods, so we won't either.
-    // TODO(froydnj): we should check this type.
-    if (!cfg.symbol.data(cs)->isAbstract()) {
-        IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, "Return value");
-    }
-    IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyBlockId, var);
+    IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyBlockId, maybeChecked);
 }
 
 void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) {
