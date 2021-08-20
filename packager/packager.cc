@@ -95,7 +95,7 @@ public:
             packageInfoByMangledName[pkg->name.mangledName] = pkg;
         }
 
-        for (std::string packagePathPrefix : pkg->packagePathPrefixes) {
+        for (const std::string &packagePathPrefix : pkg->packagePathPrefixes) {
             packageInfoByPathPrefix[packagePathPrefix] = pkg;
         }
     }
@@ -593,7 +593,7 @@ struct PackageInfoFinder {
 // Sanity checks package files, mutates arguments to export / export_methods to point to item in namespace,
 // builds up the expression injected into packages that import the package, and codegens the <PackagedMethods>  module.
 unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile &package,
-                                       vector<std::string> extraPackageFilesDirectoryPrefixes) {
+                                       const vector<std::string> &extraPackageFilesDirectoryPrefixes) {
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(ctx).sourceType == core::File::Type::Package);
     // Assumption: Root of AST is <root> class.
@@ -606,10 +606,12 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
     finder.finalize(ctx);
     if (finder.info) {
         finder.info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
-        for (string prefix : extraPackageFilesDirectoryPrefixes) {
-            string_view shortName = finder.info->name.mangledName.shortName(ctx.state);
-            string additionalDirPath = absl::StrCat(prefix, shortName.substr(0, shortName.find("_Package")), "/");
-            finder.info->packagePathPrefixes.emplace_back(additionalDirPath);
+        const string_view shortName = finder.info->name.mangledName.shortName(ctx.state);
+        const string_view dirNameFromShortName = shortName.substr(0, shortName.find("_Package"));
+
+        for (const string &prefix : extraPackageFilesDirectoryPrefixes) {
+            string additionalDirPath = absl::StrCat(prefix, dirNameFromShortName, "/");
+            finder.info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
         }
     }
     return move(finder.info);
@@ -845,7 +847,7 @@ bool checkContainsAllPackages(const core::GlobalState &gs, const vector<ast::Par
 } // namespace
 
 vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files,
-                                      vector<std::string> extraPackageFilesDirectoryPrefixes) {
+                                      const vector<std::string> &extraPackageFilesDirectoryPrefixes) {
     Timer timeit(gs.tracer(), "packager");
     // Ensure files are in canonical order.
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
@@ -865,6 +867,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
         // We're done adding packages.
         packageDB.finalizePackages();
     }
+
 
     {
         Timer timeit(gs.tracer(), "packager.rewritePackages");
@@ -939,7 +942,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
 }
 
 vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files,
-                                                 vector<std::string> extraPackageFilesDirectoryPrefixes) {
+                                                 const vector<std::string> &extraPackageFilesDirectoryPrefixes) {
     // Just run all packages w/ the changed files through Packager again. It should not define any new names.
     // TODO(jvilk): This incremental pass reprocesses every package file in the project. It should instead only process
     // the packages needed to understand file changes.
