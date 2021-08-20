@@ -592,7 +592,7 @@ struct PackageInfoFinder {
 };
 
 // TODO (aadi-stripe) we can avoid syscalls if we invent an efficient way of looking up
-// directories in the source tree. Might be tied to https://github.com/sorbet/sorbet/issues/4509
+// directories in the source tree via GlobalState. Might be tied to https://github.com/sorbet/sorbet/issues/4509
 bool pathExists(const std::string &path) {
     struct stat buffer;
     return (stat(path.c_str(), &buffer) == 0);
