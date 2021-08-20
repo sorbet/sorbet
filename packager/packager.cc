@@ -296,8 +296,7 @@ ast::ExpressionPtr prependScope(ast::ExpressionPtr scope, ast::ExpressionPtr toP
 // Registry is either <PackageRegistry> or <PackageTests>. The latter if following the convention
 // that if scope starts with `Test::`.
 ast::ExpressionPtr prependPackageScope(ast::ExpressionPtr scope, core::NameRef mangledName) {
-    auto *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
-    ENFORCE(lastConstLit != nullptr);
+    auto *lastConstLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(scope);
     while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
         lastConstLit = constLit;
     }
