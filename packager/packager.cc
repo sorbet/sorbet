@@ -11,6 +11,7 @@
 #include "common/sort.h"
 #include "core/Unfreeze.h"
 #include "core/errors/packager.h"
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -590,6 +591,13 @@ struct PackageInfoFinder {
     }
 };
 
+// TODO (aadi-stripe) we can avoid syscalls if we invent an efficient way of looking up
+// directories in the source tree. Might be tied to https://github.com/sorbet/sorbet/issues/4509
+bool pathExists(const std::string &path) {
+    struct stat buffer;
+    return (stat(path.c_str(), &buffer) == 0);
+}
+
 // Sanity checks package files, mutates arguments to export / export_methods to point to item in namespace,
 // builds up the expression injected into packages that import the package, and codegens the <PackagedMethods>  module.
 unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile &package,
@@ -611,7 +619,9 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
 
         for (const string &prefix : extraPackageFilesDirectoryPrefixes) {
             string additionalDirPath = absl::StrCat(prefix, dirNameFromShortName, "/");
-            finder.info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+            if (pathExists(additionalDirPath)) {
+                finder.info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+            }
         }
     }
     return move(finder.info);
