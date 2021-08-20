@@ -31,4 +31,6 @@ module Simpsons
       #   ^^^^ usage: bart
       end
   end
+
+  Test::Krabappel::Popquiz # error: Unable to resolve constant `Test`
 end

@@ -817,11 +817,14 @@ private:
                 // module A::B::C
                 //   D = <Mangled A::B>::A::B::C::D
                 // end
-                auto importLoc = node->source.importLoc;
                 auto assignRhs = prependPackageScope(parts2literal(parts, core::LocOffsets::none()),
                                                      node->source.packageMangledName);
                 auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
                                               std::move(assignRhs));
+
+                // Ensure import's do not add duplicate loc's in the test_module
+                auto importLoc =
+                    moduleType == node->source.importType ? node->source.importLoc : core::LocOffsets::none();
 
                 ast::ClassDef::RHS_store rhs;
                 rhs.emplace_back(std::move(assign));
