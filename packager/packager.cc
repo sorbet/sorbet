@@ -195,10 +195,8 @@ PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit 
 
     // Foo::Bar => Foo_Bar_Package
     auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx)), "_Package");
-
     auto utf8Name = ctx.state.enterNameUTF8(mangledName);
     auto packagerName = ctx.state.freshNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
-
     pName.mangledName = ctx.state.enterNameConstant(packagerName);
 
     return pName;
