@@ -489,56 +489,6 @@ void sorbet_ec_jump_tag(rb_execution_context_t *ec, enum ruby_tag_type tt) {
 
 #define SORBET_INLINE __attribute__((always_inline))
 
-// This is invoked at the beginning of a method's body, and is analogous to EC_PUSH_TAG + EC_EXEC_TAG
-// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L130-L135
-// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L181-L182
-//
-// Note that we're calling `setjmp` here, but we're returning from this function and
-// expecting `longjmp`'ing to `tag->buf` to still work correctly.  We can do this
-// because this function will be inlined, meaning that `tag->buf` will reflect the
-// state of this function's caller and `tag->buf` will be valid for the lifetime of
-// this function's caller.
-//
-// The `volatile` here is a bit gross.  If you look at `rb_ec_tag_state` and its
-// accompanying logic, referenced below, you'll notice that it contains some
-// gross hacks to force clang to stick `ec` in memory (e.g. VAR_FROM_MEMORY:
-//
-// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L146-L158
-//
-// before accessing `ec` and that its `ec` argument is `rb_execution_context_t *ec`.
-//
-// Without those hacks, clang will assume that wherever `ec` got allocated to is where
-// it should be accessed on both sides of the `if`, which is not necessarily valid in
-// the case of `longjmp`'ing back to the `if`.  (clang would presumably get this
-// right if the default implementation of RUBY_SETJMP was the C library's `setjmp`,
-// which gets annotated as "returns_twice", but the default implementation is
-// `__builtin_setjmp`, which is not so annotated.)  So the point of the hacks is
-// to force `ec` to (somehow) be allocated to memory.
-//
-// We need a similar hack, but can be slightly more elegant because we cache the
-// execution context across a tag-guarded region.  A pointer to that cache is
-// passed in here and by making the pointer volatile, we force clang to reload
-// the execution context pointer every time the execution context is needed,
-// thus ensuring that the execution context lives in memory always.
-static SORBET_INLINE enum ruby_tag_type sorbet_initializeTag(volatile rb_execution_context_t **ec, struct rb_vm_tag *tag) {
-    // inlined from EC_PUSH_TAG
-    tag->state = TAG_NONE;
-    tag->tag = Qundef;
-    tag->prev = (*ec)->tag;
-
-    if (RUBY_SETJMP(tag->buf) != 0) {
-        // See rb_ec_tag_state:
-        // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L160-L167
-        enum ruby_tag_type *statePtr = &(*ec)->tag->state;
-        enum ruby_tag_type state = *statePtr;
-        *statePtr = TAG_NONE;
-        return state;
-    } else {
-        (*ec)->tag = tag;
-        return TAG_NONE;
-    }
-}
-
 SORBET_INLINE
 static int computeLocalIndex(long index) {
     // Local offset calculation needs to take into account the fixed values that
@@ -584,8 +534,6 @@ VALUE sorbet_run_exception_handling(volatile rb_execution_context_t **ec,
                                     volatile VALUE retrySingleton,
                                     volatile long exceptionValueIndex,
                                     volatile long exceptionValueLevel) {
-    struct rb_vm_tag tag;
-
     // `volatile` is not used in polite C programming, but here it's very important:
     // it ensures that the requisite variables are stored in memory across the setjmp
     // below and therefore will still be valid upon a return via longjmp.  All such
@@ -603,7 +551,9 @@ VALUE sorbet_run_exception_handling(volatile rb_execution_context_t **ec,
     } state = RunningBody;
     volatile enum ruby_tag_type nleType;
 
-    if ((nleType = sorbet_initializeTag(ec, &tag)) == TAG_NONE) {
+    EC_PUSH_TAG(*ec);
+
+    if ((nleType = EC_EXEC_TAG()) == TAG_NONE) {
     execute_body:
         state = RunningBody;
         // tag.state will have been reset appropriately if we got here via `retry`,
@@ -727,7 +677,7 @@ VALUE sorbet_run_exception_handling(volatile rb_execution_context_t **ec,
 
  execute_ensure:
     // However we arrived at this state, we are done with our entry on the tag stack.
-    (*ec)->tag = tag.prev;
+    EC_POP_TAG();
 
     // Ruby's running of ensure handlers passes in rb_errinfo() as an argument on the
     // stack ; ensure handlers then exit via the bytecode instruction `throw 0 local[0]`,
