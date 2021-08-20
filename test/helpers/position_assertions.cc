@@ -50,6 +50,7 @@ const UnorderedMap<
         {"no-stdlib", BooleanPropertyAssertion::make},
         {"symbol-search", SymbolSearchAssertion::make},
         {"apply-rename", ApplyRenameAssertion::make},
+        {"extra-package-files-directory-prefix", StringPropertyAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -955,6 +956,37 @@ BooleanPropertyAssertion::BooleanPropertyAssertion(string_view filename, unique_
     : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value){};
 
 string BooleanPropertyAssertion::toString() const {
+    return fmt::format("{}: {}", assertionType, value);
+}
+
+shared_ptr<StringPropertyAssertion> StringPropertyAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                                    int assertionLine, string_view assertionContents,
+                                                                    string_view assertionType) {
+    return make_shared<StringPropertyAssertion>(filename, range, assertionLine, assertionContents.data(),
+                                                 assertionType);
+}
+
+optional<std::string> StringPropertyAssertion::getValue(string_view type,
+                                                  const vector<shared_ptr<RangeAssertion>> &assertions) {
+    {
+        INFO("Unrecognized string property assertion: " << type);
+        CHECK_NE(assertionConstructors.find(string(type)), assertionConstructors.end());
+    }
+    for (auto &assertion : assertions) {
+        if (auto stringAssertion = dynamic_pointer_cast<StringPropertyAssertion>(assertion)) {
+            if (stringAssertion->assertionType == type) {
+                return stringAssertion->value;
+            }
+        }
+    }
+    return nullopt;
+}
+
+StringPropertyAssertion::StringPropertyAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                 std::string value, string_view assertionType)
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value){};
+
+std::string StringPropertyAssertion::toString() const {
     return fmt::format("{}: {}", assertionType, value);
 }
 
