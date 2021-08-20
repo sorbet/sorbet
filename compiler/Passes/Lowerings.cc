@@ -38,7 +38,8 @@ public:
     // - return `instr` unchanged
     //
     // We might change this (I don't know if this decision was intentional or accidental).
-    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module, llvm::CallInst *instr) const = 0;
+    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::ModulePass *pass, llvm::Module &module,
+                                     llvm::CallInst *instr) const = 0;
 
     virtual ~IRIntrinsic() = default;
 };
@@ -81,7 +82,7 @@ public:
         return {"sorbet_i_getRubyClass", "sorbet_i_getRubyConstant"};
     }
 
-    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module,
+    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::ModulePass *pass, llvm::Module &module,
                                      llvm::CallInst *instr) const override {
         auto elemPtr = llvm::dyn_cast<llvm::GEPOperator>(instr->getArgOperand(0));
         if (elemPtr == nullptr) {
@@ -214,7 +215,7 @@ public:
     //
     // Then the LowerIntrinsicsPass harness below will update all reads from %46 to read from %47
     // instead and then delete the write to %46 entirely (which might unlock other optimizations).
-    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module,
+    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::ModulePass *pass, llvm::Module &module,
                                      llvm::CallInst *instr) const override {
         auto valueLoad = llvm::dyn_cast<llvm::LoadInst>(instr->getArgOperand(0));
         auto kindLoad = llvm::dyn_cast<llvm::LoadInst>(instr->getArgOperand(1));
@@ -263,7 +264,7 @@ public:
         return methods;
     }
 
-    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module,
+    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::ModulePass *pass, llvm::Module &module,
                                      llvm::CallInst *instr) const override {
         llvm::IRBuilder<> builder(instr);
         auto *arg = instr->getArgOperand(0);
@@ -325,7 +326,7 @@ public:
     // sorbet_pushValueStack call for "a".
     // Line 7 corresponds to the store to spPtr.
     // Line 8 corresponds to the sorbet_callFuncWithCache call.
-    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module,
+    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::ModulePass *pass, llvm::Module &module,
                                      llvm::CallInst *instr) const override {
         // Make sure cache, blk, closure, cfp and self are passed in.
         ENFORCE(instr->arg_size() >= 5);
@@ -377,6 +378,10 @@ public:
     // The contents of this variable don't matter; LLVM just uses the pointer address of it as an ID.
     static char ID;
     LowerIntrinsicsPass() : llvm::ModulePass(ID){};
+
+    void getAnalysisUsage(llvm::AnalysisUsage &AU) const override {
+        AU.addRequired<llvm::DominatorTreeWrapperPass>();
+    }
 
     struct CallInstVisitor : public llvm::InstVisitor<CallInstVisitor> {
         vector<llvm::CallInst *> result;
@@ -437,7 +442,7 @@ public:
             visitor.visit(mod);
 
             for (const auto &callInst : visitor.result) {
-                auto newRes = intrinsic->replaceCall(mod.getContext(), mod, callInst);
+                auto newRes = intrinsic->replaceCall(mod.getContext(), this, mod, callInst);
                 callInst->replaceAllUsesWith(newRes);
                 callInst->eraseFromParent();
             }
@@ -447,7 +452,7 @@ public:
     };
 
     virtual ~LowerIntrinsicsPass() = default;
-} LowerInrinsicsPass;
+} LowerIntrinsicsPass_;
 char LowerIntrinsicsPass::ID = 0;
 
 static llvm::RegisterPass<LowerIntrinsicsPass> X("lowerSorbetIntrinsics", "Lower Sorbet Intrinsics",
@@ -576,6 +581,116 @@ char DeleteUnusedInlineCachesPass::ID = 0;
 static llvm::RegisterPass<DeleteUnusedInlineCachesPass> Z("deleteUnusuedInlineCaches", "Delete Unused Inline Caches",
                                                           false, // Only looks at CFG
                                                           false  // Analysis Pass
+);
+
+// Detects code that looks like this:
+//
+// > %allTypeTested.i = call i1 (i64, ...) @sorbet_i_allTypeTested(i64 %rubyStr_hello.i)
+//
+// and replaces all uses of `%allTypeTested.i` with a constant true/false value that indicates whether or not this use
+// of `%rubyStr_hello.i` is dominated by a call to `sorbet_i_typeTested(%rubyStr_hello.i)`.
+//
+// This pass also removes all calls to `sorbet_i_typeTested`, as they are metadata that is used only by this pass.
+class AllTypeTestedPass : public llvm::ModulePass {
+public:
+    static char ID;
+
+    AllTypeTestedPass() : llvm::ModulePass(ID) {}
+
+    // Register that we need the dominator tree
+    void getAnalysisUsage(llvm::AnalysisUsage &AU) const override {
+        AU.addRequired<llvm::DominatorTreeWrapperPass>();
+    }
+
+    struct CallInstVisitor : public llvm::InstVisitor<CallInstVisitor> {
+        llvm::Function *typeTested;
+        llvm::Function *allTypeTested;
+
+        vector<llvm::CallInst *> typeTestedCalls;
+        vector<llvm::CallInst *> allTypeTestedCalls;
+
+        void visitCallInst(llvm::CallInst &ci) {
+            auto maybeFunc = ci.getCalledFunction();
+            if (maybeFunc == nullptr) {
+                return;
+            }
+
+            if (maybeFunc == typeTested) {
+                typeTestedCalls.emplace_back(&ci);
+                return;
+            }
+
+            if (maybeFunc == allTypeTested) {
+                allTypeTestedCalls.emplace_back(&ci);
+                return;
+            }
+
+            return;
+        }
+    };
+
+    bool runOnModule(llvm::Module &mod) override {
+        CallInstVisitor visitor;
+
+        visitor.typeTested = mod.getFunction("sorbet_i_typeTested");
+        visitor.allTypeTested = mod.getFunction("sorbet_i_allTypeTested");
+
+        if (visitor.typeTested == nullptr || visitor.allTypeTested == nullptr) {
+            return false;
+        }
+
+        visitor.visit(mod);
+
+        if (visitor.typeTestedCalls.empty()) {
+            return false;
+        }
+
+        // Translate all uses of `sorbet_i_allTypeTested`
+        for (auto *ci : visitor.allTypeTestedCalls) {
+            ci->dump();
+            auto &domTree = getAnalysis<llvm::DominatorTreeWrapperPass>(*ci->getParent()->getParent()).getDomTree();
+
+            bool allTypeTested = true;
+
+            for (auto &arg : ci->args()) {
+                bool localTypeTested = false;
+                for (auto *user : arg->users()) {
+                    if (auto *call = llvm::dyn_cast<llvm::CallInst>(user)) {
+                        if (call->getCalledFunction() == visitor.typeTested) {
+                            if (domTree.dominates(call, ci)) {
+                                localTypeTested = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (!localTypeTested) {
+                    allTypeTested = false;
+                    break;
+                }
+            }
+
+            // constant-fold away all uses of the original intrinsic
+            ci->replaceAllUsesWith(llvm::ConstantInt::get(mod.getContext(), llvm::APInt(1, allTypeTested)));
+            ci->eraseFromParent();
+        }
+
+        // Remove all uses of `sorbet_i_typeTested`, as the metadata is no longer needed
+        for (auto *ci : visitor.typeTestedCalls) {
+            ci->eraseFromParent();
+        }
+
+        return false;
+    }
+};
+
+char AllTypeTestedPass::ID = 0;
+
+static llvm::RegisterPass<AllTypeTestedPass> AllTypeTestedPass_("allTypeTested",
+                                                                "Propagate type tests through final method calls",
+                                                                false, // Only looks at CFG
+                                                                false  // Analysis Pass
 );
 
 class RemoveUnnecessaryHashDupsPass : public llvm::ModulePass {
@@ -749,4 +864,9 @@ llvm::ModulePass *Passes::createDeleteUnusedInlineCachesPass() {
 llvm::ModulePass *Passes::createRemoveUnnecessaryHashDupsPass() {
     return new RemoveUnnecessaryHashDupsPass();
 }
+
+llvm::ModulePass *Passes::createAllTypeTestedPass() {
+    return new AllTypeTestedPass();
+}
+
 } // namespace sorbet::compiler

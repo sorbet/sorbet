@@ -130,10 +130,17 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
 
     // this is unfortunate: fillSendArgsArray will allocate a hash when keyword arguments are present.
     auto args = IREmitterHelpers::fillSendArgArray(mcctx);
+
+    llvm::Value *allTypeTested;
+    if (!args.hasKwSplat && !mcctx.hasUntypedArgs()) {
+        allTypeTested = Payload::allTypeTested(cs, builder, args.argValues);
+    } else {
+        allTypeTested = llvm::ConstantInt::get(cs, llvm::APInt(1, false));
+    }
     auto *stackFrameVar = Payload::rubyStackFrameVar(cs, builder, mcctx.irctx, finalInfo->method);
     auto *stackFrame = builder.CreateLoad(stackFrameVar);
     auto *fastPathResult =
-        Payload::callFuncDirect(cs, builder, cache, forwarder, args.argc, args.argv, recv, stackFrame);
+        Payload::callFuncDirect(cs, builder, cache, forwarder, args.argc, args.argv, recv, stackFrame, allTypeTested);
     auto *fastPathEnd = builder.GetInsertBlock();
     builder.CreateBr(afterFinalCall);
 
@@ -288,8 +295,8 @@ llvm::Value *getSendArgsPointer(CompilerState &cs, llvm::IRBuilderBase &builder,
 } // namespace
 
 IREmitterHelpers::SendArgInfo::SendArgInfo(llvm::Value *argc, llvm::Value *argv, llvm::Value *kw_splat,
-                                           vector<llvm::Value *> argValues)
-    : argc{argc}, argv{argv}, kw_splat{kw_splat}, argValues(std::move(argValues)) {}
+                                           vector<llvm::Value *> argValues, bool hasKwSplat)
+    : argc{argc}, argv{argv}, kw_splat{kw_splat}, argValues(std::move(argValues)), hasKwSplat{hasKwSplat} {}
 
 IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallContext &mcctx, const std::size_t offset) {
     auto &cs = mcctx.cs;
@@ -326,7 +333,7 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
     auto *argc = llvm::ConstantInt::get(cs, llvm::APInt(32, length, true));
     if (length == 0) {
         return SendArgInfo{argc, llvm::Constant::getNullValue(llvm::Type::getInt64PtrTy(cs)), kw_splat,
-                           std::move(argValues)};
+                           std::move(argValues), hasKwSplat};
     }
 
     auto *sendArgs = irctx.sendArgArrayByBlock[rubyBlockId];
@@ -373,7 +380,7 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
         }
     }
 
-    return SendArgInfo{argc, getSendArgsPointer(cs, builder, sendArgs), kw_splat, std::move(argValues)};
+    return SendArgInfo{argc, getSendArgsPointer(cs, builder, sendArgs), kw_splat, std::move(argValues), hasKwSplat};
 }
 
 IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallContext &mcctx) {
