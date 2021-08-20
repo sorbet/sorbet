@@ -152,6 +152,8 @@ SORBET_ALIVE(void, sorbet_vm_register_sig,
 SORBET_ALIVE(void, sorbet_vm_define_method,
              (VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq, bool isSelf));
 
+SORBET_ALIVE(void, sorbet_throwReturn, (rb_execution_context_t *ec, VALUE retval));
+
 // The next several functions exist to convert Ruby definitions into LLVM IR, and
 // are always inlined as a consequence.
 
@@ -2299,18 +2301,6 @@ void sorbet_ensureSorbetRuby(int compile_time_is_release_build, char *compile_ti
                  "SorbetLLVM runtime version mismatch: sorbet_ruby compiled with %s but shared object compiled with %s",
                  runtime_build_scm_revision, compile_time_build_scm_revision);
     }
-}
-
-extern VALUE sorbet_vm_throw(const rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, rb_num_t throw_state,
-                             VALUE throwobj);
-extern void sorbet_ec_jump_tag(rb_execution_context_t *ec, enum ruby_tag_type tt);
-
-SORBET_INLINE
-void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) {
-    VALUE v = sorbet_vm_throw(ec, ec->cfp, TAG_RETURN, retval);
-
-    ec->errinfo = v;
-    sorbet_ec_jump_tag(ec, ec->tag->state);
 }
 
 // This is invoked at the beginning of a method's body, and is analogous to EC_PUSH_TAG + EC_EXEC_TAG

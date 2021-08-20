@@ -475,11 +475,9 @@ void sorbet_vm_setivar(VALUE obj, ID id, VALUE val, IVC ic) {
     vm_setivar(obj, id, val, ic, cc, is_attr);
 }
 
-VALUE sorbet_vm_throw(const rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, rb_num_t throw_state,
-                      VALUE throwobj) {
-    return vm_throw(ec, reg_cfp, throw_state, throwobj);
-}
+void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) {
+    VALUE v = vm_throw(ec, ec->cfp, TAG_RETURN, retval);
 
-void sorbet_ec_jump_tag(rb_execution_context_t *ec, enum ruby_tag_type tt) {
-    EC_JUMP_TAG(ec, tt);
+    ec->errinfo = v;
+    EC_JUMP_TAG(ec, ec->tag->state);
 }
