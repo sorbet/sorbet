@@ -38,7 +38,6 @@ public:
 
 struct PackageName {
     core::LocOffsets loc;
-    std::string packageNameWithUnderscores;
     core::NameRef mangledName = core::NameRef::noName();
     FullyQualifiedName fullName;
 
@@ -194,10 +193,8 @@ PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit 
     pName.loc = constantLit->loc;
     pName.fullName = getFullyQualifiedName(ctx, constantLit);
 
-    // Foo::Bar => Foo_Bar
-    pName.packageNameWithUnderscores = absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx));
-    // Foo_Bar => Foo_Bar_Package
-    auto mangledName = absl::StrCat(pName.packageNameWithUnderscores, "_Package");
+    // Foo::Bar => Foo_Bar_Package
+    auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx)), "_Package");
 
     auto utf8Name = ctx.state.enterNameUTF8(mangledName);
     auto packagerName = ctx.state.freshNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
@@ -611,7 +608,8 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
     if (finder.info) {
         finder.info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
         for (string prefix : extraPackageFilesDirectoryPrefixes) {
-            string additionalDirPath = absl::StrCat(prefix, finder.info->name.packageNameWithUnderscores, "/");
+            string_view shortName = finder.info->name.mangledName.shortName(ctx.state);
+            string additionalDirPath = absl::StrCat(prefix, shortName.substr(0, shortName.find("_Package")), "/");
             finder.info->packagePathPrefixes.emplace_back(additionalDirPath);
         }
     }
