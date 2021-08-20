@@ -9,6 +9,7 @@ class ModulePass;
 namespace sorbet::compiler {
 class Passes {
 public:
+    static llvm::ModulePass *createAllTypeTestedPass();
     static llvm::ModulePass *createDeleteUnusedSorbetIntrinsticsPass();
     static llvm::ModulePass *createDeleteUnusedInlineCachesPass();
     static llvm::ModulePass *createRemoveUnnecessaryHashDupsPass();

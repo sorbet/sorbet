@@ -75,6 +75,9 @@ public:
     // Return the function associated with the block, nullptr if blk is std::nullopt.
     llvm::Function *blkAsFunction() const;
 
+    // Returns true if any arguments in this send are T.untyped
+    bool hasUntypedArgs() const;
+
     static MethodCallContext create(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
                                     int rubyBlockId, cfg::Send *send, std::optional<int> blk);
 

@@ -96,6 +96,10 @@ void MethodCallContext::emitMethodSearch() {
     this->methodSearchPerformed = true;
 }
 
+bool MethodCallContext::hasUntypedArgs() const {
+    return absl::c_any_of(this->send->args, [](auto &arg) { return arg.type.isUntyped(); });
+}
+
 const std::vector<llvm::Value *> &MethodCallContext::getStackArgs() {
     if (this->inlineCache == nullptr) {
         this->initArgsAndCache();
