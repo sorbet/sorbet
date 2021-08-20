@@ -4,7 +4,6 @@ set -euo pipefail
 
 echo "--- Pre-setup"
 
-command -v node
 command -v realpath
 
 export JOB_NAME=build-emscripten

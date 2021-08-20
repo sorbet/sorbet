@@ -188,6 +188,12 @@ package(default_visibility = ["//visibility:public"])
     )
 
     http_archive(
+        name = "build_bazel_rules_nodejs",
+        sha256 = "e79c08a488cc5ac40981987d862c7320cee8741122a2649e9b08e850b6f20442",
+        urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/3.8.0/rules_nodejs-3.8.0.tar.gz"],
+    )
+
+    http_archive(
         name = "com_github_bazelbuild_buildtools",
         urls = _github_public_urls("bazelbuild/buildtools/archive/5bcc31df55ec1de770cb52887f2e989e7068301f.zip"),
         sha256 = "875d0c49953e221cfc35d2a3846e502f366dfa4024b271fa266b186ca4664b37",
@@ -234,6 +240,10 @@ package(default_visibility = ["//visibility:public"])
         build_file = "@com_stripe_ruby_typer//third_party:emscripten-toolchain.BUILD",
         sha256 = "4d6fa350895fabc25b89ce5f9dcb528e719e7c2bf7dacab2a3e3cc818ecd7019",
         strip_prefix = "emscripten-1.38.25",
+        patches = [
+            "@com_stripe_ruby_typer//third_party:emscripten_toolchain/emcc.py.patch",
+            "@com_stripe_ruby_typer//third_party:emscripten_toolchain/tools_shared.py.patch",
+        ],
     )
 
     http_archive(

@@ -1,21 +1,37 @@
 #!/bin/bash
 set -eo pipefail
 
-export PATH="${PATH}:/usr/local/bin/" # this is where we find node
 EM_CACHE_ARCHIVE="tools/toolchain/webasm-darwin/em_cache_existing.tar.gz"
 
 if [ ! -f "$EM_CACHE_ARCHIVE" ]; then
   echo "can't find stdlib compilation cache";
 fi
 
-command -v node >/dev/null 2>&1 || { echo 'will need node' ; exit 1; }
-command -v realpath > /dev/null 2>&1 || { echo 'will need realpath' ; exit 1; }
+command -v realpath > /dev/null 2>&1 || { echo 'You need to install the "realpath" command system-wide.' ; exit 1; }
 
-EM_CONFIG="LLVM_ROOT='${PWD}/external/emscripten_clang_darwin/';"
-EM_CONFIG+="EMSCRIPTEN_NATIVE_OPTIMIZER='${PWD}/external/external/emscripten_clang_darwin/optimizer';"
-EM_CONFIG+="BINARYEN_ROOT='${PWD}/external/emscripten_clang_darwin/binaryen';"
-EM_CONFIG+="NODE_JS='node';"
-EM_CONFIG+="EMSCRIPTEN_ROOT='${PWD}/external/emscripten_toolchain';"
+# Try to find Python on the system.
+# Our version of emscripten uses Python 2, but upstream has already switched to
+# Python 3. For now we prefer finding python2 if available, and fall back to
+# trying Python 3 in case no Python 2 was found (which will chunder warnings
+# but still work).
+if command -v python &> /dev/null; then
+  PYTHON="python"
+elif command -v python2 &> /dev/null; then
+  PYTHON="python2"
+elif command -v python3 &> /dev/null; then
+  PYTHON="python3"
+else
+  export PATH="${PATH}:/usr/local/bin/"
+  PYTHON="python"
+fi
+
+ABSOLUTE_PREFIX=$(realpath "${PWD}") # bazel replaces PWD with /proc/self/cwd which is unstable under "cd", meaning that reffering to a path under relative name fails
+
+EM_CONFIG="LLVM_ROOT='${ABSOLUTE_PREFIX}/external/emscripten_clang_darwin/';"
+EM_CONFIG+="EMSCRIPTEN_NATIVE_OPTIMIZER='${ABSOLUTE_PREFIX}/external/external/emscripten_clang_darwin/optimizer';"
+EM_CONFIG+="BINARYEN_ROOT='${ABSOLUTE_PREFIX}/external/emscripten_clang_darwin/binaryen';"
+EM_CONFIG+="NODE_JS='${ABSOLUTE_PREFIX}/external/nodejs_darwin_amd64/bin/node';"
+EM_CONFIG+="EMSCRIPTEN_ROOT='${ABSOLUTE_PREFIX}/external/emscripten_toolchain';"
 EM_CONFIG+="SPIDERMONKEY_ENGINE='';"
 EM_CONFIG+="V8_ENGINE='';"
 EM_CONFIG+="COMPILER_ENGINE=NODE_JS;"
@@ -87,7 +103,7 @@ fi
 # Run emscripten to compile and link
 #echo "original_args" "$@"
 #echo "transformed_args" "${args[@]}"
-python external/emscripten_toolchain/emcc.py "${args[@]}"
+"$PYTHON" external/emscripten_toolchain/emcc.py "${args[@]}"
 
 if [ -n "${tar_name}" ]; then
     full_tar_path=$(realpath "${tar_name}.tar")
