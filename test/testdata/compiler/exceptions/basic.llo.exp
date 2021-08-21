@@ -552,6 +552,10 @@ functionEntryInitializers:
   %or.cond = or i1 %tooManyArgs, %tooFewArgs, !dbg !73
   br i1 %or.cond, label %argCountFailBlock, label %fillRequiredArgs, !dbg !73, !prof !74
 
+postProcess:                                      ; preds = %exception-ensure, %sorbet_raiseIfNotNil.exit
+  %"<returnValue>.sroa.0.0" = phi i64 [ %123, %sorbet_raiseIfNotNil.exit ], [ %97, %exception-ensure ], !dbg !75
+  ret i64 %"<returnValue>.sroa.0.0"
+
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call void @sorbet_raiseArity(i32 %argc, i32 noundef 1, i32 noundef 1) #14, !dbg !73
   unreachable, !dbg !73
@@ -812,7 +816,7 @@ exception-ensure:                                 ; preds = %sorbet_try.exit, %s
   %send = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts.7, i64 0), !dbg !79
   call void @sorbet_popFrame()
   %isReturnValue11 = icmp ne i64 %97, 52, !dbg !72
-  br i1 %isReturnValue11, label %normalReturn, label %exception-continue, !dbg !72
+  br i1 %isReturnValue11, label %postProcess, label %exception-continue, !dbg !72
 
 exception-continue:                               ; preds = %exception-ensure
   %115 = icmp eq i64 %98, 8, !dbg !72
@@ -837,11 +841,7 @@ sorbet_raiseIfNotNil.exit:                        ; preds = %sorbet_raiseIfNotNi
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 20), i64** %4, align 8, !tbaa !39
   %122 = getelementptr inbounds i64, i64* %117, i64 -5, !dbg !80
   %123 = load i64, i64* %122, align 8, !dbg !80, !tbaa !14
-  br label %normalReturn, !dbg !80
-
-normalReturn:                                     ; preds = %exception-ensure, %sorbet_raiseIfNotNil.exit
-  %"<returnValue>.sroa.0.0" = phi i64 [ %123, %sorbet_raiseIfNotNil.exit ], [ %97, %exception-ensure ], !dbg !75
-  ret i64 %"<returnValue>.sroa.0.0"
+  br label %postProcess, !dbg !80
 }
 
 ; Function Attrs: ssp
@@ -1070,13 +1070,13 @@ functionEntryInitializers:
 14:                                               ; preds = %functionEntryInitializers
   %15 = getelementptr inbounds i64, i64* %10, i64 -5, !dbg !34
   store i64 %send, i64* %15, align 8, !dbg !34, !tbaa !14
-  br label %normalReturn, !dbg !34
+  br label %sorbet_writeLocal.exit, !dbg !34
 
 16:                                               ; preds = %functionEntryInitializers
   tail call void @sorbet_vm_env_write_slowpath(i64* nonnull align 8 dereferenceable(8) %10, i32 noundef -5, i64 %send) #11, !dbg !34
-  br label %normalReturn, !dbg !34
+  br label %sorbet_writeLocal.exit, !dbg !34
 
-normalReturn:                                     ; preds = %16, %14
+sorbet_writeLocal.exit:                           ; preds = %14, %16
   ret i64 52
 }
 

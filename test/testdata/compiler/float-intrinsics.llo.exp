@@ -356,15 +356,15 @@ typeTestSuccess7:                                 ; preds = %fillRequiredArgs, %
   %23 = xor i32 %22, -1, !dbg !21
   %24 = and i32 %23, %20, !dbg !21
   %25 = icmp eq i32 %24, 0, !dbg !21
-  br i1 %25, label %normalReturn, label %26, !dbg !21, !prof !19
+  br i1 %25, label %typeTestSuccess14, label %26, !dbg !21, !prof !19
 
 26:                                               ; preds = %typeTestSuccess7
   %27 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %18, i64 0, i32 8, !dbg !21
   %28 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %27, align 8, !dbg !21, !tbaa !30
   %29 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %28, i32 noundef 0) #15, !dbg !21
-  br label %normalReturn, !dbg !21
+  br label %typeTestSuccess14, !dbg !21
 
-normalReturn:                                     ; preds = %26, %typeTestSuccess7
+typeTestSuccess14:                                ; preds = %26, %typeTestSuccess7
   ret i64 %17
 }
 
@@ -493,16 +493,16 @@ typeTestSuccess7:                                 ; preds = %fillRequiredArgs, %
 
 rb_vm_check_ints.exit:                            ; preds = %typeTestSuccess7, %26
   switch i64 %17, label %codeRepl [
-    i64 20, label %normalReturn
-    i64 0, label %normalReturn
+    i64 20, label %typeTestSuccess14
+    i64 0, label %typeTestSuccess14
   ], !prof !44
+
+typeTestSuccess14:                                ; preds = %rb_vm_check_ints.exit, %rb_vm_check_ints.exit
+  ret i64 %17
 
 codeRepl:                                         ; preds = %rb_vm_check_ints.exit
   tail call fastcc void @"func_Object#lt.cold.1"(i64 %17) #14, !dbg !45
   unreachable
-
-normalReturn:                                     ; preds = %rb_vm_check_ints.exit, %rb_vm_check_ints.exit
-  ret i64 %17
 }
 
 ; Function Attrs: nounwind sspreq uwtable
@@ -574,16 +574,16 @@ typeTestSuccess7:                                 ; preds = %fillRequiredArgs, %
 
 rb_vm_check_ints.exit:                            ; preds = %typeTestSuccess7, %26
   switch i64 %17, label %codeRepl [
-    i64 20, label %normalReturn
-    i64 0, label %normalReturn
+    i64 20, label %typeTestSuccess14
+    i64 0, label %typeTestSuccess14
   ], !prof !44
+
+typeTestSuccess14:                                ; preds = %rb_vm_check_ints.exit, %rb_vm_check_ints.exit
+  ret i64 %17
 
 codeRepl:                                         ; preds = %rb_vm_check_ints.exit
   tail call fastcc void @"func_Object#lt.cold.1"(i64 %17) #14, !dbg !54
   unreachable
-
-normalReturn:                                     ; preds = %rb_vm_check_ints.exit, %rb_vm_check_ints.exit
-  ret i64 %17
 }
 
 ; Function Attrs: nounwind sspreq uwtable
@@ -1353,22 +1353,22 @@ functionEntryInitializers:
   store i64 %send, i64* %25, align 8, !dbg !123, !tbaa !4
   %26 = getelementptr inbounds i64, i64* %25, i64 1, !dbg !123
   store i64* %26, i64** %22, align 8, !dbg !123
-  %send41 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_params, i64 0), !dbg !123
+  %send38 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_params, i64 0), !dbg !123
   %27 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 1, !dbg !124
   %28 = load i64*, i64** %27, align 8, !dbg !124
   store i64 %15, i64* %28, align 8, !dbg !124, !tbaa !4
   %29 = getelementptr inbounds i64, i64* %28, i64 1, !dbg !124
   store i64* %29, i64** %27, align 8, !dbg !124
-  %send43 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_untyped.1, i64 0), !dbg !124
+  %send40 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_untyped.1, i64 0), !dbg !124
   %30 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 1, !dbg !123
   %31 = load i64*, i64** %30, align 8, !dbg !123
-  store i64 %send41, i64* %31, align 8, !dbg !123, !tbaa !4
+  store i64 %send38, i64* %31, align 8, !dbg !123, !tbaa !4
   %32 = getelementptr inbounds i64, i64* %31, i64 1, !dbg !123
-  store i64 %send43, i64* %32, align 8, !dbg !123, !tbaa !4
+  store i64 %send40, i64* %32, align 8, !dbg !123, !tbaa !4
   %33 = getelementptr inbounds i64, i64* %32, i64 1, !dbg !123
   store i64* %33, i64** %30, align 8, !dbg !123
-  %send45 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_returns, i64 0), !dbg !123
-  ret i64 %send45, !dbg !125
+  %send42 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_returns, i64 0), !dbg !123
+  ret i64 %send42, !dbg !125
 }
 
 ; Function Attrs: ssp
@@ -1424,22 +1424,22 @@ functionEntryInitializers:
   store i64 %send, i64* %25, align 8, !dbg !130, !tbaa !4
   %26 = getelementptr inbounds i64, i64* %25, i64 1, !dbg !130
   store i64* %26, i64** %22, align 8, !dbg !130
-  %send41 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_params.4, i64 0), !dbg !130
+  %send38 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_params.4, i64 0), !dbg !130
   %27 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 1, !dbg !131
   %28 = load i64*, i64** %27, align 8, !dbg !131
   store i64 %15, i64* %28, align 8, !dbg !131, !tbaa !4
   %29 = getelementptr inbounds i64, i64* %28, i64 1, !dbg !131
   store i64* %29, i64** %27, align 8, !dbg !131
-  %send43 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_untyped.5, i64 0), !dbg !131
+  %send40 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_untyped.5, i64 0), !dbg !131
   %30 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 1, !dbg !130
   %31 = load i64*, i64** %30, align 8, !dbg !130
-  store i64 %send41, i64* %31, align 8, !dbg !130, !tbaa !4
+  store i64 %send38, i64* %31, align 8, !dbg !130, !tbaa !4
   %32 = getelementptr inbounds i64, i64* %31, i64 1, !dbg !130
-  store i64 %send43, i64* %32, align 8, !dbg !130, !tbaa !4
+  store i64 %send40, i64* %32, align 8, !dbg !130, !tbaa !4
   %33 = getelementptr inbounds i64, i64* %32, i64 1, !dbg !130
   store i64* %33, i64** %30, align 8, !dbg !130
-  %send45 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_returns.6, i64 0), !dbg !130
-  ret i64 %send45, !dbg !132
+  %send42 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_returns.6, i64 0), !dbg !130
+  ret i64 %send42, !dbg !132
 }
 
 ; Function Attrs: ssp
@@ -1495,11 +1495,11 @@ functionEntryInitializers:
   store i64 %send, i64* %25, align 8, !dbg !137, !tbaa !4
   %26 = getelementptr inbounds i64, i64* %25, i64 1, !dbg !137
   store i64* %26, i64** %22, align 8, !dbg !137
-  %send37 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_params.9, i64 0), !dbg !137
+  %send34 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_params.9, i64 0), !dbg !137
   %27 = load i64, i64* @"guard_epoch_T::Boolean", align 8, !dbg !137
   %28 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !137, !tbaa !66
-  %needTakeSlowPath34 = icmp ne i64 %27, %28, !dbg !137
-  br i1 %needTakeSlowPath34, label %29, label %30, !dbg !137, !prof !68
+  %needTakeSlowPath31 = icmp ne i64 %27, %28, !dbg !137
+  br i1 %needTakeSlowPath31, label %29, label %30, !dbg !137, !prof !68
 
 29:                                               ; preds = %14
   tail call void @"const_recompute_T::Boolean"(), !dbg !137
@@ -1509,17 +1509,17 @@ functionEntryInitializers:
   %31 = load i64, i64* @"guarded_const_T::Boolean", align 8, !dbg !137
   %32 = load i64, i64* @"guard_epoch_T::Boolean", align 8, !dbg !137
   %33 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !137, !tbaa !66
-  %guardUpdated35 = icmp eq i64 %32, %33, !dbg !137
-  tail call void @llvm.assume(i1 %guardUpdated35), !dbg !137
+  %guardUpdated32 = icmp eq i64 %32, %33, !dbg !137
+  tail call void @llvm.assume(i1 %guardUpdated32), !dbg !137
   %34 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 1, !dbg !137
   %35 = load i64*, i64** %34, align 8, !dbg !137
-  store i64 %send37, i64* %35, align 8, !dbg !137, !tbaa !4
+  store i64 %send34, i64* %35, align 8, !dbg !137, !tbaa !4
   %36 = getelementptr inbounds i64, i64* %35, i64 1, !dbg !137
   store i64 %31, i64* %36, align 8, !dbg !137, !tbaa !4
   %37 = getelementptr inbounds i64, i64* %36, i64 1, !dbg !137
   store i64* %37, i64** %34, align 8, !dbg !137
-  %send39 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_returns.10, i64 0), !dbg !137
-  ret i64 %send39, !dbg !138
+  %send36 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_returns.10, i64 0), !dbg !137
+  ret i64 %send36, !dbg !138
 }
 
 ; Function Attrs: ssp
@@ -1575,11 +1575,11 @@ functionEntryInitializers:
   store i64 %send, i64* %25, align 8, !dbg !143, !tbaa !4
   %26 = getelementptr inbounds i64, i64* %25, i64 1, !dbg !143
   store i64* %26, i64** %22, align 8, !dbg !143
-  %send37 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_params.13, i64 0), !dbg !143
+  %send34 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_params.13, i64 0), !dbg !143
   %27 = load i64, i64* @"guard_epoch_T::Boolean", align 8, !dbg !143
   %28 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !143, !tbaa !66
-  %needTakeSlowPath34 = icmp ne i64 %27, %28, !dbg !143
-  br i1 %needTakeSlowPath34, label %29, label %30, !dbg !143, !prof !68
+  %needTakeSlowPath31 = icmp ne i64 %27, %28, !dbg !143
+  br i1 %needTakeSlowPath31, label %29, label %30, !dbg !143, !prof !68
 
 29:                                               ; preds = %14
   tail call void @"const_recompute_T::Boolean"(), !dbg !143
@@ -1589,17 +1589,17 @@ functionEntryInitializers:
   %31 = load i64, i64* @"guarded_const_T::Boolean", align 8, !dbg !143
   %32 = load i64, i64* @"guard_epoch_T::Boolean", align 8, !dbg !143
   %33 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !143, !tbaa !66
-  %guardUpdated35 = icmp eq i64 %32, %33, !dbg !143
-  tail call void @llvm.assume(i1 %guardUpdated35), !dbg !143
+  %guardUpdated32 = icmp eq i64 %32, %33, !dbg !143
+  tail call void @llvm.assume(i1 %guardUpdated32), !dbg !143
   %34 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 1, !dbg !143
   %35 = load i64*, i64** %34, align 8, !dbg !143
-  store i64 %send37, i64* %35, align 8, !dbg !143, !tbaa !4
+  store i64 %send34, i64* %35, align 8, !dbg !143, !tbaa !4
   %36 = getelementptr inbounds i64, i64* %35, i64 1, !dbg !143
   store i64 %31, i64* %36, align 8, !dbg !143, !tbaa !4
   %37 = getelementptr inbounds i64, i64* %36, i64 1, !dbg !143
   store i64* %37, i64** %34, align 8, !dbg !143
-  %send39 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_returns.14, i64 0), !dbg !143
-  ret i64 %send39, !dbg !144
+  %send36 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_returns.14, i64 0), !dbg !143
+  ret i64 %send36, !dbg !144
 }
 
 ; Function Attrs: ssp

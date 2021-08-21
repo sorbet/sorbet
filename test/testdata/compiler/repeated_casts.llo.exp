@@ -315,6 +315,9 @@ functionEntryInitializers:
   %44 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %43, i32 noundef 0) #15, !dbg !36
   br label %fastSymCallIntrinsic_Static_keep_def, !dbg !36
 
+afterSend19:                                      ; preds = %68, %fastSymCallIntrinsic_Static_keep_def
+  ret void
+
 fastSymCallIntrinsic_Static_keep_def:             ; preds = %41, %24
   tail call void @sorbet_popFrame() #15, !dbg !32
   store i64* getelementptr inbounds ([12 x i64], [12 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %8, align 8, !dbg !32, !tbaa !12
@@ -356,16 +359,13 @@ fastSymCallIntrinsic_Static_keep_def:             ; preds = %41, %24
   %65 = xor i32 %64, -1, !dbg !40
   %66 = and i32 %65, %62, !dbg !40
   %67 = icmp eq i32 %66, 0, !dbg !40
-  br i1 %67, label %normalReturn, label %68, !dbg !40, !prof !21
+  br i1 %67, label %afterSend19, label %68, !dbg !40, !prof !21
 
 68:                                               ; preds = %fastSymCallIntrinsic_Static_keep_def
   %69 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %60, i64 0, i32 8, !dbg !40
   %70 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %69, align 8, !dbg !40, !tbaa !39
   %71 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %70, i32 noundef 0) #15, !dbg !40
-  br label %normalReturn, !dbg !40
-
-normalReturn:                                     ; preds = %68, %fastSymCallIntrinsic_Static_keep_def
-  ret void
+  br label %afterSend19, !dbg !40
 }
 
 ; Function Attrs: ssp

@@ -256,6 +256,9 @@ fastSymCallIntrinsic_Static_sig:
   %20 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %19, i32 noundef 0) #16, !dbg !23
   br label %fastSymCallIntrinsic_Static_keep_self_def, !dbg !23
 
+afterSend32:                                      ; preds = %51, %24
+  ret void
+
 fastSymCallIntrinsic_Static_keep_self_def:        ; preds = %fastSymCallIntrinsic_Static_sig, %17
   store i64* getelementptr inbounds ([18 x i64], [18 x i64]* @iseqEncodedArray, i64 0, i64 7), i64** %8, align 8, !dbg !23, !tbaa !12
   %rubyId_fib = load i64, i64* @rubyIdPrecomputed_fib, align 8, !dbg !28
@@ -311,16 +314,13 @@ fastSymCallIntrinsic_Static_keep_self_def:        ; preds = %fastSymCallIntrinsi
   %48 = xor i32 %47, -1, !dbg !28
   %49 = and i32 %48, %45, !dbg !28
   %50 = icmp eq i32 %49, 0, !dbg !28
-  br i1 %50, label %normalReturn, label %51, !dbg !28, !prof !26
+  br i1 %50, label %afterSend32, label %51, !dbg !28, !prof !26
 
 51:                                               ; preds = %24
   %52 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %43, i64 0, i32 8, !dbg !28
   %53 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %52, align 8, !dbg !28, !tbaa !27
   %54 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %53, i32 noundef 0) #16, !dbg !28
-  br label %normalReturn, !dbg !28
-
-normalReturn:                                     ; preds = %51, %24
-  ret void
+  br label %afterSend32, !dbg !28
 }
 
 ; Function Attrs: nounwind sspreq uwtable
@@ -413,7 +413,7 @@ BB4:                                              ; preds = %183, %sorbet_rb_int
   store i64* getelementptr inbounds ([18 x i64], [18 x i64]* @iseqEncodedArray, i64 0, i64 13), i64** %0, align 8, !tbaa !12
   %42 = and i64 %"<returnMethodTemp>.sroa.0.0", 1
   %43 = icmp eq i64 %42, 0
-  br i1 %43, label %44, label %normalReturn, !prof !47
+  br i1 %43, label %44, label %typeTestSuccess77, !prof !47
 
 44:                                               ; preds = %BB4
   %45 = and i64 %"<returnMethodTemp>.sroa.0.0", 7
@@ -429,7 +429,7 @@ sorbet_isa_Integer.exit:                          ; preds = %44
   %52 = load i64, i64* %51, align 8, !tbaa !48
   %53 = and i64 %52, 31
   %54 = icmp eq i64 %53, 10
-  br i1 %54, label %normalReturn, label %codeRepl, !prof !26
+  br i1 %54, label %typeTestSuccess77, label %codeRepl, !prof !26
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call void @sorbet_raiseArity(i32 %argc, i32 noundef 1, i32 noundef 1) #20, !dbg !38
@@ -505,7 +505,7 @@ rb_vm_check_ints.exit98:                          ; preds = %sorbet_rb_int_lt.ex
 
 BB4.thread:                                       ; preds = %rb_vm_check_ints.exit98
   store i64* getelementptr inbounds ([18 x i64], [18 x i64]* @iseqEncodedArray, i64 0, i64 13), i64** %0, align 8, !tbaa !12
-  br label %normalReturn
+  br label %typeTestSuccess77
 
 codeRepl103:                                      ; preds = %57, %sorbet_isa_Integer.exit109
   tail call fastcc void @func_HasFib.fib.cold.2(i64 %rawArg_n) #21, !dbg !50
@@ -692,14 +692,14 @@ sorbet_rb_int_plus.exit:                          ; preds = %168, %163, %172
   %186 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %185, i32 noundef 0) #16, !dbg !44
   br label %BB4, !dbg !44
 
+typeTestSuccess77:                                ; preds = %BB4.thread, %BB4, %sorbet_isa_Integer.exit
+  %"<returnMethodTemp>.sroa.0.0111" = phi i64 [ 3, %BB4.thread ], [ %"<returnMethodTemp>.sroa.0.0", %BB4 ], [ %"<returnMethodTemp>.sroa.0.0", %sorbet_isa_Integer.exit ]
+  ret i64 %"<returnMethodTemp>.sroa.0.0111"
+
 codeRepl:                                         ; preds = %44, %sorbet_isa_Integer.exit
   %"<returnMethodTemp>.sroa.0.0112" = phi i64 [ %"<returnMethodTemp>.sroa.0.0", %44 ], [ %"<returnMethodTemp>.sroa.0.0", %sorbet_isa_Integer.exit ]
   tail call fastcc void @func_HasFib.fib.cold.1(i64 %"<returnMethodTemp>.sroa.0.0112") #21, !dbg !46
   unreachable
-
-normalReturn:                                     ; preds = %BB4.thread, %BB4, %sorbet_isa_Integer.exit
-  %"<returnMethodTemp>.sroa.0.0111" = phi i64 [ 3, %BB4.thread ], [ %"<returnMethodTemp>.sroa.0.0", %BB4 ], [ %"<returnMethodTemp>.sroa.0.0", %sorbet_isa_Integer.exit ]
-  ret i64 %"<returnMethodTemp>.sroa.0.0111"
 }
 
 ; Function Attrs: sspreq

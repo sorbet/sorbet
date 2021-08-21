@@ -387,6 +387,9 @@ sorbet_setupParamKeywords.exit:                   ; preds = %29, %fastSymCallInt
   %70 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %69, i32 noundef 0) #15, !dbg !22
   br label %fastSymCallIntrinsic_Static_keep_def84, !dbg !22
 
+afterSend81:                                      ; preds = %91, %fastSymCallIntrinsic_Static_keep_def84
+  ret void
+
 fastSymCallIntrinsic_Static_keep_def84:           ; preds = %36, %67
   store i64* getelementptr inbounds ([21 x i64], [21 x i64]* @iseqEncodedArray, i64 0, i64 6), i64** %8, align 8, !dbg !22, !tbaa !12
   %rubyId_foo67 = load i64, i64* @rubyIdPrecomputed_foo, align 8, !dbg !38
@@ -424,16 +427,13 @@ fastSymCallIntrinsic_Static_keep_def84:           ; preds = %36, %67
   %88 = xor i32 %87, -1, !dbg !27
   %89 = and i32 %88, %85, !dbg !27
   %90 = icmp eq i32 %89, 0, !dbg !27
-  br i1 %90, label %normalReturn, label %91, !dbg !27, !prof !25
+  br i1 %90, label %afterSend81, label %91, !dbg !27, !prof !25
 
 91:                                               ; preds = %fastSymCallIntrinsic_Static_keep_def84
   %92 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %83, i64 0, i32 8, !dbg !27
   %93 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %92, align 8, !dbg !27, !tbaa !26
   %94 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %93, i32 noundef 0) #15, !dbg !27
-  br label %normalReturn, !dbg !27
-
-normalReturn:                                     ; preds = %91, %fastSymCallIntrinsic_Static_keep_def84
-  ret void
+  br label %afterSend81, !dbg !27
 }
 
 ; Function Attrs: sspreq

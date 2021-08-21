@@ -286,6 +286,9 @@ fastSymCallIntrinsic_ResolvedSig_sig:
   %20 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %19, i32 noundef 0) #16, !dbg !26
   br label %fastSymCallIntrinsic_Static_keep_def, !dbg !26
 
+afterSend45:                                      ; preds = %65, %35
+  ret void
+
 fastSymCallIntrinsic_Static_keep_def:             ; preds = %fastSymCallIntrinsic_ResolvedSig_sig, %17
   store i64* getelementptr inbounds ([19 x i64], [19 x i64]* @iseqEncodedArray, i64 0, i64 6), i64** %8, align 8, !dbg !26, !tbaa !13
   %21 = load i64, i64* @"guard_epoch_T::Sig", align 8, !dbg !31
@@ -371,16 +374,13 @@ fastSymCallIntrinsic_Static_keep_def:             ; preds = %fastSymCallIntrinsi
   %62 = xor i32 %61, -1, !dbg !35
   %63 = and i32 %62, %59, !dbg !35
   %64 = icmp eq i32 %63, 0, !dbg !35
-  br i1 %64, label %normalReturn, label %65, !dbg !35, !prof !29
+  br i1 %64, label %afterSend45, label %65, !dbg !35, !prof !29
 
 65:                                               ; preds = %35
   %66 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %57, i64 0, i32 8, !dbg !35
   %67 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %66, align 8, !dbg !35, !tbaa !30
   %68 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %67, i32 noundef 0) #16, !dbg !35
-  br label %normalReturn, !dbg !35
-
-normalReturn:                                     ; preds = %65, %35
-  ret void
+  br label %afterSend45, !dbg !35
 }
 
 ; Function Attrs: sspreq
@@ -669,7 +669,7 @@ sorbet_rb_int_plus.exit:                          ; preds = %30, %25, %34
 rb_vm_check_ints.exit:                            ; preds = %sorbet_rb_int_plus.exit, %45
   %49 = and i64 %36, 1
   %50 = icmp eq i64 %49, 0
-  br i1 %50, label %51, label %normalReturn, !prof !67
+  br i1 %50, label %51, label %typeTestSuccess17, !prof !67
 
 51:                                               ; preds = %rb_vm_check_ints.exit
   %52 = and i64 %36, 7
@@ -685,18 +685,18 @@ sorbet_isa_Integer.exit26:                        ; preds = %51
   %59 = load i64, i64* %58, align 8, !tbaa !68
   %60 = and i64 %59, 31
   %61 = icmp eq i64 %60, 10
-  br i1 %61, label %normalReturn, label %codeRepl, !prof !29
+  br i1 %61, label %typeTestSuccess17, label %codeRepl, !prof !29
 
 codeRepl24:                                       ; preds = %typeTestSuccess
   tail call fastcc void @"func_Foo#bar.cold.2"(i64 %5) #19, !dbg !70
   unreachable
 
+typeTestSuccess17:                                ; preds = %rb_vm_check_ints.exit, %sorbet_isa_Integer.exit26
+  ret i64 %36
+
 codeRepl:                                         ; preds = %51, %sorbet_isa_Integer.exit26
   tail call fastcc void @"func_Foo#bar.cold.1"(i64 %36) #19, !dbg !65
   unreachable
-
-normalReturn:                                     ; preds = %rb_vm_check_ints.exit, %sorbet_isa_Integer.exit26
-  ret i64 %36
 }
 
 ; Function Attrs: ssp
@@ -750,26 +750,26 @@ functionEntryInitializers:
   store i64 %21, i64* %24, align 8, !dbg !46, !tbaa !4
   %25 = getelementptr inbounds i64, i64* %24, i64 1, !dbg !46
   store i64* %25, i64** %22, align 8, !dbg !46
-  %send44 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_returns, i64 0), !dbg !46
+  %send41 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_returns, i64 0), !dbg !46
   %26 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 1, !dbg !42
   %27 = load i64*, i64** %26, align 8, !dbg !42
   store i64 %4, i64* %27, align 8, !dbg !42, !tbaa !4
   %28 = getelementptr inbounds i64, i64* %27, i64 1, !dbg !42
   store i64 %21, i64* %28, align 8, !dbg !42, !tbaa !4
   %29 = getelementptr inbounds i64, i64* %28, i64 1, !dbg !42
-  store i64 %send44, i64* %29, align 8, !dbg !42, !tbaa !4
+  store i64 %send41, i64* %29, align 8, !dbg !42, !tbaa !4
   %30 = getelementptr inbounds i64, i64* %29, i64 1, !dbg !42
   store i64* %30, i64** %26, align 8, !dbg !42
-  %send46 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_params, i64 0), !dbg !42
+  %send43 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_params, i64 0), !dbg !42
   %31 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 1, !dbg !42
   %32 = load i64*, i64** %31, align 8, !dbg !42
-  store i64 %send46, i64* %32, align 8, !dbg !42, !tbaa !4
+  store i64 %send43, i64* %32, align 8, !dbg !42, !tbaa !4
   %33 = getelementptr inbounds i64, i64* %32, i64 1, !dbg !42
   store i64 %21, i64* %33, align 8, !dbg !42, !tbaa !4
   %34 = getelementptr inbounds i64, i64* %33, i64 1, !dbg !42
   store i64* %34, i64** %31, align 8, !dbg !42
-  %send48 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_returns.1, i64 0), !dbg !42
-  ret i64 %send48, !dbg !82
+  %send45 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_returns.1, i64 0), !dbg !42
+  ret i64 %send45, !dbg !82
 }
 
 ; Function Attrs: inaccessiblememonly nofree nosync nounwind willreturn
