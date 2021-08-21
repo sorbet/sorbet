@@ -608,7 +608,6 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
     vector<llvm::AllocaInst *> sendArgArrayByBlock;
     vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
-    vector<llvm::AllocaInst *> throwReturnFlagByBlock;
     std::optional<ReturnFromBlockState> returnFromBlockState;
     UnorderedMap<int, llvm::AllocaInst *> blockControlFramePtrs;
 
@@ -637,9 +636,6 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             blockControlFramePtrs[i] = controlFramePtr;
         }
         argumentSetupBlocksByFunction.emplace_back(llvm::BasicBlock::Create(cs, "argumentSetup", fun));
-        throwReturnFlagByBlock.emplace_back(
-            builder.CreateAlloca(llvm::Type::getInt1Ty(cs), nullptr, "throwReturnFlag"));
-        builder.CreateStore(builder.getFalse(), throwReturnFlagByBlock[i]);
         if (i == 0) {
             // If no return statements are actually present inside blocks, we will not need to push an EC tag.
             //
@@ -805,7 +801,6 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(blockExits),
         move(blockScopes),
         move(blockUsesBreak),
-        move(throwReturnFlagByBlock),
         move(returnFromBlockState),
     };
 

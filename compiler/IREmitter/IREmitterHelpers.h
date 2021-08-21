@@ -121,8 +121,6 @@ public:
                            int rubyBlockId, llvm::Value *retVal);
     static void emitReturnFromBlock(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                     int rubyBlockId, llvm::Value *retVal);
-    static void setThrowReturnFlag(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                   int rubyBlockId);
 
     // Emit a type test.  The insertion point of the builder is set to the start of
     // the block following a successful test.
