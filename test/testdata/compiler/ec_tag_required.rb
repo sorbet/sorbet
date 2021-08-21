@@ -4,7 +4,7 @@
 # run_filecheck: INITIAL
 
 # INITIAL-LABEL: define i64 @"func_Object#func_a"
-# INITIAL-NOT: alloca %struct.rb_vm_tag
+# INITIAL-NOT: call i64 @sorbet_vm_return_from_block_wrapper
 # INITIAL{LITERAL}: }
 def func_a
   return
@@ -26,7 +26,7 @@ def func_a
 end
 
 # INITIAL-LABEL: define i64 @"func_Object#func_b"
-# INITIAL: alloca %struct.rb_vm_tag
+# INITIAL: call i64 @sorbet_vm_return_from_block_wrapper
 # INITIAL{LITERAL}: }
 def func_b
   1.times { return 33 }
@@ -37,7 +37,7 @@ def justyield
 end
 
 # INITIAL-LABEL: define i64 @"func_Object#func_c"
-# INITIAL: alloca %struct.rb_vm_tag
+# INITIAL: call i64 @sorbet_vm_return_from_block_wrapper
 # INITIAL{LITERAL}: }
 def func_c
   if T.unsafe(3+3 > 5)
@@ -46,7 +46,7 @@ def func_c
 end
 
 # INITIAL-LABEL: define i64 @"func_Object#func_d"
-# INITIAL-NOT: alloca %struct.rb_vm_tag
+# INITIAL-NOT: call i64 @sorbet_vm_return_from_block_wrapper
 # INITIAL{LITERAL}: }
 def func_d
   if T.unsafe(3+3 > 5)
