@@ -221,6 +221,28 @@ void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build,
     }
 }
 
+llvm::Value *IREmitterHelpers::maybeCheckReturnValue(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+                                                     llvm::Value *returnValue) {
+    llvm::IRBuilder<> &builder = static_cast<llvm::IRBuilder<> &>(build);
+    auto expectedType = cfg.symbol.data(cs)->resultType;
+    if (expectedType == nullptr) {
+        return returnValue;
+    }
+
+    if (core::isa_type<core::ClassType>(expectedType) &&
+        core::cast_type_nonnull<core::ClassType>(expectedType).symbol == core::Symbols::void_()) {
+        return Payload::voidSingleton(cs, builder, irctx);
+    }
+
+    // sorbet-runtime doesn't check this type for abstract methods, so we won't either.
+    // TODO(froydnj): we should check this type.
+    if (!cfg.symbol.data(cs)->isAbstract()) {
+        IREmitterHelpers::emitTypeTest(cs, builder, returnValue, expectedType, "Return value");
+    }
+
+    return returnValue;
+}
+
 namespace {
 void buildTypeTestPassFailBlocks(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *value,
                                  llvm::Value *testResult, const core::TypePtr &expectedType,
