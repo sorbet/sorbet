@@ -119,10 +119,10 @@ public:
                                     int rubyBlockId, llvm::Value *retVal);
     static void emitReturn(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                            int rubyBlockId, llvm::Value *retVal);
-    static void emitReturnFromBlock(CompilerState &gs, cfg::CFG &cfg, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                    int rubyBlockId, llvm::Value *retVal);
-    static llvm::Value *maybeCheckReturnValue(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
-                                              llvm::Value *returnValue);
+    static void emitReturnFromBlock(CompilerState &gs, cfg::CFG &cfg, llvm::IRBuilderBase &builder,
+                                    const IREmitterContext &irctx, int rubyBlockId, llvm::Value *retVal);
+    static llvm::Value *maybeCheckReturnValue(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build,
+                                              const IREmitterContext &irctx, llvm::Value *returnValue);
 
     // Emit a type test.  The insertion point of the builder is set to the start of
     // the block following a successful test.

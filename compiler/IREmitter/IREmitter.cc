@@ -777,7 +777,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
 
     // Link the function initializer blocks.
     for (int funId = 0; funId < irctx.functionInitializersByFunction.size(); funId++) {
-        llvm::BasicBlock *nextBlock =  irctx.argumentSetupBlocksByFunction[funId];
+        llvm::BasicBlock *nextBlock = irctx.argumentSetupBlocksByFunction[funId];
         builder.SetInsertPoint(irctx.functionInitializersByFunction[funId]);
         builder.CreateBr(nextBlock);
     }
@@ -812,11 +812,10 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     // Keeping the args in the same order and adding the function argument at the
     // end means that the original function should just be a PC-relative load
     // plus a jump.
-    auto *retval = builder.CreateCall(wrapper, {func->arg_begin(),
-                func->arg_begin() + 1,
-                func->arg_begin() + 2,
-                func->arg_begin() + 3,
-                implementationFunction}, "returnedFromBlock");
+    auto *retval = builder.CreateCall(wrapper,
+                                      {func->arg_begin(), func->arg_begin() + 1, func->arg_begin() + 2,
+                                       func->arg_begin() + 3, implementationFunction},
+                                      "returnedFromBlock");
     builder.CreateRet(retval);
 
     // Redo verifier on our new function.

@@ -197,8 +197,8 @@ void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBas
     builder.CreateRet(retVal);
 }
 
-void IREmitterHelpers::emitReturnFromBlock(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
-                                           int rubyBlockId, llvm::Value *retVal) {
+void IREmitterHelpers::emitReturnFromBlock(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build,
+                                           const IREmitterContext &irctx, int rubyBlockId, llvm::Value *retVal) {
     ENFORCE(irctx.rubyBlockType[rubyBlockId] == FunctionType::Block);
     ENFORCE(!functionTypeNeedsPostprocessing(irctx.rubyBlockType[rubyBlockId]));
     ENFORCE(!functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId]));
@@ -222,8 +222,8 @@ void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build,
     }
 }
 
-llvm::Value *IREmitterHelpers::maybeCheckReturnValue(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
-                                                     llvm::Value *returnValue) {
+llvm::Value *IREmitterHelpers::maybeCheckReturnValue(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build,
+                                                     const IREmitterContext &irctx, llvm::Value *returnValue) {
     llvm::IRBuilder<> &builder = static_cast<llvm::IRBuilder<> &>(build);
     auto expectedType = cfg.symbol.data(cs)->resultType;
     if (expectedType == nullptr) {
