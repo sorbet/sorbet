@@ -739,9 +739,9 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
 
             // the relative block ids of blocks that are involved in the translation of an exception handling block.
             auto bodyBlockId = bodyBlock->rubyBlockId;
-            auto handlersBlockId = bodyBlockId + 1;
-            auto ensureBlockId = bodyBlockId + 2;
-            auto elseBlockId = bodyBlockId + 3;
+            auto handlersBlockId = bodyBlockId + cfg::CFG::HANDLERS_BLOCK_OFFSET;
+            auto ensureBlockId = bodyBlockId + cfg::CFG::ENSURE_BLOCK_OFFSET;
+            auto elseBlockId = bodyBlockId + cfg::CFG::ELSE_BLOCK_OFFSET;
 
             userEntryBlockByFunction[bodyBlockId] = llvmBlocks[bodyBlock->id];
             userEntryBlockByFunction[handlersBlockId] = llvmBlocks[handlersBlock->id];
