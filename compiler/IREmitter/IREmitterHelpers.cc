@@ -222,7 +222,11 @@ void IREmitterHelpers::emitReturnFromBlock(CompilerState &cs, llvm::IRBuilderBas
                                            int rubyBlockId, llvm::Value *retVal) {
     ENFORCE(irctx.rubyBlockType[rubyBlockId] == FunctionType::Block);
     ENFORCE(!functionTypeNeedsPostprocessing(irctx.rubyBlockType[rubyBlockId]));
-    emitUncheckedReturn(cs, build, irctx, rubyBlockId, retVal);
+    ENFORCE(!functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId]));
+    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
+    auto *ec = builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
+    builder.CreateCall(cs.getFunction("sorbet_throwReturn"), {ec, retVal});
+    builder.CreateUnreachable();
 }
 
 void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,

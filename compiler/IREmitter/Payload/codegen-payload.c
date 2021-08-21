@@ -152,7 +152,8 @@ SORBET_ALIVE(void, sorbet_vm_register_sig,
 SORBET_ALIVE(void, sorbet_vm_define_method,
              (VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq, bool isSelf));
 
-SORBET_ALIVE(void, sorbet_throwReturn, (rb_execution_context_t *ec, VALUE retval));
+extern void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) __attribute__((noreturn));
+KEEP_ALIVE(sorbet_throwReturn);
 SORBET_ALIVE(VALUE, sorbet_vm_return_from_block_wrapper, (int argc, VALUE *argv, VALUE recv, rb_control_frame_t *cfp, rb_sorbet_func_t wrapped));
 
 // The next several functions exist to convert Ruby definitions into LLVM IR, and
