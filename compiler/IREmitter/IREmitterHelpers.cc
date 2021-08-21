@@ -218,6 +218,11 @@ void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBas
     builder.CreateRet(retVal);
 }
 
+void IREmitterHelpers::emitReturnFromBlock(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+                                           int rubyBlockId, llvm::Value *retVal) {
+    emitReturn(cs, build, irctx, rubyBlockId, retVal);
+}
+
 void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
                                   int rubyBlockId, llvm::Value *retVal) {
     auto &builder = static_cast<llvm::IRBuilder<> &>(build);

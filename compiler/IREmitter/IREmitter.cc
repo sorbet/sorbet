@@ -594,9 +594,10 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     // by emitReturn.
                     if (irctx.rubyBlockType[bb->rubyBlockId] == FunctionType::Block) {
                         IREmitterHelpers::setThrowReturnFlag(cs, builder, irctx, bb->rubyBlockId);
+                        IREmitterHelpers::emitReturnFromBlock(cs, builder, irctx, bb->rubyBlockId, var);
+                    } else {
+                        IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
                     }
-
-                    IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
                 },
                 [&](cfg::BlockReturn *i) {
                     ENFORCE(bb->rubyBlockId != 0, "should never happen");

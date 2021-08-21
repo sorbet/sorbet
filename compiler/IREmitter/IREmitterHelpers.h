@@ -119,6 +119,8 @@ public:
                                     int rubyBlockId, llvm::Value *retVal);
     static void emitReturn(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                            int rubyBlockId, llvm::Value *retVal);
+    static void emitReturnFromBlock(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                                    int rubyBlockId, llvm::Value *retVal);
     static void setThrowReturnFlag(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                    int rubyBlockId);
 
