@@ -220,7 +220,9 @@ void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBas
 
 void IREmitterHelpers::emitReturnFromBlock(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
                                            int rubyBlockId, llvm::Value *retVal) {
-    emitReturn(cs, build, irctx, rubyBlockId, retVal);
+    ENFORCE(irctx.rubyBlockType[rubyBlockId] == FunctionType::Block);
+    ENFORCE(!functionTypeNeedsPostprocessing(irctx.rubyBlockType[rubyBlockId]));
+    emitUncheckedReturn(cs, build, irctx, rubyBlockId, retVal);
 }
 
 void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
