@@ -588,13 +588,14 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         return;
                     }
 
+                    auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
+
                     // If this is a return from a block, we set the "return-via-throw" flag which will be processed
                     // by emitReturn.
                     if (irctx.rubyBlockType[bb->rubyBlockId] == FunctionType::Block) {
                         IREmitterHelpers::setThrowReturnFlag(cs, builder, irctx, bb->rubyBlockId);
                     }
 
-                    auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
                     IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
                 },
                 [&](cfg::BlockReturn *i) {
