@@ -591,7 +591,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
 
                     if (irctx.rubyBlockType[bb->rubyBlockId] == FunctionType::Block) {
-                        IREmitterHelpers::emitReturnFromBlock(cs, builder, irctx, bb->rubyBlockId, var);
+                        IREmitterHelpers::emitReturnFromBlock(cs, cfg, builder, irctx, bb->rubyBlockId, var);
                     } else {
                         IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
                     }

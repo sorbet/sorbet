@@ -197,14 +197,15 @@ void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBas
     builder.CreateRet(retVal);
 }
 
-void IREmitterHelpers::emitReturnFromBlock(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+void IREmitterHelpers::emitReturnFromBlock(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
                                            int rubyBlockId, llvm::Value *retVal) {
     ENFORCE(irctx.rubyBlockType[rubyBlockId] == FunctionType::Block);
     ENFORCE(!functionTypeNeedsPostprocessing(irctx.rubyBlockType[rubyBlockId]));
     ENFORCE(!functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId]));
     auto &builder = static_cast<llvm::IRBuilder<> &>(build);
     auto *ec = builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
-    builder.CreateCall(cs.getFunction("sorbet_throwReturn"), {ec, retVal});
+    auto *maybeChecked = maybeCheckReturnValue(cs, cfg, builder, irctx, retVal);
+    builder.CreateCall(cs.getFunction("sorbet_throwReturn"), {ec, maybeChecked});
     builder.CreateUnreachable();
 }
 

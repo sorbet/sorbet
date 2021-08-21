@@ -119,7 +119,7 @@ public:
                                     int rubyBlockId, llvm::Value *retVal);
     static void emitReturn(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                            int rubyBlockId, llvm::Value *retVal);
-    static void emitReturnFromBlock(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+    static void emitReturnFromBlock(CompilerState &gs, cfg::CFG &cfg, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                     int rubyBlockId, llvm::Value *retVal);
     static llvm::Value *maybeCheckReturnValue(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
                                               llvm::Value *returnValue);
