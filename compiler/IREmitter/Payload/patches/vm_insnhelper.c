@@ -482,15 +482,23 @@ void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) {
     EC_JUMP_TAG(ec, ec->tag->state);
 }
 
-VALUE sorbet_vm_return_from_block_wrapper(int argc, VALUE *argv, VALUE recv, rb_control_frame_t * volatile cfp, rb_sorbet_func_t wrapped) {
+struct rfb_status {
+    VALUE return_value;
+    bool was_thrown;
+};
+
+struct rfb_status sorbet_vm_return_from_block_wrapper(int argc, VALUE *argv, VALUE recv, rb_control_frame_t * volatile cfp, rb_sorbet_func_t wrapped) {
     enum ruby_tag_type state;
     rb_execution_context_t * volatile ec = GET_EC();
-    VALUE retval = Qundef;
+    struct rfb_status status;
+    status.return_value = Qundef;
+    status.was_thrown = false;
 
     EC_PUSH_TAG(ec);
 
     if ((state = EC_EXEC_TAG()) == 0) {
-        retval = wrapped(argc, argv, recv, cfp);
+        status.return_value = wrapped(argc, argv, recv, cfp);
+        status.was_thrown = false;
     } else {
         if (state == TAG_RETURN) {
             const struct vm_throw_data *const err = (struct vm_throw_data *)ec->errinfo;
@@ -500,7 +508,8 @@ VALUE sorbet_vm_return_from_block_wrapper(int argc, VALUE *argv, VALUE recv, rb_
                 rb_vm_rewind_cfp(ec, cfp);
                 state = TAG_NONE;
                 ec->errinfo = Qnil;
-                retval = err->throw_obj;
+                status.return_value = err->throw_obj;
+                status.was_thrown = true;
             }
         }
     }
@@ -511,5 +520,5 @@ VALUE sorbet_vm_return_from_block_wrapper(int argc, VALUE *argv, VALUE recv, rb_
         rb_ec_tag_jump(ec, state);
     }
 
-    return retval;
+    return status;
 }

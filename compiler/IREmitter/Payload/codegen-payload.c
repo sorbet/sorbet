@@ -154,7 +154,15 @@ SORBET_ALIVE(void, sorbet_vm_define_method,
 
 extern void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) __attribute__((noreturn));
 KEEP_ALIVE(sorbet_throwReturn);
-SORBET_ALIVE(VALUE, sorbet_vm_return_from_block_wrapper, (int argc, VALUE *argv, VALUE recv, rb_control_frame_t *cfp, rb_sorbet_func_t wrapped));
+
+struct rfb_status {
+    // The return value from the function.
+    VALUE return_value;
+
+    // Whether the value was returned via return-from-block.
+    bool was_thrown;
+};
+SORBET_ALIVE(struct rfb_status, sorbet_vm_return_from_block_wrapper, (int argc, VALUE *argv, VALUE recv, rb_control_frame_t *cfp, rb_sorbet_func_t wrapped));
 
 // The next several functions exist to convert Ruby definitions into LLVM IR, and
 // are always inlined as a consequence.

@@ -204,8 +204,7 @@ void IREmitterHelpers::emitReturnFromBlock(CompilerState &cs, cfg::CFG &cfg, llv
     ENFORCE(!functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId]));
     auto &builder = static_cast<llvm::IRBuilder<> &>(build);
     auto *ec = builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
-    auto *maybeChecked = maybeCheckReturnValue(cs, cfg, builder, irctx, retVal);
-    builder.CreateCall(cs.getFunction("sorbet_throwReturn"), {ec, maybeChecked});
+    builder.CreateCall(cs.getFunction("sorbet_throwReturn"), {ec, retVal});
     builder.CreateUnreachable();
 }
 

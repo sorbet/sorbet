@@ -809,14 +809,31 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     builder.SetInsertPoint(entryBlock);
 
     auto *wrapper = cs.getFunction("sorbet_vm_return_from_block_wrapper");
-    // Keeping the args in the same order and adding the function argument at the
-    // end means that the original function should just be a PC-relative load
-    // plus a jump.
-    auto *retval = builder.CreateCall(wrapper,
+    // Adding the function argument at the end means that we don't have to perform
+    // any register shuffling.
+    auto *status = builder.CreateCall(wrapper,
                                       {func->arg_begin(), func->arg_begin() + 1, func->arg_begin() + 2,
                                        func->arg_begin() + 3, implementationFunction},
                                       "returnedFromBlock");
-    builder.CreateRet(retval);
+
+    // If we received this return value via throwing (i.e. return-from-block), we
+    // didn't typecheck the value when it was thrown, so we need to do it here.
+    auto *returnValue = builder.CreateExtractValue(status, {0}, "returnedValue");
+    auto *wasThrown = builder.CreateExtractValue(status, {1}, "wasThrown");
+    auto *typecheckBlock = llvm::BasicBlock::Create(cs, "typecheck", func);
+    auto *exitBlock = llvm::BasicBlock::Create(cs, "exit", func);
+    builder.CreateCondBr(builder.CreateICmpEQ(wasThrown, builder.getInt8(1)), typecheckBlock, exitBlock);
+
+    builder.SetInsertPoint(typecheckBlock);
+    auto *checkedValue = IREmitterHelpers::maybeCheckReturnValue(cs, cfg, builder, irctx, returnValue);
+    typecheckBlock = builder.GetInsertBlock();
+    builder.CreateBr(exitBlock);
+
+    builder.SetInsertPoint(exitBlock);
+    auto *returnValuePhi = builder.CreatePHI(returnValue->getType(), 2, "value");
+    returnValuePhi->addIncoming(returnValue, entryBlock);
+    returnValuePhi->addIncoming(checkedValue, typecheckBlock);
+    builder.CreateRet(returnValuePhi);
 
     // Redo verifier on our new function.
     if (debug_mode && llvm::verifyFunction(*func, &llvm::errs())) {
