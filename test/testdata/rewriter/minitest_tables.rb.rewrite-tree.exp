@@ -10,6 +10,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Parent>)
   end
 
+  class <emptyTree>::<C NoShow><<C <todo sym>>> < (<emptyTree>::<C BasicObject>)
+  end
+
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (::<todo sym>)
     def outside_method<<todo method>>(&<blk>)
       <emptyTree>
@@ -353,6 +356,41 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
+    def <it 'rejects manual destructuring of the list argument'><<todo method>>(&<blk>)
+      [[1, "a"], [2, "b"]].each() do |value|
+        begin
+          <emptyTree>::<C T>.reveal_type(i)
+          <emptyTree>::<C T>.reveal_type(s)
+        end
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it '::<Magic>.<string-interpolate>("color ", color, " which is not purple is not number 1 ", ns)'><<todo method>>(&<blk>)
+      [["red", <emptyTree>::<C NoShow>.new()], ["blue", <emptyTree>::<C NoShow>.new()]].each() do |<destructure>$24|
+        begin
+          begin
+            <assignTemp>$25 = <destructure>$24
+            <assignTemp>$26 = ::<Magic>.<expand-splat>(<assignTemp>$25, 2, 0)
+            color = <assignTemp>$26.[](0)
+            ns = <assignTemp>$26.[](1)
+            <assignTemp>$25
+          end
+          begin
+            <emptyTree>::<C T>.reveal_type(color)
+            <emptyTree>::<C T>.reveal_type(ns)
+          end
+        end
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <it 'handles lists with several types'><<todo method>>(&<blk>)
       {:foo => 1, :bar => 2, :baz => 3}.each() do |k, v|
         begin
@@ -478,6 +516,23 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.it("does not handle zero argument blocks") do ||
         <emptyTree>
       end
+    end
+
+    <self>.test_each([[1, "a"], [2, "b"]]) do |value|
+      begin
+        begin
+          <assignTemp>$22 = value
+          <assignTemp>$23 = ::<Magic>.<expand-splat>(<assignTemp>$22, 2, 0)
+          i = <assignTemp>$23.[](0)
+          s = <assignTemp>$23.[](1)
+          <assignTemp>$22
+        end
+        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'rejects manual destructuring of the list argument\'>", :normal)
+      end
+    end
+
+    <self>.test_each([["red", <emptyTree>::<C NoShow>.new()], ["blue", <emptyTree>::<C NoShow>.new()]]) do |<destructure>$24|
+      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'::<Magic>.<string-interpolate>(\"color \", color, \" which is not purple is not number 1 \", ns)\'>", :normal)
     end
 
     <self>.test_each_hash({:foo => 1, :bar => 2, :baz => 3}) do |k, v|

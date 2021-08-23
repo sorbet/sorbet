@@ -7,6 +7,9 @@ end
 class Child < Parent
 end
 
+class NoShow < BasicObject
+end
+
 class MyTest
   extend T::Sig
 
@@ -173,6 +176,29 @@ class MyTest
 
   test_each [1, 2, 3] do # error: Wrong number of parameters for `test_each` block
     it "does not handle zero argument blocks" do
+    end
+  end
+
+  # We don't allow manual destructuring currently.
+  test_each [[1,'a'], [2,'b']] do |value|
+    i, s = value # error: Only valid `it`-blocks can appear within `test_each`
+    it "rejects manual destructuring of the list argument" do
+      T.reveal_type(i) # error: type: `NilClass`
+      T.reveal_type(s) # error: type: `NilClass`
+    end
+  end
+
+  # String interpolation here is fine, but also broken, as we will use the textual representation of the string
+  # interpolation as the name of the test. This test will end up with a name like:
+  #
+  # def <it '::<Magic>.<string-interpolate>("color ", color, " which is not purple is not number 1 ", ns)'><<todo method>>(&<blk>)
+  #
+  # As a result this masks an error: `ns` is used in a context that would call a `to_s` method that does not exist on
+  # it.
+  test_each([['red', NoShow.new], ['blue', NoShow.new]]) do |(color, ns)|
+    it "color #{color} which is not purple is not number 1 #{ns}" do
+      T.reveal_type(color) # error: type: `String`
+      T.reveal_type(ns)  # error: type: `NoShow`
     end
   end
 
