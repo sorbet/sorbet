@@ -836,6 +836,9 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
         auto triple = llvm::Triple(targetTriple);
         ENFORCE(triple.getArch() == llvm::Triple::x86_64);
     }
+    // Also make sure that the return value is small enough to be returned in
+    // registers, i.e. that the function is actually returning a value directly.
+    ENFORCE(!status->getType()->isVoidTy());
 
     // If we received this return value via throwing (i.e. return-from-block), we
     // didn't typecheck the value when it was thrown, so we need to do it here.
