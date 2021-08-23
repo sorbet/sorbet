@@ -816,6 +816,8 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         for (auto &resolved : what) {
             fileq->push(move(resolved), 1);
         }
+        typecheck_result = move(what);
+        typecheck_result.clear();
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
