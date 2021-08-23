@@ -537,10 +537,10 @@ int getNearestIseqAllocatorBlock(const IREmitterContext &irctx, int rubyBlockId)
     return rubyBlockId;
 }
 
-std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
+std::tuple<string, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
                                                    const IREmitterContext &irctx, const ast::MethodDef &md,
                                                    int rubyBlockId) {
-    string_view funcName;
+    string funcName;
     llvm::Value *parent = nullptr;
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
