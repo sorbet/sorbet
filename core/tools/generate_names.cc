@@ -412,6 +412,10 @@ NameDef names[] = {
     {"PackageRegistry", "<PackageRegistry>", true},
     {"PackageMethods", "<PackageMethods>", true},
 
+    // Compiler
+    {"runningCompiled_p", "running_compiled?"},
+    {"compilerVersion", "compiler_version"},
+
     // GlobalState initEmpty()
     {"Top", "<top>", true},
     {"Bottom", "T.noreturn", true},
@@ -495,6 +499,7 @@ NameDef names[] = {
     {"VERSION", "VERSION", true},
     {"Thread", "Thread", true},
     {"Configuration", "Configuration", true},
+    {"Compiler", "Compiler", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

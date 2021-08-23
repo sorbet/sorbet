@@ -708,6 +708,39 @@ public:
     };
 } TEnum_abstract;
 
+class TPrivateCompiler_runningCompiled_p : public SymbolBasedIntrinsicMethod {
+public:
+    TPrivateCompiler_runningCompiled_p() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &builder = builderCast(mcctx.build);
+        return Payload::rubyTrue(mcctx.cs, builder);
+    };
+
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
+        return {core::Symbols::T_Private_CompilerSingleton()};
+    };
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(const core::GlobalState &gs) const override {
+        return {core::Names::runningCompiled_p()};
+    };
+} TPrivateCompiler_runningCompiled_p;
+
+class TPrivateCompiler_compilerVersion : public SymbolBasedIntrinsicMethod {
+public:
+    TPrivateCompiler_compilerVersion() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &builder = builderCast(mcctx.build);
+        auto frozen = true;
+        return Payload::cPtrToRubyString(mcctx.cs, builder, sorbet_full_version_string, frozen);
+    };
+
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
+        return {core::Symbols::T_Private_CompilerSingleton()};
+    };
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(const core::GlobalState &gs) const override {
+        return {core::Names::compilerVersion()};
+    };
+} TPrivateCompiler_compilerVersion;
+
 class CallCMethodSingleton : public CallCMethod {
 public:
     CallCMethodSingleton(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod)
@@ -805,6 +838,8 @@ vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs(const core::Globa
         &Regexp_new,
         &TEnum_new,
         &TEnum_abstract,
+        &TPrivateCompiler_runningCompiled_p,
+        &TPrivateCompiler_compilerVersion,
     };
     for (auto &method : knownCMethodsInstance) {
         if (debug_mode) {
