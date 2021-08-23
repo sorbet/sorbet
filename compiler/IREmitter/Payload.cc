@@ -540,17 +540,17 @@ int getNearestIseqAllocatorBlock(const IREmitterContext &irctx, int rubyBlockId)
 std::tuple<string, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
                                                    const IREmitterContext &irctx, const ast::MethodDef &md,
                                                    int rubyBlockId) {
-    string funcName;
+    string iseqName;
     llvm::Value *parent = nullptr;
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
-            funcName = md.symbol.data(cs)->name.shortName(cs);
+            iseqName = md.symbol.data(cs)->name.shortName(cs);
             parent = llvm::Constant::getNullValue(iseqType(cs));
             break;
 
         case FunctionType::StaticInitFile:
         case FunctionType::StaticInitModule:
-            funcName = "<top (required)>";
+            iseqName = "<top (required)>";
             parent = llvm::Constant::getNullValue(iseqType(cs));
             break;
 
@@ -558,21 +558,21 @@ std::tuple<string, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilder
             {
                 int blockLevel = irctx.rubyBlockLevel[rubyBlockId];
                 if (blockLevel == 1) {
-                    funcName = "block in "sv;
+                    iseqName = "block in "sv;
                 } else {
-                    funcName = fmt::format("block (%d levels) in ", blockLevel);
+                    iseqName = fmt::format("block (%d levels) in ", blockLevel);
                 }
                 parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
             }
             break;
 
         case FunctionType::Rescue:
-            funcName = "rescue for"sv;
+            iseqName = "rescue for"sv;
             parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
             break;
 
         case FunctionType::Ensure:
-            funcName = "ensure for"sv;
+            iseqName = "ensure for"sv;
             parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
             break;
 
@@ -588,7 +588,7 @@ std::tuple<string, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilder
             break;
     }
 
-    return {funcName, parent};
+    return {iseqName, parent};
 }
 
 // Fill the locals array with interned ruby IDs.
