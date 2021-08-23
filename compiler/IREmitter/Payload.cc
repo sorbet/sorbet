@@ -555,8 +555,15 @@ std::tuple<string, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilder
             break;
 
         case FunctionType::Block:
-            funcName = "block for"sv;
-            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
+            {
+                int blockLevel = irctx.rubyBlockLevel[rubyBlockId];
+                if (blockLevel == 1) {
+                    funcName = "block in "sv;
+                } else {
+                    funcName = fmt::format("block (%d levels) in ", blockLevel);
+                }
+                parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
+            }
             break;
 
         case FunctionType::Rescue:
