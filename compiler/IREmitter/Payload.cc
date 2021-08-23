@@ -582,8 +582,11 @@ std::tuple<string, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilder
         } break;
 
         case FunctionType::Rescue:
-            iseqName = "rescue for"sv;
-            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
+            {
+                string locationName = locationNameFor(cs, md.symbol);
+                iseqName = fmt::format("rescue in {}", locationName);
+                parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
+            }
             break;
 
         case FunctionType::Ensure:
