@@ -94,7 +94,7 @@ void CompilerState::runCheapOptimizations(llvm::Function *func) {
     int sizeLevel = 0;
     pmbuilder.OptLevel = optLevel;
     pmbuilder.SizeLevel = sizeLevel;
-    pmbuilder.Inliner = llvm::createFunctionInliningPass(optLevel, sizeLevel, false);
+    pmbuilder.Inliner = nullptr;
     pmbuilder.DisableUnrollLoops = false;
     pmbuilder.LoopVectorize = true;
     pmbuilder.SLPVectorize = true;
