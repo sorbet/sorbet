@@ -1885,10 +1885,11 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
     return allFoundDefinitions;
 }
 
-ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions) {
+ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions,
+                                          vector<ast::ParsedFile> treesAsTemporaryStorage) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
-    vector<ast::ParsedFile> output;
-    output.reserve(allFoundDefinitions.size());
+    vector<ast::ParsedFile> output(move(treesAsTemporaryStorage));
+    output.clear();
     const auto &epochManager = *gs.epochManager;
     u4 count = 0;
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
@@ -1955,7 +1956,7 @@ ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::Parsed
     if (gs.epochManager->wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
-    auto result = defineSymbols(gs, move(foundDefs));
+    auto result = defineSymbols(gs, move(foundDefs), move(trees));
     if (!result.hasResult()) {
         return result;
     }
