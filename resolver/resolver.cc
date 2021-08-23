@@ -3053,7 +3053,8 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
     });
 
     vector<ResolveSignaturesWalk::ResolveFileSignatures> combinedFileJobs;
-    vector<ast::ParsedFile> combinedTrees;
+    vector<ast::ParsedFile> combinedTrees(move(trees));
+    combinedTrees.clear();
     {
         ResolveSignaturesWalk::ResolveSignaturesWalkResult threadResult;
         for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
