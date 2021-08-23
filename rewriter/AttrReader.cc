@@ -162,6 +162,7 @@ bool sigIsUnchecked(core::MutableContext ctx, ast::Send *sig) {
     }
 
     // Treats `.checked(:tests)` as unknown, therefore not unchecked.
+    // Also treats `.checked(:compiled)` as unknown, therefore not unchecked.
     return lit->asSymbol(ctx) == core::Names::never();
 }
 
