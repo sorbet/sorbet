@@ -244,9 +244,25 @@ bool isDestructuringArg(core::GlobalState &gs, const ast::MethodDef::ARGS_store 
            }) != args.end();
 }
 
-// Destructuring blocks are added to method/block entries as an InsSeq where the method body is the distinguished final
-// statement, and the statements of the InsSeq are all individual InsSeq expressions that make up the destructuring for
-// a specific argument.
+// When given code that looks like
+//
+//     test_each(pairs) do |(x, y)|
+//       # ...
+//     end
+//
+// Sorbet desugars it to essentially
+//
+//     test_each(pairs) do |<destructureArg$1|
+//       x = <destructureArg$1>[0]
+//       y = <destructureArg$1>[1]
+//
+//       # ...
+//     end
+//
+// which would otherwise defeat the "Only valid it-blocks can appear within test_each" error message.
+//
+// Because this case is so common, we have special handling to detect "contains only valid it-blocks
+// plus desugared destruturing assignments."
 bool isDestructuringInsSeq(core::GlobalState &gs, const ast::MethodDef::ARGS_store &args, ast::InsSeq *body) {
     return absl::c_all_of(body->stats, [&gs, &args](auto &stat) {
         auto *insSeq = ast::cast_tree<ast::InsSeq>(stat);
