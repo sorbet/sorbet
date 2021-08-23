@@ -538,8 +538,8 @@ int getNearestIseqAllocatorBlock(const IREmitterContext &irctx, int rubyBlockId)
 }
 
 std::tuple<string, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
-                                                   const IREmitterContext &irctx, const ast::MethodDef &md,
-                                                   int rubyBlockId) {
+                                              const IREmitterContext &irctx, const ast::MethodDef &md,
+                                              int rubyBlockId) {
     string iseqName;
     llvm::Value *parent = nullptr;
     switch (irctx.rubyBlockType[rubyBlockId]) {
@@ -554,31 +554,29 @@ std::tuple<string, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilder
             parent = llvm::Constant::getNullValue(iseqType(cs));
             break;
 
-        case FunctionType::Block:
-            {
-                int blockLevel = irctx.rubyBlockLevel[rubyBlockId];
-                string locationName;
-                if (IREmitterHelpers::isClassStaticInit(cs, md.symbol)) {
-                    auto enclosingClassRef = md.symbol.enclosingClass(cs);
-                    ENFORCE(enclosingClassRef.exists());
-                    enclosingClassRef = enclosingClassRef.data(cs)->attachedClass(cs);
-                    ENFORCE(enclosingClassRef.exists());
-                    const auto &enclosingClass = enclosingClassRef.data(cs);
-                    locationName = fmt::format("<{}:{}>", enclosingClass->isClassOrModuleClass() ? "class"sv : "module"sv,
-                                               enclosingClassRef.show(cs));
-                } else if (IREmitterHelpers::isFileStaticInit(cs, md.symbol)) {
-                    locationName = "<top (required)>"sv;
-                } else {
-                    locationName = md.symbol.data(cs)->name.shortName(cs);
-                }
-                if (blockLevel == 1) {
-                    iseqName = fmt::format("block in {}", locationName);
-                } else {
-                    iseqName = fmt::format("block ({} levels) in {}", blockLevel, locationName);
-                }
-                parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
+        case FunctionType::Block: {
+            int blockLevel = irctx.rubyBlockLevel[rubyBlockId];
+            string locationName;
+            if (IREmitterHelpers::isClassStaticInit(cs, md.symbol)) {
+                auto enclosingClassRef = md.symbol.enclosingClass(cs);
+                ENFORCE(enclosingClassRef.exists());
+                enclosingClassRef = enclosingClassRef.data(cs)->attachedClass(cs);
+                ENFORCE(enclosingClassRef.exists());
+                const auto &enclosingClass = enclosingClassRef.data(cs);
+                locationName = fmt::format("<{}:{}>", enclosingClass->isClassOrModuleClass() ? "class"sv : "module"sv,
+                                           enclosingClassRef.show(cs));
+            } else if (IREmitterHelpers::isFileStaticInit(cs, md.symbol)) {
+                locationName = "<top (required)>"sv;
+            } else {
+                locationName = md.symbol.data(cs)->name.shortName(cs);
             }
-            break;
+            if (blockLevel == 1) {
+                iseqName = fmt::format("block in {}", locationName);
+            } else {
+                iseqName = fmt::format("block ({} levels) in {}", blockLevel, locationName);
+            }
+            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
+        } break;
 
         case FunctionType::Rescue:
             iseqName = "rescue for"sv;
