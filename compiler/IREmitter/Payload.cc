@@ -557,10 +557,11 @@ std::tuple<string, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilder
         case FunctionType::Block:
             {
                 int blockLevel = irctx.rubyBlockLevel[rubyBlockId];
+                string_view funcName = md.symbol.data(cs)->name.shortName(cs);
                 if (blockLevel == 1) {
-                    iseqName = "block in "sv;
+                    iseqName = fmt::format("block in {}", funcName);
                 } else {
-                    iseqName = fmt::format("block (%d levels) in ", blockLevel);
+                    iseqName = fmt::format("block ({} levels) in {}", blockLevel, funcName);
                 }
                 parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
             }
