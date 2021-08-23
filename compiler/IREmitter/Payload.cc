@@ -557,11 +557,24 @@ std::tuple<string, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilder
         case FunctionType::Block:
             {
                 int blockLevel = irctx.rubyBlockLevel[rubyBlockId];
-                string_view funcName = md.symbol.data(cs)->name.shortName(cs);
-                if (blockLevel == 1) {
-                    iseqName = fmt::format("block in {}", funcName);
+                string locationName;
+                if (IREmitterHelpers::isClassStaticInit(cs, md.symbol)) {
+                    auto enclosingClassRef = md.symbol.enclosingClass(cs);
+                    ENFORCE(enclosingClassRef.exists());
+                    enclosingClassRef = enclosingClassRef.data(cs)->attachedClass(cs);
+                    ENFORCE(enclosingClassRef.exists());
+                    const auto &enclosingClass = enclosingClassRef.data(cs);
+                    locationName = fmt::format("<{}:{}>", enclosingClass->isClassOrModuleClass() ? "class"sv : "module"sv,
+                                               enclosingClassRef.show(cs));
+                } else if (IREmitterHelpers::isFileStaticInit(cs, md.symbol)) {
+                    locationName = "<top (required)>"sv;
                 } else {
-                    iseqName = fmt::format("block ({} levels) in {}", blockLevel, funcName);
+                    locationName = md.symbol.data(cs)->name.shortName(cs);
+                }
+                if (blockLevel == 1) {
+                    iseqName = fmt::format("block in {}", locationName);
+                } else {
+                    iseqName = fmt::format("block ({} levels) in {}", blockLevel, locationName);
                 }
                 parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
             }
