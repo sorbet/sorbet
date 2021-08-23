@@ -126,6 +126,51 @@ class MyTest
     end
   end
 
+  CONST_LIST_TUPLE = [[1,'a'], [2,'b']]
+  test_each CONST_LIST_TUPLE do |i, s|
+    it "succeeds with a constant list of tuples" do
+      T.reveal_type(i) # error: type: `T.untyped`
+      T.reveal_type(s) # error: type: `T.untyped`
+    end
+  end
+
+  test_each CONST_LIST_TUPLE do |(i, s)|
+    it "succeeds with a constant list of tuples and destructuring" do
+      T.reveal_type(i) # error: type: `T.untyped`
+      T.reveal_type(s) # error: type: `T.untyped`
+    end
+  end
+
+  ANOTHER_CONST_LIST_TUPLE = T.let([[1,'a'], [2,'b']], T::Array[[Integer, String]])
+  test_each ANOTHER_CONST_LIST_TUPLE do |i, s|
+    it "succeeds with a typed constant tuple list" do
+      T.reveal_type(i) # error: type: `Integer`
+      T.reveal_type(s) # error: type: `String`
+    end
+  end
+
+  test_each ANOTHER_CONST_LIST_TUPLE do |(i, s)|
+    it "succeeds with a typed constant tuple list with destructuring" do
+      T.reveal_type(i) # error: type: `Integer`
+      T.reveal_type(s) # error: type: `String`
+    end
+  end
+
+  local_tuple = [[1,'a'], [2,'b']]
+  test_each local_tuple do |i,s|
+    it "succeed with local variables but cannot type them" do
+      T.reveal_type(i) # error: type: `T.untyped`
+      T.reveal_type(s) # error: type: `T.untyped`
+    end
+  end
+
+  test_each local_tuple do |(i,s)|
+    it "succeed with destructured local variables but cannot type them" do
+      T.reveal_type(i) # error: type: `T.untyped`
+      T.reveal_type(s) # error: type: `T.untyped`
+    end
+  end
+
   test_each [1, 2, 3] do # error: Wrong number of parameters for `test_each` block
     it "does not handle zero argument blocks" do
     end
