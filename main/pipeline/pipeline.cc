@@ -864,8 +864,8 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                     }
                 });
 
-            vector<ast::ParsedFile> trees;
             {
+                vector<ast::ParsedFile> trees;
                 for (auto result = treesq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
                      !result.done();
                      result = treesq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
