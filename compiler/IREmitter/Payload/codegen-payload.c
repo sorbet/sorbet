@@ -164,7 +164,7 @@ struct rfb_status {
 };
 SORBET_ALIVE(struct rfb_status, sorbet_vm_return_from_block_wrapper, (int argc, VALUE *argv, VALUE recv, rb_control_frame_t *cfp, rb_sorbet_func_t wrapped));
 SORBET_ALIVE(VALUE, sorbet_run_exception_handling,
-             (rb_execution_context_t **ec,
+             (rb_execution_context_t *ec,
               ExceptionFFIType body,
               VALUE ** volatile pc,
               // The locals offset for the body.

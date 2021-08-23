@@ -42,18 +42,7 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
     auto *ensureFunc = getExceptionFunc(cs, irctx, ensureRubyBlockId);
     auto *elseFunc = getExceptionFunc(cs, irctx, elseRubyBlockId);
 
-    // Allocate a place to hold the execution context.  This must go in the function
-    // init block, otherwise the alloca might happen inside a loop, which could cause
-    // a stack overflow at runtime.
-    auto ip = builder.saveIP();
-    builder.SetInsertPoint(irctx.functionInitializersByFunction[rubyBlockId]);
-    auto *ecType = llvm::StructType::getTypeByName(cs, "struct.rb_execution_context_struct");
-    auto *ecPtr = ecType->getPointerTo();
-    auto *ecAlloca = builder.CreateAlloca(ecPtr, nullptr, "ecCache");
-    builder.restoreIP(ip);
-
     auto *ec = builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
-    builder.CreateStore(ec, ecAlloca);
 
     auto *pc = builder.CreateLoad(irctx.lineNumberPtrsByFunction[rubyBlockId]);
     auto *closure = Payload::buildLocalsOffset(cs);
@@ -61,7 +50,7 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
 
     auto [index, level] = Payload::escapedVariableIndexAndLevel(cs, exceptionValue, irctx, bodyRubyBlockId);
     auto *v = builder.CreateCall(cs.getFunction("sorbet_run_exception_handling"),
-                                 {ecAlloca, irctx.rubyBlocks2Functions[bodyRubyBlockId], pc, closure, cfp, handlersFunc,
+                                 {ec, irctx.rubyBlocks2Functions[bodyRubyBlockId], pc, closure, cfp, handlersFunc,
                                   elseFunc, ensureFunc, Payload::retrySingleton(cs, builder, irctx), index, level});
 
     auto *exceptionContinue = llvm::BasicBlock::Create(cs, "exception-continue", currentFunc);
