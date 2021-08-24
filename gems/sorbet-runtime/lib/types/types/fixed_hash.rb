@@ -51,7 +51,7 @@ module T::Types
     # @override Base
     def describe_obj(obj)
       if obj.is_a?(Hash)
-        "type {#{obj.map {|(k, v)| "#{k}: #{v.class}"}.join(', ')}}"
+        "type #{serialize_hash(obj.transform_values(&:class))}"
       else
         super
       end

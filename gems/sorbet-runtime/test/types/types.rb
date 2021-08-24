@@ -291,6 +291,11 @@ module Opus::Types::Test
         assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type {a: TrueClass, b: TrueClass, c: Integer}", msg)
       end
 
+      it "fails validation with a hash of wrong typed keys" do
+        msg = check_error_message_for_obj(@type, {"a" => true, :"foo bar" => true, :"foo" => 3})
+        assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type {\"a\" => TrueClass, :\"foo bar\" => TrueClass, foo: Integer}", msg)
+      end
+
       it "fails validation if a field is missing" do
         msg = check_error_message_for_obj(@type, {b: true, c: 3})
         assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type {b: TrueClass, c: Integer}", msg)
