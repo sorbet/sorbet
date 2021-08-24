@@ -552,6 +552,87 @@ vector<int> getBlockLevels(vector<int> &blockParents, vector<FunctionType> &bloc
     return levels;
 }
 
+string locationNameFor(CompilerState &cs, core::MethodRef symbol) {
+    if (IREmitterHelpers::isClassStaticInit(cs, symbol)) {
+        auto enclosingClassRef = symbol.enclosingClass(cs);
+        ENFORCE(enclosingClassRef.exists());
+        enclosingClassRef = enclosingClassRef.data(cs)->attachedClass(cs);
+        ENFORCE(enclosingClassRef.exists());
+        const auto &enclosingClass = enclosingClassRef.data(cs);
+        return fmt::format("<{}:{}>", enclosingClass->isClassOrModuleClass() ? "class"sv : "module"sv,
+                           enclosingClassRef.show(cs));
+    } else if (IREmitterHelpers::isFileStaticInit(cs, symbol)) {
+        return string("<top (required)>"sv);
+    } else {
+        return string(symbol.data(cs)->name.shortName(cs));
+    }
+}
+
+// Block names in Ruby are built recursively as the file is parsed.  We aren't guaranteed
+// to process blocks in depth-first order and we don't want to constantly recompute
+// parent names.  So we build the names for everything up front.
+vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg, const vector<int> &blockLevels, const vector<int> &blockParents, const vector<FunctionType> &blockTypes) {
+    struct BlockInfo {
+        int rubyBlockId;
+        // blockLevels[this->rubyBlockId];
+        int level;
+    };
+
+    ENFORCE(blockLevels.size() == blockParents.size());
+    ENFORCE(blockLevels.size() == blockTypes.size());
+
+    vector<optional<string>> blockLocationNames(blockLevels.size());
+    // Sort blocks by their depth so that we can process things in a depth-first order.
+    vector<BlockInfo> blocksByDepth;
+    blocksByDepth.reserve(blockLevels.size());
+    for (int i = 0; i <= cfg.maxRubyBlockId; ++i) {
+        blocksByDepth.emplace_back(BlockInfo{i, blockLevels[i]});
+    }
+
+    fast_sort(blocksByDepth, [](const auto &left, const auto &right) -> bool { return left.level < right.level; });
+
+    string topLevelLocation = locationNameFor(cs, cfg.symbol);
+
+    for (const auto &info : blocksByDepth) {
+        optional<string> &iseqName = blockLocationNames[info.rubyBlockId];
+
+        switch (blockTypes[info.rubyBlockId]) {
+        case FunctionType::Method:
+            iseqName.emplace(cfg.symbol.data(cs)->name.shortName(cs));
+            break;
+
+        case FunctionType::StaticInitFile:
+        case FunctionType::StaticInitModule:
+            iseqName.emplace("<top (required)>");
+            break;
+
+        case FunctionType::Block: {
+            int blockLevel = info.level;
+            if (blockLevel == 1) {
+                iseqName.emplace(fmt::format("block in {}", topLevelLocation));
+            } else {
+                iseqName.emplace(fmt::format("block ({} levels) in {}", blockLevel, topLevelLocation));
+            }
+        } break;
+
+        case FunctionType::Rescue:
+            iseqName.emplace(fmt::format("rescue in {}", topLevelLocation));
+            break;
+
+        case FunctionType::Ensure:
+            iseqName.emplace(fmt::format("ensure in {}", topLevelLocation));
+            break;
+
+        case FunctionType::ExceptionBegin:
+        case FunctionType::Unused:
+            // These types do not have iseqs allocated for them and therefore have no name.
+            break;
+        }
+    }
+
+    return blockLocationNames;
+}
+
 } // namespace
 
 IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
@@ -580,6 +661,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc, blockTypes, rubyBlock2Function, blockScopes);
 
     auto blockLevels = getBlockLevels(blockParents, blockTypes);
+    auto blockLocationNames = getBlockLocationNames(cs, cfg, blockLevels, blockParents, blockTypes);
 
     auto [aliases, symbols] = setupAliasesAndKeywords(cs, cfg);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
@@ -785,6 +867,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(blockScopes),
         move(blockUsesBreak),
         hasReturnFromBlock,
+        move(blockLocationNames),
     };
 
     auto [llvmVariables, selfVariables] = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation);

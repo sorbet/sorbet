@@ -537,64 +537,43 @@ int getNearestIseqAllocatorBlock(const IREmitterContext &irctx, int rubyBlockId)
     return rubyBlockId;
 }
 
-string locationNameFor(CompilerState &cs, core::MethodRef symbol) {
-    if (IREmitterHelpers::isClassStaticInit(cs, symbol)) {
-        auto enclosingClassRef = symbol.enclosingClass(cs);
-        ENFORCE(enclosingClassRef.exists());
-        enclosingClassRef = enclosingClassRef.data(cs)->attachedClass(cs);
-        ENFORCE(enclosingClassRef.exists());
-        const auto &enclosingClass = enclosingClassRef.data(cs);
-        return fmt::format("<{}:{}>", enclosingClass->isClassOrModuleClass() ? "class"sv : "module"sv,
-                           enclosingClassRef.show(cs));
-    } else if (IREmitterHelpers::isFileStaticInit(cs, symbol)) {
-        return string("<top (required)>"sv);
-    } else {
-        return string(symbol.data(cs)->name.shortName(cs));
-    }
-}
-
 std::tuple<string, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
                                               const IREmitterContext &irctx, const ast::MethodDef &md,
                                               int rubyBlockId) {
+    // TODO(froydnj): eliminate copying here.
+    auto &locationName = irctx.rubyBlockLocationNames[rubyBlockId];
     string iseqName;
     llvm::Value *parent = nullptr;
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
-            iseqName = md.symbol.data(cs)->name.shortName(cs);
+            ENFORCE(locationName.has_value());
+            iseqName = *locationName;
             parent = llvm::Constant::getNullValue(iseqType(cs));
             break;
 
         case FunctionType::StaticInitFile:
         case FunctionType::StaticInitModule:
-            iseqName = "<top (required)>";
+            ENFORCE(locationName.has_value());
+            iseqName = *locationName;
             parent = llvm::Constant::getNullValue(iseqType(cs));
             break;
 
-        case FunctionType::Block: {
-            int blockLevel = irctx.rubyBlockLevel[rubyBlockId];
-            string locationName = locationNameFor(cs, md.symbol);
-            if (blockLevel == 1) {
-                iseqName = fmt::format("block in {}", locationName);
-            } else {
-                iseqName = fmt::format("block ({} levels) in {}", blockLevel, locationName);
-            }
+        case FunctionType::Block:
+            ENFORCE(locationName.has_value());
+            iseqName = *locationName;
             parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
-        } break;
+            break;
 
         case FunctionType::Rescue:
-            {
-                string locationName = locationNameFor(cs, md.symbol);
-                iseqName = fmt::format("rescue in {}", locationName);
-                parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
-            }
+            ENFORCE(locationName.has_value());
+            iseqName = *locationName;
+            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
             break;
 
         case FunctionType::Ensure:
-            {
-                string locationName = locationNameFor(cs, md.symbol);
-                iseqName = fmt::format("ensure in {}", locationName);
-                parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
-            }
+            ENFORCE(locationName.has_value());
+            iseqName = *locationName;
+            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
             break;
 
         case FunctionType::ExceptionBegin:

@@ -259,6 +259,9 @@ struct IREmitterContext {
     // Whether a Ruby block ever has an explicit return statement.
     bool hasReturnFromBlock;
 
+    // Mapping from ruby block id to the name for the block's iseq.
+    std::vector<std::optional<std::string>> rubyBlockLocationNames;
+
     static IREmitterContext getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md,
                                                              llvm::Function *mainFunc);
 };
