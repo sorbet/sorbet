@@ -784,7 +784,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(blockExits),
         move(blockScopes),
         move(blockUsesBreak),
-        move(hasReturnFromBlock),
+        hasReturnFromBlock,
     };
 
     auto [llvmVariables, selfVariables] = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation);
