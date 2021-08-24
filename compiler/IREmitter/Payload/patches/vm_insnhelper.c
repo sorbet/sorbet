@@ -25,6 +25,8 @@ void sorbet_setExceptionStackFrame(rb_execution_context_t *ec, rb_control_frame_
     cfp = vm_push_frame(ec, iseq, VM_FRAME_MAGIC_RESCUE, self, blockHandler, me, iseq->body->iseq_encoded, sp,
                         num_locals, iseq->body->stack_max);
 
+    // This mirrors what the Ruby VM does for rescue frames:
+    // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm.c#L2094-L2105
     ec->tag->state = TAG_NONE;
     ec->errinfo = Qnil;
 }
