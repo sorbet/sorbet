@@ -641,17 +641,17 @@ VALUE sorbet_run_exception_handling(rb_execution_context_t * volatile ec,
             // to run lives directly under whatever frame we started this process with.
             rb_vm_rewind_cfp(ec, cfp);
 
-            if (nleType == TAG_RAISE) {
-                // rb_rescue2/rb_vrescue2 would check ec->errinfo here to determine if it
-                // was the "right" kind of error.  Sorbet has already generated code to check
-                // the exception value for us, we can dispatch directly to the handlers here,
-                // which avoids a little bit of overhead.  But we do need to tell the
-                // handlers what the exception value *is*.
-                bodyException = ec->errinfo;
-            } else {
+            if (nleType != TAG_RAISE) {
                 // Any other kind of non-local exit will skip the rescue/else handlers.
                 goto execute_ensure;
             }
+
+            // rb_rescue2/rb_vrescue2 would check ec->errinfo here to determine if it
+            // was the "right" kind of error.  Sorbet has already generated code to check
+            // the exception value for us, we can dispatch directly to the handlers here,
+            // which avoids a little bit of overhead.  But we do need to tell the
+            // handlers what the exception value *is*.
+            bodyException = ec->errinfo;
 
             // Any exception that got thrown needs to be set for the handler.
             sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, bodyException);
@@ -679,12 +679,12 @@ VALUE sorbet_run_exception_handling(rb_execution_context_t * volatile ec,
             // `retry` in terms of Ruby's non-local exit handling rather than our current
             // retry singleton mechanism.
 
-            if (nleType == TAG_RAISE) {
-                handlerException = ec->errinfo;
-                sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, handlerException);
-            } else {
+            if (nleType != TAG_RAISE) {
                 goto execute_ensure;
             }
+
+            handlerException = ec->errinfo;
+            sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, handlerException);
         }
 
         // We need to determine what the value of the "current" exception is for the
