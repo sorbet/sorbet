@@ -622,7 +622,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             // If return statements are present inside blocks, we need to codegen
             // differently when finalizing the function.
             //
-            // TODO(aprocter): I think this is a little bit more aggressive than it needs to be, because it will push
+            // TODO(aprocter): I think this is a little bit more conservative than it needs to be, because it will push
             // a tag even if the a return-from-block comes from a lambda, which is not actually necessary.
             if (returnFromBlockIsPresent(cs, cfg, blockTypes)) {
                 hasReturnFromBlock = true;
