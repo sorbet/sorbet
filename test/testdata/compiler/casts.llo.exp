@@ -226,14 +226,14 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %1 = load i64, i64* @rb_mKernel, align 8, !dbg !17
   %2 = tail call i64 @rb_obj_is_kind_of(i64 %rawArg_arg, i64 %1), !dbg !17
   %3 = icmp eq i64 %2, 20, !dbg !17
-  br i1 %3, label %normalReturn, label %codeRepl, !dbg !17, !prof !18
+  br i1 %3, label %typeTestSuccess, label %codeRepl, !dbg !17, !prof !18
+
+typeTestSuccess:                                  ; preds = %fillRequiredArgs
+  ret i64 %rawArg_arg
 
 codeRepl:                                         ; preds = %fillRequiredArgs
   tail call fastcc void @"func_Object#fooAll.cold.1"(i64 %rawArg_arg) #15, !dbg !17
   unreachable
-
-normalReturn:                                     ; preds = %fillRequiredArgs
-  ret i64 %rawArg_arg
 }
 
 ; Function Attrs: nounwind sspreq uwtable
@@ -255,7 +255,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   store i64* getelementptr inbounds ([30 x i64], [30 x i64]* @iseqEncodedArray, i64 0, i64 10), i64** %0, align 8, !dbg !21, !tbaa !12
   %1 = and i64 %rawArg_arg, 1, !dbg !22
   %2 = icmp eq i64 %1, 0, !dbg !22
-  br i1 %2, label %3, label %normalReturn, !dbg !22, !prof !23
+  br i1 %2, label %3, label %typeTestSuccess, !dbg !22, !prof !23
 
 3:                                                ; preds = %fillRequiredArgs
   %4 = and i64 %rawArg_arg, 7, !dbg !22
@@ -271,12 +271,12 @@ sorbet_isa_Integer.exit:                          ; preds = %3
   %11 = load i64, i64* %10, align 8, !dbg !22, !tbaa !24
   %12 = and i64 %11, 31, !dbg !22
   %13 = icmp eq i64 %12, 10, !dbg !22
-  br i1 %13, label %normalReturn, label %orCase, !dbg !22
+  br i1 %13, label %typeTestSuccess, label %orCase, !dbg !22
 
 orCase:                                           ; preds = %3, %sorbet_isa_Integer.exit
   %14 = and i64 %rawArg_arg, 3, !dbg !22
   %15 = icmp eq i64 %14, 2, !dbg !22
-  br i1 %15, label %normalReturn, label %16, !dbg !22
+  br i1 %15, label %typeTestSuccess, label %16, !dbg !22
 
 16:                                               ; preds = %orCase
   %17 = and i64 %rawArg_arg, 7, !dbg !22
@@ -292,14 +292,14 @@ sorbet_isa_Float.exit:                            ; preds = %16
   %24 = load i64, i64* %23, align 8, !dbg !22, !tbaa !24
   %25 = and i64 %24, 31, !dbg !22
   %26 = icmp eq i64 %25, 4, !dbg !22
-  br i1 %26, label %normalReturn, label %codeRepl, !dbg !22, !prof !18
+  br i1 %26, label %typeTestSuccess, label %codeRepl, !dbg !22, !prof !18
+
+typeTestSuccess:                                  ; preds = %orCase, %fillRequiredArgs, %sorbet_isa_Integer.exit, %sorbet_isa_Float.exit
+  ret i64 %rawArg_arg
 
 codeRepl:                                         ; preds = %16, %sorbet_isa_Float.exit
   tail call fastcc void @"func_Object#fooAny1.cold.1"(i64 %rawArg_arg) #15, !dbg !22
   unreachable
-
-normalReturn:                                     ; preds = %orCase, %fillRequiredArgs, %sorbet_isa_Integer.exit, %sorbet_isa_Float.exit
-  ret i64 %rawArg_arg
 }
 
 ; Function Attrs: nounwind sspreq uwtable
@@ -321,7 +321,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   store i64* getelementptr inbounds ([30 x i64], [30 x i64]* @iseqEncodedArray, i64 0, i64 14), i64** %0, align 8, !dbg !28, !tbaa !12
   %1 = and i64 %rawArg_arg, 3, !dbg !29
   %2 = icmp eq i64 %1, 2, !dbg !29
-  br i1 %2, label %normalReturn, label %3, !dbg !29
+  br i1 %2, label %typeTestSuccess, label %3, !dbg !29
 
 3:                                                ; preds = %fillRequiredArgs
   %4 = and i64 %rawArg_arg, 7, !dbg !29
@@ -337,12 +337,12 @@ sorbet_isa_Float.exit:                            ; preds = %3
   %11 = load i64, i64* %10, align 8, !dbg !29, !tbaa !24
   %12 = and i64 %11, 31, !dbg !29
   %13 = icmp eq i64 %12, 4, !dbg !29
-  br i1 %13, label %normalReturn, label %orCase, !dbg !29
+  br i1 %13, label %typeTestSuccess, label %orCase, !dbg !29
 
 orCase:                                           ; preds = %3, %sorbet_isa_Float.exit
   %14 = and i64 %rawArg_arg, 1, !dbg !29
   %15 = icmp eq i64 %14, 0, !dbg !29
-  br i1 %15, label %16, label %normalReturn, !dbg !29, !prof !23
+  br i1 %15, label %16, label %typeTestSuccess, !dbg !29, !prof !23
 
 16:                                               ; preds = %orCase
   %17 = and i64 %rawArg_arg, 7, !dbg !29
@@ -358,14 +358,14 @@ sorbet_isa_Integer.exit:                          ; preds = %16
   %24 = load i64, i64* %23, align 8, !dbg !29, !tbaa !24
   %25 = and i64 %24, 31, !dbg !29
   %26 = icmp eq i64 %25, 10, !dbg !29
-  br i1 %26, label %normalReturn, label %codeRepl, !dbg !29, !prof !18
+  br i1 %26, label %typeTestSuccess, label %codeRepl, !dbg !29, !prof !18
+
+typeTestSuccess:                                  ; preds = %orCase, %fillRequiredArgs, %sorbet_isa_Float.exit, %sorbet_isa_Integer.exit
+  ret i64 %rawArg_arg
 
 codeRepl:                                         ; preds = %16, %sorbet_isa_Integer.exit
   tail call fastcc void @"func_Object#fooAny2.cold.1"(i64 %rawArg_arg) #15, !dbg !29
   unreachable
-
-normalReturn:                                     ; preds = %orCase, %fillRequiredArgs, %sorbet_isa_Float.exit, %sorbet_isa_Integer.exit
-  ret i64 %rawArg_arg
 }
 
 ; Function Attrs: nounwind sspreq uwtable
@@ -484,14 +484,14 @@ sorbet_isa_Array.exit:                            ; preds = %fillRequiredArgs
   %8 = load i64, i64* %7, align 8, !dbg !46, !tbaa !24
   %9 = and i64 %8, 31, !dbg !46
   %10 = icmp eq i64 %9, 7, !dbg !46
-  br i1 %10, label %normalReturn, label %codeRepl, !dbg !46, !prof !18
+  br i1 %10, label %typeTestSuccess, label %codeRepl, !dbg !46, !prof !18
+
+typeTestSuccess:                                  ; preds = %sorbet_isa_Array.exit
+  ret i64 %rawArg_arg
 
 codeRepl:                                         ; preds = %fillRequiredArgs, %sorbet_isa_Array.exit
   tail call fastcc void @"func_Object#fooArray.cold.1"(i64 %rawArg_arg) #15, !dbg !46
   unreachable
-
-normalReturn:                                     ; preds = %sorbet_isa_Array.exit
-  ret i64 %rawArg_arg
 }
 
 ; Function Attrs: nounwind sspreq uwtable

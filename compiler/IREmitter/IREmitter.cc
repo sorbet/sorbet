@@ -4,6 +4,7 @@
 #include "llvm/IR/DerivedTypes.h" // FunctionType, StructType
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/Transforms/Utils/Cloning.h"
 
 #include "ast/Helpers.h"
 #include "ast/ast.h"
@@ -587,14 +588,13 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         return;
                     }
 
-                    // If this is a return from a block, we set the "return-via-throw" flag which will be processed
-                    // by emitReturn.
-                    if (irctx.rubyBlockType[bb->rubyBlockId] == FunctionType::Block) {
-                        IREmitterHelpers::setThrowReturnFlag(cs, builder, irctx, bb->rubyBlockId);
-                    }
-
                     auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
-                    IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
+
+                    if (irctx.rubyBlockType[bb->rubyBlockId] == FunctionType::Block) {
+                        IREmitterHelpers::emitReturnFromBlock(cs, cfg, builder, irctx, bb->rubyBlockId, var);
+                    } else {
+                        IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
+                    }
                 },
                 [&](cfg::BlockReturn *i) {
                     ENFORCE(bb->rubyBlockId != 0, "should never happen");
@@ -734,24 +734,9 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
     auto rubyBlockId = 0;
 
     auto var = Payload::varGet(cs, returnValue(cfg, cs), builder, irctx, rubyBlockId);
-    auto expectedType = cfg.symbol.data(cs)->resultType;
-    if (expectedType == nullptr) {
-        IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyBlockId, var);
-        return;
-    }
+    auto *maybeChecked = IREmitterHelpers::maybeCheckReturnValue(cs, cfg, builder, irctx, var);
 
-    if (core::isa_type<core::ClassType>(expectedType) &&
-        core::cast_type_nonnull<core::ClassType>(expectedType).symbol == core::Symbols::void_()) {
-        auto void_ = Payload::voidSingleton(cs, builder, irctx);
-        IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyBlockId, void_);
-        return;
-    }
-    // sorbet-runtime doesn't check this type for abstract methods, so we won't either.
-    // TODO(froydnj): we should check this type.
-    if (!cfg.symbol.data(cs)->isAbstract()) {
-        IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, "Return value");
-    }
-    IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyBlockId, var);
+    IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyBlockId, maybeChecked);
 }
 
 void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) {
@@ -792,25 +777,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
 
     // Link the function initializer blocks.
     for (int funId = 0; funId < irctx.functionInitializersByFunction.size(); funId++) {
-        llvm::BasicBlock *nextBlock;
-
-        // Block 0 (the root Ruby block) is a special case: rather than jumping straight to argument setup, we may need
-        // to push an EC tag and execute setjmp. (If irctx.ecTag is nullptr, that means that we detected statically in
-        // IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping that the EC tag is actually unnecessary.) The EC tag
-        // setup will subsequently branch to the argument setup block; that branch is built in Payload::setupEcTag,
-        // which is called here.
-        //
-        // In other cases, we will just jump directly from the init block to the argument setup block.
-        if (funId == 0 && irctx.returnFromBlockState.has_value()) {
-            llvm::BasicBlock *ecTagSetupBlock = llvm::BasicBlock::Create(cs, "ecTagSetup", func);
-            builder.SetInsertPoint(ecTagSetupBlock);
-            Payload::setupEcTag(cs, builder, irctx);
-
-            nextBlock = ecTagSetupBlock;
-        } else {
-            nextBlock = irctx.argumentSetupBlocksByFunction[funId];
-        }
-
+        llvm::BasicBlock *nextBlock = irctx.argumentSetupBlocksByFunction[funId];
         builder.SetInsertPoint(irctx.functionInitializersByFunction[funId]);
         builder.CreateBr(nextBlock);
     }
@@ -818,6 +785,81 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     cs.debug->finalize();
 
     /* run verifier */
+    if (debug_mode && llvm::verifyFunction(*func, &llvm::errs())) {
+        fmt::print("failed to verify:\n");
+        func->dump();
+        ENFORCE(false);
+    }
+    cs.runCheapOptimizations(func);
+
+    // If we are ever returning across blocks, we need to wrap the entire execution
+    // of the function in an unwind-protect region that knows about the return.
+    if (!irctx.hasReturnFromBlock) {
+        return;
+    }
+
+    llvm::ValueToValueMapTy vMap;
+    auto *implementationFunction = llvm::CloneFunction(func, vMap);
+
+    // Completely delete the function body.
+    func->dropAllReferences();
+
+    // Turn the original function into a trampoline for this new function.
+    auto *entryBlock = llvm::BasicBlock::Create(cs, "entry", func);
+    builder.SetInsertPoint(entryBlock);
+
+    auto *wrapper = cs.getFunction("sorbet_vm_return_from_block_wrapper");
+    // Adding the function argument at the end means that we don't have to perform
+    // any register shuffling.
+    auto *status = builder.CreateCall(wrapper,
+                                      {func->arg_begin(), func->arg_begin() + 1, func->arg_begin() + 2,
+                                       func->arg_begin() + 3, implementationFunction},
+                                      "returnedFromBlock");
+
+    // TODO(froydnj): LLVM IR is somewhat machine-specific when it comes to calling
+    // functions returning a structure, like sorbet_vm_return_from_block_wrapper.
+    // The conventions we have here are correct for x86-64 (Linux and Mac), but the
+    // LLVM IR generated by clang for returning the same structure on arm64 Linux
+    // returns a 2 x i64 vector.  If the structure was slightly bigger, the function
+    // would actually take a pointer to the structure as a separate argument.
+    // A different architecture might take a pointer always, regardless of how the
+    // structure was laid out.
+    //
+    // It's entirely possible that having the Sorbet compiler generate code for a
+    // non-x86-64 architecture would require reworking more stuff than just this
+    // bit of code.  But this particular bit seems like an easy place to overlook
+    // and puzzle about why things are going wrong.  So try and provide a little
+    // advance notice to the would-be porter.
+    if (debug_mode) {
+        std::string error;
+        const auto &targetTriple = cs.module->getTargetTriple();
+        auto triple = llvm::Triple(targetTriple);
+        ENFORCE(triple.getArch() == llvm::Triple::x86_64);
+    }
+    // Also make sure that the return value is small enough to be returned in
+    // registers, i.e. that the function is actually returning a value directly.
+    ENFORCE(!status->getType()->isVoidTy());
+
+    // If we received this return value via throwing (i.e. return-from-block), we
+    // didn't typecheck the value when it was thrown, so we need to do it here.
+    auto *returnValue = builder.CreateExtractValue(status, {0}, "returnedValue");
+    auto *wasThrown = builder.CreateExtractValue(status, {1}, "wasThrown");
+    auto *typecheckBlock = llvm::BasicBlock::Create(cs, "typecheck", func);
+    auto *exitBlock = llvm::BasicBlock::Create(cs, "exit", func);
+    builder.CreateCondBr(builder.CreateICmpEQ(wasThrown, builder.getInt8(1)), typecheckBlock, exitBlock);
+
+    builder.SetInsertPoint(typecheckBlock);
+    auto *checkedValue = IREmitterHelpers::maybeCheckReturnValue(cs, cfg, builder, irctx, returnValue);
+    typecheckBlock = builder.GetInsertBlock();
+    builder.CreateBr(exitBlock);
+
+    builder.SetInsertPoint(exitBlock);
+    auto *returnValuePhi = builder.CreatePHI(returnValue->getType(), 2, "value");
+    returnValuePhi->addIncoming(returnValue, entryBlock);
+    returnValuePhi->addIncoming(checkedValue, typecheckBlock);
+    builder.CreateRet(returnValuePhi);
+
+    // Redo verifier on our new function.
     if (debug_mode && llvm::verifyFunction(*func, &llvm::errs())) {
         fmt::print("failed to verify:\n");
         func->dump();

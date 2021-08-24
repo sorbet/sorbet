@@ -256,33 +256,8 @@ struct IREmitterContext {
     // val: true when the block uses `break`
     std::vector<bool> blockUsesBreak;
 
-    // Mapping from ruby block id to boolean (i1)-typed local that indicates whether the upcoming function return
-    // should be handled as a Ruby VM "throw" (true) or as a regular return over the C stack (false).
-    //
-    // This is initialized to false in the function initializer block, and should be set to true before calling
-    // emitReturn if that return is to be handled via a Ruby VM "throw".
-    //
-    // idx: ruby block id
-    std::vector<llvm::AllocaInst *> throwReturnFlagByBlock;
-
-    struct ReturnFromBlockState {
-        // AllocaInst corresponding to the rb_vm_tag-typed local in Ruby block 0. This tag will be pushed onto the
-        // execution context's tag stack, to catch return statements from inside blocks.
-        llvm::AllocaInst *ecTag;
-
-        // Type corresponding to rb_execution_context_t *.
-        llvm::Type *ecPtr;
-
-        // AllocaInst for the cached execution context pointer that needs to be live
-        // across the initialization of the tag stack.
-        llvm::AllocaInst *cachedEC;
-
-        ReturnFromBlockState(CompilerState &cs, llvm::IRBuilderBase &build);
-
-        llvm::Value *loadEC(CompilerState &cs, llvm::IRBuilderBase &build) const;
-    };
-
-    std::optional<ReturnFromBlockState> returnFromBlockState;
+    // Whether a Ruby block ever has an explicit return statement.
+    bool hasReturnFromBlock;
 
     static IREmitterContext getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md,
                                                              llvm::Function *mainFunc);

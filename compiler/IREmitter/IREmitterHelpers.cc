@@ -191,36 +191,21 @@ void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBas
                                            int rubyBlockId, llvm::Value *retVal) {
     auto &builder = static_cast<llvm::IRBuilder<> &>(build);
 
-    auto *func = irctx.rubyBlocks2Functions[rubyBlockId];
-
-    auto *throwReturnBlock = llvm::BasicBlock::Create(cs, "throwReturn", func);
-    auto *normalReturnBlock = llvm::BasicBlock::Create(cs, "normalReturn", func);
-
     if (functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId])) {
         builder.CreateCall(cs.getFunction("sorbet_popFrame"), {});
     }
-    bool needsReturnFromBlock = rubyBlockId == 0 && irctx.returnFromBlockState.has_value();
-    if (needsReturnFromBlock) {
-        auto &state = *irctx.returnFromBlockState;
-        builder.CreateCall(cs.getFunction("sorbet_teardownTagForThrowReturn"),
-                           {state.loadEC(cs, builder), state.ecTag});
-    }
-    auto *throwReturnFlag = builder.CreateLoad(irctx.throwReturnFlagByBlock[rubyBlockId]);
-    builder.CreateCondBr(throwReturnFlag, throwReturnBlock, normalReturnBlock);
+    builder.CreateRet(retVal);
+}
 
-    builder.SetInsertPoint(throwReturnBlock);
-    llvm::Value *ec;
-    if (needsReturnFromBlock) {
-        auto &state = *irctx.returnFromBlockState;
-        ec = state.loadEC(cs, builder);
-    } else {
-        ec = builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
-    }
+void IREmitterHelpers::emitReturnFromBlock(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build,
+                                           const IREmitterContext &irctx, int rubyBlockId, llvm::Value *retVal) {
+    ENFORCE(irctx.rubyBlockType[rubyBlockId] == FunctionType::Block);
+    ENFORCE(!functionTypeNeedsPostprocessing(irctx.rubyBlockType[rubyBlockId]));
+    ENFORCE(!functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId]));
+    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
+    auto *ec = builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
     builder.CreateCall(cs.getFunction("sorbet_throwReturn"), {ec, retVal});
     builder.CreateUnreachable();
-
-    builder.SetInsertPoint(normalReturnBlock);
-    builder.CreateRet(retVal);
 }
 
 void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
@@ -236,11 +221,26 @@ void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build,
     }
 }
 
-void IREmitterHelpers::setThrowReturnFlag(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
-                                          int rubyBlockId) {
-    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
+llvm::Value *IREmitterHelpers::maybeCheckReturnValue(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build,
+                                                     const IREmitterContext &irctx, llvm::Value *returnValue) {
+    llvm::IRBuilder<> &builder = static_cast<llvm::IRBuilder<> &>(build);
+    auto expectedType = cfg.symbol.data(cs)->resultType;
+    if (expectedType == nullptr) {
+        return returnValue;
+    }
 
-    builder.CreateStore(builder.getTrue(), irctx.throwReturnFlagByBlock[rubyBlockId]);
+    if (core::isa_type<core::ClassType>(expectedType) &&
+        core::cast_type_nonnull<core::ClassType>(expectedType).symbol == core::Symbols::void_()) {
+        return Payload::voidSingleton(cs, builder, irctx);
+    }
+
+    // sorbet-runtime doesn't check this type for abstract methods, so we won't either.
+    // TODO(froydnj): we should check this type.
+    if (!cfg.symbol.data(cs)->isAbstract()) {
+        IREmitterHelpers::emitTypeTest(cs, builder, returnValue, expectedType, "Return value");
+    }
+
+    return returnValue;
 }
 
 namespace {

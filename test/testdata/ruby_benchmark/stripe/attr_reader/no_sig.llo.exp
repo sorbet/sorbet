@@ -363,6 +363,9 @@ fastSymCallIntrinsic_Static_keep_def:             ; preds = %fastSymCallIntrinsi
   %65 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %64, i32 noundef 0) #15, !dbg !31
   br label %fastSymCallIntrinsic_Static_keep_def67, !dbg !31
 
+afterSend64:                                      ; preds = %79, %fastSymCallIntrinsic_Static_keep_def67
+  ret void
+
 fastSymCallIntrinsic_Static_keep_def67:           ; preds = %35, %62
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 13), i64** %8, align 8, !dbg !31, !tbaa !12
   %rubyId_foo59 = load i64, i64* @rubyIdPrecomputed_foo, align 8, !dbg !37
@@ -383,16 +386,13 @@ fastSymCallIntrinsic_Static_keep_def67:           ; preds = %35, %62
   %76 = xor i32 %75, -1, !dbg !37
   %77 = and i32 %76, %73, !dbg !37
   %78 = icmp eq i32 %77, 0, !dbg !37
-  br i1 %78, label %normalReturn, label %79, !dbg !37, !prof !25
+  br i1 %78, label %afterSend64, label %79, !dbg !37, !prof !25
 
 79:                                               ; preds = %fastSymCallIntrinsic_Static_keep_def67
   %80 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %71, i64 0, i32 8, !dbg !37
   %81 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %80, align 8, !dbg !37, !tbaa !26
   %82 = tail call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %81, i32 noundef 0) #15, !dbg !37
-  br label %normalReturn, !dbg !37
-
-normalReturn:                                     ; preds = %79, %fastSymCallIntrinsic_Static_keep_def67
-  ret void
+  br label %afterSend64, !dbg !37
 }
 
 ; Function Attrs: sspreq
@@ -803,8 +803,8 @@ functionEntryInitializers:
   store i64 %send, i64* %17, align 8, !dbg !38, !tbaa !4
   %18 = getelementptr inbounds i64, i64* %17, i64 1, !dbg !38
   store i64* %18, i64** %16, align 8, !dbg !38
-  %send20 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_void, i64 0), !dbg !38
-  ret i64 %send20, !dbg !77
+  %send17 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_void, i64 0), !dbg !38
+  ret i64 %send17, !dbg !77
 }
 
 ; Function Attrs: inaccessiblememonly nofree nosync nounwind willreturn

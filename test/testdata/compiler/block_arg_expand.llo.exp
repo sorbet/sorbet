@@ -279,22 +279,22 @@ fillFromDefaultBlockDone2:                        ; preds = %argArrayExpandArray
   br i1 %44, label %45, label %typeTestSuccess, !dbg !28, !prof !26
 
 45:                                               ; preds = %fillFromDefaultBlockDone2.thread, %fillFromDefaultBlockDone2
-  %el1.sroa.0.152 = phi i64 [ 8, %fillFromDefaultBlockDone2.thread ], [ %el1.sroa.0.1, %fillFromDefaultBlockDone2 ]
-  %el2.sroa.0.049 = phi i64 [ 8, %fillFromDefaultBlockDone2.thread ], [ %el2.sroa.0.0, %fillFromDefaultBlockDone2 ]
-  %46 = and i64 %el1.sroa.0.152, 7, !dbg !28
+  %el1.sroa.0.149 = phi i64 [ 8, %fillFromDefaultBlockDone2.thread ], [ %el1.sroa.0.1, %fillFromDefaultBlockDone2 ]
+  %el2.sroa.0.046 = phi i64 [ 8, %fillFromDefaultBlockDone2.thread ], [ %el2.sroa.0.0, %fillFromDefaultBlockDone2 ]
+  %46 = and i64 %el1.sroa.0.149, 7, !dbg !28
   %47 = icmp ne i64 %46, 0, !dbg !28
-  %48 = and i64 %el1.sroa.0.152, -9, !dbg !28
+  %48 = and i64 %el1.sroa.0.149, -9, !dbg !28
   %49 = icmp eq i64 %48, 0, !dbg !28
   %50 = or i1 %47, %49, !dbg !28
-  br i1 %50, label %codeRepl44, label %sorbet_isa_Integer.exit, !dbg !28
+  br i1 %50, label %codeRepl41, label %sorbet_isa_Integer.exit, !dbg !28
 
 sorbet_isa_Integer.exit:                          ; preds = %45
-  %51 = inttoptr i64 %el1.sroa.0.152 to %struct.iseq_inline_iv_cache_entry*, !dbg !28
+  %51 = inttoptr i64 %el1.sroa.0.149 to %struct.iseq_inline_iv_cache_entry*, !dbg !28
   %52 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %51, i64 0, i32 0, !dbg !28
   %53 = load i64, i64* %52, align 8, !dbg !28, !tbaa !23
   %54 = and i64 %53, 31, !dbg !28
   %55 = icmp eq i64 %54, 10, !dbg !28
-  br i1 %55, label %typeTestSuccess, label %codeRepl44, !dbg !28, !prof !29
+  br i1 %55, label %typeTestSuccess, label %codeRepl41, !dbg !28, !prof !29
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers, %rb_array_len.exit
   %argcPhi = phi i32 [ %argc, %functionEntryInitializers ], [ %41, %rb_array_len.exit ], !dbg !22
@@ -307,48 +307,48 @@ fillFromDefaultBlockDone2.thread:                 ; preds = %fillRequiredArgs
   br label %45, !dbg !28
 
 typeTestSuccess:                                  ; preds = %fillFromDefaultBlockDone2, %sorbet_isa_Integer.exit
-  %el1.sroa.0.151 = phi i64 [ %el1.sroa.0.1, %fillFromDefaultBlockDone2 ], [ %el1.sroa.0.152, %sorbet_isa_Integer.exit ]
-  %el2.sroa.0.048 = phi i64 [ %el2.sroa.0.0, %fillFromDefaultBlockDone2 ], [ %el2.sroa.0.049, %sorbet_isa_Integer.exit ]
-  %56 = and i64 %el2.sroa.0.048, 1, !dbg !30
+  %el1.sroa.0.148 = phi i64 [ %el1.sroa.0.1, %fillFromDefaultBlockDone2 ], [ %el1.sroa.0.149, %sorbet_isa_Integer.exit ]
+  %el2.sroa.0.045 = phi i64 [ %el2.sroa.0.0, %fillFromDefaultBlockDone2 ], [ %el2.sroa.0.046, %sorbet_isa_Integer.exit ]
+  %56 = and i64 %el2.sroa.0.045, 1, !dbg !30
   %57 = icmp eq i64 %56, 0, !dbg !30
   br i1 %57, label %58, label %"fastSymCallIntrinsic_Integer_+", !dbg !30, !prof !26
 
 58:                                               ; preds = %typeTestSuccess
-  %59 = and i64 %el2.sroa.0.048, 7, !dbg !30
+  %59 = and i64 %el2.sroa.0.045, 7, !dbg !30
   %60 = icmp ne i64 %59, 0, !dbg !30
-  %61 = and i64 %el2.sroa.0.048, -9, !dbg !30
+  %61 = and i64 %el2.sroa.0.045, -9, !dbg !30
   %62 = icmp eq i64 %61, 0, !dbg !30
   %63 = or i1 %60, %62, !dbg !30
-  br i1 %63, label %codeRepl, label %sorbet_isa_Integer.exit45, !dbg !30
+  br i1 %63, label %codeRepl, label %sorbet_isa_Integer.exit42, !dbg !30
 
-sorbet_isa_Integer.exit45:                        ; preds = %58
-  %64 = inttoptr i64 %el2.sroa.0.048 to %struct.iseq_inline_iv_cache_entry*, !dbg !30
+sorbet_isa_Integer.exit42:                        ; preds = %58
+  %64 = inttoptr i64 %el2.sroa.0.045 to %struct.iseq_inline_iv_cache_entry*, !dbg !30
   %65 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %64, i64 0, i32 0, !dbg !30
   %66 = load i64, i64* %65, align 8, !dbg !30, !tbaa !23
   %67 = and i64 %66, 31, !dbg !30
   %68 = icmp eq i64 %67, 10, !dbg !30
   br i1 %68, label %"fastSymCallIntrinsic_Integer_+", label %codeRepl, !dbg !30, !prof !29
 
-codeRepl44:                                       ; preds = %45, %sorbet_isa_Integer.exit
-  %el1.sroa.0.153 = phi i64 [ %el1.sroa.0.152, %45 ], [ %el1.sroa.0.152, %sorbet_isa_Integer.exit ]
-  tail call fastcc void @"func_<root>.<static-init>$151$block_1.cold.1"(i64 %el1.sroa.0.153) #13, !dbg !28
+codeRepl41:                                       ; preds = %45, %sorbet_isa_Integer.exit
+  %el1.sroa.0.150 = phi i64 [ %el1.sroa.0.149, %45 ], [ %el1.sroa.0.149, %sorbet_isa_Integer.exit ]
+  tail call fastcc void @"func_<root>.<static-init>$151$block_1.cold.1"(i64 %el1.sroa.0.150) #13, !dbg !28
   unreachable
 
-codeRepl:                                         ; preds = %58, %sorbet_isa_Integer.exit45
-  %el2.sroa.0.050 = phi i64 [ %el2.sroa.0.048, %58 ], [ %el2.sroa.0.048, %sorbet_isa_Integer.exit45 ]
-  tail call fastcc void @"func_<root>.<static-init>$151$block_1.cold.1"(i64 %el2.sroa.0.050) #13, !dbg !30
+codeRepl:                                         ; preds = %58, %sorbet_isa_Integer.exit42
+  %el2.sroa.0.047 = phi i64 [ %el2.sroa.0.045, %58 ], [ %el2.sroa.0.045, %sorbet_isa_Integer.exit42 ]
+  tail call fastcc void @"func_<root>.<static-init>$151$block_1.cold.1"(i64 %el2.sroa.0.047) #13, !dbg !30
   unreachable
 
-"fastSymCallIntrinsic_Integer_+":                 ; preds = %typeTestSuccess, %sorbet_isa_Integer.exit45
+"fastSymCallIntrinsic_Integer_+":                 ; preds = %typeTestSuccess, %sorbet_isa_Integer.exit42
   tail call void @llvm.experimental.noalias.scope.decl(metadata !31), !dbg !28
-  %69 = and i64 %el2.sroa.0.048, 1, !dbg !28
-  %70 = and i64 %69, %el1.sroa.0.151, !dbg !28
+  %69 = and i64 %el2.sroa.0.045, 1, !dbg !28
+  %70 = and i64 %69, %el1.sroa.0.148, !dbg !28
   %71 = icmp eq i64 %70, 0, !dbg !28
   br i1 %71, label %81, label %72, !dbg !28, !prof !34
 
 72:                                               ; preds = %"fastSymCallIntrinsic_Integer_+"
-  %73 = add nsw i64 %el2.sroa.0.048, -1, !dbg !28
-  %74 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %el1.sroa.0.151, i64 %73) #14, !dbg !28
+  %73 = add nsw i64 %el2.sroa.0.045, -1, !dbg !28
+  %74 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %el1.sroa.0.148, i64 %73) #14, !dbg !28
   %75 = extractvalue { i64, i1 } %74, 1, !dbg !28
   %76 = extractvalue { i64, i1 } %74, 0, !dbg !28
   br i1 %75, label %77, label %sorbet_rb_int_plus.exit, !dbg !28
@@ -360,7 +360,7 @@ codeRepl:                                         ; preds = %58, %sorbet_isa_Int
   br label %sorbet_rb_int_plus.exit, !dbg !28
 
 81:                                               ; preds = %"fastSymCallIntrinsic_Integer_+"
-  %82 = tail call i64 @sorbet_rb_int_plus_slowpath(i64 %el1.sroa.0.151, i64 %el2.sroa.0.048) #12, !dbg !28, !noalias !31
+  %82 = tail call i64 @sorbet_rb_int_plus_slowpath(i64 %el1.sroa.0.148, i64 %el2.sroa.0.045) #12, !dbg !28, !noalias !31
   br label %sorbet_rb_int_plus.exit, !dbg !28
 
 sorbet_rb_int_plus.exit:                          ; preds = %77, %72, %81
@@ -572,9 +572,9 @@ fillFromDefaultBlockDone2:                        ; preds = %argArrayExpandArray
   store i64 %y.sroa.0.0, i64* %51, align 8, !dbg !54, !tbaa !4
   %52 = getelementptr inbounds i64, i64* %51, i64 1, !dbg !54
   store i64* %52, i64** %49, align 8, !dbg !54
-  %send41 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_p.9, i64 0), !dbg !54
+  %send38 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_p.9, i64 0), !dbg !54
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 23), i64** %10, align 8, !dbg !54, !tbaa !13
-  ret i64 %send41, !dbg !55
+  ret i64 %send38, !dbg !55
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers, %rb_array_len.exit
   %argcPhi = phi i32 [ %argc, %functionEntryInitializers ], [ %43, %rb_array_len.exit ], !dbg !51
@@ -689,9 +689,9 @@ fillFromDefaultBlockDone2:                        ; preds = %argArrayExpandArray
   store i64 %y.sroa.0.0, i64* %51, align 8, !dbg !60, !tbaa !4
   %52 = getelementptr inbounds i64, i64* %51, i64 1, !dbg !60
   store i64* %52, i64** %49, align 8, !dbg !60
-  %send41 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_p.13, i64 0), !dbg !60
+  %send38 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_p.13, i64 0), !dbg !60
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 28), i64** %10, align 8, !dbg !60, !tbaa !13
-  ret i64 %send41, !dbg !61
+  ret i64 %send38, !dbg !61
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers, %rb_array_len.exit
   %argcPhi = phi i32 [ %argc, %functionEntryInitializers ], [ %43, %rb_array_len.exit ], !dbg !57
