@@ -602,7 +602,10 @@ VALUE sorbet_run_exception_handling(rb_execution_context_t * volatile ec,
         nleType = TAG_NONE;
 
         // Clear out the local variable shared across exception handling regions
-        // where we store the current exception value.
+        // where we store the current exception value.  Note that we do not pull
+        // out a pointer to the local variable and use that throughout this function,
+        // as it's possible that the locals may shift from the Ruby stack to the
+        // heap during the execution of the exception-handling region.
         sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, Qnil);
 
         // We're also done with whatever exceptions might have gotten thrown along the way.
