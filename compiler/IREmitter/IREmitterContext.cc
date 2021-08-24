@@ -513,18 +513,24 @@ bool returnFromBlockIsPresent(CompilerState &cs, cfg::CFG &cfg, const vector<Fun
     return false;
 }
 
-// Returns the number of scopes that must be traversed to get back out out to the top-level method frame.
-int getBlockLevel(vector<int> &blockParents, vector<FunctionType> &blockTypes, int rubyBlockId) {
+// Returns the number of scopes that must be traversed to get back out out to the
+// top-level method frame and the number of blocks that must be traversed to get
+// back out to the top-level method frame.  The latter is important for providing
+// accurate location information for block iseqs.
+tuple<int, int> getBlockNesting(vector<int> &blockParents, vector<FunctionType> &blockTypes, int rubyBlockId) {
     auto level = 0;
+    auto blockLevel = 0;
 
     while (true) {
         switch (blockTypes[rubyBlockId]) {
             case FunctionType::Method:
             case FunctionType::StaticInitFile:
             case FunctionType::StaticInitModule:
-                return level;
+                return {level, blockLevel};
 
             case FunctionType::Block:
+                ++blockLevel;
+                [[fallthrough]];
             case FunctionType::Rescue:
             case FunctionType::Ensure:
                 // Increment the level, as we're crossing through a non-method stack frame to get back to our parent.
@@ -542,14 +548,17 @@ int getBlockLevel(vector<int> &blockParents, vector<FunctionType> &blockTypes, i
     }
 }
 
-vector<int> getBlockLevels(vector<int> &blockParents, vector<FunctionType> &blockTypes) {
+tuple<vector<int>, vector<int>> getBlockLevels(vector<int> &blockParents, vector<FunctionType> &blockTypes) {
     vector<int> levels(blockTypes.size(), 0);
+    vector<int> blockNesting(blockTypes.size(), 0);
 
     for (auto i = 0; i < blockTypes.size(); ++i) {
-        levels[i] = getBlockLevel(blockParents, blockTypes, i);
+        auto [level, blockLevel] = getBlockNesting(blockParents, blockTypes, i);
+        levels[i] = level;
+        blockNesting[i] = blockLevel;
     }
 
-    return levels;
+    return {move(levels), move(blockNesting)};
 }
 
 string locationNameFor(CompilerState &cs, core::MethodRef symbol) {
@@ -571,7 +580,10 @@ string locationNameFor(CompilerState &cs, core::MethodRef symbol) {
 // Block names in Ruby are built recursively as the file is parsed.  We aren't guaranteed
 // to process blocks in depth-first order and we don't want to constantly recompute
 // parent names.  So we build the names for everything up front.
-vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg, const vector<int> &blockLevels, const vector<int> &blockParents, const vector<FunctionType> &blockTypes) {
+vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg, const vector<int> &blockLevels,
+                                               const vector<int> &blockNestingLevels,
+                                               const vector<int> &blockParents,
+                                               const vector<FunctionType> &blockTypes) {
     struct BlockInfo {
         int rubyBlockId;
         // blockLevels[this->rubyBlockId];
@@ -607,7 +619,7 @@ vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg,
             break;
 
         case FunctionType::Block: {
-            int blockLevel = info.level;
+            int blockLevel = blockNestingLevels[info.rubyBlockId];
             if (blockLevel == 1) {
                 iseqName.emplace(fmt::format("block in {}", topLevelLocation));
             } else {
@@ -660,8 +672,8 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<llvm::DISubprogram *> blockScopes(cfg.maxRubyBlockId + 1, nullptr);
     getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc, blockTypes, rubyBlock2Function, blockScopes);
 
-    auto blockLevels = getBlockLevels(blockParents, blockTypes);
-    auto blockLocationNames = getBlockLocationNames(cs, cfg, blockLevels, blockParents, blockTypes);
+    auto [blockLevels, blockNestingLevels] = getBlockLevels(blockParents, blockTypes);
+    auto blockLocationNames = getBlockLocationNames(cs, cfg, blockLevels, blockNestingLevels, blockParents, blockTypes);
 
     auto [aliases, symbols] = setupAliasesAndKeywords(cs, cfg);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
