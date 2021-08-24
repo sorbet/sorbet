@@ -590,8 +590,11 @@ std::tuple<string, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilder
             break;
 
         case FunctionType::Ensure:
-            iseqName = "ensure for"sv;
-            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
+            {
+                string locationName = locationNameFor(cs, md.symbol);
+                iseqName = fmt::format("ensure in {}", locationName);
+                parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
+            }
             break;
 
         case FunctionType::ExceptionBegin:
