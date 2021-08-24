@@ -121,6 +121,9 @@ public:
                            int rubyBlockId, llvm::Value *retVal);
     static void emitReturnFromBlock(CompilerState &gs, cfg::CFG &cfg, llvm::IRBuilderBase &builder,
                                     const IREmitterContext &irctx, int rubyBlockId, llvm::Value *retVal);
+    // Typecheck returnValue as the return value of cfg, if necessary.  Returns the actual
+    // value to be returned, which may be different than returnValue e.g. in the case of a
+    // void-returning method.
     static llvm::Value *maybeCheckReturnValue(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build,
                                               const IREmitterContext &irctx, llvm::Value *returnValue);
 
