@@ -189,6 +189,7 @@ module T::Utils
   def self.signature_for_instance_method(mod, method_name); end
   def self.unwrap_nilable(type); end
   def self.wrap_method_with_call_validation_if_needed(mod, method_sig, original_method); end
+  def self.check_type_recursive!(value, type); end
 
   # only one caller; delete
   def self.methods_excluding_object(mod); end
