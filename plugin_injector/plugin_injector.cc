@@ -224,6 +224,8 @@ public:
             module = llvm::CloneModule(*threadState->codegenPayload);
 
             module->addModuleFlag(llvm::Module::Warning, "Debug Info Version", llvm::DEBUG_METADATA_VERSION);
+            module->addModuleFlag(llvm::Module::Override, "cf-protection-return", 1);
+            module->addModuleFlag(llvm::Module::Override, "cf-protection-branch", 1);
 
             if (llvm::Triple(llvm::sys::getProcessTriple()).isOSDarwin()) {
                 // osx only supports dwarf2
