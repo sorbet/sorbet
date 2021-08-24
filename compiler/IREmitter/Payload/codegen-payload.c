@@ -163,6 +163,23 @@ struct rfb_status {
     bool was_thrown;
 };
 SORBET_ALIVE(struct rfb_status, sorbet_vm_return_from_block_wrapper, (int argc, VALUE *argv, VALUE recv, rb_control_frame_t *cfp, rb_sorbet_func_t wrapped));
+SORBET_ALIVE(VALUE, sorbet_run_exception_handling,
+             (rb_execution_context_t *ec,
+              ExceptionFFIType body,
+              VALUE ** volatile pc,
+              // The locals offset for the body.
+              VALUE methodClosure,
+              rb_control_frame_t * volatile cfp,
+              // May be nullptr.
+              ExceptionFFIType handlers,
+              // May be nullptr.
+              ExceptionFFIType elseClause,
+              // May be nullptr.
+              ExceptionFFIType ensureClause,
+              // The special value indicating that we need to retry.
+              VALUE retrySingleton,
+              long exceptionValueIndex,
+              long exceptionValueLevel));
 
 // The next several functions exist to convert Ruby definitions into LLVM IR, and
 // are always inlined as a consequence.
