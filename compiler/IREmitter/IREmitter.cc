@@ -798,8 +798,8 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
         return;
     }
 
-    llvm::ValueToValueMapTy VMap;
-    auto *implementationFunction = llvm::CloneFunction(func, VMap);
+    llvm::ValueToValueMapTy vMap;
+    auto *implementationFunction = llvm::CloneFunction(func, vMap);
 
     // Completely delete the function body.
     func->dropAllReferences();
