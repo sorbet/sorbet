@@ -3135,6 +3135,7 @@ public:
     // Forward Enumerable.to_h to RubyType.enumerable_to_h[self]
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // Exit early when this is the case that's handled by the enumerable.rbi sig
+        // The result type will already have been populated by dispatchCall using the sig.
         if (args.args.empty() && args.block != nullptr) {
             return;
         }
