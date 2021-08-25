@@ -2,7 +2,7 @@
 class A
   extend T::Sig
 
-  sig {returns(Integer)}
+  sig {void}
   def initialize()
     yield
     1
