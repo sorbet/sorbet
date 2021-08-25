@@ -13,15 +13,7 @@ module T::Types
 
     # @override Base
     def name
-      entries = @types.map do |(k, v)|
-        if Symbol === k && ":#{k}" == k.inspect
-          "#{k}: #{v}"
-        else
-          "#{k.inspect} => #{v}"
-        end
-      end
-
-      "{#{entries.join(', ')}}"
+      serialize_hash(@types)
     end
 
     # @override Base
@@ -59,10 +51,24 @@ module T::Types
     # @override Base
     def describe_obj(obj)
       if obj.is_a?(Hash)
-        "type {#{obj.map {|(k, v)| "#{k}: #{v.class}"}.join(', ')}}"
+        "type #{serialize_hash(obj.transform_values(&:class))}"
       else
         super
       end
+    end
+
+    private
+
+    def serialize_hash(hash)
+      entries = hash.map do |(k, v)|
+        if Symbol === k && ":#{k}" == k.inspect
+          "#{k}: #{v}"
+        else
+          "#{k.inspect} => #{v}"
+        end
+      end
+
+      "{#{entries.join(', ')}}"
     end
   end
 end
