@@ -578,7 +578,8 @@ string locationNameFor(CompilerState &cs, core::MethodRef symbol) {
 }
 
 // Given a Ruby block, finds the block id of the nearest _proper_ ancestor of that block that allocates an iseq.
-int getNearestIseqAllocatorBlock(const vector<int> &blockParents, const vector<FunctionType> &blockTypes, int rubyBlockId) {
+int getNearestIseqAllocatorBlock(const vector<int> &blockParents, const vector<FunctionType> &blockTypes,
+                                 int rubyBlockId) {
     do {
         rubyBlockId = blockParents[rubyBlockId];
     } while (rubyBlockId > 0 && blockTypes[rubyBlockId] == FunctionType::ExceptionBegin);
@@ -590,8 +591,7 @@ int getNearestIseqAllocatorBlock(const vector<int> &blockParents, const vector<F
 // to process blocks in depth-first order and we don't want to constantly recompute
 // parent names.  So we build the names for everything up front.
 vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg, const vector<int> &blockLevels,
-                                               const vector<int> &blockNestingLevels,
-                                               const vector<int> &blockParents,
+                                               const vector<int> &blockNestingLevels, const vector<int> &blockParents,
                                                const vector<FunctionType> &blockTypes) {
     struct BlockInfo {
         int rubyBlockId;
@@ -618,24 +618,23 @@ vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg,
         optional<string> &iseqName = blockLocationNames[info.rubyBlockId];
         const auto blockType = blockTypes[info.rubyBlockId];
         switch (blockType) {
-        case FunctionType::Method:
-        case FunctionType::StaticInitFile:
-        case FunctionType::StaticInitModule:
-            iseqName.emplace(topLevelLocation);
-            break;
+            case FunctionType::Method:
+            case FunctionType::StaticInitFile:
+            case FunctionType::StaticInitModule:
+                iseqName.emplace(topLevelLocation);
+                break;
 
-        case FunctionType::Block: {
-            int blockLevel = blockNestingLevels[info.rubyBlockId];
-            if (blockLevel == 1) {
-                iseqName.emplace(fmt::format("block in {}", topLevelLocation));
-            } else {
-                iseqName.emplace(fmt::format("block ({} levels) in {}", blockLevel, topLevelLocation));
-            }
-        } break;
+            case FunctionType::Block: {
+                int blockLevel = blockNestingLevels[info.rubyBlockId];
+                if (blockLevel == 1) {
+                    iseqName.emplace(fmt::format("block in {}", topLevelLocation));
+                } else {
+                    iseqName.emplace(fmt::format("block ({} levels) in {}", blockLevel, topLevelLocation));
+                }
+            } break;
 
-        case FunctionType::Rescue:
-        case FunctionType::Ensure:
-            {
+            case FunctionType::Rescue:
+            case FunctionType::Ensure: {
                 int parent = getNearestIseqAllocatorBlock(blockParents, blockTypes, info.rubyBlockId);
                 const string *parentLocation;
                 if (parent == 0) {
@@ -646,14 +645,14 @@ vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg,
                     ENFORCE(parentName.has_value());
                     parentLocation = &*parentName;
                 }
-                iseqName.emplace(fmt::format("{} in {}", blockType == FunctionType::Rescue ? "rescue" : "ensure", *parentLocation));
-            }
-            break;
+                iseqName.emplace(
+                    fmt::format("{} in {}", blockType == FunctionType::Rescue ? "rescue" : "ensure", *parentLocation));
+            } break;
 
-        case FunctionType::ExceptionBegin:
-        case FunctionType::Unused:
-            // These types do not have iseqs allocated for them and therefore have no name.
-            break;
+            case FunctionType::ExceptionBegin:
+            case FunctionType::Unused:
+                // These types do not have iseqs allocated for them and therefore have no name.
+                break;
         }
     }
 
