@@ -107,6 +107,7 @@ public:
     static TypePtr void_();
     static TypePtr trueClass();
     static TypePtr falseClass();
+    static TypePtr nilable(const TypePtr &t);
     static TypePtr Integer();
     static TypePtr String();
     static TypePtr Symbol();
@@ -157,6 +158,7 @@ public:
     /** Internal implementation. You should probably use any(). */
     static TypePtr lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
+    static TypePtr lubAllDropLiteral(const GlobalState &gs, const std::vector<TypePtr> &elements);
     static TypePtr arrayOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr rangeOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr hashOf(const GlobalState &gs, const TypePtr &keyType, const TypePtr &valueType);
@@ -600,6 +602,7 @@ private:
      */
     friend TypePtr Types::falsyTypes();
     friend TypePtr Types::Boolean();
+    friend TypePtr Types::nilable(const TypePtr &t);
     friend class GlobalSubstitution;
     friend class serialize::SerializerImpl;
     friend bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,

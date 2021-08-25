@@ -81,6 +81,11 @@ TypePtr Types::Boolean() {
     return res;
 }
 
+TypePtr Types::nilable(const TypePtr &t) {
+    static auto res = OrType::make_shared(nilClass(), t);
+    return res;
+}
+
 TypePtr Types::Integer() {
     static auto res = make_type<ClassType>(Symbols::Integer());
     return res;
@@ -430,11 +435,29 @@ TypePtr ShapeType::underlying(const GlobalState &gs) const {
         return Types::hashOfUntyped();
     } else {
         auto keysLub = lubAllDropLiteral(gs, this->keys);
+        if (keysLub.isTrueOrFalseClass()) {
+            keysLub = Types::Boolean();
+        }
         auto valuesLub = lubAllDropLiteral(gs, this->values);
-        auto valuesOr = cast_type<OrType>(valuesLub);
-        if (valuesOr != nullptr && !(valuesOr->left.isNilClass() && isa_type<ClassType>(valuesOr->right)) &&
-            !(valuesOr->right.isNilClass() && isa_type<ClassType>(valuesOr->left))) {
-            valuesLub = Types::untypedUntracked();
+        if (valuesLub.isTrueOrFalseClass()) {
+            valuesLub = Types::Boolean();
+        } else if (isa_type<OrType>(valuesLub)) {
+            auto hasBoolean = Types::isSubType(gs, Types::trueClass(), valuesLub) ||
+                              Types::isSubType(gs, Types::falseClass(), valuesLub);
+            if (hasBoolean) {
+                auto hasNil = Types::isSubType(gs, Types::nilClass(), valuesLub);
+                if (hasNil) {
+                    valuesLub = Types::nilable(Types::Boolean());
+                } else {
+                    valuesLub = Types::Boolean();
+                }
+            } else {
+                auto valuesOr = cast_type_nonnull<OrType>(valuesLub);
+                if (!(valuesOr.left.isNilClass() && isa_type<ClassType>(valuesOr.right)) &&
+                    !(valuesOr.right.isNilClass() && isa_type<ClassType>(valuesOr.left))) {
+                    valuesLub = Types::untypedUntracked();
+                }
+            }
         }
         return Types::hashOf(gs, keysLub, valuesLub);
     }
