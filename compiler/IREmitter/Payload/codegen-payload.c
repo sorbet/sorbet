@@ -2230,63 +2230,6 @@ VALUE sorbet_getTRetry() {
     return sorbet_getConstant(retry, sizeof(retry));
 }
 
-extern void rb_set_errinfo(VALUE);
-
-struct ExceptionClosure {
-    ExceptionFFIType body;
-    VALUE **pc;
-    VALUE methodClosure;
-    rb_control_frame_t *cfp;
-    VALUE *returnValue;
-};
-
-static VALUE sorbet_applyExceptionClosure(VALUE arg) {
-    struct ExceptionClosure *closure = (struct ExceptionClosure *)arg;
-    VALUE res = closure->body(closure->pc, closure->methodClosure, closure->cfp);
-    if (res != sorbet_rubyUndef()) {
-        *closure->returnValue = res;
-    }
-    return sorbet_rubyUndef();
-}
-
-static VALUE sorbet_rescueStoreException(VALUE exceptionValuePtr, VALUE errinfo) {
-    VALUE *exceptionValue = (VALUE *)exceptionValuePtr;
-
-    // store the exception
-    *exceptionValue = errinfo;
-
-    return sorbet_rubyUndef();
-}
-
-// Run a function with a closure, and populate an exceptionValue pointer if an exception is raised.
-VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE methodClosure, rb_control_frame_t *cfp,
-                 VALUE exceptionContext, VALUE *exceptionValue) {
-    VALUE returnValue = sorbet_rubyUndef();
-
-    struct ExceptionClosure closure;
-    closure.body = body;
-    closure.pc = pc;
-    closure.methodClosure = methodClosure;
-    closure.cfp = cfp;
-    closure.returnValue = &returnValue;
-
-    *exceptionValue = RUBY_Qnil;
-
-    // Restore the exception context. When running the body of a begin/end the
-    // value of exceptionContext is nil, indicating that no exception is being
-    // handled by this function. However, when the rescue function is being run,
-    // the exception value will be non-nil, ensuring that the exception state
-    // is restored in the context of the rescue function.
-    if (exceptionContext != RUBY_Qnil) {
-        rb_set_errinfo(exceptionContext);
-    }
-
-    rb_rescue2(sorbet_applyExceptionClosure, (VALUE)(&closure), sorbet_rescueStoreException, (VALUE)exceptionValue,
-               rb_eException, 0);
-
-    return returnValue;
-}
-
 __attribute__((__noreturn__)) VALUE sorbet_block_break(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
                                                        BlockFFIType blk, VALUE closure) {
     rb_iter_break_value(argv[0]);
