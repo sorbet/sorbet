@@ -537,42 +537,21 @@ int getNearestIseqAllocatorBlock(const IREmitterContext &irctx, int rubyBlockId)
     return rubyBlockId;
 }
 
-std::tuple<string, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
-                                              const IREmitterContext &irctx, const ast::MethodDef &md,
-                                              int rubyBlockId) {
-    // TODO(froydnj): eliminate copying here.
+std::tuple<const string &, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
+                                                      const IREmitterContext &irctx, const ast::MethodDef &md,
+                                                      int rubyBlockId) {
     auto &locationName = irctx.rubyBlockLocationNames[rubyBlockId];
-    string iseqName;
     llvm::Value *parent = nullptr;
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
-            ENFORCE(locationName.has_value());
-            iseqName = *locationName;
-            parent = llvm::Constant::getNullValue(iseqType(cs));
-            break;
-
         case FunctionType::StaticInitFile:
         case FunctionType::StaticInitModule:
-            ENFORCE(locationName.has_value());
-            iseqName = *locationName;
             parent = llvm::Constant::getNullValue(iseqType(cs));
             break;
 
         case FunctionType::Block:
-            ENFORCE(locationName.has_value());
-            iseqName = *locationName;
-            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
-            break;
-
         case FunctionType::Rescue:
-            ENFORCE(locationName.has_value());
-            iseqName = *locationName;
-            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
-            break;
-
         case FunctionType::Ensure:
-            ENFORCE(locationName.has_value());
-            iseqName = *locationName;
             parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
             break;
 
@@ -588,7 +567,9 @@ std::tuple<string, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilder
             break;
     }
 
-    return {iseqName, parent};
+    // If we get here, we know we have a valid iseq and a valid name.
+    ENFORCE(locationName.has_value());
+    return {*locationName, parent};
 }
 
 // Fill the locals array with interned ruby IDs.
