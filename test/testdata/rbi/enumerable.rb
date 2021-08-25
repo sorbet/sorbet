@@ -37,6 +37,13 @@ a.one?
 a.one?(1)
 a.one? { |i| i }
 
+# There are two ways to call to_h:
+#   1) no arguments where the argument must be enumerable with tuple elements
+#   2) a block argument, where the block must return tuples
+[1,2,3].to_h # error: Expected `T::Enumerable[[T.type_parameter(:U), T.type_parameter(:V)]]`
+T.reveal_type([[:a, 1], [:b, 2], [:c, 3]].to_h) # error: Revealed type: `T::Hash[Symbol, Integer]`
+T.reveal_type([1,2,3].to_h {|i| [i.to_s, i] }) # error: Revealed type: `T::Hash[String, Integer]`
+
 # detect
 p = T.let(->{ 1 }, T.proc.returns(Integer))
 T.reveal_type([1,2].detect) # error: Revealed type: `T::Enumerator[Integer]`
