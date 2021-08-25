@@ -718,11 +718,13 @@ VALUE sorbet_boolToRuby(_Bool b) {
 }
 
 // TODO: add many from https://github.com/ruby/ruby/blob/ruby_2_6/include/ruby/intern.h#L55
+SORBET_INLINE
 VALUE sorbet_T_unsafe(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     return argv[0];
 }
 
+SORBET_INLINE
 VALUE sorbet_T_must(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     if (UNLIKELY(argv[0] == Qnil)) {
