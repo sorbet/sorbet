@@ -1,0 +1,8 @@
+test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:6: The initialize method should always return void https://srb.help/3510
+     6 |  sig {params(x: Integer).returns(Integer).on_failure(:soft, notify: 'sorbet')}
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:6: Replace with `params(x: Integer).void.on_failure(:soft, notify: 'sorbet')`
+     6 |  sig {params(x: Integer).returns(Integer).on_failure(:soft, notify: 'sorbet')}
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 1

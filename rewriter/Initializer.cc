@@ -2,7 +2,9 @@
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/core.h"
+#include "core/errors/rewriter.h"
 #include "rewriter/Util.h"
+#include <iostream>
 
 using namespace std;
 namespace sorbet::rewriter {
@@ -57,6 +59,34 @@ const ast::Send *findParams(const ast::Send *send) {
     return send;
 }
 
+// this function checks if the signature of the initialize method is using returns(Something)
+// instead of void and provides an auto-correct option
+void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
+    auto originalSend = send->deepCopy();
+
+    // try to find the invocation to returns
+    while (send && send->fun != core::Names::returns()) {
+        send = ast::cast_tree<ast::Send>(send->recv);
+    }
+
+    // if the returns exists, then add an error an suggest the auto-correct. We need to account for things
+    // being invoked after returns too. E.g.: sig { returns(Foo).on_failure(...) }
+    if (send != nullptr) {
+        if (auto e = ctx.beginError(originalSend.loc(), core::errors::Rewriter::InitializeReturnType)) {
+            e.setHeader("The {} method should always return {}", "initialize", "void");
+
+            auto loc = core::Loc(ctx.file, originalSend.loc());
+            string original = loc.source(ctx).value();
+            auto returnsStart = original.find("returns");
+            auto returnsLength = original.find(")", returnsStart) - returnsStart + 1;
+            string replacement = original.replace(returnsStart, returnsLength, "void");
+
+            e.addAutocorrect(core::AutocorrectSuggestion{fmt::format("Replace `{}` with `{}`", original, replacement),
+                                                         {core::AutocorrectSuggestion::Edit{loc, replacement}}});
+        }
+    }
+}
+
 } // namespace
 
 void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::ExpressionPtr *prevStat) {
@@ -77,8 +107,11 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
         return;
     }
 
+    auto *bodyBlock = ast::cast_tree<ast::Send>(block->body);
+    checkSigReturnType(ctx, bodyBlock);
+
     // walk through, find the `params()` invocation, and get its hash
-    auto *params = findParams(ast::cast_tree<ast::Send>(block->body));
+    auto *params = findParams(bodyBlock);
     if (params == nullptr) {
         return;
     }
