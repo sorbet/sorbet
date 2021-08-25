@@ -25,10 +25,10 @@ x = StructWithShapes.new(
 )
 
 T.reveal_type(x.empty_shape) # error: `{} (shape of T::Hash[T.untyped, T.untyped])`
-T.reveal_type(x.symbol_key_shape) # error: `{foo: Integer} (shape of T::Hash[T.untyped, T.untyped])`
-T.reveal_type(x.string_key_shape) # error: `{String("foo") => Integer} (shape of T::Hash[T.untyped, T.untyped])`
-T.reveal_type(x.multiple_keys) # error: `{foo: Integer, bar: String, baz: Symbol} (shape of T::Hash[T.untyped, T.untyped])`
+T.reveal_type(x.symbol_key_shape) # error: `{foo: Integer} (shape of T::Hash[Symbol, Integer])`
+T.reveal_type(x.string_key_shape) # error: `{String("foo") => Integer} (shape of T::Hash[String, Integer])`
+T.reveal_type(x.multiple_keys) # error: `{foo: Integer, bar: String, baz: Symbol} (shape of T::Hash[Symbol, T.untyped])`
 
 T.reveal_type(x.array_of_shape) # error: `T::Array[{foo: Integer}]`
-T.reveal_type(x.shape_with_combinators) # error: `{foo: T.nilable(Integer)} (shape of T::Hash[T.untyped, T.untyped])`
+T.reveal_type(x.shape_with_combinators) # error: `{foo: T.nilable(Integer)} (shape of T::Hash[Symbol, T.nilable(Integer)])`
 T.reveal_type(x.combinator_with_shape) # error: `T.nilable({foo: Integer})`

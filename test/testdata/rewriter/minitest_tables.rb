@@ -202,10 +202,10 @@ class MyTest
     end
   end
 
-  test_each_hash({foo: 1, bar: 2, baz: 3}) do |k, v|
-    it "handles lists with several types" do
+  test_each_hash({foo: "s", bar: 2, baz: {qux: false}}) do |k, v|
+    it "handles hashes with several types" do
       T.reveal_type(k) # error: Revealed type: `Symbol`
-      T.reveal_type(v) # error: Revealed type: `Integer`
+      T.reveal_type(v) # error: Revealed type: `T.untyped`
     end
   end
 

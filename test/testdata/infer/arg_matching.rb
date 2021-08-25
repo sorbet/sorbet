@@ -82,7 +82,7 @@ class TestArgs
     params(
       x: Integer,
       y: Integer,
-      z: T::Hash[Integer, Integer],
+      z: T::Hash[Symbol, Integer],
       w: String,
       u: Integer,
       v: Integer

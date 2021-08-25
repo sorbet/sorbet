@@ -12,6 +12,12 @@ class Baz; end
 sig { params(x: T::Hash[Symbol, T.nilable(Baz)]).void }
 def baz(x); end
 
+T.reveal_type({a: true}) # error: Revealed type: `{a: TrueClass} (shape of T::Hash[Symbol, T::Boolean])`
+T.reveal_type({a: false}) # error: Revealed type: `{a: FalseClass} (shape of T::Hash[Symbol, T::Boolean])`
+T.reveal_type({a: true, b: nil}) # error: Revealed type: `{a: TrueClass, b: NilClass} (shape of T::Hash[Symbol, T.nilable(T::Boolean)])`
+T.reveal_type({a: false, b: nil}) # error: Revealed type: `{a: FalseClass, b: NilClass} (shape of T::Hash[Symbol, T.nilable(T::Boolean)])`
+T.reveal_type({a: true, b: false, c: nil}) # error: Revealed type: `{a: TrueClass, b: FalseClass, c: NilClass} (shape of T::Hash[Symbol, T.nilable(T::Boolean)])`
+
 xi = {a: 1, b: 2}
 T.reveal_type(xi) # error: Revealed type: `{a: Integer(1), b: Integer(2)} (shape of T::Hash[Symbol, Integer])`
 foo(xi)

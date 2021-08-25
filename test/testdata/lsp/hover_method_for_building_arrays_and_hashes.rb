@@ -25,7 +25,7 @@ class Issue1777
   end
 
   def hash_hover
-    T.reveal_type({ # error: {foo: String("foo"), bar: Integer(123)}
+    T.reveal_type({ # error: {foo: String("foo"), bar: Integer(123)} (shape of T::Hash[Symbol, T.untyped])
       #           ^ hover: {foo: String("foo"), bar: Integer(123)} (shape of T::Hash[Symbol, T.any(String, Integer)])
       # Test hovering over first item in array
       foo: "foo",
