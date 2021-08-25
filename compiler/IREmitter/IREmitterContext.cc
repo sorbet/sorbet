@@ -445,8 +445,8 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
                 continue;
             }
 
-            auto *elseBlock = CFGHelpers::findRubyBlockEntry(cfg, elseBlockId);
-            auto *ensureBlock = CFGHelpers::findRubyBlockEntry(cfg, ensureBlockId);
+            auto *elseBlock = CFGHelpers::findRegionEntry(cfg, elseBlockId);
+            auto *ensureBlock = CFGHelpers::findRegionEntry(cfg, ensureBlockId);
 
             // The way the CFG is constructed ensures that there will always be an else block, an ensure block, or both
             // present.
@@ -455,14 +455,14 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
             {
                 // Find the exit block for exception handling so that we can redirect the header to it.
                 auto *exit = ensureBlock == nullptr ? elseBlock : ensureBlock;
-                auto exits = CFGHelpers::findRubyBlockExits(cfg, exit->rubyBlockId);
+                auto exits = CFGHelpers::findRegionExits(cfg, b->rubyBlockId, exit->rubyBlockId);
 
                 // The ensure block should only ever jump to the code that follows the begin/end block.
                 ENFORCE(exits.size() <= 1);
 
                 if (exits.empty()) {
                     // When control flow terminates in the block that ends exception handling, else or ensure, that
-                    // block will transition to the dead block. As `findRubyBlockExits` will ignore the dead block to
+                    // block will transition to the dead block. As `findRegionExits` will ignore the dead block to
                     // simplify the common case of looking for reachable exits, the exits vector being empty indicates
                     // that a return is present in the exception handling exit, and that the transition will never
                     // happen. In this case we can explicitly jump from the exception handling entry block directly to
@@ -725,11 +725,11 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             userEntryBlockByFunction[bodyBlockId] = llvmBlocks[bodyBlock->id];
             userEntryBlockByFunction[handlersBlockId] = llvmBlocks[handlersBlock->id];
 
-            if (auto *elseBlock = CFGHelpers::findRubyBlockEntry(cfg, elseBlockId)) {
+            if (auto *elseBlock = CFGHelpers::findRegionEntry(cfg, elseBlockId)) {
                 userEntryBlockByFunction[elseBlockId] = llvmBlocks[elseBlock->id];
             }
 
-            if (auto *ensureBlock = CFGHelpers::findRubyBlockEntry(cfg, ensureBlockId)) {
+            if (auto *ensureBlock = CFGHelpers::findRegionEntry(cfg, ensureBlockId)) {
                 userEntryBlockByFunction[ensureBlockId] = llvmBlocks[ensureBlock->id];
             }
         } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::argPresent()) {

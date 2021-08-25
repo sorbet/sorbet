@@ -9,7 +9,8 @@ namespace sorbet::compiler {
 
 namespace {
 
-bool validExit(cfg::CFG &cfg, int rubyBlockId, vector<cfg::BasicBlock *> &exits, cfg::BasicBlock *candidate) {
+bool validExit(cfg::CFG &cfg, int targetRegionId, int rubyBlockId, vector<cfg::BasicBlock *> &exits,
+               cfg::BasicBlock *candidate) {
     if (candidate->rubyBlockId == rubyBlockId) {
         return false;
     }
@@ -18,38 +19,31 @@ bool validExit(cfg::CFG &cfg, int rubyBlockId, vector<cfg::BasicBlock *> &exits,
         return false;
     }
 
-    // Block calls will be jumped over explicitly, using the basicBlockJumpOverrides map constructed in
-    // IREmitterHelpers::getRubyBlocks2FunctionsMapping, so they shouldn't be considered to be valid exits.
-    if (candidate->bexit.cond.variable == cfg::LocalRef::blockCall()) {
-        return false;
-    }
-
     if (absl::c_find(exits, candidate) != exits.end()) {
         return false;
     }
 
-    return true;
+    return candidate->rubyBlockId == targetRegionId;
 }
 
 } // namespace
 
-// Find all of the nodes that are jumped to from the given ruby block.
-vector<cfg::BasicBlock *> CFGHelpers::findRubyBlockExits(cfg::CFG &cfg, int rubyBlockId) {
+vector<cfg::BasicBlock *> CFGHelpers::findRegionExits(cfg::CFG &cfg, int targetRegionId, int sourceRegionId) {
     vector<cfg::BasicBlock *> exits;
 
     for (auto &node : cfg.basicBlocks) {
-        if (node->rubyBlockId != rubyBlockId) {
+        if (node->rubyBlockId != sourceRegionId) {
             continue;
         }
 
         auto *thenb = node->bexit.thenb;
         auto *elseb = node->bexit.elseb;
 
-        if (validExit(cfg, rubyBlockId, exits, thenb)) {
+        if (validExit(cfg, targetRegionId, sourceRegionId, exits, thenb)) {
             exits.emplace_back(thenb);
         }
 
-        if (validExit(cfg, rubyBlockId, exits, elseb)) {
+        if (validExit(cfg, targetRegionId, sourceRegionId, exits, elseb)) {
             exits.emplace_back(elseb);
         }
     }
@@ -57,8 +51,7 @@ vector<cfg::BasicBlock *> CFGHelpers::findRubyBlockExits(cfg::CFG &cfg, int ruby
     return exits;
 }
 
-// Find the basic-block with the lowest id for the given ruby block id.
-cfg::BasicBlock *CFGHelpers::findRubyBlockEntry(cfg::CFG &cfg, int rubyBlockId) {
+cfg::BasicBlock *CFGHelpers::findRegionEntry(cfg::CFG &cfg, int rubyBlockId) {
     for (auto &bb : cfg.basicBlocks) {
         if (bb->rubyBlockId == rubyBlockId) {
             return bb.get();
