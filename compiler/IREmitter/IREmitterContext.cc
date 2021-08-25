@@ -577,6 +577,15 @@ string locationNameFor(CompilerState &cs, core::MethodRef symbol) {
     }
 }
 
+// Given a Ruby block, finds the block id of the nearest _proper_ ancestor of that block that allocates an iseq.
+int getNearestIseqAllocatorBlock(const vector<int> &blockParents, const vector<FunctionType> &blockTypes, int rubyBlockId) {
+    do {
+        rubyBlockId = blockParents[rubyBlockId];
+    } while (rubyBlockId > 0 && blockTypes[rubyBlockId] == FunctionType::ExceptionBegin);
+
+    return rubyBlockId;
+}
+
 // Block names in Ruby are built recursively as the file is parsed.  We aren't guaranteed
 // to process blocks in depth-first order and we don't want to constantly recompute
 // parent names.  So we build the names for everything up front.
@@ -603,19 +612,16 @@ vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg,
 
     fast_sort(blocksByDepth, [](const auto &left, const auto &right) -> bool { return left.level < right.level; });
 
-    string topLevelLocation = locationNameFor(cs, cfg.symbol);
+    const string topLevelLocation = locationNameFor(cs, cfg.symbol);
 
     for (const auto &info : blocksByDepth) {
         optional<string> &iseqName = blockLocationNames[info.rubyBlockId];
-
-        switch (blockTypes[info.rubyBlockId]) {
+        const auto blockType = blockTypes[info.rubyBlockId];
+        switch (blockType) {
         case FunctionType::Method:
-            iseqName.emplace(cfg.symbol.data(cs)->name.shortName(cs));
-            break;
-
         case FunctionType::StaticInitFile:
         case FunctionType::StaticInitModule:
-            iseqName.emplace("<top (required)>");
+            iseqName.emplace(topLevelLocation);
             break;
 
         case FunctionType::Block: {
@@ -628,11 +634,20 @@ vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg,
         } break;
 
         case FunctionType::Rescue:
-            iseqName.emplace(fmt::format("rescue in {}", topLevelLocation));
-            break;
-
         case FunctionType::Ensure:
-            iseqName.emplace(fmt::format("ensure in {}", topLevelLocation));
+            {
+                int parent = getNearestIseqAllocatorBlock(blockParents, blockTypes, info.rubyBlockId);
+                const string *parentLocation;
+                if (parent == 0) {
+                    parentLocation = &topLevelLocation;
+                } else {
+                    const auto &parentName = blockLocationNames[parent];
+                    ENFORCE(blockLevels[parent] < blockLevels[info.rubyBlockId]);
+                    ENFORCE(parentName.has_value());
+                    parentLocation = &*parentName;
+                }
+                iseqName.emplace(fmt::format("{} in {}", blockType == FunctionType::Rescue ? "rescue" : "ensure", *parentLocation));
+            }
             break;
 
         case FunctionType::ExceptionBegin:
