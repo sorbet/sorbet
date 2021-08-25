@@ -432,8 +432,8 @@ TypePtr ShapeType::underlying(const GlobalState &gs) const {
         auto keysLub = lubAllDropLiteral(gs, this->keys);
         auto valuesLub = lubAllDropLiteral(gs, this->values);
         auto valuesOr = cast_type<OrType>(valuesLub);
-        if (valuesOr != nullptr && !(valuesOr->left.isNilClass() && isa_type<ClassType>(valuesOr->right))
-                          && !(valuesOr->right.isNilClass() && isa_type<ClassType>(valuesOr->left))) {
+        if (valuesOr != nullptr && !(valuesOr->left.isNilClass() && isa_type<ClassType>(valuesOr->right)) &&
+            !(valuesOr->right.isNilClass() && isa_type<ClassType>(valuesOr->left))) {
             valuesLub = Types::untypedUntracked();
         }
         return Types::hashOf(gs, keysLub, valuesLub);
