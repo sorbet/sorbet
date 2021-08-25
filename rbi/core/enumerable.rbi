@@ -1699,7 +1699,11 @@ module Enumerable
   # (1..5).to_h {|x| [x, x ** 2]}
   #   #=> {1=>1, 2=>4, 3=>9, 4=>16, 5=>25}
   # ```
-  sig {params(blk: T.nilable(T.proc.params(arg0: Elem).returns([T.untyped, T.untyped]))).returns(T::Hash[T.untyped, T.untyped])}
+  sig do
+    type_parameters(:U, :V).params(
+      blk: T.nilable(T.proc.params(arg0: Elem).returns([T.type_parameter(:U), T.type_parameter(:V)])))
+      .returns(T::Hash[T.type_parameter(:U), T.type_parameter(:V)])
+  end
   def to_h(&blk); end
 
   # Returns a new array by removing duplicate values in `self`.
