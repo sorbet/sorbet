@@ -1146,7 +1146,7 @@ class Regexp < Object
         arg1: Integer,
         blk: T.proc.params(arg0: MatchData).returns(T.type_parameter(:U))
     )
-    .returns(T.type_parameter(:U))
+    .returns(T.nilable(T.type_parameter(:U)))
   end
   def match(arg0, arg1=T.unsafe(nil), &blk); end
 
