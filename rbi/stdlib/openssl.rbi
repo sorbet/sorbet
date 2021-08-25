@@ -1214,7 +1214,7 @@ class OpenSSL::ASN1::ASN1Data
       arg1: ::T.untyped,
       arg2: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(arg0, arg1, arg2); end
 
@@ -1362,7 +1362,7 @@ class OpenSSL::ASN1::Constructive < OpenSSL::ASN1::ASN1Data
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -1391,7 +1391,7 @@ class OpenSSL::ASN1::Constructive < OpenSSL::ASN1::ASN1Data
 end
 
 class OpenSSL::ASN1::EndOfContent < OpenSSL::ASN1::ASN1Data
-  sig {returns(::T.untyped)}
+  sig {void}
   def initialize(); end
 end
 
@@ -1580,7 +1580,7 @@ class OpenSSL::ASN1::Primitive < OpenSSL::ASN1::ASN1Data
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -1800,7 +1800,7 @@ class OpenSSL::BN
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -2143,7 +2143,7 @@ module OpenSSL::Buffering
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -2823,7 +2823,7 @@ class OpenSSL::Cipher
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(arg0); end
 
@@ -3014,7 +3014,7 @@ class OpenSSL::Cipher::AES < OpenSSL::Cipher
     params(
       args: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*args); end
 end
@@ -3024,7 +3024,7 @@ class OpenSSL::Cipher::AES128 < OpenSSL::Cipher
     params(
       mode: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(mode=T.unsafe(nil)); end
 end
@@ -3034,7 +3034,7 @@ class OpenSSL::Cipher::AES192 < OpenSSL::Cipher
     params(
       mode: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(mode=T.unsafe(nil)); end
 end
@@ -3044,7 +3044,7 @@ class OpenSSL::Cipher::AES256 < OpenSSL::Cipher
     params(
       mode: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(mode=T.unsafe(nil)); end
 end
@@ -3054,7 +3054,7 @@ class OpenSSL::Cipher::BF < OpenSSL::Cipher
     params(
       args: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*args); end
 end
@@ -3064,7 +3064,7 @@ class OpenSSL::Cipher::CAST5 < OpenSSL::Cipher
     params(
       args: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*args); end
 end
@@ -3077,7 +3077,7 @@ class OpenSSL::Cipher::DES < OpenSSL::Cipher
     params(
       args: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*args); end
 end
@@ -3087,7 +3087,7 @@ class OpenSSL::Cipher::IDEA < OpenSSL::Cipher
     params(
       args: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*args); end
 end
@@ -3097,7 +3097,7 @@ class OpenSSL::Cipher::RC2 < OpenSSL::Cipher
     params(
       args: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*args); end
 end
@@ -3107,7 +3107,7 @@ class OpenSSL::Cipher::RC4 < OpenSSL::Cipher
     params(
       args: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*args); end
 end
@@ -3117,7 +3117,7 @@ class OpenSSL::Cipher::RC5 < OpenSSL::Cipher
     params(
       args: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*args); end
 end
@@ -3280,7 +3280,7 @@ class OpenSSL::Config
     params(
       filename: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(filename=T.unsafe(nil)); end
 
@@ -3556,7 +3556,7 @@ class OpenSSL::Digest < Digest::Class
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -3633,7 +3633,7 @@ class OpenSSL::Digest::DSS < OpenSSL::Digest
     params(
       data: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(data=T.unsafe(nil)); end
 
@@ -3659,7 +3659,7 @@ class OpenSSL::Digest::DSS1 < OpenSSL::Digest
     params(
       data: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(data=T.unsafe(nil)); end
 
@@ -3691,7 +3691,7 @@ class OpenSSL::Digest::MD2 < OpenSSL::Digest
     params(
       data: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(data=T.unsafe(nil)); end
 
@@ -3717,7 +3717,7 @@ class OpenSSL::Digest::MD4 < OpenSSL::Digest
     params(
       data: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(data=T.unsafe(nil)); end
 
@@ -3743,7 +3743,7 @@ class OpenSSL::Digest::MD5 < OpenSSL::Digest
     params(
       data: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(data=T.unsafe(nil)); end
 
@@ -3769,7 +3769,7 @@ class OpenSSL::Digest::MDC2 < OpenSSL::Digest
     params(
       data: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(data=T.unsafe(nil)); end
 
@@ -3795,7 +3795,7 @@ class OpenSSL::Digest::RIPEMD160 < OpenSSL::Digest
     params(
       data: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(data=T.unsafe(nil)); end
 
@@ -3821,7 +3821,7 @@ class OpenSSL::Digest::SHA < OpenSSL::Digest
     params(
       data: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(data=T.unsafe(nil)); end
 
@@ -3847,7 +3847,7 @@ class OpenSSL::Digest::SHA1 < OpenSSL::Digest
     params(
       data: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(data=T.unsafe(nil)); end
 
@@ -3873,7 +3873,7 @@ class OpenSSL::Digest::SHA224 < OpenSSL::Digest
     params(
       data: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(data=T.unsafe(nil)); end
 
@@ -3899,7 +3899,7 @@ class OpenSSL::Digest::SHA256 < OpenSSL::Digest
     params(
       data: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(data=T.unsafe(nil)); end
 
@@ -3925,7 +3925,7 @@ class OpenSSL::Digest::SHA384 < OpenSSL::Digest
     params(
       data: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(data=T.unsafe(nil)); end
 
@@ -3951,7 +3951,7 @@ class OpenSSL::Digest::SHA512 < OpenSSL::Digest
     params(
       data: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(data=T.unsafe(nil)); end
 
@@ -4259,7 +4259,7 @@ class OpenSSL::HMAC
       arg0: ::T.untyped,
       arg1: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(arg0, arg1); end
 
@@ -4483,7 +4483,7 @@ class OpenSSL::Netscape::SPKI
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -4876,7 +4876,7 @@ class OpenSSL::OCSP::BasicResponse
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -4970,7 +4970,7 @@ class OpenSSL::OCSP::CertificateId
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -5063,7 +5063,7 @@ class OpenSSL::OCSP::Request
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -5123,7 +5123,7 @@ class OpenSSL::OCSP::Response
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -5207,7 +5207,7 @@ class OpenSSL::OCSP::SingleResponse
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(arg0); end
 
@@ -5248,7 +5248,7 @@ class OpenSSL::PKCS12
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -5454,7 +5454,7 @@ class OpenSSL::PKCS7
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -5540,7 +5540,7 @@ class OpenSSL::PKCS7::RecipientInfo
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(arg0); end
 
@@ -5558,7 +5558,7 @@ class OpenSSL::PKCS7::SignerInfo
       arg1: ::T.untyped,
       arg2: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(arg0, arg1, arg2); end
 
@@ -5763,7 +5763,7 @@ class OpenSSL::PKey::DH < OpenSSL::PKey::PKey
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -5981,7 +5981,7 @@ class OpenSSL::PKey::DSA < OpenSSL::PKey::PKey
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -6320,7 +6320,7 @@ class OpenSSL::PKey::EC < OpenSSL::PKey::PKey
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -6507,7 +6507,7 @@ class OpenSSL::PKey::EC::Group
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -6634,7 +6634,7 @@ class OpenSSL::PKey::EC::Point
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -6707,7 +6707,7 @@ end
 # *   [`OpenSSL::PKey::DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html)
 # *   [`OpenSSL::PKey::EC`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/EC.html)
 class OpenSSL::PKey::PKey
-  sig {returns(::T.untyped)}
+  sig {void}
   def initialize(); end
 
   # To sign the [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
@@ -6853,7 +6853,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -7623,7 +7623,7 @@ class OpenSSL::SSL::SSLContext
     params(
       version: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(version=T.unsafe(nil)); end
 
@@ -8294,7 +8294,7 @@ class OpenSSL::SSL::SSLServer
       svr: ::T.untyped,
       ctx: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(svr, ctx); end
 
@@ -8467,7 +8467,7 @@ class OpenSSL::SSL::SSLSocket
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -8615,7 +8615,7 @@ class OpenSSL::SSL::Session
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(arg0); end
 
@@ -8799,7 +8799,7 @@ class OpenSSL::X509::Attribute
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -8866,7 +8866,7 @@ class OpenSSL::X509::CRL
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -9101,7 +9101,7 @@ class OpenSSL::X509::Certificate
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -9252,7 +9252,7 @@ class OpenSSL::X509::Extension
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -9364,7 +9364,7 @@ class OpenSSL::X509::ExtensionFactory
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -9529,7 +9529,7 @@ class OpenSSL::X509::Name
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -9679,7 +9679,7 @@ class OpenSSL::X509::Request
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -9783,7 +9783,7 @@ class OpenSSL::X509::Revoked
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -9925,7 +9925,7 @@ class OpenSSL::X509::Store
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -10070,7 +10070,7 @@ class OpenSSL::X509::StoreContext
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 

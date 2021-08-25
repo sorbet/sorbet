@@ -935,7 +935,7 @@ class Bundler::Definition
       optional_groups: T.untyped,
       gemfiles: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(lockfile, dependencies, sources, unlock, ruby_version=T.unsafe(nil), optional_groups=T.unsafe(nil), gemfiles=T.unsafe(nil)); end
 
@@ -1114,7 +1114,7 @@ class Bundler::DepProxy
       dep: T.untyped,
       platform: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(dep, platform); end
 
@@ -1167,7 +1167,7 @@ class Bundler::Dependency < Gem::Dependency
       options: T.untyped,
       blk: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(name, version, options=T.unsafe(nil), &blk); end
 
@@ -1279,7 +1279,7 @@ class Bundler::Dsl
   end
   def group(*args, &blk); end
 
-  sig {returns(T.untyped)}
+  sig {void}
   def initialize(); end
 
   sig do
@@ -1399,7 +1399,7 @@ class Bundler::Dsl::DSLError < Bundler::GemfileError
       backtrace: T.untyped,
       contents: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(description, dsl_path, backtrace, contents=T.unsafe(nil)); end
 
@@ -1483,7 +1483,7 @@ class Bundler::EndpointSpecification < Gem::Specification
       dependencies: T.untyped,
       metadata: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(name, version, platform, dependencies, metadata=T.unsafe(nil)); end
 
@@ -1552,7 +1552,7 @@ class Bundler::EnvironmentPreserver
       env: T.untyped,
       keys: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(env, keys); end
 
@@ -1641,7 +1641,7 @@ class Bundler::FeatureFlag
     params(
       bundler_version: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(bundler_version); end
 
@@ -3225,7 +3225,7 @@ class Bundler::FileUtils::Entry_
       b: T.untyped,
       deref: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(a, b=T.unsafe(nil), deref=T.unsafe(nil)); end
 
@@ -4234,7 +4234,7 @@ class Bundler::GemRequireError < Bundler::BundlerError
       orig_exception: T.untyped,
       msg: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(orig_exception, msg); end
 
@@ -4274,7 +4274,7 @@ class Bundler::GenericSystemCallError < Bundler::BundlerError
       underlying_error: T.untyped,
       message: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(underlying_error, message); end
 
@@ -4405,7 +4405,7 @@ class Bundler::Index
   sig {returns(T.untyped)}
   def empty?(); end
 
-  sig {returns(T.untyped)}
+  sig {void}
   def initialize(); end
 
   sig {returns(T.untyped)}
@@ -4544,7 +4544,7 @@ class Bundler::LazySpecification
       platform: T.untyped,
       source: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(name, version, platform, source=T.unsafe(nil)); end
 
@@ -4727,7 +4727,7 @@ class Bundler::LockfileParser
     params(
       lockfile: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(lockfile); end
 
@@ -4821,7 +4821,7 @@ class Bundler::Molinillo::CircularDependencyError < Bundler::Molinillo::Resolver
     params(
       vertices: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(vertices); end
 end
@@ -5052,7 +5052,7 @@ class Bundler::Molinillo::DependencyGraph
   end
   def each(&blk); end
 
-  sig {returns(T.untyped)}
+  sig {void}
   def initialize(); end
 
   # @return [String] a string suitable for debugging
@@ -5240,7 +5240,7 @@ class Bundler::Molinillo::DependencyGraph::AddEdgeNoCircular < Bundler::Molinill
       destination: T.untyped,
       requirement: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(origin, destination, requirement); end
 
@@ -5291,7 +5291,7 @@ class Bundler::Molinillo::DependencyGraph::AddVertex < Bundler::Molinillo::Depen
       payload: T.untyped,
       root: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(name, payload, root); end
 
@@ -5338,7 +5338,7 @@ class Bundler::Molinillo::DependencyGraph::DeleteEdge < Bundler::Molinillo::Depe
       destination_name: T.untyped,
       requirement: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(origin_name, destination_name, requirement); end
 
@@ -5390,7 +5390,7 @@ class Bundler::Molinillo::DependencyGraph::DetachVertexNamed < Bundler::Molinill
     params(
       name: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(name); end
 
@@ -5536,7 +5536,7 @@ class Bundler::Molinillo::DependencyGraph::Log
   end
   def each(&blk); end
 
-  sig {returns(T.untyped)}
+  sig {void}
   def initialize(); end
 
   # Pops the most recent action from the log and undoes the action @param
@@ -5601,7 +5601,7 @@ class Bundler::Molinillo::DependencyGraph::SetPayload < Bundler::Molinillo::Depe
       name: T.untyped,
       payload: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(name, payload); end
 
@@ -5639,7 +5639,7 @@ class Bundler::Molinillo::DependencyGraph::Tag < Bundler::Molinillo::DependencyG
     params(
       tag: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(tag); end
 
@@ -5763,7 +5763,7 @@ class Bundler::Molinillo::DependencyGraph::Vertex
       name: T.untyped,
       payload: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(name, payload); end
 
@@ -5950,7 +5950,7 @@ class Bundler::Molinillo::NoSuchDependencyError < Bundler::Molinillo::ResolverEr
       dependency: T.untyped,
       required_by: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(dependency, required_by=T.unsafe(nil)); end
 
@@ -6105,7 +6105,7 @@ class Bundler::Molinillo::Resolver
       specification_provider: T.untyped,
       resolver_ui: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(specification_provider, resolver_ui); end
 
@@ -6167,7 +6167,7 @@ class Bundler::Molinillo::Resolver::Resolution
       requested: T.untyped,
       base: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(specification_provider, resolver_ui, requested, base); end
 
@@ -6784,7 +6784,7 @@ class Bundler::Molinillo::VersionConflict < Bundler::Molinillo::ResolverError
       conflicts: T.untyped,
       specification_provider: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(conflicts, specification_provider); end
 
@@ -6859,7 +6859,7 @@ class Bundler::PermissionError < Bundler::BundlerError
       path: T.untyped,
       permission_type: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(path, permission_type=T.unsafe(nil)); end
 
@@ -7265,7 +7265,7 @@ class Bundler::RemoteSpecification
       platform: T.untyped,
       spec_fetcher: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(name, version, platform, spec_fetcher); end
 
@@ -7380,7 +7380,7 @@ class Bundler::Resolver
       additional_base_requirements: T.untyped,
       platforms: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(index, source_requirements, base, gem_version_promoter, additional_base_requirements, platforms); end
 
@@ -7545,7 +7545,7 @@ class Bundler::Resolver::SpecGroup
     params(
       all_specs: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(all_specs); end
 
@@ -7653,7 +7653,7 @@ class Bundler::RubyVersion
       engine: T.untyped,
       engine_version: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(versions, patchlevel, engine, engine_version); end
 
@@ -7851,7 +7851,7 @@ class Bundler::RubygemsIntegration
   end
   def inflate(obj); end
 
-  sig {returns(T.untyped)}
+  sig {void}
   def initialize(); end
 
   sig do
@@ -8156,7 +8156,7 @@ end
 
 # RubyGems versions 1.3.6 and 1.3.7
 class Bundler::RubygemsIntegration::Ancient < Bundler::RubygemsIntegration::Legacy
-  sig {returns(T.untyped)}
+  sig {void}
   def initialize(); end
 end
 
@@ -8258,7 +8258,7 @@ class Bundler::RubygemsIntegration::Legacy < Bundler::RubygemsIntegration
   end
   def find_name(name); end
 
-  sig {returns(T.untyped)}
+  sig {void}
   def initialize(); end
 
   sig {returns(T.untyped)}
@@ -8324,7 +8324,7 @@ class Bundler::RubygemsIntegration::MoreFuture < Bundler::RubygemsIntegration::F
   end
   def find_name(name); end
 
-  sig {returns(T.untyped)}
+  sig {void}
   def initialize(); end
 
   # only 2.5.2+ has all of the stub methods we want to use, and since this is a
@@ -8409,7 +8409,7 @@ class Bundler::Runtime
       root: T.untyped,
       definition: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(root, definition); end
 
@@ -8504,7 +8504,7 @@ class Bundler::Settings
     params(
       root: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(root=T.unsafe(nil)); end
 
@@ -8932,7 +8932,7 @@ class Bundler::Source::Gemspec < Bundler::Source::Path
     params(
       options: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(options); end
 end
@@ -8992,7 +8992,7 @@ class Bundler::Source::Git < Bundler::Source::Path
     params(
       options: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(options); end
 
@@ -9080,7 +9080,7 @@ class Bundler::Source::Git::GitCommandError < Bundler::GitError
       path: T.untyped,
       extra_info: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(command, path=T.unsafe(nil), extra_info=T.unsafe(nil)); end
 end
@@ -9090,13 +9090,13 @@ class Bundler::Source::Git::GitNotAllowedError < Bundler::GitError
     params(
       command: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(command); end
 end
 
 class Bundler::Source::Git::GitNotInstalledError < Bundler::GitError
-  sig {returns(T.untyped)}
+  sig {void}
   def initialize(); end
 end
 
@@ -9140,7 +9140,7 @@ class Bundler::Source::Git::GitProxy
       revision: T.untyped,
       git: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(path, uri, ref, revision=T.unsafe(nil), git=T.unsafe(nil)); end
 
@@ -9198,7 +9198,7 @@ class Bundler::Source::Git::MissingGitRevisionError < Bundler::GitError
       ref: T.untyped,
       repo: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(ref, repo); end
 end
@@ -9308,7 +9308,7 @@ class Bundler::Source::Path < Bundler::Source
     params(
       options: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(options); end
 
@@ -9544,7 +9544,7 @@ class Bundler::Source::Rubygems < Bundler::Source
     params(
       options: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(options=T.unsafe(nil)); end
 
@@ -9736,7 +9736,7 @@ class Bundler::SourceList
   end
   def global_rubygems_source=(uri); end
 
-  sig {returns(T.untyped)}
+  sig {void}
   def initialize(); end
 
   sig {returns(T.untyped)}
@@ -9858,7 +9858,7 @@ class Bundler::SpecSet
     params(
       specs: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(specs); end
 
@@ -10052,7 +10052,7 @@ class Bundler::UI::RGProxy < Gem::SilentUI
     params(
       ui: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(ui); end
 
@@ -10122,7 +10122,7 @@ class Bundler::UI::Silent
   end
   def info(message, newline=T.unsafe(nil)); end
 
-  sig {returns(T.untyped)}
+  sig {void}
   def initialize(); end
 
   sig do
@@ -10218,7 +10218,7 @@ class Bundler::VersionConflict < Bundler::BundlerError
       conflicts: T.untyped,
       msg: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(conflicts, msg=T.unsafe(nil)); end
 
@@ -10262,7 +10262,7 @@ class Bundler::YamlSyntaxError < Bundler::BundlerError
       orig_exception: T.untyped,
       msg: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(orig_exception, msg); end
 

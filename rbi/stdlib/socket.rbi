@@ -182,7 +182,7 @@ class Addrinfo < Data
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -2469,7 +2469,7 @@ class Socket < BasicSocket
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -3618,7 +3618,7 @@ class Socket::AncillaryData
       arg2: ::T.untyped,
       arg3: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(arg0, arg1, arg2, arg3); end
 
@@ -4540,7 +4540,7 @@ class Socket::Option
       arg2: ::T.untyped,
       arg3: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(arg0, arg1, arg2, arg3); end
 
@@ -4779,7 +4779,7 @@ class Socket::UDPSource
       local_address: ::T.untyped,
       reply_proc: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(remote_address, local_address, &reply_proc); end
 
@@ -4913,7 +4913,7 @@ class TCPServer < TCPSocket
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -5040,7 +5040,7 @@ class TCPSocket < IPSocket
       local_host: ::T.untyped,
       local_port: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(host=T.unsafe(nil), port=T.unsafe(nil), local_host=T.unsafe(nil), local_port=T.unsafe(nil)); end
 
@@ -5211,7 +5211,7 @@ class UDPSocket < IPSocket
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -5393,7 +5393,7 @@ class UNIXServer < UNIXSocket
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(arg0); end
 
@@ -5519,7 +5519,7 @@ class UNIXSocket < BasicSocket
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(arg0); end
 

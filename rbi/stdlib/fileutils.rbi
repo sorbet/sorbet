@@ -1013,7 +1013,7 @@ class FileUtils::Entry_ < Object
   sig {returns(T::Boolean)}
   def file?; end
 
-  sig {params(a: T.untyped, b: T.untyped, deref: T::Boolean).returns(T.untyped)}
+  sig {params(a: T.untyped, b: T.untyped, deref: T::Boolean).void}
   def initialize(a, b = nil, deref = false); end
 
   sig {params(dest: T.untyped).returns(T.untyped)}
