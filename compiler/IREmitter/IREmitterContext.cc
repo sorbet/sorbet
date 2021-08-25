@@ -590,7 +590,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
     vector<llvm::AllocaInst *> sendArgArrayByBlock;
     vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
-    bool hasReturnFromBlock;
+    bool hasReturnFromBlock = false;
     UnorderedMap<int, llvm::AllocaInst *> blockControlFramePtrs;
 
     int i = 0;
