@@ -2,6 +2,7 @@
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 #include "core/errors/infer.h"
+#include <iostream>
 
 using namespace std;
 namespace sorbet::rewriter {
@@ -15,9 +16,24 @@ struct ChainedSigWalk {
         // When we receive a `sig` send, we don't know ahead of time of whether it's a chained sig
         // or an incomplete `sig` without a block. Save it for later, so that we can add errors
         // to sigs missing block parameters
-        if (send->fun == core::Names::sig() && send->block == nullptr) {
-            incompleteSigs.push_back(send);
-            return tree;
+        if (send->fun == core::Names::sig()) {
+            if (send->block == nullptr) {
+                incompleteSigs.push_back(send);
+                return tree;
+            } else if (ctx.state.ruby3KeywordArgs) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Infer::BlockNotPassed)) {
+                    e.setHeader("This signature uses the old syntax. Please use the new syntax");
+
+                    auto loc = core::Loc(ctx.file, send->loc);
+                    string original = loc.source(ctx).value();
+                    auto *block = ast::cast_tree<ast::Block>(send->block);
+                    string replacement = buildReplacement(ctx, original, ast::cast_tree<ast::Send>(block->body));
+
+                    e.addAutocorrect(
+                        core::AutocorrectSuggestion{fmt::format("Replace `{}` with `{}`", original, replacement),
+                                                    {core::AutocorrectSuggestion::Edit{loc, replacement}}});
+                }
+            }
         }
 
         // Return early unless it's one of the sends we are interested in
@@ -66,6 +82,37 @@ struct ChainedSigWalk {
 
         return ast::MK::Send(send->loc, std::move(sigSend->recv), core::Names::sig(), 0, std::move(args), {},
                              ast::MK::Block0(send->block.loc(), std::move(newBody)));
+    }
+
+    string buildReplacement(core::MutableContext ctx, string original, ast::Send *sigBody) {
+        string result, statementAfter = "}", search = "";
+
+        // Correcting final is easier, since it is outside of the block, we just need to substitute
+        // everything up to the first curly brace
+        if (original.find(":final") != string::npos) {
+            result = original.replace(0, original.find("{") + 1, "sig.final {");
+            return result;
+        }
+
+        // Find the statement of interest and save the statement after it so that we can have accurate length
+        // calculation
+        do {
+            if (sigBody->fun == core::Names::abstract() || sigBody->fun == core::Names::override_() ||
+                sigBody->fun == core::Names::overridable()) {
+                search = sigBody->fun.toString(ctx);
+            } else {
+                statementAfter = sigBody->fun.toString(ctx);
+                sigBody = ast::cast_tree<ast::Send>(sigBody->recv);
+            }
+        } while (sigBody && search.empty());
+
+        unsigned long searchStart = original.find(search);
+        unsigned long searchLength = original.find(statementAfter, searchStart) - searchStart;
+
+        result = original.replace(searchStart, searchLength, "");
+        result = result.replace(0, result.find("{") + 1, fmt::format("sig.{} {}", search, "{"));
+
+        return result;
     }
 
     // For all remaining incompleteSigs, emit an error of missing block parameter
