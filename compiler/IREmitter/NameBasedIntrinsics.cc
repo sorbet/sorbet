@@ -131,6 +131,25 @@ public:
 class CallWithBlock : public NameBasedIntrinsicMethod {
 public:
     CallWithBlock() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
+
+    static llvm::Value *prepareBlockHandler(MethodCallContext &mcctx, cfg::VariableUseSite &blkVar) {
+        auto &cs = mcctx.cs;
+        auto &irctx = mcctx.irctx;
+        auto rubyBlockId = mcctx.rubyBlockId;
+
+        // If our current block has a block argument and we are passing it though, we don't have to reify it into a full
+        // proc; we can set things up so the Ruby VM will pass the block argument along and avoid extra allocations.
+        if (IREmitterHelpers::hasBlockArgument(cs, rubyBlockId, irctx.cfg.symbol, irctx) &&
+            blkVar.variable == irctx.rubyBlockArgs[rubyBlockId].back()) {
+            return Payload::getPassedBlockHandler(cs, mcctx.build);
+        } else {
+            // TODO(perf) `makeBlockHandlerProc` uses `to_proc` under the hood, and could be rewritten here to make an
+            // inline cache.
+            auto *block = Payload::varGet(cs, blkVar.variable, mcctx.build, irctx, rubyBlockId);
+            return Payload::makeBlockHandlerProc(cs, mcctx.build, block);
+        }
+    }
+
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
         // args[0] is the receiver
         // args[1] is the method
@@ -150,19 +169,7 @@ public:
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         auto name = lit.asName(cs).shortName(cs);
 
-        llvm::Value *blockHandler = nullptr;
-
-        // If our current block has a block argument and we are passing it though, we don't have to reify it into a full
-        // proc; we can set things up so the Ruby VM will pass the block argument along and avoid extra allocations.
-        if (IREmitterHelpers::hasBlockArgument(cs, rubyBlockId, irctx.cfg.symbol, irctx) &&
-            send->args[2].variable == irctx.rubyBlockArgs[rubyBlockId].back()) {
-            blockHandler = Payload::getPassedBlockHandler(cs, mcctx.build);
-        } else {
-            // TODO(perf) `makeBlockHandlerProc` uses `to_proc` under the hood, and could be rewritten here to make an
-            // inline cache.
-            auto *block = Payload::varGet(cs, send->args[2].variable, mcctx.build, irctx, rubyBlockId);
-            blockHandler = Payload::makeBlockHandlerProc(cs, mcctx.build, block);
-        }
+        llvm::Value *blockHandler = prepareBlockHandler(mcctx, send->args[2]);
 
         auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 3);
         auto &builder = builderCast(mcctx.build);
@@ -171,6 +178,7 @@ public:
         auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, string(name), flags, stack.size(), keywords);
         return Payload::callFuncWithCache(mcctx.cs, mcctx.build, cache, blockHandler);
     }
+
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::callWithBlock()};
     }
@@ -362,24 +370,13 @@ public:
 class CallWithSplat : public NameBasedIntrinsicMethod {
 public:
     CallWithSplat() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
-    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
-        // args[0] is the receiver
-        // args[1] is the method
-        // args[2] are the splat arguments
-        // args[3] are the keyword args
+
+    static std::tuple<CallCacheFlags, llvm::Value *>
+    prepareArgs(MethodCallContext &mcctx, cfg::VariableUseSite &splatArgsVar, cfg::VariableUseSite &kwArgsVar) {
         auto &cs = mcctx.cs;
         auto &irctx = mcctx.irctx;
         auto *send = mcctx.send;
-
-        auto recv = send->args[0].variable;
-
-        auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
-        ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-        auto methodName = lit.asName(cs).shortName(cs);
-
         auto &builder = builderCast(mcctx.build);
-
-        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
 
         // For the VM send there will be two cases:
         //
@@ -405,11 +402,7 @@ public:
         //
         // TODO(perf): We can probably save quite a bit of intermediate dupping, popping, etc., by cleverer addressing
         // of the array contents.
-        auto splatArgsVar = send->args[2].variable;
-        auto *splatArgs = Payload::varGet(mcctx.cs, splatArgsVar, mcctx.build, irctx, mcctx.rubyBlockId);
-
-        auto kwArgsVar = send->args[3].variable;
-        auto kwArgsType = send->args[3].type;
+        auto *splatArgs = Payload::varGet(mcctx.cs, splatArgsVar.variable, mcctx.build, irctx, mcctx.rubyBlockId);
 
         // TODO(perf) we can avoid duplicating the array here if we know that it was created specifically for this
         // splat.
@@ -417,13 +410,13 @@ public:
 
         CallCacheFlags flags;
 
-        if (kwArgsType.derivesFrom(mcctx.cs, core::Symbols::NilClass())) {
+        if (kwArgsVar.type.derivesFrom(mcctx.cs, core::Symbols::NilClass())) {
             flags.args_splat = true;
-        } else if (auto *ptt = core::cast_type<core::TupleType>(kwArgsType)) {
+        } else if (auto *ptt = core::cast_type<core::TupleType>(kwArgsVar.type)) {
             flags.args_splat = true;
             flags.kw_splat = true;
 
-            auto *kwArgArray = Payload::varGet(mcctx.cs, kwArgsVar, mcctx.build, irctx, mcctx.rubyBlockId);
+            auto *kwArgArray = Payload::varGet(mcctx.cs, kwArgsVar.variable, mcctx.build, irctx, mcctx.rubyBlockId);
 
             llvm::Value *kwHash;
 
@@ -460,6 +453,29 @@ public:
             flags.fcall = true;
         }
 
+        return {flags, splatArray};
+    }
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        // args[0] is the receiver
+        // args[1] is the method
+        // args[2] are the splat arguments
+        // args[3] are the keyword args
+        auto &cs = mcctx.cs;
+        auto &irctx = mcctx.irctx;
+        auto &builder = builderCast(mcctx.build);
+        auto *send = mcctx.send;
+        auto recv = send->args[0].variable;
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
+
+        auto [flags, splatArray] = prepareArgs(mcctx, send->args[2], send->args[3]);
+
+        // setup the inline cache
+        auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
+        ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+        auto methodName = lit.asName(cs).shortName(cs);
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flags, 1, {});
+
         // Push receiver and the splat array.
         // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
         // is actually the first arg of the callWithSplat intrinsic method.
@@ -467,8 +483,6 @@ public:
             cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.build, irctx, mcctx.rubyBlockId), {splatArray});
 
         // Call the receiver.
-        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flags, 1, {});
-
         if (auto *blk = mcctx.blkAsFunction()) {
             auto *closure = Payload::buildLocalsOffset(cs);
             return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.build, cache, blk, closure);
