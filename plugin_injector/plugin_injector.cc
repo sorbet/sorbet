@@ -351,8 +351,10 @@ public:
         if (irOutputDir.has_value()) {
             ensureOutputDir(irOutputDir.value(), fileName);
         }
-        compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), compiledOutputDir.value(), irOutputDir,
-                                         fileName);
+        if (!compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), compiledOutputDir.value(), irOutputDir,
+                                              fileName)) {
+            compiler::failCompilation(gs, core::Loc(f, 0, 0), "Object file emitter failed");
+        }
     };
 
     virtual void finishTypecheck(const core::GlobalState &gs) const override {}
