@@ -774,6 +774,25 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
         return file;
     }
 
+    auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
+
+    // put our class definition into a non-writeable scope, because
+    // otherwise our package definitions can conflict with top-level
+    // names. (e.g. if we have a package named `Foo`, it'll conflict
+    // with `::Foo`.)
+    auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(rootKlass.name);
+    // if scope here is `nullptr`, it means the class definition isn't
+    // well-formed and doesn't have an `UnresolvedConstantLit` as its
+    // name
+    if (scope != nullptr) {
+        // keep going until we find the root scope
+        while (auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(scope->scope)) {
+            scope = cnst;
+        }
+        // and prepend our internal non-writeable name here
+        scope->scope = name2Expr(core::Names::Constants::PackageDefs());
+    }
+
     // Sanity check: __package.rb files _must_ be typed: strict
     if (file.file.data(ctx).originalSigil < core::StrictLevel::Strict) {
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::PackageFileMustBeStrict)) {
@@ -811,8 +830,8 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
         ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
                         name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(importedPackages));
 
-    auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     rootKlass.rhs.emplace_back(move(packageNamespace));
+
     return file;
 }
 
