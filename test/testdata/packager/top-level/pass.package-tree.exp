@@ -1,0 +1,44 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Toplevel><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Toplevel_Package$1>::<C Toplevel>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Toplevel_Package$1><<C <todo sym>>> < ()
+    class <emptyTree>::<C Toplevel><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+      <self>.export(<emptyTree>::<C Toplevel>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Toplevel_Package$1><<C <todo sym>>> < ()
+    module ::<root>::<C Toplevel><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.void()
+      end
+
+      def self.hello<<todo method>>(&<blk>)
+        <self>.puts("hello")
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_self_def(<self>, :hello, :normal)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Project>::<C User><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C Toplevel>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C Package>::<C User><<C <todo sym>>> < ()
+    module <emptyTree>::<C Thing><<C <todo sym>>> < ()
+      ::<root>::<C Toplevel>.hello()
+    end
+  end
+end
