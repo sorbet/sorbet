@@ -631,7 +631,8 @@ vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg,
                 } else {
                     iseqName.emplace(fmt::format("block ({} levels) in {}", blockLevel, topLevelLocation));
                 }
-            } break;
+                break;
+            }
 
             case FunctionType::Rescue:
             case FunctionType::Ensure: {
@@ -647,7 +648,8 @@ vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg,
                 }
                 iseqName.emplace(
                     fmt::format("{} in {}", blockType == FunctionType::Rescue ? "rescue" : "ensure", *parentLocation));
-            } break;
+                break;
+            }
 
             case FunctionType::ExceptionBegin:
             case FunctionType::Unused:
