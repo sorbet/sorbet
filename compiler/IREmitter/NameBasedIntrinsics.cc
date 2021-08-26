@@ -496,6 +496,48 @@ public:
     }
 } CallWithSplat;
 
+class CallWithSplatAndBlock : public NameBasedIntrinsicMethod {
+public:
+    CallWithSplatAndBlock() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        ENFORCE(mcctx.blkAsFunction() == nullptr);
+
+        // args[0] is the receiver
+        // args[1] is the method
+        // args[2] are the splat arguments
+        // args[3] are the keyword arguments
+        // args[4] is the block
+        auto &cs = mcctx.cs;
+        auto &irctx = mcctx.irctx;
+        auto &builder = builderCast(mcctx.build);
+        auto *send = mcctx.send;
+        auto recv = send->args[0].variable;
+
+        auto [flags, splatArray] = prepareSplatArgs(mcctx, send->args[2], send->args[3]);
+        auto *blockHandler = prepareBlockHandler(mcctx, send->args[4]);
+
+        // setup the inline cache
+        auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
+        ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+        auto methodName = lit.asName(cs).shortName(cs);
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flags, 1, {});
+
+        // Push receiver and the splat array.
+        // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
+        // is actually the first arg of the callWithSplat intrinsic method.
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
+        Payload::pushRubyStackVector(
+            cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.build, irctx, mcctx.rubyBlockId), {splatArray});
+
+        return Payload::callFuncWithCache(mcctx.cs, mcctx.build, cache, blockHandler);
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::callWithSplatAndBlock()};
+    }
+} CallWithSplatAndBlock;
+
 static const vector<CallCMethod> knownCMethods{
     {"<expand-splat>", "sorbet_expandSplatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::Array()},
@@ -526,9 +568,9 @@ static const vector<CallCMethod> knownCMethods{
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
-    vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineClassIntrinsic,   &IdentityIntrinsic,
-                                                 &CallWithBlock,      &ExceptionRetry,         &BuildHash,
-                                                 &CallWithSplat,      &ShouldNeverSeeIntrinsic};
+    vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineClassIntrinsic,  &IdentityIntrinsic,
+                                                 &CallWithBlock,      &ExceptionRetry,        &BuildHash,
+                                                 &CallWithSplat,      &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic};
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }
