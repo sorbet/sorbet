@@ -51,33 +51,37 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C Baz>::<C C><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.void()
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package$1><<C <todo sym>>> < ()
+    class <emptyTree>::<C Project>::<C Baz>::<C C><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.void()
+      end
+
+      def self.c<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_self_def(<self>, :c, :normal)
     end
-
-    def self.c<<todo method>>(&<blk>)
-      <emptyTree>
-    end
-
-    <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :c, :normal)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C Foo>::<C B><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.void()
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1><<C <todo sym>>> < ()
+    class <emptyTree>::<C Project>::<C Foo>::<C B><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.void()
+      end
+
+      def self.b<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_self_def(<self>, :b, :normal)
     end
-
-    def self.b<<todo method>>(&<blk>)
-      <emptyTree>
-    end
-
-    <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :b, :normal)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
