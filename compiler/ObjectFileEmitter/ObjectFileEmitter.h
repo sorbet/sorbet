@@ -17,8 +17,9 @@ namespace sorbet::compiler {
 class ObjectFileEmitter {
 public:
     static void init();
-    static bool run(spdlog::logger &logger, llvm::LLVMContext &lctx, std::unique_ptr<llvm::Module> module,
-                    std::string_view soDir, std::optional<std::string_view> llvmIrDir, std::string_view fileName);
+    [[nodiscard]] static bool run(spdlog::logger &logger, llvm::LLVMContext &lctx, std::unique_ptr<llvm::Module> module,
+                                  std::string_view soDir, std::optional<std::string_view> llvmIrDir,
+                                  std::string_view fileName);
 };
 } // namespace sorbet::compiler
 #endif
