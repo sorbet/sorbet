@@ -84,7 +84,7 @@ class MyTest
 
   test_each ["foo", 5, {x: false}] do |v|
     it "handles lists with several types" do
-      T.reveal_type(v) # error: Revealed type: `T.any(String, Integer, T::Hash[Symbol, FalseClass])`
+      T.reveal_type(v) # error: Revealed type: `T.any(String, Integer, T::Hash[Symbol, T::Boolean])`
     end
   end
 

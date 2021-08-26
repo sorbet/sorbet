@@ -41,12 +41,10 @@ end
 
 sig {params(x: {foo: Integer, 'bar' => Float}).void}
 def test3(x)
-  T.reveal_type(x) # error: Revealed type: `{foo: Integer, String("bar") => Float} (shape of T::Hash[T.any(Symbol, String), T.any(Integer, Float)])`
+  T.reveal_type(x) # error: Revealed type: `{foo: Integer, String("bar") => Float} (shape of T::Hash[T.any(Symbol, String), T.untyped])`
   x[:foo] = '' # error: Expected `Integer` but found `String("")` for key `Symbol(:foo)`
-          # ^^ error: Expected `T.any(Integer, Float)` but found `String("")` for argument `arg1`
   T.reveal_type(x[:foo]) # error: Revealed type: `Integer`
 
   x[true] = 1.0 # error: Expected `T.any(Symbol, String)` but found `TrueClass` for argument `arg0`
   x['bar'] = nil # error: Expected `Float` but found `NilClass` for key `String("bar")`
-           # ^^^ error: Expected `T.any(Integer, Float)` but found `NilClass` for argument `arg1`
 end
