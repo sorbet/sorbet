@@ -4,7 +4,6 @@
 #include "core/core.h"
 #include "core/errors/rewriter.h"
 #include "rewriter/Util.h"
-#include <iostream>
 
 using namespace std;
 namespace sorbet::rewriter {
@@ -63,9 +62,12 @@ const ast::Send *findParams(const ast::Send *send) {
 // instead of void and provides an auto-correct option
 void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
     auto originalSend = send->deepCopy();
+    string statementAfterReturns = "";
 
-    // try to find the invocation to returns
+    // try to find the invocation to returns. Save the source code of the invocation
+    // immediately after returns() so that we can have the exact length it occupies
     while (send && send->fun != core::Names::returns()) {
+        statementAfterReturns = send->fun.toString(ctx);
         send = ast::cast_tree<ast::Send>(send->recv);
     }
 
@@ -77,9 +79,20 @@ void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
 
             auto loc = core::Loc(ctx.file, originalSend.loc());
             string original = loc.source(ctx).value();
-            auto returnsStart = original.find("returns");
-            auto returnsLength = original.find(")", returnsStart) - returnsStart + 1;
-            string replacement = original.replace(returnsStart, returnsLength, "void");
+            unsigned long returnsStart = original.find("returns");
+            unsigned long returnsLength;
+            string replacement;
+
+            // If there are no statements after returns(), we can use the length of the block to find the length
+            // we need to replace. If there are statements after it, we need to find the exact length using the next
+            // statement and remember to add a dot or else it will produce invalid code
+            if (statementAfterReturns.empty()) {
+                returnsLength = original.length() - returnsStart + 1;
+                replacement = original.replace(returnsStart, returnsLength, "void");
+            } else {
+                returnsLength = original.find(statementAfterReturns, returnsStart) - returnsStart;
+                replacement = original.replace(returnsStart, returnsLength, "void.");
+            }
 
             e.addAutocorrect(core::AutocorrectSuggestion{fmt::format("Replace `{}` with `{}`", original, replacement),
                                                          {core::AutocorrectSuggestion::Edit{loc, replacement}}});
