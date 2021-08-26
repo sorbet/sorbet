@@ -603,7 +603,7 @@ vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg,
     ENFORCE(blockLevels.size() == blockTypes.size());
 
     vector<optional<string>> blockLocationNames(blockLevels.size());
-    // Sort blocks by their depth so that we can process things in a depth-first order.
+    // Sort blocks by their depth so that we can process things in a breadth-first order.
     vector<BlockInfo> blocksByDepth;
     blocksByDepth.reserve(blockLevels.size());
     for (int i = 0; i <= cfg.maxRubyBlockId; ++i) {
