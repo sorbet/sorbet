@@ -88,9 +88,18 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @str_Foo = private unnamed_addr constant [4 x i8] c"Foo\00", align 1
 @str_Baz = private unnamed_addr constant [4 x i8] c"Baz\00", align 1
 @"stackFramePrecomputed_func_Foo.<static-init>" = internal unnamed_addr global %struct.rb_iseq_struct* null, align 8
+@"rubyIdPrecomputed_<module:Foo>" = internal unnamed_addr global i64 0, align 8
+@"str_<module:Foo>" = private unnamed_addr constant [13 x i8] c"<module:Foo>\00", align 1
+@"rubyStrFrozen_<module:Foo>" = internal unnamed_addr global i64 0, align 8
 @str_Bar = private unnamed_addr constant [4 x i8] c"Bar\00", align 1
 @"stackFramePrecomputed_func_Foo::Bar.<static-init>" = internal unnamed_addr global %struct.rb_iseq_struct* null, align 8
+@"rubyIdPrecomputed_<class:Foo::Bar>" = internal unnamed_addr global i64 0, align 8
+@"str_<class:Foo::Bar>" = private unnamed_addr constant [17 x i8] c"<class:Foo::Bar>\00", align 1
+@"rubyStrFrozen_<class:Foo::Bar>" = internal unnamed_addr global i64 0, align 8
 @"stackFramePrecomputed_func_Baz.<static-init>" = internal unnamed_addr global %struct.rb_iseq_struct* null, align 8
+@"rubyIdPrecomputed_<class:Baz>" = internal unnamed_addr global i64 0, align 8
+@"str_<class:Baz>" = private unnamed_addr constant [12 x i8] c"<class:Baz>\00", align 1
+@"rubyStrFrozen_<class:Baz>" = internal unnamed_addr global i64 0, align 8
 @guard_epoch_Foo = linkonce local_unnamed_addr global i64 0
 @guarded_const_Foo = linkonce local_unnamed_addr global i64 0
 @rb_cObject = external local_unnamed_addr constant i64
@@ -141,12 +150,18 @@ define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #2 {
 define internal fastcc void @sorbet_globalConstructors(i64 %realpath) unnamed_addr {
 allocRubyIds:
   tail call fastcc void @"Constr_rubyIdPrecomputed_<top (required)>"() #8
+  tail call fastcc void @"Constr_rubyIdPrecomputed_<module:Foo>"() #8
+  tail call fastcc void @"Constr_rubyIdPrecomputed_<class:Foo::Bar>"() #8
+  tail call fastcc void @"Constr_rubyIdPrecomputed_<class:Baz>"() #8
   tail call fastcc void @"Constr_rubyStrFrozen_<top (required)>"() #8
   tail call fastcc void @"Constr_rubyStrFrozen_test/testdata/compiler/class.rb"() #8
   tail call void @sorbet_initLineNumberInfo(%struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef getelementptr inbounds ([10 x i64], [10 x i64]* @iseqEncodedArray, i32 0, i32 0), i32 noundef 10)
   tail call fastcc void @"Constr_stackFramePrecomputed_func_<root>.<static-init>$151"(i64 %realpath)
+  tail call fastcc void @"Constr_rubyStrFrozen_<module:Foo>"() #8
   tail call fastcc void @"Constr_stackFramePrecomputed_func_Foo.<static-init>"(i64 %realpath)
+  tail call fastcc void @"Constr_rubyStrFrozen_<class:Foo::Bar>"() #8
   tail call fastcc void @"Constr_stackFramePrecomputed_func_Foo::Bar.<static-init>"(i64 %realpath)
+  tail call fastcc void @"Constr_rubyStrFrozen_<class:Baz>"() #8
   tail call fastcc void @"Constr_stackFramePrecomputed_func_Baz.<static-init>"(i64 %realpath)
   ret void
 }
@@ -282,36 +297,87 @@ entry:
 ; Function Attrs: ssp
 define internal fastcc void @"Constr_stackFramePrecomputed_func_Foo.<static-init>"(i64 %realpath) unnamed_addr #3 {
 entryInitializers:
-  %"rubyId_<top (required)>" = load i64, i64* @"rubyIdPrecomputed_<top (required)>", align 8
-  %"rubyStr_<top (required)>" = load i64, i64* @"rubyStrFrozen_<top (required)>", align 8
+  %"rubyId_<module:Foo>" = load i64, i64* @"rubyIdPrecomputed_<module:Foo>", align 8
+  %"rubyStr_<module:Foo>" = load i64, i64* @"rubyStrFrozen_<module:Foo>", align 8
   %"rubyStr_test/testdata/compiler/class.rb" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/class.rb", align 8
   %locals = alloca i64, i32 0, align 8
-  %0 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<top (required)>", i64 %"rubyId_<top (required)>", i64 %"rubyStr_test/testdata/compiler/class.rb", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 3, i32 noundef 4, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals, i32 noundef 0, i32 noundef 2)
+  %0 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<module:Foo>", i64 %"rubyId_<module:Foo>", i64 %"rubyStr_test/testdata/compiler/class.rb", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 3, i32 noundef 4, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals, i32 noundef 0, i32 noundef 2)
   store %struct.rb_iseq_struct* %0, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Foo.<static-init>", align 8
+  ret void
+}
+
+; Function Attrs: nounwind ssp
+define internal fastcc void @"Constr_rubyIdPrecomputed_<module:Foo>"() unnamed_addr #4 {
+constr:
+  %0 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([13 x i8], [13 x i8]* @"str_<module:Foo>", i64 0, i64 0), i64 noundef 12) #8
+  store i64 %0, i64* @"rubyIdPrecomputed_<module:Foo>", align 8
+  ret void
+}
+
+; Function Attrs: nounwind ssp
+define internal fastcc void @"Constr_rubyStrFrozen_<module:Foo>"() unnamed_addr #4 {
+constr:
+  %0 = tail call i64 @rb_fstring_new(i8* noundef getelementptr inbounds ([13 x i8], [13 x i8]* @"str_<module:Foo>", i64 0, i64 0), i64 noundef 12) #8
+  tail call void @rb_gc_register_mark_object(i64 %0) #8
+  store i64 %0, i64* @"rubyStrFrozen_<module:Foo>", align 8
   ret void
 }
 
 ; Function Attrs: ssp
 define internal fastcc void @"Constr_stackFramePrecomputed_func_Foo::Bar.<static-init>"(i64 %realpath) unnamed_addr #3 {
 entryInitializers:
-  %"rubyId_<top (required)>" = load i64, i64* @"rubyIdPrecomputed_<top (required)>", align 8
-  %"rubyStr_<top (required)>" = load i64, i64* @"rubyStrFrozen_<top (required)>", align 8
+  %"rubyId_<class:Foo::Bar>" = load i64, i64* @"rubyIdPrecomputed_<class:Foo::Bar>", align 8
+  %"rubyStr_<class:Foo::Bar>" = load i64, i64* @"rubyStrFrozen_<class:Foo::Bar>", align 8
   %"rubyStr_test/testdata/compiler/class.rb" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/class.rb", align 8
   %locals = alloca i64, i32 0, align 8
-  %0 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<top (required)>", i64 %"rubyId_<top (required)>", i64 %"rubyStr_test/testdata/compiler/class.rb", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 3, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals, i32 noundef 0, i32 noundef 0)
+  %0 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<class:Foo::Bar>", i64 %"rubyId_<class:Foo::Bar>", i64 %"rubyStr_test/testdata/compiler/class.rb", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 3, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals, i32 noundef 0, i32 noundef 0)
   store %struct.rb_iseq_struct* %0, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Foo::Bar.<static-init>", align 8
+  ret void
+}
+
+; Function Attrs: nounwind ssp
+define internal fastcc void @"Constr_rubyIdPrecomputed_<class:Foo::Bar>"() unnamed_addr #4 {
+constr:
+  %0 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<class:Foo::Bar>", i64 0, i64 0), i64 noundef 16) #8
+  store i64 %0, i64* @"rubyIdPrecomputed_<class:Foo::Bar>", align 8
+  ret void
+}
+
+; Function Attrs: nounwind ssp
+define internal fastcc void @"Constr_rubyStrFrozen_<class:Foo::Bar>"() unnamed_addr #4 {
+constr:
+  %0 = tail call i64 @rb_fstring_new(i8* noundef getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<class:Foo::Bar>", i64 0, i64 0), i64 noundef 16) #8
+  tail call void @rb_gc_register_mark_object(i64 %0) #8
+  store i64 %0, i64* @"rubyStrFrozen_<class:Foo::Bar>", align 8
   ret void
 }
 
 ; Function Attrs: ssp
 define internal fastcc void @"Constr_stackFramePrecomputed_func_Baz.<static-init>"(i64 %realpath) unnamed_addr #3 {
 entryInitializers:
-  %"rubyId_<top (required)>" = load i64, i64* @"rubyIdPrecomputed_<top (required)>", align 8
-  %"rubyStr_<top (required)>" = load i64, i64* @"rubyStrFrozen_<top (required)>", align 8
+  %"rubyId_<class:Baz>" = load i64, i64* @"rubyIdPrecomputed_<class:Baz>", align 8
+  %"rubyStr_<class:Baz>" = load i64, i64* @"rubyStrFrozen_<class:Baz>", align 8
   %"rubyStr_test/testdata/compiler/class.rb" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/class.rb", align 8
   %locals = alloca i64, i32 0, align 8
-  %0 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<top (required)>", i64 %"rubyId_<top (required)>", i64 %"rubyStr_test/testdata/compiler/class.rb", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 3, i32 noundef 8, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals, i32 noundef 0, i32 noundef 0)
+  %0 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<class:Baz>", i64 %"rubyId_<class:Baz>", i64 %"rubyStr_test/testdata/compiler/class.rb", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 3, i32 noundef 8, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals, i32 noundef 0, i32 noundef 0)
   store %struct.rb_iseq_struct* %0, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Baz.<static-init>", align 8
+  ret void
+}
+
+; Function Attrs: nounwind ssp
+define internal fastcc void @"Constr_rubyIdPrecomputed_<class:Baz>"() unnamed_addr #4 {
+constr:
+  %0 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([12 x i8], [12 x i8]* @"str_<class:Baz>", i64 0, i64 0), i64 noundef 11) #8
+  store i64 %0, i64* @"rubyIdPrecomputed_<class:Baz>", align 8
+  ret void
+}
+
+; Function Attrs: nounwind ssp
+define internal fastcc void @"Constr_rubyStrFrozen_<class:Baz>"() unnamed_addr #4 {
+constr:
+  %0 = tail call i64 @rb_fstring_new(i8* noundef getelementptr inbounds ([12 x i8], [12 x i8]* @"str_<class:Baz>", i64 0, i64 0), i64 noundef 11) #8
+  tail call void @rb_gc_register_mark_object(i64 %0) #8
+  store i64 %0, i64* @"rubyStrFrozen_<class:Baz>", align 8
   ret void
 }
 

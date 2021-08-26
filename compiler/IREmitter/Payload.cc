@@ -537,35 +537,21 @@ int getNearestIseqAllocatorBlock(const IREmitterContext &irctx, int rubyBlockId)
     return rubyBlockId;
 }
 
-std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
-                                                   const IREmitterContext &irctx, const ast::MethodDef &md,
-                                                   int rubyBlockId) {
-    string_view funcName;
+std::tuple<const string &, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
+                                                      const IREmitterContext &irctx, const ast::MethodDef &md,
+                                                      int rubyBlockId) {
+    auto &locationName = irctx.rubyBlockLocationNames[rubyBlockId];
     llvm::Value *parent = nullptr;
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
-            funcName = md.symbol.data(cs)->name.shortName(cs);
-            parent = llvm::Constant::getNullValue(iseqType(cs));
-            break;
-
         case FunctionType::StaticInitFile:
         case FunctionType::StaticInitModule:
-            funcName = "<top (required)>";
             parent = llvm::Constant::getNullValue(iseqType(cs));
             break;
 
         case FunctionType::Block:
-            funcName = "block for"sv;
-            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
-            break;
-
         case FunctionType::Rescue:
-            funcName = "rescue for"sv;
-            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
-            break;
-
         case FunctionType::Ensure:
-            funcName = "ensure for"sv;
             parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
             break;
 
@@ -581,7 +567,9 @@ std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBu
             break;
     }
 
-    return {funcName, parent};
+    // If we get here, we know we have a valid iseq and a valid name.
+    ENFORCE(locationName.has_value());
+    return {*locationName, parent};
 }
 
 // Fill the locals array with interned ruby IDs.

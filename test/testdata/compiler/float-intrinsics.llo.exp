@@ -116,9 +116,9 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @"rubyIdPrecomputed_<block-call>" = internal unnamed_addr global i64 0, align 8
 @"str_<block-call>" = private unnamed_addr constant [13 x i8] c"<block-call>\00", align 1
 @"stackFramePrecomputed_func_<root>.<static-init>$151$block_1" = internal unnamed_addr global %struct.rb_iseq_struct* null, align 8
-@"rubyIdPrecomputed_block for" = internal unnamed_addr global i64 0, align 8
-@"str_block for" = private unnamed_addr constant [10 x i8] c"block for\00", align 1
-@"rubyStrFrozen_block for" = internal unnamed_addr global i64 0, align 8
+@"rubyIdPrecomputed_block in <top (required)>" = internal unnamed_addr global i64 0, align 8
+@"str_block in <top (required)>" = private unnamed_addr constant [26 x i8] c"block in <top (required)>\00", align 1
+@"rubyStrFrozen_block in <top (required)>" = internal unnamed_addr global i64 0, align 8
 @"stackFramePrecomputed_func_<root>.<static-init>$151$block_2" = internal unnamed_addr global %struct.rb_iseq_struct* null, align 8
 @"stackFramePrecomputed_func_<root>.<static-init>$151$block_3" = internal unnamed_addr global %struct.rb_iseq_struct* null, align 8
 @"stackFramePrecomputed_func_<root>.<static-init>$151$block_4" = internal unnamed_addr global %struct.rb_iseq_struct* null, align 8
@@ -1641,8 +1641,8 @@ entry:
   store i64 %12, i64* @"rubyIdPrecomputed_<top (required)>", align 8
   %13 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([13 x i8], [13 x i8]* @"str_<block-call>", i64 0, i64 0), i64 noundef 12) #15
   store i64 %13, i64* @"rubyIdPrecomputed_<block-call>", align 8
-  %14 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([10 x i8], [10 x i8]* @"str_block for", i64 0, i64 0), i64 noundef 9) #15
-  store i64 %14, i64* @"rubyIdPrecomputed_block for", align 8
+  %14 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([26 x i8], [26 x i8]* @"str_block in <top (required)>", i64 0, i64 0), i64 noundef 25) #15
+  store i64 %14, i64* @"rubyIdPrecomputed_block in <top (required)>", align 8
   %15 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_sig, i64 0, i64 0), i64 noundef 3) #15
   store i64 %15, i64* @rubyIdPrecomputed_sig, align 8
   %16 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([2 x i8], [2 x i8]* @str_x, i64 0, i64 0), i64 noundef 1) #15
@@ -1710,31 +1710,31 @@ entry:
   %38 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %36, i64 %"rubyId_<top (required)>.i.i", i64 %"rubyStr_test/testdata/compiler/float-intrinsics.rb.i180.i", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 0, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull align 8 %locals.i181.i, i32 noundef 1, i32 noundef 4)
   store %struct.rb_iseq_struct* %38, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$151", align 8
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %37)
-  %39 = call i64 @rb_fstring_new(i8* noundef getelementptr inbounds ([10 x i8], [10 x i8]* @"str_block for", i64 0, i64 0), i64 noundef 9) #15
+  %39 = call i64 @rb_fstring_new(i8* noundef getelementptr inbounds ([26 x i8], [26 x i8]* @"str_block in <top (required)>", i64 0, i64 0), i64 noundef 25) #15
   call void @rb_gc_register_mark_object(i64 %39) #15
-  store i64 %39, i64* @"rubyStrFrozen_block for", align 8
+  store i64 %39, i64* @"rubyStrFrozen_block in <top (required)>", align 8
   %stackFrame.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$151", align 8
-  %"rubyId_block for.i.i" = load i64, i64* @"rubyIdPrecomputed_block for", align 8
+  %"rubyId_block in <top (required)>.i.i" = load i64, i64* @"rubyIdPrecomputed_block in <top (required)>", align 8
   %"rubyStr_test/testdata/compiler/float-intrinsics.rb.i182.i" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/float-intrinsics.rb", align 8
-  %40 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %39, i64 %"rubyId_block for.i.i", i64 %"rubyStr_test/testdata/compiler/float-intrinsics.rb.i182.i", i64 %realpath, %struct.rb_iseq_struct* %stackFrame.i.i, i32 noundef 2, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef null, i32 noundef 0, i32 noundef 4)
+  %40 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %39, i64 %"rubyId_block in <top (required)>.i.i", i64 %"rubyStr_test/testdata/compiler/float-intrinsics.rb.i182.i", i64 %realpath, %struct.rb_iseq_struct* %stackFrame.i.i, i32 noundef 2, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef null, i32 noundef 0, i32 noundef 4)
   store %struct.rb_iseq_struct* %40, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$151$block_1", align 8
   %stackFrame.i183.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$151", align 8
-  %"rubyId_block for.i184.i" = load i64, i64* @"rubyIdPrecomputed_block for", align 8
-  %"rubyStr_block for.i185.i" = load i64, i64* @"rubyStrFrozen_block for", align 8
+  %"rubyId_block in <top (required)>.i184.i" = load i64, i64* @"rubyIdPrecomputed_block in <top (required)>", align 8
+  %"rubyStr_block in <top (required)>.i185.i" = load i64, i64* @"rubyStrFrozen_block in <top (required)>", align 8
   %"rubyStr_test/testdata/compiler/float-intrinsics.rb.i186.i" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/float-intrinsics.rb", align 8
-  %41 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_block for.i185.i", i64 %"rubyId_block for.i184.i", i64 %"rubyStr_test/testdata/compiler/float-intrinsics.rb.i186.i", i64 %realpath, %struct.rb_iseq_struct* %stackFrame.i183.i, i32 noundef 2, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef null, i32 noundef 0, i32 noundef 4)
+  %41 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_block in <top (required)>.i185.i", i64 %"rubyId_block in <top (required)>.i184.i", i64 %"rubyStr_test/testdata/compiler/float-intrinsics.rb.i186.i", i64 %realpath, %struct.rb_iseq_struct* %stackFrame.i183.i, i32 noundef 2, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef null, i32 noundef 0, i32 noundef 4)
   store %struct.rb_iseq_struct* %41, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$151$block_2", align 8
   %stackFrame.i187.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$151", align 8
-  %"rubyId_block for.i188.i" = load i64, i64* @"rubyIdPrecomputed_block for", align 8
-  %"rubyStr_block for.i189.i" = load i64, i64* @"rubyStrFrozen_block for", align 8
+  %"rubyId_block in <top (required)>.i188.i" = load i64, i64* @"rubyIdPrecomputed_block in <top (required)>", align 8
+  %"rubyStr_block in <top (required)>.i189.i" = load i64, i64* @"rubyStrFrozen_block in <top (required)>", align 8
   %"rubyStr_test/testdata/compiler/float-intrinsics.rb.i190.i" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/float-intrinsics.rb", align 8
-  %42 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_block for.i189.i", i64 %"rubyId_block for.i188.i", i64 %"rubyStr_test/testdata/compiler/float-intrinsics.rb.i190.i", i64 %realpath, %struct.rb_iseq_struct* %stackFrame.i187.i, i32 noundef 2, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef null, i32 noundef 0, i32 noundef 4)
+  %42 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_block in <top (required)>.i189.i", i64 %"rubyId_block in <top (required)>.i188.i", i64 %"rubyStr_test/testdata/compiler/float-intrinsics.rb.i190.i", i64 %realpath, %struct.rb_iseq_struct* %stackFrame.i187.i, i32 noundef 2, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef null, i32 noundef 0, i32 noundef 4)
   store %struct.rb_iseq_struct* %42, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$151$block_3", align 8
   %stackFrame.i191.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$151", align 8
-  %"rubyId_block for.i192.i" = load i64, i64* @"rubyIdPrecomputed_block for", align 8
-  %"rubyStr_block for.i193.i" = load i64, i64* @"rubyStrFrozen_block for", align 8
+  %"rubyId_block in <top (required)>.i192.i" = load i64, i64* @"rubyIdPrecomputed_block in <top (required)>", align 8
+  %"rubyStr_block in <top (required)>.i193.i" = load i64, i64* @"rubyStrFrozen_block in <top (required)>", align 8
   %"rubyStr_test/testdata/compiler/float-intrinsics.rb.i194.i" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/float-intrinsics.rb", align 8
-  %43 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_block for.i193.i", i64 %"rubyId_block for.i192.i", i64 %"rubyStr_test/testdata/compiler/float-intrinsics.rb.i194.i", i64 %realpath, %struct.rb_iseq_struct* %stackFrame.i191.i, i32 noundef 2, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef null, i32 noundef 0, i32 noundef 4)
+  %43 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_block in <top (required)>.i193.i", i64 %"rubyId_block in <top (required)>.i192.i", i64 %"rubyStr_test/testdata/compiler/float-intrinsics.rb.i194.i", i64 %realpath, %struct.rb_iseq_struct* %stackFrame.i191.i, i32 noundef 2, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef null, i32 noundef 0, i32 noundef 4)
   store %struct.rb_iseq_struct* %43, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$151$block_4", align 8
   %rubyId_sig.i = load i64, i64* @rubyIdPrecomputed_sig, align 8, !dbg !63
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_sig, i64 %rubyId_sig.i, i32 noundef 20, i32 noundef 3, i32 noundef 0, i64* noundef null), !dbg !63

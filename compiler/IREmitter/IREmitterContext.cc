@@ -513,18 +513,24 @@ bool returnFromBlockIsPresent(CompilerState &cs, cfg::CFG &cfg, const vector<Fun
     return false;
 }
 
-// Returns the number of scopes that must be traversed to get back out out to the top-level method frame.
-int getBlockLevel(vector<int> &blockParents, vector<FunctionType> &blockTypes, int rubyBlockId) {
+// Returns the number of scopes that must be traversed to get back out out to the
+// top-level method frame and the number of blocks that must be traversed to get
+// back out to the top-level method frame.  The latter is important for providing
+// accurate location information for block iseqs.
+tuple<int, int> getBlockNesting(vector<int> &blockParents, vector<FunctionType> &blockTypes, int rubyBlockId) {
     auto level = 0;
+    auto blockLevel = 0;
 
     while (true) {
         switch (blockTypes[rubyBlockId]) {
             case FunctionType::Method:
             case FunctionType::StaticInitFile:
             case FunctionType::StaticInitModule:
-                return level;
+                return {level, blockLevel};
 
             case FunctionType::Block:
+                ++blockLevel;
+                [[fallthrough]];
             case FunctionType::Rescue:
             case FunctionType::Ensure:
                 // Increment the level, as we're crossing through a non-method stack frame to get back to our parent.
@@ -542,14 +548,117 @@ int getBlockLevel(vector<int> &blockParents, vector<FunctionType> &blockTypes, i
     }
 }
 
-vector<int> getBlockLevels(vector<int> &blockParents, vector<FunctionType> &blockTypes) {
+tuple<vector<int>, vector<int>> getBlockLevels(vector<int> &blockParents, vector<FunctionType> &blockTypes) {
     vector<int> levels(blockTypes.size(), 0);
+    vector<int> blockNesting(blockTypes.size(), 0);
 
     for (auto i = 0; i < blockTypes.size(); ++i) {
-        levels[i] = getBlockLevel(blockParents, blockTypes, i);
+        auto [level, blockLevel] = getBlockNesting(blockParents, blockTypes, i);
+        levels[i] = level;
+        blockNesting[i] = blockLevel;
     }
 
-    return levels;
+    return {move(levels), move(blockNesting)};
+}
+
+string locationNameFor(CompilerState &cs, core::MethodRef symbol) {
+    if (IREmitterHelpers::isClassStaticInit(cs, symbol)) {
+        auto enclosingClassRef = symbol.enclosingClass(cs);
+        ENFORCE(enclosingClassRef.exists());
+        enclosingClassRef = enclosingClassRef.data(cs)->attachedClass(cs);
+        ENFORCE(enclosingClassRef.exists());
+        const auto &enclosingClass = enclosingClassRef.data(cs);
+        return fmt::format("<{}:{}>", enclosingClass->isClassOrModuleClass() ? "class"sv : "module"sv,
+                           enclosingClassRef.show(cs));
+    } else if (IREmitterHelpers::isFileStaticInit(cs, symbol)) {
+        return string("<top (required)>"sv);
+    } else {
+        return string(symbol.data(cs)->name.shortName(cs));
+    }
+}
+
+// Given a Ruby block, finds the block id of the nearest _proper_ ancestor of that block that allocates an iseq.
+int getNearestIseqAllocatorBlock(const vector<int> &blockParents, const vector<FunctionType> &blockTypes,
+                                 int rubyBlockId) {
+    do {
+        rubyBlockId = blockParents[rubyBlockId];
+    } while (rubyBlockId > 0 && blockTypes[rubyBlockId] == FunctionType::ExceptionBegin);
+
+    return rubyBlockId;
+}
+
+// Block names in Ruby are built recursively as the file is parsed.  We aren't guaranteed
+// to process blocks in depth-first order and we don't want to constantly recompute
+// parent names.  So we build the names for everything up front.
+vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg, const vector<int> &blockLevels,
+                                               const vector<int> &blockNestingLevels, const vector<int> &blockParents,
+                                               const vector<FunctionType> &blockTypes) {
+    struct BlockInfo {
+        int rubyBlockId;
+        // blockLevels[this->rubyBlockId];
+        int level;
+    };
+
+    ENFORCE(blockLevels.size() == blockParents.size());
+    ENFORCE(blockLevels.size() == blockTypes.size());
+
+    vector<optional<string>> blockLocationNames(blockLevels.size());
+    // Sort blocks by their depth so that we can process things in a breadth-first order.
+    vector<BlockInfo> blocksByDepth;
+    blocksByDepth.reserve(blockLevels.size());
+    for (int i = 0; i <= cfg.maxRubyBlockId; ++i) {
+        blocksByDepth.emplace_back(BlockInfo{i, blockLevels[i]});
+    }
+
+    fast_sort(blocksByDepth, [](const auto &left, const auto &right) -> bool { return left.level < right.level; });
+
+    const string topLevelLocation = locationNameFor(cs, cfg.symbol);
+
+    for (const auto &info : blocksByDepth) {
+        optional<string> &iseqName = blockLocationNames[info.rubyBlockId];
+        const auto blockType = blockTypes[info.rubyBlockId];
+        switch (blockType) {
+            case FunctionType::Method:
+            case FunctionType::StaticInitFile:
+            case FunctionType::StaticInitModule:
+                iseqName.emplace(topLevelLocation);
+                break;
+
+            case FunctionType::Block: {
+                int blockLevel = blockNestingLevels[info.rubyBlockId];
+                if (blockLevel == 1) {
+                    iseqName.emplace(fmt::format("block in {}", topLevelLocation));
+                } else {
+                    iseqName.emplace(fmt::format("block ({} levels) in {}", blockLevel, topLevelLocation));
+                }
+                break;
+            }
+
+            case FunctionType::Rescue:
+            case FunctionType::Ensure: {
+                int parent = getNearestIseqAllocatorBlock(blockParents, blockTypes, info.rubyBlockId);
+                const string *parentLocation;
+                if (parent == 0) {
+                    parentLocation = &topLevelLocation;
+                } else {
+                    const auto &parentName = blockLocationNames[parent];
+                    ENFORCE(blockLevels[parent] < blockLevels[info.rubyBlockId]);
+                    ENFORCE(parentName.has_value());
+                    parentLocation = &*parentName;
+                }
+                iseqName.emplace(
+                    fmt::format("{} in {}", blockType == FunctionType::Rescue ? "rescue" : "ensure", *parentLocation));
+                break;
+            }
+
+            case FunctionType::ExceptionBegin:
+            case FunctionType::Unused:
+                // These types do not have iseqs allocated for them and therefore have no name.
+                break;
+        }
+    }
+
+    return blockLocationNames;
 }
 
 } // namespace
@@ -579,7 +688,8 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<llvm::DISubprogram *> blockScopes(cfg.maxRubyBlockId + 1, nullptr);
     getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc, blockTypes, rubyBlock2Function, blockScopes);
 
-    auto blockLevels = getBlockLevels(blockParents, blockTypes);
+    auto [blockLevels, blockNestingLevels] = getBlockLevels(blockParents, blockTypes);
+    auto blockLocationNames = getBlockLocationNames(cs, cfg, blockLevels, blockNestingLevels, blockParents, blockTypes);
 
     auto [aliases, symbols] = setupAliasesAndKeywords(cs, cfg);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
@@ -785,6 +895,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(blockScopes),
         move(blockUsesBreak),
         hasReturnFromBlock,
+        move(blockLocationNames),
     };
 
     auto [llvmVariables, selfVariables] = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation);
