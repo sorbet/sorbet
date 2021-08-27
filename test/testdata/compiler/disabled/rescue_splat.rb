@@ -6,22 +6,27 @@ def rescue_ok?(cases, &blk)
   begin
     blk.call
   rescue *cases
-    :ok
+    :rescued_from_splat
+  rescue
+    :rescued_from_catch_all
   else
-    :ko
+    :no_exception
   end
 end
 
-cases = [ArgumentError, RegexpError]
-p rescue_ok?(cases) do
-  Regexp.new("?")
-end
-p rescue_ok?(cases) do
-  1.to_a
-end
-p rescue_ok?(cases) do
-  raise "Uncaught"
-end
-p rescue_ok?(cases) do
-  [1, 2, 3].first(4, 5)
-end
+cases = [ArgumentError, TypeError]
+p (rescue_ok?(cases) do
+     T.unsafe(3.0) + "aha"
+   end)
+p (rescue_ok?(cases) do
+     T.unsafe(1).to_a
+   end)
+p (rescue_ok?(cases) do
+     raise "Uncaught"
+   end)
+p (rescue_ok?(cases) do
+     T.unsafe([1, 2, 3]).first(4, 5)
+   end)
+p (rescue_ok?(cases) do
+     2+2
+   end)
