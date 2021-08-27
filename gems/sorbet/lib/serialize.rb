@@ -346,7 +346,7 @@ class Sorbet::Private::Serialize
       # generate. (Coincidentally, that is why Ruby 2.7+ uses those names,
       # so that user code cannot mess with the forwarded arguments)
       if ["*", "**", "&"].include?(name.to_s)
-        name = '_' + (uniq == 0 ? '' : uniq.to_s)
+        name = 'arg' + (uniq == 0 ? '' : uniq.to_s)
         uniq += 1
       end
 
