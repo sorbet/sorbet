@@ -11,6 +11,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     module <emptyTree>::<C Package_Package$1>::<C Package>::<C Subpackage><<C <todo sym>>> < ()
       <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>::<C SubpackageClass>
     end
+
+    class <emptyTree>::<C Package_Package$1>::<C Package>::<C <Magic>><<C <todo sym>>> < ()
+    end
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Package_Package$1>::<C Package>::<C Subpackage><<C <todo sym>>> < ()
+      <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>::<C SubpackageClass>
+    end
+
+    <emptyTree>::<C Package_Package$1>::<C Package> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
@@ -51,6 +62,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     module <emptyTree>::<C Package_Subpackage_Package$1>::<C Package><<C <todo sym>>> < ()
       <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>
     end
+
+    class <emptyTree>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>::<C <Magic>><<C <todo sym>>> < ()
+    end
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Package_Subpackage_Package$1>::<C Package><<C <todo sym>>> < ()
+      <emptyTree>::<C InnerClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C InnerClass>
+    end
+
+    module <emptyTree>::<C Package_Subpackage_Package$1>::<C Package><<C <todo sym>>> < ()
+      <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>
+    end
+
+    <emptyTree>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)

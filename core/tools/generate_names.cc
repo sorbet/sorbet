@@ -407,10 +407,11 @@ NameDef names[] = {
 
     // Packager
     {"import"},
+    {"test_import"},
     {"export_", "export"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageRegistry", "<PackageRegistry>", true},
-    {"PackageMethods", "<PackageMethods>", true},
+    {"PackageTests", "<PackageTests>", true},
 
     // Compiler
     {"runningCompiled_p", "running_compiled?"},
@@ -500,6 +501,7 @@ NameDef names[] = {
     {"Thread", "Thread", true},
     {"Configuration", "Configuration", true},
     {"Compiler", "Compiler", true},
+    {"Test", "Test", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {
