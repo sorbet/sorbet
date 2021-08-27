@@ -213,6 +213,21 @@ ast::ExpressionPtr name2Expr(core::NameRef name, ast::ExpressionPtr scope = ast:
     return ast::MK::UnresolvedConstant(loc, move(scope), name);
 }
 
+void rescopeIntoPackageDefs(ast::ExpressionPtr &name) {
+    auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(name);
+    // this should only be called on things which are indeed constant
+    // lits, but we'll handle other cases gracefully
+    if (scope == nullptr) {
+        return;
+    }
+    // keep going until we find the root scope of this constant
+    while (auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(scope->scope)) {
+        scope = cnst;
+    }
+    // and prepend our internal non-writeable name here
+    scope->scope = name2Expr(core::Names::Constants::PackageDefs());
+}
+
 ast::ExpressionPtr FullyQualifiedName::toLiteral(core::LocOffsets loc) const {
     ast::ExpressionPtr name = ast::MK::EmptyTree();
     for (auto part : parts) {
@@ -438,6 +453,9 @@ struct PackageInfoFinder {
                     }
                 }
                 info->importedPackageNames.emplace_back(move(name));
+                // now that we've resolved it, point to the constant
+                // created in the `<PackageDefs>` namespace
+                rescopeIntoPackageDefs(send.args[0]);
             }
         }
 
@@ -467,15 +485,7 @@ struct PackageInfoFinder {
             // otherwise our package definitions can conflict with top-level
             // names. (e.g. if we have a package named `Foo`, it'll conflict
             // with `::Foo`.)
-            auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
-            // this should be enforced by the above `if`
-            ENFORCE(scope != nullptr);
-            // keep going until we find the root scope of this constant
-            while (auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(scope->scope)) {
-                scope = cnst;
-            }
-            // and prepend our internal non-writeable name here
-            scope->scope = name2Expr(core::Names::Constants::PackageDefs());
+            rescopeIntoPackageDefs(classDef.name);
 
         } else {
             if (auto e = ctx.beginError(classDef.loc, core::errors::Packager::MultiplePackagesInOneFile)) {
