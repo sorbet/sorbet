@@ -1,8 +1,8 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C Project>::<C Foo>)
+  class <emptyTree>::<C <PackageDefs>>::<C Project>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C <PackageDefs>>::<C Project>::<C Foo>)
 
-    <self>.import(<emptyTree>::<C Project>::<C Baz>)
+    <self>.import(<emptyTree>::<C <PackageDefs>>::<C Project>::<C Baz>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C Baz><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class <emptyTree>::<C <PackageDefs>>::<C Project>::<C Baz><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package$1>::<C Project>::<C Baz>::<C C>)
   end
 
@@ -51,41 +51,37 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package$1><<C <todo sym>>> < ()
-    class <emptyTree>::<C Project>::<C Baz>::<C C><<C <todo sym>>> < (::<todo sym>)
-      ::Sorbet::Private::Static.sig(<self>) do ||
-        <self>.void()
-      end
-
-      def self.c<<todo method>>(&<blk>)
-        <emptyTree>
-      end
-
-      <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-      ::Sorbet::Private::Static.keep_self_def(<self>, :c, :normal)
+  class <emptyTree>::<C Project>::<C Baz>::<C C><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
     end
+
+    def self.c<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :c, :normal)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1><<C <todo sym>>> < ()
-    class <emptyTree>::<C Project>::<C Foo>::<C B><<C <todo sym>>> < (::<todo sym>)
-      ::Sorbet::Private::Static.sig(<self>) do ||
-        <self>.void()
-      end
-
-      def self.b<<todo method>>(&<blk>)
-        <emptyTree>
-      end
-
-      <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-      ::Sorbet::Private::Static.keep_self_def(<self>, :b, :normal)
+  class <emptyTree>::<C Project>::<C Foo>::<C B><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
     end
+
+    def self.b<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :b, :normal)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class <emptyTree>::<C <PackageDefs>>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C B>)
   end
 

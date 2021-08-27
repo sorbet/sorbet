@@ -1,6 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Toplevel><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Toplevel_Package$1>::<C Toplevel>)
+  class <emptyTree>::<C <PackageDefs>>::<C Toplevel><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
@@ -31,14 +30,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C User><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C Toplevel>)
+  class <emptyTree>::<C <PackageDefs>>::<C Project>::<C User><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C <PackageDefs>>::<C Toplevel>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C Package>::<C User><<C <todo sym>>> < ()
-    module <emptyTree>::<C Thing><<C <todo sym>>> < ()
-      ::<root>::<C Toplevel>.hello()
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_User_Package$1><<C <todo sym>>> < ()
+    module <emptyTree>::<C Project>::<C User><<C <todo sym>>> < ()
+      module <emptyTree>::<C Thing><<C <todo sym>>> < ()
+        ::<root>::<C Toplevel>.hello()
+      end
     end
   end
 end

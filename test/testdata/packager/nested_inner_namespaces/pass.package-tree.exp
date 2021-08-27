@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C RootPackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C RootPackage>::<C Foo>)
+  class <emptyTree>::<C <PackageDefs>>::<C RootPackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C <PackageDefs>>::<C RootPackage>::<C Foo>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C RootPackage>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class <emptyTree>::<C <PackageDefs>>::<C RootPackage>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package$1>::<C RootPackage>::<C Foo>::<C Constant>)
 
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package$1>::<C RootPackage>::<C Foo>::<C Bar>::<C Constant>)

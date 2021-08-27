@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C Project>::<C Foo>)
+  class <emptyTree>::<C <PackageDefs>>::<C Project>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C <PackageDefs>>::<C Project>::<C Foo>)
 
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C Bar>)
 
@@ -62,8 +62,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C Project>::<C Bar>)
+  class <emptyTree>::<C <PackageDefs>>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C <PackageDefs>>::<C Project>::<C Bar>)
 
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C Foo>)
 
