@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 # typed: strict
+# enable-packager: true
 
 class Toplevel < PackageSpec
-  export Toplevel
 end
