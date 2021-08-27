@@ -1,16 +1,16 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class <emptyTree>::<C <PackageDefs>>::<C A><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(123)
 
     <self>.import("hello")
 
     <self>.import(<self>.method())
 
-    <self>.import(<emptyTree>::<C REFERENCE>)
+    <self>.import(<emptyTree>::<C <PackageDefs>>::<C REFERENCE>)
 
-    <self>.import(<emptyTree>::<C B>)
+    <self>.import(<emptyTree>::<C <PackageDefs>>::<C B>)
 
-    <self>.import(<emptyTree>::<C B>)
+    <self>.import(<emptyTree>::<C <PackageDefs>>::<C B>)
 
     <self>.export(123)
 
@@ -74,8 +74,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C A>)
+  class <emptyTree>::<C <PackageDefs>>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C <PackageDefs>>::<C A>)
 
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BClass>)
 

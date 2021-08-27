@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Package><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C Package>::<C Subpackage>)
+  class <emptyTree>::<C <PackageDefs>>::<C Package><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C <PackageDefs>>::<C Package>::<C Subpackage>)
 
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>)
 
@@ -37,8 +37,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Package>::<C Subpackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C Package>)
+  class <emptyTree>::<C <PackageDefs>>::<C Package>::<C Subpackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C <PackageDefs>>::<C Package>)
 
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>::<C SubpackageClass>)
   end
