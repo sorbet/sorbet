@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: strict
 
-module ::Toplevel # error: was previously defined
+module ::Toplevel
   extend T::Sig
 
   sig {void}
