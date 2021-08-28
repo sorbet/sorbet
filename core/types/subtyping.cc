@@ -352,16 +352,20 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     if (auto *a2 = cast_type<TupleType>(t2)) {
                         if (a1.elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                             vector<TypePtr> elemLubs;
+                            elemLubs.reserve(a1.elems.size());
                             bool isSubType1 = true;
                             bool isSubType2 = true;
                             int i = -1;
                             for (auto &el2 : a2->elems) {
                                 ++i;
-                                isSubType1 = isSubType1 && Types::isSubType(gs, a1.elems[i], el2);
-                                isSubType2 = isSubType2 && Types::isSubType(gs, el2, a1.elems[i]);
+                                auto dl1 = Types::dropLiteral(gs, a1.elems[i]);
+                                auto dl2 = Types::dropLiteral(gs, el2);
+                                elemLubs.emplace_back(dl1);
+                                isSubType1 = isSubType1 && Types::isSubType(gs, dl1, dl2);
+                                isSubType2 = isSubType2 && Types::isSubType(gs, dl2, dl1);
                             }
                             if (isSubType1 && isSubType2) {
-                                result = t1;
+                                result = make_type<TupleType>(move(elemLubs));
                             } else {
                                 result = OrType::make_shared(t1, t2);
                             }
