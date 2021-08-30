@@ -61,6 +61,7 @@ struct SorbetLineNumberInfo {
 SORBET_ALIVE(VALUE, rb_id2sym, (ID));
 SORBET_ALIVE(VALUE, rb_errinfo, ());
 SORBET_ALIVE(VALUE, rb_obj_is_kind_of, (VALUE, VALUE) __attribute__((const)));
+SORBET_ALIVE(VALUE, rb_reg_new, (const char *, long, int));
 
 SORBET_ALIVE(const char *, sorbet_dbg_p, (VALUE obj));
 SORBET_ALIVE(void, sorbet_stopInDebugger, (void));
@@ -660,13 +661,6 @@ VALUE sorbet_cPtrToRubyString(const char *ptr, long length) {
 SORBET_INLINE
 VALUE sorbet_cPtrToRubyStringFrozen(const char *ptr, long length) {
     VALUE ret = rb_fstring_new(ptr, length);
-    rb_gc_register_mark_object(ret);
-    return ret;
-}
-
-SORBET_INLINE
-VALUE sorbet_cPtrToRubyRegexpFrozen(const char *ptr, long length, int options) {
-    VALUE ret = rb_reg_new(ptr, length, options);
     rb_gc_register_mark_object(ret);
     return ret;
 }

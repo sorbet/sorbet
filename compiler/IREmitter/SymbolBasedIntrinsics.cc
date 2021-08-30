@@ -638,7 +638,10 @@ public:
         }
         auto &builder = builderCast(mcctx.build);
         auto str = literal.asName(cs).shortName(cs);
-        return Payload::cPtrToRubyRegexp(cs, builder, str, options);
+        auto *llvmString = Payload::toCString(cs, str, builder);
+        auto *length = llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()));
+        auto *llvmOptions = llvm::ConstantInt::get(cs, llvm::APInt(32, options));
+        return builder.CreateCall(cs.getFunction("rb_reg_new"), {llvmString, length, llvmOptions}, "regexp");
     };
 
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
