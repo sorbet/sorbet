@@ -392,12 +392,19 @@ public:
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs != nullptr) {
             auto &pkgName = requiredNamespace();
+            bool needsLitPush = nameParts.size() < pkgName.size() && rootConsts == 0;
+            if (needsLitPush) {
+                pushConstantLit(lhs);
+            }
             if (rootConsts == 0 && !isPrefix(pkgName, nameParts)) {
                 if (auto e = ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
                     e.setHeader("Constants may not be defined outside of the enclosing package namespace `{}`",
                                 fmt::map_join(pkgName.begin(), pkgName.end(),
                                               "::", [&](const auto &nr) { return nr.show(ctx); }));
                 }
+            }
+            if (needsLitPush) {
+                popConstantLit(lhs);
             }
         }
         return original;
