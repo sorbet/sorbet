@@ -115,13 +115,6 @@ Layout/EmptyLinesAroundModuleBody:
     - 'lib/types/props/private/deserializer_generator.rb'
     - 'lib/types/props/private/serializer_generator.rb'
 
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: IndentationWidth.
-# SupportedStyles: special_inside_parentheses, consistent, align_brackets
-Layout/FirstArrayElementIndentation:
-  EnforcedStyle: consistent
-
 # Offense count: 20
 # Cop supports --auto-correct.
 # Configuration parameters: Width, IgnoredPatterns.

@@ -28,6 +28,8 @@ Style/TrivialAccessors:
   IgnoreClassMethods: true
 Style/EmptyElse:
   EnforcedStyle: empty
+Layout/FirstArrayElementIndentation:
+  EnforcedStyle: consistent
 
 # This doesn't play very well with implementations of Sorbet abstract methods
 Lint/UnusedMethodArgument:
