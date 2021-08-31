@@ -157,7 +157,7 @@ module T::Props
         validate_lack_of_side_effects(try, whitelisted_methods_for_deserialize)
 
         assert_equal(:resbody, rescue_body.type)
-        exceptions, assignment, handler =  rescue_body.children
+        exceptions, assignment, handler = rescue_body.children
         assert_equal(:array, exceptions.type)
         exceptions.children.each {|c| assert_equal(:const, c.type)}
         assert_equal(:lvasgn, assignment.type)

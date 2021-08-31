@@ -116,7 +116,7 @@ module Opus::Types::Test
           mod = Module.new do
             extend T::Sig
             sig {params(a: Integer, b: Integer).returns(Integer)}
-            def self.foo(a: 1, b:) # rubocop:disable Style/KeywordParametersOrder
+            def self.foo(a: 1, b:)
               a + b
             end
           end
@@ -372,7 +372,7 @@ module Opus::Types::Test
               (1...10)
             end
 
-            assert_equal((1...10), @mod.foo )
+            assert_equal((1...10), @mod.foo)
           end
 
           it 'permits a range that has an integer start and no end' do
@@ -381,7 +381,7 @@ module Opus::Types::Test
               (1...nil)
             end
 
-            assert_equal((1...nil), @mod.foo )
+            assert_equal((1...nil), @mod.foo)
           end
 
           # Ruby 2.6 does not support ranges with boundless starts
@@ -392,7 +392,7 @@ module Opus::Types::Test
                 (nil...10)
               end
 
-              assert_equal((nil...10), @mod.foo )
+              assert_equal((nil...10), @mod.foo)
             end
           end
 
@@ -402,7 +402,7 @@ module Opus::Types::Test
               (nil...nil)
             end
 
-            assert_equal((nil...nil), @mod.foo )
+            assert_equal((nil...nil), @mod.foo)
           end
         end
       end

@@ -21,7 +21,7 @@ module SorbetBenchmarks
     def self.run
       poro = ExamplePoro.new
       poro.attr = 0
-      10_000.times { poro.attr }
+      10_000.times {poro.attr}
       result = Benchmark.measure do
         100_000.times do
           poro.attr
@@ -40,7 +40,7 @@ module SorbetBenchmarks
       puts result
 
       struct = ExampleStruct.new(prop: 0)
-      10_000.times { struct.prop }
+      10_000.times {struct.prop}
       result = Benchmark.measure do
         100_000.times do
           struct.prop
@@ -59,7 +59,7 @@ module SorbetBenchmarks
       puts result
 
       struct = ExampleStruct.new(prop: 0)
-      10_000.times { struct.ifunset }
+      10_000.times {struct.ifunset}
       result = Benchmark.measure do
         100_000.times do
           struct.ifunset
