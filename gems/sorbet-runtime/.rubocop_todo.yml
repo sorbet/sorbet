@@ -273,13 +273,6 @@ Naming/PredicateName:
     - 'lib/types/props/optional.rb'
     - 'lib/types/utils.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect.
-Security/JSONLoad:
-  Exclude:
-    - 'test/types/props/serializable.rb'
-
 # Offense count: 53
 # Configuration parameters: EnforcedStyle, AllowModifiersOnSymbols.
 # SupportedStyles: inline, group
