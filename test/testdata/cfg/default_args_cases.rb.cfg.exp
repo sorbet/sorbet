@@ -35,7 +35,7 @@ subgraph "cluster_::Test#test1" {
     "bb::Test#test1_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Test#test1_1" -> "bb::Test#test1_1" [style="bold"];
@@ -95,7 +95,7 @@ subgraph "cluster_::Test#test1" {
     "bb::Test#test1_9" [
         shape = rectangle;
         color = black;
-        label = "block[id=9, rubyBlockId=0](a: Integer, b: Integer, c: Integer, d: Integer, x: T.nilable(Integer), e: Integer, f: String)\lblk: T.proc.void = load_arg(blk)\l<cfgAlias>$14: T.class_of(T) = alias <C T>\l<statTemp>$12: Integer = <cfgAlias>$14: T.class_of(T).reveal_type(a: Integer)\l<cfgAlias>$18: T.class_of(T) = alias <C T>\l<statTemp>$16: Integer = <cfgAlias>$18: T.class_of(T).reveal_type(b: Integer)\l<cfgAlias>$22: T.class_of(T) = alias <C T>\l<statTemp>$20: Integer = <cfgAlias>$22: T.class_of(T).reveal_type(c: Integer)\l<cfgAlias>$26: T.class_of(T) = alias <C T>\l<statTemp>$24: Integer = <cfgAlias>$26: T.class_of(T).reveal_type(d: Integer)\l<cfgAlias>$30: T.class_of(T) = alias <C T>\l<statTemp>$28: Integer = <cfgAlias>$30: T.class_of(T).reveal_type(e: Integer)\l<cfgAlias>$34: T.class_of(T) = alias <C T>\l<statTemp>$32: String = <cfgAlias>$34: T.class_of(T).reveal_type(f: String)\l<cfgAlias>$38: T.class_of(T) = alias <C T>\l<statTemp>$36: T.proc.void = <cfgAlias>$38: T.class_of(T).reveal_type(blk: T.proc.void)\l<statTemp>$40: Sorbet::Private::Static::Void = blk: T.proc.void.call()\l<cfgAlias>$43: T.class_of(T) = alias <C T>\l<returnMethodTemp>$2: T.nilable(Integer) = <cfgAlias>$43: T.class_of(T).reveal_type(x: T.nilable(Integer))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
+        label = "block[id=9, rubyBlockId=0](a: Integer, b: Integer, c: Integer, d: Integer, x: T.nilable(Integer), e: Integer, f: String)\lblk: T.proc.void = load_arg(blk)\l<cfgAlias>$14: T.class_of(T) = alias <C T>\l<statTemp>$12: Integer = <cfgAlias>$14: T.class_of(T).reveal_type(a: Integer)\l<cfgAlias>$18: T.class_of(T) = alias <C T>\l<statTemp>$16: Integer = <cfgAlias>$18: T.class_of(T).reveal_type(b: Integer)\l<cfgAlias>$22: T.class_of(T) = alias <C T>\l<statTemp>$20: Integer = <cfgAlias>$22: T.class_of(T).reveal_type(c: Integer)\l<cfgAlias>$26: T.class_of(T) = alias <C T>\l<statTemp>$24: Integer = <cfgAlias>$26: T.class_of(T).reveal_type(d: Integer)\l<cfgAlias>$30: T.class_of(T) = alias <C T>\l<statTemp>$28: Integer = <cfgAlias>$30: T.class_of(T).reveal_type(e: Integer)\l<cfgAlias>$34: T.class_of(T) = alias <C T>\l<statTemp>$32: String = <cfgAlias>$34: T.class_of(T).reveal_type(f: String)\l<cfgAlias>$38: T.class_of(T) = alias <C T>\l<statTemp>$36: T.proc.void = <cfgAlias>$38: T.class_of(T).reveal_type(blk: T.proc.void)\l<statTemp>$40: Sorbet::Private::Static::Void = blk: T.proc.void.call()\l<cfgAlias>$43: T.class_of(T) = alias <C T>\l<returnMethodTemp>$2: T.nilable(Integer) = <cfgAlias>$43: T.class_of(T).reveal_type(x: T.nilable(Integer))\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
     ];
 
     "bb::Test#test1_9" -> "bb::Test#test1_1" [style="bold"];
@@ -117,7 +117,7 @@ subgraph "cluster_::Test#test2" {
     "bb::Test#test2_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Test#test2_1" -> "bb::Test#test2_1" [style="bold"];
@@ -138,7 +138,7 @@ subgraph "cluster_::Test#test2" {
     "bb::Test#test2_4" [
         shape = rectangle;
         color = black;
-        label = "block[id=4, rubyBlockId=0](x: Integer)\lrest: T::Array[Integer] = load_arg(rest)\lblk: T.proc.void = load_arg(blk)\l<cfgAlias>$8: T.class_of(T) = alias <C T>\l<statTemp>$6: Integer = <cfgAlias>$8: T.class_of(T).reveal_type(x: Integer)\l<cfgAlias>$12: T.class_of(T) = alias <C T>\l<statTemp>$10: T::Array[Integer] = <cfgAlias>$12: T.class_of(T).reveal_type(rest: T::Array[Integer])\l<cfgAlias>$15: T.class_of(T) = alias <C T>\l<returnMethodTemp>$2: T.proc.void = <cfgAlias>$15: T.class_of(T).reveal_type(blk: T.proc.void)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.proc.void\l<unconditional>\l"
+        label = "block[id=4, rubyBlockId=0](x: Integer)\lrest: T::Array[Integer] = load_arg(rest)\lblk: T.proc.void = load_arg(blk)\l<cfgAlias>$8: T.class_of(T) = alias <C T>\l<statTemp>$6: Integer = <cfgAlias>$8: T.class_of(T).reveal_type(x: Integer)\l<cfgAlias>$12: T.class_of(T) = alias <C T>\l<statTemp>$10: T::Array[Integer] = <cfgAlias>$12: T.class_of(T).reveal_type(rest: T::Array[Integer])\l<cfgAlias>$15: T.class_of(T) = alias <C T>\l<returnMethodTemp>$2: T.proc.void = <cfgAlias>$15: T.class_of(T).reveal_type(blk: T.proc.void)\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.proc.void\l<unconditional>\l"
     ];
 
     "bb::Test#test2_4" -> "bb::Test#test2_1" [style="bold"];
@@ -160,7 +160,7 @@ subgraph "cluster_::Test#test3" {
     "bb::Test#test3_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Test#test3_1" -> "bb::Test#test3_1" [style="bold"];
@@ -181,7 +181,7 @@ subgraph "cluster_::Test#test3" {
     "bb::Test#test3_4" [
         shape = rectangle;
         color = black;
-        label = "block[id=4, rubyBlockId=0](x: Integer)\lrest: T::Hash[Symbol, Integer] = load_arg(rest)\lblk: T.proc.void = load_arg(blk)\l<cfgAlias>$8: T.class_of(T) = alias <C T>\l<statTemp>$6: Integer = <cfgAlias>$8: T.class_of(T).reveal_type(x: Integer)\l<cfgAlias>$12: T.class_of(T) = alias <C T>\l<statTemp>$10: T::Hash[Symbol, Integer] = <cfgAlias>$12: T.class_of(T).reveal_type(rest: T::Hash[Symbol, Integer])\l<cfgAlias>$15: T.class_of(T) = alias <C T>\l<returnMethodTemp>$2: T.proc.void = <cfgAlias>$15: T.class_of(T).reveal_type(blk: T.proc.void)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.proc.void\l<unconditional>\l"
+        label = "block[id=4, rubyBlockId=0](x: Integer)\lrest: T::Hash[Symbol, Integer] = load_arg(rest)\lblk: T.proc.void = load_arg(blk)\l<cfgAlias>$8: T.class_of(T) = alias <C T>\l<statTemp>$6: Integer = <cfgAlias>$8: T.class_of(T).reveal_type(x: Integer)\l<cfgAlias>$12: T.class_of(T) = alias <C T>\l<statTemp>$10: T::Hash[Symbol, Integer] = <cfgAlias>$12: T.class_of(T).reveal_type(rest: T::Hash[Symbol, Integer])\l<cfgAlias>$15: T.class_of(T) = alias <C T>\l<returnMethodTemp>$2: T.proc.void = <cfgAlias>$15: T.class_of(T).reveal_type(blk: T.proc.void)\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.proc.void\l<unconditional>\l"
     ];
 
     "bb::Test#test3_4" -> "bb::Test#test3_1" [style="bold"];

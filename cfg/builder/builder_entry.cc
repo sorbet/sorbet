@@ -82,6 +82,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
             presentCont = joinBlocks(cctx, presentCont, defaultCont);
         }
 
+        cctx.eagerReturn = true;
         cont = walk(cctx.withTarget(retSym), md.rhs, presentCont);
     }
     // Past this point, res->localVariables is a fixed size.
@@ -101,6 +102,10 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     } else {
         rvLoc = cont->exprs.back().loc;
     }
+
+    // This might insert a duplicate return if the user wrote `return` literally, or if
+    // `eagerReturn` caused a `return` instruction to be added directly after another instruction,
+    // so we mark it synthetic to hide it from dead code checking.
     synthesizeExpr(cont, retSym1, rvLoc, make_unique<Return>(retSym, rvLoc)); // dead assign.
     jumpToDead(cont, *res.get(), rvLoc);
 

@@ -71,31 +71,24 @@ subgraph "cluster_::Examples#i_like_exps" {
     "bb::Examples#i_like_exps_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Examples#i_like_exps_1" -> "bb::Examples#i_like_exps_1" [style="bold"];
     "bb::Examples#i_like_exps_2" [
         shape = rectangle;
         color = black;
-        label = "block[id=2, rubyBlockId=0]()\l<returnMethodTemp>$2: Integer(1) = 1\l<unconditional>\l"
+        label = "block[id=2, rubyBlockId=0]()\l<returnMethodTemp>$2: Integer(1) = 1\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
     ];
 
-    "bb::Examples#i_like_exps_2" -> "bb::Examples#i_like_exps_4" [style="bold"];
+    "bb::Examples#i_like_exps_2" -> "bb::Examples#i_like_exps_1" [style="bold"];
     "bb::Examples#i_like_exps_3" [
         shape = rectangle;
         color = red;
-        label = "block[id=3, rubyBlockId=0]()\l<returnMethodTemp>$2 = 2\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0]()\l<returnMethodTemp>$2 = 2\l<returnMethodTemp>$2 = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
-    "bb::Examples#i_like_exps_3" -> "bb::Examples#i_like_exps_4" [style="bold"];
-    "bb::Examples#i_like_exps_4" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=4, rubyBlockId=0](<returnMethodTemp>$2: Integer(1))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
-    ];
-
-    "bb::Examples#i_like_exps_4" -> "bb::Examples#i_like_exps_1" [style="bold"];
+    "bb::Examples#i_like_exps_3" -> "bb::Examples#i_like_exps_1" [style="bold"];
 }
 
 subgraph "cluster_::Examples#return_in_one_branch1" {
@@ -114,7 +107,7 @@ subgraph "cluster_::Examples#return_in_one_branch1" {
     "bb::Examples#return_in_one_branch1_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Examples#return_in_one_branch1_1" -> "bb::Examples#return_in_one_branch1_1" [style="bold"];
@@ -128,7 +121,7 @@ subgraph "cluster_::Examples#return_in_one_branch1" {
     "bb::Examples#return_in_one_branch1_3" [
         shape = rectangle;
         color = red;
-        label = "block[id=3, rubyBlockId=0]()\l<returnMethodTemp>$2 = 2\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0]()\l<returnMethodTemp>$2 = 2\l<returnMethodTemp>$2 = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Examples#return_in_one_branch1_3" -> "bb::Examples#return_in_one_branch1_1" [style="bold"];
@@ -150,14 +143,14 @@ subgraph "cluster_::Examples#return_in_one_branch2" {
     "bb::Examples#return_in_one_branch2_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Examples#return_in_one_branch2_1" -> "bb::Examples#return_in_one_branch2_1" [style="bold"];
     "bb::Examples#return_in_one_branch2_2" [
         shape = rectangle;
         color = black;
-        label = "block[id=2, rubyBlockId=0]()\l<returnMethodTemp>$2: Integer(1) = 1\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
+        label = "block[id=2, rubyBlockId=0]()\l<returnMethodTemp>$2: Integer(1) = 1\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::Examples#return_in_one_branch2_2" -> "bb::Examples#return_in_one_branch2_1" [style="bold"];
@@ -186,7 +179,7 @@ subgraph "cluster_::Examples#variables" {
     "bb::Examples#variables_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_1" -> "bb::Examples#variables_1" [style="bold"];
@@ -230,7 +223,7 @@ subgraph "cluster_::Examples#variables" {
     "bb::Examples#variables_7" [
         shape = rectangle;
         color = black;
-        label = "block[id=7, rubyBlockId=0](a: Integer(1), b: Integer(2))\l<returnMethodTemp>$2: Integer = a: Integer(1).+(b: Integer(2))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=0](a: Integer(1), b: Integer(2))\l<returnMethodTemp>$2: Integer = a: Integer(1).+(b: Integer(2))\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_7" -> "bb::Examples#variables_1" [style="bold"];
@@ -252,7 +245,7 @@ subgraph "cluster_::Examples#variables_and_loop" {
     "bb::Examples#variables_and_loop_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_and_loop_1" -> "bb::Examples#variables_and_loop_1" [style="bold"];
@@ -282,7 +275,7 @@ subgraph "cluster_::Examples#variables_and_loop" {
     "bb::Examples#variables_and_loop_7" [
         shape = rectangle;
         color = red;
-        label = "block[id=7, rubyBlockId=0](b: NilClass)\l<returnMethodTemp>$2 = b\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=0](b: NilClass)\l<returnMethodTemp>$2 = b\l<returnMethodTemp>$2 = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_and_loop_7" -> "bb::Examples#variables_and_loop_1" [style="bold"];
@@ -325,7 +318,7 @@ subgraph "cluster_::Examples#variables_loop_if" {
     "bb::Examples#variables_loop_if_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_loop_if_1" -> "bb::Examples#variables_loop_if_1" [style="bold"];
@@ -341,7 +334,7 @@ subgraph "cluster_::Examples#variables_loop_if" {
     "bb::Examples#variables_loop_if_4" [
         shape = rectangle;
         color = red;
-        label = "block[id=4, rubyBlockId=0](b: NilClass)\l<returnMethodTemp>$2 = b\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+        label = "block[id=4, rubyBlockId=0](b: NilClass)\l<returnMethodTemp>$2 = b\l<returnMethodTemp>$2 = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_loop_if_4" -> "bb::Examples#variables_loop_if_1" [style="bold"];
@@ -386,31 +379,24 @@ subgraph "cluster_::Examples#take_arguments" {
     "bb::Examples#take_arguments_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Examples#take_arguments_1" -> "bb::Examples#take_arguments_1" [style="bold"];
     "bb::Examples#take_arguments_2" [
         shape = rectangle;
         color = red;
-        label = "block[id=2, rubyBlockId=0]()\l<returnMethodTemp>$2 = 2\l<unconditional>\l"
+        label = "block[id=2, rubyBlockId=0]()\l<returnMethodTemp>$2 = 2\l<returnMethodTemp>$2 = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
-    "bb::Examples#take_arguments_2" -> "bb::Examples#take_arguments_4" [style="bold"];
+    "bb::Examples#take_arguments_2" -> "bb::Examples#take_arguments_1" [style="bold"];
     "bb::Examples#take_arguments_3" [
         shape = rectangle;
         color = black;
-        label = "block[id=3, rubyBlockId=0](i: T.untyped)\l<returnMethodTemp>$2: T.untyped = i\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](i: T.untyped)\l<returnMethodTemp>$2: T.untyped = i\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
-    "bb::Examples#take_arguments_3" -> "bb::Examples#take_arguments_4" [style="bold"];
-    "bb::Examples#take_arguments_4" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=4, rubyBlockId=0](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
-    ];
-
-    "bb::Examples#take_arguments_4" -> "bb::Examples#take_arguments_1" [style="bold"];
+    "bb::Examples#take_arguments_3" -> "bb::Examples#take_arguments_1" [style="bold"];
 }
 
 subgraph "cluster_::<Class:Examples>#<static-init>" {

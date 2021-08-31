@@ -26,7 +26,11 @@ private:
     static void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocOffsets loc);
     static void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc);
     static void synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets loc, std::unique_ptr<Instruction> inst);
-    static BasicBlock *walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method);
+    [[nodiscard]] static BasicBlock *emitBinding(CFGContext cctx, BasicBlock *current, LocalRef var,
+                                                 core::LocOffsets loc, std::unique_ptr<Instruction> inst,
+                                                 bool eagerReturn);
+    static BasicBlock *walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method,
+                                bool eagerReturn);
     static std::tuple<LocalRef, BasicBlock *, BasicBlock *>
     walkDefault(CFGContext cctx, int argIndex, const core::ArgInfo &argInfo, LocalRef argLocal, core::LocOffsets argLoc,
                 ast::ExpressionPtr &def, BasicBlock *presentCont, BasicBlock *defaultCont);
@@ -41,6 +45,7 @@ public:
     LocalRef blockBreakTarget;
     int loops;
     bool isInsideRubyBlock;
+    bool eagerReturn;
     BasicBlock *nextScope;
     BasicBlock *breakScope;
     BasicBlock *rescueScope;
@@ -62,8 +67,8 @@ private:
     CFGContext(core::Context ctx, CFG &inWhat, LocalRef target, int loops, BasicBlock *nextScope,
                BasicBlock *breakScope, BasicBlock *rescueScope, UnorderedMap<core::SymbolRef, LocalRef> &aliases,
                UnorderedMap<core::NameRef, LocalRef> &discoveredUndeclaredFields, u4 &temporaryCounter)
-        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), isInsideRubyBlock(false), nextScope(nextScope),
-          breakScope(breakScope), rescueScope(rescueScope), aliases(aliases),
+        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), isInsideRubyBlock(false), eagerReturn(false),
+          nextScope(nextScope), breakScope(breakScope), rescueScope(rescueScope), aliases(aliases),
           discoveredUndeclaredFields(discoveredUndeclaredFields), temporaryCounter(temporaryCounter){};
 };
 } // namespace sorbet::cfg

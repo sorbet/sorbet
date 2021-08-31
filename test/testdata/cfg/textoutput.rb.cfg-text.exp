@@ -155,13 +155,14 @@ bb0(rubyBlockId=0):
     <castTemp>$9: T.untyped = x
     <statTemp>$3: String = cast(<castTemp>$9: T.untyped, String);
     <returnMethodTemp>$2: String = <statTemp>$3: String.+(y: T.untyped)
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String
+    <returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: String
     <unconditional>(bb0 -> bb1)
 
 # backedges
 #  bb0(rubyBlockId=0)
 bb1(rubyBlockId=0):
-    blockargs=()
+    blockargs=(<returnMethodTemp>$2)
+    <finalReturn> = return <returnMethodTemp>$2
     <unconditional>(bb1 -> bb1)
 
 }

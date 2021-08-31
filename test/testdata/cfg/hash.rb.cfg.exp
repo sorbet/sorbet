@@ -26,14 +26,14 @@ subgraph "cluster_::TestHash#something" {
     "bb::TestHash#something_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestHash = cast(<self>: NilClass, TestHash);\l<returnMethodTemp>$2: Integer(17) = 17\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(17)\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestHash = cast(<self>: NilClass, TestHash);\l<returnMethodTemp>$2: Integer(17) = 17\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer(17)\l<unconditional>\l"
     ];
 
     "bb::TestHash#something_0" -> "bb::TestHash#something_1" [style="bold"];
     "bb::TestHash#something_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestHash#something_1" -> "bb::TestHash#something_1" [style="bold"];
@@ -46,14 +46,14 @@ subgraph "cluster_::TestHash#test" {
     "bb::TestHash#test_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestHash = cast(<self>: NilClass, TestHash);\l<hashTemp>$3: T.untyped = <self>: TestHash.something()\l<hashTemp>$4: Symbol(:bar) = :bar\l<statTemp>$8: Integer(1) = 1\l<statTemp>$9: Integer(2) = 2\l<hashTemp>$6: Integer = <statTemp>$8: Integer(1).+(<statTemp>$9: Integer(2))\l<hashTemp>$7: Integer(2) = 2\l<magic>$10: T.class_of(<Magic>) = alias <C <Magic>>\l<returnMethodTemp>$2: T::Hash[T.untyped, T.untyped] = <magic>$10: T.class_of(<Magic>).<build-hash>(<hashTemp>$3: T.untyped, <hashTemp>$4: Symbol(:bar), <hashTemp>$6: Integer, <hashTemp>$7: Integer(2))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Hash[T.untyped, T.untyped]\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestHash = cast(<self>: NilClass, TestHash);\l<hashTemp>$3: T.untyped = <self>: TestHash.something()\l<hashTemp>$4: Symbol(:bar) = :bar\l<statTemp>$8: Integer(1) = 1\l<statTemp>$9: Integer(2) = 2\l<hashTemp>$6: Integer = <statTemp>$8: Integer(1).+(<statTemp>$9: Integer(2))\l<hashTemp>$7: Integer(2) = 2\l<magic>$10: T.class_of(<Magic>) = alias <C <Magic>>\l<returnMethodTemp>$2: T::Hash[T.untyped, T.untyped] = <magic>$10: T.class_of(<Magic>).<build-hash>(<hashTemp>$3: T.untyped, <hashTemp>$4: Symbol(:bar), <hashTemp>$6: Integer, <hashTemp>$7: Integer(2))\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T::Hash[T.untyped, T.untyped]\l<unconditional>\l"
     ];
 
     "bb::TestHash#test_0" -> "bb::TestHash#test_1" [style="bold"];
     "bb::TestHash#test_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestHash#test_1" -> "bb::TestHash#test_1" [style="bold"];
@@ -66,14 +66,14 @@ subgraph "cluster_::TestHash#test_shaped" {
     "bb::TestHash#test_shaped_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestHash = cast(<self>: NilClass, TestHash);\l<hashTemp>$3: Integer(1) = 1\l<hashTemp>$4: Integer(2) = 2\l<hashTemp>$5: Integer(2) = 2\l<hashTemp>$6: Integer(3) = 3\l<hashTemp>$7: Symbol(:foo) = :foo\l<hashTemp>$8: Symbol(:bar) = :bar\l<hashTemp>$9: Symbol(:baz) = :baz\l<hashTemp>$10: T.untyped = <self>: TestHash.something()\l<magic>$12: T.class_of(<Magic>) = alias <C <Magic>>\l<returnMethodTemp>$2: {Integer(1) => Integer(2), Integer(2) => Integer(3), foo: Symbol(:bar), baz: T.untyped} = <magic>$12: T.class_of(<Magic>).<build-hash>(<hashTemp>$3: Integer(1), <hashTemp>$4: Integer(2), <hashTemp>$5: Integer(2), <hashTemp>$6: Integer(3), <hashTemp>$7: Symbol(:foo), <hashTemp>$8: Symbol(:bar), <hashTemp>$9: Symbol(:baz), <hashTemp>$10: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: {Integer(1) => Integer(2), Integer(2) => Integer(3), foo: Symbol(:bar), baz: T.untyped}\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestHash = cast(<self>: NilClass, TestHash);\l<hashTemp>$3: Integer(1) = 1\l<hashTemp>$4: Integer(2) = 2\l<hashTemp>$5: Integer(2) = 2\l<hashTemp>$6: Integer(3) = 3\l<hashTemp>$7: Symbol(:foo) = :foo\l<hashTemp>$8: Symbol(:bar) = :bar\l<hashTemp>$9: Symbol(:baz) = :baz\l<hashTemp>$10: T.untyped = <self>: TestHash.something()\l<magic>$12: T.class_of(<Magic>) = alias <C <Magic>>\l<returnMethodTemp>$2: {Integer(1) => Integer(2), Integer(2) => Integer(3), foo: Symbol(:bar), baz: T.untyped} = <magic>$12: T.class_of(<Magic>).<build-hash>(<hashTemp>$3: Integer(1), <hashTemp>$4: Integer(2), <hashTemp>$5: Integer(2), <hashTemp>$6: Integer(3), <hashTemp>$7: Symbol(:foo), <hashTemp>$8: Symbol(:bar), <hashTemp>$9: Symbol(:baz), <hashTemp>$10: T.untyped)\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: {Integer(1) => Integer(2), Integer(2) => Integer(3), foo: Symbol(:bar), baz: T.untyped}\l<unconditional>\l"
     ];
 
     "bb::TestHash#test_shaped_0" -> "bb::TestHash#test_shaped_1" [style="bold"];
     "bb::TestHash#test_shaped_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestHash#test_shaped_1" -> "bb::TestHash#test_shaped_1" [style="bold"];

@@ -395,7 +395,7 @@ class T::Props::Decorator
   private def smart_coerce(type, enum:)
     # Backwards compatibility for pre-T::Types style
     type = T::Utils.coerce(type)
-    if enum.nil?
+    result = if enum.nil?
       type
     else
       nonnil_type = T::Utils.unwrap_nilable(type)
@@ -405,6 +405,7 @@ class T::Props::Decorator
         T.all(type, T.enum(enum))
       end
     end
+    T.unsafe(result)
   end
 
   # checked(:never) - Rules hash is expensive to check

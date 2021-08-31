@@ -74,7 +74,7 @@ def non_exhaustive_some_cases(x)
   when Integer
     x
   end
-end # error: Expected `Integer` but found `T.nilable(Integer)` for method result type
+end # error: Expected `Integer` but found `NilClass` for method result type
 
 sig {params(x: T.any(Integer, String)).returns(Integer)}
 def non_exhaustive_some_cases_unreachable_when(x)
@@ -84,4 +84,4 @@ def non_exhaustive_some_cases_unreachable_when(x)
   when Symbol
     3 # error: This code is unreachable
   end
-end # error: Expected `Integer` but found `T.nilable(Integer)` for method result type
+end # error: Expected `Integer` but found `NilClass` for method result type

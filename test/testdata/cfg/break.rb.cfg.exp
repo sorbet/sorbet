@@ -13,7 +13,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
@@ -36,7 +36,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_4" [
         shape = rectangle;
         color = black;
-        label = "block[id=4, rubyBlockId=0](target: T.any(T::Array[T.noreturn], Integer), <selfRestore>$9: Object)\l<cfgAlias>$20: T.class_of(T) = alias <C T>\l<returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer) = <cfgAlias>$20: T.class_of(T).reveal_type(target: T.any(T::Array[T.noreturn], Integer))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer)\l<unconditional>\l"
+        label = "block[id=4, rubyBlockId=0](target: T.any(T::Array[T.noreturn], Integer), <selfRestore>$9: Object)\l<cfgAlias>$20: T.class_of(T) = alias <C T>\l<returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer) = <cfgAlias>$20: T.class_of(T).reveal_type(target: T.any(T::Array[T.noreturn], Integer))\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer)\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];
@@ -56,14 +56,14 @@ subgraph "cluster_::Object#bar" {
     "bb::Object#bar_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<returnMethodTemp>$2: String(\"foo bar\") = \"foo bar\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: String(\"foo bar\")\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<returnMethodTemp>$2: String(\"foo bar\") = \"foo bar\"\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: String(\"foo bar\")\l<unconditional>\l"
     ];
 
     "bb::Object#bar_0" -> "bb::Object#bar_1" [style="bold"];
     "bb::Object#bar_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Object#bar_1" -> "bb::Object#bar_1" [style="bold"];

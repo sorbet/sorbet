@@ -26,14 +26,14 @@ subgraph "cluster_::Funcs#f" {
     "bb::Funcs#f_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Funcs = cast(<self>: NilClass, Funcs);\lx: Integer = load_arg(x)\l<returnMethodTemp>$2: Integer = x\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Funcs = cast(<self>: NilClass, Funcs);\lx: Integer = load_arg(x)\l<returnMethodTemp>$2: Integer = x\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Funcs#f_0" -> "bb::Funcs#f_1" [style="bold"];
     "bb::Funcs#f_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Funcs#f_1" -> "bb::Funcs#f_1" [style="bold"];
@@ -66,14 +66,14 @@ subgraph "cluster_::Funcs#g" {
     "bb::Funcs#g_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Funcs = cast(<self>: NilClass, Funcs);\ls: Symbol = load_arg(s)\l<returnMethodTemp>$2: Symbol = s\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Funcs = cast(<self>: NilClass, Funcs);\ls: Symbol = load_arg(s)\l<returnMethodTemp>$2: Symbol = s\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Symbol\l<unconditional>\l"
     ];
 
     "bb::Funcs#g_0" -> "bb::Funcs#g_1" [style="bold"];
     "bb::Funcs#g_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Funcs#g_1" -> "bb::Funcs#g_1" [style="bold"];
@@ -86,14 +86,14 @@ subgraph "cluster_::<Class:Funcs>#g" {
     "bb::<Class:Funcs>#g_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Funcs>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)\l  ]\l});\ls: Symbol = load_arg(s)\l<returnMethodTemp>$2: Symbol = s\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Funcs>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)\l  ]\l});\ls: Symbol = load_arg(s)\l<returnMethodTemp>$2: Symbol = s\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Symbol\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#g_0" -> "bb::<Class:Funcs>#g_1" [style="bold"];
     "bb::<Class:Funcs>#g_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#g_1" -> "bb::<Class:Funcs>#g_1" [style="bold"];
@@ -106,14 +106,14 @@ subgraph "cluster_::Funcs#h" {
     "bb::Funcs#h_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Funcs = cast(<self>: NilClass, Funcs);\ls: String = load_arg(s)\l<returnMethodTemp>$2: String = s\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: String\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Funcs = cast(<self>: NilClass, Funcs);\ls: String = load_arg(s)\l<returnMethodTemp>$2: String = s\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: String\l<unconditional>\l"
     ];
 
     "bb::Funcs#h_0" -> "bb::Funcs#h_1" [style="bold"];
     "bb::Funcs#h_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Funcs#h_1" -> "bb::Funcs#h_1" [style="bold"];
@@ -126,14 +126,14 @@ subgraph "cluster_::<Class:Funcs>#h" {
     "bb::<Class:Funcs>#h_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Funcs>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)\l  ]\l});\ls: String = load_arg(s)\l<returnMethodTemp>$2: String = s\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: String\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Funcs>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)\l  ]\l});\ls: String = load_arg(s)\l<returnMethodTemp>$2: String = s\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: String\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#h_0" -> "bb::<Class:Funcs>#h_1" [style="bold"];
     "bb::<Class:Funcs>#h_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#h_1" -> "bb::<Class:Funcs>#h_1" [style="bold"];
@@ -281,14 +281,14 @@ subgraph "cluster_::C#test_calls" {
     "bb::C#test_calls_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: C = cast(<self>: NilClass, C);\l<statTemp>$5: Integer(0) = 0\l<statTemp>$3: Integer = <self>: C.f(<statTemp>$5: Integer(0))\l<cfgAlias>$8: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$9: Integer(0) = 0\l<statTemp>$6: T.untyped = <cfgAlias>$8: T.class_of(Funcs).f(<statTemp>$9: Integer(0))\l<statTemp>$12: Symbol(:f) = :f\l<statTemp>$10: Symbol = <self>: C.g(<statTemp>$12: Symbol(:f))\l<cfgAlias>$15: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$16: Symbol(:f) = :f\l<statTemp>$13: Symbol = <cfgAlias>$15: T.class_of(Funcs).g(<statTemp>$16: Symbol(:f))\l<statTemp>$19: String(\"hello\") = \"hello\"\l<statTemp>$17: String = <self>: C.h(<statTemp>$19: String(\"hello\"))\l<cfgAlias>$22: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$23: String(\"world\") = \"world\"\l<statTemp>$20: String = <cfgAlias>$22: T.class_of(Funcs).h(<statTemp>$23: String(\"world\"))\l<cfgAlias>$25: T.class_of(C) = alias <C C>\l<returnMethodTemp>$2: T.untyped = <cfgAlias>$25: T.class_of(C).f()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: C = cast(<self>: NilClass, C);\l<statTemp>$5: Integer(0) = 0\l<statTemp>$3: Integer = <self>: C.f(<statTemp>$5: Integer(0))\l<cfgAlias>$8: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$9: Integer(0) = 0\l<statTemp>$6: T.untyped = <cfgAlias>$8: T.class_of(Funcs).f(<statTemp>$9: Integer(0))\l<statTemp>$12: Symbol(:f) = :f\l<statTemp>$10: Symbol = <self>: C.g(<statTemp>$12: Symbol(:f))\l<cfgAlias>$15: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$16: Symbol(:f) = :f\l<statTemp>$13: Symbol = <cfgAlias>$15: T.class_of(Funcs).g(<statTemp>$16: Symbol(:f))\l<statTemp>$19: String(\"hello\") = \"hello\"\l<statTemp>$17: String = <self>: C.h(<statTemp>$19: String(\"hello\"))\l<cfgAlias>$22: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$23: String(\"world\") = \"world\"\l<statTemp>$20: String = <cfgAlias>$22: T.class_of(Funcs).h(<statTemp>$23: String(\"world\"))\l<cfgAlias>$25: T.class_of(C) = alias <C C>\l<returnMethodTemp>$2: T.untyped = <cfgAlias>$25: T.class_of(C).f()\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::C#test_calls_0" -> "bb::C#test_calls_1" [style="bold"];
     "bb::C#test_calls_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::C#test_calls_1" -> "bb::C#test_calls_1" [style="bold"];

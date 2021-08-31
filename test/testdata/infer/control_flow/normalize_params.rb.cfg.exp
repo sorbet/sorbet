@@ -42,10 +42,10 @@ subgraph "cluster_::Test#normalize_params" {
     "bb::Test#normalize_params_2" [
         shape = rectangle;
         color = black;
-        label = "block[id=2, rubyBlockId=0](<self>: Test, v: T::Hash[T.untyped, T.untyped])\l<statTemp>$9: T::Array[[T.untyped, T.untyped]] = v: T::Hash[T.untyped, T.untyped].to_a()\l<statTemp>$7: T.untyped = <self>: Test.normalize_params(<statTemp>$9: T::Array[[T.untyped, T.untyped]])\l<returnMethodTemp>$2: T.untyped = <statTemp>$7: T.untyped.sort()\l<unconditional>\l"
+        label = "block[id=2, rubyBlockId=0](<self>: Test, v: T::Hash[T.untyped, T.untyped])\l<statTemp>$9: T::Array[[T.untyped, T.untyped]] = v: T::Hash[T.untyped, T.untyped].to_a()\l<statTemp>$7: T.untyped = <self>: Test.normalize_params(<statTemp>$9: T::Array[[T.untyped, T.untyped]])\l<returnMethodTemp>$2: T.untyped = <statTemp>$7: T.untyped.sort()\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
-    "bb::Test#normalize_params_2" -> "bb::Test#normalize_params_11" [style="bold"];
+    "bb::Test#normalize_params_2" -> "bb::Test#normalize_params_1" [style="bold"];
     "bb::Test#normalize_params_3" [
         shape = rectangle;
         color = black;
@@ -65,10 +65,10 @@ subgraph "cluster_::Test#normalize_params" {
     "bb::Test#normalize_params_5" [
         shape = rectangle;
         color = black;
-        label = "block[id=5, rubyBlockId=0](v: T.untyped)\l<returnMethodTemp>$2: T.untyped = v\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=0](v: T.untyped)\l<returnMethodTemp>$2: T.untyped = v\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
-    "bb::Test#normalize_params_5" -> "bb::Test#normalize_params_11" [style="bold"];
+    "bb::Test#normalize_params_5" -> "bb::Test#normalize_params_1" [style="bold"];
     "bb::Test#normalize_params_6" [
         shape = rectangle;
         color = black;
@@ -81,10 +81,10 @@ subgraph "cluster_::Test#normalize_params" {
     "bb::Test#normalize_params_7" [
         shape = rectangle;
         color = black;
-        label = "block[id=7, rubyBlockId=0](<block-pre-call-temp>$16: Sorbet::Private::Static::Void, <selfRestore>$17: Test)\l<returnMethodTemp>$2: T::Array[T.untyped] = Solve<<block-pre-call-temp>$16, map>\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=0](<block-pre-call-temp>$16: Sorbet::Private::Static::Void, <selfRestore>$17: Test)\l<returnMethodTemp>$2: T::Array[T.untyped] = Solve<<block-pre-call-temp>$16, map>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Array[T.untyped]\l<unconditional>\l"
     ];
 
-    "bb::Test#normalize_params_7" -> "bb::Test#normalize_params_11" [style="bold"];
+    "bb::Test#normalize_params_7" -> "bb::Test#normalize_params_1" [style="bold"];
     "bb::Test#normalize_params_9" [
         shape = rectangle;
         color = black;
@@ -92,13 +92,6 @@ subgraph "cluster_::Test#normalize_params" {
     ];
 
     "bb::Test#normalize_params_9" -> "bb::Test#normalize_params_6" [style="bold"];
-    "bb::Test#normalize_params_11" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=11, rubyBlockId=0](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
-    ];
-
-    "bb::Test#normalize_params_11" -> "bb::Test#normalize_params_1" [style="bold"];
 }
 
 subgraph "cluster_::<Class:Test>#<static-init>" {
@@ -108,14 +101,14 @@ subgraph "cluster_::<Class:Test>#<static-init>" {
     "bb::<Class:Test>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Test) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Test>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Test>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:normalize_params) = :normalize_params\l<statTemp>$7: Symbol(:normal) = :normal\l<returnMethodTemp>$2: Symbol(:normalize_params) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Test), <statTemp>$6: Symbol(:normalize_params), <statTemp>$7: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:normalize_params)\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Test) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Test>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Test>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:normalize_params) = :normalize_params\l<statTemp>$7: Symbol(:normal) = :normal\l<returnMethodTemp>$2: Symbol(:normalize_params) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Test), <statTemp>$6: Symbol(:normalize_params), <statTemp>$7: Symbol(:normal))\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Symbol(:normalize_params)\l<unconditional>\l"
     ];
 
     "bb::<Class:Test>#<static-init>_0" -> "bb::<Class:Test>#<static-init>_1" [style="bold"];
     "bb::<Class:Test>#<static-init>_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::<Class:Test>#<static-init>_1" -> "bb::<Class:Test>#<static-init>_1" [style="bold"];
