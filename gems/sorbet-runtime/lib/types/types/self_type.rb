@@ -22,9 +22,9 @@ module T::Types
     private def subtype_of_single?(other)
       case other
       when SelfType
-          true
+        true
       else
-          false
+        false
       end
     end
 

@@ -303,7 +303,7 @@ module T::Props::Serializable::DecoratorMethods
     end
 
     if !rules[:raise_on_nil_write].nil? && rules[:raise_on_nil_write] != true
-        raise ArgumentError.new("The value of `raise_on_nil_write` if specified must be `true` (given: #{rules[:raise_on_nil_write]}).")
+      raise ArgumentError.new("The value of `raise_on_nil_write` if specified must be `true` (given: #{rules[:raise_on_nil_write]}).")
     end
 
     result
