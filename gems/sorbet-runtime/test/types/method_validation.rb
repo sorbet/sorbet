@@ -225,7 +225,9 @@ module Opus::Types::Test
         klass = Class.new do
           extend T::Sig
           sig {params(m: Symbol, include_private: T::Boolean).returns(T::Boolean)}
-          def respond_to_missing?(m, include_private=false); true; end
+          def respond_to_missing?(m, include_private=false)
+            true
+          end
         end
 
         klass.new.respond_to?(:foo)

@@ -185,7 +185,6 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
   end
 
   describe 'redacted props' do
-
     before do
       T::Configuration.redaction_handler = lambda do |value, redaction|
         opts = Array(redaction)

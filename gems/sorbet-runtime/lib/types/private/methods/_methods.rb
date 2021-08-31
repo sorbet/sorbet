@@ -20,7 +20,7 @@ module T::Private::Methods
   # twice is permitted).  we could do this with two tables, but it seems slightly
   # cleaner with a single table.
   # Effectively T::Hash[Module, T.nilable(Set))]
-  @modules_with_final = Hash.new { |hash, key| hash[key] = nil }
+  @modules_with_final = Hash.new {|hash, key| hash[key] = nil}
   # this stores the old [included, extended] hooks for Module and inherited hook for Class that we override when
   # enabling final checks for when those hooks are called. the 'hooks' here don't have anything to do with the 'hooks'
   # in installed_hooks.
