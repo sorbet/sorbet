@@ -344,6 +344,8 @@ NameDef names[] = {
     {"expandSplat", "<expand-splat>"},
     {"suggestType", "<suggest-type>"},
     {"checkMatchArray", "<check-match-array>"},
+    {"definedInstanceVar", "<defined-instance-var>"},
+    {"definedClassVar", "<defined-class-var>"},
     {"arg0"},
     {"arg1"},
     {"arg2"},
