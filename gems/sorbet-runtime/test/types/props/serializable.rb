@@ -592,7 +592,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         StructWithShapes.new(
           empty_shape: {},
           symbol_key_shape: {foo: 0},
-          string_key_shape: {:not_a_string => 0}
+          string_key_shape: {not_a_string: 0}
         )
       end
       assert_includes(exn.message, '.string_key_shape to {:not_a_string=>0} (instance of Hash) - need a {"foo" => Integer}')
@@ -648,7 +648,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'round trips with arrays' do
-      a = ['bar', 'baz']
+      a = %w[bar baz]
       assert_equal(a, CustomTypeStruct.from_hash({'array' => a}).serialize['array'])
     end
 
@@ -873,7 +873,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'round trips' do
       array = [3]
       obj = CustomType.new
-      obj.value = array 
+      obj.value = array
       set = Set[obj]
       struct = CustomSetPropStruct.new
       struct.set = set
@@ -1356,7 +1356,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         props = MuckAboutWithPropInternals.decorator.instance_variable_get(:@props)
         refute_nil(props)
         refute_nil(props[:nilstring])
-        bad_rules = props[:nilstring].merge(:serialized_form => bad_hash_key)
+        bad_rules = props[:nilstring].merge(serialized_form: bad_hash_key)
         MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props.merge(ok_prop_name => bad_rules))
         assert_raises(RuntimeError) do
           MuckAboutWithPropInternals.from_hash({})
@@ -1366,13 +1366,13 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it "catches when the accessor key doesn't begin with @" do
-      DISALLOWED_PREFIXES.select {|c| c != "@" }.each do |c|
+      DISALLOWED_PREFIXES.reject {|c| c == "@"}.each do |c|
         ok_prop_name = :nilstring2
         bad_accessor_key = :"#{c}nilstring"
         props = MuckAboutWithPropInternals.decorator.instance_variable_get(:@props)
         refute_nil(props)
         refute_nil(props[:nilstring])
-        bad_rules = props[:nilstring].merge(:accessor_key => bad_accessor_key)
+        bad_rules = props[:nilstring].merge(accessor_key: bad_accessor_key)
         MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props.merge(ok_prop_name => bad_rules))
         assert_raises(RuntimeError) do
           MuckAboutWithPropInternals.from_hash({})
@@ -1382,13 +1382,13 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it "catches when the accessor key doesn't pass safe name checks" do
-      DISALLOWED_PREFIXES.each do |c|
+      DISALLOWED_PREFIXES.each do |_c|
         ok_prop_name = :nilstring2
         bad_accessor_key = :"@!nilstring"
         props = MuckAboutWithPropInternals.decorator.instance_variable_get(:@props)
         refute_nil(props)
         refute_nil(props[:nilstring])
-        bad_rules = props[:nilstring].merge(:accessor_key => bad_accessor_key)
+        bad_rules = props[:nilstring].merge(accessor_key: bad_accessor_key)
         MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props.merge(ok_prop_name => bad_rules))
         assert_raises(RuntimeError) do
           MuckAboutWithPropInternals.from_hash({})

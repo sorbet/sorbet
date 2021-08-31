@@ -25,7 +25,6 @@ module SorbetBenchmarks
       prop :prop10, T::Hash[String, Subdoc], default: {}
     end
 
-
     def self.run
       input = {
         prop3: 0,

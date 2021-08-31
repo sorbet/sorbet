@@ -19,9 +19,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     klass = Class.new do
       extend T::Sig
       extend T::Helpers
-      sig { params(foo: String).returns(String) }
+      sig {params(foo: String).returns(String)}
       attr_writer :foo
-      sig { params(bar: Integer).returns(Integer) }
+      sig {params(bar: Integer).returns(Integer)}
       attr_accessor :bar
     end
 
@@ -40,7 +40,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     mod = Module.new do
       extend T::Sig
       extend T::Helpers
-      sig { params(foo: String).returns(String) }
+      sig {params(foo: String).returns(String)}
       module_function def foo(foo)
         foo
       end
@@ -482,7 +482,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
             arr.map(&method(:bar))
           end
 
-          sig { params(x: Integer).returns(Integer) }
+          sig {params(x: Integer).returns(Integer)}
           def self.bar(x)
             -x
           end
@@ -501,7 +501,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
             arr.map(&method(:bar))
           end
 
-          sig { params(x: Integer).returns(Integer).checked(:never) }
+          sig {params(x: Integer).returns(Integer).checked(:never)}
           def self.bar(x)
             -x
           end
@@ -742,7 +742,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       def bar; "bad"; end
     end
     assert_equal(1, c1.new.foo)
-    assert_raises(TypeError) { c1.new.bar }
+    assert_raises(TypeError) {c1.new.bar}
   end
 
   it "forbids adding a sig to method_added" do
@@ -827,7 +827,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       mutex = Mutex.new
       replaced = T::Private::ClassUtils.replace_method(T::Private::Methods.singleton_class, :run_sig_block_for_method) do |*args|
         barrier.wait
-        mutex.synchronize { replaced.bind(T::Private::Methods).call(*args) }
+        mutex.synchronize {replaced.bind(T::Private::Methods).call(*args)}
       end
 
       klass = Class.new do
@@ -836,7 +836,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         def self.hello; end
       end
 
-      thread = Thread.new { klass.hello }
+      thread = Thread.new {klass.hello}
       klass.hello
     ensure
       thread&.join

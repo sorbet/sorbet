@@ -292,7 +292,7 @@ module Opus::Types::Test
       end
 
       it "fails validation with a hash of wrong typed keys" do
-        msg = check_error_message_for_obj(@type, {"a" => true, :"foo bar" => true, :"foo" => 3})
+        msg = check_error_message_for_obj(@type, {"a" => true, :"foo bar" => true, :foo => 3})
         assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type {\"a\" => TrueClass, :\"foo bar\" => TrueClass, foo: Integer}", msg)
       end
 
@@ -667,7 +667,6 @@ module Opus::Types::Test
         assert_equal(T::Set[T.untyped], T::Utils.coerce(::Set))
       end
     end
-
 
     describe "Enumerable" do
       it 'fails if value is not an enumerable' do
@@ -1392,9 +1391,6 @@ module Opus::Types::Test
     class GenericSingletonChild < GenericSingleton
       SingletonTP = type_template(fixed: String)
     end
-
-
-
 
     describe "generics" do
       it 'simply works' do

@@ -171,7 +171,6 @@ module T::Props::Serializable
   end
 end
 
-
 ##############################################
 
 # NB: This must stay in the same file where T::Props::Serializable is defined due to
@@ -334,9 +333,7 @@ module T::Props::Serializable::DecoratorMethods
   end
 end
 
-
 ##############################################
-
 
 # NB: This must stay in the same file where T::Props::Serializable is defined due to
 # T::Props::Decorator#apply_plugin; see https://git.corp.stripe.com/stripe-internal/pay-server/blob/fc7f15593b49875f2d0499ffecfd19798bac05b3/chalk/odm/lib/chalk-odm/document_decorator.rb#L716-L717

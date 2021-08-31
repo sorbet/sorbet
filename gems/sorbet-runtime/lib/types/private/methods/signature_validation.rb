@@ -154,7 +154,6 @@ module T::Private::Methods::SignatureValidation
             "#{base_override_loc_str(signature, super_signature)}"
     end
 
-
     # O(nm), but n and m are tiny here
     extra_req_kwargs = signature.req_kwarg_names - super_signature.req_kwarg_names
     if !extra_req_kwargs.empty?

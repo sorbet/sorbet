@@ -2,7 +2,7 @@ inherit_from: .rubocop_todo.yml
 require: rubocop-performance
 
 AllCops:
-  NewCops: enable
+  NewCops: disable
 
 # Stripe in-house styles that are prevalent in the codebase already.
 #
@@ -64,3 +64,17 @@ Style/DoubleNegation:
 # We don't want to needlessly break older Rubies
 Style/SlicingWithRange:
   Enabled: false
+
+Layout/EmptyLines:
+  Exclude:
+    # We deliberately add extra lines here to aid Pry debugging
+    - 'lib/types/private/methods/call_validation.rb'
+    - 'lib/types/private/methods/call_validation_2_6.rb'
+    - 'lib/types/private/methods/call_validation_2_7.rb'
+
+Layout/ArgumentAlignment:
+  Exclude:
+    # This is generated code where the readability of the generator
+    # matters more than the readability of the result
+    - 'lib/types/private/methods/call_validation_2_6.rb'
+    - 'lib/types/private/methods/call_validation_2_7.rb'

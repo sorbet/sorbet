@@ -429,10 +429,10 @@ module T::Configuration
   MODULE_NAME = Module.instance_method(:name)
   private_constant :MODULE_NAME
 
-  if T::Configuration::AT_LEAST_RUBY_2_7
-    @default_module_name_mangler = ->(type) {MODULE_NAME.bind_call(type)}
+  @default_module_name_mangler = if T::Configuration::AT_LEAST_RUBY_2_7
+    ->(type) {MODULE_NAME.bind_call(type)}
   else
-    @default_module_name_mangler = ->(type) {MODULE_NAME.bind(type).call}
+    ->(type) {MODULE_NAME.bind(type).call}
   end
 
   @module_name_mangler = nil

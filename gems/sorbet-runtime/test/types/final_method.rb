@@ -24,12 +24,12 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   private def assert_redefined_err(method_name, klass_str, final_line, method_line, err)
-    regex = %r{The method `#{method_name}` on #{klass_str} was declared as final and cannot be redefined}
+    regex = /The method `#{method_name}` on #{klass_str} was declared as final and cannot be redefined/
     assert_msg_matches(regex, final_line, method_line, "Redefined", err)
   end
 
   private def assert_overridden_err(method_name, klass_str, method_str, final_line, method_line, err)
-    regex = %r{The method `#{method_name}` on #{klass_str} was declared as final and cannot be overridden in #{method_str}}
+    regex = /The method `#{method_name}` on #{klass_str} was declared as final and cannot be overridden in #{method_str}/
     assert_msg_matches(regex, final_line, method_line, "Overridden", err)
   end
 
@@ -401,7 +401,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     err = assert_raises(RuntimeError) do
       c = Class.new do
         extend T::Sig
-        sig (:final) {void.checked(:never)}
+        sig(:final) {void.checked(:never)}
         def self.foo; end
       end
 
