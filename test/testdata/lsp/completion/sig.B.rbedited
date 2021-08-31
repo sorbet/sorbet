@@ -24,5 +24,6 @@ end
 class NoSigInScope
   sig # error: does not exist
   #  ^ completion: (nothing)
+# ^^^ error: no block
   def no_results_without_extend_tsig; end
 end
