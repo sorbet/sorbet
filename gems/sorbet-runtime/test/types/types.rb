@@ -98,7 +98,7 @@ module Opus::Types::Test
         m = Module.new
         ivars = m.instance_variables
 
-        x = T::Types::Simple::Private::Pool.type_for_module(m)
+        _ = T::Types::Simple::Private::Pool.type_for_module(m)
         assert_equal(ivars, m.instance_variables)
       end
     end

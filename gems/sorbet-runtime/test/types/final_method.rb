@@ -398,7 +398,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids redefinition with .checked(:never)" do
-    err = assert_raises(RuntimeError) do
+    assert_raises(RuntimeError) do
       c = Class.new do
         extend T::Sig
         sig(:final) {void.checked(:never)}

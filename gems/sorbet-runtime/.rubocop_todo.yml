@@ -174,13 +174,6 @@ Layout/MultilineOperationIndentation:
     - 'lib/types/props/weak_constructor.rb'
     - 'lib/types/types/base.rb'
 
-# Offense count: 3
-Lint/UselessAssignment:
-  Exclude:
-    - 'test/types/final_method.rb'
-    - 'test/types/props/serializable.rb'
-    - 'test/types/types.rb'
-
 # Offense count: 97
 # Configuration parameters: IgnoredMethods.
 Metrics/AbcSize:

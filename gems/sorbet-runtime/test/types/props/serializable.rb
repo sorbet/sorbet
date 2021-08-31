@@ -908,7 +908,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
       obj = CustomType.new
       e = assert_raises(TypeError) do
-        result = CustomSetPropStruct.from_hash({'set' => obj})
+        CustomSetPropStruct.from_hash({'set' => obj})
       end
 
       assert_includes(e.message, "value must be enumerable")
