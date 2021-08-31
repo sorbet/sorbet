@@ -17,12 +17,25 @@ for runtime_version in "${runtime_versions[@]}"; do
 done
 
 for runtime_version in "${runtime_versions[@]}"; do
-  echo "+++ tests ($runtime_version)"
   rbenv shell "$runtime_version"
 
   rbenv exec ruby --version
 
-  rbenv exec bundle exec rake test
+  failed=
+
+  echo "+++ rubocop ($runtime_version)"
+  if ! rbenv exec bundle exec rake rubocop; then
+    failed=1
+  fi
+
+  echo "+++ tests ($runtime_version)"
+  if ! rbenv exec bundle exec rake test; then
+    failed=1
+  fi
+
+  if [ "$failed" != "" ]; then
+    exit 1
+  fi
 done
 
 echo "--- build"
