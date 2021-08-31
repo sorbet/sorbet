@@ -237,9 +237,9 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       # `.expect` here is a bit messy, so we're going to set a
       # variable if we get the assert handler called once with the
       # right project
-      T::Configuration.hard_assert_handler = lambda {|_msg, kwargs|
+      T::Configuration.hard_assert_handler = lambda do |_msg, kwargs|
         found_team = kwargs[:project] if kwargs.include?(:project)
-      }
+      end
       OptionalMigrate.from_hash({})
       assert_equal(:some_team, found_team)
     ensure
@@ -387,11 +387,11 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
 
   it 'applies the supplied sensitivity and PII handler' do
 
-    T::Configuration.normalize_sensitivity_and_pii_handler = lambda {|meta|
+    T::Configuration.normalize_sensitivity_and_pii_handler = lambda do |meta|
       meta[:pii] = :set
       meta[:sensitivity] += 1
       meta
-    }
+    end
     e = Class.new(T::Struct) do
       # needs this annotation for the `:pii` field
       def self.contains_pii?

@@ -1366,7 +1366,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it "catches when the accessor key doesn't begin with @" do
-      DISALLOWED_PREFIXES.reject {|c| c == "@" }.each do |c|
+      DISALLOWED_PREFIXES.reject {|c| c == "@"}.each do |c|
         ok_prop_name = :nilstring2
         bad_accessor_key = :"#{c}nilstring"
         props = MuckAboutWithPropInternals.decorator.instance_variable_get(:@props)

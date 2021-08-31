@@ -185,7 +185,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       inner = Class.new
     end
     Class.new(inner)
-    err = assert_raises(RuntimeError) { Class.new(outer) }
+    err = assert_raises(RuntimeError) {Class.new(outer)}
     assert_match(/^#<Class:0x[0-9a-f]+> was declared as final and cannot be inherited$/, err.message)
   end
 
@@ -197,7 +197,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       inner = Class.new
     end
     Class.new(inner)
-    err = assert_raises(RuntimeError) { Class.new.include(outer) }
+    err = assert_raises(RuntimeError) {Class.new.include(outer)}
     assert_match(/^#<Module:0x[0-9a-f]+> was declared as final and cannot be included$/, err.message)
   end
 
@@ -209,7 +209,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       inner = Module.new
     end
     Class.new.include(inner)
-    err = assert_raises(RuntimeError) { Class.new(outer) }
+    err = assert_raises(RuntimeError) {Class.new(outer)}
     assert_match(/^#<Class:0x[0-9a-f]+> was declared as final and cannot be inherited$/, err.message)
   end
 
@@ -221,7 +221,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       inner = Module.new
     end
     Class.new.include(inner)
-    err = assert_raises(RuntimeError) { Class.new.include(outer) }
+    err = assert_raises(RuntimeError) {Class.new.include(outer)}
     assert_match(/^#<Module:0x[0-9a-f]+> was declared as final and cannot be included$/, err.message)
   end
 
