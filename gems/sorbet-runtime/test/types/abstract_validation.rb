@@ -374,7 +374,9 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
         def self.foo; end
 
         sig {override.returns(Object)}
-        def bar; "baz"; end
+        def bar
+          "baz"
+        end
       end
       assert_equal("baz", klass.new.bar)
     end

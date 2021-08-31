@@ -189,8 +189,12 @@ module T::Props::Serializable::DecoratorMethods
     @class.props.select {|_, v| T::Props::Utils.required_prop?(v)}.keys
   end
 
-  def prop_dont_store?(prop); prop_rules(prop)[:dont_store]; end
-  def prop_by_serialized_forms; @class.prop_by_serialized_forms; end
+  def prop_dont_store?(prop)
+    prop_rules(prop)[:dont_store]
+  end
+  def prop_by_serialized_forms
+    @class.prop_by_serialized_forms
+  end
 
   def from_hash(hash, strict=false)
     raise ArgumentError.new("#{hash.inspect} provided to from_hash") if !(hash && hash.is_a?(Hash))
@@ -338,7 +342,9 @@ end
 # NB: This must stay in the same file where T::Props::Serializable is defined due to
 # T::Props::Decorator#apply_plugin; see https://git.corp.stripe.com/stripe-internal/pay-server/blob/fc7f15593b49875f2d0499ffecfd19798bac05b3/chalk/odm/lib/chalk-odm/document_decorator.rb#L716-L717
 module T::Props::Serializable::ClassMethods
-  def prop_by_serialized_forms; @prop_by_serialized_forms ||= {}; end
+  def prop_by_serialized_forms
+    @prop_by_serialized_forms ||= {}
+  end
 
   # @!method self.from_hash(hash, strict)
   #

@@ -325,7 +325,9 @@ module Opus::Types::Test
       class TestEnumerable
         include Enumerable
 
-        def each; yield "something"; end
+        def each;
+          yield "something";
+        end
       end
 
       it 'fails if value is not an array' do
@@ -958,10 +960,14 @@ module Opus::Types::Test
         c = Class.new do
           extend T::Sig
           sig {returns(MyEnum::A)}
-          def self.good_return; MyEnum::A; end
+          def self.good_return;
+            MyEnum::A;
+          end
 
           sig {returns(MyEnum::B)}
-          def self.bad_return; MyEnum::C; end
+          def self.bad_return;
+            MyEnum::C;
+          end
         end
 
         assert_equal(c.good_return, MyEnum::A)

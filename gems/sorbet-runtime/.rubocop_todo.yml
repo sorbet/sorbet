@@ -195,7 +195,7 @@ Metrics/BlockLength:
 # Offense count: 23
 # Configuration parameters: CountComments, CountAsOne.
 Metrics/ClassLength:
-  Max: 1094
+  Max: 1098
 
 # Offense count: 38
 # Configuration parameters: IgnoredMethods.
@@ -423,24 +423,6 @@ Style/Semicolon:
     - 'test/types/casts.rb'
     - 'test/types/configuration.rb'
     - 'test/types/types.rb'
-
-# Offense count: 33
-# Cop supports --auto-correct.
-# Configuration parameters: AllowIfMethodIsEmpty.
-Style/SingleLineMethods:
-  Exclude:
-    - 'lib/types/private/methods/modes.rb'
-    - 'lib/types/props/_props.rb'
-    - 'lib/types/props/decorator.rb'
-    - 'lib/types/props/optional.rb'
-    - 'lib/types/props/serializable.rb'
-    - 'test/types/abstract_validation.rb'
-    - 'test/types/builder_syntax.rb'
-    - 'test/types/edge_cases.rb'
-    - 'test/types/interface_validation.rb'
-    - 'test/types/method_modes.rb'
-    - 'test/types/types.rb'
-    - 'test/types/validate_override_types.rb'
 
 # Offense count: 734
 # Cop supports --auto-correct.
