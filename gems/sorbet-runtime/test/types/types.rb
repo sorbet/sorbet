@@ -668,7 +668,6 @@ module Opus::Types::Test
       end
     end
 
-
     describe "Enumerable" do
       it 'fails if value is not an enumerable' do
         type = T::Enumerable[Integer]
@@ -1392,9 +1391,6 @@ module Opus::Types::Test
     class GenericSingletonChild < GenericSingleton
       SingletonTP = type_template(fixed: String)
     end
-
-
-
 
     describe "generics" do
       it 'simply works' do

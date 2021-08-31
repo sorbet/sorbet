@@ -78,9 +78,7 @@ module T
     T::Types::ClassOf.new(klass)
   end
 
-
   ## END OF THE METHODS TO PASS TO `sig`.
-
 
   # Constructs a type alias. Used to create a short name for a larger type. In Ruby this returns a
   # wrapper that contains a proc that is evaluated to get the underlying type. This syntax however

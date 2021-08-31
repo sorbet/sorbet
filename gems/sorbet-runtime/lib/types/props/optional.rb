@@ -5,9 +5,7 @@ module T::Props::Optional
   include T::Props::Plugin
 end
 
-
 ##############################################
-
 
 # NB: This must stay in the same file where T::Props::Optional is defined due to
 # T::Props::Decorator#apply_plugin; see https://git.corp.stripe.com/stripe-internal/pay-server/blob/fc7f15593b49875f2d0499ffecfd19798bac05b3/chalk/odm/lib/chalk-odm/document_decorator.rb#L716-L717
