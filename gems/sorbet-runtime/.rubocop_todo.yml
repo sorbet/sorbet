@@ -280,11 +280,6 @@ Security/JSONLoad:
   Exclude:
     - 'test/types/props/serializable.rb'
 
-# Offense count: 1
-Security/MarshalLoad:
-  Exclude:
-    - 'lib/types/enum.rb'
-
 # Offense count: 53
 # Configuration parameters: EnforcedStyle, AllowModifiersOnSymbols.
 # SupportedStyles: inline, group
