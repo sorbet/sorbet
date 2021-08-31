@@ -17,7 +17,6 @@ for runtime_version in "${runtime_versions[@]}"; do
 done
 
 for runtime_version in "${runtime_versions[@]}"; do
-  echo "+++ tests ($runtime_version)"
   rbenv shell "$runtime_version"
 
   rbenv exec ruby --version
