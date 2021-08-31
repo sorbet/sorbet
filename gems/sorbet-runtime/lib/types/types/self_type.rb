@@ -23,7 +23,7 @@ module T::Types
       case other
       when SelfType
           true
-        else
+      else
           false
       end
     end

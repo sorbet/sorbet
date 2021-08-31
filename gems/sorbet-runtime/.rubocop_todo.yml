@@ -22,12 +22,6 @@ Layout/CaseIndentation:
     - 'lib/types/props/utils.rb'
     - 'test/types/enum.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Layout/ElseAlignment:
-  Exclude:
-    - 'lib/types/types/self_type.rb'
-
 # Offense count: 51
 # Cop supports --auto-correct.
 Layout/EmptyLineAfterGuardClause:
