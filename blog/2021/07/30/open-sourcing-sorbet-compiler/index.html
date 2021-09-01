@@ -233,8 +233,8 @@ other Ruby code uses!</p>
 are sufficient to call back into the Ruby VM when a faster compilation strategy
 doesn’t exist for a particular language feature. We might write more in the
 future about how specifically we go from Sorbet’s typed IR to Ruby native
-extensions, but there this means that there is very little the Sorbet Compiler
-<em>can’t</em> handle.</p>
+extensions, but this means that there is very little the Sorbet Compiler <em>can’t</em>
+handle.</p>
 <p>The decision to compile or not compile a file is made by adding a
 <code># compiled: true</code> or <code># compiled: false</code> comment to the top of a Ruby source
 file. If a file is compiled, the compiled artifact is bundled into a service’s
