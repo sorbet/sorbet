@@ -34,11 +34,15 @@ class T::Props::Decorator
   attr_reader :props
 
   sig {returns(T::Array[Symbol])}
-  def all_props; props.keys; end
+  def all_props
+    props.keys
+  end
 
   # checked(:never) - O(prop accesses)
   sig {params(prop: T.any(Symbol, String)).returns(Rules).checked(:never)}
-  def prop_rules(prop); props[prop.to_sym] || raise("No such prop: #{prop.inspect}"); end
+  def prop_rules(prop)
+    props[prop.to_sym] || raise("No such prop: #{prop.inspect}")
+  end
 
   # checked(:never) - Rules hash is expensive to check
   sig {params(prop: Symbol, rules: Rules).void.checked(:never)}
@@ -78,7 +82,9 @@ class T::Props::Decorator
 
   # checked(:never) - O(prop accesses)
   sig {returns(T.all(Module, T::Props::ClassMethods)).checked(:never)}
-  def decorated_class; @class; end
+  def decorated_class
+    @class
+  end
 
   # Accessors
 

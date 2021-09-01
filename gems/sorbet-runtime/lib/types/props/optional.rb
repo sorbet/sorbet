@@ -25,7 +25,9 @@ module T::Props::Optional::DecoratorMethods
     super || VALID_RULE_KEYS[key]
   end
 
-  def prop_optional?(prop); prop_rules(prop)[:fully_optional]; end
+  def prop_optional?(prop)
+    prop_rules(prop)[:fully_optional]
+  end
 
   def compute_derived_rules(rules)
     rules[:fully_optional] = !T::Props::Utils.need_nil_write_check?(rules)

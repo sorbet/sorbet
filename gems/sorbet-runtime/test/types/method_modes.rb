@@ -36,7 +36,9 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
         extend T::Sig
         extend T::Helpers
         sig {override.returns(Object)}
-        def self.name; 'foo'; end
+        def self.name
+          'foo'
+        end
       end
 
       mod = Module.new do
@@ -44,7 +46,9 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
         extend T::Helpers
         extend mixin
         sig {override.returns(Object)}
-        def self.name; 'bar'; end
+        def self.name
+          'bar'
+        end
       end
 
       mod.name
@@ -215,7 +219,9 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
             .params(blk: T.proc.params(arg0: Elem).returns(BasicObject))
             .returns(T.untyped)
         end
-        def each(&blk); yield; end
+        def each(&blk)
+          yield
+        end
       end
 
       called = false

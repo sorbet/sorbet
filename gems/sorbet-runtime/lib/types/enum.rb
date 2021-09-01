@@ -361,6 +361,6 @@ class T::Enum
 
   sig {params(args: String).returns(T.attached_class)}
   def self._load(args)
-    deserialize(Marshal.load(args))
+    deserialize(Marshal.load(args)) # rubocop:disable Security/MarshalLoad
   end
 end

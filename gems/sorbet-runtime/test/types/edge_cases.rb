@@ -731,7 +731,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     c1 = Class.new do
       extend T::Sig
       sig {returns(Integer)}
-      def foo; 1; end
+      def foo
+        1
+      end
       def self.method_added(method)
         super(method)
       end
@@ -739,7 +741,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         super(method)
       end
       sig {returns(Integer)}
-      def bar; "bad"; end
+      def bar
+        "bad"
+      end
     end
     assert_equal(1, c1.new.foo)
     assert_raises(TypeError) {c1.new.bar}

@@ -22,12 +22,6 @@ Layout/CaseIndentation:
     - 'lib/types/props/utils.rb'
     - 'test/types/enum.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Layout/ElseAlignment:
-  Exclude:
-    - 'lib/types/types/self_type.rb'
-
 # Offense count: 51
 # Cop supports --auto-correct.
 Layout/EmptyLineAfterGuardClause:
@@ -115,29 +109,6 @@ Layout/EmptyLinesAroundModuleBody:
     - 'lib/types/props/private/deserializer_generator.rb'
     - 'lib/types/props/private/serializer_generator.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: AllowForAlignment, AllowBeforeTrailingComments, ForceEqualSignAlignment.
-Layout/ExtraSpacing:
-  Exclude:
-    - 'lib/types/props/generated_code_validation.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: IndentationWidth.
-# SupportedStyles: special_inside_parentheses, consistent, align_brackets
-Layout/FirstArrayElementIndentation:
-  EnforcedStyle: consistent
-
-# Offense count: 20
-# Cop supports --auto-correct.
-# Configuration parameters: Width, IgnoredPatterns.
-Layout/IndentationWidth:
-  Exclude:
-    - 'lib/types/props/serializable.rb'
-    - 'lib/types/types/self_type.rb'
-    - 'test/types/abstract_validation.rb'
-
 # Offense count: 11
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
@@ -181,75 +152,6 @@ Layout/MultilineOperationIndentation:
     - 'lib/types/props/weak_constructor.rb'
     - 'lib/types/types/base.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: space, no_space
-Layout/SpaceAroundEqualsInParameterDefault:
-  Exclude:
-    - 'test/types/method_patches.rb'
-
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: AllowForAlignment, EnforcedStyleForExponentOperator.
-# SupportedStylesForExponentOperator: space, no_space
-Layout/SpaceAroundOperators:
-  Exclude:
-    - 'lib/types/props/generated_code_validation.rb'
-    - 'lib/types/props/serializable.rb'
-
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: require_no_space, require_space
-Layout/SpaceInLambdaLiteral:
-  Exclude:
-    - 'test/types/props/private/setter_factory.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces, SpaceBeforeBlockParameters.
-# SupportedStyles: space, no_space
-# SupportedStylesForEmptyBraces: space, no_space
-Layout/SpaceInsideBlockBraces:
-  Exclude:
-    - 'bench/getters.rb'
-
-# Offense count: 8
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: space, no_space
-Layout/SpaceInsideParens:
-  Exclude:
-    - 'test/types/method_validation.rb'
-
-# Offense count: 4
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: final_newline, final_blank_line
-Layout/TrailingEmptyLines:
-  Exclude:
-    - 'bench/constructor.rb'
-    - 'bench/prop_definition.rb'
-    - 'bench/setters.rb'
-    - 'lib/types/props/private/serializer_generator.rb'
-
-# Offense count: 8
-# Cop supports --auto-correct.
-Lint/RedundantCopDisableDirective:
-  Exclude:
-    - 'lib/types/props/serializable.rb'
-    - 'test/types/enum.rb'
-    - 'test/types/method_validation.rb'
-    - 'test/types/types.rb'
-
-# Offense count: 3
-Lint/UselessAssignment:
-  Exclude:
-    - 'test/types/final_method.rb'
-    - 'test/types/props/serializable.rb'
-    - 'test/types/types.rb'
-
 # Offense count: 97
 # Configuration parameters: IgnoredMethods.
 Metrics/AbcSize:
@@ -264,7 +166,7 @@ Metrics/BlockLength:
 # Offense count: 23
 # Configuration parameters: CountComments, CountAsOne.
 Metrics/ClassLength:
-  Max: 1094
+  Max: 1098
 
 # Offense count: 38
 # Configuration parameters: IgnoredMethods.
@@ -341,18 +243,6 @@ Naming/PredicateName:
     - 'lib/types/private/methods/call_validation.rb'
     - 'lib/types/props/optional.rb'
     - 'lib/types/utils.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect.
-Security/JSONLoad:
-  Exclude:
-    - 'test/types/props/serializable.rb'
-
-# Offense count: 1
-Security/MarshalLoad:
-  Exclude:
-    - 'lib/types/enum.rb'
 
 # Offense count: 53
 # Configuration parameters: EnforcedStyle, AllowModifiersOnSymbols.
@@ -504,24 +394,6 @@ Style/Semicolon:
     - 'test/types/casts.rb'
     - 'test/types/configuration.rb'
     - 'test/types/types.rb'
-
-# Offense count: 33
-# Cop supports --auto-correct.
-# Configuration parameters: AllowIfMethodIsEmpty.
-Style/SingleLineMethods:
-  Exclude:
-    - 'lib/types/private/methods/modes.rb'
-    - 'lib/types/props/_props.rb'
-    - 'lib/types/props/decorator.rb'
-    - 'lib/types/props/optional.rb'
-    - 'lib/types/props/serializable.rb'
-    - 'test/types/abstract_validation.rb'
-    - 'test/types/builder_syntax.rb'
-    - 'test/types/edge_cases.rb'
-    - 'test/types/interface_validation.rb'
-    - 'test/types/method_modes.rb'
-    - 'test/types/types.rb'
-    - 'test/types/validate_override_types.rb'
 
 # Offense count: 734
 # Cop supports --auto-correct.

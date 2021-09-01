@@ -15,7 +15,7 @@ module T::Props::Serializable
   #   exception if this object has mandatory props with missing
   #   values.
   # @return [Hash] A serialization of this object.
-  def serialize(strict=true) # rubocop:disable Style/OptionalBooleanParameter (changing this API is unfortunately not feasible)
+  def serialize(strict=true)
     begin
       h = __t_props_generated_serialize(strict)
     rescue => e
@@ -56,7 +56,7 @@ module T::Props::Serializable
   #  the hash contains keys that do not correspond to any known
   #  props on this instance.
   # @return [void]
-  def deserialize(hash, strict=false) # rubocop:disable Style/OptionalBooleanParameter (changing this API is unfortunately not feasible)
+  def deserialize(hash, strict=false)
     begin
       hash_keys_matching_props = __t_props_generated_deserialize(hash)
     rescue => e
@@ -189,10 +189,14 @@ module T::Props::Serializable::DecoratorMethods
     @class.props.select {|_, v| T::Props::Utils.required_prop?(v)}.keys
   end
 
-  def prop_dont_store?(prop); prop_rules(prop)[:dont_store]; end
-  def prop_by_serialized_forms; @class.prop_by_serialized_forms; end
+  def prop_dont_store?(prop)
+    prop_rules(prop)[:dont_store]
+  end
+  def prop_by_serialized_forms
+    @class.prop_by_serialized_forms
+  end
 
-  def from_hash(hash, strict=false) # rubocop:disable Style/OptionalBooleanParameter (changing this API is unfortunately not feasible)
+  def from_hash(hash, strict=false)
     raise ArgumentError.new("#{hash.inspect} provided to from_hash") if !(hash && hash.is_a?(Hash))
 
     i = @class.allocate
@@ -259,7 +263,7 @@ module T::Props::Serializable::DecoratorMethods
     context = "  #{source_lines[(previous_blank + 1)...next_blank].join("\n  ")}"
     <<~MSG
       Error in #{decorated_class.name}##{generated_method}: #{error.message}
-      at line #{line_num-previous_blank-1} in:
+      at line #{line_num - previous_blank - 1} in:
       #{context}
     MSG
   end
@@ -299,7 +303,7 @@ module T::Props::Serializable::DecoratorMethods
     end
 
     if !rules[:raise_on_nil_write].nil? && rules[:raise_on_nil_write] != true
-        raise ArgumentError.new("The value of `raise_on_nil_write` if specified must be `true` (given: #{rules[:raise_on_nil_write]}).")
+      raise ArgumentError.new("The value of `raise_on_nil_write` if specified must be `true` (given: #{rules[:raise_on_nil_write]}).")
     end
 
     result
@@ -338,14 +342,16 @@ end
 # NB: This must stay in the same file where T::Props::Serializable is defined due to
 # T::Props::Decorator#apply_plugin; see https://git.corp.stripe.com/stripe-internal/pay-server/blob/fc7f15593b49875f2d0499ffecfd19798bac05b3/chalk/odm/lib/chalk-odm/document_decorator.rb#L716-L717
 module T::Props::Serializable::ClassMethods
-  def prop_by_serialized_forms; @prop_by_serialized_forms ||= {}; end
+  def prop_by_serialized_forms
+    @prop_by_serialized_forms ||= {}
+  end
 
   # @!method self.from_hash(hash, strict)
   #
   # Allocate a new instance and call {#deserialize} to load a new
   # object from a hash.
   # @return [Serializable]
-  def from_hash(hash, strict=false) # rubocop:disable Style/OptionalBooleanParameter (changing this API is unfortunately not feasible)
+  def from_hash(hash, strict=false)
     self.decorator.from_hash(hash, strict)
   end
 

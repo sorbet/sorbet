@@ -160,7 +160,9 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       include base
 
       sig {override.returns(Integer)}
-      def foo; 1; end
+      def foo
+        1
+      end
     end
 
     klass = Class.new do

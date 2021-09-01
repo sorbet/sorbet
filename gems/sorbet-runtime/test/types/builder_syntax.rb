@@ -16,7 +16,9 @@ module Opus::Types::Test
         sig do
           builder = params(x: Integer).returns(String)
         end
-        def self.fn(x); x.to_s; end
+        def self.fn(x);
+          x.to_s;
+        end
       end
       mod.fn(1) # executes the sig block
 
