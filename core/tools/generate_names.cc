@@ -185,6 +185,7 @@ NameDef names[] = {
     {"createdProp", "created_prop"},
     {"updatedProp", "updated_prop"},
     {"merchantProp", "merchant_prop"},
+    {"merchantTokenProp", "merchant_token_prop"},
     {"encryptedProp", "encrypted_prop"},
     {"array"},
     {"defDelegator", "def_delegator"},
@@ -502,6 +503,9 @@ NameDef names[] = {
     {"Configuration", "Configuration", true},
     {"Compiler", "Compiler", true},
     {"Test", "Test", true},
+    {"Autogen", "Autogen", true},
+    {"Tokens", "Tokens", true},
+    {"AccountModelMerchantToken", "AccountModelMerchantToken", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

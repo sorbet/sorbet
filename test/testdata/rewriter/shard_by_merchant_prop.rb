@@ -1,8 +1,10 @@
 # typed: true
 
 module Opus::Autogen::Tokens
-  # This isn't exactly right but it's close
-  AccountModelMerchantToken = T.type_alias {String}
+  # This isn't exactly right; this would actually be more like a type alias to
+  # a String, but we're using a class to make sure that the Prop.cc logic is
+  # right.
+  class AccountModelMerchantToken; end
 end
 
 module ShardByMerchant
@@ -30,5 +32,5 @@ end
 T.reveal_type(MerchantPropModel.new.merchant) # error: Revealed type: `String`
 MerchantPropModel.new.merchant = "hi" # error: Method `merchant=` does not exist
 
-T.reveal_type(MerchantTokenPropModel.new.merchant) # error: Revealed type: `T.untyped`
+T.reveal_type(MerchantTokenPropModel.new.merchant) # error: Revealed type: `Opus::Autogen::Tokens::AccountModelMerchantToken`
 MerchantTokenPropModel.new.merchant = nil # error: Method `merchant=` does not exist
