@@ -3,7 +3,7 @@
 
 # Specialization of Union for the common case of the union of two simple types.
 #
-# This covers e.g. T.nilable(SomeModule) and T::Boolean.
+# This covers e.g. T.nilable(SomeModule), T.any(Integer, Float), and T::Boolean.
 class T::Private::Types::SimplePairUnion < T::Types::Union
   # @param type_a [T::Types::Simple]
   # @param type_b [T::Types::Simple]
