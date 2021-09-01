@@ -1,0 +1,34 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C ShardByMerchant><<C <todo sym>>> < ()
+    def merchant_prop<<todo method>>(name: = :merchant, override: = false, without_accessors: = false, &<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :merchant_prop, :normal)
+  end
+
+  class <emptyTree>::<C MerchantPropModel><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::String)
+    end
+
+    def merchant<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@merchant)
+        <self>.class().decorator().prop_get_logic(<self>, :merchant, arg2)
+      end
+    end
+
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.extend(<emptyTree>::<C ShardByMerchant>)
+
+    <self>.merchant_prop(:without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :merchant, :normal)
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C MerchantPropModel>.new().merchant())
+
+  <emptyTree>::<C MerchantPropModel>.new().merchant=("hi")
+end
