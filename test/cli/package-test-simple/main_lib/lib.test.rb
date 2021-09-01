@@ -11,3 +11,7 @@ class Test::Project::MainLib::LibTest
 
  Project::TestOnly::SomeHelper.new # access via test_import
 end
+
+# Add "behavior" to this file. When enforcing `MultipleBehaviorDefs` in
+# `--stripe-mode` the top-level of <PackageTests> should be ignored.
+1 + 1
