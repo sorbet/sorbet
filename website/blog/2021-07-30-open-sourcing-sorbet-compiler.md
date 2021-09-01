@@ -216,8 +216,8 @@ The Ruby VM exposes quite an extensive set of APIs to extension authors, which
 are sufficient to call back into the Ruby VM when a faster compilation strategy
 doesn't exist for a particular language feature. We might write more in the
 future about how specifically we go from Sorbet's typed IR to Ruby native
-extensions, but there this means that there is very little the Sorbet Compiler
-_can't_ handle.
+extensions, but this means that there is very little the Sorbet Compiler _can't_
+handle.
 
 The decision to compile or not compile a file is made by adding a
 `# compiled: true` or `# compiled: false` comment to the top of a Ruby source
