@@ -152,6 +152,8 @@ SORBET_ALIVE(void, sorbet_vm_register_sig,
 SORBET_ALIVE(void, sorbet_vm_define_method,
              (VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq, bool isSelf));
 
+SORBET_ALIVE(VALUE, sorbet_vm_fstring_new, (const char *ptr, long len));
+
 extern void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) __attribute__((noreturn));
 KEEP_ALIVE(sorbet_throwReturn);
 
@@ -659,7 +661,7 @@ VALUE sorbet_cPtrToRubyString(const char *ptr, long length) {
 
 SORBET_INLINE
 VALUE sorbet_cPtrToRubyStringFrozen(const char *ptr, long length) {
-    VALUE ret = rb_fstring_new(ptr, length);
+    VALUE ret = sorbet_vm_fstring_new(ptr, length);
     rb_gc_register_mark_object(ret);
     return ret;
 }
