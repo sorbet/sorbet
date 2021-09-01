@@ -21,7 +21,7 @@ bool isKeywordInitKey(const core::GlobalState &gs, const ast::ExpressionPtr &nod
     return false;
 }
 
-bool missingInitialize(const core::GlobalState &gs, const ast::Send *send) {
+bool isMissingInitialize(const core::GlobalState &gs, const ast::Send *send) {
     if (send->block == nullptr) {
         return true;
     }
@@ -33,6 +33,14 @@ bool missingInitialize(const core::GlobalState &gs, const ast::Send *send) {
 
         if (methodDef && methodDef->name == core::Names::initialize()) {
             return false;
+        }
+
+        for (auto &&stat : insSeq->stats) {
+            methodDef = ast::cast_tree<ast::MethodDef>(stat);
+
+            if (methodDef && methodDef->name == core::Names::initialize()) {
+                return false;
+            }
         }
     }
 
@@ -140,7 +148,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
                             std::move(typeMember)));
     }
 
-    if (missingInitialize(ctx, send)) {
+    if (isMissingInitialize(ctx, send)) {
         body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
         body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
                                                    ast::MK::RaiseUnimplemented(loc)));
