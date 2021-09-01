@@ -19,6 +19,7 @@ p g
 # INITIAL: [[DUP:%[a-zA-Z]+]] = call i64 @sorbet_globalConstDupHash{{.*}}
 # INITIAL-NEXT: [[COND:%[0-9]+]] = call i1 @sorbet_i_isa_Hash(i64 [[DUP]]{{.*}}
 # INITIAL-NEXT: call void @llvm.assume(i1 [[COND]]){{.*}}
+# INITIAL-NEXT: call i1 @sorbet_i_typeTested(i64 [[DUP]]{{.*}}
 # INITIAL-NEXT: br i1 true, label %typeTestSuccess, label %typeTestFail{{.*}}
 # INITIAL{LITERAL}: }
 
@@ -26,5 +27,6 @@ p g
 # INITIAL: [[DUP:%[a-zA-Z]+]] = call i64 @sorbet_buildArrayIntrinsic{{.*}}
 # INITIAL-NEXT: [[COND:%[0-9]+]] = call i1 @sorbet_i_isa_Array(i64 [[DUP]]{{.*}}
 # INITIAL-NEXT: call void @llvm.assume(i1 [[COND]]){{.*}}
+# INITIAL-NEXT: call i1 @sorbet_i_typeTested(i64 [[DUP]]{{.*}}
 # INITIAL-NEXT: br i1 true, label %typeTestSuccess, label %typeTestFail{{.*}}
 # INITIAL{LITERAL}: }
