@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="Sorbet Compiler logo" width="312" src="../docs/logo/sorbet-compiler-logo@2x.png">
+</p>
+
 # The Sorbet Compiler
 
 This repository contains the Sorbet compiler. It uses Sorbet and LLVM to emit
