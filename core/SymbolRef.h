@@ -813,12 +813,16 @@ public:
         return ClassOrModuleRef::fromRaw(78);
     }
 
-    static ClassOrModuleRef PackageSpec() {
+    static ClassOrModuleRef PackageTests() {
         return ClassOrModuleRef::fromRaw(79);
     }
 
-    static ClassOrModuleRef PackageSpecSingleton() {
+    static ClassOrModuleRef PackageSpec() {
         return ClassOrModuleRef::fromRaw(80);
+    }
+
+    static ClassOrModuleRef PackageSpecSingleton() {
+        return ClassOrModuleRef::fromRaw(81);
     }
 
     static MethodRef PackageSpec_import() {
@@ -834,11 +838,11 @@ public:
     }
 
     static ClassOrModuleRef Encoding() {
-        return ClassOrModuleRef::fromRaw(81);
+        return ClassOrModuleRef::fromRaw(82);
     }
 
     static ClassOrModuleRef Thread() {
-        return ClassOrModuleRef::fromRaw(82);
+        return ClassOrModuleRef::fromRaw(83);
     }
 
     static MethodRef Class_new() {
@@ -850,19 +854,19 @@ public:
     }
 
     static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
-        return ClassOrModuleRef::fromRaw(83);
-    }
-
-    static ClassOrModuleRef Sorbet_Private_Static_ResolvedSigSingleton() {
         return ClassOrModuleRef::fromRaw(84);
     }
 
-    static ClassOrModuleRef T_Private_Compiler() {
+    static ClassOrModuleRef Sorbet_Private_Static_ResolvedSigSingleton() {
         return ClassOrModuleRef::fromRaw(85);
     }
 
-    static ClassOrModuleRef T_Private_CompilerSingleton() {
+    static ClassOrModuleRef T_Private_Compiler() {
         return ClassOrModuleRef::fromRaw(86);
+    }
+
+    static ClassOrModuleRef T_Private_CompilerSingleton() {
+        return ClassOrModuleRef::fromRaw(87);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
@@ -891,7 +895,7 @@ public:
     static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 40;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 3;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
-    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 98;
+    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 99;
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {

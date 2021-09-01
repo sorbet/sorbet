@@ -433,6 +433,8 @@ void GlobalState::initEmpty() {
 
     id = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageRegistry());
     ENFORCE(id == Symbols::PackageRegistry());
+    id = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageTests());
+    ENFORCE(id == Symbols::PackageTests());
 
     // PackageSpec is a class that can be subclassed.
     id = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpec());
