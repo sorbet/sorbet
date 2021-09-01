@@ -142,6 +142,7 @@ SORBET_ALIVE(_Bool, sorbet_i_isa_Array, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_Regexp, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_String, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_Proc, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_Thread, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_RootSingleton, (VALUE) __attribute__((const)));
 
 SORBET_ALIVE(long, sorbet_globalConstRegister, (VALUE val));
@@ -330,6 +331,12 @@ _Bool sorbet_isa_Proc(VALUE obj) {
     return rb_obj_is_proc(obj) == Qtrue;
 }
 KEEP_ALIVE(sorbet_isa_Proc);
+
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_Thread(VALUE obj) {
+    return rb_obj_is_kind_of(obj, rb_cThread) == Qtrue;
+}
+KEEP_ALIVE(sorbet_isa_Thread);
 
 SORBET_ATTRIBUTE(const)
 _Bool sorbet_isa_RootSingleton(VALUE obj) {

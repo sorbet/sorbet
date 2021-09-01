@@ -284,7 +284,8 @@ const vector<pair<llvm::StringRef, llvm::StringRef>> TypeTest::intrinsicMap{
     {"sorbet_i_isa_Float", "sorbet_isa_Float"},         {"sorbet_i_isa_Untyped", "sorbet_isa_Untyped"},
     {"sorbet_i_isa_Hash", "sorbet_isa_Hash"},           {"sorbet_i_isa_Array", "sorbet_isa_Array"},
     {"sorbet_i_isa_Regexp", "sorbet_isa_Regexp"},       {"sorbet_i_isa_String", "sorbet_isa_String"},
-    {"sorbet_i_isa_Proc", "sorbet_isa_Proc"},           {"sorbet_i_isa_RootSingleton", "sorbet_isa_RootSingleton"},
+    {"sorbet_i_isa_Proc", "sorbet_isa_Proc"},           {"sorbet_i_isa_Thread", "sorbet_isa_Thread" },
+    {"sorbet_i_isa_RootSingleton", "sorbet_isa_RootSingleton"},
 };
 
 class SorbetSend : public IRIntrinsic {
