@@ -104,34 +104,77 @@ module Opus::Types::Test
     end
 
     describe "Union" do
-      before do
-        @type = T.nilable(Integer)
+      describe "with simple nilable type" do
+        before do
+          @type = T.nilable(Integer)
+        end
+
+        it "passes a validation with a non-nil value" do
+          msg = check_error_message_for_obj(@type, 1)
+          assert_nil(msg)
+        end
+
+        it "passes a validation with a nil value" do
+          msg = check_error_message_for_obj(@type, nil)
+          assert_nil(msg)
+        end
+
+        it "fails a validation with a different type" do
+          msg = check_error_message_for_obj(@type, "1")
+          assert_equal("Expected type T.nilable(Integer), got type String with value \"1\"", msg)
+        end
+
+        it 'valid? does not allocate' do
+          allocs_when_valid = counting_allocations {@type.valid?(0)}
+          assert_equal(0, allocs_when_valid)
+
+          allocs_when_invalid = counting_allocations {@type.valid?(0.1)}
+          assert_equal(0, allocs_when_invalid)
+        end
+
+        it 'can hand back its underlying types' do
+          value = @type.types.map(&:raw_type)
+          assert_equal([Integer, NilClass], value)
+        end
       end
 
-      it "passes a validation with a non-nil value" do
-        msg = check_error_message_for_obj(@type, 1)
-        assert_nil(msg)
-      end
+      describe "with complex type" do
+        before do
+          @type = T.nilable(T.any(Integer, T::Boolean))
+        end
 
-      it "passes a validation with a nil value" do
-        msg = check_error_message_for_obj(@type, nil)
-        assert_nil(msg)
-      end
+        it "passes a validation with a non-nil value" do
+          msg = check_error_message_for_obj(@type, 1)
+          assert_nil(msg)
+        end
 
-      it "fails a validation with a different type" do
-        msg = check_error_message_for_obj(@type, "1")
-        assert_equal("Expected type T.nilable(Integer), got type String with value \"1\"", msg)
+        it "passes a validation with a nil value" do
+          msg = check_error_message_for_obj(@type, nil)
+          assert_nil(msg)
+        end
+
+        it "fails a validation with a different type" do
+          msg = check_error_message_for_obj(@type, "1")
+          assert_equal("Expected type T.nilable(T.any(Integer, T::Boolean)), got type String with value \"1\"", msg)
+        end
+
+        it 'valid? does not allocate' do
+          allocs_when_valid = counting_allocations {@type.valid?(0)}
+          assert_equal(0, allocs_when_valid)
+
+          allocs_when_invalid = counting_allocations {@type.valid?(0.1)}
+          assert_equal(0, allocs_when_invalid)
+        end
+
+        it 'can hand back its underlying types' do
+          value = @type.types.map(&:raw_type)
+          assert_equal([Integer, TrueClass, FalseClass, NilClass], value)
+        end
       end
 
       it "simplifies a union containing another union" do
-        type = T.any(@type, T.nilable(String))
+        type = T.any(T.nilable(Integer), T.nilable(String))
         assert_equal("T.nilable(T.any(Integer, String))", type.name)
-      end
-
-      it 'can hand back its underlying types' do
-        type = T.any(Integer, T::Boolean, NilClass)
-        value = type.types.map(&:raw_type)
-        assert_equal([Integer, TrueClass, FalseClass, NilClass], value)
       end
 
       it "does not crash on anonymous classes" do
@@ -142,14 +185,6 @@ module Opus::Types::Test
       it "unwraps aliased types" do
         type = T.any(String, Integer, T::Private::Types::TypeAlias.new(-> {Integer}))
         assert_equal("T.any(Integer, String)", type.name)
-      end
-
-      it 'valid? does not allocate' do
-        allocs_when_valid = counting_allocations {@type.valid?(0)}
-        assert_equal(0, allocs_when_valid)
-
-        allocs_when_invalid = counting_allocations {@type.valid?(0.1)}
-        assert_equal(0, allocs_when_invalid)
       end
 
       it 'uses structural, not reference, equality' do
@@ -170,6 +205,17 @@ module Opus::Types::Test
           T::Utils.coerce(NilClass),
         )
         assert_equal(x.object_id, y.object_id)
+        assert_equal(
+          T::Private::Types::SimplePairUnion,
+          x.class,
+        )
+      end
+
+      it 'uses fast path for T::Boolean' do
+        assert_equal(
+          T::Private::Types::SimplePairUnion,
+          T::Boolean.aliased_type.class,
+        )
       end
     end
 
