@@ -1635,7 +1635,8 @@ public:
                 classBehaviorLocs[klass.symbol] = core::Loc(ctx.file, klass.declLoc);
             } else if (prevLoc->second.file() != ctx.file &&
                        // Ignore packages, which have 'behavior defined in multiple files'.
-                       klass.symbol.data(ctx)->owner != core::Symbols::PackageRegistry()) {
+                       klass.symbol.data(ctx)->owner != core::Symbols::PackageRegistry() &&
+                       klass.symbol.data(ctx)->owner != core::Symbols::PackageTests()) {
                 if (auto e = ctx.state.beginError(core::Loc(ctx.file, klass.declLoc),
                                                   core::errors::Namer::MultipleBehaviorDefs)) {
                     e.setHeader("`{}` has behavior defined in multiple files", klass.symbol.show(ctx));
