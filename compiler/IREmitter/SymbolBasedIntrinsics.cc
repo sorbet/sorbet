@@ -765,10 +765,10 @@ public:
 
 class CallCMethodSingleton : public CallCMethod {
 public:
-    CallCMethodSingleton(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod)
+    CallCMethodSingleton(core::ClassOrModuleRef rubyClass, string_view rubyMethod, CMethod cMethod)
         : CallCMethod(rubyClass, rubyMethod, cMethod){};
 
-    CallCMethodSingleton(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod,
+    CallCMethodSingleton(core::ClassOrModuleRef rubyClass, string_view rubyMethod, CMethod cMethod,
                          string cMethodWithBlock)
         : CallCMethod(rubyClass, rubyMethod, cMethod, cMethodWithBlock){};
 
@@ -794,6 +794,14 @@ public:
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
         return {rubyClass.data(gs)->lookupSingletonClass(gs)};
     };
+
+    virtual void sanityCheck(const core::GlobalState &gs) const override {
+        auto singletonClass = rubyClass.data(gs)->lookupSingletonClass(gs);
+        cMethod.sanityCheck(gs, singletonClass, rubyMethod);
+        if (cMethodWithBlock.has_value()) {
+            cMethodWithBlock->sanityCheck(gs, singletonClass, rubyMethod);
+        }
+    }
 };
 
 static const vector<CallCMethod> knownCMethodsInstance{
@@ -865,9 +873,9 @@ static const vector<CallCMethod> knownCMethodsInstance{
 };
 
 static const vector<CallCMethodSingleton> knownCMethodsSingleton{
-    {core::Symbols::T(), "unsafe", "sorbet_T_unsafe"},
-    {core::Symbols::T(), "must", "sorbet_T_must"},
-    {core::Symbols::Thread(), "current", "sorbet_Thread_current"},
+    {core::Symbols::T(), "unsafe", CMethod{"sorbet_T_unsafe"}},
+    {core::Symbols::T(), "must", CMethod{"sorbet_T_must"}},
+    {core::Symbols::Thread(), "current", CMethod{"sorbet_Thread_current", core::Symbols::Thread()}},
 };
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs(const core::GlobalState &gs) {
