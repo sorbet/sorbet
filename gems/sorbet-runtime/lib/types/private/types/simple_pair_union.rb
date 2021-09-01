@@ -24,6 +24,10 @@ class T::Private::Types::SimplePairUnion < T::Types::Union
 
   # @override Union
   def types
+    # We reconstruct the simple types rather than just storing them because
+    # (1) this is normally not a hot path and (2) we want to keep the instance
+    # variable count <= 3 so that we can fit in a 40 byte heap entry along
+    # with object headers.
     @types ||= [
       T::Types::Simple::Private::Pool.type_for_module(@raw_a),
       T::Types::Simple::Private::Pool.type_for_module(@raw_b),
