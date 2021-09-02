@@ -105,6 +105,7 @@ require_relative 'types/props/serializable'
 require_relative 'types/props/type_validation'
 require_relative 'types/props/private/parser'
 require_relative 'types/props/generated_code_validation'
+require_relative 'types/props/value_object'
 
 require_relative 'types/struct'
 require_relative 'types/non_forcing_constants'
