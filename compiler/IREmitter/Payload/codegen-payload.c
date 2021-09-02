@@ -1735,18 +1735,21 @@ VALUE sorbet_getKWArg(VALUE maybeHash, VALUE key) {
 
     // TODO: ruby seems to do something smarter here:
     //  https://github.com/ruby/ruby/blob/5aa0e6bee916f454ecf886252e1b025d824f7bd8/class.c#L1901
-    //
-    return rb_hash_delete_entry(maybeHash, key);
+    return rb_hash_lookup2(maybeHash, key, RUBY_Qundef);
 }
 
 SORBET_INLINE
-VALUE sorbet_assertNoExtraKWArg(VALUE maybeHash) {
+VALUE sorbet_assertNoExtraKWArg(VALUE maybeHash, int requiredKwargs, int remainingRequired, int optionalParsed) {
     if (maybeHash == RUBY_Qundef) {
         return RUBY_Qundef;
     }
-    if (RHASH_EMPTY_P(maybeHash)) {
+
+    int size = rb_hash_size_num(maybeHash);
+    if (remainingRequired == 0 && (size - requiredKwargs) == optionalParsed) {
         return RUBY_Qundef;
     }
+
+    sorbet_stopInDebugger();
 
     sorbet_raiseExtraKeywords(maybeHash);
 }

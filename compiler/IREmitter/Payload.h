@@ -58,7 +58,9 @@ public:
                                           const IREmitterContext &irctx, const ast::MethodDef &md, int rubyBlockId);
 
     static llvm::Value *readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);
-    static llvm::Value *assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);
+    static llvm::Value *assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash,
+                                           llvm::Value *numRequired, llvm::Value *requiredRemaining,
+                                           llvm::Value *optionalParsed);
     static llvm::Value *getKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash,
                                  llvm::Value *rubySym);
     static llvm::Value *readRestArgs(CompilerState &cs, llvm::IRBuilderBase &builder, int maxPositionalArgCount,

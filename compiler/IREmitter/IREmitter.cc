@@ -417,6 +417,15 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                                     builder, irctx, rubyBlockId);
                 }
                 if (hasKWArgs) {
+                    // required arguments remaining to be parsed
+                    auto numRequiredKwArgs = absl::c_count_if(argsFlags, [](auto &argFlag) {
+                        return argFlag.isKeyword && !argFlag.isDefault && !argFlag.isRepeated;
+                    });
+                    auto *requiredKwargs = IREmitterHelpers::buildS4(cs, numRequiredKwArgs);
+
+                    // optional arguments that are present
+                    auto *optionalKwargs = IREmitterHelpers::buildS4(cs, 0);
+
                     for (int argId = maxPositionalArgCount; argId < argsFlags.size(); argId++) {
                         if (argsFlags[argId].isKeyword && !argsFlags[argId].isRepeated) {
                             auto name = irctx.rubyBlockArgs[rubyBlockId][argId];
@@ -430,6 +439,12 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                             auto kwArgSet = llvm::BasicBlock::Create(cs, "kwArgSet", func);
                             auto kwArgDefault = llvm::BasicBlock::Create(cs, "kwArgDefault", func);
                             auto kwArgContinue = llvm::BasicBlock::Create(cs, "kwArgContinue", func);
+
+                            auto *requiredPhi =
+                                llvm::PHINode::Create(requiredKwargs->getType(), 2, "requiredArgsPhi", kwArgContinue);
+                            auto *optionalPhi =
+                                llvm::PHINode::Create(requiredKwargs->getType(), 2, "optionalArgsPhi", kwArgContinue);
+
                             builder.CreateCondBr(isItUndef, kwArgDefault, kwArgSet);
 
                             // Write a default value out, and mark the variable as missing
@@ -438,24 +453,41 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                                 Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx,
                                                 rubyBlockId);
                             }
+                            requiredPhi->addIncoming(requiredKwargs, builder.GetInsertBlock());
+                            optionalPhi->addIncoming(optionalKwargs, builder.GetInsertBlock());
                             builder.CreateBr(kwArgContinue);
 
                             builder.SetInsertPoint(kwArgSet);
                             if (!isBlock && argPresent.exists()) {
+                                if (argsFlags[argId].isDefault) {
+                                    optionalKwargs = builder.CreateBinOp(llvm::Instruction::Add, optionalKwargs,
+                                                                         IREmitterHelpers::buildS4(cs, 1));
+                                } else {
+                                    requiredKwargs = builder.CreateBinOp(llvm::Instruction::Sub, requiredKwargs,
+                                                                         IREmitterHelpers::buildS4(cs, 1));
+                                }
+
                                 Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx,
                                                 rubyBlockId);
                             }
                             Payload::varSet(cs, name, passedValue, builder, irctx, rubyBlockId);
+                            requiredPhi->addIncoming(requiredKwargs, builder.GetInsertBlock());
+                            optionalPhi->addIncoming(optionalKwargs, builder.GetInsertBlock());
                             builder.CreateBr(kwArgContinue);
 
                             builder.SetInsertPoint(kwArgContinue);
+                            requiredKwargs = requiredPhi;
+                            optionalKwargs = optionalPhi;
                         }
                     }
+                    // TODO: assert that all required args are filled
                     if (hasKWRestArgs) {
                         Payload::varSet(cs, kwRestArgName, Payload::readKWRestArg(cs, builder, hashArgs), builder,
                                         irctx, rubyBlockId);
                     } else {
-                        Payload::assertNoExtraKWArg(cs, builder, hashArgs);
+                        Payload::assertNoExtraKWArg(cs, builder, hashArgs,
+                                                    IREmitterHelpers::buildS4(cs, numRequiredKwArgs), requiredKwargs,
+                                                    optionalKwargs);
                     }
                 }
             }

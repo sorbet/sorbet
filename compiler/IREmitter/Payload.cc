@@ -920,9 +920,11 @@ llvm::Value *Payload::readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &buil
     return builder.CreateCall(cs.getFunction("sorbet_readKWRestArgs"), {maybeHash});
 }
 
-llvm::Value *Payload::assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash) {
+llvm::Value *Payload::assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash,
+                                         llvm::Value *numRequired, llvm::Value *requiredRemaining, llvm::Value *optionalParsed) {
     auto &builder = builderCast(build);
-    return builder.CreateCall(cs.getFunction("sorbet_assertNoExtraKWArg"), {maybeHash});
+    return builder.CreateCall(cs.getFunction("sorbet_assertNoExtraKWArg"),
+                              {maybeHash, numRequired, requiredRemaining, optionalParsed});
 }
 
 llvm::Value *Payload::getKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash,
