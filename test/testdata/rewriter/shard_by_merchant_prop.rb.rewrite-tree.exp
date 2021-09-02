@@ -1,7 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C Opus>::<C Autogen>::<C Tokens><<C <todo sym>>> < ()
-    <emptyTree>::<C AccountModelMerchantToken> = <emptyTree>::<C T>.type_alias() do ||
-      <emptyTree>::<C String>
+    class <emptyTree>::<C AccountModelMerchantToken><<C <todo sym>>> < (::<todo sym>)
     end
   end
 
@@ -43,11 +42,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MerchantTokenPropModel><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Opus>::<C Autogen>::<C Tokens>::<C AccountModelMerchantToken>)
+    end
+
+    def merchant<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@merchant)
+        <self>.class().decorator().prop_get_logic(<self>, :merchant, arg2)
+      end
+    end
+
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
     <self>.extend(<emptyTree>::<C ShardByMerchantBase>)
 
-    <self>.merchant_token_prop()
+    <self>.merchant_token_prop(:without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :merchant, :normal)
   end
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C MerchantPropModel>.new().merchant())
