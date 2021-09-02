@@ -152,7 +152,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         }
         case core::Names::merchantProp().rawId():
             ret.isImmutable = true;
-            // This is a lie; technically the API allows an optional `merchant:` keyword arg to
+            // This is a lie; technically the API allows an optional `name:` keyword arg to
             // customize the method name. It defaults to `:merchant`
             ret.name = core::Names::merchant();
             // 5 is the length of the _prop suffix
