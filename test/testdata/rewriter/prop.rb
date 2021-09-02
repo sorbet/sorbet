@@ -77,12 +77,6 @@ class PropHelpers2
   created_prop(immutable: true)
 end
 
-class ShardingProp
-  include T::Props
-  def self.merchant_prop(opts={}); end
-  merchant_prop
-end
-
 
 # Minimal stub of Chalk implementation to support encrypted_prop
 class Chalk::ODM::Document
@@ -138,9 +132,6 @@ def main
 
     T.reveal_type(PropHelpers2.new.created) # error: Revealed type: `Float`
     PropHelpers2.new.created = 0.0 # error: Method `created=` does not exist
-
-    T.reveal_type(ShardingProp.new.merchant) # error: Revealed type: `String`
-    ShardingProp.new.merchant = "hi" # error: Method `merchant=` does not exist
 
     T.reveal_type(EncryptedProp.new.foo) # error: Revealed type: `T.nilable(String)`
     T.reveal_type(EncryptedProp.new.encrypted_foo) # error: Revealed type: `T.nilable(Opus::DB::Model::Mixins::Encryptable::EncryptedValue)`
