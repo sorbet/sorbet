@@ -68,8 +68,11 @@ SORBET_ALIVE(void, sorbet_stopInDebugger, (void));
 SORBET_ALIVE(void, sorbet_cast_failure,
              (VALUE value, char *castMethod, char *type) __attribute__((__cold__, __noreturn__)));
 SORBET_ALIVE(void, sorbet_raiseArity, (int argc, int min, int max) __attribute__((__noreturn__)));
+SORBET_ALIVE(void, sorbet_raiseMissingKeywords, (VALUE missing) __attribute__((__noreturn__)));
 SORBET_ALIVE(void, sorbet_raiseExtraKeywords, (VALUE hash) __attribute__((__noreturn__)));
 SORBET_ALIVE(VALUE, sorbet_t_absurd, (VALUE val) __attribute__((__cold__)));
+
+SORBET_ALIVE(VALUE, sorbet_addMissingKWArg, (VALUE missing, VALUE sym));
 
 SORBET_ALIVE(rb_iseq_t *, sorbet_allocateRubyStackFrame,
              (VALUE funcName, ID func, VALUE filename, VALUE realpath, rb_iseq_t *parent, int iseqType, int startLine,
@@ -1739,17 +1742,24 @@ VALUE sorbet_getKWArg(VALUE maybeHash, VALUE key) {
 }
 
 SORBET_INLINE
-VALUE sorbet_assertNoExtraKWArg(VALUE maybeHash, int requiredKwargs, int remainingRequired, int optionalParsed) {
+void sorbet_assertAllRequiredKWArgs(VALUE missing) {
+    if (LIKELY(missing == RUBY_Qundef)) {
+        return;
+    }
+
+    sorbet_raiseMissingKeywords(missing);
+}
+
+SORBET_INLINE
+VALUE sorbet_assertNoExtraKWArg(VALUE maybeHash, int requiredKwargs, int optionalParsed) {
     if (maybeHash == RUBY_Qundef) {
         return RUBY_Qundef;
     }
 
     int size = rb_hash_size_num(maybeHash);
-    if (remainingRequired == 0 && (size - requiredKwargs) == optionalParsed) {
+    if (LIKELY((size - requiredKwargs) == optionalParsed)) {
         return RUBY_Qundef;
     }
-
-    sorbet_stopInDebugger();
 
     sorbet_raiseExtraKeywords(maybeHash);
 }

@@ -59,8 +59,11 @@ public:
 
     static llvm::Value *readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);
     static llvm::Value *assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash,
-                                           llvm::Value *numRequired, llvm::Value *requiredRemaining,
-                                           llvm::Value *optionalParsed);
+                                           llvm::Value *numRequired, llvm::Value *optionalParsed);
+    static llvm::Value *assertAllRequiredKWArgs(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *missing);
+    static llvm::Value *addMissingKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *missing,
+                                        llvm::Value *sym);
+
     static llvm::Value *getKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash,
                                  llvm::Value *rubySym);
     static llvm::Value *readRestArgs(CompilerState &cs, llvm::IRBuilderBase &builder, int maxPositionalArgCount,
