@@ -454,26 +454,28 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                                                 rubyBlockId);
                             }
 
+                            auto *updatedMissingKwargs = missingKwargs;
                             if (!argsFlags[argId].isDefault) {
-                                missingKwargs = Payload::addMissingKWArg(cs, builder, missingKwargs, rawRubySym);
+                                updatedMissingKwargs = Payload::addMissingKWArg(cs, builder, missingKwargs, rawRubySym);
                             }
 
                             optionalPhi->addIncoming(optionalKwargs, builder.GetInsertBlock());
-                            missingPhi->addIncoming(missingKwargs, builder.GetInsertBlock());
+                            missingPhi->addIncoming(updatedMissingKwargs, builder.GetInsertBlock());
                             builder.CreateBr(kwArgContinue);
 
                             builder.SetInsertPoint(kwArgSet);
+                            auto *updatedOptionalKwargs = optionalKwargs;
                             if (!isBlock && argPresent.exists()) {
                                 if (argsFlags[argId].isDefault) {
-                                    optionalKwargs = builder.CreateBinOp(llvm::Instruction::Add, optionalKwargs,
-                                                                         IREmitterHelpers::buildS4(cs, 1));
+                                    updatedOptionalKwargs = builder.CreateBinOp(llvm::Instruction::Add, optionalKwargs,
+                                                                                IREmitterHelpers::buildS4(cs, 1));
                                 }
 
                                 Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx,
                                                 rubyBlockId);
                             }
                             Payload::varSet(cs, name, passedValue, builder, irctx, rubyBlockId);
-                            optionalPhi->addIncoming(optionalKwargs, builder.GetInsertBlock());
+                            optionalPhi->addIncoming(updatedOptionalKwargs, builder.GetInsertBlock());
                             missingPhi->addIncoming(missingKwargs, builder.GetInsertBlock());
                             builder.CreateBr(kwArgContinue);
 
