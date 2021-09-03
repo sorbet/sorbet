@@ -11,4 +11,8 @@ class Test
   end
 end
 
-Test.main(**T.unsafe({}))
+begin
+  Test.main(**T.unsafe({}))
+rescue
+  puts $!.message
+end
