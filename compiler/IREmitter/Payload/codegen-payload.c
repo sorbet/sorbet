@@ -1730,15 +1730,26 @@ VALUE sorbet_selfNew(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk
 // ****                       Calls
 // ****
 
+// When no double-splat is present, only lookup entries in the keyword argument hash, don't delete them.
 SORBET_INLINE
 VALUE sorbet_getKWArg(VALUE maybeHash, VALUE key) {
     if (maybeHash == RUBY_Qundef) {
         return RUBY_Qundef;
     }
 
-    // TODO: ruby seems to do something smarter here:
-    //  https://github.com/ruby/ruby/blob/5aa0e6bee916f454ecf886252e1b025d824f7bd8/class.c#L1901
     return rb_hash_lookup2(maybeHash, key, RUBY_Qundef);
+}
+
+// When building up a double-splat, reuse the original hash for the double-splat arg by deleting the entries that we
+// parse out of it.
+SORBET_INLINE
+VALUE sorbet_removeKWArg(VALUE maybeHash, VALUE key) {
+    if (maybeHash == RUBY_Qundef) {
+        return RUBY_Qundef;
+    }
+
+
+    return rb_hash_delete_entry(maybeHash, key);
 }
 
 SORBET_INLINE

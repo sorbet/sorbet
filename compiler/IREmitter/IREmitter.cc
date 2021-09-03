@@ -433,7 +433,14 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                             auto rawRubySym = builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
 
                             auto argPresent = irctx.argPresentVariables[argId];
-                            auto passedValue = Payload::getKWArg(cs, builder, hashArgs, rawRubySym);
+
+                            llvm::Value *passedValue;
+                            if (hasKWRestArgs) {
+                                passedValue = Payload::removeKWArg(cs, builder, hashArgs, rawRubySym);
+                            } else {
+                                passedValue = Payload::getKWArg(cs, builder, hashArgs, rawRubySym);
+                            }
+
                             auto isItUndef = Payload::testIsUndef(cs, builder, passedValue);
 
                             auto kwArgSet = llvm::BasicBlock::Create(cs, "kwArgSet", func);

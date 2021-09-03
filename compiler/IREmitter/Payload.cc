@@ -943,6 +943,12 @@ llvm::Value *Payload::getKWArg(CompilerState &cs, llvm::IRBuilderBase &build, ll
     return builder.CreateCall(cs.getFunction("sorbet_getKWArg"), {maybeHash, rubySym});
 }
 
+llvm::Value *Payload::removeKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash,
+                                  llvm::Value *rubySym) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.getFunction("sorbet_removeKWArg"), {maybeHash, rubySym});
+}
+
 llvm::Value *Payload::readRestArgs(CompilerState &cs, llvm::IRBuilderBase &build, int maxPositionalArgCount,
                                    llvm::Value *argCountRaw, llvm::Value *argArrayRaw) {
     auto &builder = builderCast(build);

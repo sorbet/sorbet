@@ -66,6 +66,8 @@ public:
 
     static llvm::Value *getKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash,
                                  llvm::Value *rubySym);
+    static llvm::Value *removeKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash,
+                                    llvm::Value *rubySym);
     static llvm::Value *readRestArgs(CompilerState &cs, llvm::IRBuilderBase &builder, int maxPositionalArgCount,
                                      llvm::Value *argCountRaw, llvm::Value *argArrayRaw);
     static core::Loc setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc,
