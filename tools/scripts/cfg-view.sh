@@ -32,7 +32,7 @@ fi
 "${sorbet_exe[@]}" --silence-dev-message --suppress-non-critical --typed=true --print "$print" "$@" > "$dot"
 dot -Tsvg "$dot" > "$svg"
 if command -v open &> /dev/null && test "$sys" != Linux; then
-  open -a "Google Chrome" "$svg"
+  open "$svg"
 elif command -v sensible-browser &> /dev/null; then
   sensible-browser "$svg"
 elif command -v xdg-open &> /dev/null; then
