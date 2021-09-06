@@ -428,7 +428,22 @@ public:
 
         // First arg: define method on what
         auto ownerSym = typeToSym(cs, send->args[0].type);
-        auto klass = Payload::getRubyConstant(cs, ownerSym, builder);
+        llvm::Value *klass;
+        // If we're defining the method on `T.class_of(T.class_of(X))`, we need to
+        // programatically access the class, rather than letting getRubyConstant do
+        // that work for us.
+        if (ownerSym.data(cs)->isSingletonClass(cs)) {
+            auto attachedClass = ownerSym.data(cs)->attachedClass(cs);
+            ENFORCE(attachedClass.exists());
+            if (attachedClass.data(cs)->isSingletonClass(cs)) {
+                klass = Payload::getRubyConstant(cs, attachedClass, builder);
+                klass = builder.CreateCall(cs.getFunction("sorbet_singleton_class"), {klass}, "singletonClass");
+            } else {
+                klass = Payload::getRubyConstant(cs, ownerSym, builder);
+            }
+        } else {
+            klass = Payload::getRubyConstant(cs, ownerSym, builder);
+        }
 
         // Second arg: name of method to define
         auto litName = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
