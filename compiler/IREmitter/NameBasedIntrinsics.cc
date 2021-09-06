@@ -82,29 +82,34 @@ public:
             return Payload::rubyNil(cs, builder);
         }
 
-        // this is wrong and will not work for `class <<self`
-        auto classNameCStr = Payload::toCString(cs, IREmitterHelpers::showClassNameWithoutOwner(cs, sym), builder);
-        auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
-        auto funcSym = cs.gs.lookupStaticInitForClass(attachedClass);
-
         llvm::Value *module = nullptr;
 
-        if (!IREmitterHelpers::isRootishSymbol(cs, sym.data(cs)->owner)) {
-            auto getOwner = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
-            if (isModule) {
-                module = builder.CreateCall(cs.getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
+        auto funcSym = cs.gs.lookupStaticInitForClass(attachedClass);
+        if (!attachedClass.data(cs)->isSingletonClass(cs)) {
+            auto classNameCStr = Payload::toCString(cs, IREmitterHelpers::showClassNameWithoutOwner(cs, sym), builder);
+            auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
+
+            if (!IREmitterHelpers::isRootishSymbol(cs, sym.data(cs)->owner)) {
+                auto getOwner = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
+                if (isModule) {
+                    module = builder.CreateCall(cs.getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
+                } else {
+                    auto rawCall = Payload::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
+                    module = builder.CreateCall(cs.getFunction("sorbet_defineNestedClass"),
+                                                {getOwner, classNameCStr, rawCall});
+                }
             } else {
-                auto rawCall = Payload::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
-                module =
-                    builder.CreateCall(cs.getFunction("sorbet_defineNestedClass"), {getOwner, classNameCStr, rawCall});
+                if (isModule) {
+                    module = builder.CreateCall(cs.getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
+                } else {
+                    auto rawCall = Payload::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
+                    module =
+                        builder.CreateCall(cs.getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
+                }
             }
         } else {
-            if (isModule) {
-                module = builder.CreateCall(cs.getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
-            } else {
-                auto rawCall = Payload::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
-                module = builder.CreateCall(cs.getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
-            }
+            module = Payload::getRubyConstant(cs, attachedClass, builder);
+            module = builder.CreateCall(cs.getFunction("sorbet_singleton_class"), {module}, "singletonClass");
         }
         builder.CreateCall(cs.getFunction("sorbet_callStaticInitDirect"),
                            {IREmitterHelpers::getOrCreateStaticInit(cs, funcSym, send->receiverLoc),
