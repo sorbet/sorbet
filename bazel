@@ -49,13 +49,29 @@ fi
 
 echo >&2 "No cached Bazel v$BAZEL_VERSION found, installing..."
 
-case "$(uname -s)" in
-  Linux)  bazel_launcher_platform_name='linux'  ;;
-  Darwin) bazel_launcher_platform_name='darwin' ;;
-  *) echo >&2 "Your platform $(uname -s) is unsupported, sorry" && exit 1 ;;
+kernel_name="$(uname -s | tr 'A-Z' 'a-z')"
+processor_name="$(uname -p)"
+
+bazel_installer_platform="${kernel_name}-${processor_name}"
+case "$bazel_installer_platform" in
+  linux-x86_64) ;;
+  darwin-x86_64) ;;
+  darwin-arm64)
+    # Pseudo Apple Silicon support by forcing x86_64 (Rosetta) for now
+    bazel_installer_platform="darwin-x86_64"
+    ;;
+  darwin-i386)
+    # macOS Mojave reports as i386
+    bazel_installer_platform="darwin-x86_64"
+    ;;
+  *)
+    echo >&2 "Building on $bazel_installer_platform is not implemented"
+    exit 1
+    ;;
 esac
 
-bazel_installer_sha_regex="BAZEL_INSTALLER_VERSION_${bazel_launcher_platform_name}_SHA = \"([^\"]+)\""
+bazel_installer_platform_var="$(echo "$bazel_installer_platform" | tr 'a-z-' 'A-Z_')"
+bazel_installer_sha_regex="BAZEL_INSTALLER_VERSION_${bazel_installer_platform_var}_SHA = \"([^\"]+)\""
 if [[ $workspace_contents =~ $bazel_installer_sha_regex ]]; then
   export expected_sha="${BASH_REMATCH[1]}"
 else
@@ -72,7 +88,7 @@ mkdir -p "$BUILD_DIR"
   cd "$BUILD_DIR"
   echo "$PWD"
 
-  installer_name="bazel-${BAZEL_VERSION}-installer-${bazel_launcher_platform_name}-x86_64.sh"
+  installer_name="bazel-${BAZEL_VERSION}-installer-${bazel_installer_platform}.sh"
   BAZEL_REMOTE_SOURCE="${BAZEL_REMOTE_SOURCE:-https://github.com/bazelbuild/bazel/releases/download}"
   BAZEL_INSTALLER_PATH="${BAZEL_INSTALLER_PATH:-$BAZEL_REMOTE_SOURCE/${BAZEL_VERSION}/$installer_name}"
 
