@@ -132,6 +132,19 @@ __attribute__((__noreturn__)) void sorbet_raiseArity(int argc, int min, int max)
     rb_exc_raise(sorbet_rb_arity_error_new(argc, min, max));
 }
 
+VALUE sorbet_addMissingKWArg(VALUE missing, VALUE sym) {
+    if (UNLIKELY(missing == RUBY_Qundef)) {
+        missing = rb_ary_new();
+    }
+
+    rb_ary_push(missing, sym);
+    return missing;
+}
+
+__attribute__((__noreturn)) void sorbet_raiseMissingKeywords(VALUE missing) {
+    rb_exc_raise(rb_keyword_error_new("missing", missing));
+}
+
 __attribute__((__noreturn__)) void sorbet_raiseExtraKeywords(VALUE hash) {
     VALUE err_mess = rb_sprintf("unknown keywords: %" PRIsVALUE, rb_hash_keys(hash));
     rb_exc_raise(rb_exc_new3(rb_eArgError, err_mess));

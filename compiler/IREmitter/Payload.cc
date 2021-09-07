@@ -920,15 +920,33 @@ llvm::Value *Payload::readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &buil
     return builder.CreateCall(cs.getFunction("sorbet_readKWRestArgs"), {maybeHash});
 }
 
-llvm::Value *Payload::assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash) {
+llvm::Value *Payload::addMissingKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *missing,
+                                      llvm::Value *sym) {
     auto &builder = builderCast(build);
-    return builder.CreateCall(cs.getFunction("sorbet_assertNoExtraKWArg"), {maybeHash});
+    return builder.CreateCall(cs.getFunction("sorbet_addMissingKWArg"), {missing, sym});
+}
+
+llvm::Value *Payload::assertAllRequiredKWArgs(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *missing) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.getFunction("sorbet_assertAllRequiredKWArgs"), {missing});
+}
+
+llvm::Value *Payload::assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash,
+                                         llvm::Value *numRequired, llvm::Value *optionalParsed) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.getFunction("sorbet_assertNoExtraKWArg"), {maybeHash, numRequired, optionalParsed});
 }
 
 llvm::Value *Payload::getKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash,
                                llvm::Value *rubySym) {
     auto &builder = builderCast(build);
     return builder.CreateCall(cs.getFunction("sorbet_getKWArg"), {maybeHash, rubySym});
+}
+
+llvm::Value *Payload::removeKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash,
+                                  llvm::Value *rubySym) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.getFunction("sorbet_removeKWArg"), {maybeHash, rubySym});
 }
 
 llvm::Value *Payload::readRestArgs(CompilerState &cs, llvm::IRBuilderBase &build, int maxPositionalArgCount,

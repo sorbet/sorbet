@@ -68,8 +68,11 @@ SORBET_ALIVE(void, sorbet_stopInDebugger, (void));
 SORBET_ALIVE(void, sorbet_cast_failure,
              (VALUE value, char *castMethod, char *type) __attribute__((__cold__, __noreturn__)));
 SORBET_ALIVE(void, sorbet_raiseArity, (int argc, int min, int max) __attribute__((__noreturn__)));
+SORBET_ALIVE(void, sorbet_raiseMissingKeywords, (VALUE missing) __attribute__((__noreturn__)));
 SORBET_ALIVE(void, sorbet_raiseExtraKeywords, (VALUE hash) __attribute__((__noreturn__)));
 SORBET_ALIVE(VALUE, sorbet_t_absurd, (VALUE val) __attribute__((__cold__)));
+
+SORBET_ALIVE(VALUE, sorbet_addMissingKWArg, (VALUE missing, VALUE sym));
 
 SORBET_ALIVE(rb_iseq_t *, sorbet_allocateRubyStackFrame,
              (VALUE funcName, ID func, VALUE filename, VALUE realpath, rb_iseq_t *parent, int iseqType, int startLine,
@@ -1727,24 +1730,45 @@ VALUE sorbet_selfNew(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk
 // ****                       Calls
 // ****
 
+// When no double-splat is present, only lookup entries in the keyword argument hash, don't delete them.
 SORBET_INLINE
 VALUE sorbet_getKWArg(VALUE maybeHash, VALUE key) {
     if (maybeHash == RUBY_Qundef) {
         return RUBY_Qundef;
     }
 
-    // TODO: ruby seems to do something smarter here:
-    //  https://github.com/ruby/ruby/blob/5aa0e6bee916f454ecf886252e1b025d824f7bd8/class.c#L1901
-    //
+    return rb_hash_lookup2(maybeHash, key, RUBY_Qundef);
+}
+
+// When building up a double-splat, reuse the original hash for the double-splat arg by deleting the entries that we
+// parse out of it.
+SORBET_INLINE
+VALUE sorbet_removeKWArg(VALUE maybeHash, VALUE key) {
+    if (maybeHash == RUBY_Qundef) {
+        return RUBY_Qundef;
+    }
+
+
     return rb_hash_delete_entry(maybeHash, key);
 }
 
 SORBET_INLINE
-VALUE sorbet_assertNoExtraKWArg(VALUE maybeHash) {
+void sorbet_assertAllRequiredKWArgs(VALUE missing) {
+    if (LIKELY(missing == RUBY_Qundef)) {
+        return;
+    }
+
+    sorbet_raiseMissingKeywords(missing);
+}
+
+SORBET_INLINE
+VALUE sorbet_assertNoExtraKWArg(VALUE maybeHash, int requiredKwargs, int optionalParsed) {
     if (maybeHash == RUBY_Qundef) {
         return RUBY_Qundef;
     }
-    if (RHASH_EMPTY_P(maybeHash)) {
+
+    int size = rb_hash_size_num(maybeHash);
+    if (LIKELY((size - requiredKwargs) == optionalParsed)) {
         return RUBY_Qundef;
     }
 
