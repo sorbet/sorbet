@@ -193,6 +193,14 @@ string LoadYieldParams::showRaw(const core::GlobalState &gs, const CFG &cfg, int
     return fmt::format("LoadYieldParams {{ link = {0} }}", this->link->fun.showRaw(gs));
 }
 
+string YieldParamPresent::toString(const core::GlobalState &gs, const CFG &cfg) const {
+    return fmt::format("yield_param_present({})", this->argId);
+}
+
+string YieldParamPresent::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
+    return fmt::format("YieldParamPresent {{ argId = {} }}", this->argId);
+}
+
 string GetCurrentException::toString(const core::GlobalState &gs, const CFG &cfg) const {
     return "<get-current-exception>";
 }

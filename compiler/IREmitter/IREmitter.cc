@@ -662,6 +662,10 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     loadYieldParamsResults.insert(bind.bind.variable);
                     /* intentionally omitted, it's part of method preambula */
                 },
+                [&](cfg::YieldParamPresent *i) {
+                    failCompilation(cs, core::Loc(cfg.file, bind.loc),
+                                    "Unable to compile blocks with default arguments!");
+                },
                 [&](cfg::Cast *i) {
                     auto val = Payload::varGet(cs, i->value.variable, builder, irctx, bb->rubyBlockId);
 
