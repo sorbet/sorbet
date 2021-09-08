@@ -229,7 +229,10 @@ class TrackCaptures final {
 
         // If we're in a block that wouldn't have the same frame as the toplevel,
         // the block is captured.
-        if (functionTypePushesFrame(blockTypes[bb->rubyBlockId])) {
+        //
+        // TODO: this needs to be move sophisticated in the case of blocks taking
+        // blocks as arguments.
+        if (blockLevels[bb->rubyBlockId] != 0) {
             return BlockArgUsage::Captured;
         }
 
@@ -249,8 +252,7 @@ class TrackCaptures final {
         if (context.kind == CaptureContext::Kind::SendArgument &&
             context.send->fun == core::Names::callWithBlock() &&
             context.send->args[2].variable == lv) {
-                return BlockArgUsage::SameFrameAsTopLevel;
-            }
+            return BlockArgUsage::SameFrameAsTopLevel;
         }
 
         // Anything else captures the block.
@@ -290,11 +292,11 @@ public:
     BlockArgUsage blockArgUsage = BlockArgUsage::None;
     cfg::LocalRef blkArg = cfg::LocalRef::noVariable();
     const UnorderedMap<cfg::LocalRef, Alias> &aliases;
-    const vector<FunctionType> &blockTypes;
+    const vector<int> &blockLevels;
 
     TrackCaptures(const UnorderedMap<cfg::LocalRef, Alias> &aliases,
-                  const vector<FunctionType> &blockTypes)
-        : aliases(aliases), blockTypes(blockTypes) {}
+                  const vector<int> &blockLevels)
+        : aliases(aliases), blockLevels(blockLevels) {}
 
     void trackBlockRead(cfg::BasicBlock *bb, cfg::LocalRef lv, CaptureContext context = CaptureContext::general()) {
         trackBlockUsage(bb, lv, LocalUsedHow::ReadOnly, context);
@@ -341,8 +343,8 @@ public:
  * negative number */
 CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
                                const UnorderedMap<cfg::LocalRef, Alias> &aliases, const vector<int> &exceptionHandlingBlockHeaders,
-                               const vector<FunctionType> &blockTypes) {
-    TrackCaptures usage(aliases, blockTypes);
+                               const vector<int> &blockLevels) {
+    TrackCaptures usage(aliases, blockLevels);
 
     int argId = -1;
     for (auto &arg : mdef.args) {
@@ -908,7 +910,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     auto [aliases, symbols] = setupAliasesAndKeywords(cs, cfg);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
     auto [variablesPrivateToBlocks, escapedVariableIndices, blockArgUsage] =
-        findCaptures(cs, md, cfg, aliases, exceptionHandlingBlockHeaders, blockTypes);
+        findCaptures(cs, md, cfg, aliases, exceptionHandlingBlockHeaders, blockLevels);
     vector<llvm::BasicBlock *> functionInitializersByFunction;
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
