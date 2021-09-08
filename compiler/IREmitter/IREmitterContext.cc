@@ -182,7 +182,7 @@ public:
     UnorderedMap<cfg::LocalRef, optional<int>> privateUsages;
     UnorderedMap<cfg::LocalRef, int> escapedIndexes;
     int escapedIndexCounter = 0;
-    bool usesBlockArg = false;
+    BlockArgUsage blockArgUsage = BlockArgUsage::None;
     cfg::LocalRef blkArg = cfg::LocalRef::noVariable();
     UnorderedMap<cfg::LocalRef, Alias> aliases;
 
@@ -193,7 +193,9 @@ public:
         if (lv == cfg::LocalRef::selfVariable()) {
             return;
         }
-        usesBlockArg = usesBlockArg || lv == blkArg;
+        if (lv == blkArg) {
+            blockArgUsage = BlockArgUsage::Captured;
+        }
         auto fnd = privateUsages.find(lv);
         if (fnd != privateUsages.end()) {
             auto &store = fnd->second;
@@ -219,7 +221,7 @@ public:
             realPrivateUsages[entry.first] = entry.second.value();
         }
 
-        return CapturedVariables{std::move(realPrivateUsages), std::move(escapedIndexes), usesBlockArg ? BlockArgUsage::Captured : BlockArgUsage::None};
+        return CapturedVariables{std::move(realPrivateUsages), std::move(escapedIndexes), blockArgUsage};
     }
 };
 
