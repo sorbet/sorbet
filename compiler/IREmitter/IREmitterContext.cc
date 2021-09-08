@@ -176,9 +176,15 @@ struct CapturedVariables {
     BlockArgUsage usesBlockArgs;
 };
 
+enum class CaptureContext {
+    Receiver,
+    SendArgument,
+    General,
+};
+
 // Bundle up a bunch of state used for capture tracking to simplify the interface in findCaptures below.
 class TrackCaptures final {
-    void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv, LocalUsedHow use) {
+    void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv, LocalUsedHow use, CaptureContext context) {
         if (lv == cfg::LocalRef::selfVariable()) {
             return;
         }
@@ -211,16 +217,16 @@ public:
                   const vector<FunctionType> &blockTypes)
         : aliases(aliases), blockTypes(blockTypes) {}
 
-    void trackBlockRead(cfg::BasicBlock *bb, cfg::LocalRef lv) {
-        trackBlockUsage(bb, lv, LocalUsedHow::ReadOnly);
+    void trackBlockRead(cfg::BasicBlock *bb, cfg::LocalRef lv, CaptureContext context = CaptureContext::General) {
+        trackBlockUsage(bb, lv, LocalUsedHow::ReadOnly, context);
     }
 
-    void trackBlockWrite(cfg::BasicBlock *bb, cfg::LocalRef lv) {
-        trackBlockUsage(bb, lv, LocalUsedHow::WrittenTo);
+    void trackBlockWrite(cfg::BasicBlock *bb, cfg::LocalRef lv, CaptureContext context = CaptureContext::General) {
+        trackBlockUsage(bb, lv, LocalUsedHow::WrittenTo, context);
     }
 
-    void trackBlockArgument(cfg::BasicBlock *bb, cfg::LocalRef lv) {
-        trackBlockUsage(bb, lv, LocalUsedHow::ReadOnly);
+    void trackBlockArgument(cfg::BasicBlock *bb, cfg::LocalRef lv, CaptureContext context = CaptureContext::General) {
+        trackBlockUsage(bb, lv, LocalUsedHow::ReadOnly, context);
     }
 
     CapturedVariables finalize() {
@@ -281,9 +287,9 @@ CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cf
                 [&](cfg::SolveConstraint &i) { /* nothing*/ },
                 [&](cfg::Send &i) {
                     for (auto &arg : i.args) {
-                        usage.trackBlockRead(bb.get(), arg.variable);
+                        usage.trackBlockRead(bb.get(), arg.variable, CaptureContext::SendArgument);
                     }
-                    usage.trackBlockRead(bb.get(), i.recv.variable);
+                    usage.trackBlockRead(bb.get(), i.recv.variable, CaptureContext::Receiver);
                 },
                 [&](cfg::GetCurrentException &i) {
                     // if the current block is an exception header, record a usage of the variable in the else block
