@@ -397,33 +397,10 @@ RubyStackArgs IREmitterHelpers::buildSendArgs(MethodCallContext &mcctx, cfg::Loc
     return RubyStackArgs(std::move(stack), std::move(keywords), flags);
 }
 
-namespace {
-bool canCallBlockViaRubyVM(MethodCallContext &mcctx) {
-    auto &cs = mcctx.cs;
-    auto *send = mcctx.send;
-    auto &irctx = mcctx.irctx;
-
-    ENFORCE(IREmitterHelpers::hasBlockArgument(cs, 0, irctx.cfg.symbol, irctx))
-
-    // If the receiver is not the distinguished block argument then we have to be
-    // more general in our send.
-    auto recv = send->recv.variable;
-    if (recv != irctx.rubyBlockArgs[0].back()) {
-        return false;
-    }
-
-    // If our send has a block, we should have turned it into a call to call-with-block
-    // or similar.
-    ENFORCE(!mcctx.blk.has_value());
-
-    return true;
-}
-
-} // namespace
-
 llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx) {
     auto &cs = mcctx.cs;
     auto &builder = mcctx.builder;
+    auto &irctx = mcctx.irctx;
     auto *send = mcctx.send;
     auto &irctx = mcctx.irctx;
 
@@ -470,15 +447,20 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     // Try to call blocks directly without reifying the block into a proc.
     if (send->fun == core::Names::call() &&
         irctx.blockArgUsage == BlockArgUsage::SameFrameAsTopLevel &&
-        IREmitterHelpers::hasBlockArgument(cs, 0, irctx.cfg.symbol, irctx)) {
-        if (canCallBlockViaRubyVM(mcctx)) {
-            // fill in args
-            auto args = IREmitterHelpers::fillSendArgArray(mcctx);
-            auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
+        irctx.rubyBlockLevel[mcctx.rubyBlockId] == 0 &&
+        send>recv.variable == irctx.rubyBlockArgs[0].back()) {
+        // If blockArgUsage is SameFrameAsTopLevel, then this must have been true.
+        ENFORCE(IREmitterHelpers::hasBlockArgument(cs, 0, irctx.cfg.symbol, irctx));
+        // If our send has a block, we should have turned it into a call to call-with-block
+        // or similar.
+        ENFORCE(!mcctx.blk.has_value());
 
-            return builder.CreateCall(cs.getFunction("sorbet_vm_callBlock"), {cfp, args.argc, args.argv, args.kw_splat},
-                                      "rawBlockSendResult");
-        }
+        // fill in args
+        auto args = IREmitterHelpers::fillSendArgArray(mcctx);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
+
+        return builder.CreateCall(cs.getFunction("sorbet_vm_callBlock"), {cfp, args.argc, args.argv, args.kw_splat},
+                                  "rawBlockSendResult");
     }
 
     return callViaRubyVMSimple(mcctx);
