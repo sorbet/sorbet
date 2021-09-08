@@ -50,7 +50,7 @@ fi
 echo >&2 "No cached Bazel v$BAZEL_VERSION found, installing..."
 
 kernel_name="$(uname -s | tr 'A-Z' 'a-z')"
-processor_name="$(uname -p)"
+processor_name="$(uname -m)"
 
 bazel_installer_platform="${kernel_name}-${processor_name}"
 case "$bazel_installer_platform" in
@@ -58,10 +58,6 @@ case "$bazel_installer_platform" in
   darwin-x86_64) ;;
   darwin-arm64)
     # Pseudo Apple Silicon support by forcing x86_64 (Rosetta) for now
-    bazel_installer_platform="darwin-x86_64"
-    ;;
-  darwin-i386)
-    # macOS Mojave reports as i386
     bazel_installer_platform="darwin-x86_64"
     ;;
   *)
