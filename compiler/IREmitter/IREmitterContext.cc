@@ -176,10 +176,27 @@ struct CapturedVariables {
     BlockArgUsage usesBlockArgs;
 };
 
-enum class CaptureContext {
-    Receiver,
-    SendArgument,
-    General,
+class CaptureContext {
+public:
+    enum class Kind {
+        MethodArgument,
+        Receiver,
+        SendArgument,
+        General,
+    };
+
+private:
+    CaptureContext(Kind kind) : kind(kind) {}
+    CaptureContext(Kind kind, cfg::Send *send) : kind(kind), send(send) {}
+
+public:
+    const Kind kind;
+    const cfg::Send *send = nullptr;
+
+    static CaptureContext methodArg() { return CaptureContext(Kind::MethodArgument); }
+    static CaptureContext receiver(cfg::Send *send) { return CaptureContext(Kind::Receiver, send); }
+    static CaptureContext sendArg(cfg::Send *send) { return CaptureContext(Kind::SendArgument, send); }
+    static CaptureContext general() { return CaptureContext(Kind::General); }
 };
 
 // Bundle up a bunch of state used for capture tracking to simplify the interface in findCaptures below.
@@ -217,16 +234,16 @@ public:
                   const vector<FunctionType> &blockTypes)
         : aliases(aliases), blockTypes(blockTypes) {}
 
-    void trackBlockRead(cfg::BasicBlock *bb, cfg::LocalRef lv, CaptureContext context = CaptureContext::General) {
+    void trackBlockRead(cfg::BasicBlock *bb, cfg::LocalRef lv, CaptureContext context = CaptureContext::general()) {
         trackBlockUsage(bb, lv, LocalUsedHow::ReadOnly, context);
     }
 
-    void trackBlockWrite(cfg::BasicBlock *bb, cfg::LocalRef lv, CaptureContext context = CaptureContext::General) {
+    void trackBlockWrite(cfg::BasicBlock *bb, cfg::LocalRef lv, CaptureContext context = CaptureContext::general()) {
         trackBlockUsage(bb, lv, LocalUsedHow::WrittenTo, context);
     }
 
-    void trackBlockArgument(cfg::BasicBlock *bb, cfg::LocalRef lv, CaptureContext context = CaptureContext::General) {
-        trackBlockUsage(bb, lv, LocalUsedHow::ReadOnly, context);
+    void trackBlockArgument(cfg::BasicBlock *bb, cfg::LocalRef lv) {
+        trackBlockUsage(bb, lv, LocalUsedHow::ReadOnly, CaptureContext::methodArg());
     }
 
     CapturedVariables finalize() {
@@ -287,9 +304,9 @@ CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cf
                 [&](cfg::SolveConstraint &i) { /* nothing*/ },
                 [&](cfg::Send &i) {
                     for (auto &arg : i.args) {
-                        usage.trackBlockRead(bb.get(), arg.variable, CaptureContext::SendArgument);
+                        usage.trackBlockRead(bb.get(), arg.variable, CaptureContext::sendArg(&i));
                     }
-                    usage.trackBlockRead(bb.get(), i.recv.variable, CaptureContext::Receiver);
+                    usage.trackBlockRead(bb.get(), i.recv.variable, CaptureContext::receiver(&i));
                 },
                 [&](cfg::GetCurrentException &i) {
                     // if the current block is an exception header, record a usage of the variable in the else block
