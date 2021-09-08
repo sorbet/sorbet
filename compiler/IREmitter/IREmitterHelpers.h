@@ -155,6 +155,10 @@ public:
     static llvm::Value *receiverFastPathTestWithCache(MethodCallContext &mcctx,
                                                       const std::vector<std::string> &expectedRubyCFuncs,
                                                       const std::string &methodNameForDebug);
+
+    // Given a method call context representing a send, determine whether a variable
+    // representing a block can be fetched out of the Ruby VM state.
+    static bool canPassThroughBlockViaRubyVM(MethodCallContext &mcctx, cfg::LocalRef var);
 };
 } // namespace sorbet::compiler
 #endif

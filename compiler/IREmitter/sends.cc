@@ -402,7 +402,6 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     auto &builder = mcctx.builder;
     auto &irctx = mcctx.irctx;
     auto *send = mcctx.send;
-    auto &irctx = mcctx.irctx;
 
     // If we get here with <Magic>, then something has gone wrong.
     // TODO(froydnj): We want to do the same thing with Sorbet::Private::Static,
@@ -446,11 +445,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
 
     // Try to call blocks directly without reifying the block into a proc.
     if (send->fun == core::Names::call() &&
-        irctx.blockArgUsage == BlockArgUsage::SameFrameAsTopLevel &&
-        irctx.rubyBlockLevel[mcctx.rubyBlockId] == 0 &&
-        send>recv.variable == irctx.rubyBlockArgs[0].back()) {
-        // If blockArgUsage is SameFrameAsTopLevel, then this must have been true.
-        ENFORCE(IREmitterHelpers::hasBlockArgument(cs, 0, irctx.cfg.symbol, irctx));
+        IREmitterHelpers::canPassThroughBlockViaRubyVM(mcctx, send->recv.variable)) {
         // If our send has a block, we should have turned it into a call to call-with-block
         // or similar.
         ENFORCE(!mcctx.blk.has_value());
