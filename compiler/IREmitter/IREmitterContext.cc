@@ -201,12 +201,74 @@ public:
 
 // Bundle up a bunch of state used for capture tracking to simplify the interface in findCaptures below.
 class TrackCaptures final {
+    BlockArgUsage determineUsage(cfg::BasicBlock *bb, cfg::LocalRef lv, LocalUsedHow use, CaptureContext context) {
+        // Once captured, always captured.
+        if (blockArgUsage == BlockArgUsage::Captured) {
+            return BlockArgUsage::Captured;
+        }
+
+        // Writes to blocks would be unusual, so don't do anything fancy.
+        if (use == LocalUsedHow::WrittenTo) {
+            return BlockArgUsage::Captured;
+        }
+        ENFORCE(use == LocalUsedHow::ReadOnly);
+
+        if (context.kind == CaptureContext::Kind::General) {
+            return BlockArgUsage::Captured;
+        }
+
+        if (context.kind == CaptureContext::Kind::MethodArgument) {
+            ENFORCE(bb->rubyBlockId == 0);
+            ENFORCE(blockArgUsage == BlockArgUsage::None);
+            return BlockArgUsage::SameFrameAsTopLevel;
+        }
+
+        ENFORCE(blockArgUsage == BlockArgUsage::SameFrameAsTopLevel);
+        ENFORCE(context.kind == CaptureContext::Kind::Receiver
+                || context.kind == CaptureContext::Kind::SendArgument);
+
+        // If we're in a block that wouldn't have the same frame as the toplevel,
+        // the block is captured.
+        if (functionTypePushesFrame(blockTypes[bb->rubyBlockId])) {
+            return BlockArgUsage::Captured;
+        }
+
+        // Sending `call` to a block is how we represent `yield`, and does not capture
+        // the block.
+        if (context.kind == CaptureContext::Kind::Receiver &&
+            context.send->fun == core::Names::call()) {
+            // We should have called this via call-with-block.
+            ENFORCE(context.send->link == nullptr);
+            return BlockArgUsage::SameFrameAsTopLevel;
+        }
+
+        // If we are the distinguished block argument to <Magic>.<call-with-block>,
+        // that does not capture the block.
+        //
+        // TODO: handle call-with-splat-and-block.
+        if (context.kind == CaptureContext::Kind::SendArgument &&
+            context.send->fun == core::Names::callWithBlock() &&
+            context.send->args[2].variable == lv) {
+                return BlockArgUsage::SameFrameAsTopLevel;
+            }
+        }
+
+        // Anything else captures the block.
+        return BlockArgUsage::Captured;
+    }
+
     void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv, LocalUsedHow use, CaptureContext context) {
         if (lv == cfg::LocalRef::selfVariable()) {
             return;
         }
+        // Blocks are special, because they have specific support in the Ruby VM that
+        // we want to re-use as much as possible: converting the blocks into an
+        // explicit Ruby value (e.g. rb_block_proc()) is expensive.
+        //
+        // Thus, this separate tracking for block arguments.
         if (lv == blkArg) {
-            blockArgUsage = BlockArgUsage::Captured;
+            blockArgUsage = determineUsage(bb, lv, use, context);
+            return;
         }
         auto fnd = privateUsages.find(lv);
         if (fnd != privateUsages.end()) {
@@ -258,6 +320,19 @@ public:
             realPrivateUsages[entry.first] = entry.second.value();
         }
 
+        if (blkArg.exists()) {
+            // We have been tracking the block argument separately.
+            ENFORCE(!realPrivateUsages.contains(blkArg));
+            ENFORCE(!escapedIndexes.contains(blkArg));
+
+            // ...but we still need to note that it is a legitimate local variable
+            // if it was captured in some way.
+            if (blockArgUsage == BlockArgUsage::Captured) {
+                escapedIndexes[blkArg] = escapedIndexCounter;
+                escapedIndexCounter += 1;
+            }
+        }
+
         return CapturedVariables{std::move(realPrivateUsages), std::move(escapedIndexes), blockArgUsage};
     }
 };
@@ -280,10 +355,10 @@ CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cf
         }
         ENFORCE(local);
         auto localRef = cfg.enterLocal(local->localVariable);
-        usage.trackBlockArgument(cfg.entry(), localRef);
         if (cfg.symbol.data(cs)->arguments()[argId].flags.isBlock) {
             usage.blkArg = localRef;
         }
+        usage.trackBlockArgument(cfg.entry(), localRef);
     }
 
     for (auto &bb : cfg.basicBlocks) {
