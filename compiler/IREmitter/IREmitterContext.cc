@@ -178,18 +178,7 @@ struct CapturedVariables {
 
 // Bundle up a bunch of state used for capture tracking to simplify the interface in findCaptures below.
 class TrackCaptures final {
-public:
-    UnorderedMap<cfg::LocalRef, optional<int>> privateUsages;
-    UnorderedMap<cfg::LocalRef, int> escapedIndexes;
-    int escapedIndexCounter = 0;
-    BlockArgUsage blockArgUsage = BlockArgUsage::None;
-    cfg::LocalRef blkArg = cfg::LocalRef::noVariable();
-    UnorderedMap<cfg::LocalRef, Alias> aliases;
-
-    TrackCaptures(const UnorderedMap<cfg::LocalRef, Alias> &aliases)
-        : aliases(aliases) {}
-
-    void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv) {
+    void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv, LocalUsedHow use) {
         if (lv == cfg::LocalRef::selfVariable()) {
             return;
         }
@@ -207,6 +196,29 @@ public:
         } else {
             privateUsages[lv] = bb->rubyBlockId;
         }
+    }
+
+public:
+    UnorderedMap<cfg::LocalRef, optional<int>> privateUsages;
+    UnorderedMap<cfg::LocalRef, int> escapedIndexes;
+    int escapedIndexCounter = 0;
+    BlockArgUsage blockArgUsage = BlockArgUsage::None;
+    cfg::LocalRef blkArg = cfg::LocalRef::noVariable();
+    UnorderedMap<cfg::LocalRef, Alias> aliases;
+
+    TrackCaptures(const UnorderedMap<cfg::LocalRef, Alias> &aliases)
+        : aliases(aliases) {}
+
+    void trackBlockRead(cfg::BasicBlock *bb, cfg::LocalRef lv) {
+        trackBlockUsage(bb, lv, LocalUsedHow::ReadOnly);
+    }
+
+    void trackBlockWrite(cfg::BasicBlock *bb, cfg::LocalRef lv) {
+        trackBlockUsage(bb, lv, LocalUsedHow::WrittenTo);
+    }
+
+    void trackBlockArgument(cfg::BasicBlock *bb, cfg::LocalRef lv) {
+        trackBlockUsage(bb, lv, LocalUsedHow::ReadOnly);
     }
 
     CapturedVariables finalize() {
@@ -242,7 +254,7 @@ CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cf
         }
         ENFORCE(local);
         auto localRef = cfg.enterLocal(local->localVariable);
-        usage.trackBlockUsage(cfg.entry(), localRef);
+        usage.trackBlockArgument(cfg.entry(), localRef);
         if (cfg.symbol.data(cs)->arguments()[argId].flags.isBlock) {
             usage.blkArg = localRef;
         }
@@ -250,38 +262,49 @@ CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cf
 
     for (auto &bb : cfg.basicBlocks) {
         for (cfg::Binding &bind : bb->exprs) {
-            usage.trackBlockUsage(bb.get(), bind.bind.variable);
+            // Despite:
+            //
+            // var: $TYPE = LoadArg(var)
+            //
+            // looking like a write to var, we don't want to track it as such.  We know
+            // that this (initial) write isn't really the kind of write we care about.
+            // So we have this to indicate whether we should record the write to
+            // bind.bind.variable.
+            bool trackBinding = true;
             typecase(
-                bind.value, [&](cfg::Ident &i) { usage.trackBlockUsage(bb.get(), i.what); },
+                bind.value, [&](cfg::Ident &i) { usage.trackBlockRead(bb.get(), i.what); },
                 [&](cfg::Alias &i) { /* nothing */
                 },
                 [&](cfg::SolveConstraint &i) { /* nothing*/ },
                 [&](cfg::Send &i) {
                     for (auto &arg : i.args) {
-                        usage.trackBlockUsage(bb.get(), arg.variable);
+                        usage.trackBlockRead(bb.get(), arg.variable);
                     }
-                    usage.trackBlockUsage(bb.get(), i.recv.variable);
+                    usage.trackBlockRead(bb.get(), i.recv.variable);
                 },
                 [&](cfg::GetCurrentException &i) {
                     // if the current block is an exception header, record a usage of the variable in the else block
                     // (the body block of the exception handling) to force it to escape.
                     if (exceptionHandlingBlockHeaders[bb->id] != 0) {
-                        usage.trackBlockUsage(bb->bexit.elseb, bind.bind.variable);
+                        usage.trackBlockRead(bb->bexit.elseb, bind.bind.variable);
                     }
                 },
-                [&](cfg::Return &i) { usage.trackBlockUsage(bb.get(), i.what.variable); },
-                [&](cfg::BlockReturn &i) { usage.trackBlockUsage(bb.get(), i.what.variable); },
+                [&](cfg::Return &i) { usage.trackBlockRead(bb.get(), i.what.variable); },
+                [&](cfg::BlockReturn &i) { usage.trackBlockRead(bb.get(), i.what.variable); },
                 [&](cfg::LoadSelf &i) { /*nothing*/ /*todo: how does instance exec pass self?*/ },
                 [&](cfg::Literal &i) { /* nothing*/ }, [&](cfg::ArgPresent &i) { /*nothing*/ },
-                [&](cfg::LoadArg &i) { /*nothing*/ }, [&](cfg::LoadYieldParams &i) { /*nothing*/ },
+                [&](cfg::LoadArg &i) { trackBinding = false; }, [&](cfg::LoadYieldParams &i) { /*nothing*/ },
                 [&](cfg::YieldParamPresent &i) { /* nothing */ }, [&](cfg::YieldLoadArg &i) { /* nothing */ },
-                [&](cfg::Cast &i) { usage.trackBlockUsage(bb.get(), i.value.variable); },
-                [&](cfg::TAbsurd &i) { usage.trackBlockUsage(bb.get(), i.what.variable); });
+                [&](cfg::Cast &i) { usage.trackBlockRead(bb.get(), i.value.variable); },
+                [&](cfg::TAbsurd &i) { usage.trackBlockRead(bb.get(), i.what.variable); });
+            if (trackBinding) {
+                usage.trackBlockWrite(bb.get(), bind.bind.variable);
+            }
         }
 
         // no need to track the condition variable if the jump is unconditional
         if (bb->bexit.thenb != bb->bexit.elseb) {
-            usage.trackBlockUsage(bb.get(), bb->bexit.cond.variable);
+            usage.trackBlockRead(bb.get(), bb->bexit.cond.variable);
         }
     }
 

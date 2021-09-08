@@ -55,6 +55,14 @@ enum class BlockArgUsage {
     Captured,
 };
 
+// We only track if a local variable is ever written to.  A more sophisticated
+// analysis might take into account where it is written to: writes only happen
+// after all escaped reads, all writes happen before any escaped reads, etc.
+enum class LocalUsedHow {
+    ReadOnly,
+    WrittenTo,
+};
+
 constexpr bool functionTypePushesFrame(FunctionType ty) {
     switch (ty) {
         case FunctionType::Method:
