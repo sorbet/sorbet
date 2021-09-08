@@ -9,8 +9,11 @@ def boo(&blk)
 end
 
 # INITIAL-LABEL: "func_Object#3boo"
-# INITIAL: call i64 @sorbet_getMethodBlockAsProc
-# INITIAL: call i64 @sorbet_vm_callBlock
+# INITIAL-NOT: call i64 @sorbet_getMethodBlockAsProc
+# INITIAL-NOT: call i64 @rb_block_proc
+# INITIAL: call i64 @sorbet_callBlock
+# INITIAL-NOT: call i64 @sorbet_getMethodBlockAsProc
+# INITIAL-NOT: call i64 @rb_block_proc
 # INITIAL{LITERAL}: }
 
 # OPT-LABEL: "func_Object#3boo"
