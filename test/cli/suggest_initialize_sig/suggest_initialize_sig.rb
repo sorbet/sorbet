@@ -54,3 +54,41 @@ class SingleLineNoAfterStatements
     @x = x
   end
 end
+
+class ClassMethodInitializeIsIgnored
+  extend T::Sig
+
+  sig {returns(ClassMethodInitializeIsIgnored)}
+  def self.initialize
+    new
+  end
+end
+
+class LineBreakAfterReturns
+  extend T::Sig
+
+  sig do
+    params(
+      path: String,
+      key: String
+    )
+    .returns(T.self_type)
+    .checked(:tests)
+  end
+  def initialize(path, key)
+  end
+end
+
+class LineBreakOnlyAtEnd
+  extend T::Sig
+
+  sig do
+    params(
+      path: String,
+      key: String
+    )
+    .returns(T.self_type).checked(:tests)
+  end
+  def initialize(path, key)
+  end
+end

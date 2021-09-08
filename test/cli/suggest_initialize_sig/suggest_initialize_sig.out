@@ -51,4 +51,67 @@ test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:52: The initialize met
     test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:52: Replace with `params(x: T.any(Integer, String)).void`
     52 |  sig {params(x: T.any(Integer, String)).returns(T.any(Integer, String))}
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 5
+
+test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:71: The initialize method should always return void https://srb.help/3510
+    71 |    params(
+    72 |      path: String,
+    73 |      key: String
+    74 |    )
+    75 |    .returns(T.self_type)
+    76 |    .checked(:tests)
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:71: Replace with `params(
+      path: String,
+      key: String
+    )
+    .void
+    .checked(:tests)`
+    71 |    params(
+    72 |      path: String,
+    73 |      key: String
+    74 |    )
+    75 |    .returns(T.self_type)
+    76 |    .checked(:tests)
+
+test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:86: The initialize method should always return void https://srb.help/3510
+    86 |    params(
+    87 |      path: String,
+    88 |      key: String
+    89 |    )
+    90 |    .returns(T.self_type).checked(:tests)
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:86: Replace with `params(
+      path: String,
+      key: String
+    )
+    .void.checked(:tests)`
+    86 |    params(
+    87 |      path: String,
+    88 |      key: String
+    89 |    )
+    90 |    .returns(T.self_type).checked(:tests)
+
+test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:79: Expected `LineBreakAfterReturns` but found `NilClass` for method result type https://srb.help/7005
+    79 |  end
+          ^^^
+  Expected `LineBreakAfterReturns` for result type of method `initialize`:
+    test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:78:
+    78 |  def initialize(path, key)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `NilClass` originating from:
+    test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:78: Possibly uninitialized (`NilClass`) in:
+    78 |  def initialize(path, key)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:93: Expected `LineBreakOnlyAtEnd` but found `NilClass` for method result type https://srb.help/7005
+    93 |  end
+          ^^^
+  Expected `LineBreakOnlyAtEnd` for result type of method `initialize`:
+    test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:92:
+    92 |  def initialize(path, key)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `NilClass` originating from:
+    test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:92: Possibly uninitialized (`NilClass`) in:
+    92 |  def initialize(path, key)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 9

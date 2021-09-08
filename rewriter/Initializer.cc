@@ -1,4 +1,5 @@
 #include "rewriter/Initializer.h"
+#include "absl/strings/str_split.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/core.h"
@@ -80,18 +81,32 @@ void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
             auto loc = core::Loc(ctx.file, originalSend.loc());
             string original = loc.source(ctx).value();
             unsigned long returnsStart = original.find("returns");
-            unsigned long returnsLength;
+            unsigned long returnsLength, afterReturnsPosition;
             string replacement;
 
             // If there are no statements after returns(), we can use the length of the block to find the length
             // we need to replace. If there are statements after it, we need to find the exact length using the next
             // statement and remember to add a dot or else it will produce invalid code
+            returnsLength = original.length() - returnsStart + 1;
+
             if (statementAfterReturns.empty()) {
-                returnsLength = original.length() - returnsStart + 1;
                 replacement = original.replace(returnsStart, returnsLength, "void");
             } else {
-                returnsLength = original.find(statementAfterReturns, returnsStart) - returnsStart;
-                replacement = original.replace(returnsStart, returnsLength, "void.");
+                afterReturnsPosition = original.find(statementAfterReturns, returnsStart);
+
+                // If there is a line break between returns() and the next statement, change the returns() entry and
+                // re-join the string with the line breaks. Otherwise, everything is on the same line and we can replace
+                // directly without worrying about line breaks
+                vector<string> lines = absl::StrSplit(original.substr(returnsStart, afterReturnsPosition), "\n");
+
+                if (lines.size() > 1) {
+                    lines[0] = "void";
+                    replacement = original.replace(returnsStart, returnsLength,
+                                                   fmt::format("{}", fmt::join(lines.begin(), lines.end(), "\n")));
+                } else {
+                    returnsLength = original.find(statementAfterReturns, returnsStart) - returnsStart;
+                    replacement = original.replace(returnsStart, returnsLength, "void.");
+                }
             }
 
             e.addAutocorrect(core::AutocorrectSuggestion{fmt::format("Replace `{}` with `{}`", original, replacement),
@@ -104,7 +119,7 @@ void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
 
 void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::ExpressionPtr *prevStat) {
     // this should only run in an `initialize` that has a sig
-    if (methodDef->name != core::Names::initialize()) {
+    if (methodDef->name != core::Names::initialize() || methodDef->flags.isSelfMethod) {
         return;
     }
     if (prevStat == nullptr) {
