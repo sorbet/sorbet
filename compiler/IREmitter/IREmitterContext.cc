@@ -184,6 +184,10 @@ public:
     int escapedIndexCounter = 0;
     bool usesBlockArg = false;
     cfg::LocalRef blkArg = cfg::LocalRef::noVariable();
+    UnorderedMap<cfg::LocalRef, Alias> aliases;
+
+    TrackCaptures(const UnorderedMap<cfg::LocalRef, Alias> &aliases)
+        : aliases(aliases) {}
 
     void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv) {
         if (lv == cfg::LocalRef::selfVariable()) {
