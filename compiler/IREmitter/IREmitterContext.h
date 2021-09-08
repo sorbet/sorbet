@@ -38,6 +38,23 @@ enum class FunctionType {
     Unused,
 };
 
+enum class BlockArgUsage {
+    // This function does not have a block arg.
+    None,
+
+    // The block argument to the function is only used directly within the
+    // top-level ruby block (rubyBlockId == 0) or in ruby blocks that have the
+    // same frame as the top-level ruby block (e.g. ExceptionBegin blocks).
+    //
+    // "used" here means that either it is only ever the receiver of .call
+    // (i.e. it is yield'd to) or it is passed along as a block argument itself.
+    SameFrameAsTopLevel,
+
+    // The block argument is captured in some way (e.g. being called by a
+    // `rescue` block or it is passed as a non-block argument to some method).
+    Captured,
+};
+
 constexpr bool functionTypePushesFrame(FunctionType ty) {
     switch (ty) {
         case FunctionType::Method:
@@ -236,8 +253,8 @@ struct IREmitterContext {
     // idx: cfg::BasicBlock::rubyBlockId
     UnorderedMap<int, llvm::AllocaInst *> blockControlFramePtrs;
 
-    // TODO(jez) usesBlockArgs
-    bool usesBlockArgs;
+    // How this function uses its block arg, if any.
+    BlockArgUsage blockArgUsage;
 
     // Non-zero for basic-blocks that originally jumped to exception-handling code.
     // idx: block id

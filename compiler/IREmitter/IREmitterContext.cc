@@ -173,7 +173,7 @@ struct CapturedVariables {
     UnorderedMap<cfg::LocalRef, int> escapedVariableIndexes;
 
     // Whether the ruby method uses a block argument.
-    bool usesBlockArgs;
+    BlockArgUsage usesBlockArgs;
 };
 
 // Bundle up a bunch of state used for capture tracking to simplify the interface in findCaptures below.
@@ -215,15 +215,15 @@ public:
             realPrivateUsages[entry.first] = entry.second.value();
         }
 
-        return CapturedVariables{std::move(realPrivateUsages), std::move(escapedIndexes), usesBlockArg};
+        return CapturedVariables{std::move(realPrivateUsages), std::move(escapedIndexes), usesBlockArg ? BlockArgUsage::Captured : BlockArgUsage::None};
     }
 };
 
 /* if local variable is only used in block X, it maps the local variable to X, otherwise, it maps local variable to a
  * negative number */
 CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
-                               const vector<int> &exceptionHandlingBlockHeaders) {
-    TrackCaptures usage;
+                               const UnorderedMap<cfg::LocalRef, Alias> &aliases, const vector<int> &exceptionHandlingBlockHeaders) {
+    TrackCaptures usage(aliases);
 
     int argId = -1;
     for (auto &arg : mdef.args) {
@@ -777,8 +777,8 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
 
     auto [aliases, symbols] = setupAliasesAndKeywords(cs, cfg);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
-    auto [variablesPrivateToBlocks, escapedVariableIndices, usesBlockArgs] =
-        findCaptures(cs, md, cfg, exceptionHandlingBlockHeaders);
+    auto [variablesPrivateToBlocks, escapedVariableIndices, blockArgUsage] =
+        findCaptures(cs, md, cfg, aliases, exceptionHandlingBlockHeaders);
     vector<llvm::BasicBlock *> functionInitializersByFunction;
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
@@ -978,7 +978,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(blockLevels),
         move(lineNumberPtrsByFunction),
         std::move(blockControlFramePtrs),
-        usesBlockArgs,
+        blockArgUsage,
         move(exceptionHandlingBlockHeaders),
         move(deadBlocks),
         move(blockExits),
