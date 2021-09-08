@@ -326,6 +326,11 @@ public:
             // We have been tracking the block argument separately.
             ENFORCE(!realPrivateUsages.contains(blkArg));
             ENFORCE(!escapedIndexes.contains(blkArg));
+            if (blkArg.exists()) {
+                ENFORCE(blockArgUsage != BlockArgUsage::None);
+            } else {
+                ENFORCE(blockArgUsage == BlockArgUsage::None);
+            }
 
             // ...but we still need to note that it is a legitimate local variable
             // if it was captured in some way.
