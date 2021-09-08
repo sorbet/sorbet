@@ -452,6 +452,10 @@ void sorbet_defineIvarMethodSingleton(VALUE klass, const char *name) {
     sorbet_defineIvarMethod(rb_singleton_class(klass), name);
 }
 
+VALUE sorbet_singleton_class(VALUE klass) {
+    return rb_singleton_class(klass);
+}
+
 // ****
 // ****                       Variables
 // ****
