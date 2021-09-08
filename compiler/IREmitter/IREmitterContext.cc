@@ -204,10 +204,12 @@ public:
     int escapedIndexCounter = 0;
     BlockArgUsage blockArgUsage = BlockArgUsage::None;
     cfg::LocalRef blkArg = cfg::LocalRef::noVariable();
-    UnorderedMap<cfg::LocalRef, Alias> aliases;
+    const UnorderedMap<cfg::LocalRef, Alias> &aliases;
+    const vector<FunctionType> &blockTypes;
 
-    TrackCaptures(const UnorderedMap<cfg::LocalRef, Alias> &aliases)
-        : aliases(aliases) {}
+    TrackCaptures(const UnorderedMap<cfg::LocalRef, Alias> &aliases,
+                  const vector<FunctionType> &blockTypes)
+        : aliases(aliases), blockTypes(blockTypes) {}
 
     void trackBlockRead(cfg::BasicBlock *bb, cfg::LocalRef lv) {
         trackBlockUsage(bb, lv, LocalUsedHow::ReadOnly);
@@ -240,8 +242,9 @@ public:
 /* if local variable is only used in block X, it maps the local variable to X, otherwise, it maps local variable to a
  * negative number */
 CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
-                               const UnorderedMap<cfg::LocalRef, Alias> &aliases, const vector<int> &exceptionHandlingBlockHeaders) {
-    TrackCaptures usage(aliases);
+                               const UnorderedMap<cfg::LocalRef, Alias> &aliases, const vector<int> &exceptionHandlingBlockHeaders,
+                               const vector<FunctionType> &blockTypes) {
+    TrackCaptures usage(aliases, blockTypes);
 
     int argId = -1;
     for (auto &arg : mdef.args) {
@@ -807,7 +810,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     auto [aliases, symbols] = setupAliasesAndKeywords(cs, cfg);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
     auto [variablesPrivateToBlocks, escapedVariableIndices, blockArgUsage] =
-        findCaptures(cs, md, cfg, aliases, exceptionHandlingBlockHeaders);
+        findCaptures(cs, md, cfg, aliases, exceptionHandlingBlockHeaders, blockTypes);
     vector<llvm::BasicBlock *> functionInitializersByFunction;
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
