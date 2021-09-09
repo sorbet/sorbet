@@ -451,15 +451,16 @@ struct method_block_params {
     void *paramp;
     rb_iseq_t *iseq;
     bool isSelf;
+    rb_cref_t *cref;
 };
 
 static VALUE define_method_block(RB_BLOCK_CALL_FUNC_ARGLIST(first_arg, data)) {
     struct method_block_params *params = (struct method_block_params *)data;
     if (params->isSelf) {
-        rb_define_singleton_sorbet_method(params->klass, params->name, params->methodPtr, params->paramp, params->iseq);
+        rb_define_singleton_sorbet_method(params->klass, params->name, params->methodPtr, params->paramp, params->iseq, params->cref);
     } else {
         rb_add_method_sorbet(params->klass, params->id, params->methodPtr, params->paramp, METHOD_VISI_PUBLIC,
-                             params->iseq);
+                             params->iseq, params->cref);
     }
     return Qnil;
 }
@@ -482,6 +483,7 @@ void sorbet_vm_define_method(VALUE klass, const char *name, rb_sorbet_func_t met
     params.paramp = paramp;
     params.iseq = iseq;
     params.isSelf = isSelf;
+    params.cref = rb_vm_cref(GET_EC());
 
     VALUE methods = MOD_CONST_GET("T::Private::Methods");
     VALUE args[] = {klass, built_sig};
