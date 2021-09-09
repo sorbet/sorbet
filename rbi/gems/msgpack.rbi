@@ -66,7 +66,7 @@ class MessagePack::Buffer
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -204,7 +204,7 @@ class MessagePack::Factory
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -303,7 +303,7 @@ class MessagePack::Packer
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 
@@ -510,7 +510,7 @@ class MessagePack::Unpacker
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(*arg0); end
 

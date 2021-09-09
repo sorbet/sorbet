@@ -414,7 +414,7 @@ class Thread < Object
   sig {returns(T.nilable(ThreadGroup))}
   def group; end
 
-  sig {params(args: T.untyped, blk: T.untyped).returns(Thread)}
+  sig {params(args: T.untyped, blk: T.untyped).void}
   def initialize(*args, &blk); end
 
   # The calling thread will suspend execution and run this `thr`.
@@ -1602,7 +1602,7 @@ class Thread::SizedQueue < Thread::Queue
   sig {params(args: T.untyped).returns(T.untyped)}
   def enq(*args); end
 
-  sig {params(max: T.untyped).returns(SizedQueue)}
+  sig {params(max: T.untyped).void}
   def initialize(max); end
 
   # Returns the maximum size of the queue.

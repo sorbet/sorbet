@@ -510,7 +510,7 @@ class CGI
       options: ::T.untyped,
       block: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(options=T.unsafe(nil), &block); end
 
@@ -730,7 +730,7 @@ class CGI::Cookie < Array
       name: ::T.untyped,
       value: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(name=T.unsafe(nil), *value); end
 

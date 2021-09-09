@@ -156,3 +156,21 @@ class OnFailure
     T.reveal_type(@x) # error: Revealed type: `Integer`
   end
 end
+
+class BadSigReturn
+  extend T::Sig
+
+  sig {params(x: Integer).returns(Integer)} # error: The initialize method should always return void
+  def initialize(x)
+    @x = x
+  end
+end
+
+class BadSigReturnNotLastStatement
+  extend T::Sig
+
+  sig {params(x: Integer).returns(Integer).on_failure(:soft, notify: 'sorbet')} # error: The initialize method should always return void
+  def initialize(x)
+    @x = x
+  end
+end

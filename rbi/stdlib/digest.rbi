@@ -175,7 +175,7 @@ end
 # This module stands as a base class for digest implementation classes.
 class Digest::Class
   include ::Digest::Instance
-  sig {returns(::T.untyped)}
+  sig {void}
   def initialize(); end
 
   # Returns the base64 encoded hash value of a given *string*. The return value
@@ -457,7 +457,7 @@ class Digest::SHA2 < Digest::Class
     params(
       bitlen: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(bitlen=T.unsafe(nil)); end
 
