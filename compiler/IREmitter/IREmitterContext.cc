@@ -500,11 +500,12 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
     return;
 }
 
-bool returnFromBlockIsPresent(CompilerState &cs, cfg::CFG &cfg, const vector<FunctionType> &blockTypes) {
+bool returnFromBlockIsPresent(CompilerState &cs, cfg::CFG &cfg, const vector<int> &blockNestingLevels) {
     for (auto &bb : cfg.basicBlocks) {
-        if (blockTypes[bb->rubyBlockId] == FunctionType::Block) {
-            for (auto &bind : bb->exprs) {
-                if (cfg::isa_instruction<cfg::Return>(bind.value.get())) {
+        for (auto &bind : bb->exprs) {
+            if (cfg::isa_instruction<cfg::Return>(bind.value.get())) {
+                // This will be non-zero if there was a block in any of our parent blocks.
+                if (blockNestingLevels[bb->rubyBlockId] != 0) {
                     return true;
                 }
             }
@@ -734,7 +735,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             //
             // TODO(aprocter): I think this is a little bit more conservative than it needs to be, because it will push
             // a tag even if the a return-from-block comes from a lambda, which is not actually necessary.
-            if (returnFromBlockIsPresent(cs, cfg, blockTypes)) {
+            if (returnFromBlockIsPresent(cs, cfg, blockNestingLevels)) {
                 hasReturnFromBlock = true;
             }
         }

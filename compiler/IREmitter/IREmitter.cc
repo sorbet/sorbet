@@ -609,9 +609,16 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     isTerminated = true;
 
                     auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
+                    bool hasBlockAncestor = false;
+                    int rubyBlockId = bb->rubyBlockId;
 
-                    if (irctx.rubyBlockType[bb->rubyBlockId] == FunctionType::Block) {
-                        IREmitterHelpers::emitReturnFromBlock(cs, cfg, builder, irctx, bb->rubyBlockId, var);
+                    while (rubyBlockId != 0) {
+                        hasBlockAncestor = hasBlockAncestor || irctx.rubyBlockType[rubyBlockId] == FunctionType::Block;
+                        rubyBlockId = irctx.rubyBlockParent[rubyBlockId];
+                    }
+
+                    if (hasBlockAncestor) {
+                        IREmitterHelpers::emitReturnAcrossBlock(cs, cfg, builder, irctx, bb->rubyBlockId, var);
                     } else {
                         IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
                     }
