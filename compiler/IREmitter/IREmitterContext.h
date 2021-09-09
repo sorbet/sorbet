@@ -256,8 +256,9 @@ struct IREmitterContext {
     // val: true when the block uses `break`
     std::vector<bool> blockUsesBreak;
 
-    // Whether a Ruby block ever has an explicit return statement.
-    bool hasReturnFromBlock;
+    // Whether an explicit return statement ever appears in a context that has a
+    // Ruby block as an ancestor.
+    bool hasReturnAcrossBlock;
 
     // Mapping from ruby block id to the name for the block's iseq.
     std::vector<std::optional<std::string>> rubyBlockLocationNames;

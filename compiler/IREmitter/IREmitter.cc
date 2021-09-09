@@ -618,6 +618,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     }
 
                     if (hasBlockAncestor) {
+                        ENFORCE(irctx.hasReturnAcrossBlock);
                         IREmitterHelpers::emitReturnAcrossBlock(cs, cfg, builder, irctx, bb->rubyBlockId, var);
                     } else {
                         IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
@@ -821,7 +822,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
 
     // If we are ever returning across blocks, we need to wrap the entire execution
     // of the function in an unwind-protect region that knows about the return.
-    if (!irctx.hasReturnFromBlock) {
+    if (!irctx.hasReturnAcrossBlock) {
         return;
     }
 
