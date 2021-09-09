@@ -138,6 +138,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
         if (blockType == FunctionType::Method || blockType == FunctionType::StaticInitFile ||
             blockType == FunctionType::StaticInitModule || blockType == FunctionType::Block) {
             auto func = irctx.rubyBlocks2Functions[rubyBlockId];
+            auto &argPresentVariables = irctx.argPresentVariables[rubyBlockId];
             auto maxPositionalArgCount = 0;
             auto minPositionalArgCount = 0;
             auto isBlock = blockType == FunctionType::Block;
@@ -345,7 +346,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     }
 
                     // mark the arg as present
-                    auto &argPresent = irctx.argPresentVariables[i];
+                    auto &argPresent = argPresentVariables[i];
                     if (!isBlock && argPresent.exists()) {
                         Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx, rubyBlockId);
                     }
@@ -391,7 +392,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
 
                     auto argIndex = i + minPositionalArgCount;
                     if (!isBlock) {
-                        auto argPresent = irctx.argPresentVariables[argIndex];
+                        auto argPresent = argPresentVariables[argIndex];
                         if (argPresent.exists()) {
                             Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx,
                                             rubyBlockId);
@@ -432,7 +433,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                             auto rawId = Payload::idIntern(cs, builder, name.data(cfg)._name.shortName(cs));
                             auto rawRubySym = builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
 
-                            auto argPresent = irctx.argPresentVariables[argId];
+                            auto argPresent = argPresentVariables[argId];
 
                             llvm::Value *passedValue;
                             if (hasKWRestArgs) {

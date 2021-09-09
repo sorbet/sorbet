@@ -816,8 +816,13 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         }
     }
 
+    vector<vector<cfg::LocalRef>> argPresentVariables(cfg.maxRubyBlockId + 1);
+
+    // The method arguments are initialized here, while the block arguments are initialized when the blockCall header is
+    // encountered in the loop below.
     int numArgs = md.symbol.data(cs)->arguments().size();
-    vector<cfg::LocalRef> argPresentVariables(numArgs, cfg::LocalRef::noVariable());
+    argPresentVariables[0].resize(numArgs, cfg::LocalRef::noVariable());
+
     for (auto &b : cfg.basicBlocks) {
         if (b->bexit.cond.variable == cfg::LocalRef::blockCall()) {
             userEntryBlockByFunction[b->rubyBlockId] = llvmBlocks[b->bexit.thenb->id];
@@ -845,9 +850,14 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             ENFORCE(expectedSend->link);
             blockLinks[b->rubyBlockId] = expectedSend->link;
 
+            auto numBlockArgs = expectedSend->link->argFlags.size();
             auto &blockArgs = rubyBlockArgs[b->rubyBlockId];
-            blockArgs.resize(expectedSend->link->argFlags.size(), cfg::LocalRef::noVariable());
+            blockArgs.resize(numBlockArgs, cfg::LocalRef::noVariable());
             collectRubyBlockArgs(cfg, b->bexit.thenb, blockArgs);
+
+            auto &argsPresent = argPresentVariables[b->bexit.thenb->rubyBlockId];
+            argsPresent.resize(numBlockArgs, cfg::LocalRef::noVariable());
+
         } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::exceptionValue()) {
             if (exceptionHandlingBlockHeaders[b->id] == 0) {
                 continue;
@@ -873,11 +883,6 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
                 userEntryBlockByFunction[ensureBlockId] = llvmBlocks[ensureBlock->id];
             }
         } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::argPresent()) {
-            // TODO(trevor) we don't currently handle argPresent decisions in ruby-Argblocks, only for the method entry.
-            if (b->rubyBlockId > 0) {
-                continue;
-            }
-
             // the ArgPresent instruction is always the last one generated in the block
             int argId = -1;
             auto &bind = b->exprs.back();
@@ -887,11 +892,15 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
                     ENFORCE(bind.bind.variable == b->bexit.cond.variable);
                     argId = i->argId;
                 },
+                [&](cfg::YieldParamPresent *i) {
+                    ENFORCE(bind.bind.variable == b->bexit.cond.variable);
+                    argId = i->argId;
+                },
                 [](cfg::Instruction *i) { /* do nothing */ });
 
             ENFORCE(argId >= 0, "Missing an index for argPresent condition variable");
 
-            argPresentVariables[argId] = b->bexit.cond.variable;
+            argPresentVariables[b->rubyBlockId][argId] = b->bexit.cond.variable;
         }
     }
 
