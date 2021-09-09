@@ -1163,6 +1163,12 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
                 tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
             },
+            [&](cfg::YieldParamPresent *i) {
+                // Return an unanalyzable boolean value that indicates whether or not arg was provided
+                // It's unanalyzable because it varies by each individual call site.
+                tp.type = core::Types::Boolean();
+                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+            },
             [&](cfg::Return *i) {
                 tp.type = core::Types::bottom();
                 tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));

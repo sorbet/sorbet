@@ -674,6 +674,10 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     loadYieldParamsResults.insert(bind.bind.variable);
                     /* intentionally omitted, it's part of method preambula */
                 },
+                [&](cfg::YieldParamPresent *i) {
+                    auto *val = Payload::rubyTrue(cs, builder);
+                    Payload::varSet(cs, bind.bind.variable, val, builder, irctx, bb->rubyBlockId);
+                },
                 [&](cfg::Cast *i) {
                     auto val = Payload::varGet(cs, i->value.variable, builder, irctx, bb->rubyBlockId);
 

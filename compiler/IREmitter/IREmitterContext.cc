@@ -262,6 +262,7 @@ findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
                 [&](cfg::LoadSelf *i) { /*nothing*/ /*todo: how does instance exec pass self?*/ },
                 [&](cfg::Literal *i) { /* nothing*/ }, [&](cfg::ArgPresent *i) { /*nothing*/ },
                 [&](cfg::LoadArg *i) { /*nothing*/ }, [&](cfg::LoadYieldParams *i) { /*nothing*/ },
+                [&](cfg::YieldParamPresent *i) { /* nothing */ },
                 [&](cfg::Cast *i) { usage.trackBlockUsage(bb.get(), i->value.variable); },
                 [&](cfg::TAbsurd *i) { usage.trackBlockUsage(bb.get(), i->what.variable); });
         }
@@ -662,6 +663,44 @@ vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg,
     return blockLocationNames;
 }
 
+void collectRubyBlockArgs(const cfg::CFG &cfg, const cfg::BasicBlock *b, vector<cfg::LocalRef> &blockArgs) {
+    bool insideThenBlock = false;
+
+    while (true) {
+        for (auto &maybeCallOnLoadYieldArg : b->exprs) {
+            auto maybeCast = cfg::cast_instruction<cfg::Send>(maybeCallOnLoadYieldArg.value.get());
+            if (maybeCast == nullptr || maybeCast->recv.variable.data(cfg)._name != core::Names::blkArg() ||
+                maybeCast->fun != core::Names::squareBrackets() || maybeCast->args.size() != 1) {
+                continue;
+            }
+            if (!core::isa_type<core::LiteralType>(maybeCast->args[0].type)) {
+                continue;
+            }
+            auto litType = core::cast_type_nonnull<core::LiteralType>(maybeCast->args[0].type);
+            blockArgs[litType.asInteger()] = maybeCallOnLoadYieldArg.bind.variable;
+        }
+
+        // When the exit condition for this block is constructed through `argPresent`, continue down the `then` branch
+        // to collect more block arg definitions.
+        if (b->bexit.cond.variable.data(cfg)._name == core::Names::argPresent()) {
+            insideThenBlock = true;
+            b = b->bexit.thenb;
+            continue;
+        }
+
+        // The blocks emitted when optional arguments are present end in an unconditional jump to join with the path
+        // that would populate the arg with the default value.
+        if (insideThenBlock) {
+            insideThenBlock = false;
+            b = b->bexit.thenb;
+            continue;
+        }
+
+        // We've reaced the end of argument handling entry blocks in the ruby block CFG.
+        return;
+    }
+}
+
 } // namespace
 
 IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
@@ -806,19 +845,9 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             ENFORCE(expectedSend->link);
             blockLinks[b->rubyBlockId] = expectedSend->link;
 
-            rubyBlockArgs[b->rubyBlockId].resize(expectedSend->link->argFlags.size(), cfg::LocalRef::noVariable());
-            for (auto &maybeCallOnLoadYieldArg : b->bexit.thenb->exprs) {
-                auto maybeCast = cfg::cast_instruction<cfg::Send>(maybeCallOnLoadYieldArg.value.get());
-                if (maybeCast == nullptr || maybeCast->recv.variable.data(cfg)._name != core::Names::blkArg() ||
-                    maybeCast->fun != core::Names::squareBrackets() || maybeCast->args.size() != 1) {
-                    continue;
-                }
-                if (!core::isa_type<core::LiteralType>(maybeCast->args[0].type)) {
-                    continue;
-                }
-                auto litType = core::cast_type_nonnull<core::LiteralType>(maybeCast->args[0].type);
-                rubyBlockArgs[b->rubyBlockId][litType.asInteger()] = maybeCallOnLoadYieldArg.bind.variable;
-            }
+            auto &blockArgs = rubyBlockArgs[b->rubyBlockId];
+            blockArgs.resize(expectedSend->link->argFlags.size(), cfg::LocalRef::noVariable());
+            collectRubyBlockArgs(cfg, b->bexit.thenb, blockArgs);
         } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::exceptionValue()) {
             if (exceptionHandlingBlockHeaders[b->id] == 0) {
                 continue;
@@ -844,6 +873,11 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
                 userEntryBlockByFunction[ensureBlockId] = llvmBlocks[ensureBlock->id];
             }
         } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::argPresent()) {
+            // TODO(trevor) we don't currently handle argPresent decisions in ruby-Argblocks, only for the method entry.
+            if (b->rubyBlockId > 0) {
+                continue;
+            }
+
             // the ArgPresent instruction is always the last one generated in the block
             int argId = -1;
             auto &bind = b->exprs.back();
