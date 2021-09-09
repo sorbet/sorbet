@@ -3386,7 +3386,7 @@ class REXML::XPath
   # XPath.first( node, "a/x:b", { "x"=>"http://doofus" } )
   # XPath.first( node, '/book/publisher/text()=$publisher', {}, {"publisher"=>"O'Reilly"})
   # ```
-  def self.first(element, path = _, namespaces = _, variables = _, options = _, &block); end
+  def self.first(element, path = nil, namespaces = nil, variables = {}, options = {}, &block); end
 
   # Iterates over nodes that match the given path, calling the supplied block
   # with the match.
@@ -3411,7 +3411,7 @@ class REXML::XPath
   # XPath.each( node, '/book/publisher/text()=$publisher', {}, {"publisher"=>"O'Reilly"}) \
   #   {|el| ... }
   # ```
-  def self.each(element, path = _, namespaces = _, variables = _, options = _, &block); end
+  def self.each(element, path = nil, namespaces = nil, variables = {}, options = {}, &block); end
 end
 
 # You don't want to use this class. Really. Use XPath, which is a wrapper for
