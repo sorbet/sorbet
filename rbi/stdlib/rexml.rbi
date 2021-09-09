@@ -3412,6 +3412,10 @@ class REXML::XPath
   #   {|el| ... }
   # ```
   def self.each(element, path = nil, namespaces = nil, variables = {}, options = {}, &block); end
+
+  # Returns an array of nodes matching a given
+  # [`XPath`](https://docs.ruby-lang.org/en/2.7.0/REXML/XPath.html).
+  def self.match(element, path = nil, namespaces = nil, variables = {}, options = {}); end
 end
 
 # You don't want to use this class. Really. Use XPath, which is a wrapper for
