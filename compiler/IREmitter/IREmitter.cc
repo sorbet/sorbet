@@ -613,6 +613,10 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     int rubyBlockId = bb->rubyBlockId;
 
                     while (rubyBlockId != 0) {
+                        // We iterate over the entire ancestor chain instead of breaking out early
+                        // when we hit a Ruby block.  We do this so we can check this ENFORCE and
+                        // ensure that we're not throwing over something that would require postprocessing.
+                        ENFORCE(!functionTypeNeedsPostprocessing(irctx.rubyBlockType[rubyBlockId]));
                         hasBlockAncestor = hasBlockAncestor || irctx.rubyBlockType[rubyBlockId] == FunctionType::Block;
                         rubyBlockId = irctx.rubyBlockParent[rubyBlockId];
                     }
