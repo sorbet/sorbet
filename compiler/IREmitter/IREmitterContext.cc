@@ -500,11 +500,12 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
     return;
 }
 
-bool returnFromBlockIsPresent(CompilerState &cs, cfg::CFG &cfg, const vector<FunctionType> &blockTypes) {
+bool returnAcrossBlockIsPresent(CompilerState &cs, cfg::CFG &cfg, const vector<int> &blockNestingLevels) {
     for (auto &bb : cfg.basicBlocks) {
-        if (blockTypes[bb->rubyBlockId] == FunctionType::Block) {
-            for (auto &bind : bb->exprs) {
-                if (cfg::isa_instruction<cfg::Return>(bind.value.get())) {
+        for (auto &bind : bb->exprs) {
+            if (cfg::isa_instruction<cfg::Return>(bind.value.get())) {
+                // This will be non-zero if there was a block in any of our parent blocks.
+                if (blockNestingLevels[bb->rubyBlockId] != 0) {
                     return true;
                 }
             }
@@ -700,7 +701,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
     vector<llvm::AllocaInst *> sendArgArrayByBlock;
     vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
-    bool hasReturnFromBlock = false;
+    bool hasReturnAcrossBlock = false;
     UnorderedMap<int, llvm::AllocaInst *> blockControlFramePtrs;
 
     int i = 0;
@@ -734,8 +735,8 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             //
             // TODO(aprocter): I think this is a little bit more conservative than it needs to be, because it will push
             // a tag even if the a return-from-block comes from a lambda, which is not actually necessary.
-            if (returnFromBlockIsPresent(cs, cfg, blockTypes)) {
-                hasReturnFromBlock = true;
+            if (returnAcrossBlockIsPresent(cs, cfg, blockNestingLevels)) {
+                hasReturnAcrossBlock = true;
             }
         }
         i++;
@@ -894,7 +895,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(blockExits),
         move(blockScopes),
         move(blockUsesBreak),
-        hasReturnFromBlock,
+        hasReturnAcrossBlock,
         move(blockLocationNames),
     };
 

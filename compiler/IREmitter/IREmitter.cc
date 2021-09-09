@@ -609,9 +609,21 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     isTerminated = true;
 
                     auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
+                    bool hasBlockAncestor = false;
+                    int rubyBlockId = bb->rubyBlockId;
 
-                    if (irctx.rubyBlockType[bb->rubyBlockId] == FunctionType::Block) {
-                        IREmitterHelpers::emitReturnFromBlock(cs, cfg, builder, irctx, bb->rubyBlockId, var);
+                    while (rubyBlockId != 0) {
+                        // We iterate over the entire ancestor chain instead of breaking out early
+                        // when we hit a Ruby block.  We do this so we can check this ENFORCE and
+                        // ensure that we're not throwing over something that would require postprocessing.
+                        ENFORCE(!functionTypeNeedsPostprocessing(irctx.rubyBlockType[rubyBlockId]));
+                        hasBlockAncestor = hasBlockAncestor || irctx.rubyBlockType[rubyBlockId] == FunctionType::Block;
+                        rubyBlockId = irctx.rubyBlockParent[rubyBlockId];
+                    }
+
+                    if (hasBlockAncestor) {
+                        ENFORCE(irctx.hasReturnAcrossBlock);
+                        IREmitterHelpers::emitReturnAcrossBlock(cs, cfg, builder, irctx, bb->rubyBlockId, var);
                     } else {
                         IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
                     }
@@ -814,7 +826,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
 
     // If we are ever returning across blocks, we need to wrap the entire execution
     // of the function in an unwind-protect region that knows about the return.
-    if (!irctx.hasReturnFromBlock) {
+    if (!irctx.hasReturnAcrossBlock) {
         return;
     }
 
