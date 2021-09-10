@@ -14,4 +14,6 @@ class A
 end
 
 A.init_change('constant')
+A.init_change('other')
 p A.get_change('constant')
+p A.get_change('other')
