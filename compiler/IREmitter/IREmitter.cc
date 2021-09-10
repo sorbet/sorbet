@@ -347,7 +347,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
 
                     // mark the arg as present
                     auto &argPresent = argPresentVariables[i];
-                    if (!isBlock && argPresent.exists()) {
+                    if (argPresent.exists()) {
                         Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx, rubyBlockId);
                     }
 
@@ -391,13 +391,12 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     builder.SetInsertPoint(fillFromDefaultBlocks[i]);
 
                     auto argIndex = i + minPositionalArgCount;
-                    if (!isBlock) {
-                        auto argPresent = argPresentVariables[argIndex];
-                        if (argPresent.exists()) {
-                            Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx,
-                                            rubyBlockId);
-                        }
-                    } else {
+                    auto argPresent = argPresentVariables[argIndex];
+                    if (argPresent.exists()) {
+                        Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx, rubyBlockId);
+                    }
+
+                    if (isBlock) {
                         auto a = irctx.rubyBlockArgs[rubyBlockId][argIndex];
                         Payload::varSet(cs, a, Payload::rubyNil(cs, builder), builder, irctx, rubyBlockId);
                     }
@@ -676,8 +675,8 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     /* intentionally omitted, it's part of method preambula */
                 },
                 [&](cfg::YieldParamPresent *i) {
-                    auto *val = Payload::rubyTrue(cs, builder);
-                    Payload::varSet(cs, bind.bind.variable, val, builder, irctx, bb->rubyBlockId);
+                    ENFORCE(bb->rubyBlockId != 0, "YieldParamPresent found outside of ruby block");
+                    // Intentionally omitted: the result of the YieldParamPresent call is filled out in `setupArguments`
                 },
                 [&](cfg::Cast *i) {
                     auto val = Payload::varGet(cs, i->value.variable, builder, irctx, bb->rubyBlockId);
