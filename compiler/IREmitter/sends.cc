@@ -457,6 +457,18 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     auto &irctx = mcctx.irctx;
     auto rubyBlockId = mcctx.rubyBlockId;
 
+    // If we get here with <Magic>, then something has gone wrong.
+    // TODO(froydnj): We want to do the same thing with Sorbet::Private::Static,
+    // but we'd need to do some surgery on either a) making those methods not
+    // be emitted via symbol-based intrinsics or b) making it possible for
+    // (some) symbol-based intrinsics to bypass typechecks completely.
+    if (auto *at = core::cast_type<core::AppliedType>(send->recv.type)) {
+        if (at->klass == core::Symbols::MagicSingleton()) {
+            failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
+                            "No runtime implemention for <Magic> method exists");
+        }
+    }
+
     // TODO(perf): call
     // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
     // to get inline caching.
