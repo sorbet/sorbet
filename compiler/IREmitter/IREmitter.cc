@@ -456,7 +456,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
 
                             // Write a default value out, and mark the variable as missing
                             builder.SetInsertPoint(kwArgDefault);
-                            if (!isBlock && argPresent.exists()) {
+                            if (argPresent.exists()) {
                                 Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx,
                                                 rubyBlockId);
                             }
@@ -472,7 +472,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
 
                             builder.SetInsertPoint(kwArgSet);
                             auto *updatedOptionalKwargs = optionalKwargs;
-                            if (!isBlock && argPresent.exists()) {
+                            if (argPresent.exists()) {
                                 if (argsFlags[argId].isDefault) {
                                     updatedOptionalKwargs = builder.CreateBinOp(llvm::Instruction::Add, optionalKwargs,
                                                                                 IREmitterHelpers::buildS4(cs, 1));
