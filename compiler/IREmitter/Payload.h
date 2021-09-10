@@ -72,6 +72,8 @@ public:
                                      llvm::Value *argCountRaw, llvm::Value *argArrayRaw);
     static core::Loc setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc,
                                    core::Loc methodStart, core::Loc lastLoc, llvm::AllocaInst *lineNumberPtr);
+    static llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                                   const IREmitterContext &irctx);
     static llvm::Value *varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBuilderBase &builder,
                                const IREmitterContext &irctx, int rubyBlockId);
     static void varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, llvm::IRBuilderBase &builder,

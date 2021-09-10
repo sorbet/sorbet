@@ -613,6 +613,16 @@ void GlobalState::initEmpty() {
                  .repeatedUntypedArg(Names::arg())
                  .buildWithResultUntyped();
 
+    // Synthesize <Magic>.<defined-class-var>(arg0: T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::definedClassVar())
+                 .untypedArg(Names::arg0())
+                 .buildWithResultUntyped();
+
+    // Synthesize <Magic>.<defined-instance-var>(arg0: T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::definedInstanceVar())
+                 .untypedArg(Names::arg0())
+                 .buildWithResultUntyped();
+
     // Synthesize <DeclBuilderForProcs>.<params>(args: T.untyped) => DeclBuilderForProcs
     method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::params())
                  .kwsplatArg(Names::arg0())

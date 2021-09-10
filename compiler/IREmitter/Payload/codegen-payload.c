@@ -481,6 +481,11 @@ void sorbet_instanceVariableSet(VALUE receiver, ID name, VALUE newValue, struct 
 }
 
 SORBET_INLINE
+VALUE sorbet_instanceVariableDefined(VALUE recv, VALUE name) {
+    return rb_ivar_defined(recv, SYM2ID(name));
+}
+
+SORBET_INLINE
 VALUE sorbet_classVariableGet(VALUE _class, ID name) {
     return rb_cvar_get(_class, name);
 }
@@ -488,6 +493,11 @@ VALUE sorbet_classVariableGet(VALUE _class, ID name) {
 SORBET_INLINE
 void sorbet_classVariableSet(VALUE _class, ID name, VALUE newValue) {
     rb_cvar_set(_class, name, newValue);
+}
+
+SORBET_INLINE
+VALUE sorbet_classVariableDefined(VALUE klass, VALUE name) {
+    return rb_cvar_defined(klass, SYM2ID(name));
 }
 
 // ****

@@ -958,13 +958,6 @@ llvm::Value *Payload::readRestArgs(CompilerState &cs, llvm::IRBuilderBase &build
 }
 
 namespace {
-llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &builder, const IREmitterContext &irctx) {
-    auto sym = irctx.cfg.symbol.data(cs)->owner;
-    ENFORCE(sym.data(cs)->isClassOrModule());
-
-    return Payload::getRubyConstant(cs, sym.data(cs)->topAttachedClass(cs), builder);
-};
-
 // For a variable that's escaped, compute its index into the locals from its unique id in the
 // closure.
 llvm::Value *indexForLocalVariable(CompilerState &cs, const IREmitterContext &irctx, int rubyBlockId, int escapeId) {
@@ -981,6 +974,15 @@ llvm::Value *buildInstanceVariableCache(CompilerState &cs, std::string_view name
 }
 
 } // namespace
+
+llvm::Value *Payload::getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilderBase &build,
+                                                 const IREmitterContext &irctx) {
+    auto &builder = builderCast(build);
+    auto sym = irctx.cfg.symbol.data(cs)->owner;
+    ENFORCE(sym.data(cs)->isClassOrModule());
+
+    return Payload::getRubyConstant(cs, sym.data(cs)->topAttachedClass(cs), builder);
+}
 
 std::tuple<llvm::Value *, llvm::Value *> Payload::escapedVariableIndexAndLevel(CompilerState &cs, cfg::LocalRef local,
                                                                                const IREmitterContext &irctx,
