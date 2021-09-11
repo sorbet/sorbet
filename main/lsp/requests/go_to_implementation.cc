@@ -2,6 +2,7 @@
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
+#include <cstddef>
 #include <memory>
 
 using namespace std;
@@ -41,6 +42,18 @@ const MethodImplementationResults findMethodImplementations(const core::GlobalSt
     return {.locations = {locations}};
 }
 
+core::SymbolRef findOverridedMethod(const core::GlobalState &gs, const core::SymbolRef method) {
+    auto ownerClass = method.data(gs)->owner.asClassOrModuleRef();
+
+    for (auto mixin : ownerClass.data(gs)->mixins()) {
+        if (!mixin.data(gs)->isClassOrModule() && !mixin.data(gs)->isAbstract()) {
+            continue;
+        }
+        return mixin.data(gs)->findMember(gs, method.data(gs)->name);
+    }
+    return core::Symbols::noSymbol();
+}
+
 GoToImplementationTask::GoToImplementationTask(const LSPConfiguration &config, MessageId id,
                                                std::unique_ptr<ImplementationParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentImplementation), params(move(params)) {}
@@ -72,7 +85,12 @@ unique_ptr<ResponseMessage> GoToImplementationTask::runRequest(LSPTypecheckerDel
                 (int)LSPErrorCodes::InvalidParams,
                 "Go to implementation can be used only for methods or references of abstract classes");
 
-        auto locationsOrError = findMethodImplementations(gs, method);
+
+        core::SymbolRef overridedMethod = method;
+        if (method.data(gs)->isOverride()) {
+            overridedMethod = findOverridedMethod(gs, method);
+        }
+        auto locationsOrError = findMethodImplementations(gs, overridedMethod);
 
         if (locationsOrError.error != nullptr) {
             response->error = move(locationsOrError.error);
@@ -96,15 +114,21 @@ unique_ptr<ResponseMessage> GoToImplementationTask::runRequest(LSPTypecheckerDel
         auto classOrModuleRef = classSymbol.asClassOrModuleRef();
         auto childClasses = classOrModuleRef.getSubclasses(gs, false);
         for (const auto &childClass : childClasses) {
-            for (auto loc : childClass.data(gs)->allLocs()) {
+            for (auto loc : childClass.data(gs)->locs()) {
                 addLocIfExists(gs, result, loc);
             }
         }
 
     } else if (auto send = queryResponse->isSend()) {
         // User called "Go to Implementation" from the abstract function call
-        auto calledMethod = send->dispatchResult->main.method;
-        auto locationsOrError = findMethodImplementations(gs, calledMethod);
+        const core::MethodRef calledMethod = send->dispatchResult->main.method;
+
+        core::SymbolRef overridedMethod = core::SymbolRef(calledMethod);
+        if (calledMethod.data(gs)->isOverride()) {
+            overridedMethod = findOverridedMethod(gs, overridedMethod);
+        }
+
+        auto locationsOrError = findMethodImplementations(gs, overridedMethod);
 
         if (locationsOrError.error != nullptr) {
             response->error = move(locationsOrError.error);
