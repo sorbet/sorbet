@@ -40,6 +40,7 @@ string spacesForTabLevel(int tabs) {
             CASE_STATEMENT(body, LoadArg)                               \
             CASE_STATEMENT(body, ArgPresent)                            \
             CASE_STATEMENT(body, LoadYieldParams)                       \
+            CASE_STATEMENT(body, YieldParamPresent)                     \
             CASE_STATEMENT(body, Cast)                                  \
             CASE_STATEMENT(body, TAbsurd)                               \
             }
