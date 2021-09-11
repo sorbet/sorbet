@@ -253,33 +253,32 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
     Timer timeit(ctx.state.tracer(), "removeDeadAssigns");
     for (auto &it : cfg.basicBlocks) {
         /* remove dead variables */
-        it->exprs.erase(remove_if(it->exprs.begin(), it->exprs.end(),
-                                  [&ctx, &cfg, &RnW, &blockArgs, &it](auto &bind) -> bool {
-                                      if (bind.bind.variable.isAliasForGlobal(ctx, cfg)) {
-                                          return false;
-                                      }
-                                      bool wasRead = RnW.reads[it->id].contains(
-                                                         bind.bind.variable.id()) || // read in the same block
-                                                     blockArgs[it->bexit.thenb->id].contains(bind.bind.variable.id()) ||
-                                                     blockArgs[it->bexit.elseb->id].contains(bind.bind.variable.id());
+        it->exprs.erase(
+            remove_if(it->exprs.begin(), it->exprs.end(),
+                      [&ctx, &cfg, &RnW, &blockArgs, &it](auto &bind) -> bool {
+                          if (bind.bind.variable.isAliasForGlobal(ctx, cfg)) {
+                              return false;
+                          }
+                          bool wasRead =
+                              RnW.reads[it->id].contains(bind.bind.variable.id()) || // read in the same block
+                              blockArgs[it->bexit.thenb->id].contains(bind.bind.variable.id()) ||
+                              blockArgs[it->bexit.elseb->id].contains(bind.bind.variable.id());
 
-                                      if (!wasRead) {
-                                          // These are all instructions with no side effects, which can be
-                                          // deleted if the assignment is dead. It would be slightly
-                                          // shorter to list the converse set -- those which *do* have
-                                          // side effects -- but doing it this way is more robust to us
-                                          // adding more instruction types in the future.
-                                          if (isa_instruction<Ident>(bind.value) ||
-                                              isa_instruction<Literal>(bind.value) ||
-                                              isa_instruction<LoadSelf>(bind.value) ||
-                                              isa_instruction<LoadArg>(bind.value) ||
-                                              isa_instruction<LoadYieldParams>(bind.value)) {
-                                              return true;
-                                          }
-                                      }
-                                      return false;
-                                  }),
-                        it->exprs.end());
+                          if (!wasRead) {
+                              // These are all instructions with no side effects, which can be
+                              // deleted if the assignment is dead. It would be slightly
+                              // shorter to list the converse set -- those which *do* have
+                              // side effects -- but doing it this way is more robust to us
+                              // adding more instruction types in the future.
+                              if (isa_instruction<Ident>(bind.value) || isa_instruction<Literal>(bind.value) ||
+                                  isa_instruction<LoadSelf>(bind.value) || isa_instruction<LoadArg>(bind.value) ||
+                                  isa_instruction<LoadYieldParams>(bind.value)) {
+                                  return true;
+                              }
+                          }
+                          return false;
+                      }),
+            it->exprs.end());
     }
 }
 
