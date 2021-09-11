@@ -42,6 +42,7 @@ enum class Tag : u1 {
     LoadArg,
     ArgPresent,
     LoadYieldParams,
+    YieldParamPresent,
     Cast,
     TAbsurd,
 };
@@ -223,10 +224,10 @@ public:
     YieldParamPresent(u2 argId) : argId{argId} {
         categoryCounterInc("cfg", "argpresent");
     };
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(YieldParamPresent, 16, 8);
+CheckSize(YieldParamPresent, 8, 8);
 
 INSN(YieldLoadArg) : public Instruction {
 public:
