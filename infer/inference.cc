@@ -140,7 +140,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 //   4. Otherwise, we want to issue a DeadBranchInferencer error, taking the first
                 //      (non-synthetic, non-"T.absurd") instruction in the block as the loc of the
                 //      error.
-                cfg::InsnPtr *unreachableInstruction = nullptr;
+                cfg::InstructionPtr *unreachableInstruction = nullptr;
                 core::LocOffsets locForUnreachable;
                 bool dueToSafeNavigation = false;
 

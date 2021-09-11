@@ -50,7 +50,7 @@ enum class Tag : u1 {
 // A mapping from instruction type to its corresponding tag.
 template <typename T> struct InsnToTag;
 
-class InsnPtr;
+class InstructionPtr;
 class Instruction;
 
 // When adding a new subtype, see if you need to add it to fillInBlockArguments
@@ -63,7 +63,7 @@ protected:
     ~Instruction() = default;
 
 private:
-    friend InsnPtr;
+    friend InstructionPtr;
 };
 
 #define INSN(name)                              \
@@ -270,7 +270,7 @@ public:
 };
 CheckSize(TAbsurd, 32, 8);
 
-class InsnPtr final {
+class InstructionPtr final {
     using tagged_storage = u8;
 
     static constexpr tagged_storage TAG_MASK = 0xffff;
@@ -279,7 +279,7 @@ class InsnPtr final {
 
     tagged_storage ptr;
 
-    template <typename T, typename... Args> friend InsnPtr make_insn(Args &&...);
+    template <typename T, typename... Args> friend InstructionPtr make_insn(Args &&...);
 
     static tagged_storage tagPtr(Tag tag, void *i) {
         auto val = static_cast<tagged_storage>(tag);
@@ -290,7 +290,7 @@ class InsnPtr final {
 
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
-    InsnPtr(Tag tag, Instruction *i) : ptr(tagPtr(tag, i)) {}
+    InstructionPtr(Tag tag, Instruction *i) : ptr(tagPtr(tag, i)) {}
 
     void resetTagged(tagged_storage i) noexcept {
         Tag tagVal;
@@ -315,27 +315,27 @@ class InsnPtr final {
 
 public:
     // Required for typecase
-    template <class To> static bool isa(const InsnPtr &insn);
-    template <class To> static const To &cast(const InsnPtr &insn);
-    template <class To> static To &cast(InsnPtr &insn) {
-        return const_cast<To &>(cast<To>(static_cast<const InsnPtr &>(insn)));
+    template <class To> static bool isa(const InstructionPtr &insn);
+    template <class To> static const To &cast(const InstructionPtr &insn);
+    template <class To> static To &cast(InstructionPtr &insn) {
+        return const_cast<To &>(cast<To>(static_cast<const InstructionPtr &>(insn)));
     }
 
-    constexpr InsnPtr() noexcept : ptr(0) {}
-    constexpr InsnPtr(std::nullptr_t) : ptr(0) {}
-    ~InsnPtr() {
+    constexpr InstructionPtr() noexcept : ptr(0) {}
+    constexpr InstructionPtr(std::nullptr_t) : ptr(0) {}
+    ~InstructionPtr() {
         if (ptr != 0) {
             deleteTagged(tag(), get());
         }
     }
 
-    InsnPtr(const InsnPtr &) = delete;
-    InsnPtr &operator=(const InsnPtr &) = delete;
+    InstructionPtr(const InstructionPtr &) = delete;
+    InstructionPtr &operator=(const InstructionPtr &) = delete;
 
-    InsnPtr(InsnPtr &&other) noexcept {
+    InstructionPtr(InstructionPtr &&other) noexcept {
         ptr = other.releaseTagged();
     }
-    InsnPtr &operator=(InsnPtr &&other) noexcept {
+    InstructionPtr &operator=(InstructionPtr &&other) noexcept {
         if (*this == other) {
             return *this;
         }
@@ -356,10 +356,10 @@ public:
         return get() != nullptr;
     }
 
-    bool operator==(const InsnPtr &other) const noexcept {
+    bool operator==(const InstructionPtr &other) const noexcept {
         return get() == other.get();
     }
-    bool operator!=(const InsnPtr &other) const noexcept {
+    bool operator!=(const InstructionPtr &other) const noexcept {
         return get() != other.get();
     }
 
@@ -373,11 +373,11 @@ public:
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 
-template <class To> bool isa_instruction(const InsnPtr &what) {
+template <class To> bool isa_instruction(const InstructionPtr &what) {
     return what != nullptr && what.tag() == InsnToTag<To>::value;
 }
 
-template <class To> To *cast_instruction(InsnPtr &what) {
+template <class To> To *cast_instruction(InstructionPtr &what) {
     static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
     static_assert(std::is_assignable<Instruction *&, To *>::value,
                   "Ill Formed To, has to be a subclass of Instruction");
@@ -387,7 +387,7 @@ template <class To> To *cast_instruction(InsnPtr &what) {
     return nullptr;
 }
 
-template <class To> const To *cast_instruction(const InsnPtr &what) {
+template <class To> const To *cast_instruction(const InstructionPtr &what) {
     static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
     static_assert(std::is_assignable<Instruction *&, To *>::value,
                   "Ill Formed To, has to be a subclass of Instruction");
@@ -397,23 +397,23 @@ template <class To> const To *cast_instruction(const InsnPtr &what) {
     return nullptr;
 }
 
-template <class To> inline bool InsnPtr::isa(const InsnPtr &what) {
+template <class To> inline bool InstructionPtr::isa(const InstructionPtr &what) {
     return isa_instruction<To>(what);
 }
-template <> inline bool InsnPtr::isa<InsnPtr>(const InsnPtr &what) {
+template <> inline bool InstructionPtr::isa<InstructionPtr>(const InstructionPtr &what) {
     return true;
 }
 
-template <class To> inline const To &InsnPtr::cast(const InsnPtr &what) {
+template <class To> inline const To &InstructionPtr::cast(const InstructionPtr &what) {
     return *cast_instruction<To>(what);
 }
-template <> inline const InsnPtr &InsnPtr::cast(const InsnPtr &what) {
+template <> inline const InstructionPtr &InstructionPtr::cast(const InstructionPtr &what) {
     return what;
 }
 
 template <typename T, class... Args>
-InsnPtr make_insn(Args&& ...arg) {
-    return InsnPtr(InsnToTag<T>::value, new T(std::forward<Args>(arg)...));
+InstructionPtr make_insn(Args&& ...arg) {
+    return InstructionPtr(InsnToTag<T>::value, new T(std::forward<Args>(arg)...));
 }
 
 } // namespace sorbet::cfg

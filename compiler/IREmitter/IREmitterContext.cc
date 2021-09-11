@@ -23,7 +23,7 @@ namespace sorbet::compiler {
 
 namespace {
 
-optional<string_view> isSymbol(const core::GlobalState &gs, const cfg::InsnPtr &insn) {
+optional<string_view> isSymbol(const core::GlobalState &gs, const cfg::InstructionPtr &insn) {
     auto *liti = cfg::cast_instruction<cfg::Literal>(insn);
     if (liti == nullptr) {
         return std::nullopt;
@@ -829,7 +829,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             }
             ENFORCE(backId >= 0);
 
-            cfg::InsnPtr *expected = nullptr;
+            cfg::InstructionPtr *expected = nullptr;
             for (auto i = b->backEdges[backId]->exprs.rbegin(); i != b->backEdges[backId]->exprs.rend(); ++i) {
                 if (i->bind.variable.data(cfg)._name == core::Names::blockPreCallTemp()) {
                     expected = &i->value;
