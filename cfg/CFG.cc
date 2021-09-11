@@ -313,7 +313,7 @@ string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
         fmt::format_to(std::back_inserter(buf), "outerLoops: {}\n", this->outerLoops);
     }
     for (const Binding &exp : this->exprs) {
-        fmt::format_to(std::back_inserter(buf), "{} = {}\n", exp.bind.toString(gs, cfg), exp.value->toString(gs, cfg));
+        fmt::format_to(std::back_inserter(buf), "{} = {}\n", exp.bind.toString(gs, cfg), exp.value.toString(gs, cfg));
     }
     fmt::format_to(std::back_inserter(buf), "{}", this->bexit.cond.toString(gs, cfg));
     return to_string(buf);

@@ -155,12 +155,12 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
                         auto send = cfg::cast_instruction<cfg::Send>(expr.value);
                         if (send != nullptr && send->fun == core::Names::nilForSafeNavigation()) {
-                            unreachableInstruction = expr.value.get();
+                            unreachableInstruction = &expr.value;
                             locForUnreachable = expr.loc;
                             dueToSafeNavigation = true;
                             break;
                         } else if (unreachableInstruction == nullptr) {
-                            unreachableInstruction = expr.value.get();
+                            unreachableInstruction = &expr.value;
                             locForUnreachable = expr.loc;
                         } else {
                             // Expand the loc to cover the entire dead basic block

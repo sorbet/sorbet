@@ -1248,8 +1248,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         e.addErrorSection(
                             core::TypeAndOrigins::explainExpected(ctx, methodReturnType, ownerData->loc(), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
-                        if (i->whatLoc != inWhat.implicitReturnLoc) {
-                            auto replaceLoc = core::Loc(ctx.file, i->whatLoc);
+                        if (i.whatLoc != inWhat.implicitReturnLoc) {
+                            auto replaceLoc = core::Loc(ctx.file, i.whatLoc);
                             core::TypeDrivenAutocorrect::maybeAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
                                                                           typeAndOrigin.type);
                         }
@@ -1278,7 +1278,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         e.setHeader("Expected `{}` but found `{}` for block result type", expectedType.show(ctx),
                                     typeAndOrigin.type.show(ctx));
 
-                        const auto &bspec = i->link->result->main.method.data(ctx)->arguments().back();
+                        const auto &bspec = i.link->result->main.method.data(ctx)->arguments().back();
                         ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg");
                         e.addErrorSection(
                             core::TypeAndOrigins::explainExpected(ctx, expectedType, bspec.loc, "block result type"));
@@ -1341,7 +1341,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     noLoopChecking = true;
                 }
 
-                const core::TypeAndOrigins &ty = getAndFillTypeAndOrigin(ctx, c->value);
+                const core::TypeAndOrigins &ty = getAndFillTypeAndOrigin(ctx, c.value);
                 ENFORCE(c.cast != core::Names::uncheckedLet() && c.cast != core::Names::bind());
 
                 if (c.cast != core::Names::cast()) {
