@@ -7,6 +7,7 @@
 #include "absl/base/casts.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
+#include "absl/strings/str_split.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"
@@ -58,7 +59,22 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
         suffix = name.toString(cs);
     }
 
-    return prefix + suffix;
+    // '@' in symbol names means special things to the dynamic linker with regards
+    // to symbol versioning.  Since we're not using symbol versioning, we need to
+    // mangle function names to avoid '@'.
+    string mangled;
+    bool isFirst = true;
+    for (auto part : absl::StrSplit(suffix, '@')) {
+        if (!isFirst) {
+            mangled += "at";
+        } else {
+            isFirst = false;
+        }
+        mangled += to_string(part.size());
+        mangled += part;
+    }
+
+    return prefix + mangled;
 }
 
 bool IREmitterHelpers::isFileStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
