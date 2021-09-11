@@ -110,7 +110,7 @@ void CFGBuilder::jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc)
     }
 }
 
-void CFGBuilder::synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets loc, InsnPtr inst) {
+void CFGBuilder::synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets loc, InstructionPtr inst) {
     auto &inserted = bb->exprs.emplace_back(var, loc, move(inst));
     inserted.value->isSynthetic = true;
 }

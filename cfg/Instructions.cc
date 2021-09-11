@@ -45,7 +45,7 @@ string spacesForTabLevel(int tabs) {
             CASE_STATEMENT(body, TAbsurd)                               \
             }
 
-std::string InsnPtr::toString(const core::GlobalState &gs, const CFG &cfg) const {
+std::string InstructionPtr::toString(const core::GlobalState &gs, const CFG &cfg) const {
     auto *ptr = get();
 
 #define TO_STRING(name) return static_cast<const name *>(ptr)->toString(gs, cfg);
@@ -53,7 +53,7 @@ std::string InsnPtr::toString(const core::GlobalState &gs, const CFG &cfg) const
 #undef TO_STRING
 }
 
-std::string InsnPtr::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
+std::string InstructionPtr::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     auto *ptr = get();
 
 #define SHOW_RAW(name) return static_cast<const name *>(ptr)->showRaw(gs, cfg, tabs);
@@ -61,7 +61,7 @@ std::string InsnPtr::showRaw(const core::GlobalState &gs, const CFG &cfg, int ta
 #undef SHOW_RAW
 }
 
-void InsnPtr::deleteTagged(Tag tag, void *expr) noexcept {
+void InstructionPtr::deleteTagged(Tag tag, void *expr) noexcept {
     ENFORCE(expr != nullptr);
 
 #define DELETE_INSN(name) delete static_cast<name *>(expr);
