@@ -2001,10 +2001,6 @@ const InlinedVector<Loc, 2> &Symbol::locs() const {
     return locs_;
 }
 
-const std::vector<Loc> &Symbol::allLocs() const {
-    return allLocs_;
-}
-
 void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
     if (!loc.file().exists()) {
         return;
@@ -2024,7 +2020,6 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
         }
     }
 
-    allLocs_.emplace_back(loc);
     if (locs_.empty() || (loc.file().data(gs).sourceType == core::File::Type::Normal && !loc.file().data(gs).isRBI())) {
         if (this->loc().exists() && loc.file().data(gs).strictLevel >= this->loc().file().data(gs).strictLevel) {
             // The new loc is stricter; make it the new canonical loc.
