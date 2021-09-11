@@ -85,7 +85,6 @@ unique_ptr<ResponseMessage> GoToImplementationTask::runRequest(LSPTypecheckerDel
                 (int)LSPErrorCodes::InvalidParams,
                 "Go to implementation can be used only for methods or references of abstract classes");
 
-
         core::SymbolRef overridedMethod = method;
         if (method.data(gs)->isOverride()) {
             overridedMethod = findOverridedMethod(gs, method);
