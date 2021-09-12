@@ -1,1 +1,5 @@
-s(:nil)
+s(:block,
+  s(:send, nil, :proc), nil,
+  s(:assign,
+    s(:lvasgn, :_1),
+    s(:nil)))

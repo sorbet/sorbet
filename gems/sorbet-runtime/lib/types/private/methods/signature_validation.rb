@@ -154,7 +154,6 @@ module T::Private::Methods::SignatureValidation
             "#{base_override_loc_str(signature, super_signature)}"
     end
 
-
     # O(nm), but n and m are tiny here
     extra_req_kwargs = signature.req_kwarg_names - super_signature.req_kwarg_names
     if !extra_req_kwargs.empty?
@@ -174,7 +173,7 @@ module T::Private::Methods::SignatureValidation
     return if signature.override_allow_incompatible
     return if super_signature.mode == Modes.untyped
     return unless [signature, super_signature].all? do |sig|
-      sig.check_level == :always || (sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
+      sig.check_level == :always || sig.check_level == :compiled || (sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
     end
     mode_noun = super_signature.mode == Modes.abstract ? 'implementation' : 'override'
 

@@ -47,4 +47,6 @@ bool stopInDebugger();
 bool amIBeingDebugged();
 
 void intentionallyLeakMemory(void *ptr);
+
+void initializeSymbolizer(char *argv0);
 #endif // SORBET_OS_H

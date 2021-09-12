@@ -196,6 +196,18 @@ public:
 };
 CheckSize(LoadYieldParams, 32, 8);
 
+class YieldParamPresent final : public Instruction {
+public:
+    u2 argId;
+
+    YieldParamPresent(u2 argId) : argId{argId} {
+        categoryCounterInc("cfg", "argpresent");
+    };
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+};
+CheckSize(YieldParamPresent, 16, 8);
+
 class Cast final : public Instruction {
 public:
     core::NameRef cast;

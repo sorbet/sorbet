@@ -1,4 +1,5 @@
 #ifdef __APPLE__
+#include "absl/debugging/symbolize.h"
 #include "common/common.h"
 #include <cassert>
 #include <cstdio>
@@ -86,5 +87,9 @@ bool bindThreadToCore(pthread_t handle, int coreId) {
     thread_port_t mach_thread = pthread_mach_thread_np(handle);
     auto ret = thread_policy_set(mach_thread, THREAD_AFFINITY_POLICY, (thread_policy_t)&policy, 1);
     return ret == 0;
+}
+
+void initializeSymbolizer(char *argv0) {
+    absl::InitializeSymbolizer(argv0);
 }
 #endif

@@ -94,7 +94,7 @@ class Socket < BasicSocket
 end
 
 class BasicSocket < IO
-  def read_nonblock(*_); end
+  def read_nonblock(*arg0); end
 end
 
 Errno::EAUTH = Errno::NOERROR
@@ -123,7 +123,7 @@ Errno::EQFULL = Errno::ELAST
 Errno::ESHLIBVERS = Errno::NOERROR
 
 class IPSocket < BasicSocket
-  def self.getaddress_orig(*_); end
+  def self.getaddress_orig(*arg0); end
 end
 
 module Process
@@ -409,7 +409,7 @@ class Etc::Passwd
 end
 
 class IO
-  def nonblock(*_); end
+  def nonblock(*arg0); end
   def nonblock=(nonblock); end
   def nonblock?(); end
 end
@@ -461,30 +461,30 @@ class Gem::Security::KEY_ALGORITHM
   def dmp1(); end
   def dmq1(); end
   def e(); end
-  def export(*_); end
-  def self.generate(*_); end
-  def initialize(*_); end
+  def export(*arg0); end
+  def self.generate(*arg0); end
+  def initialize(*arg0); end
   def iqmp(); end
   def n(); end
   def p(); end
   def params(); end
   def private?(); end
-  def private_decrypt(*_); end
-  def private_encrypt(*_); end
+  def private_decrypt(*arg0); end
+  def private_encrypt(*arg0); end
   def public?(); end
-  def public_decrypt(*_); end
-  def public_encrypt(*_); end
+  def public_decrypt(*arg0); end
+  def public_encrypt(*arg0); end
   def public_key(); end
   def q(); end
-  def set_crt_params(_, _1, _2); end
-  def set_factors(_, _1); end
-  def set_key(_, _1, _2); end
-  def sign_pss(*_); end
+  def set_crt_params(arg0, arg1, arg2); end
+  def set_factors(arg0, arg1); end
+  def set_key(arg0, arg1, arg2); end
+  def sign_pss(*arg0); end
   def to_der(); end
-  def to_pem(*_); end
-  def to_s(*_); end
+  def to_pem(*arg0); end
+  def to_s(*arg0); end
   def to_text(); end
-  def verify_pss(*_); end
+  def verify_pss(*arg0); end
   NO_PADDING = nil
   PKCS1_OAEP_PADDING = nil
   PKCS1_PADDING = nil

@@ -537,35 +537,21 @@ int getNearestIseqAllocatorBlock(const IREmitterContext &irctx, int rubyBlockId)
     return rubyBlockId;
 }
 
-std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
-                                                   const IREmitterContext &irctx, const ast::MethodDef &md,
-                                                   int rubyBlockId) {
-    string_view funcName;
+std::tuple<const string &, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
+                                                      const IREmitterContext &irctx, const ast::MethodDef &md,
+                                                      int rubyBlockId) {
+    auto &locationName = irctx.rubyBlockLocationNames[rubyBlockId];
     llvm::Value *parent = nullptr;
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
-            funcName = md.symbol.data(cs)->name.shortName(cs);
-            parent = llvm::Constant::getNullValue(iseqType(cs));
-            break;
-
         case FunctionType::StaticInitFile:
         case FunctionType::StaticInitModule:
-            funcName = "<top (required)>";
             parent = llvm::Constant::getNullValue(iseqType(cs));
             break;
 
         case FunctionType::Block:
-            funcName = "block for"sv;
-            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
-            break;
-
         case FunctionType::Rescue:
-            funcName = "rescue for"sv;
-            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
-            break;
-
         case FunctionType::Ensure:
-            funcName = "ensure for"sv;
             parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
             break;
 
@@ -581,7 +567,9 @@ std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBu
             break;
     }
 
-    return {funcName, parent};
+    // If we get here, we know we have a valid iseq and a valid name.
+    ENFORCE(locationName.has_value());
+    return {*locationName, parent};
 }
 
 // Fill the locals array with interned ruby IDs.
@@ -932,15 +920,33 @@ llvm::Value *Payload::readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &buil
     return builder.CreateCall(cs.getFunction("sorbet_readKWRestArgs"), {maybeHash});
 }
 
-llvm::Value *Payload::assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash) {
+llvm::Value *Payload::addMissingKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *missing,
+                                      llvm::Value *sym) {
     auto &builder = builderCast(build);
-    return builder.CreateCall(cs.getFunction("sorbet_assertNoExtraKWArg"), {maybeHash});
+    return builder.CreateCall(cs.getFunction("sorbet_addMissingKWArg"), {missing, sym});
+}
+
+llvm::Value *Payload::assertAllRequiredKWArgs(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *missing) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.getFunction("sorbet_assertAllRequiredKWArgs"), {missing});
+}
+
+llvm::Value *Payload::assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash,
+                                         llvm::Value *numRequired, llvm::Value *optionalParsed) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.getFunction("sorbet_assertNoExtraKWArg"), {maybeHash, numRequired, optionalParsed});
 }
 
 llvm::Value *Payload::getKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash,
                                llvm::Value *rubySym) {
     auto &builder = builderCast(build);
     return builder.CreateCall(cs.getFunction("sorbet_getKWArg"), {maybeHash, rubySym});
+}
+
+llvm::Value *Payload::removeKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash,
+                                  llvm::Value *rubySym) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.getFunction("sorbet_removeKWArg"), {maybeHash, rubySym});
 }
 
 llvm::Value *Payload::readRestArgs(CompilerState &cs, llvm::IRBuilderBase &build, int maxPositionalArgCount,
@@ -952,13 +958,6 @@ llvm::Value *Payload::readRestArgs(CompilerState &cs, llvm::IRBuilderBase &build
 }
 
 namespace {
-llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &builder, const IREmitterContext &irctx) {
-    auto sym = irctx.cfg.symbol.data(cs)->owner;
-    ENFORCE(sym.data(cs)->isClassOrModule());
-
-    return Payload::getRubyConstant(cs, sym.data(cs)->topAttachedClass(cs), builder);
-};
-
 // For a variable that's escaped, compute its index into the locals from its unique id in the
 // closure.
 llvm::Value *indexForLocalVariable(CompilerState &cs, const IREmitterContext &irctx, int rubyBlockId, int escapeId) {
@@ -975,6 +974,15 @@ llvm::Value *buildInstanceVariableCache(CompilerState &cs, std::string_view name
 }
 
 } // namespace
+
+llvm::Value *Payload::getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilderBase &build,
+                                                 const IREmitterContext &irctx) {
+    auto &builder = builderCast(build);
+    auto sym = irctx.cfg.symbol.data(cs)->owner;
+    ENFORCE(sym.data(cs)->isClassOrModule());
+
+    return Payload::getRubyConstant(cs, sym.data(cs)->topAttachedClass(cs), builder);
+}
 
 std::tuple<llvm::Value *, llvm::Value *> Payload::escapedVariableIndexAndLevel(CompilerState &cs, cfg::LocalRef local,
                                                                                const IREmitterContext &irctx,
@@ -1179,28 +1187,5 @@ llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &bui
 // even though for now the offset is always zero.
 llvm::Value *Payload::buildLocalsOffset(CompilerState &cs) {
     return llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true));
-}
-
-void Payload::setupEcTag(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx) {
-    ENFORCE(irctx.returnFromBlockState.has_value());
-
-    auto &builder = builderCast(build);
-
-    auto &state = *irctx.returnFromBlockState;
-    auto *setjmpRetval =
-        builder.CreateCall(cs.getFunction("sorbet_initializeTag"), {state.cachedEC, state.ecTag}, "setjmpRetval");
-
-    auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, 0);
-    auto *throwReturnVal =
-        builder.CreateCall(cs.getFunction("sorbet_processThrowReturnSetJmp"),
-                           {state.loadEC(cs, builder), setjmpRetval, cfp, state.ecTag}, "throwReturnVal");
-    auto *throwReturnValIsUndef = testIsUndef(cs, builder, throwReturnVal);
-
-    auto *fun = builder.GetInsertBlock()->getParent();
-    auto *caughtThrowReturnJump = llvm::BasicBlock::Create(cs, "caughtThrowReturnJump", fun);
-    builder.CreateCondBr(throwReturnValIsUndef, irctx.argumentSetupBlocksByFunction[0], caughtThrowReturnJump);
-
-    builder.SetInsertPoint(caughtThrowReturnJump);
-    IREmitterHelpers::emitReturn(cs, builder, irctx, 0, throwReturnVal);
 }
 } // namespace sorbet::compiler

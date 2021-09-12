@@ -21,6 +21,32 @@ bool isKeywordInitKey(const core::GlobalState &gs, const ast::ExpressionPtr &nod
     return false;
 }
 
+bool isMissingInitialize(const core::GlobalState &gs, const ast::Send *send) {
+    if (send->block == nullptr) {
+        return true;
+    }
+
+    auto &block = ast::cast_tree_nonnull<ast::Block>(send->block);
+
+    if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block.body)) {
+        auto methodDef = ast::cast_tree<ast::MethodDef>(insSeq->expr);
+
+        if (methodDef && methodDef->name == core::Names::initialize()) {
+            return false;
+        }
+
+        for (auto &&stat : insSeq->stats) {
+            methodDef = ast::cast_tree<ast::MethodDef>(stat);
+
+            if (methodDef && methodDef->name == core::Names::initialize()) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 } // namespace
 
 vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
@@ -122,9 +148,11 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
                             std::move(typeMember)));
     }
 
-    body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
-    body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
-                                               ast::MK::RaiseUnimplemented(loc)));
+    if (isMissingInitialize(ctx, send)) {
+        body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
+        body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
+                                                   ast::MK::RaiseUnimplemented(loc)));
+    }
 
     if (send->block != nullptr) {
         auto &block = ast::cast_tree_nonnull<ast::Block>(send->block);

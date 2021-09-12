@@ -341,7 +341,7 @@ class ERB
       trim_mode: ::T.untyped,
       eoutvar: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(str, safe_level=T.unsafe(nil), trim_mode=T.unsafe(nil), eoutvar=T.unsafe(nil)); end
 
@@ -521,7 +521,7 @@ class ERB::Compiler
     params(
       trim_mode: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(trim_mode); end
 
@@ -605,7 +605,7 @@ class ERB::Compiler::Buffer
       enc: ::T.untyped,
       frozen: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(compiler, enc=T.unsafe(nil), frozen=T.unsafe(nil)); end
 
@@ -634,7 +634,7 @@ class ERB::Compiler::PercentLine
     params(
       str: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(str); end
 
@@ -655,7 +655,7 @@ class ERB::Compiler::Scanner
       trim_mode: ::T.untyped,
       percent: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(src, trim_mode, percent); end
 
@@ -737,7 +737,7 @@ class ERB::Compiler::TrimScanner < ERB::Compiler::Scanner
       trim_mode: ::T.untyped,
       percent: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(src, trim_mode, percent); end
 

@@ -58,13 +58,22 @@ public:
                                           const IREmitterContext &irctx, const ast::MethodDef &md, int rubyBlockId);
 
     static llvm::Value *readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);
-    static llvm::Value *assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);
+    static llvm::Value *assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash,
+                                           llvm::Value *numRequired, llvm::Value *optionalParsed);
+    static llvm::Value *assertAllRequiredKWArgs(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *missing);
+    static llvm::Value *addMissingKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *missing,
+                                        llvm::Value *sym);
+
     static llvm::Value *getKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash,
                                  llvm::Value *rubySym);
+    static llvm::Value *removeKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash,
+                                    llvm::Value *rubySym);
     static llvm::Value *readRestArgs(CompilerState &cs, llvm::IRBuilderBase &builder, int maxPositionalArgCount,
                                      llvm::Value *argCountRaw, llvm::Value *argArrayRaw);
     static core::Loc setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc,
                                    core::Loc methodStart, core::Loc lastLoc, llvm::AllocaInst *lineNumberPtr);
+    static llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                                   const IREmitterContext &irctx);
     static llvm::Value *varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBuilderBase &builder,
                                const IREmitterContext &irctx, int rubyBlockId);
     static void varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, llvm::IRBuilderBase &builder,
@@ -103,8 +112,6 @@ public:
                                        int rubyBlockId);
 
     static llvm::Value *buildLocalsOffset(CompilerState &cs);
-
-    static void setupEcTag(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
 };
 } // namespace sorbet::compiler
 #endif

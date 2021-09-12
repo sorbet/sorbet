@@ -1998,6 +1998,17 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             [&](parser::Defined *defined) {
                 auto value = node2TreeImpl(dctx, std::move(defined->value));
                 auto loc = value.loc();
+                auto *ident = cast_tree<UnresolvedIdent>(value);
+                if (ident &&
+                    (ident->kind == UnresolvedIdent::Kind::Instance || ident->kind == UnresolvedIdent::Kind::Class)) {
+                    auto methodName = ident->kind == UnresolvedIdent::Kind::Instance ? core::Names::definedInstanceVar()
+                                                                                     : core::Names::definedClassVar();
+                    auto sym = MK::Symbol(loc, ident->name);
+                    auto res = MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()), methodName, std::move(sym));
+                    result = std::move(res);
+                    return;
+                }
+
                 Send::ARGS_store args;
                 while (!isa_tree<EmptyTree>(value)) {
                     auto lit = cast_tree<UnresolvedConstantLit>(value);

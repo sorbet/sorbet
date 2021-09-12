@@ -49,7 +49,7 @@ class A
   class ConstructorBlock
     extend T::Sig
 
-    sig {params(blk: T.proc.params(s: Symbol).returns(String)).returns(NilClass)}
+    sig {params(blk: T.proc.params(s: Symbol).returns(String)).void}
     def initialize(&blk)
     end
   end

@@ -433,6 +433,8 @@ void GlobalState::initEmpty() {
 
     id = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageRegistry());
     ENFORCE(id == Symbols::PackageRegistry());
+    id = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageTests());
+    ENFORCE(id == Symbols::PackageTests());
 
     // PackageSpec is a class that can be subclassed.
     id = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpec());
@@ -446,6 +448,11 @@ void GlobalState::initEmpty() {
                  .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
                  .build();
     ENFORCE(method == Symbols::PackageSpec_import());
+
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::test_import())
+                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
+                 .build();
+    ENFORCE(method == Symbols::PackageSpec_test_import());
 
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::export_()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_export());
@@ -468,6 +475,11 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Sorbet_Private_Static_ResolvedSig());
     id = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);
     ENFORCE(id == Symbols::Sorbet_Private_Static_ResolvedSigSingleton());
+
+    id = enterClassSymbol(Loc::none(), Symbols::T_Private(), core::Names::Constants::Compiler());
+    ENFORCE(id == Symbols::T_Private_Compiler());
+    id = Symbols::T_Private_Compiler().data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::T_Private_CompilerSingleton());
 
     typeArgument =
         enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
@@ -599,6 +611,16 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::mergeHashValues())
                  .untypedArg(Names::arg0())
                  .repeatedUntypedArg(Names::arg())
+                 .buildWithResultUntyped();
+
+    // Synthesize <Magic>.<defined-class-var>(arg0: T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::definedClassVar())
+                 .untypedArg(Names::arg0())
+                 .buildWithResultUntyped();
+
+    // Synthesize <Magic>.<defined-instance-var>(arg0: T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::definedInstanceVar())
+                 .untypedArg(Names::arg0())
                  .buildWithResultUntyped();
 
     // Synthesize <DeclBuilderForProcs>.<params>(args: T.untyped) => DeclBuilderForProcs

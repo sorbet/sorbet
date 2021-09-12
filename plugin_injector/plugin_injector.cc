@@ -224,6 +224,8 @@ public:
             module = llvm::CloneModule(*threadState->codegenPayload);
 
             module->addModuleFlag(llvm::Module::Warning, "Debug Info Version", llvm::DEBUG_METADATA_VERSION);
+            module->addModuleFlag(llvm::Module::Override, "cf-protection-return", 1);
+            module->addModuleFlag(llvm::Module::Override, "cf-protection-branch", 1);
 
             if (llvm::Triple(llvm::sys::getProcessTriple()).isOSDarwin()) {
                 // osx only supports dwarf2
@@ -349,8 +351,10 @@ public:
         if (irOutputDir.has_value()) {
             ensureOutputDir(irOutputDir.value(), fileName);
         }
-        compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), compiledOutputDir.value(), irOutputDir,
-                                         fileName);
+        if (!compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), compiledOutputDir.value(), irOutputDir,
+                                              fileName)) {
+            compiler::failCompilation(gs, core::Loc(f, 0, 0), "Object file emitter failed");
+        }
     };
 
     virtual void finishTypecheck(const core::GlobalState &gs) const override {}

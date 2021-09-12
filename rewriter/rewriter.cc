@@ -42,6 +42,8 @@ public:
     ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
 
+        auto isClass = classDef->kind == ast::ClassDef::Kind::Class;
+
         Command::run(ctx, classDef);
         Rails::run(ctx, classDef);
         TEnum::run(ctx, classDef);
@@ -91,7 +93,7 @@ public:
                         return;
                     }
 
-                    nodes = Minitest::run(ctx, &send);
+                    nodes = Minitest::run(ctx, isClass, &send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = move(nodes);
                         return;

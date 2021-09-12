@@ -8,6 +8,12 @@ module Wrong
       # ^^^^^^ error: Class or method definition must match enclosing package namespace `Root::Nested`
 end
 
+Root::Nested::Foo::Bar = nil
+::Allowed::TopLevel = nil
+
+  NotAllowed::Foo::Bar = nil
+# ^^^^^^^^^^^^^^^^^^^^ error: Constants may not be defined outside of the enclosing package namespace `Root::Nested`
+
 module Root::Nested
 
   ALLOWED_CONST = T.let(1, Integer)

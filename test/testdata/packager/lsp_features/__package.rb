@@ -11,6 +11,11 @@ class Simpsons < PackageSpec
     #      ^^^^ def: bart 1 not-def-of-self
     #      ^^^^ usage: bartpkg
     #      ^^^^ hover: Bart package description
+
+    test_import Krabappel
+    #           ^^^^^^^^^ usage: krabappel-pkg
+    #           ^^^^^^^^^ hover: Bart's teacher
+
     export Simpsons::Family
     #                ^^^^^^ usage: family
 end

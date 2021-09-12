@@ -155,10 +155,9 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "com_google_absl",
-        urls = _github_public_urls("abseil/abseil-cpp/archive/b699707f0bfeae034e36cdfd909b66b0fcab696c.zip"),
-        sha256 = "29a165fcbf802f3cdb6d7a17327ede0af2c799a11f88611c005867e994b984e2",
-        strip_prefix = "abseil-cpp-b699707f0bfeae034e36cdfd909b66b0fcab696c",
-        patches = ["@com_stripe_ruby_typer//third_party:abseil-platforms.patch"],
+        urls = _github_public_urls("abseil/abseil-cpp/archive/8910297baf87e1777c4fd30fb0693eecf9f2c134.zip"),
+        sha256 = "c43b8cd8e306e7fe3f006d880181d60db59a3bae6b6bc725da86a28a6b0f9f30",
+        strip_prefix = "abseil-cpp-8910297baf87e1777c4fd30fb0693eecf9f2c134",
     )
 
     http_archive(
@@ -186,6 +185,12 @@ package(default_visibility = ["//visibility:public"])
         urls = _github_public_urls("bazelbuild/rules_go/archive/dd4fb4f8128b83f189f7bdda663e65b915a6d3c4.zip"),
         sha256 = "ea702009018b6a5d6665808a4d1f54e2f40a2938e3946e98de00d38b34fd8a27",
         strip_prefix = "rules_go-dd4fb4f8128b83f189f7bdda663e65b915a6d3c4",
+    )
+
+    http_archive(
+        name = "build_bazel_rules_nodejs",
+        sha256 = "e79c08a488cc5ac40981987d862c7320cee8741122a2649e9b08e850b6f20442",
+        urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/3.8.0/rules_nodejs-3.8.0.tar.gz"],
     )
 
     http_archive(
@@ -235,6 +240,10 @@ package(default_visibility = ["//visibility:public"])
         build_file = "@com_stripe_ruby_typer//third_party:emscripten-toolchain.BUILD",
         sha256 = "4d6fa350895fabc25b89ce5f9dcb528e719e7c2bf7dacab2a3e3cc818ecd7019",
         strip_prefix = "emscripten-1.38.25",
+        patches = [
+            "@com_stripe_ruby_typer//third_party:emscripten_toolchain/emcc.py.patch",
+            "@com_stripe_ruby_typer//third_party:emscripten_toolchain/tools_shared.py.patch",
+        ],
     )
 
     http_archive(

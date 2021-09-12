@@ -98,7 +98,7 @@ module Opus::Types::Test
         m = Module.new
         ivars = m.instance_variables
 
-        x = T::Types::Simple::Private::Pool.type_for_module(m)
+        _ = T::Types::Simple::Private::Pool.type_for_module(m)
         assert_equal(ivars, m.instance_variables)
       end
     end
@@ -291,6 +291,11 @@ module Opus::Types::Test
         assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type {a: TrueClass, b: TrueClass, c: Integer}", msg)
       end
 
+      it "fails validation with a hash of wrong typed keys" do
+        msg = check_error_message_for_obj(@type, {"a" => true, :"foo bar" => true, :foo => 3})
+        assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type {\"a\" => TrueClass, :\"foo bar\" => TrueClass, foo: Integer}", msg)
+      end
+
       it "fails validation if a field is missing" do
         msg = check_error_message_for_obj(@type, {b: true, c: 3})
         assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type {b: TrueClass, c: Integer}", msg)
@@ -320,7 +325,9 @@ module Opus::Types::Test
       class TestEnumerable
         include Enumerable
 
-        def each; yield "something"; end
+        def each;
+          yield "something";
+        end
       end
 
       it 'fails if value is not an array' do
@@ -663,7 +670,6 @@ module Opus::Types::Test
       end
     end
 
-
     describe "Enumerable" do
       it 'fails if value is not an enumerable' do
         type = T::Enumerable[Integer]
@@ -823,7 +829,7 @@ module Opus::Types::Test
       it 'delegates equality' do
         assert(T.any(Integer, String) == make_type_alias {T.any(Integer, String)})
         assert(make_type_alias {T.any(Integer, String)} == T.any(Integer, String))
-        assert(make_type_alias {T.any(Integer, String)} == make_type_alias {T.any(Integer, String)}) # rubocop:disable Lint/BinaryOperatorWithIdenticalOperands
+        assert(make_type_alias {T.any(Integer, String)} == make_type_alias {T.any(Integer, String)})
 
         refute(make_type_alias {T.any(Integer, Float)} == make_type_alias {T.any(Integer, String)})
       end
@@ -954,10 +960,14 @@ module Opus::Types::Test
         c = Class.new do
           extend T::Sig
           sig {returns(MyEnum::A)}
-          def self.good_return; MyEnum::A; end
+          def self.good_return;
+            MyEnum::A;
+          end
 
           sig {returns(MyEnum::B)}
-          def self.bad_return; MyEnum::C; end
+          def self.bad_return;
+            MyEnum::C;
+          end
         end
 
         assert_equal(c.good_return, MyEnum::A)
@@ -1387,9 +1397,6 @@ module Opus::Types::Test
     class GenericSingletonChild < GenericSingleton
       SingletonTP = type_template(fixed: String)
     end
-
-
-
 
     describe "generics" do
       it 'simply works' do

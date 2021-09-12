@@ -116,7 +116,7 @@ module Opus::Types::Test
           mod = Module.new do
             extend T::Sig
             sig {params(a: Integer, b: Integer).returns(Integer)}
-            def self.foo(a: 1, b:) # rubocop:disable Style/KeywordParametersOrder
+            def self.foo(a: 1, b:)
               a + b
             end
           end
@@ -225,7 +225,9 @@ module Opus::Types::Test
         klass = Class.new do
           extend T::Sig
           sig {params(m: Symbol, include_private: T::Boolean).returns(T::Boolean)}
-          def respond_to_missing?(m, include_private=false); true; end
+          def respond_to_missing?(m, include_private=false)
+            true
+          end
         end
 
         klass.new.respond_to?(:foo)
@@ -349,7 +351,7 @@ module Opus::Types::Test
       end
 
       it "raises a sensible error for custom enumerable validation errors" do
-        @mod.sig { returns(T::Array[String]) }
+        @mod.sig {returns(T::Array[String])}
         def @mod.foo
           TestEnumerable.new
         end
@@ -365,42 +367,42 @@ module Opus::Types::Test
       describe 'ranges' do
         describe 'return type is non-nilable integer' do
           it 'permits a range that has integers on start and end' do
-            @mod.sig { returns(T::Range[Integer] )}
+            @mod.sig {returns(T::Range[Integer])}
             def @mod.foo
               (1...10)
             end
 
-            assert_equal((1...10), @mod.foo )
+            assert_equal((1...10), @mod.foo)
           end
 
           it 'permits a range that has an integer start and no end' do
-            @mod.sig { returns(T::Range[Integer] )}
+            @mod.sig {returns(T::Range[Integer])}
             def @mod.foo
               (1...nil)
             end
 
-            assert_equal((1...nil), @mod.foo )
+            assert_equal((1...nil), @mod.foo)
           end
 
           # Ruby 2.6 does not support ranges with boundless starts
           if RUBY_VERSION >= '2.7'
             it 'permits a range that has an integer start and no end' do
-              @mod.sig { returns(T::Range[Integer] )}
+              @mod.sig {returns(T::Range[Integer])}
               def @mod.foo
                 (nil...10)
               end
 
-              assert_equal((nil...10), @mod.foo )
+              assert_equal((nil...10), @mod.foo)
             end
           end
 
           it 'permits a range with no beginning or end' do
-            @mod.sig { returns(T::Range[Integer] )}
+            @mod.sig {returns(T::Range[Integer])}
             def @mod.foo
               (nil...nil)
             end
 
-            assert_equal((nil...nil), @mod.foo )
+            assert_equal((nil...nil), @mod.foo)
           end
         end
       end
@@ -544,7 +546,7 @@ module Opus::Types::Test
 
       it 'raises an error when two parameters have the same name' do
 
-        @mod.sig { params(_: Integer, _: Integer).returns(String) } # rubocop:disable Lint/DuplicateHashKey
+        @mod.sig {params(_: Integer, _: Integer).returns(String)} # rubocop:disable Lint/DuplicateHashKey
         def @mod.bar(_, _)
           ""
         end

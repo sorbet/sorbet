@@ -262,6 +262,7 @@ findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
                 [&](cfg::LoadSelf *i) { /*nothing*/ /*todo: how does instance exec pass self?*/ },
                 [&](cfg::Literal *i) { /* nothing*/ }, [&](cfg::ArgPresent *i) { /*nothing*/ },
                 [&](cfg::LoadArg *i) { /*nothing*/ }, [&](cfg::LoadYieldParams *i) { /*nothing*/ },
+                [&](cfg::YieldParamPresent *i) { /* nothing */ },
                 [&](cfg::Cast *i) { usage.trackBlockUsage(bb.get(), i->value.variable); },
                 [&](cfg::TAbsurd *i) { usage.trackBlockUsage(bb.get(), i->what.variable); });
         }
@@ -445,8 +446,8 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
                 continue;
             }
 
-            auto *elseBlock = CFGHelpers::findRubyBlockEntry(cfg, elseBlockId);
-            auto *ensureBlock = CFGHelpers::findRubyBlockEntry(cfg, ensureBlockId);
+            auto *elseBlock = CFGHelpers::findRegionEntry(cfg, elseBlockId);
+            auto *ensureBlock = CFGHelpers::findRegionEntry(cfg, ensureBlockId);
 
             // The way the CFG is constructed ensures that there will always be an else block, an ensure block, or both
             // present.
@@ -455,14 +456,14 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
             {
                 // Find the exit block for exception handling so that we can redirect the header to it.
                 auto *exit = ensureBlock == nullptr ? elseBlock : ensureBlock;
-                auto exits = CFGHelpers::findRubyBlockExits(cfg, exit->rubyBlockId);
+                auto exits = CFGHelpers::findRegionExits(cfg, b->rubyBlockId, exit->rubyBlockId);
 
                 // The ensure block should only ever jump to the code that follows the begin/end block.
                 ENFORCE(exits.size() <= 1);
 
                 if (exits.empty()) {
                     // When control flow terminates in the block that ends exception handling, else or ensure, that
-                    // block will transition to the dead block. As `findRubyBlockExits` will ignore the dead block to
+                    // block will transition to the dead block. As `findRegionExits` will ignore the dead block to
                     // simplify the common case of looking for reachable exits, the exits vector being empty indicates
                     // that a return is present in the exception handling exit, and that the transition will never
                     // happen. In this case we can explicitly jump from the exception handling entry block directly to
@@ -500,11 +501,12 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
     return;
 }
 
-bool returnFromBlockIsPresent(CompilerState &cs, cfg::CFG &cfg, const vector<FunctionType> &blockTypes) {
+bool returnAcrossBlockIsPresent(CompilerState &cs, cfg::CFG &cfg, const vector<int> &blockNestingLevels) {
     for (auto &bb : cfg.basicBlocks) {
-        if (blockTypes[bb->rubyBlockId] == FunctionType::Block) {
-            for (auto &bind : bb->exprs) {
-                if (cfg::isa_instruction<cfg::Return>(bind.value.get())) {
+        for (auto &bind : bb->exprs) {
+            if (cfg::isa_instruction<cfg::Return>(bind.value.get())) {
+                // This will be non-zero if there was a block in any of our parent blocks.
+                if (blockNestingLevels[bb->rubyBlockId] != 0) {
                     return true;
                 }
             }
@@ -513,18 +515,24 @@ bool returnFromBlockIsPresent(CompilerState &cs, cfg::CFG &cfg, const vector<Fun
     return false;
 }
 
-// Returns the number of scopes that must be traversed to get back out out to the top-level method frame.
-int getBlockLevel(vector<int> &blockParents, vector<FunctionType> &blockTypes, int rubyBlockId) {
+// Returns the number of scopes that must be traversed to get back out out to the
+// top-level method frame and the number of blocks that must be traversed to get
+// back out to the top-level method frame.  The latter is important for providing
+// accurate location information for block iseqs.
+tuple<int, int> getBlockNesting(vector<int> &blockParents, vector<FunctionType> &blockTypes, int rubyBlockId) {
     auto level = 0;
+    auto blockLevel = 0;
 
     while (true) {
         switch (blockTypes[rubyBlockId]) {
             case FunctionType::Method:
             case FunctionType::StaticInitFile:
             case FunctionType::StaticInitModule:
-                return level;
+                return {level, blockLevel};
 
             case FunctionType::Block:
+                ++blockLevel;
+                [[fallthrough]];
             case FunctionType::Rescue:
             case FunctionType::Ensure:
                 // Increment the level, as we're crossing through a non-method stack frame to get back to our parent.
@@ -542,35 +550,158 @@ int getBlockLevel(vector<int> &blockParents, vector<FunctionType> &blockTypes, i
     }
 }
 
-vector<int> getBlockLevels(vector<int> &blockParents, vector<FunctionType> &blockTypes) {
+tuple<vector<int>, vector<int>> getBlockLevels(vector<int> &blockParents, vector<FunctionType> &blockTypes) {
     vector<int> levels(blockTypes.size(), 0);
+    vector<int> blockNesting(blockTypes.size(), 0);
 
     for (auto i = 0; i < blockTypes.size(); ++i) {
-        levels[i] = getBlockLevel(blockParents, blockTypes, i);
+        auto [level, blockLevel] = getBlockNesting(blockParents, blockTypes, i);
+        levels[i] = level;
+        blockNesting[i] = blockLevel;
     }
 
-    return levels;
+    return {move(levels), move(blockNesting)};
+}
+
+string locationNameFor(CompilerState &cs, core::MethodRef symbol) {
+    if (IREmitterHelpers::isClassStaticInit(cs, symbol)) {
+        auto enclosingClassRef = symbol.enclosingClass(cs);
+        ENFORCE(enclosingClassRef.exists());
+        enclosingClassRef = enclosingClassRef.data(cs)->attachedClass(cs);
+        ENFORCE(enclosingClassRef.exists());
+        const auto &enclosingClass = enclosingClassRef.data(cs);
+        return fmt::format("<{}:{}>", enclosingClass->isClassOrModuleClass() ? "class"sv : "module"sv,
+                           enclosingClassRef.show(cs));
+    } else if (IREmitterHelpers::isFileStaticInit(cs, symbol)) {
+        return string("<top (required)>"sv);
+    } else {
+        return string(symbol.data(cs)->name.shortName(cs));
+    }
+}
+
+// Given a Ruby block, finds the block id of the nearest _proper_ ancestor of that block that allocates an iseq.
+int getNearestIseqAllocatorBlock(const vector<int> &blockParents, const vector<FunctionType> &blockTypes,
+                                 int rubyBlockId) {
+    do {
+        rubyBlockId = blockParents[rubyBlockId];
+    } while (rubyBlockId > 0 && blockTypes[rubyBlockId] == FunctionType::ExceptionBegin);
+
+    return rubyBlockId;
+}
+
+// Block names in Ruby are built recursively as the file is parsed.  We aren't guaranteed
+// to process blocks in depth-first order and we don't want to constantly recompute
+// parent names.  So we build the names for everything up front.
+vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg, const vector<int> &blockLevels,
+                                               const vector<int> &blockNestingLevels, const vector<int> &blockParents,
+                                               const vector<FunctionType> &blockTypes) {
+    struct BlockInfo {
+        int rubyBlockId;
+        // blockLevels[this->rubyBlockId];
+        int level;
+    };
+
+    ENFORCE(blockLevels.size() == blockParents.size());
+    ENFORCE(blockLevels.size() == blockTypes.size());
+
+    vector<optional<string>> blockLocationNames(blockLevels.size());
+    // Sort blocks by their depth so that we can process things in a breadth-first order.
+    vector<BlockInfo> blocksByDepth;
+    blocksByDepth.reserve(blockLevels.size());
+    for (int i = 0; i <= cfg.maxRubyBlockId; ++i) {
+        blocksByDepth.emplace_back(BlockInfo{i, blockLevels[i]});
+    }
+
+    fast_sort(blocksByDepth, [](const auto &left, const auto &right) -> bool { return left.level < right.level; });
+
+    const string topLevelLocation = locationNameFor(cs, cfg.symbol);
+
+    for (const auto &info : blocksByDepth) {
+        optional<string> &iseqName = blockLocationNames[info.rubyBlockId];
+        const auto blockType = blockTypes[info.rubyBlockId];
+        switch (blockType) {
+            case FunctionType::Method:
+            case FunctionType::StaticInitFile:
+            case FunctionType::StaticInitModule:
+                iseqName.emplace(topLevelLocation);
+                break;
+
+            case FunctionType::Block: {
+                int blockLevel = blockNestingLevels[info.rubyBlockId];
+                if (blockLevel == 1) {
+                    iseqName.emplace(fmt::format("block in {}", topLevelLocation));
+                } else {
+                    iseqName.emplace(fmt::format("block ({} levels) in {}", blockLevel, topLevelLocation));
+                }
+                break;
+            }
+
+            case FunctionType::Rescue:
+            case FunctionType::Ensure: {
+                int parent = getNearestIseqAllocatorBlock(blockParents, blockTypes, info.rubyBlockId);
+                const string *parentLocation;
+                if (parent == 0) {
+                    parentLocation = &topLevelLocation;
+                } else {
+                    const auto &parentName = blockLocationNames[parent];
+                    ENFORCE(blockLevels[parent] < blockLevels[info.rubyBlockId]);
+                    ENFORCE(parentName.has_value());
+                    parentLocation = &*parentName;
+                }
+                iseqName.emplace(
+                    fmt::format("{} in {}", blockType == FunctionType::Rescue ? "rescue" : "ensure", *parentLocation));
+                break;
+            }
+
+            case FunctionType::ExceptionBegin:
+            case FunctionType::Unused:
+                // These types do not have iseqs allocated for them and therefore have no name.
+                break;
+        }
+    }
+
+    return blockLocationNames;
+}
+
+void collectRubyBlockArgs(const cfg::CFG &cfg, const cfg::BasicBlock *b, vector<cfg::LocalRef> &blockArgs) {
+    bool insideThenBlock = false;
+
+    while (true) {
+        for (auto &maybeCallOnLoadYieldArg : b->exprs) {
+            auto maybeCast = cfg::cast_instruction<cfg::Send>(maybeCallOnLoadYieldArg.value.get());
+            if (maybeCast == nullptr || maybeCast->recv.variable.data(cfg)._name != core::Names::blkArg() ||
+                maybeCast->fun != core::Names::squareBrackets() || maybeCast->args.size() != 1) {
+                continue;
+            }
+            if (!core::isa_type<core::LiteralType>(maybeCast->args[0].type)) {
+                continue;
+            }
+            auto litType = core::cast_type_nonnull<core::LiteralType>(maybeCast->args[0].type);
+            blockArgs[litType.asInteger()] = maybeCallOnLoadYieldArg.bind.variable;
+        }
+
+        // When the exit condition for this block is constructed through `argPresent`, continue down the `then` branch
+        // to collect more block arg definitions.
+        if (b->bexit.cond.variable.data(cfg)._name == core::Names::argPresent()) {
+            insideThenBlock = true;
+            b = b->bexit.thenb;
+            continue;
+        }
+
+        // The blocks emitted when optional arguments are present end in an unconditional jump to join with the path
+        // that would populate the arg with the default value.
+        if (insideThenBlock) {
+            insideThenBlock = false;
+            b = b->bexit.thenb;
+            continue;
+        }
+
+        // We've reaced the end of argument handling entry blocks in the ruby block CFG.
+        return;
+    }
 }
 
 } // namespace
-
-IREmitterContext::ReturnFromBlockState::ReturnFromBlockState(CompilerState &cs, llvm::IRBuilderBase &build) {
-    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
-
-    this->ecTag = builder.CreateAlloca(llvm::StructType::getTypeByName(cs, "struct.rb_vm_tag"), nullptr, "ecTag");
-    auto *ecType = llvm::StructType::getTypeByName(cs, "struct.rb_execution_context_struct");
-    this->ecPtr = ecType->getPointerTo();
-    this->cachedEC = builder.CreateAlloca(ecPtr, nullptr, "ecCache");
-    auto *ec = builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
-    builder.CreateStore(ec, this->cachedEC);
-}
-
-llvm::Value *IREmitterContext::ReturnFromBlockState::loadEC(CompilerState &cs, llvm::IRBuilderBase &build) const {
-    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
-
-    const bool isVolatile = true;
-    return builder.CreateLoad(this->ecPtr, this->cachedEC, isVolatile, "loadedEC");
-}
 
 IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                                                                     const ast::MethodDef &md,
@@ -597,7 +728,8 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<llvm::DISubprogram *> blockScopes(cfg.maxRubyBlockId + 1, nullptr);
     getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc, blockTypes, rubyBlock2Function, blockScopes);
 
-    auto blockLevels = getBlockLevels(blockParents, blockTypes);
+    auto [blockLevels, blockNestingLevels] = getBlockLevels(blockParents, blockTypes);
+    auto blockLocationNames = getBlockLocationNames(cs, cfg, blockLevels, blockNestingLevels, blockParents, blockTypes);
 
     auto [aliases, symbols] = setupAliasesAndKeywords(cs, cfg);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
@@ -608,8 +740,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
     vector<llvm::AllocaInst *> sendArgArrayByBlock;
     vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
-    vector<llvm::AllocaInst *> throwReturnFlagByBlock;
-    std::optional<ReturnFromBlockState> returnFromBlockState;
+    bool hasReturnAcrossBlock = false;
     UnorderedMap<int, llvm::AllocaInst *> blockControlFramePtrs;
 
     int i = 0;
@@ -637,16 +768,14 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             blockControlFramePtrs[i] = controlFramePtr;
         }
         argumentSetupBlocksByFunction.emplace_back(llvm::BasicBlock::Create(cs, "argumentSetup", fun));
-        throwReturnFlagByBlock.emplace_back(
-            builder.CreateAlloca(llvm::Type::getInt1Ty(cs), nullptr, "throwReturnFlag"));
-        builder.CreateStore(builder.getFalse(), throwReturnFlagByBlock[i]);
         if (i == 0) {
-            // If no return statements are actually present inside blocks, we will not need to push an EC tag.
+            // If return statements are present inside blocks, we need to codegen
+            // differently when finalizing the function.
             //
             // TODO(aprocter): I think this is a little bit more conservative than it needs to be, because it will push
             // a tag even if the a return-from-block comes from a lambda, which is not actually necessary.
-            if (returnFromBlockIsPresent(cs, cfg, blockTypes)) {
-                returnFromBlockState.emplace(cs, builder);
+            if (returnAcrossBlockIsPresent(cs, cfg, blockNestingLevels)) {
+                hasReturnAcrossBlock = true;
             }
         }
         i++;
@@ -716,19 +845,9 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             ENFORCE(expectedSend->link);
             blockLinks[b->rubyBlockId] = expectedSend->link;
 
-            rubyBlockArgs[b->rubyBlockId].resize(expectedSend->link->argFlags.size(), cfg::LocalRef::noVariable());
-            for (auto &maybeCallOnLoadYieldArg : b->bexit.thenb->exprs) {
-                auto maybeCast = cfg::cast_instruction<cfg::Send>(maybeCallOnLoadYieldArg.value.get());
-                if (maybeCast == nullptr || maybeCast->recv.variable.data(cfg)._name != core::Names::blkArg() ||
-                    maybeCast->fun != core::Names::squareBrackets() || maybeCast->args.size() != 1) {
-                    continue;
-                }
-                if (!core::isa_type<core::LiteralType>(maybeCast->args[0].type)) {
-                    continue;
-                }
-                auto litType = core::cast_type_nonnull<core::LiteralType>(maybeCast->args[0].type);
-                rubyBlockArgs[b->rubyBlockId][litType.asInteger()] = maybeCallOnLoadYieldArg.bind.variable;
-            }
+            auto &blockArgs = rubyBlockArgs[b->rubyBlockId];
+            blockArgs.resize(expectedSend->link->argFlags.size(), cfg::LocalRef::noVariable());
+            collectRubyBlockArgs(cfg, b->bexit.thenb, blockArgs);
         } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::exceptionValue()) {
             if (exceptionHandlingBlockHeaders[b->id] == 0) {
                 continue;
@@ -739,21 +858,26 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
 
             // the relative block ids of blocks that are involved in the translation of an exception handling block.
             auto bodyBlockId = bodyBlock->rubyBlockId;
-            auto handlersBlockId = bodyBlockId + 1;
-            auto ensureBlockId = bodyBlockId + 2;
-            auto elseBlockId = bodyBlockId + 3;
+            auto handlersBlockId = bodyBlockId + cfg::CFG::HANDLERS_BLOCK_OFFSET;
+            auto ensureBlockId = bodyBlockId + cfg::CFG::ENSURE_BLOCK_OFFSET;
+            auto elseBlockId = bodyBlockId + cfg::CFG::ELSE_BLOCK_OFFSET;
 
             userEntryBlockByFunction[bodyBlockId] = llvmBlocks[bodyBlock->id];
             userEntryBlockByFunction[handlersBlockId] = llvmBlocks[handlersBlock->id];
 
-            if (auto *elseBlock = CFGHelpers::findRubyBlockEntry(cfg, elseBlockId)) {
+            if (auto *elseBlock = CFGHelpers::findRegionEntry(cfg, elseBlockId)) {
                 userEntryBlockByFunction[elseBlockId] = llvmBlocks[elseBlock->id];
             }
 
-            if (auto *ensureBlock = CFGHelpers::findRubyBlockEntry(cfg, ensureBlockId)) {
+            if (auto *ensureBlock = CFGHelpers::findRegionEntry(cfg, ensureBlockId)) {
                 userEntryBlockByFunction[ensureBlockId] = llvmBlocks[ensureBlock->id];
             }
         } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::argPresent()) {
+            // TODO(trevor) we don't currently handle argPresent decisions in ruby-Argblocks, only for the method entry.
+            if (b->rubyBlockId > 0) {
+                continue;
+            }
+
             // the ArgPresent instruction is always the last one generated in the block
             int argId = -1;
             auto &bind = b->exprs.back();
@@ -805,8 +929,8 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(blockExits),
         move(blockScopes),
         move(blockUsesBreak),
-        move(throwReturnFlagByBlock),
-        move(returnFromBlockState),
+        hasReturnAcrossBlock,
+        move(blockLocationNames),
     };
 
     auto [llvmVariables, selfVariables] = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation);

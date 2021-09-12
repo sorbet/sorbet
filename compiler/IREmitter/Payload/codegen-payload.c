@@ -68,8 +68,11 @@ SORBET_ALIVE(void, sorbet_stopInDebugger, (void));
 SORBET_ALIVE(void, sorbet_cast_failure,
              (VALUE value, char *castMethod, char *type) __attribute__((__cold__, __noreturn__)));
 SORBET_ALIVE(void, sorbet_raiseArity, (int argc, int min, int max) __attribute__((__noreturn__)));
+SORBET_ALIVE(void, sorbet_raiseMissingKeywords, (VALUE missing) __attribute__((__noreturn__)));
 SORBET_ALIVE(void, sorbet_raiseExtraKeywords, (VALUE hash) __attribute__((__noreturn__)));
 SORBET_ALIVE(VALUE, sorbet_t_absurd, (VALUE val) __attribute__((__cold__)));
+
+SORBET_ALIVE(VALUE, sorbet_addMissingKWArg, (VALUE missing, VALUE sym));
 
 SORBET_ALIVE(rb_iseq_t *, sorbet_allocateRubyStackFrame,
              (VALUE funcName, ID func, VALUE filename, VALUE realpath, rb_iseq_t *parent, int iseqType, int startLine,
@@ -151,6 +154,37 @@ SORBET_ALIVE(void, sorbet_vm_register_sig,
              (VALUE isSelf, VALUE method, VALUE self, VALUE arg, rb_block_call_func_t block));
 SORBET_ALIVE(void, sorbet_vm_define_method,
              (VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq, bool isSelf));
+
+SORBET_ALIVE(VALUE, sorbet_vm_fstring_new, (const char *ptr, long len));
+
+extern void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) __attribute__((noreturn));
+KEEP_ALIVE(sorbet_throwReturn);
+
+struct rfb_status {
+    // The return value from the function.
+    VALUE return_value;
+
+    // Whether the value was returned via return-from-block.
+    bool was_thrown;
+};
+SORBET_ALIVE(struct rfb_status, sorbet_vm_return_from_block_wrapper, (int argc, VALUE *argv, VALUE recv, rb_control_frame_t *cfp, rb_sorbet_func_t wrapped));
+SORBET_ALIVE(VALUE, sorbet_run_exception_handling,
+             (rb_execution_context_t *ec,
+              ExceptionFFIType body,
+              VALUE ** volatile pc,
+              // The locals offset for the body.
+              VALUE methodClosure,
+              rb_control_frame_t * volatile cfp,
+              // May be nullptr.
+              ExceptionFFIType handlers,
+              // May be nullptr.
+              ExceptionFFIType elseClause,
+              // May be nullptr.
+              ExceptionFFIType ensureClause,
+              // The special value indicating that we need to retry.
+              VALUE retrySingleton,
+              long exceptionValueIndex,
+              long exceptionValueLevel));
 
 // The next several functions exist to convert Ruby definitions into LLVM IR, and
 // are always inlined as a consequence.
@@ -418,6 +452,10 @@ void sorbet_defineIvarMethodSingleton(VALUE klass, const char *name) {
     sorbet_defineIvarMethod(rb_singleton_class(klass), name);
 }
 
+VALUE sorbet_singleton_class(VALUE klass) {
+    return rb_singleton_class(klass);
+}
+
 // ****
 // ****                       Variables
 // ****
@@ -443,6 +481,11 @@ void sorbet_instanceVariableSet(VALUE receiver, ID name, VALUE newValue, struct 
 }
 
 SORBET_INLINE
+VALUE sorbet_instanceVariableDefined(VALUE recv, VALUE name) {
+    return rb_ivar_defined(recv, SYM2ID(name));
+}
+
+SORBET_INLINE
 VALUE sorbet_classVariableGet(VALUE _class, ID name) {
     return rb_cvar_get(_class, name);
 }
@@ -450,6 +493,11 @@ VALUE sorbet_classVariableGet(VALUE _class, ID name) {
 SORBET_INLINE
 void sorbet_classVariableSet(VALUE _class, ID name, VALUE newValue) {
     rb_cvar_set(_class, name, newValue);
+}
+
+SORBET_INLINE
+VALUE sorbet_classVariableDefined(VALUE klass, VALUE name) {
+    return rb_cvar_defined(klass, SYM2ID(name));
 }
 
 // ****
@@ -630,7 +678,7 @@ VALUE sorbet_cPtrToRubyString(const char *ptr, long length) {
 
 SORBET_INLINE
 VALUE sorbet_cPtrToRubyStringFrozen(const char *ptr, long length) {
-    VALUE ret = rb_fstring_new(ptr, length);
+    VALUE ret = sorbet_vm_fstring_new(ptr, length);
     rb_gc_register_mark_object(ret);
     return ret;
 }
@@ -689,11 +737,13 @@ VALUE sorbet_boolToRuby(_Bool b) {
 }
 
 // TODO: add many from https://github.com/ruby/ruby/blob/ruby_2_6/include/ruby/intern.h#L55
+SORBET_INLINE
 VALUE sorbet_T_unsafe(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     return argv[0];
 }
 
+SORBET_INLINE
 VALUE sorbet_T_must(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     if (UNLIKELY(argv[0] == Qnil)) {
@@ -1694,24 +1744,45 @@ VALUE sorbet_selfNew(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk
 // ****                       Calls
 // ****
 
+// When no double-splat is present, only lookup entries in the keyword argument hash, don't delete them.
 SORBET_INLINE
 VALUE sorbet_getKWArg(VALUE maybeHash, VALUE key) {
     if (maybeHash == RUBY_Qundef) {
         return RUBY_Qundef;
     }
 
-    // TODO: ruby seems to do something smarter here:
-    //  https://github.com/ruby/ruby/blob/5aa0e6bee916f454ecf886252e1b025d824f7bd8/class.c#L1901
-    //
+    return rb_hash_lookup2(maybeHash, key, RUBY_Qundef);
+}
+
+// When building up a double-splat, reuse the original hash for the double-splat arg by deleting the entries that we
+// parse out of it.
+SORBET_INLINE
+VALUE sorbet_removeKWArg(VALUE maybeHash, VALUE key) {
+    if (maybeHash == RUBY_Qundef) {
+        return RUBY_Qundef;
+    }
+
+
     return rb_hash_delete_entry(maybeHash, key);
 }
 
 SORBET_INLINE
-VALUE sorbet_assertNoExtraKWArg(VALUE maybeHash) {
+void sorbet_assertAllRequiredKWArgs(VALUE missing) {
+    if (LIKELY(missing == RUBY_Qundef)) {
+        return;
+    }
+
+    sorbet_raiseMissingKeywords(missing);
+}
+
+SORBET_INLINE
+VALUE sorbet_assertNoExtraKWArg(VALUE maybeHash, int requiredKwargs, int optionalParsed) {
     if (maybeHash == RUBY_Qundef) {
         return RUBY_Qundef;
     }
-    if (RHASH_EMPTY_P(maybeHash)) {
+
+    int size = rb_hash_size_num(maybeHash);
+    if (LIKELY((size - requiredKwargs) == optionalParsed)) {
         return RUBY_Qundef;
     }
 
@@ -2201,63 +2272,6 @@ VALUE sorbet_getTRetry() {
     return sorbet_getConstant(retry, sizeof(retry));
 }
 
-extern void rb_set_errinfo(VALUE);
-
-struct ExceptionClosure {
-    ExceptionFFIType body;
-    VALUE **pc;
-    VALUE methodClosure;
-    rb_control_frame_t *cfp;
-    VALUE *returnValue;
-};
-
-static VALUE sorbet_applyExceptionClosure(VALUE arg) {
-    struct ExceptionClosure *closure = (struct ExceptionClosure *)arg;
-    VALUE res = closure->body(closure->pc, closure->methodClosure, closure->cfp);
-    if (res != sorbet_rubyUndef()) {
-        *closure->returnValue = res;
-    }
-    return sorbet_rubyUndef();
-}
-
-static VALUE sorbet_rescueStoreException(VALUE exceptionValuePtr, VALUE errinfo) {
-    VALUE *exceptionValue = (VALUE *)exceptionValuePtr;
-
-    // store the exception
-    *exceptionValue = errinfo;
-
-    return sorbet_rubyUndef();
-}
-
-// Run a function with a closure, and populate an exceptionValue pointer if an exception is raised.
-VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE methodClosure, rb_control_frame_t *cfp,
-                 VALUE exceptionContext, VALUE *exceptionValue) {
-    VALUE returnValue = sorbet_rubyUndef();
-
-    struct ExceptionClosure closure;
-    closure.body = body;
-    closure.pc = pc;
-    closure.methodClosure = methodClosure;
-    closure.cfp = cfp;
-    closure.returnValue = &returnValue;
-
-    *exceptionValue = RUBY_Qnil;
-
-    // Restore the exception context. When running the body of a begin/end the
-    // value of exceptionContext is nil, indicating that no exception is being
-    // handled by this function. However, when the rescue function is being run,
-    // the exception value will be non-nil, ensuring that the exception state
-    // is restored in the context of the rescue function.
-    if (exceptionContext != RUBY_Qnil) {
-        rb_set_errinfo(exceptionContext);
-    }
-
-    rb_rescue2(sorbet_applyExceptionClosure, (VALUE)(&closure), sorbet_rescueStoreException, (VALUE)exceptionValue,
-               rb_eException, 0);
-
-    return returnValue;
-}
-
 __attribute__((__noreturn__)) VALUE sorbet_block_break(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
                                                        BlockFFIType blk, VALUE closure) {
     rb_iter_break_value(argv[0]);
@@ -2300,118 +2314,6 @@ void sorbet_ensureSorbetRuby(int compile_time_is_release_build, char *compile_ti
                  runtime_build_scm_revision, compile_time_build_scm_revision);
     }
 }
-
-extern VALUE sorbet_vm_throw(const rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, rb_num_t throw_state,
-                             VALUE throwobj);
-extern void sorbet_ec_jump_tag(rb_execution_context_t *ec, enum ruby_tag_type tt);
-
-SORBET_INLINE
-void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) {
-    VALUE v = sorbet_vm_throw(ec, ec->cfp, TAG_RETURN, retval);
-
-    ec->errinfo = v;
-    sorbet_ec_jump_tag(ec, ec->tag->state);
-}
-
-// This is invoked at the beginning of a method's body, and is analogous to EC_PUSH_TAG + EC_EXEC_TAG
-// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L130-L135
-// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L181-L182
-//
-// Note that we're calling `setjmp` here, but we're returning from this function and
-// expecting `longjmp`'ing to `tag->buf` to still work correctly.  We can do this
-// because this function will be inlined, meaning that `tag->buf` will reflect the
-// state of this function's caller and `tag->buf` will be valid for the lifetime of
-// this function's caller.
-//
-// The `volatile` here is a bit gross.  If you look at `rb_ec_tag_state` and its
-// accompanying logic, referenced below, you'll notice that it contains some
-// gross hacks to force clang to stick `ec` in memory (e.g. VAR_FROM_MEMORY:
-//
-// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L146-L158
-//
-// before accessing `ec` and that its `ec` argument is `rb_execution_context_t *ec`.
-//
-// Without those hacks, clang will assume that wherever `ec` got allocated to is where
-// it should be accessed on both sides of the `if`, which is not necessarily valid in
-// the case of `longjmp`'ing back to the `if`.  (clang would presumably get this
-// right if the default implementation of RUBY_SETJMP was the C library's `setjmp`,
-// which gets annotated as "returns_twice", but the default implementation is
-// `__builtin_setjmp`, which is not so annotated.)  So the point of the hacks is
-// to force `ec` to (somehow) be allocated to memory.
-//
-// We need a similar hack, but can be slightly more elegant because we cache the
-// execution context across a tag-guarded region.  A pointer to that cache is
-// passed in here and by making the pointer volatile, we force clang to reload
-// the execution context pointer every time the execution context is needed,
-// thus ensuring that the execution context lives in memory always.
-SORBET_INLINE
-enum ruby_tag_type sorbet_initializeTag(volatile rb_execution_context_t **ec, struct rb_vm_tag *tag) {
-    // inlined from EC_PUSH_TAG
-    tag->state = TAG_NONE;
-    tag->tag = Qundef;
-    tag->prev = (*ec)->tag;
-
-    if (RUBY_SETJMP(tag->buf) != 0) {
-        // See rb_ec_tag_state:
-        // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L160-L167
-        enum ruby_tag_type *statePtr = &(*ec)->tag->state;
-        enum ruby_tag_type state = *statePtr;
-        *statePtr = TAG_NONE;
-        return state;
-    } else {
-        (*ec)->tag = tag;
-        return TAG_NONE;
-    }
-}
-KEEP_ALIVE(sorbet_initializeTag)
-
-// Used by method and static init functions, for setjmp handling for returns from block statements.
-//
-// This is analogous to what comes after return from EC_EXEC_TAG (whether it's the initial setjmp
-// or a longjmp back to it). For the initial setjmp, we do nothing, indicating that tag setup is
-// complete and the function should continue as normal. For a longjmp back, we will do subsequent
-// processing: inspect the throw data to see if it's a return statement meant for us, pop the tag,
-// then either re-throw (if the return wasn't for us) or return the (non-Qundef) return value to
-// the caller, which should return the return value (applying a type test on the way out if
-// appropriate).
-SORBET_INLINE
-VALUE sorbet_processThrowReturnSetJmp(rb_execution_context_t *ec, enum ruby_tag_type state, rb_control_frame_t *cfp, struct rb_vm_tag *tag) {
-    VALUE retval = Qundef;
-
-    if (state != TAG_NONE) {
-        const struct vm_throw_data *const err = (struct vm_throw_data *)ec->errinfo;
-        const rb_control_frame_t *const escape_cfp = err->catch_frame;
-
-        if (state == TAG_RETURN && cfp == escape_cfp) {
-            rb_vm_rewind_cfp(ec, cfp);
-            state = TAG_NONE;
-
-            ec->errinfo = Qnil;
-
-            retval = err->throw_obj;
-        }
-
-        // See EC_POP_TAG:
-        // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L137-L139
-        ec->tag = tag->prev;
-
-        if (state != TAG_NONE) {
-            // inlined from rb_ec_tag_jump
-            ec->tag->state = state;
-            RUBY_LONGJMP(ec->tag->buf, 1);
-        }
-    }
-
-    return retval;
-}
-KEEP_ALIVE(sorbet_processThrowReturnSetJmp)
-
-SORBET_INLINE
-void sorbet_teardownTagForThrowReturn(rb_execution_context_t *ec, struct rb_vm_tag *tag) {
-    // inlined from EC_POP_TAG
-    ec->tag = tag->prev;
-}
-KEEP_ALIVE(sorbet_teardownTagForThrowReturn)
 
 // ****
 // ****                       sorbet_ruby version information fallback

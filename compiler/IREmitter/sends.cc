@@ -266,8 +266,9 @@ llvm::Value *getSendArgsPointer(CompilerState &cs, llvm::IRBuilderBase &build, l
 
 } // namespace
 
-IREmitterHelpers::SendArgInfo::SendArgInfo(llvm::Value *argc, llvm::Value *argv, llvm::Value *kw_splat)
-    : argc{argc}, argv{argv}, kw_splat{kw_splat} {}
+IREmitterHelpers::SendArgInfo::SendArgInfo(llvm::Value *argc, llvm::Value *argv, llvm::Value *kw_splat,
+                                           vector<llvm::Value *> argValues)
+    : argc{argc}, argv{argv}, kw_splat{kw_splat}, argValues(std::move(argValues)) {}
 
 IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallContext &mcctx, const std::size_t offset) {
     auto &cs = mcctx.cs;
@@ -285,6 +286,9 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
 
     ENFORCE(offset <= posEnd, "Invalid positional offset given to fillSendArgArray");
 
+    // keep track of the intermediate argument values that we've seen
+    vector<llvm::Value *> argValues;
+
     // compute the number of actual args that will be filled in
     auto numPosArgs = posEnd - offset;
     auto numKwArgs = kwEnd - posEnd;
@@ -300,7 +304,8 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
 
     auto *argc = llvm::ConstantInt::get(cs, llvm::APInt(32, length, true));
     if (length == 0) {
-        return SendArgInfo{argc, llvm::Constant::getNullValue(llvm::Type::getInt64PtrTy(cs)), kw_splat};
+        return SendArgInfo{argc, llvm::Constant::getNullValue(llvm::Type::getInt64PtrTy(cs)), kw_splat,
+                           std::move(argValues)};
     }
 
     auto *sendArgs = irctx.sendArgArrayByBlock[rubyBlockId];
@@ -316,6 +321,7 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
             auto it = args.begin() + posEnd;
             for (auto argId = 0; argId < numKwArgs; ++argId, ++it) {
                 auto var = Payload::varGet(cs, it->variable, builder, irctx, rubyBlockId);
+                argValues.emplace_back(var);
                 setSendArgsEntry(cs, builder, sendArgs, argId, var);
             }
 
@@ -327,6 +333,7 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
             // merge in the splat if it's present (mcctx.send->args.back())
             if (hasKwSplat) {
                 auto *splat = Payload::varGet(cs, args.back().variable, builder, irctx, rubyBlockId);
+                argValues.emplace_back(splat);
                 builder.CreateCall(cs.getFunction("sorbet_hashUpdate"), {kwHash, splat});
             }
         }
@@ -340,11 +347,12 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
         auto it = args.begin() + offset;
         for (; argId < numPosArgs; argId += 1, ++it) {
             auto var = Payload::varGet(cs, it->variable, builder, irctx, rubyBlockId);
+            argValues.emplace_back(var);
             setSendArgsEntry(cs, builder, sendArgs, argId, var);
         }
     }
 
-    return SendArgInfo{argc, getSendArgsPointer(cs, builder, sendArgs), kw_splat};
+    return SendArgInfo{argc, getSendArgsPointer(cs, builder, sendArgs), kw_splat, std::move(argValues)};
 }
 
 IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallContext &mcctx) {
@@ -449,23 +457,36 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     auto &irctx = mcctx.irctx;
     auto rubyBlockId = mcctx.rubyBlockId;
 
+    // If we get here with <Magic>, then something has gone wrong.
+    // TODO(froydnj): We want to do the same thing with Sorbet::Private::Static,
+    // but we'd need to do some surgery on either a) making those methods not
+    // be emitted via symbol-based intrinsics or b) making it possible for
+    // (some) symbol-based intrinsics to bypass typechecks completely.
+    if (auto *at = core::cast_type<core::AppliedType>(send->recv.type)) {
+        if (at->klass == core::Symbols::MagicSingleton()) {
+            failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
+                            "No runtime implemention for <Magic> method exists");
+        }
+    }
+
     // TODO(perf): call
     // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
     // to get inline caching.
     // before this, perf will not be good
     if (send->fun == core::Names::super()) {
         // fill in args
-        auto [argc, argv, kw_splat] = IREmitterHelpers::fillSendArgArray(mcctx);
+        auto args = IREmitterHelpers::fillSendArgArray(mcctx);
 
         if (auto *blk = mcctx.blkAsFunction()) {
             // blocks require a locals offset parameter
             llvm::Value *localsOffset = Payload::buildLocalsOffset(cs);
             ENFORCE(localsOffset != nullptr);
             return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
-                                      {argc, argv, kw_splat, blk, localsOffset}, "rawSendResult");
+                                      {args.argc, args.argv, args.kw_splat, blk, localsOffset}, "rawSendResult");
         }
 
-        return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {argc, argv, kw_splat}, "rawSendResult");
+        return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {args.argc, args.argv, args.kw_splat},
+                                  "rawSendResult");
     }
 
     // Try to call blocks directly without reifying the block into a proc.
@@ -473,9 +494,10 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
         IREmitterHelpers::hasBlockArgument(cs, rubyBlockId, irctx.cfg.symbol, irctx)) {
         if (canCallBlockViaRubyVM(mcctx)) {
             // fill in args
-            auto [argc, argv, kw_splat] = IREmitterHelpers::fillSendArgArray(mcctx);
+            auto args = IREmitterHelpers::fillSendArgArray(mcctx);
 
-            return builder.CreateCall(cs.getFunction("sorbet_callBlock"), {argc, argv, kw_splat}, "rawBlockSendResult");
+            return builder.CreateCall(cs.getFunction("sorbet_callBlock"), {args.argc, args.argv, args.kw_splat},
+                                      "rawBlockSendResult");
         }
     }
 

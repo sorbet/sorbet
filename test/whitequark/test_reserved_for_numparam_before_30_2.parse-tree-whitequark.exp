@@ -1,4 +1,0 @@
-s(:block,
-  s(:send, nil, :proc),
-  s(:args,
-    s(:arg, :_3)), nil)

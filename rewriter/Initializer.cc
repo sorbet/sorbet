@@ -1,7 +1,9 @@
 #include "rewriter/Initializer.h"
+#include "absl/strings/str_split.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/core.h"
+#include "core/errors/rewriter.h"
 #include "rewriter/Util.h"
 
 using namespace std;
@@ -57,11 +59,67 @@ const ast::Send *findParams(const ast::Send *send) {
     return send;
 }
 
+// this function checks if the signature of the initialize method is using returns(Something)
+// instead of void and provides an auto-correct option
+void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
+    auto originalSend = send->deepCopy();
+    string statementAfterReturns = "";
+
+    // try to find the invocation to returns. Save the source code of the invocation
+    // immediately after returns() so that we can have the exact length it occupies
+    while (send && send->fun != core::Names::returns()) {
+        statementAfterReturns = send->fun.toString(ctx);
+        send = ast::cast_tree<ast::Send>(send->recv);
+    }
+
+    // if the returns exists, then add an error an suggest the auto-correct. We need to account for things
+    // being invoked after returns too. E.g.: sig { returns(Foo).on_failure(...) }
+    if (send != nullptr) {
+        if (auto e = ctx.beginError(originalSend.loc(), core::errors::Rewriter::InitializeReturnType)) {
+            e.setHeader("The {} method should always return {}", "initialize", "void");
+
+            auto loc = core::Loc(ctx.file, originalSend.loc());
+            string original = loc.source(ctx).value();
+            unsigned long returnsStart = original.find("returns");
+            unsigned long returnsLength, afterReturnsPosition;
+            string replacement;
+
+            // If there are no statements after returns(), we can use the length of the block to find the length
+            // we need to replace. If there are statements after it, we need to find the exact length using the next
+            // statement and remember to add a dot or else it will produce invalid code
+            returnsLength = original.length() - returnsStart + 1;
+
+            if (statementAfterReturns.empty()) {
+                replacement = original.replace(returnsStart, returnsLength, "void");
+            } else {
+                afterReturnsPosition = original.find(statementAfterReturns, returnsStart);
+
+                // If there is a line break between returns() and the next statement, change the returns() entry and
+                // re-join the string with the line breaks. Otherwise, everything is on the same line and we can replace
+                // directly without worrying about line breaks
+                vector<string> lines = absl::StrSplit(original.substr(returnsStart, afterReturnsPosition), "\n");
+
+                if (lines.size() > 1) {
+                    lines[0] = "void";
+                    replacement = original.replace(returnsStart, returnsLength,
+                                                   fmt::format("{}", fmt::join(lines.begin(), lines.end(), "\n")));
+                } else {
+                    returnsLength = original.find(statementAfterReturns, returnsStart) - returnsStart;
+                    replacement = original.replace(returnsStart, returnsLength, "void.");
+                }
+            }
+
+            e.addAutocorrect(core::AutocorrectSuggestion{fmt::format("Replace `{}` with `{}`", original, replacement),
+                                                         {core::AutocorrectSuggestion::Edit{loc, replacement}}});
+        }
+    }
+}
+
 } // namespace
 
 void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::ExpressionPtr *prevStat) {
     // this should only run in an `initialize` that has a sig
-    if (methodDef->name != core::Names::initialize()) {
+    if (methodDef->name != core::Names::initialize() || methodDef->flags.isSelfMethod) {
         return;
     }
     if (prevStat == nullptr) {
@@ -77,8 +135,11 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
         return;
     }
 
+    auto *bodyBlock = ast::cast_tree<ast::Send>(block->body);
+    checkSigReturnType(ctx, bodyBlock);
+
     // walk through, find the `params()` invocation, and get its hash
-    auto *params = findParams(ast::cast_tree<ast::Send>(block->body));
+    auto *params = findParams(bodyBlock);
     if (params == nullptr) {
         return;
     }

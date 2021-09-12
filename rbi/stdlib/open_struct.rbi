@@ -237,7 +237,7 @@ class OpenStruct
     params(
       hash: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
   def initialize(hash=T.unsafe(nil)); end
 

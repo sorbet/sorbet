@@ -5,11 +5,6 @@
 #
 # Use them at your own risk.
 
-module T::Private
-  sig {params(value: T.untyped, type: T.untyped).returns(BasicObject)}
-  def self.check_type_recursive!(value, type); end
-end
-
 module T::Private::Types
 end
 
@@ -22,4 +17,12 @@ end
 
 module T::Private::Methods::CallValidation
   def self.disable_fast_path; end
+end
+
+module T::Private::Compiler
+  sig {returns(T::Boolean)}
+  def self.running_compiled?; end
+
+  sig {returns(T.nilable(String))}
+  def self.compiler_version; end
 end

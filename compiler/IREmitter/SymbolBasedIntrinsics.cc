@@ -177,7 +177,7 @@ public:
         auto *offset = Payload::buildLocalsOffset(cs);
 
         // kwsplat is used by the vm only, and we don't use the vm's api for calling an intrinsic directly.
-        auto [argc, argv, _kwSplat] = IREmitterHelpers::fillSendArgArray(mcctx);
+        auto args = IREmitterHelpers::fillSendArgArray(mcctx);
 
         llvm::Value *res{nullptr};
         if (auto *blk = mcctx.blkAsFunction()) {
@@ -192,7 +192,8 @@ public:
             bool usesBreak = mcctx.irctx.blockUsesBreak[mcctx.blk.value()];
             if (usesBreak) {
                 res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock"),
-                                         {forwarder, recv, id, argc, argv, blk, offset}, "rawSendResultWithBlock");
+                                         {forwarder, recv, id, args.argc, args.argv, blk, offset},
+                                         "rawSendResultWithBlock");
             } else {
                 // Since the block doesn't use break we can make two optimizations:
                 //
@@ -201,12 +202,14 @@ public:
                 // 2. Emit a type assertion on the result of the function, as we know that there won't be non-local
                 //    control flow based on the use of `break` that could change the type of the returned value
                 res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock_noBreak"),
-                                         {forwarder, recv, id, argc, argv, blk, offset}, "rawSendResultWithBlock");
+                                         {forwarder, recv, id, args.argc, args.argv, blk, offset},
+                                         "rawSendResultWithBlock");
                 cMethodWithBlock->assertResultType(cs, builder, res);
             }
         } else {
             auto *blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
-            res = builder.CreateCall(cMethod.getFunction(cs), {recv, id, argc, argv, blkPtr, offset}, "rawSendResult");
+            res = builder.CreateCall(cMethod.getFunction(cs), {recv, id, args.argc, args.argv, blkPtr, offset},
+                                     "rawSendResult");
             cMethod.assertResultType(cs, builder, res);
         }
 
@@ -425,7 +428,22 @@ public:
 
         // First arg: define method on what
         auto ownerSym = typeToSym(cs, send->args[0].type);
-        auto klass = Payload::getRubyConstant(cs, ownerSym, builder);
+        llvm::Value *klass;
+        // If we're defining the method on `T.class_of(T.class_of(X))`, we need to
+        // programatically access the class, rather than letting getRubyConstant do
+        // that work for us.
+        if (ownerSym.data(cs)->isSingletonClass(cs)) {
+            auto attachedClass = ownerSym.data(cs)->attachedClass(cs);
+            ENFORCE(attachedClass.exists());
+            if (attachedClass.data(cs)->isSingletonClass(cs)) {
+                klass = Payload::getRubyConstant(cs, attachedClass, builder);
+                klass = builder.CreateCall(cs.getFunction("sorbet_singleton_class"), {klass}, "singletonClass");
+            } else {
+                klass = Payload::getRubyConstant(cs, ownerSym, builder);
+            }
+        } else {
+            klass = Payload::getRubyConstant(cs, ownerSym, builder);
+        }
 
         // Second arg: name of method to define
         auto litName = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
@@ -705,6 +723,39 @@ public:
     };
 } TEnum_abstract;
 
+class TPrivateCompiler_runningCompiled_p : public SymbolBasedIntrinsicMethod {
+public:
+    TPrivateCompiler_runningCompiled_p() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &builder = builderCast(mcctx.build);
+        return Payload::rubyTrue(mcctx.cs, builder);
+    };
+
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
+        return {core::Symbols::T_Private_CompilerSingleton()};
+    };
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(const core::GlobalState &gs) const override {
+        return {core::Names::runningCompiled_p()};
+    };
+} TPrivateCompiler_runningCompiled_p;
+
+class TPrivateCompiler_compilerVersion : public SymbolBasedIntrinsicMethod {
+public:
+    TPrivateCompiler_compilerVersion() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &builder = builderCast(mcctx.build);
+        auto frozen = true;
+        return Payload::cPtrToRubyString(mcctx.cs, builder, sorbet_full_version_string, frozen);
+    };
+
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
+        return {core::Symbols::T_Private_CompilerSingleton()};
+    };
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(const core::GlobalState &gs) const override {
+        return {core::Names::compilerVersion()};
+    };
+} TPrivateCompiler_compilerVersion;
+
 class CallCMethodSingleton : public CallCMethod {
 public:
     CallCMethodSingleton(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod)
@@ -802,6 +853,8 @@ vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs(const core::Globa
         &Regexp_new,
         &TEnum_new,
         &TEnum_abstract,
+        &TPrivateCompiler_runningCompiled_p,
+        &TPrivateCompiler_compilerVersion,
     };
     for (auto &method : knownCMethodsInstance) {
         if (debug_mode) {

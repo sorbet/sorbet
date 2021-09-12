@@ -26,7 +26,9 @@ module Opus::Types::Test
       klass = Class.new(SuccessBase) do
         extend T::Sig
         sig {override.params(pos: SubFoo1, kw: SubFoo2).returns(BaseFoo3)}
-        def foo(pos, kw:); BaseFoo3.new; end
+        def foo(pos, kw:)
+          BaseFoo3.new
+        end
       end
       klass.new.foo(SubFoo1.new, kw: SubFoo2.new)
     end
@@ -35,7 +37,9 @@ module Opus::Types::Test
       klass = Class.new(SuccessBase) do
         extend T::Sig
         sig {override.params(pos: BaseFoo1, kw: SubFoo2).returns(BaseFoo3)}
-        def foo(pos, kw:); BaseFoo3.new; end
+        def foo(pos, kw:)
+          BaseFoo3.new
+        end
       end
       klass.new.foo(SubFoo1.new, kw: SubFoo2.new)
     end
@@ -44,7 +48,9 @@ module Opus::Types::Test
       klass = Class.new(SuccessBase) do
         extend T::Sig
         sig {override.params(pos: SubFoo1, kw: BaseFoo2).returns(BaseFoo3)}
-        def foo(pos, kw:); BaseFoo3.new; end
+        def foo(pos, kw:)
+          BaseFoo3.new
+        end
       end
       klass.new.foo(SubFoo1.new, kw: SubFoo2.new)
     end
@@ -53,7 +59,9 @@ module Opus::Types::Test
       klass = Class.new(SuccessBase) do
         extend T::Sig
         sig {override.params(pos: SubFoo1, kw: SubFoo2).returns(SubFoo3)}
-        def foo(pos, kw:); SubFoo3.new; end
+        def foo(pos, kw:)
+          SubFoo3.new
+        end
       end
       klass.new.foo(SubFoo1.new, kw: SubFoo2.new)
     end

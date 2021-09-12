@@ -74,4 +74,3 @@ module T::Props
     end
   end
 end
-

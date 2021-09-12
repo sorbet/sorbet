@@ -30,8 +30,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C PropHelpers2>.new().token=(nil)
       <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers2>.new().created())
       <emptyTree>::<C PropHelpers2>.new().created=(0.000000)
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C ShardingProp>.new().merchant())
-      <emptyTree>::<C ShardingProp>.new().merchant=("hi")
       <emptyTree>::<C T>.reveal_type(<emptyTree>::<C EncryptedProp>.new().foo())
       <emptyTree>::<C T>.reveal_type(<emptyTree>::<C EncryptedProp>.new().encrypted_foo())
       <emptyTree>::<C EncryptedProp>.new().foo=("hello")
@@ -742,31 +740,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.created_prop(:immutable, true, :without_accessors, true)
 
     ::Sorbet::Private::Static.keep_def(<self>, :created, :normal)
-  end
-
-  class <emptyTree>::<C ShardingProp><<C <todo sym>>> < (::<todo sym>)
-    def self.merchant_prop<<todo method>>(opts = {}, &<blk>)
-      <emptyTree>
-    end
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.returns(::String)
-    end
-
-    def merchant<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@merchant)
-        <self>.class().decorator().prop_get_logic(<self>, :merchant, arg2)
-      end
-    end
-
-    <self>.include(<emptyTree>::<C T>::<C Props>)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :merchant_prop, :normal)
-
-    <self>.merchant_prop(:without_accessors, true)
-
-    ::Sorbet::Private::Static.keep_def(<self>, :merchant, :normal)
   end
 
   class <emptyTree>::<C Chalk>::<C ODM>::<C Document><<C <todo sym>>> < (::<todo sym>)

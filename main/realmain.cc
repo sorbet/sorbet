@@ -4,7 +4,6 @@
 #define FULL_BUILD_ONLY(X) X;
 #include "core/proto/proto.h" // has to be included first as it violates our poisons
 // intentional comment to stop from reformatting
-#include "absl/debugging/symbolize.h"
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
@@ -358,7 +357,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
 
 int realmain(int argc, char *argv[]) {
 #ifndef SORBET_REALMAIN_MIN
-    absl::InitializeSymbolizer(argv[0]);
+    initializeSymbolizer(argv[0]);
 #endif
     returnCode = 0;
     logger = make_shared<spd::logger>("console", stderrColorSink);

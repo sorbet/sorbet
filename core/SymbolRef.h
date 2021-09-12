@@ -814,44 +814,60 @@ public:
         return ClassOrModuleRef::fromRaw(78);
     }
 
-    static ClassOrModuleRef PackageSpec() {
+    static ClassOrModuleRef PackageTests() {
         return ClassOrModuleRef::fromRaw(79);
     }
 
-    static ClassOrModuleRef PackageSpecSingleton() {
+    static ClassOrModuleRef PackageSpec() {
         return ClassOrModuleRef::fromRaw(80);
+    }
+
+    static ClassOrModuleRef PackageSpecSingleton() {
+        return ClassOrModuleRef::fromRaw(81);
     }
 
     static MethodRef PackageSpec_import() {
         return MethodRef::fromRaw(6);
     }
 
-    static MethodRef PackageSpec_export() {
+    static MethodRef PackageSpec_test_import() {
         return MethodRef::fromRaw(7);
     }
 
-    static ClassOrModuleRef Encoding() {
-        return ClassOrModuleRef::fromRaw(81);
-    }
-
-    static ClassOrModuleRef Thread() {
-        return ClassOrModuleRef::fromRaw(82);
-    }
-
-    static MethodRef Class_new() {
+    static MethodRef PackageSpec_export() {
         return MethodRef::fromRaw(8);
     }
 
-    static MethodRef todoMethod() {
-        return MethodRef::fromRaw(9);
+    static ClassOrModuleRef Encoding() {
+        return ClassOrModuleRef::fromRaw(82);
     }
 
-    static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
+    static ClassOrModuleRef Thread() {
         return ClassOrModuleRef::fromRaw(83);
     }
 
-    static ClassOrModuleRef Sorbet_Private_Static_ResolvedSigSingleton() {
+    static MethodRef Class_new() {
+        return MethodRef::fromRaw(9);
+    }
+
+    static MethodRef todoMethod() {
+        return MethodRef::fromRaw(10);
+    }
+
+    static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
         return ClassOrModuleRef::fromRaw(84);
+    }
+
+    static ClassOrModuleRef Sorbet_Private_Static_ResolvedSigSingleton() {
+        return ClassOrModuleRef::fromRaw(85);
+    }
+
+    static ClassOrModuleRef T_Private_Compiler() {
+        return ClassOrModuleRef::fromRaw(86);
+    }
+
+    static ClassOrModuleRef T_Private_CompilerSingleton() {
+        return ClassOrModuleRef::fromRaw(87);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
@@ -876,11 +892,11 @@ public:
         return ClassOrModuleRef::fromRaw(MAX_SYNTHETIC_CLASS_SYMBOLS - 1);
     }
 
-    static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 200;
-    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 39;
+    static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 202;
+    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 42;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 3;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
-    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 96;
+    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 99;
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {

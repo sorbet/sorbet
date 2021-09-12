@@ -771,7 +771,7 @@ class Psych::Emitter < Psych::Handler
   #
   # See
   # [`Psych::Handler#alias`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-alias)
-  def alias(_); end
+  def alias(arg0); end
 
   # Get the output style, canonical or not.
   def canonical(); end
@@ -784,7 +784,7 @@ class Psych::Emitter < Psych::Handler
   #
   # See
   # [`Psych::Handler#end_document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-end_document)
-  def end_document(_); end
+  def end_document(arg0); end
 
   # Emit the end of a mapping.
   #
@@ -811,7 +811,7 @@ class Psych::Emitter < Psych::Handler
   # to `level`. The level must be less than 10 and greater than 1.
   def indentation=(indentation); end
 
-  def initialize(*_); end
+  def initialize(*arg0); end
 
   # Get the preferred line width.
   def line_width(); end
@@ -825,7 +825,7 @@ class Psych::Emitter < Psych::Handler
   #
   # See
   # [`Psych::Handler#scalar`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-scalar)
-  def scalar(_, _1, _2, _3, _4, _5); end
+  def scalar(arg0, arg1, arg2, arg3, arg4, arg5); end
 
   # Start a document emission with
   # [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) `version`, `tags`,
@@ -833,27 +833,27 @@ class Psych::Emitter < Psych::Handler
   #
   # See
   # [`Psych::Handler#start_document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-start_document)
-  def start_document(_, _1, _2); end
+  def start_document(arg0, arg1, arg2); end
 
   # Start emitting a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) map
   # with `anchor`, `tag`, an `implicit` start and end, and `style`.
   #
   # See
   # [`Psych::Handler#start_mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-start_mapping)
-  def start_mapping(_, _1, _2, _3); end
+  def start_mapping(arg0, arg1, arg2, arg3); end
 
   # Start emitting a sequence with `anchor`, a `tag`, `implicit` sequence start
   # and end, along with `style`.
   #
   # See
   # [`Psych::Handler#start_sequence`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-start_sequence)
-  def start_sequence(_, _1, _2, _3); end
+  def start_sequence(arg0, arg1, arg2, arg3); end
 
   # Start a stream emission with `encoding`
   #
   # See
   # [`Psych::Handler#start_stream`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-start_stream)
-  def start_stream(_); end
+  def start_stream(arg0); end
 end
 
 # [`Psych::Handler`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html) is
@@ -1743,22 +1743,22 @@ class Psych::Parser
   # See [`Psych::Parser`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser.html)
   # and
   # [`Psych::Parser#handler`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser.html#attribute-i-handler)
-  def parse(*_); end
+  def parse(*arg0); end
 end
 
 class Psych::Parser::Mark
 
   def column(); end
 
-  def column=(_); end
+  def column=(arg0); end
 
   def index(); end
 
-  def index=(_); end
+  def index=(arg0); end
 
   def line(); end
 
-  def line=(_); end
+  def line=(arg0); end
 end
 
 # Scan scalars for built in types

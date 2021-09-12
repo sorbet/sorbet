@@ -185,6 +185,7 @@ NameDef names[] = {
     {"createdProp", "created_prop"},
     {"updatedProp", "updated_prop"},
     {"merchantProp", "merchant_prop"},
+    {"merchantTokenProp", "merchant_token_prop"},
     {"encryptedProp", "encrypted_prop"},
     {"array"},
     {"defDelegator", "def_delegator"},
@@ -343,6 +344,8 @@ NameDef names[] = {
     {"expandSplat", "<expand-splat>"},
     {"suggestType", "<suggest-type>"},
     {"checkMatchArray", "<check-match-array>"},
+    {"definedInstanceVar", "<defined-instance-var>"},
+    {"definedClassVar", "<defined-class-var>"},
     {"arg0"},
     {"arg1"},
     {"arg2"},
@@ -407,10 +410,15 @@ NameDef names[] = {
 
     // Packager
     {"import"},
+    {"test_import"},
     {"export_", "export"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageRegistry", "<PackageRegistry>", true},
-    {"PackageMethods", "<PackageMethods>", true},
+    {"PackageTests", "<PackageTests>", true},
+
+    // Compiler
+    {"runningCompiled_p", "running_compiled?"},
+    {"compilerVersion", "compiler_version"},
 
     // GlobalState initEmpty()
     {"Top", "<top>", true},
@@ -495,6 +503,11 @@ NameDef names[] = {
     {"VERSION", "VERSION", true},
     {"Thread", "Thread", true},
     {"Configuration", "Configuration", true},
+    {"Compiler", "Compiler", true},
+    {"Test", "Test", true},
+    {"Autogen", "Autogen", true},
+    {"Tokens", "Tokens", true},
+    {"AccountModelMerchantToken", "AccountModelMerchantToken", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

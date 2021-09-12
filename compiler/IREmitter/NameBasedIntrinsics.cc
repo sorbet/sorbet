@@ -82,29 +82,34 @@ public:
             return Payload::rubyNil(cs, builder);
         }
 
-        // this is wrong and will not work for `class <<self`
-        auto classNameCStr = Payload::toCString(cs, IREmitterHelpers::showClassNameWithoutOwner(cs, sym), builder);
-        auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
-        auto funcSym = cs.gs.lookupStaticInitForClass(attachedClass);
-
         llvm::Value *module = nullptr;
 
-        if (!IREmitterHelpers::isRootishSymbol(cs, sym.data(cs)->owner)) {
-            auto getOwner = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
-            if (isModule) {
-                module = builder.CreateCall(cs.getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
+        auto funcSym = cs.gs.lookupStaticInitForClass(attachedClass);
+        if (!attachedClass.data(cs)->isSingletonClass(cs)) {
+            auto classNameCStr = Payload::toCString(cs, IREmitterHelpers::showClassNameWithoutOwner(cs, sym), builder);
+            auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
+
+            if (!IREmitterHelpers::isRootishSymbol(cs, sym.data(cs)->owner)) {
+                auto getOwner = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
+                if (isModule) {
+                    module = builder.CreateCall(cs.getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
+                } else {
+                    auto rawCall = Payload::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
+                    module = builder.CreateCall(cs.getFunction("sorbet_defineNestedClass"),
+                                                {getOwner, classNameCStr, rawCall});
+                }
             } else {
-                auto rawCall = Payload::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
-                module =
-                    builder.CreateCall(cs.getFunction("sorbet_defineNestedClass"), {getOwner, classNameCStr, rawCall});
+                if (isModule) {
+                    module = builder.CreateCall(cs.getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
+                } else {
+                    auto rawCall = Payload::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
+                    module =
+                        builder.CreateCall(cs.getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
+                }
             }
         } else {
-            if (isModule) {
-                module = builder.CreateCall(cs.getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
-            } else {
-                auto rawCall = Payload::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
-                module = builder.CreateCall(cs.getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
-            }
+            module = Payload::getRubyConstant(cs, attachedClass, builder);
+            module = builder.CreateCall(cs.getFunction("sorbet_singleton_class"), {module}, "singletonClass");
         }
         builder.CreateCall(cs.getFunction("sorbet_callStaticInitDirect"),
                            {IREmitterHelpers::getOrCreateStaticInit(cs, funcSym, send->receiverLoc),
@@ -128,9 +133,28 @@ public:
     }
 } IdentityIntrinsic;
 
+llvm::Value *prepareBlockHandler(MethodCallContext &mcctx, cfg::VariableUseSite &blkVar) {
+    auto &cs = mcctx.cs;
+    auto &irctx = mcctx.irctx;
+    auto rubyBlockId = mcctx.rubyBlockId;
+
+    // If our current block has a block argument and we are passing it though, we don't have to reify it into a full
+    // proc; we can set things up so the Ruby VM will pass the block argument along and avoid extra allocations.
+    if (IREmitterHelpers::hasBlockArgument(cs, rubyBlockId, irctx.cfg.symbol, irctx) &&
+        blkVar.variable == irctx.rubyBlockArgs[rubyBlockId].back()) {
+        return Payload::getPassedBlockHandler(cs, mcctx.build);
+    } else {
+        // TODO(perf) `makeBlockHandlerProc` uses `to_proc` under the hood, and could be rewritten here to make an
+        // inline cache.
+        auto *block = Payload::varGet(cs, blkVar.variable, mcctx.build, irctx, rubyBlockId);
+        return Payload::makeBlockHandlerProc(cs, mcctx.build, block);
+    }
+}
+
 class CallWithBlock : public NameBasedIntrinsicMethod {
 public:
     CallWithBlock() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
+
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
         // args[0] is the receiver
         // args[1] is the method
@@ -150,19 +174,7 @@ public:
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         auto name = lit.asName(cs).shortName(cs);
 
-        llvm::Value *blockHandler = nullptr;
-
-        // If our current block has a block argument and we are passing it though, we don't have to reify it into a full
-        // proc; we can set things up so the Ruby VM will pass the block argument along and avoid extra allocations.
-        if (IREmitterHelpers::hasBlockArgument(cs, rubyBlockId, irctx.cfg.symbol, irctx) &&
-            send->args[2].variable == irctx.rubyBlockArgs[rubyBlockId].back()) {
-            blockHandler = Payload::getPassedBlockHandler(cs, mcctx.build);
-        } else {
-            // TODO(perf) `makeBlockHandlerProc` uses `to_proc` under the hood, and could be rewritten here to make an
-            // inline cache.
-            auto *block = Payload::varGet(cs, send->args[2].variable, mcctx.build, irctx, rubyBlockId);
-            blockHandler = Payload::makeBlockHandlerProc(cs, mcctx.build, block);
-        }
+        llvm::Value *blockHandler = prepareBlockHandler(mcctx, send->args[2]);
 
         auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 3);
         auto &builder = builderCast(mcctx.build);
@@ -171,6 +183,7 @@ public:
         auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, string(name), flags, stack.size(), keywords);
         return Payload::callFuncWithCache(mcctx.cs, mcctx.build, cache, blockHandler);
     }
+
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::callWithBlock()};
     }
@@ -210,7 +223,7 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
     auto &cs = mcctx.cs;
     auto &builder = builderCast(mcctx.build);
 
-    auto [argc, argv, _] = IREmitterHelpers::fillSendArgArray(mcctx);
+    auto args = IREmitterHelpers::fillSendArgArray(mcctx);
 
     llvm::Value *recv;
     if (takesReceiver == TakesReceiver) {
@@ -229,7 +242,8 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
     llvm::Value *offset = Payload::buildLocalsOffset(cs);
 
     auto fun = Payload::idIntern(cs, builder, mcctx.send->fun.shortName(cs));
-    auto *value = builder.CreateCall(cs.getFunction(cMethod), {recv, fun, argc, argv, blkPtr, offset}, "rawSendResult");
+    auto *value =
+        builder.CreateCall(cs.getFunction(cMethod), {recv, fun, args.argc, args.argv, blkPtr, offset}, "rawSendResult");
     if (klass.exists()) {
         Payload::assumeType(cs, builder, value, klass);
     }
@@ -358,9 +372,95 @@ public:
     }
 } BuildHash;
 
+std::tuple<CallCacheFlags, llvm::Value *> prepareSplatArgs(MethodCallContext &mcctx, cfg::VariableUseSite &splatArgsVar,
+                                                           cfg::VariableUseSite &kwArgsVar) {
+    auto &cs = mcctx.cs;
+    auto &irctx = mcctx.irctx;
+    auto *send = mcctx.send;
+    auto &builder = builderCast(mcctx.build);
+
+    // For the VM send there will be two cases:
+    //
+    // 1. We do not have keyword args (args[3] is nil). Then we can just dup args[2] and use VM_CALL_ARGS_SPLAT.
+    //
+    // 2. We do have keyword args (args[3] is not nil). Then we'll need to construct an array of this form:
+    //
+    //      [posarg0, posarg1, ..., posargn, kwhash]
+    //
+    //    where args[2] = [posarg0, posarg1, ..., posargsn], and use VM_CALL_ARGS_SPLAT | VM_CALL_KW_SPLAT.
+    //
+    //    There are two subcases:
+    //
+    //    2a. All keywords were inline (args[3] has even length, and its contents will be of the form
+    //        [sym,val,sym,val,...,sym,val]). Then we can just construct kwhash by build_hash'ing args[3].
+    //    2b. Not all keywords were inline (args[3] has odd length, and its contents will be of the form)
+    //        [sym,val,sym,val,...,sym,val,kwhash1]). Then we dup args[3], pop kwhash1 from it, construct
+    //        kwhash0 from what's remaining, and update kwhash0 with kwhash1 to obtain kwhash.
+    //
+    //        Note that for now, the desugarer does not produce (2b) cases where the array is not simply [kwhash1].
+    //        Thus we can't really test this case, so we throw an error, even though the code that is there does
+    //        attempt to do the right thing.
+    //
+    // TODO(perf): We can probably save quite a bit of intermediate dupping, popping, etc., by cleverer addressing
+    // of the array contents.
+    auto *splatArgs = Payload::varGet(mcctx.cs, splatArgsVar.variable, mcctx.build, irctx, mcctx.rubyBlockId);
+
+    // TODO(perf) we can avoid duplicating the array here if we know that it was created specifically for this
+    // splat.
+    llvm::Value *splatArray = builder.CreateCall(cs.getFunction("sorbet_arrayDup"), {splatArgs}, "splatArray");
+
+    CallCacheFlags flags;
+
+    if (kwArgsVar.type.derivesFrom(mcctx.cs, core::Symbols::NilClass())) {
+        flags.args_splat = true;
+    } else if (auto *ptt = core::cast_type<core::TupleType>(kwArgsVar.type)) {
+        flags.args_splat = true;
+        flags.kw_splat = true;
+
+        auto *kwArgArray = Payload::varGet(mcctx.cs, kwArgsVar.variable, mcctx.build, irctx, mcctx.rubyBlockId);
+
+        llvm::Value *kwHash;
+
+        if (ptt->elems.size() & 0x1) {
+            auto *kwHash1 = builder.CreateCall(cs.getFunction("sorbet_arrayPop"), {kwArgArray}, "kwHash1");
+            if (ptt->elems.size() > 1) {
+                auto *size = llvm::ConstantInt::get(cs, llvm::APInt(32, ptt->elems.size() - 1, true));
+                auto *innerPtr = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {kwArgArray});
+                kwHash = builder.CreateCall(cs.getFunction("sorbet_hashBuild"), {size, innerPtr}, "kwHash");
+                builder.CreateCall(cs.getFunction("sorbet_hashUpdate"), {kwHash, kwHash1});
+
+                // Failing compilation because as of this writing, this case is not produced by the desugarer, so
+                // the above code is untested. In theory, once the case is implemented in the desugarer, it should
+                // be okay to remove this.
+                failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
+                                "internal error: arg 3 to call-with-splat has odd length > 1");
+            } else {
+                kwHash = builder.CreateCall(cs.getFunction("sorbet_hashDup"), {kwHash1}, "kwHash");
+            }
+        } else {
+            auto *size = llvm::ConstantInt::get(cs, llvm::APInt(32, ptt->elems.size(), true));
+            auto *innerPtr = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {kwArgArray});
+            kwHash = builder.CreateCall(cs.getFunction("sorbet_hashBuild"), {size, innerPtr}, "kwHash");
+        }
+
+        builder.CreateCall(cs.getFunction("sorbet_arrayPush"), {splatArray, kwHash});
+    } else {
+        // This should not be possible (desugarer will only pass nil or a tuple).
+        failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
+                        "internal error: arg 3 to call-with-splat has neither nil nor tuple type");
+    }
+
+    if (send->isPrivateOk) {
+        flags.fcall = true;
+    }
+
+    return {flags, splatArray};
+}
+
 class CallWithSplat : public NameBasedIntrinsicMethod {
 public:
     CallWithSplat() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
+
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
         // args[0] is the receiver
         // args[1] is the method
@@ -368,96 +468,18 @@ public:
         // args[3] are the keyword args
         auto &cs = mcctx.cs;
         auto &irctx = mcctx.irctx;
+        auto &builder = builderCast(mcctx.build);
         auto *send = mcctx.send;
-
         auto recv = send->args[0].variable;
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
 
+        auto [flags, splatArray] = prepareSplatArgs(mcctx, send->args[2], send->args[3]);
+
+        // setup the inline cache
         auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         auto methodName = lit.asName(cs).shortName(cs);
-
-        auto &builder = builderCast(mcctx.build);
-
-        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
-
-        // For the VM send there will be two cases:
-        //
-        // 1. We do not have keyword args (args[3] is nil). Then we can just dup args[2] and use VM_CALL_ARGS_SPLAT.
-        //
-        // 2. We do have keyword args (args[3] is not nil). Then we'll need to construct an array of this form:
-        //
-        //      [posarg0, posarg1, ..., posargn, kwhash]
-        //
-        //    where args[2] = [posarg0, posarg1, ..., posargsn], and use VM_CALL_ARGS_SPLAT | VM_CALL_KW_SPLAT.
-        //
-        //    There are two subcases:
-        //
-        //    2a. All keywords were inline (args[3] has even length, and its contents will be of the form
-        //        [sym,val,sym,val,...,sym,val]). Then we can just construct kwhash by build_hash'ing args[3].
-        //    2b. Not all keywords were inline (args[3] has odd length, and its contents will be of the form)
-        //        [sym,val,sym,val,...,sym,val,kwhash1]). Then we dup args[3], pop kwhash1 from it, construct
-        //        kwhash0 from what's remaining, and update kwhash0 with kwhash1 to obtain kwhash.
-        //
-        //        Note that for now, the desugarer does not produce (2b) cases where the array is not simply [kwhash1].
-        //        Thus we can't really test this case, so we throw an error, even though the code that is there does
-        //        attempt to do the right thing.
-        //
-        // TODO(perf): We can probably save quite a bit of intermediate dupping, popping, etc., by cleverer addressing
-        // of the array contents.
-        auto splatArgsVar = send->args[2].variable;
-        auto *splatArgs = Payload::varGet(mcctx.cs, splatArgsVar, mcctx.build, irctx, mcctx.rubyBlockId);
-
-        auto kwArgsVar = send->args[3].variable;
-        auto kwArgsType = send->args[3].type;
-
-        // TODO(perf) we can avoid duplicating the array here if we know that it was created specifically for this
-        // splat.
-        llvm::Value *splatArray = builder.CreateCall(cs.getFunction("sorbet_arrayDup"), {splatArgs}, "splatArray");
-
-        CallCacheFlags flags;
-
-        if (kwArgsType.derivesFrom(mcctx.cs, core::Symbols::NilClass())) {
-            flags.args_splat = true;
-        } else if (auto *ptt = core::cast_type<core::TupleType>(kwArgsType)) {
-            flags.args_splat = true;
-            flags.kw_splat = true;
-
-            auto *kwArgArray = Payload::varGet(mcctx.cs, kwArgsVar, mcctx.build, irctx, mcctx.rubyBlockId);
-
-            llvm::Value *kwHash;
-
-            if (ptt->elems.size() & 0x1) {
-                auto *kwHash1 = builder.CreateCall(cs.getFunction("sorbet_arrayPop"), {kwArgArray}, "kwHash1");
-                if (ptt->elems.size() > 1) {
-                    auto *size = llvm::ConstantInt::get(cs, llvm::APInt(32, ptt->elems.size() - 1, true));
-                    auto *innerPtr = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {kwArgArray});
-                    kwHash = builder.CreateCall(cs.getFunction("sorbet_hashBuild"), {size, innerPtr}, "kwHash");
-                    builder.CreateCall(cs.getFunction("sorbet_hashUpdate"), {kwHash, kwHash1});
-
-                    // Failing compilation because as of this writing, this case is not produced by the desugarer, so
-                    // the above code is untested. In theory, once the case is implemented in the desugarer, it should
-                    // be okay to remove this.
-                    failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
-                                    "internal error: arg 3 to call-with-splat has odd length > 1");
-                } else {
-                    kwHash = builder.CreateCall(cs.getFunction("sorbet_hashDup"), {kwHash1}, "kwHash");
-                }
-            } else {
-                auto *size = llvm::ConstantInt::get(cs, llvm::APInt(32, ptt->elems.size(), true));
-                auto *innerPtr = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {kwArgArray});
-                kwHash = builder.CreateCall(cs.getFunction("sorbet_hashBuild"), {size, innerPtr}, "kwHash");
-            }
-
-            builder.CreateCall(cs.getFunction("sorbet_arrayPush"), {splatArray, kwHash});
-        } else {
-            // This should not be possible (desugarer will only pass nil or a tuple).
-            failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
-                            "internal error: arg 3 to call-with-splat has neither nil nor tuple type");
-        }
-
-        if (send->isPrivateOk) {
-            flags.fcall = true;
-        }
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flags, 1, {});
 
         // Push receiver and the splat array.
         // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
@@ -466,8 +488,6 @@ public:
             cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.build, irctx, mcctx.rubyBlockId), {splatArray});
 
         // Call the receiver.
-        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flags, 1, {});
-
         if (auto *blk = mcctx.blkAsFunction()) {
             auto *closure = Payload::buildLocalsOffset(cs);
             return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.build, cache, blk, closure);
@@ -480,6 +500,90 @@ public:
         return {core::Names::callWithSplat()};
     }
 } CallWithSplat;
+
+class CallWithSplatAndBlock : public NameBasedIntrinsicMethod {
+public:
+    CallWithSplatAndBlock() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        ENFORCE(mcctx.blkAsFunction() == nullptr);
+
+        // args[0] is the receiver
+        // args[1] is the method
+        // args[2] are the splat arguments
+        // args[3] are the keyword arguments
+        // args[4] is the block
+        auto &cs = mcctx.cs;
+        auto &irctx = mcctx.irctx;
+        auto &builder = builderCast(mcctx.build);
+        auto *send = mcctx.send;
+        auto recv = send->args[0].variable;
+
+        auto [flags, splatArray] = prepareSplatArgs(mcctx, send->args[2], send->args[3]);
+        auto *blockHandler = prepareBlockHandler(mcctx, send->args[4]);
+
+        // setup the inline cache
+        auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
+        ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+        auto methodName = lit.asName(cs).shortName(cs);
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flags, 1, {});
+
+        // Push receiver and the splat array.
+        // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
+        // is actually the first arg of the callWithSplat intrinsic method.
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
+        Payload::pushRubyStackVector(
+            cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.build, irctx, mcctx.rubyBlockId), {splatArray});
+
+        return Payload::callFuncWithCache(mcctx.cs, mcctx.build, cache, blockHandler);
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::callWithSplatAndBlock()};
+    }
+} CallWithSplatAndBlock;
+
+class DefinedClassVar : public NameBasedIntrinsicMethod {
+public:
+    DefinedClassVar() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
+        auto &builder = builderCast(mcctx.build);
+        auto &irctx = mcctx.irctx;
+        int rubyBlockId = mcctx.rubyBlockId;
+
+        auto *klass = Payload::getClassVariableStoreClass(cs, builder, irctx);
+        // TODO(froydnj): figure out how to access the ID of the argument directly.
+        auto *var = Payload::varGet(cs, mcctx.send->args[0].variable, builder, irctx, rubyBlockId);
+        return builder.CreateCall(cs.getFunction("sorbet_classVariableDefined"), {klass, var}, "is_cvar_defined");
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::definedClassVar()};
+    }
+} DefinedClassVar;
+
+class DefinedInstanceVar : public NameBasedIntrinsicMethod {
+public:
+    DefinedInstanceVar() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
+        auto &builder = builderCast(mcctx.build);
+        auto &irctx = mcctx.irctx;
+        int rubyBlockId = mcctx.rubyBlockId;
+
+        auto *self = Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyBlockId);
+        // TODO(froydnj): figure out how to access the ID of the argument directly.
+        auto *var = Payload::varGet(cs, mcctx.send->args[0].variable, builder, irctx, rubyBlockId);
+        return builder.CreateCall(cs.getFunction("sorbet_instanceVariableDefined"), {self, var}, "is_cvar_defined");
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::definedInstanceVar()};
+    }
+} DefinedInstanceVar;
 
 static const vector<CallCMethod> knownCMethods{
     {"<expand-splat>", "sorbet_expandSplatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
@@ -511,9 +615,10 @@ static const vector<CallCMethod> knownCMethods{
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
-    vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineClassIntrinsic,   &IdentityIntrinsic,
-                                                 &CallWithBlock,      &ExceptionRetry,         &BuildHash,
-                                                 &CallWithSplat,      &ShouldNeverSeeIntrinsic};
+    vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineClassIntrinsic,  &IdentityIntrinsic,
+                                                 &CallWithBlock,      &ExceptionRetry,        &BuildHash,
+                                                 &CallWithSplat,      &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic,
+                                                 &DefinedClassVar,    &DefinedInstanceVar};
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }

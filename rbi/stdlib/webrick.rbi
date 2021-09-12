@@ -604,7 +604,7 @@ class WEBrick::Cookie
       name: T.untyped,
       value: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(name, value); end
 
@@ -742,7 +742,7 @@ class WEBrick::GenericServer
       config: T.untyped,
       default: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(config=T.unsafe(nil), default=T.unsafe(nil)); end
 
@@ -993,7 +993,7 @@ class WEBrick::HTTPAuth::BasicAuth
       config: T.untyped,
       default: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(config, default=T.unsafe(nil)); end
 
@@ -1084,7 +1084,7 @@ class WEBrick::HTTPAuth::DigestAuth
       config: T.untyped,
       default: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(config, default=T.unsafe(nil)); end
 
@@ -1217,7 +1217,7 @@ class WEBrick::HTTPAuth::Htdigest
     params(
       path: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(path); end
 
@@ -1281,7 +1281,7 @@ class WEBrick::HTTPAuth::Htgroup
     params(
       path: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(path); end
 
@@ -1360,7 +1360,7 @@ class WEBrick::HTTPAuth::Htpasswd
       path: T.untyped,
       password_hash: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(path, password_hash: T.unsafe(nil)); end
 
@@ -1555,7 +1555,7 @@ class WEBrick::HTTPRequest
     params(
       config: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(config); end
 
@@ -1855,7 +1855,7 @@ class WEBrick::HTTPResponse
     params(
       config: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(config); end
 
@@ -2042,7 +2042,7 @@ class WEBrick::HTTPServer < WEBrick::GenericServer
       config: T.untyped,
       default: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(config=T.unsafe(nil), default=T.unsafe(nil)); end
 
@@ -2165,7 +2165,7 @@ class WEBrick::HTTPServer::MountTable
   end
   def delete(dir); end
 
-  sig {returns(T.untyped)}
+  sig {void}
   def initialize(); end
 
   sig do
@@ -2284,7 +2284,7 @@ class WEBrick::HTTPServlet::AbstractServlet
       server: T.untyped,
       options: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(server, *options); end
 
@@ -2349,7 +2349,7 @@ class WEBrick::HTTPServlet::CGIHandler < WEBrick::HTTPServlet::AbstractServlet
       server: T.untyped,
       name: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(server, name); end
 end
@@ -2381,7 +2381,7 @@ class WEBrick::HTTPServlet::DefaultFileHandler < WEBrick::HTTPServlet::AbstractS
       server: T.untyped,
       local_path: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(server, local_path); end
 
@@ -2471,7 +2471,7 @@ class WEBrick::HTTPServlet::ERBHandler < WEBrick::HTTPServlet::AbstractServlet
       server: T.untyped,
       name: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(server, name); end
 end
@@ -2521,7 +2521,7 @@ class WEBrick::HTTPServlet::FileHandler < WEBrick::HTTPServlet::AbstractServlet
       options: T.untyped,
       default: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(server, root, options=T.unsafe(nil), default=T.unsafe(nil)); end
 
@@ -2599,7 +2599,7 @@ class WEBrick::HTTPServlet::ProcHandler < WEBrick::HTTPServlet::AbstractServlet
     params(
       proc: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(proc); end
 end
@@ -3224,7 +3224,7 @@ class WEBrick::HTTPUtils::FormData < String
     params(
       args: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(*args); end
 
@@ -3293,7 +3293,7 @@ class WEBrick::HTTPVersion
     params(
       version: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(version); end
 
@@ -3346,7 +3346,7 @@ class WEBrick::Log < WEBrick::BasicLog
       log_file: T.untyped,
       level: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
   def initialize(log_file=T.unsafe(nil), level=T.unsafe(nil)); end
 
@@ -3503,7 +3503,7 @@ class WEBrick::Utils::TimeoutHandler
   end
   def cancel(thread, id); end
 
-  sig {returns(T.untyped)}
+  sig {void}
   def initialize(); end
 
   sig do

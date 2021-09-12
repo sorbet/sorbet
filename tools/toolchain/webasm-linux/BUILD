@@ -19,7 +19,7 @@ export PATH="$${PATH}:/usr/local/bin/"
 EM_CONFIG="LLVM_ROOT='$${PWD}/external/emscripten_clang_linux/';"
 EM_CONFIG+="EMSCRIPTEN_NATIVE_OPTIMIZER='$${PWD}/external/external/emscripten_clang_linux/optimizer';"
 EM_CONFIG+="BINARYEN_ROOT='$${PWD}/external/emscripten_clang_linux/binaryen';"
-EM_CONFIG+="NODE_JS='node';"
+EM_CONFIG+="NODE_JS='$${PWD}/external/nodejs_linux_amd64/bin/node';"
 EM_CONFIG+="EMSCRIPTEN_ROOT='$${PWD}/external/emscripten_toolchain';"
 EM_CONFIG+="SPIDERMONKEY_ENGINE='';"
 EM_CONFIG+="V8_ENGINE='';"
@@ -53,6 +53,7 @@ genrule(
     srcs = [
         "@emscripten_clang_linux//:all",
         "@emscripten_toolchain//:all",
+        "@nodejs_linux_amd64//:node",
     ],
     outs = ["em_cache.tar.gz"],
     cmd = GENERATE_EM_CACHE_COMMAND,
@@ -66,6 +67,7 @@ filegroup(
         "emcc.sh",
         "@emscripten_clang_linux//:all",
         "@emscripten_toolchain//:all",
+        "@nodejs_linux_amd64//:node",
     ],
     tags = ["manual"],
 )

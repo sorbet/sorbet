@@ -328,8 +328,9 @@ void ObjectFileEmitter::init() {
     llvm::InitializeNativeTargetAsmParser();
 }
 
-bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, unique_ptr<llvm::Module> module,
-                            string_view soDir, optional<string_view> llvmIrDir, string_view objectName) {
+[[nodiscard]] bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx,
+                                          unique_ptr<llvm::Module> module, string_view soDir,
+                                          optional<string_view> llvmIrDir, string_view objectName) {
     // We need to ensure that the codegen flags have been initialized, so that InitTargetOptionsFromCodeGenFlags has
     // sane defaults to use.
     static llvm::codegen::RegisterCodeGenFlags codeGenFlags;

@@ -1,7 +1,7 @@
 # typed: true
 require_relative '../../../lib/sorbet-runtime'
 
-extend T::Sig # rubocop:disable Style/MixinUsage
+extend T::Sig
 
 sig {returns(Integer)}
 def foo

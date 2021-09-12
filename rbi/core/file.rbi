@@ -1721,7 +1721,7 @@ class File::Stat < Object
     params(
         file: String,
     )
-    .returns(Object)
+    .void
   end
   def initialize(file); end
 

@@ -7,32 +7,32 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
   end
 
   module AbstractMixin
-  extend T::Sig
-  extend T::Helpers
-  abstract!
+    extend T::Sig
+    extend T::Helpers
+    abstract!
 
-  sig {abstract.returns(Object)}
-  def foo; end
+    sig {abstract.returns(Object)}
+    def foo; end
 
-  sig {abstract.returns(Object)}
-  def bar; end
+    sig {abstract.returns(Object)}
+    def bar; end
 
-  sig {returns(Object)}
-  def concrete_standard; end
+    sig {returns(Object)}
+    def concrete_standard; end
 
-  def concrete_no_signature; end
+    def concrete_no_signature; end
   end
 
   class AbstractClass
-  extend T::Sig
-  extend T::Helpers
-  abstract!
+    extend T::Sig
+    extend T::Helpers
+    abstract!
 
-  sig {abstract.returns(Object)}
-  def self.foo; end
+    sig {abstract.returns(Object)}
+    def self.foo; end
 
-  sig {abstract.returns(Object)}
-  def bar; end
+    sig {abstract.returns(Object)}
+    def bar; end
   end
 
   it "raises an error when defining an abstract class method on a module" do
@@ -374,7 +374,9 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
         def self.foo; end
 
         sig {override.returns(Object)}
-        def bar; "baz"; end
+        def bar
+          "baz"
+        end
       end
       assert_equal("baz", klass.new.bar)
     end

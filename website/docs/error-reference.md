@@ -1186,6 +1186,27 @@ def publish_item(name, category = nil)
 end
 ```
 
+## 7009
+
+This error occurs when a value is used in place of a type. There are many
+different situations where this can happen; one example is given below:
+
+```
+class Box
+  extend T::Generic
+
+  E = type_member
+end
+
+Box[true].new # error: Unsupported usage of bare type
+```
+
+To fix this error, replace the `true` value with the type `TrueClass`:
+
+```rb
+Box[TrueClass].new
+```
+
 ## 7013
 
 Sorbet detected that an instance variable was reassigned with different types:
