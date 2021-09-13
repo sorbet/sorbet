@@ -1015,9 +1015,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     result = std::move(wrapped);
                 } else if (isa_reference(recv)) {
                     auto cond = MK::cpRef(recv);
-                    auto elsep = MK::cpRef(recv);
-                    auto body = MK::Assign(loc, std::move(recv), std::move(arg));
-                    auto iff = MK::If(loc, std::move(cond), std::move(elsep), std::move(body));
+                    auto body = MK::cpRef(recv);
+                    auto elsep = MK::Assign(loc, std::move(recv), std::move(arg));
+                    auto iff = MK::If(loc, std::move(cond), std::move(body), std::move(elsep));
                     result = std::move(iff);
                 } else if (auto i = cast_tree<UnresolvedConstantLit>(recv)) {
                     if (auto e = dctx.ctx.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
