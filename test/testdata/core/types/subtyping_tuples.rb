@@ -31,3 +31,20 @@ T.reveal_type(fsi) # error: Revealed type: `[T.any(Float, Integer)] (1-tuple)`
 
 isf_or_fsi = rand() < 0.5 ? isf : fsi
 T.reveal_type(isf_or_fsi) # error: Revealed type: `[T.any(Integer, Float)] (1-tuple)`
+
+ii = T.let([1, 1], [Integer, Integer])
+
+nn = T.let([1, 1], [Numeric, Numeric])
+
+if T.unsafe(true)
+  x = ii # always takes this
+else
+  x = nn
+end
+
+T.reveal_type(x)
+
+x[0] = 1.0 # always mutates ii
+
+T.reveal_type(ii[0]) # error: Revealed type: `Integer`
+puts ii[0].class     # => Float
