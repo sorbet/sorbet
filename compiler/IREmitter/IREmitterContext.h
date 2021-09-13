@@ -168,10 +168,11 @@ struct IREmitterContext {
     // When arguments have defaults, the use of the default is guarded by a call to ArgPresent. The ArgPresent variables
     // are initialized during setupArguments, but need to be available by argument index.
     //
+    // outer idx: the ruby block id that defines these arguments
     // idx: Argument index into the method arguments
     // val: The local ref that holds the result of the ArgPresent instruction, or cfg::LocalRef::noVariable if the
     //      argument does not have a default value.
-    std::vector<cfg::LocalRef> argPresentVariables;
+    std::vector<std::vector<cfg::LocalRef>> argPresentVariables;
 
     // Every local variable (including arguments) shows up as either an index into the closure (escapedVariableIndices)
     // or something that was explicitly stack allocated.
