@@ -9,7 +9,7 @@ class A
     begin
       T.unsafe(new).call(*args, &blk)
     rescue
-      puts "whoops! #{$!}"
+      puts $!
     end
   end
 end
