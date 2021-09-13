@@ -4,7 +4,6 @@
 
 class A
   extend T::Sig
-  extend T::Helpers
 
   def self.call(*args, &blk)
     begin
