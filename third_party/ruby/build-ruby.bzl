@@ -416,13 +416,11 @@ exec "$binary_path" "$@"
 def _ruby_binary_impl(ctx):
     workspace = ctx.label.workspace_name
 
-    ruby_info = ctx.attr.ruby[RubyInfo]
-
     wrapper = ctx.actions.declare_file(ctx.label.name)
 
     binary = None
 
-    for candidate in ruby_info.binaries:
+    for candidate in ctx.attr.ruby[RubyInfo].binaries:
         if candidate.basename == ctx.label.name:
             binary = candidate
             break
@@ -441,17 +439,9 @@ def _ruby_binary_impl(ctx):
     )
 
     runfiles_bash = ctx.attr._runfiles_bash[DefaultInfo].default_runfiles
+    ruby = ctx.attr.ruby[DefaultInfo]
 
-    symlinks = {}
-
-    symlinks["{}/toolchain/include".format(workspace)] = ruby_info.includes
-    symlinks["{}/toolchain/lib".format(workspace)] = ruby_info.lib
-    symlinks["{}/toolchain/share".format(workspace)] = ruby_info.share
-
-    for target in ruby_info.binaries:
-        symlinks["{}/toolchain/bin/{}".format(workspace, target.basename)] = target
-
-    runfiles = ctx.runfiles(root_symlinks = symlinks)
+    runfiles = ctx.runfiles(transitive_files = ruby.files)
     runfiles = runfiles.merge(runfiles_bash)
 
     return [DefaultInfo(executable = wrapper, runfiles = runfiles)]
