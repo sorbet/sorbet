@@ -46,8 +46,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
 
-      <emptyTree>::<C Elem> = <self>.type_member(:fixed, ::T.untyped())
-
       ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
     end
 
@@ -83,8 +81,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
 
       ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
-
-      <emptyTree>::<C Elem> = <self>.type_member(:fixed, ::T.untyped())
 
       ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
     end
@@ -152,8 +148,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
 
-      <emptyTree>::<C Elem> = <self>.type_member(:fixed, ::T.untyped())
-
       ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
     end
 
@@ -177,8 +171,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
 
       ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
-
-      <emptyTree>::<C Elem> = <self>.type_member(:fixed, ::T.untyped())
 
       ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
     end
@@ -221,8 +213,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
 
-      <emptyTree>::<C Elem> = <self>.type_member(:fixed, ::T.untyped())
-
       ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
     end
   end
@@ -257,8 +247,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       ::Sorbet::Private::Static.keep_def(<self>, :x=, :normal)
 
-      <emptyTree>::<C Elem> = <self>.type_member(:fixed, ::T.untyped())
-
       ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
 
       <self>.include(<emptyTree>::<C MyMixin>)
@@ -288,8 +276,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Sorbet::Private::Static.keep_def(<self>, :x, :normal)
 
       ::Sorbet::Private::Static.keep_def(<self>, :x=, :normal)
-
-      <emptyTree>::<C Elem> = <self>.type_member(:fixed, ::T.untyped())
 
       ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
 
@@ -371,8 +357,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       ::Sorbet::Private::Static.keep_def(<self>, :a=, :normal)
 
-      <emptyTree>::<C Elem> = <self>.type_member(:fixed, ::T.untyped())
-
       ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
     end
 
@@ -396,8 +380,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Sorbet::Private::Static.keep_def(<self>, :a, :normal)
 
       ::Sorbet::Private::Static.keep_def(<self>, :a=, :normal)
-
-      <emptyTree>::<C Elem> = <self>.type_member(:fixed, ::T.untyped())
 
       ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
     end
