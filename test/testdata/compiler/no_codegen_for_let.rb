@@ -11,7 +11,7 @@ end
 p bar('baz')
 p bar(nil)
 
-# INITIAL-LABEL: @"func_Object#bar"
+# INITIAL-LABEL: @"func_Object#3bar"
 # INITIAL-NOT: sorbet_i_getRubyClass{{.*}}str_T
 # INITIAL-NOT: sorbet_callFuncWithCache{{.*}}ic_nilable
 # INITIAL: {{^[}]}}

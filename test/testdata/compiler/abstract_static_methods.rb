@@ -12,8 +12,8 @@ class IFoo
   def self.foo; end
 end
 
-# INITIAL{LITERAL}-LABEL: define internal i64 @"func_IFoo.<static-init>
-# INITIAL: call void @{{sorbet_defineMethodSingleton.*@func_IFoo.foo,}}
+# INITIAL{LITERAL}-LABEL: define internal i64 @"func_IFoo.18<static-init>
+# INITIAL: call void @{{sorbet_defineMethodSingleton.*@func_IFoo.3foo,}}
 # INITIAL{LITERAL}: }
 
 class Foo < IFoo

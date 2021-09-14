@@ -16,10 +16,10 @@ def caller(a)
 end
 end
 
-# INITIAL-LABEL: define i64 @"func_B#caller"
-# INITIAL: call i64 @sorbet_callFuncDirect(%struct.FunctionInlineCache* @{{.*@func_A.foo}}
+# INITIAL-LABEL: define i64 @"func_B#6caller"
+# INITIAL: call i64 @sorbet_callFuncDirect(%struct.FunctionInlineCache* @{{.*@func_A.3foo}}
 # INITIAL{LITERAL}: }
 
-# OPT-LABEL: define i64 @"func_B#caller"
+# OPT-LABEL: define i64 @"func_B#6caller"
 # OPT-NOT: sorbet_callFuncWithCache
 # OPT{LITERAL}: }

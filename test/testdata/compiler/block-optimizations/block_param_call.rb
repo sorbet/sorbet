@@ -8,12 +8,12 @@ def baz(&blk)
   blk.call("baz")
 end
 
-# INITIAL-LABEL: "func_Object#baz"
+# INITIAL-LABEL: "func_Object#3baz"
 # INITIAL: call i64 @sorbet_getMethodBlockAsProc
 # INITIAL: call i64 @sorbet_callBlock
 # INITIAL{LITERAL}: }
 
-# OPT-LABEL: "func_Object#baz"
+# OPT-LABEL: "func_Object#3baz"
 # OPT-NOT: call i64 @sorbet_getMethodBlockAsProc
 # OPT-NOT: call i64 @rb_block_proc
 # OPT: call i64 @rb_yield_values_kw

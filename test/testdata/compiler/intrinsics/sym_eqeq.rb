@@ -10,7 +10,7 @@ def symeq(sym, obj)
   sym == obj
 end
 
-# INITIAL-LABEL: "func_Object#symeq"
+# INITIAL-LABEL: "func_Object#5symeq"
 # INITIAL: call i64 @sorbet_rb_sym_equal
 # INITIAL{LITERAL}: }
 

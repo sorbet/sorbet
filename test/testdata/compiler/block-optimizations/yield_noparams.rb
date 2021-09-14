@@ -8,12 +8,12 @@ def foo
   yield
 end
 
-# INITIAL-LABEL: "func_Object#foo"
+# INITIAL-LABEL: "func_Object#3foo"
 # INITIAL: call i64 @sorbet_getMethodBlockAsProc
 # INITIAL: call i64 @sorbet_callBlock
 # INITIAL{LITERAL}: }
 
-# OPT-LABEL: "func_Object#foo"
+# OPT-LABEL: "func_Object#3foo"
 # OPT-NOT: call i64 @sorbet_getMethodBlockAsProc
 # OPT-NOT: call i64 @rb_block_proc
 # OPT: call i64 @rb_yield_values_kw
