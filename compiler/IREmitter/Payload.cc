@@ -729,7 +729,7 @@ llvm::GlobalVariable *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &
     string rawName = "stackFramePrecomputed_" + name;
     auto *var = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
         auto ret =
-            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, nullptr, rawName);
+            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::ExternalLinkage, nullptr, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
         ret->setAlignment(llvm::MaybeAlign(8));
 
