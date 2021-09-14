@@ -12,6 +12,6 @@ def hello(name)
 end
 hello("sorbet")
 
-# INITIAL-LABEL: define internal i64 @"func_<root>.<static-init>
+# INITIAL-LABEL: define internal i64 @"func_<root>.17<static-init>
 # INITIAL: call void @sorbet_defineMethod({{.*@str_hello}}
 # INITIAL{LITERAL}: }

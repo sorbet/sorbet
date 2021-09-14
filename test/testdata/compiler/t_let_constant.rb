@@ -15,14 +15,14 @@ end
 
 p g
 
-# INITIAL-LABEL: define i64 @"func_Object#f"
+# INITIAL-LABEL: define i64 @"func_Object#1f"
 # INITIAL: [[DUP:%[a-zA-Z]+]] = call i64 @sorbet_globalConstDupHash{{.*}}
 # INITIAL-NEXT: [[COND:%[0-9]+]] = call i1 @sorbet_i_isa_Hash(i64 [[DUP]]{{.*}}
 # INITIAL-NEXT: call void @llvm.assume(i1 [[COND]]){{.*}}
 # INITIAL-NEXT: br i1 true, label %typeTestSuccess, label %typeTestFail{{.*}}
 # INITIAL{LITERAL}: }
 
-# INITIAL-LABEL: define i64 @"func_Object#g"
+# INITIAL-LABEL: define i64 @"func_Object#1g"
 # INITIAL: [[DUP:%[a-zA-Z]+]] = call i64 @sorbet_buildArrayIntrinsic{{.*}}
 # INITIAL-NEXT: [[COND:%[0-9]+]] = call i1 @sorbet_i_isa_Array(i64 [[DUP]]{{.*}}
 # INITIAL-NEXT: call void @llvm.assume(i1 [[COND]]){{.*}}

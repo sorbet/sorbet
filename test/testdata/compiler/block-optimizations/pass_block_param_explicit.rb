@@ -12,13 +12,13 @@ def bar(&blk)
   foo(&blk)
 end
 
-# INITIAL-LABEL: "func_Object#bar"
+# INITIAL-LABEL: "func_Object#3bar"
 # INITIAL: call i64 @sorbet_getMethodBlockAsProc
 # INITIAL: @sorbet_getPassedBlockHandler
 # INITIAL: call i64 @sorbet_callFuncWithCache
 # INITIAL{LITERAL}: }
 
-# OPT-LABEL: "func_Object#bar"
+# OPT-LABEL: "func_Object#3bar"
 # OPT-NOT: call i64 @sorbet_getMethodBlockAsProc
 # OPT-NOT: call i64 @rb_block_proc
 # OPT: @sorbet_getPassedBlockHandler

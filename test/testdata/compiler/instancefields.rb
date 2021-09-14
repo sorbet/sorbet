@@ -13,19 +13,19 @@ class A
   end
 end
 
-# INITIAL-LABEL: define i64 @"func_A#write"
+# INITIAL-LABEL: define i64 @"func_A#5write"
 # INITIAL: call void @sorbet_instanceVariableSet
 # INITIAL{LITERAL}: }
 
-# INITIAL-LABEL: define i64 @"func_A#read"
+# INITIAL-LABEL: define i64 @"func_A#4read"
 # INITIAL: call i64 @sorbet_instanceVariableGet
 # INITIAL{LITERAL}: }
 
-# OPT-LABEL: define i64 @"func_A#write"
+# OPT-LABEL: define i64 @"func_A#5write"
 # OPT: call void @sorbet_vm_setivar
 # OPT{LITERAL}: }
 
-# OPT-LABEL: define i64 @"func_A#read"
+# OPT-LABEL: define i64 @"func_A#4read"
 # OPT: call i64 @sorbet_vm_getivar
 # OPT{LITERAL}: }
 

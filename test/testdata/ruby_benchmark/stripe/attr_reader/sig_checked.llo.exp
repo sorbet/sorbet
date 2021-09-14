@@ -83,7 +83,7 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @rb_eRuntimeError = external local_unnamed_addr global i64, align 8
 @.str.9 = private unnamed_addr constant [95 x i8] c"sorbet_getBuildSCMRevision: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
 @.str.10 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
-@"stackFramePrecomputed_func_<root>.<static-init>$152" = unnamed_addr global %struct.rb_iseq_struct* null, align 8
+@"stackFramePrecomputed_func_<root>.17<static-init>$152" = unnamed_addr global %struct.rb_iseq_struct* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
 @"rubyStrFrozen_<top (required)>" = internal unnamed_addr global i64 0, align 8
@@ -109,7 +109,7 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
 @ic_foo.1 = internal global %struct.FunctionInlineCache zeroinitializer
 @ic_puts.2 = internal global %struct.FunctionInlineCache zeroinitializer
-@"stackFramePrecomputed_func_AttrReaderSigChecked#initialize" = unnamed_addr global %struct.rb_iseq_struct* null, align 8
+@"stackFramePrecomputed_func_AttrReaderSigChecked#10initialize" = unnamed_addr global %struct.rb_iseq_struct* null, align 8
 @rubyIdPrecomputed_initialize = internal unnamed_addr global i64 0, align 8
 @str_initialize = private unnamed_addr constant [11 x i8] c"initialize\00", align 1
 @str_sig = private unnamed_addr constant [4 x i8] c"sig\00", align 1
@@ -119,19 +119,19 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @"str_@foo" = private unnamed_addr constant [5 x i8] c"@foo\00", align 1
 @"ivc_@foo.3" = internal global %struct.iseq_inline_iv_cache_entry zeroinitializer
 @"<void-singleton>" = internal unnamed_addr global i64 0
-@"stackFramePrecomputed_func_AttrReaderSigChecked#foo" = unnamed_addr global %struct.rb_iseq_struct* null, align 8
+@"stackFramePrecomputed_func_AttrReaderSigChecked#3foo" = unnamed_addr global %struct.rb_iseq_struct* null, align 8
 @"ivc_@foo.4" = internal global %struct.iseq_inline_iv_cache_entry zeroinitializer
 @"str_Return value" = private unnamed_addr constant [13 x i8] c"Return value\00", align 1
-@"stackFramePrecomputed_func_AttrReaderSigChecked.<static-init>" = unnamed_addr global %struct.rb_iseq_struct* null, align 8
+@"stackFramePrecomputed_func_AttrReaderSigChecked.13<static-init>" = unnamed_addr global %struct.rb_iseq_struct* null, align 8
 @"rubyIdPrecomputed_<class:AttrReaderSigChecked>" = internal unnamed_addr global i64 0, align 8
 @"str_<class:AttrReaderSigChecked>" = private unnamed_addr constant [29 x i8] c"<class:AttrReaderSigChecked>\00", align 1
 @"rubyIdPrecomputed_<block-call>" = internal unnamed_addr global i64 0, align 8
 @"str_<block-call>" = private unnamed_addr constant [13 x i8] c"<block-call>\00", align 1
-@"stackFramePrecomputed_func_AttrReaderSigChecked.<static-init>$block_1" = unnamed_addr global %struct.rb_iseq_struct* null, align 8
+@"stackFramePrecomputed_func_AttrReaderSigChecked.13<static-init>$block_1" = unnamed_addr global %struct.rb_iseq_struct* null, align 8
 @"rubyIdPrecomputed_block in <class:AttrReaderSigChecked>" = internal unnamed_addr global i64 0, align 8
 @"str_block in <class:AttrReaderSigChecked>" = private unnamed_addr constant [38 x i8] c"block in <class:AttrReaderSigChecked>\00", align 1
 @"rubyStrFrozen_block in <class:AttrReaderSigChecked>" = internal unnamed_addr global i64 0, align 8
-@"stackFramePrecomputed_func_AttrReaderSigChecked.<static-init>$block_2" = unnamed_addr global %struct.rb_iseq_struct* null, align 8
+@"stackFramePrecomputed_func_AttrReaderSigChecked.13<static-init>$block_2" = unnamed_addr global %struct.rb_iseq_struct* null, align 8
 @ic_sig = internal global %struct.FunctionInlineCache zeroinitializer
 @rubyIdPrecomputed_sig = internal unnamed_addr global i64 0, align 8
 @ic_params = internal global %struct.FunctionInlineCache zeroinitializer
@@ -241,9 +241,9 @@ define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #6 {
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define internal fastcc void @"func_AttrReaderSigChecked.<static-init>L62"(i64 %selfRaw, %struct.rb_control_frame_struct* %cfp) unnamed_addr #7 !dbg !10 {
+define internal fastcc void @"func_AttrReaderSigChecked.13<static-init>L62"(i64 %selfRaw, %struct.rb_control_frame_struct* %cfp) unnamed_addr #7 !dbg !10 {
 fastSymCallIntrinsic_ResolvedSig_sig:
-  %stackFrame = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.<static-init>", align 8
+  %stackFrame = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.13<static-init>", align 8
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !14
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
   %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !16
@@ -259,7 +259,7 @@ fastSymCallIntrinsic_ResolvedSig_sig:
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 7), i64** %8, align 8, !dbg !23, !tbaa !14
   %rubyId_initialize = load i64, i64* @rubyIdPrecomputed_initialize, align 8, !dbg !24
   %rawSym = tail call i64 @rb_id2sym(i64 %rubyId_initialize), !dbg !24
-  tail call void @sorbet_vm_register_sig(i64 noundef 0, i64 %rawSym, i64 %selfRaw, i64 noundef 8, i64 (i64, i64, i32, i64*, i64)* noundef @"func_AttrReaderSigChecked.<static-init>L62$block_1"), !dbg !24
+  tail call void @sorbet_vm_register_sig(i64 noundef 0, i64 %rawSym, i64 %selfRaw, i64 noundef 8, i64 (i64, i64, i32, i64*, i64)* noundef @"func_AttrReaderSigChecked.13<static-init>L62$block_1"), !dbg !24
   %9 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !24, !tbaa !14
   %10 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %9, i64 0, i32 5, !dbg !24
   %11 = load i32, i32* %10, align 8, !dbg !24, !tbaa !25
@@ -280,7 +280,7 @@ fastSymCallIntrinsic_ResolvedSig_sig63:           ; preds = %fastSymCallIntrinsi
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 12), i64** %8, align 8, !dbg !24, !tbaa !14
   %rubyId_foo = load i64, i64* @rubyIdPrecomputed_foo, align 8, !dbg !29
   %rawSym57 = tail call i64 @rb_id2sym(i64 %rubyId_foo), !dbg !29
-  tail call void @sorbet_vm_register_sig(i64 noundef 0, i64 %rawSym57, i64 %selfRaw, i64 noundef 8, i64 (i64, i64, i32, i64*, i64)* noundef @"func_AttrReaderSigChecked.<static-init>L62$block_2"), !dbg !29
+  tail call void @sorbet_vm_register_sig(i64 noundef 0, i64 %rawSym57, i64 %selfRaw, i64 noundef 8, i64 (i64, i64, i32, i64*, i64)* noundef @"func_AttrReaderSigChecked.13<static-init>L62$block_2"), !dbg !29
   %21 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !29, !tbaa !14
   %22 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %21, i64 0, i32 5, !dbg !29
   %23 = load i32, i32* %22, align 8, !dbg !29, !tbaa !25
@@ -342,7 +342,7 @@ fastSymCallIntrinsic_Static_keep_def:             ; preds = %fastSymCallIntrinsi
   %50 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !34, !tbaa !31
   %guardUpdated5 = icmp eq i64 %49, %50, !dbg !34
   tail call void @llvm.assume(i1 %guardUpdated5), !dbg !34
-  %stackFrame85 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked#initialize", align 8, !dbg !34
+  %stackFrame85 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked#10initialize", align 8, !dbg !34
   %51 = tail call noalias nonnull i8* @ruby_xcalloc(i64 noundef 1, i64 noundef 64) #16, !dbg !34
   %52 = bitcast i8* %51 to i16*, !dbg !34
   %53 = load i16, i16* %52, align 8, !dbg !34
@@ -367,7 +367,7 @@ fastSymCallIntrinsic_Static_keep_def:             ; preds = %fastSymCallIntrinsi
   %64 = getelementptr inbounds i8, i8* %51, i64 32, !dbg !34
   %65 = bitcast i8* %64 to i8**, !dbg !34
   store i8* %62, i8** %65, align 8, !dbg !34, !tbaa !39
-  tail call void @sorbet_vm_define_method(i64 %48, i8* noundef getelementptr inbounds ([11 x i8], [11 x i8]* @str_initialize, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)* noundef @"func_AttrReaderSigChecked#initialize", i8* nonnull %51, %struct.rb_iseq_struct* %stackFrame85, i1 noundef zeroext false) #15, !dbg !34
+  tail call void @sorbet_vm_define_method(i64 %48, i8* noundef getelementptr inbounds ([11 x i8], [11 x i8]* @str_initialize, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)* noundef @"func_AttrReaderSigChecked#10initialize", i8* nonnull %51, %struct.rb_iseq_struct* %stackFrame85, i1 noundef zeroext false) #15, !dbg !34
   %66 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !34, !tbaa !14
   %67 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %66, i64 0, i32 5, !dbg !34
   %68 = load i32, i32* %67, align 8, !dbg !34, !tbaa !25
@@ -393,7 +393,7 @@ fastSymCallIntrinsic_Static_keep_def100:          ; preds = %47, %74
   %rawSym92 = tail call i64 @rb_id2sym(i64 %rubyId_foo91), !dbg !40
   %rubyId_normal93 = load i64, i64* @rubyIdPrecomputed_normal, align 8, !dbg !40
   %rawSym94 = tail call i64 @rb_id2sym(i64 %rubyId_normal93), !dbg !40
-  %stackFrame101 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked#foo", align 8, !dbg !40
+  %stackFrame101 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked#3foo", align 8, !dbg !40
   %78 = tail call noalias nonnull i8* @ruby_xcalloc(i64 noundef 1, i64 noundef 64) #16, !dbg !40
   %79 = bitcast i8* %78 to i16*, !dbg !40
   %80 = load i16, i16* %79, align 8, !dbg !40
@@ -402,7 +402,7 @@ fastSymCallIntrinsic_Static_keep_def100:          ; preds = %47, %74
   %82 = getelementptr inbounds i8, i8* %78, i64 4, !dbg !40
   %83 = bitcast i8* %82 to i32*, !dbg !40
   tail call void @llvm.memset.p0i8.i64(i8* nonnull align 4 %82, i8 0, i64 28, i1 false), !dbg !40
-  tail call void @sorbet_vm_define_method(i64 %48, i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)* noundef @"func_AttrReaderSigChecked#foo", i8* nonnull %78, %struct.rb_iseq_struct* %stackFrame101, i1 noundef zeroext false) #15, !dbg !40
+  tail call void @sorbet_vm_define_method(i64 %48, i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)* noundef @"func_AttrReaderSigChecked#3foo", i8* nonnull %78, %struct.rb_iseq_struct* %stackFrame101, i1 noundef zeroext false) #15, !dbg !40
   %84 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !40, !tbaa !14
   %85 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %84, i64 0, i32 5, !dbg !40
   %86 = load i32, i32* %85, align 8, !dbg !40, !tbaa !25
@@ -478,7 +478,7 @@ entry:
   %"rubyStr_<top (required)>.i.i" = load i64, i64* @"rubyStrFrozen_<top (required)>", align 8
   %"rubyStr_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb.i.i" = load i64, i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb", align 8
   %21 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<top (required)>.i.i", i64 %"rubyId_<top (required)>.i.i", i64 %"rubyStr_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb.i.i", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 0, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals.i.i, i32 noundef 0, i32 noundef 2)
-  store %struct.rb_iseq_struct* %21, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$152", align 8
+  store %struct.rb_iseq_struct* %21, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.17<static-init>$152", align 8
   %rubyId_new.i = load i64, i64* @rubyIdPrecomputed_new, align 8, !dbg !43
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_new, i64 %rubyId_new.i, i32 noundef 16, i32 noundef 1, i32 noundef 0, i64* noundef null), !dbg !43
   %"rubyId_<.i" = load i64, i64* @"rubyIdPrecomputed_<", align 8, !dbg !45
@@ -498,7 +498,7 @@ entry:
   %rubyId_initialize.i.i = load i64, i64* @rubyIdPrecomputed_initialize, align 8
   %"rubyStr_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb.i25.i" = load i64, i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb", align 8
   %23 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %22, i64 %rubyId_initialize.i.i, i64 %"rubyStr_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb.i25.i", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 1, i32 noundef 8, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals.i26.i, i32 noundef 0, i32 noundef 0)
-  store %struct.rb_iseq_struct* %23, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked#initialize", align 8
+  store %struct.rb_iseq_struct* %23, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked#10initialize", align 8
   %24 = call i64 @sorbet_getConstant(i8* noundef getelementptr inbounds ([30 x i8], [30 x i8]* @sorbet_getVoidSingleton.name, i64 0, i64 0), i64 noundef 30) #15
   store i64 %24, i64* @"<void-singleton>", align 8
   %25 = call i64 @sorbet_vm_fstring_new(i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 noundef 3) #15
@@ -506,7 +506,7 @@ entry:
   %rubyId_foo.i.i = load i64, i64* @rubyIdPrecomputed_foo, align 8
   %"rubyStr_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb.i27.i" = load i64, i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb", align 8
   %26 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %25, i64 %rubyId_foo.i.i, i64 %"rubyStr_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb.i27.i", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 1, i32 noundef 13, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals.i28.i, i32 noundef 0, i32 noundef 0)
-  store %struct.rb_iseq_struct* %26, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked#foo", align 8
+  store %struct.rb_iseq_struct* %26, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked#3foo", align 8
   %27 = call i64 @sorbet_vm_fstring_new(i8* noundef getelementptr inbounds ([29 x i8], [29 x i8]* @"str_<class:AttrReaderSigChecked>", i64 0, i64 0), i64 noundef 28) #15
   call void @rb_gc_register_mark_object(i64 %27) #15
   %28 = bitcast i64* %locals.i30.i to i8*
@@ -516,22 +516,22 @@ entry:
   %"rubyId_<block-call>.i.i" = load i64, i64* @"rubyIdPrecomputed_<block-call>", align 8
   store i64 %"rubyId_<block-call>.i.i", i64* %locals.i30.i, align 8
   %29 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %27, i64 %"rubyId_<class:AttrReaderSigChecked>.i.i", i64 %"rubyStr_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb.i29.i", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 3, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull align 8 %locals.i30.i, i32 noundef 1, i32 noundef 4)
-  store %struct.rb_iseq_struct* %29, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.<static-init>", align 8
+  store %struct.rb_iseq_struct* %29, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.13<static-init>", align 8
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %28)
   %30 = call i64 @sorbet_vm_fstring_new(i8* noundef getelementptr inbounds ([38 x i8], [38 x i8]* @"str_block in <class:AttrReaderSigChecked>", i64 0, i64 0), i64 noundef 37) #15
   call void @rb_gc_register_mark_object(i64 %30) #15
   store i64 %30, i64* @"rubyStrFrozen_block in <class:AttrReaderSigChecked>", align 8
-  %stackFrame.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.<static-init>", align 8
+  %stackFrame.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.13<static-init>", align 8
   %"rubyId_block in <class:AttrReaderSigChecked>.i.i" = load i64, i64* @"rubyIdPrecomputed_block in <class:AttrReaderSigChecked>", align 8
   %"rubyStr_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb.i31.i" = load i64, i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb", align 8
   %31 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %30, i64 %"rubyId_block in <class:AttrReaderSigChecked>.i.i", i64 %"rubyStr_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb.i31.i", i64 %realpath, %struct.rb_iseq_struct* %stackFrame.i.i, i32 noundef 2, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef null, i32 noundef 0, i32 noundef 4)
-  store %struct.rb_iseq_struct* %31, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.<static-init>$block_1", align 8
-  %stackFrame.i32.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.<static-init>", align 8
+  store %struct.rb_iseq_struct* %31, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.13<static-init>$block_1", align 8
+  %stackFrame.i32.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.13<static-init>", align 8
   %"rubyId_block in <class:AttrReaderSigChecked>.i33.i" = load i64, i64* @"rubyIdPrecomputed_block in <class:AttrReaderSigChecked>", align 8
   %"rubyStr_block in <class:AttrReaderSigChecked>.i34.i" = load i64, i64* @"rubyStrFrozen_block in <class:AttrReaderSigChecked>", align 8
   %"rubyStr_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb.i35.i" = load i64, i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb", align 8
   %32 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_block in <class:AttrReaderSigChecked>.i34.i", i64 %"rubyId_block in <class:AttrReaderSigChecked>.i33.i", i64 %"rubyStr_test/testdata/ruby_benchmark/stripe/attr_reader/sig_checked.rb.i35.i", i64 %realpath, %struct.rb_iseq_struct* %stackFrame.i32.i, i32 noundef 2, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef null, i32 noundef 0, i32 noundef 4)
-  store %struct.rb_iseq_struct* %32, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.<static-init>$block_2", align 8
+  store %struct.rb_iseq_struct* %32, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.13<static-init>$block_2", align 8
   %rubyId_sig.i = load i64, i64* @rubyIdPrecomputed_sig, align 8, !dbg !24
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_sig, i64 %rubyId_sig.i, i32 noundef 20, i32 noundef 3, i32 noundef 0, i64* noundef null), !dbg !24
   %rubyId_params.i = load i64, i64* @rubyIdPrecomputed_params, align 8, !dbg !41
@@ -558,7 +558,7 @@ entry:
   %37 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !14
   %38 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %37, i64 0, i32 2
   %39 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %38, align 8, !tbaa !16
-  %stackFrame.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$152", align 8
+  %stackFrame.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.17<static-init>$152", align 8
   %40 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %39, i64 0, i32 2
   store %struct.rb_iseq_struct* %stackFrame.i, %struct.rb_iseq_struct** %40, align 8, !tbaa !20
   %41 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %39, i64 0, i32 4
@@ -572,7 +572,7 @@ entry:
   %46 = load i64, i64* @rb_cObject, align 8, !dbg !62
   %47 = call i64 @rb_define_class(i8* noundef getelementptr inbounds ([21 x i8], [21 x i8]* @str_AttrReaderSigChecked, i64 0, i64 0), i64 %46) #15, !dbg !62
   %48 = call %struct.rb_control_frame_struct* @sorbet_pushStaticInitFrame(i64 %47) #15, !dbg !62
-  call fastcc void @"func_AttrReaderSigChecked.<static-init>L62"(i64 %47, %struct.rb_control_frame_struct* %48) #15, !dbg !62
+  call fastcc void @"func_AttrReaderSigChecked.13<static-init>L62"(i64 %47, %struct.rb_control_frame_struct* %48) #15, !dbg !62
   call void @sorbet_popFrame() #15, !dbg !62
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 16), i64** %45, align 8, !dbg !62, !tbaa !14
   %49 = load i64, i64* @guard_epoch_AttrReaderSigChecked, align 8, !dbg !43
@@ -639,7 +639,7 @@ afterSend37.i:                                    ; preds = %101, %sorbet_rb_int
   %"symIntrinsicRawPhi_<.i" = phi i64 [ %send4, %"alternativeCallIntrinsic_Integer_<.i" ], [ %rawSendResult89.i, %sorbet_rb_int_lt.exit.i ], [ %rawSendResult89.i, %101 ], !dbg !45
   %77 = and i64 %"symIntrinsicRawPhi_<.i", -9, !dbg !45
   %78 = icmp ne i64 %77, 0, !dbg !45
-  br i1 %78, label %BB5.i, label %"func_<root>.<static-init>$152.exit", !dbg !45
+  br i1 %78, label %BB5.i, label %"func_<root>.17<static-init>$152.exit", !dbg !45
 
 "alternativeCallIntrinsic_Integer_<.i":           ; preds = %62, %sorbet_isa_Integer.exit
   %79 = phi i1 [ %72, %sorbet_isa_Integer.exit ], [ false, %62 ]
@@ -743,7 +743,7 @@ BB2.i.backedge:                                   ; preds = %130, %sorbet_rb_int
   %i.sroa.0.0.i.be = phi i64 [ %send6, %"alternativeCallIntrinsic_Integer_+.i" ], [ %121, %sorbet_rb_int_plus.exit.i ], [ %121, %130 ]
   br label %BB2.i
 
-"func_<root>.<static-init>$152.exit":             ; preds = %afterSend37.i
+"func_<root>.17<static-init>$152.exit":           ; preds = %afterSend37.i
   %i.sroa.0.0.i.lcssa = phi i64 [ %i.sroa.0.0.i, %afterSend37.i ], !dbg !61
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 26), i64** %45, align 8, !tbaa !14
   %134 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %39, i64 0, i32 1, !dbg !48
@@ -773,7 +773,7 @@ BB2.i.backedge:                                   ; preds = %130, %sorbet_rb_int
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"func_AttrReaderSigChecked#initialize"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw, %struct.rb_control_frame_struct* nocapture nonnull writeonly align 8 dereferenceable(8) %cfp) #7 !dbg !75 {
+define i64 @"func_AttrReaderSigChecked#10initialize"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw, %struct.rb_control_frame_struct* nocapture nonnull writeonly align 8 dereferenceable(8) %cfp) #7 !dbg !75 {
 functionEntryInitializers:
   %0 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %cfp, i64 0, i32 0
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %0, align 8, !tbaa !14
@@ -818,12 +818,12 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs, %
   ret i64 %"<void-singleton>"
 
 codeRepl:                                         ; preds = %3, %sorbet_isa_Integer.exit
-  tail call fastcc void @"func_AttrReaderSigChecked#initialize.cold.1"(i64 %rawArg_foo) #19, !dbg !77
+  tail call fastcc void @"func_AttrReaderSigChecked#10initialize.cold.1"(i64 %rawArg_foo) #19, !dbg !77
   unreachable
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"func_AttrReaderSigChecked#foo"(i32 %argc, i64* nocapture nofree readnone %argArray, i64 %selfRaw, %struct.rb_control_frame_struct* nocapture nonnull writeonly align 8 dereferenceable(8) %cfp) #7 !dbg !80 {
+define i64 @"func_AttrReaderSigChecked#3foo"(i32 %argc, i64* nocapture nofree readnone %argArray, i64 %selfRaw, %struct.rb_control_frame_struct* nocapture nonnull writeonly align 8 dereferenceable(8) %cfp) #7 !dbg !80 {
 functionEntryInitializers:
   %0 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %cfp, i64 0, i32 0
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 13), i64** %0, align 8, !tbaa !14
@@ -861,19 +861,19 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs, %
   ret i64 %1
 
 codeRepl:                                         ; preds = %4, %sorbet_isa_Integer.exit
-  tail call fastcc void @"func_AttrReaderSigChecked#foo.cold.1"(i64 %1) #19, !dbg !83
+  tail call fastcc void @"func_AttrReaderSigChecked#3foo.cold.1"(i64 %1) #19, !dbg !83
   unreachable
 }
 
 ; Function Attrs: ssp
-define internal i64 @"func_AttrReaderSigChecked.<static-init>L62$block_1"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture nofree readnone %argArray, i64 %blockArg) #9 !dbg !42 {
+define internal i64 @"func_AttrReaderSigChecked.13<static-init>L62$block_1"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture nofree readnone %argArray, i64 %blockArg) #9 !dbg !42 {
 functionEntryInitializers:
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !14
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
   %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !16
   %3 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 3
   %4 = load i64, i64* %3, align 8, !tbaa !84
-  %stackFrame = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.<static-init>$block_1", align 8
+  %stackFrame = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.13<static-init>$block_1", align 8
   %5 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 2
   store %struct.rb_iseq_struct* %stackFrame, %struct.rb_iseq_struct** %5, align 8, !tbaa !20
   %6 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 4
@@ -904,14 +904,14 @@ functionEntryInitializers:
 }
 
 ; Function Attrs: ssp
-define internal i64 @"func_AttrReaderSigChecked.<static-init>L62$block_2"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture nofree readnone %argArray, i64 %blockArg) #9 !dbg !52 {
+define internal i64 @"func_AttrReaderSigChecked.13<static-init>L62$block_2"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture nofree readnone %argArray, i64 %blockArg) #9 !dbg !52 {
 functionEntryInitializers:
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !14
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
   %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !16
   %3 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 3
   %4 = load i64, i64* %3, align 8, !tbaa !84
-  %stackFrame = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.<static-init>$block_2", align 8
+  %stackFrame = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderSigChecked.13<static-init>$block_2", align 8
   %5 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 2
   store %struct.rb_iseq_struct* %stackFrame, %struct.rb_iseq_struct** %5, align 8, !tbaa !20
   %6 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 4
@@ -946,14 +946,14 @@ declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #5
 declare void @llvm.memset.p0i8.i64(i8* nocapture writeonly, i8, i64, i1 immarg) #11
 
 ; Function Attrs: cold minsize noreturn nounwind sspreq uwtable
-define internal fastcc void @"func_AttrReaderSigChecked#initialize.cold.1"(i64 %rawArg_foo) unnamed_addr #12 !dbg !88 {
+define internal fastcc void @"func_AttrReaderSigChecked#10initialize.cold.1"(i64 %rawArg_foo) unnamed_addr #12 !dbg !88 {
 newFuncRoot:
   tail call void @sorbet_cast_failure(i64 %rawArg_foo, i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_sig, i64 0, i64 0), i8* noundef getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0)) #18, !dbg !90
   unreachable, !dbg !90
 }
 
 ; Function Attrs: cold minsize noreturn nounwind sspreq uwtable
-define internal fastcc void @"func_AttrReaderSigChecked#foo.cold.1"(i64 %0) unnamed_addr #12 !dbg !91 {
+define internal fastcc void @"func_AttrReaderSigChecked#3foo.cold.1"(i64 %0) unnamed_addr #12 !dbg !91 {
 newFuncRoot:
   tail call void @sorbet_cast_failure(i64 %0, i8* noundef getelementptr inbounds ([13 x i8], [13 x i8]* @"str_Return value", i64 0, i64 0), i8* noundef getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0)) #18
   unreachable
@@ -1014,7 +1014,7 @@ attributes #19 = { noinline }
 !7 = !{!"long", !8, i64 0}
 !8 = !{!"omnipotent char", !9, i64 0}
 !9 = !{!"Simple C/C++ TBAA"}
-!10 = distinct !DISubprogram(name: "AttrReaderSigChecked.<static-init>", linkageName: "func_AttrReaderSigChecked.<static-init>L62", scope: null, file: !4, line: 5, type: !11, scopeLine: 5, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
+!10 = distinct !DISubprogram(name: "AttrReaderSigChecked.<static-init>", linkageName: "func_AttrReaderSigChecked.13<static-init>L62", scope: null, file: !4, line: 5, type: !11, scopeLine: 5, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
 !11 = !DISubroutineType(types: !12)
 !12 = !{!13}
 !13 = !DIBasicType(name: "VALUE", size: 64, encoding: DW_ATE_signed)
@@ -1046,9 +1046,9 @@ attributes #19 = { noinline }
 !39 = !{!36, !15, i64 32}
 !40 = !DILocation(line: 13, column: 3, scope: !10)
 !41 = !DILocation(line: 7, column: 8, scope: !42)
-!42 = distinct !DISubprogram(name: "AttrReaderSigChecked.<static-init>", linkageName: "func_AttrReaderSigChecked.<static-init>L62$block_1", scope: !10, file: !4, line: 5, type: !11, scopeLine: 5, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
+!42 = distinct !DISubprogram(name: "AttrReaderSigChecked.<static-init>", linkageName: "func_AttrReaderSigChecked.13<static-init>L62$block_1", scope: !10, file: !4, line: 5, type: !11, scopeLine: 5, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
 !43 = !DILocation(line: 16, column: 5, scope: !44)
-!44 = distinct !DISubprogram(name: "<root>.<static-init>", linkageName: "func_<root>.<static-init>$152", scope: null, file: !4, line: 5, type: !11, scopeLine: 5, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
+!44 = distinct !DISubprogram(name: "<root>.<static-init>", linkageName: "func_<root>.17<static-init>$152", scope: null, file: !4, line: 5, type: !11, scopeLine: 5, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
 !45 = !DILocation(line: 19, column: 7, scope: !44)
 !46 = !DILocation(line: 21, column: 3, scope: !44)
 !47 = !DILocation(line: 23, column: 3, scope: !44)
@@ -1056,7 +1056,7 @@ attributes #19 = { noinline }
 !49 = !DILocation(line: 27, column: 6, scope: !44)
 !50 = !DILocation(line: 27, column: 1, scope: !44)
 !51 = !DILocation(line: 12, column: 8, scope: !52)
-!52 = distinct !DISubprogram(name: "AttrReaderSigChecked.<static-init>", linkageName: "func_AttrReaderSigChecked.<static-init>L62$block_2", scope: !10, file: !4, line: 5, type: !11, scopeLine: 5, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
+!52 = distinct !DISubprogram(name: "AttrReaderSigChecked.<static-init>", linkageName: "func_AttrReaderSigChecked.13<static-init>L62$block_2", scope: !10, file: !4, line: 5, type: !11, scopeLine: 5, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
 !53 = !{!54, !7, i64 400}
 !54 = !{!"rb_vm_struct", !7, i64 0, !55, i64 8, !15, i64 192, !15, i64 200, !15, i64 208, !32, i64 216, !8, i64 224, !56, i64 264, !56, i64 280, !56, i64 296, !56, i64 312, !7, i64 328, !18, i64 336, !18, i64 340, !18, i64 344, !18, i64 344, !18, i64 344, !18, i64 344, !18, i64 348, !7, i64 352, !8, i64 360, !7, i64 400, !7, i64 408, !7, i64 416, !7, i64 424, !7, i64 432, !7, i64 440, !7, i64 448, !15, i64 456, !15, i64 464, !58, i64 472, !59, i64 992, !15, i64 1016, !15, i64 1024, !18, i64 1032, !18, i64 1036, !56, i64 1040, !8, i64 1056, !7, i64 1096, !7, i64 1104, !7, i64 1112, !7, i64 1120, !7, i64 1128, !18, i64 1136, !15, i64 1144, !15, i64 1152, !15, i64 1160, !15, i64 1168, !15, i64 1176, !15, i64 1184, !18, i64 1192, !60, i64 1200, !8, i64 1232}
 !55 = !{!"rb_global_vm_lock_struct", !15, i64 0, !8, i64 8, !56, i64 48, !15, i64 64, !18, i64 72, !8, i64 80, !8, i64 128, !18, i64 176, !18, i64 180}
@@ -1079,12 +1079,12 @@ attributes #19 = { noinline }
 !72 = !{!73}
 !73 = distinct !{!73, !74, !"sorbet_rb_int_plus: argument 0"}
 !74 = distinct !{!74, !"sorbet_rb_int_plus"}
-!75 = distinct !DISubprogram(name: "AttrReaderSigChecked#initialize", linkageName: "func_AttrReaderSigChecked#initialize", scope: null, file: !4, line: 8, type: !11, scopeLine: 8, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
+!75 = distinct !DISubprogram(name: "AttrReaderSigChecked#initialize", linkageName: "func_AttrReaderSigChecked#10initialize", scope: null, file: !4, line: 8, type: !11, scopeLine: 8, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
 !76 = !DILocation(line: 8, column: 3, scope: !75)
 !77 = !DILocation(line: 8, column: 18, scope: !75)
 !78 = !DILocation(line: 9, column: 12, scope: !75)
 !79 = !DILocation(line: 9, column: 5, scope: !75)
-!80 = distinct !DISubprogram(name: "AttrReaderSigChecked#foo", linkageName: "func_AttrReaderSigChecked#foo", scope: null, file: !4, line: 13, type: !11, scopeLine: 13, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
+!80 = distinct !DISubprogram(name: "AttrReaderSigChecked#foo", linkageName: "func_AttrReaderSigChecked#3foo", scope: null, file: !4, line: 13, type: !11, scopeLine: 13, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
 !81 = !DILocation(line: 13, column: 3, scope: !80)
 !82 = !DILocation(line: 13, column: 16, scope: !80)
 !83 = !DILocation(line: 0, scope: !80)
@@ -1092,7 +1092,7 @@ attributes #19 = { noinline }
 !85 = !DILocation(line: 7, column: 15, scope: !42)
 !86 = !DILocation(line: 7, column: 3, scope: !42)
 !87 = !DILocation(line: 12, column: 3, scope: !52)
-!88 = distinct !DISubprogram(name: "func_AttrReaderSigChecked#initialize.cold.1", linkageName: "func_AttrReaderSigChecked#initialize.cold.1", scope: null, file: !4, type: !89, spFlags: DISPFlagLocalToUnit | DISPFlagDefinition | DISPFlagOptimized, unit: !3, retainedNodes: !5)
+!88 = distinct !DISubprogram(name: "func_AttrReaderSigChecked#10initialize.cold.1", linkageName: "func_AttrReaderSigChecked#10initialize.cold.1", scope: null, file: !4, type: !89, spFlags: DISPFlagLocalToUnit | DISPFlagDefinition | DISPFlagOptimized, unit: !3, retainedNodes: !5)
 !89 = !DISubroutineType(types: !5)
 !90 = !DILocation(line: 8, column: 18, scope: !88)
-!91 = distinct !DISubprogram(name: "func_AttrReaderSigChecked#foo.cold.1", linkageName: "func_AttrReaderSigChecked#foo.cold.1", scope: null, file: !4, type: !89, spFlags: DISPFlagLocalToUnit | DISPFlagDefinition | DISPFlagOptimized, unit: !3, retainedNodes: !5)
+!91 = distinct !DISubprogram(name: "func_AttrReaderSigChecked#3foo.cold.1", linkageName: "func_AttrReaderSigChecked#3foo.cold.1", scope: null, file: !4, type: !89, spFlags: DISPFlagLocalToUnit | DISPFlagDefinition | DISPFlagOptimized, unit: !3, retainedNodes: !5)
