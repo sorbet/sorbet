@@ -1,6 +1,7 @@
 # typed: true
 # compiled: true
 # frozen_string_literal: true
+# run_filecheck: INITIAL
 
 class Parent
   extend T::Sig
@@ -18,3 +19,7 @@ class Child < Parent; end
 # use `findMemberTransitive` to find the final method in Parent, and so this
 # won't end up being a direct call in the generated llvm.
 Child.new.final_method
+
+# INITIAL-LABEL: define internal i64 @"func_<root>.<static-init>$152"
+# INITIAL: call i64{{.*}}@sorbet_i_send(%struct.FunctionInlineCache* @ic_final_method
+# INITIAL{LITERAL}: }
