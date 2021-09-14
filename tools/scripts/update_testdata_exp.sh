@@ -81,6 +81,15 @@ for this_src in "${rb_src[@]}" DUMMY; do
       fi
       if [ "$pass" = "package-tree" ]; then
         args=("--stripe-packages")
+        extra_prefixes=()
+        while IFS='' read -r prefix; do
+          extra_prefixes+=("$prefix")
+        done < <(grep '# extra-package-files-directory-prefix: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
+        if [ "${#extra_prefixes[@]}" -gt 0 ]; then
+          for prefix in "${extra_prefixes[@]}"; do
+            args+=("--extra-package-files-directory-prefix" "${prefix}")
+          done
+        fi
       fi
       if ! [ -e "$candidate" ]; then
         continue
