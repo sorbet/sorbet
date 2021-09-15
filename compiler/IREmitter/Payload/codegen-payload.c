@@ -160,6 +160,8 @@ SORBET_ALIVE(VALUE, sorbet_vm_fstring_new, (const char *ptr, long len));
 extern void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) __attribute__((noreturn));
 KEEP_ALIVE(sorbet_throwReturn);
 
+SORBET_ALIVE(int, rb_cvar_lookup, (VALUE klass, ID id, VALUE *v));
+
 struct rfb_status {
     // The return value from the function.
     VALUE return_value;
@@ -498,6 +500,15 @@ void sorbet_classVariableSet(VALUE _class, ID name, VALUE newValue) {
 SORBET_INLINE
 VALUE sorbet_classVariableDefined(VALUE klass, VALUE name) {
     return rb_cvar_defined(klass, SYM2ID(name));
+}
+
+SORBET_INLINE
+_Bool sorbet_classVariableDefinedAndTruthy(VALUE klass, ID name) {
+    VALUE val = Qundef;
+    if (!rb_cvar_lookup(klass, name, &val)) {
+        return false;
+    }
+    return RTEST(val);
 }
 
 // ****

@@ -712,8 +712,30 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
             auto *elseb = resolveJumpTarget(cfg, irctx, bb, bb->bexit.elseb);
 
             if (thenb != elseb && bb->bexit.cond.variable != cfg::LocalRef::blockCall()) {
-                auto var = Payload::varGet(cs, bb->bexit.cond.variable, builder, irctx, bb->rubyBlockId);
-                auto condValue = Payload::testIsTruthy(cs, builder, var);
+                // If the condition is a class variable reference, we can't just access it
+                // directly, because it might not have been defined yet, and accessing
+                // class variables prior to their definition is an error.
+                //
+                // The VM will insert an explicit `defined?(@@var)` check for `@@var ||= ...`.
+                // We desugar that expression to explicit conditionals (without the `defined?`
+                // check, so we have to insert the definedness check for safety.
+                //
+                // If you write `if @@var; @@var; else; @@var = ...; end`, the VM will
+                // test for truthiness directly without doing through `defined?`.  Even
+                // so, the translation we're doing here is just as efficient: the VM would
+                // do a class variable lookup and truthiness test, which is exactly the
+                // same thing as sorbet_classVariableDefinedAndTruthy does.
+                auto testref = bb->bexit.cond.variable;
+                auto aliasEntry = irctx.aliases.find(testref);
+                llvm::Value *condValue;
+                if (aliasEntry != irctx.aliases.end() && aliasEntry->second.kind == Alias::AliasKind::ClassField) {
+                    auto klass = Payload::getClassVariableStoreClass(cs, builder, irctx);
+                    auto id = Payload::idIntern(cs, builder, aliasEntry->second.classField.shortName(cs));
+                    condValue = builder.CreateCall(cs.getFunction("sorbet_classVariableDefinedAndTruthy"), {klass, id});
+                } else {
+                    auto var = Payload::varGet(cs, testref, builder, irctx, bb->rubyBlockId);
+                    condValue = Payload::testIsTruthy(cs, builder, var);
+                }
 
                 builder.CreateCondBr(condValue, thenb, elseb);
             } else {
