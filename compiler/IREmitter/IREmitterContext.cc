@@ -164,33 +164,112 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, const UnorderedMap<cfg::Lo
 }
 
 // Bundle up a bunch of state used for capture tracking to simplify the interface in findCaptures below.
+struct HomeBlock {
+    int rubyBlockId;
+};
+
 class TrackCaptures final {
+    int findNearestLocalsBlock(int rubyBlockId) {
+        while (!functionTypeManagesLocals(blockTypes[rubyBlockId])) {
+            rubyBlockId = blockParents[rubyBlockId];
+        }
+        return rubyBlockId;
+    }
+
+    int chooseHigherBlock(int blockId1, int blockId2) {
+        // If one of the blocks is already the root block, we can't move up any higher.
+        if (blockId1 == 0 || blockId2 == 0) {
+            return 0;
+        }
+
+        const int level1 = blockLevels[blockId1];
+        const int level2 = blockLevels[blockId2];
+        if (level1 == level2) {
+            // This should mean that the blocks are the same, but amazingly, they might
+            // not be; <gotoDeadTemp> local variables, for instance, are referenced by
+            // rescue and ensure blocks for a given exception handling region.
+            if (blockId1 == blockId2) {
+                return blockId1;
+            }
+            // If we don't have the same blocks, they should at least have the same
+            // parent block, and we'll home the local to the nearest locals block to that.
+            auto parent1 = blockParents[blockId1];
+            auto parent2 = blockParents[blockId2];
+            if (parent1 == parent2) {
+                return findNearestLocalsBlock(parent1);
+            }
+            // This is weird, but we run into this in the case of something like:
+            //
+            // begin
+            //   begin
+            //     # code
+            //   rescue => e
+            //     # code
+            //   end
+            // rescue => e
+            //   # code
+            // end
+            //
+            // From Sorbet's perspective, the `e` variables are considered the same
+            // LocalRef, despite them having absolutely nothing to do with each other,
+            // scope-wise.  This is unfortunate and weird, but it's the way things
+            // work.  So we'll keep recursing up the tree.
+            return chooseHigherBlock(findNearestLocalsBlock(parent1),
+                findNearestLocalsBlock(parent2));
+        }
+        if (level1 < level2) {
+            return blockId1;
+        }
+        return blockId2;
+    }
+
 public:
+    const vector<int> &blockParents;
+    const vector<FunctionType> &blockTypes;
+    const vector<int> &blockLevels;
     UnorderedMap<cfg::LocalRef, optional<int>> privateUsages;
-    UnorderedMap<cfg::LocalRef, EscapedUse> escapedIndexes;
-    int escapedIndexCounter;
+    UnorderedMap<cfg::LocalRef, HomeBlock> homeBlocks;
     bool usesBlockArg;
     cfg::LocalRef blkArg;
 
-    TrackCaptures()
-        : privateUsages{}, escapedIndexes{}, escapedIndexCounter{0},
-          usesBlockArg{false}, blkArg{cfg::LocalRef::noVariable()} {}
+    TrackCaptures(const vector<int> &blockParents, const vector<FunctionType> &blockTypes,
+                  const vector<int> &blockLevels)
+        : blockParents(blockParents), blockTypes(blockTypes), blockLevels(blockLevels),
+          privateUsages{}, usesBlockArg{false}, blkArg{cfg::LocalRef::noVariable()} {}
 
     void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv) {
-        if (lv == cfg::LocalRef::selfVariable()) {
+        if (lv == cfg::LocalRef::selfVariable() || lv == cfg::LocalRef::blockCall()) {
             return;
         }
         usesBlockArg = usesBlockArg || lv == blkArg;
         auto fnd = privateUsages.find(lv);
-        if (fnd != privateUsages.end()) {
-            auto &store = fnd->second;
-            if (store && store.value() != bb->rubyBlockId) {
-                store = nullopt;
-                escapedIndexes[lv] = EscapedUse{escapedIndexCounter};
-                escapedIndexCounter += 1;
-            }
-        } else {
+        if (fnd == privateUsages.end()) {
             privateUsages[lv] = bb->rubyBlockId;
+            return;
+        }
+
+        auto &store = fnd->second;
+        if (store.has_value()) {
+            if (store.value() != bb->rubyBlockId) {
+                auto origBlock = findNearestLocalsBlock(store.value());
+                auto newBlock = findNearestLocalsBlock(bb->rubyBlockId);
+                store = nullopt;
+                ENFORCE(homeBlocks.find(lv) == homeBlocks.end());
+                homeBlocks[lv] = HomeBlock{chooseHigherBlock(origBlock, newBlock)};
+            }
+            // Otherwise, the references come from the same block and we don't
+            // need to update anything.
+        } else {
+            // This variable is referenced from multiple blocks.  See if we need
+            // to update its home block.
+            ENFORCE(homeBlocks.find(lv) != homeBlocks.end());
+            auto &home = homeBlocks[lv];
+            if (home.rubyBlockId == bb->rubyBlockId) {
+                return;
+            }
+
+            auto potentialHome = findNearestLocalsBlock(bb->rubyBlockId);
+            home.rubyBlockId = chooseHigherBlock(home.rubyBlockId, potentialHome);
         }
     }
 
@@ -206,6 +285,22 @@ public:
             realPrivateUsages[entry.first] = entry.second.value();
         }
 
+        // For now, even though we have home blocks for everything, we say that everything
+        // lives in block 0.  This is obviously incorrect, but fixing it requires surgery
+        // in other parts of the compiler, so do this for now.
+
+        // Assign indices into the single locals array in a stable order.
+        vector<cfg::LocalRef> refs;
+        for (auto &entry : homeBlocks) {
+            refs.push_back(entry.first);
+        }
+        fast_sort(refs, [](const auto &left, const auto &right) { return left.id() < right.id(); });
+
+        UnorderedMap<cfg::LocalRef, EscapedUse> escapedIndexes;
+        int counter = 0;
+        for (auto ref : refs) {
+            escapedIndexes[ref] = EscapedUse{counter++};
+        }
         return {std::move(realPrivateUsages), std::move(escapedIndexes), usesBlockArg};
     }
 };
@@ -214,8 +309,11 @@ public:
  * negative number */
 tuple<UnorderedMap<cfg::LocalRef, int>, UnorderedMap<cfg::LocalRef, EscapedUse>, bool>
 findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
-             const vector<int> &exceptionHandlingBlockHeaders) {
-    TrackCaptures usage;
+             const vector<int> &exceptionHandlingBlockHeaders,
+             const vector<int> &blockParents,
+             const vector<FunctionType> &blockTypes,
+             const vector<int> &blockLevels) {
+    TrackCaptures usage(blockParents, blockTypes, blockLevels);
 
     int argId = -1;
     for (auto &arg : mdef.args) {
@@ -770,7 +868,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     auto [aliases, symbols] = setupAliasesAndKeywords(cs, cfg);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
     auto [variablesPrivateToBlocks, escapedVariableIndices, usesBlockArgs] =
-        findCaptures(cs, md, cfg, exceptionHandlingBlockHeaders);
+        findCaptures(cs, md, cfg, exceptionHandlingBlockHeaders, blockParents, blockTypes, blockLevels);
     vector<llvm::BasicBlock *> functionInitializersByFunction;
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
