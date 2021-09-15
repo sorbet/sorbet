@@ -167,7 +167,7 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, const UnorderedMap<cfg::Lo
 class TrackCaptures final {
 public:
     UnorderedMap<cfg::LocalRef, optional<int>> privateUsages;
-    UnorderedMap<cfg::LocalRef, int> escapedIndexes;
+    UnorderedMap<cfg::LocalRef, EscapedUse> escapedIndexes;
     int escapedIndexCounter;
     bool usesBlockArg;
     cfg::LocalRef blkArg;
@@ -186,7 +186,7 @@ public:
             auto &store = fnd->second;
             if (store && store.value() != bb->rubyBlockId) {
                 store = nullopt;
-                escapedIndexes[lv] = escapedIndexCounter;
+                escapedIndexes[lv] = EscapedUse{escapedIndexCounter};
                 escapedIndexCounter += 1;
             }
         } else {
@@ -194,7 +194,7 @@ public:
         }
     }
 
-    tuple<UnorderedMap<cfg::LocalRef, int>, UnorderedMap<cfg::LocalRef, int>, bool> finalize() {
+    tuple<UnorderedMap<cfg::LocalRef, int>, UnorderedMap<cfg::LocalRef, EscapedUse>, bool> finalize() {
         // privateUsages entries that have nullopt values are only interesting to the
         // capture analysis process, so remove them
         UnorderedMap<cfg::LocalRef, int> realPrivateUsages;
@@ -212,7 +212,7 @@ public:
 
 /* if local variable is only used in block X, it maps the local variable to X, otherwise, it maps local variable to a
  * negative number */
-tuple<UnorderedMap<cfg::LocalRef, int>, UnorderedMap<cfg::LocalRef, int>, bool>
+tuple<UnorderedMap<cfg::LocalRef, int>, UnorderedMap<cfg::LocalRef, EscapedUse>, bool>
 findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
              const vector<int> &exceptionHandlingBlockHeaders) {
     TrackCaptures usage;

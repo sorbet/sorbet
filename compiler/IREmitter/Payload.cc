@@ -567,16 +567,16 @@ void fillLocals(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitter
                 int baseOffset, llvm::Value *locals) {
     // The map used to store escaped variables isn't stable, so we first sort it into a vector. This isn't great, but
     // without this step the locals are processed in random order, making the llvm output unstable.
-    vector<pair<cfg::LocalRef, int>> escapedVariables{};
+    vector<pair<cfg::LocalRef, EscapedUse>> escapedVariables{};
     for (auto &entry : irctx.escapedVariableIndices) {
         escapedVariables.emplace_back(entry);
     }
 
-    fast_sort(escapedVariables, [](const auto &left, const auto &right) -> bool { return left.second < right.second; });
+    fast_sort(escapedVariables, [](const auto &left, const auto &right) -> bool { return left.second.localIndex < right.second.localIndex; });
 
     for (auto &entry : escapedVariables) {
         auto *id = Payload::idIntern(cs, builder, entry.first.data(irctx.cfg)._name.shortName(cs));
-        auto *offset = llvm::ConstantInt::get(cs, llvm::APInt(32, baseOffset + entry.second, false));
+        auto *offset = llvm::ConstantInt::get(cs, llvm::APInt(32, baseOffset + entry.second.localIndex, false));
         llvm::Value *indices[] = {offset};
         builder.CreateStore(id, builder.CreateGEP(locals, indices));
     }
@@ -938,8 +938,8 @@ llvm::Value *Payload::readRestArgs(CompilerState &cs, llvm::IRBuilderBase &build
 namespace {
 // For a variable that's escaped, compute its index into the locals from its unique id in the
 // closure.
-llvm::Value *indexForLocalVariable(CompilerState &cs, const IREmitterContext &irctx, int rubyBlockId, int escapeId) {
-    return llvm::ConstantInt::get(cs, llvm::APInt(64, escapeId, true));
+llvm::Value *indexForLocalVariable(CompilerState &cs, const IREmitterContext &irctx, int rubyBlockId, const EscapedUse &escaped) {
+    return llvm::ConstantInt::get(cs, llvm::APInt(64, escaped.localIndex, true));
 }
 
 llvm::Value *buildInstanceVariableCache(CompilerState &cs, std::string_view name) {

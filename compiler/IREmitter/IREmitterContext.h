@@ -108,6 +108,11 @@ struct BlockArity {
     int max = 0;
 };
 
+struct EscapedUse {
+    // Index into the local variables array.
+    int localIndex;
+};
+
 // Contains a bunch of state that gets populated and accessed while emitting IR for a single Ruby method.
 //
 // Nearly every vector here behaves as a lookup map keyed on cfg::BasicBlock::rubyBlockId (i.e., an ID
@@ -189,7 +194,7 @@ struct IREmitterContext {
     std::vector<llvm::AllocaInst *> sendArgArrayByBlock;
 
     // TODO(jez) document escapedVariableIndices
-    UnorderedMap<cfg::LocalRef, int> escapedVariableIndices;
+    UnorderedMap<cfg::LocalRef, EscapedUse> escapedVariableIndices;
 
     // When arguments have defaults, the use of the default is guarded by a call to ArgPresent. The ArgPresent variables
     // are initialized during setupArguments, but need to be available by argument index.
