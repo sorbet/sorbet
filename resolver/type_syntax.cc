@@ -1017,6 +1017,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 recvi->loc,
                 argLocs,
             };
+            auto suppressErrors = false;
             core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),
                                             locs,
                                             s.numPosArgs,
@@ -1026,7 +1027,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                                             ctype,
                                             nullptr,
                                             originForUninitialized,
-                                            s.flags.isPrivateOk};
+                                            s.flags.isPrivateOk,
+                                            suppressErrors};
             auto out = core::Types::dispatchCallWithoutBlock(ctx, ctype, dispatchArgs);
 
             if (out.isUntyped()) {

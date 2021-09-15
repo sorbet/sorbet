@@ -830,7 +830,7 @@ struct DispatchArgs {
     // Do not produce dispatch-related errors while evaluating the call. This is a performance optimization, as there
     // are cases where we call dispatchCall with no intention of showing the errors to the user. Producing those
     // unreported errors is expensive!
-    bool suppressErrors = false;
+    bool suppressErrors;
 
     Loc callLoc() const {
         return core::Loc(locs.file, locs.call);

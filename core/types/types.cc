@@ -771,17 +771,19 @@ core::ClassOrModuleRef Types::getRepresentedClass(const GlobalState &gs, const T
 
 DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) const {
     return DispatchArgs{
-        name, locs, numPosArgs, args, newSelfRef, fullType, newSelfRef, block, originForUninitialized, suppressErrors};
+        name,        locs,          numPosArgs, args, newSelfRef, fullType, newSelfRef, block, originForUninitialized,
+        isPrivateOk, suppressErrors};
 }
 
 DispatchArgs DispatchArgs::withThisRef(const TypePtr &newThisRef) const {
     return DispatchArgs{
-        name, locs, numPosArgs, args, selfType, fullType, newThisRef, block, originForUninitialized, suppressErrors};
+        name,        locs,          numPosArgs, args, selfType, fullType, newThisRef, block, originForUninitialized,
+        isPrivateOk, suppressErrors};
 }
 
 DispatchArgs DispatchArgs::withErrorsSuppressed() const {
-    return DispatchArgs{name, locs, numPosArgs, args, selfType, fullType, thisType, block, originForUninitialized,
-                        true};
+    return DispatchArgs{
+        name, locs, numPosArgs, args, selfType, fullType, thisType, block, originForUninitialized, isPrivateOk, true};
 }
 
 DispatchResult DispatchResult::merge(const GlobalState &gs, DispatchResult::Combinator kind, DispatchResult &&left,

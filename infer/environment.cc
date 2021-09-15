@@ -961,9 +961,12 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     send->argLocs,
                 };
 
+                // This is the main place where we type check a method, so we default by assuming
+                // that we want to report all errors (supressing nothing).
+                auto suppressErrors = false;
                 core::DispatchArgs dispatchArgs{
-                    send->fun, locs,          send->numPosArgs, args,     recvType.type,
-                    recvType,  recvType.type, send->link,       ownerLoc, send->isPrivateOk};
+                    send->fun,  locs,     send->numPosArgs,  args,          recvType.type, recvType, recvType.type,
+                    send->link, ownerLoc, send->isPrivateOk, suppressErrors};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
