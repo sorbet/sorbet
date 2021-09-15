@@ -166,16 +166,14 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, const UnorderedMap<cfg::Lo
 // Bundle up a bunch of state used for capture tracking to simplify the interface in findCaptures below.
 class TrackCaptures final {
 public:
-    const UnorderedMap<cfg::LocalRef, Alias> &aliases;
-
     UnorderedMap<cfg::LocalRef, optional<int>> privateUsages;
     UnorderedMap<cfg::LocalRef, int> escapedIndexes;
     int escapedIndexCounter;
     bool usesBlockArg;
     cfg::LocalRef blkArg;
 
-    TrackCaptures(const UnorderedMap<cfg::LocalRef, Alias> &aliases)
-        : aliases(aliases), privateUsages{}, escapedIndexes{}, escapedIndexCounter{0},
+    TrackCaptures()
+        : privateUsages{}, escapedIndexes{}, escapedIndexCounter{0},
           usesBlockArg{false}, blkArg{cfg::LocalRef::noVariable()} {}
 
     void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv) {
@@ -216,8 +214,8 @@ public:
  * negative number */
 tuple<UnorderedMap<cfg::LocalRef, int>, UnorderedMap<cfg::LocalRef, int>, bool>
 findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
-             const UnorderedMap<cfg::LocalRef, Alias> &aliases, const vector<int> &exceptionHandlingBlockHeaders) {
-    TrackCaptures usage(aliases);
+             const vector<int> &exceptionHandlingBlockHeaders) {
+    TrackCaptures usage;
 
     int argId = -1;
     for (auto &arg : mdef.args) {
@@ -734,7 +732,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     auto [aliases, symbols] = setupAliasesAndKeywords(cs, cfg);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
     auto [variablesPrivateToBlocks, escapedVariableIndices, usesBlockArgs] =
-        findCaptures(cs, md, cfg, aliases, exceptionHandlingBlockHeaders);
+        findCaptures(cs, md, cfg, exceptionHandlingBlockHeaders);
     vector<llvm::BasicBlock *> functionInitializersByFunction;
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
