@@ -123,6 +123,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
     // core::Loc::none() should be okay here.
     auto originForUninitialized = core::Loc::none();
     auto originForFullType = core::Loc::none();
+    auto suppressErrors = true;
     core::DispatchArgs dispatchArgs{snd->fun,
                                     locs,
                                     numPosArgs,
@@ -132,7 +133,8 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
                                     snd->recv.type,
                                     snd->link,
                                     originForUninitialized,
-                                    snd->isPrivateOk};
+                                    snd->isPrivateOk,
+                                    suppressErrors};
     auto dispatchInfo = snd->recv.type.dispatchCall(ctx, dispatchArgs);
 
     // See if we can learn what types should they have
