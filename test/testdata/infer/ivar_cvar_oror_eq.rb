@@ -43,6 +43,33 @@ class C
     @@falsy_var ||= x
   end
 
+  sig {params(x: Integer).returns(Integer)}
+  def h1(x)
+    @@nilable_var ||= x
+  end
+
+  sig {params(x: Integer).returns(Integer)}
+  def h2(x)
+    @@nevernil ||= x # error: This code is unreachable
+  end
+
+  sig {params(x: Integer).returns(Integer)}
+  def h3(x)
+    @@nilable_var ||= x
+    @@nilable_var
+  end
+
+  sig {params(x: Integer).returns(Integer)}
+  def h4(x)
+    @@falsy_var ||= x
+    @@falsy_var
+  end
+
+  sig {params(x: Integer).returns(Integer)}
+  def h5(x)
+    @@falsy_var ||= x
+  end
+
   sig {params(x: String).returns(String)}
   def g1(x)
     @ivar ||= x
