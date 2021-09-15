@@ -6,6 +6,7 @@
 #include "llvm/Support/Host.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 
+#include "absl/cleanup/cleanup.h"
 #include "absl/strings/str_split.h"
 #include "absl/synchronization/mutex.h"
 #include "ast/ast.h"
@@ -266,25 +267,28 @@ public:
         compiler::CompilerState state(gs, lctx, module.get(), debug.get(), compUnit, threadState->file,
                                       threadState->allocRubyIdsEntry, threadState->initializeStaticInitNamesEntry,
                                       threadState->globalConstructorsEntry);
+        absl::Cleanup dropInternalState = [&] {
+            threadState->aborted = true;
+            module = nullptr;
+            threadState->file = core::FileRef();
+        };
         try {
             compiler::IREmitter::run(state, cfg, md);
             string fileName = objectFileName(gs, cfg.file);
             compiler::IREmitter::buildInitFor(state, cfg.symbol, fileName);
+            std::move(dropInternalState).Cancel();
         } catch (sorbet::compiler::AbortCompilation &) {
             threadState->aborted = true;
+            std::move(dropInternalState).Cancel();
         } catch (sorbet::compiler::OptimizerException &oe) {
             threadState->aborted = true;
+            std::move(dropInternalState).Cancel();
             // This exception is thrown from within an optimizer pass, where GlobalState
             // is not available, so we need to emit an error here, where we do have
             // access to GlobalState.
             if (auto e = gs.beginError(core::Loc(cfg.file, 0, 0), core::errors::Compiler::OptimizerFailure)) {
                 e.setHeader("{}", oe.what());
             }
-        } catch (...) {
-            // cleanup
-            module = nullptr;
-            threadState->file = core::FileRef();
-            throw;
         }
     };
 

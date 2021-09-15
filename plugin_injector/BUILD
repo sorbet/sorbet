@@ -13,6 +13,7 @@ cc_library(
         "//compiler/IREmitter",
         "//compiler/Names",
         "//compiler/ObjectFileEmitter",
+        "@com_google_absl//absl/cleanup",
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//cfg",
         "@com_stripe_ruby_typer//common",
