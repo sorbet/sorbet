@@ -80,6 +80,27 @@ constexpr bool functionTypeNeedsPostprocessing(FunctionType ty) {
     }
 }
 
+constexpr bool functionTypeManagesLocals(FunctionType ty) {
+    switch (ty) {
+        case FunctionType::Method:
+            return true;
+        case FunctionType::StaticInitModule:
+            return true;
+        case FunctionType::StaticInitFile:
+            return true;
+        case FunctionType::Block:
+            return true;
+        case FunctionType::Rescue:
+            return true;
+        case FunctionType::Ensure:
+            return true;
+        case FunctionType::ExceptionBegin:
+            return false;
+        case FunctionType::Unused:
+            return false;
+    }
+}
+
 struct Alias;
 
 struct BlockArity {
