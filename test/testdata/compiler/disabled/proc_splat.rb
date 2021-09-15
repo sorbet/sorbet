@@ -2,5 +2,8 @@
 # typed: true
 # frozen_string_literal: true
 
-proc do |*args|
+foo = proc do |*args|
+  puts args
 end
+
+foo.call(1,2,3,'hi')
