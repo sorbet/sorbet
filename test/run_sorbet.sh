@@ -12,6 +12,7 @@ Usage: test/run_sorbet.sh [options] <test_file_1> [<test_file_n> ...]"
 
   -h       Show this message
   -d       Start sorbet under the debugger [lldb]
+  -g       Start sorbet under the debugger [gdb] (implies -d)
   -iPATH   Place build outputs in PATH
 
   NOTE: when running this script with tools/scripts/remote-script, an explicit
@@ -20,6 +21,7 @@ EOF
 }
 
 debug=
+use_gdb=
 if [ -n "${llvmir:-}" ]; then
   explicit_llvmir=1
 else
@@ -32,7 +34,7 @@ else
   compiled_out_dir=''
 fi
 
-while getopts ":hds:i:" opt; do
+while getopts ":hdgs:i:" opt; do
   case $opt in
     h)
       usage
@@ -41,6 +43,11 @@ while getopts ":hds:i:" opt; do
 
     d)
       debug=1
+      ;;
+
+    g)
+      debug=1
+      use_gdb=1
       ;;
 
     s)
@@ -98,10 +105,14 @@ else
   ./bazel build //compiler:sorbet -c opt
 fi
 
-if [ -z "$debug" ]; then
-  command=( "bazel-bin/compiler/sorbet" )
+if [ -n "$debug" ]; then
+  if [ -n "$use_gdb" ]; then
+    command=( "${GDB:-gdb}" "--args" "./bazel-bin/compiler/sorbet" )
+  else
+    command=( "${LLDB:-lldb}" "--" "./bazel-bin/compiler/sorbet" )
+  fi
 else
-  command=( "${LLDB:-lldb}" "--" "./bazel-bin/compiler/sorbet" )
+  command=( "bazel-bin/compiler/sorbet" )
 fi
 
 command=( "${command[@]}" --silence-dev-message "--compiled-out-dir=$compiled_out_dir" "--llvm-ir-dir=$llvmir" \

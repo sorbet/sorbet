@@ -8,18 +8,20 @@ source "test/logging.sh"
 
 debug=
 llvmir="${llvmir:-}"
+use_gdb=
 
 usage() {
   cat << EOF
 Usage: test/run_compiled.sh [options] file_1.rb <file_2.rb .. file_n.rb>
 
   -d       Run the ruby interpreter under the debugger [lldb]
+  -g       Run the ruby interpreter under the debugger [gdb] (implies -d)
   -iPATH   Store intermediate outputs in PATH
 
 EOF
 }
 
-while getopts 'hdi:' opt; do
+while getopts 'hdgi:' opt; do
   case $opt in
     h)
       usage
@@ -28,6 +30,11 @@ while getopts 'hdi:' opt; do
 
     d)
       debug=1
+      ;;
+
+    g)
+      debug=1
+      use_gdb=1
       ;;
 
     i)
@@ -85,8 +92,13 @@ echo
 info "Building Ruby..."
 
 if [ -n "$debug" ]; then
-  ./bazel build @sorbet_ruby_2_7//:ruby --config dbg --config=static-libs
-  command=("${LLDB:-lldb}" "--" "${ruby}")
+  if [ -n "$use_gdb" ]; then
+    ./bazel build @sorbet_ruby_2_7//:ruby --config dbg --config=static-libs
+    command=("${GDB:-gdb}" "--args" "${ruby}")
+  else
+    ./bazel build @sorbet_ruby_2_7//:ruby --config dbg --config=static-libs
+    command=("${LLDB:-lldb}" "--" "${ruby}")
+  fi
 else
   ./bazel build @sorbet_ruby_2_7//:ruby -c opt
   command=( "${ruby}" )
