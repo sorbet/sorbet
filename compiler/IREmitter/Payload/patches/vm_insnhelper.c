@@ -762,3 +762,11 @@ VALUE sorbet_run_exception_handling(rb_execution_context_t * volatile ec,
 
     return executionResult;
 }
+
+VALUE sorbet_vm_callBlock(rb_control_frame_t *cfp, int argc, const VALUE *const restrict argv, int kw_splat) {
+    // cf. https://github.com/ruby/ruby/blob/ruby_2_7/vm_insnhelper.c#L3990-L3995
+    if (UNLIKELY(VM_CF_BLOCK_HANDLER(cfp) == VM_BLOCK_HANDLER_NONE)) {
+        rb_vm_localjump_error("no block given (yield)", Qnil, 0);
+    }
+    return rb_yield_values_kw(argc, argv, kw_splat);
+}

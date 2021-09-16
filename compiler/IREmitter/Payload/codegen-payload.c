@@ -159,6 +159,7 @@ SORBET_ALIVE(VALUE, sorbet_vm_fstring_new, (const char *ptr, long len));
 
 extern void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) __attribute__((noreturn));
 KEEP_ALIVE(sorbet_throwReturn);
+SORBET_ALIVE(VALUE, sorbet_vm_callBlock, (rb_control_frame_t *cfp, int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat));
 
 SORBET_ALIVE(int, rb_cvar_lookup, (VALUE klass, ID id, VALUE *v));
 
@@ -1829,11 +1830,6 @@ void sorbet_setLineNumber(int offset, VALUE *encoded, VALUE **storeLocation) {
     (*storeLocation) = encoded + offset + 1;
 }
 
-SORBET_INLINE
-VALUE sorbet_callBlock(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat) {
-    return rb_yield_values_kw(argc, argv, kw_splat);
-}
-
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.h#L123
 #define GET_PREV_EP(ep) ((VALUE *)((ep)[VM_ENV_DATA_INDEX_SPECVAL] & ~0x03))
 
@@ -1963,6 +1959,9 @@ KEEP_ALIVE(sorbet_callFuncBlockWithCache_noBreak);
 
 SORBET_INLINE
 VALUE sorbet_makeBlockHandlerProc(VALUE block) {
+    if (block == Qnil) {
+        return VM_BLOCK_HANDLER_NONE;
+    }
     return rb_funcall(block, rb_intern2("to_proc", 7), 0);
 }
 

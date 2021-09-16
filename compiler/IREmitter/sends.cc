@@ -495,8 +495,9 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
         if (canCallBlockViaRubyVM(mcctx)) {
             // fill in args
             auto args = IREmitterHelpers::fillSendArgArray(mcctx);
+            auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
 
-            return builder.CreateCall(cs.getFunction("sorbet_callBlock"), {args.argc, args.argv, args.kw_splat},
+            return builder.CreateCall(cs.getFunction("sorbet_vm_callBlock"), {cfp, args.argc, args.argv, args.kw_splat},
                                       "rawBlockSendResult");
         }
     }
