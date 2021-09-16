@@ -16,11 +16,6 @@ const users = [
     infoLink: 'https://www.coinbase.com/',
   },
   {
-    caption: 'TaskRabbit',
-    image: 'img/taskrabbit-logo.svg',
-    infoLink: 'https://www.taskrabbit.com/',
-  },
-  {
     caption: 'Atrium',
     image: 'img/atrium-logo.jpg',
     infoLink: 'https://www.atrium.co/',
@@ -56,14 +51,19 @@ const users = [
     infoLink: 'https://marketplacer.com/',
   },
   {
-    caption: 'Vonage',
-    image: 'img/vonage-logo.png',
-    infoLink: 'https://www.vonage.com/',
-  },
-  {
     caption: 'PhishSafety',
     image: 'img/phishsafety-logo.png',
     infoLink: 'https://phishsafety.com',
+  },
+  {
+    caption: 'TaskRabbit',
+    image: 'img/taskrabbit-logo.svg',
+    infoLink: 'https://www.taskrabbit.com/',
+  },
+  {
+    caption: 'Vonage',
+    image: 'img/vonage-logo.png',
+    infoLink: 'https://www.vonage.com/',
   },
   {
     caption: 'Workforce.com',
