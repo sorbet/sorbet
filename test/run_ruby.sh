@@ -6,17 +6,47 @@ pushd "$(dirname "$0")/.." > /dev/null
 
 source "test/logging.sh"
 
+usage() {
+  cat << EOF
+Usage: test/run_ruby.sh [options] file_1.rb <file_2.rb .. file_n.rb>
+
+  -d       Run the ruby interpreter under the debugger [lldb]
+  -g       Run the ruby interpreter under the debugger [gdb] (implies -d)
+EOF
+}
+
 debug=
-if [ "$1" == "-d" ]; then
-  debug=1
-  shift 1
-fi
+use_gdb=
+
+while getopts 'hdg' opt; do
+  case $opt in
+    h)
+      usage
+      exit 0
+      ;;
+
+    d)
+      debug=1
+      ;;
+
+    g)
+      debug=1
+      use_gdb=1
+      ;;
+
+    *)
+      break;
+      ;;
+  esac
+done
+
+shift $((OPTIND - 1))
 
 rb_file=$1
 shift
 
 if [ -z "$rb_file" ]; then
-  echo "Usage: test/run_ruby.sh <test_file>"
+  usage
   exit 1
 fi
 
@@ -27,8 +57,13 @@ echo
 info "Building Ruby..."
 
 if [ -n "$debug" ]; then
-  ./bazel build @sorbet_ruby_2_7//:ruby --config dbg
-  command=("lldb" "--" "${ruby}")
+  if [ -n "$use_gdb" ]; then
+    ./bazel build @sorbet_ruby_2_7//:ruby --config dbg
+    command=("gdb" "--args" "${ruby}")
+  else
+    ./bazel build @sorbet_ruby_2_7//:ruby --config dbg
+    command=("lldb" "--" "${ruby}")
+  fi
 else
   ./bazel build @sorbet_ruby_2_7//:ruby -c opt
   command=( "${ruby}" )
