@@ -154,6 +154,7 @@ public:
     struct FinalMethodInfo {
         core::ClassOrModuleRef recv;
         core::SymbolRef method;
+        core::FileRef file;
         bool isCompiled{false};
     };
 
