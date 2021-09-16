@@ -10,13 +10,13 @@ end
 
 # INITIAL-LABEL: "func_Object#3baz"
 # INITIAL: call i64 @sorbet_getMethodBlockAsProc
-# INITIAL: call i64 @sorbet_callBlock
+# INITIAL: call i64 @sorbet_vm_callBlock
 # INITIAL{LITERAL}: }
 
 # OPT-LABEL: "func_Object#3baz"
 # OPT-NOT: call i64 @sorbet_getMethodBlockAsProc
 # OPT-NOT: call i64 @rb_block_proc
-# OPT: call i64 @rb_yield_values_kw
+# OPT: call i64 @sorbet_vm_callBlock
 # OPT-NOT: call i64 @sorbet_getMethodBlockAsProc
 # OPT-NOT: call i64 @rb_block_proc
 # OPT{LITERAL}: }
