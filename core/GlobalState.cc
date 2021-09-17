@@ -1949,6 +1949,7 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     }
 
     unique_ptr<GlobalStateHash> result = make_unique<GlobalStateHash>();
+    result->methodHashes.reserve(methodHashes.size());
     for (const auto &e : methodHashes) {
         result->methodHashes.emplace_back(e.first, patchHash(e.second));
     }
