@@ -13,69 +13,63 @@
 
 using namespace std;
 namespace sorbet::compiler {
-namespace {
-llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
-    return static_cast<llvm::IRBuilder<> &>(builder);
-};
-} // namespace
 
 llvm::Value *Payload::setExpectedBool(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *value,
                                       bool expected) {
-    return builderCast(builder).CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::expect,
-                                                {llvm::Type::getInt1Ty(cs)}, {value, builder.getInt1(expected)});
+    return builder.CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::expect, {llvm::Type::getInt1Ty(cs)},
+                                   {value, builder.getInt1(expected)});
 }
 
 void Payload::boxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *target,
                           llvm::Value *rawData) {
-    builderCast(builder).CreateStore(rawData, builderCast(builder).CreateStructGEP(target, 0));
+    builder.CreateStore(rawData, builder.CreateStructGEP(target, 0));
 }
 
 llvm::Value *Payload::unboxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *target) {
-    return builderCast(builder).CreateLoad(builderCast(builder).CreateStructGEP(target, 0), "rawRubyValue");
+    return builder.CreateLoad(builder.CreateStructGEP(target, 0), "rawRubyValue");
 }
 
 llvm::Value *Payload::rubyUndef(CompilerState &cs, llvm::IRBuilderBase &builder) {
-    return builderCast(builder).CreateCall(cs.getFunction("sorbet_rubyUndef"), {}, "undefValueRaw");
+    return builder.CreateCall(cs.getFunction("sorbet_rubyUndef"), {}, "undefValueRaw");
 }
 
 llvm::Value *Payload::rubyNil(CompilerState &cs, llvm::IRBuilderBase &builder) {
-    return builderCast(builder).CreateCall(cs.getFunction("sorbet_rubyNil"), {}, "nilValueRaw");
+    return builder.CreateCall(cs.getFunction("sorbet_rubyNil"), {}, "nilValueRaw");
 }
 
 llvm::Value *Payload::rubyFalse(CompilerState &cs, llvm::IRBuilderBase &builder) {
-    return builderCast(builder).CreateCall(cs.getFunction("sorbet_rubyFalse"), {}, "falseValueRaw");
+    return builder.CreateCall(cs.getFunction("sorbet_rubyFalse"), {}, "falseValueRaw");
 }
 
 llvm::Value *Payload::rubyTopSelf(CompilerState &cs, llvm::IRBuilderBase &builder) {
-    return builderCast(builder).CreateCall(cs.getFunction("sorbet_rubyTopSelf"), {}, "topSelf");
+    return builder.CreateCall(cs.getFunction("sorbet_rubyTopSelf"), {}, "topSelf");
 }
 
 llvm::Value *Payload::rubyTrue(CompilerState &cs, llvm::IRBuilderBase &builder) {
-    return builderCast(builder).CreateCall(cs.getFunction("sorbet_rubyTrue"), {}, "trueValueRaw");
+    return builder.CreateCall(cs.getFunction("sorbet_rubyTrue"), {}, "trueValueRaw");
 }
 
 void Payload::raiseArity(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *currentArgCount, int minArgs,
                          int maxArgs) {
-    builderCast(builder).CreateCall(cs.getFunction("sorbet_raiseArity"),
-                                    {currentArgCount, llvm::ConstantInt::get(cs, llvm::APInt(32, minArgs, true)),
-                                     llvm::ConstantInt::get(cs, llvm::APInt(32, maxArgs, true))
+    builder.CreateCall(cs.getFunction("sorbet_raiseArity"),
+                       {currentArgCount, llvm::ConstantInt::get(cs, llvm::APInt(32, minArgs, true)),
+                        llvm::ConstantInt::get(cs, llvm::APInt(32, maxArgs, true))
 
-                                    });
-    builderCast(builder).CreateUnreachable();
+                       });
+    builder.CreateUnreachable();
 }
 llvm::Value *Payload::longToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, long num) {
-    return builderCast(builder).CreateCall(cs.getFunction("sorbet_longToRubyValue"),
-                                           {llvm::ConstantInt::get(cs, llvm::APInt(64, num, true))}, "rawRubyInt");
+    return builder.CreateCall(cs.getFunction("sorbet_longToRubyValue"),
+                              {llvm::ConstantInt::get(cs, llvm::APInt(64, num, true))}, "rawRubyInt");
 }
 
 llvm::Value *Payload::doubleToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, double num) {
-    return builderCast(builder).CreateCall(cs.getFunction("sorbet_doubleToRubyValue"),
-                                           {llvm::ConstantFP::get(llvm::Type::getDoubleTy(cs), num)}, "rawRubyDouble");
+    return builder.CreateCall(cs.getFunction("sorbet_doubleToRubyValue"),
+                              {llvm::ConstantFP::get(llvm::Type::getDoubleTy(cs), num)}, "rawRubyDouble");
 }
 
-llvm::Value *Payload::cPtrToRubyRegexp(CompilerState &cs, llvm::IRBuilderBase &build, std::string_view str,
+llvm::Value *Payload::cPtrToRubyRegexp(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str,
                                        int options) {
-    auto &builder = builderCast(build);
     // all regexp are frozen. We'll allocate it at load time and share it.
     string rawName = "rubyRegexpFrozen_" + (string)str;
     auto tp = llvm::Type::getInt64Ty(cs);
@@ -125,9 +119,8 @@ llvm::Value *Payload::cPtrToRubyRegexp(CompilerState &cs, llvm::IRBuilderBase &b
     return global;
 }
 
-llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &build, std::string_view str,
+llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str,
                                        bool frozen) {
-    auto &builder = builderCast(build);
     if (!frozen) {
         auto rawCString = Payload::toCString(cs, str, builder);
         return builder.CreateCall(cs.getFunction("sorbet_cPtrToRubyString"),
@@ -176,15 +169,14 @@ llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &b
 }
 
 llvm::Value *Payload::testIsUndef(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val) {
-    return builderCast(builder).CreateCall(cs.getFunction("sorbet_testIsUndef"), {val}, "isUndef");
+    return builder.CreateCall(cs.getFunction("sorbet_testIsUndef"), {val}, "isUndef");
 }
 
 llvm::Value *Payload::testIsTruthy(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val) {
-    return builderCast(builder).CreateCall(cs.getFunction("sorbet_testIsTruthy"), {val}, "cond");
+    return builder.CreateCall(cs.getFunction("sorbet_testIsTruthy"), {val}, "cond");
 }
 
-llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &build, std::string_view idName) {
-    auto &builder = builderCast(build);
+llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view idName) {
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     auto name = llvm::StringRef(idName.data(), idName.length());
     llvm::Constant *indices[] = {zero};
@@ -234,9 +226,8 @@ std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
 
 } // namespace
 
-llvm::Value *Payload::getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &build) {
+llvm::Value *Payload::getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &builder) {
     ENFORCE(sym.data(cs)->isClassOrModule() || sym.data(cs)->isStaticField() || sym.data(cs)->isTypeMember());
-    auto &builder = builderCast(build);
     sym = IREmitterHelpers::fixupOwningSymbol(cs, sym);
     auto str = showClassName(cs, sym);
     ENFORCE(str.length() < 2 || (str[0] != ':'), "implementation assumes that strings dont start with ::");
@@ -265,7 +256,7 @@ llvm::Value *Payload::toCString(CompilerState &cs, string_view str, llvm::IRBuil
             return addrGlobal;
         }));
 
-    return builderCast(builder).CreateLoad(globalDeclaration);
+    return builder.CreateLoad(globalDeclaration);
 }
 
 namespace {
@@ -329,8 +320,8 @@ static bool isProc(core::SymbolRef sym) {
     return id >= core::Symbols::Proc0().id() && id <= core::Symbols::last_proc().id();
 }
 
-llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::Value *val, const core::TypePtr &type) {
-    auto &builder = builderCast(b);
+llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
+                               const core::TypePtr &type) {
     llvm::Value *ret = nullptr;
     typecase(
         type,
@@ -443,9 +434,8 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
     return ret;
 }
 
-llvm::Value *Payload::typeTestForBlock(CompilerState &cs, llvm::IRBuilderBase &b, llvm::Value *val,
+llvm::Value *Payload::typeTestForBlock(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                        const core::TypePtr &type) {
-    auto &builder = builderCast(b);
     core::SymbolRef procSym;
 
     // We are deliberately not being exhaustive here and only handling the "easy"
@@ -463,7 +453,7 @@ llvm::Value *Payload::typeTestForBlock(CompilerState &cs, llvm::IRBuilderBase &b
         return builder.CreateCall(cs.getFunction("sorbet_block_isa_proc"), {});
     }
 
-    return typeTest(cs, b, val, type);
+    return typeTest(cs, builder, val, type);
 }
 
 // Emit an `llvm.assume` intrinsic with the result of a `Payload::typeTest` with the given symbol. For example, this can
@@ -476,22 +466,21 @@ void Payload::assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::
                          core::ClassOrModuleRef sym) {
     auto type = core::make_type<core::ClassType>(sym);
     auto *cond = Payload::typeTest(cs, builder, val, type);
-    builderCast(builder).CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::assume, {}, {cond});
+    builder.CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::assume, {}, {cond});
     return;
 }
 
 llvm::Value *Payload::boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *u1) {
-    return builderCast(builder).CreateCall(cs.getFunction("sorbet_boolToRuby"), {u1}, "rubyBool");
+    return builder.CreateCall(cs.getFunction("sorbet_boolToRuby"), {u1}, "rubyBool");
 }
 
 namespace {
 
-llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                      const ast::MethodDef &md, int rubyBlockId);
 
-llvm::Value *getIseqType(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+llvm::Value *getIseqType(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                          int rubyBlockId) {
-    auto &builder = builderCast(build);
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
             return builder.CreateCall(cs.getFunction("sorbet_rubyIseqTypeMethod"), {}, "ISEQ_TYPE_METHOD");
@@ -537,7 +526,7 @@ int getNearestIseqAllocatorBlock(const IREmitterContext &irctx, int rubyBlockId)
     return rubyBlockId;
 }
 
-std::tuple<const string &, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
+std::tuple<const string &, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &builder,
                                                       const IREmitterContext &irctx, const ast::MethodDef &md,
                                                       int rubyBlockId) {
     auto &locationName = irctx.rubyBlockLocationNames[rubyBlockId];
@@ -552,7 +541,7 @@ std::tuple<const string &, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::I
         case FunctionType::Block:
         case FunctionType::Rescue:
         case FunctionType::Ensure:
-            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
+            parent = allocateRubyStackFrames(cs, builder, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
             break;
 
         case FunctionType::ExceptionBegin:
@@ -573,10 +562,8 @@ std::tuple<const string &, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::I
 }
 
 // Fill the locals array with interned ruby IDs.
-void fillLocals(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx, int rubyBlockId,
+void fillLocals(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx, int rubyBlockId,
                 int baseOffset, llvm::Value *locals) {
-    auto &builder = builderCast(build);
-
     // The map used to store escaped variables isn't stable, so we first sort it into a vector. This isn't great, but
     // without this step the locals are processed in random order, making the llvm output unstable.
     vector<pair<cfg::LocalRef, int>> escapedVariables{};
@@ -625,10 +612,9 @@ LocalsIDStorage classifyStorageFor(CompilerState &cs, const IREmitterContext &ir
 }
 
 // Allocate an array to hold local variable ids before calling `sorbet_allocateRubyStackFrame`.
-tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilderBase &build,
+tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilderBase &builder,
                                               const IREmitterContext &irctx, const ast::MethodDef &md,
                                               int rubyBlockId) {
-    auto &builder = builderCast(build);
     llvm::Value *locals = nullptr;
     llvm::Value *numLocals = nullptr;
     auto *idType = llvm::Type::getInt64Ty(cs);
@@ -722,7 +708,7 @@ string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx,
     }
 }
 
-llvm::GlobalVariable *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+llvm::GlobalVariable *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                         core::SymbolRef methodSym, int rubyBlockId) {
     auto tp = iseqType(cs);
     auto name = getStackFrameGlobalName(cs, irctx, methodSym, rubyBlockId);
@@ -739,10 +725,10 @@ llvm::GlobalVariable *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &
     return var;
 }
 
-llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                      const ast::MethodDef &md, int rubyBlockId) {
     llvm::IRBuilder<> globalInitBuilder(cs);
-    auto globalDeclaration = rubyStackFrameVar(cs, build, irctx, md.symbol, rubyBlockId);
+    auto globalDeclaration = rubyStackFrameVar(cs, builder, irctx, md.symbol, rubyBlockId);
     if (!globalDeclaration->hasInitializer()) {
         auto nullv = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(globalDeclaration->getValueType()));
         globalDeclaration->setInitializer(nullv);
@@ -770,14 +756,13 @@ llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &bui
 
 } // namespace
 
-llvm::Value *Payload::rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+llvm::Value *Payload::rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                         core::SymbolRef methodSym) {
-    return ::sorbet::compiler::rubyStackFrameVar(cs, build, irctx, methodSym, 0);
+    return ::sorbet::compiler::rubyStackFrameVar(cs, builder, irctx, methodSym, 0);
 }
 
-llvm::Value *Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+llvm::Value *Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                         const ast::MethodDef &md, int rubyBlockId) {
-    auto &builder = builderCast(build);
     auto stackFrame = allocateRubyStackFrames(cs, builder, irctx, md, rubyBlockId);
     auto *iseqType = getIseqType(cs, builder, irctx, rubyBlockId);
     auto *isStaticInit = llvm::ConstantInt::get(
@@ -790,7 +775,7 @@ llvm::Value *Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &
 }
 
 // Ensure that the retry singleton is present during module initialization, and store it in a module-local global.
-llvm::Value *Payload::retrySingleton(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx) {
+llvm::Value *Payload::retrySingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx) {
     auto tp = llvm::Type::getInt64Ty(cs);
     string rawName = "<retry-singleton>";
     auto *global = cs.module->getOrInsertGlobal(rawName, tp, [&] {
@@ -809,11 +794,11 @@ llvm::Value *Payload::retrySingleton(CompilerState &cs, llvm::IRBuilderBase &bui
         return global;
     });
 
-    return builderCast(build).CreateLoad(global, rawName);
+    return builder.CreateLoad(global, rawName);
 }
 
 // Ensure that the VOID singleton is present during module initialization, and store it in a module-local global.
-llvm::Value *Payload::voidSingleton(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx) {
+llvm::Value *Payload::voidSingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx) {
     auto tp = llvm::Type::getInt64Ty(cs);
     string rawName = "<void-singleton>";
     auto *global = cs.module->getOrInsertGlobal(rawName, tp, [&] {
@@ -833,19 +818,19 @@ llvm::Value *Payload::voidSingleton(CompilerState &cs, llvm::IRBuilderBase &buil
         return global;
     });
 
-    return builderCast(build).CreateLoad(global, rawName);
+    return builder.CreateLoad(global, rawName);
 }
 
 // Lazily initialize a global that contains enough noops to represent all the lines in the file as an iseq_encoded
 // array.
-llvm::Value *Payload::getFileLineNumberInfo(CompilerState &cs, llvm::IRBuilderBase &build, core::FileRef file) {
+llvm::Value *Payload::getFileLineNumberInfo(CompilerState &cs, llvm::IRBuilderBase &builder, core::FileRef file) {
     auto *iseqEncodedInitFn = cs.module->getFunction("sorbet_initLineNumberInfo");
     auto *infoPointerTy = iseqEncodedInitFn->getFunctionType()->params()[0];
     ENFORCE(infoPointerTy != nullptr);
 
     auto *globalTy = llvm::cast<llvm::PointerType>(infoPointerTy)->getElementType();
 
-    auto *iseqEncoded = getIseqEncodedPointer(cs, build, file);
+    auto *iseqEncoded = getIseqEncodedPointer(cs, builder, file);
     const string rawName = "fileLineNumberInfo";
     auto *global = cs.module->getOrInsertGlobal(
         rawName, globalTy, [&cs, &rawName, &iseqEncoded, file, globalTy, iseqEncodedInitFn]() {
@@ -890,12 +875,11 @@ llvm::Value *Payload::getIseqEncodedPointer(CompilerState &cs, llvm::IRBuilderBa
     return global;
 }
 
-core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc, core::Loc methodStart,
+core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc, core::Loc methodStart,
                                  core::Loc lastLoc, llvm::AllocaInst *lineNumberPtr) {
     if (!loc.exists()) {
         return lastLoc;
     }
-    auto &builder = builderCast(build);
     auto lineno = loc.position(cs).first.line;
     if (lastLoc.exists() && lastLoc.position(cs).first.line == lineno) {
         return lastLoc;
@@ -915,43 +899,36 @@ core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, 
     return loc;
 }
 
-llvm::Value *Payload::readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash) {
-    auto &builder = builderCast(build);
+llvm::Value *Payload::readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash) {
     return builder.CreateCall(cs.getFunction("sorbet_readKWRestArgs"), {maybeHash});
 }
 
-llvm::Value *Payload::addMissingKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *missing,
+llvm::Value *Payload::addMissingKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *missing,
                                       llvm::Value *sym) {
-    auto &builder = builderCast(build);
     return builder.CreateCall(cs.getFunction("sorbet_addMissingKWArg"), {missing, sym});
 }
 
-llvm::Value *Payload::assertAllRequiredKWArgs(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *missing) {
-    auto &builder = builderCast(build);
+llvm::Value *Payload::assertAllRequiredKWArgs(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *missing) {
     return builder.CreateCall(cs.getFunction("sorbet_assertAllRequiredKWArgs"), {missing});
 }
 
-llvm::Value *Payload::assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash,
+llvm::Value *Payload::assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash,
                                          llvm::Value *numRequired, llvm::Value *optionalParsed) {
-    auto &builder = builderCast(build);
     return builder.CreateCall(cs.getFunction("sorbet_assertNoExtraKWArg"), {maybeHash, numRequired, optionalParsed});
 }
 
-llvm::Value *Payload::getKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash,
+llvm::Value *Payload::getKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash,
                                llvm::Value *rubySym) {
-    auto &builder = builderCast(build);
     return builder.CreateCall(cs.getFunction("sorbet_getKWArg"), {maybeHash, rubySym});
 }
 
-llvm::Value *Payload::removeKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash,
+llvm::Value *Payload::removeKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash,
                                   llvm::Value *rubySym) {
-    auto &builder = builderCast(build);
     return builder.CreateCall(cs.getFunction("sorbet_removeKWArg"), {maybeHash, rubySym});
 }
 
-llvm::Value *Payload::readRestArgs(CompilerState &cs, llvm::IRBuilderBase &build, int maxPositionalArgCount,
+llvm::Value *Payload::readRestArgs(CompilerState &cs, llvm::IRBuilderBase &builder, int maxPositionalArgCount,
                                    llvm::Value *argCountRaw, llvm::Value *argArrayRaw) {
-    auto &builder = builderCast(build);
     return builder.CreateCall(
         cs.getFunction("sorbet_readRestArgs"),
         {llvm::ConstantInt::get(cs, llvm::APInt(32, maxPositionalArgCount)), argCountRaw, argArrayRaw});
@@ -975,9 +952,8 @@ llvm::Value *buildInstanceVariableCache(CompilerState &cs, std::string_view name
 
 } // namespace
 
-llvm::Value *Payload::getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilderBase &build,
+llvm::Value *Payload::getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilderBase &builder,
                                                  const IREmitterContext &irctx) {
-    auto &builder = builderCast(build);
     auto sym = irctx.cfg.symbol.data(cs)->owner;
     ENFORCE(sym.data(cs)->isClassOrModule());
 
@@ -992,9 +968,8 @@ std::tuple<llvm::Value *, llvm::Value *> Payload::escapedVariableIndexAndLevel(C
     return {index, llvm::ConstantInt::get(cs, llvm::APInt(64, level, true))};
 }
 
-llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBuilderBase &build,
+llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBuilderBase &builder,
                              const IREmitterContext &irctx, int rubyBlockId) {
-    auto &builder = builderCast(build);
     if (local == cfg::LocalRef::selfVariable()) {
         return Payload::unboxRawValue(cs, builder, irctx.selfVariables.at(rubyBlockId));
     }
@@ -1039,9 +1014,8 @@ llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBui
     return Payload::unboxRawValue(cs, builder, irctx.llvmVariables.at(local));
 }
 
-void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, llvm::IRBuilderBase &build,
+void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, llvm::IRBuilderBase &builder,
                      const IREmitterContext &irctx, int rubyBlockId) {
-    auto &builder = builderCast(build);
     if (local == cfg::LocalRef::selfVariable()) {
         return Payload::boxRawValue(cs, builder, irctx.selfVariables.at(rubyBlockId), var);
     }
@@ -1096,19 +1070,16 @@ void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, l
     Payload::boxRawValue(cs, builder, irctx.llvmVariables.at(local), var);
 }
 
-void Payload::rubyStopInDebugger(CompilerState &cs, llvm::IRBuilderBase &build) {
-    auto &builder = builderCast(build);
+void Payload::rubyStopInDebugger(CompilerState &cs, llvm::IRBuilderBase &builder) {
     builder.CreateCall(cs.getFunction("sorbet_stopInDebugger"), {});
 }
 
-void Payload::dbg_p(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *val) {
-    auto &builder = builderCast(build);
+void Payload::dbg_p(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val) {
     builder.CreateCall(cs.getFunction("sorbet_dbg_p"), {val});
 }
 
-void Payload::pushRubyStackVector(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *cfp, llvm::Value *recv,
+void Payload::pushRubyStackVector(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cfp, llvm::Value *recv,
                                   const std::vector<llvm::Value *> &stack) {
-    auto &builder = builderCast(build);
     auto *sorbetPush = cs.getFunction("sorbet_pushValueStack");
 
     auto *spPtr = builder.CreateCall(cs.getFunction("sorbet_get_sp"), {cfp});
@@ -1121,49 +1092,42 @@ void Payload::pushRubyStackVector(CompilerState &cs, llvm::IRBuilderBase &build,
     builder.CreateStore(sp, spPtr);
 }
 
-llvm::Value *Payload::vmBlockHandlerNone(CompilerState &cs, llvm::IRBuilderBase &build) {
-    auto &builder = builderCast(build);
+llvm::Value *Payload::vmBlockHandlerNone(CompilerState &cs, llvm::IRBuilderBase &builder) {
     return builder.CreateCall(cs.getFunction("sorbet_vmBlockHandlerNone"), {}, "VM_BLOCK_HANDLER_NONE");
 }
 
-llvm::Value *Payload::makeBlockHandlerProc(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *block) {
-    auto &builder = builderCast(build);
+llvm::Value *Payload::makeBlockHandlerProc(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *block) {
     return builder.CreateCall(cs.getFunction("sorbet_makeBlockHandlerProc"), {block}, "blockHandlerProc");
 }
 
-llvm::Value *Payload::getPassedBlockHandler(CompilerState &cs, llvm::IRBuilderBase &build) {
-    auto &builder = builderCast(build);
+llvm::Value *Payload::getPassedBlockHandler(CompilerState &cs, llvm::IRBuilderBase &builder) {
     return builder.CreateCall(cs.getFunction("sorbet_getPassedBlockHandler"), {}, "passedBlockHandler");
 }
 
-llvm::Value *Payload::callFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *cache,
+llvm::Value *Payload::callFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                         llvm::Value *blockHandler) {
-    auto &builder = builderCast(build);
     return builder.CreateCall(cs.getFunction("sorbet_callFuncWithCache"), {cache, blockHandler}, "send");
 }
 
-llvm::Value *Payload::callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *cache,
+llvm::Value *Payload::callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                              llvm::Value *blockFun, llvm::Value *closure) {
-    auto &builder = builderCast(build);
     return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache"), {cache, blockFun, closure},
                               "sendWithBlock");
 }
 
-llvm::Value *Payload::callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *cache, llvm::Value *fn,
-                                     llvm::Value *argc, llvm::Value *argv, llvm::Value *recv, llvm::Value *iseq) {
-    auto &builder = builderCast(build);
+llvm::Value *Payload::callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
+                                     llvm::Value *fn, llvm::Value *argc, llvm::Value *argv, llvm::Value *recv,
+                                     llvm::Value *iseq) {
     return builder.CreateCall(cs.getFunction("sorbet_callFuncDirect"), {cache, fn, argc, argv, recv, iseq},
                               "sendDirect");
 }
 
-void Payload::afterIntrinsic(CompilerState &cs, llvm::IRBuilderBase &build) {
-    auto &builder = builderCast(build);
+void Payload::afterIntrinsic(CompilerState &cs, llvm::IRBuilderBase &builder) {
     builder.CreateCall(cs.getFunction("sorbet_afterIntrinsic"), {});
 }
 
-llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                      int rubyBlockId) {
-    auto &builder = builderCast(build);
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
         case FunctionType::StaticInitModule:

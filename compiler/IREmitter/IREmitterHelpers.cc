@@ -180,10 +180,8 @@ llvm::Function *IREmitterHelpers::cleanFunctionBody(CompilerState &cs, llvm::Fun
     return func;
 }
 
-void IREmitterHelpers::emitDebugLoc(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+void IREmitterHelpers::emitDebugLoc(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                     int rubyBlockId, core::Loc loc) {
-    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
-
     auto *scope = irctx.blockScopes[rubyBlockId];
     unsigned line, column;
 
@@ -203,28 +201,23 @@ void IREmitterHelpers::emitDebugLoc(CompilerState &cs, llvm::IRBuilderBase &buil
     builder.SetCurrentDebugLocation(llvm::DILocation::get(cs, line, column, scope));
 }
 
-void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
-                                           int rubyBlockId, llvm::Value *retVal) {
-    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
-
+void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                           const IREmitterContext &irctx, int rubyBlockId, llvm::Value *retVal) {
     if (functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId])) {
         builder.CreateCall(cs.getFunction("sorbet_popFrame"), {});
     }
     builder.CreateRet(retVal);
 }
 
-void IREmitterHelpers::emitReturnAcrossBlock(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build,
+void IREmitterHelpers::emitReturnAcrossBlock(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &builder,
                                              const IREmitterContext &irctx, int rubyBlockId, llvm::Value *retVal) {
-    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
     auto *ec = builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
     builder.CreateCall(cs.getFunction("sorbet_throwReturn"), {ec, retVal});
     builder.CreateUnreachable();
 }
 
-void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                   int rubyBlockId, llvm::Value *retVal) {
-    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
-
     if (functionTypeNeedsPostprocessing(irctx.rubyBlockType[rubyBlockId])) {
         auto returnValue = irctx.cfg.enterLocal({Names::returnValue(cs), 1});
         Payload::varSet(cs, returnValue, retVal, builder, irctx, rubyBlockId);
@@ -234,9 +227,8 @@ void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build,
     }
 }
 
-llvm::Value *IREmitterHelpers::maybeCheckReturnValue(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build,
+llvm::Value *IREmitterHelpers::maybeCheckReturnValue(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &builder,
                                                      const IREmitterContext &irctx, llvm::Value *returnValue) {
-    llvm::IRBuilder<> &builder = static_cast<llvm::IRBuilder<> &>(build);
     auto expectedType = cfg.symbol.data(cs)->resultType;
     if (expectedType == nullptr) {
         return returnValue;
@@ -257,11 +249,9 @@ llvm::Value *IREmitterHelpers::maybeCheckReturnValue(CompilerState &cs, cfg::CFG
 }
 
 namespace {
-void buildTypeTestPassFailBlocks(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *value,
+void buildTypeTestPassFailBlocks(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *value,
                                  llvm::Value *testResult, const core::TypePtr &expectedType,
                                  std::string_view description) {
-    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
-
     auto successBlock = llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
 
     auto failBlock = llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
@@ -277,13 +267,13 @@ void buildTypeTestPassFailBlocks(CompilerState &cs, llvm::IRBuilderBase &build, 
 }
 } // namespace
 
-void IREmitterHelpers::emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *value,
+void IREmitterHelpers::emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *value,
                                     const core::TypePtr &expectedType, std::string_view description) {
-    auto *typeTest = Payload::typeTest(cs, build, value, expectedType);
-    buildTypeTestPassFailBlocks(cs, build, value, typeTest, expectedType, description);
+    auto *typeTest = Payload::typeTest(cs, builder, value, expectedType);
+    buildTypeTestPassFailBlocks(cs, builder, value, typeTest, expectedType, description);
 }
 
-void IREmitterHelpers::emitTypeTestForBlock(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *value,
+void IREmitterHelpers::emitTypeTestForBlock(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *value,
                                             const core::TypePtr &expectedType, std::string_view description) {
     // Checking for blocks is special.  We don't want to materialize the block (`value`)
     // unless we absolutely have to, so we check the type of blocks by poking at the
@@ -291,12 +281,12 @@ void IREmitterHelpers::emitTypeTestForBlock(CompilerState &cs, llvm::IRBuilderBa
     // `value` to inspect, but we have an LLVM optimization pass that will delete the
     // materialization if the result of the materialization is unused.  So we don't
     // want to add any more uses than we have to.)
-    auto *typeTest = Payload::typeTestForBlock(cs, build, value, expectedType);
-    buildTypeTestPassFailBlocks(cs, build, value, typeTest, expectedType, description);
+    auto *typeTest = Payload::typeTestForBlock(cs, builder, value, expectedType);
+    buildTypeTestPassFailBlocks(cs, builder, value, typeTest, expectedType, description);
 }
 
-llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilderBase &build, const core::TypePtr &lit) {
-    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
+llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                              const core::TypePtr &lit) {
     if (lit.derivesFrom(cs, core::Symbols::FalseClass())) {
         return Payload::rubyFalse(cs, builder);
     }
@@ -446,8 +436,7 @@ llvm::Value *IREmitterHelpers::receiverFastPathTestWithCache(MethodCallContext &
                                                              const vector<string> &expectedRubyCFuncs,
                                                              const string &methodNameForDebug) {
     auto &cs = mcctx.cs;
-    auto &builder = static_cast<llvm::IRBuilder<> &>(mcctx.build);
-
+    auto &builder = mcctx.builder;
     auto *cache = mcctx.getInlineCache();
     auto *recv = mcctx.varGetRecv();
     mcctx.emitMethodSearch();
@@ -472,9 +461,7 @@ llvm::Value *IREmitterHelpers::receiverFastPathTestWithCache(MethodCallContext &
     return result;
 }
 
-llvm::Value *CallCacheFlags::build(CompilerState &cs, llvm::IRBuilderBase &build) {
-    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
-
+llvm::Value *CallCacheFlags::build(CompilerState &cs, llvm::IRBuilderBase &builder) {
     static struct {
         bool CallCacheFlags::*field;
         string_view functionName;

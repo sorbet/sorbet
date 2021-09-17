@@ -25,10 +25,6 @@
 using namespace std;
 namespace sorbet::compiler {
 namespace {
-llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
-    return static_cast<llvm::IRBuilder<> &>(builder);
-};
-
 llvm::Function *getFinalForwarder(MethodCallContext &mcctx, IREmitterHelpers::FinalMethodInfo &finalInfo) {
     if (auto *func = IREmitterHelpers::lookupFunction(mcctx.cs, finalInfo.method)) {
         return func;
@@ -104,7 +100,7 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
         return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
     }
 
-    auto &builder = builderCast(mcctx.build);
+    auto &builder = mcctx.builder;
     auto *send = mcctx.send;
     auto *recv = mcctx.varGetRecv();
 
@@ -174,7 +170,7 @@ llvm::Value *tryNameBasedIntrinsic(MethodCallContext &mcctx) {
 llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
     auto &cs = mcctx.cs;
     auto *send = mcctx.send;
-    auto &builder = builderCast(mcctx.build);
+    auto &builder = mcctx.builder;
     auto remainingType = mcctx.send->recv.type;
     auto afterSend = llvm::BasicBlock::Create(cs, "afterSend", builder.GetInsertBlock()->getParent());
     auto rememberStart = builder.GetInsertBlock();
@@ -248,9 +244,8 @@ std::size_t IREmitterHelpers::sendArgCount(cfg::Send *send) {
 
 namespace {
 
-void setSendArgsEntry(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *sendArgs, int index,
+void setSendArgsEntry(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *sendArgs, int index,
                       llvm::Value *val) {
-    auto &builder = builderCast(build);
     // the sendArgArray is always a pointer to an array of VALUEs. That is, since the
     // outermost type is a pointer, not an array, the first 0 in the instruction:
     //   getelementptr inbounds <type>, <type>* %s, i64 0, i64 <argId>
@@ -262,8 +257,7 @@ void setSendArgsEntry(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value
     builder.CreateStore(val, builder.CreateGEP(sendArgs, indices, fmt::format("callArgs{}Addr", index)));
 }
 
-llvm::Value *getSendArgsPointer(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *sendArgs) {
-    auto &builder = builderCast(build);
+llvm::Value *getSendArgsPointer(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *sendArgs) {
     llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
                               llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
     return builder.CreateGEP(sendArgs, indices);
@@ -277,7 +271,7 @@ IREmitterHelpers::SendArgInfo::SendArgInfo(llvm::Value *argc, llvm::Value *argv,
 
 IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallContext &mcctx, const std::size_t offset) {
     auto &cs = mcctx.cs;
-    auto &builder = builderCast(mcctx.build);
+    auto &builder = mcctx.builder;
     auto &args = mcctx.send->args;
     auto irctx = mcctx.irctx;
     auto rubyBlockId = mcctx.rubyBlockId;
@@ -372,7 +366,7 @@ IREmitterHelpers::RubyStackArgs IREmitterHelpers::buildSendArgs(MethodCallContex
                                                                 const std::size_t offset) {
     auto &cs = mcctx.cs;
     auto &irctx = mcctx.irctx;
-    auto &builder = builderCast(mcctx.build);
+    auto &builder = mcctx.builder;
     auto &send = mcctx.send;
     auto rubyBlockId = mcctx.rubyBlockId;
 
@@ -457,7 +451,7 @@ bool canCallBlockViaRubyVM(MethodCallContext &mcctx) {
 
 llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx) {
     auto &cs = mcctx.cs;
-    auto &builder = builderCast(mcctx.build);
+    auto &builder = mcctx.builder;
     auto *send = mcctx.send;
     auto &irctx = mcctx.irctx;
     auto rubyBlockId = mcctx.rubyBlockId;
@@ -511,10 +505,8 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
 }
 
 // Create a global to hold the FunctionInlineCache value, and setup its initialization in the `Init_` function.
-llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, llvm::IRBuilderBase &build, string methodName,
+llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, llvm::IRBuilderBase &builder, string methodName,
                                                CallCacheFlags flags, int argc, const vector<string_view> &keywords) {
-    auto &builder = builderCast(build);
-
     auto *setupFn = cs.getFunction("sorbet_setupFunctionInlineCache");
     auto *cacheTy = static_cast<llvm::PointerType *>(setupFn->arg_begin()->getType())->getElementType();
     auto *zero = llvm::ConstantAggregateZero::get(cacheTy);
@@ -554,7 +546,7 @@ llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, llvm::IRBuilde
             }
         }
 
-        auto *flagVal = flags.build(cs, build);
+        auto *flagVal = flags.build(cs, builder);
         builder.CreateCall(setupFn, {cache, midVal, flagVal, argcVal, keywordsLenVal, keywordsVal});
 
         builder.restoreIP(restore);
@@ -565,7 +557,7 @@ llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, llvm::IRBuilde
 
 llvm::Value *IREmitterHelpers::callViaRubyVMSimple(MethodCallContext &mcctx) {
     auto &cs = mcctx.cs;
-    auto &builder = builderCast(mcctx.build);
+    auto &builder = mcctx.builder;
     auto &irctx = mcctx.irctx;
     auto rubyBlockId = mcctx.rubyBlockId;
     auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
