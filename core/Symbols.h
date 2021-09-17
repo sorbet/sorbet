@@ -84,6 +84,7 @@ public:
         static constexpr u4 CLASS_OR_MODULE_FINAL = 0x0000'0200;
         static constexpr u4 CLASS_OR_MODULE_SEALED = 0x0000'0400;
         static constexpr u4 CLASS_OR_MODULE_PRIVATE = 0x0000'0800;
+        static constexpr u4 CLASS_OR_MODULE_REWRITER_STRUCT = 0x0000'1000;
 
         // Method flags
         static constexpr u4 METHOD_PROTECTED = 0x0000'0010;
