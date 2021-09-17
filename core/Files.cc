@@ -34,7 +34,7 @@ vector<int> findLineBreaks(string_view s) {
     return res;
 }
 
-StrictLevel File::fileSigil(string_view source) {
+StrictLevel File::fileStrictSigil(string_view source) {
     /*
      * StrictLevel::None: <none>
      * StrictLevel::False: # typed: false
@@ -107,9 +107,69 @@ StrictLevel File::fileSigil(string_view source) {
     }
 }
 
+CompiledLevel File::fileCompiledSigil(string_view source) {
+    size_t start = 0;
+    while (true) {
+        start = source.find("compiled:", start);
+
+        if (start == string_view::npos) {
+            return CompiledLevel::None;
+        }
+
+        auto comment_start = start;
+        while (comment_start > 0) {
+            --comment_start;
+            auto c = source[comment_start];
+            if (c == ' ') {
+                continue;
+            } else {
+                break;
+            }
+        }
+
+        if (source[comment_start] != '#') {
+            ++start;
+            continue;
+        }
+
+        // skip over 'compiled:'
+        start += 9;
+        while (start < source.size() && source[start] == ' ') {
+            ++start;
+        }
+
+        if (start >= source.size()) {
+            return CompiledLevel::None;
+        }
+
+        auto end = start + 1;
+        while (end < source.size() && source[end] != ' ' && source[end] != '\n') {
+            ++end;
+        }
+        if (source[end - 1] == '\r') {
+            end -= 1;
+        }
+
+        string_view suffix = source.substr(start, end - start);
+        if (suffix == "false") {
+            return CompiledLevel::False;
+        } else if (suffix == "true") {
+            return CompiledLevel::True;
+        } else {
+            // TODO(nelhage): We should report an error here to help catch
+            // typos. This would require refactoring so this function has
+            // access to GlobalState or can return errors to someone who
+            // does.
+        }
+
+        start = end;
+    }
+}
+
 File::File(string &&path_, string &&source_, Type sourceType, u4 epoch)
     : epoch(epoch), sourceType(sourceType), path_(move(path_)), source_(move(source_)),
-      originalSigil(fileSigil(this->source_)), strictLevel(originalSigil) {}
+      originalSigil(fileStrictSigil(this->source_)), strictLevel(originalSigil),
+      compiledLevel(fileCompiledSigil(this->source_)) {}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;
@@ -183,7 +243,7 @@ bool File::isRBI() const {
 }
 
 bool File::isStdlib() const {
-    return fileSigil(source()) == StrictLevel::Stdlib;
+    return fileStrictSigil(source()) == StrictLevel::Stdlib;
 }
 
 bool File::isPackage() const {

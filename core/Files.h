@@ -1,6 +1,7 @@
 #ifndef SORBET_AST_FILES_H
 #define SORBET_AST_FILES_H
 
+#include "core/CompiledLevel.h"
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include <string>
@@ -80,7 +81,8 @@ public:
     friend class GlobalState;
     friend class ::sorbet::core::serialize::SerializerImpl;
 
-    static StrictLevel fileSigil(std::string_view source);
+    static StrictLevel fileStrictSigil(std::string_view source);
+    static CompiledLevel fileCompiledSigil(std::string_view source);
 
     std::string_view path() const;
     std::string_view source() const;
@@ -119,6 +121,8 @@ private:
 public:
     const StrictLevel originalSigil;
     StrictLevel strictLevel;
+
+    const CompiledLevel compiledLevel;
 };
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {
