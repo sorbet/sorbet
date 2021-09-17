@@ -22,11 +22,9 @@ llvm::Function *getExceptionFunc(CompilerState &cs, const IREmitterContext &irct
 }
 } // namespace
 
-void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderBase &build,
+void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderBase &builder,
                                              const IREmitterContext &irctx, int rubyBlockId, int bodyRubyBlockId,
                                              cfg::LocalRef exceptionValue) {
-    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
-
     const int handlersRubyBlockId = bodyRubyBlockId + cfg::CFG::HANDLERS_BLOCK_OFFSET;
     const int ensureRubyBlockId = bodyRubyBlockId + cfg::CFG::ENSURE_BLOCK_OFFSET;
     const int elseRubyBlockId = bodyRubyBlockId + cfg::CFG::ELSE_BLOCK_OFFSET;
