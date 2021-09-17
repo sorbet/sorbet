@@ -155,7 +155,6 @@ public:
         core::ClassOrModuleRef recv;
         core::SymbolRef method;
         core::FileRef file;
-        bool isCompiled{false};
     };
 
     // Return true when the symbol is a final method
