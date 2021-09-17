@@ -320,6 +320,8 @@ public:
         Class,
     };
     Kind kind;
+    // Is this defined in the Struct.new rewriter?
+    bool isRewriterStruct = false;
     static constexpr int EXPECTED_RHS_COUNT = 4;
     using RHS_store = InlinedVector<ExpressionPtr, EXPECTED_RHS_COUNT>;
 
