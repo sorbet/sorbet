@@ -14,5 +14,6 @@ constexpr ErrorClass BadTestEach{3507, StrictLevel::True};
 constexpr ErrorClass PropForeignStrict{3508, StrictLevel::False};
 constexpr ErrorClass ComputedBySymbol{3509, StrictLevel::False};
 constexpr ErrorClass InitializeReturnType{3510, StrictLevel::False};
+constexpr ErrorClass InvalidStructMember{3511, StrictLevel::False};
 } // namespace sorbet::core::errors::Rewriter
 #endif

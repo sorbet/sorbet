@@ -42,6 +42,10 @@ class AccidentallyStruct
     A = Struct.new(:foo, :bar)
 end
 
+class InvalidMember
+  A = Struct.new(:foo=) # error: Struct member `foo=` cannot end with an equal
+end
+
 class MixinStruct
   module MyMixin
     def foo; end

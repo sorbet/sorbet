@@ -5,6 +5,7 @@
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
+#include "core/errors/rewriter.h"
 #include "rewriter/Util.h"
 #include "rewriter/rewriter.h"
 
@@ -120,6 +121,13 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         }
         core::NameRef name = sym->asSymbol(ctx);
         auto symLoc = sym->loc;
+        auto strname = name.shortName(ctx);
+        if (!strname.empty() && strname.back() == '=') {
+            if (auto e = ctx.beginError(symLoc, core::errors::Rewriter::InvalidStructMember)) {
+                e.setHeader("Struct member `{}` cannot end with an equal", strname);
+            }
+        }
+
         // TODO(jez) Use Loc::adjust here
         if (symLoc.exists() && absl::StartsWith(core::Loc(ctx.file, symLoc).source(ctx).value(), ":")) {
             symLoc = core::LocOffsets{symLoc.beginPos() + 1, symLoc.endPos()};
