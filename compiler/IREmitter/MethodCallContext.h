@@ -30,14 +30,14 @@ class MethodCallContext {
 
     void initArgsAndCache();
 
-    MethodCallContext(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx, int rubyBlockId,
+    MethodCallContext(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx, int rubyBlockId,
                       cfg::Send *send, std::optional<int> blk)
-        : cs(cs), build(build), irctx(irctx), rubyBlockId(rubyBlockId), send(send), blk(blk){};
+        : cs(cs), builder(builder), irctx(irctx), rubyBlockId(rubyBlockId), send(send), blk(blk){};
 
 public:
     CompilerState &cs;
 
-    llvm::IRBuilderBase &build;
+    llvm::IRBuilderBase &builder;
 
     const IREmitterContext &irctx;
 

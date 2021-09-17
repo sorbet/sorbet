@@ -25,10 +25,6 @@
 using namespace std;
 namespace sorbet::compiler {
 namespace {
-llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
-    return static_cast<llvm::IRBuilder<> &>(builder);
-};
-
 core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     core::SymbolRef sym;
     if (core::isa_type<core::ClassType>(typ)) {
@@ -117,7 +113,7 @@ private:
     // > }
     llvm::Function *generateForwarder(MethodCallContext &mcctx) const {
         auto &cs = mcctx.cs;
-        auto &builder = builderCast(mcctx.build);
+        auto &builder = mcctx.builder;
 
         // function signature
         auto linkage = llvm::Function::InternalLinkage;
@@ -169,7 +165,7 @@ public:
 
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
         auto &cs = mcctx.cs;
-        auto &builder = builderCast(mcctx.build);
+        auto &builder = mcctx.builder;
         auto *send = mcctx.send;
 
         auto *recv = mcctx.varGetRecv();
@@ -239,7 +235,7 @@ public:
     }
 };
 
-void emitParamInitialization(CompilerState &cs, llvm::IRBuilder<> &builder, const IREmitterContext &irctx,
+void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                              core::SymbolRef funcSym, int rubyBlockId, llvm::Value *param) {
     // Following the comment in vm_core.h:
     // https://github.com/ruby/ruby/blob/344a824ef9d4b6152703d02d7ffa042abd4252c1/vm_core.h#L321-L342
@@ -403,10 +399,8 @@ void emitParamInitialization(CompilerState &cs, llvm::IRBuilder<> &builder, cons
 }
 
 // TODO(froydnj): we need to do something like this for blocks as well.
-llvm::Value *buildParamInfo(CompilerState &cs, llvm::IRBuilder<> &builderBase, const IREmitterContext &irctx,
+llvm::Value *buildParamInfo(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                             core::SymbolRef funcSym, int rubyBlockId) {
-    auto &builder = builderCast(builderBase);
-
     auto *paramInfo = builder.CreateCall(cs.getFunction("sorbet_allocateParamInfo"), {}, "parameterInfo");
 
     emitParamInitialization(cs, builder, irctx, funcSym, rubyBlockId, paramInfo);
@@ -419,7 +413,7 @@ public:
     DefineMethodIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
         auto &cs = mcctx.cs;
-        auto &builder = builderCast(mcctx.build);
+        auto &builder = mcctx.builder;
         auto *send = mcctx.send;
 
         bool isSelf = send->fun == core::Names::keepSelfDef();
@@ -507,7 +501,7 @@ public:
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
         auto &cs = mcctx.cs;
         auto &irctx = mcctx.irctx;
-        auto &builder = builderCast(mcctx.build);
+        auto &builder = mcctx.builder;
         auto *send = mcctx.send;
         auto rubyBlockId = mcctx.rubyBlockId;
         // args[0] = originalRecv
@@ -551,7 +545,7 @@ class SorbetPrivateStaticSigIntrinsic : public SymbolBasedIntrinsicMethod {
 public:
     SorbetPrivateStaticSigIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
-        auto &builder = builderCast(mcctx.build);
+        auto &builder = mcctx.builder;
         return Payload::rubyNil(mcctx.cs, builder);
     }
 
@@ -577,7 +571,7 @@ public:
         auto recvType = representedClass.data(cs)->externalType();
         auto &arg0 = send->args[0];
 
-        auto &builder = builderCast(mcctx.build);
+        auto &builder = mcctx.builder;
 
         auto recvValue = mcctx.varGetRecv();
         auto representedClassValue = Payload::getRubyConstant(cs, representedClass, builder);
@@ -651,7 +645,7 @@ public:
         if (literal.literalKind != core::LiteralType::LiteralTypeKind::String) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
-        auto &builder = builderCast(mcctx.build);
+        auto &builder = mcctx.builder;
         auto str = literal.asName(cs).shortName(cs);
         return Payload::cPtrToRubyRegexp(cs, builder, str, options);
     };
@@ -683,17 +677,17 @@ public:
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
 
-        auto *blockHandler = Payload::vmBlockHandlerNone(cs, mcctx.build);
+        auto *blockHandler = Payload::vmBlockHandlerNone(cs, mcctx.builder);
 
         auto recv = cfg::LocalRef::selfVariable();
         auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 0);
         auto &irctx = mcctx.irctx;
-        auto &builder = builderCast(mcctx.build);
+        auto &builder = mcctx.builder;
         auto rubyBlockId = mcctx.rubyBlockId;
         auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
         Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyBlockId), stack);
         auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, "new", flags, stack.size(), keywords);
-        return Payload::callFuncWithCache(cs, mcctx.build, cache, blockHandler);
+        return Payload::callFuncWithCache(cs, builder, cache, blockHandler);
     };
 
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
@@ -703,7 +697,7 @@ public:
         return {core::Names::new_()};
     };
     virtual llvm::Value *receiverFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef c) const override {
-        return builderCast(mcctx.build).getInt1(true);
+        return mcctx.builder.getInt1(true);
     };
 } TEnum_new;
 
@@ -711,7 +705,7 @@ class TEnum_abstract : public SymbolBasedIntrinsicMethod {
 public:
     TEnum_abstract() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
-        auto &builder = builderCast(mcctx.build);
+        auto &builder = mcctx.builder;
         return Payload::rubyNil(mcctx.cs, builder);
     };
 
@@ -727,7 +721,7 @@ class TPrivateCompiler_runningCompiled_p : public SymbolBasedIntrinsicMethod {
 public:
     TPrivateCompiler_runningCompiled_p() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
-        auto &builder = builderCast(mcctx.build);
+        auto &builder = mcctx.builder;
         return Payload::rubyTrue(mcctx.cs, builder);
     };
 
@@ -743,7 +737,7 @@ class TPrivateCompiler_compilerVersion : public SymbolBasedIntrinsicMethod {
 public:
     TPrivateCompiler_compilerVersion() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
-        auto &builder = builderCast(mcctx.build);
+        auto &builder = mcctx.builder;
         auto frozen = true;
         return Payload::cPtrToRubyString(mcctx.cs, builder, sorbet_full_version_string, frozen);
     };
@@ -877,7 +871,7 @@ vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs(const core::Globa
 llvm::Value *SymbolBasedIntrinsicMethod::receiverFastPathTest(MethodCallContext &mcctx,
                                                               core::ClassOrModuleRef potentialClass) const {
     auto *recv = mcctx.varGetRecv();
-    return Payload::typeTest(mcctx.cs, mcctx.build, recv, core::make_type<core::ClassType>(potentialClass));
+    return Payload::typeTest(mcctx.cs, mcctx.builder, recv, core::make_type<core::ClassType>(potentialClass));
 }
 
 void SymbolBasedIntrinsicMethod::sanityCheck(const core::GlobalState &gs) const {}

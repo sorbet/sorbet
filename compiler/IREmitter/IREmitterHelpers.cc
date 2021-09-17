@@ -435,7 +435,7 @@ llvm::Value *IREmitterHelpers::receiverFastPathTestWithCache(MethodCallContext &
                                                              const vector<string> &expectedRubyCFuncs,
                                                              const string &methodNameForDebug) {
     auto &cs = mcctx.cs;
-    auto &builder = mcctx.build;
+    auto &builder = mcctx.builder;
     auto *cache = mcctx.getInlineCache();
     auto *recv = mcctx.varGetRecv();
     mcctx.emitMethodSearch();
