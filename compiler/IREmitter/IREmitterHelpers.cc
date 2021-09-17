@@ -428,7 +428,7 @@ IREmitterHelpers::isFinalMethod(const core::GlobalState &gs, core::TypePtr recvT
     }
 
     auto file = funSym.data(gs)->loc().file();
-    bool isCompiled = file.data(gs).source().find("# compiled: true\n") != string_view::npos;
+    bool isCompiled = file.data(gs).compiledLevel == core::CompiledLevel::True;
     return IREmitterHelpers::FinalMethodInfo{recvSym, funSym, file, isCompiled};
 }
 
