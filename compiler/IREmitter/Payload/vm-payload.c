@@ -141,7 +141,10 @@ VALUE sorbet_addMissingKWArg(VALUE missing, VALUE sym) {
     return missing;
 }
 
-__attribute__((__noreturn)) void sorbet_raiseMissingKeywords(VALUE missing) {
+// from class.c
+VALUE rb_keyword_error_new(const char *error, VALUE keys);
+
+__attribute__((__noreturn__)) void sorbet_raiseMissingKeywords(VALUE missing) {
     rb_exc_raise(rb_keyword_error_new("missing", missing));
 }
 
