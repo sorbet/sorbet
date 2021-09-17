@@ -103,6 +103,26 @@ TEST_CASE("FileIsTyped") { // NOLINT
     }
 }
 
+struct FileIsCompiledCase {
+    string_view src;
+    CompiledLevel compiled;
+};
+
+TEST_CASE("FileIsCompiled") { // NOLINT
+    vector<FileIsCompiledCase> cases = {
+        {"", CompiledLevel::None},
+        {"# compiled: true", CompiledLevel::True},
+        {"\n# compiled: true\n", CompiledLevel::True},
+        {"\n# compiled: false\n", CompiledLevel::False},
+        {"not a compiled: sigil\n# compiled: true\n", CompiledLevel::True},
+        {"compiled:\n# compiled: nonsense\n", CompiledLevel::None},
+        {"compiled: true\n", CompiledLevel::None},
+    };
+    for (auto &tc : cases) {
+        CHECK_EQ(tc.compiled, File::fileCompiledSigil(tc.src));
+    }
+}
+
 TEST_CASE("Substitute") { // NOLINT
     GlobalState gs1(errorQueue);
     gs1.initEmpty();
