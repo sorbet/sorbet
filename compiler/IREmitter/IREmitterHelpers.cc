@@ -201,8 +201,8 @@ void IREmitterHelpers::emitDebugLoc(CompilerState &cs, llvm::IRBuilderBase &buil
     builder.SetCurrentDebugLocation(llvm::DILocation::get(cs, line, column, scope));
 }
 
-void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                           int rubyBlockId, llvm::Value *retVal) {
+void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                           const IREmitterContext &irctx, int rubyBlockId, llvm::Value *retVal) {
     if (functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId])) {
         builder.CreateCall(cs.getFunction("sorbet_popFrame"), {});
     }
@@ -285,7 +285,8 @@ void IREmitterHelpers::emitTypeTestForBlock(CompilerState &cs, llvm::IRBuilderBa
     buildTypeTestPassFailBlocks(cs, builder, value, typeTest, expectedType, description);
 }
 
-llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilderBase &builder, const core::TypePtr &lit) {
+llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                              const core::TypePtr &lit) {
     if (lit.derivesFrom(cs, core::Symbols::FalseClass())) {
         return Payload::rubyFalse(cs, builder);
     }

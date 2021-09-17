@@ -59,7 +59,8 @@ llvm::Value *MethodCallContext::varGetRecv() {
 
         auto saved = builder.saveIP();
         this->builder.SetInsertPoint(this->sendEntry);
-        this->recv = Payload::varGet(this->cs, this->send->recv.variable, this->builder, this->irctx, this->rubyBlockId);
+        this->recv =
+            Payload::varGet(this->cs, this->send->recv.variable, this->builder, this->irctx, this->rubyBlockId);
         this->builder.restoreIP(saved);
     }
 

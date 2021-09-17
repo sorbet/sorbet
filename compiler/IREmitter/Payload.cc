@@ -16,8 +16,8 @@ namespace sorbet::compiler {
 
 llvm::Value *Payload::setExpectedBool(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *value,
                                       bool expected) {
-    return builder.CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::expect,
-                                                {llvm::Type::getInt1Ty(cs)}, {value, builder.getInt1(expected)});
+    return builder.CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::expect, {llvm::Type::getInt1Ty(cs)},
+                                   {value, builder.getInt1(expected)});
 }
 
 void Payload::boxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *target,
@@ -52,10 +52,10 @@ llvm::Value *Payload::rubyTrue(CompilerState &cs, llvm::IRBuilderBase &builder) 
 void Payload::raiseArity(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *currentArgCount, int minArgs,
                          int maxArgs) {
     builder.CreateCall(cs.getFunction("sorbet_raiseArity"),
-                                    {currentArgCount, llvm::ConstantInt::get(cs, llvm::APInt(32, minArgs, true)),
-                                     llvm::ConstantInt::get(cs, llvm::APInt(32, maxArgs, true))
+                       {currentArgCount, llvm::ConstantInt::get(cs, llvm::APInt(32, minArgs, true)),
+                        llvm::ConstantInt::get(cs, llvm::APInt(32, maxArgs, true))
 
-                                    });
+                       });
     builder.CreateUnreachable();
 }
 llvm::Value *Payload::longToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, long num) {
@@ -320,7 +320,8 @@ static bool isProc(core::SymbolRef sym) {
     return id >= core::Symbols::Proc0().id() && id <= core::Symbols::last_proc().id();
 }
 
-llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val, const core::TypePtr &type) {
+llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
+                               const core::TypePtr &type) {
     llvm::Value *ret = nullptr;
     typecase(
         type,
@@ -563,7 +564,6 @@ std::tuple<const string &, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::I
 // Fill the locals array with interned ruby IDs.
 void fillLocals(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx, int rubyBlockId,
                 int baseOffset, llvm::Value *locals) {
-
     // The map used to store escaped variables isn't stable, so we first sort it into a vector. This isn't great, but
     // without this step the locals are processed in random order, making the llvm output unstable.
     vector<pair<cfg::LocalRef, int>> escapedVariables{};
@@ -1115,8 +1115,9 @@ llvm::Value *Payload::callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderB
                               "sendWithBlock");
 }
 
-llvm::Value *Payload::callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache, llvm::Value *fn,
-                                     llvm::Value *argc, llvm::Value *argv, llvm::Value *recv, llvm::Value *iseq) {
+llvm::Value *Payload::callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
+                                     llvm::Value *fn, llvm::Value *argc, llvm::Value *argv, llvm::Value *recv,
+                                     llvm::Value *iseq) {
     return builder.CreateCall(cs.getFunction("sorbet_callFuncDirect"), {cache, fn, argc, argv, recv, iseq},
                               "sendDirect");
 }
