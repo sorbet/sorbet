@@ -536,7 +536,7 @@ int realmain(int argc, char *argv[]) {
                 prodCounterInc("types.input.lines");
                 prodCounterInc("types.input.files");
                 auto input = opts.inlineInput;
-                if (core::File::fileSigil(opts.inlineInput) == core::StrictLevel::None) {
+                if (core::File::fileStrictSigil(opts.inlineInput) == core::StrictLevel::None) {
                     // put it at the end so as to not upset line numbers
                     input += "\n# typed: true";
                 }

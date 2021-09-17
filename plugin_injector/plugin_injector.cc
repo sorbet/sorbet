@@ -130,8 +130,7 @@ class LLVMSemanticExtension : public SemanticExtension {
     }
 
     bool isCompiledTrue(const core::GlobalState &gs, const core::FileRef &f) const {
-        // TODO parse this the same way as `typed:`
-        return f.data(gs).source().find("# compiled: true\n") != string_view::npos;
+        return f.data(gs).compiledLevel == core::CompiledLevel::True;
     }
 
     // There are a certain class of method calls that sorbet generates for auxiliary

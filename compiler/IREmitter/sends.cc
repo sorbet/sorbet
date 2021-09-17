@@ -86,7 +86,7 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
     auto &cs = mcctx.cs;
     auto recvType = mcctx.send->recv.type;
     auto finalInfo = IREmitterHelpers::isFinalMethod(cs, recvType, mcctx.send->fun);
-    if (!finalInfo.has_value() || !finalInfo->isCompiled) {
+    if (!finalInfo.has_value()) {
         return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
     }
 
