@@ -114,6 +114,10 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         }
     }
 
+    // We don't want synthesized methods on this structure to be emitted by the compiler.
+    ast::MethodDef::Flags flags;
+    flags.discardDef = true;
+
     for (int i = 0; i < send->numPosArgs; i++) {
         auto *sym = ast::cast_tree<ast::Literal>(send->args[i]);
         if (!sym || !sym->isSymbol(ctx)) {
@@ -141,9 +145,9 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         }
         newArgs.emplace_back(ast::MK::OptionalArg(symLoc, move(argName), ast::MK::Nil(symLoc)));
 
-        body.emplace_back(ast::MK::SyntheticMethod0(symLoc, symLoc, name, ast::MK::RaiseUnimplemented(loc)));
+        body.emplace_back(ast::MK::SyntheticMethod0(symLoc, symLoc, name, ast::MK::RaiseUnimplemented(loc), flags));
         body.emplace_back(ast::MK::SyntheticMethod1(symLoc, symLoc, name.addEq(ctx), ast::MK::Local(symLoc, name),
-                                                    ast::MK::RaiseUnimplemented(loc)));
+                                                    ast::MK::RaiseUnimplemented(loc), flags));
     }
 
     // Elem = type_member(fixed: T.untyped)
@@ -159,7 +163,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
     if (isMissingInitialize(ctx, send)) {
         body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
         body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
-                                                   ast::MK::RaiseUnimplemented(loc)));
+                                                   ast::MK::RaiseUnimplemented(loc), flags));
     }
 
     if (send->block != nullptr) {
