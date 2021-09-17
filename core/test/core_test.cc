@@ -99,7 +99,7 @@ TEST_CASE("FileIsTyped") { // NOLINT
         {"\n# @typed\n", StrictLevel::None},
     };
     for (auto &tc : cases) {
-        CHECK_EQ(tc.strict, File::fileSigil(tc.src));
+        CHECK_EQ(tc.strict, File::fileStrictSigil(tc.src));
     }
 }
 
