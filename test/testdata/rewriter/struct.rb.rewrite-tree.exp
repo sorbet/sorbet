@@ -227,6 +227,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
+  class <emptyTree>::<C InvalidMember><<C <todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
+      def foo=<<todo method>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      def foo==<<todo method>>(foo=, &<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params(:foo=, ::BasicObject).void()
+      end
+
+      def initialize<<todo method>>(foo= = nil, &<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+
+      ::Sorbet::Private::Static.keep_def(<self>, :foo==, :normal)
+
+      <emptyTree>::<C Elem> = <self>.type_member(:fixed, ::T.untyped())
+
+      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+    end
+  end
+
   class <emptyTree>::<C MixinStruct><<C <todo sym>>> < (::<todo sym>)
     module <emptyTree>::<C MyMixin><<C <todo sym>>> < ()
       def foo<<todo method>>(&<blk>)
