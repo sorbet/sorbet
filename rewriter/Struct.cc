@@ -187,7 +187,9 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
                                                        core::Names::Constants::Struct()));
 
     vector<ast::ExpressionPtr> stats;
-    stats.emplace_back(ast::MK::Class(loc, loc, std::move(asgn->lhs), std::move(ancestors), std::move(body)));
+    ast::ExpressionPtr classDef = ast::MK::Class(loc, loc, std::move(asgn->lhs), std::move(ancestors), std::move(body));
+    ast::cast_tree_nonnull<ast::ClassDef>(classDef).isRewriterStruct = true;
+    stats.emplace_back(std::move(classDef));
     return stats;
 }
 
