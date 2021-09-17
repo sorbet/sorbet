@@ -12,7 +12,7 @@ enum class CompiledLevel {
     False = 1,
 
     // This file should be compiled.
-    True = 1,
+    True = 2,
 };
 }
 
