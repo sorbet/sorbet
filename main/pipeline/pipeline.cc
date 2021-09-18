@@ -6,6 +6,8 @@
 // ^^ has to go first
 #include "common/json2msgpack/json2msgpack.h"
 #include "packager/packager.h"
+#include "rapidjson/ostreamwrapper.h"
+#include "rapidjson/writer.h"
 #include <sstream>
 #endif
 #include "ProgressIndicator.h"
@@ -1036,6 +1038,44 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
             if (mpack_writer_destroy(&writer)) {
                 Exception::raise("failed to write msgpack");
             }
+        }
+        if (opts.print.CompiledFilesJson.enabled) {
+            stringstream buf;
+            rapidjson::OStreamWrapper wrapper{buf};
+            rapidjson::Writer writer{wrapper};
+
+            writer.StartArray();
+            for (auto &file : gs->getFiles()) {
+                if (file == nullptr || file->sourceType != core::File::Type::Normal) {
+                    continue;
+                }
+
+                writer.StartObject();
+                writer.Key("file");
+
+                auto path = file->path();
+                writer.String(path.data(), path.size());
+
+                writer.Key("compiled");
+                switch (file->compiledLevel) {
+                    case core::CompiledLevel::None:
+                        writer.String("none");
+                        break;
+
+                    case core::CompiledLevel::False:
+                        writer.String("false");
+                        break;
+
+                    case core::CompiledLevel::True:
+                        writer.String("true");
+                        break;
+                }
+
+                writer.EndObject();
+            }
+            writer.EndArray();
+
+            opts.print.CompiledFilesJson.print(buf.str());
         }
 #endif
         // Error queue is re-used across runs, so reset the flush count to ignore files flushed during typecheck.
