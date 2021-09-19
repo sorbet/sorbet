@@ -7,6 +7,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    def <recursive_micm><<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
     module <emptyTree>::<C ClassMethods><<C <todo sym>>> < ()
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.void()
@@ -26,6 +30,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :instance_method, :normal)
 
     ::<Magic>.mixes_in_class_methods(<self>, <emptyTree>::<C ClassMethods>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :<recursive_micm>, :normal)
   end
 
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
@@ -40,6 +46,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   module <emptyTree>::<C Bar><<C <todo sym>>> < ()
     def instance_method<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def <recursive_micm><<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -68,6 +78,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :instance_method, :normal)
 
     ::<Magic>.mixes_in_class_methods(<self>, <emptyTree>::<C ClassMethods>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :<recursive_micm>, :normal)
   end
 
   class <emptyTree>::<C B><<C <todo sym>>> < (::<todo sym>)
@@ -84,6 +96,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   module <emptyTree>::<C Baz><<C <todo sym>>> < ()
     def instance_method<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def <recursive_micm><<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -112,6 +128,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :instance_method, :normal)
 
     ::<Magic>.mixes_in_class_methods(<self>, <emptyTree>::<C ClassMethods>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :<recursive_micm>, :normal)
   end
 
   class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
@@ -126,6 +144,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   module <emptyTree>::<C Qux><<C <todo sym>>> < ()
     def instance_method<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def <recursive_micm><<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -148,6 +170,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :instance_method, :normal)
 
     ::<Magic>.mixes_in_class_methods(<self>, <emptyTree>::<C ClassMethods>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :<recursive_micm>, :normal)
   end
 
   class <emptyTree>::<C D><<C <todo sym>>> < (::<todo sym>)
@@ -201,6 +225,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C F>.a_class_method()
 
   module <emptyTree>::<C Grault><<C <todo sym>>> < ()
+    def <recursive_micm><<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
     module <emptyTree>::<C ClassMethods><<C <todo sym>>> < ()
       def a_class_method<<todo method>>(&<blk>)
         <emptyTree>
@@ -218,6 +246,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C ActiveSupport>::<C Concern>)
 
     ::<Magic>.mixes_in_class_methods(<self>, <emptyTree>::<C ClassMethods>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :<recursive_micm>, :normal)
   end
 
   class <emptyTree>::<C G><<C <todo sym>>> < (::<todo sym>)

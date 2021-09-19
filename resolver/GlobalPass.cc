@@ -358,13 +358,50 @@ InlinedVector<core::ClassOrModuleRef, 4> ParentLinearizationInformation::fullLin
     return res;
 }
 
+void linearizeMixesInClassMethods(core::GlobalState &gs, core::SymbolRef singleton,
+                                  core::SymbolRef mixedInClassMethods) {
+    auto resultType = mixedInClassMethods.data(gs)->resultType;
+    ENFORCE(resultType != nullptr && core::isa_type<core::TupleType>(resultType));
+    auto types = core::cast_type<core::TupleType>(resultType);
+
+    for (auto &type : types->elems) {
+        ENFORCE(core::isa_type<core::ClassType>(type));
+        auto classType = core::cast_type_nonnull<core::ClassType>(type);
+        if (!singleton.data(gs)->addMixin(gs, classType.symbol)) {
+            // Should never happen. We check in ResolveConstantsWalk that classMethods are a module before
+            // adding it as a member.
+            ENFORCE(false);
+        }
+    }
+}
+
 void Resolver::computeLinearization(core::GlobalState &gs) {
     Timer timer(gs.tracer(), "resolver.compute_linearization");
 
     // TODO: this does not support `prepend`
     for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
         const auto &ref = core::ClassOrModuleRef(gs, i);
-        computeClassLinearization(gs, ref);
+        auto mixins = computeClassLinearization(gs, ref).mixins;
+
+        // Iterate over mixins of the class as long as they are calling `Magic.mixes_in_class_methods()`
+        // Provides recursive `mixes_in_class_methods` support
+        core::SymbolRef singleton;
+        for (auto mod : mixins) {
+            auto recursiveMicm = mod.data(gs)->findMember(gs, core::Names::recursiveMicm());
+            if (!recursiveMicm.exists()) {
+                break;
+            }
+
+            auto mixedInClassMethods = mod.data(gs)->findMember(gs, core::Names::mixedInClassMethods());
+            if (!mixedInClassMethods.exists()) {
+                break;
+            }
+            if (!singleton.exists()) {
+                singleton = ref.data(gs)->singletonClass(gs);
+            }
+
+            linearizeMixesInClassMethods(gs, singleton, mixedInClassMethods);
+        }
     }
 }
 
@@ -390,19 +427,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
                 singleton = sym.data(gs)->singletonClass(gs);
             }
 
-            auto resultType = mixedInClassMethods.data(gs)->resultType;
-            ENFORCE(resultType != nullptr && core::isa_type<core::TupleType>(resultType));
-            auto types = core::cast_type<core::TupleType>(resultType);
-
-            for (auto &type : types->elems) {
-                ENFORCE(core::isa_type<core::ClassType>(type));
-                auto classType = core::cast_type_nonnull<core::ClassType>(type);
-                if (!singleton.data(gs)->addMixin(gs, classType.symbol)) {
-                    // Should never happen. We check in ResolveConstantsWalk that classMethods are a module before
-                    // adding it as a member.
-                    ENFORCE(false);
-                }
-            }
+            linearizeMixesInClassMethods(gs, singleton, mixedInClassMethods);
         }
     }
 
