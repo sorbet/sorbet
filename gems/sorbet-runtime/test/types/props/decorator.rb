@@ -51,6 +51,51 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     prop :the_hash, T.nilable(T::Hash[String, CustomType])
   end
 
+  module OnlyGetterInterface
+    extend T::Sig
+    extend T::Helpers
+    include T::Props
+
+    interface!
+
+    sig {abstract.returns(Integer)}
+    def baz; end
+  end
+
+  module OnlySetterInterface
+    extend T::Sig
+    extend T::Helpers
+    include T::Props
+
+    interface!
+
+    sig {abstract.params(val: Integer).returns(Integer)}
+    def baz=(val); end
+  end
+
+  module CompleteInterface
+    extend T::Sig
+    extend T::Helpers
+    include T::Props
+
+    interface!
+
+    sig {abstract.returns(Integer)}
+    def baz; end
+
+    sig {abstract.params(val: Integer).returns(Integer)}
+    def baz=(val); end
+  end
+
+  module PropInterface
+    extend T::Helpers
+    include T::Props
+
+    interface!
+
+    prop :baz, Integer
+  end
+
   describe 'typed arrays and hashes' do
     it 'can have string values' do
       doc = StringArrayAndHashStruct.new(
@@ -113,6 +158,62 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     it 'Validates you pass a type' do
       assert_prop_error(/Invalid String literal for type constraint.*Got a String with value `goat`/, error: RuntimeError) do
         prop :foo, "goat"
+      end
+    end
+
+    it "Validates missing override" do
+      assert_prop_error(/Attempted to redefine method :baz using a prop without specifying :override => true/,
+        error: ArgumentError, mixin: OnlyGetterInterface) do
+        prop :baz, Integer
+      end
+    end
+
+    it "Validates override without an existing super method" do
+      assert_prop_error(/Attempted to override a prop :baz that doesn't already exist/,
+        error: ArgumentError) do
+        prop :baz, Integer, override: true
+      end
+    end
+
+    it "Validates override type mismatches" do
+      assert_prop_error(/Incompatible return type in signature for implementation of method `baz`/,
+        error: RuntimeError, mixin: OnlyGetterInterface) do
+        prop :baz, String, override: true
+      end
+    end
+
+    it "Validates override for setter only" do
+      assert_prop_error(/Incompatible type for arg #1 \(`val`\) in signature for implementation of method `baz=`/,
+        error: RuntimeError, mixin: OnlySetterInterface) do
+        prop :baz, String, override: true
+      end
+    end
+
+    it "Validates override for setter only" do
+      assert_prop_error(/Incompatible type for arg #1 \(`val`\) in signature for implementation of method `baz=`/,
+        error: RuntimeError, mixin: OnlySetterInterface) do
+        prop :baz, String, override: true
+      end
+    end
+
+    it "Validates override for getter and setter" do
+      assert_prop_error(/Incompatible return type in signature for implementation of method `baz`/,
+        error: RuntimeError, mixin: CompleteInterface) do
+        prop :baz, String, override: true
+      end
+    end
+
+    it "Validates override when using props" do
+      assert_prop_error(/Incompatible prop override type for `baz`. Original type was Integer/,
+        error: RuntimeError, mixin: PropInterface) do
+        prop :baz, String, override: true
+      end
+    end
+
+    it "allows type mismatches when using allow_incompatible" do
+      Class.new do
+        include CompleteInterface
+        prop :baz, String, override: true, allow_incompatible: true
       end
     end
 

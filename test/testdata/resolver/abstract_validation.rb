@@ -166,3 +166,32 @@ module BadTypedImpl
   sig {override.returns(Integer)}
   def foo; 1; end # error: Return type `Integer` does not match return type of abstract method `GoodInterface#foo`
 end
+
+class BadAttrImpl
+  extend T::Sig
+  extend T::Helpers
+  include GoodInterface
+
+  sig {override.returns(Integer)}
+  attr_reader :foo # error: Return type `Integer` does not match return type of abstract method `GoodInterface#foo`
+end
+
+class BadStructImpl < T::Struct
+  include GoodInterface
+
+  const :foo, Integer, override: true
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Return type `Integer` does not match return type of abstract method `GoodInterface#foo`
+end
+
+class BadStructMissingOverride < T::Struct
+  include GoodInterface
+
+  const :foo, Integer
+# ^^^^^^^^^^^^^^^^^^^ error: Method `BadStructMissingOverride#foo` implements an abstract method `GoodInterface#foo` but is not declared with `override.`
+end
+
+class IncompatibleOverride < T::Struct
+  include GoodInterface
+
+  const :foo, Integer, override: true, allow_incompatible: true
+end
