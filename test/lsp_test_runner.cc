@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include <cxxopts.hpp>
+#include <memory>
 // has to go first as it violates our requirements
 
 #include "absl/strings/match.h"
@@ -432,7 +433,12 @@ TEST_CASE("LSPTest") {
         // (The first element of the pair is only ever TypeDefAssertions but we only ever care that they're
         // RangeAssertions, so rather than fiddle with up casting, we'll just make the whole vector RangeAssertions)
         UnorderedMap<string, pair<vector<shared_ptr<RangeAssertion>>, vector<shared_ptr<TypeAssertion>>>> typeDefMap;
+
+
+        // symbol => [ ImplementationAssertion[], FindImplementationAssertion[] ]
+        UnorderedMap<string, pair<vector<shared_ptr<ImplementationAssertion>>, vector<shared_ptr<FindImplementationAssertion>>>> implementationMap;
         for (auto &assertion : assertions) {
+            fmt::print("*** assertion: {}", assertion->toString());
             if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
                 auto &entry = defUsageMap[defAssertion->symbol];
                 auto &defMap = entry.first;
@@ -452,6 +458,12 @@ TEST_CASE("LSPTest") {
             } else if (auto typeAssertion = dynamic_pointer_cast<TypeAssertion>(assertion)) {
                 auto &[_typeDefs, typeAssertions] = typeDefMap[typeAssertion->symbol];
                 typeAssertions.emplace_back(typeAssertion);
+            } else if (auto implAssertion = dynamic_pointer_cast<ImplementationAssertion>(assertion)) {
+                auto &[impls, _implAssertions] = implementationMap[implAssertion->symbol];
+                impls.emplace_back(implAssertion);
+            } else if (auto findImplAssertion = dynamic_pointer_cast<FindImplementationAssertion>(assertion)) {
+                auto &[_impls, implAssertions] = implementationMap[findImplAssertion->symbol];
+                implAssertions.emplace_back(findImplAssertion);
             }
         }
 
@@ -532,6 +544,15 @@ TEST_CASE("LSPTest") {
                 auto queryLoc = typeAssertion->getLocation(config);
                 // Check that a type definition request at this location returns type-def.
                 TypeDefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc, typeDefs);
+            }
+        }
+
+        // Check each find/implementation assertion.
+        for (auto &[symbol, implsAndAssertions] : implementationMap) {
+            auto &[impls, implAssertions] = implsAndAssertions;
+            for (auto &implAssertion : implAssertions) {
+                auto queryLoc = implAssertion->getLocation(config);
+                FindImplementationAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc, impls);
             }
         }
     }

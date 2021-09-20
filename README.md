@@ -659,6 +659,33 @@ class Project::Foo
 end
 ```
 
+#### Testing "Go to Implementation"
+
+Testing the "Go to Implementation" feature is really similar to the testing techniques of the "Go to Type Definition".
+
+```ruby
+module A
+#      ^ find-implementation: A
+  extend T::Sig
+  extend T::Helpers
+  interface!
+end
+
+ class B
+#^^^^^^^ implementation: A
+  extend T::Sig
+  include A
+#         ^ find-implementation: A
+end
+```
+
+There are two types of assertions:
+
+1. `find-implementation: <symbol>` means make a "Go to Implementation" request here. `<symbol>` marks the symbol name we are looking for.
+2. `implementation: <symbol>` marks the location which should be returned for the "Go to Implementation" call for a given `<symbol>`
+
+If the request returns multiple locations, you should mark all of them with `implementation: <symbol>`
+
 #### Testing rename constant
 
 To write a test for renaming constants, you need to make at least two files:
