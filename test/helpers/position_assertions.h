@@ -393,22 +393,24 @@ public:
 
 // # ^^^ implementation: symbol
 class ImplementationAssertion final : public RangeAssertion {
-    public:
-
-    ImplementationAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol);
-    static std::shared_ptr<ImplementationAssertion> make(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
-                                                std::string_view assertionContents, std::string_view assertionType);
+public:
+    ImplementationAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                            std::string_view symbol);
+    static std::shared_ptr<ImplementationAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                         int assertionLine, std::string_view assertionContents,
+                                                         std::string_view assertionType);
     const std::string symbol;
     std::string toString() const override;
 };
 
 // # ^^^ find-implementation: symbol
 class FindImplementationAssertion final : public RangeAssertion {
-    public:
-
-    FindImplementationAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol);
-    static std::shared_ptr<FindImplementationAssertion> make(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
-                                                std::string_view assertionContents, std::string_view assertionType);
+public:
+    FindImplementationAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                                std::string_view symbol);
+    static std::shared_ptr<FindImplementationAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                             int assertionLine, std::string_view assertionContents,
+                                                             std::string_view assertionType);
 
     static void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
                       LSPWrapper &wrapper, int &nextId, std::string_view symbol, const Location &queryLoc,
