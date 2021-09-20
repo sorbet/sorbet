@@ -119,8 +119,15 @@ unique_ptr<ResponseMessage> GoToImplementationTask::runRequest(LSPTypecheckerDel
         }
 
     } else if (auto send = queryResponse->isSend()) {
+        auto mainResponse = move(send->dispatchResult->main);
+
         // User called "Go to Implementation" from the abstract function call
-        const core::MethodRef calledMethod = send->dispatchResult->main.method;
+        const core::MethodRef calledMethod = mainResponse.method;
+
+        if (mainResponse.errors.size() != 0) {
+            response->error = makeInvalidParamsError("Failed to fetch implementations");
+            return response;
+        }
 
         core::SymbolRef overridedMethod = core::SymbolRef(calledMethod);
         if (calledMethod.data(gs)->isOverride()) {
