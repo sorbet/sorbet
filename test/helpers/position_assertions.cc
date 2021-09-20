@@ -51,6 +51,8 @@ const UnorderedMap<
         {"symbol-search", SymbolSearchAssertion::make},
         {"apply-rename", ApplyRenameAssertion::make},
         {"extra-package-files-directory-prefix", StringPropertyAssertion::make},
+        {"implementation", ImplementationAssertion::make},
+        {"find-implementation", FindImplementationAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -1793,5 +1795,63 @@ void SymbolSearchAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &a
         checkAllForQuery(entry.first, entry.second, sourceFileContents, lspWrapper, nextId, errorPrefix);
     }
 }
+
+ImplementationAssertion::ImplementationAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view symbol)
+    : RangeAssertion(filename, range, assertionLine), symbol(symbol) {}
+
+shared_ptr<ImplementationAssertion> ImplementationAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                string_view assertionContents, string_view assertionType) {
+    auto [symbol, _, __] = getSymbolVersionAndOption(assertionContents);
+    return make_shared<ImplementationAssertion>(filename, range, assertionLine, symbol);
+}
+
+string ImplementationAssertion::toString() const {
+    return fmt::format("implementation: {}", symbol);
+}
+
+FindImplementationAssertion::FindImplementationAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view symbol)
+    : RangeAssertion(filename, range, assertionLine), symbol(symbol) {}
+
+shared_ptr<FindImplementationAssertion> FindImplementationAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                string_view assertionContents, string_view assertionType) {
+    auto [symbol, _, __] = getSymbolVersionAndOption(assertionContents);
+    return make_shared<FindImplementationAssertion>(filename, range, assertionLine, symbol);
+}
+
+string FindImplementationAssertion::toString() const {
+    return fmt::format("find-implementation: {}", symbol);
+}
+
+void FindImplementationAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                      LSPWrapper &wrapper, int &nextId, std::string_view symbol, const Location &queryLoc,
+                      const std::vector<std::shared_ptr<ImplementationAssertion>> &allImpls) {
+    const int line = queryLoc.range->start->line;
+    // Can only query with one character, so just use the first one.
+    const int character = queryLoc.range->start->character;
+    const auto &config = wrapper.config();
+    auto locSourceLine = getLine(config, sourceFileContents, queryLoc);
+    string locFilename = uriToFilePath(config, queryLoc.uri);
+
+    const int id = nextId++;
+    auto request = make_unique<LSPMessage>(make_unique<RequestMessage>(
+        "2.0", id, LSPMethod::TextDocumentImplementation,
+        make_unique<ImplementationParams>(make_unique<TextDocumentIdentifier>(string(queryLoc.uri)),
+                                                make_unique<Position>(line, character))));
+    auto responses = getLSPResponsesFor(wrapper, move(request));
+    REQUIRE_EQ(1, responses.size());
+    assertResponseMessage(id, *responses.at(0));
+
+    auto &respMsg = responses.at(0)->asResponse();
+    REQUIRE(respMsg.result.has_value());
+    REQUIRE_FALSE(respMsg.error.has_value());
+
+    auto &locations = extractLocations(respMsg);
+
+    // casting from ImplementationAssertion to RangeAssertion
+    std::vector<std::shared_ptr<RangeAssertion>> allLocs (allImpls.begin(), allImpls.end());
+    assertLocationsMatch(config, sourceFileContents, symbol, allLocs, line, character, locSourceLine, locFilename,
+                         locations, "find implementation");
+};
+
 
 } // namespace sorbet::test
