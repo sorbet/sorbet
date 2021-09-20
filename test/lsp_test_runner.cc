@@ -434,9 +434,10 @@ TEST_CASE("LSPTest") {
         // RangeAssertions, so rather than fiddle with up casting, we'll just make the whole vector RangeAssertions)
         UnorderedMap<string, pair<vector<shared_ptr<RangeAssertion>>, vector<shared_ptr<TypeAssertion>>>> typeDefMap;
 
-
         // symbol => [ ImplementationAssertion[], FindImplementationAssertion[] ]
-        UnorderedMap<string, pair<vector<shared_ptr<ImplementationAssertion>>, vector<shared_ptr<FindImplementationAssertion>>>> implementationMap;
+        UnorderedMap<string,
+                     pair<vector<shared_ptr<ImplementationAssertion>>, vector<shared_ptr<FindImplementationAssertion>>>>
+            implementationMap;
         for (auto &assertion : assertions) {
             fmt::print("*** assertion: {}", assertion->toString());
             if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
@@ -552,7 +553,8 @@ TEST_CASE("LSPTest") {
             auto &[impls, implAssertions] = implsAndAssertions;
             for (auto &implAssertion : implAssertions) {
                 auto queryLoc = implAssertion->getLocation(config);
-                FindImplementationAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc, impls);
+                FindImplementationAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
+                                                   impls);
             }
         }
     }
