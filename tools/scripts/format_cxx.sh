@@ -2,22 +2,36 @@
 
 set -e
 
-if [ "$1" = -t ]; then
-    mode="test"
-else
-    mode="fix"
-fi
+mode="fix"
+
+while getopts 't' opt; do
+    case "$opt" in
+        t)
+            mode="test"
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
 
 cd "$(dirname "$0")/../.."
 
 ./bazel build //tools:clang-format &> /dev/null
 
-# shellcheck disable=SC2207
-cxx_src=(
-    $(git ls-files -c -m -o --exclude-standard -- '*.cxx' '*.cc' '*.h' | \
-          grep -v ^third_party/
+if [ "$#" -ne 0 ]; then
+    cxx_src=("$@")
+else
+    # shellcheck disable=SC2207
+    cxx_src=(
+        $(git ls-files -c -m -o --exclude-standard -- '*.cxx' '*.cc' '*.h' '*.c' | \
+              grep -v ^third_party/
+        )
     )
-)
+fi
+
 misformatted=()
 
 cleanup() {
@@ -52,6 +66,14 @@ if [ "$mode" = "fix" ]; then
     for src in "${misformatted[@]}"; do
         echo "$src" >&2
     done
+
+    if [ "${EMIT_SYNCBACK:-}" != "" ]; then
+        echo '### BEGIN SYNCBACK ###'
+        for file in "${misformatted[@]}"; do
+            echo "$file"
+        done
+        echo '### END SYNCBACK ###'
+    fi
 else
     echo "Some c++ files need to be formatted!"
     for src in "${misformatted[@]}"; do

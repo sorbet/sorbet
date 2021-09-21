@@ -492,9 +492,10 @@ struct rfb_status {
     bool was_thrown;
 };
 
-struct rfb_status sorbet_vm_return_from_block_wrapper(int argc, VALUE *argv, VALUE recv, rb_control_frame_t * volatile cfp, rb_sorbet_func_t wrapped) {
+struct rfb_status sorbet_vm_return_from_block_wrapper(int argc, VALUE *argv, VALUE recv,
+                                                      rb_control_frame_t *volatile cfp, rb_sorbet_func_t wrapped) {
     enum ruby_tag_type state;
-    rb_execution_context_t * volatile ec = GET_EC();
+    rb_execution_context_t *volatile ec = GET_EC();
     struct rfb_status status;
     status.return_value = Qundef;
     status.was_thrown = false;
@@ -562,12 +563,10 @@ static void sorbet_raiseIfNotNil(VALUE exception) {
 
     rb_exc_raise(exception);
 }
-VALUE sorbet_run_exception_handling(rb_execution_context_t * volatile ec,
-                                    volatile ExceptionFFIType body,
-                                    VALUE ** volatile pc,
+VALUE sorbet_run_exception_handling(rb_execution_context_t *volatile ec, volatile ExceptionFFIType body,
+                                    VALUE **volatile pc,
                                     // The locals offset for the body.
-                                    volatile VALUE methodClosure,
-                                    rb_control_frame_t * volatile cfp,
+                                    volatile VALUE methodClosure, rb_control_frame_t *volatile cfp,
                                     // May be nullptr.
                                     volatile ExceptionFFIType handlers,
                                     // May be nullptr.
@@ -575,8 +574,7 @@ VALUE sorbet_run_exception_handling(rb_execution_context_t * volatile ec,
                                     // May be nullptr.
                                     volatile ExceptionFFIType ensureClause,
                                     // The special value indicating that we need to retry.
-                                    volatile VALUE retrySingleton,
-                                    volatile long exceptionValueIndex,
+                                    volatile VALUE retrySingleton, volatile long exceptionValueIndex,
                                     volatile long exceptionValueLevel) {
     // `volatile` is not used in polite C programming, but here it's very important:
     // it ensures that the requisite variables are stored in memory across the setjmp
@@ -722,7 +720,7 @@ VALUE sorbet_run_exception_handling(rb_execution_context_t * volatile ec,
         rb_set_errinfo(postRescueExceptionContext);
     }
 
- execute_ensure:
+execute_ensure:
     // However we arrived at this state, we are done with our entry on the tag stack.
     EC_POP_TAG();
 
