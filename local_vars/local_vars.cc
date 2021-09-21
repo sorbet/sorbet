@@ -25,8 +25,14 @@ class LocalNameInserter {
         bool isPositional() const {
             return !this->keyword && !this->block && !this->repeated && !this->shadow;
         }
+        bool isPositionalSplat() const {
+            return !this->keyword && !this->block && this->repeated && !this->shadow;
+        }
         bool isKeyword() const {
             return this->keyword && !this->repeated;
+        }
+        bool isKeywordSplat() const {
+            return this->keyword && this->repeated;
         }
     };
     CheckSize(ArgFlags, 1, 1);
@@ -226,35 +232,246 @@ public:
     }
 
     ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
+        // Replace ZSuperArgs with an explicit forwarding of the enclosing method's arguments.
+
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (original.args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.args[0])) {
-            original.numPosArgs = 0;
-            original.args.clear();
-            if (scopeStack.back().insideMethod) {
-                bool seenKeywordArgs = false;
-                for (auto arg : scopeStack.back().args) {
-                    if (arg.flags.isPositional()) {
-                        ENFORCE(!seenKeywordArgs, "Saw positional arg after keyword arg");
-                        original.args.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
-                        ++original.numPosArgs;
-                    } else if (arg.flags.isKeyword()) {
-                        seenKeywordArgs = true;
-                        original.args.emplace_back(ast::MK::Symbol(original.loc, arg.arg._name));
-                        original.args.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
-                    } else if (arg.flags.repeated || arg.flags.block) {
-                        // Explicitly skip for now.
-                        // Involves synthesizing a call to callWithSplat, callWithBlock, or callWithSplatAndBlock
-                    } else if (arg.flags.shadow) {
-                        ENFORCE(false, "Shadow only come from blocks, but super only looks at a method's args");
-                    } else {
-                        ENFORCE(false, "Unhandled arg kind in ZSuperArgs");
-                    }
+        if (original.args.size() != 1 || !ast::isa_tree<ast::ZSuperArgs>(original.args[0])) {
+            return tree;
+        }
+
+        // Clear out the args (which are just [ZSuperArgs]) in the original send. (Note that we want this cleared even
+        // if we error out below, because later `ENFORCE`s will be triggered if we don't.)
+        original.numPosArgs = 0;
+        original.args.clear();
+
+        if (!scopeStack.back().insideMethod) {
+            if (auto e = ctx.beginError(original.loc, core::errors::Namer::SelfOutsideClass)) {
+                e.setHeader("`{}` outside of method", "super");
+            }
+            return tree;
+        }
+
+        // In the context of a method with a signature like this:
+        //
+        //    def f(<posargs>,<kwargs>,&<blkvar>)
+        //
+        // We're rewriting from something of the form:
+        //
+        //    super(ZSuperArgs)
+        //
+        // or:
+        //
+        //    super(ZSuperArgs) do <foo> end
+        //
+        // (Note that some <blkvar> is always present in the AST even if it was not explicitly written out in the
+        // original source.)
+        //
+        // What we need to produce for the rewrite depends on two things: (1) whether there is a "*args"-style posarg
+        // splat in the enclosing method's parameters, and (2) whether there is a "do" attached to the send that we are
+        // lowering.
+        //
+        //    Posarg splat? | "do" attached? | Lower to...
+        //    --------------+----------------+------------
+        //    Yes           | Yes            | ::<Magic>::<call-with-splat>(..., :super, ...) do <foo> end
+        //    Yes           | No             | ::<Magic>::<call-with-splat-and-block>(..., :super, ..., &<blkvar>)
+        //    No            | Yes            | super(...) do <foo> end
+        //    No            | No             | ::<Magic>::<call-with-block>(..., :super, ..., &<blkvar>)
+        //
+        // (In particular, note that the <blkvar> is thrown on the floor when a "do" is present.)
+
+        // First, gather positional and keyword args into a vector (ENFORCE-ing for form invariants as we go)...
+        ast::Array::ENTRY_store posArgsEntries;
+        ast::Hash::ENTRY_store kwArgKeyEntries;
+        ast::Hash::ENTRY_store kwArgValueEntries;
+
+        // ...if we hit a splat along the way, however, we'll build it into an expression that evaluates to an array
+        // (or a hash, where keyword args are concerned). Otherwise, posArgsArray (resp. kwArgsHash) will be null.
+        ast::ExpressionPtr posArgsArray;
+        ast::ExpressionPtr kwArgsHash;
+
+        // We'll also look for the block arg, which should always be present at the end of the args.
+        ast::ExpressionPtr blockArg;
+
+        for (auto arg : scopeStack.back().args) {
+            ENFORCE(!blockArg, "Block arg was not in final position");
+
+            if (arg.flags.isPositional()) {
+                ENFORCE(kwArgKeyEntries.empty(), "Saw positional arg after keyword arg");
+                ENFORCE(!kwArgsHash, "Saw positional arg after keyword splat");
+
+                posArgsEntries.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
+            } else if (arg.flags.isPositionalSplat()) {
+                ENFORCE(!posArgsArray, "Saw multiple positional splats");
+                ENFORCE(kwArgKeyEntries.empty(), "Saw positional splat after keyword arg");
+                ENFORCE(!kwArgsHash, "Saw positional splat after keyword splat");
+
+                posArgsArray = ast::MK::Splat(original.loc, ast::make_expression<ast::Local>(original.loc, arg.arg));
+                if (!posArgsEntries.empty()) {
+                    posArgsArray = ast::MK::Send1(original.loc, ast::MK::Array(original.loc, std::move(posArgsEntries)),
+                                                  core::Names::concat(), std::move(posArgsArray));
+                    posArgsEntries.clear();
                 }
+            } else if (arg.flags.isKeyword()) {
+                ENFORCE(!kwArgsHash, "Saw keyword arg after keyword splat");
+
+                kwArgKeyEntries.emplace_back(ast::MK::Literal(
+                    original.loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), arg.arg._name)));
+                kwArgValueEntries.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
+            } else if (arg.flags.isKeywordSplat()) {
+                ENFORCE(!kwArgsHash, "Saw multiple keyword splats");
+
+                // TODO(aprocter): is it necessary to duplicate the hash here?
+                kwArgsHash =
+                    ast::MK::Send1(original.loc, ast::MK::Constant(original.loc, core::Symbols::Magic()),
+                                   core::Names::toHashDup(), ast::make_expression<ast::Local>(original.loc, arg.arg));
+                if (!kwArgKeyEntries.empty()) {
+                    // TODO(aprocter): it might make more sense to replace this with an InsSeq that calls
+                    // <Magic>::<merge-hash>, which is what's done in the desugarer.
+                    kwArgsHash = ast::MK::Send1(
+                        original.loc,
+                        ast::MK::Hash(original.loc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries)),
+                        core::Names::merge(), std::move(kwArgsHash));
+                    kwArgKeyEntries.clear();
+                    kwArgValueEntries.clear();
+                }
+            } else if (arg.flags.block) {
+                blockArg = ast::make_expression<ast::Local>(original.loc, arg.arg);
+            } else if (arg.flags.shadow) {
+                ENFORCE(false, "Shadow only come from blocks, but super only looks at a method's args");
             } else {
-                if (auto e = ctx.beginError(original.loc, core::errors::Namer::SelfOutsideClass)) {
-                    e.setHeader("`{}` outside of method", "super");
+                ENFORCE(false, "Unhandled arg kind in ZSuperArgs");
+            }
+        }
+
+        // At this stage the method should always have a block arg, even if it's synthetic (i.e., wasn't mentioned in
+        // the original source).
+        ENFORCE(blockArg, "Block argument not present");
+
+        // If there were any posargs after a positional splat, fold them into the splatted array.
+        if (posArgsArray && !posArgsEntries.empty()) {
+            posArgsArray = ast::MK::Send1(original.loc, std::move(posArgsArray), core::Names::concat(),
+                                          ast::MK::Array(original.loc, std::move(posArgsEntries)));
+            posArgsEntries.clear();
+        }
+
+        // If there were any keyword args after a keyword splat, fold them into the splatted hash.
+        if (kwArgsHash && !kwArgKeyEntries.empty()) {
+            kwArgsHash =
+                ast::MK::Send1(original.loc, std::move(kwArgsHash), core::Names::merge(),
+                               ast::MK::Hash(original.loc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries)));
+            kwArgKeyEntries.clear();
+            kwArgValueEntries.clear();
+        }
+
+        auto method = ast::MK::Literal(
+            original.loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), core::Names::super()));
+
+        if (posArgsArray) {
+            ast::Send::ARGS_store sendargs;
+            // We wrap self with T.unsafe in order to get around the requirement for <call-with-splat> and
+            // <call-with-splat-and-block> that the shapes of the splatted hashes be known statically. This is a bit of
+            // a hack, but 'super' is currently treated as untyped anyway.
+            sendargs.emplace_back(ast::MK::Unsafe(original.loc, std::move(original.recv)));
+            sendargs.emplace_back(std::move(method));
+
+            // For <call-with-splat> and <call-with-splat-and-block> posargs are always passed in an array.
+            if (!posArgsArray) {
+                posArgsArray = ast::MK::Array(original.loc, std::move(posArgsEntries));
+            }
+            sendargs.emplace_back(std::move(posArgsArray));
+
+            // For <call-with-splat> and <call-with-splat-and-block>, the kwargs array can either be a
+            // [:key, val, :key, val, ...] array or a one-element [kwargshash] array, depending on whether splatting
+            // has taken place, or nil (if no kwargs at all).
+            ast::ExpressionPtr boxedKwArgs;
+
+            if (kwArgsHash) {
+                ast::Array::ENTRY_store entries;
+                entries.emplace_back(std::move(kwArgsHash));
+                boxedKwArgs = ast::MK::Array(original.loc, std::move(entries));
+            } else if (!kwArgKeyEntries.empty()) {
+                ast::Array::ENTRY_store entries;
+                entries.reserve(2 * kwArgKeyEntries.size());
+                ENFORCE(kwArgKeyEntries.size() == kwArgValueEntries.size());
+                for (size_t i = 0; i < kwArgKeyEntries.size(); i++) {
+                    entries.emplace_back(std::move(kwArgKeyEntries[i]));
+                    entries.emplace_back(std::move(kwArgValueEntries[i]));
+                }
+                boxedKwArgs = ast::MK::Array(original.loc, std::move(entries));
+            } else {
+                boxedKwArgs = ast::MK::Nil(original.loc);
+            }
+            sendargs.emplace_back(std::move(boxedKwArgs));
+
+            original.recv = ast::MK::Constant(original.loc, core::Symbols::Magic());
+
+            if (original.block) {
+                // <call-with-splat> and "do"
+                original.fun = core::Names::callWithSplat();
+                original.numPosArgs = 4;
+            } else {
+                // <call-with-splat-and-block>(..., &blk)
+                original.fun = core::Names::callWithSplatAndBlock();
+                original.numPosArgs = 5;
+                sendargs.emplace_back(std::move(blockArg));
+            }
+
+            original.args = std::move(sendargs);
+        } else if (!original.block) {
+            // No positional splat and no "do", so we need to forward &<blkvar> with <call-with-block>.
+            ast::Send::ARGS_store sendargs;
+            sendargs.reserve(3 + posArgsEntries.size() + std::max({1UL, 2 * kwArgKeyEntries.size()}));
+            sendargs.emplace_back(std::move(original.recv));
+            sendargs.emplace_back(std::move(method));
+            sendargs.emplace_back(std::move(blockArg));
+
+            for (auto &arg : posArgsEntries) {
+                sendargs.emplace_back(std::move(arg));
+            }
+            posArgsEntries.clear();
+            u2 numPosArgs = sendargs.size();
+
+            if (kwArgsHash) {
+                sendargs.emplace_back(std::move(kwArgsHash));
+            } else {
+                ENFORCE(kwArgKeyEntries.size() == kwArgValueEntries.size());
+                for (size_t i = 0; i < kwArgKeyEntries.size(); i++) {
+                    sendargs.emplace_back(std::move(kwArgKeyEntries[i]));
+                    sendargs.emplace_back(std::move(kwArgValueEntries[i]));
                 }
             }
+            kwArgKeyEntries.clear();
+            kwArgValueEntries.clear();
+
+            original.recv = ast::MK::Constant(original.loc, core::Symbols::Magic());
+            original.fun = core::Names::callWithBlock();
+            original.numPosArgs = numPosArgs;
+            original.args = std::move(sendargs);
+        } else {
+            // No positional splat and we have a "do", so we can synthesize an ordinary send.
+            ast::Send::ARGS_store sendargs;
+            sendargs.reserve(posArgsEntries.size() + std::max({1UL, 2 * kwArgKeyEntries.size()}));
+
+            for (auto &arg : posArgsEntries) {
+                sendargs.emplace_back(std::move(arg));
+            }
+            posArgsEntries.clear();
+            u2 numPosArgs = sendargs.size();
+
+            if (kwArgsHash) {
+                sendargs.emplace_back(std::move(kwArgsHash));
+            } else {
+                ENFORCE(kwArgKeyEntries.size() == kwArgValueEntries.size());
+                for (size_t i = 0; i < kwArgKeyEntries.size(); i++) {
+                    sendargs.emplace_back(std::move(kwArgKeyEntries[i]));
+                    sendargs.emplace_back(std::move(kwArgValueEntries[i]));
+                }
+            }
+            kwArgKeyEntries.clear();
+            kwArgValueEntries.clear();
+
+            original.numPosArgs = numPosArgs;
+            original.args = std::move(sendargs);
         }
 
         return tree;
