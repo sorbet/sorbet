@@ -227,37 +227,107 @@ public:
 
     ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (original.args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.args[0])) {
-            original.numPosArgs = 0;
-            original.args.clear();
-            if (scopeStack.back().insideMethod) {
-                bool seenKeywordArgs = false;
-                for (auto arg : scopeStack.back().args) {
-                    if (arg.flags.isPositional()) {
-                        ENFORCE(!seenKeywordArgs, "Saw positional arg after keyword arg");
-                        original.args.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
-                        ++original.numPosArgs;
-                    } else if (arg.flags.isKeyword()) {
-                        seenKeywordArgs = true;
-                        original.args.emplace_back(ast::MK::Symbol(original.loc, arg.arg._name));
-                        original.args.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
-                    } else if (arg.flags.repeated || arg.flags.block) {
-                        // Explicitly skip for now.
-                        // Involves synthesizing a call to callWithSplat, callWithBlock, or callWithSplatAndBlock
-                    } else if (arg.flags.shadow) {
-                        ENFORCE(false, "Shadow only come from blocks, but super only looks at a method's args");
-                    } else {
-                        ENFORCE(false, "Unhandled arg kind in ZSuperArgs");
-                    }
-                }
+        if (original.args.size() != 1 || !ast::isa_tree<ast::ZSuperArgs>(original.args[0])) {
+            return tree;
+        }
+
+        if (!scopeStack.back().insideMethod) {
+            if (auto e = ctx.beginError(original.loc, core::errors::Namer::SelfOutsideClass)) {
+                e.setHeader("`{}` outside of method", "super");
+            }
+            return tree;
+        }
+
+        bool seenKeywordArgs = false;
+        bool seenRepeatedArgs = false;
+        bool seenBlockArg = false;
+
+        // Scan ahead to see if we have repeat or block args, and to validate that args are of the shape we
+        // expect.
+        for (auto arg : scopeStack.back().args) {
+            ENFORCE(!seenBlockArg, "Block arg was not in final position");
+            if (arg.flags.isPositional()) {
+                ENFORCE(!seenKeywordArgs, "Saw positional arg after keyword arg");
+            } else if (arg.flags.repeated) {
+                ENFORCE(!seenKeywordArgs, "Saw repeated arg after keyword arg");
+                seenRepeatedArgs = true;
+            } else if (arg.flags.isKeyword()) {
+                seenKeywordArgs = true;
+            } else if (arg.flags.block) {
+                seenBlockArg = true;
+            } else if (arg.flags.shadow) {
+                ENFORCE(false, "Shadow only come from blocks, but super only looks at a method's args");
             } else {
-                if (auto e = ctx.beginError(original.loc, core::errors::Namer::SelfOutsideClass)) {
-                    e.setHeader("`{}` outside of method", "super");
-                }
+                ENFORCE(false, "Unhandled arg kind in ZSuperArgs");
             }
         }
 
-        return tree;
+        // If we don't have repeat or block args, we can rewrite `original` in place.
+        // TODO(aprocter): Actually I'm not sure this case will ever fire anymore!
+        if (!seenRepeatedArgs && !seenBlockArg) {
+            original.numPosArgs = 0;
+            original.args.clear();
+
+            for (auto arg : scopeStack.back().args) {
+                if (arg.flags.isPositional()) {
+                    original.args.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
+                    ++original.numPosArgs;
+                } else if (arg.flags.isKeyword()) {
+                    original.args.emplace_back(ast::MK::Symbol(original.loc, arg.arg._name));
+                    original.args.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
+                }
+            }
+
+            return tree;
+        } else {
+            // So what the desugarer does with this is to box the args in an array and then node2Tree that.
+            // (Ignoring kwargs for now.)
+            ast::Array::ENTRY_store posArgsEntries;
+            ast::ExpressionPtr posArgsArray;
+
+            for (auto arg : scopeStack.back().args) {
+                if (arg.flags.isPositional()) {
+                    posArgsEntries.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
+                } else if (arg.flags.repeated) {
+                    if (!posArgsEntries.empty()) {
+                        if (posArgsArray == nullptr) {
+                            posArgsArray = ast::MK::Array(original.loc, std::move(posArgsEntries));
+                        } else {
+                            posArgsArray = ast::MK::Send1(original.loc, std::move(posArgsArray), core::Names::concat(),
+                                                          ast::MK::Array(original.loc, std::move(posArgsEntries)));
+                        }
+                        posArgsArray = ast::MK::Send1(
+                            original.loc, std::move(posArgsArray), core::Names::concat(),
+                            ast::MK::Splat(original.loc, ast::make_expression<ast::Local>(original.loc, arg.arg)));
+                        posArgsEntries.clear();
+                    }
+                } else if (arg.flags.keyword) {
+                    ENFORCE(false, "oopsie, a keyword");
+                } // else if (arg.flags.block) {
+                  //  ENFORCE(false, "oopsie, a block");
+                  //}
+            }
+            if (!posArgsEntries.empty()) {
+                if (posArgsArray == nullptr) {
+                    posArgsArray = ast::MK::Array(original.loc, std::move(posArgsEntries));
+                } else {
+                    posArgsArray = ast::MK::Send1(original.loc, std::move(posArgsArray), core::Names::concat(),
+                                                  ast::MK::Array(original.loc, std::move(posArgsEntries)));
+                }
+            }
+
+            auto method = ast::MK::Literal(
+                original.loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), core::Names::super()));
+
+            ast::Send::ARGS_store sendargs;
+            sendargs.emplace_back(std::move(original.recv));
+            sendargs.emplace_back(std::move(method));
+            sendargs.emplace_back(std::move(posArgsArray));
+            // sendargs.emplace_back(std::move(kwargs));
+
+            return ast::MK::Send(original.loc, ast::MK::Constant(original.loc, core::Symbols::Magic()),
+                                 core::Names::callWithSplat(), 3, std::move(sendargs));
+        }
     }
 
     ast::ExpressionPtr preTransformBlock(core::MutableContext ctx, ast::ExpressionPtr tree) {
