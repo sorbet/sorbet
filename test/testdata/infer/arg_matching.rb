@@ -82,7 +82,7 @@ class TestArgs
     params(
       x: Integer,
       y: Integer,
-      z: T::Hash[Integer, Integer],
+      z: T::Hash[Symbol, Integer],
       w: String,
       u: Integer,
       v: Integer
@@ -97,6 +97,8 @@ class TestArgs
     mixed(0, 1, u: 1)
     mixed(0, 1, {z: 1}, u: 1)
     mixed(0, 1, {z: 1}, "hi", "there", u: 1, v: 0)
+    mixed(0, 1, {2 => 1}, u: 1) # error: Expected `T::Hash[Symbol, Integer]` but found `{Integer(2) => Integer(1)}` for argument `z`
+    mixed(0, 1, {2 => 1}, "hi", "there", u: 1, v: 0) # error: Expected `T::Hash[Symbol, Integer]` but found `{Integer(2) => Integer(1)}` for argument `z`
   end
 
   def optkw(x, y=T.unsafe(nil), u:)

@@ -273,6 +273,10 @@ public:
 
     bool isNilClass() const;
 
+    bool isTrueOrFalseClass() const;
+
+    bool isClass(ClassOrModuleRef cls) const;
+
     bool isBottom() const;
 
     // Used in subtyping.cc to order types.

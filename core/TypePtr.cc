@@ -72,7 +72,15 @@ bool TypePtr::isUntyped() const {
 }
 
 bool TypePtr::isNilClass() const {
-    return isa_type<ClassType>(*this) && cast_type_nonnull<ClassType>(*this).symbol == Symbols::NilClass();
+    return this->isClass(Symbols::NilClass());
+}
+
+bool TypePtr::isTrueOrFalseClass() const {
+    return this->isClass(Symbols::TrueClass()) || this->isClass(Symbols::FalseClass());
+}
+
+bool TypePtr::isClass(ClassOrModuleRef cls) const {
+    return isa_type<ClassType>(*this) && cast_type_nonnull<ClassType>(*this).symbol == cls;
 }
 
 bool TypePtr::isBottom() const {

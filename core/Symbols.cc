@@ -488,7 +488,7 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
         return instantiated;
     }
     if (flags.isKeyword) {
-        return Types::hashOf(ctx, instantiated);
+        return Types::hashOfSymbolKey(ctx, instantiated);
     }
     return Types::arrayOf(ctx, instantiated);
 }

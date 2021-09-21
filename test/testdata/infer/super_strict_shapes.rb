@@ -7,7 +7,7 @@ xs = {
   bar: nil,
 }
 
-T.reveal_type(xs) # error: Revealed type: `{foo: T.nilable(Integer), bar: NilClass} (shape of T::Hash[T.untyped, T.untyped])`
+T.reveal_type(xs) # error: Revealed type: `{foo: T.nilable(Integer), bar: NilClass} (shape of T::Hash[Symbol, T.nilable(Integer)])`
 
 xs[:foo] = 1
 xs[:bar] = 1 # error: Expected `NilClass` but found `Integer(1)` for key `Symbol(:bar)`
@@ -19,7 +19,7 @@ options = {
   enable_qux: false,
 }
 
-T.reveal_type(options) # error: Revealed type: `{enable_foo: T::Boolean, enable_bar: T::Boolean, enable_qux: FalseClass} (shape of T::Hash[T.untyped, T.untyped])`
+T.reveal_type(options) # error: Revealed type: `{enable_foo: T::Boolean, enable_bar: T::Boolean, enable_qux: FalseClass} (shape of T::Hash[Symbol, T::Boolean])`
 
 ARGV.each do |arg|
   case arg
@@ -29,7 +29,7 @@ ARGV.each do |arg|
   end
 end
 
-T.reveal_type(options) # error: Revealed type: `{enable_foo: T::Boolean, enable_bar: T::Boolean, enable_qux: FalseClass} (shape of T::Hash[T.untyped, T.untyped])`
+T.reveal_type(options) # error: Revealed type: `{enable_foo: T::Boolean, enable_bar: T::Boolean, enable_qux: FalseClass} (shape of T::Hash[Symbol, T::Boolean])`
 
 # These merge algorithms more or less assume exact shape types.
 #
@@ -46,7 +46,7 @@ odds = {
   two: 2,
   four: 4,
 }
-T.reveal_type(evens.merge(odds)) # error: Revealed type: `{one: Integer(1), three: Integer(3), two: Integer(2), four: Integer(4)} (shape of T::Hash[T.untyped, T.untyped])`
+T.reveal_type(evens.merge(odds)) # error: Revealed type: `{one: Integer(1), three: Integer(3), two: Integer(2), four: Integer(4)} (shape of T::Hash[Symbol, Integer])`
 
 # Looks like our Shape_merge intrinsic hardcodes one positional argument
 T.reveal_type({}.merge(evens, odds)) # error: Revealed type: `{} (shape of T::Hash[T.untyped, T.untyped])`
@@ -59,7 +59,7 @@ three_five = {
   three: '3',
   five: '5',
 }
-T.reveal_type(one_three.merge(three_five)) # error: Revealed type: `{one: Integer(1), three: String("3"), five: String("5")} (shape of T::Hash[T.untyped, T.untyped])`
+T.reveal_type(one_three.merge(three_five)) # error: Revealed type: `{one: Integer(1), three: String("3"), five: String("5")} (shape of T::Hash[Symbol, T.untyped])`
 
 # Fixes https://github.com/sorbet/sorbet/issues/3751
 sig {params(xs: T::Array[Integer]).void}
