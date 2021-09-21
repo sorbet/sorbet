@@ -159,7 +159,9 @@ SORBET_ALIVE(VALUE, sorbet_vm_fstring_new, (const char *ptr, long len));
 
 extern void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) __attribute__((noreturn));
 KEEP_ALIVE(sorbet_throwReturn);
-SORBET_ALIVE(VALUE, sorbet_vm_callBlock, (rb_control_frame_t *cfp, int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat));
+SORBET_ALIVE(VALUE, sorbet_vm_callBlock,
+             (rb_control_frame_t * cfp, int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv,
+              int kw_splat));
 
 SORBET_ALIVE(int, rb_cvar_lookup, (VALUE klass, ID id, VALUE *v));
 
@@ -170,14 +172,12 @@ struct rfb_status {
     // Whether the value was returned via return-from-block.
     bool was_thrown;
 };
-SORBET_ALIVE(struct rfb_status, sorbet_vm_return_from_block_wrapper, (int argc, VALUE *argv, VALUE recv, rb_control_frame_t *cfp, rb_sorbet_func_t wrapped));
+SORBET_ALIVE(struct rfb_status, sorbet_vm_return_from_block_wrapper,
+             (int argc, VALUE *argv, VALUE recv, rb_control_frame_t *cfp, rb_sorbet_func_t wrapped));
 SORBET_ALIVE(VALUE, sorbet_run_exception_handling,
-             (rb_execution_context_t *ec,
-              ExceptionFFIType body,
-              VALUE ** volatile pc,
+             (rb_execution_context_t * ec, ExceptionFFIType body, VALUE **volatile pc,
               // The locals offset for the body.
-              VALUE methodClosure,
-              rb_control_frame_t * volatile cfp,
+              VALUE methodClosure, rb_control_frame_t *volatile cfp,
               // May be nullptr.
               ExceptionFFIType handlers,
               // May be nullptr.
@@ -185,9 +185,7 @@ SORBET_ALIVE(VALUE, sorbet_run_exception_handling,
               // May be nullptr.
               ExceptionFFIType ensureClause,
               // The special value indicating that we need to retry.
-              VALUE retrySingleton,
-              long exceptionValueIndex,
-              long exceptionValueLevel));
+              VALUE retrySingleton, long exceptionValueIndex, long exceptionValueLevel));
 
 // The next several functions exist to convert Ruby definitions into LLVM IR, and
 // are always inlined as a consequence.
@@ -1773,7 +1771,6 @@ VALUE sorbet_removeKWArg(VALUE maybeHash, VALUE key) {
     if (maybeHash == RUBY_Qundef) {
         return RUBY_Qundef;
     }
-
 
     return rb_hash_delete_entry(maybeHash, key);
 }
