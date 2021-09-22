@@ -273,7 +273,8 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
                                               isa_instruction<Literal>(bind.value.get()) ||
                                               isa_instruction<LoadSelf>(bind.value.get()) ||
                                               isa_instruction<LoadArg>(bind.value.get()) ||
-                                              isa_instruction<LoadYieldParams>(bind.value.get())) {
+                                              isa_instruction<LoadYieldParams>(bind.value.get()) ||
+                                              isa_instruction<YieldLoadArg>(bind.value.get())) {
                                               return true;
                                           }
                                       }
