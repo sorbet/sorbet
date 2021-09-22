@@ -1,120 +1,134 @@
-digraph "rescue_expression.rb" {
-subgraph "cluster_::Object#foo" {
-    label = "::Object#foo";
-    color = blue;
+method ::Object#foo {
 
-    "bb::Object#foo_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<magic>$8: T.class_of(<Magic>) = alias <C <Magic>>\l<exceptionValue>$3: T.untyped = <get-current-exception>\l<exceptionValue>$3: T.untyped\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: Object = cast(<self>: NilClass, Object);
+    <magic>$8: T.class_of(<Magic>) = alias <C <Magic>>
+    <exceptionValue>$3: T.untyped = <get-current-exception>
+    <exceptionValue>$3: T.untyped(bb0 -> bb3)
 
-    "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
-    "bb::Object#foo_0" -> "bb::Object#foo_4" [style="tapered"];
+# backedges
+#  bb6(rubyBlockId=3)
+#  bb9(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::Object#foo_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+#  bb4(rubyBlockId=1)
+bb3(rubyBlockId=2):
+    blockargs=(<returnMethodTemp>$2: NilClass, <exceptionValue>$3: T.untyped, <magic>$8: T.class_of(<Magic>))
+    e: T.untyped = <exceptionValue>$3
+    <cfgAlias>$13: T.class_of(MyException) = alias <C MyException>
+    <statTemp>$11: MyException = <cfgAlias>$13: T.class_of(MyException).new()
+    <exceptionClassTemp>$10: T.class_of(MyException) = <statTemp>$11: MyException.class()
+    <isaCheckTemp>$14: T.untyped = e: T.untyped.is_a?(<exceptionClassTemp>$10: T.class_of(MyException))
+    <isaCheckTemp>$14: T.untyped(bb3 -> bb7)
 
-    "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=2](<returnMethodTemp>$2: NilClass, <exceptionValue>$3: T.untyped, <magic>$8: T.class_of(<Magic>))\le: T.untyped = <exceptionValue>$3\l<cfgAlias>$13: T.class_of(MyException) = alias <C MyException>\l<statTemp>$11: MyException = <cfgAlias>$13: T.class_of(MyException).new()\l<exceptionClassTemp>$10: T.class_of(MyException) = <statTemp>$11: MyException.class()\l<isaCheckTemp>$14: T.untyped = e: T.untyped.is_a?(<exceptionClassTemp>$10: T.class_of(MyException))\l<isaCheckTemp>$14: T.untyped\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb4(rubyBlockId=1):
+    blockargs=(<self>: Object, <magic>$8: T.class_of(<Magic>))
+    <cfgAlias>$7: T.class_of(MyException) = alias <C MyException>
+    <statTemp>$5: MyException = <cfgAlias>$7: T.class_of(MyException).new()
+    <returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$5: MyException)
+    <exceptionValue>$3 = <get-current-exception>
+    <exceptionValue>$3(bb4 -> bb3)
 
-    "bb::Object#foo_3" -> "bb::Object#foo_7" [style="bold"];
-    "bb::Object#foo_3" -> "bb::Object#foo_8" [style="tapered"];
+# backedges
+#  bb4(rubyBlockId=1)
+bb5(rubyBlockId=4):
+    blockargs=(<returnMethodTemp>$2: NilClass)
+    <unconditional>(bb5 -> bb6)
 
-    "bb::Object#foo_4" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=4, rubyBlockId=1](<self>: Object, <magic>$8: T.class_of(<Magic>))\l<cfgAlias>$7: T.class_of(MyException) = alias <C MyException>\l<statTemp>$5: MyException = <cfgAlias>$7: T.class_of(MyException).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$5: MyException)\l<exceptionValue>$3 = <get-current-exception>\l<exceptionValue>$3\l"
-    ];
+# backedges
+#  bb5(rubyBlockId=4)
+#  bb7(rubyBlockId=2)
+#  bb8(rubyBlockId=2)
+bb6(rubyBlockId=3):
+    blockargs=(<returnMethodTemp>$2: T.nilable(Integer), <gotoDeadTemp>$15: T.nilable(TrueClass))
+    <gotoDeadTemp>$15: T.nilable(TrueClass)(bb6 -> bb1)
 
-    "bb::Object#foo_4" -> "bb::Object#foo_3" [style="bold"];
-    "bb::Object#foo_4" -> "bb::Object#foo_5" [style="tapered"];
+# backedges
+#  bb3(rubyBlockId=2)
+bb7(rubyBlockId=2):
+    blockargs=(<magic>$8: T.class_of(<Magic>))
+    <exceptionValue>$3: NilClass = nil
+    <keepForCfgTemp>$9: Sorbet::Private::Static::Void = <magic>$8: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
+    <returnMethodTemp>$2: Integer(3) = 3
+    <unconditional>(bb7 -> bb6)
 
-    "bb::Object#foo_5" [
-        shape = rectangle;
-        color = red;
-        label = "block[id=5, rubyBlockId=4](<returnMethodTemp>$2: NilClass)\l<unconditional>\l"
-    ];
+# backedges
+#  bb3(rubyBlockId=2)
+bb8(rubyBlockId=2):
+    blockargs=(<returnMethodTemp>$2: NilClass)
+    <gotoDeadTemp>$15: TrueClass = true
+    <unconditional>(bb8 -> bb6)
 
-    "bb::Object#foo_5" -> "bb::Object#foo_6" [style="bold"];
-    "bb::Object#foo_6" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.nilable(Integer), <gotoDeadTemp>$15: T.nilable(TrueClass))\l<gotoDeadTemp>$15: T.nilable(TrueClass)\l"
-    ];
+# backedges
+#  bb6(rubyBlockId=3)
+bb9(rubyBlockId=0):
+    blockargs=(<returnMethodTemp>$2: Integer(3))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(3)
+    <unconditional>(bb9 -> bb1)
 
-    "bb::Object#foo_6" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_6" -> "bb::Object#foo_9" [style="tapered"];
-
-    "bb::Object#foo_7" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=7, rubyBlockId=2](<magic>$8: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$9: Sorbet::Private::Static::Void = <magic>$8: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: Integer(3) = 3\l<unconditional>\l"
-    ];
-
-    "bb::Object#foo_7" -> "bb::Object#foo_6" [style="bold"];
-    "bb::Object#foo_8" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: NilClass)\l<gotoDeadTemp>$15: TrueClass = true\l<unconditional>\l"
-    ];
-
-    "bb::Object#foo_8" -> "bb::Object#foo_6" [style="bold"];
-    "bb::Object#foo_9" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=9, rubyBlockId=0](<returnMethodTemp>$2: Integer(3))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(3)\l<unconditional>\l"
-    ];
-
-    "bb::Object#foo_9" -> "bb::Object#foo_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:<root>>#<static-init>" {
-    label = "::<Class:<root>>#<static-init>";
-    color = blue;
+method ::<Class:<root>>#<static-init> {
 
-    "bb::<Class:<root>>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$6: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$8: T.class_of(MyException) = alias <C MyException>\l<statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$8: T.class_of(MyException))\l<cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$13: T.class_of(MyException) = alias <C MyException>\l<statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$13: T.class_of(MyException))\l<cfgAlias>$16: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$18: T.class_of(Exception) = alias <C Exception>\l<statTemp>$14: Sorbet::Private::Static::Void = <cfgAlias>$16: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$18: T.class_of(Exception))\l<cfgAlias>$21: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$23: Symbol(:foo) = :foo\l<statTemp>$24: Symbol(:normal) = :normal\l<statTemp>$19: Symbol(:foo) = <cfgAlias>$21: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$23: Symbol(:foo), <statTemp>$24: Symbol(:normal))\l<statTemp>$27: T.untyped = <self>: T.class_of(<root>).foo()\l<statTemp>$25: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$27: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {
+      klass = <S <C <U <root>>> $1>
+      targs = [
+        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)
+      ]
+    });
+    <cfgAlias>$6: T.class_of(<Magic>) = alias <C <Magic>>
+    <cfgAlias>$8: T.class_of(MyException) = alias <C MyException>
+    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$8: T.class_of(MyException))
+    <cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$13: T.class_of(MyException) = alias <C MyException>
+    <statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$13: T.class_of(MyException))
+    <cfgAlias>$16: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$18: T.class_of(Exception) = alias <C Exception>
+    <statTemp>$14: Sorbet::Private::Static::Void = <cfgAlias>$16: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$18: T.class_of(Exception))
+    <cfgAlias>$21: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$23: Symbol(:foo) = :foo
+    <statTemp>$24: Symbol(:normal) = :normal
+    <statTemp>$19: Symbol(:foo) = <cfgAlias>$21: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$23: Symbol(:foo), <statTemp>$24: Symbol(:normal))
+    <statTemp>$27: T.untyped = <self>: T.class_of(<root>).foo()
+    <statTemp>$25: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$27: T.untyped)
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional>(bb0 -> bb1)
 
-    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
-    "bb::<Class:<root>>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:MyException>#<static-init>" {
-    label = "::<Class:MyException>#<static-init>";
-    color = blue;
+method ::<Class:MyException>#<static-init> {
 
-    "bb::<Class:MyException>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(MyException) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U MyException>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U MyException>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: T.class_of(MyException) = cast(<self>: NilClass, AppliedType {
+      klass = <S <C <U MyException>> $1>
+      targs = [
+        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U MyException>> $1><C <U <AttachedClass>>>)
+      ]
+    });
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional>(bb0 -> bb1)
 
-    "bb::<Class:MyException>#<static-init>_0" -> "bb::<Class:MyException>#<static-init>_1" [style="bold"];
-    "bb::<Class:MyException>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
-
-    "bb::<Class:MyException>#<static-init>_1" -> "bb::<Class:MyException>#<static-init>_1" [style="bold"];
-}
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
 }
 

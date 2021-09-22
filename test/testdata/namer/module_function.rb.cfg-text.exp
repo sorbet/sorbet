@@ -1,318 +1,441 @@
-digraph "module_function.rb" {
-subgraph "cluster_::<Class:<root>>#<static-init>" {
-    label = "::<Class:<root>>#<static-init>";
-    color = blue;
+method ::<Class:<root>>#<static-init> {
 
-    "bb::<Class:<root>>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$6: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$8: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$8: T.class_of(Funcs))\l<cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$13: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$13: T.class_of(Funcs))\l<cfgAlias>$17: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$19: T.class_of(C) = alias <C C>\l<statTemp>$15: Sorbet::Private::Static::Void = <cfgAlias>$17: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$19: T.class_of(C))\l<cfgAlias>$22: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$24: T.class_of(C) = alias <C C>\l<statTemp>$20: Sorbet::Private::Static::Void = <cfgAlias>$22: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$24: T.class_of(C))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {
+      klass = <S <C <U <root>>> $1>
+      targs = [
+        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)
+      ]
+    });
+    <cfgAlias>$6: T.class_of(<Magic>) = alias <C <Magic>>
+    <cfgAlias>$8: T.class_of(Funcs) = alias <C Funcs>
+    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$8: T.class_of(Funcs))
+    <cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$13: T.class_of(Funcs) = alias <C Funcs>
+    <statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$13: T.class_of(Funcs))
+    <cfgAlias>$17: T.class_of(<Magic>) = alias <C <Magic>>
+    <cfgAlias>$19: T.class_of(C) = alias <C C>
+    <statTemp>$15: Sorbet::Private::Static::Void = <cfgAlias>$17: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$19: T.class_of(C))
+    <cfgAlias>$22: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$24: T.class_of(C) = alias <C C>
+    <statTemp>$20: Sorbet::Private::Static::Void = <cfgAlias>$22: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$24: T.class_of(C))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional>(bb0 -> bb1)
 
-    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
-    "bb::<Class:<root>>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::Funcs#f" {
-    label = "::Funcs#f";
-    color = blue;
+method ::Funcs#f {
 
-    "bb::Funcs#f_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Funcs = cast(<self>: NilClass, Funcs);\lx: Integer = load_arg(x)\l<returnMethodTemp>$2: Integer = x\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: Funcs = cast(<self>: NilClass, Funcs);
+    x: Integer = load_arg(x)
+    <returnMethodTemp>$2: Integer = x
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
+    <unconditional>(bb0 -> bb1)
 
-    "bb::Funcs#f_0" -> "bb::Funcs#f_1" [style="bold"];
-    "bb::Funcs#f_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::Funcs#f_1" -> "bb::Funcs#f_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:Funcs>#f" {
-    label = "::<Class:Funcs>#f";
-    color = blue;
+method ::<Class:Funcs>#f {
 
-    "bb::<Class:Funcs>#f_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Funcs>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {
+      klass = <S <C <U Funcs>> $1>
+      targs = [
+        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)
+      ]
+    });
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional>(bb0 -> bb1)
 
-    "bb::<Class:Funcs>#f_0" -> "bb::<Class:Funcs>#f_1" [style="bold"];
-    "bb::<Class:Funcs>#f_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::<Class:Funcs>#f_1" -> "bb::<Class:Funcs>#f_1" [style="bold"];
 }
 
-subgraph "cluster_::Funcs#g" {
-    label = "::Funcs#g";
-    color = blue;
+method ::Funcs#g {
 
-    "bb::Funcs#g_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Funcs = cast(<self>: NilClass, Funcs);\ls: Symbol = load_arg(s)\l<returnMethodTemp>$2: Symbol = s\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: Funcs = cast(<self>: NilClass, Funcs);
+    s: Symbol = load_arg(s)
+    <returnMethodTemp>$2: Symbol = s
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol
+    <unconditional>(bb0 -> bb1)
 
-    "bb::Funcs#g_0" -> "bb::Funcs#g_1" [style="bold"];
-    "bb::Funcs#g_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::Funcs#g_1" -> "bb::Funcs#g_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:Funcs>#g" {
-    label = "::<Class:Funcs>#g";
-    color = blue;
+method ::<Class:Funcs>#g {
 
-    "bb::<Class:Funcs>#g_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Funcs>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)\l  ]\l});\ls: Symbol = load_arg(s)\l<returnMethodTemp>$2: Symbol = s\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {
+      klass = <S <C <U Funcs>> $1>
+      targs = [
+        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)
+      ]
+    });
+    s: Symbol = load_arg(s)
+    <returnMethodTemp>$2: Symbol = s
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol
+    <unconditional>(bb0 -> bb1)
 
-    "bb::<Class:Funcs>#g_0" -> "bb::<Class:Funcs>#g_1" [style="bold"];
-    "bb::<Class:Funcs>#g_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::<Class:Funcs>#g_1" -> "bb::<Class:Funcs>#g_1" [style="bold"];
 }
 
-subgraph "cluster_::Funcs#h" {
-    label = "::Funcs#h";
-    color = blue;
+method ::Funcs#h {
 
-    "bb::Funcs#h_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Funcs = cast(<self>: NilClass, Funcs);\ls: String = load_arg(s)\l<returnMethodTemp>$2: String = s\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: String\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: Funcs = cast(<self>: NilClass, Funcs);
+    s: String = load_arg(s)
+    <returnMethodTemp>$2: String = s
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String
+    <unconditional>(bb0 -> bb1)
 
-    "bb::Funcs#h_0" -> "bb::Funcs#h_1" [style="bold"];
-    "bb::Funcs#h_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::Funcs#h_1" -> "bb::Funcs#h_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:Funcs>#h" {
-    label = "::<Class:Funcs>#h";
-    color = blue;
+method ::<Class:Funcs>#h {
 
-    "bb::<Class:Funcs>#h_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Funcs>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)\l  ]\l});\ls: String = load_arg(s)\l<returnMethodTemp>$2: String = s\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: String\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {
+      klass = <S <C <U Funcs>> $1>
+      targs = [
+        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)
+      ]
+    });
+    s: String = load_arg(s)
+    <returnMethodTemp>$2: String = s
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String
+    <unconditional>(bb0 -> bb1)
 
-    "bb::<Class:Funcs>#h_0" -> "bb::<Class:Funcs>#h_1" [style="bold"];
-    "bb::<Class:Funcs>#h_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::<Class:Funcs>#h_1" -> "bb::<Class:Funcs>#h_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:Funcs>#<static-init>" {
-    label = "::<Class:Funcs>#<static-init>";
-    color = blue;
+method ::<Class:Funcs>#<static-init> {
 
-    "bb::<Class:Funcs>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Funcs>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$7: FalseClass = false\l<statTemp>$8: Symbol(:f) = :f\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(Funcs), <statTemp>$7: FalseClass, <statTemp>$8: Symbol(:f))\l<selfRestore>$10: T.class_of(Funcs) = <self>\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {
+      klass = <S <C <U Funcs>> $1>
+      targs = [
+        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)
+      ]
+    });
+    <cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$7: FalseClass = false
+    <statTemp>$8: Symbol(:f) = :f
+    <block-pre-call-temp>$9: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(Funcs), <statTemp>$7: FalseClass, <statTemp>$8: Symbol(:f))
+    <selfRestore>$10: T.class_of(Funcs) = <self>
+    <unconditional>(bb0 -> bb2)
 
-    "bb::<Class:Funcs>#<static-init>_0" -> "bb::<Class:Funcs>#<static-init>_2" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb19(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::<Class:Funcs>#<static-init>_1" -> "bb::<Class:Funcs>#<static-init>_1" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=1](<self>: T.class_of(Funcs), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Funcs))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+#  bb5(rubyBlockId=1)
+bb2(rubyBlockId=1):
+    blockargs=(<self>: T.class_of(Funcs), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Funcs))
+    outerLoops: 1
+    <block-call>: NilClass(bb2 -> bb5)
 
-    "bb::<Class:Funcs>#<static-init>_2" -> "bb::<Class:Funcs>#<static-init>_5" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_2" -> "bb::<Class:Funcs>#<static-init>_3" [style="tapered"];
+# backedges
+#  bb2(rubyBlockId=1)
+bb3(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Funcs))
+    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$9, sig>
+    <self>: T.class_of(Funcs) = <selfRestore>$10
+    <cfgAlias>$24: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$26: FalseClass = false
+    <statTemp>$27: Symbol(:g) = :g
+    <block-pre-call-temp>$28: Sorbet::Private::Static::Void = <cfgAlias>$24: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(Funcs), <statTemp>$26: FalseClass, <statTemp>$27: Symbol(:g))
+    <selfRestore>$29: T.class_of(Funcs) = <self>
+    <unconditional>(bb3 -> bb6)
 
-    "bb::<Class:Funcs>#<static-init>_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=0](<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Funcs))\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$9, sig>\l<self>: T.class_of(Funcs) = <selfRestore>$10\l<cfgAlias>$24: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$26: FalseClass = false\l<statTemp>$27: Symbol(:g) = :g\l<block-pre-call-temp>$28: Sorbet::Private::Static::Void = <cfgAlias>$24: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(Funcs), <statTemp>$26: FalseClass, <statTemp>$27: Symbol(:g))\l<selfRestore>$29: T.class_of(Funcs) = <self>\l<unconditional>\l"
-    ];
+# backedges
+#  bb2(rubyBlockId=1)
+bb5(rubyBlockId=1):
+    blockargs=(<self>: T.class_of(Funcs), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Funcs))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <hashTemp>$16: Symbol(:x) = :x
+    <cfgAlias>$18: T.class_of(Integer) = alias <C Integer>
+    <statTemp>$14: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$16: Symbol(:x), <cfgAlias>$18: T.class_of(Integer))
+    <cfgAlias>$20: T.class_of(Integer) = alias <C Integer>
+    <blockReturnTemp>$13: T::Private::Methods::DeclBuilder = <statTemp>$14: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$20: T.class_of(Integer))
+    <blockReturnTemp>$21: T.noreturn = blockreturn<sig> <blockReturnTemp>$13: T::Private::Methods::DeclBuilder
+    <unconditional>(bb5 -> bb2)
 
-    "bb::<Class:Funcs>#<static-init>_3" -> "bb::<Class:Funcs>#<static-init>_6" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_5" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=5, rubyBlockId=1](<self>: T.class_of(Funcs), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Funcs))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$16: Symbol(:x) = :x\l<cfgAlias>$18: T.class_of(Integer) = alias <C Integer>\l<statTemp>$14: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$16: Symbol(:x), <cfgAlias>$18: T.class_of(Integer))\l<cfgAlias>$20: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$13: T::Private::Methods::DeclBuilder = <statTemp>$14: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$20: T.class_of(Integer))\l<blockReturnTemp>$21: T.noreturn = blockreturn<sig> <blockReturnTemp>$13: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
+# backedges
+#  bb3(rubyBlockId=0)
+#  bb9(rubyBlockId=2)
+bb6(rubyBlockId=2):
+    blockargs=(<self>: T.class_of(Funcs), <block-pre-call-temp>$28: Sorbet::Private::Static::Void, <selfRestore>$29: T.class_of(Funcs))
+    outerLoops: 1
+    <block-call>: NilClass(bb6 -> bb9)
 
-    "bb::<Class:Funcs>#<static-init>_5" -> "bb::<Class:Funcs>#<static-init>_2" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_6" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=6, rubyBlockId=2](<self>: T.class_of(Funcs), <block-pre-call-temp>$28: Sorbet::Private::Static::Void, <selfRestore>$29: T.class_of(Funcs))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
+# backedges
+#  bb6(rubyBlockId=2)
+bb7(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$28: Sorbet::Private::Static::Void, <selfRestore>$29: T.class_of(Funcs))
+    <statTemp>$22: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$28, sig>
+    <self>: T.class_of(Funcs) = <selfRestore>$29
+    <cfgAlias>$43: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$45: TrueClass = true
+    <statTemp>$46: Symbol(:g) = :g
+    <block-pre-call-temp>$47: Sorbet::Private::Static::Void = <cfgAlias>$43: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(Funcs), <statTemp>$45: TrueClass, <statTemp>$46: Symbol(:g))
+    <selfRestore>$48: T.class_of(Funcs) = <self>
+    <unconditional>(bb7 -> bb10)
 
-    "bb::<Class:Funcs>#<static-init>_6" -> "bb::<Class:Funcs>#<static-init>_9" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_6" -> "bb::<Class:Funcs>#<static-init>_7" [style="tapered"];
+# backedges
+#  bb6(rubyBlockId=2)
+bb9(rubyBlockId=2):
+    blockargs=(<self>: T.class_of(Funcs), <block-pre-call-temp>$28: Sorbet::Private::Static::Void, <selfRestore>$29: T.class_of(Funcs))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <hashTemp>$35: Symbol(:s) = :s
+    <cfgAlias>$37: T.class_of(Symbol) = alias <C Symbol>
+    <statTemp>$33: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$35: Symbol(:s), <cfgAlias>$37: T.class_of(Symbol))
+    <cfgAlias>$39: T.class_of(Symbol) = alias <C Symbol>
+    <blockReturnTemp>$32: T::Private::Methods::DeclBuilder = <statTemp>$33: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$39: T.class_of(Symbol))
+    <blockReturnTemp>$40: T.noreturn = blockreturn<sig> <blockReturnTemp>$32: T::Private::Methods::DeclBuilder
+    <unconditional>(bb9 -> bb6)
 
-    "bb::<Class:Funcs>#<static-init>_7" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=7, rubyBlockId=0](<block-pre-call-temp>$28: Sorbet::Private::Static::Void, <selfRestore>$29: T.class_of(Funcs))\l<statTemp>$22: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$28, sig>\l<self>: T.class_of(Funcs) = <selfRestore>$29\l<cfgAlias>$43: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$45: TrueClass = true\l<statTemp>$46: Symbol(:g) = :g\l<block-pre-call-temp>$47: Sorbet::Private::Static::Void = <cfgAlias>$43: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(Funcs), <statTemp>$45: TrueClass, <statTemp>$46: Symbol(:g))\l<selfRestore>$48: T.class_of(Funcs) = <self>\l<unconditional>\l"
-    ];
+# backedges
+#  bb7(rubyBlockId=0)
+#  bb13(rubyBlockId=3)
+bb10(rubyBlockId=3):
+    blockargs=(<self>: T.class_of(Funcs), <block-pre-call-temp>$47: Sorbet::Private::Static::Void, <selfRestore>$48: T.class_of(Funcs))
+    outerLoops: 1
+    <block-call>: NilClass(bb10 -> bb13)
 
-    "bb::<Class:Funcs>#<static-init>_7" -> "bb::<Class:Funcs>#<static-init>_10" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_9" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=9, rubyBlockId=2](<self>: T.class_of(Funcs), <block-pre-call-temp>$28: Sorbet::Private::Static::Void, <selfRestore>$29: T.class_of(Funcs))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$35: Symbol(:s) = :s\l<cfgAlias>$37: T.class_of(Symbol) = alias <C Symbol>\l<statTemp>$33: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$35: Symbol(:s), <cfgAlias>$37: T.class_of(Symbol))\l<cfgAlias>$39: T.class_of(Symbol) = alias <C Symbol>\l<blockReturnTemp>$32: T::Private::Methods::DeclBuilder = <statTemp>$33: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$39: T.class_of(Symbol))\l<blockReturnTemp>$40: T.noreturn = blockreturn<sig> <blockReturnTemp>$32: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
+# backedges
+#  bb10(rubyBlockId=3)
+bb11(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$47: Sorbet::Private::Static::Void, <selfRestore>$48: T.class_of(Funcs))
+    <statTemp>$41: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$47, sig>
+    <self>: T.class_of(Funcs) = <selfRestore>$48
+    <cfgAlias>$62: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$64: FalseClass = false
+    <statTemp>$65: Symbol(:h) = :h
+    <block-pre-call-temp>$66: Sorbet::Private::Static::Void = <cfgAlias>$62: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(Funcs), <statTemp>$64: FalseClass, <statTemp>$65: Symbol(:h))
+    <selfRestore>$67: T.class_of(Funcs) = <self>
+    <unconditional>(bb11 -> bb14)
 
-    "bb::<Class:Funcs>#<static-init>_9" -> "bb::<Class:Funcs>#<static-init>_6" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_10" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=10, rubyBlockId=3](<self>: T.class_of(Funcs), <block-pre-call-temp>$47: Sorbet::Private::Static::Void, <selfRestore>$48: T.class_of(Funcs))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
+# backedges
+#  bb10(rubyBlockId=3)
+bb13(rubyBlockId=3):
+    blockargs=(<self>: T.class_of(Funcs), <block-pre-call-temp>$47: Sorbet::Private::Static::Void, <selfRestore>$48: T.class_of(Funcs))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <hashTemp>$54: Symbol(:s) = :s
+    <cfgAlias>$56: T.class_of(Symbol) = alias <C Symbol>
+    <statTemp>$52: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$54: Symbol(:s), <cfgAlias>$56: T.class_of(Symbol))
+    <cfgAlias>$58: T.class_of(Symbol) = alias <C Symbol>
+    <blockReturnTemp>$51: T::Private::Methods::DeclBuilder = <statTemp>$52: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$58: T.class_of(Symbol))
+    <blockReturnTemp>$59: T.noreturn = blockreturn<sig> <blockReturnTemp>$51: T::Private::Methods::DeclBuilder
+    <unconditional>(bb13 -> bb10)
 
-    "bb::<Class:Funcs>#<static-init>_10" -> "bb::<Class:Funcs>#<static-init>_13" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_10" -> "bb::<Class:Funcs>#<static-init>_11" [style="tapered"];
+# backedges
+#  bb11(rubyBlockId=0)
+#  bb17(rubyBlockId=4)
+bb14(rubyBlockId=4):
+    blockargs=(<self>: T.class_of(Funcs), <block-pre-call-temp>$66: Sorbet::Private::Static::Void, <selfRestore>$67: T.class_of(Funcs))
+    outerLoops: 1
+    <block-call>: NilClass(bb14 -> bb17)
 
-    "bb::<Class:Funcs>#<static-init>_11" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=11, rubyBlockId=0](<block-pre-call-temp>$47: Sorbet::Private::Static::Void, <selfRestore>$48: T.class_of(Funcs))\l<statTemp>$41: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$47, sig>\l<self>: T.class_of(Funcs) = <selfRestore>$48\l<cfgAlias>$62: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$64: FalseClass = false\l<statTemp>$65: Symbol(:h) = :h\l<block-pre-call-temp>$66: Sorbet::Private::Static::Void = <cfgAlias>$62: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(Funcs), <statTemp>$64: FalseClass, <statTemp>$65: Symbol(:h))\l<selfRestore>$67: T.class_of(Funcs) = <self>\l<unconditional>\l"
-    ];
+# backedges
+#  bb14(rubyBlockId=4)
+bb15(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$66: Sorbet::Private::Static::Void, <selfRestore>$67: T.class_of(Funcs))
+    <statTemp>$60: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$66, sig>
+    <self>: T.class_of(Funcs) = <selfRestore>$67
+    <cfgAlias>$81: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$83: TrueClass = true
+    <statTemp>$84: Symbol(:h) = :h
+    <block-pre-call-temp>$85: Sorbet::Private::Static::Void = <cfgAlias>$81: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(Funcs), <statTemp>$83: TrueClass, <statTemp>$84: Symbol(:h))
+    <selfRestore>$86: T.class_of(Funcs) = <self>
+    <unconditional>(bb15 -> bb18)
 
-    "bb::<Class:Funcs>#<static-init>_11" -> "bb::<Class:Funcs>#<static-init>_14" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_13" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=13, rubyBlockId=3](<self>: T.class_of(Funcs), <block-pre-call-temp>$47: Sorbet::Private::Static::Void, <selfRestore>$48: T.class_of(Funcs))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$54: Symbol(:s) = :s\l<cfgAlias>$56: T.class_of(Symbol) = alias <C Symbol>\l<statTemp>$52: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$54: Symbol(:s), <cfgAlias>$56: T.class_of(Symbol))\l<cfgAlias>$58: T.class_of(Symbol) = alias <C Symbol>\l<blockReturnTemp>$51: T::Private::Methods::DeclBuilder = <statTemp>$52: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$58: T.class_of(Symbol))\l<blockReturnTemp>$59: T.noreturn = blockreturn<sig> <blockReturnTemp>$51: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
+# backedges
+#  bb14(rubyBlockId=4)
+bb17(rubyBlockId=4):
+    blockargs=(<self>: T.class_of(Funcs), <block-pre-call-temp>$66: Sorbet::Private::Static::Void, <selfRestore>$67: T.class_of(Funcs))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <hashTemp>$73: Symbol(:s) = :s
+    <cfgAlias>$75: T.class_of(String) = alias <C String>
+    <statTemp>$71: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$73: Symbol(:s), <cfgAlias>$75: T.class_of(String))
+    <cfgAlias>$77: T.class_of(String) = alias <C String>
+    <blockReturnTemp>$70: T::Private::Methods::DeclBuilder = <statTemp>$71: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$77: T.class_of(String))
+    <blockReturnTemp>$78: T.noreturn = blockreturn<sig> <blockReturnTemp>$70: T::Private::Methods::DeclBuilder
+    <unconditional>(bb17 -> bb14)
 
-    "bb::<Class:Funcs>#<static-init>_13" -> "bb::<Class:Funcs>#<static-init>_10" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_14" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=14, rubyBlockId=4](<self>: T.class_of(Funcs), <block-pre-call-temp>$66: Sorbet::Private::Static::Void, <selfRestore>$67: T.class_of(Funcs))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
+# backedges
+#  bb15(rubyBlockId=0)
+#  bb21(rubyBlockId=5)
+bb18(rubyBlockId=5):
+    blockargs=(<self>: T.class_of(Funcs), <block-pre-call-temp>$85: Sorbet::Private::Static::Void, <selfRestore>$86: T.class_of(Funcs))
+    outerLoops: 1
+    <block-call>: NilClass(bb18 -> bb21)
 
-    "bb::<Class:Funcs>#<static-init>_14" -> "bb::<Class:Funcs>#<static-init>_17" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_14" -> "bb::<Class:Funcs>#<static-init>_15" [style="tapered"];
+# backedges
+#  bb18(rubyBlockId=5)
+bb19(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$85: Sorbet::Private::Static::Void, <selfRestore>$86: T.class_of(Funcs))
+    <statTemp>$79: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$85, sig>
+    <self>: T.class_of(Funcs) = <selfRestore>$86
+    <cfgAlias>$101: T.class_of(T::Sig) = alias <C Sig>
+    <cfgAlias>$103: T.class_of(T) = alias <C T>
+    <statTemp>$98: T.class_of(Funcs) = <self>: T.class_of(Funcs).extend(<cfgAlias>$101: T.class_of(T::Sig))
+    <cfgAlias>$106: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$108: Symbol(:f) = :f
+    <statTemp>$109: Symbol(:normal) = :normal
+    <statTemp>$104: Symbol(:f) = <cfgAlias>$106: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Funcs), <statTemp>$108: Symbol(:f), <statTemp>$109: Symbol(:normal))
+    <statTemp>$112: Symbol(:f) = :f
+    <statTemp>$110: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$112: Symbol(:f))
+    <cfgAlias>$115: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$117: Symbol(:f) = :f
+    <statTemp>$118: Symbol(:normal) = :normal
+    <statTemp>$113: Symbol(:f) = <cfgAlias>$115: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(Funcs), <statTemp>$117: Symbol(:f), <statTemp>$118: Symbol(:normal))
+    <cfgAlias>$123: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$125: Symbol(:g) = :g
+    <statTemp>$126: Symbol(:normal) = :normal
+    <statTemp>$121: Symbol(:g) = <cfgAlias>$123: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Funcs), <statTemp>$125: Symbol(:g), <statTemp>$126: Symbol(:normal))
+    <statTemp>$119: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$121: Symbol(:g))
+    <cfgAlias>$129: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$131: Symbol(:g) = :g
+    <statTemp>$132: Symbol(:normal) = :normal
+    <statTemp>$127: Symbol(:g) = <cfgAlias>$129: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(Funcs), <statTemp>$131: Symbol(:g), <statTemp>$132: Symbol(:normal))
+    <cfgAlias>$137: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$139: Symbol(:h) = :h
+    <statTemp>$140: Symbol(:normal) = :normal
+    <statTemp>$135: Symbol(:h) = <cfgAlias>$137: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Funcs), <statTemp>$139: Symbol(:h), <statTemp>$140: Symbol(:normal))
+    <statTemp>$133: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$135: Symbol(:h))
+    <cfgAlias>$143: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$145: Symbol(:h) = :h
+    <statTemp>$146: Symbol(:normal) = :normal
+    <statTemp>$141: Symbol(:h) = <cfgAlias>$143: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(Funcs), <statTemp>$145: Symbol(:h), <statTemp>$146: Symbol(:normal))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional>(bb19 -> bb1)
 
-    "bb::<Class:Funcs>#<static-init>_15" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=15, rubyBlockId=0](<block-pre-call-temp>$66: Sorbet::Private::Static::Void, <selfRestore>$67: T.class_of(Funcs))\l<statTemp>$60: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$66, sig>\l<self>: T.class_of(Funcs) = <selfRestore>$67\l<cfgAlias>$81: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$83: TrueClass = true\l<statTemp>$84: Symbol(:h) = :h\l<block-pre-call-temp>$85: Sorbet::Private::Static::Void = <cfgAlias>$81: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(Funcs), <statTemp>$83: TrueClass, <statTemp>$84: Symbol(:h))\l<selfRestore>$86: T.class_of(Funcs) = <self>\l<unconditional>\l"
-    ];
+# backedges
+#  bb18(rubyBlockId=5)
+bb21(rubyBlockId=5):
+    blockargs=(<self>: T.class_of(Funcs), <block-pre-call-temp>$85: Sorbet::Private::Static::Void, <selfRestore>$86: T.class_of(Funcs))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <hashTemp>$92: Symbol(:s) = :s
+    <cfgAlias>$94: T.class_of(String) = alias <C String>
+    <statTemp>$90: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$92: Symbol(:s), <cfgAlias>$94: T.class_of(String))
+    <cfgAlias>$96: T.class_of(String) = alias <C String>
+    <blockReturnTemp>$89: T::Private::Methods::DeclBuilder = <statTemp>$90: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$96: T.class_of(String))
+    <blockReturnTemp>$97: T.noreturn = blockreturn<sig> <blockReturnTemp>$89: T::Private::Methods::DeclBuilder
+    <unconditional>(bb21 -> bb18)
 
-    "bb::<Class:Funcs>#<static-init>_15" -> "bb::<Class:Funcs>#<static-init>_18" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_17" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=17, rubyBlockId=4](<self>: T.class_of(Funcs), <block-pre-call-temp>$66: Sorbet::Private::Static::Void, <selfRestore>$67: T.class_of(Funcs))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$73: Symbol(:s) = :s\l<cfgAlias>$75: T.class_of(String) = alias <C String>\l<statTemp>$71: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$73: Symbol(:s), <cfgAlias>$75: T.class_of(String))\l<cfgAlias>$77: T.class_of(String) = alias <C String>\l<blockReturnTemp>$70: T::Private::Methods::DeclBuilder = <statTemp>$71: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$77: T.class_of(String))\l<blockReturnTemp>$78: T.noreturn = blockreturn<sig> <blockReturnTemp>$70: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:Funcs>#<static-init>_17" -> "bb::<Class:Funcs>#<static-init>_14" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_18" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=18, rubyBlockId=5](<self>: T.class_of(Funcs), <block-pre-call-temp>$85: Sorbet::Private::Static::Void, <selfRestore>$86: T.class_of(Funcs))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
-
-    "bb::<Class:Funcs>#<static-init>_18" -> "bb::<Class:Funcs>#<static-init>_21" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_18" -> "bb::<Class:Funcs>#<static-init>_19" [style="tapered"];
-
-    "bb::<Class:Funcs>#<static-init>_19" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=19, rubyBlockId=0](<block-pre-call-temp>$85: Sorbet::Private::Static::Void, <selfRestore>$86: T.class_of(Funcs))\l<statTemp>$79: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$85, sig>\l<self>: T.class_of(Funcs) = <selfRestore>$86\l<cfgAlias>$101: T.class_of(T::Sig) = alias <C Sig>\l<cfgAlias>$103: T.class_of(T) = alias <C T>\l<statTemp>$98: T.class_of(Funcs) = <self>: T.class_of(Funcs).extend(<cfgAlias>$101: T.class_of(T::Sig))\l<cfgAlias>$106: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$108: Symbol(:f) = :f\l<statTemp>$109: Symbol(:normal) = :normal\l<statTemp>$104: Symbol(:f) = <cfgAlias>$106: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Funcs), <statTemp>$108: Symbol(:f), <statTemp>$109: Symbol(:normal))\l<statTemp>$112: Symbol(:f) = :f\l<statTemp>$110: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$112: Symbol(:f))\l<cfgAlias>$115: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$117: Symbol(:f) = :f\l<statTemp>$118: Symbol(:normal) = :normal\l<statTemp>$113: Symbol(:f) = <cfgAlias>$115: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(Funcs), <statTemp>$117: Symbol(:f), <statTemp>$118: Symbol(:normal))\l<cfgAlias>$123: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$125: Symbol(:g) = :g\l<statTemp>$126: Symbol(:normal) = :normal\l<statTemp>$121: Symbol(:g) = <cfgAlias>$123: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Funcs), <statTemp>$125: Symbol(:g), <statTemp>$126: Symbol(:normal))\l<statTemp>$119: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$121: Symbol(:g))\l<cfgAlias>$129: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$131: Symbol(:g) = :g\l<statTemp>$132: Symbol(:normal) = :normal\l<statTemp>$127: Symbol(:g) = <cfgAlias>$129: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(Funcs), <statTemp>$131: Symbol(:g), <statTemp>$132: Symbol(:normal))\l<cfgAlias>$137: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$139: Symbol(:h) = :h\l<statTemp>$140: Symbol(:normal) = :normal\l<statTemp>$135: Symbol(:h) = <cfgAlias>$137: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Funcs), <statTemp>$139: Symbol(:h), <statTemp>$140: Symbol(:normal))\l<statTemp>$133: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$135: Symbol(:h))\l<cfgAlias>$143: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$145: Symbol(:h) = :h\l<statTemp>$146: Symbol(:normal) = :normal\l<statTemp>$141: Symbol(:h) = <cfgAlias>$143: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(Funcs), <statTemp>$145: Symbol(:h), <statTemp>$146: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
-
-    "bb::<Class:Funcs>#<static-init>_19" -> "bb::<Class:Funcs>#<static-init>_1" [style="bold"];
-    "bb::<Class:Funcs>#<static-init>_21" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=21, rubyBlockId=5](<self>: T.class_of(Funcs), <block-pre-call-temp>$85: Sorbet::Private::Static::Void, <selfRestore>$86: T.class_of(Funcs))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$92: Symbol(:s) = :s\l<cfgAlias>$94: T.class_of(String) = alias <C String>\l<statTemp>$90: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$92: Symbol(:s), <cfgAlias>$94: T.class_of(String))\l<cfgAlias>$96: T.class_of(String) = alias <C String>\l<blockReturnTemp>$89: T::Private::Methods::DeclBuilder = <statTemp>$90: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$96: T.class_of(String))\l<blockReturnTemp>$97: T.noreturn = blockreturn<sig> <blockReturnTemp>$89: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:Funcs>#<static-init>_21" -> "bb::<Class:Funcs>#<static-init>_18" [style="bold"];
 }
 
-subgraph "cluster_::C#test_calls" {
-    label = "::C#test_calls";
-    color = blue;
+method ::C#test_calls {
 
-    "bb::C#test_calls_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: C = cast(<self>: NilClass, C);\l<statTemp>$5: Integer(0) = 0\l<statTemp>$3: Integer = <self>: C.f(<statTemp>$5: Integer(0))\l<cfgAlias>$8: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$9: Integer(0) = 0\l<statTemp>$6: T.untyped = <cfgAlias>$8: T.class_of(Funcs).f(<statTemp>$9: Integer(0))\l<statTemp>$12: Symbol(:f) = :f\l<statTemp>$10: Symbol = <self>: C.g(<statTemp>$12: Symbol(:f))\l<cfgAlias>$15: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$16: Symbol(:f) = :f\l<statTemp>$13: Symbol = <cfgAlias>$15: T.class_of(Funcs).g(<statTemp>$16: Symbol(:f))\l<statTemp>$19: String(\"hello\") = \"hello\"\l<statTemp>$17: String = <self>: C.h(<statTemp>$19: String(\"hello\"))\l<cfgAlias>$22: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$23: String(\"world\") = \"world\"\l<statTemp>$20: String = <cfgAlias>$22: T.class_of(Funcs).h(<statTemp>$23: String(\"world\"))\l<cfgAlias>$25: T.class_of(C) = alias <C C>\l<returnMethodTemp>$2: T.untyped = <cfgAlias>$25: T.class_of(C).f()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: C = cast(<self>: NilClass, C);
+    <statTemp>$5: Integer(0) = 0
+    <statTemp>$3: Integer = <self>: C.f(<statTemp>$5: Integer(0))
+    <cfgAlias>$8: T.class_of(Funcs) = alias <C Funcs>
+    <statTemp>$9: Integer(0) = 0
+    <statTemp>$6: T.untyped = <cfgAlias>$8: T.class_of(Funcs).f(<statTemp>$9: Integer(0))
+    <statTemp>$12: Symbol(:f) = :f
+    <statTemp>$10: Symbol = <self>: C.g(<statTemp>$12: Symbol(:f))
+    <cfgAlias>$15: T.class_of(Funcs) = alias <C Funcs>
+    <statTemp>$16: Symbol(:f) = :f
+    <statTemp>$13: Symbol = <cfgAlias>$15: T.class_of(Funcs).g(<statTemp>$16: Symbol(:f))
+    <statTemp>$19: String("hello") = "hello"
+    <statTemp>$17: String = <self>: C.h(<statTemp>$19: String("hello"))
+    <cfgAlias>$22: T.class_of(Funcs) = alias <C Funcs>
+    <statTemp>$23: String("world") = "world"
+    <statTemp>$20: String = <cfgAlias>$22: T.class_of(Funcs).h(<statTemp>$23: String("world"))
+    <cfgAlias>$25: T.class_of(C) = alias <C C>
+    <returnMethodTemp>$2: T.untyped = <cfgAlias>$25: T.class_of(C).f()
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <unconditional>(bb0 -> bb1)
 
-    "bb::C#test_calls_0" -> "bb::C#test_calls_1" [style="bold"];
-    "bb::C#test_calls_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::C#test_calls_1" -> "bb::C#test_calls_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:C>#<static-init>" {
-    label = "::<Class:C>#<static-init>";
-    color = blue;
+method ::<Class:C>#<static-init> {
 
-    "bb::<Class:C>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$6: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$3: T.class_of(C) = <self>: T.class_of(C).include(<cfgAlias>$6: T.class_of(Funcs))\l<cfgAlias>$9: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$11: Symbol(:test_calls) = :test_calls\l<statTemp>$12: Symbol(:normal) = :normal\l<statTemp>$7: Symbol(:test_calls) = <cfgAlias>$9: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(C), <statTemp>$11: Symbol(:test_calls), <statTemp>$12: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: T.class_of(C) = cast(<self>: NilClass, AppliedType {
+      klass = <S <C <U C>> $1>
+      targs = [
+        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C>> $1><C <U <AttachedClass>>>)
+      ]
+    });
+    <cfgAlias>$6: T.class_of(Funcs) = alias <C Funcs>
+    <statTemp>$3: T.class_of(C) = <self>: T.class_of(C).include(<cfgAlias>$6: T.class_of(Funcs))
+    <cfgAlias>$9: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$11: Symbol(:test_calls) = :test_calls
+    <statTemp>$12: Symbol(:normal) = :normal
+    <statTemp>$7: Symbol(:test_calls) = <cfgAlias>$9: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(C), <statTemp>$11: Symbol(:test_calls), <statTemp>$12: Symbol(:normal))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional>(bb0 -> bb1)
 
-    "bb::<Class:C>#<static-init>_0" -> "bb::<Class:C>#<static-init>_1" [style="bold"];
-    "bb::<Class:C>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
-
-    "bb::<Class:C>#<static-init>_1" -> "bb::<Class:C>#<static-init>_1" [style="bold"];
-}
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
 }
 

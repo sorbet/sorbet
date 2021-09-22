@@ -1,149 +1,189 @@
-digraph "array.rb" {
-subgraph "cluster_::<Class:<root>>#<static-init>" {
-    label = "::<Class:<root>>#<static-init>";
-    color = blue;
+method ::<Class:<root>>#<static-init> {
 
-    "bb::<Class:<root>>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$7: T.class_of(TestArray) = alias <C TestArray>\l<statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(TestArray))\l<cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$12: T.class_of(TestArray) = alias <C TestArray>\l<statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(TestArray))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {
+      klass = <S <C <U <root>>> $1>
+      targs = [
+        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)
+      ]
+    });
+    <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
+    <cfgAlias>$7: T.class_of(TestArray) = alias <C TestArray>
+    <statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(TestArray))
+    <cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$12: T.class_of(TestArray) = alias <C TestArray>
+    <statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(TestArray))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional>(bb0 -> bb1)
 
-    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
-    "bb::<Class:<root>>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::TestArray#an_int" {
-    label = "::TestArray#an_int";
-    color = blue;
+method ::TestArray#an_int {
 
-    "bb::TestArray#an_int_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestArray = cast(<self>: NilClass, TestArray);\l<returnMethodTemp>$2: Integer(0) = 0\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(0)\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: TestArray = cast(<self>: NilClass, TestArray);
+    <returnMethodTemp>$2: Integer(0) = 0
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(0)
+    <unconditional>(bb0 -> bb1)
 
-    "bb::TestArray#an_int_0" -> "bb::TestArray#an_int_1" [style="bold"];
-    "bb::TestArray#an_int_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::TestArray#an_int_1" -> "bb::TestArray#an_int_1" [style="bold"];
 }
 
-subgraph "cluster_::TestArray#a_string" {
-    label = "::TestArray#a_string";
-    color = blue;
+method ::TestArray#a_string {
 
-    "bb::TestArray#a_string_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestArray = cast(<self>: NilClass, TestArray);\l<returnMethodTemp>$2: String(\"str\") = \"str\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: String(\"str\")\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: TestArray = cast(<self>: NilClass, TestArray);
+    <returnMethodTemp>$2: String("str") = "str"
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String("str")
+    <unconditional>(bb0 -> bb1)
 
-    "bb::TestArray#a_string_0" -> "bb::TestArray#a_string_1" [style="bold"];
-    "bb::TestArray#a_string_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::TestArray#a_string_1" -> "bb::TestArray#a_string_1" [style="bold"];
 }
 
-subgraph "cluster_::TestArray#test_arrays" {
-    label = "::TestArray#test_arrays";
-    color = blue;
+method ::TestArray#test_arrays {
 
-    "bb::TestArray#test_arrays_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestArray = cast(<self>: NilClass, TestArray);\l<magic>$4: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$3: [] = <magic>$4: T.class_of(<Magic>).<build-array>()\l<arrayTemp>$6: Integer(1) = 1\l<arrayTemp>$7: Integer(2) = 2\l<magic>$8: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$5: [Integer(1), Integer(2)] = <magic>$8: T.class_of(<Magic>).<build-array>(<arrayTemp>$6: Integer(1), <arrayTemp>$7: Integer(2))\l<arrayTemp>$9: Integer = <self>: TestArray.an_int()\l<arrayTemp>$11: String = <self>: TestArray.a_string()\l<magic>$14: T.class_of(<Magic>) = alias <C <Magic>>\l<arrayTemp>$13: [] = <magic>$14: T.class_of(<Magic>).<build-array>()\l<magic>$15: T.class_of(<Magic>) = alias <C <Magic>>\l<returnMethodTemp>$2: [Integer, String, []] = <magic>$15: T.class_of(<Magic>).<build-array>(<arrayTemp>$9: Integer, <arrayTemp>$11: String, <arrayTemp>$13: [])\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: [Integer, String, []]\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: TestArray = cast(<self>: NilClass, TestArray);
+    <magic>$4: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$3: [] = <magic>$4: T.class_of(<Magic>).<build-array>()
+    <arrayTemp>$6: Integer(1) = 1
+    <arrayTemp>$7: Integer(2) = 2
+    <magic>$8: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$5: [Integer(1), Integer(2)] = <magic>$8: T.class_of(<Magic>).<build-array>(<arrayTemp>$6: Integer(1), <arrayTemp>$7: Integer(2))
+    <arrayTemp>$9: Integer = <self>: TestArray.an_int()
+    <arrayTemp>$11: String = <self>: TestArray.a_string()
+    <magic>$14: T.class_of(<Magic>) = alias <C <Magic>>
+    <arrayTemp>$13: [] = <magic>$14: T.class_of(<Magic>).<build-array>()
+    <magic>$15: T.class_of(<Magic>) = alias <C <Magic>>
+    <returnMethodTemp>$2: [Integer, String, []] = <magic>$15: T.class_of(<Magic>).<build-array>(<arrayTemp>$9: Integer, <arrayTemp>$11: String, <arrayTemp>$13: [])
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: [Integer, String, []]
+    <unconditional>(bb0 -> bb1)
 
-    "bb::TestArray#test_arrays_0" -> "bb::TestArray#test_arrays_1" [style="bold"];
-    "bb::TestArray#test_arrays_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::TestArray#test_arrays_1" -> "bb::TestArray#test_arrays_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:TestArray>#<static-init>" {
-    label = "::<Class:TestArray>#<static-init>";
-    color = blue;
+method ::<Class:TestArray>#<static-init> {
 
-    "bb::<Class:TestArray>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(TestArray) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U TestArray>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U TestArray>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$7: FalseClass = false\l<statTemp>$8: Symbol(:an_int) = :an_int\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(TestArray), <statTemp>$7: FalseClass, <statTemp>$8: Symbol(:an_int))\l<selfRestore>$10: T.class_of(TestArray) = <self>\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: T.class_of(TestArray) = cast(<self>: NilClass, AppliedType {
+      klass = <S <C <U TestArray>> $1>
+      targs = [
+        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U TestArray>> $1><C <U <AttachedClass>>>)
+      ]
+    });
+    <cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$7: FalseClass = false
+    <statTemp>$8: Symbol(:an_int) = :an_int
+    <block-pre-call-temp>$9: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(TestArray), <statTemp>$7: FalseClass, <statTemp>$8: Symbol(:an_int))
+    <selfRestore>$10: T.class_of(TestArray) = <self>
+    <unconditional>(bb0 -> bb2)
 
-    "bb::<Class:TestArray>#<static-init>_0" -> "bb::<Class:TestArray>#<static-init>_2" [style="bold"];
-    "bb::<Class:TestArray>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb7(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::<Class:TestArray>#<static-init>_1" -> "bb::<Class:TestArray>#<static-init>_1" [style="bold"];
-    "bb::<Class:TestArray>#<static-init>_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=1](<self>: T.class_of(TestArray), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(TestArray))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+#  bb5(rubyBlockId=1)
+bb2(rubyBlockId=1):
+    blockargs=(<self>: T.class_of(TestArray), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(TestArray))
+    outerLoops: 1
+    <block-call>: NilClass(bb2 -> bb5)
 
-    "bb::<Class:TestArray>#<static-init>_2" -> "bb::<Class:TestArray>#<static-init>_5" [style="bold"];
-    "bb::<Class:TestArray>#<static-init>_2" -> "bb::<Class:TestArray>#<static-init>_3" [style="tapered"];
+# backedges
+#  bb2(rubyBlockId=1)
+bb3(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(TestArray))
+    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$9, sig>
+    <self>: T.class_of(TestArray) = <selfRestore>$10
+    <cfgAlias>$20: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$22: FalseClass = false
+    <statTemp>$23: Symbol(:a_string) = :a_string
+    <block-pre-call-temp>$24: Sorbet::Private::Static::Void = <cfgAlias>$20: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(TestArray), <statTemp>$22: FalseClass, <statTemp>$23: Symbol(:a_string))
+    <selfRestore>$25: T.class_of(TestArray) = <self>
+    <unconditional>(bb3 -> bb6)
 
-    "bb::<Class:TestArray>#<static-init>_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=0](<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(TestArray))\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$9, sig>\l<self>: T.class_of(TestArray) = <selfRestore>$10\l<cfgAlias>$20: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$22: FalseClass = false\l<statTemp>$23: Symbol(:a_string) = :a_string\l<block-pre-call-temp>$24: Sorbet::Private::Static::Void = <cfgAlias>$20: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(TestArray), <statTemp>$22: FalseClass, <statTemp>$23: Symbol(:a_string))\l<selfRestore>$25: T.class_of(TestArray) = <self>\l<unconditional>\l"
-    ];
+# backedges
+#  bb2(rubyBlockId=1)
+bb5(rubyBlockId=1):
+    blockargs=(<self>: T.class_of(TestArray), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(TestArray))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <cfgAlias>$16: T.class_of(Integer) = alias <C Integer>
+    <blockReturnTemp>$13: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$16: T.class_of(Integer))
+    <blockReturnTemp>$17: T.noreturn = blockreturn<sig> <blockReturnTemp>$13: T::Private::Methods::DeclBuilder
+    <unconditional>(bb5 -> bb2)
 
-    "bb::<Class:TestArray>#<static-init>_3" -> "bb::<Class:TestArray>#<static-init>_6" [style="bold"];
-    "bb::<Class:TestArray>#<static-init>_5" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=5, rubyBlockId=1](<self>: T.class_of(TestArray), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(TestArray))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<cfgAlias>$16: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$13: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$16: T.class_of(Integer))\l<blockReturnTemp>$17: T.noreturn = blockreturn<sig> <blockReturnTemp>$13: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
+# backedges
+#  bb3(rubyBlockId=0)
+#  bb9(rubyBlockId=2)
+bb6(rubyBlockId=2):
+    blockargs=(<self>: T.class_of(TestArray), <block-pre-call-temp>$24: Sorbet::Private::Static::Void, <selfRestore>$25: T.class_of(TestArray))
+    outerLoops: 1
+    <block-call>: NilClass(bb6 -> bb9)
 
-    "bb::<Class:TestArray>#<static-init>_5" -> "bb::<Class:TestArray>#<static-init>_2" [style="bold"];
-    "bb::<Class:TestArray>#<static-init>_6" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=6, rubyBlockId=2](<self>: T.class_of(TestArray), <block-pre-call-temp>$24: Sorbet::Private::Static::Void, <selfRestore>$25: T.class_of(TestArray))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
+# backedges
+#  bb6(rubyBlockId=2)
+bb7(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$24: Sorbet::Private::Static::Void, <selfRestore>$25: T.class_of(TestArray))
+    <statTemp>$18: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$24, sig>
+    <self>: T.class_of(TestArray) = <selfRestore>$25
+    <cfgAlias>$36: T.class_of(T::Sig) = alias <C Sig>
+    <cfgAlias>$38: T.class_of(T) = alias <C T>
+    <statTemp>$33: T.class_of(TestArray) = <self>: T.class_of(TestArray).extend(<cfgAlias>$36: T.class_of(T::Sig))
+    <cfgAlias>$41: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$43: Symbol(:an_int) = :an_int
+    <statTemp>$44: Symbol(:normal) = :normal
+    <statTemp>$39: Symbol(:an_int) = <cfgAlias>$41: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$43: Symbol(:an_int), <statTemp>$44: Symbol(:normal))
+    <cfgAlias>$47: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$49: Symbol(:a_string) = :a_string
+    <statTemp>$50: Symbol(:normal) = :normal
+    <statTemp>$45: Symbol(:a_string) = <cfgAlias>$47: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$49: Symbol(:a_string), <statTemp>$50: Symbol(:normal))
+    <cfgAlias>$53: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$55: Symbol(:test_arrays) = :test_arrays
+    <statTemp>$56: Symbol(:normal) = :normal
+    <statTemp>$51: Symbol(:test_arrays) = <cfgAlias>$53: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$55: Symbol(:test_arrays), <statTemp>$56: Symbol(:normal))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional>(bb7 -> bb1)
 
-    "bb::<Class:TestArray>#<static-init>_6" -> "bb::<Class:TestArray>#<static-init>_9" [style="bold"];
-    "bb::<Class:TestArray>#<static-init>_6" -> "bb::<Class:TestArray>#<static-init>_7" [style="tapered"];
-
-    "bb::<Class:TestArray>#<static-init>_7" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=7, rubyBlockId=0](<block-pre-call-temp>$24: Sorbet::Private::Static::Void, <selfRestore>$25: T.class_of(TestArray))\l<statTemp>$18: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$24, sig>\l<self>: T.class_of(TestArray) = <selfRestore>$25\l<cfgAlias>$36: T.class_of(T::Sig) = alias <C Sig>\l<cfgAlias>$38: T.class_of(T) = alias <C T>\l<statTemp>$33: T.class_of(TestArray) = <self>: T.class_of(TestArray).extend(<cfgAlias>$36: T.class_of(T::Sig))\l<cfgAlias>$41: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$43: Symbol(:an_int) = :an_int\l<statTemp>$44: Symbol(:normal) = :normal\l<statTemp>$39: Symbol(:an_int) = <cfgAlias>$41: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$43: Symbol(:an_int), <statTemp>$44: Symbol(:normal))\l<cfgAlias>$47: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$49: Symbol(:a_string) = :a_string\l<statTemp>$50: Symbol(:normal) = :normal\l<statTemp>$45: Symbol(:a_string) = <cfgAlias>$47: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$49: Symbol(:a_string), <statTemp>$50: Symbol(:normal))\l<cfgAlias>$53: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$55: Symbol(:test_arrays) = :test_arrays\l<statTemp>$56: Symbol(:normal) = :normal\l<statTemp>$51: Symbol(:test_arrays) = <cfgAlias>$53: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$55: Symbol(:test_arrays), <statTemp>$56: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
-
-    "bb::<Class:TestArray>#<static-init>_7" -> "bb::<Class:TestArray>#<static-init>_1" [style="bold"];
-    "bb::<Class:TestArray>#<static-init>_9" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=9, rubyBlockId=2](<self>: T.class_of(TestArray), <block-pre-call-temp>$24: Sorbet::Private::Static::Void, <selfRestore>$25: T.class_of(TestArray))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<cfgAlias>$31: T.class_of(String) = alias <C String>\l<blockReturnTemp>$28: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$31: T.class_of(String))\l<blockReturnTemp>$32: T.noreturn = blockreturn<sig> <blockReturnTemp>$28: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:TestArray>#<static-init>_9" -> "bb::<Class:TestArray>#<static-init>_6" [style="bold"];
-}
+# backedges
+#  bb6(rubyBlockId=2)
+bb9(rubyBlockId=2):
+    blockargs=(<self>: T.class_of(TestArray), <block-pre-call-temp>$24: Sorbet::Private::Static::Void, <selfRestore>$25: T.class_of(TestArray))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <cfgAlias>$31: T.class_of(String) = alias <C String>
+    <blockReturnTemp>$28: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$31: T.class_of(String))
+    <blockReturnTemp>$32: T.noreturn = blockreturn<sig> <blockReturnTemp>$28: T::Private::Methods::DeclBuilder
+    <unconditional>(bb9 -> bb6)
 
 }
 

@@ -1,651 +1,802 @@
-digraph "simple.rb" {
-subgraph "cluster_::<Class:<root>>#<static-init>" {
-    label = "::<Class:<root>>#<static-init>";
-    color = blue;
+method ::<Class:<root>>#<static-init> {
 
-    "bb::<Class:<root>>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$7: T.class_of(ControlFlow) = alias <C ControlFlow>\l<statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(ControlFlow))\l<cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$12: T.class_of(ControlFlow) = alias <C ControlFlow>\l<statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(ControlFlow))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {
+      klass = <S <C <U <root>>> $1>
+      targs = [
+        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)
+      ]
+    });
+    <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
+    <cfgAlias>$7: T.class_of(ControlFlow) = alias <C ControlFlow>
+    <statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(ControlFlow))
+    <cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$12: T.class_of(ControlFlow) = alias <C ControlFlow>
+    <statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(ControlFlow))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional>(bb0 -> bb1)
 
-    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
-    "bb::<Class:<root>>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::ControlFlow#orZero0" {
-    label = "::ControlFlow#orZero0";
-    color = blue;
+method ::ControlFlow#orZero0 {
 
-    "bb::ControlFlow#orZero0_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\la: T.nilable(Integer)\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    a: T.nilable(Integer) = load_arg(a)
+    a: T.nilable(Integer)(bb0 -> bb2)
 
-    "bb::ControlFlow#orZero0_0" -> "bb::ControlFlow#orZero0_2" [style="bold"];
-    "bb::ControlFlow#orZero0_0" -> "bb::ControlFlow#orZero0_3" [style="tapered"];
+# backedges
+#  bb2(rubyBlockId=0)
+#  bb3(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=(<returnMethodTemp>$2)
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional>(bb1 -> bb1)
 
-    "bb::ControlFlow#orZero0_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb2(rubyBlockId=0):
+    blockargs=(a: Integer)
+    <returnMethodTemp>$2: T.noreturn = return a: Integer
+    <unconditional>(bb2 -> bb1)
 
-    "bb::ControlFlow#orZero0_1" -> "bb::ControlFlow#orZero0_1" [style="bold"];
-    "bb::ControlFlow#orZero0_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0](a: Integer)\l<returnMethodTemp>$2: T.noreturn = return a: Integer\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb3(rubyBlockId=0):
+    blockargs=()
+    <returnTemp>$5: Integer(0) = 0
+    <returnMethodTemp>$2: T.noreturn = return <returnTemp>$5: Integer(0)
+    <unconditional>(bb3 -> bb1)
 
-    "bb::ControlFlow#orZero0_2" -> "bb::ControlFlow#orZero0_1" [style="bold"];
-    "bb::ControlFlow#orZero0_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=0]()\l<returnTemp>$5: Integer(0) = 0\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$5: Integer(0)\l<unconditional>\l"
-    ];
-
-    "bb::ControlFlow#orZero0_3" -> "bb::ControlFlow#orZero0_1" [style="bold"];
 }
 
-subgraph "cluster_::ControlFlow#orZero0a" {
-    label = "::ControlFlow#orZero0a";
-    color = blue;
+method ::ControlFlow#orZero0a {
 
-    "bb::ControlFlow#orZero0a_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: Integer = load_arg(a)\la: Integer\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    a: Integer = load_arg(a)
+    a: Integer(bb0 -> bb2)
 
-    "bb::ControlFlow#orZero0a_0" -> "bb::ControlFlow#orZero0a_2" [style="bold"];
-    "bb::ControlFlow#orZero0a_0" -> "bb::ControlFlow#orZero0a_3" [style="tapered"];
+# backedges
+#  bb2(rubyBlockId=0)
+#  bb3(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=(<returnMethodTemp>$2)
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional>(bb1 -> bb1)
 
-    "bb::ControlFlow#orZero0a_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb2(rubyBlockId=0):
+    blockargs=(a: Integer)
+    <returnMethodTemp>$2: T.noreturn = return a: Integer
+    <unconditional>(bb2 -> bb1)
 
-    "bb::ControlFlow#orZero0a_1" -> "bb::ControlFlow#orZero0a_1" [style="bold"];
-    "bb::ControlFlow#orZero0a_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0](a: Integer)\l<returnMethodTemp>$2: T.noreturn = return a: Integer\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb3(rubyBlockId=0):
+    blockargs=()
+    <returnTemp>$5 = 0
+    <returnMethodTemp>$2 = return <returnTemp>$5
+    <unconditional>(bb3 -> bb1)
 
-    "bb::ControlFlow#orZero0a_2" -> "bb::ControlFlow#orZero0a_1" [style="bold"];
-    "bb::ControlFlow#orZero0a_3" [
-        shape = rectangle;
-        color = red;
-        label = "block[id=3, rubyBlockId=0]()\l<returnTemp>$5 = 0\l<returnMethodTemp>$2 = return <returnTemp>$5\l<unconditional>\l"
-    ];
-
-    "bb::ControlFlow#orZero0a_3" -> "bb::ControlFlow#orZero0a_1" [style="bold"];
 }
 
-subgraph "cluster_::ControlFlow#orZero0n" {
-    label = "::ControlFlow#orZero0n";
-    color = blue;
+method ::ControlFlow#orZero0n {
 
-    "bb::ControlFlow#orZero0n_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\lb: T::Boolean = a: T.nilable(Integer).!()\lb: T::Boolean\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    a: T.nilable(Integer) = load_arg(a)
+    b: T::Boolean = a: T.nilable(Integer).!()
+    b: T::Boolean(bb0 -> bb2)
 
-    "bb::ControlFlow#orZero0n_0" -> "bb::ControlFlow#orZero0n_2" [style="bold"];
-    "bb::ControlFlow#orZero0n_0" -> "bb::ControlFlow#orZero0n_3" [style="tapered"];
+# backedges
+#  bb2(rubyBlockId=0)
+#  bb3(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=(<returnMethodTemp>$2)
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional>(bb1 -> bb1)
 
-    "bb::ControlFlow#orZero0n_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb2(rubyBlockId=0):
+    blockargs=()
+    <returnTemp>$6: Integer(0) = 0
+    <returnMethodTemp>$2: T.noreturn = return <returnTemp>$6: Integer(0)
+    <unconditional>(bb2 -> bb1)
 
-    "bb::ControlFlow#orZero0n_1" -> "bb::ControlFlow#orZero0n_1" [style="bold"];
-    "bb::ControlFlow#orZero0n_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0]()\l<returnTemp>$6: Integer(0) = 0\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$6: Integer(0)\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb3(rubyBlockId=0):
+    blockargs=(a: Integer)
+    <returnMethodTemp>$2: T.noreturn = return a: Integer
+    <unconditional>(bb3 -> bb1)
 
-    "bb::ControlFlow#orZero0n_2" -> "bb::ControlFlow#orZero0n_1" [style="bold"];
-    "bb::ControlFlow#orZero0n_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=0](a: Integer)\l<returnMethodTemp>$2: T.noreturn = return a: Integer\l<unconditional>\l"
-    ];
-
-    "bb::ControlFlow#orZero0n_3" -> "bb::ControlFlow#orZero0n_1" [style="bold"];
 }
 
-subgraph "cluster_::ControlFlow#orZero1n" {
-    label = "::ControlFlow#orZero1n";
-    color = blue;
+method ::ControlFlow#orZero1n {
 
-    "bb::ControlFlow#orZero1n_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\l<cfgAlias>$7: T.class_of(Integer) = alias <C Integer>\l<statTemp>$4: T::Boolean = a: T.nilable(Integer).is_a?(<cfgAlias>$7: T.class_of(Integer))\lb: T::Boolean = <statTemp>$4: T::Boolean.!()\lb: T::Boolean\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    a: T.nilable(Integer) = load_arg(a)
+    <cfgAlias>$7: T.class_of(Integer) = alias <C Integer>
+    <statTemp>$4: T::Boolean = a: T.nilable(Integer).is_a?(<cfgAlias>$7: T.class_of(Integer))
+    b: T::Boolean = <statTemp>$4: T::Boolean.!()
+    b: T::Boolean(bb0 -> bb2)
 
-    "bb::ControlFlow#orZero1n_0" -> "bb::ControlFlow#orZero1n_2" [style="bold"];
-    "bb::ControlFlow#orZero1n_0" -> "bb::ControlFlow#orZero1n_3" [style="tapered"];
+# backedges
+#  bb2(rubyBlockId=0)
+#  bb3(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=(<returnMethodTemp>$2)
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional>(bb1 -> bb1)
 
-    "bb::ControlFlow#orZero1n_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb2(rubyBlockId=0):
+    blockargs=()
+    <returnTemp>$9: Integer(0) = 0
+    <returnMethodTemp>$2: T.noreturn = return <returnTemp>$9: Integer(0)
+    <unconditional>(bb2 -> bb1)
 
-    "bb::ControlFlow#orZero1n_1" -> "bb::ControlFlow#orZero1n_1" [style="bold"];
-    "bb::ControlFlow#orZero1n_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0]()\l<returnTemp>$9: Integer(0) = 0\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$9: Integer(0)\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb3(rubyBlockId=0):
+    blockargs=(a: Integer)
+    <returnMethodTemp>$2: T.noreturn = return a: Integer
+    <unconditional>(bb3 -> bb1)
 
-    "bb::ControlFlow#orZero1n_2" -> "bb::ControlFlow#orZero1n_1" [style="bold"];
-    "bb::ControlFlow#orZero1n_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=0](a: Integer)\l<returnMethodTemp>$2: T.noreturn = return a: Integer\l<unconditional>\l"
-    ];
-
-    "bb::ControlFlow#orZero1n_3" -> "bb::ControlFlow#orZero1n_1" [style="bold"];
 }
 
-subgraph "cluster_::ControlFlow#orZero2" {
-    label = "::ControlFlow#orZero2";
-    color = blue;
+method ::ControlFlow#orZero2 {
 
-    "bb::ControlFlow#orZero2_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\la: T.nilable(Integer)\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    a: T.nilable(Integer) = load_arg(a)
+    a: T.nilable(Integer)(bb0 -> bb4)
 
-    "bb::ControlFlow#orZero2_0" -> "bb::ControlFlow#orZero2_4" [style="bold"];
-    "bb::ControlFlow#orZero2_0" -> "bb::ControlFlow#orZero2_3" [style="tapered"];
+# backedges
+#  bb4(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::ControlFlow#orZero2_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb3(rubyBlockId=0):
+    blockargs=()
+    a: Integer(0) = 0
+    <unconditional>(bb3 -> bb4)
 
-    "bb::ControlFlow#orZero2_1" -> "bb::ControlFlow#orZero2_1" [style="bold"];
-    "bb::ControlFlow#orZero2_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=0]()\la: Integer(0) = 0\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+#  bb3(rubyBlockId=0)
+bb4(rubyBlockId=0):
+    blockargs=(a: Integer)
+    <returnMethodTemp>$2: Integer = a
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
+    <unconditional>(bb4 -> bb1)
 
-    "bb::ControlFlow#orZero2_3" -> "bb::ControlFlow#orZero2_4" [style="bold"];
-    "bb::ControlFlow#orZero2_4" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=4, rubyBlockId=0](a: Integer)\l<returnMethodTemp>$2: Integer = a\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
-    ];
-
-    "bb::ControlFlow#orZero2_4" -> "bb::ControlFlow#orZero2_1" [style="bold"];
 }
 
-subgraph "cluster_::ControlFlow#orZero3" {
-    label = "::ControlFlow#orZero3";
-    color = blue;
+method ::ControlFlow#orZero3 {
 
-    "bb::ControlFlow#orZero3_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\la: T.nilable(Integer)\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    a: T.nilable(Integer) = load_arg(a)
+    a: T.nilable(Integer)(bb0 -> bb2)
 
-    "bb::ControlFlow#orZero3_0" -> "bb::ControlFlow#orZero3_2" [style="bold"];
-    "bb::ControlFlow#orZero3_0" -> "bb::ControlFlow#orZero3_3" [style="tapered"];
+# backedges
+#  bb5(rubyBlockId=0)
+#  bb6(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=(<returnMethodTemp>$2)
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional>(bb1 -> bb1)
 
-    "bb::ControlFlow#orZero3_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb2(rubyBlockId=0):
+    blockargs=()
+    <statTemp>$5: Integer(1) = 1
+    <statTemp>$6: Integer(2) = 2
+    <ifTemp>$3: T::Boolean = <statTemp>$5: Integer(1).==(<statTemp>$6: Integer(2))
+    <ifTemp>$3: T::Boolean(bb2 -> bb5)
 
-    "bb::ControlFlow#orZero3_1" -> "bb::ControlFlow#orZero3_1" [style="bold"];
-    "bb::ControlFlow#orZero3_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0]()\l<statTemp>$5: Integer(1) = 1\l<statTemp>$6: Integer(2) = 2\l<ifTemp>$3: T::Boolean = <statTemp>$5: Integer(1).==(<statTemp>$6: Integer(2))\l<ifTemp>$3: T::Boolean\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb3(rubyBlockId=0):
+    blockargs=(a: NilClass)
+    <ifTemp>$3: NilClass = a
+    <ifTemp>$3: NilClass(bb3 -> bb5)
 
-    "bb::ControlFlow#orZero3_2" -> "bb::ControlFlow#orZero3_5" [style="bold"];
-    "bb::ControlFlow#orZero3_2" -> "bb::ControlFlow#orZero3_6" [style="tapered"];
+# backedges
+#  bb2(rubyBlockId=0)
+#  bb3(rubyBlockId=0)
+bb5(rubyBlockId=0):
+    blockargs=()
+    <returnTemp>$7: Integer(1) = 1
+    <returnMethodTemp>$2: T.noreturn = return <returnTemp>$7: Integer(1)
+    <unconditional>(bb5 -> bb1)
 
-    "bb::ControlFlow#orZero3_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=0](a: NilClass)\l<ifTemp>$3: NilClass = a\l<ifTemp>$3: NilClass\l"
-    ];
+# backedges
+#  bb2(rubyBlockId=0)
+#  bb3(rubyBlockId=0)
+bb6(rubyBlockId=0):
+    blockargs=()
+    <returnTemp>$8: Integer(0) = 0
+    <returnMethodTemp>$2: T.noreturn = return <returnTemp>$8: Integer(0)
+    <unconditional>(bb6 -> bb1)
 
-    "bb::ControlFlow#orZero3_3" -> "bb::ControlFlow#orZero3_5" [style="bold"];
-    "bb::ControlFlow#orZero3_3" -> "bb::ControlFlow#orZero3_6" [style="tapered"];
-
-    "bb::ControlFlow#orZero3_5" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=5, rubyBlockId=0]()\l<returnTemp>$7: Integer(1) = 1\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$7: Integer(1)\l<unconditional>\l"
-    ];
-
-    "bb::ControlFlow#orZero3_5" -> "bb::ControlFlow#orZero3_1" [style="bold"];
-    "bb::ControlFlow#orZero3_6" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=6, rubyBlockId=0]()\l<returnTemp>$8: Integer(0) = 0\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$8: Integer(0)\l<unconditional>\l"
-    ];
-
-    "bb::ControlFlow#orZero3_6" -> "bb::ControlFlow#orZero3_1" [style="bold"];
 }
 
-subgraph "cluster_::ControlFlow#orZero3n" {
-    label = "::ControlFlow#orZero3n";
-    color = blue;
+method ::ControlFlow#orZero3n {
 
-    "bb::ControlFlow#orZero3n_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\la: T.nilable(Integer)\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    a: T.nilable(Integer) = load_arg(a)
+    a: T.nilable(Integer)(bb0 -> bb2)
 
-    "bb::ControlFlow#orZero3n_0" -> "bb::ControlFlow#orZero3n_2" [style="bold"];
-    "bb::ControlFlow#orZero3n_0" -> "bb::ControlFlow#orZero3n_3" [style="tapered"];
+# backedges
+#  bb5(rubyBlockId=0)
+#  bb6(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=(<returnMethodTemp>$2)
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional>(bb1 -> bb1)
 
-    "bb::ControlFlow#orZero3n_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb2(rubyBlockId=0):
+    blockargs=()
+    <statTemp>$6: Integer(1) = 1
+    <statTemp>$7: Integer(2) = 2
+    <statTemp>$4: T::Boolean = <statTemp>$6: Integer(1).==(<statTemp>$7: Integer(2))
+    <unconditional>(bb2 -> bb4)
 
-    "bb::ControlFlow#orZero3n_1" -> "bb::ControlFlow#orZero3n_1" [style="bold"];
-    "bb::ControlFlow#orZero3n_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0]()\l<statTemp>$6: Integer(1) = 1\l<statTemp>$7: Integer(2) = 2\l<statTemp>$4: T::Boolean = <statTemp>$6: Integer(1).==(<statTemp>$7: Integer(2))\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb3(rubyBlockId=0):
+    blockargs=(a: NilClass)
+    <statTemp>$4: NilClass = a
+    <unconditional>(bb3 -> bb4)
 
-    "bb::ControlFlow#orZero3n_2" -> "bb::ControlFlow#orZero3n_4" [style="bold"];
-    "bb::ControlFlow#orZero3n_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=0](a: NilClass)\l<statTemp>$4: NilClass = a\l<unconditional>\l"
-    ];
+# backedges
+#  bb2(rubyBlockId=0)
+#  bb3(rubyBlockId=0)
+bb4(rubyBlockId=0):
+    blockargs=(<statTemp>$4: T.nilable(T::Boolean))
+    b: T::Boolean = <statTemp>$4: T.nilable(T::Boolean).!()
+    b: T::Boolean(bb4 -> bb5)
 
-    "bb::ControlFlow#orZero3n_3" -> "bb::ControlFlow#orZero3n_4" [style="bold"];
-    "bb::ControlFlow#orZero3n_4" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=4, rubyBlockId=0](<statTemp>$4: T.nilable(T::Boolean))\lb: T::Boolean = <statTemp>$4: T.nilable(T::Boolean).!()\lb: T::Boolean\l"
-    ];
+# backedges
+#  bb4(rubyBlockId=0)
+bb5(rubyBlockId=0):
+    blockargs=()
+    <returnTemp>$9: Integer(0) = 0
+    <returnMethodTemp>$2: T.noreturn = return <returnTemp>$9: Integer(0)
+    <unconditional>(bb5 -> bb1)
 
-    "bb::ControlFlow#orZero3n_4" -> "bb::ControlFlow#orZero3n_5" [style="bold"];
-    "bb::ControlFlow#orZero3n_4" -> "bb::ControlFlow#orZero3n_6" [style="tapered"];
+# backedges
+#  bb4(rubyBlockId=0)
+bb6(rubyBlockId=0):
+    blockargs=()
+    <returnTemp>$10: Integer(1) = 1
+    <returnMethodTemp>$2: T.noreturn = return <returnTemp>$10: Integer(1)
+    <unconditional>(bb6 -> bb1)
 
-    "bb::ControlFlow#orZero3n_5" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=5, rubyBlockId=0]()\l<returnTemp>$9: Integer(0) = 0\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$9: Integer(0)\l<unconditional>\l"
-    ];
-
-    "bb::ControlFlow#orZero3n_5" -> "bb::ControlFlow#orZero3n_1" [style="bold"];
-    "bb::ControlFlow#orZero3n_6" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=6, rubyBlockId=0]()\l<returnTemp>$10: Integer(1) = 1\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$10: Integer(1)\l<unconditional>\l"
-    ];
-
-    "bb::ControlFlow#orZero3n_6" -> "bb::ControlFlow#orZero3n_1" [style="bold"];
 }
 
-subgraph "cluster_::ControlFlow#orZero4" {
-    label = "::ControlFlow#orZero4";
-    color = blue;
+method ::ControlFlow#orZero4 {
 
-    "bb::ControlFlow#orZero4_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\la: T.nilable(Integer)\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    a: T.nilable(Integer) = load_arg(a)
+    a: T.nilable(Integer)(bb0 -> bb2)
 
-    "bb::ControlFlow#orZero4_0" -> "bb::ControlFlow#orZero4_2" [style="bold"];
-    "bb::ControlFlow#orZero4_0" -> "bb::ControlFlow#orZero4_3" [style="tapered"];
+# backedges
+#  bb5(rubyBlockId=0)
+#  bb6(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=(<returnMethodTemp>$2)
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional>(bb1 -> bb1)
 
-    "bb::ControlFlow#orZero4_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb2(rubyBlockId=0):
+    blockargs=(a: Integer)
+    <ifTemp>$3: Integer = a
+    <ifTemp>$3: Integer(bb2 -> bb5)
 
-    "bb::ControlFlow#orZero4_1" -> "bb::ControlFlow#orZero4_1" [style="bold"];
-    "bb::ControlFlow#orZero4_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0](a: Integer)\l<ifTemp>$3: Integer = a\l<ifTemp>$3: Integer\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb3(rubyBlockId=0):
+    blockargs=(a: NilClass)
+    <ifTemp>$3: TrueClass = true
+    <ifTemp>$3: TrueClass(bb3 -> bb5)
 
-    "bb::ControlFlow#orZero4_2" -> "bb::ControlFlow#orZero4_5" [style="bold"];
-    "bb::ControlFlow#orZero4_2" -> "bb::ControlFlow#orZero4_6" [style="tapered"];
+# backedges
+#  bb2(rubyBlockId=0)
+#  bb3(rubyBlockId=0)
+bb5(rubyBlockId=0):
+    blockargs=(a: T.nilable(Integer))
+    <returnMethodTemp>$2: T.noreturn = return a: T.nilable(Integer)
+    <unconditional>(bb5 -> bb1)
 
-    "bb::ControlFlow#orZero4_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=0](a: NilClass)\l<ifTemp>$3: TrueClass = true\l<ifTemp>$3: TrueClass\l"
-    ];
+# backedges
+#  bb2(rubyBlockId=0)
+#  bb3(rubyBlockId=0)
+bb6(rubyBlockId=0):
+    blockargs=()
+    <returnTemp>$6 = 0
+    <returnMethodTemp>$2 = return <returnTemp>$6
+    <unconditional>(bb6 -> bb1)
 
-    "bb::ControlFlow#orZero4_3" -> "bb::ControlFlow#orZero4_5" [style="bold"];
-    "bb::ControlFlow#orZero4_3" -> "bb::ControlFlow#orZero4_6" [style="tapered"];
-
-    "bb::ControlFlow#orZero4_5" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=5, rubyBlockId=0](a: T.nilable(Integer))\l<returnMethodTemp>$2: T.noreturn = return a: T.nilable(Integer)\l<unconditional>\l"
-    ];
-
-    "bb::ControlFlow#orZero4_5" -> "bb::ControlFlow#orZero4_1" [style="bold"];
-    "bb::ControlFlow#orZero4_6" [
-        shape = rectangle;
-        color = red;
-        label = "block[id=6, rubyBlockId=0]()\l<returnTemp>$6 = 0\l<returnMethodTemp>$2 = return <returnTemp>$6\l<unconditional>\l"
-    ];
-
-    "bb::ControlFlow#orZero4_6" -> "bb::ControlFlow#orZero4_1" [style="bold"];
 }
 
-subgraph "cluster_::ControlFlow#orZero5" {
-    label = "::ControlFlow#orZero5";
-    color = blue;
+method ::ControlFlow#orZero5 {
 
-    "bb::ControlFlow#orZero5_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: ControlFlow = cast(<self>: NilClass, ControlFlow);\la: T.nilable(Integer) = load_arg(a)\la: T.nilable(Integer)\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    a: T.nilable(Integer) = load_arg(a)
+    a: T.nilable(Integer)(bb0 -> bb2)
 
-    "bb::ControlFlow#orZero5_0" -> "bb::ControlFlow#orZero5_2" [style="bold"];
-    "bb::ControlFlow#orZero5_0" -> "bb::ControlFlow#orZero5_3" [style="tapered"];
+# backedges
+#  bb5(rubyBlockId=0)
+#  bb6(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=(<returnMethodTemp>$2)
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional>(bb1 -> bb1)
 
-    "bb::ControlFlow#orZero5_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb2(rubyBlockId=0):
+    blockargs=(a: Integer)
+    <ifTemp>$3: TrueClass = true
+    <ifTemp>$3: TrueClass(bb2 -> bb5)
 
-    "bb::ControlFlow#orZero5_1" -> "bb::ControlFlow#orZero5_1" [style="bold"];
-    "bb::ControlFlow#orZero5_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0](a: Integer)\l<ifTemp>$3: TrueClass = true\l<ifTemp>$3: TrueClass\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+bb3(rubyBlockId=0):
+    blockargs=(a: NilClass)
+    <ifTemp>$3: NilClass = a
+    <ifTemp>$3: NilClass(bb3 -> bb5)
 
-    "bb::ControlFlow#orZero5_2" -> "bb::ControlFlow#orZero5_5" [style="bold"];
-    "bb::ControlFlow#orZero5_2" -> "bb::ControlFlow#orZero5_6" [style="tapered"];
+# backedges
+#  bb2(rubyBlockId=0)
+#  bb3(rubyBlockId=0)
+bb5(rubyBlockId=0):
+    blockargs=(a: Integer)
+    <returnMethodTemp>$2: T.noreturn = return a: Integer
+    <unconditional>(bb5 -> bb1)
 
-    "bb::ControlFlow#orZero5_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=0](a: NilClass)\l<ifTemp>$3: NilClass = a\l<ifTemp>$3: NilClass\l"
-    ];
+# backedges
+#  bb2(rubyBlockId=0)
+#  bb3(rubyBlockId=0)
+bb6(rubyBlockId=0):
+    blockargs=()
+    <returnTemp>$6: Integer(0) = 0
+    <returnMethodTemp>$2: T.noreturn = return <returnTemp>$6: Integer(0)
+    <unconditional>(bb6 -> bb1)
 
-    "bb::ControlFlow#orZero5_3" -> "bb::ControlFlow#orZero5_5" [style="bold"];
-    "bb::ControlFlow#orZero5_3" -> "bb::ControlFlow#orZero5_6" [style="tapered"];
-
-    "bb::ControlFlow#orZero5_5" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=5, rubyBlockId=0](a: Integer)\l<returnMethodTemp>$2: T.noreturn = return a: Integer\l<unconditional>\l"
-    ];
-
-    "bb::ControlFlow#orZero5_5" -> "bb::ControlFlow#orZero5_1" [style="bold"];
-    "bb::ControlFlow#orZero5_6" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=6, rubyBlockId=0]()\l<returnTemp>$6: Integer(0) = 0\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$6: Integer(0)\l<unconditional>\l"
-    ];
-
-    "bb::ControlFlow#orZero5_6" -> "bb::ControlFlow#orZero5_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:ControlFlow>#<static-init>" {
-    label = "::<Class:ControlFlow>#<static-init>";
-    color = blue;
+method ::<Class:ControlFlow>#<static-init> {
 
-    "bb::<Class:ControlFlow>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(ControlFlow) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U ControlFlow>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U ControlFlow>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$7: FalseClass = false\l<statTemp>$8: Symbol(:orZero0) = :orZero0\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$7: FalseClass, <statTemp>$8: Symbol(:orZero0))\l<selfRestore>$10: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: T.class_of(ControlFlow) = cast(<self>: NilClass, AppliedType {
+      klass = <S <C <U ControlFlow>> $1>
+      targs = [
+        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U ControlFlow>> $1><C <U <AttachedClass>>>)
+      ]
+    });
+    <cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$7: FalseClass = false
+    <statTemp>$8: Symbol(:orZero0) = :orZero0
+    <block-pre-call-temp>$9: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$7: FalseClass, <statTemp>$8: Symbol(:orZero0))
+    <selfRestore>$10: T.class_of(ControlFlow) = <self>
+    <unconditional>(bb0 -> bb2)
 
-    "bb::<Class:ControlFlow>#<static-init>_0" -> "bb::<Class:ControlFlow>#<static-init>_2" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+#  bb35(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
 
-    "bb::<Class:ControlFlow>#<static-init>_1" -> "bb::<Class:ControlFlow>#<static-init>_1" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=1](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(ControlFlow))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
+# backedges
+#  bb0(rubyBlockId=0)
+#  bb5(rubyBlockId=1)
+bb2(rubyBlockId=1):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(ControlFlow))
+    outerLoops: 1
+    <block-call>: NilClass(bb2 -> bb5)
 
-    "bb::<Class:ControlFlow>#<static-init>_2" -> "bb::<Class:ControlFlow>#<static-init>_5" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_2" -> "bb::<Class:ControlFlow>#<static-init>_3" [style="tapered"];
+# backedges
+#  bb2(rubyBlockId=1)
+bb3(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(ControlFlow))
+    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$9, sig>
+    <self>: T.class_of(ControlFlow) = <selfRestore>$10
+    <cfgAlias>$29: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$31: FalseClass = false
+    <statTemp>$32: Symbol(:orZero0a) = :orZero0a
+    <block-pre-call-temp>$33: Sorbet::Private::Static::Void = <cfgAlias>$29: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$31: FalseClass, <statTemp>$32: Symbol(:orZero0a))
+    <selfRestore>$34: T.class_of(ControlFlow) = <self>
+    <unconditional>(bb3 -> bb6)
 
-    "bb::<Class:ControlFlow>#<static-init>_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=0](<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(ControlFlow))\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$9, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$10\l<cfgAlias>$29: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$31: FalseClass = false\l<statTemp>$32: Symbol(:orZero0a) = :orZero0a\l<block-pre-call-temp>$33: Sorbet::Private::Static::Void = <cfgAlias>$29: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$31: FalseClass, <statTemp>$32: Symbol(:orZero0a))\l<selfRestore>$34: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
+# backedges
+#  bb2(rubyBlockId=1)
+bb5(rubyBlockId=1):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(ControlFlow))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <hashTemp>$16: Symbol(:a) = :a
+    <cfgAlias>$19: T.class_of(T) = alias <C T>
+    <cfgAlias>$21: T.class_of(Integer) = alias <C Integer>
+    <cfgAlias>$23: T.class_of(NilClass) = alias <C NilClass>
+    <hashTemp>$17: <Type: T.nilable(Integer)> = <cfgAlias>$19: T.class_of(T).any(<cfgAlias>$21: T.class_of(Integer), <cfgAlias>$23: T.class_of(NilClass))
+    <statTemp>$14: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$16: Symbol(:a), <hashTemp>$17: <Type: T.nilable(Integer)>)
+    <cfgAlias>$25: T.class_of(Integer) = alias <C Integer>
+    <blockReturnTemp>$13: T::Private::Methods::DeclBuilder = <statTemp>$14: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$25: T.class_of(Integer))
+    <blockReturnTemp>$26: T.noreturn = blockreturn<sig> <blockReturnTemp>$13: T::Private::Methods::DeclBuilder
+    <unconditional>(bb5 -> bb2)
 
-    "bb::<Class:ControlFlow>#<static-init>_3" -> "bb::<Class:ControlFlow>#<static-init>_6" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_5" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=5, rubyBlockId=1](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(ControlFlow))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$16: Symbol(:a) = :a\l<cfgAlias>$19: T.class_of(T) = alias <C T>\l<cfgAlias>$21: T.class_of(Integer) = alias <C Integer>\l<cfgAlias>$23: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$17: <Type: T.nilable(Integer)> = <cfgAlias>$19: T.class_of(T).any(<cfgAlias>$21: T.class_of(Integer), <cfgAlias>$23: T.class_of(NilClass))\l<statTemp>$14: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$16: Symbol(:a), <hashTemp>$17: <Type: T.nilable(Integer)>)\l<cfgAlias>$25: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$13: T::Private::Methods::DeclBuilder = <statTemp>$14: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$25: T.class_of(Integer))\l<blockReturnTemp>$26: T.noreturn = blockreturn<sig> <blockReturnTemp>$13: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
+# backedges
+#  bb3(rubyBlockId=0)
+#  bb9(rubyBlockId=2)
+bb6(rubyBlockId=2):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$33: Sorbet::Private::Static::Void, <selfRestore>$34: T.class_of(ControlFlow))
+    outerLoops: 1
+    <block-call>: NilClass(bb6 -> bb9)
 
-    "bb::<Class:ControlFlow>#<static-init>_5" -> "bb::<Class:ControlFlow>#<static-init>_2" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_6" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=6, rubyBlockId=2](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$33: Sorbet::Private::Static::Void, <selfRestore>$34: T.class_of(ControlFlow))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
+# backedges
+#  bb6(rubyBlockId=2)
+bb7(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$33: Sorbet::Private::Static::Void, <selfRestore>$34: T.class_of(ControlFlow))
+    <statTemp>$27: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$33, sig>
+    <self>: T.class_of(ControlFlow) = <selfRestore>$34
+    <cfgAlias>$48: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$50: FalseClass = false
+    <statTemp>$51: Symbol(:orZero0n) = :orZero0n
+    <block-pre-call-temp>$52: Sorbet::Private::Static::Void = <cfgAlias>$48: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$50: FalseClass, <statTemp>$51: Symbol(:orZero0n))
+    <selfRestore>$53: T.class_of(ControlFlow) = <self>
+    <unconditional>(bb7 -> bb10)
 
-    "bb::<Class:ControlFlow>#<static-init>_6" -> "bb::<Class:ControlFlow>#<static-init>_9" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_6" -> "bb::<Class:ControlFlow>#<static-init>_7" [style="tapered"];
+# backedges
+#  bb6(rubyBlockId=2)
+bb9(rubyBlockId=2):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$33: Sorbet::Private::Static::Void, <selfRestore>$34: T.class_of(ControlFlow))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <hashTemp>$40: Symbol(:a) = :a
+    <cfgAlias>$42: T.class_of(Integer) = alias <C Integer>
+    <statTemp>$38: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$40: Symbol(:a), <cfgAlias>$42: T.class_of(Integer))
+    <cfgAlias>$44: T.class_of(Integer) = alias <C Integer>
+    <blockReturnTemp>$37: T::Private::Methods::DeclBuilder = <statTemp>$38: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$44: T.class_of(Integer))
+    <blockReturnTemp>$45: T.noreturn = blockreturn<sig> <blockReturnTemp>$37: T::Private::Methods::DeclBuilder
+    <unconditional>(bb9 -> bb6)
 
-    "bb::<Class:ControlFlow>#<static-init>_7" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=7, rubyBlockId=0](<block-pre-call-temp>$33: Sorbet::Private::Static::Void, <selfRestore>$34: T.class_of(ControlFlow))\l<statTemp>$27: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$33, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$34\l<cfgAlias>$48: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$50: FalseClass = false\l<statTemp>$51: Symbol(:orZero0n) = :orZero0n\l<block-pre-call-temp>$52: Sorbet::Private::Static::Void = <cfgAlias>$48: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$50: FalseClass, <statTemp>$51: Symbol(:orZero0n))\l<selfRestore>$53: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
+# backedges
+#  bb7(rubyBlockId=0)
+#  bb13(rubyBlockId=3)
+bb10(rubyBlockId=3):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$52: Sorbet::Private::Static::Void, <selfRestore>$53: T.class_of(ControlFlow))
+    outerLoops: 1
+    <block-call>: NilClass(bb10 -> bb13)
 
-    "bb::<Class:ControlFlow>#<static-init>_7" -> "bb::<Class:ControlFlow>#<static-init>_10" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_9" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=9, rubyBlockId=2](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$33: Sorbet::Private::Static::Void, <selfRestore>$34: T.class_of(ControlFlow))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$40: Symbol(:a) = :a\l<cfgAlias>$42: T.class_of(Integer) = alias <C Integer>\l<statTemp>$38: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$40: Symbol(:a), <cfgAlias>$42: T.class_of(Integer))\l<cfgAlias>$44: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$37: T::Private::Methods::DeclBuilder = <statTemp>$38: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$44: T.class_of(Integer))\l<blockReturnTemp>$45: T.noreturn = blockreturn<sig> <blockReturnTemp>$37: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
+# backedges
+#  bb10(rubyBlockId=3)
+bb11(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$52: Sorbet::Private::Static::Void, <selfRestore>$53: T.class_of(ControlFlow))
+    <statTemp>$46: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$52, sig>
+    <self>: T.class_of(ControlFlow) = <selfRestore>$53
+    <cfgAlias>$72: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$74: FalseClass = false
+    <statTemp>$75: Symbol(:orZero1n) = :orZero1n
+    <block-pre-call-temp>$76: Sorbet::Private::Static::Void = <cfgAlias>$72: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$74: FalseClass, <statTemp>$75: Symbol(:orZero1n))
+    <selfRestore>$77: T.class_of(ControlFlow) = <self>
+    <unconditional>(bb11 -> bb14)
 
-    "bb::<Class:ControlFlow>#<static-init>_9" -> "bb::<Class:ControlFlow>#<static-init>_6" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_10" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=10, rubyBlockId=3](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$52: Sorbet::Private::Static::Void, <selfRestore>$53: T.class_of(ControlFlow))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
+# backedges
+#  bb10(rubyBlockId=3)
+bb13(rubyBlockId=3):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$52: Sorbet::Private::Static::Void, <selfRestore>$53: T.class_of(ControlFlow))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <hashTemp>$59: Symbol(:a) = :a
+    <cfgAlias>$62: T.class_of(T) = alias <C T>
+    <cfgAlias>$64: T.class_of(Integer) = alias <C Integer>
+    <cfgAlias>$66: T.class_of(NilClass) = alias <C NilClass>
+    <hashTemp>$60: <Type: T.nilable(Integer)> = <cfgAlias>$62: T.class_of(T).any(<cfgAlias>$64: T.class_of(Integer), <cfgAlias>$66: T.class_of(NilClass))
+    <statTemp>$57: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$59: Symbol(:a), <hashTemp>$60: <Type: T.nilable(Integer)>)
+    <cfgAlias>$68: T.class_of(Integer) = alias <C Integer>
+    <blockReturnTemp>$56: T::Private::Methods::DeclBuilder = <statTemp>$57: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$68: T.class_of(Integer))
+    <blockReturnTemp>$69: T.noreturn = blockreturn<sig> <blockReturnTemp>$56: T::Private::Methods::DeclBuilder
+    <unconditional>(bb13 -> bb10)
 
-    "bb::<Class:ControlFlow>#<static-init>_10" -> "bb::<Class:ControlFlow>#<static-init>_13" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_10" -> "bb::<Class:ControlFlow>#<static-init>_11" [style="tapered"];
+# backedges
+#  bb11(rubyBlockId=0)
+#  bb17(rubyBlockId=4)
+bb14(rubyBlockId=4):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$76: Sorbet::Private::Static::Void, <selfRestore>$77: T.class_of(ControlFlow))
+    outerLoops: 1
+    <block-call>: NilClass(bb14 -> bb17)
 
-    "bb::<Class:ControlFlow>#<static-init>_11" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=11, rubyBlockId=0](<block-pre-call-temp>$52: Sorbet::Private::Static::Void, <selfRestore>$53: T.class_of(ControlFlow))\l<statTemp>$46: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$52, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$53\l<cfgAlias>$72: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$74: FalseClass = false\l<statTemp>$75: Symbol(:orZero1n) = :orZero1n\l<block-pre-call-temp>$76: Sorbet::Private::Static::Void = <cfgAlias>$72: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$74: FalseClass, <statTemp>$75: Symbol(:orZero1n))\l<selfRestore>$77: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
+# backedges
+#  bb14(rubyBlockId=4)
+bb15(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$76: Sorbet::Private::Static::Void, <selfRestore>$77: T.class_of(ControlFlow))
+    <statTemp>$70: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$76, sig>
+    <self>: T.class_of(ControlFlow) = <selfRestore>$77
+    <cfgAlias>$96: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$98: FalseClass = false
+    <statTemp>$99: Symbol(:orZero2) = :orZero2
+    <block-pre-call-temp>$100: Sorbet::Private::Static::Void = <cfgAlias>$96: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$98: FalseClass, <statTemp>$99: Symbol(:orZero2))
+    <selfRestore>$101: T.class_of(ControlFlow) = <self>
+    <unconditional>(bb15 -> bb18)
 
-    "bb::<Class:ControlFlow>#<static-init>_11" -> "bb::<Class:ControlFlow>#<static-init>_14" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_13" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=13, rubyBlockId=3](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$52: Sorbet::Private::Static::Void, <selfRestore>$53: T.class_of(ControlFlow))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$59: Symbol(:a) = :a\l<cfgAlias>$62: T.class_of(T) = alias <C T>\l<cfgAlias>$64: T.class_of(Integer) = alias <C Integer>\l<cfgAlias>$66: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$60: <Type: T.nilable(Integer)> = <cfgAlias>$62: T.class_of(T).any(<cfgAlias>$64: T.class_of(Integer), <cfgAlias>$66: T.class_of(NilClass))\l<statTemp>$57: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$59: Symbol(:a), <hashTemp>$60: <Type: T.nilable(Integer)>)\l<cfgAlias>$68: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$56: T::Private::Methods::DeclBuilder = <statTemp>$57: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$68: T.class_of(Integer))\l<blockReturnTemp>$69: T.noreturn = blockreturn<sig> <blockReturnTemp>$56: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
+# backedges
+#  bb14(rubyBlockId=4)
+bb17(rubyBlockId=4):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$76: Sorbet::Private::Static::Void, <selfRestore>$77: T.class_of(ControlFlow))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <hashTemp>$83: Symbol(:a) = :a
+    <cfgAlias>$86: T.class_of(T) = alias <C T>
+    <cfgAlias>$88: T.class_of(Integer) = alias <C Integer>
+    <cfgAlias>$90: T.class_of(NilClass) = alias <C NilClass>
+    <hashTemp>$84: <Type: T.nilable(Integer)> = <cfgAlias>$86: T.class_of(T).any(<cfgAlias>$88: T.class_of(Integer), <cfgAlias>$90: T.class_of(NilClass))
+    <statTemp>$81: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$83: Symbol(:a), <hashTemp>$84: <Type: T.nilable(Integer)>)
+    <cfgAlias>$92: T.class_of(Integer) = alias <C Integer>
+    <blockReturnTemp>$80: T::Private::Methods::DeclBuilder = <statTemp>$81: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$92: T.class_of(Integer))
+    <blockReturnTemp>$93: T.noreturn = blockreturn<sig> <blockReturnTemp>$80: T::Private::Methods::DeclBuilder
+    <unconditional>(bb17 -> bb14)
 
-    "bb::<Class:ControlFlow>#<static-init>_13" -> "bb::<Class:ControlFlow>#<static-init>_10" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_14" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=14, rubyBlockId=4](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$76: Sorbet::Private::Static::Void, <selfRestore>$77: T.class_of(ControlFlow))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
+# backedges
+#  bb15(rubyBlockId=0)
+#  bb21(rubyBlockId=5)
+bb18(rubyBlockId=5):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$100: Sorbet::Private::Static::Void, <selfRestore>$101: T.class_of(ControlFlow))
+    outerLoops: 1
+    <block-call>: NilClass(bb18 -> bb21)
 
-    "bb::<Class:ControlFlow>#<static-init>_14" -> "bb::<Class:ControlFlow>#<static-init>_17" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_14" -> "bb::<Class:ControlFlow>#<static-init>_15" [style="tapered"];
+# backedges
+#  bb18(rubyBlockId=5)
+bb19(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$100: Sorbet::Private::Static::Void, <selfRestore>$101: T.class_of(ControlFlow))
+    <statTemp>$94: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$100, sig>
+    <self>: T.class_of(ControlFlow) = <selfRestore>$101
+    <cfgAlias>$120: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$122: FalseClass = false
+    <statTemp>$123: Symbol(:orZero3) = :orZero3
+    <block-pre-call-temp>$124: Sorbet::Private::Static::Void = <cfgAlias>$120: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$122: FalseClass, <statTemp>$123: Symbol(:orZero3))
+    <selfRestore>$125: T.class_of(ControlFlow) = <self>
+    <unconditional>(bb19 -> bb22)
 
-    "bb::<Class:ControlFlow>#<static-init>_15" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=15, rubyBlockId=0](<block-pre-call-temp>$76: Sorbet::Private::Static::Void, <selfRestore>$77: T.class_of(ControlFlow))\l<statTemp>$70: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$76, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$77\l<cfgAlias>$96: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$98: FalseClass = false\l<statTemp>$99: Symbol(:orZero2) = :orZero2\l<block-pre-call-temp>$100: Sorbet::Private::Static::Void = <cfgAlias>$96: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$98: FalseClass, <statTemp>$99: Symbol(:orZero2))\l<selfRestore>$101: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
+# backedges
+#  bb18(rubyBlockId=5)
+bb21(rubyBlockId=5):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$100: Sorbet::Private::Static::Void, <selfRestore>$101: T.class_of(ControlFlow))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <hashTemp>$107: Symbol(:a) = :a
+    <cfgAlias>$110: T.class_of(T) = alias <C T>
+    <cfgAlias>$112: T.class_of(Integer) = alias <C Integer>
+    <cfgAlias>$114: T.class_of(NilClass) = alias <C NilClass>
+    <hashTemp>$108: <Type: T.nilable(Integer)> = <cfgAlias>$110: T.class_of(T).any(<cfgAlias>$112: T.class_of(Integer), <cfgAlias>$114: T.class_of(NilClass))
+    <statTemp>$105: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$107: Symbol(:a), <hashTemp>$108: <Type: T.nilable(Integer)>)
+    <cfgAlias>$116: T.class_of(Integer) = alias <C Integer>
+    <blockReturnTemp>$104: T::Private::Methods::DeclBuilder = <statTemp>$105: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$116: T.class_of(Integer))
+    <blockReturnTemp>$117: T.noreturn = blockreturn<sig> <blockReturnTemp>$104: T::Private::Methods::DeclBuilder
+    <unconditional>(bb21 -> bb18)
 
-    "bb::<Class:ControlFlow>#<static-init>_15" -> "bb::<Class:ControlFlow>#<static-init>_18" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_17" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=17, rubyBlockId=4](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$76: Sorbet::Private::Static::Void, <selfRestore>$77: T.class_of(ControlFlow))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$83: Symbol(:a) = :a\l<cfgAlias>$86: T.class_of(T) = alias <C T>\l<cfgAlias>$88: T.class_of(Integer) = alias <C Integer>\l<cfgAlias>$90: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$84: <Type: T.nilable(Integer)> = <cfgAlias>$86: T.class_of(T).any(<cfgAlias>$88: T.class_of(Integer), <cfgAlias>$90: T.class_of(NilClass))\l<statTemp>$81: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$83: Symbol(:a), <hashTemp>$84: <Type: T.nilable(Integer)>)\l<cfgAlias>$92: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$80: T::Private::Methods::DeclBuilder = <statTemp>$81: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$92: T.class_of(Integer))\l<blockReturnTemp>$93: T.noreturn = blockreturn<sig> <blockReturnTemp>$80: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
+# backedges
+#  bb19(rubyBlockId=0)
+#  bb25(rubyBlockId=6)
+bb22(rubyBlockId=6):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$124: Sorbet::Private::Static::Void, <selfRestore>$125: T.class_of(ControlFlow))
+    outerLoops: 1
+    <block-call>: NilClass(bb22 -> bb25)
 
-    "bb::<Class:ControlFlow>#<static-init>_17" -> "bb::<Class:ControlFlow>#<static-init>_14" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_18" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=18, rubyBlockId=5](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$100: Sorbet::Private::Static::Void, <selfRestore>$101: T.class_of(ControlFlow))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
+# backedges
+#  bb22(rubyBlockId=6)
+bb23(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$124: Sorbet::Private::Static::Void, <selfRestore>$125: T.class_of(ControlFlow))
+    <statTemp>$118: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$124, sig>
+    <self>: T.class_of(ControlFlow) = <selfRestore>$125
+    <cfgAlias>$144: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$146: FalseClass = false
+    <statTemp>$147: Symbol(:orZero3n) = :orZero3n
+    <block-pre-call-temp>$148: Sorbet::Private::Static::Void = <cfgAlias>$144: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$146: FalseClass, <statTemp>$147: Symbol(:orZero3n))
+    <selfRestore>$149: T.class_of(ControlFlow) = <self>
+    <unconditional>(bb23 -> bb26)
 
-    "bb::<Class:ControlFlow>#<static-init>_18" -> "bb::<Class:ControlFlow>#<static-init>_21" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_18" -> "bb::<Class:ControlFlow>#<static-init>_19" [style="tapered"];
+# backedges
+#  bb22(rubyBlockId=6)
+bb25(rubyBlockId=6):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$124: Sorbet::Private::Static::Void, <selfRestore>$125: T.class_of(ControlFlow))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <hashTemp>$131: Symbol(:a) = :a
+    <cfgAlias>$134: T.class_of(T) = alias <C T>
+    <cfgAlias>$136: T.class_of(Integer) = alias <C Integer>
+    <cfgAlias>$138: T.class_of(NilClass) = alias <C NilClass>
+    <hashTemp>$132: <Type: T.nilable(Integer)> = <cfgAlias>$134: T.class_of(T).any(<cfgAlias>$136: T.class_of(Integer), <cfgAlias>$138: T.class_of(NilClass))
+    <statTemp>$129: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$131: Symbol(:a), <hashTemp>$132: <Type: T.nilable(Integer)>)
+    <cfgAlias>$140: T.class_of(Integer) = alias <C Integer>
+    <blockReturnTemp>$128: T::Private::Methods::DeclBuilder = <statTemp>$129: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$140: T.class_of(Integer))
+    <blockReturnTemp>$141: T.noreturn = blockreturn<sig> <blockReturnTemp>$128: T::Private::Methods::DeclBuilder
+    <unconditional>(bb25 -> bb22)
 
-    "bb::<Class:ControlFlow>#<static-init>_19" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=19, rubyBlockId=0](<block-pre-call-temp>$100: Sorbet::Private::Static::Void, <selfRestore>$101: T.class_of(ControlFlow))\l<statTemp>$94: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$100, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$101\l<cfgAlias>$120: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$122: FalseClass = false\l<statTemp>$123: Symbol(:orZero3) = :orZero3\l<block-pre-call-temp>$124: Sorbet::Private::Static::Void = <cfgAlias>$120: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$122: FalseClass, <statTemp>$123: Symbol(:orZero3))\l<selfRestore>$125: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
+# backedges
+#  bb23(rubyBlockId=0)
+#  bb29(rubyBlockId=7)
+bb26(rubyBlockId=7):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$148: Sorbet::Private::Static::Void, <selfRestore>$149: T.class_of(ControlFlow))
+    outerLoops: 1
+    <block-call>: NilClass(bb26 -> bb29)
 
-    "bb::<Class:ControlFlow>#<static-init>_19" -> "bb::<Class:ControlFlow>#<static-init>_22" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_21" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=21, rubyBlockId=5](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$100: Sorbet::Private::Static::Void, <selfRestore>$101: T.class_of(ControlFlow))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$107: Symbol(:a) = :a\l<cfgAlias>$110: T.class_of(T) = alias <C T>\l<cfgAlias>$112: T.class_of(Integer) = alias <C Integer>\l<cfgAlias>$114: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$108: <Type: T.nilable(Integer)> = <cfgAlias>$110: T.class_of(T).any(<cfgAlias>$112: T.class_of(Integer), <cfgAlias>$114: T.class_of(NilClass))\l<statTemp>$105: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$107: Symbol(:a), <hashTemp>$108: <Type: T.nilable(Integer)>)\l<cfgAlias>$116: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$104: T::Private::Methods::DeclBuilder = <statTemp>$105: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$116: T.class_of(Integer))\l<blockReturnTemp>$117: T.noreturn = blockreturn<sig> <blockReturnTemp>$104: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
+# backedges
+#  bb26(rubyBlockId=7)
+bb27(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$148: Sorbet::Private::Static::Void, <selfRestore>$149: T.class_of(ControlFlow))
+    <statTemp>$142: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$148, sig>
+    <self>: T.class_of(ControlFlow) = <selfRestore>$149
+    <cfgAlias>$168: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$170: FalseClass = false
+    <statTemp>$171: Symbol(:orZero4) = :orZero4
+    <block-pre-call-temp>$172: Sorbet::Private::Static::Void = <cfgAlias>$168: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$170: FalseClass, <statTemp>$171: Symbol(:orZero4))
+    <selfRestore>$173: T.class_of(ControlFlow) = <self>
+    <unconditional>(bb27 -> bb30)
 
-    "bb::<Class:ControlFlow>#<static-init>_21" -> "bb::<Class:ControlFlow>#<static-init>_18" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_22" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=22, rubyBlockId=6](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$124: Sorbet::Private::Static::Void, <selfRestore>$125: T.class_of(ControlFlow))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
+# backedges
+#  bb26(rubyBlockId=7)
+bb29(rubyBlockId=7):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$148: Sorbet::Private::Static::Void, <selfRestore>$149: T.class_of(ControlFlow))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <hashTemp>$155: Symbol(:a) = :a
+    <cfgAlias>$158: T.class_of(T) = alias <C T>
+    <cfgAlias>$160: T.class_of(Integer) = alias <C Integer>
+    <cfgAlias>$162: T.class_of(NilClass) = alias <C NilClass>
+    <hashTemp>$156: <Type: T.nilable(Integer)> = <cfgAlias>$158: T.class_of(T).any(<cfgAlias>$160: T.class_of(Integer), <cfgAlias>$162: T.class_of(NilClass))
+    <statTemp>$153: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$155: Symbol(:a), <hashTemp>$156: <Type: T.nilable(Integer)>)
+    <cfgAlias>$164: T.class_of(Integer) = alias <C Integer>
+    <blockReturnTemp>$152: T::Private::Methods::DeclBuilder = <statTemp>$153: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$164: T.class_of(Integer))
+    <blockReturnTemp>$165: T.noreturn = blockreturn<sig> <blockReturnTemp>$152: T::Private::Methods::DeclBuilder
+    <unconditional>(bb29 -> bb26)
 
-    "bb::<Class:ControlFlow>#<static-init>_22" -> "bb::<Class:ControlFlow>#<static-init>_25" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_22" -> "bb::<Class:ControlFlow>#<static-init>_23" [style="tapered"];
+# backedges
+#  bb27(rubyBlockId=0)
+#  bb33(rubyBlockId=8)
+bb30(rubyBlockId=8):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$172: Sorbet::Private::Static::Void, <selfRestore>$173: T.class_of(ControlFlow))
+    outerLoops: 1
+    <block-call>: NilClass(bb30 -> bb33)
 
-    "bb::<Class:ControlFlow>#<static-init>_23" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=23, rubyBlockId=0](<block-pre-call-temp>$124: Sorbet::Private::Static::Void, <selfRestore>$125: T.class_of(ControlFlow))\l<statTemp>$118: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$124, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$125\l<cfgAlias>$144: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$146: FalseClass = false\l<statTemp>$147: Symbol(:orZero3n) = :orZero3n\l<block-pre-call-temp>$148: Sorbet::Private::Static::Void = <cfgAlias>$144: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$146: FalseClass, <statTemp>$147: Symbol(:orZero3n))\l<selfRestore>$149: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
+# backedges
+#  bb30(rubyBlockId=8)
+bb31(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$172: Sorbet::Private::Static::Void, <selfRestore>$173: T.class_of(ControlFlow))
+    <statTemp>$166: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$172, sig>
+    <self>: T.class_of(ControlFlow) = <selfRestore>$173
+    <cfgAlias>$192: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
+    <statTemp>$194: FalseClass = false
+    <statTemp>$195: Symbol(:orZero5) = :orZero5
+    <block-pre-call-temp>$196: Sorbet::Private::Static::Void = <cfgAlias>$192: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$194: FalseClass, <statTemp>$195: Symbol(:orZero5))
+    <selfRestore>$197: T.class_of(ControlFlow) = <self>
+    <unconditional>(bb31 -> bb34)
 
-    "bb::<Class:ControlFlow>#<static-init>_23" -> "bb::<Class:ControlFlow>#<static-init>_26" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_25" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=25, rubyBlockId=6](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$124: Sorbet::Private::Static::Void, <selfRestore>$125: T.class_of(ControlFlow))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$131: Symbol(:a) = :a\l<cfgAlias>$134: T.class_of(T) = alias <C T>\l<cfgAlias>$136: T.class_of(Integer) = alias <C Integer>\l<cfgAlias>$138: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$132: <Type: T.nilable(Integer)> = <cfgAlias>$134: T.class_of(T).any(<cfgAlias>$136: T.class_of(Integer), <cfgAlias>$138: T.class_of(NilClass))\l<statTemp>$129: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$131: Symbol(:a), <hashTemp>$132: <Type: T.nilable(Integer)>)\l<cfgAlias>$140: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$128: T::Private::Methods::DeclBuilder = <statTemp>$129: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$140: T.class_of(Integer))\l<blockReturnTemp>$141: T.noreturn = blockreturn<sig> <blockReturnTemp>$128: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
+# backedges
+#  bb30(rubyBlockId=8)
+bb33(rubyBlockId=8):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$172: Sorbet::Private::Static::Void, <selfRestore>$173: T.class_of(ControlFlow))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <hashTemp>$179: Symbol(:a) = :a
+    <cfgAlias>$182: T.class_of(T) = alias <C T>
+    <cfgAlias>$184: T.class_of(Integer) = alias <C Integer>
+    <cfgAlias>$186: T.class_of(NilClass) = alias <C NilClass>
+    <hashTemp>$180: <Type: T.nilable(Integer)> = <cfgAlias>$182: T.class_of(T).any(<cfgAlias>$184: T.class_of(Integer), <cfgAlias>$186: T.class_of(NilClass))
+    <statTemp>$177: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$179: Symbol(:a), <hashTemp>$180: <Type: T.nilable(Integer)>)
+    <cfgAlias>$188: T.class_of(Integer) = alias <C Integer>
+    <blockReturnTemp>$176: T::Private::Methods::DeclBuilder = <statTemp>$177: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$188: T.class_of(Integer))
+    <blockReturnTemp>$189: T.noreturn = blockreturn<sig> <blockReturnTemp>$176: T::Private::Methods::DeclBuilder
+    <unconditional>(bb33 -> bb30)
 
-    "bb::<Class:ControlFlow>#<static-init>_25" -> "bb::<Class:ControlFlow>#<static-init>_22" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_26" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=26, rubyBlockId=7](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$148: Sorbet::Private::Static::Void, <selfRestore>$149: T.class_of(ControlFlow))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
+# backedges
+#  bb31(rubyBlockId=0)
+#  bb37(rubyBlockId=9)
+bb34(rubyBlockId=9):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$196: Sorbet::Private::Static::Void, <selfRestore>$197: T.class_of(ControlFlow))
+    outerLoops: 1
+    <block-call>: NilClass(bb34 -> bb37)
 
-    "bb::<Class:ControlFlow>#<static-init>_26" -> "bb::<Class:ControlFlow>#<static-init>_29" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_26" -> "bb::<Class:ControlFlow>#<static-init>_27" [style="tapered"];
+# backedges
+#  bb34(rubyBlockId=9)
+bb35(rubyBlockId=0):
+    blockargs=(<block-pre-call-temp>$196: Sorbet::Private::Static::Void, <selfRestore>$197: T.class_of(ControlFlow))
+    <statTemp>$190: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$196, sig>
+    <self>: T.class_of(ControlFlow) = <selfRestore>$197
+    <cfgAlias>$217: T.class_of(T::Sig) = alias <C Sig>
+    <cfgAlias>$219: T.class_of(T) = alias <C T>
+    <statTemp>$214: T.class_of(ControlFlow) = <self>: T.class_of(ControlFlow).extend(<cfgAlias>$217: T.class_of(T::Sig))
+    <cfgAlias>$222: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$224: Symbol(:orZero0) = :orZero0
+    <statTemp>$225: Symbol(:normal) = :normal
+    <statTemp>$220: Symbol(:orZero0) = <cfgAlias>$222: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$224: Symbol(:orZero0), <statTemp>$225: Symbol(:normal))
+    <cfgAlias>$228: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$230: Symbol(:orZero0a) = :orZero0a
+    <statTemp>$231: Symbol(:normal) = :normal
+    <statTemp>$226: Symbol(:orZero0a) = <cfgAlias>$228: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$230: Symbol(:orZero0a), <statTemp>$231: Symbol(:normal))
+    <cfgAlias>$234: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$236: Symbol(:orZero0n) = :orZero0n
+    <statTemp>$237: Symbol(:normal) = :normal
+    <statTemp>$232: Symbol(:orZero0n) = <cfgAlias>$234: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$236: Symbol(:orZero0n), <statTemp>$237: Symbol(:normal))
+    <cfgAlias>$240: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$242: Symbol(:orZero1n) = :orZero1n
+    <statTemp>$243: Symbol(:normal) = :normal
+    <statTemp>$238: Symbol(:orZero1n) = <cfgAlias>$240: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$242: Symbol(:orZero1n), <statTemp>$243: Symbol(:normal))
+    <cfgAlias>$246: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$248: Symbol(:orZero2) = :orZero2
+    <statTemp>$249: Symbol(:normal) = :normal
+    <statTemp>$244: Symbol(:orZero2) = <cfgAlias>$246: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$248: Symbol(:orZero2), <statTemp>$249: Symbol(:normal))
+    <cfgAlias>$252: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$254: Symbol(:orZero3) = :orZero3
+    <statTemp>$255: Symbol(:normal) = :normal
+    <statTemp>$250: Symbol(:orZero3) = <cfgAlias>$252: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$254: Symbol(:orZero3), <statTemp>$255: Symbol(:normal))
+    <cfgAlias>$258: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$260: Symbol(:orZero3n) = :orZero3n
+    <statTemp>$261: Symbol(:normal) = :normal
+    <statTemp>$256: Symbol(:orZero3n) = <cfgAlias>$258: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$260: Symbol(:orZero3n), <statTemp>$261: Symbol(:normal))
+    <cfgAlias>$264: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$266: Symbol(:orZero4) = :orZero4
+    <statTemp>$267: Symbol(:normal) = :normal
+    <statTemp>$262: Symbol(:orZero4) = <cfgAlias>$264: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$266: Symbol(:orZero4), <statTemp>$267: Symbol(:normal))
+    <cfgAlias>$270: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$272: Symbol(:orZero5) = :orZero5
+    <statTemp>$273: Symbol(:normal) = :normal
+    <statTemp>$268: Symbol(:orZero5) = <cfgAlias>$270: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$272: Symbol(:orZero5), <statTemp>$273: Symbol(:normal))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional>(bb35 -> bb1)
 
-    "bb::<Class:ControlFlow>#<static-init>_27" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=27, rubyBlockId=0](<block-pre-call-temp>$148: Sorbet::Private::Static::Void, <selfRestore>$149: T.class_of(ControlFlow))\l<statTemp>$142: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$148, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$149\l<cfgAlias>$168: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$170: FalseClass = false\l<statTemp>$171: Symbol(:orZero4) = :orZero4\l<block-pre-call-temp>$172: Sorbet::Private::Static::Void = <cfgAlias>$168: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$170: FalseClass, <statTemp>$171: Symbol(:orZero4))\l<selfRestore>$173: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_27" -> "bb::<Class:ControlFlow>#<static-init>_30" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_29" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=29, rubyBlockId=7](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$148: Sorbet::Private::Static::Void, <selfRestore>$149: T.class_of(ControlFlow))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$155: Symbol(:a) = :a\l<cfgAlias>$158: T.class_of(T) = alias <C T>\l<cfgAlias>$160: T.class_of(Integer) = alias <C Integer>\l<cfgAlias>$162: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$156: <Type: T.nilable(Integer)> = <cfgAlias>$158: T.class_of(T).any(<cfgAlias>$160: T.class_of(Integer), <cfgAlias>$162: T.class_of(NilClass))\l<statTemp>$153: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$155: Symbol(:a), <hashTemp>$156: <Type: T.nilable(Integer)>)\l<cfgAlias>$164: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$152: T::Private::Methods::DeclBuilder = <statTemp>$153: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$164: T.class_of(Integer))\l<blockReturnTemp>$165: T.noreturn = blockreturn<sig> <blockReturnTemp>$152: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_29" -> "bb::<Class:ControlFlow>#<static-init>_26" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_30" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=30, rubyBlockId=8](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$172: Sorbet::Private::Static::Void, <selfRestore>$173: T.class_of(ControlFlow))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_30" -> "bb::<Class:ControlFlow>#<static-init>_33" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_30" -> "bb::<Class:ControlFlow>#<static-init>_31" [style="tapered"];
-
-    "bb::<Class:ControlFlow>#<static-init>_31" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=31, rubyBlockId=0](<block-pre-call-temp>$172: Sorbet::Private::Static::Void, <selfRestore>$173: T.class_of(ControlFlow))\l<statTemp>$166: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$172, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$173\l<cfgAlias>$192: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$194: FalseClass = false\l<statTemp>$195: Symbol(:orZero5) = :orZero5\l<block-pre-call-temp>$196: Sorbet::Private::Static::Void = <cfgAlias>$192: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(ControlFlow), <statTemp>$194: FalseClass, <statTemp>$195: Symbol(:orZero5))\l<selfRestore>$197: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_31" -> "bb::<Class:ControlFlow>#<static-init>_34" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_33" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=33, rubyBlockId=8](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$172: Sorbet::Private::Static::Void, <selfRestore>$173: T.class_of(ControlFlow))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$179: Symbol(:a) = :a\l<cfgAlias>$182: T.class_of(T) = alias <C T>\l<cfgAlias>$184: T.class_of(Integer) = alias <C Integer>\l<cfgAlias>$186: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$180: <Type: T.nilable(Integer)> = <cfgAlias>$182: T.class_of(T).any(<cfgAlias>$184: T.class_of(Integer), <cfgAlias>$186: T.class_of(NilClass))\l<statTemp>$177: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$179: Symbol(:a), <hashTemp>$180: <Type: T.nilable(Integer)>)\l<cfgAlias>$188: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$176: T::Private::Methods::DeclBuilder = <statTemp>$177: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$188: T.class_of(Integer))\l<blockReturnTemp>$189: T.noreturn = blockreturn<sig> <blockReturnTemp>$176: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_33" -> "bb::<Class:ControlFlow>#<static-init>_30" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_34" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=34, rubyBlockId=9](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$196: Sorbet::Private::Static::Void, <selfRestore>$197: T.class_of(ControlFlow))\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_34" -> "bb::<Class:ControlFlow>#<static-init>_37" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_34" -> "bb::<Class:ControlFlow>#<static-init>_35" [style="tapered"];
-
-    "bb::<Class:ControlFlow>#<static-init>_35" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=35, rubyBlockId=0](<block-pre-call-temp>$196: Sorbet::Private::Static::Void, <selfRestore>$197: T.class_of(ControlFlow))\l<statTemp>$190: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$196, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$197\l<cfgAlias>$217: T.class_of(T::Sig) = alias <C Sig>\l<cfgAlias>$219: T.class_of(T) = alias <C T>\l<statTemp>$214: T.class_of(ControlFlow) = <self>: T.class_of(ControlFlow).extend(<cfgAlias>$217: T.class_of(T::Sig))\l<cfgAlias>$222: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$224: Symbol(:orZero0) = :orZero0\l<statTemp>$225: Symbol(:normal) = :normal\l<statTemp>$220: Symbol(:orZero0) = <cfgAlias>$222: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$224: Symbol(:orZero0), <statTemp>$225: Symbol(:normal))\l<cfgAlias>$228: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$230: Symbol(:orZero0a) = :orZero0a\l<statTemp>$231: Symbol(:normal) = :normal\l<statTemp>$226: Symbol(:orZero0a) = <cfgAlias>$228: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$230: Symbol(:orZero0a), <statTemp>$231: Symbol(:normal))\l<cfgAlias>$234: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$236: Symbol(:orZero0n) = :orZero0n\l<statTemp>$237: Symbol(:normal) = :normal\l<statTemp>$232: Symbol(:orZero0n) = <cfgAlias>$234: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$236: Symbol(:orZero0n), <statTemp>$237: Symbol(:normal))\l<cfgAlias>$240: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$242: Symbol(:orZero1n) = :orZero1n\l<statTemp>$243: Symbol(:normal) = :normal\l<statTemp>$238: Symbol(:orZero1n) = <cfgAlias>$240: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$242: Symbol(:orZero1n), <statTemp>$243: Symbol(:normal))\l<cfgAlias>$246: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$248: Symbol(:orZero2) = :orZero2\l<statTemp>$249: Symbol(:normal) = :normal\l<statTemp>$244: Symbol(:orZero2) = <cfgAlias>$246: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$248: Symbol(:orZero2), <statTemp>$249: Symbol(:normal))\l<cfgAlias>$252: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$254: Symbol(:orZero3) = :orZero3\l<statTemp>$255: Symbol(:normal) = :normal\l<statTemp>$250: Symbol(:orZero3) = <cfgAlias>$252: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$254: Symbol(:orZero3), <statTemp>$255: Symbol(:normal))\l<cfgAlias>$258: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$260: Symbol(:orZero3n) = :orZero3n\l<statTemp>$261: Symbol(:normal) = :normal\l<statTemp>$256: Symbol(:orZero3n) = <cfgAlias>$258: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$260: Symbol(:orZero3n), <statTemp>$261: Symbol(:normal))\l<cfgAlias>$264: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$266: Symbol(:orZero4) = :orZero4\l<statTemp>$267: Symbol(:normal) = :normal\l<statTemp>$262: Symbol(:orZero4) = <cfgAlias>$264: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$266: Symbol(:orZero4), <statTemp>$267: Symbol(:normal))\l<cfgAlias>$270: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$272: Symbol(:orZero5) = :orZero5\l<statTemp>$273: Symbol(:normal) = :normal\l<statTemp>$268: Symbol(:orZero5) = <cfgAlias>$270: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$272: Symbol(:orZero5), <statTemp>$273: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_35" -> "bb::<Class:ControlFlow>#<static-init>_1" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_37" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=37, rubyBlockId=9](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$196: Sorbet::Private::Static::Void, <selfRestore>$197: T.class_of(ControlFlow))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$203: Symbol(:a) = :a\l<cfgAlias>$206: T.class_of(T) = alias <C T>\l<cfgAlias>$208: T.class_of(Integer) = alias <C Integer>\l<cfgAlias>$210: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$204: <Type: T.nilable(Integer)> = <cfgAlias>$206: T.class_of(T).any(<cfgAlias>$208: T.class_of(Integer), <cfgAlias>$210: T.class_of(NilClass))\l<statTemp>$201: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$203: Symbol(:a), <hashTemp>$204: <Type: T.nilable(Integer)>)\l<cfgAlias>$212: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$200: T::Private::Methods::DeclBuilder = <statTemp>$201: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$212: T.class_of(Integer))\l<blockReturnTemp>$213: T.noreturn = blockreturn<sig> <blockReturnTemp>$200: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_37" -> "bb::<Class:ControlFlow>#<static-init>_34" [style="bold"];
-}
+# backedges
+#  bb34(rubyBlockId=9)
+bb37(rubyBlockId=9):
+    blockargs=(<self>: T.class_of(ControlFlow), <block-pre-call-temp>$196: Sorbet::Private::Static::Void, <selfRestore>$197: T.class_of(ControlFlow))
+    outerLoops: 1
+    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <hashTemp>$203: Symbol(:a) = :a
+    <cfgAlias>$206: T.class_of(T) = alias <C T>
+    <cfgAlias>$208: T.class_of(Integer) = alias <C Integer>
+    <cfgAlias>$210: T.class_of(NilClass) = alias <C NilClass>
+    <hashTemp>$204: <Type: T.nilable(Integer)> = <cfgAlias>$206: T.class_of(T).any(<cfgAlias>$208: T.class_of(Integer), <cfgAlias>$210: T.class_of(NilClass))
+    <statTemp>$201: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$203: Symbol(:a), <hashTemp>$204: <Type: T.nilable(Integer)>)
+    <cfgAlias>$212: T.class_of(Integer) = alias <C Integer>
+    <blockReturnTemp>$200: T::Private::Methods::DeclBuilder = <statTemp>$201: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$212: T.class_of(Integer))
+    <blockReturnTemp>$213: T.noreturn = blockreturn<sig> <blockReturnTemp>$200: T::Private::Methods::DeclBuilder
+    <unconditional>(bb37 -> bb34)
 
 }
 
