@@ -1,0 +1,142 @@
+method ::<Class:<root>>#<static-init> {
+
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {
+      klass = <S <C <U <root>>> $1>
+      targs = [
+        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)
+      ]
+    });
+    <unconditional>(bb0 -> bb2)
+
+# backedges
+#  bb20(rubyBlockId=0)
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
+
+# backedges
+#  bb0(rubyBlockId=0)
+#  bb5(rubyBlockId=0)
+bb2(rubyBlockId=0):
+    blockargs=(<self>: T.class_of(<root>))
+    outerLoops: 1
+    <whileTemp>$4: TrueClass = true
+    <whileTemp>$4: TrueClass(bb2 -> bb5)
+
+# backedges
+#  bb2(rubyBlockId=0)
+bb5(rubyBlockId=0):
+    blockargs=(<self>: T.class_of(<root>))
+    outerLoops: 1
+    <statTemp>$8: Integer(2) = 2
+    <statTemp>$6: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$8: Integer(2))
+    <statTemp>$10: FalseClass = false
+    <ifTemp>$9: TrueClass = <statTemp>$10: FalseClass.!()
+    <ifTemp>$9: TrueClass(bb5 -> bb6)
+
+# backedges
+#  bb5(rubyBlockId=0)
+bb6(rubyBlockId=0):
+    blockargs=(<self>: T.class_of(<root>))
+    outerLoops: 1
+    <block-break-assign>$12: NilClass = <returnTemp>$11
+    <magic>$13: T.class_of(<Magic>) = alias <C <Magic>>
+    <block-break>$14: T.untyped = <magic>$13: T.class_of(<Magic>).<block-break>(<returnTemp>$11: NilClass)
+    <unconditional>(bb6 -> bb8)
+
+# backedges
+#  bb2(rubyBlockId=0)
+#  bb6(rubyBlockId=0)
+#  bb11(rubyBlockId=0)
+bb8(rubyBlockId=0):
+    blockargs=(<self>: T.class_of(<root>))
+    outerLoops: 1
+    <whileTemp>$16: TrueClass = true
+    <whileTemp>$16: TrueClass(bb8 -> bb11)
+
+# backedges
+#  bb8(rubyBlockId=0)
+#  bb12(rubyBlockId=0)
+bb10(rubyBlockId=0):
+    blockargs=(<self>: T.class_of(<root>))
+    x: Integer(0) = 0
+    <unconditional>(bb10 -> bb14)
+
+# backedges
+#  bb8(rubyBlockId=0)
+bb11(rubyBlockId=0):
+    blockargs=(<self>: T.class_of(<root>))
+    outerLoops: 1
+    <statTemp>$20: Integer(2) = 2
+    <statTemp>$18: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$20: Integer(2))
+    <ifTemp>$21: TrueClass = true
+    <ifTemp>$21: TrueClass(bb11 -> bb12)
+
+# backedges
+#  bb11(rubyBlockId=0)
+bb12(rubyBlockId=0):
+    blockargs=(<self>: T.class_of(<root>))
+    outerLoops: 1
+    <block-break-assign>$23: NilClass = <returnTemp>$22
+    <magic>$24: T.class_of(<Magic>) = alias <C <Magic>>
+    <block-break>$25: T.untyped = <magic>$24: T.class_of(<Magic>).<block-break>(<returnTemp>$22: NilClass)
+    <unconditional>(bb12 -> bb10)
+
+# backedges
+#  bb10(rubyBlockId=0)
+#  bb17(rubyBlockId=0)
+bb14(rubyBlockId=0):
+    blockargs=(<self>: T.class_of(<root>), x: Integer(0))
+    outerLoops: 1
+    <whileTemp>$28: FalseClass = false
+    <whileTemp>$28: FalseClass(bb14 -> bb17)
+
+# backedges
+#  bb14(rubyBlockId=0)
+bb16(rubyBlockId=0):
+    blockargs=(<self>: T.class_of(<root>), x: Integer(0))
+    y: Integer(0) = 0
+    <unconditional>(bb16 -> bb18)
+
+# backedges
+#  bb14(rubyBlockId=0)
+bb17(rubyBlockId=0):
+    blockargs=(<self>: T.class_of(<root>), x: Integer(0))
+    outerLoops: 1
+    <statTemp>$32 = 2
+    <statTemp>$30 = <self>.puts(<statTemp>$32)
+    x = 1
+    <unconditional>(bb17 -> bb14)
+
+# backedges
+#  bb16(rubyBlockId=0)
+#  bb21(rubyBlockId=0)
+bb18(rubyBlockId=0):
+    blockargs=(<self>: T.class_of(<root>), x: Integer(0), y: Integer(0))
+    outerLoops: 1
+    <statTemp>$36: TrueClass = true
+    <whileTemp>$35: FalseClass = <statTemp>$36: TrueClass.!()
+    <whileTemp>$35: FalseClass(bb18 -> bb21)
+
+# backedges
+#  bb18(rubyBlockId=0)
+bb20(rubyBlockId=0):
+    blockargs=(<self>: T.class_of(<root>), x: Integer(0), y: Integer(0))
+    <statTemp>$41: NilClass = <self>: T.class_of(<root>).puts(x: Integer(0), y: Integer(0))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional>(bb20 -> bb1)
+
+# backedges
+#  bb18(rubyBlockId=0)
+bb21(rubyBlockId=0):
+    blockargs=(<self>: T.class_of(<root>), x: Integer(0), y: Integer(0))
+    outerLoops: 1
+    <statTemp>$40 = 2
+    <statTemp>$38 = <self>.puts(<statTemp>$40)
+    y = 1
+    <unconditional>(bb21 -> bb18)
+
+}
+
