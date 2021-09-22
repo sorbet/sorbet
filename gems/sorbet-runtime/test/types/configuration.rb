@@ -100,6 +100,9 @@ module Opus::Types::Test
         end
       end
 
+      # `inline_type_error_handler` historically took only a single arg, but now takes two. This
+      # test ensures backwards compatibility with any consumers still using a single argument. It
+      # can/should be removed whenever we're comfortable breaking this compatibility.
       describe 'when overridden with a single arg' do
         before do
           T::Configuration.inline_type_error_handler = lambda do |single_arg|
