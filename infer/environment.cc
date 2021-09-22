@@ -1225,6 +1225,11 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
                 tp.type = dispatched.returnType;
                 tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                if (lspQueryMatch) {
+                    core::lsp::QueryResponse::pushQueryResponse(
+                        ctx, core::lsp::IdentResponse(core::Loc(ctx.file, bind.loc), bind.bind.variable.data(inWhat),
+                                                      tp, ctx.owner.asMethodRef()));
+                }
             },
             [&](cfg::Return *i) {
                 tp.type = core::Types::bottom();
