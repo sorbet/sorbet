@@ -1190,7 +1190,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 // Fetch the type for the argument out of the parameters for the block
                 // by simulating a blockParam[i] call.
                 const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, i->yieldParam);
-                core::TypePtr argType = core::make_type<core::LiteralType>((long)i->argId);
+                core::TypePtr argType = core::make_type<core::LiteralType>((int64_t)i->argId);
 
                 core::TypeAndOrigins arg;
                 arg.type = argType;
