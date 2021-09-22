@@ -93,7 +93,7 @@ module Opus::Types::Test
             error.is_a?(TypeError) &&
               opts.is_a?(Hash) &&
               opts[:kind] == 'T.let' &&
-              opts[:type] == String &&
+              opts[:type].name == 'String' &&
               opts[:value] == 1
           end
           assert_equal(1, T.let(1, String))
