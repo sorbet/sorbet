@@ -78,15 +78,51 @@ module Opus::Types::Test
         end
 
         it 'handles a T.must error' do
-          CustomReceiver.expects(:receive).once.with do |error|
-            error.is_a?(TypeError)
+          CustomReceiver.expects(:receive).once.with do |error, opts|
+            error.is_a?(TypeError) &&
+              opts.is_a?(Hash) &&
+              opts[:kind] == 'T.must' &&
+              opts[:type].nil? &&
+              opts[:value].nil?
           end
           assert_nil(T.must(nil))
         end
 
         it 'handles a T.let error' do
-          CustomReceiver.expects(:receive).once.with do |error|
-            error.is_a?(TypeError)
+          CustomReceiver.expects(:receive).once.with do |error, opts|
+            error.is_a?(TypeError) &&
+              opts.is_a?(Hash) &&
+              opts[:kind] == 'T.let' &&
+              opts[:type] == String &&
+              opts[:value] == 1
+          end
+          assert_equal(1, T.let(1, String))
+        end
+      end
+
+      describe 'when overridden with a single arg' do
+        before do
+          T::Configuration.inline_type_error_handler = lambda do |single_arg|
+            CustomReceiver.receive(single_arg)
+          end
+        end
+
+        after do
+          T::Configuration.inline_type_error_handler = nil
+        end
+
+        it 'handles a T.must error' do
+          CustomReceiver.expects(:receive).once.with do |error, opts|
+            error.is_a?(TypeError) &&
+              opts.nil?
+          end
+          assert_nil(T.must(nil))
+        end
+
+        it 'handles a T.let error' do
+          CustomReceiver.expects(:receive).once.with do |error, opts|
+            error.is_a?(TypeError) &&
+              opts.nil?
           end
           assert_equal(1, T.let(1, String))
         end
