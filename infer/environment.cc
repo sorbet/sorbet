@@ -1211,9 +1211,17 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 const auto suppressErrors = true;
                 const auto isPrivateOk = true;
                 const std::shared_ptr<const core::SendAndBlockLink> block = nullptr;
-                core::DispatchArgs dispatchArgs{
-                    core::Names::squareBrackets(), locs, numPosArgs, args, recvType.type, recvType, recvType.type,
-                        block, core::Loc(ctx.file, bind.loc), isPrivateOk, suppressErrors};
+                core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),
+                                                locs,
+                                                numPosArgs,
+                                                args,
+                                                recvType.type,
+                                                recvType,
+                                                recvType.type,
+                                                block,
+                                                core::Loc(ctx.file, bind.loc),
+                                                isPrivateOk,
+                                                suppressErrors};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
                 tp.type = dispatched.returnType;
                 tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
