@@ -167,6 +167,46 @@ llvm::Value *tryNameBasedIntrinsic(MethodCallContext &mcctx) {
     return tryFinalMethodCall(mcctx);
 }
 
+// We want at least inline storage for one intrinsic so we don't allocate during
+// the search process.  Two intrinsics are reasonably common (e.g. .length) and
+// three could come up quite a bit in numeric code.
+const size_t NUM_INTRINSICS = 3;
+
+struct ApplicableIntrinsic {
+    ApplicableIntrinsic(const SymbolBasedIntrinsicMethod *method, core::ClassOrModuleRef klass)
+        : method(method), klass(klass) {}
+    const SymbolBasedIntrinsicMethod *method;
+    core::ClassOrModuleRef klass;
+};
+
+InlinedVector<ApplicableIntrinsic, NUM_INTRINSICS> applicableIntrinsics(MethodCallContext &mcctx) {
+    InlinedVector<ApplicableIntrinsic, NUM_INTRINSICS> intrinsics;
+    auto remainingType = mcctx.send->recv.type;
+    for (auto symbolBasedIntrinsic : SymbolBasedIntrinsicMethod::definedIntrinsics(mcctx.cs)) {
+        if (!absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(mcctx.cs), mcctx.send->fun)) {
+            continue;
+        }
+
+        if (mcctx.blk.has_value() && symbolBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Unhandled) {
+            continue;
+        }
+
+        auto potentialClasses = symbolBasedIntrinsic->applicableClasses(mcctx.cs);
+        for (auto &c : potentialClasses) {
+            auto leftType = core::Types::dropSubtypesOf(mcctx.cs, remainingType, c);
+
+            if (leftType == remainingType) {
+                continue;
+            }
+
+            remainingType = leftType;
+            intrinsics.emplace_back(symbolBasedIntrinsic, c);
+        }
+    }
+
+    return intrinsics;
+}
+
 llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
     auto &cs = mcctx.cs;
     auto *send = mcctx.send;
@@ -180,45 +220,27 @@ llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
     auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, llvm::Twine("symIntrinsicRawPhi_") + methodNameRef);
     builder.SetInsertPoint(rememberStart);
     if (!remainingType.isUntyped()) {
-        for (auto symbolBasedIntrinsic : SymbolBasedIntrinsicMethod::definedIntrinsics(mcctx.cs)) {
-            if (!absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(cs), send->fun)) {
-                continue;
-            }
+        auto intrinsics = applicableIntrinsics(mcctx);
+        for (auto &intrinsic : intrinsics) {
+            auto clazName = intrinsic.klass.data(cs)->name.shortName(cs);
+            llvm::StringRef clazNameRef(clazName.data(), clazName.size());
 
-            if (mcctx.blk.has_value() && symbolBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Unhandled) {
-                continue;
-            }
+            auto alternative = llvm::BasicBlock::Create(
+                cs, llvm::Twine("alternativeCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
+                builder.GetInsertBlock()->getParent());
+            auto fastPath =
+                llvm::BasicBlock::Create(cs, llvm::Twine("fastSymCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
+                                         builder.GetInsertBlock()->getParent());
 
-            auto potentialClasses = symbolBasedIntrinsic->applicableClasses(cs);
-            for (auto &c : potentialClasses) {
-                auto leftType = core::Types::dropSubtypesOf(cs, remainingType, c);
-
-                if (leftType == remainingType) {
-                    continue;
-                }
-
-                remainingType = leftType;
-
-                auto clazName = c.data(cs)->name.shortName(cs);
-                llvm::StringRef clazNameRef(clazName.data(), clazName.size());
-
-                auto alternative = llvm::BasicBlock::Create(
-                    cs, llvm::Twine("alternativeCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
-                    builder.GetInsertBlock()->getParent());
-                auto fastPath = llvm::BasicBlock::Create(
-                    cs, llvm::Twine("fastSymCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
-                    builder.GetInsertBlock()->getParent());
-
-                auto *typeTest = symbolBasedIntrinsic->receiverFastPathTest(mcctx, c);
-                builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, alternative);
-                builder.SetInsertPoint(fastPath);
-                auto fastPathRes = symbolBasedIntrinsic->makeCall(mcctx);
-                Payload::afterIntrinsic(cs, builder);
-                auto fastPathEnd = builder.GetInsertBlock();
-                builder.CreateBr(afterSend);
-                phi->addIncoming(fastPathRes, fastPathEnd);
-                builder.SetInsertPoint(alternative);
-            }
+            auto *typeTest = intrinsic.method->receiverFastPathTest(mcctx, intrinsic.klass);
+            builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, alternative);
+            builder.SetInsertPoint(fastPath);
+            auto fastPathRes = intrinsic.method->makeCall(mcctx);
+            Payload::afterIntrinsic(cs, builder);
+            auto fastPathEnd = builder.GetInsertBlock();
+            builder.CreateBr(afterSend);
+            phi->addIncoming(fastPathRes, fastPathEnd);
+            builder.SetInsertPoint(alternative);
         }
     }
     auto slowPathRes = tryNameBasedIntrinsic(mcctx);
