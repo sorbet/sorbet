@@ -152,7 +152,12 @@ module T::Configuration
 
   def self.inline_type_error_handler(error, opts={})
     if @inline_type_error_handler
-      @inline_type_error_handler.call(error, opts)
+      # Backwards compatibility before `inline_type_error_handler` took a second arg
+      if @inline_type_error_handler.arity == 1
+        @inline_type_error_handler.call(error)
+      else
+        @inline_type_error_handler.call(error, opts)
+      end
     else
       inline_type_error_handler_default(error, opts)
     end
