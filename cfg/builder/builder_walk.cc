@@ -456,14 +456,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         LocalRef argLoc = cctx.inWhat.enterLocal(arg.local);
 
                         if (arg.flags.isRepeated) {
-                            if (i != 0) {
-                                // Mixing positional and rest args in blocks is
-                                // not currently supported; drop in an untyped.
-                                argBlock->exprs.emplace_back(argLoc, arg.loc,
-                                                             make_unique<Alias>(core::Symbols::untyped()));
-                            } else {
-                                argBlock->exprs.emplace_back(argLoc, arg.loc, make_unique<Ident>(argTemp));
-                            }
+                            // Mixing positional and rest args in blocks is
+                            // not currently supported, but we'll handle that in
+                            // inference.
+                            argBlock->exprs.emplace_back(argLoc, arg.loc,
+                                                         make_unique<YieldLoadArg>(i, arg.flags, argTemp));
                             continue;
                         }
 
@@ -482,7 +479,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                             // compile the argument fetch in the present block
                             presentBlock->exprs.emplace_back(argLoc, arg.loc,
-                                                             make_unique<YieldLoadArg>(i, argTemp));
+                                                             make_unique<YieldLoadArg>(i, arg.flags, argTemp));
                             unconditionalJump(presentBlock, argBlock, cctx.inWhat, arg.loc);
 
                             // compile the default expr in `missingBlock`
@@ -490,7 +487,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                             unconditionalJump(missingLast, argBlock, cctx.inWhat, arg.loc);
                         } else {
                             argBlock->exprs.emplace_back(argLoc, arg.loc,
-                                                         make_unique<YieldLoadArg>(i, argTemp));
+                                                         make_unique<YieldLoadArg>(i, arg.flags, argTemp));
                         }
                     }
 

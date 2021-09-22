@@ -210,10 +210,11 @@ CheckSize(YieldParamPresent, 16, 8);
 
 class YieldLoadArg final : public Instruction {
 public:
+    core::ArgInfo::ArgFlags flags;
     u2 argId;
     VariableUseSite yieldParam;
 
-    YieldLoadArg(u2 argId, LocalRef yieldParam) : argId(argId), yieldParam(yieldParam) {
+    YieldLoadArg(u2 argId, core::ArgInfo::ArgFlags flags, LocalRef yieldParam) : flags(flags), argId(argId), yieldParam(yieldParam) {
         categoryCounterInc("cfg", "yieldloadarg");
     }
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
