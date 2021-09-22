@@ -72,17 +72,21 @@ module SorbetBenchmarks
       end
 
       type = T::Utils.coerce(T.nilable(Integer))
-      time_block("T::Types::Union#valid?", iterations_in_block: 10) do
+      time_block("T.nilable(Integer).valid?", iterations_in_block: 5) do
         type.valid?(0)
         type.valid?(1)
         type.valid?(2)
         type.valid?(nil)
         type.valid?(false)
+      end
+
+      type = T::Utils.coerce(T.any(Integer, Float, T::Boolean))
+      time_block("T.any(Integer, Float, T::Boolean).valid?", iterations_in_block: 5) do
         type.valid?(0)
         type.valid?(1)
         type.valid?(2)
         type.valid?(nil)
-        type.valid?(false)
+        type.valid?('hi')
       end
 
       time_block("T.let(..., Integer)") do
@@ -128,26 +132,6 @@ module SorbetBenchmarks
       time_block("sig {params(s: Symbol, x: Integer, y: Integer).void} (with kwargs)") do
         arg_plus_kwargs(:foo, x: 1, y: 2)
         arg_plus_kwargs(:bar, x: 1)
-      end
-
-      time_block(".bind(example).call") do
-        Object.instance_method(:class).bind(example).call
-      end
-
-      if T::Configuration::AT_LEAST_RUBY_2_7
-        time_block(".bind_call(example)") do
-          Object.instance_method(:class).bind_call(example)
-        end
-
-        time_block("if AT_LEAST_RUBY_2_7; .bind_call(example); end") do
-          if T::Configuration::AT_LEAST_RUBY_2_7
-            Object.instance_method(:class).bind_call(example)
-          else
-            raise "must be run on 2.7"
-          end
-        end
-      else
-        puts 'skipping UnboundMethod#bind_call tests (re-run on Ruby 2.7+)'
       end
     end
 

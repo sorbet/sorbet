@@ -20,7 +20,8 @@ module T::Types
 
     # @override Base
     def name
-      type_shortcuts(@types)
+      # Use the attr_reader here so we can override it in SimplePairUnion
+      type_shortcuts(types)
     end
 
     private def type_shortcuts(types)
@@ -67,17 +68,22 @@ module T::Types
         # @param types [Array] optional array of additional T::Types::Base instances
         def self.union_of_types(type_a, type_b, types=EMPTY_ARRAY)
           if types.empty?
+            # Try to use `to_nilable` on a type to get memoization, or failing that
+            # try to at least use SimplePairUnion to get faster init and typechecking.
+            #
             # We aren't guaranteed to detect a simple `T.nilable(<Module>)` type here
             # in cases where there are duplicate types, nested unions, etc.
             #
             # That's ok, because this is an optimization which isn't necessary for
             # correctness.
-            if type_b == T::Utils::Nilable::NIL_TYPE && type_a.is_a?(T::Types::Simple)
+            if !type_a.is_a?(T::Types::Simple) || !type_b.is_a?(T::Types::Simple)
+              Union.new([type_a, type_b])
+            elsif type_b == T::Utils::Nilable::NIL_TYPE
               type_a.to_nilable
-            elsif type_a == T::Utils::Nilable::NIL_TYPE && type_b.is_a?(T::Types::Simple)
+            elsif type_a == T::Utils::Nilable::NIL_TYPE
               type_b.to_nilable
             else
-              Union.new([type_a, type_b])
+              T::Private::Types::SimplePairUnion.new(type_a, type_b)
             end
           else
             # This can't be a `T.nilable(<Module>)` case unless there are duplicates,
