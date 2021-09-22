@@ -6,6 +6,7 @@ cc_library(
             "*.h",
             "types/*.cc",
             "lsp/*.cc",
+            "packages/*.cc",
         ],
         exclude = [
             # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
@@ -18,7 +19,10 @@ cc_library(
     hdrs = [
         "GlobalSubstitution.h",
         "core.h",
-    ] + glob(["errors/*.h"]) + glob(["lsp/*.h"]),
+    ] + glob(["errors/*.h"]) + glob([
+        "lsp/*.h",
+        "packages/*.h",
+    ]),
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,

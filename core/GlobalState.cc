@@ -1765,6 +1765,11 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     for (auto &semanticExtension : this->semanticExtensions) {
         result->semanticExtensions.emplace_back(semanticExtension->deepCopy(*this, *result));
     }
+    result->packages.reserve(this->packages.size());
+    for (auto const &[nr, pkgInfo] : this->packages) {
+        result->packages[nr] = pkgInfo->deepCopy();
+    }
+    result->packagesByPathPrefix = this->packagesByPathPrefix;
     result->sanityCheck();
     {
         Timer timeit2(tracer(), "GlobalState::deepCopyOut");
@@ -1899,6 +1904,36 @@ FileRef GlobalState::findFileByPath(string_view path) const {
         return fnd->second;
     }
     return FileRef();
+}
+
+NameRef GlobalState::enterPackage(unique_ptr<packages::PackageInfo> pkg) {
+    // TODO enforce packaging enabled
+    auto nr = pkg->mangledName();
+    auto prev = packages.find(nr);
+    if (prev == packages.end()) {
+        for (const auto &prefix : pkg->pathPrefixes()) {
+            // TODO can we not copy
+            packagesByPathPrefix[prefix] = nr;
+        }
+    } else {
+        // Package files do not have full featured content hashing. If the contents of one changes
+        // we always run slow-path and fully rebuild the set of packages. In some cases, the LSP
+        // fast-path may re-run on an unchanged package file. Sanity check to ensure the loc and
+        // prefixes are the same.
+        ENFORCE(prev->second->definitionLoc() == pkg->definitionLoc());
+        ENFORCE(prev->second->pathPrefixes() == pkg->pathPrefixes());
+    }
+    packages[nr] = move(pkg);
+    return nr;
+}
+
+NameRef GlobalState::lookupPackage(NameRef pkgMangledName) const {
+    ENFORCE(pkgMangledName.exists());
+    auto it = packages.find(pkgMangledName);
+    if (it == packages.end()) {
+        return NameRef::noName();
+    }
+    return it->first;
 }
 
 unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState> what, FileRef fref) {

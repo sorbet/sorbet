@@ -8,8 +8,13 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/lsp/Query.h"
+#include "core/packages/PackageInfo.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <memory>
+
+namespace sorbet::packager {
+class PackagerImpl;
+} // namespace sorbet::packager
 
 namespace sorbet::core {
 
@@ -54,6 +59,7 @@ class GlobalState final {
     friend class UnfreezeSymbolTable;
     friend class UnfreezeFileTable;
     friend struct NameRefDebugCheck;
+    friend class sorbet::packager::PackagerImpl;
 
     // Private constructor that allows a specific globalStateId. Used in `makeEmptyGlobalStateForHashing` to avoid
     // contention on the global state ID atomic.
@@ -149,6 +155,9 @@ public:
                                                     const std::shared_ptr<File> &withWhat);
     static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
     FileRef findFileByPath(std::string_view path) const;
+
+    NameRef enterPackage(std::unique_ptr<packages::PackageInfo> pkg);
+    NameRef lookupPackage(NameRef pkgMangledName) const;
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName);
     spdlog::logger &tracer() const;
@@ -296,6 +305,9 @@ private:
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
     bool wasModified_ = false;
+
+    UnorderedMap<NameRef, std::unique_ptr<packages::PackageInfo>> packages;
+    UnorderedMap<std::string, NameRef> packagesByPathPrefix;
 
     bool freezeSymbolTable();
     bool freezeNameTable();
