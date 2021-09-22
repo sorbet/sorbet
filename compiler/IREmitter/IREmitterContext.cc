@@ -261,6 +261,7 @@ findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
                 [&](cfg::Literal *i) { /* nothing*/ }, [&](cfg::ArgPresent *i) { /*nothing*/ },
                 [&](cfg::LoadArg *i) { /*nothing*/ }, [&](cfg::LoadYieldParams *i) { /*nothing*/ },
                 [&](cfg::YieldParamPresent *i) { /* nothing */ },
+                [&](cfg::YieldLoadArg *i) { /* nothing */ },
                 [&](cfg::Cast *i) { usage.trackBlockUsage(bb.get(), i->value.variable); },
                 [&](cfg::TAbsurd *i) { usage.trackBlockUsage(bb.get(), i->what.variable); });
         }
@@ -665,17 +666,12 @@ void collectRubyBlockArgs(const cfg::CFG &cfg, const cfg::BasicBlock *b, vector<
     bool insideThenBlock = false;
 
     while (true) {
-        for (auto &maybeCallOnLoadYieldArg : b->exprs) {
-            auto maybeCast = cfg::cast_instruction<cfg::Send>(maybeCallOnLoadYieldArg.value.get());
-            if (maybeCast == nullptr || maybeCast->recv.variable.data(cfg)._name != core::Names::blkArg() ||
-                maybeCast->fun != core::Names::squareBrackets() || maybeCast->args.size() != 1) {
+        for (auto &expr : b->exprs) {
+            auto loadArg = cfg::cast_instruction<cfg::YieldLoadArg>(expr.value.get());
+            if (loadArg == nullptr) {
                 continue;
             }
-            if (!core::isa_type<core::LiteralType>(maybeCast->args[0].type)) {
-                continue;
-            }
-            auto litType = core::cast_type_nonnull<core::LiteralType>(maybeCast->args[0].type);
-            blockArgs[litType.asInteger()] = maybeCallOnLoadYieldArg.bind.variable;
+            blockArgs[loadArg->argId] = expr.bind.variable;
         }
 
         // When the exit condition for this block is constructed through `argPresent`, continue down the `then` branch
