@@ -25,8 +25,14 @@ class LocalNameInserter {
         bool isPositional() const {
             return !this->keyword && !this->block && !this->repeated && !this->shadow;
         }
+        bool isPositionalSplat() const {
+            return !this->keyword && !this->block && this->repeated && !this->shadow;
+        }
         bool isKeyword() const {
             return this->keyword && !this->repeated;
+        }
+        bool isKeywordSplat() const {
+            return this->keyword && this->repeated;
         }
     };
     CheckSize(ArgFlags, 1, 1);
@@ -231,6 +237,9 @@ public:
             return tree;
         }
 
+        original.numPosArgs = 0;
+        original.args.clear();
+
         if (!scopeStack.back().insideMethod) {
             if (auto e = ctx.beginError(original.loc, core::errors::Namer::SelfOutsideClass)) {
                 e.setHeader("`{}` outside of method", "super");
@@ -238,8 +247,9 @@ public:
             return tree;
         }
 
+        bool seenPositionalSplat = false;
         bool seenKeywordArgs = false;
-        bool seenRepeatedArgs = false;
+        bool seenKeywordSplat = false;
         bool seenBlockArg = false;
 
         // Scan ahead to see if we have repeat or block args, and to validate that args are of the shape we
@@ -248,11 +258,18 @@ public:
             ENFORCE(!seenBlockArg, "Block arg was not in final position");
             if (arg.flags.isPositional()) {
                 ENFORCE(!seenKeywordArgs, "Saw positional arg after keyword arg");
-            } else if (arg.flags.repeated) {
-                ENFORCE(!seenKeywordArgs, "Saw repeated arg after keyword arg");
-                seenRepeatedArgs = true;
+                ENFORCE(!seenKeywordSplat, "Saw positional arg after keyword splat");
+            } else if (arg.flags.isPositionalSplat()) {
+                ENFORCE(!seenPositionalSplat, "Saw multiple positional splats");
+                ENFORCE(!seenKeywordArgs, "Saw positional splat after keyword arg");
+                ENFORCE(!seenKeywordSplat, "Saw positional splat after keyword splat");
+                seenPositionalSplat = true;
             } else if (arg.flags.isKeyword()) {
+                ENFORCE(!seenKeywordSplat, "Saw keyword arg after keyword splat");
                 seenKeywordArgs = true;
+            } else if (arg.flags.isKeywordSplat()) {
+                ENFORCE(!seenPositionalSplat, "Saw multiple keyword splats");
+                seenKeywordSplat = true;
             } else if (arg.flags.block) {
                 seenBlockArg = true;
             } else if (arg.flags.shadow) {
@@ -264,7 +281,7 @@ public:
 
         // If we don't have repeat or block args, we can rewrite `original` in place.
         // TODO(aprocter): Actually I'm not sure this case will ever fire anymore!
-        if (!seenRepeatedArgs && !seenBlockArg) {
+        if (!seenPositionalSplat && !seenKeywordSplat && !seenBlockArg) {
             original.numPosArgs = 0;
             original.args.clear();
 
@@ -283,12 +300,16 @@ public:
             // So what the desugarer does with this is to box the args in an array and then node2Tree that.
             // (Ignoring kwargs for now.)
             ast::Array::ENTRY_store posArgsEntries;
+            ast::Hash::ENTRY_store kwArgKeyEntries;
+            ast::Hash::ENTRY_store kwArgValueEntries;
             ast::ExpressionPtr posArgsArray;
+            ast::ExpressionPtr kwArgsHash;
+            ast::ExpressionPtr blockArg;
 
             for (auto arg : scopeStack.back().args) {
                 if (arg.flags.isPositional()) {
                     posArgsEntries.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
-                } else if (arg.flags.repeated) {
+                } else if (arg.flags.isPositionalSplat()) {
                     if (!posArgsEntries.empty()) {
                         if (posArgsArray == nullptr) {
                             posArgsArray = ast::MK::Array(original.loc, std::move(posArgsEntries));
@@ -301,11 +322,37 @@ public:
                             ast::MK::Splat(original.loc, ast::make_expression<ast::Local>(original.loc, arg.arg)));
                         posArgsEntries.clear();
                     }
-                } else if (arg.flags.keyword) {
-                    ENFORCE(false, "oopsie, a keyword");
-                } // else if (arg.flags.block) {
-                  //  ENFORCE(false, "oopsie, a block");
-                  //}
+                } else if (arg.flags.isKeyword()) {
+                    kwArgKeyEntries.emplace_back(ast::MK::Literal(
+                        original.loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), arg.arg._name)));
+                    kwArgValueEntries.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
+                } else if (arg.flags.isKeywordSplat()) {
+                    if (!kwArgKeyEntries.empty()) {
+                        if (kwArgsHash == nullptr) {
+                            kwArgsHash =
+                                ast::MK::Hash(original.loc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries));
+                        } else {
+                            kwArgsHash = ast::MK::Send1(
+                                original.loc, std::move(kwArgsHash), core::Names::merge(),
+                                ast::MK::Hash(original.loc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries)));
+                        }
+                    }
+                    auto splatStuff = ast::MK::Send1(
+                        original.loc, ast::MK::Constant(original.loc, core::Symbols::Magic()), core::Names::toHashDup(),
+                        ast::make_expression<ast::Local>(original.loc, arg.arg));
+                    if (kwArgsHash != nullptr) {
+                        kwArgsHash = ast::MK::Send1(original.loc, std::move(kwArgsHash), core::Names::merge(),
+                                                    std::move(splatStuff));
+                    } else {
+                        kwArgsHash = std::move(splatStuff);
+                    }
+                    kwArgKeyEntries.clear();
+                    kwArgValueEntries.clear();
+                } else if (arg.flags.block) {
+                    blockArg = ast::make_expression<ast::Local>(original.loc, arg.arg);
+                } else {
+                    ENFORCE(false, "Unhandled arg kind");
+                }
             }
             if (!posArgsEntries.empty()) {
                 if (posArgsArray == nullptr) {
@@ -314,7 +361,25 @@ public:
                     posArgsArray = ast::MK::Send1(original.loc, std::move(posArgsArray), core::Names::concat(),
                                                   ast::MK::Array(original.loc, std::move(posArgsEntries)));
                 }
+            } else if (posArgsArray == nullptr) {
+                posArgsArray = ast::MK::Array(original.loc, std::move(posArgsEntries));
             }
+
+            if (!kwArgKeyEntries.empty()) {
+                if (kwArgsHash == nullptr) {
+                    kwArgsHash = ast::MK::Hash(original.loc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries));
+                } else {
+                    kwArgsHash = ast::MK::Send1(
+                        original.loc, std::move(kwArgsHash), core::Names::merge(),
+                        ast::MK::Hash(original.loc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries)));
+                }
+            }
+
+            ast::Array::ENTRY_store entries;
+            if (kwArgsHash) {
+                entries.emplace_back(std::move(kwArgsHash));
+            }
+            auto boxedkwArgsHash = ast::MK::Array(original.loc, std::move(entries));
 
             auto method = ast::MK::Literal(
                 original.loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), core::Names::super()));
@@ -323,10 +388,16 @@ public:
             sendargs.emplace_back(std::move(original.recv));
             sendargs.emplace_back(std::move(method));
             sendargs.emplace_back(std::move(posArgsArray));
-            // sendargs.emplace_back(std::move(kwargs));
+            sendargs.emplace_back(std::move(boxedkwArgsHash));
 
-            return ast::MK::Send(original.loc, ast::MK::Constant(original.loc, core::Symbols::Magic()),
-                                 core::Names::callWithSplat(), 3, std::move(sendargs));
+            if (blockArg) {
+                sendargs.emplace_back(std::move(blockArg));
+                return ast::MK::Send(original.loc, ast::MK::Constant(original.loc, core::Symbols::Magic()),
+                                     core::Names::callWithSplatAndBlock(), 5, std::move(sendargs));
+            } else {
+                return ast::MK::Send(original.loc, ast::MK::Constant(original.loc, core::Symbols::Magic()),
+                                     core::Names::callWithSplat(), 4, std::move(sendargs));
+            }
         }
     }
 

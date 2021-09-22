@@ -1993,6 +1993,8 @@ public:
         if (posTuple == nullptr) {
             if (auto e = gs.beginError(args.argLoc(2), core::errors::Infer::UntypedSplat)) {
                 e.setHeader("Splats are only supported where the size of the array is known statically");
+                auto tpo = TypeAndOrigins{args.args[2]->type, args.args[2]->origins};
+                e.addErrorSection(tpo.explainGot(gs, args.originForUninitialized));
             }
             return;
         }
@@ -2003,6 +2005,8 @@ public:
             if (auto e = gs.beginError(args.argLoc(2), core::errors::Infer::UntypedSplat)) {
                 e.setHeader(
                     "Keyword args with splats are only supported where the shape of the hash is known statically");
+                auto tpo = TypeAndOrigins{args.args[3]->type, args.args[3]->origins};
+                e.addErrorSection(tpo.explainGot(gs, args.originForUninitialized));
             }
             return;
         }
