@@ -9,10 +9,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo2<<todo method>>(*args, *kwargs:, &block)
-      ::<Magic>.<call-with-splat-and-block>(<emptyTree>::<C T>.unsafe(<self>), :bar, ::<Magic>.<splat>(args).concat([begin
-              <hashTemp>$2 = ::<Magic>.<to-hash-dup>(kwargs)
-              <hashTemp>$2
-            end]), nil, block)
+      ::<Magic>.<call-with-splat-and-block>(<emptyTree>::<C T>.unsafe(<self>), :bar, ::<Magic>.<splat>(args), [begin
+            <hashTemp>$2 = ::<Magic>.<to-hash-dup>(kwargs)
+            <hashTemp>$2
+          end], block)
     end
 
     def foo3<<todo method>>(*<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
@@ -20,10 +20,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo4<<todo method>>(*args, *kwargs:, &block)
-      ::<Magic>.<call-with-splat-and-block>(<emptyTree>::<C T>.unsafe(<self>), :bar, ::<Magic>.<splat>([1, 2, 3]).concat(::<Magic>.<splat>(args)).concat([begin
-              <hashTemp>$2 = ::<Magic>.<to-hash-dup>(kwargs)
-              <hashTemp>$2
-            end]), nil, block)
+      ::<Magic>.<call-with-splat-and-block>(<emptyTree>::<C T>.unsafe(<self>), :bar, ::<Magic>.<splat>([1, 2, 3]).concat(::<Magic>.<splat>(args)), [begin
+            <hashTemp>$2 = ::<Magic>.<to-hash-dup>(kwargs)
+            <hashTemp>$2
+          end], block)
     end
   end
 
