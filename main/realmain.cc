@@ -216,7 +216,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     auto fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
     vector<AutogenResult::Serialized> merged(indexed.size());
     for (int i = 0; i < indexed.size(); ++i) {
-        fileq->push(move(i), 1);
+        fileq->push(i, 1);
     }
     auto crcBuilder = autogen::CRCBuilder::create();
 

@@ -74,8 +74,7 @@ void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spd
     Timer timeit(logger, "computeFileHashes");
     auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
     for (size_t i = 0; i < files.size(); i++) {
-        auto copy = i;
-        fileq->push(move(copy), 1);
+        fileq->push(i, 1);
     }
 
     logger.debug("Computing state hashes for {} files", files.size());
@@ -129,8 +128,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
     // Below, we rewrite ASTs to an empty GlobalState and use them for hashing.
     auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(asts.size());
     for (size_t i = 0; i < asts.size(); i++) {
-        auto copy = i;
-        fileq->push(move(copy), 1);
+        fileq->push(i, 1);
     }
 
     logger.debug("Computing state hashes for {} files", asts.size());

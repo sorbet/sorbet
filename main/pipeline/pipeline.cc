@@ -1096,8 +1096,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
     // Compress files in parallel.
     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile *>>(parsedFiles.size());
     for (auto &parsedFile : parsedFiles) {
-        auto ptr = &parsedFile;
-        fileq->push(move(ptr), 1);
+        fileq->push(&parsedFile, 1);
     }
 
     auto resultq = make_shared<BlockingBoundedQueue<vector<pair<string, vector<u1>>>>>(parsedFiles.size());
