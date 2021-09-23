@@ -27,6 +27,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     serverCap->documentHighlightProvider = opts.lspDocumentHighlightEnabled;
     serverCap->hoverProvider = true;
     serverCap->referencesProvider = true;
+    serverCap->implementationProvider = opts.lspGoToImplementationEnabled;
     serverCap->documentFormattingProvider = rubyfmt_enabled && opts.lspDocumentFormatRubyfmtEnabled;
 
     auto codeActionProvider = make_unique<CodeActionOptions>();
