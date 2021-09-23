@@ -10,6 +10,7 @@ ruby(
         "--disable-maintainer-mode",
         "--disable-dependency-tracking",
         "--disable-jit-support",
+        "--disable-install-doc",
     ] + select({
         # Enforce that we don't need Ruby to build in release builds.
         # (In non-release builds, we allow for an available system Ruby to
