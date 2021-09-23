@@ -659,7 +659,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         send->args.pop_back();
                     }
 
-                    // Deconstruct the kwargs hash in if it's present.
+                    // Deconstruct the kwargs hash if it's present.
                     if (!send->args.empty()) {
                         if (auto *hash = parser::cast_node<parser::Hash>(send->args.back().get())) {
                             if (hash->kwargs) {
