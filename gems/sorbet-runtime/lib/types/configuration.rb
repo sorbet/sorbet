@@ -138,7 +138,7 @@ module T::Configuration
   # @option opts [Object] :value Actual param/return value
   #
   # @example
-  #   T::Configuration.inline_type_error_handler = lambda do |error|
+  #   T::Configuration.inline_type_error_handler = lambda do |error, opts|
   #     puts error.message
   #   end
   def self.inline_type_error_handler=(value)
