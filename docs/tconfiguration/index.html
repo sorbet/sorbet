@@ -87,7 +87,7 @@ change Sorbet’s runtime, see <a href="/docs/runtime">Enabling Runtime Checks</
 <li><code>T.assert_type!(expr, Type)</code></li>
 </ul>
 <p>To customize the behavior when one of these assertions fails:</p>
-<pre><code class="hljs css language-ruby">T::Configuration.inline_type_error_handler = lambda <span class="hljs-keyword">do</span> <span class="hljs-params">|error|</span>
+<pre><code class="hljs css language-ruby">T::Configuration.inline_type_error_handler = lambda <span class="hljs-keyword">do</span> <span class="hljs-params">|error, opts|</span>
   puts error.message
 <span class="hljs-keyword">end</span>
 </code></pre>
