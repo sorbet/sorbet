@@ -467,7 +467,17 @@ void Payload::assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::
     auto type = core::make_type<core::ClassType>(sym);
     auto *cond = Payload::typeTest(cs, builder, val, type);
     builder.CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::assume, {}, {cond});
+    Payload::assertTypeTested(cs, builder, val);
     return;
+}
+
+void Payload::assertTypeTested(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val) {
+    builder.CreateCall(cs.getFunction("sorbet_i_typeTested"), {val}, "typeTestedAssertion");
+    return;
+}
+
+llvm::Value *Payload::allTypeTested(CompilerState &cs, llvm::IRBuilderBase &builder, vector<llvm::Value *> vals) {
+    return builder.CreateCall(cs.getFunction("sorbet_i_allTypeTested"), vals, "allTypeTested");
 }
 
 llvm::Value *Payload::boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *u1) {
@@ -1117,9 +1127,9 @@ llvm::Value *Payload::callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderB
 
 llvm::Value *Payload::callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                      llvm::Value *fn, llvm::Value *argc, llvm::Value *argv, llvm::Value *recv,
-                                     llvm::Value *iseq) {
-    return builder.CreateCall(cs.getFunction("sorbet_callFuncDirect"), {cache, fn, argc, argv, recv, iseq},
-                              "sendDirect");
+                                     llvm::Value *iseq, llvm::Value *allTypeTested) {
+    return builder.CreateCall(cs.getFunction("sorbet_callFuncDirect"),
+                              {cache, fn, argc, argv, recv, iseq, allTypeTested}, "sendDirect");
 }
 
 void Payload::afterIntrinsic(CompilerState &cs, llvm::IRBuilderBase &builder) {

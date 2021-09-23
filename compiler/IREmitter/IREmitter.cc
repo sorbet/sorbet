@@ -659,6 +659,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                             IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, "sig");
                         }
                     }
+                    Payload::assertTypeTested(cs, builder, var);
                 },
                 [&](cfg::LoadYieldParams *i) {
                     ENFORCE(bb->rubyBlockId != 0, "LoadYieldParams found outside of ruby block");
@@ -684,6 +685,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     if (!skipTypeTest) {
                         IREmitterHelpers::emitTypeTest(cs, builder, val, bind.bind.type,
                                                        fmt::format("T.{}", i->cast.shortName(cs)));
+                        Payload::assertTypeTested(cs, builder, val);
                     }
 
                     if (i->cast == core::Names::let() || i->cast == core::Names::cast()) {

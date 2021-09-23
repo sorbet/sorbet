@@ -75,13 +75,15 @@ public:
     static std::size_t sendArgCount(cfg::Send *send);
 
     struct SendArgInfo {
-        SendArgInfo(llvm::Value *argc, llvm::Value *argv, llvm::Value *kw_splat, std::vector<llvm::Value *> argValues);
+        SendArgInfo(llvm::Value *argc, llvm::Value *argv, llvm::Value *kw_splat, std::vector<llvm::Value *> argValues,
+                    bool hasKwSplat);
 
         llvm::Value *argc;
         llvm::Value *argv;
         llvm::Value *kw_splat;
 
         std::vector<llvm::Value *> argValues;
+        bool hasKwSplat;
     };
 
     static SendArgInfo fillSendArgArray(MethodCallContext &mcctx, const std::size_t offset);

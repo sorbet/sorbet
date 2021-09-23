@@ -53,6 +53,14 @@ public:
                                          const core::TypePtr &type);
     static void assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                            core::ClassOrModuleRef sym);
+
+    // Emit an assertion that indicates that a type test has been performed for `val`.
+    static void assertTypeTested(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val);
+
+    // Check that all arguments have been tested. NOTE: this doesn't account for `T.untyped` arguments, so that must be
+    // ruled out through other means (see MethodCallContext.hasUntypedArgs for example).
+    static llvm::Value *allTypeTested(CompilerState &cs, llvm::IRBuilderBase &builder, std::vector<llvm::Value *> vals);
+
     static llvm::Value *boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *u1);
     static llvm::Value *setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &builder,
                                           const IREmitterContext &irctx, const ast::MethodDef &md, int rubyBlockId);
@@ -99,7 +107,7 @@ public:
                                                llvm::Value *blockFun, llvm::Value *closure);
     static llvm::Value *callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                        llvm::Value *fn, llvm::Value *argc, llvm::Value *argv, llvm::Value *recv,
-                                       llvm::Value *iseq);
+                                       llvm::Value *iseq, llvm::Value *allTypeTested);
     static void afterIntrinsic(CompilerState &cs, llvm::IRBuilderBase &builder);
 
     static llvm::Value *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder,
