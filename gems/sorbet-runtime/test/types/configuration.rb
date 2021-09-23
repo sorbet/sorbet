@@ -78,15 +78,54 @@ module Opus::Types::Test
         end
 
         it 'handles a T.must error' do
-          CustomReceiver.expects(:receive).once.with do |error|
-            error.is_a?(TypeError)
+          CustomReceiver.expects(:receive).once.with do |error, opts|
+            error.is_a?(TypeError) &&
+              opts.is_a?(Hash) &&
+              opts[:kind] == 'T.must' &&
+              opts[:type].nil? &&
+              opts[:value].nil?
           end
           assert_nil(T.must(nil))
         end
 
         it 'handles a T.let error' do
-          CustomReceiver.expects(:receive).once.with do |error|
-            error.is_a?(TypeError)
+          CustomReceiver.expects(:receive).once.with do |error, opts|
+            error.is_a?(TypeError) &&
+              opts.is_a?(Hash) &&
+              opts[:kind] == 'T.let' &&
+              opts[:type].name == 'String' &&
+              opts[:value] == 1
+          end
+          assert_equal(1, T.let(1, String))
+        end
+      end
+
+      # `inline_type_error_handler` historically took only a single arg, but now takes two. This
+      # test ensures backwards compatibility with any consumers still using a single argument. It
+      # can/should be removed whenever we're comfortable breaking this compatibility.
+      describe 'when overridden with a single arg' do
+        before do
+          T::Configuration.inline_type_error_handler = lambda do |single_arg|
+            CustomReceiver.receive(single_arg)
+          end
+        end
+
+        after do
+          T::Configuration.inline_type_error_handler = nil
+        end
+
+        it 'handles a T.must error' do
+          CustomReceiver.expects(:receive).once.with do |error, opts|
+            error.is_a?(TypeError) &&
+              opts.nil?
+          end
+          assert_nil(T.must(nil))
+        end
+
+        it 'handles a T.let error' do
+          CustomReceiver.expects(:receive).once.with do |error, opts|
+            error.is_a?(TypeError) &&
+              opts.nil?
           end
           assert_equal(1, T.let(1, String))
         end

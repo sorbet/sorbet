@@ -14,7 +14,7 @@ module T::Private
 
         raise TypeError.new("#{cast_method}: #{error}\n#{suffix}")
       rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
-        T::Configuration.inline_type_error_handler(e)
+        T::Configuration.inline_type_error_handler(e, {kind: cast_method, value: value, type: type})
         value
       end
     end
@@ -33,7 +33,7 @@ module T::Private
 
         raise TypeError.new("#{cast_method}: #{error}\n#{suffix}")
       rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
-        T::Configuration.inline_type_error_handler(e)
+        T::Configuration.inline_type_error_handler(e, {kind: cast_method, value: value, type: type})
         value
       end
     end

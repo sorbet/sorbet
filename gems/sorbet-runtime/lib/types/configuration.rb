@@ -131,9 +131,14 @@ module T::Configuration
   # Parameters passed to value.call:
   #
   # @param [TypeError] error TypeError that was raised
+  # @param [Hash] opts A hash containing contextual information on the error:
+  # @option opts [String] :kind One of:
+  #   ['T.cast', 'T.let', 'T.bind', 'T.assert_type!', 'T.must', 'T.absurd']
+  # @option opts [Object, nil] :type Expected param/return value type
+  # @option opts [Object] :value Actual param/return value
   #
   # @example
-  #   T::Configuration.inline_type_error_handler = lambda do |error|
+  #   T::Configuration.inline_type_error_handler = lambda do |error, opts|
   #     puts error.message
   #   end
   def self.inline_type_error_handler=(value)
@@ -141,15 +146,20 @@ module T::Configuration
     @inline_type_error_handler = value
   end
 
-  private_class_method def self.inline_type_error_handler_default(error)
+  private_class_method def self.inline_type_error_handler_default(error, opts)
     raise error
   end
 
-  def self.inline_type_error_handler(error)
+  def self.inline_type_error_handler(error, opts={})
     if @inline_type_error_handler
-      @inline_type_error_handler.call(error)
+      # Backwards compatibility before `inline_type_error_handler` took a second arg
+      if @inline_type_error_handler.arity == 1
+        @inline_type_error_handler.call(error)
+      else
+        @inline_type_error_handler.call(error, opts)
+      end
     else
-      inline_type_error_handler_default(error)
+      inline_type_error_handler_default(error, opts)
     end
     nil
   end

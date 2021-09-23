@@ -132,7 +132,7 @@ end
 T::Boolean = T.type_alias {T.any(TrueClass, FalseClass)}
 
 module T::Configuration
-  def self.call_validation_error_handler(signature, opts); end
+  def self.call_validation_error_handler(signature, opts={}); end
   def self.call_validation_error_handler=(value); end
   def self.default_checked_level=(default_checked_level); end
   def self.enable_checking_for_sigs_marked_checked_tests; end
@@ -151,7 +151,7 @@ module T::Configuration
   def self.disable_vm_prop_serde; end
   def self.hard_assert_handler(str, extra); end
   def self.hard_assert_handler=(value); end
-  def self.inline_type_error_handler(error); end
+  def self.inline_type_error_handler(error, opts={}); end
   def self.inline_type_error_handler=(value); end
   def self.log_info_handler(str, extra); end
   def self.log_info_handler=(value); end
@@ -163,7 +163,7 @@ module T::Configuration
   def self.sealed_violation_whitelist=(sealed_violation_whitelist); end
   def self.sig_builder_error_handler(error, location); end
   def self.sig_builder_error_handler=(value); end
-  def self.sig_validation_error_handler(error, opts); end
+  def self.sig_validation_error_handler(error, opts={}); end
   def self.sig_validation_error_handler=(value); end
   def self.soft_assert_handler(str, extra); end
   def self.soft_assert_handler=(value); end

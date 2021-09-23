@@ -33,7 +33,7 @@ There are four kinds of [inline type assertions](type-assertions.md):
 To customize the behavior when one of these assertions fails:
 
 ```ruby
-T::Configuration.inline_type_error_handler = lambda do |error|
+T::Configuration.inline_type_error_handler = lambda do |error, opts|
   puts error.message
 end
 ```
