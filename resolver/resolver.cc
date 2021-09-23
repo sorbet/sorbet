@@ -661,31 +661,53 @@ private:
             return;
         }
 
-        if (send->args.empty()) {
-            return; // The arity mismatch error will be emitted later by infer.
+        auto *block = ast::cast_tree<ast::Block>(send->block);
+
+        if (!send->args.empty()) {
+            if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidRequiredAncestor)) {
+                e.setHeader("`{}` only accepts a block", send->fun.show(gs));
+
+                string replacement = "";
+                int indent = core::Loc::offset2Pos(todo.file.data(gs), send->loc.beginPos()).column - 1;
+                int index = 1;
+                for (auto &arg : send->args) {
+                    auto argLoc = core::Loc(todo.file, arg.loc());
+                    replacement += fmt::format("{:{}}{} {{ {} }}{}", "", index == 1 ? 0 : indent, send->fun.show(gs),
+                                               argLoc.source(gs).value(), index < send->args.size() ? "\n" : "");
+                    index += 1;
+                }
+                e.addAutocorrect(
+                    core::AutocorrectSuggestion{fmt::format("Replace `{}` with `{}`", send->fun.show(gs), replacement),
+                                                {core::AutocorrectSuggestion::Edit{loc, replacement}}});
+            }
+            return;
         }
 
-        for (auto &arg : send->args) {
-            auto argLoc = core::Loc(todo.file, arg.loc());
-            auto *id = ast::cast_tree<ast::ConstantLit>(arg);
-
-            if (id == nullptr || !id->symbol.exists() || !id->symbol.data(gs)->isClassOrModule()) {
-                if (auto e = gs.beginError(argLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
-                    e.setHeader("Argument to `{}` must be statically resolvable to a class or a module",
-                                send->fun.show(gs));
-                }
-                return;
-            }
-
-            if (id->symbol == owner) {
-                if (auto e = gs.beginError(argLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
-                    e.setHeader("Must not pass yourself to `{}`", send->fun.show(gs));
-                }
-                return;
-            }
-
-            owner.data(gs)->recordRequiredAncestor(gs, id->symbol.asClassOrModuleRef(), argLoc);
+        if (block == nullptr) {
+            return; // The sig mismatch error will be emitted later by infer.
         }
+
+        ENFORCE(block->body);
+
+        auto blockLoc = core::Loc(todo.file, block->body.loc());
+        auto *id = ast::cast_tree<ast::ConstantLit>(block->body);
+
+        if (id == nullptr || !id->symbol.exists() || !id->symbol.data(gs)->isClassOrModule()) {
+            if (auto e = gs.beginError(blockLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
+                e.setHeader("Argument to `{}` must be statically resolvable to a class or a module",
+                            send->fun.show(gs));
+            }
+            return;
+        }
+
+        if (id->symbol == owner) {
+            if (auto e = gs.beginError(blockLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
+                e.setHeader("Must not pass yourself to `{}`", send->fun.show(gs));
+            }
+            return;
+        }
+
+        owner.data(gs)->recordRequiredAncestor(gs, id->symbol.asClassOrModuleRef(), blockLoc);
     }
 
     static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {

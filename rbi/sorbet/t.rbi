@@ -91,23 +91,25 @@ module T::Helpers
   sig {void}
   def sealed!; end
 
-  # We do not use signatures on the following methods as to not duplicate errors
+  # We do not use signatures on `mixes_in_class_methods` as to not duplicate errors
   # between the `namer` phase and typechecking for calls.
   #
   # With the following example:
   #
   # ```
   # class A
-  #   requires_ancestor "A"
+  #   mixes_in_class_methods A
   # end
   # ```
   #
   # Using a signature would mean we would generate two errors:
-  # 1. error: `requires_ancestor` must only contain constant literals (from namer)
+  # 1. error: `mixes_in_class_methods` must only contain constant literals (from namer)
   # 2. error: Expected `Module` but found `NilClass` for argument `mod` (from calls)
 
   def mixes_in_class_methods(mod, *mods); end
-  def requires_ancestor(mod, *mods); end
+
+  sig { params(block: T.proc.returns(Module)).void }
+  def requires_ancestor(&block); end
 end
 
 module T::Array
