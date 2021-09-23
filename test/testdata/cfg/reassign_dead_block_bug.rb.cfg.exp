@@ -36,7 +36,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_5" [
         shape = rectangle;
         color = black;
-        label = "block[id=5, rubyBlockId=1](<self>: T.class_of(<root>))\louterLoops: 1\l<self>: T.class_of(<root>) = loadSelf\lx$1: Integer(1) = 1\l<returnTemp>$11: Integer(1) = 1\l<statTemp>$10: T.noreturn = return <returnTemp>$11: Integer(1)\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=1](<self>: T.class_of(<root>))\louterLoops: 1\l<self>: T.class_of(<root>) = loadSelf\lx$1: Integer(1) = 1\l<returnTemp>$10: Integer(1) = 1\l<statTemp>$9: T.noreturn = return <returnTemp>$10: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_5" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];

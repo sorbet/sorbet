@@ -134,10 +134,9 @@ bb5(rubyBlockId=1):
     outerLoops: 1
     <self>: A = loadSelf
     <blk>$6: T.untyped = load_yield_params(map)
-    <blk>$7: Integer(0) = 0
-    e$1: T.untyped = <blk>$6: T.untyped.[](<blk>$7: Integer(0))
-    <blockReturnTemp>$8: T.untyped = <self>: A.g(e$1: T.untyped, y: T.untyped)
-    <blockReturnTemp>$12: T.noreturn = blockreturn<map> <blockReturnTemp>$8: T.untyped
+    e$1: T.untyped = yield_load_arg(0)
+    <blockReturnTemp>$7: T.untyped = <self>: A.g(e$1: T.untyped, y: T.untyped)
+    <blockReturnTemp>$11: T.noreturn = blockreturn<map> <blockReturnTemp>$7: T.untyped
     <unconditional>(bb5 -> bb2)
 
 }

@@ -541,7 +541,6 @@ llvm::BasicBlock *resolveJumpTarget(cfg::CFG &cfg, const IREmitterContext &irctx
 
 void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(base);
-    UnorderedSet<cfg::LocalRef> loadYieldParamsResults; // methods calls on these are ignored
     auto startLoc = cfg.symbol.data(base)->loc();
     auto &arguments = cfg.symbol.data(base)->arguments();
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
@@ -587,13 +586,6 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     Payload::varSet(cs, bind.bind.variable, var, builder, irctx, bb->rubyBlockId);
                 },
                 [&](cfg::Send *i) {
-                    if (i->recv.variable.data(cfg)._name == core::Names::blkArg() &&
-                        loadYieldParamsResults.contains(i->recv.variable)) {
-                        // this loads an argument of a block.
-                        // They are already loaded in preambula of the method
-                        return;
-                    }
-
                     std::optional<int> blk;
                     if (i->link != nullptr) {
                         blk.emplace(i->link->rubyBlockId);
@@ -669,12 +661,16 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     }
                 },
                 [&](cfg::LoadYieldParams *i) {
-                    loadYieldParamsResults.insert(bind.bind.variable);
+                    ENFORCE(bb->rubyBlockId != 0, "LoadYieldParams found outside of ruby block");
                     /* intentionally omitted, it's part of method preambula */
                 },
                 [&](cfg::YieldParamPresent *i) {
                     ENFORCE(bb->rubyBlockId != 0, "YieldParamPresent found outside of ruby block");
                     // Intentionally omitted: the result of the YieldParamPresent call is filled out in `setupArguments`
+                },
+                [&](cfg::YieldLoadArg *i) {
+                    ENFORCE(bb->rubyBlockId != 0, "YieldLoadArg found outside of ruby block");
+                    // Filled out as part of the method preamble.
                 },
                 [&](cfg::Cast *i) {
                     auto val = Payload::varGet(cs, i->value.variable, builder, irctx, bb->rubyBlockId);

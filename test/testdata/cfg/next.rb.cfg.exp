@@ -13,7 +13,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0](<self>)\l<statTemp>$16 = <self>\l<blockReturnTemp>$10 = <statTemp>$16.bad()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<self>)\l<statTemp>$15 = <self>\l<blockReturnTemp>$9 = <statTemp>$15.bad()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
@@ -36,7 +36,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_5" [
         shape = rectangle;
         color = black;
-        label = "block[id=5, rubyBlockId=1](<self>: Object, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: Object)\louterLoops: 1\l<self>: Object = loadSelf\l<blk>$8: [Integer] = load_yield_params(map)\l<blk>$9: Integer(0) = 0\lx$1: Integer = <blk>$8: [Integer].[](<blk>$9: Integer(0))\l<statTemp>$11: T.untyped = <self>: Object.good()\l<nextTemp>$14: Integer = x$1\l<nextTemp>$15: T.noreturn = blockreturn<map> <nextTemp>$14: Integer\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=1](<self>: Object, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: Object)\louterLoops: 1\l<self>: Object = loadSelf\l<blk>$8: [Integer] = load_yield_params(map)\lx$1: Integer = yield_load_arg(0)\l<statTemp>$10: T.untyped = <self>: Object.good()\l<nextTemp>$13: Integer = x$1\l<nextTemp>$14: T.noreturn = blockreturn<map> <nextTemp>$13: Integer\l<unconditional>\l"
     ];
 
     "bb::Object#foo_5" -> "bb::Object#foo_2" [style="bold"];

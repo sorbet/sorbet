@@ -1172,6 +1172,65 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 tp.type = core::Types::Boolean();
                 tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
             },
+            [&](cfg::YieldLoadArg *i) {
+                // Mixing positional and rest args in blocks is not well supported.
+                // Use these special cases for now.
+                // TODO: handle kwsplats here as well.
+                if (i->flags.isRepeated) {
+                    if (i->argId == 0) {
+                        const core::TypeAndOrigins &argsType = getAndFillTypeAndOrigin(ctx, i->yieldParam);
+                        tp.type = argsType.type;
+                    } else {
+                        tp.type = core::Types::untypedUntracked();
+                    }
+                    tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                    return;
+                }
+
+                // Fetch the type for the argument out of the parameters for the block
+                // by simulating a blockParam[i] call.
+                const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, i->yieldParam);
+                core::TypePtr argType = core::make_type<core::LiteralType>((int64_t)i->argId);
+
+                core::TypeAndOrigins arg;
+                arg.type = argType;
+                arg.origins = recvType.origins;
+                InlinedVector<const core::TypeAndOrigins *, 2> args;
+                args.emplace_back(&arg);
+
+                InlinedVector<core::LocOffsets, 2> argLocs;
+                argLocs.emplace_back(bind.loc);
+                core::CallLocs locs{
+                    ctx.file,
+                    bind.loc,
+                    bind.loc,
+                    argLocs,
+                };
+
+                const auto numPosArgs = 1;
+                const auto suppressErrors = true;
+                const auto isPrivateOk = true;
+                const std::shared_ptr<const core::SendAndBlockLink> block = nullptr;
+                core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),
+                                                locs,
+                                                numPosArgs,
+                                                args,
+                                                recvType.type,
+                                                recvType,
+                                                recvType.type,
+                                                block,
+                                                core::Loc(ctx.file, bind.loc),
+                                                isPrivateOk,
+                                                suppressErrors};
+                auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
+                tp.type = dispatched.returnType;
+                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                if (lspQueryMatch) {
+                    core::lsp::QueryResponse::pushQueryResponse(
+                        ctx, core::lsp::IdentResponse(core::Loc(ctx.file, bind.loc), bind.bind.variable.data(inWhat),
+                                                      tp, ctx.owner.asMethodRef()));
+                }
+            },
             [&](cfg::Return *i) {
                 tp.type = core::Types::bottom();
                 tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));

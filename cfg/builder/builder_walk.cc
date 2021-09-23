@@ -446,7 +446,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     auto bodyBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyBlockId);
 
                     LocalRef argTemp = cctx.newTemporary(core::Names::blkArg());
-                    LocalRef idxTmp = cctx.newTemporary(core::Names::blkArg());
                     bodyBlock->exprs.emplace_back(LocalRef::selfVariable(), s.loc,
                                                   make_unique<LoadSelf>(link, LocalRef::selfVariable()));
                     bodyBlock->exprs.emplace_back(argTemp, s.block.loc(), make_unique<LoadYieldParams>(link));
@@ -457,27 +456,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         LocalRef argLoc = cctx.inWhat.enterLocal(arg.local);
 
                         if (arg.flags.isRepeated) {
-                            if (i != 0) {
-                                // Mixing positional and rest args in blocks is
-                                // not currently supported; drop in an untyped.
-                                argBlock->exprs.emplace_back(argLoc, arg.loc,
-                                                             make_unique<Alias>(core::Symbols::untyped()));
-                            } else {
-                                argBlock->exprs.emplace_back(argLoc, arg.loc, make_unique<Ident>(argTemp));
-                            }
+                            // Mixing positional and rest args in blocks is
+                            // not currently supported, but we'll handle that in
+                            // inference.
+                            argBlock->exprs.emplace_back(argLoc, arg.loc,
+                                                         make_unique<YieldLoadArg>(i, arg.flags, argTemp));
                             continue;
                         }
 
-                        // Inserting a statement that does not directly map to any source text. Make its loc
-                        // 0-length so LSP ignores it in queries.
-                        core::LocOffsets zeroLengthLoc = arg.loc.copyWithZeroLength();
-                        argBlock->exprs.emplace_back(
-                            idxTmp, zeroLengthLoc,
-                            make_unique<Literal>(core::make_type<core::LiteralType>(int64_t(i))));
-
-                        InlinedVector<LocalRef, 2> idxVec{idxTmp};
-                        InlinedVector<core::LocOffsets, 2> locs{zeroLengthLoc};
-                        auto isPrivateOk = false;
                         if (auto *opt = ast::cast_tree<ast::OptionalArg>(blockArgs[i])) {
                             auto *presentBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyBlockId);
                             auto *missingBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyBlockId);
@@ -493,9 +479,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                             // compile the argument fetch in the present block
                             presentBlock->exprs.emplace_back(argLoc, arg.loc,
-                                                             make_unique<Send>(argTemp, core::Names::squareBrackets(),
-                                                                               s.block.loc(), idxVec.size(), idxVec,
-                                                                               locs, isPrivateOk));
+                                                             make_unique<YieldLoadArg>(i, arg.flags, argTemp));
                             unconditionalJump(presentBlock, argBlock, cctx.inWhat, arg.loc);
 
                             // compile the default expr in `missingBlock`
@@ -503,9 +487,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                             unconditionalJump(missingLast, argBlock, cctx.inWhat, arg.loc);
                         } else {
                             argBlock->exprs.emplace_back(argLoc, arg.loc,
-                                                         make_unique<Send>(argTemp, core::Names::squareBrackets(),
-                                                                           s.block.loc(), idxVec.size(), idxVec, locs,
-                                                                           isPrivateOk));
+                                                         make_unique<YieldLoadArg>(i, arg.flags, argTemp));
                         }
                     }
 

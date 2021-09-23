@@ -13,7 +13,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0](<self>)\l<statTemp>$11 = <self>\l<block-pre-call-temp>$12 = <statTemp>$11.inner()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<self>)\l<statTemp>$10 = <self>\l<block-pre-call-temp>$11 = <statTemp>$10.inner()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
@@ -36,7 +36,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_5" [
         shape = rectangle;
         color = black;
-        label = "block[id=5, rubyBlockId=1](<self>: Object)\louterLoops: 1\l<self>: Object = loadSelf\l<statTemp>$9: T.noreturn = return <returnTemp>$10: NilClass\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=1](<self>: Object)\louterLoops: 1\l<self>: Object = loadSelf\l<statTemp>$8: T.noreturn = return <returnTemp>$9: NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#foo_5" -> "bb::Object#foo_1" [style="bold"];

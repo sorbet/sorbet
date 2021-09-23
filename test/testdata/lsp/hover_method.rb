@@ -87,8 +87,8 @@ def main
   rv = Foo.blk_arg {|num, str| num.to_s + str}
 # ^ hover: String
          # ^ hover:     blk: T.proc.params(arg0: Integer, arg1: String).returns(String)
-                   # ^ hover: sig {params(args: T.untyped).returns(Integer)}
-                        # ^ hover: sig {params(args: T.untyped).returns(String)}
+                   # ^ hover: Integer
+                        # ^ hover: String
   rv2 = Foo.splat_arg("a", "b", "c")
 # ^ hover: T::Array[String]
           # ^ hover: sig {params(a: String, x: String).returns(T::Array[String])}
