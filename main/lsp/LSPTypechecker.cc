@@ -281,8 +281,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
     Timer timeit(logger, "slow_path.copy_indexes");
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
     for (int i = 0; i < indexed.size(); i++) {
-        auto copy = i;
-        fileq->push(move(copy), 1);
+        fileq->push(i, 1);
     }
 
     const auto &epochManager = *gs->epochManager;

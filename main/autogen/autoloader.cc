@@ -453,7 +453,7 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
     auto inputq = make_shared<ConcurrentBoundedQueue<int>>(tasks.size());
     auto outputq = make_shared<BlockingBoundedQueue<CounterState>>(tasks.size());
     for (int i = 0; i < tasks.size(); ++i) {
-        inputq->push(move(i), 1);
+        inputq->push(i, 1);
     }
 
     workers.multiplexJob("runAutogenWriteAutoloads", [&gs, &tasks, &alCfg, inputq, outputq]() {
