@@ -82,8 +82,10 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
     ast::MethodDef::Flags flags;
     flags.discardDef = true;
 
-    stats.emplace_back(ast::MK::Send(loc, move(send->recv), sendFun, send->numPosArgs, std::move(send->args),
-                                     send->flags, move(send->block)));
+    if (!skipSetter && !skipGetter) {
+        stats.emplace_back(ast::MK::Send(loc, ast::MK::Unsafe(loc, move(send->recv)), sendFun, send->numPosArgs,
+                                         std::move(send->args), send->flags, move(send->block)));
+    }
 
     // def self.<prop>
     if (!skipSetter) {
