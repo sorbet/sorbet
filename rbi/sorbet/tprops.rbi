@@ -207,3 +207,8 @@ module T::Props::GeneratedCodeValidation
   def self.validate_deserialize(source); end
   def self.validate_serialize(source); end
 end
+
+module T::Props::ValueObject
+  include T::Props
+  include Kernel
+end

@@ -68,3 +68,37 @@ my_struct.serialize # => { "foo": 4, "quz": 0.5 }
 ```
 
 Note that `bar` is skipped because it is `nil`.
+
+## Using T::Struct as value objects
+
+Regular Ruby structs work as value objects. An instance of a struct is
+considered to be equal to another if they have the same class and the same
+attributes.
+
+The same behavior can be achieved for `T::Struct` or any class using `T::Props`
+by including the `T::Props::ValueObject` module.
+
+```ruby
+class MyValueObject < T::Struct
+  include T::Props::ValueObject
+
+  prop :a, Integer
+end
+
+first = MyValueObject.new(a: 50)
+second = MyValueObject.new(a: 50)
+
+first == second # true because classes, prop definitions and values are the same
+
+class AnotherValueObject
+  include T::Props
+  include T::Props::ValueObject
+
+  prop :a, Integer
+end
+
+first = AnotherValueObject.new(a: 50)
+second = AnotherValueObject.new(a: 50)
+
+first == second # true. Same behavior as T::Struct
+```
