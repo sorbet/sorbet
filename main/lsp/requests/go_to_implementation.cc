@@ -85,10 +85,12 @@ unique_ptr<ResponseMessage> GoToImplementationTask::runRequest(LSPTypecheckerDel
     if (auto def = queryResponse->isDefinition()) {
         // User called "Go to Implementation" from the abstract function definition
         core::SymbolRef method = def->symbol;
-        if (!method.data(gs)->isMethod())
+        if (!method.data(gs)->isMethod()) {
             response->error = make_unique<ResponseError>(
                 (int)LSPErrorCodes::InvalidParams,
                 "Go to implementation can be used only for methods or references of abstract classes");
+            return response;
+        }
 
         core::SymbolRef overridedMethod = method;
         if (method.data(gs)->isOverride()) {
