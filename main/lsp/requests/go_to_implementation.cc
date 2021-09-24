@@ -21,15 +21,19 @@ unique_ptr<ResponseError> makeInvalidParamsError(std::string error) {
 }
 
 const MethodImplementationResults findMethodImplementations(const core::GlobalState &gs, core::SymbolRef method) {
+    MethodImplementationResults res;
     if (!method.data(gs)->isMethod() || !method.data(gs)->isAbstract()) {
-        return {.error = {makeInvalidParamsError(
-                    "Go to implementation can be used only for methods or references of abstract classes")}};
+        res.error = makeInvalidParamsError(
+            "Go to implementation can be used only for methods or references of abstract classes");
+        return res;
     }
 
     vector<core::Loc> locations;
     auto owner = method.data(gs)->owner;
-    if (!owner.isClassOrModule())
-        return {.error = {makeInvalidParamsError("Abstract method can only be inside a class or module")}};
+    if (!owner.isClassOrModule()) {
+        res.error = makeInvalidParamsError("Abstract method can only be inside a class or module");
+        return res;
+    }
 
     auto owningClassSymbolRef = owner.asClassOrModuleRef();
     auto childClasses = owningClassSymbolRef.getSubclasses(gs, false);
@@ -39,7 +43,8 @@ const MethodImplementationResults findMethodImplementations(const core::GlobalSt
         locations.push_back(methodImplementation.data(gs)->loc());
     }
 
-    return {.locations = {locations}};
+    res.locations = locations;
+    return res;
 }
 
 core::SymbolRef findOverridedMethod(const core::GlobalState &gs, const core::SymbolRef method) {
@@ -122,14 +127,13 @@ unique_ptr<ResponseMessage> GoToImplementationTask::runRequest(LSPTypecheckerDel
         auto mainResponse = move(send->dispatchResult->main);
 
         // User called "Go to Implementation" from the abstract function call
-        const core::MethodRef calledMethod = mainResponse.method;
-
         if (mainResponse.errors.size() != 0) {
             response->error = makeInvalidParamsError("Failed to fetch implementations");
             return response;
         }
 
-        core::SymbolRef overridedMethod = core::SymbolRef(calledMethod);
+        auto calledMethod = mainResponse.method;
+        core::SymbolRef overridedMethod = calledMethod;
         if (calledMethod.data(gs)->isOverride()) {
             overridedMethod = findOverridedMethod(gs, overridedMethod);
         }
