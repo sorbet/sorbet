@@ -649,8 +649,18 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     // Build up an array that represents the keyword args for the send. When there is a Kwsplat, treat
                     // all keyword arguments as a single argument.
                     unique_ptr<parser::Node> kwArray;
+
+                    // If there's a &blk node in the last position, pop that off (we'll put it back later, but
+                    // subsequent logic for dealing with the kwargs hash is simpler this way).
+                    unique_ptr<parser::Node> savedBlockPass = nullptr;
+
+                    if (!send->args.empty() && parser::isa_node<parser::BlockPass>(send->args.back().get())) {
+                        savedBlockPass = std::move(send->args.back());
+                        send->args.pop_back();
+                    }
+
+                    // Deconstruct the kwargs hash if it's present.
                     if (!send->args.empty()) {
-                        // Deconstruct the kwargs hash in the last argument if it's present.
                         if (auto *hash = parser::cast_node<parser::Hash>(send->args.back().get())) {
                             if (hash->kwargs) {
                                 // hold a reference to the node, and remove it from the back of the send list
@@ -684,6 +694,11 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                                 kwArray = make_unique<parser::Array>(loc, std::move(elts));
                             }
                         }
+                    }
+
+                    // Put the &blk arg back, if present.
+                    if (savedBlockPass) {
+                        send->args.emplace_back(std::move(savedBlockPass));
                     }
 
                     // If the kwargs hash is not present, make a `nil` to put in the place of that argument. This
