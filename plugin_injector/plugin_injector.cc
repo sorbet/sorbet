@@ -143,7 +143,7 @@ class LLVMSemanticExtension : public SemanticExtension {
             UnorderedSet<cfg::LocalRef> refsToDelete;
             for (auto i = block->exprs.rbegin(), e = block->exprs.rend(); i != e; ++i) {
                 auto &binding = *i;
-                if (auto *send = cfg::cast_instruction<cfg::Send>(binding.value.get())) {
+                if (auto *send = cfg::cast_instruction<cfg::Send>(binding.value)) {
                     switch (send->fun.rawId()) {
                         case core::Names::keepForIde().rawId():
                         case core::Names::keepForTypechecking().rawId():

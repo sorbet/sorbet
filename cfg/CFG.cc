@@ -105,31 +105,30 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
              * assignment. Treating every write as also reading from the
              * variable serves to represent this.
              */
-            if (bind.bind.variable.isAliasForGlobal(ctx, *this) &&
-                cast_instruction<Alias>(bind.value.get()) == nullptr) {
+            if (bind.bind.variable.isAliasForGlobal(ctx, *this) && cast_instruction<Alias>(bind.value) == nullptr) {
                 blockReads.add(bind.bind.variable.id());
             }
 
-            if (auto *v = cast_instruction<Ident>(bind.value.get())) {
+            if (auto *v = cast_instruction<Ident>(bind.value)) {
                 blockReads.add(v->what.id());
-            } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<Send>(bind.value)) {
                 blockReads.add(v->recv.variable.id());
                 for (auto &arg : v->args) {
                     blockReads.add(arg.variable.id());
                 }
-            } else if (auto *v = cast_instruction<TAbsurd>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<TAbsurd>(bind.value)) {
                 blockReads.add(v->what.variable.id());
-            } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<Return>(bind.value)) {
                 blockReads.add(v->what.variable.id());
-            } else if (auto *v = cast_instruction<BlockReturn>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<BlockReturn>(bind.value)) {
                 blockReads.add(v->what.variable.id());
-            } else if (auto *v = cast_instruction<Cast>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<Cast>(bind.value)) {
                 blockReads.add(v->value.variable.id());
-            } else if (auto *v = cast_instruction<LoadSelf>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<LoadSelf>(bind.value)) {
                 blockReads.add(v->fallback.id());
-            } else if (auto *v = cast_instruction<SolveConstraint>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<SolveConstraint>(bind.value)) {
                 blockReads.add(v->send.id());
-            } else if (auto *v = cast_instruction<YieldLoadArg>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<YieldLoadArg>(bind.value)) {
                 blockReads.add(v->yieldParam.variable.id());
             }
 
@@ -313,7 +312,7 @@ string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
         fmt::format_to(std::back_inserter(buf), "outerLoops: {}\n", this->outerLoops);
     }
     for (const Binding &exp : this->exprs) {
-        fmt::format_to(std::back_inserter(buf), "{} = {}\n", exp.bind.toString(gs, cfg), exp.value->toString(gs, cfg));
+        fmt::format_to(std::back_inserter(buf), "{} = {}\n", exp.bind.toString(gs, cfg), exp.value.toString(gs, cfg));
     }
     fmt::format_to(std::back_inserter(buf), "{}", this->bexit.cond.toString(gs, cfg));
     return to_string(buf);
@@ -330,7 +329,7 @@ string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) 
         fmt::format_to(std::back_inserter(buf), "outerLoops: {}\n", this->outerLoops);
     }
     for (const Binding &exp : this->exprs) {
-        fmt::format_to(std::back_inserter(buf), "{} = {}\n", exp.bind.toString(gs, cfg), exp.value->toString(gs, cfg));
+        fmt::format_to(std::back_inserter(buf), "{} = {}\n", exp.bind.toString(gs, cfg), exp.value.toString(gs, cfg));
     }
     fmt::format_to(std::back_inserter(buf), "{}", this->bexit.cond.toString(gs, cfg));
     return to_string(buf);
@@ -348,13 +347,13 @@ string BasicBlock::showRaw(const core::GlobalState &gs, const CFG &cfg) const {
     }
     for (const Binding &exp : this->exprs) {
         fmt::format_to(std::back_inserter(buf), "Binding {{\n&nbsp;bind = {},\n&nbsp;value = {},\n}}\n",
-                       exp.bind.showRaw(gs, cfg, 1), exp.value->showRaw(gs, cfg, 1));
+                       exp.bind.showRaw(gs, cfg, 1), exp.value.showRaw(gs, cfg, 1));
     }
     fmt::format_to(std::back_inserter(buf), "{}", this->bexit.cond.showRaw(gs, cfg));
     return to_string(buf);
 }
 
-Binding::Binding(LocalRef bind, core::LocOffsets loc, unique_ptr<Instruction> value)
+Binding::Binding(LocalRef bind, core::LocOffsets loc, InstructionPtr value)
     : bind(bind), loc(loc), value(std::move(value)) {}
 
 } // namespace sorbet::cfg

@@ -570,35 +570,35 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
             IREmitterHelpers::emitDebugLoc(cs, builder, irctx, bb->rubyBlockId, loc);
 
             typecase(
-                bind.value.get(),
-                [&](cfg::Ident *i) {
-                    auto var = Payload::varGet(cs, i->what, builder, irctx, bb->rubyBlockId);
+                bind.value,
+                [&](cfg::Ident &i) {
+                    auto var = Payload::varGet(cs, i.what, builder, irctx, bb->rubyBlockId);
                     Payload::varSet(cs, bind.bind.variable, var, builder, irctx, bb->rubyBlockId);
                 },
-                [&](cfg::Alias *i) {
+                [&](cfg::Alias &i) {
                     // We compute the alias map when IREmitterContext is first created, so if an entry is missing,
                     // there's a problem.
                     ENFORCE(irctx.aliases.find(bind.bind.variable) != irctx.aliases.end(),
                             "Alias is missing from the alias map");
                 },
-                [&](cfg::SolveConstraint *i) {
-                    auto var = Payload::varGet(cs, i->send, builder, irctx, bb->rubyBlockId);
+                [&](cfg::SolveConstraint &i) {
+                    auto var = Payload::varGet(cs, i.send, builder, irctx, bb->rubyBlockId);
                     Payload::varSet(cs, bind.bind.variable, var, builder, irctx, bb->rubyBlockId);
                 },
-                [&](cfg::Send *i) {
+                [&](cfg::Send &i) {
                     std::optional<int> blk;
-                    if (i->link != nullptr) {
-                        blk.emplace(i->link->rubyBlockId);
+                    if (i.link != nullptr) {
+                        blk.emplace(i.link->rubyBlockId);
                     }
-                    auto mcctx = MethodCallContext::create(cs, builder, irctx, bb->rubyBlockId, i, blk);
+                    auto mcctx = MethodCallContext::create(cs, builder, irctx, bb->rubyBlockId, &i, blk);
                     auto rawCall = IREmitterHelpers::emitMethodCall(mcctx);
                     mcctx.finalize();
                     Payload::varSet(cs, bind.bind.variable, rawCall, builder, irctx, bb->rubyBlockId);
                 },
-                [&](cfg::Return *i) {
+                [&](cfg::Return &i) {
                     isTerminated = true;
 
-                    auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
+                    auto *var = Payload::varGet(cs, i.what.variable, builder, irctx, bb->rubyBlockId);
                     bool hasBlockAncestor = false;
                     int rubyBlockId = bb->rubyBlockId;
 
@@ -618,20 +618,20 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
                     }
                 },
-                [&](cfg::BlockReturn *i) {
+                [&](cfg::BlockReturn &i) {
                     ENFORCE(bb->rubyBlockId != 0, "should never happen");
                     isTerminated = true;
-                    auto var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
+                    auto var = Payload::varGet(cs, i.what.variable, builder, irctx, bb->rubyBlockId);
                     IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
                 },
-                [&](cfg::LoadSelf *i) {
+                [&](cfg::LoadSelf &i) {
                     // it's done in function setup, no need to do anything here
                 },
-                [&](cfg::Literal *i) {
-                    auto rawValue = IREmitterHelpers::emitLiteralish(cs, builder, i->value);
+                [&](cfg::Literal &i) {
+                    auto rawValue = IREmitterHelpers::emitLiteralish(cs, builder, i.value);
                     Payload::varSet(cs, bind.bind.variable, rawValue, builder, irctx, bb->rubyBlockId);
                 },
-                [&](cfg::GetCurrentException *i) {
+                [&](cfg::GetCurrentException &i) {
                     // if this block isn't an exception block header, there's nothing to do here.
                     auto bodyRubyBlockId = irctx.exceptionBlockHeader[bb->id];
                     if (bodyRubyBlockId == 0) {
@@ -641,16 +641,16 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     IREmitterHelpers::emitExceptionHandlers(cs, builder, irctx, bb->rubyBlockId, bodyRubyBlockId,
                                                             bind.bind.variable);
                 },
-                [&](cfg::ArgPresent *i) {
+                [&](cfg::ArgPresent &i) {
                     ENFORCE(bb->rubyBlockId == 0, "ArgPresent found outside of entry-method");
                     // Intentionally omitted: the result of the ArgPresent call is filled out in `setupArguments`
                 },
-                [&](cfg::LoadArg *i) {
+                [&](cfg::LoadArg &i) {
                     ENFORCE(bb->rubyBlockId == 0, "LoadArg found outside of entry-method");
 
                     // Argument values are loaded by `setupArguments`, we just need to check their type here
-                    auto &argInfo = arguments[i->argId];
-                    auto local = irctx.rubyBlockArgs[0][i->argId];
+                    auto &argInfo = arguments[i.argId];
+                    auto local = irctx.rubyBlockArgs[0][i.argId];
                     auto var = Payload::varGet(cs, local, builder, irctx, 0);
                     if (auto &expectedType = argInfo.type) {
                         if (argInfo.flags.isBlock) {
@@ -660,20 +660,20 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         }
                     }
                 },
-                [&](cfg::LoadYieldParams *i) {
+                [&](cfg::LoadYieldParams &i) {
                     ENFORCE(bb->rubyBlockId != 0, "LoadYieldParams found outside of ruby block");
                     /* intentionally omitted, it's part of method preambula */
                 },
-                [&](cfg::YieldParamPresent *i) {
+                [&](cfg::YieldParamPresent &i) {
                     ENFORCE(bb->rubyBlockId != 0, "YieldParamPresent found outside of ruby block");
                     // Intentionally omitted: the result of the YieldParamPresent call is filled out in `setupArguments`
                 },
-                [&](cfg::YieldLoadArg *i) {
+                [&](cfg::YieldLoadArg &i) {
                     ENFORCE(bb->rubyBlockId != 0, "YieldLoadArg found outside of ruby block");
                     // Filled out as part of the method preamble.
                 },
-                [&](cfg::Cast *i) {
-                    auto val = Payload::varGet(cs, i->value.variable, builder, irctx, bb->rubyBlockId);
+                [&](cfg::Cast &i) {
+                    auto val = Payload::varGet(cs, i.value.variable, builder, irctx, bb->rubyBlockId);
 
                     // We skip the type test for Cast instructions that assign into <self>.
                     // These instructions only exist in the CFG for the purpose of type checking.
@@ -683,18 +683,18 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
 
                     if (!skipTypeTest) {
                         IREmitterHelpers::emitTypeTest(cs, builder, val, bind.bind.type,
-                                                       fmt::format("T.{}", i->cast.shortName(cs)));
+                                                       fmt::format("T.{}", i.cast.shortName(cs)));
                     }
 
-                    if (i->cast == core::Names::let() || i->cast == core::Names::cast()) {
+                    if (i.cast == core::Names::let() || i.cast == core::Names::cast()) {
                         Payload::varSet(cs, bind.bind.variable, val, builder, irctx, bb->rubyBlockId);
-                    } else if (i->cast == core::Names::assertType()) {
+                    } else if (i.cast == core::Names::assertType()) {
                         Payload::varSet(cs, bind.bind.variable, Payload::rubyFalse(cs, builder), builder, irctx,
                                         bb->rubyBlockId);
                     }
                 },
-                [&](cfg::TAbsurd *i) {
-                    auto val = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
+                [&](cfg::TAbsurd &i) {
+                    auto val = Payload::varGet(cs, i.what.variable, builder, irctx, bb->rubyBlockId);
                     builder.CreateCall(cs.getFunction("sorbet_t_absurd"), {val});
                 });
             if (isTerminated) {

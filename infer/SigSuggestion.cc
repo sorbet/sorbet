@@ -234,14 +234,14 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
             }
             InlinedVector<core::NameRef, 1> newInsert;
 
-            if (auto load = cfg::cast_instruction<cfg::LoadArg>(bind.value.get())) {
+            if (auto load = cfg::cast_instruction<cfg::LoadArg>(bind.value)) {
                 newInsert.emplace_back(load->argument(ctx).name);
-            } else if (auto ident = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
+            } else if (auto ident = cfg::cast_instruction<cfg::Ident>(bind.value)) {
                 auto fnd = blockLocals.find(ident->what);
                 if (fnd != blockLocals.end()) {
                     newInsert.insert(newInsert.end(), fnd->second.begin(), fnd->second.end());
                 }
-            } else if (auto snd = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
+            } else if (auto snd = cfg::cast_instruction<cfg::Send>(bind.value)) {
                 // see if we have at least a single call argument that is a method argument
                 bool shouldFindArgumentTypes = false;
                 for (auto &arg : snd->args) {

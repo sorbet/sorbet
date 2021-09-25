@@ -5,8 +5,6 @@
 #include "core/Names.h"
 #include "core/TypeConstraint.h"
 #include <utility>
-// helps debugging
-template class std::unique_ptr<sorbet::cfg::Instruction>;
 
 using namespace std;
 
@@ -21,6 +19,56 @@ string spacesForTabLevel(int tabs) {
     return to_string(ss);
 }
 } // namespace
+
+#define CASE_STATEMENT(CASE_BODY, T) \
+    case Tag::T: {                   \
+        CASE_BODY(T)                 \
+        break;                       \
+    }
+
+#define GENERATE_TAG_SWITCH(tag, body)            \
+    switch (tag) {                                \
+        CASE_STATEMENT(body, Ident)               \
+        CASE_STATEMENT(body, Alias)               \
+        CASE_STATEMENT(body, SolveConstraint)     \
+        CASE_STATEMENT(body, Send)                \
+        CASE_STATEMENT(body, Return)              \
+        CASE_STATEMENT(body, BlockReturn)         \
+        CASE_STATEMENT(body, LoadSelf)            \
+        CASE_STATEMENT(body, Literal)             \
+        CASE_STATEMENT(body, GetCurrentException) \
+        CASE_STATEMENT(body, LoadArg)             \
+        CASE_STATEMENT(body, ArgPresent)          \
+        CASE_STATEMENT(body, LoadYieldParams)     \
+        CASE_STATEMENT(body, YieldParamPresent)   \
+        CASE_STATEMENT(body, YieldLoadArg)        \
+        CASE_STATEMENT(body, Cast)                \
+        CASE_STATEMENT(body, TAbsurd)             \
+    }
+
+std::string InstructionPtr::toString(const core::GlobalState &gs, const CFG &cfg) const {
+    auto *ptr = get();
+
+#define TO_STRING(name) return static_cast<const name *>(ptr)->toString(gs, cfg);
+    GENERATE_TAG_SWITCH(tag(), TO_STRING)
+#undef TO_STRING
+}
+
+std::string InstructionPtr::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
+    auto *ptr = get();
+
+#define SHOW_RAW(name) return static_cast<const name *>(ptr)->showRaw(gs, cfg, tabs);
+    GENERATE_TAG_SWITCH(tag(), SHOW_RAW)
+#undef SHOW_RAW
+}
+
+void InstructionPtr::deleteTagged(Tag tag, void *expr) noexcept {
+    ENFORCE(expr != nullptr);
+
+#define DELETE_INSN(name) delete static_cast<name *>(expr);
+    GENERATE_TAG_SWITCH(tag, DELETE_INSN)
+#undef DELETE_INSN
+}
 
 Return::Return(LocalRef what, core::LocOffsets whatLoc) : what(what), whatLoc(whatLoc) {
     categoryCounterInc("cfg", "return");

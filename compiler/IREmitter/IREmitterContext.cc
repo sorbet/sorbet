@@ -23,7 +23,7 @@ namespace sorbet::compiler {
 
 namespace {
 
-optional<string_view> isSymbol(const core::GlobalState &gs, cfg::Instruction *insn) {
+optional<string_view> isSymbol(const core::GlobalState &gs, const cfg::InstructionPtr &insn) {
     auto *liti = cfg::cast_instruction<cfg::Literal>(insn);
     if (liti == nullptr) {
         return std::nullopt;
@@ -52,7 +52,7 @@ AliasesAndKeywords setupAliasesAndKeywords(CompilerState &cs, const cfg::CFG &cf
 
     for (auto &bb : cfg.basicBlocks) {
         for (auto &bind : bb->exprs) {
-            if (auto *i = cfg::cast_instruction<cfg::Alias>(bind.value.get())) {
+            if (auto *i = cfg::cast_instruction<cfg::Alias>(bind.value)) {
                 ENFORCE(res.aliases.find(bind.bind.variable) == res.aliases.end(),
                         "Overwriting an entry in the aliases map");
 
@@ -88,7 +88,7 @@ AliasesAndKeywords setupAliasesAndKeywords(CompilerState &cs, const cfg::CFG &cf
                         res.aliases[bind.bind.variable] = Alias::forConstant(i->what);
                     }
                 }
-            } else if (auto sym = isSymbol(cs, bind.value.get())) {
+            } else if (auto sym = isSymbol(cs, bind.value)) {
                 res.symbols[bind.bind.variable] = sym.value();
             }
         }
@@ -238,31 +238,31 @@ findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
         for (cfg::Binding &bind : bb->exprs) {
             usage.trackBlockUsage(bb.get(), bind.bind.variable);
             typecase(
-                bind.value.get(), [&](cfg::Ident *i) { usage.trackBlockUsage(bb.get(), i->what); },
-                [&](cfg::Alias *i) { /* nothing */
+                bind.value, [&](cfg::Ident &i) { usage.trackBlockUsage(bb.get(), i.what); },
+                [&](cfg::Alias &i) { /* nothing */
                 },
-                [&](cfg::SolveConstraint *i) { /* nothing*/ },
-                [&](cfg::Send *i) {
-                    for (auto &arg : i->args) {
+                [&](cfg::SolveConstraint &i) { /* nothing*/ },
+                [&](cfg::Send &i) {
+                    for (auto &arg : i.args) {
                         usage.trackBlockUsage(bb.get(), arg.variable);
                     }
-                    usage.trackBlockUsage(bb.get(), i->recv.variable);
+                    usage.trackBlockUsage(bb.get(), i.recv.variable);
                 },
-                [&](cfg::GetCurrentException *i) {
+                [&](cfg::GetCurrentException &i) {
                     // if the current block is an exception header, record a usage of the variable in the else block
                     // (the body block of the exception handling) to force it to escape.
                     if (exceptionHandlingBlockHeaders[bb->id] != 0) {
                         usage.trackBlockUsage(bb->bexit.elseb, bind.bind.variable);
                     }
                 },
-                [&](cfg::Return *i) { usage.trackBlockUsage(bb.get(), i->what.variable); },
-                [&](cfg::BlockReturn *i) { usage.trackBlockUsage(bb.get(), i->what.variable); },
-                [&](cfg::LoadSelf *i) { /*nothing*/ /*todo: how does instance exec pass self?*/ },
-                [&](cfg::Literal *i) { /* nothing*/ }, [&](cfg::ArgPresent *i) { /*nothing*/ },
-                [&](cfg::LoadArg *i) { /*nothing*/ }, [&](cfg::LoadYieldParams *i) { /*nothing*/ },
-                [&](cfg::YieldParamPresent *i) { /* nothing */ }, [&](cfg::YieldLoadArg *i) { /* nothing */ },
-                [&](cfg::Cast *i) { usage.trackBlockUsage(bb.get(), i->value.variable); },
-                [&](cfg::TAbsurd *i) { usage.trackBlockUsage(bb.get(), i->what.variable); });
+                [&](cfg::Return &i) { usage.trackBlockUsage(bb.get(), i.what.variable); },
+                [&](cfg::BlockReturn &i) { usage.trackBlockUsage(bb.get(), i.what.variable); },
+                [&](cfg::LoadSelf &i) { /*nothing*/ /*todo: how does instance exec pass self?*/ },
+                [&](cfg::Literal &i) { /* nothing*/ }, [&](cfg::ArgPresent &i) { /*nothing*/ },
+                [&](cfg::LoadArg &i) { /*nothing*/ }, [&](cfg::LoadYieldParams &i) { /*nothing*/ },
+                [&](cfg::YieldParamPresent &i) { /* nothing */ }, [&](cfg::YieldLoadArg &i) { /* nothing */ },
+                [&](cfg::Cast &i) { usage.trackBlockUsage(bb.get(), i.value.variable); },
+                [&](cfg::TAbsurd &i) { usage.trackBlockUsage(bb.get(), i.what.variable); });
         }
 
         // no need to track the condition variable if the jump is unconditional
@@ -278,7 +278,7 @@ int getMaxSendArgCount(cfg::CFG &cfg) {
     int maxSendArgCount = 0;
     for (auto &bb : cfg.basicBlocks) {
         for (cfg::Binding &bind : bb->exprs) {
-            if (auto snd = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
+            if (auto snd = cfg::cast_instruction<cfg::Send>(bind.value)) {
                 int numPosArgs = snd->numPosArgs;
                 int numKwArgs = snd->args.size() - numPosArgs;
 
@@ -502,7 +502,7 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
 bool returnAcrossBlockIsPresent(CompilerState &cs, cfg::CFG &cfg, const vector<int> &blockNestingLevels) {
     for (auto &bb : cfg.basicBlocks) {
         for (auto &bind : bb->exprs) {
-            if (cfg::isa_instruction<cfg::Return>(bind.value.get())) {
+            if (cfg::isa_instruction<cfg::Return>(bind.value)) {
                 // This will be non-zero if there was a block in any of our parent blocks.
                 if (blockNestingLevels[bb->rubyBlockId] != 0) {
                     return true;
@@ -666,7 +666,7 @@ void collectRubyBlockArgs(const cfg::CFG &cfg, const cfg::BasicBlock *b, vector<
 
     while (true) {
         for (auto &expr : b->exprs) {
-            auto loadArg = cfg::cast_instruction<cfg::YieldLoadArg>(expr.value.get());
+            auto loadArg = cfg::cast_instruction<cfg::YieldLoadArg>(expr.value);
             if (loadArg == nullptr) {
                 continue;
             }
@@ -829,16 +829,16 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             }
             ENFORCE(backId >= 0);
 
-            cfg::Instruction *expected = nullptr;
+            cfg::InstructionPtr *expected = nullptr;
             for (auto i = b->backEdges[backId]->exprs.rbegin(); i != b->backEdges[backId]->exprs.rend(); ++i) {
                 if (i->bind.variable.data(cfg)._name == core::Names::blockPreCallTemp()) {
-                    expected = i->value.get();
+                    expected = &i->value;
                     break;
                 }
             }
             ENFORCE(expected);
 
-            auto expectedSend = cfg::cast_instruction<cfg::Send>(expected);
+            auto expectedSend = cfg::cast_instruction<cfg::Send>(*expected);
             ENFORCE(expectedSend);
             ENFORCE(expectedSend->link);
             blockLinks[b->rubyBlockId] = expectedSend->link;
@@ -880,17 +880,15 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             int argId = -1;
             auto &bind = b->exprs.back();
             typecase(
-                bind.value.get(),
-                [&](cfg::ArgPresent *i) {
+                bind.value,
+                [&](cfg::ArgPresent &i) {
                     ENFORCE(bind.bind.variable == b->bexit.cond.variable);
-                    argId = i->argId;
+                    argId = i.argId;
                 },
-                [&](cfg::YieldParamPresent *i) {
+                [&](cfg::YieldParamPresent &i) {
                     ENFORCE(bind.bind.variable == b->bexit.cond.variable);
-                    argId = i->argId;
-                },
-                [](cfg::Instruction *i) { /* do nothing */ });
-
+                    argId = i.argId;
+                });
             ENFORCE(argId >= 0, "Missing an index for argPresent condition variable");
 
             argPresentVariables[b->rubyBlockId][argId] = b->bexit.cond.variable;

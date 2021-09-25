@@ -140,7 +140,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 //   4. Otherwise, we want to issue a DeadBranchInferencer error, taking the first
                 //      (non-synthetic, non-"T.absurd") instruction in the block as the loc of the
                 //      error.
-                cfg::Instruction *unreachableInstruction = nullptr;
+                cfg::InstructionPtr *unreachableInstruction = nullptr;
                 core::LocOffsets locForUnreachable;
                 bool dueToSafeNavigation = false;
 
@@ -149,18 +149,18 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         if (expr.value->isSynthetic) {
                             continue;
                         }
-                        if (cfg::isa_instruction<cfg::TAbsurd>(expr.value.get())) {
+                        if (cfg::isa_instruction<cfg::TAbsurd>(expr.value)) {
                             continue;
                         }
 
-                        auto send = cfg::cast_instruction<cfg::Send>(expr.value.get());
+                        auto send = cfg::cast_instruction<cfg::Send>(expr.value);
                         if (send != nullptr && send->fun == core::Names::nilForSafeNavigation()) {
-                            unreachableInstruction = expr.value.get();
+                            unreachableInstruction = &expr.value;
                             locForUnreachable = expr.loc;
                             dueToSafeNavigation = true;
                             break;
                         } else if (unreachableInstruction == nullptr) {
-                            unreachableInstruction = expr.value.get();
+                            unreachableInstruction = &expr.value;
                             locForUnreachable = expr.loc;
                         } else {
                             // Expand the loc to cover the entire dead basic block
@@ -170,8 +170,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 }
 
                 if (unreachableInstruction != nullptr) {
-                    auto send = cfg::cast_instruction<cfg::Send>(unreachableInstruction);
-
+                    auto *send = cfg::cast_instruction<cfg::Send>(*unreachableInstruction);
                     if (dueToSafeNavigation && send != nullptr) {
                         if (auto e =
                                 ctx.beginError(locForUnreachable, core::errors::Infer::UnnecessarySafeNavigation)) {
@@ -230,7 +229,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 bind.bind.type =
                     current.processBinding(ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg),
                                            knowledgeFilter, *constr, methodReturnType);
-                if (cfg::isa_instruction<cfg::Send>(bind.value.get())) {
+                if (cfg::isa_instruction<cfg::Send>(bind.value)) {
                     totalSendCount++;
                     if (bind.bind.type && !bind.bind.type.isUntyped()) {
                         typedSendCount++;
