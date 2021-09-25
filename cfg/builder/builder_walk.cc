@@ -426,6 +426,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         target.isRepeated = e.flags.isRepeated;
                         target.isDefault = e.flags.isDefault;
                         target.isShadow = e.flags.isShadow;
+                        target.isBlock = e.flags.isBlock;
                     }
                     auto link = make_shared<core::SendAndBlockLink>(s.fun, move(argFlags), newRubyBlockId);
                     auto send = make_unique<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs, args, argLocs,
