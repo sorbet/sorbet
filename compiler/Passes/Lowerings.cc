@@ -301,6 +301,7 @@ public:
     //   %3 = call ... @sorbet_i_send(%struct.FunctionInlineCache* @ic_puts,
     //                                i1 false,
     //                                i64 (i64, i64, i32, i64*, i64)* null,
+    //                                i32 0, i32 0,
     //                                %struct.rb_control_frame_struct* %cfp,
     //                                i64 %selfRaw,
     //                                i64 %rubyStr_a
@@ -333,13 +334,15 @@ public:
         llvm::IRBuilder<> builder(instr);
         auto *cache = instr->getArgOperand(0);
         auto *blk = instr->getArgOperand(2);
-        auto *closure = instr->getArgOperand(3);
-        auto *cfp = instr->getArgOperand(4);
+        auto *blkMinArgs = instr->getArgOperand(3);
+        auto *blkMaxArgs = instr->getArgOperand(4);
+        auto *closure = instr->getArgOperand(5);
+        auto *cfp = instr->getArgOperand(6);
 
         auto *spPtr = builder.CreateCall(module.getFunction("sorbet_get_sp"), {cfp});
         auto spPtrType = llvm::dyn_cast<llvm::PointerType>(spPtr->getType());
         llvm::Value *sp = builder.CreateLoad(spPtrType->getElementType(), spPtr);
-        for (auto iter = std::next(instr->arg_begin(), 5); iter < instr->arg_end(); ++iter) {
+        for (auto iter = std::next(instr->arg_begin(), 7); iter < instr->arg_end(); ++iter) {
             sp = builder.CreateCall(module.getFunction("sorbet_pushValueStack"), {sp, iter->get()});
         }
         builder.CreateStore(sp, spPtr);
@@ -355,7 +358,7 @@ public:
             auto *callImpl = blkUsesBreak->equalsInt(1) ? module.getFunction("sorbet_callFuncBlockWithCache")
                                                         : module.getFunction("sorbet_callFuncBlockWithCache_noBreak");
 
-            return builder.CreateCall(callImpl, {cache, blk, closure}, "sendWithBlock");
+            return builder.CreateCall(callImpl, {cache, blk, blkMinArgs, blkMaxArgs, closure}, "sendWithBlock");
         }
     }
 } SorbetSend;

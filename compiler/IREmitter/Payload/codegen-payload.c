@@ -127,7 +127,8 @@ SORBET_ALIVE(VALUE, sorbet_i_getRubyClass, (const char *const className, long cl
 SORBET_ALIVE(VALUE, sorbet_i_getRubyConstant, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_objIsKindOf, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_i_send,
-             (struct FunctionInlineCache *, _Bool blkUsesBreak, BlockFFIType blk, VALUE, rb_control_frame_t *, ...));
+             (struct FunctionInlineCache *, _Bool blkUsesBreak, BlockFFIType blk, int blkMinArgs, int blkMaxArgs, VALUE,
+              rb_control_frame_t *, ...));
 
 SORBET_ALIVE(_Bool, sorbet_i_isa_Integer, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_TrueClass, (VALUE) __attribute__((const)));
@@ -1927,13 +1928,15 @@ static VALUE sorbet_iterMethod(VALUE obj) {
 }
 
 SORBET_INLINE
-VALUE sorbet_callFuncBlockWithCache(struct FunctionInlineCache *cache, BlockFFIType blockImpl, VALUE closure) {
+VALUE sorbet_callFuncBlockWithCache(struct FunctionInlineCache *cache, BlockFFIType blockImpl, int blkMinArgs,
+                                    int blkMaxArgs, VALUE closure) {
     return rb_iterate(sorbet_iterMethod, (VALUE)cache, blockImpl, closure);
 }
 KEEP_ALIVE(sorbet_callFuncBlockWithCache);
 
 SORBET_INLINE
-VALUE sorbet_callFuncBlockWithCache_noBreak(struct FunctionInlineCache *cache, BlockFFIType blockImpl, VALUE closure) {
+VALUE sorbet_callFuncBlockWithCache_noBreak(struct FunctionInlineCache *cache, BlockFFIType blockImpl, int blkMinArgs,
+                                            int blkMaxArgs, VALUE closure) {
     rb_execution_context_t *ec = GET_EC();
     rb_control_frame_t *cfp = ec->cfp;
 
@@ -1941,7 +1944,7 @@ VALUE sorbet_callFuncBlockWithCache_noBreak(struct FunctionInlineCache *cache, B
     // the use of `rb_vm_ifunc_proc_new` and the setup of the captured block handler.
     // * https://github.com/ruby/ruby/blob/ruby_2_7/vm_eval.c#L1448
     // * https://github.com/ruby/ruby/blob/ruby_2_7/vm_eval.c#L1406-L1408
-    const struct vm_ifunc *const ifunc = rb_vm_ifunc_proc_new(blockImpl, (void *)closure);
+    const struct vm_ifunc *const ifunc = rb_vm_ifunc_new(blockImpl, (void *)closure, blkMinArgs, blkMaxArgs);
     struct rb_captured_block *captured = (struct rb_captured_block *)&cfp->self;
     captured->code.ifunc = ifunc;
 
