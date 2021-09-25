@@ -421,11 +421,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     vector<ast::ParsedArg> blockArgFlags = ast::ArgParsing::parseArgs(blockArgs);
                     vector<core::ArgInfo::ArgFlags> argFlags;
                     for (auto &e : blockArgFlags) {
-                        auto &target = argFlags.emplace_back();
-                        target.isKeyword = e.flags.isKeyword;
-                        target.isRepeated = e.flags.isRepeated;
-                        target.isDefault = e.flags.isDefault;
-                        target.isShadow = e.flags.isShadow;
+                        argFlags.emplace_back(e.flags);
                     }
                     auto link = make_shared<core::SendAndBlockLink>(s.fun, move(argFlags), newRubyBlockId);
                     auto send = make_unique<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs, args, argLocs,
