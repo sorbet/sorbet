@@ -5,37 +5,6 @@
 #include <sstream>
 #include <utility>
 
-// makes lldb work. Don't remove please
-template class std::unique_ptr<sorbet::ast::ClassDef>;
-template class std::unique_ptr<sorbet::ast::MethodDef>;
-template class std::unique_ptr<sorbet::ast::If>;
-template class std::unique_ptr<sorbet::ast::While>;
-template class std::unique_ptr<sorbet::ast::Break>;
-template class std::unique_ptr<sorbet::ast::Retry>;
-template class std::unique_ptr<sorbet::ast::Next>;
-template class std::unique_ptr<sorbet::ast::Return>;
-template class std::unique_ptr<sorbet::ast::RescueCase>;
-template class std::unique_ptr<sorbet::ast::Rescue>;
-template class std::unique_ptr<sorbet::ast::Local>;
-template class std::unique_ptr<sorbet::ast::UnresolvedIdent>;
-template class std::unique_ptr<sorbet::ast::RestArg>;
-template class std::unique_ptr<sorbet::ast::KeywordArg>;
-template class std::unique_ptr<sorbet::ast::OptionalArg>;
-template class std::unique_ptr<sorbet::ast::BlockArg>;
-template class std::unique_ptr<sorbet::ast::ShadowArg>;
-template class std::unique_ptr<sorbet::ast::Assign>;
-template class std::unique_ptr<sorbet::ast::Send>;
-template class std::unique_ptr<sorbet::ast::Cast>;
-template class std::unique_ptr<sorbet::ast::Hash>;
-template class std::unique_ptr<sorbet::ast::Array>;
-template class std::unique_ptr<sorbet::ast::Literal>;
-template class std::unique_ptr<sorbet::ast::UnresolvedConstantLit>;
-template class std::unique_ptr<sorbet::ast::ZSuperArgs>;
-template class std::unique_ptr<sorbet::ast::Block>;
-template class std::unique_ptr<sorbet::ast::InsSeq>;
-template class std::unique_ptr<sorbet::ast::EmptyTree>;
-template class std::unique_ptr<sorbet::ast::ConstantLit>;
-
 using namespace std;
 
 namespace sorbet::ast {
