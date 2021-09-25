@@ -82,6 +82,11 @@ constexpr bool functionTypeNeedsPostprocessing(FunctionType ty) {
 
 struct Alias;
 
+struct BlockArity {
+    int min = 0;
+    int max = 0;
+};
+
 // Contains a bunch of state that gets populated and accessed while emitting IR for a single Ruby method.
 //
 // Nearly every vector here behaves as a lookup map keyed on cfg::BasicBlock::rubyBlockId (i.e., an ID
@@ -263,6 +268,10 @@ struct IREmitterContext {
 
     // Mapping from ruby block id to the name for the block's iseq.
     std::vector<std::optional<std::string>> rubyBlockLocationNames;
+
+    // Mapping from ruby block id to min/max arguments that block takes. As this is only used for block allocations,
+    // it's {0, 0} for every ruby block id that is not a FunctionType::Block.
+    std::vector<BlockArity> rubyBlockArity;
 
     static IREmitterContext getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md,
                                                              llvm::Function *mainFunc);

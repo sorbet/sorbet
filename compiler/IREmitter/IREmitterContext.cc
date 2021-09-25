@@ -810,6 +810,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     }
 
     vector<vector<cfg::LocalRef>> argPresentVariables(cfg.maxRubyBlockId + 1);
+    vector<BlockArity> rubyBlockArity(cfg.maxRubyBlockId + 1);
 
     // The method arguments are initialized here, while the block arguments are initialized when the blockCall header is
     // encountered in the loop below.
@@ -843,13 +844,37 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             ENFORCE(expectedSend->link);
             blockLinks[b->rubyBlockId] = expectedSend->link;
 
-            auto numBlockArgs = expectedSend->link->argFlags.size();
+            auto &argFlags = expectedSend->link->argFlags;
+            auto numBlockArgs = argFlags.size();
             auto &blockArgs = rubyBlockArgs[b->rubyBlockId];
             blockArgs.resize(numBlockArgs, cfg::LocalRef::noVariable());
             collectRubyBlockArgs(cfg, b->bexit.thenb, blockArgs);
 
             auto &argsPresent = argPresentVariables[b->bexit.thenb->rubyBlockId];
             argsPresent.resize(numBlockArgs, cfg::LocalRef::noVariable());
+
+            auto &blockArity = rubyBlockArity[b->rubyBlockId];
+            bool seenKwarg = false;
+            for (auto &arg : argFlags) {
+                if (arg.isBlock) {
+                    break;
+                }
+
+                if (arg.isRepeated) {
+                    blockArity.max = -1;
+                    break;
+                }
+
+                if (!seenKwarg) {
+                    if (!arg.isDefault) {
+                        blockArity.min += 1;
+                    }
+
+                    blockArity.max += 1;
+                }
+
+                seenKwarg = seenKwarg || arg.isKeyword;
+            }
 
         } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::exceptionValue()) {
             if (exceptionHandlingBlockHeaders[b->id] == 0) {
@@ -931,6 +956,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(blockUsesBreak),
         hasReturnAcrossBlock,
         move(blockLocationNames),
+        move(rubyBlockArity),
     };
 
     auto [llvmVariables, selfVariables] = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation);
