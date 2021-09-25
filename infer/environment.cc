@@ -966,7 +966,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 auto suppressErrors = false;
                 core::DispatchArgs dispatchArgs{
                     send.fun, locs,          send.numPosArgs, args,     recvType.type,
-                    recvType,  recvType.type, send.link,       ownerLoc, send.isPrivateOk suppressErrors};
+                        recvType,  recvType.type, send.link,       ownerLoc, send.isPrivateOk, suppressErrors};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
