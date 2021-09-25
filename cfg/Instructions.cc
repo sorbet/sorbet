@@ -26,25 +26,25 @@ string spacesForTabLevel(int tabs) {
         break;                       \
     }
 
-#define GENERATE_TAG_SWITCH(tag, body)                                  \
-    switch (tag) {                                                      \
-        CASE_STATEMENT(body, Ident)                                     \
-            CASE_STATEMENT(body, Alias)                                 \
-            CASE_STATEMENT(body, SolveConstraint)                       \
-            CASE_STATEMENT(body, Send)                                  \
-            CASE_STATEMENT(body, Return)                                \
-            CASE_STATEMENT(body, BlockReturn)                           \
-            CASE_STATEMENT(body, LoadSelf)                              \
-            CASE_STATEMENT(body, Literal)                               \
-            CASE_STATEMENT(body, GetCurrentException)                   \
-            CASE_STATEMENT(body, LoadArg)                               \
-            CASE_STATEMENT(body, ArgPresent)                            \
-            CASE_STATEMENT(body, LoadYieldParams)                       \
-            CASE_STATEMENT(body, YieldParamPresent)                     \
-            CASE_STATEMENT(body, YieldLoadArg)                          \
-            CASE_STATEMENT(body, Cast)                                  \
-            CASE_STATEMENT(body, TAbsurd)                               \
-            }
+#define GENERATE_TAG_SWITCH(tag, body)            \
+    switch (tag) {                                \
+        CASE_STATEMENT(body, Ident)               \
+        CASE_STATEMENT(body, Alias)               \
+        CASE_STATEMENT(body, SolveConstraint)     \
+        CASE_STATEMENT(body, Send)                \
+        CASE_STATEMENT(body, Return)              \
+        CASE_STATEMENT(body, BlockReturn)         \
+        CASE_STATEMENT(body, LoadSelf)            \
+        CASE_STATEMENT(body, Literal)             \
+        CASE_STATEMENT(body, GetCurrentException) \
+        CASE_STATEMENT(body, LoadArg)             \
+        CASE_STATEMENT(body, ArgPresent)          \
+        CASE_STATEMENT(body, LoadYieldParams)     \
+        CASE_STATEMENT(body, YieldParamPresent)   \
+        CASE_STATEMENT(body, YieldLoadArg)        \
+        CASE_STATEMENT(body, Cast)                \
+        CASE_STATEMENT(body, TAbsurd)             \
+    }
 
 std::string InstructionPtr::toString(const core::GlobalState &gs, const CFG &cfg) const {
     auto *ptr = get();

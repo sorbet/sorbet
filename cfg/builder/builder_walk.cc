@@ -425,7 +425,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     }
                     auto link = make_shared<core::SendAndBlockLink>(s.fun, move(argFlags), newRubyBlockId);
                     auto send = make_insn<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs, args, argLocs,
-                                                  !!s.flags.isPrivateOk, link);
+                                                !!s.flags.isPrivateOk, link);
                     LocalRef sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
                     auto solveConstraint = make_insn<SolveConstraint>(link, sendTemp);
                     current->exprs.emplace_back(sendTemp, s.loc, move(send));
@@ -530,9 +530,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                      *
                      */
                 } else {
-                    current->exprs.emplace_back(cctx.target, s.loc,
-                                                make_insn<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs, args,
-                                                                  argLocs, !!s.flags.isPrivateOk));
+                    current->exprs.emplace_back(
+                        cctx.target, s.loc,
+                        make_insn<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs, args, argLocs, !!s.flags.isPrivateOk));
                 }
 
                 ret = current;
@@ -595,8 +595,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 // by the VM itself; and b) may not actually happen depending on the frames
                 // that the break unwinds through.
                 synthesizeExpr(afterBreak, ignored, core::LocOffsets::none(),
-                               make_insn<Send>(magic, core::Names::blockBreak(), core::LocOffsets::none(),
-                                                 args.size(), args, locs, isPrivateOk));
+                               make_insn<Send>(magic, core::Names::blockBreak(), core::LocOffsets::none(), args.size(),
+                                               args, locs, isPrivateOk));
 
                 afterBreak->exprs.emplace_back(cctx.blockBreakTarget, a.loc, make_insn<Ident>(blockBreakAssign));
 
@@ -621,15 +621,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     unconditionalJump(current, cctx.inWhat.deadBlock(), cctx.inWhat, a.loc);
                 } else {
                     auto magic = cctx.newTemporary(core::Names::magic());
-                    synthesizeExpr(current, magic, core::LocOffsets::none(),
-                                   make_insn<Alias>(core::Symbols::Magic()));
+                    synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
                     auto retryTemp = cctx.newTemporary(core::Names::retryTemp());
                     InlinedVector<cfg::LocalRef, 2> args{};
                     InlinedVector<core::LocOffsets, 2> argLocs{};
                     auto isPrivateOk = false;
                     synthesizeExpr(current, retryTemp, core::LocOffsets::none(),
-                                   make_insn<Send>(magic, core::Names::retry(), what.loc(), args.size(), args,
-                                                     argLocs, isPrivateOk));
+                                   make_insn<Send>(magic, core::Names::retry(), what.loc(), args.size(), args, argLocs,
+                                                   isPrivateOk));
                     unconditionalJump(current, cctx.rescueScope, cctx.inWhat, a.loc);
                 }
                 ret = cctx.inWhat.deadBlock();
@@ -696,8 +695,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     auto args = {exceptionValue};
                     auto argLocs = {what.loc()};
                     synthesizeExpr(caseBody, res, rescueCase->loc,
-                                   make_insn<Send>(magic, core::Names::keepForCfg(), rescueCase->loc, args.size(),
-                                                     args, argLocs, isPrivateOk));
+                                   make_insn<Send>(magic, core::Names::keepForCfg(), rescueCase->loc, args.size(), args,
+                                                   argLocs, isPrivateOk));
 
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError
@@ -718,8 +717,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         auto isPrivateOk = false;
                         rescueHandlersBlock->exprs.emplace_back(isaCheck, loc,
                                                                 make_insn<Send>(localVar, core::Names::isA_p(), loc,
-                                                                                  args.size(), args, argLocs,
-                                                                                  isPrivateOk));
+                                                                                args.size(), args, argLocs,
+                                                                                isPrivateOk));
 
                         auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops, handlersRubyBlockId);
                         conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
@@ -737,8 +736,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 // and if so, after the ensure runs, we should jump to dead
                 // since in Ruby the exception would propagate up the statck.
                 auto gotoDeadTemp = cctx.newTemporary(core::Names::gotoDeadTemp());
-                synthesizeExpr(rescueHandlersBlock, gotoDeadTemp, a.loc,
-                               make_insn<Literal>(core::Types::trueClass()));
+                synthesizeExpr(rescueHandlersBlock, gotoDeadTemp, a.loc, make_insn<Literal>(core::Types::trueClass()));
                 unconditionalJump(rescueHandlersBlock, ensureBody, cctx.inWhat, a.loc);
 
                 auto throwAway = cctx.newTemporary(core::Names::throwAwayTemp());

@@ -67,8 +67,8 @@ private:
     friend InstructionPtr;
 };
 
-#define INSN(name)                              \
-    class name;                                 \
+#define INSN(name)                                                                  \
+    class name;                                                                     \
     template <> struct InsnToTag<name> { static constexpr Tag value = Tag::name; }; \
     class __attribute__((aligned(8))) name final
 
@@ -412,8 +412,7 @@ template <> inline const InstructionPtr &InstructionPtr::cast(const InstructionP
     return what;
 }
 
-template <typename T, class... Args>
-InstructionPtr make_insn(Args&& ...arg) {
+template <typename T, class... Args> InstructionPtr make_insn(Args &&...arg) {
     return InstructionPtr(InsnToTag<T>::value, new T(std::forward<Args>(arg)...));
 }
 
