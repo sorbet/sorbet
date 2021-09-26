@@ -13,17 +13,17 @@ module T::Private::Types
       @aliased_type ||= T::Utils.coerce(@callable.call)
     end
 
-    # @override Base
+    # overrides Base
     def name
       aliased_type.name
     end
 
-    # @override Base
+    # overrides Base
     def recursively_valid?(obj)
       aliased_type.recursively_valid?(obj)
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       aliased_type.valid?(obj)
     end

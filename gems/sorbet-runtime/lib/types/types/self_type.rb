@@ -8,17 +8,17 @@ module T::Types
 
     def initialize(); end
 
-    # @override Base
+    # overrides Base
     def name
       "T.self_type"
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       true
     end
 
-    # @override Base
+    # overrides Base
     private def subtype_of_single?(other)
       case other
       when SelfType

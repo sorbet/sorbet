@@ -12,12 +12,12 @@ module T::Types
       @types = types.map {|type| T::Utils.coerce(type)}
     end
 
-    # @override Base
+    # overrides Base
     def name
       "[#{@types.join(', ')}]"
     end
 
-    # @override Base
+    # overrides Base
     def recursively_valid?(obj)
       if obj.is_a?(Array) && obj.length == @types.length
         i = 0
@@ -33,7 +33,7 @@ module T::Types
       end
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       if obj.is_a?(Array) && obj.length == @types.length
         i = 0
@@ -49,7 +49,7 @@ module T::Types
       end
     end
 
-    # @override Base
+    # overrides Base
     private def subtype_of_single?(other)
       case other
       when FixedArray
@@ -69,7 +69,7 @@ module T::Types
     # instead of
     # "Expected [String, Symbol], got Array".
     #
-    # @override Base
+    # overrides Base
     def describe_obj(obj)
       if obj.is_a?(Array)
         if obj.length == @types.length

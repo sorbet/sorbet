@@ -9,17 +9,17 @@ module T::Types
       Hash
     end
 
-    # @override Base
+    # overrides Base
     def name
       "T::Range[#{@type.name}]"
     end
 
-    # @override Base
+    # overrides Base
     def recursively_valid?(obj)
       obj.is_a?(Range) && super
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       obj.is_a?(Range)
     end

@@ -37,7 +37,7 @@ module T::Props
     # Given an instance of this type, serialize that into a scalar type
     # supported by T::Props.
     #
-    # @param [Object] _instance
+    # @param [Object] instance
     # @return An instance of one of T::Configuration.scalar_types
     sig {abstract.params(instance: T.untyped).returns(T.untyped).checked(:never)}
     def serialize(instance); end

@@ -47,7 +47,7 @@ class T::Enum
   SerializedVal = T.type_alias {T.untyped}
   private_constant :SerializedVal
 
-  ## Enum class methods ##
+  ### Enum class methods ###
   sig {returns(T::Array[T.attached_class])}
   def self.values
     if @values.nil?
@@ -134,7 +134,7 @@ class T::Enum
     self.from_serialized(mongo_value)
   end
 
-  ## Enum instance methods ##
+  ### Enum instance methods ###
 
   sig {returns(T.self_type)}
   def dup
@@ -243,7 +243,7 @@ class T::Enum
     )
   end
 
-  ## Private implementation ##
+  ### Private implementation ###
 
   sig {params(serialized_val: SerializedVal).void}
   def initialize(serialized_val=nil)

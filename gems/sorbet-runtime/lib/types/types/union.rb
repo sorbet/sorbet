@@ -18,7 +18,7 @@ module T::Types
       end.uniq
     end
 
-    # @override Base
+    # overrides Base
     def name
       type_shortcuts(@types)
     end
@@ -42,17 +42,17 @@ module T::Types
       end
     end
 
-    # @override Base
+    # overrides Base
     def recursively_valid?(obj)
       @types.any? {|type| type.recursively_valid?(obj)}
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       @types.any? {|type| type.valid?(obj)}
     end
 
-    # @override Base
+    # overrides Base
     private def subtype_of_single?(other)
       raise "This should never be reached if you're going through `subtype_of?` (and you should be)"
     end

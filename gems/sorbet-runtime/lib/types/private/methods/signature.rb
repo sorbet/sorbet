@@ -156,7 +156,7 @@ class T::Private::Methods::Signature
     "#{@mode}_method"
   end
 
-  # @return [Hash] a mapping like {arg_name: [val, type], ...}, for only those args actually present.
+  # @return [Hash] a mapping like `{arg_name: [val, type], ...}`, for only those args actually present.
   def each_args_value_type(args)
     # Manually split out args and kwargs based on ruby's behavior. Do not try to implement this by
     # getting ruby to determine the kwargs for you (e.g., by defining this method to take *args and

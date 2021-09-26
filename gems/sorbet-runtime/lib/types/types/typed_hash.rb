@@ -16,17 +16,17 @@ module T::Types
       @type = T::Utils.coerce([keys, values])
     end
 
-    # @override Base
+    # overrides Base
     def name
       "T::Hash[#{@keys.name}, #{@values.name}]"
     end
 
-    # @override Base
+    # overrides Base
     def recursively_valid?(obj)
       obj.is_a?(Hash) && super
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       obj.is_a?(Hash)
     end

@@ -17,17 +17,17 @@ class T::Private::Types::Void < T::Types::Base
     freeze
   end
 
-  # @override Base
+  # overrides Base
   def name
     "<VOID>"
   end
 
-  # @override Base
+  # overrides Base
   def valid?(obj)
     raise ERROR_MESSAGE
   end
 
-  # @override Base
+  # overrides Base
   private def subtype_of_single?(other)
     raise ERROR_MESSAGE
   end

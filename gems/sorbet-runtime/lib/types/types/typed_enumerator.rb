@@ -9,17 +9,17 @@ module T::Types
       Enumerator
     end
 
-    # @override Base
+    # overrides Base
     def name
       "T::Enumerator[#{@type.name}]"
     end
 
-    # @override Base
+    # overrides Base
     def recursively_valid?(obj)
       obj.is_a?(Enumerator) && super
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       obj.is_a?(Enumerator)
     end

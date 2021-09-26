@@ -14,12 +14,12 @@ module T::Types
       @values = values
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       @values.member?(obj)
     end
 
-    # @override Base
+    # overrides Base
     private def subtype_of_single?(other)
       case other
       when Enum
@@ -29,12 +29,12 @@ module T::Types
       end
     end
 
-    # @override Base
+    # overrides Base
     def name
       "T.enum([#{@values.map(&:inspect).join(', ')}])"
     end
 
-    # @override Base
+    # overrides Base
     def describe_obj(obj)
       obj.inspect
     end

@@ -10,7 +10,7 @@ module T::Types
       @val = val
     end
 
-    # @override Base
+    # overrides Base
     def name
       # Strips the #<...> off, just leaving the ...
       # Reasoning: the user will have written something like
@@ -20,12 +20,12 @@ module T::Types
       @val.inspect[2..-2]
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       @val == obj
     end
 
-    # @override Base
+    # overrides Base
     private def subtype_of_single?(other)
       case other
       when TEnum

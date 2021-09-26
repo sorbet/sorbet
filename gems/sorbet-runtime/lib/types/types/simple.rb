@@ -10,7 +10,7 @@ module T::Types
       @raw_type = raw_type
     end
 
-    # @override Base
+    # overrides Base
     def name
       # Memoize to mitigate pathological performance with anonymous modules (https://bugs.ruby-lang.org/issues/11119)
       #
@@ -19,12 +19,12 @@ module T::Types
       @name ||= @raw_type.name.freeze
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       obj.is_a?(@raw_type)
     end
 
-    # @override Base
+    # overrides Base
     private def subtype_of_single?(other)
       case other
       when Simple
