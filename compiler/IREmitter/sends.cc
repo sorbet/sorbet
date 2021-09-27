@@ -221,6 +221,17 @@ llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
     builder.SetInsertPoint(rememberStart);
     if (!remainingType.isUntyped()) {
         auto intrinsics = applicableIntrinsics(mcctx);
+
+        if (intrinsics.size() == 1 && intrinsics[0].method->skipFastPathTest(mcctx, intrinsics[0].klass)) {
+            auto fastPathRes = intrinsics[0].method->makeCall(mcctx);
+            Payload::afterIntrinsic(cs, builder);
+            auto fastPathEnd = builder.GetInsertBlock();
+            builder.CreateBr(afterSend);
+            builder.SetInsertPoint(afterSend);
+            phi->addIncoming(fastPathRes, fastPathEnd);
+            return phi;
+        }
+
         for (auto &intrinsic : intrinsics) {
             auto clazName = intrinsic.klass.data(cs)->name.shortName(cs);
             llvm::StringRef clazNameRef(clazName.data(), clazName.size());
@@ -487,6 +498,10 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
         if (at->klass == core::Symbols::MagicSingleton()) {
             failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
                             "No runtime implemention for <Magic> method exists");
+        }
+        if (at->klass == core::Symbols::Sorbet_Private_StaticSingleton()) {
+            failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
+                            "No runtime implementation for Sorbet::Private::Static method exists");
         }
     }
 

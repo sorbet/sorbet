@@ -487,6 +487,9 @@ public:
         return Payload::varGet(cs, send->args[1].variable, builder, mcctx.irctx, mcctx.rubyBlockId);
     }
 
+    virtual bool skipFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass) const override {
+        return true;
+    }
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
         return {core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs)};
     };
@@ -549,6 +552,9 @@ public:
         return Payload::rubyNil(mcctx.cs, builder);
     }
 
+    virtual bool skipFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass) const override {
+        return true;
+    }
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
         return {core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs)};
     };
@@ -872,6 +878,11 @@ llvm::Value *SymbolBasedIntrinsicMethod::receiverFastPathTest(MethodCallContext 
                                                               core::ClassOrModuleRef potentialClass) const {
     auto *recv = mcctx.varGetRecv();
     return Payload::typeTest(mcctx.cs, mcctx.builder, recv, core::make_type<core::ClassType>(potentialClass));
+}
+
+bool SymbolBasedIntrinsicMethod::skipFastPathTest(MethodCallContext &mcctx,
+                                                  core::ClassOrModuleRef potentialClass) const {
+    return false;
 }
 
 void SymbolBasedIntrinsicMethod::sanityCheck(const core::GlobalState &gs) const {}

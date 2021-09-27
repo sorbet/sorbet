@@ -30,6 +30,16 @@ public:
     // Ruby VM.
     virtual llvm::Value *receiverFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass) const;
 
+    // The above is a runtime test, since it returns an llvm::Value (which might be `true`).
+    // This method is a compile test for instances where we statically know the compile-time
+    // test would succeed.  This might be done for intrinsics which we know don't have
+    // a slow path through the VM (e.g. calls on Sorbet::Private::Static) or where having
+    // a slow path through the VM would hinder optimizations like having an assumption
+    // about the return type of the method.
+    //
+    // You should not typically be returning true from this.
+    virtual bool skipFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass) const;
+
     SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock blockHandled) : blockHandled(blockHandled){};
     virtual ~SymbolBasedIntrinsicMethod() = default;
     static std::vector<const SymbolBasedIntrinsicMethod *> &definedIntrinsics(const core::GlobalState &gs);
