@@ -31,10 +31,11 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
     bool skipSetter = false;
     ast::ExpressionPtr type;
     core::NameRef name;
+    core::NameRef sendFun = send->fun;
 
-    if (send->fun == core::Names::dslOptional()) {
+    if (sendFun == core::Names::dslOptional()) {
         nilable = true;
-    } else if (send->fun == core::Names::dslRequired()) {
+    } else if (sendFun == core::Names::dslRequired()) {
     } else {
         return empty;
     }
@@ -78,6 +79,14 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
 
     vector<ast::ExpressionPtr> stats;
 
+    ast::MethodDef::Flags flags;
+    flags.discardDef = true;
+
+    if (!skipSetter && !skipGetter) {
+        stats.emplace_back(ast::MK::Send(loc, ast::MK::Unsafe(loc, move(send->recv)), sendFun, send->numPosArgs,
+                                         std::move(send->args), send->flags, move(send->block)));
+    }
+
     // def self.<prop>
     if (!skipSetter) {
         stats.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, name), ASTUtil::dupType(type),
@@ -87,7 +96,7 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
             auto default_ = ast::MK::UntypedNil(loc);
             arg = ast::MK::OptionalArg(loc, move(arg), move(default_));
         }
-        auto defSelfProp = ast::MK::SyntheticMethod1(loc, loc, name, move(arg), ast::MK::EmptyTree());
+        auto defSelfProp = ast::MK::SyntheticMethod1(loc, loc, name, move(arg), ast::MK::EmptyTree(), flags);
         ast::cast_tree<ast::MethodDef>(defSelfProp)->flags.isSelfMethod = true;
         stats.emplace_back(move(defSelfProp));
     }
@@ -100,13 +109,13 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
         // def self.get_<prop>
         core::NameRef getName = ctx.state.enterNameUTF8("get_" + name.show(ctx));
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type)));
-        auto defSelfGetProp = ast::MK::SyntheticMethod(loc, loc, getName, {}, ast::MK::RaiseUnimplemented(loc));
+        auto defSelfGetProp = ast::MK::SyntheticMethod(loc, loc, getName, {}, ast::MK::RaiseUnimplemented(loc), flags);
         ast::cast_tree<ast::MethodDef>(defSelfGetProp)->flags.isSelfMethod = true;
         stats.emplace_back(move(defSelfGetProp));
 
         // def <prop>()
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type)));
-        stats.emplace_back(ast::MK::SyntheticMethod(loc, loc, name, {}, ast::MK::RaiseUnimplemented(loc)));
+        stats.emplace_back(ast::MK::SyntheticMethod(loc, loc, name, {}, ast::MK::RaiseUnimplemented(loc), flags));
     }
 
     return stats;

@@ -168,49 +168,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :opt_string, :normal)
+    ::T.unsafe(<self>).dsl_optional(:opt_string, <emptyTree>::<C String>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :get_opt_string, :normal)
+    ::T.unsafe(<self>).dsl_optional(:opt_int_defaulted, <emptyTree>::<C Integer>, :default, 0)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :opt_string, :normal)
+    ::T.unsafe(<self>).dsl_required(:req_string, <emptyTree>::<C String>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :opt_int_defaulted, :normal)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :get_opt_int_defaulted, :normal)
-
-    ::Sorbet::Private::Static.keep_def(<self>, :opt_int_defaulted, :normal)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :req_string, :normal)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :get_req_string, :normal)
-
-    ::Sorbet::Private::Static.keep_def(<self>, :req_string, :normal)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :implied_string, :normal)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :get_implied_string, :normal)
-
-    ::Sorbet::Private::Static.keep_def(<self>, :implied_string, :normal)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :no_getter, :normal)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :get_no_setter, :normal)
-
-    ::Sorbet::Private::Static.keep_def(<self>, :no_setter, :normal)
+    ::T.unsafe(<self>).dsl_required(:implied_string, <emptyTree>::<C String>, :implied, "foo")
 
     <self>.dsl_optional(:no_getter_or_setter, <emptyTree>::<C String>, :skip_getter, true, :skip_setter, true)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :class_of, :normal)
+    ::T.unsafe(<self>).dsl_optional(:class_of, <emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>))
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :get_class_of, :normal)
-
-    ::Sorbet::Private::Static.keep_def(<self>, :class_of, :normal)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :root_const, :normal)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :get_root_const, :normal)
-
-    ::Sorbet::Private::Static.keep_def(<self>, :root_const, :normal)
+    ::T.unsafe(<self>).dsl_optional(:root_const, ::<root>::<C Integer>)
   end
 
   class <emptyTree>::<C TestChild><<C <todo sym>>> < (<emptyTree>::<C TestDSLBuilder>)
