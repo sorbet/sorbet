@@ -486,7 +486,10 @@ public:
         // Call the receiver.
         if (auto *blk = mcctx.blkAsFunction()) {
             auto *closure = Payload::buildLocalsOffset(cs);
-            return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, blk, closure);
+            auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
+            auto usesBreak = irctx.blockUsesBreak[mcctx.blk.value()];
+            return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, blk, arity.min, arity.max,
+                                                   closure);
         } else {
             auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.builder);
             return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);

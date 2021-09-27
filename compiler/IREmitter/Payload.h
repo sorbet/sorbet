@@ -96,7 +96,8 @@ public:
     static llvm::Value *callFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                           llvm::Value *blockHandler);
     static llvm::Value *callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
-                                               llvm::Value *blockFun, llvm::Value *closure);
+                                               bool usesBreak, llvm::Value *blockFun, int blkMinArgs, int blkMaxArgs,
+                                               llvm::Value *closure);
     static llvm::Value *callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                        llvm::Value *fn, llvm::Value *argc, llvm::Value *argv, llvm::Value *recv,
                                        llvm::Value *iseq);

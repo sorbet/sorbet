@@ -517,8 +517,12 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
             // blocks require a locals offset parameter
             llvm::Value *localsOffset = Payload::buildLocalsOffset(cs);
             ENFORCE(localsOffset != nullptr);
+            auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
+            auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
+            auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
             return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
-                                      {args.argc, args.argv, args.kw_splat, blk, localsOffset}, "rawSendResult");
+                                      {args.argc, args.argv, args.kw_splat, blk, blkMinArgs, blkMaxArgs, localsOffset},
+                                      "rawSendResult");
         }
 
         return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {args.argc, args.argv, args.kw_splat},
