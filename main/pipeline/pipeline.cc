@@ -1039,7 +1039,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                 Exception::raise("failed to write msgpack");
             }
         }
-        if (opts.print.CompiledFilesJson.enabled) {
+        if (opts.print.FileSigilsJson.enabled) {
             stringstream buf;
             rapidjson::OStreamWrapper wrapper{buf};
             rapidjson::Writer writer{wrapper};
@@ -1075,7 +1075,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
             }
             writer.EndArray();
 
-            opts.print.CompiledFilesJson.print(buf.str());
+            opts.print.FileSigilsJson.print(buf.str());
         }
 #endif
         // Error queue is re-used across runs, so reset the flush count to ignore files flushed during typecheck.
