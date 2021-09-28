@@ -198,6 +198,9 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
                                                       move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
             case LSPMethod::TextDocumentReferences:
                 return make_unique<ReferencesTask>(*config, id, move(get<unique_ptr<ReferenceParams>>(rawParams)));
+            case LSPMethod::TextDocumentImplementation:
+                return make_unique<GoToImplementationTask>(*config, id,
+                                                           move(get<unique_ptr<ImplementationParams>>(rawParams)));
             case LSPMethod::SorbetReadFile:
                 return make_unique<SorbetReadFileTask>(*config, id,
                                                        move(get<unique_ptr<TextDocumentIdentifier>>(rawParams)));

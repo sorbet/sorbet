@@ -35,45 +35,6 @@ bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalStat
     return true;
 }
 
-// Checks if s is a subclass of root or contains root as a mixin, and updates visited and memoized vectors.
-bool isSubclassOrMixin(const core::GlobalState &gs, core::ClassOrModuleRef root, core::ClassOrModuleRef s,
-                       vector<bool> &memoized, vector<bool> &visited) {
-    // don't visit the same class twice
-    if (visited[s.id()] == true) {
-        return memoized[s.id()];
-    }
-    visited[s.id()] = true;
-
-    for (auto a : s.data(gs)->mixins()) {
-        if (a == root) {
-            memoized[s.id()] = true;
-            return true;
-        }
-    }
-    if (s.data(gs)->superClass().exists()) {
-        memoized[s.id()] = isSubclassOrMixin(gs, root, s.data(gs)->superClass(), memoized, visited);
-    }
-
-    return memoized[s.id()];
-}
-
-// Returns all subclasses of root (including root)
-vector<core::ClassOrModuleRef> getSubclasses(const core::GlobalState &gs, core::ClassOrModuleRef root) {
-    vector<bool> memoized(gs.classAndModulesUsed());
-    vector<bool> visited(gs.classAndModulesUsed());
-    memoized[root.id()] = true;
-    visited[root.id()] = true;
-
-    vector<core::ClassOrModuleRef> subclasses;
-    for (u4 i = 1; i < gs.classAndModulesUsed(); ++i) {
-        auto s = core::ClassOrModuleRef(gs, i);
-        if (isSubclassOrMixin(gs, root, s, memoized, visited)) {
-            subclasses.emplace_back(s);
-        }
-    }
-    return subclasses;
-}
-
 // Follow superClass links until we find the highest class that contains the given method. In other words we find the
 // "root" of the tree of classes that define a method.
 core::ClassOrModuleRef findRootClassWithMethod(const core::GlobalState &gs, core::ClassOrModuleRef klass,
@@ -131,7 +92,7 @@ void addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symb
     // method_class_hierarchy test case for an example).
     auto root = findRootClassWithMethod(gs, symbolClass, symbolData->name);
 
-    auto subclasses = getSubclasses(gs, root);
+    auto subclasses = root.getSubclasses(gs);
 
     // find the target method definition in each subclass
     for (auto c : subclasses) {

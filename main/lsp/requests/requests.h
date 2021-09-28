@@ -8,6 +8,7 @@
 #include "main/lsp/requests/document_highlight.h"
 #include "main/lsp/requests/document_symbol.h"
 #include "main/lsp/requests/get_counters.h"
+#include "main/lsp/requests/go_to_implementation.h"
 #include "main/lsp/requests/hover.h"
 #include "main/lsp/requests/initialize.h"
 #include "main/lsp/requests/prepare_rename.h"

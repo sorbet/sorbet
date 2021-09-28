@@ -74,6 +74,7 @@ public:
     SymbolData dataAllowingNone(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
     ConstSymbolData dataAllowingNone(const GlobalState &gs) const;
+    std::vector<core::ClassOrModuleRef> getSubclasses(const core::GlobalState &gs, bool withSelf = true);
 
     bool operator==(const ClassOrModuleRef &rhs) const;
     bool operator!=(const ClassOrModuleRef &rhs) const;

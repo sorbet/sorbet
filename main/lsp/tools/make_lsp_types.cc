@@ -590,8 +590,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             makeField("signatureHelpProvider", makeOptional(SignatureHelpOptions)),
             makeField("definitionProvider", makeOptional(JSONBool)),
             makeField("typeDefinitionProvider", makeOptional(JSONBool)),
-            makeField("implementationProvider",
-                      makeOptional(makeVariant({JSONBool, TextDocumentAndStaticRegistrationOptions}))),
+            makeField("implementationProvider", makeOptional({JSONBool})),
             makeField("referencesProvider", makeOptional(JSONBool)),
             makeField("documentHighlightProvider", makeOptional(JSONBool)),
             makeField("documentSymbolProvider", makeOptional(JSONBool)),
@@ -1068,6 +1067,13 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                    },
                    classTypes);
 
+    auto ImplementationParams = makeObject("ImplementationParams",
+                                           {
+                                               makeField("textDocument", TextDocumentIdentifier),
+                                               makeField("position", Position),
+                                           },
+                                           classTypes);
+
     auto CodeLensParams = makeObject("CodeLensParams",
                                      {
                                          makeField("textDocument", TextDocumentIdentifier),
@@ -1352,6 +1358,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "textDocument/signatureHelp",
                                      "window/showMessage",
                                      "workspace/symbol",
+                                     "textDocument/implementation",
                                  },
                                  enumTypes);
 
@@ -1372,6 +1379,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"textDocument/rename", RenameParams},
                                                 {"textDocument/signatureHelp", TextDocumentPositionParams},
                                                 {"textDocument/codeAction", CodeActionParams},
+                                                {"textDocument/implementation", ImplementationParams},
                                                 {"textDocument/formatting", DocumentFormattingParams},
                                                 {"workspace/symbol", WorkspaceSymbolParams},
                                                 {"sorbet/error", SorbetErrorParams},
@@ -1414,6 +1422,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             // TODO: the following are more correct but I can only get the above to work.
             // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(makeVariant({CodeAction, Command}))})},
             // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction), makeArray(Command)})},
+            {"textDocument/implementation", makeVariant({JSONNull, makeArray(Location)})},
             {"workspace/symbol", makeVariant({JSONNull, makeArray(SymbolInformation)})},
             {"sorbet/error", SorbetErrorParams},
             {"sorbet/readFile", TextDocumentItem},

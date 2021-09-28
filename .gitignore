@@ -9,6 +9,7 @@
 
 .idea/
 .vscode/
+.vim/
 
 /website/lib/core/metadata.js
 /website/lib/core/MetadataBlog.js
