@@ -92,9 +92,9 @@ UnorderedSet<string> locationCheckExemptTests = {"test/testdata/packager/nested_
                                                  "test/testdata/packager/import_subpackage",
                                                  "test/testdata/packager/nested_packages",
                                                  "test/testdata/packager/deeply_nested_packages",
-                                                 "test/testdata/desugar/assign_empty_stats",
-                                                 "test/testdata/desugar/assign_keyword",
-                                                 "test/testdata/lsp/struct_fuzz"};
+                                                 "test/testdata/desugar/assign_empty_stmts.rb",
+                                                 "test/testdata/desugar/assign_keyword.rb",
+                                                 "test/testdata/lsp/struct_fuzz.rb"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
