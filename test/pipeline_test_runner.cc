@@ -88,16 +88,13 @@ UnorderedSet<string> knownExpectations = {"parse-tree",       "parse-tree-json",
 
 // TODO: This list will be progressively made empty, and we will not have any tests that
 // can swallow errors that don't have association locations. See lines 481-484 below.
-UnorderedSet<string> locationCheckExemptTests = {
-    "test/testdata/packager/nested_inner_namespaces",
-    "test/testdata/packager/import_subpackage",
-    "test/testdata/packager/nested_packages",
-    "test/testdata/packager/deeply_nested_packages",
-    "test/testdata/desugar/assign_empty_stats",
-    "test/testdata/desugar/assign_keyword",
-    "test/testdata/lsp/struct_fuzz"
-};
-
+UnorderedSet<string> locationCheckExemptTests = {"test/testdata/packager/nested_inner_namespaces",
+                                                 "test/testdata/packager/import_subpackage",
+                                                 "test/testdata/packager/nested_packages",
+                                                 "test/testdata/packager/deeply_nested_packages",
+                                                 "test/testdata/desugar/assign_empty_stats",
+                                                 "test/testdata/desugar/assign_keyword",
+                                                 "test/testdata/lsp/struct_fuzz"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
