@@ -31,7 +31,7 @@ public:
     virtual llvm::Value *receiverFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass) const;
 
     // The above is a runtime test, since it returns an llvm::Value (which might be `true`).
-    // This method is a compile test for instances where we statically know the compile-time
+    // This method is a compile test for instances where we statically know the runtime
     // test would succeed.  This might be done for intrinsics which we know don't have
     // a slow path through the VM (e.g. calls on Sorbet::Private::Static) or where having
     // a slow path through the VM would hinder optimizations like having an assumption
