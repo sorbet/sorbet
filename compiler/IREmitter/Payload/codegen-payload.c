@@ -2171,6 +2171,34 @@ VALUE sorbet_callSuper(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const r
     }
 }
 
+SORBET_INLINE
+VALUE sorbet_callSuperBlockHandler(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
+                                   VALUE block_handler) {
+    // Mostly an implementation of return rb_call_super(argc, argv);
+    rb_execution_context_t *ec = GET_EC();
+    VALUE recv = ec->cfp->self;
+    VALUE klass;
+    ID id;
+    rb_control_frame_t *cfp = ec->cfp;
+    const rb_callable_method_entry_t *me = rb_vm_frame_method_entry(cfp);
+
+    klass = RCLASS_ORIGIN(me->defined_class);
+    klass = RCLASS_SUPER(klass);
+    id = me->def->original_id;
+    me = rb_callable_method_entry(klass, id);
+
+    if (!me) {
+        // TODO do something here
+        // return rb_method_missing(recv, id, argc, argv, MISSING_SUPER);
+        rb_raise(rb_eRuntimeError, "unimplemented super with a missing method");
+        return Qnil;
+    } else {
+        ec->passed_block_handler = block_handler;
+        // TODO: consider vm_block_handler_verify?
+        return rb_vm_call_kw(ec, recv, id, argc, argv, me, kw_splat);
+    }
+}
+
 struct sorbet_iterSuperArg {
     VALUE recv;
     ID func;
