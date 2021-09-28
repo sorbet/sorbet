@@ -86,6 +86,19 @@ UnorderedSet<string> knownExpectations = {"parse-tree",       "parse-tree-json",
                                           "document-symbols", "package-tree",     "document-formatting-rubyfmt",
                                           "autocorrects"};
 
+// TODO: This list will be progressively made empty, and we will not have any tests that
+// can swallow errors that don't have association locations. See lines 481-484 below.
+UnorderedSet<string> locationCheckExemptTests = {
+    "test/testdata/packager/nested_inner_namespaces",
+    "test/testdata/packager/import_subpackage",
+    "test/testdata/packager/nested_packages",
+    "test/testdata/packager/deeply_nested_packages",
+    "test/testdata/desugar/assign_empty_stats",
+    "test/testdata/desugar/assign_keyword",
+    "test/testdata/lsp/struct_fuzz"
+};
+
+
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
     auto saved = core::serialize::Serializer::storeTree(savedFile, expr);
@@ -465,9 +478,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 continue;
             }
             auto diag = errorToDiagnostic(*gs, *error);
-            if (diag == nullptr) {
+            if (diag == nullptr && locationCheckExemptTests.contains(singleTest)) {
                 continue;
             }
+            ENFORCE(diag != nullptr, "Error was given no valid location - '{}'", error->toString(*gs));
+
             auto path = error->loc.file().data(*gs).path();
             diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
         }
