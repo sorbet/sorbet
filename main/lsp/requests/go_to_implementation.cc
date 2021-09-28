@@ -14,7 +14,6 @@ struct MethodImplementationResults {
     vector<core::Loc> locations;
     unique_ptr<ResponseError> error;
 };
-} // namespace
 
 unique_ptr<ResponseError> makeInvalidParamsError(std::string error) {
     return make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams, error);
@@ -58,6 +57,7 @@ core::SymbolRef findOverridedMethod(const core::GlobalState &gs, const core::Sym
     }
     return core::Symbols::noSymbol();
 }
+} // namespace
 
 GoToImplementationTask::GoToImplementationTask(const LSPConfiguration &config, MessageId id,
                                                std::unique_ptr<ImplementationParams> params)
