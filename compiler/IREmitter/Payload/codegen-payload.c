@@ -800,6 +800,11 @@ VALUE sorbet_Thread_square_br(VALUE recv, ID fun, int argc, const VALUE *const r
     return rb_thread_local_aref(recv, id);
 }
 
+SORBET_INLINE
+VALUE sorbet_Thread_square_br_symarg(VALUE recv, ID id) {
+    return rb_thread_local_aref(recv, id);
+}
+
 // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/thread.c#L3386-L3390
 SORBET_INLINE
 VALUE sorbet_Thread_square_br_eq(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
