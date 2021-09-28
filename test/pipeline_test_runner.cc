@@ -86,8 +86,10 @@ UnorderedSet<string> knownExpectations = {"parse-tree",       "parse-tree-json",
                                           "document-symbols", "package-tree",     "document-formatting-rubyfmt",
                                           "autocorrects"};
 
-// TODO: This list will be progressively made empty, and we will not have any tests that
-// can swallow errors that don't have association locations. See lines 481-484 below.
+// This list will be progressively made empty, and we will not have any tests that
+// can swallow errors that don't have associated locations. See lines 479-483 below.
+// DO NOT add new tests here.
+// TODO (jez) Fix these tests
 UnorderedSet<string> locationCheckExemptTests = {"test/testdata/packager/nested_inner_namespaces",
                                                  "test/testdata/packager/import_subpackage",
                                                  "test/testdata/packager/nested_packages",
