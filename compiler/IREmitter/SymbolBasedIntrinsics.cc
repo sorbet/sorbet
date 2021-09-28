@@ -536,6 +536,9 @@ public:
         return Payload::rubyNil(mcctx.cs, builder);
     }
 
+    virtual bool skipFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass) const override {
+        return true;
+    }
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
         return {core::Symbols::Sorbet_Private_Static_ResolvedSig().data(gs)->lookupSingletonClass(gs)};
     };
