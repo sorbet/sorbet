@@ -790,6 +790,34 @@ public:
     }
 } Thread_squareBrackets;
 
+class Thread_squareBracketsEq : public CallCMethod {
+public:
+    Thread_squareBracketsEq() : CallCMethod(core::Symbols::Thread(), "[]="sv, CMethod{"sorbet_Thread_square_br_eq"}) {}
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
+        auto &builder = mcctx.builder;
+        auto &irctx = mcctx.irctx;
+        auto *send = mcctx.send;
+
+        if (send->args.size() != 2 || send->numPosArgs != 2) {
+            return CallCMethod::makeCall(mcctx);
+        }
+
+        auto &arg = send->args[0];
+        auto symit = irctx.symbols.find(arg.variable);
+        if (symit == irctx.symbols.end()) {
+            return CallCMethod::makeCall(mcctx);
+        }
+
+        auto *recv = mcctx.varGetRecv();
+        auto *id = Payload::idIntern(cs, builder, symit->second);
+        return builder.CreateCall(cs.getFunction("sorbet_Thread_square_br_eq_symarg"),
+                                  {recv, id, Payload::varGet(cs, send->args[1].variable, builder, irctx,
+                                                             mcctx.rubyBlockId)});
+    }
+} Thread_squareBracketsEq;
+
 class CallCMethodSingleton : public CallCMethod {
 public:
     CallCMethodSingleton(core::ClassOrModuleRef rubyClass, string_view rubyMethod, CMethod cMethod)
@@ -892,7 +920,6 @@ static const vector<CallCMethod> knownCMethodsInstance{
      CMethod{"sorbet_rb_int_dotimes_withBlock", core::Symbols::Integer()}},
     {core::Symbols::Symbol(), "==", CMethod{"sorbet_rb_sym_equal"}},
     {core::Symbols::Symbol(), "===", CMethod{"sorbet_rb_sym_equal"}},
-    {core::Symbols::Thread(), "[]=", CMethod{"sorbet_Thread_square_br_eq"}},
     {core::Symbols::Kernel(), "is_a?", CMethod{"sorbet_rb_obj_is_kind_of"}, nullopt, {"rb_obj_is_kind_of"}},
     {core::Symbols::Kernel(), "kind_of?", CMethod{"sorbet_rb_obj_is_kind_of"}, nullopt, {"rb_obj_is_kind_of"}},
 #include "WrappedIntrinsics.h"
@@ -916,6 +943,7 @@ vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs(const core::Globa
         &TPrivateCompiler_runningCompiled_p,
         &TPrivateCompiler_compilerVersion,
         &Thread_squareBrackets,
+        &Thread_squareBracketsEq,
     };
     for (auto &method : knownCMethodsInstance) {
         if (debug_mode) {
