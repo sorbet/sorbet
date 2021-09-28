@@ -58,7 +58,7 @@ struct SorbetLineNumberInfo {
     extern rettype name rest;             \
     KEEP_ALIVE(name)
 
-SORBET_ALIVE(VALUE, rb_id2sym, (ID));
+SORBET_ALIVE(VALUE, rb_id2sym, (ID) SORBET_ATTRIBUTE(const));
 SORBET_ALIVE(VALUE, rb_errinfo, ());
 SORBET_ALIVE(VALUE, rb_obj_is_kind_of, (VALUE, VALUE) __attribute__((const)));
 
