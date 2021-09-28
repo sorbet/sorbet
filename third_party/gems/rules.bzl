@@ -107,7 +107,7 @@ def _impl(repo_ctx):
 
     gems_to_fetch = {}
 
-    for gem, sha256 in repo_ctx.attr.gems:
+    for gem, sha256 in repo_ctx.attr.gems.items():
         gems_to_fetch[gem] = sha256
 
     # collect all requested gems
