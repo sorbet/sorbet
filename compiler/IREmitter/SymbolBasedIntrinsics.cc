@@ -785,8 +785,7 @@ public:
 
         auto *recv = mcctx.varGetRecv();
         auto *id = Payload::idIntern(cs, builder, symit->second);
-        return builder.CreateCall(cs.getFunction("sorbet_Thread_square_br_symarg"),
-                                  {recv, id});
+        return builder.CreateCall(cs.getFunction("sorbet_Thread_square_br_symarg"), {recv, id});
     }
 } Thread_squareBrackets;
 
@@ -812,9 +811,9 @@ public:
 
         auto *recv = mcctx.varGetRecv();
         auto *id = Payload::idIntern(cs, builder, symit->second);
-        return builder.CreateCall(cs.getFunction("sorbet_Thread_square_br_eq_symarg"),
-                                  {recv, id, Payload::varGet(cs, send->args[1].variable, builder, irctx,
-                                                             mcctx.rubyBlockId)});
+        return builder.CreateCall(
+            cs.getFunction("sorbet_Thread_square_br_eq_symarg"),
+            {recv, id, Payload::varGet(cs, send->args[1].variable, builder, irctx, mcctx.rubyBlockId)});
     }
 } Thread_squareBracketsEq;
 

@@ -278,13 +278,20 @@ public:
 } TypeTest;
 
 const vector<pair<llvm::StringRef, llvm::StringRef>> TypeTest::intrinsicMap{
-    {"sorbet_i_isa_Array", "sorbet_isa_Array"},         {"sorbet_i_isa_Integer", "sorbet_isa_Integer"},
-    {"sorbet_i_isa_TrueClass", "sorbet_isa_TrueClass"}, {"sorbet_i_isa_FalseClass", "sorbet_isa_FalseClass"},
-    {"sorbet_i_isa_NilClass", "sorbet_isa_NilClass"},   {"sorbet_i_isa_Symbol", "sorbet_isa_Symbol"},
-    {"sorbet_i_isa_Float", "sorbet_isa_Float"},         {"sorbet_i_isa_Untyped", "sorbet_isa_Untyped"},
-    {"sorbet_i_isa_Hash", "sorbet_isa_Hash"},           {"sorbet_i_isa_Array", "sorbet_isa_Array"},
-    {"sorbet_i_isa_Regexp", "sorbet_isa_Regexp"},       {"sorbet_i_isa_String", "sorbet_isa_String"},
-    {"sorbet_i_isa_Proc", "sorbet_isa_Proc"},           {"sorbet_i_isa_Thread", "sorbet_isa_Thread" },
+    {"sorbet_i_isa_Array", "sorbet_isa_Array"},
+    {"sorbet_i_isa_Integer", "sorbet_isa_Integer"},
+    {"sorbet_i_isa_TrueClass", "sorbet_isa_TrueClass"},
+    {"sorbet_i_isa_FalseClass", "sorbet_isa_FalseClass"},
+    {"sorbet_i_isa_NilClass", "sorbet_isa_NilClass"},
+    {"sorbet_i_isa_Symbol", "sorbet_isa_Symbol"},
+    {"sorbet_i_isa_Float", "sorbet_isa_Float"},
+    {"sorbet_i_isa_Untyped", "sorbet_isa_Untyped"},
+    {"sorbet_i_isa_Hash", "sorbet_isa_Hash"},
+    {"sorbet_i_isa_Array", "sorbet_isa_Array"},
+    {"sorbet_i_isa_Regexp", "sorbet_isa_Regexp"},
+    {"sorbet_i_isa_String", "sorbet_isa_String"},
+    {"sorbet_i_isa_Proc", "sorbet_isa_Proc"},
+    {"sorbet_i_isa_Thread", "sorbet_isa_Thread"},
     {"sorbet_i_isa_RootSingleton", "sorbet_isa_RootSingleton"},
 };
 
