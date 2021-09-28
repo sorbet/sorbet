@@ -537,7 +537,7 @@ entry:
   %59 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !46, !tbaa !15
   %60 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %59, i64 0, i32 2, !dbg !46
   %61 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %60, align 8, !dbg !46, !tbaa !17
-  %62 = call %struct.vm_ifunc* @rb_vm_ifunc_new(i64 (i64, i64, i32, i64*, i64)* @"func_<root>.17<static-init>$152$block_1", i8* null, i32 noundef 0, i32 noundef -1) #16, !dbg !46
+  %62 = call %struct.vm_ifunc* @rb_vm_ifunc_new(i64 (i64, i64, i32, i64*, i64)* @"func_<root>.17<static-init>$152$block_1", i8* null, i32 0, i32 0) #16, !dbg !46
   %63 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %61, i64 0, i32 3, !dbg !46
   %64 = bitcast i64* %63 to %struct.rb_captured_block*, !dbg !46
   %65 = getelementptr inbounds i64, i64* %63, i64 2, !dbg !46
