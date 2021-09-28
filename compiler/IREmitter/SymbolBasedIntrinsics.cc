@@ -772,6 +772,25 @@ public:
                          string cMethodWithBlock)
         : CallCMethod(rubyClass, rubyMethod, cMethod, cMethodWithBlock){};
 
+    // It is safe to skip the test if the receiver is a constant of the given class.
+    virtual bool skipFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass) const override {
+        auto &cs = mcctx.cs;
+        auto &irctx = mcctx.irctx;
+        auto &recv = mcctx.send->recv;
+
+        auto aliasit = irctx.aliases.find(recv.variable);
+        if (aliasit == irctx.aliases.end()) {
+            return false;
+        }
+
+        if (aliasit->second.kind != Alias::AliasKind::Constant) {
+            return false;
+        }
+
+        ENFORCE(potentialClass.data(cs)->isSingletonClass(cs));
+        auto attachedClass = potentialClass.data(cs)->attachedClass(cs);
+        return aliasit->second.constantSym == attachedClass;
+    }
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
         return {rubyClass.data(gs)->lookupSingletonClass(gs)};
     };
