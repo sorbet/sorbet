@@ -797,17 +797,7 @@ private:
         });
         for (auto const &[nameRef, child] : childPairs) {
             // Ignore the entire `Test::*` part of import tree if we are not in a test context.
-            // TODO need to deal with this
-            // if (moduleType != ImportType::Test && parts.empty() && nameRef == TEST_NAME) {
-            //     continue;
-            // }
-
-            // if (parts.empty() &&
-            //         ((moduleType == ImportType::Normal && nameRef == TEST_NAME) ||
-            //          (moduleType == ImportType::Test && nameRef != TEST_NAME))) {
-            //         continue;
-            // }
-            if (parts.empty() && ((moduleType == ImportType::Test) != (nameRef == TEST_NAME))) {
+            if (moduleType != ImportType::Test && parts.empty() && nameRef == TEST_NAME) {
                 continue;
             }
             parts.emplace_back(nameRef);
@@ -828,9 +818,8 @@ private:
                         e.addErrorLine(core::Loc(ctx.file, parentSrc.importLoc), "Conflict from");
                     }
                 }
-            // } else if (moduleType == ImportType::Test || node->source.importType == ImportType::Normal) {
-            // } else if (moduleType == ImportType::Normal) {
-            } else {
+            } else if (moduleType ==
+                       parts2ImportType(parts)) { // Test:: imports go in TestModule, other go in "normal" module
                 // Construct a module containing an assignment for an imported name:
                 // For name `A::B::C::D` imported from package `A::B` construct:
                 // module A::B::C
@@ -867,6 +856,10 @@ private:
         // Put the loc on the outer name:
         auto &lit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(name);
         return ast::MK::UnresolvedConstant(importLoc, move(lit.scope), lit.cnst);
+    }
+
+    ImportType parts2ImportType(const vector<core::NameRef> &parts) {
+        return parts[0] == TEST_NAME ? ImportType::Test : ImportType::Normal;
     }
 };
 
@@ -932,20 +925,6 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
         importedPackages.emplace_back(move(stubClass));
 
         testImportedPackages = treeBuilder.makeModule(ctx, ImportType::Test);
-
-        // In the test namespace for this package add an alias to give tests full access to the
-        // packaged code:
-        // module <PackageTests>
-        //   <Imports>
-        //   <Mangled_Pkg_A>::Pkg::A = <PackageRegistry>::<Mangled_Pkg_A>::Pkg::A
-        // end
-        // auto assignRhs =
-        //     prependPackageScope(package->name.fullName.toLiteral(core::LocOffsets::none()), package->name.mangledName);
-        // auto assign = ast::MK::Assign(core::LocOffsets::none(),
-        //                               prependScope(package->name.fullName.toLiteral(core::LocOffsets::none()),
-        //                                            name2Expr(package->name.mangledName)),
-        //                               std::move(assignRhs));
-        // testImportedPackages.emplace_back(std::move(assign));
     }
 
     auto packageNamespace =
@@ -972,38 +951,37 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, cor
     EnforcePackagePrefix enforcePrefix(pkg, isTestFile);
     file.tree = ast::ShallowMap::apply(ctx, enforcePrefix, move(file.tree));
 
-    // auto wrapperName = isTestFile ? core::Names::Constants::PackageTests() : core::Names::Constants::PackageRegistry();
-    // auto moduleWrapper =
-    //     ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-    //                     name2Expr(packageMangledName, name2Expr(wrapperName)), {}, std::move(rootKlass.rhs));
     ast::ExpressionPtr moduleWrapper;
     if (isTestFile) {
-        // ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(), name
-        // auto x = name2Expr(packageMangledName, name2Expr(core::Names::Constants::PackageRegistry()));
-        // auto *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(x);
-        // while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
-        //     lastConstLit = constLit;
-        // }
-        // fmt::print("HI: {}\nLast: {}\n", x.showRaw(ctx), lastConstLit->showRaw(ctx));
-        // x = ast::MK::UnresolvedConstant(core::LocOffsets::none(), move(x), {});
-        // fmt::print("HI2: {}\n", x.showRaw(ctx));
-        auto cbaseName = name2Expr(packageMangledName, name2Expr(core::Names::Constants::PackageTests(), ast::MK::Constant(core::LocOffsets::none(), core::Symbols::root())));
-        auto pkgName = name2Expr(packageMangledName, name2Expr(core::Names::Constants::PackageRegistry()));
+        // In order to give test code access to all names in its corresponding package we wrap test
+        // code as follows:
+        // module <PackageRegistry>::<Mangled_Pkg_A>
+        //   module ::<PackageTests>::<Mangled_Pkg_A> # <-- Note the leading `::`
+        //      <SOURCE CODE IN FILE>
+        //   end
+        // end
+        //
+        // This means code written in test files has a lexical scope that resolves constants in both
+        // the "Test" package and "Normal" package (in that order). Since test code is required to
+        // start with a special namespace these are guaranteed not to collide.
 
-        // fmt::print("HI: {}\n", cbaseName.toString(ctx));
-        moduleWrapper =
-            ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                            move(cbaseName), {}, std::move(rootKlass.rhs));
+        // ::<PackageTests>::<Mangled_Pkg_A>
+        auto cbaseName = name2Expr(packageMangledName,
+                                   name2Expr(core::Names::Constants::PackageTests(),
+                                             ast::MK::Constant(core::LocOffsets::none(), core::Symbols::root())));
+        // <PackageRegistry>::<Mangled_Pkg_A>
+        auto pkgName = name2Expr(packageMangledName, name2Expr(core::Names::Constants::PackageRegistry()));
+        moduleWrapper = ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(), move(cbaseName), {},
+                                        std::move(rootKlass.rhs));
         ast::ClassDef::RHS_store rhs;
         rhs.emplace_back(move(moduleWrapper));
         moduleWrapper =
-            ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                            move(pkgName), {}, std::move(rhs));
-        // fmt::print("HI: {}\n", moduleWrapper.toString(ctx));
+            ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(), move(pkgName), {}, std::move(rhs));
     } else {
         moduleWrapper =
             ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                            name2Expr(packageMangledName, name2Expr(core::Names::Constants::PackageRegistry())), {}, std::move(rootKlass.rhs));
+                            name2Expr(packageMangledName, name2Expr(core::Names::Constants::PackageRegistry())), {},
+                            std::move(rootKlass.rhs));
     }
     rootKlass.rhs.clear();
     rootKlass.rhs.emplace_back(move(moduleWrapper));
