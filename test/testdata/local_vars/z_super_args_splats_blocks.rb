@@ -1,6 +1,7 @@
 # typed: true
 
-extend T::Sig
+# Note that this test exists just for the purpose of validating lowering of zero-arg "super", via exp files. It's not
+# expected to do anything useful if actually executed.
 
 def pos(x, y, z)
   super
