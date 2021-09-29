@@ -12,5 +12,5 @@ class Test::Project::MainLib::LibTest
   Test::Project::Util::UtilHelper # allowed by import
 
   Test::Project::Util::Unexported
-# ^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `Util`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `Unexported`
 end

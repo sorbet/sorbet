@@ -13,6 +13,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     module <emptyTree>::<C Project_MainLib_Package$1>::<C Project>::<C Util><<C <todo sym>>> < ()
       <emptyTree>::<C MyUtil> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1>::<C Project>::<C Util>::<C MyUtil>
     end
+
+    class <emptyTree>::<C Project_MainLib_Package$1>::<C Project>::<C MainLib>::<C <Magic>><<C <todo sym>>> < ()
+    end
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Project_MainLib_Package$1>::<C Test>::<C Project>::<C Util><<C <todo sym>>> < ()
+      <emptyTree>::<C UtilHelper> = <emptyTree>::<C <PackageTests>>::<C Project_Util_Package$1>::<C Test>::<C Project>::<C Util>::<C UtilHelper>
+    end
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
@@ -53,6 +62,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+    class <emptyTree>::<C Project_TestOnly_Package$1>::<C Project>::<C TestOnly>::<C <Magic>><<C <todo sym>>> < ()
+    end
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
@@ -69,6 +83,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+    class <emptyTree>::<C Project_Util_Package$1>::<C Project>::<C Util>::<C <Magic>><<C <todo sym>>> < ()
+    end
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
