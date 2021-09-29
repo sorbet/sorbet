@@ -1457,6 +1457,11 @@ class ResolveTypeMembersAndFieldsWalk {
                 // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
                 auto rhs = move(job.asgn->rhs);
                 auto loc = rhs.loc();
+                if (!loc.exists()) {
+                    // If the rhs happens to be an EmptyTree (e.g., `begin; end`) there will be no loc.
+                    // In that case, use the assign's loc instead.
+                    loc = job.asgn->loc;
+                }
                 job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
                                                core::Names::suggestType(), move(rhs));
             }

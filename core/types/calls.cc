@@ -2376,10 +2376,17 @@ public:
         ENFORCE(args.args.size() == 1);
         auto ty = core::Types::widen(gs, args.args.front()->type);
         auto loc = args.argLoc(0);
+        if (!loc.exists()) {
+            // This might be because our argument was an EmptyTree (`begin; end`). Fall back to
+            // using the loc of the whole send.
+            loc = args.callLoc();
+        }
         if (auto e = gs.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
             e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
                         "# typed: strict");
-            if (!ty.isUntyped() && loc.exists()) {
+            if (!ty.isUntyped() && loc.exists() && loc != args.callLoc()) {
+                // (skip the autocorrect if we had to fall back to using callLoc, because using that
+                // will suggest something syntactically invalid like `T.let(U = begin; end, NilClass))`
                 e.replaceWith(fmt::format("Initialize as `{}`", ty.show(gs)), loc, "T.let({}, {})",
                               loc.source(gs).value(), ty.show(gs));
             }
