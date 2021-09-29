@@ -1618,13 +1618,14 @@ public:
                 }
             }
         }
+        auto loc = klass.declLoc;
         ast::InsSeq::STATS_store ideSeqs;
         if (ast::isa_tree<ast::ConstantLit>(klass.name)) {
-            ideSeqs.emplace_back(ast::MK::KeepForIDE(klass.name.deepCopy()));
+            ideSeqs.emplace_back(ast::MK::KeepForIDE(loc, klass.name.deepCopy()));
         }
         if (klass.kind == ast::ClassDef::Kind::Class && !klass.ancestors.empty() &&
             shouldLeaveAncestorForIDE(klass.ancestors.front())) {
-            ideSeqs.emplace_back(ast::MK::KeepForIDE(klass.ancestors.front().deepCopy()));
+            ideSeqs.emplace_back(ast::MK::KeepForIDE(loc, klass.ancestors.front().deepCopy()));
         }
 
         if (klass.symbol != core::Symbols::root() && !ctx.file.data(ctx).isRBI() &&
@@ -1646,7 +1647,6 @@ public:
         }
 
         ast::InsSeq::STATS_store retSeqs;
-        auto loc = klass.declLoc;
         retSeqs.emplace_back(std::move(tree));
         for (auto &stat : ideSeqs) {
             retSeqs.emplace_back(std::move(stat));

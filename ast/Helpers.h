@@ -376,8 +376,7 @@ public:
         return Send1(loc, T(loc), core::Names::nilable(), std::move(arg));
     }
 
-    static ExpressionPtr KeepForIDE(ExpressionPtr arg) {
-        auto loc = core::LocOffsets::none();
+    static ExpressionPtr KeepForIDE(core::LocOffsets loc, ExpressionPtr arg) {
         return Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::keepForIde(),
                      std::move(arg));
     }
