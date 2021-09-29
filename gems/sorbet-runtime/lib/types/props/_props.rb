@@ -38,8 +38,6 @@ module T::Props
       @decorator = decorator_class.new(self)
     end
 
-    # @!method self.prop(name, type, opts={})
-    #
     # Define a new property. See {file:README.md} for some concrete
     #  examples.
     #
@@ -50,7 +48,7 @@ module T::Props
     #
     # @param name [Symbol] The name of this property
     # @param cls [Class,T::Types::Base] The type of this
-    #   property. If the type is itself a {Document} subclass, this
+    #   property. If the type is itself a `Document` subclass, this
     #   property will be recursively serialized/deserialized.
     # @param rules [Hash] Options to control this property's behavior.
     # @option rules [T::Boolean,Symbol] :optional If `true`, this property
@@ -61,7 +59,7 @@ module T::Props
     #   If `false`, when the property is missing/nil after deserialization, it
     #   will be set to the default value (as defined by the `default` or
     #   `factory` option) or will raise if they are not present.
-    #   Deprecated: For {Model}s, if `:optional` is set to the special value
+    #   Deprecated: For `Model`s, if `:optional` is set to the special value
     #   `:existing`, the property can be saved as nil even if it was
     #   deserialized with a non-nil value. (Deprecated because there should
     #   never be a need for this behavior; the new behavior of non-optional
@@ -69,7 +67,8 @@ module T::Props
     # @option rules [Array] :enum An array of legal values; The
     #  property is required to take on one of those values.
     # @option rules [T::Boolean] :dont_store If true, this property will
-    #   not be saved on the hash resulting from {#serialize}
+    #   not be saved on the hash resulting from
+    #   {T::Props::Serializable#serialize}
     # @option rules [Object] :ifunset A value to be returned if this
     #   property is requested but has never been set (is set to
     #   `nil`). It is applied at property-access time, and never saved
@@ -93,10 +92,10 @@ module T::Props
     #  class directly.
     #
     # @option rules [Object] :default A default value that will be set
-    #   by {#initialize} if none is provided in the initialization
+    #   by `#initialize` if none is provided in the initialization
     #   hash. This will not affect objects loaded by {.from_hash}.
     # @option rules [Proc] :factory A `Proc` that will be called to
-    #   generate an initial value for this prop on {#initialize}, if
+    #   generate an initial value for this prop on `#initialize`, if
     #   none is provided.
     # @option rules [T::Boolean] :immutable If true, this prop cannot be
     #   modified after an instance is created or loaded from a hash.
@@ -116,8 +115,6 @@ module T::Props
       decorator.prop_defined(name, cls, rules)
     end
 
-    # @!method validate_prop_value(propname, value)
-    #
     # Validates the value of the specified prop. This method allows the caller to
     #  validate a value for a prop without having to set the data on the instance.
     #  Throws if invalid.

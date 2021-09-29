@@ -6,17 +6,17 @@
 class T::Private::Types::NotTyped < T::Types::Base
   ERROR_MESSAGE = "Validation is being done on a `NotTyped`. Please report to #dev-productivity."
 
-  # @override Base
+  # overrides Base
   def name
     "<NOT-TYPED>"
   end
 
-  # @override Base
+  # overrides Base
   def valid?(obj)
     raise ERROR_MESSAGE
   end
 
-  # @override Base
+  # overrides Base
   private def subtype_of_single?(other)
     raise ERROR_MESSAGE
   end

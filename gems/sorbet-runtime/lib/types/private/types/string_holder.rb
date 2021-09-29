@@ -9,17 +9,17 @@ class T::Private::Types::StringHolder < T::Types::Base
     @string = string
   end
 
-  # @override Base
+  # overrides Base
   def name
     string
   end
 
-  # @override Base
+  # overrides Base
   def valid?(obj)
     false
   end
 
-  # @override Base
+  # overrides Base
   private def subtype_of_single?(other)
     false
   end

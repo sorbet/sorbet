@@ -10,17 +10,17 @@ module T::Types
       @type = type
     end
 
-    # @override Base
+    # overrides Base
     def name
       "T.class_of(#{@type})"
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       obj.is_a?(Module) && obj <= @type
     end
 
-    # @override Base
+    # overrides Base
     def subtype_of_single?(other)
       case other
       when ClassOf
@@ -30,7 +30,7 @@ module T::Types
       end
     end
 
-    # @override Base
+    # overrides Base
     def describe_obj(obj)
       obj.inspect
     end

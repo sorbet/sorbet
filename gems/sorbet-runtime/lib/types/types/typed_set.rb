@@ -9,17 +9,17 @@ module T::Types
       Hash
     end
 
-    # @override Base
+    # overrides Base
     def name
       "T::Set[#{@type.name}]"
     end
 
-    # @override Base
+    # overrides Base
     def recursively_valid?(obj)
       obj.is_a?(Set) && super
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       obj.is_a?(Set)
     end

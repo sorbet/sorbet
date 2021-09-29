@@ -16,17 +16,17 @@ module T::Types
       Enumerable
     end
 
-    # @override Base
+    # overrides Base
     def name
       "T::Enumerable[#{@type.name}]"
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       obj.is_a?(Enumerable)
     end
 
-    # @override Base
+    # overrides Base
     def recursively_valid?(obj)
       return false unless obj.is_a?(Enumerable)
       case obj
@@ -74,7 +74,7 @@ module T::Types
       end
     end
 
-    # @override Base
+    # overrides Base
     private def subtype_of_single?(other)
       if other.class <= TypedEnumerable &&
          underlying_class <= other.underlying_class
@@ -90,7 +90,7 @@ module T::Types
       end
     end
 
-    # @override Base
+    # overrides Base
     def describe_obj(obj)
       return super unless obj.is_a?(Enumerable)
       type_from_instance(obj).name

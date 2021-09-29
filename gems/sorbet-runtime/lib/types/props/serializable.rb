@@ -325,7 +325,7 @@ module T::Props::Serializable::DecoratorMethods
     instance.instance_variable_get(:@_extra_props) || EMPTY_EXTRA_PROPS
   end
 
-  # @override T::Props::PrettyPrintable
+  # overrides T::Props::PrettyPrintable
   private def inspect_instance_components(instance, multiline:, indent:)
     if (extra_props = extra_props(instance)) && !extra_props.empty?
       pretty_kvs = extra_props.map {|k, v| [k.to_sym, v.inspect]}
@@ -346,8 +346,6 @@ module T::Props::Serializable::ClassMethods
     @prop_by_serialized_forms ||= {}
   end
 
-  # @!method self.from_hash(hash, strict)
-  #
   # Allocate a new instance and call {#deserialize} to load a new
   # object from a hash.
   # @return [Serializable]

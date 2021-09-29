@@ -7,17 +7,17 @@ module T::Types
 
     def initialize; end
 
-    # @override Base
+    # overrides Base
     def name
       "T.noreturn"
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       false
     end
 
-    # @override Base
+    # overrides Base
     private def subtype_of_single?(other)
       true
     end

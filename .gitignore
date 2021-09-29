@@ -46,3 +46,7 @@ compiler/IREmitter/Intrinsics/WrappedIntrinsics.formatted.h
 
 # clangd caches data in this folder.
 /.clangd
+
+# for YARD documentation
+.yardoc/
+doc/

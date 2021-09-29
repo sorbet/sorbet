@@ -130,12 +130,12 @@ module T::Configuration
   #
   # Parameters passed to value.call:
   #
-  # @param [TypeError] error TypeError that was raised
-  # @param [Hash] opts A hash containing contextual information on the error:
-  # @option opts [String] :kind One of:
-  #   ['T.cast', 'T.let', 'T.bind', 'T.assert_type!', 'T.must', 'T.absurd']
-  # @option opts [Object, nil] :type Expected param/return value type
-  # @option opts [Object] :value Actual param/return value
+  #  @param [TypeError] error TypeError that was raised
+  #  @param [Hash] opts A hash containing contextual information on the error:
+  #  @option opts [String] :kind One of:
+  #    ['T.cast', 'T.let', 'T.bind', 'T.assert_type!', 'T.must', 'T.absurd']
+  #  @option opts [Object, nil] :type Expected param/return value type
+  #  @option opts [Object] :value Actual param/return value
   #
   # @example
   #   T::Configuration.inline_type_error_handler = lambda do |error, opts|
@@ -179,8 +179,8 @@ module T::Configuration
   #
   # Parameters passed to value.call:
   #
-  # @param [StandardError] error The error that was raised
-  # @param [Thread::Backtrace::Location] location Location of the error
+  #  @param [StandardError] error The error that was raised
+  #  @param [Thread::Backtrace::Location] location Location of the error
   #
   # @example
   #   T::Configuration.sig_builder_error_handler = lambda do |error, location|
@@ -221,16 +221,16 @@ module T::Configuration
   #
   # Parameters passed to value.call:
   #
-  # @param [StandardError] error The error that was raised
-  # @param [Hash] opts A hash containing contextual information on the error:
-  # @option opts [Method, UnboundMethod] :method Method on which the signature build failed
-  # @option opts [T::Private::Methods::Declaration] :declaration Method
-  #   signature declaration struct
-  # @option opts [T::Private::Methods::Signature, nil] :signature Signature
-  #   that failed (nil if sig build failed before Signature initialization)
-  # @option opts [T::Private::Methods::Signature, nil] :super_signature Super
-  #   method's signature (nil if method is not an override or super method
-  #   does not have a method signature)
+  #  @param [StandardError] error The error that was raised
+  #  @param [Hash] opts A hash containing contextual information on the error:
+  #  @option opts [Method, UnboundMethod] :method Method on which the signature build failed
+  #  @option opts [T::Private::Methods::Declaration] :declaration Method
+  #    signature declaration struct
+  #  @option opts [T::Private::Methods::Signature, nil] :signature Signature
+  #    that failed (nil if sig build failed before Signature initialization)
+  #  @option opts [T::Private::Methods::Signature, nil] :super_signature Super
+  #    method's signature (nil if method is not an override or super method
+  #    does not have a method signature)
   #
   # @example
   #   T::Configuration.sig_validation_error_handler = lambda do |error, opts|
@@ -266,17 +266,17 @@ module T::Configuration
   #
   # Parameters passed to value.call:
   #
-  # @param [T::Private::Methods::Signature] signature Signature that failed
-  # @param [Hash] opts A hash containing contextual information on the error:
-  # @option opts [String] :message Error message
-  # @option opts [String] :kind One of:
-  #   ['Parameter', 'Block parameter', 'Return value']
-  # @option opts [Symbol] :name Param or block param name (nil for return
-  #   value)
-  # @option opts [Object] :type Expected param/return value type
-  # @option opts [Object] :value Actual param/return value
-  # @option opts [Thread::Backtrace::Location] :location Location of the
-  #   caller
+  #  @param [T::Private::Methods::Signature] signature Signature that failed
+  #  @param [Hash] opts A hash containing contextual information on the error:
+  #  @option opts [String] :message Error message
+  #  @option opts [String] :kind One of:
+  #    ['Parameter', 'Block parameter', 'Return value']
+  #  @option opts [Symbol] :name Param or block param name (nil for return
+  #    value)
+  #  @option opts [Object] :type Expected param/return value type
+  #  @option opts [Object] :value Actual param/return value
+  #  @option opts [Thread::Backtrace::Location] :location Location of the
+  #    caller
   #
   # @example
   #   T::Configuration.call_validation_error_handler = lambda do |signature, opts|
@@ -307,8 +307,8 @@ module T::Configuration
   #
   # Parameters passed to value.call:
   #
-  # @param [String] str Message to be logged
-  # @param [Hash] extra A hash containing additional parameters to be passed along to the logger.
+  #  @param [String] str Message to be logged
+  #  @param [Hash] extra A hash containing additional parameters to be passed along to the logger.
   #
   # @example
   #   T::Configuration.log_info_handler = lambda do |str, extra|
@@ -341,8 +341,8 @@ module T::Configuration
   #
   # Parameters passed to value.call:
   #
-  # @param [String] str Assertion message
-  # @param [Hash] extra A hash containing additional parameters to be passed along to the handler.
+  #  @param [String] str Assertion message
+  #  @param [Hash] extra A hash containing additional parameters to be passed along to the handler.
   #
   # @example
   #   T::Configuration.soft_assert_handler = lambda do |str, extra|
@@ -375,8 +375,8 @@ module T::Configuration
   #
   # Parameters passed to value.call:
   #
-  # @param [String] str Assertion message
-  # @param [Hash] extra A hash containing additional parameters to be passed along to the handler.
+  #  @param [String] str Assertion message
+  #  @param [Hash] extra A hash containing additional parameters to be passed along to the handler.
   #
   # @example
   #   T::Configuration.hard_assert_handler = lambda do |str, extra|
@@ -402,7 +402,7 @@ module T::Configuration
   # Set a list of class strings that are to be considered scalar.
   #   (pass nil to reset to default behavior)
   #
-  # @param [String] value Class name.
+  # @param [String] values Class name.
   #
   # @example
   #   T::Configuration.scalar_types = ["NilClass", "TrueClass", "FalseClass", ...]
@@ -455,7 +455,7 @@ module T::Configuration
   #   to names in generated code. Used by the runtime implementation
   #   associated with `--stripe-packages` mode.
   #
-  # @param [Lambda, Proc, nil] value Proc that converts a type (Class/Module)
+  # @param [Lambda, Proc, nil] handler Proc that converts a type (Class/Module)
   #   to a String (pass nil to reset to default behavior)
   def self.module_name_mangler=(handler)
     @module_name_mangler = handler
@@ -464,7 +464,7 @@ module T::Configuration
   # Set to a PII handler function. This will be called with the `sensitivity:`
   # annotations on things that use `T::Props` and can modify them ahead-of-time.
   #
-  # @param [Lambda, Proc, nil] value Proc that takes a hash mapping symbols to the
+  # @param [Lambda, Proc, nil] handler Proc that takes a hash mapping symbols to the
   # prop values. Pass nil to avoid changing `sensitivity:` annotations.
   def self.normalize_sensitivity_and_pii_handler=(handler)
     @sensitivity_and_pii_handler = handler
@@ -480,7 +480,7 @@ module T::Configuration
   # `nil` and will raise an exception when the redacted version of a prop is
   # accessed.
   #
-  # @param [Lambda, Proc, nil] value Proc that converts a value into its
+  # @param [Lambda, Proc, nil] handler Proc that converts a value into its
   # redacted version according to the spec passed as the second argument.
   def self.redaction_handler=(handler)
     @redaction_handler = handler
@@ -493,7 +493,7 @@ module T::Configuration
   # Set to a function which can get the 'owner' of a class. This is
   # used in reporting deserialization errors
   #
-  # @param [Lambda, Proc, nil] value Proc that takes a class and
+  # @param [Lambda, Proc, nil] handler Proc that takes a class and
   # produces its owner, or `nil` if it does not have one.
   def self.class_owner_finder=(handler)
     @class_owner_finder = handler

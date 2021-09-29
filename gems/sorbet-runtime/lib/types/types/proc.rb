@@ -19,7 +19,7 @@ module T::Types
       @returns = T::Utils.coerce(returns)
     end
 
-    # @override Base
+    # overrides Base
     def name
       args = []
       @arg_types.each do |k, v|
@@ -28,12 +28,12 @@ module T::Types
       "T.proc.params(#{args.join(', ')}).returns(#{returns})"
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       obj.is_a?(::Proc)
     end
 
-    # @override Base
+    # overrides Base
     private def subtype_of_single?(other)
       case other
       when self.class

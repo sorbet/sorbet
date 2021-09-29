@@ -442,7 +442,7 @@ class T::Props::Decorator
     end
   end
 
-  # Create "#{prop_name}_redacted" method
+  # Create `#{prop_name}_redacted` method
   sig do
     params(
       prop_name: Symbol,

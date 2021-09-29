@@ -11,12 +11,12 @@ module T::Types
       @types = types.transform_values {|v| T::Utils.coerce(v)}
     end
 
-    # @override Base
+    # overrides Base
     def name
       serialize_hash(@types)
     end
 
-    # @override Base
+    # overrides Base
     def recursively_valid?(obj)
       return false unless obj.is_a?(Hash)
       return false if @types.any? {|key, type| !type.recursively_valid?(obj[key])}
@@ -24,7 +24,7 @@ module T::Types
       true
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       return false unless obj.is_a?(Hash)
       return false if @types.any? {|key, type| !type.valid?(obj[key])}
@@ -32,7 +32,7 @@ module T::Types
       true
     end
 
-    # @override Base
+    # overrides Base
     private def subtype_of_single?(other)
       case other
       when FixedHash
@@ -44,11 +44,11 @@ module T::Types
     end
 
     # This gives us better errors, e.g.:
-    # "Expected {a: String}, got {a: TrueClass}"
+    # `Expected {a: String}, got {a: TrueClass}`
     # instead of
-    # "Expected {a: String}, got Hash".
+    # `Expected {a: String}, got Hash`.
     #
-    # @override Base
+    # overrides Base
     def describe_obj(obj)
       if obj.is_a?(Hash)
         "type #{serialize_hash(obj.transform_values(&:class))}"

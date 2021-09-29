@@ -3,7 +3,7 @@
 
 module T::Types
   class TypedArray < TypedEnumerable
-    # @override Base
+    # overrides Base
     def name
       "T::Array[#{@type.name}]"
     end
@@ -12,12 +12,12 @@ module T::Types
       Array
     end
 
-    # @override Base
+    # overrides Base
     def recursively_valid?(obj)
       obj.is_a?(Array) && super
     end
 
-    # @override Base
+    # overrides Base
     def valid?(obj)
       obj.is_a?(Array)
     end

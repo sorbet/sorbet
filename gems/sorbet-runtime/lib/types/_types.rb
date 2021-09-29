@@ -82,8 +82,9 @@ module T
 
   # Constructs a type alias. Used to create a short name for a larger type. In Ruby this returns a
   # wrapper that contains a proc that is evaluated to get the underlying type. This syntax however
-  # is needed for support by the static checker. Example usage:
+  # is needed for support by the static checker.
   #
+  # @example
   #  NilableString = T.type_alias {T.nilable(String)}
   #
   #  sig {params(arg: NilableString, default: String).returns(String)}
@@ -106,8 +107,9 @@ module T
   # References a type parameter which was previously defined with
   # `type_parameters`.
   #
-  # This is used for generic methods. Example usage:
+  # This is used for generic methods.
   #
+  # @example
   #  sig
   #  .type_parameters(:U)
   #  .params(
@@ -185,7 +187,7 @@ module T
   # cycle. However, we also don't actually need to do so; An untyped
   # identity method works just as well here.
   #
-  # sig {params(value: T.untyped).returns(T.untyped)}
+  # `sig {params(value: T.untyped).returns(T.untyped)}`
   def self.unsafe(value)
     value
   end
@@ -206,7 +208,7 @@ module T
   # Intended to be used to promise sorbet that a given nilable value happens
   # to contain a non-nil value at this point.
   #
-  # sig {params(arg: T.nilable(A)).returns(A)}
+  # `sig {params(arg: T.nilable(A)).returns(A)}`
   def self.must(arg)
     return arg if arg
     return arg if arg == false
