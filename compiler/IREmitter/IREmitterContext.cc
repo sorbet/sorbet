@@ -694,6 +694,49 @@ void collectRubyBlockArgs(const cfg::CFG &cfg, const cfg::BasicBlock *b, vector<
     }
 }
 
+// Given a block's argument list, compute the minimum and maximum arguments that will be present at runtime.
+BlockArity computeBlockArity(const vector<core::ArgInfo::ArgFlags> &argFlags) {
+    BlockArity blockArity;
+
+    bool seenKwarg = false;
+    bool seenKwopt = false;
+    bool seenSplat = false;
+    for (auto &arg : argFlags) {
+        if (arg.isBlock || arg.isShadow) {
+            break;
+        } else if (arg.isKeyword) {
+            // Defaulted and repeated kwargs will both cause the max arg count to go to -1 when no required
+            // kwargs are present.
+            if (arg.isDefault || arg.isRepeated) {
+                seenKwopt = true;
+            } else {
+                seenKwarg = true;
+            }
+        } else {
+            if (!arg.isDefault && !arg.isRepeated) {
+                blockArity.min += 1;
+            }
+
+            blockArity.max += 1;
+
+            seenSplat = seenSplat || arg.isRepeated;
+        }
+    }
+
+    if (seenKwarg) {
+        blockArity.min += 1;
+        blockArity.max += 1;
+    } else if (seenKwopt) {
+        blockArity.max = -1;
+    }
+
+    if (seenSplat) {
+        blockArity.max = -1;
+    }
+
+    return blockArity;
+}
+
 } // namespace
 
 IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
@@ -810,6 +853,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     }
 
     vector<vector<cfg::LocalRef>> argPresentVariables(cfg.maxRubyBlockId + 1);
+    vector<BlockArity> rubyBlockArity(cfg.maxRubyBlockId + 1);
 
     // The method arguments are initialized here, while the block arguments are initialized when the blockCall header is
     // encountered in the loop below.
@@ -843,13 +887,16 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             ENFORCE(expectedSend->link);
             blockLinks[b->rubyBlockId] = expectedSend->link;
 
-            auto numBlockArgs = expectedSend->link->argFlags.size();
+            auto &argFlags = expectedSend->link->argFlags;
+            auto numBlockArgs = argFlags.size();
             auto &blockArgs = rubyBlockArgs[b->rubyBlockId];
             blockArgs.resize(numBlockArgs, cfg::LocalRef::noVariable());
             collectRubyBlockArgs(cfg, b->bexit.thenb, blockArgs);
 
             auto &argsPresent = argPresentVariables[b->bexit.thenb->rubyBlockId];
             argsPresent.resize(numBlockArgs, cfg::LocalRef::noVariable());
+
+            rubyBlockArity[b->rubyBlockId] = computeBlockArity(argFlags);
 
         } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::exceptionValue()) {
             if (exceptionHandlingBlockHeaders[b->id] == 0) {
@@ -931,6 +978,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(blockUsesBreak),
         hasReturnAcrossBlock,
         move(blockLocationNames),
+        move(rubyBlockArity),
     };
 
     auto [llvmVariables, selfVariables] = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation);

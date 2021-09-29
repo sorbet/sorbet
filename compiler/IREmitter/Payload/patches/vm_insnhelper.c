@@ -768,3 +768,58 @@ VALUE sorbet_vm_callBlock(rb_control_frame_t *cfp, int argc, const VALUE *const 
     }
     return rb_yield_values_kw(argc, argv, kw_splat);
 }
+
+// This is a version of rb_iterate specialized to the case where we know the block is non-null and its arity.
+VALUE sorbet_rb_iterate(VALUE (*it_proc)(VALUE), VALUE data1, rb_block_call_func_t bl_proc, int minArgs, int maxArgs,
+                        VALUE data2) {
+    rb_execution_context_t *ec = GET_EC();
+    rb_control_frame_t *const cfp = ec->cfp;
+
+    enum ruby_tag_type state;
+    volatile VALUE retval = Qnil;
+
+    const struct vm_ifunc *const ifunc = rb_vm_ifunc_new(bl_proc, (void *)data2, minArgs, maxArgs);
+
+    EC_PUSH_TAG(ec);
+    state = EC_EXEC_TAG();
+    if (state == 0) {
+        // clang-format off
+iter_retry:
+
+        {
+            VALUE block_handler;
+
+            struct rb_captured_block *captured = VM_CFP_TO_CAPTURED_BLOCK(cfp);
+            captured->code.ifunc = ifunc;
+            block_handler = VM_BH_FROM_IFUNC_BLOCK(captured);
+            vm_passed_block_handler_set(ec, block_handler);
+        }
+
+        retval = (*it_proc)(data1);
+        // clang-format on
+    } else if (state == TAG_BREAK || state == TAG_RETRY) {
+        const struct vm_throw_data *const err = (struct vm_throw_data *)ec->errinfo;
+        const rb_control_frame_t *const escape_cfp = THROW_DATA_CATCH_FRAME(err);
+
+        if (cfp == escape_cfp) {
+            rb_vm_rewind_cfp(ec, cfp);
+
+            state = 0;
+            ec->tag->state = TAG_NONE;
+            ec->errinfo = Qnil;
+
+            if (state == TAG_RETRY)
+                goto iter_retry;
+            retval = THROW_DATA_VAL(err);
+        } else if (0) {
+            SDR();
+            fprintf(stderr, "%p, %p\n", (void *)cfp, (void *)escape_cfp);
+        }
+    }
+    EC_POP_TAG();
+
+    if (state) {
+        EC_JUMP_TAG(ec, state);
+    }
+    return retval;
+}

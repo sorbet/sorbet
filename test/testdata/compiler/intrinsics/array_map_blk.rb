@@ -13,12 +13,12 @@
 # INITIAL{LITERAL}: }
 
 
-# Additionally, in the optimized output, we should see exactly one call to `rb_iterate` (from the use of
+# Additionally, in the optimized output, we should see exactly one call to `sorbet_rb_iterate` (from the use of
 # `sorbet_callIntrinsicInlineBlock`) in the Init function, as the root static init will be inlined there.
 
 # OPT-LABEL: define void @Init_array_map_blk()
-# OPT: call i64 @rb_iterate(
-# OPT-NOT: call i64 @rb_iterate(
+# OPT: call i64 @sorbet_rb_iterate(
+# OPT-NOT: call i64 @sorbet_rb_iterate(
 # OPT{LITERAL}: }
 
 result = [1, 2, 3].map do |x|
