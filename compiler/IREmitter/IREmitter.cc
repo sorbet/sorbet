@@ -865,7 +865,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     // any register shuffling.
     auto *status = builder.CreateCall(wrapper,
                                       {func->arg_begin(), func->arg_begin() + 1, func->arg_begin() + 2,
-                                       func->arg_begin() + 3, implementationFunction},
+                                       func->arg_begin() + 3, func->arg_begin() + 4, implementationFunction},
                                       "returnedFromBlock");
 
     // TODO(froydnj): LLVM IR is somewhat machine-specific when it comes to calling
@@ -979,6 +979,7 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
                                llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
                                Payload::rubyTopSelf(cs, builder),
                                builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfpTop"),
+                               llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(cs)),
                            },
                            staticInitName);
     }

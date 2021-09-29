@@ -493,7 +493,8 @@ struct rfb_status {
 };
 
 struct rfb_status sorbet_vm_return_from_block_wrapper(int argc, VALUE *argv, VALUE recv,
-                                                      rb_control_frame_t *volatile cfp, rb_sorbet_func_t wrapped) {
+                                                      rb_control_frame_t *volatile cfp, void *cd,
+                                                      rb_sorbet_func_t wrapped) {
     enum ruby_tag_type state;
     rb_execution_context_t *volatile ec = GET_EC();
     struct rfb_status status;
@@ -503,7 +504,7 @@ struct rfb_status sorbet_vm_return_from_block_wrapper(int argc, VALUE *argv, VAL
     EC_PUSH_TAG(ec);
 
     if ((state = EC_EXEC_TAG()) == 0) {
-        status.return_value = wrapped(argc, argv, recv, cfp);
+        status.return_value = wrapped(argc, argv, recv, cfp, cd);
         status.was_thrown = false;
     } else {
         if (state == TAG_RETURN) {
