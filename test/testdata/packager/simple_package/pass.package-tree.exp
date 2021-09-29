@@ -15,6 +15,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
       <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C Foo>
     end
+
+    class <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C <Magic>><<C <todo sym>>> < ()
+    end
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
@@ -78,6 +84,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Bar><<C <todo sym>>> < ()
       <emptyTree>::<C CallsFoo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C CallsFoo>
     end
+
+    class <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C <Magic>><<C <todo sym>>> < ()
+    end
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
