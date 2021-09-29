@@ -10,12 +10,14 @@ class R3; end
 module Test1
   module M1
     extend T::Helpers
-    requires_ancestor R1, R2
+    requires_ancestor { R1 }
+    requires_ancestor { R2 }
   end
 
   module M2 # error: `Test1::M2` requires unrelated classes `R1` and `R3` making it impossible to include
     extend T::Helpers
-    requires_ancestor R1, R3
+    requires_ancestor { R1 }
+    requires_ancestor { R3 }
   end
 end
 
@@ -24,12 +26,12 @@ end
 module Test2
   module M1
     extend T::Helpers
-    requires_ancestor R1
+    requires_ancestor { R1 }
   end
 
   module M2
     extend T::Helpers
-    requires_ancestor R3
+    requires_ancestor { R3 }
   end
 
   module M3 # error: `Test2::M3` requires unrelated classes `R3` and `R1` making it impossible to include
@@ -43,12 +45,12 @@ end
 module Test3
   module M1
     extend T::Helpers
-    requires_ancestor R1
+    requires_ancestor { R1 }
   end
 
   module M2
     extend T::Helpers
-    requires_ancestor R3
+    requires_ancestor { R3 }
   end
 
   module M3
@@ -68,7 +70,8 @@ module Test4
 # ^^^^^^^^ error: `Test4::C1` requires unrelated classes `R2` and `R3` making it impossible to inherit
     extend T::Helpers
     abstract!
-    requires_ancestor R2, R3
+    requires_ancestor { R2 }
+    requires_ancestor { R3 }
   end
 
   class C2 < C1
@@ -85,13 +88,13 @@ end
 module Test5
   module M1
     extend T::Helpers
-    requires_ancestor R2
+    requires_ancestor { R2 }
   end
 
   module M2 # error: `Test5::M2` requires unrelated classes `R3` and `R2` making it impossible to include
     extend T::Helpers
     include M1
-    requires_ancestor R3
+    requires_ancestor { R3 }
   end
 
   class C1 < R2
@@ -109,14 +112,15 @@ module Test6
   module M1
     extend T::Helpers
     abstract!
-    requires_ancestor R2
+    requires_ancestor { R2 }
   end
 
   module M2
 # ^^^^^^^^^ error: `Test6::M2` requires unrelated classes `R2` and `R3` making it impossible to include
     extend T::Helpers
     abstract!
-    requires_ancestor R2, R3
+    requires_ancestor { R2 }
+    requires_ancestor { R3 }
   end
 
   module M3
@@ -133,14 +137,15 @@ module Test7
   module M1
     extend T::Helpers
     interface!
-    requires_ancestor R2
+    requires_ancestor { R2 }
   end
 
   module M2
 # ^^^^^^^^^ error: `Test7::M2` requires unrelated classes `R2` and `R3` making it impossible to include
     extend T::Helpers
     interface!
-    requires_ancestor R2, R3
+    requires_ancestor { R2 }
+    requires_ancestor { R3 }
   end
 
   module M3

@@ -12,7 +12,7 @@ module Test1
 
   module M1
     extend T::Helpers
-    requires_ancestor RA
+    requires_ancestor { RA }
   end
 
   class C1

@@ -4,7 +4,7 @@
 module Helper
   extend T::Helpers
 
-  requires_ancestor Object
+  requires_ancestor { Object }
 
   def get_my_class_name
     self.class.name

@@ -9,7 +9,7 @@ module R2; end
 module Test1
   module M1
     extend T::Helpers
-    requires_ancestor R1
+    requires_ancestor { R1 }
   end
 
   class C1 # error: `Test1::C1` must include `R1` (required by `Test1::M1`)
@@ -27,13 +27,13 @@ end
 module Test2
   module M1
     extend T::Helpers
-    requires_ancestor R1
+    requires_ancestor { R1 }
   end
 
   module M2
     extend T::Helpers
     interface!
-    requires_ancestor R2
+    requires_ancestor { R2 }
   end
 
   class C1
@@ -59,7 +59,7 @@ end
 module Test3
   module M1
     extend T::Helpers
-    requires_ancestor R1
+    requires_ancestor { R1 }
   end
 
   module M2
@@ -88,7 +88,7 @@ end
 module Test4
   module M1
     extend T::Helpers
-    requires_ancestor C1
+    requires_ancestor { C1 }
   end
 
   class C1
@@ -108,7 +108,7 @@ end
 module Test5
   module M1
     extend T::Helpers
-    requires_ancestor C2
+    requires_ancestor { C2 }
   end
 
   class C1
@@ -141,12 +141,12 @@ end
 module Test6
   module M1
     extend T::Helpers
-    requires_ancestor M2
+    requires_ancestor { M2 }
   end
 
   module M2
     extend T::Helpers
-    requires_ancestor M1
+    requires_ancestor { M1 }
   end
 
   class C1 # error: `Test6::C1` must include `Test6::M2` (required by `Test6::M1`)
@@ -167,18 +167,18 @@ end
 module Test7
   module M1
     extend T::Helpers
-    requires_ancestor M2
+    requires_ancestor { M2 }
   end
 
   module M2
     extend T::Helpers
-    requires_ancestor C2
+    requires_ancestor { C2 }
   end
 
   class C1
     extend T::Helpers
     abstract!
-    requires_ancestor M1
+    requires_ancestor { M1 }
   end
 
   class C2 < C1
@@ -207,7 +207,7 @@ end
 module Test8
   module M1
     extend T::Helpers
-    requires_ancestor R1
+    requires_ancestor { R1 }
   end
 
   module M2
@@ -231,7 +231,7 @@ end
 module Test9
   module M1
     extend T::Helpers
-    requires_ancestor R1
+    requires_ancestor { R1 }
   end
 
   module M2 # error: `T.class_of(Test9::M2)` must include `R1` (required by `Test9::M1`)

@@ -11,7 +11,7 @@ module Test1
 
   module M # error: `Test1::M` can't require generic ancestor `Test1::RA` (unsupported)
     extend T::Helpers
-    requires_ancestor RA
+    requires_ancestor { RA }
   end
 end
 
@@ -23,6 +23,6 @@ module Test2
 
   module M # error: `Test2::M` can't require generic ancestor `Test2::RA` (unsupported)
     extend T::Helpers
-    requires_ancestor RA
+    requires_ancestor { RA }
   end
 end
