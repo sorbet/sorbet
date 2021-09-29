@@ -861,8 +861,13 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
                 if (arg.isBlock || arg.isShadow) {
                     break;
                 } else if (arg.isKeyword) {
-                    seenKwarg = seenKwarg || !(arg.isDefault || arg.isRepeated);
-                    seenKwopt = seenKwopt || arg.isDefault || arg.isRepeated;
+                    // Defaulted and repeated kwargs will both cause the max arg count to go to -1 when no required
+                    // kwargs are present.
+                    if (arg.isDefault || arg.isRepeated) {
+                        seenKwopt = true;
+                    } else {
+                        seenKwarg = true;
+                    }
                 } else {
                     if (!arg.isDefault && !arg.isRepeated) {
                         blockArity.min += 1;
@@ -874,8 +879,6 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
                 }
             }
 
-            // All keyword args count as 1 (for the hash) if there's a required keyword arg, and -1 if there are only
-            // optional args.
             if (seenKwarg) {
                 blockArity.min += 1;
                 blockArity.max += 1;
