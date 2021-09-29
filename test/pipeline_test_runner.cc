@@ -90,11 +90,7 @@ UnorderedSet<string> knownExpectations = {"parse-tree",       "parse-tree-json",
 // can swallow errors that don't have associated locations. See lines 479-483 below.
 // DO NOT add new tests here.
 // TODO (jez) Fix these tests
-UnorderedSet<string> locationCheckExemptTests = {"test/testdata/packager/nested_inner_namespaces",
-                                                 "test/testdata/packager/import_subpackage",
-                                                 "test/testdata/packager/nested_packages",
-                                                 "test/testdata/packager/deeply_nested_packages",
-                                                 "test/testdata/desugar/assign_empty_stmts.rb",
+UnorderedSet<string> locationCheckExemptTests = {"test/testdata/desugar/assign_empty_stmts.rb",
                                                  "test/testdata/desugar/assign_keyword.rb",
                                                  "test/testdata/lsp/struct_fuzz.rb"};
 
