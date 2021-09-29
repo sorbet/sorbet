@@ -855,25 +855,36 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
 
             auto &blockArity = rubyBlockArity[b->rubyBlockId];
             bool seenKwarg = false;
+            bool seenKwopt = false;
+            bool seenSplat = false;
             for (auto &arg : argFlags) {
-                if (arg.isBlock) {
+                if (arg.isBlock || arg.isShadow) {
                     break;
-                }
-
-                if (arg.isRepeated) {
-                    blockArity.max = -1;
-                    break;
-                }
-
-                if (!seenKwarg) {
-                    if (!arg.isDefault) {
+                } else if (arg.isKeyword) {
+                    seenKwarg = seenKwarg || !(arg.isDefault || arg.isRepeated);
+                    seenKwopt = seenKwopt || arg.isDefault || arg.isRepeated;
+                } else {
+                    if (!arg.isDefault && !arg.isRepeated) {
                         blockArity.min += 1;
                     }
 
                     blockArity.max += 1;
-                }
 
-                seenKwarg = seenKwarg || arg.isKeyword;
+                    seenSplat = seenSplat || arg.isRepeated;
+                }
+            }
+
+            // All keyword args count as 1 (for the hash) if there's a required keyword arg, and -1 if there are only
+            // optional args.
+            if (seenKwarg) {
+                blockArity.min += 1;
+                blockArity.max += 1;
+            } else if (seenKwopt) {
+                blockArity.max = -1;
+            }
+
+            if (seenSplat) {
+                blockArity.max = -1;
             }
 
         } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::exceptionValue()) {
