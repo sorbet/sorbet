@@ -4,6 +4,8 @@
 # Use as a mixin with extend (`extend T::Helpers`).
 # Docs at https://confluence.corp.stripe.com/display/PRODINFRA/Ruby+Types
 module T::Helpers
+  extend T::Sig
+
   Private = T::Private
 
   ### Class/Module Helpers ###
@@ -44,7 +46,7 @@ module T::Helpers
   #   module MyHelper
   #     extend T::Helpers
   #
-  #     requires_ancestor Kernel
+  #     requires_ancestor { Kernel }
   #   end
   #
   #   class MyClass < BasicObject # error: `MyClass` must include `Kernel` (required by `MyHelper`)
@@ -52,5 +54,5 @@ module T::Helpers
   #   end
   #
   # TODO: implement the checks in sorbet-runtime.
-  def requires_ancestor(mod, *mods); end
+  def requires_ancestor(&block); end
 end
