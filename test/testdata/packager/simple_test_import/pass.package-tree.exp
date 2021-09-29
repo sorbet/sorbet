@@ -22,6 +22,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <emptyTree>::<C Project>::<C TestOnly>::<C SomeHelper>.new()
 
+      <emptyTree>::<C Test>
+
       <emptyTree>::<C Test>::<C Project>::<C Util>::<C UtilHelper>
 
       <emptyTree>::<C Test>::<C Project>::<C Util>::<C Unexported>

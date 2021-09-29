@@ -5,8 +5,11 @@ class Project::MainLib::Lib
   Project::Util::MyUtil.new
 
   # Normal code is not allowed to access names from `test_import`
+  # TODO TODO this should not be allowed
   Project::TestOnly::SomeHelper.new
-# ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `TestOnly`
+
+  Test
+# ^^^^ error: Unable to resolve constant `Test`
 
   Test::Project::Util::UtilHelper
 # ^^^^ error: Unable to resolve constant `Test`
