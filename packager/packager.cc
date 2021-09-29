@@ -798,7 +798,16 @@ private:
         for (auto const &[nameRef, child] : childPairs) {
             // Ignore the entire `Test::*` part of import tree if we are not in a test context.
             // TODO need to deal with this
-            if (moduleType != ImportType::Test && parts.empty() && nameRef == TEST_NAME) {
+            // if (moduleType != ImportType::Test && parts.empty() && nameRef == TEST_NAME) {
+            //     continue;
+            // }
+
+            // if (parts.empty() &&
+            //         ((moduleType == ImportType::Normal && nameRef == TEST_NAME) ||
+            //          (moduleType == ImportType::Test && nameRef != TEST_NAME))) {
+            //         continue;
+            // }
+            if (parts.empty() && ((moduleType == ImportType::Test) != (nameRef == TEST_NAME))) {
                 continue;
             }
             parts.emplace_back(nameRef);
@@ -820,7 +829,8 @@ private:
                     }
                 }
             // } else if (moduleType == ImportType::Test || node->source.importType == ImportType::Normal) {
-            } else if (moduleType == ImportType::Normal) {
+            // } else if (moduleType == ImportType::Normal) {
+            } else {
                 // Construct a module containing an assignment for an imported name:
                 // For name `A::B::C::D` imported from package `A::B` construct:
                 // module A::B::C
