@@ -5,7 +5,7 @@ class Project::MainLib::Lib
   Project::Util::MyUtil.new
 
   # Normal code is not allowed to access names from `test_import`
-  # TODO TODO this should not be allowed
+  # TODO(ngroman) Move this error enforcement into Sorbet
   Project::TestOnly::SomeHelper.new
 
   Test
