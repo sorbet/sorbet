@@ -51,31 +51,31 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Parent>)
     def takes_positional<<todo method>>(arg0, &<blk>)
-      <self>.<super>(arg0)
+      ::<Magic>.<call-with-block>(<self>, :<super>, <blk>, arg0)
     end
 
     def takes_keyword<<todo method>>(arg0:, &<blk>)
-      <self>.<super>(:arg0, arg0)
+      ::<Magic>.<call-with-block>(<self>, :<super>, <blk>, :arg0, arg0)
     end
 
     def takes_two_keyword<<todo method>>(arg0:, arg1:, &<blk>)
-      <self>.<super>(:arg0, arg0, :arg1, arg1)
+      ::<Magic>.<call-with-block>(<self>, :<super>, <blk>, :arg0, arg0, :arg1, arg1)
     end
 
     def takes_positional_then_keyword<<todo method>>(arg0, arg1:, &<blk>)
-      <self>.<super>(arg0, :arg1, arg1)
+      ::<Magic>.<call-with-block>(<self>, :<super>, <blk>, arg0, :arg1, arg1)
     end
 
     def takes_rest<<todo method>>(*args, &<blk>)
-      <self>.<super>()
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(args), nil, <blk>)
     end
 
     def takes_keyword_rest<<todo method>>(*args:, &<blk>)
-      <self>.<super>()
+      ::<Magic>.<call-with-block>(<self>, :<super>, <blk>, ::<Magic>.<to-hash-dup>(args))
     end
 
     def takes_block<<todo method>>(&blk)
-      <self>.<super>()
+      ::<Magic>.<call-with-block>(<self>, :<super>, blk)
     end
 
     ::Sorbet::Private::Static.keep_def(<self>, :takes_positional, :normal)

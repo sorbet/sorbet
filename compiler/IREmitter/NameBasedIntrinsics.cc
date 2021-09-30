@@ -162,22 +162,34 @@ public:
         auto &irctx = mcctx.irctx;
         auto rubyBlockId = mcctx.rubyBlockId;
         auto *send = mcctx.send;
+        auto &builder = mcctx.builder;
 
         // TODO: this implementation generates code that is stupidly slow, we should be able to reuse instrinsics here
         // one day
         auto recv = send->args[0].variable;
         auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-        auto name = lit.asName(cs).shortName(cs);
+        auto methodName = lit.asName(cs);
 
         llvm::Value *blockHandler = prepareBlockHandler(mcctx, send->args[2]);
 
-        auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 3);
-        auto &builder = mcctx.builder;
-        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
-        Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyBlockId), stack);
-        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, string(name), flags, stack.size(), keywords);
-        return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
+        if (methodName == core::Names::super()) {
+            // fill in args
+            auto args = IREmitterHelpers::fillSendArgArray(mcctx, 3);
+
+            return builder.CreateCall(cs.getFunction("sorbet_callSuperBlockHandler"),
+                                      {args.argc, args.argv, args.kw_splat, blockHandler}, "rawSendResult");
+        } else {
+            auto shortName = methodName.shortName(cs);
+
+            auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 3);
+            auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
+            Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyBlockId),
+                                         stack);
+            auto *cache =
+                IREmitterHelpers::makeInlineCache(cs, builder, string(shortName), flags, stack.size(), keywords);
+            return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
+        }
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -471,28 +483,52 @@ public:
 
         auto [flags, splatArray] = prepareSplatArgs(mcctx, send->args[2], send->args[3]);
 
-        // setup the inline cache
         auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-        auto methodName = lit.asName(cs).shortName(cs);
-        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flags, 1, {});
+        auto methodName = lit.asName(cs);
 
-        // Push receiver and the splat array.
-        // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
-        // is actually the first arg of the callWithSplat intrinsic method.
-        Payload::pushRubyStackVector(
-            cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId), {splatArray});
-
-        // Call the receiver.
-        if (auto *blk = mcctx.blkAsFunction()) {
-            auto *closure = Payload::buildLocalsOffset(cs);
+        if (methodName == core::Names::super()) {
+            auto *argc = builder.CreateCall(cs.getFunction("sorbet_rubyArrayLen"), {splatArray}, "argc");
+            auto *argv = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {splatArray}, "argv");
+            auto *kwSplatFlag = llvm::ConstantInt::get(cs, llvm::APInt(32, flags.kw_splat ? 1 : 0));
             auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
-            auto usesBreak = irctx.blockUsesBreak[mcctx.blk.value()];
-            return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, blk, arity.min, arity.max,
-                                                   closure);
+            auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
+            auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
+
+            if (auto *blk = mcctx.blkAsFunction()) {
+                // blocks require a locals offset parameter
+                llvm::Value *localsOffset = Payload::buildLocalsOffset(cs);
+                ENFORCE(localsOffset != nullptr);
+                return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
+                                          {argc, argv, kwSplatFlag, blk, blkMinArgs, blkMaxArgs, localsOffset},
+                                          "rawSendResult");
+            } else {
+                return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {argc, argv, kwSplatFlag},
+                                          "rawSendResult");
+            }
         } else {
-            auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.builder);
-            return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
+            // setup the inline cache
+            auto shortName = methodName.shortName(cs);
+            auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(shortName), flags, 1, {});
+
+            // Push receiver and the splat array.
+            // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
+            // is actually the first arg of the callWithSplat intrinsic method.
+            Payload::pushRubyStackVector(cs, builder, cfp,
+                                         Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId),
+                                         {splatArray});
+
+            // Call the receiver.
+            if (auto *blk = mcctx.blkAsFunction()) {
+                auto *closure = Payload::buildLocalsOffset(cs);
+                auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
+                auto usesBreak = irctx.blockUsesBreak[mcctx.blk.value()];
+                return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, blk, arity.min,
+                                                       arity.max, closure);
+            } else {
+                auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.builder);
+                return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
+            }
         }
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -521,20 +557,31 @@ public:
         auto [flags, splatArray] = prepareSplatArgs(mcctx, send->args[2], send->args[3]);
         auto *blockHandler = prepareBlockHandler(mcctx, send->args[4]);
 
-        // setup the inline cache
         auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-        auto methodName = lit.asName(cs).shortName(cs);
-        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flags, 1, {});
+        auto methodName = lit.asName(cs);
 
-        // Push receiver and the splat array.
-        // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
-        // is actually the first arg of the callWithSplat intrinsic method.
-        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
-        Payload::pushRubyStackVector(
-            cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId), {splatArray});
+        if (methodName == core::Names::super()) {
+            auto *argc = builder.CreateCall(cs.getFunction("sorbet_rubyArrayLen"), {splatArray}, "argc");
+            auto *argv = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {splatArray}, "argv");
+            auto *kwSplatFlag = llvm::ConstantInt::get(cs, llvm::APInt(32, flags.kw_splat ? 1 : 0));
+            return builder.CreateCall(cs.getFunction("sorbet_callSuperBlockHandler"),
+                                      {argc, argv, kwSplatFlag, blockHandler}, "rawSendResult");
+        } else {
+            // setup the inline cache
+            auto shortName = methodName.shortName(cs);
+            auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(shortName), flags, 1, {});
 
-        return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
+            // Push receiver and the splat array.
+            // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
+            // is actually the first arg of the callWithSplat intrinsic method.
+            auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
+            Payload::pushRubyStackVector(cs, builder, cfp,
+                                         Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId),
+                                         {splatArray});
+
+            return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
+        }
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
