@@ -293,17 +293,17 @@ public:
         ast::ExpressionPtr blockArg;
 
         for (auto arg : scopeStack.back().args) {
-            ENFORCE(!blockArg, "Block arg was not in final position");
+            ENFORCE(blockArg == nullptr, "Block arg was not in final position");
 
             if (arg.flags.isPositional()) {
                 ENFORCE(kwArgKeyEntries.empty(), "Saw positional arg after keyword arg");
-                ENFORCE(!kwArgsHash, "Saw positional arg after keyword splat");
+                ENFORCE(kwArgsHash == nullptr, "Saw positional arg after keyword splat");
 
                 posArgsEntries.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
             } else if (arg.flags.isPositionalSplat()) {
-                ENFORCE(!posArgsArray, "Saw multiple positional splats");
+                ENFORCE(posArgsArray == nullptr, "Saw multiple positional splats");
                 ENFORCE(kwArgKeyEntries.empty(), "Saw positional splat after keyword arg");
-                ENFORCE(!kwArgsHash, "Saw positional splat after keyword splat");
+                ENFORCE(kwArgsHash == nullptr, "Saw positional splat after keyword splat");
 
                 posArgsArray = ast::MK::Splat(original.loc, ast::make_expression<ast::Local>(original.loc, arg.arg));
                 if (!posArgsEntries.empty()) {
@@ -312,13 +312,13 @@ public:
                     posArgsEntries.clear();
                 }
             } else if (arg.flags.isKeyword()) {
-                ENFORCE(!kwArgsHash, "Saw keyword arg after keyword splat");
+                ENFORCE(kwArgsHash == nullptr, "Saw keyword arg after keyword splat");
 
                 kwArgKeyEntries.emplace_back(ast::MK::Literal(
                     original.loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), arg.arg._name)));
                 kwArgValueEntries.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
             } else if (arg.flags.isKeywordSplat()) {
-                ENFORCE(!kwArgsHash, "Saw multiple keyword splats");
+                ENFORCE(kwArgsHash == nullptr, "Saw multiple keyword splats");
 
                 // TODO(aprocter): is it necessary to duplicate the hash here?
                 kwArgsHash =
@@ -348,25 +348,16 @@ public:
         ENFORCE(blockArg, "Block argument not present");
 
         // If there were any posargs after a positional splat, fold them into the splatted array.
-        if (posArgsArray && !posArgsEntries.empty()) {
+        if (posArgsArray != nullptr && !posArgsEntries.empty()) {
             posArgsArray = ast::MK::Send1(original.loc, std::move(posArgsArray), core::Names::concat(),
                                           ast::MK::Array(original.loc, std::move(posArgsEntries)));
             posArgsEntries.clear();
         }
 
-        // If there were any keyword args after a keyword splat, fold them into the splatted hash.
-        if (kwArgsHash && !kwArgKeyEntries.empty()) {
-            kwArgsHash =
-                ast::MK::Send1(original.loc, std::move(kwArgsHash), core::Names::merge(),
-                               ast::MK::Hash(original.loc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries)));
-            kwArgKeyEntries.clear();
-            kwArgValueEntries.clear();
-        }
-
         auto method = ast::MK::Literal(
             original.loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), core::Names::super()));
 
-        if (posArgsArray) {
+        if (posArgsArray != nullptr) {
             ast::Send::ARGS_store sendargs;
             // We wrap self with T.unsafe in order to get around the requirement for <call-with-splat> and
             // <call-with-splat-and-block> that the shapes of the splatted hashes be known statically. This is a bit of
@@ -375,7 +366,7 @@ public:
             sendargs.emplace_back(std::move(method));
 
             // For <call-with-splat> and <call-with-splat-and-block> posargs are always passed in an array.
-            if (!posArgsArray) {
+            if (posArgsArray == nullptr) {
                 posArgsArray = ast::MK::Array(original.loc, std::move(posArgsEntries));
             }
             sendargs.emplace_back(std::move(posArgsArray));
@@ -385,7 +376,7 @@ public:
             // has taken place, or nil (if no kwargs at all).
             ast::ExpressionPtr boxedKwArgs;
 
-            if (kwArgsHash) {
+            if (kwArgsHash != nullptr) {
                 ast::Array::ENTRY_store entries;
                 entries.emplace_back(std::move(kwArgsHash));
                 boxedKwArgs = ast::MK::Array(original.loc, std::move(entries));
@@ -405,7 +396,7 @@ public:
 
             original.recv = ast::MK::Constant(original.loc, core::Symbols::Magic());
 
-            if (original.block) {
+            if (original.block != nullptr) {
                 // <call-with-splat> and "do"
                 original.fun = core::Names::callWithSplat();
                 original.numPosArgs = 4;
@@ -417,7 +408,7 @@ public:
             }
 
             original.args = std::move(sendargs);
-        } else if (!original.block) {
+        } else if (original.block == nullptr) {
             // No positional splat and no "do", so we need to forward &<blkvar> with <call-with-block>.
             ast::Send::ARGS_store sendargs;
             sendargs.reserve(3 + posArgsEntries.size() + std::max({1UL, 2 * kwArgKeyEntries.size()}));
@@ -431,7 +422,7 @@ public:
             posArgsEntries.clear();
             u2 numPosArgs = sendargs.size();
 
-            if (kwArgsHash) {
+            if (kwArgsHash != nullptr) {
                 sendargs.emplace_back(std::move(kwArgsHash));
             } else {
                 ENFORCE(kwArgKeyEntries.size() == kwArgValueEntries.size());
@@ -458,7 +449,7 @@ public:
             posArgsEntries.clear();
             u2 numPosArgs = sendargs.size();
 
-            if (kwArgsHash) {
+            if (kwArgsHash != nullptr) {
                 sendargs.emplace_back(std::move(kwArgsHash));
             } else {
                 ENFORCE(kwArgKeyEntries.size() == kwArgValueEntries.size());
