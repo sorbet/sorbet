@@ -255,44 +255,44 @@ argCountSecondCheckBlock:                         ; preds = %functionEntryInitia
 fillFromDefaultBlockDone1:                        ; preds = %sorbet_getMethodBlockAsProc.exit
   %13 = getelementptr i64, i64* %argArray, i32 1, !dbg !16
   %rawArg_b = load i64, i64* %13, align 8, !dbg !16
-  %14 = icmp sgt i32 %argcPhi87, 2, !dbg !16
+  %14 = icmp sgt i32 %argcPhi96, 2, !dbg !16
   br i1 %14, label %16, label %fillFromDefaultBlockDone1.thread, !dbg !16
 
 fillFromDefaultBlockDone1.thread:                 ; preds = %sorbet_getMethodBlockAsProc.exit, %fillFromDefaultBlockDone1
-  %"<argPresent>.sroa.0.093" = phi i64 [ 20, %fillFromDefaultBlockDone1 ], [ 0, %sorbet_getMethodBlockAsProc.exit ]
-  %b.sroa.0.191 = phi i64 [ %rawArg_b, %fillFromDefaultBlockDone1 ], [ 8, %sorbet_getMethodBlockAsProc.exit ]
+  %"<argPresent>.sroa.0.0102" = phi i64 [ 20, %fillFromDefaultBlockDone1 ], [ 0, %sorbet_getMethodBlockAsProc.exit ]
+  %b.sroa.0.1100 = phi i64 [ %rawArg_b, %fillFromDefaultBlockDone1 ], [ 8, %sorbet_getMethodBlockAsProc.exit ]
   %15 = tail call i64 @rb_ary_new() #11, !dbg !16
   br label %sorbet_readRestArgs.exit, !dbg !16
 
 16:                                               ; preds = %fillFromDefaultBlockDone1
-  %17 = sub nuw nsw i32 %argcPhi87, 2, !dbg !16
+  %17 = sub nuw nsw i32 %argcPhi96, 2, !dbg !16
   %18 = zext i32 %17 to i64
   %19 = getelementptr inbounds i64, i64* %argArray, i64 2, !dbg !16
   %20 = tail call i64 @rb_ary_new_from_values(i64 %18, i64* nonnull %19) #11, !dbg !16
   br label %sorbet_readRestArgs.exit, !dbg !16
 
 sorbet_readRestArgs.exit:                         ; preds = %fillFromDefaultBlockDone1.thread, %16
-  %"<argPresent>.sroa.0.092" = phi i64 [ %"<argPresent>.sroa.0.093", %fillFromDefaultBlockDone1.thread ], [ 20, %16 ]
-  %b.sroa.0.190 = phi i64 [ %b.sroa.0.191, %fillFromDefaultBlockDone1.thread ], [ %rawArg_b, %16 ]
+  %"<argPresent>.sroa.0.0101" = phi i64 [ %"<argPresent>.sroa.0.0102", %fillFromDefaultBlockDone1.thread ], [ 20, %16 ]
+  %b.sroa.0.199 = phi i64 [ %b.sroa.0.1100, %fillFromDefaultBlockDone1.thread ], [ %rawArg_b, %16 ]
   %21 = phi i64 [ %15, %fillFromDefaultBlockDone1.thread ], [ %20, %16 ], !dbg !16
   %rubyId_d = load i64, i64* @rubyIdPrecomputed_d, align 8, !dbg !16
   %rawSym = tail call i64 @rb_id2sym(i64 %rubyId_d), !dbg !16
-  %22 = icmp eq i64 %hashArgsPhi84, 52, !dbg !16
-  br i1 %22, label %kwArgContinue, label %sorbet_removeKWArg.exit79, !dbg !16
+  %22 = icmp eq i64 %hashArgsPhi93, 52, !dbg !16
+  br i1 %22, label %kwArgContinue, label %sorbet_removeKWArg.exit88, !dbg !16
 
-sorbet_removeKWArg.exit79:                        ; preds = %sorbet_readRestArgs.exit
-  %23 = tail call i64 @rb_hash_delete_entry(i64 %hashArgsPhi84, i64 %rawSym) #11, !dbg !16
+sorbet_removeKWArg.exit88:                        ; preds = %sorbet_readRestArgs.exit
+  %23 = tail call i64 @rb_hash_delete_entry(i64 %hashArgsPhi93, i64 %rawSym) #11, !dbg !16
   %24 = icmp eq i64 %23, 52, !dbg !16
   br i1 %24, label %kwArgContinue, label %kwArgContinue.thread, !dbg !16
 
-kwArgContinue.thread:                             ; preds = %sorbet_removeKWArg.exit79
-  %rubyId_e100 = load i64, i64* @rubyIdPrecomputed_e, align 8, !dbg !16
-  %rawSym21101 = tail call i64 @rb_id2sym(i64 %rubyId_e100), !dbg !16
+kwArgContinue.thread:                             ; preds = %sorbet_removeKWArg.exit88
+  %rubyId_e109 = load i64, i64* @rubyIdPrecomputed_e, align 8, !dbg !16
+  %rawSym21110 = tail call i64 @rb_id2sym(i64 %rubyId_e109), !dbg !16
   br label %sorbet_removeKWArg.exit.thread, !dbg !16
 
 fillRequiredArgs:                                 ; preds = %.thread, %sorbet_isa_Hash.exit, %argCountSecondCheckBlock
-  %argcPhi87 = phi i32 [ 1, %argCountSecondCheckBlock ], [ %argc, %.thread ], [ %argsWithoutHashCount, %sorbet_isa_Hash.exit ]
-  %hashArgsPhi84 = phi i64 [ 52, %argCountSecondCheckBlock ], [ 52, %.thread ], [ %KWArgHash, %sorbet_isa_Hash.exit ]
+  %argcPhi96 = phi i32 [ 1, %argCountSecondCheckBlock ], [ %argc, %.thread ], [ %argsWithoutHashCount, %sorbet_isa_Hash.exit ]
+  %hashArgsPhi93 = phi i64 [ 52, %argCountSecondCheckBlock ], [ 52, %.thread ], [ %KWArgHash, %sorbet_isa_Hash.exit ]
   %rawArg_a = load i64, i64* %argArray, align 8, !dbg !16
   %25 = tail call i32 @rb_block_given_p() #11, !dbg !16
   %26 = icmp eq i32 %25, 0, !dbg !16
@@ -304,10 +304,10 @@ fillRequiredArgs:                                 ; preds = %.thread, %sorbet_is
 
 sorbet_getMethodBlockAsProc.exit:                 ; preds = %fillRequiredArgs, %27
   %29 = phi i64 [ %28, %27 ], [ 8, %fillRequiredArgs ], !dbg !16
-  %default0 = icmp eq i32 %argcPhi87, 1, !dbg !16
+  %default0 = icmp eq i32 %argcPhi96, 1, !dbg !16
   br i1 %default0, label %fillFromDefaultBlockDone1.thread, label %fillFromDefaultBlockDone1, !dbg !16, !prof !19
 
-kwArgContinue:                                    ; preds = %sorbet_readRestArgs.exit, %sorbet_removeKWArg.exit79
+kwArgContinue:                                    ; preds = %sorbet_readRestArgs.exit, %sorbet_removeKWArg.exit88
   %30 = tail call i64 @sorbet_addMissingKWArg(i64 noundef 52, i64 %rawSym), !dbg !16
   %rubyId_e = load i64, i64* @rubyIdPrecomputed_e, align 8, !dbg !16
   %rawSym21 = tail call i64 @rb_id2sym(i64 %rubyId_e), !dbg !16
@@ -318,53 +318,53 @@ sorbet_removeKWArg.exit:                          ; preds = %kwArgContinue
   br i1 %31, label %sorbet_readKWRestArgs.exit.thread, label %35, !dbg !16, !prof !20
 
 sorbet_removeKWArg.exit.thread:                   ; preds = %kwArgContinue, %kwArgContinue.thread
-  %rawSym21107 = phi i64 [ %rawSym21101, %kwArgContinue.thread ], [ %rawSym21, %kwArgContinue ]
-  %missingArgsPhi105 = phi i64 [ 52, %kwArgContinue.thread ], [ %30, %kwArgContinue ]
-  %d.sroa.0.0103 = phi i64 [ %23, %kwArgContinue.thread ], [ 8, %kwArgContinue ]
-  %32 = tail call i64 @rb_hash_delete_entry(i64 %hashArgsPhi84, i64 %rawSym21107) #11, !dbg !16
+  %rawSym21116 = phi i64 [ %rawSym21110, %kwArgContinue.thread ], [ %rawSym21, %kwArgContinue ]
+  %missingArgsPhi114 = phi i64 [ 52, %kwArgContinue.thread ], [ %30, %kwArgContinue ]
+  %d.sroa.0.0112 = phi i64 [ %23, %kwArgContinue.thread ], [ 8, %kwArgContinue ]
+  %32 = tail call i64 @rb_hash_delete_entry(i64 %hashArgsPhi93, i64 %rawSym21116) #11, !dbg !16
   %33 = icmp eq i64 %32, 52, !dbg !16
-  %e.sroa.0.1111 = select i1 %33, i64 8, i64 %32, !dbg !16
-  %"<argPresent>9.sroa.0.0112" = select i1 %33, i64 0, i64 20, !dbg !16
-  %34 = icmp eq i64 %missingArgsPhi105, 52, !dbg !16
+  %e.sroa.0.1120 = select i1 %33, i64 8, i64 %32, !dbg !16
+  %"<argPresent>9.sroa.0.0121" = select i1 %33, i64 0, i64 20, !dbg !16
+  %34 = icmp eq i64 %missingArgsPhi114, 52, !dbg !16
   br i1 %34, label %sorbet_readKWRestArgs.exit, label %35, !dbg !16, !prof !20
 
 35:                                               ; preds = %sorbet_removeKWArg.exit.thread, %sorbet_removeKWArg.exit
-  %missingArgsPhi106113 = phi i64 [ %missingArgsPhi105, %sorbet_removeKWArg.exit.thread ], [ %30, %sorbet_removeKWArg.exit ]
-  tail call void @sorbet_raiseMissingKeywords(i64 %missingArgsPhi106113) #9, !dbg !16
+  %missingArgsPhi115122 = phi i64 [ %missingArgsPhi114, %sorbet_removeKWArg.exit.thread ], [ %30, %sorbet_removeKWArg.exit ]
+  tail call void @sorbet_raiseMissingKeywords(i64 %missingArgsPhi115122) #9, !dbg !16
   unreachable, !dbg !16
 
 sorbet_readKWRestArgs.exit.thread:                ; preds = %sorbet_removeKWArg.exit
   %36 = tail call i64 @rb_hash_new() #11, !dbg !16
-  %37 = and i64 %"<argPresent>.sroa.0.092", -9, !dbg !21
+  %37 = and i64 %"<argPresent>.sroa.0.0101", -9, !dbg !21
   %38 = icmp ne i64 %37, 0, !dbg !21
-  %b.sroa.0.0138 = select i1 %38, i64 %b.sroa.0.190, i64 3, !dbg !21
+  %b.sroa.0.0147 = select i1 %38, i64 %b.sroa.0.199, i64 3, !dbg !21
   br label %44, !dbg !22
 
 sorbet_readKWRestArgs.exit:                       ; preds = %sorbet_removeKWArg.exit.thread
-  %39 = tail call i64 @rb_hash_dup(i64 %hashArgsPhi84) #11, !dbg !16
-  %40 = and i64 %"<argPresent>.sroa.0.092", -9, !dbg !21
+  %39 = tail call i64 @rb_hash_dup(i64 %hashArgsPhi93) #11, !dbg !16
+  %40 = and i64 %"<argPresent>.sroa.0.0101", -9, !dbg !21
   %41 = icmp ne i64 %40, 0, !dbg !21
-  %b.sroa.0.0 = select i1 %41, i64 %b.sroa.0.190, i64 3, !dbg !21
-  %42 = icmp ne i64 %"<argPresent>9.sroa.0.0112", 0, !dbg !22
+  %b.sroa.0.0 = select i1 %41, i64 %b.sroa.0.199, i64 3, !dbg !21
+  %42 = icmp ne i64 %"<argPresent>9.sroa.0.0121", 0, !dbg !22
   br i1 %42, label %43, label %44, !dbg !22
 
 43:                                               ; preds = %sorbet_readKWRestArgs.exit
   br label %44, !dbg !22
 
 44:                                               ; preds = %sorbet_readKWRestArgs.exit.thread, %sorbet_readKWRestArgs.exit, %43
-  %b.sroa.0.0140 = phi i64 [ %b.sroa.0.0, %43 ], [ %b.sroa.0.0, %sorbet_readKWRestArgs.exit ], [ %b.sroa.0.0138, %sorbet_readKWRestArgs.exit.thread ]
+  %b.sroa.0.0149 = phi i64 [ %b.sroa.0.0, %43 ], [ %b.sroa.0.0, %sorbet_readKWRestArgs.exit ], [ %b.sroa.0.0147, %sorbet_readKWRestArgs.exit.thread ]
   %45 = phi i64 [ %39, %43 ], [ %39, %sorbet_readKWRestArgs.exit ], [ %36, %sorbet_readKWRestArgs.exit.thread ]
-  %d.sroa.0.0104114127139 = phi i64 [ %d.sroa.0.0103, %43 ], [ %d.sroa.0.0103, %sorbet_readKWRestArgs.exit ], [ 8, %sorbet_readKWRestArgs.exit.thread ]
-  %46 = phi i64 [ %e.sroa.0.1111, %43 ], [ 5, %sorbet_readKWRestArgs.exit ], [ 5, %sorbet_readKWRestArgs.exit.thread ]
+  %d.sroa.0.0113123136148 = phi i64 [ %d.sroa.0.0112, %43 ], [ %d.sroa.0.0112, %sorbet_readKWRestArgs.exit ], [ 8, %sorbet_readKWRestArgs.exit.thread ]
+  %46 = phi i64 [ %e.sroa.0.1120, %43 ], [ 5, %sorbet_readKWRestArgs.exit ], [ 5, %sorbet_readKWRestArgs.exit.thread ]
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 5), i64** %1, align 8, !dbg !23, !tbaa !14
   %callArgs0Addr = getelementptr [8 x i64], [8 x i64]* %callArgs, i32 0, i64 0, !dbg !24
   store i64 %rawArg_a, i64* %callArgs0Addr, align 8, !dbg !24
   %callArgs1Addr = getelementptr [8 x i64], [8 x i64]* %callArgs, i32 0, i64 1, !dbg !24
-  store i64 %b.sroa.0.0140, i64* %callArgs1Addr, align 8, !dbg !24
+  store i64 %b.sroa.0.0149, i64* %callArgs1Addr, align 8, !dbg !24
   %callArgs2Addr = getelementptr [8 x i64], [8 x i64]* %callArgs, i32 0, i64 2, !dbg !24
   store i64 %21, i64* %callArgs2Addr, align 8, !dbg !24
   %callArgs3Addr = getelementptr [8 x i64], [8 x i64]* %callArgs, i32 0, i64 3, !dbg !24
-  store i64 %d.sroa.0.0104114127139, i64* %callArgs3Addr, align 8, !dbg !24
+  store i64 %d.sroa.0.0113123136148, i64* %callArgs3Addr, align 8, !dbg !24
   %callArgs4Addr = getelementptr [8 x i64], [8 x i64]* %callArgs, i32 0, i64 4, !dbg !24
   store i64 %46, i64* %callArgs4Addr, align 8, !dbg !24
   %callArgs5Addr = getelementptr [8 x i64], [8 x i64]* %callArgs, i32 0, i64 5, !dbg !24
@@ -387,8 +387,8 @@ sorbet_readKWRestArgs.exit:                       ; preds = %sorbet_removeKWArg.
   store i64 %send, i64* %54, align 8, !dbg !28, !tbaa !6
   %55 = getelementptr inbounds i64, i64* %54, i64 1, !dbg !28
   store i64* %55, i64** %52, align 8, !dbg !28
-  %send134 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts, i64 0), !dbg !28
-  ret i64 %send134
+  %send143 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts, i64 0), !dbg !28
+  ret i64 %send143
 }
 
 ; Function Attrs: sspreq
@@ -742,7 +742,7 @@ entry:
   %116 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %108, i64 0, i32 0
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 4), i64** %116, align 8, !dbg !68, !tbaa !14
   %117 = load i64, i64* @rb_cObject, align 8, !dbg !29
-  %stackFrame387.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Object#14take_arguments", align 8, !dbg !29
+  %stackFrame388.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Object#14take_arguments", align 8, !dbg !29
   %118 = call noalias nonnull i8* @ruby_xcalloc(i64 noundef 1, i64 noundef 64) #14, !dbg !29
   %119 = bitcast i8* %118 to i16*, !dbg !29
   %120 = load i16, i16* %119, align 8, !dbg !29
@@ -822,7 +822,7 @@ sorbet_setupParamKeywords.exit.i:                 ; preds = %158, %entry
   %163 = getelementptr inbounds i8, i8* %118, i64 56, !dbg !29
   %164 = bitcast i8* %163 to i8**, !dbg !29
   store i8* %162, i8** %164, align 8, !dbg !29, !tbaa !82
-  call void @sorbet_vm_define_method(i64 %117, i8* noundef getelementptr inbounds ([15 x i8], [15 x i8]* @str_take_arguments, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*, i8*)* noundef @"func_Object#14take_arguments", i8* nonnull %118, %struct.rb_iseq_struct* %stackFrame387.i, i1 noundef zeroext false) #11, !dbg !29
+  call void @sorbet_vm_define_method(i64 %117, i8* noundef getelementptr inbounds ([15 x i8], [15 x i8]* @str_take_arguments, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*, i8*)* noundef @"func_Object#14take_arguments", i8* nonnull %118, %struct.rb_iseq_struct* %stackFrame388.i, i1 noundef zeroext false) #11, !dbg !29
   %165 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !29, !tbaa !14
   %166 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %165, i64 0, i32 5, !dbg !29
   %167 = load i32, i32* %166, align 8, !dbg !29, !tbaa !83
