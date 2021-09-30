@@ -87,17 +87,6 @@ UnorderedSet<string> knownExpectations = {"parse-tree",       "parse-tree-json",
                                           "document-symbols", "package-tree",     "document-formatting-rubyfmt",
                                           "autocorrects"};
 
-// This list will be progressively made empty, and we will not have any tests that
-// can swallow errors that don't have associated locations. See lines 479-483 below.
-// DO NOT add new tests here.
-// TODO(aadi-stripe) Fix these tests
-UnorderedSet<string> locationCheckExemptTests = {
-    "test/testdata/packager/nested_inner_namespaces",
-    "test/testdata/packager/import_subpackage",
-    "test/testdata/packager/nested_packages",
-    "test/testdata/packager/deeply_nested_packages",
-};
-
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
     auto saved = core::serialize::Serializer::storeTree(savedFile, expr);
@@ -477,9 +466,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 continue;
             }
             auto diag = errorToDiagnostic(*gs, *error);
-            if (diag == nullptr && locationCheckExemptTests.contains(singleTest)) {
-                continue;
-            }
             ENFORCE(diag != nullptr, "Error was given no valid location - '{}'", error->toString(*gs));
 
             auto path = error->loc.file().data(*gs).path();
