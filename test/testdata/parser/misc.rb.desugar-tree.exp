@@ -100,7 +100,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   ::<Magic>.defined?("X")
 
-  <self>.super(ZSuperArgs)
+  <self>.<super>(ZSuperArgs)
 
   def kwfoo<<todo method>>(x:, y: = 1, *z:, &<blk>)
     <emptyTree>

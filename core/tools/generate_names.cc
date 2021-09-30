@@ -330,7 +330,7 @@ NameDef names[] = {
     {"blank_p", "blank?"},
     {"present_p", "present?"},
     {"nil"},
-    {"super"},
+    {"super", "<super>"},
     {"empty", ""},
 
     {"buildHash", "<build-hash>"},
