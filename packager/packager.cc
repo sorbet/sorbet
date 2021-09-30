@@ -920,20 +920,6 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
         importedPackages.emplace_back(move(stubClass));
 
         testImportedPackages = treeBuilder.makeModule(ctx, ImportType::Test);
-
-        // In the test namespace for this package add an alias to give tests full access to the
-        // packaged code:
-        // module <PackageTests>
-        //   <Imports>
-        //   <Mangled_Pkg_A>::Pkg::A = <PackageRegistry>::<Mangled_Pkg_A>::Pkg::A
-        // end
-        auto assignRhs =
-            prependPackageScope(package->name.fullName.toLiteral(core::LocOffsets::none()), package->name.mangledName);
-        auto assign = ast::MK::Assign(core::LocOffsets::none(),
-                                      prependScope(package->name.fullName.toLiteral(core::LocOffsets::none()),
-                                                   name2Expr(package->name.mangledName)),
-                                      std::move(assignRhs));
-        testImportedPackages.emplace_back(std::move(assign));
     }
 
     auto packageNamespace =
