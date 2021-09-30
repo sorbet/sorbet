@@ -133,6 +133,7 @@ llvm::Function *IREmitterHelpers::getOrCreateFunctionWeak(CompilerState &cs, cor
     (fn->arg_begin() + 1)->setName("argArray");
     (fn->arg_begin() + 2)->setName("selfRaw");
     (fn->arg_begin() + 3)->setName("cfp");
+    (fn->arg_begin() + 4)->setName("callData");
 
     return fn;
 }
