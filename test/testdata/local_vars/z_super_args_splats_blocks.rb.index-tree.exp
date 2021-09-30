@@ -1,8 +1,8 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   def pos<<todo method>>(x, y, z, &<blk>)
     begin
-      ::<Magic>.<call-with-block>(::T.unsafe(<self>), :super, <blk>, x, y, z)
-      <self>.super(x, y, z) do ||
+      ::<Magic>.<call-with-block>(<self>, :<super>, <blk>, x, y, z)
+      <self>.<super>(x, y, z) do ||
         <self>.puts("hi")
       end
     end
@@ -10,8 +10,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat<<todo method>>(*foo, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), nil, <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), nil) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), nil, <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), nil) do ||
         <self>.puts("hi")
       end
     end
@@ -19,8 +19,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_pos<<todo method>>(*foo, p, q, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), nil, <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), nil) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), nil, <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), nil) do ||
         <self>.puts("hi")
       end
     end
@@ -28,8 +28,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat<<todo method>>(x, y, z, *foo, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), nil, <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), nil) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), nil, <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), nil) do ||
         <self>.puts("hi")
       end
     end
@@ -37,8 +37,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_pos<<todo method>>(x, y, z, *foo, p, q, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), nil, <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), nil) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), nil, <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), nil) do ||
         <self>.puts("hi")
       end
     end
@@ -46,8 +46,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_blk<<todo method>>(x, y, z, &blk)
     begin
-      ::<Magic>.<call-with-block>(::T.unsafe(<self>), :super, blk, x, y, z)
-      <self>.super(x, y, z) do ||
+      ::<Magic>.<call-with-block>(<self>, :<super>, blk, x, y, z)
+      <self>.<super>(x, y, z) do ||
         <self>.puts("hi")
       end
     end
@@ -55,8 +55,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_blk<<todo method>>(*foo, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), nil, blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), nil) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), nil, blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), nil) do ||
         <self>.puts("hi")
       end
     end
@@ -64,8 +64,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_pos_blk<<todo method>>(*foo, p, q, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), nil, blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), nil) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), nil, blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), nil) do ||
         <self>.puts("hi")
       end
     end
@@ -73,8 +73,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_blk<<todo method>>(x, y, z, *foo, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), nil, blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), nil) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), nil, blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), nil) do ||
         <self>.puts("hi")
       end
     end
@@ -82,8 +82,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_pos_blk<<todo method>>(x, y, z, *foo, p, q, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), nil, blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), nil) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), nil, blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), nil) do ||
         <self>.puts("hi")
       end
     end
@@ -91,8 +91,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_kw<<todo method>>(x, y, z, j:, k:, &<blk>)
     begin
-      ::<Magic>.<call-with-block>(::T.unsafe(<self>), :super, <blk>, x, y, z, :j, j, :k, k)
-      <self>.super(x, y, z, :j, j, :k, k) do ||
+      ::<Magic>.<call-with-block>(<self>, :<super>, <blk>, x, y, z, :j, j, :k, k)
+      <self>.<super>(x, y, z, :j, j, :k, k) do ||
         <self>.puts("hi")
       end
     end
@@ -100,8 +100,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_kw<<todo method>>(*foo, j:, k:, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), [:j, j, :k, k], <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), [:j, j, :k, k]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), [:j, j, :k, k], <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), [:j, j, :k, k]) do ||
         <self>.puts("hi")
       end
     end
@@ -109,8 +109,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_pos_kw<<todo method>>(*foo, p, q, j:, k:, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), [:j, j, :k, k], <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), [:j, j, :k, k]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), [:j, j, :k, k], <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), [:j, j, :k, k]) do ||
         <self>.puts("hi")
       end
     end
@@ -118,8 +118,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_kw<<todo method>>(x, y, z, *foo, j:, k:, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), [:j, j, :k, k], <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), [:j, j, :k, k]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), [:j, j, :k, k], <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), [:j, j, :k, k]) do ||
         <self>.puts("hi")
       end
     end
@@ -127,8 +127,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_pos_kw<<todo method>>(x, y, z, *foo, p, q, j:, k:, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [:j, j, :k, k], <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [:j, j, :k, k]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [:j, j, :k, k], <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [:j, j, :k, k]) do ||
         <self>.puts("hi")
       end
     end
@@ -136,8 +136,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_kwsplat<<todo method>>(x, y, z, *bar:, &<blk>)
     begin
-      ::<Magic>.<call-with-block>(::T.unsafe(<self>), :super, <blk>, x, y, z, ::<Magic>.<to-hash-dup>(bar))
-      <self>.super(x, y, z, ::<Magic>.<to-hash-dup>(bar)) do ||
+      ::<Magic>.<call-with-block>(<self>, :<super>, <blk>, x, y, z, ::<Magic>.<to-hash-dup>(bar))
+      <self>.<super>(x, y, z, ::<Magic>.<to-hash-dup>(bar)) do ||
         <self>.puts("hi")
       end
     end
@@ -145,8 +145,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_kwsplat<<todo method>>(*foo, *bar:, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), [::<Magic>.<to-hash-dup>(bar)], <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), [::<Magic>.<to-hash-dup>(bar)]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), [::<Magic>.<to-hash-dup>(bar)], <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), [::<Magic>.<to-hash-dup>(bar)]) do ||
         <self>.puts("hi")
       end
     end
@@ -154,8 +154,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_pos_kwsplat<<todo method>>(*foo, p, q, *bar:, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)], <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)], <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)]) do ||
         <self>.puts("hi")
       end
     end
@@ -163,8 +163,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_kwsplat<<todo method>>(x, y, z, *foo, *bar:, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), [::<Magic>.<to-hash-dup>(bar)], <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), [::<Magic>.<to-hash-dup>(bar)]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), [::<Magic>.<to-hash-dup>(bar)], <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), [::<Magic>.<to-hash-dup>(bar)]) do ||
         <self>.puts("hi")
       end
     end
@@ -172,8 +172,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_pos_kwsplat<<todo method>>(x, y, z, *foo, p, q, *bar:, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)], <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)], <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)]) do ||
         <self>.puts("hi")
       end
     end
@@ -181,8 +181,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_kw_kwsplat<<todo method>>(x, y, z, j:, k:, *bar:, &<blk>)
     begin
-      ::<Magic>.<call-with-block>(::T.unsafe(<self>), :super, <blk>, x, y, z, {:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar)))
-      <self>.super(x, y, z, {:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))) do ||
+      ::<Magic>.<call-with-block>(<self>, :<super>, <blk>, x, y, z, {:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar)))
+      <self>.<super>(x, y, z, {:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))) do ||
         <self>.puts("hi")
       end
     end
@@ -190,8 +190,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_kw_kwsplat<<todo method>>(*foo, j:, k:, *bar:, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
         <self>.puts("hi")
       end
     end
@@ -199,8 +199,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_pos_kw_kwsplat<<todo method>>(*foo, p, q, j:, k:, *bar:, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
         <self>.puts("hi")
       end
     end
@@ -208,8 +208,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_kw_kwsplat<<todo method>>(x, y, z, *foo, j:, k:, *bar:, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
         <self>.puts("hi")
       end
     end
@@ -217,8 +217,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_pos_kw_kwsplat<<todo method>>(x, y, z, *foo, p, q, j:, k:, *bar:, &<blk>)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], <blk>)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], <blk>)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
         <self>.puts("hi")
       end
     end
@@ -226,8 +226,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_kw_blk<<todo method>>(x, y, z, j:, k:, &blk)
     begin
-      ::<Magic>.<call-with-block>(::T.unsafe(<self>), :super, blk, x, y, z, :j, j, :k, k)
-      <self>.super(x, y, z, :j, j, :k, k) do ||
+      ::<Magic>.<call-with-block>(<self>, :<super>, blk, x, y, z, :j, j, :k, k)
+      <self>.<super>(x, y, z, :j, j, :k, k) do ||
         <self>.puts("hi")
       end
     end
@@ -235,8 +235,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_kw_blk<<todo method>>(*foo, j:, k:, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), [:j, j, :k, k], blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), [:j, j, :k, k]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), [:j, j, :k, k], blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), [:j, j, :k, k]) do ||
         <self>.puts("hi")
       end
     end
@@ -244,8 +244,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_pos_kw_blk<<todo method>>(*foo, p, q, j:, k:, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), [:j, j, :k, k], blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), [:j, j, :k, k]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), [:j, j, :k, k], blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), [:j, j, :k, k]) do ||
         <self>.puts("hi")
       end
     end
@@ -253,8 +253,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_kw_blk<<todo method>>(x, y, z, *foo, j:, k:, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), [:j, j, :k, k], blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), [:j, j, :k, k]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), [:j, j, :k, k], blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), [:j, j, :k, k]) do ||
         <self>.puts("hi")
       end
     end
@@ -262,8 +262,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_pos_kw_blk<<todo method>>(x, y, z, *foo, p, q, j:, k:, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [:j, j, :k, k], blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [:j, j, :k, k]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [:j, j, :k, k], blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [:j, j, :k, k]) do ||
         <self>.puts("hi")
       end
     end
@@ -271,8 +271,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_kwsplat_blk<<todo method>>(x, y, z, *bar:, &blk)
     begin
-      ::<Magic>.<call-with-block>(::T.unsafe(<self>), :super, blk, x, y, z, ::<Magic>.<to-hash-dup>(bar))
-      <self>.super(x, y, z, ::<Magic>.<to-hash-dup>(bar)) do ||
+      ::<Magic>.<call-with-block>(<self>, :<super>, blk, x, y, z, ::<Magic>.<to-hash-dup>(bar))
+      <self>.<super>(x, y, z, ::<Magic>.<to-hash-dup>(bar)) do ||
         <self>.puts("hi")
       end
     end
@@ -280,8 +280,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_kwsplat_blk<<todo method>>(*foo, *bar:, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), [::<Magic>.<to-hash-dup>(bar)], blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), [::<Magic>.<to-hash-dup>(bar)]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), [::<Magic>.<to-hash-dup>(bar)], blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), [::<Magic>.<to-hash-dup>(bar)]) do ||
         <self>.puts("hi")
       end
     end
@@ -289,8 +289,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_pos_kwsplat_blk<<todo method>>(*foo, p, q, *bar:, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)], blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)], blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)]) do ||
         <self>.puts("hi")
       end
     end
@@ -298,8 +298,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_kwsplat_blk<<todo method>>(x, y, z, *foo, *bar:, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), [::<Magic>.<to-hash-dup>(bar)], blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), [::<Magic>.<to-hash-dup>(bar)]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), [::<Magic>.<to-hash-dup>(bar)], blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), [::<Magic>.<to-hash-dup>(bar)]) do ||
         <self>.puts("hi")
       end
     end
@@ -307,8 +307,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_pos_kwsplat_blk<<todo method>>(x, y, z, *foo, p, q, *bar:, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)], blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)], blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [::<Magic>.<to-hash-dup>(bar)]) do ||
         <self>.puts("hi")
       end
     end
@@ -316,8 +316,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_kw_kwsplat_blk<<todo method>>(x, y, z, j:, k:, *bar:, &blk)
     begin
-      ::<Magic>.<call-with-block>(::T.unsafe(<self>), :super, blk, x, y, z, {:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar)))
-      <self>.super(x, y, z, {:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))) do ||
+      ::<Magic>.<call-with-block>(<self>, :<super>, blk, x, y, z, {:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar)))
+      <self>.<super>(x, y, z, {:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))) do ||
         <self>.puts("hi")
       end
     end
@@ -325,8 +325,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_kw_kwsplat_blk<<todo method>>(*foo, j:, k:, *bar:, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
         <self>.puts("hi")
       end
     end
@@ -334,8 +334,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def possplat_pos_kw_kwsplat_blk<<todo method>>(*foo, p, q, j:, k:, *bar:, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, ::<Magic>.<splat>(foo).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, ::<Magic>.<splat>(foo).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
         <self>.puts("hi")
       end
     end
@@ -343,8 +343,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_kw_kwsplat_blk<<todo method>>(x, y, z, *foo, j:, k:, *bar:, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
         <self>.puts("hi")
       end
     end
@@ -352,8 +352,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def pos_possplat_pos_kw_kwsplat_blk<<todo method>>(x, y, z, *foo, p, q, j:, k:, *bar:, &blk)
     begin
-      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], blk)
-      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :super, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
+      ::<Magic>.<call-with-splat-and-block>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))], blk)
+      ::<Magic>.<call-with-splat>(::T.unsafe(<self>), :<super>, [x, y, z].concat(::<Magic>.<splat>(foo)).concat([p, q]), [{:j => j, :k => k}.merge(::<Magic>.<to-hash-dup>(bar))]) do ||
         <self>.puts("hi")
       end
     end
