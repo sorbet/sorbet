@@ -838,6 +838,10 @@ public:
         return MethodRef::fromRaw(8);
     }
 
+    static MethodRef PackageSpec_export_for_test() {
+        return MethodRef::fromRaw(9);
+    }
+
     static ClassOrModuleRef Encoding() {
         return ClassOrModuleRef::fromRaw(82);
     }
@@ -847,11 +851,11 @@ public:
     }
 
     static MethodRef Class_new() {
-        return MethodRef::fromRaw(9);
+        return MethodRef::fromRaw(10);
     }
 
     static MethodRef todoMethod() {
-        return MethodRef::fromRaw(10);
+        return MethodRef::fromRaw(11);
     }
 
     static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
@@ -893,7 +897,7 @@ public:
     }
 
     static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 202;
-    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 42;
+    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 43;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 3;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
     static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 99;
