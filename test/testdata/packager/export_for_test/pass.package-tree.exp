@@ -41,6 +41,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C BarClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package$1>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
     end
 
+    module <emptyTree>::<C Opus_Foo_Package$1>::<C Opus>::<C Foo>::<C Private><<C <todo sym>>> < ()
+      <emptyTree>::<C ImplDetail> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package$1>::<C Opus>::<C Foo>::<C Private>::<C ImplDetail>
+    end
+
     module <emptyTree>::<C Opus_Foo_Package$1>::<C Opus>::<C TestImported><<C <todo sym>>> < ()
       <emptyTree>::<C TIClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_TestImported_Package$1>::<C Opus>::<C TestImported>::<C TIClass>
     end
@@ -95,6 +99,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package$1><<C <todo sym>>> < ()
     module <emptyTree>::<C Opus>::<C Foo><<C <todo sym>>> < ()
       class <emptyTree>::<C FooClass><<C <todo sym>>> < (::<todo sym>)
+        <emptyTree>::<C Inner> = 1
+      end
+
+      class <emptyTree>::<C FooUnexported><<C <todo sym>>> < (::<todo sym>)
       end
 
       class <emptyTree>::<C Private>::<C ImplDetail><<C <todo sym>>> < (::<todo sym>)
@@ -110,12 +118,48 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
         ::Sorbet::Private::Static.keep_self_def(<self>, :stub_stuff!, :normal)
       end
+
+      <emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
+
+      <emptyTree>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>
+
+      <emptyTree>::<C Opus>::<C Util>::<C UtilClass>
+
+      <emptyTree>::<C Test>::<C Opus>::<C Util>::<C TestUtil>
+
+      <emptyTree>::<C Opus>::<C TestImported>::<C TIClass>
+
+      <emptyTree>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass>
+
+      <emptyTree>::<C Opus>::<C Foo>::<C Private>::<C ImplDetail>.stub_stuff!()
+
+      <emptyTree>::<C Opus>::<C Foo>::<C FooUnexported>
     end
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageTests>>::<C Opus_Foo_Package$1><<C <todo sym>>> < ()
-    nil
+    class <emptyTree>::<C Test>::<C Opus>::<C Foo>::<C FooTest><<C <todo sym>>> < (::<todo sym>)
+      <emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
+
+      <emptyTree>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>
+
+      <emptyTree>::<C Opus>::<C Util>::<C UtilClass>
+
+      <emptyTree>::<C Test>::<C Opus>::<C Util>::<C TestUtil>
+
+      <emptyTree>::<C Opus>::<C TestImported>::<C TIClass>
+
+      <emptyTree>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass>
+
+      <emptyTree>::<C Opus>::<C Foo>::<C FooClass>
+
+      <emptyTree>::<C Opus>::<C Foo>::<C FooClass>::<C Inner>
+
+      <emptyTree>::<C Opus>::<C Foo>::<C Private>::<C ImplDetail>.stub_stuff!()
+
+      <emptyTree>::<C Opus>::<C Foo>::<C FooUnexported>
+    end
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
