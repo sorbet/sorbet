@@ -798,9 +798,13 @@ public:
         }
     }
 
-    void mergePrivateTestExports(const PackageInfo &pkg) {
+    // Make add imports for the test package for all normal code exported by its corresponding
+    // "normal" package.
+    void mergeSelfExportsForTest(const PackageInfo &pkg) {
         for (const auto &exp : pkg.exports) {
-            if (exp.type == ExportType::PrivateTest) {
+            const auto &parts = exp.parts();
+            ENFORCE(parts.size() > 0);
+            if (parts[0] != TEST_NAME) {          // Only add imports for non-test
                 auto loc = exp.fqn.loc.offsets(); // TODO XXX is this right?
                 addImport(pkg, loc, exp.fqn, ImportType::Test);
             }
@@ -955,7 +959,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 treeBuilder.mergeImports(*importedPackage, import);
             }
         }
-        treeBuilder.mergePrivateTestExports(*package);
+        treeBuilder.mergeSelfExportsForTest(*package);
 
         importedPackages = treeBuilder.makeModule(ctx, ImportType::Normal);
         // Include an empty class definition <Mangled_Pkg_A>::Pkg::A::<Magic> in <PackageRegistry>.
