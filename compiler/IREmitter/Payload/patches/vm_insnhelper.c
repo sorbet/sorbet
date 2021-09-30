@@ -43,7 +43,8 @@ rb_control_frame_t *sorbet_pushStaticInitFrame(VALUE recv) {
     return vm_push_frame(ec, NULL, frame_type, recv, block_handler, cref, 0, ec->cfp->sp, 0, 0);
 }
 
-rb_control_frame_t *sorbet_pushCfuncFrame(struct FunctionInlineCache *cache, VALUE recv, const rb_iseq_t *iseq) {
+rb_control_frame_t *sorbet_pushCfuncFrame(bool allTypeTested, struct FunctionInlineCache *cache, VALUE recv,
+                                          const rb_iseq_t *iseq) {
     rb_execution_context_t *ec = GET_EC();
 
     // NOTE: method search must be done to ensure that this field is not NULL

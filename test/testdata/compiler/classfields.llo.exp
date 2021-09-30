@@ -313,7 +313,7 @@ entry:
   %50 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !10, !tbaa !43
   %guardUpdated = icmp eq i64 %49, %50, !dbg !10
   call void @llvm.assume(i1 %guardUpdated), !dbg !10
-  %stackFrame26.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_B#5write", align 8, !dbg !10
+  %stackFrame27.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_B#5write", align 8, !dbg !10
   %51 = call noalias nonnull i8* @ruby_xcalloc(i64 noundef 1, i64 noundef 64) #12, !dbg !10
   %52 = bitcast i8* %51 to i16*, !dbg !10
   %53 = load i16, i16* %52, align 8, !dbg !10
@@ -335,7 +335,7 @@ entry:
   %62 = getelementptr inbounds i8, i8* %51, i64 32, !dbg !10
   %63 = bitcast i8* %62 to i8**, !dbg !10
   store i8* %61, i8** %63, align 8, !dbg !10, !tbaa !49
-  call void @sorbet_vm_define_method(i64 %48, i8* noundef getelementptr inbounds ([6 x i8], [6 x i8]* @str_write, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*, i8*)* noundef @"func_B#5write", i8* nonnull %51, %struct.rb_iseq_struct* %stackFrame26.i.i, i1 noundef zeroext false) #11, !dbg !10
+  call void @sorbet_vm_define_method(i64 %48, i8* noundef getelementptr inbounds ([6 x i8], [6 x i8]* @str_write, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*, i8*)* noundef @"func_B#5write", i8* nonnull %51, %struct.rb_iseq_struct* %stackFrame27.i.i, i1 noundef zeroext false) #11, !dbg !10
   %64 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !10, !tbaa !22
   %65 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %64, i64 0, i32 5, !dbg !10
   %66 = load i32, i32* %65, align 8, !dbg !10, !tbaa !50
@@ -354,7 +354,7 @@ entry:
 
 rb_vm_check_ints.exit2.i.i:                       ; preds = %72, %47
   store i64* getelementptr inbounds ([29 x i64], [29 x i64]* @iseqEncodedArray, i64 0, i64 16), i64** %43, align 8, !dbg !10, !tbaa !22
-  %stackFrame35.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_B#4read", align 8, !dbg !54
+  %stackFrame38.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_B#4read", align 8, !dbg !54
   %76 = call noalias nonnull i8* @ruby_xcalloc(i64 noundef 1, i64 noundef 64) #12, !dbg !54
   %77 = bitcast i8* %76 to i16*, !dbg !54
   %78 = load i16, i16* %77, align 8, !dbg !54
@@ -362,7 +362,7 @@ rb_vm_check_ints.exit2.i.i:                       ; preds = %72, %47
   store i16 %79, i16* %77, align 8, !dbg !54
   %80 = getelementptr inbounds i8, i8* %76, i64 4, !dbg !54
   call void @llvm.memset.p0i8.i64(i8* nonnull align 4 %80, i8 0, i64 28, i1 false) #11, !dbg !54
-  call void @sorbet_vm_define_method(i64 %48, i8* noundef getelementptr inbounds ([5 x i8], [5 x i8]* @str_read, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*, i8*)* noundef @"func_B#4read", i8* nonnull %76, %struct.rb_iseq_struct* %stackFrame35.i.i, i1 noundef zeroext false) #11, !dbg !54
+  call void @sorbet_vm_define_method(i64 %48, i8* noundef getelementptr inbounds ([5 x i8], [5 x i8]* @str_read, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*, i8*)* noundef @"func_B#4read", i8* nonnull %76, %struct.rb_iseq_struct* %stackFrame38.i.i, i1 noundef zeroext false) #11, !dbg !54
   %81 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !54, !tbaa !22
   %82 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %81, i64 0, i32 5, !dbg !54
   %83 = load i32, i32* %82, align 8, !dbg !54, !tbaa !50
@@ -381,7 +381,7 @@ rb_vm_check_ints.exit2.i.i:                       ; preds = %72, %47
 
 rb_vm_check_ints.exit1.i.i:                       ; preds = %89, %rb_vm_check_ints.exit2.i.i
   store i64* getelementptr inbounds ([29 x i64], [29 x i64]* @iseqEncodedArray, i64 0, i64 19), i64** %43, align 8, !dbg !54, !tbaa !22
-  %stackFrame45.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @stackFramePrecomputed_func_B.4read, align 8, !dbg !55
+  %stackFrame50.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @stackFramePrecomputed_func_B.4read, align 8, !dbg !55
   %93 = call noalias nonnull i8* @ruby_xcalloc(i64 noundef 1, i64 noundef 64) #12, !dbg !55
   %94 = bitcast i8* %93 to i16*, !dbg !55
   %95 = load i16, i16* %94, align 8, !dbg !55
@@ -389,7 +389,7 @@ rb_vm_check_ints.exit1.i.i:                       ; preds = %89, %rb_vm_check_in
   store i16 %96, i16* %94, align 8, !dbg !55
   %97 = getelementptr inbounds i8, i8* %93, i64 4, !dbg !55
   call void @llvm.memset.p0i8.i64(i8* nonnull align 4 %97, i8 0, i64 28, i1 false) #11, !dbg !55
-  call void @sorbet_vm_define_method(i64 %48, i8* noundef getelementptr inbounds ([5 x i8], [5 x i8]* @str_read, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*, i8*)* noundef @func_B.4read, i8* nonnull %93, %struct.rb_iseq_struct* %stackFrame45.i.i, i1 noundef zeroext true) #11, !dbg !55
+  call void @sorbet_vm_define_method(i64 %48, i8* noundef getelementptr inbounds ([5 x i8], [5 x i8]* @str_read, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*, i8*)* noundef @func_B.4read, i8* nonnull %93, %struct.rb_iseq_struct* %stackFrame50.i.i, i1 noundef zeroext true) #11, !dbg !55
   %98 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !55, !tbaa !22
   %99 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %98, i64 0, i32 5, !dbg !55
   %100 = load i32, i32* %99, align 8, !dbg !55, !tbaa !50
