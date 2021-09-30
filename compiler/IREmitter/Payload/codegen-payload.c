@@ -58,7 +58,7 @@ struct SorbetLineNumberInfo {
     extern rettype name rest;             \
     KEEP_ALIVE(name)
 
-SORBET_ALIVE(VALUE, rb_id2sym, (ID));
+SORBET_ALIVE(VALUE, rb_id2sym, (ID)SORBET_ATTRIBUTE(const));
 SORBET_ALIVE(VALUE, rb_errinfo, ());
 SORBET_ALIVE(VALUE, rb_obj_is_kind_of, (VALUE, VALUE) __attribute__((const)));
 
@@ -142,6 +142,7 @@ SORBET_ALIVE(_Bool, sorbet_i_isa_Array, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_Regexp, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_String, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_Proc, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_Thread, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_RootSingleton, (VALUE) __attribute__((const)));
 
 SORBET_ALIVE(long, sorbet_globalConstRegister, (VALUE val));
@@ -330,6 +331,12 @@ _Bool sorbet_isa_Proc(VALUE obj) {
     return rb_obj_is_proc(obj) == Qtrue;
 }
 KEEP_ALIVE(sorbet_isa_Proc);
+
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_Thread(VALUE obj) {
+    return rb_obj_is_kind_of(obj, rb_cThread) == Qtrue;
+}
+KEEP_ALIVE(sorbet_isa_Thread);
 
 SORBET_ATTRIBUTE(const)
 _Bool sorbet_isa_RootSingleton(VALUE obj) {
@@ -793,6 +800,11 @@ VALUE sorbet_Thread_square_br(VALUE recv, ID fun, int argc, const VALUE *const r
     return rb_thread_local_aref(recv, id);
 }
 
+SORBET_INLINE
+VALUE sorbet_Thread_square_br_symarg(VALUE recv, ID id) {
+    return rb_thread_local_aref(recv, id);
+}
+
 // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/thread.c#L3386-L3390
 SORBET_INLINE
 VALUE sorbet_Thread_square_br_eq(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
@@ -801,6 +813,11 @@ VALUE sorbet_Thread_square_br_eq(VALUE recv, ID fun, int argc, const VALUE *cons
     VALUE id = argv[0];
     VALUE val = argv[1];
     return rb_thread_local_aset(recv, rb_to_id(id), val);
+}
+
+SORBET_INLINE
+VALUE sorbet_Thread_square_br_eq_symarg(VALUE recv, ID id, VALUE val) {
+    return rb_thread_local_aset(recv, id, val);
 }
 
 // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/thread.c#L3386-L3390
