@@ -33,7 +33,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C CallsWithObjectChild><<C <todo sym>>> < (<emptyTree>::<C CallsWithObject>)
     def self.calls_with_object<<todo method>>(&blk)
-      ::<Magic>.<call-with-block>(<self>, :super, blk)
+      ::<Magic>.<call-with-block>(<self>, :<super>, blk)
     end
   end
 

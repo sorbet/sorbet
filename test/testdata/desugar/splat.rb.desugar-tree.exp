@@ -25,7 +25,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def foo<<todo method>>(&<blk>)
       begin
         a = [1, 2]
-        ::<Magic>.<call-with-splat>(<self>, :super, ::<Magic>.<splat>(a), nil)
+        ::<Magic>.<call-with-splat>(<self>, :<super>, ::<Magic>.<splat>(a), nil)
       end
     end
   end
