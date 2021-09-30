@@ -34,7 +34,7 @@ done < <(find "${paths[@]}" -name '*.rb*' | sort)
 
 basename=
 srcs=()
-exp_extensions="llo ll stderr"
+exp_extensions="opt.ll ll stderr"
 
 syncback=()
 
