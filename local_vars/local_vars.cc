@@ -207,37 +207,12 @@ class LocalNameInserter {
         return owner;
     }
 
-public:
-    ast::ExpressionPtr preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
-        enterClass();
-        return tree;
-    }
-
-    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
-        exitScope();
-        return tree;
-    }
-
-    ast::ExpressionPtr preTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
-        enterMethod();
-
-        auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        method.args = fillInArgs(nameArgs(ctx, method.args));
-        return tree;
-    }
-
-    ast::ExpressionPtr postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
-        exitScope();
-        return tree;
-    }
-
-    ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
-        // Replace ZSuperArgs with an explicit forwarding of the enclosing method's arguments.
+    // Replace a send on ZSuperArgs with an explicit forwarding of the enclosing method's arguments.
+    ast::ExpressionPtr lowerZSuperArgs(core::MutableContext ctx, ast::ExpressionPtr tree) {
+        ENFORCE(ast::isa_tree<ast::Send>(tree));
 
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (original.args.size() != 1 || !ast::isa_tree<ast::ZSuperArgs>(original.args[0])) {
-            return tree;
-        }
+        ENFORCE(original.args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.args[0]));
 
         // Clear out the args (which are just [ZSuperArgs]) in the original send. (Note that we want this cleared even
         // if we error out below, because later `ENFORCE`s will be triggered if we don't.)
@@ -463,6 +438,39 @@ public:
 
             original.numPosArgs = numPosArgs;
             original.args = std::move(sendargs);
+        }
+
+        return tree;
+    }
+
+public:
+    ast::ExpressionPtr preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+        enterClass();
+        return tree;
+    }
+
+    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+        exitScope();
+        return tree;
+    }
+
+    ast::ExpressionPtr preTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+        enterMethod();
+
+        auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+        method.args = fillInArgs(nameArgs(ctx, method.args));
+        return tree;
+    }
+
+    ast::ExpressionPtr postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+        exitScope();
+        return tree;
+    }
+
+    ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
+        auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
+        if (original.args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.args[0])) {
+            return lowerZSuperArgs(ctx, std::move(tree));
         }
 
         return tree;
