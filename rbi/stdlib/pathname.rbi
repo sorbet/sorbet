@@ -526,7 +526,7 @@ class Pathname < Object
     params(
         consider_symlink: T::Boolean,
     )
-    .returns(T.untyped)
+    .returns(Pathname)
   end
   def cleanpath(consider_symlink=T.unsafe(nil)); end
 
