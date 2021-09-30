@@ -765,6 +765,9 @@ public:
 
 class Thread_squareBrackets : public CallCMethod {
 public:
+    // This sorbet_Thread_square_br is a slower version that will do arity checking and convert the
+    // argument to a symbol. If our `makeCall` fast path doesn't apply, we'll fall back to calling
+    // the slow version (via super class `makeCall`).
     Thread_squareBrackets() : CallCMethod(core::Symbols::Thread(), "[]"sv, CMethod{"sorbet_Thread_square_br"}) {}
 
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
@@ -791,6 +794,9 @@ public:
 
 class Thread_squareBracketsEq : public CallCMethod {
 public:
+    // This sorbet_Thread_square_br_eq is a slower version that will do arity checking and convert the
+    // argument to a symbol. If our `makeCall` fast path doesn't apply, we'll fall back to calling
+    // the slow version (via super class).
     Thread_squareBracketsEq() : CallCMethod(core::Symbols::Thread(), "[]="sv, CMethod{"sorbet_Thread_square_br_eq"}) {}
 
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
