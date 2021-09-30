@@ -83,6 +83,7 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     // leave comments with added/removed passes
     // pmbuilder.populateModulePassManager(pm);
 
+    pm.add(llvm::createGlobalDCEPass());
     pm.add(llvm::createSROAPass()); // this is super useful for us so we want to run it early
     if (unnecessaryForUs) {
         pm.add(llvm::createForceFunctionAttrsLegacyPass());
