@@ -174,7 +174,7 @@ public:
         std::string_view path = ctx.file.data(ctx).path();
         int curPrefixPos = path.find_last_of('/');
         while (curPrefixPos != std::string::npos) {
-            const auto &it = packageInfoByPathPrefix.find(path.substr(0, curPrefixPos + 1));
+            const auto it = packageInfoByPathPrefix.find(path.substr(0, curPrefixPos + 1));
             if (it != packageInfoByPathPrefix.end()) {
                 return it->second.get();
             }
@@ -182,7 +182,7 @@ public:
             curPrefixPos = path.find_last_of('/', curPrefixPos - 1);
         }
 
-        const auto &root = packageInfoByPathPrefix.find("");
+        const auto root = packageInfoByPathPrefix.find("");
         if (root != packageInfoByPathPrefix.end()) {
             return root->second.get();
         }
