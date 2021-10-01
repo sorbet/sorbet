@@ -294,15 +294,14 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
     closedir(dir);
 }
 
-vector<string> sorbet::FileOps::listFilesInDir(string_view path, const UnorderedSet<string> &extensions, bool recursive,
-                                               const std::vector<std::string> &absoluteIgnorePatterns,
+vector<string> sorbet::FileOps::listFilesInDir(string_view basePath, const UnorderedSet<string> &extensions,
+                                               bool recursive, const std::vector<std::string> &absoluteIgnorePatterns,
                                                const std::vector<std::string> &relativeIgnorePatterns) {
     vector<string> result;
     // Mini-optimization: appendFilesInDir needs to grab a c_str from path, so we pass in a string reference to avoid
     // copying.
-    string pathStr(path);
-    appendFilesInDir(path == "." ? "" : path, pathStr, extensions, recursive, result, absoluteIgnorePatterns,
-                     relativeIgnorePatterns);
+    string path(basePath);
+    appendFilesInDir(basePath, path, extensions, recursive, result, absoluteIgnorePatterns, relativeIgnorePatterns);
     fast_sort(result);
     return result;
 }
