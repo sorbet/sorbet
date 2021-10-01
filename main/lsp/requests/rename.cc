@@ -210,9 +210,9 @@ public:
         }
         string newsrc;
         if (auto sendResp = response->isSend()) {
-            newsrc = replaceMethodNameInSend(source.value(), sendResp);
+            newsrc = replaceMethodNameInSend(string(source.value()), sendResp);
         } else if (auto defResp = response->isDefinition()) {
-            newsrc = replaceMethodNameInDef(source.value());
+            newsrc = replaceMethodNameInDef(string(source.value()));
         } else {
             ENFORCE(0, "Unexpected query response type while renaming method");
             return;

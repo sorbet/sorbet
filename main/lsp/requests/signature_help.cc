@@ -25,12 +25,13 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::MethodRef method,
     for (const auto &arg : args) {
         // label field is populated with the name of the variable.
         // Not sure why VSCode does not display this for now.
-        auto parameter = make_unique<ParameterInformation>(arg.argumentName(gs));
+        auto argName = string(arg.argumentName(gs));
+        auto parameter = make_unique<ParameterInformation>(argName);
         if (i == activeParameter) {
             // this bolds the active parameter in markdown
-            methodDocumentation += "**_" + arg.argumentName(gs) + "_**";
+            methodDocumentation += "**_" + argName + "_**";
         } else {
-            methodDocumentation += arg.argumentName(gs);
+            methodDocumentation += argName;
         }
         if (i != args.size() - 1) {
             methodDocumentation += ", ";

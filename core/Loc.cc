@@ -252,12 +252,12 @@ string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
     return buf.str();
 }
 
-optional<string> Loc::source(const GlobalState &gs) const {
+optional<string_view> Loc::source(const GlobalState &gs) const {
     if (!exists()) {
         return nullopt;
     } else {
         auto source = this->file().data(gs).source();
-        return string(source.substr(beginPos(), endPos() - beginPos()));
+        return source.substr(beginPos(), endPos() - beginPos());
     }
 }
 

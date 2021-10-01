@@ -79,7 +79,7 @@ void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
             e.setHeader("The {} method should always return {}", "initialize", "void");
 
             auto loc = core::Loc(ctx.file, originalSend.loc());
-            string original = loc.source(ctx).value();
+            auto original = (string)loc.source(ctx).value();
             unsigned long returnsStart = original.find("returns");
             unsigned long returnsLength, afterReturnsPosition;
             string replacement;

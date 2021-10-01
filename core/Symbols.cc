@@ -1377,15 +1377,15 @@ string ArgInfo::toString(const GlobalState &gs) const {
     return to_string(buf);
 }
 
-string ArgInfo::argumentName(const GlobalState &gs) const {
+string_view ArgInfo::argumentName(const GlobalState &gs) const {
     if (flags.isKeyword) {
-        return (string)name.shortName(gs);
+        return name.shortName(gs);
     } else {
         // positional arg
         if (auto source = loc.source(gs)) {
             return source.value();
         } else {
-            return (string)name.shortName(gs);
+            return name.shortName(gs);
         }
     }
 }
