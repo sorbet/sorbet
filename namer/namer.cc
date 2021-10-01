@@ -1621,11 +1621,11 @@ public:
         auto loc = klass.declLoc;
         ast::InsSeq::STATS_store ideSeqs;
         if (ast::isa_tree<ast::ConstantLit>(klass.name)) {
-            ideSeqs.emplace_back(ast::MK::KeepForIDE(loc, klass.name.deepCopy()));
+            ideSeqs.emplace_back(ast::MK::KeepForIDE(loc.copyWithZeroLength(), klass.name.deepCopy()));
         }
         if (klass.kind == ast::ClassDef::Kind::Class && !klass.ancestors.empty() &&
             shouldLeaveAncestorForIDE(klass.ancestors.front())) {
-            ideSeqs.emplace_back(ast::MK::KeepForIDE(loc, klass.ancestors.front().deepCopy()));
+            ideSeqs.emplace_back(ast::MK::KeepForIDE(loc.copyWithZeroLength(), klass.ancestors.front().deepCopy()));
         }
 
         if (klass.symbol != core::Symbols::root() && !ctx.file.data(ctx).isRBI() &&
