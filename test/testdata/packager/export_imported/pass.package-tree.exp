@@ -6,6 +6,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+    module <emptyTree>::<C A_Package$1>::<C B><<C <todo sym>>> < ()
+      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BClass>
+    end
+
     class <emptyTree>::<C A_Package$1>::<C A>::<C <Magic>><<C <todo sym>>> < ()
     end
   end

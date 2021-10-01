@@ -950,7 +950,6 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 treeBuilder.mergeImports(*importedPackage, import);
             }
         }
-        treeBuilder.mergeSelfExportsForTest(*package);
 
         importedPackages = treeBuilder.makeModule(ctx, ImportType::Normal);
         // Include an empty class definition <Mangled_Pkg_A>::Pkg::A::<Magic> in <PackageRegistry>.
@@ -962,6 +961,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
         auto stubClass = ast::MK::Class(core::LocOffsets::none(), core::LocOffsets::none(), move(stubName), {}, {});
         importedPackages.emplace_back(move(stubClass));
 
+        treeBuilder.mergeSelfExportsForTest(*package);
         testImportedPackages = treeBuilder.makeModule(ctx, ImportType::Test);
     }
 
