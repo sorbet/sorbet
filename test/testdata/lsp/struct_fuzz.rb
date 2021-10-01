@@ -1,6 +1,6 @@
 # typed: true
 # no-stdlib: true
-  ::B=Struct.new:x
+  ::B=Struct.new:x # error-with-dupes: Method `keep_for_ide` does not exist on `T.class_of(Sorbet::Private::Static)`
 # ^^^^^^^^^^^^^^^^ error: Method `keep_def` does not exist on `T.class_of(Sorbet::Private::Static)`
 # ^^^^^^^^^^^^^^^^ error: Method `type_member` does not exist on `T.class_of(B)`
 # ^^^^^^^^^^^^^^^^ error: Method `params` does not exist on `T.class_of(B)`
