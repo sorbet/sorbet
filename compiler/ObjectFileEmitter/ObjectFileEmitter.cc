@@ -372,7 +372,7 @@ void ObjectFileEmitter::init() {
     if (llvmIrDir.has_value()) {
         llvm::legacy::PassManager ppm;
         std::error_code ec;
-        auto name = ((string)llvmIrDir.value()) + "/" + (string)objectName + ".ll";
+        auto name = fmt::format("{}/{}.ll", llvmIrDir.value(), objectName);
         llvm::raw_fd_ostream llFile(name, ec, llvm::sys::fs::F_Text);
         ppm.add(llvm::createPrintModulePass(llFile, ""));
         ppm.run(*module);
@@ -412,7 +412,7 @@ void ObjectFileEmitter::init() {
     // doesn't take ownership of it.
     std::optional<llvm::raw_fd_ostream> lllFile;
     if (llvmIrDir.has_value()) {
-        auto nameOptl = ((string)llvmIrDir.value()) + "/" + (string)objectName + ".lll";
+        auto nameOptl = fmt::format("{}/{}.lll", llvmIrDir.value(), objectName);
         lllFile.emplace(nameOptl, ec1, llvm::sys::fs::F_Text);
         printLowered = llvm::createPrintModulePass(lllFile.value(), "");
     }
@@ -423,7 +423,7 @@ void ObjectFileEmitter::init() {
     // doesn't take ownership of it.
     std::optional<llvm::raw_fd_ostream> lloFile;
     if (llvmIrDir.has_value()) {
-        auto nameOpt = ((string)llvmIrDir.value()) + "/" + (string)objectName + ".llo";
+        auto nameOpt = fmt::format("{}/{}.llo", llvmIrDir.value(), objectName);
         lloFile.emplace(nameOpt, ec1, llvm::sys::fs::F_Text);
         pm.add(llvm::createPrintModulePass(lloFile.value(), ""));
     }
@@ -445,8 +445,8 @@ void ObjectFileEmitter::init() {
     if (debug_mode) {
         pm.add(llvm::createVerifierPass());
     }
-    auto objectFileName = (string)fmt::format("{}/{}.o", soDir, objectName);
-    auto soNamePrefix = (string)fmt::format("{}/{}", soDir, objectName);
+    auto objectFileName = fmt::format("{}/{}.o", soDir, objectName);
+    auto soNamePrefix = fmt::format("{}/{}", soDir, objectName);
     if (!outputObjectFile(logger, pm, objectFileName, move(module), targetMachine)) {
         return false;
     }
