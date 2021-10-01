@@ -2,7 +2,7 @@
 # typed: strict
 
 class Test::Project::MainLib::LibTest
-  # Tests can access their package's code
+  # Tests can access their package's code when exported
   Project::MainLib::Lib.new
   # Tests can access `import`
   Project::Util::MyUtil.new
