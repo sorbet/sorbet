@@ -70,6 +70,7 @@ SORBET_ALIVE(void, sorbet_cast_failure,
 SORBET_ALIVE(void, sorbet_raiseArity, (int argc, int min, int max) __attribute__((__noreturn__)));
 SORBET_ALIVE(void, sorbet_raiseMissingKeywords, (VALUE missing) __attribute__((__noreturn__)));
 SORBET_ALIVE(void, sorbet_raiseExtraKeywords, (VALUE hash) __attribute__((__noreturn__)));
+SORBET_ALIVE(void, sorbet_raiseCallDataExtraKeywords, (int keyword_len, ID *keywords) __attribute__((__noreturn__)));
 SORBET_ALIVE(VALUE, sorbet_t_absurd, (VALUE val) __attribute__((__cold__)));
 
 SORBET_ALIVE(VALUE, sorbet_addMissingKWArg, (VALUE missing, VALUE sym));
@@ -1776,6 +1777,32 @@ VALUE sorbet_selfNew(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk
 // ****                       Calls
 // ****
 
+SORBET_INLINE
+_Bool sorbet_is_kwsplat_calling(void *callingp) {
+    struct rb_calling_info *calling = (struct rb_calling_info *)callingp;
+    return calling->kw_splat != 0;
+}
+
+SORBET_INLINE
+_Bool sorbet_is_kwarg_calldata(void *cdp) {
+    struct rb_call_data *cd = (struct rb_call_data *)cdp;
+    return (cd->ci.flag & VM_CALL_KWARG) != 0;
+}
+
+SORBET_INLINE
+VALUE sorbet_kwarg_passed_value(void *cdp, ID kwarg, VALUE *kwargv) {
+    struct rb_kwarg_call_data *cd = (struct rb_kwarg_call_data *)cdp;
+    struct rb_call_info_kw_arg *ci_kw_arg = cd->ci_kw.kw_arg;
+    VALUE kwarg_sym = rb_id2sym(kwarg);
+    for (int i = 0, len = ci_kw_arg->keyword_len; i < len; ++i) {
+        if (kwarg_sym == ci_kw_arg->keywords[i]) {
+            return kwargv[i];
+        }
+    }
+
+    return RUBY_Qundef;
+}
+
 // When no double-splat is present, only lookup entries in the keyword argument hash, don't delete them.
 SORBET_INLINE
 VALUE sorbet_getKWArg(VALUE maybeHash, VALUE key) {
@@ -1849,6 +1876,23 @@ VALUE sorbet_assertNoExtraKWArg(VALUE maybeHash, int requiredKwargs, int optiona
     }
 
     sorbet_raiseExtraKeywords(maybeHash);
+}
+
+SORBET_INLINE
+void sorbet_assertCallDataNoExtraKWArg(void *cdp, int requiredKwargs, int optionalParsed) {
+    struct rb_kwarg_call_data *cd = (struct rb_kwarg_call_data *)cdp;
+    struct rb_call_info_kw_arg *ci_kw_arg = cd->ci_kw.kw_arg;
+    if (ci_kw_arg->keyword_len == 0) {
+        return;
+    }
+
+    if (LIKELY((ci_kw_arg->keyword_len - requiredKwargs) == optionalParsed)) {
+        return;
+    }
+
+    // TODO: this is not quite right, since we're not specifying the particular
+    // keywords that are missing.
+    sorbet_raiseCallDataExtraKeywords(ci_kw_arg->keyword_len, &ci_kw_arg->keywords[0]);
 }
 
 SORBET_INLINE
