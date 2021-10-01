@@ -97,6 +97,9 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
             case Definition::Type::Alias:
                 type = "alias"sv;
                 break;
+            case Definition::Type::TypeAlias:
+                type = "typealias"sv;
+                break;
         }
 
         fmt::format_to(std::back_inserter(out),

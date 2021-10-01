@@ -17,6 +17,7 @@ class AutogenWalk {
     vector<core::NameRef>
     requires;
     vector<DefinitionRef> nesting;
+    int autogenVersion;
 
     enum class ScopeType { Class, Block };
     vector<ast::Send *> ignoring;
@@ -262,6 +263,10 @@ public:
             // RHS. Mark this `Definition` as an alias for it.
             ENFORCE(refMap.count(original.rhs.get()));
             def.aliased_ref = refMap[original.rhs.get()];
+        } else if (autogenVersion == 3 && lhs->symbol.exists() && lhs->symbol.data(ctx)->isTypeAlias()) {
+            // if the LHS has already been annotated as a type alias by the namer, the definition is (by definition,
+            // hah) a type alias.
+            def.type = Definition::Type::TypeAlias;
         } else {
             // if the RHS _isn't_ just a constant literal, then this is a constant definition.
             def.type = Definition::Type::Casgn;
@@ -314,6 +319,10 @@ public:
         return tree;
     }
 
+    void setAutogenVersion(int version) {
+       autogenVersion = version;
+    }
+
     ParsedFile parsedFile() {
         ENFORCE(scopeTypes.empty());
 
@@ -327,8 +336,12 @@ public:
 
 // Convert a Sorbet `ParsedFile` into an Autogen `ParsedFile` by walking it as above and also recording the checksum of
 // the current file
-ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const CRCBuilder &crcBuilder) {
+ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const CRCBuilder &crcBuilder, int autogenVersion) {
+    if (autogenVersion == 0) {
+        autogenVersion = 3;
+    }
     AutogenWalk walk;
+    walk.setAutogenVersion(autogenVersion);
     tree.tree = ast::TreeMap::apply(ctx, walk, move(tree.tree));
     auto pf = walk.parsedFile();
     pf.path = string(tree.file.data(ctx).path());

@@ -235,7 +235,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 }
 
                 core::Context ctx(gs, core::Symbols::root(), tree.file);
-                auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder);
+                auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder, opts.autogenVersion);
                 tree = move(pf.tree);
 
                 AutogenResult::Serialized serialized;
