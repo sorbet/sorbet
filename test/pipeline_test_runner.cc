@@ -336,7 +336,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 auto crcBuilder = autogen::CRCBuilder::create();
                 for (auto &tree : trees) {
                     core::Context ctx(*gs, core::Symbols::root(), tree.file);
-                    auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder);
+                    int autogenVersion = 0; // setting to 0 will default to latest version
+                    auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder, autogenVersion);
                     tree = move(pf.tree);
                     payload << pf.toString(ctx);
                 }
