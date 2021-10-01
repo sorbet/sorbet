@@ -850,7 +850,8 @@ private:
             if (parentSrc.exists()) {
                 // A conflicting import exist. Only report errors while constructing the test output
                 // to avoid duplicate errors because test imports are a superset of normal imports.
-                if (moduleType == ImportType::Test) {
+                bool isSelfImport = node->source.packageMangledName == pkgMangledName;
+                if (moduleType == ImportType::Test && !isSelfImport) {
                     if (auto e = ctx.beginError(node->source.importLoc, core::errors::Packager::ImportConflict)) {
                         // TODO Fix flaky ordering of errors. This is strange...not being done in parallel,
                         // and the file processing order is consistent.
