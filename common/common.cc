@@ -248,6 +248,8 @@ bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view filePath,
     return false;
 }
 
+namespace {
+
 void appendFilesInDir(string_view basePath, const string &path, const sorbet::UnorderedSet<string> &extensions,
                       bool recursive, vector<string> &result, const std::vector<std::string> &absoluteIgnorePatterns,
                       const std::vector<std::string> &relativeIgnorePatterns) {
@@ -293,6 +295,8 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
     }
     closedir(dir);
 }
+
+} // namespace
 
 vector<string> sorbet::FileOps::listFilesInDir(string_view basePath, const UnorderedSet<string> &extensions,
                                                bool recursive, const std::vector<std::string> &absoluteIgnorePatterns,
