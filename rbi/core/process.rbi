@@ -1751,7 +1751,7 @@ class Process::Status < Object
   # Returns `true` if *stat* is successful, `false` if not. Returns `nil` if
   # [`exited?`](https://docs.ruby-lang.org/en/2.7.0/Process/Status.html#method-i-exited-3F)
   # is not `true`.
-  sig {returns(T::Boolean)}
+  sig {returns(T.nilable(T::Boolean))}
   def success?(); end
 
   # Returns the number of the signal that caused *stat* to terminate (or `nil`
