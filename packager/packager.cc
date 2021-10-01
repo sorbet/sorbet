@@ -182,6 +182,11 @@ public:
             curPrefixPos = path.find_last_of('/', curPrefixPos - 1);
         }
 
+        const auto &root = packageInfoByPathPrefix.find("");
+        if (root != packageInfoByPathPrefix.end()) {
+            return root->second.get();
+        }
+
         return nullptr;
     }
 };
@@ -701,7 +706,12 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
     package.tree = ast::TreeMap::apply(ctx, finder, move(package.tree));
     finder.finalize(ctx);
     if (finder.info) {
-        finder.info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
+        if (packageFilePath.find('.') == string::npos) {
+            finder.info->packagePathPrefixes.emplace_back("");
+        } else {
+            finder.info->packagePathPrefixes.emplace_back(
+                packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
+        }
         const string_view shortName = finder.info->name.mangledName.shortName(ctx.state);
         const string_view dirNameFromShortName = shortName.substr(0, shortName.find("_Package"));
 
