@@ -19,6 +19,7 @@ private:
 
     static const std::map<int, std::vector<std::string>> refAttrMap;
     static const std::map<int, std::vector<std::string>> defAttrMap;
+    static const std::map<int, int> symbolCount;
 
     // a bunch of helpers
     void packName(core::NameRef nm);
@@ -41,7 +42,7 @@ public:
     MsgpackWriter(int version);
 
     constexpr static int MIN_VERSION = 2;
-    constexpr static int MAX_VERSION = 2;
+    constexpr static int MAX_VERSION = 3;
     std::string pack(core::Context ctx, ParsedFile &pf);
 };
 

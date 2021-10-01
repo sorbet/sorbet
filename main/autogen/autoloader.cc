@@ -222,7 +222,8 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
             }
             fmt::format_to(std::back_inserter(buf), "}})\n", fullName);
         }
-    } else if (type == Definition::Type::Casgn || type == Definition::Type::Alias) {
+    } else if (type == Definition::Type::Casgn || type == Definition::Type::Alias ||
+               type == Definition::Type::TypeAlias) {
         ENFORCE(qname.size() > 1);
         casgnArg = fmt::format(", [{}, :{}]",
                                fmt::map_join(qname.nameParts.begin(), --qname.nameParts.end(),
