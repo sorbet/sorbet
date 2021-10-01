@@ -254,11 +254,11 @@ class Set < Object
 
   sig do
     type_parameters(:U).params(
-        enum: T::Enumerable[T.type_parameter(:U)],
+        enum: T.nilable(T::Enumerable[T.type_parameter(:U)]),
     )
     .void
   end
-  def initialize(enum=T.unsafe(nil)); end
+  def initialize(enum=nil); end
 
   # Returns true if the set and the given set have at least one element in
   # common.
