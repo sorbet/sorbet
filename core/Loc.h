@@ -119,7 +119,7 @@ public:
     }
     std::string showRaw(const GlobalState &gs) const;
     std::string filePosToString(const GlobalState &gs, bool showFull = false) const;
-    std::optional<std::string> source(const GlobalState &gs) const;
+    std::optional<std::string_view> source(const GlobalState &gs) const;
 
     bool operator==(const Loc &rhs) const;
 
