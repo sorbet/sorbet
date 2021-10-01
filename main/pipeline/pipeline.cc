@@ -1075,7 +1075,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
             }
             writer.EndArray();
 
-            opts.print.FileSigilsJson.print(buf.str());
+            opts.print.FileSigilsJson.fmt("{}\n", buf.str());
         }
 #endif
         // Error queue is re-used across runs, so reset the flush count to ignore files flushed during typecheck.
