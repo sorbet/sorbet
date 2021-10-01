@@ -320,7 +320,7 @@ public:
     }
 
     void setAutogenVersion(int version) {
-       autogenVersion = version;
+        autogenVersion = version;
     }
 
     ParsedFile parsedFile() {
@@ -336,7 +336,8 @@ public:
 
 // Convert a Sorbet `ParsedFile` into an Autogen `ParsedFile` by walking it as above and also recording the checksum of
 // the current file
-ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const CRCBuilder &crcBuilder, int autogenVersion) {
+ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const CRCBuilder &crcBuilder,
+                             int autogenVersion) {
     if (autogenVersion == 0) {
         autogenVersion = 3;
     }
