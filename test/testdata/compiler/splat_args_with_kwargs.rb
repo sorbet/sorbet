@@ -32,10 +32,15 @@ def expects_ArgumentError
     yield
   rescue ArgumentError => e
     p e.message
+  else
+    raise "Didn't get expected ArgumentError"
   end
 end
 
 # Regular splat arguments are not re-processed as keyword args.
+expects_ArgumentError do
+  f(*[1,2,3,:d,10]) {|x| p x}
+end
 expects_ArgumentError do
   f(*[1,2,3,:d,10], d: 9) {|x| p x}
 end
