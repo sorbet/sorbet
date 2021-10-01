@@ -5,6 +5,7 @@
 #include "common/formatting.h"
 #include "main/autogen/autoloader.h"
 #include "main/autogen/crc_builder.h"
+#include "main/autogen/data/version.h"
 
 using namespace std;
 namespace sorbet::autogen {
@@ -339,7 +340,7 @@ public:
 ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const CRCBuilder &crcBuilder,
                              int autogenVersion) {
     if (autogenVersion == 0) {
-        autogenVersion = 3;
+        autogenVersion = AutogenVersion::MAX_VERSION;
     }
     AutogenWalk walk;
     walk.setAutogenVersion(autogenVersion);

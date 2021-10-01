@@ -4,6 +4,7 @@
 #include "mpack/mpack.h"
 
 #include "main/autogen/data/definitions.h"
+#include "main/autogen/data/version.h"
 
 namespace sorbet::autogen {
 
@@ -32,8 +33,9 @@ private:
     void packDefinition(core::Context ctx, ParsedFile &pf, Definition &def);
     void packReference(core::Context ctx, ParsedFile &pf, Reference &ref);
     static int assertValidVersion(int version) {
-        if (version < MIN_VERSION || version > MAX_VERSION) {
-            Exception::raise("msgpack version {} not in available range [{}, {}]", version, MIN_VERSION, MAX_VERSION);
+        if (version < AutogenVersion::MIN_VERSION || version > AutogenVersion::MAX_VERSION) {
+            Exception::raise("msgpack version {} not in available range [{}, {}]", version, AutogenVersion::MIN_VERSION,
+                             AutogenVersion::MAX_VERSION);
         }
         return version;
     }
@@ -41,8 +43,6 @@ private:
 public:
     MsgpackWriter(int version);
 
-    constexpr static int MIN_VERSION = 2;
-    constexpr static int MAX_VERSION = 3;
     std::string pack(core::Context ctx, ParsedFile &pf);
 };
 
