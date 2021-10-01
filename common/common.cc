@@ -265,6 +265,7 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
     }
 
     while ((entry = readdir(dir)) != nullptr) {
+        // Will always add a ./ prefix (convenient for matching ignore patterns)
         auto fullPath = fmt::format("{}/{}", path, entry->d_name);
         if (sorbet::FileOps::isFileIgnored(basePath, fullPath, absoluteIgnorePatterns, relativeIgnorePatterns)) {
             continue;
@@ -279,7 +280,13 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
             if (dotLocation != string::npos) {
                 string_view ext(fullPath.c_str() + dotLocation, fullPath.size() - dotLocation);
                 if (extensions.contains(ext)) {
-                    result.push_back(move(fullPath));
+                    // Remove the ./ prefix in the final path (but it's convenient to have it
+                    // above for the sake of matching ignore patterns). Also don't allocate unless we have to.
+                    if (basePath == ".") {
+                        result.push_back(fullPath.substr(2));
+                    } else {
+                        result.push_back(move(fullPath));
+                    }
                 }
             }
         }
@@ -294,7 +301,8 @@ vector<string> sorbet::FileOps::listFilesInDir(string_view path, const Unordered
     // Mini-optimization: appendFilesInDir needs to grab a c_str from path, so we pass in a string reference to avoid
     // copying.
     string pathStr(path);
-    appendFilesInDir(path, pathStr, extensions, recursive, result, absoluteIgnorePatterns, relativeIgnorePatterns);
+    appendFilesInDir(path == "." ? "" : path, pathStr, extensions, recursive, result, absoluteIgnorePatterns,
+                     relativeIgnorePatterns);
     fast_sort(result);
     return result;
 }

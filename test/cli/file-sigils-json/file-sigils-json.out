@@ -3,7 +3,7 @@ No errors! Great job.
 [{"file":"./compiled-false.rb","compiled":"false"},{"file":"./compiled-none.rb","compiled":"none"},{"file":"./compiled-true.rb","compiled":"true"}]
 ----- --dir=. ----------------------------------------------------------
 No errors! Great job.
-[{"file":"./compiled-false.rb","compiled":"false"},{"file":"./compiled-none.rb","compiled":"none"},{"file":"./compiled-true.rb","compiled":"true"}]
+[{"file":"compiled-false.rb","compiled":"false"},{"file":"compiled-none.rb","compiled":"none"},{"file":"compiled-true.rb","compiled":"true"}]
 ----- *.rb -------------------------------------------------------------
 No errors! Great job.
 [{"file":"compiled-false.rb","compiled":"false"},{"file":"compiled-none.rb","compiled":"none"},{"file":"compiled-true.rb","compiled":"true"}]
