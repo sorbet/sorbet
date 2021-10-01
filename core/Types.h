@@ -55,7 +55,7 @@ public:
     bool isSyntheticBlockArgument() const;
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;
-    std::string argumentName(const GlobalState &gs) const;
+    std::string_view argumentName(const GlobalState &gs) const;
     ArgInfo(const ArgInfo &) = delete;
     ArgInfo() = default;
     ArgInfo(ArgInfo &&) noexcept = default;
