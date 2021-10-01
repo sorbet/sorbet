@@ -223,7 +223,7 @@ bool sorbet::FileOps::isFolder(string_view path, string_view ignorePattern, cons
 bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view filePath,
                                     const vector<string> &absoluteIgnorePatterns,
                                     const vector<string> &relativeIgnorePatterns) {
-    ENFORCE(filePath.substr(0, basePath.length()) == basePath);
+    ENFORCE(filePath.substr(0, basePath.length()) == basePath, "filePath='{}', basePath='{}'", filePath, basePath);
     // Note: relative_path always includes a leading /
     string_view relative_path = filePath.substr(basePath.length());
     for (auto &p : absoluteIgnorePatterns) {
