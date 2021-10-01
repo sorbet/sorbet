@@ -115,7 +115,7 @@ public:
                 return builder.CreateLoad(globalDeclaration);
             }
         }
-        auto str = (string)symName;
+        auto str = string(symName);
         ENFORCE(str.length() < 2 || (str[0] != ':'), "implementation assumes that strings dont start with ::");
         auto loaderName = "const_load" + str;
         auto guardEpochName = "guard_epoch_" + str;

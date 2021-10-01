@@ -20,7 +20,7 @@ string sourceName2funcName(string sourceName) {
 }
 
 string sourceName2DepName(string sourceName) {
-    return (string) absl::StripPrefix(sourceName, ".txt");
+    return string(absl::StripPrefix(sourceName, ".txt"));
 }
 
 void emitlicenses(vector<string> sourceFileNames, ostream &out) {

@@ -112,16 +112,16 @@ void generateDclassStrings() {
 
 int main(int argc, char **argv) {
     if (argc != 2) {
-        cout << "Usage: {} (dclass|dclassStrings)\n", (string)argv[0];
+        cout << "Usage: {} (dclass|dclassStrings)\n", string(argv[0]);
         return 1;
     }
 
-    if ((string)argv[1] == "dclass") {
+    if (string(argv[1]) == "dclass") {
         generateDclass();
-    } else if ((string)argv[1] == "dclassStrings") {
+    } else if (string(argv[1]) == "dclassStrings") {
         generateDclassStrings();
     } else {
-        cout << "Usage: {} (dclass|dclassStrings)\n", (string)argv[0];
+        cout << "Usage: {} (dclass|dclassStrings)\n", string(argv[0]);
         return 1;
     }
     return 0;

@@ -108,7 +108,7 @@ ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
 }
 
 unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print) {
-    Timer timeit(gs.tracer(), "runParser", {{"file", (string)file.data(gs).path()}});
+    Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
     unique_ptr<parser::Node> nodes;
     {
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
@@ -131,7 +131,7 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
                               const options::Printers &print) {
-    Timer timeit(gs.tracer(), "runDesugar", {{"file", (string)file.data(gs).path()}});
+    Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
     ast::ExpressionPtr ast;
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
@@ -149,13 +149,13 @@ ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_
 
 ast::ExpressionPtr runRewriter(core::GlobalState &gs, core::FileRef file, ast::ExpressionPtr ast) {
     core::MutableContext ctx(gs, core::Symbols::root(), file);
-    Timer timeit(gs.tracer(), "runRewriter", {{"file", (string)file.data(gs).path()}});
+    Timer timeit(gs.tracer(), "runRewriter", {{"file", string(file.data(gs).path())}});
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
     return rewriter::Rewriter::run(ctx, move(ast));
 }
 
 ast::ParsedFile runLocalVars(core::GlobalState &gs, ast::ParsedFile tree) {
-    Timer timeit(gs.tracer(), "runLocalVars", {{"file", (string)tree.file.data(gs).path()}});
+    Timer timeit(gs.tracer(), "runLocalVars", {{"file", string(tree.file.data(gs).path())}});
     core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
     return sorbet::local_vars::LocalVars::run(ctx, move(tree));
 }
@@ -373,7 +373,7 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(unique_ptr<core::GlobalState>
         return ast;
     }
     auto fileName = file.dataAllowingUnsafe(*gs).path();
-    Timer timeit(gs->tracer(), "readFileWithStrictnessOverrides", {{"file", (string)fileName}});
+    Timer timeit(gs->tracer(), "readFileWithStrictnessOverrides", {{"file", string(fileName)}});
     string src;
     bool fileFound = true;
     try {
@@ -559,7 +559,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         return result;
     }
 
-    Timer timeit(ctx.state.tracer(), "typecheckOne", {{"file", (string)f.data(ctx).path()}});
+    Timer timeit(ctx.state.tracer(), "typecheckOne", {{"file", string(f.data(ctx).path())}});
     try {
         if (opts.print.CFG.enabled) {
             opts.print.CFG.fmt("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
@@ -740,7 +740,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                 // appear before file's old EOF.
                 const int prohibitedLines = f.file.data(*gs).source().size();
                 auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(*gs).source());
-                auto newFile = make_shared<core::File>((string)f.file.data(*gs).path(), move(newSource),
+                auto newFile = make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource),
                                                        f.file.data(*gs).sourceType);
                 gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
                 f.file.data(*gs).strictLevel = decideStrictLevel(*gs, f.file, opts);
