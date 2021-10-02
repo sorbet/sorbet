@@ -380,10 +380,13 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
     it 'allows T.all' do
       c = Class.new(TypeValidating) do
         prop :intersection, T.all(Object, T.enum(["foo"]))
+        prop :deprecated_intersection, T.all(Object, T.deprecated_enum(["foo"]))
       end
       o = c.new
       o.intersection = "foo"
+      o.deprecated_intersection = "foo"
       assert_equal("foo", o.intersection)
+      assert_equal("foo", o.deprecated_intersection)
     end
   end
 

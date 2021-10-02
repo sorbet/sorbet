@@ -42,6 +42,7 @@ class Opus::Types::Test::TypesToRubyTest < Critic::Unit::UnitTest
 
     # Enum:
     [T.enum(%w[a b c]), 'T.enum(["a", "b", "c"])'],
+    [T.deprecated_enum(%w[a b c]), 'T.deprecated_enum(["a", "b", "c"])'],
 
     # Range:
     [T::Range[Integer], "T::Range[Integer]"],
