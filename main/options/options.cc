@@ -70,8 +70,6 @@ const vector<PrintOptions> print_options({
     {"autogen-autoloader", &Printers::AutogenAutoloader, true, false},
     {"autogen-subclasses", &Printers::AutogenSubclasses, true},
     {"package-tree", &Printers::Packager},
-    {"compiled-files-json", &Printers::FileSigilsJson}, // TODO(jez) Remove this one once all references updated
-    {"file-sigils-json", &Printers::FileSigilsJson},
 });
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -137,7 +135,6 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         AutogenAutoloader,
         AutogenSubclasses,
         Packager,
-        FileSigilsJson,
     });
 }
 

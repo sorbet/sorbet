@@ -285,7 +285,7 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                     // Remove the ./ prefix in the final path (but it's convenient to have it
                     // above for the sake of matching ignore patterns). Also don't allocate unless we have to.
                     if (basePath == ".") {
-                        result.push_back(fullPath.substr(2));
+                        result.push_back(fullPath.erase(0, 2));
                     } else {
                         result.push_back(move(fullPath));
                     }

@@ -1039,44 +1039,6 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                 Exception::raise("failed to write msgpack");
             }
         }
-        if (opts.print.FileSigilsJson.enabled) {
-            stringstream buf;
-            rapidjson::OStreamWrapper wrapper{buf};
-            rapidjson::Writer writer{wrapper};
-
-            writer.StartArray();
-            for (auto &file : gs->getFiles()) {
-                if (file == nullptr || file->sourceType != core::File::Type::Normal) {
-                    continue;
-                }
-
-                writer.StartObject();
-                writer.Key("file");
-
-                auto path = file->path();
-                writer.String(path.data(), path.size());
-
-                writer.Key("compiled");
-                switch (file->compiledLevel) {
-                    case core::CompiledLevel::None:
-                        writer.String("none");
-                        break;
-
-                    case core::CompiledLevel::False:
-                        writer.String("false");
-                        break;
-
-                    case core::CompiledLevel::True:
-                        writer.String("true");
-                        break;
-                }
-
-                writer.EndObject();
-            }
-            writer.EndArray();
-
-            opts.print.FileSigilsJson.fmt("{}\n", buf.str());
-        }
 #endif
         // Error queue is re-used across runs, so reset the flush count to ignore files flushed during typecheck.
         gs->errorQueue->filesFlushedCount = 0;
