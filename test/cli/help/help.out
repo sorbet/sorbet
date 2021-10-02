@@ -199,8 +199,7 @@ Usage:
                                 file-table-proto, file-table-messagepack,
                                 missing-constants, autogen, autogen-msgpack,
                                 autogen-classlist, autogen-autoloader, autogen-subclasses,
-                                package-tree, compiled-files-json,
-                                file-sigils-json]
+                                package-tree]
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of
                                 subclasses. This option must be used in
