@@ -888,36 +888,6 @@ module Opus::Types::Test
 
     end
 
-    describe "T.enum" do
-      before do
-        @type = T.enum(%i[foo bar])
-      end
-
-      it 'passes validation with a value from the enum' do
-        msg = check_error_message_for_obj(@type, :foo)
-        assert_nil(msg)
-      end
-
-      it 'fails validation with a value not from the enum' do
-        msg = check_error_message_for_obj(@type, :baz)
-        assert_equal("Expected type T.enum([:foo, :bar]), got :baz", msg)
-      end
-
-      it 'does not coerce types' do
-        msg = check_error_message_for_obj(@type, 'foo')
-        assert_equal('Expected type T.enum([:foo, :bar]), got "foo"', msg)
-
-        type = T.enum(%w[foo bar])
-        msg = check_error_message_for_obj(type, :foo)
-        assert_equal('Expected type T.enum(["foo", "bar"]), got :foo', msg)
-      end
-
-      it 'fails validation with a nil value' do
-        msg = check_error_message_for_obj(@type, nil)
-        assert_equal("Expected type T.enum([:foo, :bar]), got nil", msg)
-      end
-    end
-
     describe "T.deprecated_enum" do
       before do
         @type = T.deprecated_enum(%i[foo bar])

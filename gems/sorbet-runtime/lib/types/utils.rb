@@ -145,7 +145,7 @@ module T::Utils
 
   def self.lift_enum(enum)
     unless enum.is_a?(T::Types::Enum)
-      raise ArgumentError.new("#{enum.inspect} is not a T.enum")
+      raise ArgumentError.new("#{enum.inspect} is not a T.deprecated_enum")
     end
 
     classes = enum.values.map(&:class).uniq

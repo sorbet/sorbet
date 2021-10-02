@@ -7,11 +7,10 @@ module T::Types
     extend T::Sig
 
     attr_reader :values
-    attr_reader :method_name
 
     # TODO Ideally Hash would not be accepted but there are a lot of uses with prop enum.
-    sig {params(values: T.any(Array, Set, Hash, T::Range[T.untyped]), method_name: String).void}
-    def initialize(values, method_name: "enum")
+    sig {params(values: T.any(Array, Set, Hash, T::Range[T.untyped])).void}
+    def initialize(values)
       @values = values
       @method_name = method_name
     end
@@ -33,7 +32,7 @@ module T::Types
 
     # overrides Base
     def name
-      "T.#{@method_name}([#{@values.map(&:inspect).join(', ')}])"
+      "T.deprecated_enum([#{@values.map(&:inspect).join(', ')}])"
     end
 
     # overrides Base
