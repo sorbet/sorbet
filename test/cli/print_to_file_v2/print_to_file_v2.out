@@ -252,6 +252,6 @@ requires: []
  is_defining_ref=0
 --- autogen.txt end ---
 
-52145434b2a9c787cbfd3405a9fd547b5a305600  autogen.msgpack
+bebe1bec5a305f6c01a56ce81b2dbbab7fd1b194  autogen.msgpack
 
 --print=cfg specified multiple times with inconsistent output options

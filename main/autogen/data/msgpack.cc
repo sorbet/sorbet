@@ -124,10 +124,10 @@ void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &
     mpack_finish_array(&writer);
 }
 
-// symbols[0..4] are reserved for the Type aliases
+// symbols[0..(typeCount-1)] are reserved for the Type aliases
 MsgpackWriter::MsgpackWriter(int version)
     : version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)), defAttrs(defAttrMap.at(version)),
-      symbols(symbolCount.at(version)) {}
+      symbols(typeCount.at(version)) {}
 
 string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
     char *data;
@@ -170,29 +170,35 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
 
     packString("symbols");
     int i = -1;
+    int numTypes = typeCount.at(version);
     mpack_start_array(&writer, symbols.size());
     for (auto sym : symbols) {
         ++i;
         string str;
-        switch ((Definition::Type)i) {
-            case Definition::Type::Module:
-                str = "module";
-                break;
-            case Definition::Type::Class:
-                str = "class";
-                break;
-            case Definition::Type::Casgn:
-                str = "casgn";
-                break;
-            case Definition::Type::Alias:
-                str = "alias";
-                break;
-            case Definition::Type::TypeAlias:
-                str = "typealias";
-                break;
-            default:
-                str = sym.show(ctx);
+        if (i < numTypes) {
+            switch ((Definition::Type)i) {
+                case Definition::Type::Module:
+                    str = "module";
+                    break;
+                case Definition::Type::Class:
+                    str = "class";
+                    break;
+                case Definition::Type::Casgn:
+                    str = "casgn";
+                    break;
+                case Definition::Type::Alias:
+                    str = "alias";
+                    break;
+                case Definition::Type::TypeAlias:
+                    str = "typealias";
+                    break;
+                default: // shouldn't happen
+                    str = sym.show(ctx);
+            }
+        } else {
+            str = sym.show(ctx);
         }
+
         packString(str);
     }
     mpack_finish_array(&writer);
@@ -228,7 +234,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
 
 // Support back-compat down to V2. V3 includes an additional
 // symbol for definition Type, namely TypeAlias.
-const map<int, int> MsgpackWriter::symbolCount{
+const map<int, int> MsgpackWriter::typeCount{
     {2, 4},
     {3, 5},
 };
@@ -278,14 +284,13 @@ const map<int, vector<string>> MsgpackWriter::defAttrMap{
     {
         3,
         {
-            "scope",
-            "name",
-            "nesting",
-            "expression_range",
-            "expression_pos_range",
-            "resolved",
-            "is_defining_ref",
-            "parent_of",
+            "raw_full_name",
+            "type",
+            "defines_behavior",
+            "is_empty",
+            "parent_ref",
+            "aliased_ref",
+            "defining_ref",
         },
     },
 };

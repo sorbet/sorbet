@@ -20,7 +20,7 @@ private:
 
     static const std::map<int, std::vector<std::string>> refAttrMap;
     static const std::map<int, std::vector<std::string>> defAttrMap;
-    static const std::map<int, int> symbolCount;
+    static const std::map<int, int> typeCount;
 
     // a bunch of helpers
     void packName(core::NameRef nm);
