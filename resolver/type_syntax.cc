@@ -534,7 +534,8 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
             }
             return TypeSyntax::ResultType{fnd.type, core::Symbols::noClassOrModule()};
         }
-        case core::Names::enum_().rawId(): {
+        case core::Names::enum_().rawId():
+        case core::Names::deprecatedEnum().rawId(): {
             if (send.args.size() != 1) {
                 // Error will be reported in infer
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
