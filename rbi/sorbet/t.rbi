@@ -47,6 +47,7 @@ module T
   def self.class_of(klass); end
   def self.noreturn; end
   def self.enum(values); end
+  def self.deprecated_enum(values); end
   def self.untyped; end
 
   sig {params(type_a: T.untyped, type_b: T.untyped, types: T.untyped).returns(BasicObject)}
