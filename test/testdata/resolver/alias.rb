@@ -9,9 +9,15 @@ class Foo
   end
 
   Reactions = T.type_alias {T.enum(['+1', '-1', 'laugh', 'confused', 'heart', 'hooray'])}
+  DeprecatedReactions = T.type_alias {T.deprecated_enum(['+1', '-1', 'laugh', 'confused', 'heart', 'hooray'])}
 
   sig {returns(Reactions)}
   def react
+    any
+  end
+
+  sig {returns(DeprecatedReactions)}
+  def deprecated_react
     any
   end
 

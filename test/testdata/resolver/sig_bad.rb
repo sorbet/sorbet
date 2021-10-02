@@ -19,6 +19,10 @@ class A
       c: T.enum(1),
       d: T.enum([]), # error: enum([]) is invalid
       e: T.enum([unsupported]), # error: Unsupported type literal
+      b1: T.deprecated_enum, # error: Not enough arguments provided for method `T.deprecated_enum`. Expected: `1`, got: `0`
+      c1: T.deprecated_enum(1),
+      d1: T.deprecated_enum([]), # error: enum([]) is invalid
+      e1: T.deprecated_enum([unsupported]), # error: Unsupported type literal
       f: 0, # error: Unsupported literal in type syntax
       g: T.any(*[Integer, String]), # error: splats cannot be used in types
       h: T.junk, # error: Method `junk` does not exist on `T.class_of(T)`
@@ -37,7 +41,7 @@ class A
     )
     .returns(T2)
   end
-  def bad(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+  def bad(a, b, c, d, e, b1, c1, d1, e1, f, g, h, i, j, k, l, m, n, o)
     T2.new
   end
 end

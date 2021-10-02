@@ -9,6 +9,7 @@ T.proc.params(arg0: String, arg1: Integer)
 T.class_of(String)
 T.noreturn
 T.enum([:a, :b])
+T.deprecated_enum([:a, :b])
 
 T.untyped
 T.any(String) # error: Not enough arguments provided for method `T.any`.
@@ -28,6 +29,7 @@ T.class_of # error: Not enough arguments provided for method `T.class_of`. Expec
   T.noreturn(String)
 # ^^^^^^^^^^^^^^^^^^ error: Too many arguments provided for method `T.noreturn`. Expected: `0`, got: `1`
 T.enum # error: Not enough arguments provided for method `T.enum`. Expected: `1`, got: `0`
+T.deprecated_enum # error: Not enough arguments provided for method `T.deprecated_enum`. Expected: `1`, got: `0`
 
   T.untyped(String)
 # ^^^^^^^^^^^^^^^^^ error: Too many arguments provided for method `T.untyped`. Expected: `0`, got: `1`
