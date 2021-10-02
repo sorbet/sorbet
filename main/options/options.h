@@ -73,6 +73,9 @@ struct Printers {
     PrinterConfig FileTableJson;
     PrinterConfig FileTableProto;
     PrinterConfig FileTableMessagePack;
+    PrinterConfig FileTableFullJson;
+    PrinterConfig FileTableFullProto;
+    PrinterConfig FileTableFullMessagePack;
     PrinterConfig MissingConstants;
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
