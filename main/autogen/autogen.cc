@@ -262,6 +262,10 @@ public:
             // RHS. Mark this `Definition` as an alias for it.
             ENFORCE(refMap.count(original.rhs.get()));
             def.aliased_ref = refMap[original.rhs.get()];
+        } else if (lhs->symbol.exists() && lhs->symbol.data(ctx)->isTypeAlias()) {
+            // if the LHS has already been annotated as a type alias by the namer, the definition is (by definition,
+            // hah) a type alias.
+            def.type = Definition::Type::TypeAlias;
         } else {
             // if the RHS _isn't_ just a constant literal, then this is a constant definition.
             def.type = Definition::Type::Casgn;

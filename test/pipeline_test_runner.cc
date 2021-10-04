@@ -28,6 +28,7 @@
 #include "local_vars/local_vars.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/crc_builder.h"
+#include "main/autogen/data/version.h"
 #include "namer/namer.h"
 #include "packager/packager.h"
 #include "parser/parser.h"
@@ -337,7 +338,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                     core::Context ctx(*gs, core::Symbols::root(), tree.file);
                     auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder);
                     tree = move(pf.tree);
-                    payload << pf.toString(ctx);
+                    payload << pf.toString(ctx, autogen::AutogenVersion::MAX_VERSION);
                 }
                 return payload.str();
             },

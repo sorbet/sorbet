@@ -88,7 +88,7 @@ struct ReferenceRef {
 
 // A constant definition---a class, module, constant definition, or constant alias---along with relevant metadata
 struct Definition {
-    enum class Type : u8 { Module, Class, Casgn, Alias };
+    enum class Type : u8 { Module, Class, Casgn, Alias, TypeAlias };
 
     // the reference to this definition. Once `AutogenWalk` is completed and a full `ParsedFile` has been created, it
     // should always be the case that
@@ -168,7 +168,7 @@ struct ParsedFile {
     std::vector<core::NameRef>
     requires;
 
-    std::string toString(const core::GlobalState &gs) const;
+    std::string toString(const core::GlobalState &gs, int version) const;
     std::string toMsgpack(core::Context ctx, int version);
     std::vector<core::NameRef> showFullName(const core::GlobalState &gs, DefinitionRef id) const;
     QualifiedName showQualifiedName(const core::GlobalState &gs, DefinitionRef id) const;

@@ -72,7 +72,7 @@ QualifiedName ParsedFile::showQualifiedName(const core::GlobalState &gs, Definit
 }
 
 // Pretty-print a `ParsedFile`, including all definitions and references and the pieces of metadata associated with them
-string ParsedFile::toString(const core::GlobalState &gs) const {
+string ParsedFile::toString(const core::GlobalState &gs, int version) const {
     fmt::memory_buffer out;
     auto nameToString = [&](const auto &nm) -> string { return nm.show(gs); };
 
@@ -96,6 +96,13 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
                 break;
             case Definition::Type::Alias:
                 type = "alias"sv;
+                break;
+            case Definition::Type::TypeAlias:
+                if (version <= 2) {
+                    type = "casgn"sv;
+                } else {
+                    type = "typealias"sv;
+                }
                 break;
         }
 

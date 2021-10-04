@@ -7,6 +7,7 @@ cc_library(
     hdrs = [
         "definitions.h",
         "msgpack.h",
+        "version.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,
