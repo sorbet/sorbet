@@ -168,7 +168,7 @@ struct ParsedFile {
     std::vector<core::NameRef>
     requires;
 
-    std::string toString(const core::GlobalState &gs) const;
+    std::string toString(const core::GlobalState &gs, int version) const;
     std::string toMsgpack(core::Context ctx, int version);
     std::vector<core::NameRef> showFullName(const core::GlobalState &gs, DefinitionRef id) const;
     QualifiedName showQualifiedName(const core::GlobalState &gs, DefinitionRef id) const;

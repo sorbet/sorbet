@@ -68,7 +68,11 @@ void MsgpackWriter::packDefinition(core::Context ctx, ParsedFile &pf, Definition
     packNames(raw_full_name);
 
     // type
-    mpack_write_u8(&writer, static_cast<u8>(def.type));
+    auto defType = def.type;
+    if (version <= 2 && defType == Definition::Type::TypeAlias) {
+        defType = Definition::Type::Casgn;
+    }
+    mpack_write_u8(&writer, static_cast<u8>(defType));
 
     // defines_behavior
     packBool(def.defines_behavior);
