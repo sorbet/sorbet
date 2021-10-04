@@ -292,27 +292,6 @@ ast::ExpressionPtr parts2literal(const vector<core::NameRef> &parts, core::LocOf
     return name;
 }
 
-// Prepend to a scope `Foo::Bar` some prefix -> `<toPrepend>::Foo::Bar`
-ast::ExpressionPtr prependScope(ast::ExpressionPtr scope, ast::ExpressionPtr toPrepend) {
-    // For `Bar::Baz::Bat`, `UnresolvedConstantLit` will contain `Bar`.
-    auto *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
-    if (lastConstLit != nullptr) {
-        while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
-            lastConstLit = constLit;
-        }
-    }
-
-    // If `lastConstLit` is `nullptr`, then `scope` should be EmptyTree.
-    ENFORCE(lastConstLit != nullptr || ast::isa_tree<ast::EmptyTree>(scope));
-
-    if (lastConstLit == nullptr) {
-        return toPrepend;
-    } else {
-        lastConstLit->scope = move(toPrepend);
-        return scope;
-    }
-}
-
 // Prefix a constant reference with a name: `Foo::Bar` -> `<REGISTRY>::<name>::Foo::Bar`
 // Registry is either <PackageRegistry> or <PackageTests>. The latter if following the convention
 // that if scope starts with `Test::`.
@@ -962,14 +941,6 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
         }
 
         importedPackages = treeBuilder.makeModule(ctx, ImportType::Normal);
-        // Include an empty class definition <Mangled_Pkg_A>::Pkg::A::<Magic> in <PackageRegistry>.
-        // This ensures that the refernce to <PackageRegistry>::<Mangled_Pkg_A>::Pkg::A always
-        // exists.
-        auto stubName = prependScope(
-            name2Expr(core::Names::Constants::Magic(), package->name.fullName.toLiteral(core::LocOffsets::none())),
-            name2Expr(package->name.mangledName));
-        auto stubClass = ast::MK::Class(core::LocOffsets::none(), core::LocOffsets::none(), move(stubName), {}, {});
-        importedPackages.emplace_back(move(stubClass));
 
         treeBuilder.mergeSelfExportsForTest(*package);
         testImportedPackages = treeBuilder.makeModule(ctx, ImportType::Test);
