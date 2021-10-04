@@ -804,8 +804,8 @@ public:
         for (const auto &exp : pkg.exports) {
             const auto &parts = exp.parts();
             ENFORCE(parts.size() > 0);
-            if (parts[0] != TEST_NAME) {          // Only add imports for non-test
-                auto loc = exp.fqn.loc.offsets(); // TODO XXX is this right?
+            if (parts[0] != TEST_NAME) { // Only add imports for non-test
+                auto loc = exp.fqn.loc.offsets();
                 addImport(pkg, loc, exp.fqn, ImportType::Test);
             }
         }
