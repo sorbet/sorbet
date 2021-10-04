@@ -70,7 +70,7 @@ SORBET_ALIVE(void, sorbet_cast_failure,
 SORBET_ALIVE(void, sorbet_raiseArity, (int argc, int min, int max) __attribute__((__noreturn__)));
 SORBET_ALIVE(void, sorbet_raiseMissingKeywords, (VALUE missing) __attribute__((__noreturn__)));
 SORBET_ALIVE(void, sorbet_raiseExtraKeywords, (VALUE hash) __attribute__((__noreturn__)));
-SORBET_ALIVE(void, sorbet_raiseCallDataExtraKeywords, (int keyword_len, ID *keywords) __attribute__((__noreturn__)));
+SORBET_ALIVE(void, sorbet_raiseCallDataExtraKeywords, (int keyword_len, VALUE *keywords) __attribute__((__noreturn__)));
 SORBET_ALIVE(VALUE, sorbet_t_absurd, (VALUE val) __attribute__((__cold__)));
 
 SORBET_ALIVE(VALUE, sorbet_addMissingKWArg, (VALUE missing, VALUE sym));
