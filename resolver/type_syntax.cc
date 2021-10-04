@@ -540,6 +540,13 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 // Error will be reported in infer
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
+
+            if (send.fun == core::Names::enum_()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("`{}` has been renamed to `{}`", "T.enum", "T.deprecated_enum");
+                }
+            }
+
             auto arr = ast::cast_tree<ast::Array>(send.args[0]);
             if (arr == nullptr) {
                 // TODO(pay-server) unsilence this error and support enums from pay-server

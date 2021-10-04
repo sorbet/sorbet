@@ -1437,7 +1437,7 @@ end
 class Resolv::LOC::Coord
   Regex = T.let(T.unsafe(nil), Regexp)
 
-  sig { params(coordinates: String, orientation: T.enum(%w[lat lon])).void }
+  sig { params(coordinates: String, orientation: T.deprecated_enum(%w[lat lon])).void }
   def initialize(coordinates, orientation); end
 
   def ==(other); end
@@ -1453,7 +1453,7 @@ class Resolv::LOC::Coord
   def inspect; end
 
   # The orientation of the hemisphere as 'lat' or 'lon'
-  sig { returns(T.enum(%w[lat lon])) }
+  sig { returns(T.deprecated_enum(%w[lat lon])) }
   def orientation; end
 
   def to_s; end
