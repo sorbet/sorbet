@@ -366,6 +366,8 @@ string Proto::toJSON(const google::protobuf::Message &message) {
     string jsonString;
     google::protobuf::util::JsonPrintOptions options;
     options.add_whitespace = true;
+    // Enabling this option caused proto to consume ~10G of RAM keeping track of which fields it has
+    // and has not emitted.
     options.always_print_primitive_fields = false;
     options.preserve_proto_field_names = true;
     google::protobuf::util::MessageToJsonString(message, &jsonString, options);
@@ -383,6 +385,8 @@ void Proto::toJSON(const google::protobuf::Message &message, ostream &out) {
 
     google::protobuf::util::JsonPrintOptions options;
     options.add_whitespace = true;
+    // Enabling this option caused proto to consume ~10G of RAM keeping track of which fields it has
+    // and has not emitted.
     options.always_print_primitive_fields = false;
     options.preserve_proto_field_names = true;
 
