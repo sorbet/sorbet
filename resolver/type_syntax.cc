@@ -1,4 +1,5 @@
 #include "resolver/type_syntax.h"
+#include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
 #include "common/typecase.h"
 #include "core/Names.h"
@@ -544,6 +545,16 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
             if (send.fun == core::Names::enum_()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("`{}` has been renamed to `{}`", "T.enum", "T.deprecated_enum");
+
+                    auto prefix = 0;
+                    auto sendSource = core::Loc(ctx.file, send.loc).source(ctx);
+                    if (sendSource.has_value() && absl::StartsWith(sendSource.value(), "::")) {
+                        prefix += 2;
+                    }
+
+                    auto replaceLoc =
+                        core::Loc(ctx.file, send.loc).adjustLen(ctx, prefix, char_traits<char>::length("T.enum"));
+                    e.replaceWith("Replace with `T.deprecated_enum`", replaceLoc, "{}", "T.deprecated_enum");
                 }
             }
 
