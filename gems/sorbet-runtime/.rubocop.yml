@@ -39,6 +39,9 @@ Lint/UnusedMethodArgument:
 Lint/UselessMethodDefinition:
   Enabled: false
 
+Metrics/ClassLength:
+  Enabled: false
+
 # This can be bad for performance
 Style/MultipleComparison:
   Enabled: false
