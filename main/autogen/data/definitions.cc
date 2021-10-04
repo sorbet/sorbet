@@ -99,9 +99,9 @@ string ParsedFile::toString(const core::GlobalState &gs, int version) const {
                 break;
             case Definition::Type::TypeAlias:
                 if (version <= 2) {
-                  type = "casgn"sv;
+                    type = "casgn"sv;
                 } else {
-                  type = "typealias"sv;
+                    type = "typealias"sv;
                 }
                 break;
         }

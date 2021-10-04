@@ -7,9 +7,9 @@
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
-#include "main/autogen/data/version.h"
 #include "main/autogen/autoloader.h"
 #include "main/autogen/crc_builder.h"
+#include "main/autogen/data/version.h"
 #include "main/autogen/packages.h"
 #include "main/autogen/subclasses.h"
 #include "main/lsp/LSPInput.h"
@@ -240,7 +240,8 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 tree = move(pf.tree);
 
                 AutogenResult::Serialized serialized;
-                int autogenVersion = opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
+                int autogenVersion =
+                    opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
 
                 if (opts.print.Autogen.enabled) {
                     Timer timeit(logger, "autogenToString");
