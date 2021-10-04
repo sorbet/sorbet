@@ -15,9 +15,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     module <emptyTree>::<C RootPackage_Package$1>::<C RootPackage>::<C Foo><<C <todo sym>>> < ()
       <emptyTree>::<C Constant> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package$1>::<C RootPackage>::<C Foo>::<C Constant>
     end
-
-    class <emptyTree>::<C RootPackage_Package$1>::<C RootPackage>::<C <Magic>><<C <todo sym>>> < ()
-    end
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
@@ -69,8 +66,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    class <emptyTree>::<C RootPackage_Foo_Package$1>::<C RootPackage>::<C Foo>::<C <Magic>><<C <todo sym>>> < ()
-    end
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
