@@ -491,11 +491,12 @@ public:
             auto *argc = builder.CreateCall(cs.getFunction("sorbet_rubyArrayLen"), {splatArray}, "argc");
             auto *argv = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {splatArray}, "argv");
             auto *kwSplatFlag = llvm::ConstantInt::get(cs, llvm::APInt(32, flags.kw_splat ? 1 : 0));
-            auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
-            auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
-            auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
 
             if (auto *blk = mcctx.blkAsFunction()) {
+                auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
+                auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
+                auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
+
                 // blocks require a locals offset parameter
                 llvm::Value *localsOffset = Payload::buildLocalsOffset(cs);
                 ENFORCE(localsOffset != nullptr);
