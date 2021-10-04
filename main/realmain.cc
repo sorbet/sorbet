@@ -7,6 +7,7 @@
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
+#include "main/autogen/data/version.h"
 #include "main/autogen/autoloader.h"
 #include "main/autogen/crc_builder.h"
 #include "main/autogen/packages.h"
@@ -235,17 +236,19 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 }
 
                 core::Context ctx(gs, core::Symbols::root(), tree.file);
-                auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder, opts.autogenVersion);
+                auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder);
                 tree = move(pf.tree);
 
                 AutogenResult::Serialized serialized;
+                int autogenVersion = opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
+
                 if (opts.print.Autogen.enabled) {
                     Timer timeit(logger, "autogenToString");
-                    serialized.strval = pf.toString(ctx);
+                    serialized.strval = pf.toString(ctx, autogenVersion);
                 }
                 if (opts.print.AutogenMsgPack.enabled) {
                     Timer timeit(logger, "autogenToMsgpack");
-                    serialized.msgpack = pf.toMsgpack(ctx, opts.autogenVersion);
+                    serialized.msgpack = pf.toMsgpack(ctx, autogenVersion);
                 }
                 if (opts.print.AutogenClasslist.enabled) {
                     Timer timeit(logger, "autogenClasslist");

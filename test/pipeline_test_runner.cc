@@ -28,6 +28,7 @@
 #include "local_vars/local_vars.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/crc_builder.h"
+#include "main/autogen/data/version.h"
 #include "namer/namer.h"
 #include "packager/packager.h"
 #include "parser/parser.h"
@@ -335,10 +336,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 auto crcBuilder = autogen::CRCBuilder::create();
                 for (auto &tree : trees) {
                     core::Context ctx(*gs, core::Symbols::root(), tree.file);
-                    int autogenVersion = 0; // setting to 0 will default to latest version
-                    auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder, autogenVersion);
+                    auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder);
                     tree = move(pf.tree);
-                    payload << pf.toString(ctx);
+                    payload << pf.toString(ctx, autogen::AutogenVersion::MAX_VERSION);
                 }
                 return payload.str();
             },
