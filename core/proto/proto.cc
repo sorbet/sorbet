@@ -356,10 +356,13 @@ com::stripe::rubytyper::File::CompiledLevel compiledToProto(core::CompiledLevel 
     }
 }
 
-com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs) {
+com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs, bool showFull) {
     com::stripe::rubytyper::FileTable files;
     for (int i = 1; i < gs.filesUsed(); ++i) {
         core::FileRef file(i);
+        if (!showFull && file.data(gs).isPayload()) {
+            continue;
+        }
         auto *entry = files.add_files();
         auto path_view = file.data(gs).path();
         string path(path_view.begin(), path_view.end());
