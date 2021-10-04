@@ -51,9 +51,9 @@ namespace {
 constexpr int sizeLevel = 0;
 constexpr int optLevel = 2;
 
-bool outputObjectFile(spdlog::logger &logger, llvm::legacy::PassManager &pm, const string &fileName,
-                      unique_ptr<llvm::Module> module, llvm::TargetMachine *targetMachine) {
-    Timer timer(logger, "objectFileEmission");
+bool outputObjectFile(spdlog::logger &logger, llvm::legacy::PassManager &pm, const string &rubyFileName,
+                      const string &fileName, unique_ptr<llvm::Module> module, llvm::TargetMachine *targetMachine) {
+    Timer timer(logger, "objectFileEmission", {{"file", rubyFileName}});
     std::error_code ec;
     llvm::raw_fd_ostream dest(fileName, ec, llvm::sys::fs::OF_None);
 
@@ -447,7 +447,7 @@ void ObjectFileEmitter::init() {
     }
     auto objectFileName = fmt::format("{}/{}.o", soDir, objectName);
     auto soNamePrefix = fmt::format("{}/{}", soDir, objectName);
-    if (!outputObjectFile(logger, pm, objectFileName, move(module), targetMachine)) {
+    if (!outputObjectFile(logger, pm, string(objectName), objectFileName, move(module), targetMachine)) {
         return false;
     }
     if (!Linker::run(logger, {objectFileName}, soNamePrefix)) {
