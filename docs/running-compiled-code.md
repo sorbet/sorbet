@@ -113,14 +113,14 @@ No errors! Great job.
 $ ls compiled_output
 test.rb.so
 $ ls ir_output
-test.rb.ll  test.rb.lll  test.rb.llo
+test.rb.ll  test.rb.lowered.ll  test.rb.opt.ll
 ```
 
 The files produced have suffixes that correspond to different phases of
-compilation: `.lll` is the initial LLVM IR before any optimizations are applied;
-`.ll` is that tree with some fast optimizations applied; `.llo` is the final
-version of the LLVM IR with all optimizations applied; `.rb.so` is the native
-artifact that can be run by the Ruby VM.
+compilation: `.ll` is the initial LLVM IR before any optimizations are applied;
+`.lowered.ll` is that tree with some fast optimizations applied; `.opt.ll` is
+the final version of the LLVM IR with all optimizations applied; `.rb.so` is the
+native artifact that can be run by the Ruby VM.
 
 ## Running the compiled Ruby artifacts
 

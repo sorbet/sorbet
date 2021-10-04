@@ -410,22 +410,22 @@ void ObjectFileEmitter::init() {
     llvm::ModulePass *printLowered = nullptr;
     // We put the ostream in an std::optional declared outside the "if", because unfortunately `createPrintModulePass`
     // doesn't take ownership of it.
-    std::optional<llvm::raw_fd_ostream> lllFile;
+    std::optional<llvm::raw_fd_ostream> loweredllFile;
     if (llvmIrDir.has_value()) {
-        auto nameOptl = fmt::format("{}/{}.lll", llvmIrDir.value(), objectName);
-        lllFile.emplace(nameOptl, ec1, llvm::sys::fs::F_Text);
-        printLowered = llvm::createPrintModulePass(lllFile.value(), "");
+        auto nameOptl = fmt::format("{}/{}.lowered.ll", llvmIrDir.value(), objectName);
+        loweredllFile.emplace(nameOptl, ec1, llvm::sys::fs::F_Text);
+        printLowered = llvm::createPrintModulePass(loweredllFile.value(), "");
     }
     // LTO passes
     addLTOPasses(pm, printLowered);
     // print optimized IR
     // We put the ostream in an std::optional declared outside the "if", because unfortunately `createPrintModulePass`
     // doesn't take ownership of it.
-    std::optional<llvm::raw_fd_ostream> lloFile;
+    std::optional<llvm::raw_fd_ostream> optllFile;
     if (llvmIrDir.has_value()) {
-        auto nameOpt = fmt::format("{}/{}.llo", llvmIrDir.value(), objectName);
-        lloFile.emplace(nameOpt, ec1, llvm::sys::fs::F_Text);
-        pm.add(llvm::createPrintModulePass(lloFile.value(), ""));
+        auto nameOpt = fmt::format("{}/{}.opt.ll", llvmIrDir.value(), objectName);
+        optllFile.emplace(nameOpt, ec1, llvm::sys::fs::F_Text);
+        pm.add(llvm::createPrintModulePass(optllFile.value(), ""));
     }
     {
         Timer timer(logger, "functionPasses");

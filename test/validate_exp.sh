@@ -84,7 +84,7 @@ something_failed() {
   fi
 }
 
-exts=("llo")
+exts=("opt.ll")
 for ext in "${exts[@]}"; do
   exp="$root/${rb[0]%.rb}.$ext.exp"
   if [ -f "$exp" ]; then

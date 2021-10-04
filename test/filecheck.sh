@@ -39,10 +39,10 @@ for pass in "INITIAL" "LOWERED" "OPT"; do
             output="${rb[0]}.ll"
             ;;
         LOWERED)
-            output="${rb[0]}.lll"
+            output="${rb[0]}.lowered.ll"
             ;;
         OPT)
-            output="${rb[0]}.llo"
+            output="${rb[0]}.opt.ll"
             ;;
         *)
             fatal "Don't know how to examine $pass"

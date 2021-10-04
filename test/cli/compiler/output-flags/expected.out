@@ -9,5 +9,5 @@ Files in $sodir:
 ./hello.rb.so
 Files in $irdir:
 ./hello.rb.ll
-./hello.rb.lll
-./hello.rb.llo
+./hello.rb.lowered.ll
+./hello.rb.opt.ll

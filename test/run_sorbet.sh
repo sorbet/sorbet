@@ -127,7 +127,7 @@ if "${command[@]}"; then
 
   if [[ -n "${EMIT_SYNCBACK:-}" && -n "$explicit_llvmir" ]]; then
     echo '### BEGIN SYNCBACK ###'
-    find "$orig_llvmir" -name '*.ll' -o -name '*.lll' -o -name '*.llo'
+    find "$orig_llvmir" -name '*.ll'
     echo '### END SYNCBACK ###'
   fi
 
