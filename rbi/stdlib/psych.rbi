@@ -625,8 +625,8 @@ module Psych
   # Load the document contained in `filename`. Returns the yaml contained in
   # `filename` as a Ruby object, or if the file is empty, it returns the
   # specified `fallback` return value, which defaults to `false`.
-  sig { params(filename: T.any(String, Pathname), fallback: T.untyped).returns(T.untyped) }
-  def self.load_file(filename, fallback: false); end
+  sig { params(filename: T.any(String, Pathname), kwargs: T.untyped).returns(T.untyped) }
+  def self.load_file(filename, **kwargs); end
 end
 
 class Psych::Exception < RuntimeError

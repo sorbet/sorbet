@@ -10272,3 +10272,29 @@ class Bundler::YamlSyntaxError < Bundler::BundlerError
   sig {returns(T.untyped)}
   def status_code(); end
 end
+
+class Bundler::Installer
+  sig {params(ambiguous_gems: T.untyped).returns(T.untyped)}
+  def self.ambiguous_gems=(ambiguous_gems); end
+
+  sig {returns(T.untyped)}
+  def self.ambiguous_gems; end
+
+  sig {returns(T.untyped)}
+  def post_install_messages; end
+
+  sig {params(root: T.untyped, definition: T.untyped, options: T.untyped).returns(T.untyped)}
+  def self.install(root, definition, options = {}); end
+
+  sig {params(root: T.untyped, definition: T.untyped).void}
+  def initialize(root, definition); end
+
+  sig {params(options: T.untyped).void}
+  def run(options); end
+
+  sig {params(spec: T.untyped, options: T.untyped).void}
+  def generate_bundler_executable_stubs(spec, options = {}); end
+
+  sig {params(spec: T.untyped, options: T.untyped).void}
+  def generate_standalone_bundler_executable_stubs(spec, options = {}); end
+end
