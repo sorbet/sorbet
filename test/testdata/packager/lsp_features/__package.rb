@@ -18,4 +18,8 @@ class Simpsons < PackageSpec
 
     export Simpsons::Family
     #                ^^^^^^ usage: family
+
+    export_for_test Simpsons::Private
+    #                         ^^^^^^^ usage: s-private
+    #               ^^^^^^^^^^^^^^^^^ symbol-search: "Simpsons", name = "Simpsons", container = "<PackageTests>::Simpsons_Package"
 end

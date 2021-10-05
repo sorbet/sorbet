@@ -33,4 +33,8 @@ module Simpsons
   end
 
   Test::Krabappel::Popquiz # error: Unable to resolve constant `Test`
+
+  class Private
+    #   ^^^^^^^ def: s-private
+  end
 end

@@ -81,6 +81,22 @@ struct Import {
     Import(PackageName &&name, ImportType type) : name(std::move(name)), type(type) {}
 };
 
+enum class ExportType {
+    Public,
+    PrivateTest,
+};
+
+struct Export {
+    FullyQualifiedName fqn;
+    ExportType type;
+
+    Export(FullyQualifiedName &&fqn, ExportType type) : fqn(move(fqn)), type(type) {}
+
+    const vector<core::NameRef> &parts() const {
+        return fqn.parts;
+    }
+};
+
 struct PackageInfo {
     // The possible path prefixes associated with files in the package, including path separator at end.
     vector<std::string> packagePathPrefixes;
@@ -91,7 +107,7 @@ struct PackageInfo {
     vector<Import> importedPackageNames;
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
-    vector<FullyQualifiedName> exports;
+    vector<Export> exports;
 };
 
 /**
@@ -271,27 +287,6 @@ ast::ExpressionPtr parts2literal(const vector<core::NameRef> &parts, core::LocOf
     return name;
 }
 
-// Prepend to a scope `Foo::Bar` some prefix -> `<toPrepend>::Foo::Bar`
-ast::ExpressionPtr prependScope(ast::ExpressionPtr scope, ast::ExpressionPtr toPrepend) {
-    // For `Bar::Baz::Bat`, `UnresolvedConstantLit` will contain `Bar`.
-    auto *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
-    if (lastConstLit != nullptr) {
-        while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
-            lastConstLit = constLit;
-        }
-    }
-
-    // If `lastConstLit` is `nullptr`, then `scope` should be EmptyTree.
-    ENFORCE(lastConstLit != nullptr || ast::isa_tree<ast::EmptyTree>(scope));
-
-    if (lastConstLit == nullptr) {
-        return toPrepend;
-    } else {
-        lastConstLit->scope = move(toPrepend);
-        return scope;
-    }
-}
-
 // Prefix a constant reference with a name: `Foo::Bar` -> `<REGISTRY>::<name>::Foo::Bar`
 // Registry is either <PackageRegistry> or <PackageTests>. The latter if following the convention
 // that if scope starts with `Test::`.
@@ -450,7 +445,7 @@ private:
 
 struct PackageInfoFinder {
     unique_ptr<PackageInfo> info = nullptr;
-    vector<FullyQualifiedName> exported;
+    vector<Export> exported;
 
     ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
@@ -487,7 +482,24 @@ struct PackageInfoFinder {
         if (send.fun == core::Names::export_() && send.args.size() == 1) {
             // null indicates an invalid export.
             if (auto target = verifyConstant(ctx, core::Names::export_(), send.args[0])) {
-                exported.emplace_back(getFullyQualifiedName(ctx, target));
+                exported.emplace_back(getFullyQualifiedName(ctx, target), ExportType::Public);
+                // Transform the constant lit to refer to the target within the mangled package namespace.
+                send.args[0] = prependInternalPackageName(move(send.args[0]));
+            }
+        }
+        if (send.fun == core::Names::export_for_test() && send.args.size() == 1) {
+            // null indicates an invalid export.
+            if (auto target = verifyConstant(ctx, core::Names::export_for_test(), send.args[0])) {
+                auto fqn = getFullyQualifiedName(ctx, target);
+                ENFORCE(fqn.parts.size() > 0);
+                if (fqn.parts[0] == TEST_NAME) {
+                    if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidExportForTest)) {
+                        e.setHeader("Packages may not {} names in the `{}::` namespace", send.fun.toString(ctx),
+                                    TEST_NAME.show(ctx));
+                    }
+                } else {
+                    exported.emplace_back(move(fqn), ExportType::PrivateTest);
+                }
                 // Transform the constant lit to refer to the target within the mangled package namespace.
                 send.args[0] = prependInternalPackageName(move(send.args[0]));
             }
@@ -558,15 +570,15 @@ struct PackageInfoFinder {
         if (exported.empty()) {
             return;
         }
-        fast_sort(exported, [](const auto &a, const auto &b) -> bool { return a.parts.size() < b.parts.size(); });
+        fast_sort(exported, [](const auto &a, const auto &b) -> bool { return a.parts().size() < b.parts().size(); });
         // TODO(nroman) If this is too slow could probably be sped up with lexigraphic sort.
         for (auto longer = exported.begin() + 1; longer != exported.end(); longer++) {
             for (auto shorter = exported.begin(); shorter != longer; shorter++) {
-                if (std::equal(longer->parts.begin(), longer->parts.begin() + shorter->parts.size(),
-                               shorter->parts.begin())) {
-                    if (auto e = ctx.beginError(longer->loc.offsets(), core::errors::Packager::ImportConflict)) {
+                if (std::equal(longer->parts().begin(), longer->parts().begin() + shorter->parts().size(),
+                               shorter->parts().begin())) {
+                    if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ImportConflict)) {
                         e.setHeader("Exported names may not be prefixes of each other");
-                        e.addErrorLine(shorter->loc, "Prefix exported here");
+                        e.addErrorLine(shorter->fqn.loc, "Prefix exported here");
                     }
                     break; // Only need to find the shortest conflicting export
                 }
@@ -582,6 +594,7 @@ struct PackageInfoFinder {
             case core::Names::import().rawId():
             case core::Names::test_import().rawId():
             case core::Names::export_().rawId():
+            case core::Names::export_for_test().rawId():
                 return true;
             default:
                 return false;
@@ -755,8 +768,23 @@ public:
     ImportTreeBuilder &operator=(ImportTreeBuilder &&) = default;
 
     void mergeImports(const PackageInfo &importedPackage, const Import &import) {
-        for (const auto &exportedFqn : importedPackage.exports) {
-            addImport(importedPackage, import.name.loc, exportedFqn, import.type);
+        for (const auto &exp : importedPackage.exports) {
+            if (exp.type == ExportType::Public) {
+                addImport(importedPackage, import.name.loc, exp.fqn, import.type);
+            }
+        }
+    }
+
+    // Make add imports for the test package for all normal code exported by its corresponding
+    // "normal" package.
+    void mergeSelfExportsForTest(const PackageInfo &pkg) {
+        for (const auto &exp : pkg.exports) {
+            const auto &parts = exp.parts();
+            ENFORCE(parts.size() > 0);
+            if (parts[0] != TEST_NAME) { // Only add imports for non-test
+                auto loc = exp.fqn.loc.offsets();
+                addImport(pkg, loc, exp.fqn, ImportType::Test);
+            }
         }
     }
 
@@ -809,7 +837,8 @@ private:
             if (parentSrc.exists()) {
                 // A conflicting import exist. Only report errors while constructing the test output
                 // to avoid duplicate errors because test imports are a superset of normal imports.
-                if (moduleType == ImportType::Test) {
+                bool isSelfImport = node->source.packageMangledName == pkgMangledName;
+                if (moduleType == ImportType::Test && !isSelfImport) {
                     if (auto e = ctx.beginError(node->source.importLoc, core::errors::Packager::ImportConflict)) {
                         // TODO Fix flaky ordering of errors. This is strange...not being done in parallel,
                         // and the file processing order is consistent.
@@ -910,30 +939,9 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
         }
 
         importedPackages = treeBuilder.makeModule(ctx, ImportType::Normal);
-        // Include an empty class definition <Mangled_Pkg_A>::Pkg::A::<Magic> in <PackageRegistry>.
-        // This ensures that the refernce to <PackageRegistry>::<Mangled_Pkg_A>::Pkg::A always
-        // exists.
-        auto stubName = prependScope(
-            name2Expr(core::Names::Constants::Magic(), package->name.fullName.toLiteral(core::LocOffsets::none())),
-            name2Expr(package->name.mangledName));
-        auto stubClass = ast::MK::Class(core::LocOffsets::none(), core::LocOffsets::none(), move(stubName), {}, {});
-        importedPackages.emplace_back(move(stubClass));
 
+        treeBuilder.mergeSelfExportsForTest(*package);
         testImportedPackages = treeBuilder.makeModule(ctx, ImportType::Test);
-
-        // In the test namespace for this package add an alias to give tests full access to the
-        // packaged code:
-        // module <PackageTests>
-        //   <Imports>
-        //   <Mangled_Pkg_A>::Pkg::A = <PackageRegistry>::<Mangled_Pkg_A>::Pkg::A
-        // end
-        auto assignRhs =
-            prependPackageScope(package->name.fullName.toLiteral(core::LocOffsets::none()), package->name.mangledName);
-        auto assign = ast::MK::Assign(core::LocOffsets::none(),
-                                      prependScope(package->name.fullName.toLiteral(core::LocOffsets::none()),
-                                                   name2Expr(package->name.mangledName)),
-                                      std::move(assignRhs));
-        testImportedPackages.emplace_back(std::move(assign));
     }
 
     auto packageNamespace =

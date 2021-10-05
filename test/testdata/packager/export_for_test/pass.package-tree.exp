@@ -1,0 +1,230 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C RootPkg><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Opus>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C Opus>::<C Foo>::<C Bar>)
+
+    <self>.import(<emptyTree>::<C Opus>::<C Util>)
+
+    <self>.test_import(<emptyTree>::<C Opus>::<C TestImported>)
+
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package$1>::<C Opus>::<C Foo>::<C FooClass>)
+
+    <self>.export_for_test(<emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package$1>::<C Opus>::<C Foo>::<C Private>::<C ImplDetail>)
+
+    <self>.export_for_test(<emptyTree>::<C <PackageTests>>::<C Opus_Foo_Package$1>::<C Test>::<C Opus>::<C Foo>::<C FooTest>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Opus_Foo_Package$1>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < ()
+      <emptyTree>::<C BarClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package$1>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
+    end
+
+    module <emptyTree>::<C Opus_Foo_Package$1>::<C Opus>::<C Util><<C <todo sym>>> < ()
+      <emptyTree>::<C UtilClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package$1>::<C Opus>::<C Util>::<C UtilClass>
+    end
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Opus_Foo_Package$1>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < ()
+      <emptyTree>::<C BarClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package$1>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
+    end
+
+    module <emptyTree>::<C Opus_Foo_Package$1>::<C Opus>::<C Foo><<C <todo sym>>> < ()
+      <emptyTree>::<C FooClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package$1>::<C Opus>::<C Foo>::<C FooClass>
+    end
+
+    module <emptyTree>::<C Opus_Foo_Package$1>::<C Opus>::<C Foo>::<C Private><<C <todo sym>>> < ()
+      <emptyTree>::<C ImplDetail> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package$1>::<C Opus>::<C Foo>::<C Private>::<C ImplDetail>
+    end
+
+    module <emptyTree>::<C Opus_Foo_Package$1>::<C Opus>::<C TestImported><<C <todo sym>>> < ()
+      <emptyTree>::<C TIClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_TestImported_Package$1>::<C Opus>::<C TestImported>::<C TIClass>
+    end
+
+    module <emptyTree>::<C Opus_Foo_Package$1>::<C Opus>::<C Util><<C <todo sym>>> < ()
+      <emptyTree>::<C UtilClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package$1>::<C Opus>::<C Util>::<C UtilClass>
+    end
+
+    module <emptyTree>::<C Opus_Foo_Package$1>::<C Test>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < ()
+      <emptyTree>::<C BarClassTest> = <emptyTree>::<C <PackageTests>>::<C Opus_Foo_Bar_Package$1>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>
+    end
+
+    module <emptyTree>::<C Opus_Foo_Package$1>::<C Test>::<C Opus>::<C TestImported><<C <todo sym>>> < ()
+      <emptyTree>::<C TITestClass> = <emptyTree>::<C <PackageTests>>::<C Opus_TestImported_Package$1>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass>
+    end
+
+    module <emptyTree>::<C Opus_Foo_Package$1>::<C Test>::<C Opus>::<C Util><<C <todo sym>>> < ()
+      <emptyTree>::<C TestUtil> = <emptyTree>::<C <PackageTests>>::<C Opus_Util_Package$1>::<C Test>::<C Opus>::<C Util>::<C TestUtil>
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package$1>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>)
+
+    <self>.export(<emptyTree>::<C <PackageTests>>::<C Opus_Foo_Bar_Package$1>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Opus_Foo_Bar_Package$1>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < ()
+      <emptyTree>::<C BarClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package$1>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package$1><<C <todo sym>>> < ()
+    class <emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C BarClass><<C <todo sym>>> < (::<todo sym>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageTests>>::<C Opus_Foo_Bar_Package$1><<C <todo sym>>> < ()
+    module <emptyTree>::<C Test>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < ()
+      class <emptyTree>::<C BarClassTest><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package$1><<C <todo sym>>> < ()
+    module <emptyTree>::<C Opus>::<C Foo><<C <todo sym>>> < ()
+      class <emptyTree>::<C FooClass><<C <todo sym>>> < (::<todo sym>)
+        <emptyTree>::<C Inner> = 1
+      end
+
+      class <emptyTree>::<C FooUnexported><<C <todo sym>>> < (::<todo sym>)
+      end
+
+      class <emptyTree>::<C Private>::<C ImplDetail><<C <todo sym>>> < (::<todo sym>)
+        ::Sorbet::Private::Static.sig(<self>) do ||
+          <self>.void()
+        end
+
+        def self.stub_stuff!<<todo method>>(&<blk>)
+          <emptyTree>
+        end
+
+        <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+        ::Sorbet::Private::Static.keep_self_def(<self>, :stub_stuff!, :normal)
+      end
+
+      <emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
+
+      <emptyTree>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>
+
+      <emptyTree>::<C Opus>::<C Util>::<C UtilClass>
+
+      <emptyTree>::<C Test>::<C Opus>::<C Util>::<C TestUtil>
+
+      <emptyTree>::<C Opus>::<C TestImported>::<C TIClass>
+
+      <emptyTree>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass>
+
+      <emptyTree>::<C Opus>::<C Foo>::<C Private>::<C ImplDetail>.stub_stuff!()
+
+      <emptyTree>::<C Opus>::<C Foo>::<C FooUnexported>
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageTests>>::<C Opus_Foo_Package$1><<C <todo sym>>> < ()
+    class <emptyTree>::<C Test>::<C Opus>::<C Foo>::<C FooTest><<C <todo sym>>> < (::<todo sym>)
+      <emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
+
+      <emptyTree>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>
+
+      <emptyTree>::<C Opus>::<C Util>::<C UtilClass>
+
+      <emptyTree>::<C Test>::<C Opus>::<C Util>::<C TestUtil>
+
+      <emptyTree>::<C Opus>::<C TestImported>::<C TIClass>
+
+      <emptyTree>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass>
+
+      <emptyTree>::<C Opus>::<C Foo>::<C FooClass>
+
+      <emptyTree>::<C Opus>::<C Foo>::<C FooClass>::<C Inner>
+
+      <emptyTree>::<C Opus>::<C Foo>::<C Private>::<C ImplDetail>.stub_stuff!()
+
+      <emptyTree>::<C Opus>::<C Foo>::<C FooUnexported>
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Opus>::<C TestImported><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Opus_TestImported_Package$1>::<C Opus>::<C TestImported>::<C TIClass>)
+
+    <self>.export(<emptyTree>::<C <PackageTests>>::<C Opus_TestImported_Package$1>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Opus_TestImported_Package$1>::<C Opus>::<C TestImported><<C <todo sym>>> < ()
+      <emptyTree>::<C TIClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_TestImported_Package$1>::<C Opus>::<C TestImported>::<C TIClass>
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Opus_TestImported_Package$1><<C <todo sym>>> < ()
+    module <emptyTree>::<C Opus>::<C TestImported><<C <todo sym>>> < ()
+      class <emptyTree>::<C TIClass><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageTests>>::<C Opus_TestImported_Package$1><<C <todo sym>>> < ()
+    module <emptyTree>::<C Test>::<C Opus>::<C TestImported><<C <todo sym>>> < ()
+      class <emptyTree>::<C TITestClass><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Opus>::<C Util><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package$1>::<C Opus>::<C Util>::<C UtilClass>)
+
+    <self>.export(<emptyTree>::<C <PackageTests>>::<C Opus_Util_Package$1>::<C Test>::<C Opus>::<C Util>::<C TestUtil>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Opus_Util_Package$1>::<C Opus>::<C Util><<C <todo sym>>> < ()
+      <emptyTree>::<C UtilClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package$1>::<C Opus>::<C Util>::<C UtilClass>
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package$1><<C <todo sym>>> < ()
+    module <emptyTree>::<C Opus>::<C Util><<C <todo sym>>> < ()
+      class <emptyTree>::<C UtilClass><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageTests>>::<C Opus_Util_Package$1><<C <todo sym>>> < ()
+    module <emptyTree>::<C Test>::<C Opus>::<C Util><<C <todo sym>>> < ()
+      class <emptyTree>::<C TestUtil><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+  end
+end
