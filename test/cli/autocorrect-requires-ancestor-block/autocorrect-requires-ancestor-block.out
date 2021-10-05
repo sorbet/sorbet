@@ -1,0 +1,75 @@
+autocorrect-requires-ancestor-block.rb:12: `requires_ancestor` only accepts a block https://srb.help/5062
+    12 |  requires_ancestor RA1
+          ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-requires-ancestor-block.rb:12: Replaced with `requires_ancestor { RA1 }`
+    12 |  requires_ancestor RA1
+          ^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-requires-ancestor-block.rb:13: `requires_ancestor` only accepts a block https://srb.help/5062
+    13 |  requires_ancestor RA2, RA3
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-requires-ancestor-block.rb:13: Replaced with `requires_ancestor { RA2 }
+  requires_ancestor { RA3 }`
+    13 |  requires_ancestor RA2, RA3
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-requires-ancestor-block.rb:14: `requires_ancestor` only accepts a block https://srb.help/5062
+    14 |  requires_ancestor(RA4) { RA5 }
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-requires-ancestor-block.rb:12: Too many arguments provided for method `T::Helpers#requires_ancestor`. Expected: `0`, got: `1` https://srb.help/7004
+    12 |  requires_ancestor RA1
+          ^^^^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L112: `requires_ancestor` defined here
+     112 |  def requires_ancestor(&block); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-requires-ancestor-block.rb:12: `requires_ancestor` requires a block parameter, but no block was passed https://srb.help/7021
+    12 |  requires_ancestor RA1
+          ^^^^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L112: defined here
+     112 |  def requires_ancestor(&block); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-requires-ancestor-block.rb:13: Too many arguments provided for method `T::Helpers#requires_ancestor`. Expected: `0`, got: `2` https://srb.help/7004
+    13 |  requires_ancestor RA2, RA3
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L112: `requires_ancestor` defined here
+     112 |  def requires_ancestor(&block); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-requires-ancestor-block.rb:13: `requires_ancestor` requires a block parameter, but no block was passed https://srb.help/7021
+    13 |  requires_ancestor RA2, RA3
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L112: defined here
+     112 |  def requires_ancestor(&block); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-requires-ancestor-block.rb:14: Too many arguments provided for method `T::Helpers#requires_ancestor`. Expected: `0`, got: `1` https://srb.help/7004
+    14 |  requires_ancestor(RA4) { RA5 }
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L112: `requires_ancestor` defined here
+     112 |  def requires_ancestor(&block); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 8
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+class RA1; end
+module RA2; end
+module RA3; end
+module RA4; end
+module RA5; end
+
+module M
+  extend T::Helpers
+
+  requires_ancestor { RA1 }
+  requires_ancestor { RA2 }
+  requires_ancestor { RA3 }
+  requires_ancestor(RA4) { RA5 }
+end

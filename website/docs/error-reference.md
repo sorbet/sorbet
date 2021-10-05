@@ -787,7 +787,7 @@ end
 module Bar
   extend T::Helpers
 
-  requires_ancestor Foo
+  requires_ancestor { Foo }
 
   def bar
     foo
@@ -819,7 +819,7 @@ end
 module Bar
   extend T::Helpers
 
-  requires_ancestor Foo
+  requires_ancestor { Foo }
 
   def bar
     foo

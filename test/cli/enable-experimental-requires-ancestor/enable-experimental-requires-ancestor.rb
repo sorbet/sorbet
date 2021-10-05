@@ -3,7 +3,7 @@
 module Foo
   extend T::Helpers
 
-  requires_ancestor Kernel
+  requires_ancestor { Kernel }
 end
 
 class Bar < BasicObject

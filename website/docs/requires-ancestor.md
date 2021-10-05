@@ -64,7 +64,7 @@ Let's change our base example to use `requires_ancestor`:
 module MyHelper
   extend T::Helpers
 
-  requires_ancestor Kernel
+  requires_ancestor { Kernel }
 
   def say_error(message)
     raise "InternalError: #{message}"
@@ -88,7 +88,7 @@ inherited:
 module MyHelper
   extend T::Helpers
 
-  requires_ancestor Object
+  requires_ancestor { Object }
 
   def class_name
     self.class.name
@@ -134,7 +134,8 @@ end
 module MyTestHelper
   extend T::Helpers
 
-  requires_ancestor Test::TestAssertions, MyLogger
+  requires_ancestor { Test::TestAssertions }
+  requires_ancestor { MyLogger }
 
   def assert_not_equal(x, y)
     if assert_equal(x, y)

@@ -4,7 +4,7 @@
 module MyHelper
   extend T::Helpers
 
-  requires_ancestor Kernel
+  requires_ancestor { Kernel }
 
   def error(message)
     puts "An error occurred: #{message}"

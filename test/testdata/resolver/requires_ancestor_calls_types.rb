@@ -14,7 +14,7 @@ end
 module Test1
   module M1
     extend T::Helpers
-    requires_ancestor RA1
+    requires_ancestor { RA1 }
 
     def m1
       foo
@@ -27,7 +27,7 @@ end
 module Test2
   module M1
     extend T::Helpers
-    requires_ancestor RA1
+    requires_ancestor { RA1 }
 
     def m1
       self.foo
@@ -41,7 +41,7 @@ module Test3
   module M1
     extend T::Helpers
     extend T::Sig
-    requires_ancestor RA1
+    requires_ancestor { RA1 }
 
     def m1
       get_me.foo
@@ -66,7 +66,8 @@ module Test4
   module M1
     extend T::Helpers
     extend T::Sig
-    requires_ancestor Kernel, RA1
+    requires_ancestor { Kernel }
+    requires_ancestor { RA1 }
 
     def m1
       any_m1_ra1.foo
@@ -97,7 +98,7 @@ module Test5
   module M1
     extend T::Helpers
     extend T::Sig
-    requires_ancestor RA2
+    requires_ancestor { RA2 }
     include RA1
 
     def m1
@@ -117,7 +118,7 @@ module Test6
   module M1
     extend T::Helpers
     extend T::Sig
-    requires_ancestor RA1
+    requires_ancestor { RA1 }
 
     def m1
       m = m1?
@@ -138,7 +139,8 @@ module Test7
   module M1
     extend T::Helpers
     extend T::Sig
-    requires_ancestor RA1, RA2
+    requires_ancestor { RA1 }
+    requires_ancestor { RA2 }
 
     def m1
       m = tuple
@@ -159,7 +161,8 @@ module Test8
   module M1
     extend T::Helpers
     extend T::Sig
-    requires_ancestor RA1, RA2
+    requires_ancestor { RA1 }
+    requires_ancestor { RA2 }
 
     def m1
       m = shape
@@ -179,7 +182,7 @@ end
 module Test9
   module M1
     extend T::Helpers
-    requires_ancestor RA1
+    requires_ancestor { RA1 }
   end
 
   class C1
@@ -209,7 +212,7 @@ end
 module Test10
   module M1
     extend T::Helpers
-    requires_ancestor RA1
+    requires_ancestor { RA1 }
   end
 
   module M2
@@ -235,7 +238,7 @@ end
 module Test11
   module M1
     extend T::Helpers
-    requires_ancestor RA1
+    requires_ancestor { RA1 }
   end
 
   class C1

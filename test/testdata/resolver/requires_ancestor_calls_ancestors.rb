@@ -6,7 +6,7 @@
 module Test1
   module M1
     extend T::Helpers
-    requires_ancestor M2
+    requires_ancestor { M2 }
 
     def m1
       m2
@@ -23,7 +23,7 @@ end
 module Test2
   module M1
     extend T::Helpers
-    requires_ancestor M3
+    requires_ancestor { M3 }
 
     def m1
       m2
@@ -46,7 +46,7 @@ end
 module Test3
   module M1
     extend T::Helpers
-    requires_ancestor M4
+    requires_ancestor { M4 }
 
     def m1
       m2
@@ -79,7 +79,7 @@ module Test4
 
   module M2
     extend T::Helpers
-    requires_ancestor M1
+    requires_ancestor { M1 }
 
     def m2
       m1
@@ -88,7 +88,7 @@ module Test4
 
   module M3
     extend T::Helpers
-    requires_ancestor M2
+    requires_ancestor { M2 }
 
     def m3
       m1
@@ -98,7 +98,7 @@ module Test4
 
   module M4
     extend T::Helpers
-    requires_ancestor M3
+    requires_ancestor { M3 }
 
     def m4
       m1
@@ -127,7 +127,7 @@ end
 module Test5
   module M1
     extend T::Helpers
-    requires_ancestor C1
+    requires_ancestor { C1 }
 
     def m1
       c1
@@ -146,7 +146,7 @@ end
 module Test6
   module M1
     extend T::Helpers
-    requires_ancestor C2
+    requires_ancestor { C2 }
 
     def m1
       c1
@@ -169,7 +169,7 @@ module Test7
   module M1
     extend T::Helpers
 
-    requires_ancestor C3
+    requires_ancestor { C3 }
 
     def m1
       c3

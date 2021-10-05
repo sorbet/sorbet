@@ -8,7 +8,7 @@ end
 module B
   extend T::Helpers
 
-  # requires_ancestor A
+  # requires_ancestor { A }
 
   def foo_b
     foo_a # error: Method `foo_a` does not exist on `B`
@@ -22,7 +22,7 @@ end
 
 module D
   extend T::Helpers
-  requires_ancestor E
+  requires_ancestor { E }
 end
 
 module E
