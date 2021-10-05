@@ -12,7 +12,6 @@ module T::Types
     sig {params(values: T.any(Array, Set, Hash, T::Range[T.untyped])).void}
     def initialize(values)
       @values = values
-      @method_name = method_name
     end
 
     # overrides Base
