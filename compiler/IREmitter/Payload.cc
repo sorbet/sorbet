@@ -71,7 +71,7 @@ llvm::Value *Payload::doubleToRubyValue(CompilerState &cs, llvm::IRBuilderBase &
 llvm::Value *Payload::cPtrToRubyRegexp(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str,
                                        int options) {
     // all regexp are frozen. We'll allocate it at load time and share it.
-    string rawName = "rubyRegexpFrozen_" + (string)str;
+    string rawName = "rubyRegexpFrozen_" + string(str);
     auto tp = llvm::Type::getInt64Ty(cs);
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     llvm::Constant *indices[] = {zero};
@@ -128,7 +128,7 @@ llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &b
                                   "rawRubyStr");
     }
     // this is a frozen string. We'll allocate it at load time and share it.
-    string rawName = "rubyStrFrozen_" + (string)str;
+    string rawName = "rubyStrFrozen_" + string(str);
     auto tp = llvm::Type::getInt64Ty(cs);
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     llvm::Constant *indices[] = {zero};
@@ -180,7 +180,7 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, 
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     auto name = llvm::StringRef(idName.data(), idName.length());
     llvm::Constant *indices[] = {zero};
-    string rawName = "rubyIdPrecomputed_" + (string)idName;
+    string rawName = "rubyIdPrecomputed_" + string(idName);
     auto tp = llvm::Type::getInt64Ty(cs);
     auto globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
         llvm::IRBuilder<> globalInitBuilder(cs);
@@ -239,7 +239,7 @@ llvm::Value *Payload::getRubyConstant(CompilerState &cs, core::SymbolRef sym, ll
 
 llvm::Value *Payload::toCString(CompilerState &cs, string_view str, llvm::IRBuilderBase &builder) {
     llvm::StringRef valueRef(str.data(), str.length());
-    auto globalName = "addr_str_" + (string)str;
+    auto globalName = "addr_str_" + string(str);
     auto globalDeclaration =
         static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(globalName, builder.getInt8PtrTy(), [&] {
             auto valueGlobal = builder.CreateGlobalString(valueRef, llvm::Twine("str_") + valueRef);
@@ -948,7 +948,7 @@ llvm::Value *buildInstanceVariableCache(CompilerState &cs, std::string_view name
     auto *zero = llvm::ConstantAggregateZero::get(cacheTy);
     // No special initialization necessary, unlike function inline caches.
     return new llvm::GlobalVariable(*cs.module, cacheTy, false, llvm::GlobalVariable::InternalLinkage, zero,
-                                    llvm::Twine("ivc_") + (string)name);
+                                    llvm::Twine("ivc_") + string(name));
 }
 
 } // namespace

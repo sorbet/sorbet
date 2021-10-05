@@ -943,7 +943,7 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
         auto linkageType = llvm::Function::ExternalLinkage;
         std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
         auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
-        entryFunc = llvm::Function::Create(ft, linkageType, "Init_" + (string)baseName, *cs.module);
+        entryFunc = llvm::Function::Create(ft, linkageType, "Init_" + string(baseName), *cs.module);
     } else {
         entryFunc = IREmitterHelpers::getInitFunction(cs, sym);
     }

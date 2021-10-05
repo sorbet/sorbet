@@ -30,7 +30,7 @@ string getFunctionNamePrefix(CompilerState &cs, core::SymbolRef sym) {
     string suffix;
     auto name = sym.data(cs)->name;
     if (name.kind() == core::NameKind::CONSTANT && name.dataCnst(cs)->original.kind() == core::NameKind::UTF8) {
-        suffix = (string)name.shortName(cs);
+        suffix = string(name.shortName(cs));
     } else {
         suffix = name.toString(cs);
     }
@@ -54,7 +54,7 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
     auto name = sym.data(cs)->name;
     string suffix;
     if (name.kind() == core::NameKind::UTF8) {
-        suffix = (string)name.shortName(cs);
+        suffix = string(name.shortName(cs));
     } else {
         suffix = name.toString(cs);
     }
