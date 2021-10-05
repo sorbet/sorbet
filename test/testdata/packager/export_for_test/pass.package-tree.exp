@@ -19,6 +19,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package$1>::<C Opus>::<C Foo>::<C FooClass>)
 
     <self>.export_for_test(<emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package$1>::<C Opus>::<C Foo>::<C Private>::<C ImplDetail>)
+
+    <self>.export_for_test(<emptyTree>::<C <PackageTests>>::<C Opus_Foo_Package$1>::<C Test>::<C Opus>::<C Foo>::<C FooTest>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()

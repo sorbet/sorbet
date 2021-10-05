@@ -494,9 +494,17 @@ struct PackageInfoFinder {
         }
         if (send.fun == core::Names::export_for_test() && send.args.size() == 1) {
             // null indicates an invalid export.
-            // TODO make sure this isn't a Test:: name
             if (auto target = verifyConstant(ctx, core::Names::export_for_test(), send.args[0])) {
-                exported.emplace_back(getFullyQualifiedName(ctx, target), ExportType::PrivateTest);
+                auto fqn = getFullyQualifiedName(ctx, target);
+                ENFORCE(fqn.parts.size() > 0);
+                if (fqn.parts[0] == TEST_NAME) {
+                    if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidExportForTest)) {
+                        e.setHeader("Packages may not {} names in the `{}::` namespace", send.fun.toString(ctx),
+                                    TEST_NAME.show(ctx));
+                    }
+                } else {
+                    exported.emplace_back(move(fqn), ExportType::PrivateTest);
+                }
                 // Transform the constant lit to refer to the target within the mangled package namespace.
                 send.args[0] = prependInternalPackageName(move(send.args[0]));
             }
