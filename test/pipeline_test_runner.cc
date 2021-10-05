@@ -550,7 +550,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         const int prohibitedLines = f.file.data(*gs).source().size();
         auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.file.data(*gs).source());
         auto newFile =
-            make_shared<core::File>((string)f.file.data(*gs).path(), move(newSource), f.file.data(*gs).sourceType);
+            make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource), f.file.data(*gs).sourceType);
         gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
 
         // this replicates the logic of pipeline::indexOne
