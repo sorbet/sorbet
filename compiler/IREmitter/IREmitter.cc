@@ -165,8 +165,6 @@ tuple<llvm::Value *, llvm::Value *> determineKwSplatArg(CompilerState &cs, llvm:
     hashArgsPhi->addIncoming(maybeHashValue, hasPassedHashEnd);
 
     return {argcPhi, hashArgsPhi};
-    argCountRaw = argcPhi;
-    hashArgs = hashArgsPhi;
 }
 
 void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
