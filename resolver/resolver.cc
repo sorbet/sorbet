@@ -667,6 +667,10 @@ private:
             if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidRequiredAncestor)) {
                 e.setHeader("`{}` only accepts a block", send->fun.show(gs));
 
+                if (block != nullptr) {
+                    return;
+                }
+
                 string replacement = "";
                 int indent = core::Loc::offset2Pos(todo.file.data(gs), send->loc.beginPos()).column - 1;
                 int index = 1;
