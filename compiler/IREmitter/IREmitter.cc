@@ -535,7 +535,7 @@ llvm::BasicBlock *resolveJumpTarget(cfg::CFG &cfg, const IREmitterContext &irctx
     if (from->rubyBlockId != irctx.basicBlockRubyBlockId[remapped]) {
         return irctx.blockExitMapping[from->rubyBlockId];
     } else {
-        return irctx.llvmBlocksBySorbetBlocks[irctx.basicBlockJumpOverrides[to->id]];
+        return irctx.llvmBlocksBySorbetBlocks[remapped];
     }
 }
 
