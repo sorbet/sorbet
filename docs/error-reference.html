@@ -636,7 +636,7 @@ does not include <code>Foo</code>.</p>
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Bar</span></span>
   extend T::Helpers
 
-  requires_ancestor Foo
+  requires_ancestor { Foo }
 
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span></span>
     foo
@@ -662,7 +662,7 @@ are required to have some class as an ancestor:</p>
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Bar</span></span>
   <span class="hljs-keyword">extend</span> <span class="hljs-symbol">T:</span>:Helpers
 
-  requires_ancestor Foo
+  requires_ancestor { Foo }
 
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span></span>
     foo

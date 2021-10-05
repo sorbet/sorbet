@@ -112,7 +112,7 @@ or modules including <code>MyHelper</code> will also include <code>Kernel</code>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">MyHelper</span></span>
   extend T::Helpers
 
-  requires_ancestor Kernel
+  requires_ancestor { Kernel }
 
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">say_error</span><span class="hljs-params">(message)</span></span>
     raise <span class="hljs-string">"InternalError: <span class="hljs-subst">#{message}</span>"</span>
@@ -130,7 +130,7 @@ inherited:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">MyHelper</span></span>
   extend T::Helpers
 
-  requires_ancestor Object
+  requires_ancestor { Object }
 
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">class_name</span></span>
     <span class="hljs-keyword">self</span><span class="hljs-class">.<span class="hljs-keyword">class</span>.<span class="hljs-title">name</span></span>
@@ -170,7 +170,8 @@ inherited:</p>
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">MyTestHelper</span></span>
   extend T::Helpers
 
-  requires_ancestor Test::TestAssertions, MyLogger
+  requires_ancestor { Test::TestAssertions }
+  requires_ancestor { MyLogger }
 
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">assert_not_equal</span><span class="hljs-params">(x, y)</span></span>
     <span class="hljs-keyword">if</span> assert_equal(x, y)
