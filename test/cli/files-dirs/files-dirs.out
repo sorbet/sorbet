@@ -28,7 +28,7 @@ Usage:
 {
  "files": [
   {
-   "path": "foo.rb",
+   "path": "./foo.rb",
    "strict": "False",
    "min_error_level": "Max"
   }
@@ -39,7 +39,7 @@ Note: --dir and -e are meant to be additive
 {
  "files": [
   {
-   "path": "foo.rb",
+   "path": "./foo.rb",
    "strict": "False",
    "min_error_level": "Max"
   }

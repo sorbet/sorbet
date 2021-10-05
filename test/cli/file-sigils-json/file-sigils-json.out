@@ -27,18 +27,18 @@ No errors! Great job.
 {
  "files": [
   {
-   "path": "compiled-false.rb",
+   "path": "./compiled-false.rb",
    "strict": "False",
    "min_error_level": "Max",
    "compiled": "CompiledFalse"
   },
   {
-   "path": "compiled-none.rb",
+   "path": "./compiled-none.rb",
    "strict": "False",
    "min_error_level": "Max"
   },
   {
-   "path": "compiled-true.rb",
+   "path": "./compiled-true.rb",
    "sigil": "True",
    "strict": "True",
    "min_error_level": "Max",
