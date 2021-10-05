@@ -1046,7 +1046,7 @@ class Pathname < Object
   #
   # See
   # [`File.readlink`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-readlink).
-  sig {returns(String)}
+  sig {returns(T.self_type)}
   def readlink(); end
 
   # Returns the real (absolute) pathname of `self` in the actual filesystem.
