@@ -120,12 +120,9 @@ void setupStackFrames(CompilerState &base, const ast::MethodDef &md, const IREmi
 }
 
 tuple<llvm::Value *, llvm::Value *> determineKwSplatArg(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                                        const IREmitterContext &irctx,
-                                                        int minPositionalArgCount,
-                                                        llvm::Value *argCountRaw,
-                                                        llvm::Value *argArrayRaw,
-                                                        llvm::Value *hashArgs,
-                                                        int rubyBlockId) {
+                                                        const IREmitterContext &irctx, int minPositionalArgCount,
+                                                        llvm::Value *argCountRaw, llvm::Value *argArrayRaw,
+                                                        llvm::Value *hashArgs, int rubyBlockId) {
     auto *func = irctx.rubyBlocks2Functions[rubyBlockId];
     auto hasEnoughArgs = llvm::BasicBlock::Create(cs, "readKWHashArgCountSuccess", func);
     auto hasPassedHash = llvm::BasicBlock::Create(cs, "readKWHash", func);
@@ -133,23 +130,22 @@ tuple<llvm::Value *, llvm::Value *> determineKwSplatArg(CompilerState &cs, llvm:
 
     // Check that there are enough arguments to fill out minPositionalArgCount
     // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2547
-    auto argSizeForHashCheck =
-        builder.CreateICmpULT(llvm::ConstantInt::get(cs, llvm::APInt(32, minPositionalArgCount)),
-                              argCountRaw, "hashAttemptReadGuard");
+    auto argSizeForHashCheck = builder.CreateICmpULT(llvm::ConstantInt::get(cs, llvm::APInt(32, minPositionalArgCount)),
+                                                     argCountRaw, "hashAttemptReadGuard");
     builder.CreateCondBr(argSizeForHashCheck, hasEnoughArgs, afterHash);
 
     auto sizeTestFailedEnd = builder.GetInsertBlock();
     builder.SetInsertPoint(hasEnoughArgs);
-    llvm::Value *argsWithoutHashCount = builder.CreateSub(
-                                                          argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, 1)), "argsWithoutHashCount");
+    llvm::Value *argsWithoutHashCount =
+        builder.CreateSub(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, 1)), "argsWithoutHashCount");
 
     llvm::Value *indices[] = {argsWithoutHashCount};
 
     auto maybeHashValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "KWArgHash");
 
     // checkIfLastArgIsHash
-    auto isHashValue = Payload::typeTest(cs, builder, maybeHashValue,
-                                         core::make_type<core::ClassType>(core::Symbols::Hash()));
+    auto isHashValue =
+        Payload::typeTest(cs, builder, maybeHashValue, core::make_type<core::ClassType>(core::Symbols::Hash()));
 
     builder.CreateCondBr(isHashValue, hasPassedHash, afterHash);
 
@@ -173,18 +169,14 @@ tuple<llvm::Value *, llvm::Value *> determineKwSplatArg(CompilerState &cs, llvm:
     hashArgs = hashArgsPhi;
 }
 
-void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                 const IREmitterContext &irctx,
-                                 cfg::LocalRef kwRestArgName,
-                                 llvm::Value *hashArgs,
-                                 int maxPositionalArgCount,
+void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                                 cfg::LocalRef kwRestArgName, llvm::Value *hashArgs, int maxPositionalArgCount,
                                  const vector<core::ArgInfo::ArgFlags> &argsFlags, int rubyBlockId) {
     auto *func = irctx.rubyBlocks2Functions[rubyBlockId];
     auto &argPresentVariables = irctx.argPresentVariables[rubyBlockId];
     // required arguments remaining to be parsed
-    auto numRequiredKwArgs = absl::c_count_if(argsFlags, [](auto &argFlag) {
-            return argFlag.isKeyword && !argFlag.isDefault && !argFlag.isRepeated;
-        });
+    auto numRequiredKwArgs = absl::c_count_if(
+        argsFlags, [](auto &argFlag) { return argFlag.isKeyword && !argFlag.isDefault && !argFlag.isRepeated; });
     auto *missingKwargs = Payload::rubyUndef(cs, builder);
 
     // optional arguments that are present
@@ -213,18 +205,15 @@ void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder
         auto kwArgDefault = llvm::BasicBlock::Create(cs, "kwArgDefault", func);
         auto kwArgContinue = llvm::BasicBlock::Create(cs, "kwArgContinue", func);
 
-        auto *missingPhi =
-            llvm::PHINode::Create(missingKwargs->getType(), 2, "missingArgsPhi", kwArgContinue);
-        auto *optionalPhi =
-            llvm::PHINode::Create(optionalKwargs->getType(), 2, "optionalArgsPhi", kwArgContinue);
+        auto *missingPhi = llvm::PHINode::Create(missingKwargs->getType(), 2, "missingArgsPhi", kwArgContinue);
+        auto *optionalPhi = llvm::PHINode::Create(optionalKwargs->getType(), 2, "optionalArgsPhi", kwArgContinue);
 
         builder.CreateCondBr(isItUndef, kwArgDefault, kwArgSet);
 
         // Write a default value out, and mark the variable as missing
         builder.SetInsertPoint(kwArgDefault);
         if (argPresent.exists()) {
-            Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx,
-                            rubyBlockId);
+            Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx, rubyBlockId);
         }
 
         auto *updatedMissingKwargs = missingKwargs;
@@ -240,12 +229,11 @@ void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder
         auto *updatedOptionalKwargs = optionalKwargs;
         if (argPresent.exists()) {
             if (argsFlags[argId].isDefault) {
-                updatedOptionalKwargs = builder.CreateBinOp(llvm::Instruction::Add, optionalKwargs,
-                                                            IREmitterHelpers::buildS4(cs, 1));
+                updatedOptionalKwargs =
+                    builder.CreateBinOp(llvm::Instruction::Add, optionalKwargs, IREmitterHelpers::buildS4(cs, 1));
             }
 
-            Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx,
-                            rubyBlockId);
+            Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx, rubyBlockId);
         }
         Payload::varSet(cs, name, passedValue, builder, irctx, rubyBlockId);
         optionalPhi->addIncoming(updatedOptionalKwargs, builder.GetInsertBlock());
@@ -258,11 +246,10 @@ void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder
     }
     Payload::assertAllRequiredKWArgs(cs, builder, missingKwargs);
     if (kwRestArgName.exists()) {
-        Payload::varSet(cs, kwRestArgName, Payload::readKWRestArg(cs, builder, hashArgs), builder,
-                        irctx, rubyBlockId);
+        Payload::varSet(cs, kwRestArgName, Payload::readKWRestArg(cs, builder, hashArgs), builder, irctx, rubyBlockId);
     } else {
-        Payload::assertNoExtraKWArg(cs, builder, hashArgs,
-                                    IREmitterHelpers::buildS4(cs, numRequiredKwArgs), optionalKwargs);
+        Payload::assertNoExtraKWArg(cs, builder, hashArgs, IREmitterHelpers::buildS4(cs, numRequiredKwArgs),
+                                    optionalKwargs);
     }
 }
 
@@ -335,10 +322,8 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
             if (hasKWArgs) {
                 // if last argument is a hash, it's not part of positional arguments - it's going to
                 // fullfill all kw arguments instead
-                std::tie(argCountRaw, hashArgs) = determineKwSplatArg(cs, builder, irctx,
-                                                                      minPositionalArgCount,
-                                                                      argCountRaw, argArrayRaw,
-                                                                      hashArgs, rubyBlockId);
+                std::tie(argCountRaw, hashArgs) = determineKwSplatArg(cs, builder, irctx, minPositionalArgCount,
+                                                                      argCountRaw, argArrayRaw, hashArgs, rubyBlockId);
             }
 
             if (isBlock) {
@@ -526,7 +511,8 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     if (hasKWRestArgs) {
                         ENFORCE(kwRestArgName.exists());
                     }
-                    parseKeywordArgsFromKwSplat(cs, builder, irctx, kwRestArgName, hashArgs, maxPositionalArgCount, argsFlags, rubyBlockId);
+                    parseKeywordArgsFromKwSplat(cs, builder, irctx, kwRestArgName, hashArgs, maxPositionalArgCount,
+                                                argsFlags, rubyBlockId);
                 }
             }
         }
