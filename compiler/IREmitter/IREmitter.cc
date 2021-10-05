@@ -425,69 +425,70 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     auto *optionalKwargs = IREmitterHelpers::buildS4(cs, 0);
 
                     for (int argId = maxPositionalArgCount; argId < argsFlags.size(); argId++) {
-                        if (argsFlags[argId].isKeyword && !argsFlags[argId].isRepeated) {
-                            auto name = irctx.rubyBlockArgs[rubyBlockId][argId];
-                            auto rawId = Payload::idIntern(cs, builder, name.data(cfg)._name.shortName(cs));
-                            auto rawRubySym = builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
-
-                            auto argPresent = argPresentVariables[argId];
-
-                            llvm::Value *passedValue;
-                            if (hasKWRestArgs) {
-                                passedValue = Payload::removeKWArg(cs, builder, hashArgs, rawRubySym);
-                            } else {
-                                passedValue = Payload::getKWArg(cs, builder, hashArgs, rawRubySym);
-                            }
-
-                            auto isItUndef = Payload::testIsUndef(cs, builder, passedValue);
-
-                            auto kwArgSet = llvm::BasicBlock::Create(cs, "kwArgSet", func);
-                            auto kwArgDefault = llvm::BasicBlock::Create(cs, "kwArgDefault", func);
-                            auto kwArgContinue = llvm::BasicBlock::Create(cs, "kwArgContinue", func);
-
-                            auto *missingPhi =
-                                llvm::PHINode::Create(missingKwargs->getType(), 2, "missingArgsPhi", kwArgContinue);
-                            auto *optionalPhi =
-                                llvm::PHINode::Create(optionalKwargs->getType(), 2, "optionalArgsPhi", kwArgContinue);
-
-                            builder.CreateCondBr(isItUndef, kwArgDefault, kwArgSet);
-
-                            // Write a default value out, and mark the variable as missing
-                            builder.SetInsertPoint(kwArgDefault);
-                            if (argPresent.exists()) {
-                                Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx,
-                                                rubyBlockId);
-                            }
-
-                            auto *updatedMissingKwargs = missingKwargs;
-                            if (!argsFlags[argId].isDefault) {
-                                updatedMissingKwargs = Payload::addMissingKWArg(cs, builder, missingKwargs, rawRubySym);
-                            }
-
-                            optionalPhi->addIncoming(optionalKwargs, builder.GetInsertBlock());
-                            missingPhi->addIncoming(updatedMissingKwargs, builder.GetInsertBlock());
-                            builder.CreateBr(kwArgContinue);
-
-                            builder.SetInsertPoint(kwArgSet);
-                            auto *updatedOptionalKwargs = optionalKwargs;
-                            if (argPresent.exists()) {
-                                if (argsFlags[argId].isDefault) {
-                                    updatedOptionalKwargs = builder.CreateBinOp(llvm::Instruction::Add, optionalKwargs,
-                                                                                IREmitterHelpers::buildS4(cs, 1));
-                                }
-
-                                Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx,
-                                                rubyBlockId);
-                            }
-                            Payload::varSet(cs, name, passedValue, builder, irctx, rubyBlockId);
-                            optionalPhi->addIncoming(updatedOptionalKwargs, builder.GetInsertBlock());
-                            missingPhi->addIncoming(missingKwargs, builder.GetInsertBlock());
-                            builder.CreateBr(kwArgContinue);
-
-                            builder.SetInsertPoint(kwArgContinue);
-                            optionalKwargs = optionalPhi;
-                            missingKwargs = missingPhi;
+                        if (!argsFlags[argId].isKeyword || argsFlags[argId].isRepeated) {
+                            continue;
                         }
+                        auto name = irctx.rubyBlockArgs[rubyBlockId][argId];
+                        auto rawId = Payload::idIntern(cs, builder, name.data(cfg)._name.shortName(cs));
+                        auto rawRubySym = builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
+
+                        auto argPresent = argPresentVariables[argId];
+
+                        llvm::Value *passedValue;
+                        if (hasKWRestArgs) {
+                            passedValue = Payload::removeKWArg(cs, builder, hashArgs, rawRubySym);
+                        } else {
+                            passedValue = Payload::getKWArg(cs, builder, hashArgs, rawRubySym);
+                        }
+
+                        auto isItUndef = Payload::testIsUndef(cs, builder, passedValue);
+
+                        auto kwArgSet = llvm::BasicBlock::Create(cs, "kwArgSet", func);
+                        auto kwArgDefault = llvm::BasicBlock::Create(cs, "kwArgDefault", func);
+                        auto kwArgContinue = llvm::BasicBlock::Create(cs, "kwArgContinue", func);
+
+                        auto *missingPhi =
+                            llvm::PHINode::Create(missingKwargs->getType(), 2, "missingArgsPhi", kwArgContinue);
+                        auto *optionalPhi =
+                            llvm::PHINode::Create(optionalKwargs->getType(), 2, "optionalArgsPhi", kwArgContinue);
+
+                        builder.CreateCondBr(isItUndef, kwArgDefault, kwArgSet);
+
+                        // Write a default value out, and mark the variable as missing
+                        builder.SetInsertPoint(kwArgDefault);
+                        if (argPresent.exists()) {
+                            Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx,
+                                            rubyBlockId);
+                        }
+
+                        auto *updatedMissingKwargs = missingKwargs;
+                        if (!argsFlags[argId].isDefault) {
+                            updatedMissingKwargs = Payload::addMissingKWArg(cs, builder, missingKwargs, rawRubySym);
+                        }
+
+                        optionalPhi->addIncoming(optionalKwargs, builder.GetInsertBlock());
+                        missingPhi->addIncoming(updatedMissingKwargs, builder.GetInsertBlock());
+                        builder.CreateBr(kwArgContinue);
+
+                        builder.SetInsertPoint(kwArgSet);
+                        auto *updatedOptionalKwargs = optionalKwargs;
+                        if (argPresent.exists()) {
+                            if (argsFlags[argId].isDefault) {
+                                updatedOptionalKwargs = builder.CreateBinOp(llvm::Instruction::Add, optionalKwargs,
+                                                                            IREmitterHelpers::buildS4(cs, 1));
+                            }
+
+                            Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx,
+                                            rubyBlockId);
+                        }
+                        Payload::varSet(cs, name, passedValue, builder, irctx, rubyBlockId);
+                        optionalPhi->addIncoming(updatedOptionalKwargs, builder.GetInsertBlock());
+                        missingPhi->addIncoming(missingKwargs, builder.GetInsertBlock());
+                        builder.CreateBr(kwArgContinue);
+
+                        builder.SetInsertPoint(kwArgContinue);
+                        optionalKwargs = optionalPhi;
+                        missingKwargs = missingPhi;
                     }
                     Payload::assertAllRequiredKWArgs(cs, builder, missingKwargs);
                     if (hasKWRestArgs) {
