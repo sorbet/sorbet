@@ -39,6 +39,7 @@ llvm::FunctionType *CompilerState::getRubyFFIType() {
         llvm::Type::getInt64PtrTy(lctx), // argArray
         llvm::Type::getInt64Ty(lctx),    // self
         llvm::StructType::getTypeByName(lctx, "struct.rb_control_frame_struct")->getPointerTo(),
+        llvm::Type::getInt8PtrTy(lctx), // void* (struct rb_calling_info)
         llvm::Type::getInt8PtrTy(lctx), // void* (struct rb_call_data / struct rb_kwarg_call_data)
     };
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);

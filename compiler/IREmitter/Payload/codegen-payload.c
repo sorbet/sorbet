@@ -175,7 +175,8 @@ struct rfb_status {
     bool was_thrown;
 };
 SORBET_ALIVE(struct rfb_status, sorbet_vm_return_from_block_wrapper,
-             (int argc, VALUE *argv, VALUE recv, rb_control_frame_t *cfp, void *, rb_sorbet_func_t wrapped));
+             (int argc, VALUE *argv, VALUE recv, rb_control_frame_t *cfp, void *calling, void *cd,
+              rb_sorbet_func_t wrapped));
 SORBET_ALIVE(VALUE, sorbet_run_exception_handling,
              (rb_execution_context_t * ec, ExceptionFFIType body, VALUE **volatile pc,
               // The locals offset for the body.
@@ -2003,7 +2004,12 @@ VALUE sorbet_callFuncDirect(struct FunctionInlineCache *cache, rb_sorbet_func_t 
     }
 
     rb_control_frame_t *cfp = sorbet_pushCfuncFrame(cache, recv, iseq);
-    VALUE res = methodPtr(argc, argv, recv, cfp, &cache->cd);
+    struct rb_calling_info calling;
+    calling.block_handler = VM_BLOCK_HANDLER_NONE;
+    calling.kw_splat = (cache->cd.ci_kw.ci.flag & VM_CALL_KW_SPLAT) > 0;
+    calling.recv = recv;
+    calling.argc = argc;
+    VALUE res = methodPtr(argc, argv, recv, cfp, &calling, &cache->cd);
     sorbet_popFrame();
     return res;
 }
@@ -2011,8 +2017,13 @@ VALUE sorbet_callFuncDirect(struct FunctionInlineCache *cache, rb_sorbet_func_t 
 SORBET_INLINE
 VALUE sorbet_callStaticInitDirect(rb_sorbet_func_t methodPtr, int argc, VALUE *argv, VALUE recv) {
     rb_control_frame_t *cfp = sorbet_pushStaticInitFrame(recv);
+    struct rb_calling_info calling;
+    calling.block_handler = VM_BLOCK_HANDLER_NONE;
+    calling.kw_splat = 0;
+    calling.recv = recv;
+    calling.argc = argc;
     // XXX we don't really have a call data here, but we shouldn't be parsing any kwargs either.
-    VALUE res = methodPtr(argc, argv, recv, cfp, NULL);
+    VALUE res = methodPtr(argc, argv, recv, cfp, &calling, NULL);
     sorbet_popFrame();
     return res;
 }
