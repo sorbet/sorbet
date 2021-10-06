@@ -666,6 +666,8 @@ private:
         if (!send->args.empty()) {
             if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidRequiredAncestor)) {
                 e.setHeader("`{}` only accepts a block", send->fun.show(gs));
+                e.addErrorNote("Use {} to auto-correct using the new syntax",
+                               "--isolate-error-code 5062 -a --typed true");
 
                 if (block != nullptr) {
                     return;
