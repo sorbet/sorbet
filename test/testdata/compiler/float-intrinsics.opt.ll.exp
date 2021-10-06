@@ -91,7 +91,7 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @"str_test/testdata/compiler/float-intrinsics.rb" = private unnamed_addr constant [43 x i8] c"test/testdata/compiler/float-intrinsics.rb\00", align 1
 @iseqEncodedArray = internal global [49 x i64] zeroinitializer
 @fileLineNumberInfo = internal global %struct.SorbetLineNumberInfo zeroinitializer
-@str_sig = private unnamed_addr constant [4 x i8] c"sig\00", align 1
+@"str_Parameter 'x'" = private unnamed_addr constant [14 x i8] c"Parameter 'x'\00", align 1
 @str_Float = private unnamed_addr constant [6 x i8] c"Float\00", align 1
 @"str_+" = private unnamed_addr constant [2 x i8] c"+\00", align 1
 @"str_Return value" = private unnamed_addr constant [13 x i8] c"Return value\00", align 1
@@ -1880,7 +1880,7 @@ newFuncRoot:
 ; Function Attrs: cold minsize noreturn nounwind sspreq uwtable
 define internal fastcc void @"func_Object#2lt.cold.3"(i64 %rawArg_x) unnamed_addr #11 !dbg !149 {
 newFuncRoot:
-  tail call void @sorbet_cast_failure(i64 %rawArg_x, i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_sig, i64 0, i64 0), i8* noundef getelementptr inbounds ([6 x i8], [6 x i8]* @str_Float, i64 0, i64 0)) #14, !dbg !150
+  tail call void @sorbet_cast_failure(i64 %rawArg_x, i8* noundef getelementptr inbounds ([14 x i8], [14 x i8]* @"str_Parameter 'x'", i64 0, i64 0), i8* noundef getelementptr inbounds ([6 x i8], [6 x i8]* @str_Float, i64 0, i64 0)) #14, !dbg !150
   unreachable, !dbg !150
 }
 

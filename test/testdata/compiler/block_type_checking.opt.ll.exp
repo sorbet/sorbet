@@ -108,8 +108,9 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @rubyIdPrecomputed_p = internal unnamed_addr global i64 0, align 8
 @str_p = private unnamed_addr constant [2 x i8] c"p\00", align 1
 @"stackFramePrecomputed_func_Foo#3bar" = unnamed_addr global %struct.rb_iseq_struct* null, align 8
-@str_sig = private unnamed_addr constant [4 x i8] c"sig\00", align 1
+@"str_Parameter 'x'" = private unnamed_addr constant [14 x i8] c"Parameter 'x'\00", align 1
 @str_Integer = private unnamed_addr constant [8 x i8] c"Integer\00", align 1
+@"str_Parameter 'blk'" = private unnamed_addr constant [16 x i8] c"Parameter 'blk'\00", align 1
 @"str_T.proc.returns(Integer)" = private unnamed_addr constant [24 x i8] c"T.proc.returns(Integer)\00", align 1
 @"str_+" = private unnamed_addr constant [2 x i8] c"+\00", align 1
 @"str_Return value" = private unnamed_addr constant [13 x i8] c"Return value\00", align 1
@@ -781,14 +782,14 @@ newFuncRoot:
 ; Function Attrs: cold minsize noreturn nounwind sspreq uwtable
 define internal fastcc void @"func_Foo#3bar.cold.2"(i64 %0) unnamed_addr #14 !dbg !82 {
 newFuncRoot:
-  tail call void @sorbet_cast_failure(i64 %0, i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_sig, i64 0, i64 0), i8* noundef getelementptr inbounds ([24 x i8], [24 x i8]* @"str_T.proc.returns(Integer)", i64 0, i64 0)) #20, !dbg !83
+  tail call void @sorbet_cast_failure(i64 %0, i8* noundef getelementptr inbounds ([16 x i8], [16 x i8]* @"str_Parameter 'blk'", i64 0, i64 0), i8* noundef getelementptr inbounds ([24 x i8], [24 x i8]* @"str_T.proc.returns(Integer)", i64 0, i64 0)) #20, !dbg !83
   unreachable, !dbg !83
 }
 
 ; Function Attrs: cold minsize noreturn nounwind sspreq uwtable
 define internal fastcc void @"func_Foo#3bar.cold.3"(i64 %rawArg_x) unnamed_addr #14 !dbg !84 {
 newFuncRoot:
-  tail call void @sorbet_cast_failure(i64 %rawArg_x, i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_sig, i64 0, i64 0), i8* noundef getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0)) #20, !dbg !85
+  tail call void @sorbet_cast_failure(i64 %rawArg_x, i8* noundef getelementptr inbounds ([14 x i8], [14 x i8]* @"str_Parameter 'x'", i64 0, i64 0), i8* noundef getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0)) #20, !dbg !85
   unreachable, !dbg !85
 }
 
