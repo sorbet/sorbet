@@ -375,8 +375,8 @@ void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, co
         builder.CreateCall(cs.getFunction("sorbet_setupParamPositional"), {param, tableSize, table});
     }
 
-    if (hasKw) {
-        ENFORCE(kwNum > 0);
+    if (hasKw || hasKwRest) {
+        ENFORCE(kwNum > 0 || hasKwRest);
         ENFORCE(reqKwNum <= kwNum);
         ENFORCE(keywordArgInfo.size() == (kwNum + hasKwRest));
 
