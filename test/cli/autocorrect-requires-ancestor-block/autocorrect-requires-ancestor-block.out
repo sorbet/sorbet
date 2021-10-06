@@ -1,6 +1,8 @@
 autocorrect-requires-ancestor-block.rb:12: `requires_ancestor` only accepts a block https://srb.help/5062
     12 |  requires_ancestor RA1
           ^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Use --isolate-error-code 5062 -a --typed true to auto-correct using the new syntax
   Autocorrect: Done
     autocorrect-requires-ancestor-block.rb:12: Replaced with `requires_ancestor { RA1 }`
     12 |  requires_ancestor RA1
@@ -9,6 +11,8 @@ autocorrect-requires-ancestor-block.rb:12: `requires_ancestor` only accepts a bl
 autocorrect-requires-ancestor-block.rb:13: `requires_ancestor` only accepts a block https://srb.help/5062
     13 |  requires_ancestor RA2, RA3
           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Use --isolate-error-code 5062 -a --typed true to auto-correct using the new syntax
   Autocorrect: Done
     autocorrect-requires-ancestor-block.rb:13: Replaced with `requires_ancestor { RA2 }
   requires_ancestor { RA3 }`
@@ -18,6 +22,8 @@ autocorrect-requires-ancestor-block.rb:13: `requires_ancestor` only accepts a bl
 autocorrect-requires-ancestor-block.rb:14: `requires_ancestor` only accepts a block https://srb.help/5062
     14 |  requires_ancestor(RA4) { RA5 }
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Use --isolate-error-code 5062 -a --typed true to auto-correct using the new syntax
 
 autocorrect-requires-ancestor-block.rb:12: Too many arguments provided for method `T::Helpers#requires_ancestor`. Expected: `0`, got: `1` https://srb.help/7004
     12 |  requires_ancestor RA1
