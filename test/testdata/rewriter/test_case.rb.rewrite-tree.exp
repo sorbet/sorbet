@@ -3,6 +3,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:test, <emptyTree>::<C T>.untyped()).returns(<emptyTree>::<C T>::<C Boolean>)
+    end
+
     def assert<<todo method>>(test, &<blk>)
       if test
         true
@@ -11,7 +15,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def self.test<<todo method>>(*args, &<blk>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:args, <emptyTree>::<C T>.untyped(), :block, <emptyTree>::<C T>.nilable(<emptyTree>::<C T>.proc().void())).void()
+    end
+
+    def self.test<<todo method>>(*args, &block)
       <emptyTree>
     end
 
@@ -35,9 +43,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def setup<<todo method>>(&<blk>)
+    def initialize<<todo method>>(&<blk>)
       begin
-        @a = 1
+        @a = <emptyTree>::<C T>.let(1, <emptyTree>::<C Integer>)
         <self>.foo()
       end
     end
@@ -46,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def setup<<todo method>>(&<blk>)
+    def initialize<<todo method>>(&<blk>)
       <self>.bar()
     end
 
@@ -65,6 +73,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def teardown<<todo method>>(&<blk>)
       <self>.baz()
     end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :assert, :normal)
 
@@ -92,9 +102,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :test_block_is_evaluated_in_the_context_of_an_instance, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :setup, :normal)
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :setup, :normal)
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
 
     ::Sorbet::Private::Static.keep_def(<self>, :teardown, :normal)
 
@@ -102,13 +112,23 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C NoMatchTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
-    def self.setup<<todo method>>(&<blk>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:block, <emptyTree>::<C T>.proc().void()).void()
+    end
+
+    def self.setup<<todo method>>(&block)
       <emptyTree>
     end
 
-    def self.teardown<<todo method>>(&<blk>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:block, <emptyTree>::<C T>.proc().void()).void()
+    end
+
+    def self.teardown<<todo method>>(&block)
       <emptyTree>
     end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     ::Sorbet::Private::Static.keep_self_def(<self>, :setup, :normal)
 
@@ -121,5 +141,69 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.teardown() do ||
       <self>.bar()
     end
+  end
+
+  class <emptyTree>::<C NoParentClass><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:block, <emptyTree>::<C T>.proc().void()).void()
+    end
+
+    def self.setup<<todo method>>(&block)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:block, <emptyTree>::<C T>.proc().void()).void()
+    end
+
+    def self.teardown<<todo method>>(&block)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:a, <emptyTree>::<C T>.untyped(), :b, <emptyTree>::<C T>.untyped()).void()
+    end
+
+    def assert_equal<<todo method>>(a, b, &<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def test_it_works<<todo method>>(&<blk>)
+      <self>.assert_equal(1, @a)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def initialize<<todo method>>(&<blk>)
+      @a = <emptyTree>::<C T>.let(1, <emptyTree>::<C Integer>)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def teardown<<todo method>>(&<blk>)
+      @a = 5
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :setup, :normal)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :teardown, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :assert_equal, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :test_it_works, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :teardown, :normal)
   end
 end

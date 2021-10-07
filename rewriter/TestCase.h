@@ -5,9 +5,9 @@
 namespace sorbet::rewriter {
 
 /**
- * This class desugars things of the form
+ * This class desugars any test that includes invocations to `test "string" do ... end`
  *
- *    class MyTest < ActiveSupport::TestCase
+ *    class MyTest < AnyParent
  *      setup do
  *        @a = 1
  *      end
@@ -23,7 +23,7 @@ namespace sorbet::rewriter {
  *
  * into
  *
- *    class MyTest < ActiveSupport::TestCase
+ *    class MyTest < AnyParent
  *      def setup
  *        @a = 1
  *      end

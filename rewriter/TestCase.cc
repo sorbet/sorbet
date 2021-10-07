@@ -7,10 +7,6 @@ namespace sorbet::rewriter {
 void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
     std::vector<ast::ExpressionPtr> stats;
 
-    if (ctx.state.runningUnderAutogen) {
-        return;
-    }
-
     // Go through all class definition statements and find all setups, tests and teardowns
     std::vector<ast::ExpressionPtr> testSends, setupAndTeardownSends;
     for (auto &stat : klass->rhs) {
@@ -56,8 +52,9 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
             auto *send = ast::cast_tree<ast::Send>(stat);
             auto loc = send->loc;
             auto block = ast::cast_tree<ast::Block>(send->block);
+            auto method_name = send->fun == core::Names::setup() ? core::Names::initialize() : core::Names::teardown();
 
-            auto method = ast::MK::SyntheticMethod0(loc, loc, send->fun, std::move(block->body));
+            auto method = ast::MK::SyntheticMethod0(loc, loc, method_name, std::move(block->body));
             auto method_with_sig =
                 ast::MK::InsSeq1(method.loc(), ast::MK::SigVoid(method.loc(), {}), std::move(method));
 

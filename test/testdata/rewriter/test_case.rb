@@ -1,20 +1,23 @@
-# typed: true
+# typed: strict
 
 class ActiveSupport::TestCase
 end
 
 class MyTest < ActiveSupport::TestCase
+  extend T::Sig
   # Helper instance method
+  sig { params(test: T.untyped).returns(T::Boolean) }
   def assert(test)
     test ? true : false
   end
 
   # Helper method to direct calls to `test` instead of Kernel#test
-  def self.test(*args)
+  sig { params(args: T.untyped, block: T.nilable(T.proc.void)).void }
+  def self.test(*args, &block)
   end
 
   setup do
-    @a = 1
+    @a = T.let(1, Integer)
     foo # error: Method `foo` does not exist on `MyTest`
   end
 
@@ -56,14 +59,46 @@ class MyTest < ActiveSupport::TestCase
 end
 
 class NoMatchTest < ActiveSupport::TestCase
-  def self.setup; end
-  def self.teardown; end
+  extend T::Sig
+
+  sig { params(block: T.proc.void).void }
+  def self.setup(&block); end
+
+  sig { params(block: T.proc.void).void }
+  def self.teardown(&block); end
 
   setup do
-    foo # error: Method `foo` does not exist on `T.class_of(NoMatchTest)`
+    foo
+  # ^^^ error: Method `foo` does not exist on `T.class_of(NoMatchTest)`
   end
 
   teardown do
-    bar # error: Method `bar` does not exist on `T.class_of(NoMatchTest)`
+    bar
+  # ^^^ error: Method `bar` does not exist on `T.class_of(NoMatchTest)`
+  end
+end
+
+class NoParentClass
+  extend T::Sig
+
+  sig { params(block: T.proc.void).void }
+  def self.setup(&block); end
+
+  sig { params(block: T.proc.void).void }
+  def self.teardown(&block); end
+
+  sig { params(a: T.untyped, b: T.untyped).void }
+  def assert_equal(a, b); end
+
+  setup do
+    @a = T.let(1, Integer)
+  end
+
+  test "it works" do
+    assert_equal 1, @a
+  end
+
+  teardown do
+    @a = 5
   end
 end

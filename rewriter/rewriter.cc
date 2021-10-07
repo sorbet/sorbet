@@ -124,12 +124,6 @@ public:
                         return;
                     }
 
-                    // nodes = TestCase::run(ctx, &send);
-                    // if (!nodes.empty()) {
-                    //     replaceNodes[stat.get()] = std::move(nodes);
-                    //     return;
-                    // }
-
                     // This one is different: it gets an extra prevStat argument.
                     nodes = AttrReader::run(ctx, &send, prevStat);
                     if (!nodes.empty()) {
