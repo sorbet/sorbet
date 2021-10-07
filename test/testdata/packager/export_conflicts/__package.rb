@@ -3,8 +3,8 @@
 
 class MyPackage < PackageSpec
   export MyPackage::A::B
-       # ^^^^^^^^^^^^^^^ error: Exported names may not be prefixes of each other
+       # ^^^^^^^^^^^^^^^ error: Cannot export `MyPackage::A::B` because another exported name `MyPackage::A` is a prefix of it
   export MyPackage::A::C
-       # ^^^^^^^^^^^^^^^ error: Exported names may not be prefixes of each other
+       # ^^^^^^^^^^^^^^^ error: Cannot export `MyPackage::A::C` because another exported name `MyPackage::A` is a prefix of it
   export MyPackage::A
 end

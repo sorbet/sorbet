@@ -576,8 +576,11 @@ struct PackageInfoFinder {
             for (auto shorter = exported.begin(); shorter != longer; shorter++) {
                 if (std::equal(longer->parts().begin(), longer->parts().begin() + shorter->parts().size(),
                                shorter->parts().begin())) {
-                    if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ImportConflict)) {
-                        e.setHeader("Exported names may not be prefixes of each other");
+                    if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
+                        e.setHeader(
+                            "Cannot export `{}` because another exported name `{}` is a prefix of it",
+                            fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }),
+                            fmt::map_join(shorter->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
                         e.addErrorLine(shorter->fqn.loc, "Prefix exported here");
                     }
                     break; // Only need to find the shortest conflicting export
