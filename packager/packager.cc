@@ -576,7 +576,7 @@ struct PackageInfoFinder {
             for (auto shorter = exported.begin(); shorter != longer; shorter++) {
                 if (std::equal(longer->parts().begin(), longer->parts().begin() + shorter->parts().size(),
                                shorter->parts().begin())) {
-                    if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ImportConflict)) {
+                    if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
                         e.setHeader("Exported names may not be prefixes of each other");
                         e.addErrorLine(shorter->fqn.loc, "Prefix exported here");
                     }

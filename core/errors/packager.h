@@ -20,5 +20,6 @@ constexpr ErrorClass InvalidPackageName{3712, StrictLevel::False};
 constexpr ErrorClass DefinitionPackageMismatch{3713, StrictLevel::False};
 constexpr ErrorClass ImportConflict{3714, StrictLevel::False};
 constexpr ErrorClass InvalidExportForTest{3715, StrictLevel::False};
+constexpr ErrorClass ExportConflict{3716, StrictLevel::False};
 } // namespace sorbet::core::errors::Packager
 #endif
