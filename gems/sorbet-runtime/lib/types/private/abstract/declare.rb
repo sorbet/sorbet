@@ -40,6 +40,11 @@ module T::Private::Abstract::Declare
         end
         super(*args, &blk)
       end
+
+      # Ruby doesn not emit "method redefined" warnings for aliased methods
+      # (more robust than undef_method that would create a small window in which the method doesn't exist)
+      mod.send(:alias_method, :initialize, :initialize)
+
       if mod.respond_to?(:ruby2_keywords, true)
         mod.send(:ruby2_keywords, :initialize)
       end
