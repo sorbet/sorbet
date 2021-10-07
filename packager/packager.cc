@@ -575,7 +575,8 @@ struct PackageInfoFinder {
         for (auto longer = exported.begin() + 1; longer != exported.end(); longer++) {
             for (auto shorter = exported.begin(); shorter != longer; shorter++) {
                 if (std::equal(longer->parts().begin(), longer->parts().begin() + shorter->parts().size(),
-                               shorter->parts().begin())) {
+                               shorter->parts().begin()) &&
+                    !allowedExportPrefix(ctx, *shorter, *longer)) {
                     if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
                         e.setHeader(
                             "Cannot export `{}` because another exported name `{}` is a prefix of it",
@@ -590,6 +591,14 @@ struct PackageInfoFinder {
 
         ENFORCE(info->exports.empty());
         std::swap(exported, info->exports);
+    }
+
+    bool allowedExportPrefix(core::Context ctx, const Export &shorter, const Export &longer) {
+        // Permits:
+        //   export Foo::Bar::Baz
+        //   export_for_test Foo::Bar
+        return shorter.type == ExportType::PrivateTest && longer.type == ExportType::Public &&
+               shorter.fqn.loc.file() == longer.fqn.loc.file() && ctx.file == shorter.fqn.loc.file();
     }
 
     bool isSpecMethod(const sorbet::ast::Send &send) const {
