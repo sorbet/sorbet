@@ -20,16 +20,25 @@ module Opus::Foo
   Test::Opus::Foo::Bar::BarClassTest
 # ^^^^ error: Unable to resolve constant `Test`
 
+
   # via import Opus::Util
   Opus::Util::UtilClass
   Test::Opus::Util::TestUtil
 # ^^^^ error: Unable to resolve constant `Test`
+  #
+  Opus::Util::Nesting::Public.public_method
+
+  # util/__package.rb exposed via export_for_test, cannot access from here:
+  Opus::Util::Nesting.nesting_method
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Method `nesting_method` does not exist on `T.class_of(Opus::Util::Nesting)`
+
 
   # via test_import Opus::TestImported
   Opus::TestImported::TIClass
 # ^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `TestImported`
   Test::Opus::TestImported::TITestClass
 # ^^^^ error: Unable to resolve constant `Test`
+
 
   # via export_for_test Opus::Foo::Private::ImplDetail
   Opus::Foo::Private::ImplDetail.stub_stuff!
