@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C ActiveSupport>::<C TestCase><<C <todo sym>>> < ()
+  class <emptyTree>::<C ActiveSupport>::<C TestCase><<C <todo sym>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
@@ -31,6 +31,41 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.assert(true)
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def setup<<todo method>>(&<blk>)
+      begin
+        @a = 1
+        <self>.foo()
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def setup<<todo method>>(&<blk>)
+      <self>.bar()
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def teardown<<todo method>>(&<blk>)
+      <self>.fiz()
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def teardown<<todo method>>(&<blk>)
+      <self>.baz()
+    end
+
     ::Sorbet::Private::Static.keep_def(<self>, :assert, :normal)
 
     ::Sorbet::Private::Static.keep_self_def(<self>, :test, :normal)
@@ -56,5 +91,35 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :test_valid_method_call, :normal)
 
     ::Sorbet::Private::Static.keep_def(<self>, :test_block_is_evaluated_in_the_context_of_an_instance, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :setup, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :setup, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :teardown, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :teardown, :normal)
+  end
+
+  class <emptyTree>::<C NoMatchTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
+    def self.setup<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def self.teardown<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :setup, :normal)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :teardown, :normal)
+
+    <self>.setup() do ||
+      <self>.foo()
+    end
+
+    <self>.teardown() do ||
+      <self>.bar()
+    end
   end
 end
