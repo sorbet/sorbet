@@ -1767,6 +1767,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     for (auto &semanticExtension : this->semanticExtensions) {
         result->semanticExtensions.emplace_back(semanticExtension->deepCopy(*this, *result));
     }
+    result->packageDB_ = move(*packageDB_.deepCopy().get());
     result->sanityCheck();
     {
         Timer timeit2(tracer(), "GlobalState::deepCopyOut");
@@ -1901,6 +1902,14 @@ FileRef GlobalState::findFileByPath(string_view path) const {
         return fnd->second;
     }
     return FileRef();
+}
+
+const packages::PackageDB &GlobalState::packageDB() const {
+    return packageDB_;
+}
+
+packages::UnfreezePackages GlobalState::unfreezePackages() {
+    return packageDB_.unfreeze();
 }
 
 unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState> what, FileRef fref) {
