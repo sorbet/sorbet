@@ -569,11 +569,40 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                                     builder, irctx, rubyBlockId);
                 }
                 if (hasKWArgs) {
-                    if (hasKWRestArgs) {
-                        ENFORCE(kwRestArgName.exists());
+                    // If we have a kwsplat arg, the caller/VM will always make sure that
+                    // our keyword args are rolled up into the splat, so there's no point
+                    // in attempting to take the efficient parsing route.
+                    //
+                    // Blocks also take the splat route always.
+                    if (hasKWRestArgs || rubyBlockId != 0) {
+                        parseKeywordArgsFromKwSplat(cs, builder, irctx, kwRestArgName, hashArgs, maxPositionalArgCount,
+                                                    argsFlags, rubyBlockId);
+                    } else {
+                        // Due to the wonders of Ruby, we can't always be assured that
+                        // our kwargs are passed directly on the stack.  They might
+                        // be in the kwsplat arg that we determined earlier.  So we need
+                        // a runtime check to determine how to parse the args.
+                        auto *check = builder.CreateCall(cs.getFunction("sorbet_can_efficiently_parse_kwargs"),
+                                                         {hashArgs, func->arg_begin() + 4, func->arg_begin() + 5}, "efficient?");
+                        auto *efficientBlock = llvm::BasicBlock::Create(cs, "efficientParsing", func);
+                        auto *hashBlock = llvm::BasicBlock::Create(cs, "kwsplatParsing", func);
+                        auto *continuationBlock = llvm::BasicBlock::Create(cs, "continuationBlock", func);
+
+                        builder.CreateCondBr(check, efficientBlock, hashBlock);
+
+                        builder.SetInsertPoint(efficientBlock);
+                        parseKeywordArgsFromCallData(cs, builder, irctx, kwRestArgName,
+                                                     argCountRaw, argArrayRaw, hashArgs,
+                                                     maxPositionalArgCount, argsFlags, rubyBlockId);
+                        builder.CreateBr(continuationBlock);
+
+                        builder.SetInsertPoint(hashBlock);
+                        parseKeywordArgsFromKwSplat(cs, builder, irctx, kwRestArgName, hashArgs, maxPositionalArgCount,
+                                                    argsFlags, rubyBlockId);
+                        builder.CreateBr(continuationBlock);
+
+                        builder.SetInsertPoint(continuationBlock);
                     }
-                    parseKeywordArgsFromKwSplat(cs, builder, irctx, kwRestArgName, hashArgs, maxPositionalArgCount,
-                                                argsFlags, rubyBlockId);
                 }
             }
         }

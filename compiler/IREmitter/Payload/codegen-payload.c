@@ -1790,6 +1790,16 @@ _Bool sorbet_is_kwarg_calldata(void *cdp) {
 }
 
 SORBET_INLINE
+_Bool sorbet_can_efficiently_parse_kwargs(VALUE maybeHash, void *callingp, void *cdp) {
+    // We have a kwargs hash, so take the slower path.
+    if (maybeHash != RUBY_Qundef) {
+        return false;
+    }
+
+    return !sorbet_is_kwsplat_calling(callingp) && sorbet_is_kwarg_calldata(cdp);
+}
+
+SORBET_INLINE
 VALUE sorbet_kwarg_passed_value(void *cdp, ID kwarg, VALUE *kwargv) {
     struct rb_kwarg_call_data *cd = (struct rb_kwarg_call_data *)cdp;
     struct rb_call_info_kw_arg *ci_kw_arg = cd->ci_kw.kw_arg;
