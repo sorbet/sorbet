@@ -8,22 +8,38 @@ namespace sorbet::rewriter {
  * This class desugars things of the form
  *
  *    class MyTest < ActiveSupport::TestCase
- *      test "the truth" do
- *          assert true
+ *      setup do
+ *        @a = 1
+ *      end
+ *
+ *      test "the equality" do
+ *        assert_equal 1, @a
+ *      end
+ *
+ *      teardown do
+ *        @a = nil
  *      end
  *    end
  *
  * into
  *
  *    class MyTest < ActiveSupport::TestCase
- *      def test_the_truth
- *        assert true
+ *      def setup
+ *        @a = 1
+ *      end
+ *
+ *      def test_the_equality
+ *        assert_equal 1, @a
+ *      end
+ *
+ *      def teardown
+ *        @a = nil
  *      end
  *    end
  */
 class TestCase final {
 public:
-    static std::vector<ast::ExpressionPtr> run(core::MutableContext ctx, ast::Send *send);
+    static void run(core::MutableContext ctx, ast::ClassDef *klass);
 
     TestCase() = delete;
 };

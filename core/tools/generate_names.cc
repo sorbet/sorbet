@@ -280,6 +280,8 @@ NameDef names[] = {
     {"rewriterRaiseUnimplemented", "Sorbet rewriter pass partially unimplemented"},
 
     {"test"},
+    {"setup"},
+    {"teardown"},
     // end DSL methods
 
     // The next two names are used as keys in SymbolInfo::members to store

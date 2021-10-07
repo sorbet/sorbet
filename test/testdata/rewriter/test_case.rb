@@ -1,8 +1,9 @@
 # typed: true
-module ActiveSupport::TestCase
+
+class ActiveSupport::TestCase
 end
 
-class MyTest < ActiveSupport::TestCase # error: The super class `ActiveSupport::TestCase` of `MyTest` does not derive from `Class`
+class MyTest < ActiveSupport::TestCase
   # Helper instance method
   def assert(test)
     test ? true : false
@@ -10,6 +11,15 @@ class MyTest < ActiveSupport::TestCase # error: The super class `ActiveSupport::
 
   # Helper method to direct calls to `test` instead of Kernel#test
   def self.test(*args)
+  end
+
+  setup do
+    @a = 1
+    foo # error: Method `foo` does not exist on `MyTest`
+  end
+
+  setup do
+    bar # error: Method `bar` does not exist on `MyTest`
   end
 
   # Method calls that shouldn't be rewritten
@@ -34,5 +44,26 @@ class MyTest < ActiveSupport::TestCase # error: The super class `ActiveSupport::
 
   test "block is evaluated in the context of an instance" do
     assert true
+  end
+
+  teardown do
+    fiz # error: Method `fiz` does not exist on `MyTest`
+  end
+
+  teardown do
+    baz # error: Method `baz` does not exist on `MyTest`
+  end
+end
+
+class NoMatchTest < ActiveSupport::TestCase
+  def self.setup; end
+  def self.teardown; end
+
+  setup do
+    foo # error: Method `foo` does not exist on `T.class_of(NoMatchTest)`
+  end
+
+  teardown do
+    bar # error: Method `bar` does not exist on `T.class_of(NoMatchTest)`
   end
 end
