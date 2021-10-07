@@ -9954,6 +9954,9 @@ class Bundler::StubSpecification < Bundler::RemoteSpecification
   sig {returns(T.untyped)}
   def default_gem(); end
 
+  sig { returns(T::Boolean) }
+  def default_gem?; end
+
   sig {returns(T.untyped)}
   def full_gem_path(); end
 
