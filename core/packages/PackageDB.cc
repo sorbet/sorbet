@@ -52,12 +52,10 @@ UnfreezePackages::~UnfreezePackages() {
 NameRef PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
     ENFORCE(!frozen);
     ENFORCE(writerThread == this_thread::get_id(), "PackageDB writes are not thread safe");
-    // TODO enforce packaging enabled
     auto nr = pkg->mangledName();
     auto prev = packages.find(nr);
     if (prev == packages.end()) {
         for (const auto &prefix : pkg->pathPrefixes()) {
-            // TODO can we not copy
             packagesByPathPrefix[prefix] = nr;
         }
     } else {
