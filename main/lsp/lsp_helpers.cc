@@ -294,6 +294,53 @@ SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym
     return SymbolKind::Unknown;
 }
 
+namespace {
+
+// Checks if s is a subclass of root or contains root as a mixin, and updates visited and memoized vectors.
+bool isSubclassOrMixin(const core::GlobalState &gs, core::ClassOrModuleRef root, core::ClassOrModuleRef s,
+                       std::vector<bool> &memoized, std::vector<bool> &visited) {
+    // don't visit the same class twice
+    if (visited[s.id()] == true) {
+        return memoized[s.id()];
+    }
+    visited[s.id()] = true;
+
+    for (auto a : s.data(gs)->mixins()) {
+        if (a == root) {
+            memoized[s.id()] = true;
+            return true;
+        }
+    }
+    if (s.data(gs)->superClass().exists()) {
+        memoized[s.id()] = isSubclassOrMixin(gs, root, s.data(gs)->superClass(), memoized, visited);
+    }
+
+    return memoized[s.id()];
+}
+
+} // namespace
+
+// This is slow. See the comment in the header file.
+vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, core::ClassOrModuleRef sym,
+                                                 bool includeSelf) {
+    vector<bool> memoized(gs.classAndModulesUsed());
+    vector<bool> visited(gs.classAndModulesUsed());
+    memoized[sym.id()] = true;
+    visited[sym.id()] = true;
+
+    vector<core::ClassOrModuleRef> subclasses;
+    for (u4 i = 1; i < gs.classAndModulesUsed(); ++i) {
+        auto s = core::ClassOrModuleRef(gs, i);
+        if (!includeSelf && s == sym) {
+            continue;
+        }
+        if (isSubclassOrMixin(gs, sym, s, memoized, visited)) {
+            subclasses.emplace_back(s);
+        }
+    }
+    return subclasses;
+}
+
 /**
  * Retrieves the documentation above a symbol.
  * - Returned documentation has one trailing newline (if it exists)

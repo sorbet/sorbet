@@ -39,7 +39,9 @@ const MethodImplementationResults findMethodImplementations(const core::GlobalSt
     }
 
     auto owningClassSymbolRef = owner.asClassOrModuleRef();
-    auto childClasses = owningClassSymbolRef.getSubclasses(gs, false);
+    auto includeOwner = false;
+    // Scans whole symbol table. This is slow, and we might need to make this faster eventually.
+    auto childClasses = getSubclassesSlow(gs, owningClassSymbolRef, includeOwner);
     auto methodName = method.data(gs)->name;
     for (const auto &childClass : childClasses) {
         auto methodImplementation = childClass.data(gs)->findMember(gs, methodName);

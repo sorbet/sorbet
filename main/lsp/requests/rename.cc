@@ -92,7 +92,9 @@ void addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symb
     // method_class_hierarchy test case for an example).
     auto root = findRootClassWithMethod(gs, symbolClass, symbolData->name);
 
-    auto subclasses = root.getSubclasses(gs);
+    // Scans whole symbol table. This is slow, and we might need to make this faster eventually.
+    auto includeRoot = true;
+    auto subclasses = getSubclassesSlow(gs, root, includeRoot);
 
     // find the target method definition in each subclass
     for (auto c : subclasses) {

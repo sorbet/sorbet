@@ -96,5 +96,19 @@ core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &ty
                             core::TypePtr receiver, const core::TypeConstraint *constr);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym);
 
+// Returns all subclasses of ClassOrModuleRef (including itself)
+//
+// This method scans the entire list of classes or modules, which means scanning tens of thousands,
+// at least.
+//
+// This method MUST NOT be used in Sorbet's core type checking pipeline, because it would be
+// prohibitively expensive. It is defined here in lsp_helpers for use implementing certain LSP
+// methods where performance is not a constraint (i.e., where the user is ok waiting for multiple
+// seconds for a response). This means it must not be used to respond to e.g. completion requests.
+//
+// @param includeSelf Whether to include `sym` in the list of subclasses or not.
+std::vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, core::ClassOrModuleRef sym,
+                                                      bool includeSelf);
+
 } // namespace sorbet::realmain::lsp
 #endif // RUBY_TYPER_LSPLOOP_H

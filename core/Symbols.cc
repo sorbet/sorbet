@@ -22,31 +22,6 @@ namespace sorbet::core {
 using namespace std;
 
 namespace {
-
-// Checks if s is a subclass of root or contains root as a mixin, and updates visited and memoized vectors.
-bool isSubclassOrMixin(const core::GlobalState &gs, core::ClassOrModuleRef root, core::ClassOrModuleRef s,
-                       std::vector<bool> &memoized, std::vector<bool> &visited) {
-    // don't visit the same class twice
-    if (visited[s.id()] == true) {
-        return memoized[s.id()];
-    }
-    visited[s.id()] = true;
-
-    for (auto a : s.data(gs)->mixins()) {
-        if (a == root) {
-            memoized[s.id()] = true;
-            return true;
-        }
-    }
-    if (s.data(gs)->superClass().exists()) {
-        memoized[s.id()] = isSubclassOrMixin(gs, root, s.data(gs)->superClass(), memoized, visited);
-    }
-
-    return memoized[s.id()];
-}
-} // namespace
-
-namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;
 constexpr string_view HASH_SEPARATOR = "#"sv;
 
@@ -73,26 +48,6 @@ bool ClassOrModuleRef::operator==(const ClassOrModuleRef &rhs) const {
 
 bool ClassOrModuleRef::operator!=(const ClassOrModuleRef &rhs) const {
     return rhs._id != this->_id;
-}
-
-// Returns all subclasses of ClassOrModuleRef (including itself)
-vector<core::ClassOrModuleRef> ClassOrModuleRef::getSubclasses(const core::GlobalState &gs, bool withSelf) {
-    vector<bool> memoized(gs.classAndModulesUsed());
-    vector<bool> visited(gs.classAndModulesUsed());
-    memoized[this->id()] = true;
-    visited[this->id()] = true;
-
-    vector<core::ClassOrModuleRef> subclasses;
-    for (u4 i = 1; i < gs.classAndModulesUsed(); ++i) {
-        auto s = core::ClassOrModuleRef(gs, i);
-        if (!withSelf && s == *this) {
-            continue;
-        }
-        if (isSubclassOrMixin(gs, *this, s, memoized, visited)) {
-            subclasses.emplace_back(s);
-        }
-    }
-    return subclasses;
 }
 
 bool MethodRef::operator==(const MethodRef &rhs) const {
