@@ -83,6 +83,11 @@ module T::Props
         lazily_defined_methods[name] = blk
 
         cls = decorated_class
+        if cls.method_defined?(name)
+          # Ruby doesn not emit "method redefined" warnings for aliased methods
+          # (more robust than undef_method that would create a small window in which the method doesn't exist)
+          cls.send(:alias_method, name, name)
+        end
         cls.send(:define_method, name) do |*args|
           self.class.decorator.send(:eval_lazily_defined_method!, name)
           send(name, *args)
