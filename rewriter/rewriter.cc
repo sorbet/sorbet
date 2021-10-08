@@ -52,6 +52,7 @@ public:
         TypeMembers::run(ctx, classDef);
         Singleton::run(ctx, classDef);
         Concern::run(ctx, classDef);
+        TestCase::run(ctx, classDef);
 
         for (auto &extension : ctx.state.semanticExtensions) {
             extension->run(ctx, classDef);
@@ -118,12 +119,6 @@ public:
                     }
 
                     nodes = Delegate::run(ctx, &send);
-                    if (!nodes.empty()) {
-                        replaceNodes[stat.get()] = std::move(nodes);
-                        return;
-                    }
-
-                    nodes = TestCase::run(ctx, &send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
