@@ -15,7 +15,7 @@ puts my_name(name: "Paul")
 
 puts f(1, {x: 5}, name: "Nathan")
 
-def builder(name, type,
+def builder(name,
             default: :default_default,
             validate: :validate_default,
             overridable: :overridable_default,
@@ -24,11 +24,11 @@ def builder(name, type,
             skip_set: :skip_set_default,
             inherit: :inherit_default)
   p name
-  p type
   p default, validate, overridable, implied, skip_get, skip_set, inherit
 end
 
-builder(:use_inputs, :maybe, default: :default_passed, inherit: :inherit_passed)
-builder(:use_inputs, true, validate: :validate_passed, implied: :implied_passed)
-builder(:use_inputs, true, skip_get: :skip_get_passed, skip_set: :skip_set_passed)
-builder(:use_inputs, :three_args, overridable: :overridable_passed, skip_get: :skip_get_passed, inherit: :inherit_passed)
+builder(:first_last, default: :default_passed, inherit: :inherit_passed)
+builder(:middles, validate: :validate_passed, implied: :implied_passed)
+builder(:consecutive, skip_get: :skip_get_passed, skip_set: :skip_set_passed)
+builder(:three_args, overridable: :overridable_passed, skip_get: :skip_get_passed, inherit: :inherit_passed)
+builder(tricky: :keyword, args: :passed, as: :hash)
