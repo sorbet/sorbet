@@ -2704,7 +2704,7 @@ class Array < Object
   # c = [["student","sam"], ["student","george"], ["teacher","matz"]]
   # c.uniq! {|s| s.first}   # => [["student", "sam"], ["teacher", "matz"]]
   # ```
-  sig {params(blk: T.nilable(T.proc.params(arg0: Elem).returns(BasicObject))).returns(T::Array[Elem])}
+  sig {params(blk: T.nilable(T.proc.params(arg0: Elem).returns(BasicObject))).returns(T.nilable(T::Array[Elem]))}
   def uniq!(&blk); end
 
   # Prepends objects to the front of `self`, moving other elements upwards. See
