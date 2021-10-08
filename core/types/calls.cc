@@ -2972,7 +2972,16 @@ class Array_flatten : public IntrinsicMethod {
 
         auto dispatched = type.dispatchCall(gs, innerArgs);
         if (dispatched.main.errors.empty()) {
-            return recursivelyFlattenArrays(gs, args, move(dispatched.returnType), newDepth);
+            if (dispatched.returnType.isNilClass()) {
+                // According to the Ruby spec, it is valid for `to_ary` to return `nil`
+                // which will stop `flatten` descending further.
+                //
+                // So, when we find a `NilClass` return type from `to_ary`, the type
+                // we have is the one we are looking for.
+                return type;
+            } else {
+                return recursivelyFlattenArrays(gs, args, move(dispatched.returnType), newDepth);
+            }
         }
 
         return type;
