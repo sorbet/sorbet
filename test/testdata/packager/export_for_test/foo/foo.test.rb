@@ -9,6 +9,11 @@ class Test::Opus::Foo::FooTest
   # via import Opus::Util
   Opus::Util::UtilClass
   Test::Opus::Util::TestUtil
+  Opus::Util::Nesting::Public.public_method
+
+  # util/__package.rb exposed via export_for_test, cannot access from here:
+  Opus::Util::Nesting.nesting_method
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Method `nesting_method` does not exist on `T.class_of(Opus::Util::Nesting)`
 
   # via test_import Opus::TestImported
   Opus::TestImported::TIClass
