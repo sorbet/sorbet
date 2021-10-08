@@ -125,8 +125,9 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
             return response;
         }
 
+        auto includeClassSymbol = false;
         auto classOrModuleRef = classSymbol.asClassOrModuleRef();
-        auto childClasses = classOrModuleRef.getSubclasses(gs, false);
+        auto childClasses = getSubclassesSlow(gs, classOrModuleRef, includeClassSymbol);
         for (const auto &childClass : childClasses) {
             for (auto loc : childClass.data(gs)->locs()) {
                 addLocIfExists(gs, result, loc);
