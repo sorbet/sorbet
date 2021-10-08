@@ -831,8 +831,8 @@ private:
     }
 };
 
-ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, core::NameRef packageMangledName,
-                                    const PackageInfoImpl &pkg, bool isTestFile) {
+ast::ParsedFile wrapFileInPackageModule(core::Context ctx, ast::ParsedFile file, core::NameRef packageMangledName,
+                                        const PackageInfoImpl &pkg, bool isTestFile) {
     if (ast::isa_tree<ast::EmptyTree>(file.tree)) {
         // Nothing to wrap. This occurs when a file is marked typed: Ignore.
         return file;
@@ -944,6 +944,36 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
     return file;
 }
 
+ast::ParsedFile rewritePackagedFile(core::GlobalState &gs, ast::ParsedFile parsedFile) {
+    auto &file = parsedFile.file.data(gs);
+    ENFORCE(file.sourceType != core::File::Type::Package);
+    core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
+    auto &pkg = gs.packageDB().getPackageForFile(ctx, ctx.file);
+    if (pkg.exists()) {
+        auto &pkgImpl = PackageInfoImpl::from(pkg);
+        parsedFile =
+            wrapFileInPackageModule(ctx, move(parsedFile), pkgImpl.name.mangledName, pkgImpl, isTestFile(gs, file));
+    } else {
+        // Don't transform, but raise an error on the first line.
+        if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
+            e.setHeader("File `{}` does not belong to a package; add a `__package.rb` file to one "
+                        "of its parent directories",
+                        ctx.file.data(gs).path());
+        }
+    }
+    return parsedFile;
+}
+
+// Re-write source files to be in packages. This is only called if no package definitions were
+// changed.
+vector<ast::ParsedFile> rewritePackagedFilesFast(core::GlobalState &gs, vector<ast::ParsedFile> files) {
+    Timer timeit(gs.tracer(), "packager.rewritePackagedFilesFast");
+    for (auto i = 0; i < files.size(); i++) {
+        files[i] = rewritePackagedFile(gs, move(files[i]));
+    }
+    return files;
+}
+
 vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files,
                                       const vector<std::string> &extraPackageFilesDirectoryPrefixes) {
     Timer timeit(gs.tracer(), "packager");
@@ -1011,21 +1041,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                     filesProcessed++;
                     auto &file = job.file.data(gs);
                     if (file.sourceType == core::File::Type::Normal) {
-                        core::Context ctx(gs, core::Symbols::root(), job.file);
-                        auto &pkg = gs.packageDB().getPackageForFile(ctx, ctx.file);
-                        if (pkg.exists()) {
-                            auto &pkgImpl = PackageInfoImpl::from(pkg);
-                            job = rewritePackagedFile(ctx, move(job), pkgImpl.name.mangledName, pkgImpl,
-                                                      isTestFile(gs, file));
-                        } else {
-                            // Don't transform, but raise an error on the first line.
-                            if (auto e =
-                                    ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
-                                e.setHeader("File `{}` does not belong to a package; add a `__package.rb` file to one "
-                                            "of its parent directories",
-                                            ctx.file.data(gs).path());
-                            }
-                        }
+                        job = rewritePackagedFile(gs, move(job));
                     }
                     results.emplace_back(move(job));
                 }
@@ -1056,13 +1072,20 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
 
 vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files,
                                                  const vector<std::string> &extraPackageFilesDirectoryPrefixes) {
-    // Just run all packages w/ the changed files through Packager again. It should not define any new names.
-    // TODO(jvilk): This incremental pass reprocesses every package file in the project. It should instead only process
-    // the packages needed to understand file changes.
-    ENFORCE(checkContainsAllPackages(gs, files));
+    // However, if only source files have changed the existing PackageDB can be used to re-process
+    // the changed files only.
+    // TODO(nroman-stripe) This could be further incrementalized to avoid processing all packages by
+    // building in an understanding of the dependencies between packages.
     auto namesUsed = gs.namesUsedTotal();
-    auto emptyWorkers = WorkerPool::create(0, gs.tracer());
-    files = Packager::run(gs, *emptyWorkers, move(files), extraPackageFilesDirectoryPrefixes);
+    bool packageDefChanged = absl::c_any_of(
+        files, [&gs](const auto &pf) -> bool { return pf.file.data(gs).sourceType == core::File::Type::Package; });
+    if (packageDefChanged) {
+        ENFORCE(checkContainsAllPackages(gs, files));
+        auto emptyWorkers = WorkerPool::create(0, gs.tracer());
+        files = Packager::run(gs, *emptyWorkers, move(files), extraPackageFilesDirectoryPrefixes);
+    } else {
+        files = rewritePackagedFilesFast(gs, move(files));
+    }
     ENFORCE(gs.namesUsedTotal() == namesUsed);
     return files;
 }
