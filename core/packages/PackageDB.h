@@ -26,7 +26,7 @@ public:
     const PackageInfo &getPackageForFile(const core::GlobalState &gs, core::FileRef file) const;
     const PackageInfo &getPackageInfo(core::NameRef mangledName) const;
 
-    std::unique_ptr<PackageDB> deepCopy() const;
+    PackageDB deepCopy() const;
 
     UnfreezePackages unfreeze();
 

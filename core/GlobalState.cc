@@ -1767,7 +1767,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     for (auto &semanticExtension : this->semanticExtensions) {
         result->semanticExtensions.emplace_back(semanticExtension->deepCopy(*this, *result));
     }
-    result->packageDB_ = move(*packageDB_.deepCopy().get());
+    result->packageDB_ = packageDB_.deepCopy();
     result->sanityCheck();
     {
         Timer timeit2(tracer(), "GlobalState::deepCopyOut");

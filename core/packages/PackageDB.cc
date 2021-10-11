@@ -109,14 +109,14 @@ const PackageInfo &PackageDB::getPackageInfo(core::NameRef mangledName) const {
     return *it->second;
 }
 
-unique_ptr<PackageDB> PackageDB::deepCopy() const {
+PackageDB PackageDB::deepCopy() const {
     ENFORCE(frozen);
-    auto result = make_unique<PackageDB>();
-    result->packages.reserve(this->packages.size());
+    PackageDB result;
+    result.packages.reserve(this->packages.size());
     for (auto const &[nr, pkgInfo] : this->packages) {
-        result->packages[nr] = pkgInfo->deepCopy();
+        result.packages[nr] = pkgInfo->deepCopy();
     }
-    result->packagesByPathPrefix = this->packagesByPathPrefix;
+    result.packagesByPathPrefix = this->packagesByPathPrefix;
     return result;
 }
 
