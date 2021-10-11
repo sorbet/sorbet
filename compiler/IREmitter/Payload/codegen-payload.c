@@ -1797,6 +1797,40 @@ VALUE sorbet_removeKWArg(VALUE maybeHash, VALUE key) {
     return rb_hash_delete_entry(maybeHash, key);
 }
 
+// The compiler has intimate knowledge of the layout of this structure.
+struct sorbet_kwsplat_arg_context {
+    int argc;
+    VALUE hashArgs;
+};
+
+// This function is called from function argument validation to determine if
+// the function has been passed a kwsplat argument.
+SORBET_INLINE
+struct sorbet_kwsplat_arg_context sorbet_determineKwSplatArg(int argc, VALUE *argv, int minPositionalArgCount) {
+    const VALUE noHash = RUBY_Qundef;
+
+    // If we definitely have enough arguments to fill out the minimum number
+    // of arguments, then the last argument might be a kwsplat hash for
+    // keyword args.  We'll need to adjust the actual argument count for our
+    // caller, who will use the adjusted value to validate the function's
+    // arity (if appropriate).
+
+    if (minPositionalArgCount < argc) {
+        int argcWithoutHashCount = argc - 1;
+        VALUE maybeHash = argv[argcWithoutHashCount];
+        if (sorbet_isa_Hash(maybeHash)) {
+            struct sorbet_kwsplat_arg_context ctx = {argcWithoutHashCount, maybeHash};
+            return ctx;
+        }
+
+        struct sorbet_kwsplat_arg_context ctx = {argc, noHash};
+        return ctx;
+    }
+
+    struct sorbet_kwsplat_arg_context ctx = {argc, noHash};
+    return ctx;
+}
+
 SORBET_INLINE
 void sorbet_assertAllRequiredKWArgs(VALUE missing) {
     if (LIKELY(missing == RUBY_Qundef)) {

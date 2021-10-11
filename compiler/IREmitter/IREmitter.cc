@@ -119,54 +119,6 @@ void setupStackFrames(CompilerState &base, const ast::MethodDef &md, const IREmi
     }
 }
 
-tuple<llvm::Value *, llvm::Value *> determineKwSplatArg(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                                        const IREmitterContext &irctx, int minPositionalArgCount,
-                                                        llvm::Value *argCountRaw, llvm::Value *argArrayRaw,
-                                                        llvm::Value *hashArgs, int rubyBlockId) {
-    auto *func = irctx.rubyBlocks2Functions[rubyBlockId];
-    auto hasEnoughArgs = llvm::BasicBlock::Create(cs, "readKWHashArgCountSuccess", func);
-    auto hasPassedHash = llvm::BasicBlock::Create(cs, "readKWHash", func);
-    auto afterHash = llvm::BasicBlock::Create(cs, "afterKWHash", func);
-
-    // Check that there are enough arguments to fill out minPositionalArgCount
-    // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2547
-    auto argSizeForHashCheck = builder.CreateICmpULT(llvm::ConstantInt::get(cs, llvm::APInt(32, minPositionalArgCount)),
-                                                     argCountRaw, "hashAttemptReadGuard");
-    builder.CreateCondBr(argSizeForHashCheck, hasEnoughArgs, afterHash);
-
-    auto sizeTestFailedEnd = builder.GetInsertBlock();
-    builder.SetInsertPoint(hasEnoughArgs);
-    llvm::Value *argsWithoutHashCount =
-        builder.CreateSub(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, 1)), "argsWithoutHashCount");
-
-    llvm::Value *indices[] = {argsWithoutHashCount};
-
-    auto maybeHashValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "KWArgHash");
-
-    // checkIfLastArgIsHash
-    auto isHashValue =
-        Payload::typeTest(cs, builder, maybeHashValue, core::make_type<core::ClassType>(core::Symbols::Hash()));
-
-    builder.CreateCondBr(isHashValue, hasPassedHash, afterHash);
-
-    auto hashTypeFailedTestEnd = builder.GetInsertBlock();
-    builder.SetInsertPoint(hasPassedHash);
-    // yes, this is an empty block. It's used only for Phi node
-    auto hasPassedHashEnd = builder.GetInsertBlock();
-    builder.CreateBr(afterHash);
-    builder.SetInsertPoint(afterHash);
-    auto hashArgsPhi = builder.CreatePHI(builder.getInt64Ty(), 3, "hashArgsPhi");
-    auto argcPhi = builder.CreatePHI(builder.getInt32Ty(), 3, "argcPhi");
-    argcPhi->addIncoming(argCountRaw, sizeTestFailedEnd);
-    argcPhi->addIncoming(argCountRaw, hashTypeFailedTestEnd);
-    hashArgsPhi->addIncoming(hashArgs, sizeTestFailedEnd);
-    hashArgsPhi->addIncoming(hashArgs, hashTypeFailedTestEnd);
-    argcPhi->addIncoming(argsWithoutHashCount, hasPassedHashEnd);
-    hashArgsPhi->addIncoming(maybeHashValue, hasPassedHashEnd);
-
-    return {argcPhi, hashArgsPhi};
-}
-
 void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                  cfg::LocalRef kwRestArgName, llvm::Value *hashArgs, int maxPositionalArgCount,
                                  const vector<core::ArgInfo::ArgFlags> &argsFlags, int rubyBlockId) {
@@ -320,8 +272,12 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
             if (hasKWArgs) {
                 // if last argument is a hash, it's not part of positional arguments - it's going to
                 // fullfill all kw arguments instead
-                std::tie(argCountRaw, hashArgs) = determineKwSplatArg(cs, builder, irctx, minPositionalArgCount,
-                                                                      argCountRaw, argArrayRaw, hashArgs, rubyBlockId);
+                auto *minPositionalArgValue = llvm::ConstantInt::get(cs, llvm::APInt(32, minPositionalArgCount));
+                auto *hashArgsCtx =
+                    builder.CreateCall(cs.getFunction("sorbet_determineKwSplatArg"),
+                                       {argCountRaw, argArrayRaw, minPositionalArgValue}, "hashArgsCtx");
+                argCountRaw = builder.CreateExtractValue(hashArgsCtx, {0}, "argCountRaw");
+                hashArgs = builder.CreateExtractValue(hashArgsCtx, {1}, "hashArgs");
             }
 
             if (isBlock) {
