@@ -1,6 +1,5 @@
 #include "doctest.h"
 #include <cxxopts.hpp>
-#include <memory>
 // has to go first as it violates our requirements
 
 #include "absl/strings/match.h"
@@ -439,7 +438,6 @@ TEST_CASE("LSPTest") {
                      pair<vector<shared_ptr<ImplementationAssertion>>, vector<shared_ptr<FindImplementationAssertion>>>>
             implementationMap;
         for (auto &assertion : assertions) {
-            fmt::print("*** assertion: {}", assertion->toString());
             if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
                 auto &entry = defUsageMap[defAssertion->symbol];
                 auto &defMap = entry.first;
