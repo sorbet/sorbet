@@ -956,9 +956,9 @@ ast::ParsedFile rewritePackagedFile(core::GlobalState &gs, ast::ParsedFile parse
     } else {
         // Don't transform, but raise an error on the first line.
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
-            e.setHeader("File `{}` does not belong to a package; add a `__package.rb` file to one "
+            e.setHeader("File `{}` does not belong to a package; add a `{}` file to one "
                         "of its parent directories",
-                        ctx.file.data(gs).path());
+                        ctx.file.data(gs).path(), "__package.rb");
         }
     }
     return parsedFile;

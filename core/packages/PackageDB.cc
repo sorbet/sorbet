@@ -37,14 +37,14 @@ static const NonePackage NONE_PKG;
 
 UnfreezePackages::UnfreezePackages(PackageDB &db) : db(db) {
     ENFORCE(db.frozen);
-    db.frozen = false;
     db.writerThread = this_thread::get_id();
+    db.frozen = false;
 }
 
 UnfreezePackages::~UnfreezePackages() {
     ENFORCE(!db.frozen);
-    db.frozen = true;
     db.writerThread = std::thread::id();
+    db.frozen = true;
     // Note in the future we may want to change the data structures involved in a way that requires
     // a finalization step. Controlling freeze/unfreeze with RAII gives a good hook to do that.
 }

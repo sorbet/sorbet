@@ -19,7 +19,8 @@ cc_library(
     hdrs = [
         "GlobalSubstitution.h",
         "core.h",
-    ] + glob(["errors/*.h"]) + glob([
+    ] + glob([
+        "errors/*.h",
         "lsp/*.h",
         "packages/*.h",
     ]),
