@@ -16,10 +16,11 @@ module T::NonForcingConstants
       raise ArgumentError.new("The string given to `#{method_name}` must not be empty")
     end
 
-    # TODO(gdritter): this might not be want we want in a multipackage
-    # world; revisit this implementation we move on from the monopackage
+    # We don't treat packages differently at runtime, but the static
+    # type-checker still needs to have the package and constant
+    # separated out. This just re-assembles the string as needed
     if stripe_packages_enabled?
-      klass = "PkgRegistry::#{package}::#{klass}"
+      klass = "::#{package}::#{klass}"
     end
 
     current_klass = T.let(nil, T.nilable(Module))
