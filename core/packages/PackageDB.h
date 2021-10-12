@@ -26,6 +26,8 @@ public:
     const PackageInfo &getPackageForFile(const core::GlobalState &gs, core::FileRef file) const;
     const PackageInfo &getPackageInfo(core::NameRef mangledName) const;
 
+    u4 countPackages() const;
+
     PackageDB deepCopy() const;
 
     UnfreezePackages unfreeze();
