@@ -1859,8 +1859,8 @@ class ResolveTypeMembersAndFieldsWalk {
             }
             packageType = packageNode->value;
         }
-        // if we got no keyword args, then package should be null, and if we keyword args, then package should be
-        // non-null
+        // if we got no keyword args, then package should be null, and
+        // if we got keyword args, then package should be non-null
         ENFORCE((!send.hasKwArgs() && !packageType) || (send.hasKwArgs() && packageType));
 
         auto name = literal.asName(ctx);
@@ -1872,10 +1872,29 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        // If this string _begins_ with `::`, then the first fragment will be an empty string; in multiple places below,
-        // we'll check to find out whether the first part is `""` or not, which means we're testing whether the string
-        // did or did not begin with `::`.
-        auto parts = absl::StrSplit(shortName, "::");
+        // If this string _begins_ with `::`, then the first fragment
+        // will be an empty string; in multiple places below, we'll
+        // check to find out whether the first part is `""` or not,
+        // which means we're testing whether the string did or did not
+        // begin with `::`.
+        vector<string> parts = absl::StrSplit(shortName, "::");
+        // we want package mode to be theoretically compatible with
+        // non-package mode, so this special case exists for that: if
+        // we are given a package `A::B`, and a constant `C::D`, then
+        // we want to treat that like the user just wrote
+        // `::A::B::C::D`.
+        if (packageType && core::Symbols::PackageRegistry().data(ctx)->members().size() == 1) {
+            auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
+            auto name = package.asName(ctx).shortName(ctx);
+            vector<string> pkgParts = absl::StrSplit(name, "::");
+            // add the initial empty string to mimic the leading `::`
+            pkgParts.insert(pkgParts.begin(), "");
+            // and now add the rest of `parts` to it
+            pkgParts.insert(pkgParts.end(), parts.begin(), parts.end());
+            // and then treat this new vector as the parts to walk over
+            parts = move(pkgParts);
+        }
+
         core::SymbolRef current;
         for (auto part : parts) {
             if (!current.exists()) {
