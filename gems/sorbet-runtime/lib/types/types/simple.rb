@@ -48,8 +48,6 @@ module T::Types
 
           type = if mod == ::Array
             T::Array[T.untyped]
-          elsif mod == ::Set
-            T::Set[T.untyped]
           elsif mod == ::Hash
             T::Hash[T.untyped, T.untyped]
           elsif mod == ::Enumerable
@@ -58,6 +56,8 @@ module T::Types
             T::Enumerator[T.untyped]
           elsif mod == ::Range
             T::Range[T.untyped]
+          elsif !Object.autoload?(:Set) && Object.const_defined?(:Set) && mod == ::Set
+            T::Set[T.untyped]
           else
             Simple.new(mod)
           end

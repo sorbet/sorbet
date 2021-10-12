@@ -415,21 +415,21 @@ module T::Configuration
         raise ArgumentError.new("Provided values must all be class name strings.")
       end
 
-      @scalar_types = Set.new(values).freeze
+      @scalar_types = values.reduce({}) {|acc, x| acc[x] = true; acc}.freeze
     end
   end
 
-  @default_scalar_types = Set.new(%w[
-    NilClass
-    TrueClass
-    FalseClass
-    Integer
-    Float
-    String
-    Symbol
-    Time
-    T::Enum
-  ]).freeze
+  @default_scalar_types = {
+    "NilClass" => true,
+    "TrueClass" => true,
+    "FalseClass" => true,
+    "Integer" => true,
+    "Float" => true,
+    "String" => true,
+    "Symbol" => true,
+    "Time" => true,
+    "T::Enum" => true,
+  }.freeze
 
   def self.scalar_types
     @scalar_types || @default_scalar_types

@@ -1089,7 +1089,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
   describe 'with a module prop type' do
     before do
-      T::Configuration.scalar_types += [ModulePropStruct::Scalar.name]
+      T::Configuration.scalar_types = T::Configuration.scalar_types.keys + [ModulePropStruct::Scalar.name]
     end
 
     after do
@@ -1105,6 +1105,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'is not cloned on serde if set as scalar' do
+      # require 'pry'; binding.pry
       val = ModulePropStruct::ConcreteScalar.new
       T::Props::Utils.expects(:deep_clone_object).never
 

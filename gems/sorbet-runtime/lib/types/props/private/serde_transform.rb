@@ -88,6 +88,7 @@ module T::Props
             # string comparisons.
             nil
           else
+            # require 'pry'; binding.pry
             "T::Props::Utils.deep_clone_object(#{varname})"
           end
         when T::Types::Union
