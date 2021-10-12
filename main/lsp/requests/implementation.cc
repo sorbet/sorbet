@@ -1,9 +1,7 @@
-#include "main/lsp/requests/go_to_implementation.h"
+#include "main/lsp/requests/implementation.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
-#include <cstddef>
-#include <memory>
 
 using namespace std;
 
@@ -19,11 +17,17 @@ unique_ptr<ResponseError> makeInvalidParamsError(std::string error) {
     return make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams, error);
 }
 
+unique_ptr<ResponseError> makeInvalidRequestError(core::SymbolRef symbol, const core::GlobalState &gs) {
+    auto errorMessage = fmt::format("Selected symbol `{}` is not a method or a reference of an abstract class. `Go To "
+                                    "Implementation` request can't be applied",
+                                    symbol.show(gs));
+    return make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams, errorMessage);
+}
+
 const MethodImplementationResults findMethodImplementations(const core::GlobalState &gs, core::SymbolRef method) {
     MethodImplementationResults res;
     if (!method.data(gs)->isMethod() || !method.data(gs)->isAbstract()) {
-        res.error = makeInvalidParamsError(
-            "Go to implementation can be used only for methods or references of abstract classes");
+        res.error = makeInvalidRequestError(method, gs);
         return res;
     }
 
@@ -59,12 +63,18 @@ core::SymbolRef findOverridedMethod(const core::GlobalState &gs, const core::Sym
 }
 } // namespace
 
-GoToImplementationTask::GoToImplementationTask(const LSPConfiguration &config, MessageId id,
-                                               std::unique_ptr<ImplementationParams> params)
+ImplementationTask::ImplementationTask(const LSPConfiguration &config, MessageId id,
+                                       std::unique_ptr<ImplementationParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentImplementation), params(move(params)) {}
 
-unique_ptr<ResponseMessage> GoToImplementationTask::runRequest(LSPTypecheckerDelegate &typechecker) {
+unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentImplementation);
+    if (!config.opts.lspGoToImplementationEnabled) {
+        response->error = make_unique<ResponseError>(
+            (int)LSPErrorCodes::InvalidRequest,
+            "The `Go To Implementation` LSP feature is experimental and disabled by default.");
+        return response;
+    }
 
     const core::GlobalState &gs = typechecker.state();
     auto queryResult =
@@ -86,9 +96,7 @@ unique_ptr<ResponseMessage> GoToImplementationTask::runRequest(LSPTypecheckerDel
         // User called "Go to Implementation" from the abstract function definition
         core::SymbolRef method = def->symbol;
         if (!method.data(gs)->isMethod()) {
-            response->error = make_unique<ResponseError>(
-                (int)LSPErrorCodes::InvalidParams,
-                "Go to implementation can be used only for methods or references of abstract classes");
+            response->error = makeInvalidRequestError(method, gs);
             return response;
         }
 
@@ -111,9 +119,7 @@ unique_ptr<ResponseMessage> GoToImplementationTask::runRequest(LSPTypecheckerDel
         auto classSymbol = constant->symbol;
 
         if (!classSymbol.data(gs)->isClassOrModule() || !classSymbol.data(gs)->isClassOrModuleAbstract()) {
-            response->error = make_unique<ResponseError>(
-                (int)LSPErrorCodes::InvalidParams,
-                "Go to implementation can be used only for methods or references of abstract classes");
+            response->error = makeInvalidRequestError(classSymbol, gs);
             return response;
         }
 

@@ -12,7 +12,6 @@
 #include "core/errors/internal.h"
 #include "core/hashing/hashing.h"
 #include <string>
-#include <vector>
 
 template class std::vector<sorbet::core::TypeAndOrigins>;
 template class std::vector<std::pair<sorbet::core::NameRef, sorbet::core::SymbolRef>>;
