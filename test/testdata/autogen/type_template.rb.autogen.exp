@@ -34,6 +34,6 @@ requires: []
  scope=[A]
  name=[X]
  nesting=[[A]]
- resolved=[<Class:A> X]
+ resolved=[A X]
  loc=test/testdata/autogen/type_template.rb:4
  is_defining_ref=1

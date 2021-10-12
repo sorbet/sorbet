@@ -74,7 +74,7 @@ QualifiedName ParsedFile::showQualifiedName(const core::GlobalState &gs, Definit
 // Pretty-print a `ParsedFile`, including all definitions and references and the pieces of metadata associated with them
 string ParsedFile::toString(const core::GlobalState &gs, int version) const {
     fmt::memory_buffer out;
-    auto nameToString = [&](const auto &nm) -> string { return nm.show(gs); };
+    auto nameToString = [&](const auto &nm) -> string_view { return nm.shortName(gs); };
 
     fmt::format_to(std::back_inserter(out),
                    "# ParsedFile: {}\n"
