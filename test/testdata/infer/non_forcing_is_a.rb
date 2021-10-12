@@ -55,3 +55,12 @@ if T::NonForcingConstants.non_forcing_is_a?(i_or_s, '::String')
   T.reveal_type(i_or_s) # error: Revealed type: `T.any(Integer, String)`
 end
 
+oni = T.unsafe(Outer::Nested::Inner.new)
+if T::NonForcingConstants.non_forcing_is_a?(oni, "Inner", package: "Outer::Nested")
+  puts oni
+  T.reveal_type(oni) # error: Revealed type: `Outer::Nested::Inner`
+end
+if T::NonForcingConstants.non_forcing_is_a?(oni, "Nested::Inner", package: "Outer")
+  puts oni
+  T.reveal_type(oni) # error: Revealed type: `Outer::Nested::Inner`
+end
