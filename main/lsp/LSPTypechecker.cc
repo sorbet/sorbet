@@ -582,10 +582,12 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     vector<ast::ParsedFile> updatedIndexed;
 
+    bool addAllPackages = false;
     for (auto fref : frefs) {
         if (fref.data(*gs).sourceType == core::File::Type::Package) {
             // Will be added in second loop.
             ENFORCE(config->opts.stripePackages);
+            addAllPackages = true;
             continue;
         }
 
@@ -595,8 +597,9 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
         }
     }
 
-    if (config->opts.stripePackages) {
-        // We must include every package file to resolve these files properly.
+    if (addAllPackages) {
+        ENFORCE(config->opts.stripePackages);
+        // We must include every package file to rebuild the full PackageDB.
         for (u4 i = 1; i < gs->filesUsed(); i++) {
             core::FileRef fref(i);
             if (fref.data(*gs).sourceType == core::File::Type::Package) {
