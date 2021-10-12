@@ -1,0 +1,39 @@
+# ParsedFile: test/testdata/autogen/type_template.rb
+requires: []
+## defs:
+[def id=0]
+ type=module
+ defines_behavior=0
+ is_empty=0
+[def id=1]
+ type=class
+ defines_behavior=1
+ is_empty=0
+ defining_ref=[A]
+[def id=2]
+ type=casgn
+ defines_behavior=1
+ is_empty=0
+ defining_ref=[X]
+## refs:
+[ref id=0]
+ scope=[]
+ name=[A]
+ nesting=[]
+ resolved=[A]
+ loc=test/testdata/autogen/type_template.rb:2
+ is_defining_ref=1
+[ref id=1]
+ scope=[A]
+ name=[T Generic]
+ nesting=[[A]]
+ resolved=[T Generic]
+ loc=test/testdata/autogen/type_template.rb:3
+ is_defining_ref=0
+[ref id=2]
+ scope=[A]
+ name=[X]
+ nesting=[[A]]
+ resolved=[<Class:A> X]
+ loc=test/testdata/autogen/type_template.rb:4
+ is_defining_ref=1
