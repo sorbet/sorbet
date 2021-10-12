@@ -1822,9 +1822,6 @@ struct sorbet_kwsplat_arg_context sorbet_determineKwSplatArg(int argc, VALUE *ar
             struct sorbet_kwsplat_arg_context ctx = {argcWithoutHashCount, maybeHash};
             return ctx;
         }
-
-        struct sorbet_kwsplat_arg_context ctx = {argc, noHash};
-        return ctx;
     }
 
     struct sorbet_kwsplat_arg_context ctx = {argc, noHash};
