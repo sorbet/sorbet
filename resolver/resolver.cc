@@ -1883,7 +1883,7 @@ class ResolveTypeMembersAndFieldsWalk {
         // we are given a package `A::B`, and a constant `C::D`, then
         // we want to treat that like the user just wrote
         // `::A::B::C::D`.
-        if (packageType && core::Symbols::PackageRegistry().data(ctx)->members().size() == 1) {
+        if (packageType && ctx.state.packageDB().countPackages() == 0) {
             auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
             auto name = package.asName(ctx).shortName(ctx);
             vector<string> pkgParts = absl::StrSplit(name, "::");
@@ -1893,6 +1893,8 @@ class ResolveTypeMembersAndFieldsWalk {
             pkgParts.insert(pkgParts.end(), parts.begin(), parts.end());
             // and then treat this new vector as the parts to walk over
             parts = move(pkgParts);
+            // we want to make sure we don't take the package path if we've done this
+            packageType = nullptr;
         }
 
         core::SymbolRef current;
@@ -1925,21 +1927,19 @@ class ResolveTypeMembersAndFieldsWalk {
                     auto mangledName = packageName.lookupMangledPackageName(ctx.state);
                     // if the mangled name doesn't exist, then this means probably there's no package named this
                     if (!mangledName.exists()) {
-                        // TODO(gdritter): re-enable this once we implement runtime package support
-                        // if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
-                        //     e.setHeader("Unable to find package: `{}`", packageName.toString(ctx));
-                        // }
-                        // return;
+                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader("Unable to find package: `{}`", packageName.toString(ctx));
+                        }
+                        return;
                         current = core::Symbols::root();
                         continue;
                     }
                     current = core::Symbols::PackageRegistry().data(ctx)->findMember(ctx, mangledName);
                     if (!current.exists()) {
-                        // TODO(gdritter): re-enable this once we implement runtime package support
-                        // if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
-                        //     e.setHeader("Unable to find package `{}`", packageName.toString(ctx));
-                        // }
-                        // return;
+                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader("Unable to find package `{}`", packageName.toString(ctx));
+                        }
+                        return;
                         current = core::Symbols::root();
                         continue;
                     }
