@@ -15,6 +15,7 @@ class A
       f: T::Array[T1],
       g: T::Hash[T1, T2],
       h: T.enum([false, 1, 3.14, "foo", :bar]),
+      h1: T.deprecated_enum([false, 1, 3.14, "foo", :bar]),
       i: A1,
       j: T.class_of(T1),
       k: T.class_of(A1),
@@ -28,6 +29,6 @@ class A
     )
     .returns(T2)
   end
-  def good(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+  def good(a, b, c, d, e, f, g, h, h1, i, j, k, l, m, n, o)
   end
 end

@@ -925,32 +925,38 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   class EnumStruct < T::Struct
     prop :enum, MyEnum
     prop :enum_of_enums, T.nilable(T.enum([MyEnum::BAR]))
+    prop :deprecated_enum_of_enums, T.nilable(T.deprecated_enum([MyEnum::BAR]))
   end
 
   class RedundantEnumStruct < T::Struct
     prop :enum, T.all(MyEnum, T.enum(MyEnum.values))
+    prop :deprecated_enum, T.all(MyEnum, T.deprecated_enum(MyEnum.values))
   end
 
   describe 'enum' do
     it 'round trips' do
-      s = EnumStruct.new(enum: MyEnum::FOO, enum_of_enums: MyEnum::BAR)
+      s = EnumStruct.new(enum: MyEnum::FOO, enum_of_enums: MyEnum::BAR, deprecated_enum_of_enums: MyEnum::BAR)
 
       serialized = s.serialize
       assert_equal('foo', serialized['enum'])
       assert_equal('bar', serialized['enum_of_enums'])
+      assert_equal('bar', serialized['deprecated_enum_of_enums'])
 
       roundtripped = EnumStruct.from_hash(serialized)
       assert_equal(MyEnum::FOO, roundtripped.enum)
       assert_equal(MyEnum::BAR, roundtripped.enum_of_enums)
+      assert_equal(MyEnum::BAR, roundtripped.deprecated_enum_of_enums)
     end
 
     it 'does not break during serde when used redundantly with legacy T.enum' do
-      s = RedundantEnumStruct.new(enum: MyEnum::FOO)
+      s = RedundantEnumStruct.new(enum: MyEnum::FOO, deprecated_enum: MyEnum::FOO)
       serialized = s.serialize
       assert_equal('foo', serialized['enum'])
+      assert_equal('foo', serialized['deprecated_enum'])
 
       roundtripped = RedundantEnumStruct.from_hash(serialized)
       assert_equal(MyEnum::FOO, roundtripped.enum)
+      assert_equal(MyEnum::FOO, roundtripped.deprecated_enum)
     end
   end
 

@@ -53,8 +53,16 @@ module T
   end
 
   # Matches any of the listed values
+  # @deprecated Use T::Enum instead.
   def self.enum(values)
     T::Types::Enum.new(values)
+  end
+
+  # Matches any of the listed values
+  # Equivalent to T.enum, but the name will be changed permanently to `T.deprecated_enum`.
+  # @deprecated Use T::Enum instead.
+  def self.deprecated_enum(values)
+    T::Types::Enum.new(values, method_name: "deprecated_enum")
   end
 
   # Creates a proc type

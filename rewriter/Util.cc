@@ -16,7 +16,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         if (!dupRecv) {
             return nullptr;
         }
-        if (send->fun == core::Names::enum_()) {
+        if (send->fun == core::Names::enum_() || send->fun == core::Names::deprecatedEnum()) {
             // T.enum() is weird, and accepts values instead of types. Just copy
             // it blindly through.
             return send->deepCopy();
