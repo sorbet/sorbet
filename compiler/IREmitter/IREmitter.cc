@@ -272,7 +272,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
             if (hasKWArgs) {
                 // if last argument is a hash, it's not part of positional arguments - it's going to
                 // fullfill all kw arguments instead
-                auto *minPositionalArgValue = llvm::ConstantInt::get(cs, llvm::APInt(32, minPositionalArgCount));
+                auto *minPositionalArgValue = IREmitterHelpers::buildS4(cs, minPositionalArgCount);
                 auto *hashArgsCtx =
                     builder.CreateCall(cs.getFunction("sorbet_determineKwSplatArg"),
                                        {argCountRaw, argArrayRaw, minPositionalArgValue}, "hashArgsCtx");
