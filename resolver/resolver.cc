@@ -1872,17 +1872,14 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        // If this string _begins_ with `::`, then the first fragment
-        // will be an empty string; in multiple places below, we'll
-        // check to find out whether the first part is `""` or not,
-        // which means we're testing whether the string did or did not
-        // begin with `::`.
+
+        // If this string _begins_ with `::`, then the first fragment will be an empty string; in multiple places below,
+        // we'll check to find out whether the first part is `""` or not, which means we're testing whether the string
+        // did or did not begin with `::`.
         vector<string> parts = absl::StrSplit(shortName, "::");
-        // we want package mode to be theoretically compatible with
-        // non-package mode, so this special case exists for that: if
-        // we are given a package `A::B`, and a constant `C::D`, then
-        // we want to treat that like the user just wrote
-        // `::A::B::C::D`.
+        // we want package mode to be theoretically compatible with non-package mode, so this special case exists for
+        // that: if we are given a package `A::B`, and a constant `C::D`, then we want to treat that like the user
+        // just wrote `::A::B::C::D`.
         if (packageType && ctx.state.packageDB().countPackages() == 0) {
             auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
             auto name = package.asName(ctx).shortName(ctx);
