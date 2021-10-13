@@ -65,3 +65,6 @@ T::NonForcingConstants.non_forcing_is_a?(oni, "Nested::Inner", package: "Outer")
 T::NonForcingConstants.non_forcing_is_a?(oni, "::Outer::Nested::Other") # error: Unable to resolve constant `::Outer::Nested::Other`
 T::NonForcingConstants.non_forcing_is_a?(oni, "Other", package: "Outer::Nested") # error: Unable to resolve constant `::Outer::Nested::Other`
 T::NonForcingConstants.non_forcing_is_a?(oni, "Nested::Other", package: "Outer") # error: Unable to resolve constant `::Outer::Nested::Other`
+
+pkg = "Outer"
+T::NonForcingConstants.non_forcing_is_a?(oni, "Nested::Other", package: pkg) # error: only accepts string literals
