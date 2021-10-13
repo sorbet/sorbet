@@ -1928,8 +1928,6 @@ class ResolveTypeMembersAndFieldsWalk {
                             e.setHeader("Unable to find package: `{}`", packageName.toString(ctx));
                         }
                         return;
-                        current = core::Symbols::root();
-                        continue;
                     }
                     current = core::Symbols::PackageRegistry().data(ctx)->findMember(ctx, mangledName);
                     if (!current.exists()) {
@@ -1937,8 +1935,6 @@ class ResolveTypeMembersAndFieldsWalk {
                             e.setHeader("Unable to find package `{}`", packageName.toString(ctx));
                         }
                         return;
-                        current = core::Symbols::root();
-                        continue;
                     }
                 }
             }
