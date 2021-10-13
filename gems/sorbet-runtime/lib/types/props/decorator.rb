@@ -198,7 +198,7 @@ class T::Props::Decorator
   end
 
   # TODO: we should really be checking all the methods on `cls`, not just Object
-  BANNED_METHOD_NAMES = T.let(Object.instance_methods.reduce({}) {|acc, x| acc[x] = true; acc}.freeze, T::Hash[Symbol, TrueClass])
+  BANNED_METHOD_NAMES = T.let(Object.instance_methods.each_with_object({}) {|x, acc| acc[x] = true}.freeze, T::Hash[Symbol, TrueClass])
 
   # checked(:never) - Rules hash is expensive to check
   sig do

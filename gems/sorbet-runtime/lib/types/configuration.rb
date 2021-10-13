@@ -415,7 +415,7 @@ module T::Configuration
         raise ArgumentError.new("Provided values must all be class name strings.")
       end
 
-      @scalar_types = values.reduce({}) {|acc, x| acc[x] = true; acc}.freeze
+      @scalar_types = values.each_with_object({}) {|x, acc| acc[x] = true}.freeze
     end
   end
 
