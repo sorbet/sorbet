@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 require_relative '../test_helper'
 
-# this is a fake PkgRegistry which we can use to test the packaged
-# form later on
-module PkgRegistry
-  module SomePackage
-    class Thing; end
-  end
+# this is a fake "package" which we can use to test the packaged form
+# later on
+module SomePackage
+  class Thing; end
 end
 
 class Opus::Types::Test::NonForcingConstantsTest < Critic::Unit::UnitTest
@@ -126,7 +124,7 @@ class Opus::Types::Test::NonForcingConstantsTest < Critic::Unit::UnitTest
         T::NonForcingConstants.expects(:stripe_packages_enabled?).returns(true)
 
         # This relies on the PkgRegistry we've set up elsewhere
-        res = T::NonForcingConstants.non_forcing_is_a?(PkgRegistry::SomePackage::Thing.new, 'Thing', package: "SomePackage")
+        res = T::NonForcingConstants.non_forcing_is_a?(SomePackage::Thing.new, 'Thing', package: "SomePackage")
         assert_equal(true, res)
       end
     end

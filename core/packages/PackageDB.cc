@@ -109,6 +109,10 @@ const PackageInfo &PackageDB::getPackageInfo(core::NameRef mangledName) const {
     return *it->second;
 }
 
+bool PackageDB::empty() const {
+    return packages.empty();
+}
+
 PackageDB PackageDB::deepCopy() const {
     ENFORCE(frozen);
     PackageDB result;

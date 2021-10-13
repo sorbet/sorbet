@@ -1859,8 +1859,8 @@ class ResolveTypeMembersAndFieldsWalk {
             }
             packageType = packageNode->value;
         }
-        // if we got no keyword args, then package should be null, and if we keyword args, then package should be
-        // non-null
+        // if we got no keyword args, then package should be null, and
+        // if we got keyword args, then package should be non-null
         ENFORCE((!send.hasKwArgs() && !packageType) || (send.hasKwArgs() && packageType));
 
         auto name = literal.asName(ctx);
@@ -1875,7 +1875,24 @@ class ResolveTypeMembersAndFieldsWalk {
         // If this string _begins_ with `::`, then the first fragment will be an empty string; in multiple places below,
         // we'll check to find out whether the first part is `""` or not, which means we're testing whether the string
         // did or did not begin with `::`.
-        auto parts = absl::StrSplit(shortName, "::");
+        vector<string> parts = absl::StrSplit(shortName, "::");
+        // we want package mode to be theoretically compatible with non-package mode, so this special case exists for
+        // that: if we are given a package `A::B`, and a constant `C::D`, then we want to treat that like the user
+        // just wrote `::A::B::C::D`.
+        if (packageType && ctx.state.packageDB().empty()) {
+            auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
+            auto name = package.asName(ctx).shortName(ctx);
+            vector<string> pkgParts = absl::StrSplit(name, "::");
+            // add the initial empty string to mimic the leading `::`
+            pkgParts.insert(pkgParts.begin(), "");
+            // and now add the rest of `parts` to it
+            pkgParts.insert(pkgParts.end(), parts.begin(), parts.end());
+            // and then treat this new vector as the parts to walk over
+            parts = move(pkgParts);
+            // we want to make sure we don't take the package path if we've done this
+            packageType = nullptr;
+        }
+
         core::SymbolRef current;
         for (auto part : parts) {
             if (!current.exists()) {
@@ -1906,23 +1923,17 @@ class ResolveTypeMembersAndFieldsWalk {
                     auto mangledName = packageName.lookupMangledPackageName(ctx.state);
                     // if the mangled name doesn't exist, then this means probably there's no package named this
                     if (!mangledName.exists()) {
-                        // TODO(gdritter): re-enable this once we implement runtime package support
-                        // if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
-                        //     e.setHeader("Unable to find package: `{}`", packageName.toString(ctx));
-                        // }
-                        // return;
-                        current = core::Symbols::root();
-                        continue;
+                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader("Unable to find package: `{}`", packageName.toString(ctx));
+                        }
+                        return;
                     }
                     current = core::Symbols::PackageRegistry().data(ctx)->findMember(ctx, mangledName);
                     if (!current.exists()) {
-                        // TODO(gdritter): re-enable this once we implement runtime package support
-                        // if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
-                        //     e.setHeader("Unable to find package `{}`", packageName.toString(ctx));
-                        // }
-                        // return;
-                        current = core::Symbols::root();
-                        continue;
+                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader("Unable to find package `{}`", packageName.toString(ctx));
+                        }
+                        return;
                     }
                 }
             }
