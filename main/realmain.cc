@@ -224,6 +224,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, crcBuilder, fileq, resultq]() {
         AutogenResult out;
         int n = 0;
+        int autogenVersion = opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
         {
             Timer timeit(logger, "autogenWorker");
             int idx = 0;
@@ -234,14 +235,15 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 if (tree.file.data(gs).isPackage()) {
                     continue;
                 }
+                if (autogenVersion < autogen::AutogenVersion::VERSION_INCLUDE_RBI && tree.file.data(gs).isRBI()) {
+                    continue;
+                }
 
                 core::Context ctx(gs, core::Symbols::root(), tree.file);
                 auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder);
                 tree = move(pf.tree);
 
                 AutogenResult::Serialized serialized;
-                int autogenVersion =
-                    opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
 
                 if (opts.print.Autogen.enabled) {
                     Timer timeit(logger, "autogenToString");
@@ -253,6 +255,8 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 }
 
                 if (!tree.file.data(gs).isRBI()) {
+                    // Exclude RBI files because they are not loadable and should not appear in
+                    // auto-loader related output.
                     if (opts.print.AutogenClasslist.enabled) {
                         Timer timeit(logger, "autogenClasslist");
                         serialized.classlist = pf.listAllClasses(ctx);
