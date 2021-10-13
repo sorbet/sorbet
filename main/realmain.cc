@@ -572,6 +572,7 @@ int realmain(int argc, char *argv[]) {
             gs->suppressErrorClass(core::errors::Namer::InvalidClassOwner.code);
             gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
             gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
+            gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
 
             indexed = pipeline::package(*gs, move(indexed), opts, *workers);
             indexed = move(pipeline::name(*gs, move(indexed), opts, *workers).result());
