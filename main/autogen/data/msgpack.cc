@@ -76,6 +76,7 @@ void MsgpackWriter::packDefinition(core::Context ctx, ParsedFile &pf, Definition
 
     // defines_behavior
     packBool(def.defines_behavior);
+    ENFORCE(!def.defines_behavior || !ctx.file.data(ctx).isRBI(), "RBI files should never define behavior");
 
     // isEmpty
     packBool(def.is_empty);
