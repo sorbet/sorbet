@@ -259,9 +259,9 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                     }
                     if (opts.print.AutogenSubclasses.enabled) {
                         Timer timeit(logger, "autogenSubclasses");
-                        serialized.subclasses =
-                            autogen::Subclasses::listAllSubclasses(ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
-                                                                   opts.autogenSubclassesRelativeIgnorePatterns);
+                        serialized.subclasses = autogen::Subclasses::listAllSubclasses(
+                            ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
+                            opts.autogenSubclassesRelativeIgnorePatterns);
                     }
                     if (opts.print.AutogenAutoloader.enabled) {
                         Timer timeit(logger, "autogenNamedDefs");
