@@ -2947,7 +2947,8 @@ class Magic_mergeHashValues : public IntrinsicMethod {
 class Array_flatten : public IntrinsicMethod {
     // If the element type supports the #to_ary method, then Ruby will implicitly call it when flattening. So here we
     // dispatch #to_ary and recurse further down the result if it succeeds, otherwise we just return the type.
-    static TypePtr typeToAry(const GlobalState &gs, const DispatchArgs &args, const TypePtr &type, const int newDepth) {
+    static TypePtr typeToAry(const GlobalState &gs, const DispatchArgs &args, const TypePtr &type,
+                             const int64_t depth) {
         if (type.isUntyped()) {
             return type;
         }
@@ -2980,7 +2981,7 @@ class Array_flatten : public IntrinsicMethod {
                 // we have is the one we are looking for.
                 return type;
             } else {
-                return recursivelyFlattenArrays(gs, args, move(dispatched.returnType), newDepth);
+                return recursivelyFlattenArrays(gs, args, move(dispatched.returnType), depth);
             }
         }
 
@@ -2995,7 +2996,6 @@ class Array_flatten : public IntrinsicMethod {
         if (depth == 0) {
             return type;
         }
-        const int newDepth = depth - 1;
 
         TypePtr result;
         typecase(
@@ -3004,23 +3004,23 @@ class Array_flatten : public IntrinsicMethod {
             // This only shows up because t->elementType(gs) for tuples returns an OrType of all its elements.
             // So to properly handle nested tuples, we have to descend into the OrType's.
             [&](const OrType &o) {
-                result = Types::any(gs, recursivelyFlattenArrays(gs, args, o.left, newDepth),
-                                    recursivelyFlattenArrays(gs, args, o.right, newDepth));
+                result = Types::any(gs, recursivelyFlattenArrays(gs, args, o.left, depth),
+                                    recursivelyFlattenArrays(gs, args, o.right, depth));
             },
 
-            [&](const ClassType &c) { result = typeToAry(gs, args, type, newDepth); },
+            [&](const ClassType &c) { result = typeToAry(gs, args, type, depth); },
 
             [&](const AppliedType &a) {
                 if (a.klass == Symbols::Array()) {
                     ENFORCE(a.targs.size() == 1);
-                    result = recursivelyFlattenArrays(gs, args, a.targs.front(), newDepth);
+                    result = recursivelyFlattenArrays(gs, args, a.targs.front(), depth - 1);
                     return;
                 }
 
-                result = typeToAry(gs, args, type, newDepth);
+                result = typeToAry(gs, args, type, depth);
             },
 
-            [&](const TupleType &t) { result = recursivelyFlattenArrays(gs, args, t.elementType(gs), newDepth); },
+            [&](const TupleType &t) { result = recursivelyFlattenArrays(gs, args, t.elementType(gs), depth - 1); },
 
             [&](const TypePtr &t) { result = std::move(type); });
         return result;
