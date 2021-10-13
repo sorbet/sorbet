@@ -16,7 +16,7 @@ steps:
         - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
             image: "sorbetruby/sorbet-build-image:latest"
             workdir: /app
-            always-pull: true
+            always-pull: false
             init: true
             propagate-environment: true
             environment:
