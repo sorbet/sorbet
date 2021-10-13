@@ -197,10 +197,10 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
                     str = "typealias";
                     break;
                 default: // shouldn't happen
-                    str = sym.show(ctx);
+                    str = sym.shortName(ctx);
             }
         } else {
-            str = sym.show(ctx);
+            str = sym.shortName(ctx);
         }
 
         packString(str);
