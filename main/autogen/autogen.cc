@@ -86,7 +86,12 @@ public:
         def.is_empty =
             absl::c_all_of(original.rhs, [](auto &tree) { return sorbet::ast::BehaviorHelpers::checkEmptyDeep(tree); });
         // does it define behavior?
-        def.defines_behavior = sorbet::ast::BehaviorHelpers::checkClassDefinesBehavior(tree);
+        //
+        if (ctx.file.data(ctx).isRBI()) {
+            def.defines_behavior = false;
+        } else {
+            def.defines_behavior = sorbet::ast::BehaviorHelpers::checkClassDefinesBehavior(tree);
+        }
 
         // TODO: ref.parent_of, def.parent_ref
         // TODO: expression_range
@@ -247,6 +252,10 @@ public:
         // autogen only cares about constant assignments/definitions, so bail otherwise
         auto *lhs = ast::cast_tree<ast::ConstantLit>(original.lhs);
         if (lhs == nullptr || lhs->original == nullptr) {
+            return tree;
+        }
+
+        if (ctx.file.data(ctx).isRBI()) {
             return tree;
         }
 

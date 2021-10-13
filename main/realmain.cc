@@ -231,7 +231,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
                 ++n;
                 auto &tree = indexed[idx];
-                if (tree.file.data(gs).isRBI() || tree.file.data(gs).isPackage()) {
+                if (tree.file.data(gs).isPackage()) {
                     continue;
                 }
 
@@ -251,19 +251,22 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                     Timer timeit(logger, "autogenToMsgpack");
                     serialized.msgpack = pf.toMsgpack(ctx, autogenVersion);
                 }
-                if (opts.print.AutogenClasslist.enabled) {
-                    Timer timeit(logger, "autogenClasslist");
-                    serialized.classlist = pf.listAllClasses(ctx);
-                }
-                if (opts.print.AutogenSubclasses.enabled) {
-                    Timer timeit(logger, "autogenSubclasses");
-                    serialized.subclasses =
-                        autogen::Subclasses::listAllSubclasses(ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
-                                                               opts.autogenSubclassesRelativeIgnorePatterns);
-                }
-                if (opts.print.AutogenAutoloader.enabled) {
-                    Timer timeit(logger, "autogenNamedDefs");
-                    autogen::DefTreeBuilder::addParsedFileDefinitions(ctx, autoloaderCfg, out.defTree, pf);
+
+                if (!tree.file.data(gs).isRBI()) {
+                    if (opts.print.AutogenClasslist.enabled) {
+                        Timer timeit(logger, "autogenClasslist");
+                        serialized.classlist = pf.listAllClasses(ctx);
+                    }
+                    if (opts.print.AutogenSubclasses.enabled) {
+                        Timer timeit(logger, "autogenSubclasses");
+                        serialized.subclasses =
+                            autogen::Subclasses::listAllSubclasses(ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
+                                                                   opts.autogenSubclassesRelativeIgnorePatterns);
+                    }
+                    if (opts.print.AutogenAutoloader.enabled) {
+                        Timer timeit(logger, "autogenNamedDefs");
+                        autogen::DefTreeBuilder::addParsedFileDefinitions(ctx, autoloaderCfg, out.defTree, pf);
+                    }
                 }
 
                 out.prints.emplace_back(make_pair(idx, serialized));
