@@ -1,23 +1,28 @@
 # typed: true
-T.assert_type!(
-  [1].flat_map {|x| x},
-  T::Array[Integer],
-)
 
-T.assert_type!(
-  [1].flat_map {|x| [x]},
-  T::Array[Integer],
-)
+class ContainerType
+  extend T::Sig
 
-T.assert_type!(
-  [1].flat_map {|x| [[x]]},
-  T::Array[T::Array[Integer]],
-)
+  sig { returns(T::Array[StringPair]) }
+  def to_ary
+    [StringPair.new, StringPair.new]
+  end
+end
 
-T.assert_type!(
-  [1].flat_map {|x| [[[x]]]},
-  T::Array[T::Array[T::Array[Integer]]],
-)
+class StringPair
+  extend T::Sig
+
+  sig { returns(T::Array[String]) }
+  def to_ary
+    ["1", "2"]
+  end
+end
+
+T.reveal_type([1].flat_map {|x| x}) # error: Revealed type: `T::Array[Integer]`
+T.reveal_type([1].flat_map {|x| [x]}) # error: Revealed type: `T::Array[Integer]`
+T.reveal_type([1].flat_map {|x| [[x]]}) # error: Revealed type: `T::Array[[Integer]]`
+T.reveal_type([1].flat_map {|x| [[[x]]]}) # error: Revealed type: `T::Array[[[Integer]]]`
+T.reveal_type([1].flat_map {|x| ContainerType.new }) # error: Revealed type: `T::Array[StringPair]`
 
 class A; end
 class B; end
@@ -27,7 +32,7 @@ class E; end
 class F; end
 class G; end
 
-T.assert_type!(
+T.reveal_type(
   [1].flat_map do |x|
     case rand
     when 0.1
@@ -45,6 +50,5 @@ T.assert_type!(
     else
       G.new
     end
-  end,
-  T::Array[T.any(A, B, C, D, E, F, G)],
-)
+  end
+) # error: Revealed type: `T::Array[T.any(A, B, C, D, E, F, G)]`
