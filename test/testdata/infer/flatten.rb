@@ -116,7 +116,8 @@ T.reveal_type(integer_pairs.flatten) # error: Revealed type: `T::Array[Integer]`
 T.reveal_type(super_pairs.flatten) # error: Revealed type: `T::Array[Integer]`
 T.reveal_type(generic_pairs.flatten) # error: Revealed type: `T::Array[Integer]`
 T.reveal_type(nested_generic_pairs.flatten) # error: Revealed type: `T::Array[Integer]`
-T.reveal_type(nested_generic_pairs.flatten(1)) # error: Revealed type: `T::Array[T::Array[GenericPair[Integer]]]`
+T.reveal_type(nested_generic_pairs.flatten(1)) # error: Revealed type: `T::Array[GenericPair[Integer]]`
+T.reveal_type(nested_generic_pairs.flatten(2)) # error: Revealed type: `T::Array[Integer]`
 
 T.reveal_type(nested_flat_type_list.flatten) # error: Revealed type: `T::Array[FlatType]`
 T.reveal_type(flat_type_collections.flatten) # error: Revealed type: `T::Array[FlatType]`
@@ -129,3 +130,17 @@ xs.flatten(true)
 
   xs.flatten(1, 1)
 # ^^^^^^^^^^^^^^^^ error: Too many arguments provided for method `Array#flatten`. Expected: `0..1`, got: `2`
+
+or_type_collection = [
+  case rand
+  when (0..0.5)
+    1
+  else
+    ["2"]
+  end
+]
+
+T.reveal_type(or_type_collection) # error: Revealed type: `[T.any(T::Array[String], Integer)] (1-tuple)`
+T.reveal_type(or_type_collection.flatten(1)) # error: Revealed type: `T::Array[T.any(String, Integer)]`
+T.reveal_type(or_type_collection.flatten(2)) # error: Revealed type: `T::Array[T.any(String, Integer)]`
+T.reveal_type(or_type_collection.flatten) # error: Revealed type: `T::Array[T.any(String, Integer)]`
