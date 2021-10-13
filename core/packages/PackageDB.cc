@@ -109,8 +109,8 @@ const PackageInfo &PackageDB::getPackageInfo(core::NameRef mangledName) const {
     return *it->second;
 }
 
-u4 PackageDB::countPackages() const {
-    return packages.size();
+bool PackageDB::empty() const {
+    return packages.empty();
 }
 
 PackageDB PackageDB::deepCopy() const {

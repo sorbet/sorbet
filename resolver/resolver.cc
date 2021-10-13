@@ -1880,7 +1880,7 @@ class ResolveTypeMembersAndFieldsWalk {
         // we want package mode to be theoretically compatible with non-package mode, so this special case exists for
         // that: if we are given a package `A::B`, and a constant `C::D`, then we want to treat that like the user
         // just wrote `::A::B::C::D`.
-        if (packageType && ctx.state.packageDB().countPackages() == 0) {
+        if (packageType && ctx.state.packageDB().empty()) {
             auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
             auto name = package.asName(ctx).shortName(ctx);
             vector<string> pkgParts = absl::StrSplit(name, "::");
