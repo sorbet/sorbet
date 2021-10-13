@@ -1817,7 +1817,7 @@ public:
             }
 
             keys.emplace_back(args.args[i]->type);
-            values.emplace_back(args.args[i + 1]->type);
+            values.emplace_back(Types::widen(gs, args.args[i + 1]->type));
         }
         res.returnType = make_type<ShapeType>(move(keys), move(values));
     }
