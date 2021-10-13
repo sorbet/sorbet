@@ -119,21 +119,16 @@ void setupStackFrames(CompilerState &base, const ast::MethodDef &md, const IREmi
     }
 }
 
-void parseKeywordArgsFromCallData(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                  const IREmitterContext &irctx,
-                                  cfg::LocalRef kwRestArgName,
-                                  llvm::Value *argCountRaw,
-                                  llvm::Value *argArrayRaw,
-                                  llvm::Value *hashArgs,
-                                  int maxPositionalArgCount,
+void parseKeywordArgsFromCallData(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                                  cfg::LocalRef kwRestArgName, llvm::Value *argCountRaw, llvm::Value *argArrayRaw,
+                                  llvm::Value *hashArgs, int maxPositionalArgCount,
                                   const vector<core::ArgInfo::ArgFlags> &argsFlags, int rubyBlockId) {
     ENFORCE(rubyBlockId == 0);
     auto *func = irctx.rubyBlocks2Functions[rubyBlockId];
     auto &argPresentVariables = irctx.argPresentVariables[rubyBlockId];
     // required arguments remaining to be parsed
-    auto numRequiredKwArgs = absl::c_count_if(argsFlags, [](auto &argFlag) {
-            return argFlag.isKeyword && !argFlag.isDefault && !argFlag.isRepeated;
-        });
+    auto numRequiredKwArgs = absl::c_count_if(
+        argsFlags, [](auto &argFlag) { return argFlag.isKeyword && !argFlag.isDefault && !argFlag.isRepeated; });
     auto *missingKwargs = Payload::rubyUndef(cs, builder);
 
     // optional arguments that are present
@@ -178,8 +173,7 @@ void parseKeywordArgsFromCallData(CompilerState &cs, llvm::IRBuilderBase &builde
         // Write a default value out, and mark the variable as missing
         builder.SetInsertPoint(kwArgDefault);
         if (argPresent.exists()) {
-            Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx,
-                            rubyBlockId);
+            Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx, rubyBlockId);
         }
 
         auto *updatedMissingKwargs = missingKwargs;
@@ -201,8 +195,7 @@ void parseKeywordArgsFromCallData(CompilerState &cs, llvm::IRBuilderBase &builde
                                         fmt::format("updatedOptional_{}", strviewName));
             }
 
-            Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx,
-                            rubyBlockId);
+            Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx, rubyBlockId);
         }
         Payload::varSet(cs, name, passedValue, builder, irctx, rubyBlockId);
 
@@ -219,15 +212,11 @@ void parseKeywordArgsFromCallData(CompilerState &cs, llvm::IRBuilderBase &builde
     // will roll things up into the kwsplat, so there wouldn't be anything for us.
     ENFORCE(!kwRestArgName.exists());
     builder.CreateCall(cs.getFunction("sorbet_assertCallDataNoExtraKWArg"),
-                       {callData, IREmitterHelpers::buildS4(cs, numRequiredKwArgs),
-                               optionalKwargs});
+                       {callData, IREmitterHelpers::buildS4(cs, numRequiredKwArgs), optionalKwargs});
 }
 
-void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                 const IREmitterContext &irctx,
-                                 cfg::LocalRef kwRestArgName,
-                                 llvm::Value *hashArgs,
-                                 int maxPositionalArgCount,
+void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                                 cfg::LocalRef kwRestArgName, llvm::Value *hashArgs, int maxPositionalArgCount,
                                  const vector<core::ArgInfo::ArgFlags> &argsFlags, int rubyBlockId) {
     auto *func = irctx.rubyBlocks2Functions[rubyBlockId];
     auto &argPresentVariables = irctx.argPresentVariables[rubyBlockId];
@@ -582,8 +571,9 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                         // our kwargs are passed directly on the stack.  They might
                         // be in the kwsplat arg that we determined earlier.  So we need
                         // a runtime check to determine how to parse the args.
-                        auto *check = builder.CreateCall(cs.getFunction("sorbet_can_efficiently_parse_kwargs"),
-                                                         {hashArgs, func->arg_begin() + 4, func->arg_begin() + 5}, "efficient?");
+                        auto *check =
+                            builder.CreateCall(cs.getFunction("sorbet_can_efficiently_parse_kwargs"),
+                                               {hashArgs, func->arg_begin() + 4, func->arg_begin() + 5}, "efficient?");
                         auto *efficientBlock = llvm::BasicBlock::Create(cs, "efficientParsing", func);
                         auto *hashBlock = llvm::BasicBlock::Create(cs, "kwsplatParsing", func);
                         auto *continuationBlock = llvm::BasicBlock::Create(cs, "continuationBlock", func);
@@ -591,9 +581,8 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                         builder.CreateCondBr(check, efficientBlock, hashBlock);
 
                         builder.SetInsertPoint(efficientBlock);
-                        parseKeywordArgsFromCallData(cs, builder, irctx, kwRestArgName,
-                                                     argCountRaw, argArrayRaw, hashArgs,
-                                                     maxPositionalArgCount, argsFlags, rubyBlockId);
+                        parseKeywordArgsFromCallData(cs, builder, irctx, kwRestArgName, argCountRaw, argArrayRaw,
+                                                     hashArgs, maxPositionalArgCount, argsFlags, rubyBlockId);
                         builder.CreateBr(continuationBlock);
 
                         builder.SetInsertPoint(hashBlock);
