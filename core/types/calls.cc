@@ -1817,6 +1817,9 @@ public:
             }
 
             keys.emplace_back(args.args[i]->type);
+            // TODO(jez) This is too eager. We don't want to widen all proxy types, we just want to
+            // widen the `String("foo")` and `Symbol(:foo)` types.
+            // Maybe there should be some "widen to a type that is user-writeable type syntax" helper?
             values.emplace_back(Types::widen(gs, args.args[i + 1]->type));
         }
         res.returnType = make_type<ShapeType>(move(keys), move(values));
