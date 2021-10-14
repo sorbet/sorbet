@@ -71,7 +71,7 @@ llvm::Value *Payload::doubleToRubyValue(CompilerState &cs, llvm::IRBuilderBase &
 llvm::Value *Payload::cPtrToRubyRegexp(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str,
                                        int options) {
     // all regexp are frozen. We'll allocate it at load time and share it.
-    string rawName = "rubyRegexpFrozen_" + string(str);
+    auto rawName = fmt::format("rubyRegexpFrozen_{}_{}", str, options);
     auto tp = llvm::Type::getInt64Ty(cs);
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     llvm::Constant *indices[] = {zero};
