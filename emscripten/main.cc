@@ -53,7 +53,7 @@ void EMSCRIPTEN_KEEPALIVE typecheck(const char *optionsJson) {
         argCharStars.push_back(const_cast<char *>(argStrings[i].c_str()));
     }
 
-    sorbet::realmain::realmain(argCharStars.size(), (argCharStars.data()));
+    sorbet::realmain::realmain(argCharStars.size(), argCharStars.data());
 }
 
 void EMSCRIPTEN_KEEPALIVE lsp(void (*respond)(const char *), const char *message) {
