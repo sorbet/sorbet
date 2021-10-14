@@ -2,11 +2,6 @@
 # typed: strict
 
 module T::NonForcingConstants
-  T::Sig::WithoutRuntime.sig {returns(T::Boolean)}
-  private_class_method def self.stripe_packages_enabled?
-    const_defined?('StripePackages') && const_get('StripePackages').enabled?
-  end
-
   # NOTE: This method is documented on the RBI in Sorbet's payload, so that it
   # shows up in the hover/completion documentation via LSP.
   T::Sig::WithoutRuntime.sig {params(val: BasicObject, klass: String, package: T.nilable(String)).returns(T::Boolean)}
@@ -19,7 +14,7 @@ module T::NonForcingConstants
     # We don't treat packages differently at runtime, but the static
     # type-checker still needs to have the package and constant
     # separated out. This just re-assembles the string as needed
-    if stripe_packages_enabled?
+    if !package.nil?
       klass = "::#{package}::#{klass}"
     end
 
