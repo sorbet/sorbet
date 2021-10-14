@@ -1,7 +1,7 @@
 From c780e0d9fe693ef62f0cf5f351731a59cd9c1101 Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Fri, 15 Jan 2021 10:26:17 -0500
-Subject: [PATCH 01/29] add a VM_METHOD_TYPE_SORBET
+Subject: [PATCH 01/30] add a VM_METHOD_TYPE_SORBET
 
 ---
  class.c               |  6 ++++
@@ -385,7 +385,7 @@ index 450446878950..246de5720e4f 100644
 From b413fda816838412316ecf833005a70d4d2fa65d Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Thu, 28 Jan 2021 15:32:56 -0500
-Subject: [PATCH 02/29] add locals_size and stack_max information to sorbet
+Subject: [PATCH 02/30] add locals_size and stack_max information to sorbet
  methods
 
 ---
@@ -531,7 +531,7 @@ index 246de5720e4f..5d5b8863cb21 100644
 From 343b149cd874f99f6153287b21a19c307285e22c Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Fri, 29 Jan 2021 11:52:33 -0500
-Subject: [PATCH 03/29] change sorbet methods to take a precomputed iseqptr
+Subject: [PATCH 03/30] change sorbet methods to take a precomputed iseqptr
 
 ---
  class.c               |  4 ++--
@@ -672,7 +672,7 @@ index 5d5b8863cb21..e805326656a8 100644
 From 1f7a077e9480a6fef9c7ac21e963fb9b70daee1c Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Tue, 6 Apr 2021 14:14:10 -0400
-Subject: [PATCH 04/29] remove event hooks from sorbet methods
+Subject: [PATCH 04/30] remove event hooks from sorbet methods
 
 ---
  vm_insnhelper.c | 4 ++--
@@ -704,7 +704,7 @@ index efb978fd5986..696fc289a833 100644
 From e2cde7a9545d5d2c08319f305c4832da9ead9694 Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Wed, 28 Apr 2021 14:27:15 -0400
-Subject: [PATCH 05/29] restruct sorbet calling to enable fast paths for
+Subject: [PATCH 05/30] restruct sorbet calling to enable fast paths for
  non-kwargs, non-splat calls
 
 ---
@@ -1040,7 +1040,7 @@ index 696fc289a833..334227ff41cc 100644
 From e69dd7e2e2ad78137b0b727fd01ad45b68ec8953 Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Thu, 8 Apr 2021 10:41:08 -0400
-Subject: [PATCH 06/29] add parameter information slot to sorbet methods
+Subject: [PATCH 06/30] add parameter information slot to sorbet methods
 
 ---
  class.c               |   4 +-
@@ -1440,7 +1440,7 @@ index e805326656a8..6acdb09541a7 100644
 From 68af8cc532d9eb780703240b06f51c2fe9b89f0e Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Thu, 8 Apr 2021 15:04:26 -0400
-Subject: [PATCH 07/29] add a fast path for sorbet functions with only required
+Subject: [PATCH 07/30] add a fast path for sorbet functions with only required
  arguments
 
 ---
@@ -1561,7 +1561,7 @@ index 15fb2764bd66..f91fcf8b2ef2 100644
 From b9355a96db799a444389759e7eecff4a460df0e3 Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@stripe.com>
 Date: Fri, 16 Apr 2021 10:30:51 -0400
-Subject: [PATCH 08/29] remove VM_FRAME_MAGIC_CFRAME setting from sorbet
+Subject: [PATCH 08/30] remove VM_FRAME_MAGIC_CFRAME setting from sorbet
  calling convention
 
 ---
@@ -1609,7 +1609,7 @@ index f91fcf8b2ef2..54333f6ab7d4 100644
 From 7e5c9183bd985c6f637bf03ca25687a746d450f3 Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@stripe.com>
 Date: Fri, 16 Apr 2021 10:44:38 -0400
-Subject: [PATCH 09/29] don't pass argc when defining sorbet methods, as it's
+Subject: [PATCH 09/30] don't pass argc when defining sorbet methods, as it's
  unnecessary
 
 ---
@@ -1702,7 +1702,7 @@ index 6acdb09541a7..18d38f874aa1 100644
 From 6c09090c9d6a0484b9977e88a1733c696203bb7f Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@stripe.com>
 Date: Fri, 16 Apr 2021 10:59:46 -0400
-Subject: [PATCH 10/29] delete some TODOs that are no longer applicable
+Subject: [PATCH 10/30] delete some TODOs that are no longer applicable
 
 We don't need to verify `VM_METHOD_TYPE_SORBET` because callers have
 already validated this for us.
@@ -1747,7 +1747,7 @@ index 54333f6ab7d4..2ced5655e88b 100644
 From 9bf4e09d6210a4c11f2ce7d7d6763334a9d2bb92 Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@stripe.com>
 Date: Fri, 16 Apr 2021 11:58:59 -0400
-Subject: [PATCH 11/29] explain fastpath setting in
+Subject: [PATCH 11/30] explain fastpath setting in
  vm_call_sorbet_maybe_setup_fastpath
 
 ---
@@ -1773,7 +1773,7 @@ index 2ced5655e88b..491928899803 100644
 From 5baf06b400a5164efae5c80f20e2c9ec75b04458 Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@stripe.com>
 Date: Fri, 16 Apr 2021 12:03:59 -0400
-Subject: [PATCH 12/29] do fastpath optimizations for all positional args
+Subject: [PATCH 12/30] do fastpath optimizations for all positional args
 
 ---
  vm_insnhelper.c | 13 ++++++-------
@@ -1827,7 +1827,7 @@ index 491928899803..bb93f8aea0bc 100644
 From 0fbdce696c5206e84d9b75e1f601d0be0c6774a8 Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Fri, 23 Apr 2021 10:14:03 -0400
-Subject: [PATCH 13/29] add back event hooks to sorbet calls
+Subject: [PATCH 13/30] add back event hooks to sorbet calls
 
 ---
  vm_insnhelper.c | 7 +++++--
@@ -1877,7 +1877,7 @@ index bb93f8aea0bc..a361d382f1a9 100644
 From 71f0921d70fc960cace11a16aaee302df07a1345 Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Wed, 28 Apr 2021 10:42:40 -0400
-Subject: [PATCH 14/29] disable fastpath for optional arguments
+Subject: [PATCH 14/30] disable fastpath for optional arguments
 
 ---
  vm_insnhelper.c | 3 ++-
@@ -1901,7 +1901,7 @@ index a361d382f1a9..d07887dec803 100644
 From 9f54cc4d7f7c0dfc58233c99983b1a6bcf8f661f Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Wed, 28 Apr 2021 14:31:53 -0400
-Subject: [PATCH 15/29] move fastpath helpers to where they compile
+Subject: [PATCH 15/30] move fastpath helpers to where they compile
 
 ---
  vm_insnhelper.c | 50 ++++++++++++++++++++++++-------------------------
@@ -1979,7 +1979,7 @@ index d07887dec803..d95cc3ba1c9d 100644
 From 35646afb50bcd190112cf46e3d16fca18fb507eb Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Tue, 11 May 2021 09:19:44 -0400
-Subject: [PATCH 16/29] add a control frame parameter to sorbet methods
+Subject: [PATCH 16/30] add a control frame parameter to sorbet methods
 
 ---
  class.c               |  2 +-
@@ -2135,7 +2135,7 @@ index 18d38f874aa1..781feb6557e8 100644
 From 48fe82a0fb0b125d1b784650200155999211870e Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Wed, 12 May 2021 15:35:36 -0400
-Subject: [PATCH 17/29] record method entries for VM_METHOD_TYPE_SORBET in
+Subject: [PATCH 17/30] record method entries for VM_METHOD_TYPE_SORBET in
  backtraces
 
 ---
@@ -2168,7 +2168,7 @@ index f6b4e8e1d6e4..1c4a7ff2784b 100644
 From ee25d5416591d8e563f78323138604ea84aa9547 Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Fri, 14 May 2021 10:30:25 -0400
-Subject: [PATCH 18/29] provide location information for sorbet methods
+Subject: [PATCH 18/30] provide location information for sorbet methods
 
 ---
  proc.c | 5 +++++
@@ -2201,7 +2201,7 @@ index 87c16530c55d..d10ae0c4f4b9 100644
 From f425aa7056f94cbb0781ccd6596c2d00cb3c0e88 Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Mon, 24 May 2021 11:06:14 -0400
-Subject: [PATCH 19/29] always inline vm_call_sorbet_with_frame_normal
+Subject: [PATCH 19/30] always inline vm_call_sorbet_with_frame_normal
 
 ---
  vm_insnhelper.c | 9 ++++++++-
@@ -2231,7 +2231,7 @@ index ae6b87b9123c..824efb54bd66 100644
 From 197b973f6ebb478aab9aa3364abe7be4e9e596e8 Mon Sep 17 00:00:00 2001
 From: Adam Procter <aprocter@stripe.com>
 Date: Wed, 11 Aug 2021 11:22:07 -0700
-Subject: [PATCH 20/29] Apply gc-remove-write-barrier.patch
+Subject: [PATCH 20/30] Apply gc-remove-write-barrier.patch
 
 ---
  class.c     |  9 +++------
@@ -2372,7 +2372,7 @@ index 450446878950..e1819f5c8048 100644
 From b647146e41059bf0b6a4960f09e321de2b447eb1 Mon Sep 17 00:00:00 2001
 From: Adam Procter <aprocter@stripe.com>
 Date: Wed, 12 May 2021 15:26:53 -0700
-Subject: [PATCH 21/29] Apply VM_FRAME_FLAG_LAMBDA patch from sorbet_llvm
+Subject: [PATCH 21/30] Apply VM_FRAME_FLAG_LAMBDA patch from sorbet_llvm
 
 ---
  vm.c            |  4 ++--
@@ -2466,7 +2466,7 @@ index c0d9092a67da..10428817b3ff 100644
 From 286be5a98159ab45c9aadf10d21aef739be47b25 Mon Sep 17 00:00:00 2001
 From: Adam Procter <aprocter@stripe.com>
 Date: Tue, 18 May 2021 14:47:45 -0700
-Subject: [PATCH 22/29] POPN before vm_yield_with_cfunc
+Subject: [PATCH 22/30] POPN before vm_yield_with_cfunc
 
 ---
  vm_insnhelper.c | 12 +++++++++---
@@ -2506,7 +2506,7 @@ index 10428817b3ff..fe29925833bd 100644
 From 2a075c37925f7846d2c0ba3b3be0a5b8080c6af6 Mon Sep 17 00:00:00 2001
 From: Adam Procter <aprocter@stripe.com>
 Date: Fri, 9 Jul 2021 16:04:36 -0700
-Subject: [PATCH 23/29] Only adjust the stack pointer in cases where POPN was
+Subject: [PATCH 23/30] Only adjust the stack pointer in cases where POPN was
  going to happen on the way out
 
 ---
@@ -2577,7 +2577,7 @@ index fe29925833bd..03a47b5885c2 100644
 From 8916b482974de925c3c7e0ef232384dfc73d691a Mon Sep 17 00:00:00 2001
 From: Adam Procter <aprocter@stripe.com>
 Date: Tue, 20 Jul 2021 14:46:53 -0700
-Subject: [PATCH 24/29] Replace sp_adjust with a boolean flag; adjust by argc
+Subject: [PATCH 24/30] Replace sp_adjust with a boolean flag; adjust by argc
  if true
 
 ---
@@ -2649,7 +2649,7 @@ index 03a47b5885c2..cf39b11ff8c4 100644
 From f567121ed09a6d9450a4d494ac52f1a5ae93e6cd Mon Sep 17 00:00:00 2001
 From: Adam Procter <aprocter@stripe.com>
 Date: Wed, 11 Aug 2021 11:26:09 -0700
-Subject: [PATCH 25/29] Apply init-sorbet-t-modules.patch
+Subject: [PATCH 25/30] Apply init-sorbet-t-modules.patch
 
 ---
  inits.c | 1 +
@@ -2671,7 +2671,7 @@ index 79a6cf014ec8..8596e416d7b7 100644
 From 199da36596d186ad6c1abe9fdd9204e6688a4bd9 Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Wed, 1 Sep 2021 16:59:03 -0400
-Subject: [PATCH 26/29] add crefs to sorbet methods
+Subject: [PATCH 26/30] add crefs to sorbet methods
 
 ---
  class.c         | 4 ++--
@@ -2810,7 +2810,7 @@ index 948eedf35970..b65245481e5b 100644
 From 9f6462569bc56f865b575c654f812d255c7bde4f Mon Sep 17 00:00:00 2001
 From: Adam Procter <71457435+aprocter-stripe@users.noreply.github.com>
 Date: Fri, 10 Sep 2021 15:14:36 -0700
-Subject: [PATCH 27/29] Revert "add crefs to sorbet methods" (#2)
+Subject: [PATCH 27/30] Revert "add crefs to sorbet methods" (#2)
 
 This reverts commit 199da36596d186ad6c1abe9fdd9204e6688a4bd9.
 ---
@@ -2950,7 +2950,7 @@ index b65245481e5b..948eedf35970 100644
 From 46b9109c7ddcaa4e8bbc6b01af83357d966f4f43 Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Wed, 29 Sep 2021 17:13:43 -0400
-Subject: [PATCH 28/29] pass the call data to sorbet method functions (#3)
+Subject: [PATCH 28/30] pass the call data to sorbet method functions (#3)
 
 ---
  method.h        | 2 +-
@@ -3001,7 +3001,7 @@ index a891794d0a08..05171ad04ca7 100644
 From 835f30277a15b0566fa0a23e33ccef4fde517243 Mon Sep 17 00:00:00 2001
 From: Nathan Froyd <froydnj@gmail.com>
 Date: Tue, 5 Oct 2021 08:39:12 -0400
-Subject: [PATCH 29/29] pass rb_calling_info into sorbet method functions (#4)
+Subject: [PATCH 29/30] pass rb_calling_info into sorbet method functions (#4)
 
 ---
  method.h        | 10 ++++++++--
@@ -3065,3 +3065,553 @@ index 05171ad04ca7..392278ee2a1a 100644
  
      CHECK_CFP_CONSISTENCY("vm_call_sorbet");
  
+
+From 12d8c43330278a744d6e45135d1a8735f23f5afe Mon Sep 17 00:00:00 2001
+From: Nathan Froyd <froydnj@gmail.com>
+Date: Wed, 13 Oct 2021 13:00:12 -0400
+Subject: [PATCH 30/30] add the ability to use interpreter-style keyword arg
+ parsing for compiled functions (#5)
+
+---
+ vm_insnhelper.c | 308 ++++++++++++++++++++++++++++++++++++------------
+ 1 file changed, 234 insertions(+), 74 deletions(-)
+
+diff --git a/vm_insnhelper.c b/vm_insnhelper.c
+index 392278ee2a1a..f1d8966bb385 100644
+--- a/vm_insnhelper.c
++++ b/vm_insnhelper.c
+@@ -2554,30 +2554,81 @@ vm_call_sorbet_simple_p(const rb_method_sorbet_t *sorbet)
+         sorbet->param->flags.has_block == FALSE;
+ }
+ 
+-/* This call combines vm_call_iseq_optimizable_p and logic in vm_callee_setup_arg */
++/* Return true if this method has kwargs than can be parsed efficiently by the
++ * compiler's kwarg parsing. */
+ static bool
++vm_call_kwarg_simple_p(const rb_method_sorbet_t *sorbet)
++{
++    const rb_sorbet_param_t *param = sorbet->param;
++    return param->flags.has_opt == FALSE &&
++        param->flags.has_rest == FALSE &&
++        param->flags.has_post == FALSE &&
++        param->flags.has_kw == TRUE &&
++        param->flags.has_kwrest == FALSE &&
++        param->flags.has_block == FALSE;
++}
++
++enum sorbet_method_opt_kind {
++    /* Not specially optimizable */
++    SORBET_METHOD_OPT_NONE,
++    /* Only required parameters */
++    SORBET_METHOD_OPT_REQ_PARAM_ONLY,
++    /* Keyword arguments without potential kwsplats */
++    SORBET_METHOD_OPT_EFFICIENT_KWARGS,
++};
++
++/* This call combines vm_call_iseq_optimizable_p and logic in vm_callee_setup_arg */
++static enum sorbet_method_opt_kind
+ vm_call_sorbet_optimizable_p(const struct rb_call_info *ci, const struct rb_call_cache *cc,
+-                             const rb_method_sorbet_t *sorbet)
++                             const struct rb_calling_info *calling, const rb_method_sorbet_t *sorbet)
+ {
+-    if (!vm_call_iseq_optimizable_p(ci, cc)) {
+-        return false;
++    /* Splat calls are generally not interesting, because they can introduce kwsplats
++     * and require extra processing anyway to resolve the splat. */
++    if (IS_ARGS_SPLAT(ci)) {
++        return SORBET_METHOD_OPT_NONE;
+     }
+ 
+-    /* vm_callee_setup_arg */
+-    if (UNLIKELY(ci->flag & VM_CALL_KW_SPLAT)) {
+-        return false;
++    /* Similarly for keyword splats. */
++    if (IS_ARGS_KW_SPLAT(ci)) {
++        return SORBET_METHOD_OPT_NONE;
+     }
+ 
+-    /* We only handle simple calls to functions with positional args, unlike
+-     * vm_callee_setup_arg */
+-    if (!vm_call_sorbet_simple_p(sorbet)) {
+-        return false;
++    /* Protected methods are weird, so don't deal with them. */
++    if (METHOD_ENTRY_VISI(cc->me) == METHOD_VISI_PROTECTED) {
++        return SORBET_METHOD_OPT_NONE;
+     }
+ 
+-    /* This callsite is to a method that only takes positional arguments. */
+-    /* TODO: change this to handle more of the cases that vm_callee_setup_arg does,
+-     * like kwarg-only functions.  */
+-    return true;
++    /* Positional-argument-only methods are easy to optimize and very common.  But
++     * make sure we're not providing keyword args here.  */
++    if (vm_call_sorbet_simple_p(sorbet) && !IS_ARGS_KEYWORD(ci)) {
++        return SORBET_METHOD_OPT_REQ_PARAM_ONLY;
++    }
++
++    /* If we're calling a keyword-arg taking function that doesn't have other complex
++     * arguments, we can avoid turning the keyword args into a keyword splat. */
++    if (vm_call_kwarg_simple_p(sorbet) && IS_ARGS_KEYWORD(ci)) {
++        /* Because Ruby keyword args can be rolled up into keyword splats to satisfy
++         * the last positional arg, the only case we can handle is when there are
++         * exactly the right number of positional args already.
++         *
++         * vm_callee_setup_arg has another case for no keyword args getting passed,
++         * but we don't handle that yet (and if we did handle it, we'd do it in the
++         * compiled code instead of in the VM, barring major changes to how the
++         * compiled code's argument parsing works).
++         */
++        const int lead_num = sorbet->param->lead_num;
++        const int argc = calling->argc;
++        const struct rb_call_info_kw_arg *kw_arg = ((struct rb_call_info_with_kwarg *)ci)->kw_arg;
++
++        if (argc - kw_arg->keyword_len == lead_num) {
++            return SORBET_METHOD_OPT_EFFICIENT_KWARGS;
++        }
++
++        return SORBET_METHOD_OPT_NONE;
++    }
++
++    /* We have something else that we haven't added an efficient case for. */
++    return SORBET_METHOD_OPT_NONE;
+ }
+ 
+ /* -- Remove empty_kw_splat In 3.0 -- */
+@@ -2586,10 +2637,10 @@ vm_call_sorbet_optimizable_p(const struct rb_call_info *ci, const struct rb_call
+  * Compare the ALWAYS_INLINE declaration on vm_call_iseq_setup_normal, which
+  * works on the same principles.
+  */
+-ALWAYS_INLINE(static VALUE vm_call_sorbet_with_frame_normal(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd, const rb_callable_method_entry_t *me, int check_kw_splat, int empty_kw_splat, int param_size, int local_size));
++ALWAYS_INLINE(static VALUE vm_call_sorbet_with_frame_normal(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd, const rb_callable_method_entry_t *me, int check_kw_splat, int empty_kw_splat, int argc, int param_size, int local_size));
+ 
+ static VALUE
+-vm_call_sorbet_with_frame_normal(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd, const rb_callable_method_entry_t *me, int check_kw_splat, int empty_kw_splat, int param_size, int local_size)
++vm_call_sorbet_with_frame_normal(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd, const rb_callable_method_entry_t *me, int check_kw_splat, int empty_kw_splat, int argc, int param_size, int local_size)
+ {
+     const struct rb_call_info *ci = &cd->ci;
+     VALUE val;
+@@ -2602,7 +2653,6 @@ vm_call_sorbet_with_frame_normal(rb_execution_context_t *ec, rb_control_frame_t
+      * be accessed by Binding#local_variables and that need to be accessed by blocks/closures.
+      */
+     VALUE frame_type = VM_FRAME_MAGIC_CFUNC | VM_ENV_FLAG_LOCAL;
+-    int argc = param_size;
+ 
+     if (check_kw_splat) {
+         if (UNLIKELY(calling->kw_splat)) {
+@@ -2620,7 +2670,7 @@ vm_call_sorbet_with_frame_normal(rb_execution_context_t *ec, rb_control_frame_t
+                                                 block_handler, (VALUE)me,
+                                                 0, ec->cfp->sp, local_size, sorbet->iseqptr->body->stack_max);
+ 
+-    reg_cfp->sp -= argc + 1;
++    reg_cfp->sp -= param_size + 1;
+     val = (*sorbet->func)(argc, reg_cfp->sp + 1, recv, new_cfp, calling, cd);
+ 
+     CHECK_CFP_CONSISTENCY("vm_call_sorbet");
+@@ -2639,7 +2689,35 @@ vm_call_sorbet_with_frame(rb_execution_context_t *ec, rb_control_frame_t *reg_cf
+     const int check_kw_splat = 1;
+     const rb_callable_method_entry_t *me = cd->cc.me;
+     const rb_method_sorbet_t *sorbet = UNALIGNED_MEMBER_PTR(me->def, body.sorbet);
+-    return vm_call_sorbet_with_frame_normal(ec, reg_cfp, calling, cd, me, check_kw_splat, empty_kw_splat, calling->argc, sorbet->iseqptr->body->local_table_size);
++    const int argc = calling->argc;
++    const int param_size = calling->argc;
++    const int locals = sorbet->iseqptr->body->local_table_size;
++    return vm_call_sorbet_with_frame_normal(ec, reg_cfp, calling, cd, me, check_kw_splat, empty_kw_splat, argc, param_size, locals);
++}
++
++static VALUE
++vm_call_sorbet_kwargs(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const struct rb_kwarg_call_data *kcd = (void *)cd;
++    const struct rb_call_info_with_kwarg *ci_kw = &kcd->ci_kw;
++    /* We have ensured that anything going through this function won't have kwsplats. */
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const rb_callable_method_entry_t *me = cd->cc.me;
++    const rb_method_sorbet_t *sorbet = UNALIGNED_MEMBER_PTR(me->def, body.sorbet);
++
++    /* Similarly to the above, we have ensured that anything going through this function
++     * won't have rest args, so we don't have to splat rest args via CALLER_SETUP_ARG.
++     * We also don't have to do the IS_ARGS_KEYWORD part of CALLER_SETUP_ARG, because
++     * we explicitly want to keep the interpreter-style of keyword arg passing.
++     *
++     * We do, however, need to adjust argc to make it reflect only the positional args
++     * being passed.
++     */
++    const int argc = calling->argc - ci_kw->kw_arg->keyword_len;
++    const int param_size = calling->argc;
++    const int locals = sorbet->iseqptr->body->local_table_size;
++    return vm_call_sorbet_with_frame_normal(ec, reg_cfp, calling, cd, me, check_kw_splat, empty_kw_splat, argc, param_size, locals);
+ }
+ 
+ static VALUE
+@@ -2673,7 +2751,10 @@ vm_call_sorbet_fast_0params_0locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 0, 0);
++    const int argc = 0;
++    const int params = 0;
++    const int locals = 0;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2681,7 +2762,10 @@ vm_call_sorbet_fast_0params_1locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 0, 1);
++    const int argc = 0;
++    const int params = 0;
++    const int locals = 1;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2689,7 +2773,10 @@ vm_call_sorbet_fast_0params_2locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 0, 2);
++    const int argc = 0;
++    const int params = 0;
++    const int locals = 2;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2697,7 +2784,10 @@ vm_call_sorbet_fast_0params_3locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 0, 3);
++    const int argc = 0;
++    const int params = 0;
++    const int locals = 3;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2705,7 +2795,10 @@ vm_call_sorbet_fast_0params_4locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 0, 4);
++    const int argc = 0;
++    const int params = 0;
++    const int locals = 4;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2713,7 +2806,10 @@ vm_call_sorbet_fast_0params_5locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 0, 5);
++    const int argc = 0;
++    const int params = 0;
++    const int locals = 5;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2721,7 +2817,10 @@ vm_call_sorbet_fast_1params_0locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 1, 0);
++    const int argc = 1;
++    const int params = 1;
++    const int locals = 0;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2729,7 +2828,10 @@ vm_call_sorbet_fast_1params_1locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 1, 1);
++    const int argc = 1;
++    const int params = 1;
++    const int locals = 1;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2737,7 +2839,10 @@ vm_call_sorbet_fast_1params_2locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 1, 2);
++    const int argc = 1;
++    const int params = 1;
++    const int locals = 2;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2745,7 +2850,10 @@ vm_call_sorbet_fast_1params_3locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 1, 3);
++    const int argc = 1;
++    const int params = 1;
++    const int locals = 3;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2753,7 +2861,10 @@ vm_call_sorbet_fast_1params_4locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 1, 4);
++    const int argc = 1;
++    const int params = 1;
++    const int locals = 4;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2761,7 +2872,10 @@ vm_call_sorbet_fast_1params_5locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 1, 5);
++    const int argc = 1;
++    const int params = 1;
++    const int locals = 5;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2769,7 +2883,10 @@ vm_call_sorbet_fast_2params_0locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 2, 0);
++    const int argc = 2;
++    const int params = 2;
++    const int locals = 0;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2777,7 +2894,10 @@ vm_call_sorbet_fast_2params_1locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 2, 1);
++    const int argc = 2;
++    const int params = 2;
++    const int locals = 1;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2785,7 +2905,10 @@ vm_call_sorbet_fast_2params_2locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 2, 2);
++    const int argc = 2;
++    const int params = 2;
++    const int locals = 2;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2793,7 +2916,10 @@ vm_call_sorbet_fast_2params_3locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 2, 3);
++    const int argc = 2;
++    const int params = 2;
++    const int locals = 3;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2801,7 +2927,10 @@ vm_call_sorbet_fast_2params_4locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 2, 4);
++    const int argc = 2;
++    const int params = 2;
++    const int locals = 4;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2809,7 +2938,10 @@ vm_call_sorbet_fast_2params_5locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 2, 5);
++    const int argc = 2;
++    const int params = 2;
++    const int locals = 5;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2817,7 +2949,10 @@ vm_call_sorbet_fast_3params_0locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 3, 0);
++    const int argc = 3;
++    const int params = 3;
++    const int locals = 0;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2825,7 +2960,10 @@ vm_call_sorbet_fast_3params_1locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 3, 1);
++    const int argc = 3;
++    const int params = 3;
++    const int locals = 1;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2833,7 +2971,10 @@ vm_call_sorbet_fast_3params_2locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 3, 2);
++    const int argc = 3;
++    const int params = 3;
++    const int locals = 2;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2841,7 +2982,10 @@ vm_call_sorbet_fast_3params_3locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 3, 3);
++    const int argc = 3;
++    const int params = 3;
++    const int locals = 3;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2849,7 +2993,10 @@ vm_call_sorbet_fast_3params_4locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 3, 4);
++    const int argc = 3;
++    const int params = 3;
++    const int locals = 4;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static VALUE
+@@ -2857,7 +3004,10 @@ vm_call_sorbet_fast_3params_5locals(rb_execution_context_t *ec, rb_control_frame
+ {
+     const int check_kw_splat = 0;
+     const int empty_kw_splat = 0;
+-    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, 3, 5);
++    const int argc = 3;
++    const int params = 3;
++    const int locals = 5;
++    return vm_call_sorbet_with_frame_normal(ec, cfp, calling, cd, cd->cc.me, check_kw_splat, empty_kw_splat, argc, params, locals);
+ }
+ 
+ static const vm_call_handler vm_call_sorbet_handlers[][6] = {
+@@ -2908,42 +3058,52 @@ vm_call_sorbet_maybe_setup_fastpath(rb_execution_context_t *ec, rb_control_frame
+     const struct rb_call_info *ci = &cd->ci;
+     struct rb_call_cache *cc = &cd->cc;
+     const rb_method_sorbet_t *sorbet = UNALIGNED_MEMBER_PTR(cc->me->def, body.sorbet);
++    enum sorbet_method_opt_kind kind = vm_call_sorbet_optimizable_p(ci, cc, calling, sorbet);
+ 
+-    /* Just take the normal path, we'll call vm_call_sorbet directly next time. */
+-    if (!vm_call_sorbet_optimizable_p(ci, cc, sorbet)) {
++    /* vm_call_sorbet has already been set as the fastpath before we enter this
++     * function, so we're just trying to figure out if there's something even
++     * faster that we could use as the fastpath.  If not, we can just call
++     * vm_call_sorbet here, and the fastpath code will be triggered next time.
++     */
++    switch (kind) {
++    case SORBET_METHOD_OPT_NONE:
+         return vm_call_sorbet(ec, cfp, calling, cd);
+-    }
++    case SORBET_METHOD_OPT_EFFICIENT_KWARGS:
++        CC_SET_FASTPATH(cc, vm_call_sorbet_kwargs, TRUE);
++        return vm_call_sorbet_kwargs(ec, cfp, calling, cd);
++    case SORBET_METHOD_OPT_REQ_PARAM_ONLY: {
++        /* We know that the method we're calling takes only positional arguments.
++         * But we need to verify that the method is being passed only positional
++         * arguments and there aren't any kwarg fixups that we need to do.  We
++         * only need to do this once, cf. vm_callee_setup_arg.
++         */
++        CALLER_SETUP_ARG(cfp, calling, ci);
++        int empty_kw_splat = calling->kw_splat;
++        CALLER_REMOVE_EMPTY_KW_SPLAT(cfp, calling, ci);
++        if (empty_kw_splat && calling->kw_splat) {
++            empty_kw_splat = 0;
++        }
+ 
+-    /* We know that the method we're calling takes only positional arguments.
+-     * But we need to verify that the method is being passed only positional
+-     * arguments and there aren't any kwarg fixups that we need to do.  We
+-     * only need to do this once, cf. vm_callee_setup_arg.
+-     */
+-    CALLER_SETUP_ARG(cfp, calling, ci);
+-    int empty_kw_splat = calling->kw_splat;
+-    CALLER_REMOVE_EMPTY_KW_SPLAT(cfp, calling, ci);
+-    if (empty_kw_splat && calling->kw_splat) {
+-        empty_kw_splat = 0;
+-    }
++        if (UNLIKELY(calling->argc != sorbet->param->lead_num)) {
++            /* vm_callee_setup_arg calls argument_arity_error, but our iseq is not
++             * set up in the way that function expects.  We don't declare and call
++             * sorbet_raiseArity here because it's nice to have a Ruby with just
++             * the Sorbet calling convention patches applied be able to compile
++             * and run Ruby's testsuite.  Instead, just call the function "normally"
++             * and let the argument checking in the function itself handle raising
++             * the error.
++             */
++            return vm_call_sorbet_with_frame(ec, cfp, calling, cd, empty_kw_splat);
++        }
+ 
+-    if (UNLIKELY(calling->argc != sorbet->param->lead_num)) {
+-        /* vm_callee_setup_arg calls argument_arity_error, but our iseq is not
+-         * set up in the way that function expects.  We don't declare and call
+-         * sorbet_raiseArity here because it's nice to have a Ruby with just
+-         * the Sorbet calling convention patches applied be able to compile
+-         * and run Ruby's testsuite.  Instead, just call the function "normally"
+-         * and let the argument checking in the function itself handle raising
+-         * the error.
++        /* vm_call_method_each_type has already set the fastpath to vm_call_sorbet,
++         * which handles all of the cases above.  We've done all of those checks so that
++         * we know a different fastpath is available, which we set here.
+          */
+-        return vm_call_sorbet_with_frame(ec, cfp, calling, cd, empty_kw_splat);
++        CC_SET_FASTPATH(cc, vm_call_sorbet_fast_func(ci, sorbet->param->size, sorbet->iseqptr->body->local_table_size), TRUE);
++        return vm_call_sorbet(ec, cfp, calling, cd);
++    }
+     }
+-
+-    /* vm_call_method_each_type has already set the fastpath to vm_call_sorbet,
+-     * which handles all of the cases above.  We've done all of those checks so that
+-     * we know a different fastpath is available, which we set here.
+-     */
+-    CC_SET_FASTPATH(cc, vm_call_sorbet_fast_func(ci, sorbet->param->size, sorbet->iseqptr->body->local_table_size), TRUE);
+-    return vm_call_sorbet(ec, cfp, calling, cd);
+ }
+ 
+ static VALUE

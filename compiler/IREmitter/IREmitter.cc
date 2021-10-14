@@ -119,6 +119,102 @@ void setupStackFrames(CompilerState &base, const ast::MethodDef &md, const IREmi
     }
 }
 
+void parseKeywordArgsFromCallData(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                                  cfg::LocalRef kwRestArgName, llvm::Value *argCountRaw, llvm::Value *argArrayRaw,
+                                  llvm::Value *hashArgs, int maxPositionalArgCount,
+                                  const vector<core::ArgInfo::ArgFlags> &argsFlags, int rubyBlockId) {
+    ENFORCE(rubyBlockId == 0);
+    auto *func = irctx.rubyBlocks2Functions[rubyBlockId];
+    auto &argPresentVariables = irctx.argPresentVariables[rubyBlockId];
+    // required arguments remaining to be parsed
+    auto numRequiredKwArgs = absl::c_count_if(
+        argsFlags, [](auto &argFlag) { return argFlag.isKeyword && !argFlag.isDefault && !argFlag.isRepeated; });
+    auto *missingKwargs = Payload::rubyUndef(cs, builder);
+
+    // optional arguments that are present
+    auto *optionalKwargs = IREmitterHelpers::buildS4(cs, 0);
+
+    // Sorbet method functions are passed (int, VALUE *, VALUE, rb_control_frame_t *, void *, void *).
+    // The second void *, argument 6, is rb_call_data/rb_kwarg_call_data.
+    auto *callData = func->arg_begin() + 5;
+    // The keywords, for a non-kwsplat situation, are passed after the positional
+    // arguments.  The passed argc (argument 1) reflects *only* the number of
+    // positional arguments passed; the number of keyword arguments is stored in the
+    // call data.  But the keyword arguments are still passed in argv (argument 2).
+    llvm::Value *kwargvIndices[] = {argCountRaw};
+    auto *kwargv = builder.CreateGEP(argArrayRaw, kwargvIndices, "kwargv");
+
+    for (int argId = maxPositionalArgCount; argId < argsFlags.size(); argId++) {
+        if (!argsFlags[argId].isKeyword || argsFlags[argId].isRepeated) {
+            continue;
+        }
+        auto name = irctx.rubyBlockArgs[rubyBlockId][argId];
+        auto strviewName = name.data(irctx.cfg)._name.shortName(cs);
+        auto rawId = Payload::idIntern(cs, builder, strviewName);
+
+        auto argPresent = argPresentVariables[argId];
+
+        auto *passedValue = builder.CreateCall(cs.getFunction("sorbet_kwarg_passed_value"), {callData, rawId, kwargv},
+                                               fmt::format("kwargValueFor_{}", strviewName));
+        auto *isItUndef = Payload::testIsUndef(cs, builder, passedValue);
+
+        // Fill in the default value, if any.
+        auto kwArgSet = llvm::BasicBlock::Create(cs, fmt::format("kwArgSet_{}", strviewName), func);
+        auto kwArgDefault = llvm::BasicBlock::Create(cs, fmt::format("kwArgDefault_{}", strviewName), func);
+        auto kwArgContinue = llvm::BasicBlock::Create(cs, fmt::format("kwArgContinue_{}", strviewName), func);
+
+        auto *missingPhi = llvm::PHINode::Create(missingKwargs->getType(), 2,
+                                                 fmt::format("missingArgsPhi_{}", strviewName), kwArgContinue);
+        auto *optionalPhi = llvm::PHINode::Create(optionalKwargs->getType(), 2,
+                                                  fmt::format("optionalArgsPhi_{}", strviewName), kwArgContinue);
+
+        builder.CreateCondBr(isItUndef, kwArgDefault, kwArgSet);
+
+        // Write a default value out, and mark the variable as missing
+        builder.SetInsertPoint(kwArgDefault);
+        if (argPresent.exists()) {
+            Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx, rubyBlockId);
+        }
+
+        auto *updatedMissingKwargs = missingKwargs;
+        if (!argsFlags[argId].isDefault) {
+            auto *rawRubySym = builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
+            updatedMissingKwargs = Payload::addMissingKWArg(cs, builder, missingKwargs, rawRubySym);
+        }
+
+        optionalPhi->addIncoming(optionalKwargs, builder.GetInsertBlock());
+        missingPhi->addIncoming(updatedMissingKwargs, builder.GetInsertBlock());
+        builder.CreateBr(kwArgContinue);
+
+        builder.SetInsertPoint(kwArgSet);
+        auto *updatedOptionalKwargs = optionalKwargs;
+        if (argPresent.exists()) {
+            if (argsFlags[argId].isDefault) {
+                updatedOptionalKwargs =
+                    builder.CreateBinOp(llvm::Instruction::Add, optionalKwargs, IREmitterHelpers::buildS4(cs, 1),
+                                        fmt::format("updatedOptional_{}", strviewName));
+            }
+
+            Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx, rubyBlockId);
+        }
+        Payload::varSet(cs, name, passedValue, builder, irctx, rubyBlockId);
+
+        optionalPhi->addIncoming(updatedOptionalKwargs, builder.GetInsertBlock());
+        missingPhi->addIncoming(missingKwargs, builder.GetInsertBlock());
+        builder.CreateBr(kwArgContinue);
+
+        builder.SetInsertPoint(kwArgContinue);
+        optionalKwargs = optionalPhi;
+        missingKwargs = missingPhi;
+    }
+    Payload::assertAllRequiredKWArgs(cs, builder, missingKwargs);
+    // We never want to use this path when we have a kwsplat arg, because the caller
+    // will roll things up into the kwsplat, so there wouldn't be anything for us.
+    ENFORCE(!kwRestArgName.exists());
+    builder.CreateCall(cs.getFunction("sorbet_assertCallDataNoExtraKWArg"),
+                       {callData, IREmitterHelpers::buildS4(cs, numRequiredKwArgs), optionalKwargs});
+}
+
 void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                  cfg::LocalRef kwRestArgName, llvm::Value *hashArgs, int maxPositionalArgCount,
                                  const vector<core::ArgInfo::ArgFlags> &argsFlags, int rubyBlockId) {
@@ -462,11 +558,40 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                                     builder, irctx, rubyBlockId);
                 }
                 if (hasKWArgs) {
-                    if (hasKWRestArgs) {
-                        ENFORCE(kwRestArgName.exists());
+                    // If we have a kwsplat arg, the caller/VM will always make sure that
+                    // our keyword args are rolled up into the splat, so there's no point
+                    // in attempting to take the efficient parsing route.
+                    //
+                    // Blocks also take the splat route always.
+                    if (hasKWRestArgs || rubyBlockId != 0) {
+                        parseKeywordArgsFromKwSplat(cs, builder, irctx, kwRestArgName, hashArgs, maxPositionalArgCount,
+                                                    argsFlags, rubyBlockId);
+                    } else {
+                        // Due to the wonders of Ruby, we can't always be assured that
+                        // our kwargs are passed directly on the stack.  They might
+                        // be in the kwsplat arg that we determined earlier.  So we need
+                        // a runtime check to determine how to parse the args.
+                        auto *check =
+                            builder.CreateCall(cs.getFunction("sorbet_can_efficiently_parse_kwargs"),
+                                               {hashArgs, func->arg_begin() + 4, func->arg_begin() + 5}, "efficient?");
+                        auto *efficientBlock = llvm::BasicBlock::Create(cs, "efficientParsing", func);
+                        auto *hashBlock = llvm::BasicBlock::Create(cs, "kwsplatParsing", func);
+                        auto *continuationBlock = llvm::BasicBlock::Create(cs, "continuationBlock", func);
+
+                        builder.CreateCondBr(check, efficientBlock, hashBlock);
+
+                        builder.SetInsertPoint(efficientBlock);
+                        parseKeywordArgsFromCallData(cs, builder, irctx, kwRestArgName, argCountRaw, argArrayRaw,
+                                                     hashArgs, maxPositionalArgCount, argsFlags, rubyBlockId);
+                        builder.CreateBr(continuationBlock);
+
+                        builder.SetInsertPoint(hashBlock);
+                        parseKeywordArgsFromKwSplat(cs, builder, irctx, kwRestArgName, hashArgs, maxPositionalArgCount,
+                                                    argsFlags, rubyBlockId);
+                        builder.CreateBr(continuationBlock);
+
+                        builder.SetInsertPoint(continuationBlock);
                     }
-                    parseKeywordArgsFromKwSplat(cs, builder, irctx, kwRestArgName, hashArgs, maxPositionalArgCount,
-                                                argsFlags, rubyBlockId);
                 }
             }
         }

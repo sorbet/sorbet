@@ -148,6 +148,15 @@ __attribute__((__noreturn__)) void sorbet_raiseMissingKeywords(VALUE missing) {
     rb_exc_raise(rb_keyword_error_new("missing", missing));
 }
 
+__attribute__((__noreturn__)) void sorbet_raiseCallDataExtraKeywords(int keyword_len, VALUE *keywords) {
+    // This is not quite right, but we can fix that up later.
+    VALUE missing = rb_ary_new();
+    for (int i = 0; i < keyword_len; ++i) {
+        rb_ary_push(missing, keywords[i]);
+    }
+    sorbet_raiseMissingKeywords(missing);
+}
+
 __attribute__((__noreturn__)) void sorbet_raiseExtraKeywords(VALUE hash) {
     VALUE err_mess = rb_sprintf("unknown keywords: %" PRIsVALUE, rb_hash_keys(hash));
     rb_exc_raise(rb_exc_new3(rb_eArgError, err_mess));
