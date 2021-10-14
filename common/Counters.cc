@@ -445,8 +445,9 @@ string getCounterStatistics() {
         fast_sort(entries, std::greater{}, [](const auto &ent) { return ent.second.total(); });
 
         for (auto &entry : entries) {
-            fmt::format_to(std::back_inserter(buf), "  {}: total: {}, compiled: {}, interpreted: {}\n", entry.first,
-                           entry.second.total(), entry.second.compiled, entry.second.interpreted);
+            fmt::format_to(std::back_inserter(buf),
+                           "{{\"method\": \"{}\", \"total\": {}, \"compiled\": {}, \"interpreted\": {}}}\n",
+                           entry.first, entry.second.total(), entry.second.compiled, entry.second.interpreted);
         }
     }
     return to_string(buf);

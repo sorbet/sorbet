@@ -6,7 +6,9 @@
 template <class Container, class Compare, class Proj>
 inline void fast_sort(Container &container, Compare &&comp, Proj &&proj) {
     pdqsort(container.begin(), container.end(),
-            [comp, proj](const auto &left, const auto &right) -> bool { return comp(proj(left), proj(right)); });
+            [comp = std::move(comp), proj = std::move(proj)](const auto &left, const auto &right) -> bool {
+                return std::invoke(comp, std::invoke(proj, left), std::invoke(proj, right));
+            });
 }
 
 template <class Container, class Compare> inline void fast_sort(Container &container, Compare &&comp) {
