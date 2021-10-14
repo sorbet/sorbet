@@ -437,12 +437,7 @@ string getCounterStatistics() {
 
         fast_sort(entries, [](auto &left, auto &right) { return left.second > right.second; });
 
-        int i = 0;
         for (auto &entry : entries) {
-            if (i >= 1000) {
-                break;
-            }
-
             fmt::format_to(std::back_inserter(buf), "  {}: {}\n", entry.first, entry.second);
         }
     }
