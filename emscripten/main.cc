@@ -14,7 +14,7 @@ namespace {
 
 void typecheckString(const char *rubySrc) {
     const char *argv[] = {"sorbet", "--color=always", "--silence-dev-message", "-e", rubySrc};
-    sorbet::realmain::realmain(size(argv), const_cast<char **>(&argv[0]));
+    sorbet::realmain::realmain(size(argv), const_cast<char **>(reinterpret_cast<const char **>(argv)));
 }
 
 } // namespace
@@ -53,7 +53,7 @@ void EMSCRIPTEN_KEEPALIVE typecheck(const char *optionsJson) {
         argCharStars.push_back(const_cast<char *>(argStrings[i].c_str()));
     }
 
-    sorbet::realmain::realmain(argCharStars.size(), const_cast<char **>(&argCharStars[0]));
+    sorbet::realmain::realmain(argCharStars.size(), (argCharStars.data()));
 }
 
 void EMSCRIPTEN_KEEPALIVE lsp(void (*respond)(const char *), const char *message) {
