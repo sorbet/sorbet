@@ -886,33 +886,8 @@ core::TypePtr Environment::getReturnType(core::Context ctx, const core::TypePtr 
     return applied->targs.front();
 }
 
-core::TypePtr flattenArrays(core::Context ctx, const core::TypePtr &type) {
-    core::TypePtr result;
-
-    typecase(
-        type,
-
-        [&](const core::OrType &o) {
-            result = core::Types::any(ctx, flattenArrays(ctx, o.left), flattenArrays(ctx, o.right));
-        },
-
-        [&](const core::AppliedType &a) {
-            if (a.klass != core::Symbols::Array()) {
-                result = type;
-                return;
-            }
-            ENFORCE(a.targs.size() == 1);
-            result = a.targs.front();
-        },
-
-        [&](const core::TupleType &t) { result = t.elementType(ctx); },
-
-        [&](const core::TypePtr &t) { result = std::move(type); });
-    return result;
-}
-
 core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, const core::TypePtr &returnType,
-                          core::NameRef fun) {
+                          core::NameRef fun, const core::Loc &loc) {
     if (fun != core::Names::flatMap()) {
         return returnType;
     }
@@ -924,7 +899,30 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
         return returnType;
     }
 
-    return core::Types::arrayOf(ctx, flattenArrays(ctx, returnType));
+    int64_t flattenDepth = 1;
+    auto mapType = core::Types::arrayOf(ctx, returnType);
+
+    const core::TypeAndOrigins recvType = {mapType, {loc}};
+    core::TypeAndOrigins arg{core::make_type<core::LiteralType>((int64_t)flattenDepth), recvType.origins};
+    InlinedVector<const core::TypeAndOrigins *, 2> args{&arg};
+
+    InlinedVector<core::LocOffsets, 2> argLocs{loc.offsets()};
+    core::CallLocs locs{
+        ctx.file,
+        loc.offsets(),
+        loc.offsets(),
+        argLocs,
+    };
+
+    core::DispatchArgs dispatchArgs{core::Names::flatten(), locs,    1,   args, recvType.type, recvType,
+                                    recvType.type,          nullptr, loc, true, false};
+
+    auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
+    if (dispatched.main.errors.empty()) {
+        return std::move(dispatched.returnType);
+    }
+
+    return mapType;
 }
 
 core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
@@ -1109,9 +1107,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 } else {
                     type = i.link->result->returnType;
                 }
-                type = flatmapHack(ctx, main.receiver, type, i.link->fun);
+                auto loc = core::Loc(ctx.file, bind.loc);
+                type = flatmapHack(ctx, main.receiver, type, i.link->fun, loc);
                 tp.type = std::move(type);
-                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                tp.origins.emplace_back(loc);
             },
             [&](cfg::LoadArg &i) {
                 /* read type from info filled by define_method */
