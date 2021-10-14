@@ -1,12 +1,13 @@
-# put here what's needed to set up each instance
+#!/bin/bash
 
-# installs Bazel and prints out the version
+# Running the scripts here helps Spin to do it in background
+# and then make a snapshot to save time at new instance creation.
+
 ./bazel version
 
-# TODO: Make sure you have "/home/spin/.bazel_binaries/4.1.0/bin_t" in your path.
-export PATH="~/.bazel_binaries/4.1.0/bin_t:$PATH"
-
-# sets up go to definition in VS Code
+# TODO: Make sure you have "/home/spin/.bazel_binaries/4.1.0/bin_t" in spin user path too.
+export PATH="/home/spin/.bazel_binaries/4.1.0/bin_t:$PATH"
+# Sets up go to definition in VS Code
 tools/scripts/build_compilation_db.sh
 
 
