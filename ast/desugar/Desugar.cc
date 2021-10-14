@@ -1691,7 +1691,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(send);
             },
             [&](parser::Regopt *regopt) {
-                ExpressionPtr acc = MK::Int(loc, 0);
+                int flags = 0;
                 for (auto &chr : regopt->opts) {
                     int flag = 0;
                     switch (chr) {
@@ -1714,11 +1714,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                             // The parser already yelled about this
                             break;
                     }
-                    if (flag != 0) {
-                        acc = MK::Send1(loc, std::move(acc), core::Names::orOp(), MK::Int(loc, flag));
-                    }
+                    flags |= flag;
                 }
-                result = std::move(acc);
+                result = MK::Int(loc, flags);
             },
             [&](parser::Return *ret) {
                 if (ret->exprs.size() > 1) {
