@@ -123,7 +123,7 @@ requires: []
  is_defining_ref=0
 
 f3b9f8c31a343a60665c06f959a48dbdceef757c  autogen3.msgpack
-1d15cfc4ae99782d587f483ffeda1206cd89b3aa  autogen4.msgpack
+a20ed01b8a7646141440ba39b60b247bd13a4388  autogen4.msgpack
 
 39a40,80
 > # ParsedFile: test/cli/autogen_print_rbi/b.rbi
