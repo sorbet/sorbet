@@ -1,0 +1,28 @@
+# put here what's needed to set up each instance
+
+# installs Bazel and prints out the version
+./bazel version
+
+# TODO: Make sure you have "/home/spin/.bazel_binaries/4.1.0/bin_t" in your path.
+export PATH="~/.bazel_binaries/4.1.0/bin_t:$PATH"
+
+# sets up go to definition in VS Code
+tools/scripts/build_compilation_db.sh
+
+
+# TODO: useful aliases
+
+# alias compile_sorbet="./bazel build //main:sorbet --config=dbg"
+
+# comp_run() {
+# compile_sorbet && sorbet_run $@
+# }
+
+# sorbet_run() {
+#   bazel-bin/main/sorbet $@ --silence-dev-message
+# }
+
+# bazel_test_find() {
+#   ./bazel query ‘tests(//...)’ | grep $@ | xargs ./bazel test --config=dbg --test_output=errors
+# }
+
