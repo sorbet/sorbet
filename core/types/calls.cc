@@ -716,7 +716,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         constr = &TypeConstraint::EmptyFrozenConstraint;
     }
 
-    incrementMethodResolved(method.showFullName(gs));
+    incrementMethodResolved(args.callLoc().file().data(gs).compiledLevel == CompiledLevel::True,
+                            method.showFullName(gs));
 
     if (data->isGenericMethod()) {
         constr->defineDomain(gs, data->typeArguments());

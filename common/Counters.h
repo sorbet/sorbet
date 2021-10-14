@@ -79,7 +79,7 @@ CounterState getAndClearThreadCounters();
 void counterConsume(CounterState cs);
 
 // slow, and shouldn't be merged to master
-void incrementMethodResolved(std::string methodFullName);
+void incrementMethodResolved(bool callerIsCompiled, std::string methodFullName);
 
 void prodCounterInc(ConstExprStr counter);
 void prodCounterAdd(ConstExprStr counter, unsigned long value);

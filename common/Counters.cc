@@ -143,7 +143,9 @@ void counterConsume(CounterState cs) {
     }
 
     for (auto &method : cs.counters->methodCounters) {
-        counterState.methodCounters[method.first] += method.second;
+        auto &counters = counterState.methodCounters[method.first];
+        counters.compiled += method.second.compiled;
+        counters.interpreted += method.second.interpreted;
     }
 }
 
@@ -175,8 +177,13 @@ void categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned lo
     counterState.categoryCounterAdd(category.str, counter.str, value);
 }
 
-void incrementMethodResolved(string methodFullName) {
-    counterState.methodCounters[methodFullName] += 1;
+void incrementMethodResolved(bool callerIsCompiled, string methodFullName) {
+    auto &counters = counterState.methodCounters[methodFullName];
+    if (callerIsCompiled) {
+        counters.compiled += 1;
+    } else {
+        counters.interpreted += 1;
+    }
 }
 
 int genThreadId() {
@@ -429,16 +436,17 @@ string getCounterStatistics() {
     {
         fmt::format_to(std::back_inserter(buf), "Resolved Methods: \n");
 
-        std::vector<pair<string_view, int>> entries;
+        std::vector<pair<string_view, CounterImpl::MethodCounts>> entries;
 
         for (const auto &method : counterState.methodCounters) {
             entries.emplace_back(method.first, method.second);
         }
 
-        fast_sort(entries, [](auto &left, auto &right) { return left.second > right.second; });
+        fast_sort(entries, std::greater{}, [](const auto &ent) { return ent.second.total(); });
 
         for (auto &entry : entries) {
-            fmt::format_to(std::back_inserter(buf), "  {}: {}\n", entry.first, entry.second);
+            fmt::format_to(std::back_inserter(buf), "  {}: total: {}, compiled: {}, interpreted: {}\n", entry.first,
+                           entry.second.total(), entry.second.compiled, entry.second.interpreted);
         }
     }
     return to_string(buf);

@@ -48,8 +48,15 @@ struct CounterImpl {
     std::vector<Timing> timings;
     UnorderedMap<const char *, UnorderedMap<const char *, CounterType>> countersByCategory;
 
-    // methodFullName -> count
-    UnorderedMap<std::string, int> methodCounters;
+    struct MethodCounts {
+        int compiled = 0;
+        int interpreted = 0;
+
+        int total() const {
+            return this->compiled + this->interpreted;
+        }
+    };
+    UnorderedMap<std::string, MethodCounts> methodCounters;
 };
 } // namespace sorbet
 
