@@ -96,23 +96,8 @@ class Opus::Types::Test::NonForcingConstantsTest < Critic::Unit::UnitTest
       assert_match(/is not a class or module/, exn.message)
     end
 
-    # These tests describe the /current/ behavior, but we expect this
-    # behavior to change once we have a runtime implementation of
-    # packages
     describe 'packaged form' do
-      it "when exists but isn't is_a?" do
-        res = T::NonForcingConstants.non_forcing_is_a?(nil, 'Integer', package: "SomePackage")
-        assert_equal(false, res)
-      end
-
-      it "when exists and is_a?" do
-        res = T::NonForcingConstants.non_forcing_is_a?(0, 'Integer', package: "SomePackage")
-        assert_equal(true, res)
-      end
-
       it "when exists and is_a? of something not in the package" do
-        T::NonForcingConstants.expects(:stripe_packages_enabled?).returns(true)
-
         # 0 is an Integer, but we're trying to find out if it's a
         # `PkgRegistry::SomePackage::Integer` here, so this should be
         # false
@@ -120,10 +105,8 @@ class Opus::Types::Test::NonForcingConstantsTest < Critic::Unit::UnitTest
         assert_equal(false, res)
       end
 
-      it "when exists and is_a? of something that IS in the package" do
-        T::NonForcingConstants.expects(:stripe_packages_enabled?).returns(true)
-
-        # This relies on the PkgRegistry we've set up elsewhere
+      it "when exists and is_a? of something that IS in the 'package' (i.e. in the right namespace)" do
+        # This relies on the constants we've set up elsewhere
         res = T::NonForcingConstants.non_forcing_is_a?(SomePackage::Thing.new, 'Thing', package: "SomePackage")
         assert_equal(true, res)
       end
