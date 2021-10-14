@@ -76,6 +76,7 @@ void MsgpackWriter::packDefinition(core::Context ctx, ParsedFile &pf, Definition
 
     // defines_behavior
     packBool(def.defines_behavior);
+    ENFORCE(!def.defines_behavior || !ctx.file.data(ctx).isRBI(), "RBI files should never define behavior");
 
     // isEmpty
     packBool(def.is_empty);
@@ -241,6 +242,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
 const map<int, int> MsgpackWriter::typeCount{
     {2, 4},
     {3, 5},
+    {4, 5},
 };
 
 const map<int, vector<string>> MsgpackWriter::refAttrMap{
@@ -270,6 +272,19 @@ const map<int, vector<string>> MsgpackWriter::refAttrMap{
             "parent_of",
         },
     },
+    {
+        4,
+        {
+            "scope",
+            "name",
+            "nesting",
+            "expression_range",
+            "expression_pos_range",
+            "resolved",
+            "is_defining_ref",
+            "parent_of",
+        },
+    },
 };
 
 const map<int, vector<string>> MsgpackWriter::defAttrMap{
@@ -287,6 +302,18 @@ const map<int, vector<string>> MsgpackWriter::defAttrMap{
     },
     {
         3,
+        {
+            "raw_full_name",
+            "type",
+            "defines_behavior",
+            "is_empty",
+            "parent_ref",
+            "aliased_ref",
+            "defining_ref",
+        },
+    },
+    {
+        4,
         {
             "raw_full_name",
             "type",

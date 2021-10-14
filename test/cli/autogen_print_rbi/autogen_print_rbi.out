@@ -1,0 +1,169 @@
+Version 3:
+# ParsedFile: test/cli/autogen_print_rbi/a.rb
+requires: []
+## defs:
+[def id=0]
+ type=module
+ defines_behavior=0
+ is_empty=0
+[def id=1]
+ type=module
+ defines_behavior=0
+ is_empty=0
+ defining_ref=[A B]
+[def id=2]
+ type=class
+ defines_behavior=1
+ is_empty=0
+ defining_ref=[C]
+## refs:
+[ref id=0]
+ scope=[]
+ name=[A B]
+ nesting=[]
+ resolved=[A B]
+ loc=test/cli/autogen_print_rbi/a.rb:3
+ is_defining_ref=1
+[ref id=1]
+ scope=[A B]
+ name=[C]
+ nesting=[[A B]]
+ resolved=[A B C]
+ loc=test/cli/autogen_print_rbi/a.rb:4
+ is_defining_ref=1
+[ref id=2]
+ scope=[A B C]
+ name=[FromRBI A]
+ nesting=[[A B C] [A B]]
+ resolved=[FromRBI A]
+ loc=test/cli/autogen_print_rbi/a.rb:5
+ is_defining_ref=0
+
+
+Version 4:
+# ParsedFile: test/cli/autogen_print_rbi/a.rb
+requires: []
+## defs:
+[def id=0]
+ type=module
+ defines_behavior=0
+ is_empty=0
+[def id=1]
+ type=module
+ defines_behavior=0
+ is_empty=0
+ defining_ref=[A B]
+[def id=2]
+ type=class
+ defines_behavior=1
+ is_empty=0
+ defining_ref=[C]
+## refs:
+[ref id=0]
+ scope=[]
+ name=[A B]
+ nesting=[]
+ resolved=[A B]
+ loc=test/cli/autogen_print_rbi/a.rb:3
+ is_defining_ref=1
+[ref id=1]
+ scope=[A B]
+ name=[C]
+ nesting=[[A B]]
+ resolved=[A B C]
+ loc=test/cli/autogen_print_rbi/a.rb:4
+ is_defining_ref=1
+[ref id=2]
+ scope=[A B C]
+ name=[FromRBI A]
+ nesting=[[A B C] [A B]]
+ resolved=[FromRBI A]
+ loc=test/cli/autogen_print_rbi/a.rb:5
+ is_defining_ref=0
+# ParsedFile: test/cli/autogen_print_rbi/b.rbi
+requires: []
+## defs:
+[def id=0]
+ type=module
+ defines_behavior=0
+ is_empty=0
+[def id=1]
+ type=class
+ defines_behavior=0
+ is_empty=0
+ defining_ref=[FromRBI]
+## refs:
+[ref id=0]
+ scope=[]
+ name=[FromRBI]
+ nesting=[]
+ resolved=[FromRBI]
+ loc=test/cli/autogen_print_rbi/b.rbi:3
+ is_defining_ref=1
+[ref id=1]
+ scope=[FromRBI]
+ name=[A]
+ nesting=[[FromRBI]]
+ resolved=[FromRBI A]
+ loc=test/cli/autogen_print_rbi/b.rbi:4
+ is_defining_ref=0
+[ref id=2]
+ scope=[FromRBI]
+ name=[T]
+ nesting=[[FromRBI]]
+ resolved=[T]
+ loc=test/cli/autogen_print_rbi/b.rbi:4
+ is_defining_ref=0
+[ref id=3]
+ scope=[FromRBI]
+ name=[Integer]
+ nesting=[[FromRBI]]
+ resolved=[Integer]
+ loc=test/cli/autogen_print_rbi/b.rbi:4
+ is_defining_ref=0
+
+f3b9f8c31a343a60665c06f959a48dbdceef757c  autogen3.msgpack
+a20ed01b8a7646141440ba39b60b247bd13a4388  autogen4.msgpack
+
+39a40,80
+> # ParsedFile: test/cli/autogen_print_rbi/b.rbi
+> requires: []
+> ## defs:
+> [def id=0]
+>  type=module
+>  defines_behavior=0
+>  is_empty=0
+> [def id=1]
+>  type=class
+>  defines_behavior=0
+>  is_empty=0
+>  defining_ref=[FromRBI]
+> ## refs:
+> [ref id=0]
+>  scope=[]
+>  name=[FromRBI]
+>  nesting=[]
+>  resolved=[FromRBI]
+>  loc=test/cli/autogen_print_rbi/b.rbi:3
+>  is_defining_ref=1
+> [ref id=1]
+>  scope=[FromRBI]
+>  name=[A]
+>  nesting=[[FromRBI]]
+>  resolved=[FromRBI A]
+>  loc=test/cli/autogen_print_rbi/b.rbi:4
+>  is_defining_ref=0
+> [ref id=2]
+>  scope=[FromRBI]
+>  name=[T]
+>  nesting=[[FromRBI]]
+>  resolved=[T]
+>  loc=test/cli/autogen_print_rbi/b.rbi:4
+>  is_defining_ref=0
+> [ref id=3]
+>  scope=[FromRBI]
+>  name=[Integer]
+>  nesting=[[FromRBI]]
+>  resolved=[Integer]
+>  loc=test/cli/autogen_print_rbi/b.rbi:4
+>  is_defining_ref=0
