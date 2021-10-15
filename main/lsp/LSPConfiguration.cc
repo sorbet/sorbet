@@ -1,4 +1,5 @@
 #include "main/lsp/LSPConfiguration.h"
+#include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_replace.h"
@@ -140,8 +141,24 @@ string LSPConfiguration::localName2Remote(string_view filePath) const {
     return absl::StrCat(clientConfig->rootUri, "/", relativeUri);
 }
 
-string LSPConfiguration::remoteName2Local(string_view uri) const {
+string urlDecode(string_view uri) {
+    vector<pair<const absl::string_view, string>> replacements;
+
+    for (size_t pos = uri.find('%'); pos != string::npos; pos = uri.find('%', pos + 1)) {
+        auto from = uri.substr(pos, 3);
+        auto to = absl::HexStringToBytes(from.substr(1));
+        replacements.push_back({from, to});
+    }
+
+    return absl::StrReplaceAll(uri, replacements);
+}
+
+string LSPConfiguration::remoteName2Local(string_view encodedUri) const {
     assertHasClientConfig();
+
+    // VS Code URLencodes the file path, so we should decode first
+    string uri = urlDecode(encodedUri);
+
     if (!isUriInWorkspace(uri) && !isSorbetUri(uri)) {
         logger->error("Unrecognized URI received from client: {}", uri);
         return string(uri);
@@ -149,18 +166,17 @@ string LSPConfiguration::remoteName2Local(string_view uri) const {
 
     const bool isSorbetURI = this->isSorbetUri(uri);
     const string_view root = isSorbetURI ? sorbetScheme : clientConfig->rootUri;
-    const char *start = uri.data() + root.length();
+    string::iterator start = uri.begin() + root.length();
     if (*start == '/') {
         ++start;
     }
 
     string path = string(start, uri.end());
-    // Note: May be `https://` or `https%3A//`. VS Code URLencodes the : in sorbet:https:// paths.
+
     const bool isHttps = isSorbetURI && absl::StartsWith(path, httpsScheme) && path.length() > httpsScheme.length() &&
-                         (path[httpsScheme.length()] == ':' || path[httpsScheme.length()] == '%');
+                         path[httpsScheme.length()] == ':';
     if (isHttps) {
-        // URL decode the :
-        return absl::StrReplaceAll(path, {{"%3A", ":"}});
+        return path;
     } else if (rootPath.length() > 0) {
         return absl::StrCat(rootPath, "/", path);
     } else {
