@@ -90,11 +90,6 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
         return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
     }
 
-    // We eventually want to eliminate this check.
-    if (finalInfo->file != mcctx.irctx.cfg.file) {
-        return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
-    }
-
     auto *forwarder = getFinalForwarder(mcctx, *finalInfo);
     if (forwarder == nullptr) {
         return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
