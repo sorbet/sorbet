@@ -139,9 +139,9 @@ module T::Props
             dynamic_fallback
           else
             # This is probably something like `T.all(String, SomeMarker)` or
-            # `T.all(SomeEnum, T.enum(SomeEnum::FOO))` and we should treat it
-            # like String or SomeEnum even if we don't know what to do with
-            # the rest of the type.
+            # `T.all(SomeEnum, T.deprecated_enum(SomeEnum::FOO))` and we should
+            # treat it like String or SomeEnum even if we don't know what to do
+            # with the rest of the type.
             inner_known.first
           end
         when T::Types::Enum

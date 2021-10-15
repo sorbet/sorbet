@@ -46,7 +46,6 @@ module T
 
   def self.class_of(klass); end
   def self.noreturn; end
-  def self.enum(values); end
   def self.deprecated_enum(values); end
   def self.untyped; end
 

@@ -88,7 +88,7 @@ class T::Types::NoReturn < T::Types::Base
 end
 
 class T::Types::Enum < T::Types::Base
-  def initialize(values, method_name: "enum"); end
+  def initialize(values); end
   def valid?(obj); end
   def name; end
   def describe_obj(obj); end

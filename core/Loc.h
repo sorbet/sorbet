@@ -143,6 +143,10 @@ public:
     // etc.
     Loc adjust(const GlobalState &gs, int32_t beginAdjust, int32_t endAdjust) const;
 
+    // Like `Loc::adjust`, but takes a start offset and length, instead of independently adjusting
+    // the begin and end positions.
+    Loc adjustLen(const GlobalState &gs, int32_t beginAdjust, int32_t len) const;
+
     // For a given Loc, returns
     //
     // - the Loc corresponding to the first non-whitespace character on this line, and

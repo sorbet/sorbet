@@ -8,7 +8,7 @@ T.proc
 T.proc.params(arg0: String, arg1: Integer)
 T.class_of(String)
 T.noreturn
-T.enum([:a, :b])
+T.enum([:a, :b]) # error: Method `enum` does not exist on `T.class_of(T)`
 T.deprecated_enum([:a, :b])
 
 T.untyped
@@ -28,7 +28,7 @@ T.nilable # error: Not enough arguments provided for method `T.nilable`. Expecte
 T.class_of # error: Not enough arguments provided for method `T.class_of`. Expected: `1`, got: `0`
   T.noreturn(String)
 # ^^^^^^^^^^^^^^^^^^ error: Too many arguments provided for method `T.noreturn`. Expected: `0`, got: `1`
-T.enum # error: Not enough arguments provided for method `T.enum`. Expected: `1`, got: `0`
+T.enum # error: Method `enum` does not exist on `T.class_of(T)`
 T.deprecated_enum # error: Not enough arguments provided for method `T.deprecated_enum`. Expected: `1`, got: `0`
 
   T.untyped(String)

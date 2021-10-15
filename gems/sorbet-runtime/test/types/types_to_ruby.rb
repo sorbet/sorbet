@@ -41,7 +41,6 @@ class Opus::Types::Test::TypesToRubyTest < Critic::Unit::UnitTest
     [T.nilable(T::Hash[String, String]), "T.nilable(T::Hash[String, String])"],
 
     # Enum:
-    [T.enum(%w[a b c]), 'T.enum(["a", "b", "c"])'],
     [T.deprecated_enum(%w[a b c]), 'T.deprecated_enum(["a", "b", "c"])'],
 
     # Range:

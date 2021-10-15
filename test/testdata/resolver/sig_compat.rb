@@ -4,11 +4,10 @@
 class A
   sig do
     params(
-      a: T.enum([1,2]),
       b: T.deprecated_enum([1,2]),
       c: T.any(*[Integer, String])
     ).returns(T.untyped)
   end
-  def f(a, b, c)
+  def f(b, c)
   end
 end

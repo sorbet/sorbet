@@ -15,10 +15,19 @@ class A
   sig do
     params(
       a: unsupported, # error: Unknown type syntax
-      b: T.enum, # error: Not enough arguments provided for method `T.enum`. Expected: `1`, got: `0`
+      b: T.enum,
+      #  ^^^^^^ error: Method `enum` does not exist on `T.class_of(T)`
       c: T.enum(1),
-      d: T.enum([]), # error: enum([]) is invalid
-      e: T.enum([unsupported]), # error: Unsupported type literal
+      #  ^^^^^^^^^ error: `T.enum` has been renamed to `T.deprecated_enum`
+      #  ^^^^^^^^^ error: Method `enum` does not exist on `T.class_of(T)`
+      d: T.enum([]),
+      #  ^^^^^^^^^^ error: `T.enum` has been renamed to `T.deprecated_enum`
+      #  ^^^^^^^^^^ error: enum([]) is invalid
+      #  ^^^^^^^^^^ error: Method `enum` does not exist on `T.class_of(T)`
+      e: T.enum([unsupported]),
+      #  ^^^^^^^^^^^^^^^^^^^^^ error: `T.enum` has been renamed to `T.deprecated_enum`
+      #          ^^^^^^^^^^^   error: Unsupported type literal
+      #  ^^^^^^^^^^^^^^^^^^^^^ error: Method `enum` does not exist on `T.class_of(T)`
       b1: T.deprecated_enum, # error: Not enough arguments provided for method `T.deprecated_enum`. Expected: `1`, got: `0`
       c1: T.deprecated_enum(1),
       d1: T.deprecated_enum([]), # error: enum([]) is invalid
