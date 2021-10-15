@@ -78,6 +78,33 @@ class FlatTypeCollection
   end
 end
 
+class CircularTypeOne
+  extend T::Sig
+
+  sig { returns(T::Array[CircularTypeTwo])}
+  def to_ary
+    []
+  end
+end
+
+class CircularTypeTwo
+  extend T::Sig
+
+  sig { returns(T::Array[CircularTypeOne])}
+  def to_ary
+    []
+  end
+end
+
+class SelfReferentialType
+  extend T::Sig
+
+  sig { returns(T::Array[SelfReferentialType])}
+  def to_ary
+    []
+  end
+end
+
 integer_pairs = T.let([IntegerPair.new(1, 2), IntegerPair.new(3, 4)], T::Array[IntegerPair])
 super_pairs = T.let([SuperPair.new(1, 2)], T::Array[SuperPair])
 
@@ -96,6 +123,9 @@ flat_type_collections = T.let(
   [FlatTypeCollection.new, FlatTypeCollection.new, FlatTypeCollection.new],
   T::Array[FlatTypeCollection]
 )
+
+circular_one_collection = T.let([], T::Array[CircularTypeOne])
+self_referential_collection =  T.let([], T::Array[SelfReferentialType])
 
 T.reveal_type(flat_tuple.flatten) # error: Revealed type: `T::Array[Integer]`
 T.reveal_type(nested_tuple.flatten) # error: Revealed type: `T::Array[Integer]`
@@ -121,6 +151,9 @@ T.reveal_type(nested_generic_pairs.flatten(2)) # error: Revealed type: `T::Array
 
 T.reveal_type(nested_flat_type_list.flatten) # error: Revealed type: `T::Array[FlatType]`
 T.reveal_type(flat_type_collections.flatten) # error: Revealed type: `T::Array[FlatType]`
+
+T.reveal_type(circular_one_collection.flatten) # error: Revealed type: `T::Array[CircularTypeOne]`
+T.reveal_type(self_referential_collection.flatten) # error: Revealed type: `T::Array[SelfReferentialType]`
 
 xs.flatten(1 + 1) # error: You must pass an Integer literal to specify a depth
 
