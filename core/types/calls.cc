@@ -3035,6 +3035,7 @@ public:
         ENFORCE(!ap->targs.empty());
         element = ap->targs.front();
 
+        int64_t MAX_DEPTH = 100;
         int64_t depth;
         if (args.args.size() == 1) {
             auto argTyp = args.args[0]->type;
@@ -3057,10 +3058,10 @@ public:
                 depth = lt.asInteger();
             } else {
                 // Negative values behave like no depth was given
-                depth = INT64_MAX;
+                depth = MAX_DEPTH;
             }
         } else if (args.args.size() == 0) {
-            depth = INT64_MAX;
+            depth = MAX_DEPTH;
         } else {
             // If our arity is off, then calls.cc will report an error due to mismatch with the RBI elsewhere, so we
             // don't need to do anything special here
