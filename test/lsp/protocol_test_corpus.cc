@@ -524,6 +524,20 @@ TEST_CASE_FIXTURE(ProtocolTest, "DoesNotTypecheckSorbetURIs") {
     REQUIRE_EQ(0, responses.size());
 }
 
+// Tests that files with url encoded characters in their name are matched to local files
+TEST_CASE_FIXTURE(ProtocolTest, "MatchesFilesWithUrlEncodedNames") {
+    initializeLSP(false, {});
+
+    string filename = "test file@123+%&*#!.rbi";
+    string encodedFilename = "test%20file%40123%2B%25%26*%23!.rbi";
+
+    send(*openFile(filename, "# typed: true\nclass Foo; end;\n"));
+
+    auto rbi = readFile(getUri(filename));
+    auto rbiURLEncoded = readFile(getUri(encodedFilename));
+    REQUIRE_EQ(rbi, rbiURLEncoded);
+}
+
 // Tests that Sorbet does not crash when a file URI falls outside of the workspace.
 TEST_CASE_FIXTURE(ProtocolTest, "DoesNotCrashOnNonWorkspaceURIs") {
     const bool supportsMarkdown = false;
