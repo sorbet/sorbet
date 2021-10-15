@@ -23,6 +23,23 @@ variant<JSONNullObject, unique_ptr<PrepareRenameResult>> getPrepareRenameResult(
 }
 
 variant<JSONNullObject, unique_ptr<PrepareRenameResult>>
+getPrepareRenameResultForIdent(const core::GlobalState &gs, const core::lsp::IdentResponse *identResp) {
+    auto identNameLoc = identResp->getIdentNameLoc(gs);
+    if (!identNameLoc) {
+        return JSONNullObject();
+    }
+
+    auto range = Range::fromLoc(gs, identNameLoc.value());
+    if (range == nullptr) {
+        return JSONNullObject();
+    }
+
+    auto result = make_unique<PrepareRenameResult>(move(range));
+    result->placeholder = identNameLoc.value().source(gs);
+    return result;
+}
+
+variant<JSONNullObject, unique_ptr<PrepareRenameResult>>
 getPrepareRenameResultForSend(const core::GlobalState &gs, const core::lsp::SendResponse *sendResp) {
     // The send expression is of the form <receiver>.<method><args>
     // We want to return the range and placeholder for the method part of the expression, because this is what the
@@ -78,6 +95,8 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerInterfac
         response->result = getPrepareRenameResult(gs, defResp->symbol);
     } else if (auto sendResp = resp->isSend()) {
         response->result = getPrepareRenameResultForSend(gs, sendResp);
+    } else if (auto identResp = resp->isIdent()) {
+        response->result = getPrepareRenameResultForIdent(gs, identResp);
     }
 
     return response;
