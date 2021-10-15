@@ -709,57 +709,67 @@ string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx,
     }
 }
 
-llvm::GlobalVariable *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                        core::SymbolRef methodSym, int rubyBlockId) {
-    auto tp = iseqType(cs);
-    auto name = getStackFrameGlobalName(cs, irctx, methodSym, rubyBlockId);
-    string rawName = "stackFramePrecomputed_" + name;
-    auto *var = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
-        auto ret =
-            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::ExternalLinkage, nullptr, rawName);
-        ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-        ret->setAlignment(llvm::MaybeAlign(8));
+llvm::Function *rubyStackFrameInit(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                                   core::SymbolRef methodSym, int rubyBlockId) {
+    auto name = string("loadStackFrame_") + getStackFrameGlobalName(cs, irctx, methodSym, rubyBlockId);
+    auto *initFn = cs.module->getFunction(name);
+    if (initFn != nullptr) {
+        return initFn;
+    }
 
-        return ret;
-    }));
+    auto noVarArgs = false;
+    auto *ty = llvm::FunctionType::get(iseqType(cs), {}, noVarArgs);
 
-    return var;
+    // not defining the body turns this into a declaration
+    return llvm::Function::Create(ty, llvm::Function::ExternalLinkage, name, cs.module);
 }
 
 llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                      const ast::MethodDef &md, int rubyBlockId) {
     llvm::IRBuilder<> globalInitBuilder(cs);
-    auto globalDeclaration = rubyStackFrameVar(cs, builder, irctx, md.symbol, rubyBlockId);
-    if (!globalDeclaration->hasInitializer()) {
-        auto nullv = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(globalDeclaration->getValueType()));
-        globalDeclaration->setInitializer(nullv);
+
+    auto *tp = iseqType(cs);
+    auto name = getStackFrameGlobalName(cs, irctx, md.symbol, rubyBlockId);
+    string rawName = "stackFramePrecomputed_" + name;
+    auto *globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
+        auto nullv = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(tp));
+
+        auto ret =
+            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, nullv, rawName);
+        ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+        ret->setAlignment(llvm::MaybeAlign(8));
 
         // The realpath is the first argument to `sorbet_globalConstructors`
         auto realpath = cs.globalConstructorsEntry->getParent()->arg_begin();
         realpath->setName("realpath");
 
         // create constructor
-        auto constr = allocateRubyStackFramesImpl(cs, irctx, md, rubyBlockId, globalDeclaration);
+        auto constr = allocateRubyStackFramesImpl(cs, irctx, md, rubyBlockId, ret);
         globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
         globalInitBuilder.CreateCall(constr, {realpath});
+
+        return ret;
+    }));
+
+    // define the body of the function that exposes the global across modules
+    auto *initFn = rubyStackFrameInit(cs, builder, irctx, md.symbol, rubyBlockId);
+    if (initFn->isDeclaration()) {
+        auto *bb = llvm::BasicBlock::Create(cs, "entry", initFn);
+        globalInitBuilder.SetInsertPoint(bb);
+        auto *global = globalInitBuilder.CreateLoad(globalDeclaration);
+        globalInitBuilder.CreateRet(global);
     }
 
-    globalInitBuilder.SetInsertPoint(cs.functionEntryInitializers);
-    auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
-    llvm::Constant *indices[] = {zero};
-    auto global = globalInitBuilder.CreateLoad(
-        llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
-        "stackFrame");
-
     // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
-    return global;
+    globalInitBuilder.SetInsertPoint(cs.functionEntryInitializers);
+    return globalInitBuilder.CreateLoad(globalDeclaration, "stackFrame");
 }
 
 } // namespace
 
 llvm::Value *Payload::rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                         core::SymbolRef methodSym) {
-    return ::sorbet::compiler::rubyStackFrameVar(cs, builder, irctx, methodSym, 0);
+    return builder.CreateCall(rubyStackFrameInit(cs, builder, irctx, methodSym, 0), {}, "stackFrame");
 }
 
 llvm::Value *Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,

@@ -474,8 +474,7 @@ public:
                     "Unknown method kind: {}", methodKind.show(cs));
 
             auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
-            auto *stackFrameVar = Payload::rubyStackFrameVar(cs, builder, mcctx.irctx, funcSym);
-            auto *stackFrame = builder.CreateLoad(stackFrameVar, "stackFrame");
+            auto *stackFrame = Payload::rubyStackFrameVar(cs, builder, mcctx.irctx, funcSym);
 
             const char *payloadFuncName = isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod";
             auto rubyFunc = cs.getFunction(payloadFuncName);
