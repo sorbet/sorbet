@@ -32,7 +32,7 @@ end
 # OPT-LITERAL: }
 
 def ix_flag(x)
-  x.match(/pattern/ix)
+  x.match(/pattern # Comment/ix)
 end
 
 # INITIAL-LABEL: define i64 @"func_Object#7ix_flag"(
@@ -46,7 +46,7 @@ end
 # OPT-LITERAL: }
 
 def ixm_flag(x)
-  x.match(/pattern/ixm)
+  x.match(/pattern.more # Comment/ixm)
 end
 
 # INITIAL-LABEL: define i64 @"func_Object#8ixm_flag"(
@@ -60,7 +60,7 @@ end
 # OPT-LITERAL: }
 
 def x_flag(x)
-  x.match(/pattern/x)
+  x.match(/pattern # Comment/x)
 end
 
 # INITIAL-LABEL: define i64 @"func_Object#6x_flag"(
@@ -74,7 +74,7 @@ end
 # OPT-LITERAL: }
 
 def xm_flag(x)
-  x.match(/pattern/xm)
+  x.match(/pattern.still more # Comment/xm)
 end
 
 # INITIAL-LABEL: define i64 @"func_Object#7xm_flag"(
@@ -88,7 +88,7 @@ end
 # OPT-LITERAL: }
 
 def m_flag(x)
-  x.match(/pattern/m)
+  x.match(/pattern.mflag/m)
 end
 
 # INITIAL-LABEL: define i64 @"func_Object#6m_flag"(
@@ -100,3 +100,19 @@ end
 # OPT: load i64, i64* @rubyRegexpFrozen_pattern_4
 # OPT-NOT: ic_new
 # OPT-LITERAL: }
+
+# Run some execution tests, too.
+p noflags("pattern")
+p noflags("PATTERN")
+p i_flag("pattern")
+p i_flag("PATTERN")
+p ix_flag("pattern")
+p ix_flag("PATTERN")
+p ixm_flag("pattern\nmore")
+p ixm_flag("PATTERN\nMORE")
+p x_flag("pattern")
+p x_flag("PATTERN")
+p xm_flag("pattern\nstillmore")
+p xm_flag("PATTERN\nstillmore")
+p m_flag("pattern\nmflag")
+p m_flag("PATTERN\nmflag")
