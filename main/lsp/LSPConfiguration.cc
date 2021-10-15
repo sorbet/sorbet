@@ -145,9 +145,13 @@ string urlDecode(string_view uri) {
     vector<pair<const absl::string_view, string>> replacements;
 
     for (size_t pos = uri.find('%'); pos != string::npos; pos = uri.find('%', pos + 1)) {
+        // "%3a"
         auto from = uri.substr(pos, 3);
-        auto to = absl::HexStringToBytes(from.substr(1));
-        replacements.push_back({from, to});
+        // add replacement only if % is actually followed by exactly 2 hex digits
+        if (from.size() == 3 && isxdigit(from[1]) && isxdigit(from[2])) {
+            auto to = absl::HexStringToBytes(from.substr(1));
+            replacements.push_back({from, to});
+        }
     }
 
     return absl::StrReplaceAll(uri, replacements);
