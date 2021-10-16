@@ -11,7 +11,7 @@ module T::Private::Sealed
     end
 
     def sealed_subclasses
-      @sorbet_sealed_module_all_subclasses_set ||=
+      @sorbet_sealed_module_all_subclasses_set ||= # rubocop:disable Naming/MemoizedInstanceVariableName
         begin
           require 'set'
           Set.new(@sorbet_sealed_module_all_subclasses).freeze
@@ -38,7 +38,7 @@ module T::Private::Sealed
       # this will freeze the set so that you can never get into a
       # state where you use the subclasses list and then something
       # else will add to it
-      @sorbet_sealed_module_all_subclasses_set ||=
+      @sorbet_sealed_module_all_subclasses_set ||= # rubocop:disable Naming/MemoizedInstanceVariableName
         begin
           require 'set'
           Set.new(@sorbet_sealed_module_all_subclasses).freeze

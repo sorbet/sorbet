@@ -194,6 +194,7 @@ module T::Private::Methods
       @modules_with_final[m] = methods
     end
     methods[method_name] = true
+    nil
   end
 
   def self.note_module_deals_with_final(mod)
