@@ -80,9 +80,6 @@ public:
     // The basic-block that holds the initialization of string constants.
     llvm::BasicBlock *allocRubyIdsEntry = nullptr;
 
-    // The basic-block that holds the initialization of static-init constants.
-    llvm::BasicBlock *initializeStaticInitNamesEntry = nullptr;
-
     // The function that holds calls to global constructors
     //
     // This works as a replacement to llvm.global_ctors so that we can delay initialization until after
@@ -252,8 +249,6 @@ public:
                 auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), argTys, varArgs);
                 auto globalConstructors = llvm::Function::Create(ft, linkageType, "sorbet_globalConstructors", *module);
                 threadState->allocRubyIdsEntry = llvm::BasicBlock::Create(lctx, "allocRubyIds", globalConstructors);
-                threadState->initializeStaticInitNamesEntry =
-                    llvm::BasicBlock::Create(lctx, "initializeStaticInitNames", globalConstructors);
                 threadState->globalConstructorsEntry =
                     llvm::BasicBlock::Create(lctx, "globalConstructors", globalConstructors);
             }
@@ -264,8 +259,7 @@ public:
         }
         ENFORCE(threadState->file.exists());
         compiler::CompilerState state(gs, lctx, module.get(), debug.get(), compUnit, threadState->file,
-                                      threadState->allocRubyIdsEntry, threadState->initializeStaticInitNamesEntry,
-                                      threadState->globalConstructorsEntry);
+                                      threadState->allocRubyIdsEntry, threadState->globalConstructorsEntry);
         absl::Cleanup dropInternalState = [&] {
             threadState->aborted = true;
             module = nullptr;
@@ -328,9 +322,6 @@ public:
             llvm::IRBuilder<> builder(lctx);
 
             builder.SetInsertPoint(threadState->allocRubyIdsEntry);
-            builder.CreateBr(threadState->initializeStaticInitNamesEntry);
-
-            builder.SetInsertPoint(threadState->initializeStaticInitNamesEntry);
             builder.CreateBr(threadState->globalConstructorsEntry);
 
             builder.SetInsertPoint(threadState->globalConstructorsEntry);
@@ -348,7 +339,7 @@ public:
 
         debug->finalize();
 
-        compiler::CompilerState cs(gs, lctx, module.get(), debug.get(), compileUnit, f, nullptr, nullptr, nullptr);
+        compiler::CompilerState cs(gs, lctx, module.get(), debug.get(), compileUnit, f, nullptr, nullptr);
         string fileName = objectFileName(gs, f);
         ensureOutputDir(compiledOutputDir.value(), fileName);
         if (irOutputDir.has_value()) {
