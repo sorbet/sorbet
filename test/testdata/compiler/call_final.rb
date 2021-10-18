@@ -20,10 +20,10 @@ end
 # present in the un-optimized ir, and that it gets inlined in the optimized
 # version.
 
-# INITIAL-LABEL: define i64 @"func_B#6caller"
+# INITIAL-LABEL: define internal i64 @"func_B#6caller"
 # INITIAL: call i64 @direct_func_A.3foo(%struct.FunctionInlineCache*
 # INITIAL{LITERAL}: }
 
-# OPT-LABEL: define i64 @"func_B#6caller"
+# OPT-LABEL: define internal i64 @"func_B#6caller"
 # OPT-NOT: call i64 @direct_func_A.3foo(%struct.FunctionInlineCache*
 # OPT{LITERAL}: }

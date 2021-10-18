@@ -3,7 +3,7 @@
 # compiled: true
 # run_filecheck: INITIAL
 
-# INITIAL-LABEL: define i64 @"func_Object#6func_a"
+# INITIAL-LABEL: define internal i64 @"func_Object#6func_a"
 # INITIAL-NOT: call { i64, i8 } @sorbet_vm_return_from_block_wrapper
 # INITIAL{LITERAL}: }
 def func_a
@@ -25,7 +25,7 @@ def func_a
   end
 end
 
-# INITIAL-LABEL: define i64 @"func_Object#6func_b"
+# INITIAL-LABEL: define internal i64 @"func_Object#6func_b"
 # INITIAL: call { i64, i8 } @sorbet_vm_return_from_block_wrapper
 # INITIAL{LITERAL}: }
 def func_b
@@ -36,7 +36,7 @@ def justyield
   yield
 end
 
-# INITIAL-LABEL: define i64 @"func_Object#6func_c"
+# INITIAL-LABEL: define internal i64 @"func_Object#6func_c"
 # INITIAL: call { i64, i8 } @sorbet_vm_return_from_block_wrapper
 # INITIAL{LITERAL}: }
 def func_c
@@ -45,7 +45,7 @@ def func_c
   end
 end
 
-# INITIAL-LABEL: define i64 @"func_Object#6func_d"
+# INITIAL-LABEL: define internal i64 @"func_Object#6func_d"
 # INITIAL-NOT: call { i64, i8 } @sorbet_vm_return_from_block_wrapper
 # INITIAL{LITERAL}: }
 def func_d
