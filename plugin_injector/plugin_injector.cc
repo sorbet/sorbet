@@ -259,8 +259,7 @@ public:
         }
         ENFORCE(threadState->file.exists());
         compiler::CompilerState state(gs, lctx, module.get(), debug.get(), compUnit, threadState->file,
-                                      threadState->allocRubyIdsEntry,
-                                      threadState->globalConstructorsEntry);
+                                      threadState->allocRubyIdsEntry, threadState->globalConstructorsEntry);
         absl::Cleanup dropInternalState = [&] {
             threadState->aborted = true;
             module = nullptr;
