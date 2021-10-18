@@ -94,14 +94,6 @@ bool IREmitterHelpers::isFileOrClassStaticInit(const core::GlobalState &gs, core
 }
 
 namespace {
-llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &cs, core::SymbolRef sym) {
-    if (IREmitterHelpers::isFileOrClassStaticInit(cs, sym)) {
-        // this is top level code that shoudln't be callable externally.
-        // Even more, sorbet reuses symbols used for these and thus if we mark them non-private we'll get link errors
-        return llvm::Function::InternalLinkage;
-    }
-    return llvm::Function::ExternalLinkage;
-}
 
 llvm::Function *
 getOrCreateFunctionWithName(CompilerState &cs, std::string name, llvm::FunctionType *ft,
@@ -148,13 +140,13 @@ llvm::Function *IREmitterHelpers::getOrCreateDirectWrapper(CompilerState &cs, co
 llvm::Function *IREmitterHelpers::getOrCreateFunction(CompilerState &cs, core::SymbolRef sym) {
     ENFORCE(!isClassStaticInit(cs, sym), "use special helper instead");
     return getOrCreateFunctionWithName(cs, IREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
-                                       getFunctionLinkageType(cs, sym), true);
+                                       llvm::Function::InternalLinkage, true);
 }
 
 llvm::Function *IREmitterHelpers::getOrCreateStaticInit(CompilerState &cs, core::SymbolRef sym, core::LocOffsets loc) {
     ENFORCE(isClassStaticInit(cs, sym), "use general helper instead");
     auto name = IREmitterHelpers::getFunctionName(cs, sym) + "L" + to_string(loc.beginPos());
-    return getOrCreateFunctionWithName(cs, name, cs.getRubyFFIType(), getFunctionLinkageType(cs, sym), true);
+    return getOrCreateFunctionWithName(cs, name, cs.getRubyFFIType(), llvm::Function::InternalLinkage, true);
 }
 llvm::Function *IREmitterHelpers::getInitFunction(CompilerState &cs, core::SymbolRef sym) {
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
