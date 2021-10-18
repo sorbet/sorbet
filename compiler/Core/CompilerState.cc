@@ -44,6 +44,16 @@ llvm::FunctionType *CompilerState::getRubyFFIType() {
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }
 
+llvm::FunctionType *CompilerState::getDirectWrapperFunctionType() {
+    llvm::Type *args[] = {
+        llvm::StructType::getTypeByName(lctx, "struct.FunctionInlineCache")->getPointerTo(), // cache
+        llvm::Type::getInt32Ty(lctx),                                                        // arg count
+        llvm::Type::getInt64PtrTy(lctx),                                                     // argArray
+        llvm::Type::getInt64Ty(lctx),                                                        // self
+    };
+    return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
+}
+
 llvm::FunctionType *CompilerState::getRubyBlockFFIType() {
     llvm::Type *args[] = {
         llvm::Type::getInt64Ty(lctx),    // first yielded argument(first argument is both here and in argArray

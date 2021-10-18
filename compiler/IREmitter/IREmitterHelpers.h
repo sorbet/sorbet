@@ -69,6 +69,7 @@ public:
     static llvm::Function *cleanFunctionBody(CompilerState &cs, llvm::Function *func);
     static llvm::Function *getOrCreateStaticInit(CompilerState &cs, core::SymbolRef sym, core::LocOffsets loc);
     static llvm::Function *getOrCreateFunction(CompilerState &cs, core::SymbolRef sym);
+    static llvm::Function *getOrCreateDirectWrapper(CompilerState &cs, core::SymbolRef sym);
 
     static llvm::Function *getInitFunction(CompilerState &cs, core::SymbolRef sym);
 

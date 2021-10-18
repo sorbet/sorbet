@@ -887,6 +887,31 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
     IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyBlockId, maybeChecked);
 }
 
+// Direct wrappers correspond to only the direct call when we know the receive is of the correct type. Any type tests
+// must be done in the caller prior to calling the direct wrapper.
+void emitDirectWrapper(CompilerState &cs, const ast::MethodDef &md, const IREmitterContext &irctx) {
+    llvm::IRBuilder<> builder(cs);
+
+    auto *wrapper = IREmitterHelpers::getOrCreateDirectWrapper(cs, md.symbol);
+    auto *cache = wrapper->arg_begin();
+    auto *argc = wrapper->arg_begin() + 1;
+    auto *argv = wrapper->arg_begin() + 2;
+    auto *self = wrapper->arg_begin() + 3;
+
+    cache->setName("cache");
+    argc->setName("argc");
+    argv->setName("argv");
+    self->setName("self");
+
+    auto *entry = llvm::BasicBlock::Create(cs, "entry", wrapper);
+    builder.SetInsertPoint(entry);
+
+    auto *target = irctx.rubyBlocks2Functions[0];
+    auto *stackFrame = builder.CreateLoad(Payload::rubyStackFrameVar(cs, builder, irctx, md.symbol));
+    auto *res = Payload::callFuncDirect(cs, builder, cache, target, argc, argv, self, stackFrame);
+    builder.CreateRet(res);
+}
+
 void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) {
     Timer timer(cs.gs.tracer(), "IREmitter::run");
     cfg::CFG::UnfreezeCFGLocalVariables unfreezeVars(cfg);
@@ -922,6 +947,10 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     emitDeadBlocks(cs, cfg, irctx);
     emitBlockExits(cs, cfg, irctx);
     emitPostProcess(cs, cfg, irctx);
+
+    if (md.symbol.data(cs)->isFinalMethod()) {
+        emitDirectWrapper(cs, md, irctx);
+    }
 
     // Link the function initializer blocks.
     for (int funId = 0; funId < irctx.functionInitializersByFunction.size(); funId++) {
