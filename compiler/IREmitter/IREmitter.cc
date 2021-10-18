@@ -887,8 +887,8 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
     IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyBlockId, maybeChecked);
 }
 
-// Direct wrappers correspond to only the direct call when we know the receive is of the correct type. Any type tests
-// must be done in the caller prior to calling the direct wrapper.
+// Direct wrappers call the wrapped function without checking the receiver's type; the caller is responsible for
+// guarding the call to the wrapper with appropriate validation of the receiver.
 void emitDirectWrapper(CompilerState &cs, const ast::MethodDef &md, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(cs);
 
