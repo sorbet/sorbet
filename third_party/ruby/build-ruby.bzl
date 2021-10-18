@@ -390,8 +390,6 @@ def _ruby_archive_impl(ctx):
         )),
     )
 
-    archive = ctx.actions.declare_file("ruby.tar.gz")
-
     return [DefaultInfo(files = depset([archive]))]
 
 _ruby_archive = rule(
