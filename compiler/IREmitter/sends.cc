@@ -25,54 +25,6 @@
 using namespace std;
 namespace sorbet::compiler {
 namespace {
-llvm::Function *getFinalForwarder(MethodCallContext &mcctx, IREmitterHelpers::FinalMethodInfo &finalInfo) {
-    if (auto *func = IREmitterHelpers::lookupFunction(mcctx.cs, finalInfo.method)) {
-        return func;
-    }
-
-    auto *send = mcctx.send;
-
-    auto *func = IREmitterHelpers::getOrCreateFunctionWeak(mcctx.cs, finalInfo.method);
-    llvm::IRBuilder builder{mcctx.cs};
-
-    auto *argc = func->arg_begin();
-    auto *argv = func->arg_begin() + 1;
-    auto *self = func->arg_begin() + 2;
-
-    auto *entry = llvm::BasicBlock::Create(mcctx.cs, "entry", func);
-    auto *forward = llvm::BasicBlock::Create(mcctx.cs, "forward", func);
-    auto funcCs = mcctx.cs.withFunctionEntry(entry);
-
-    // setup the forwarding call
-    {
-        builder.SetInsertPoint(forward);
-
-        // TODO(trevor) we could probably handle methods wih block args as well, following callWithSplatAndBlock
-
-        // build a splat array
-        auto *splat =
-            builder.CreateCall(funcCs.module->getFunction("sorbet_arrayNewFromValues"), {argc, argv}, "splat");
-
-        // setup the ruby stack
-        auto *cfp = builder.CreateCall(funcCs.getFunction("sorbet_getCFP"), {}, "cfp");
-        Payload::pushRubyStackVector(funcCs, builder, cfp, self, {splat});
-        auto methodName = string(send->fun.shortName(funcCs));
-        CallCacheFlags flags;
-        flags.args_splat = true;
-        auto *cache = IREmitterHelpers::makeInlineCache(funcCs, builder, methodName, flags, 1, {});
-        auto *bh = Payload::vmBlockHandlerNone(funcCs, builder);
-        auto *res = Payload::callFuncWithCache(funcCs, builder, cache, bh);
-        builder.CreateRet(res);
-    }
-
-    // finalize the entry block
-    builder.SetInsertPoint(entry);
-    builder.CreateBr(forward);
-
-    ENFORCE(!llvm::verifyFunction(*func, &llvm::dbgs()));
-
-    return func;
-}
 
 llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
     // TODO(trevor) we could probably handle methods wih block args as well, by passing the block handler through the
@@ -90,15 +42,8 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
         return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
     }
 
-    // We eventually want to eliminate this check.
-    if (finalInfo->file != mcctx.irctx.cfg.file) {
-        return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
-    }
-
-    auto *forwarder = getFinalForwarder(mcctx, *finalInfo);
-    if (forwarder == nullptr) {
-        return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
-    }
+    // If the wrapper is defined in another file, this will be resolved by the runtime linker.
+    auto *wrapper = IREmitterHelpers::getOrCreateDirectWrapper(mcctx.cs, finalInfo->method);
 
     auto &builder = mcctx.builder;
     auto *send = mcctx.send;
@@ -130,10 +75,7 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
 
     // this is unfortunate: fillSendArgsArray will allocate a hash when keyword arguments are present.
     auto args = IREmitterHelpers::fillSendArgArray(mcctx);
-    auto *stackFrameVar = Payload::rubyStackFrameVar(cs, builder, mcctx.irctx, finalInfo->method);
-    auto *stackFrame = builder.CreateLoad(stackFrameVar);
-    auto *fastPathResult =
-        Payload::callFuncDirect(cs, builder, cache, forwarder, args.argc, args.argv, recv, stackFrame);
+    auto *fastPathResult = builder.CreateCall(wrapper, {cache, args.argc, args.argv, recv});
     auto *fastPathEnd = builder.GetInsertBlock();
     builder.CreateBr(afterFinalCall);
 

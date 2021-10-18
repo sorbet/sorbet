@@ -16,10 +16,14 @@ def caller(a)
 end
 end
 
+# These groups of assertions check that the call to the direct wrapper is
+# present in the un-optimized ir, and that it gets inlined in the optimized
+# version.
+
 # INITIAL-LABEL: define i64 @"func_B#6caller"
-# INITIAL: call i64 @sorbet_callFuncDirect(%struct.FunctionInlineCache* @{{.*@func_A.3foo}}
+# INITIAL: call i64 @direct_func_A.3foo(%struct.FunctionInlineCache*
 # INITIAL{LITERAL}: }
 
 # OPT-LABEL: define i64 @"func_B#6caller"
-# OPT-NOT: sorbet_callFuncWithCache
+# OPT-NOT: call i64 @direct_func_A.3foo(%struct.FunctionInlineCache*
 # OPT{LITERAL}: }

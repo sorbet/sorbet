@@ -139,6 +139,12 @@ llvm::Function *IREmitterHelpers::getOrCreateFunctionWeak(CompilerState &cs, cor
     return fn;
 }
 
+llvm::Function *IREmitterHelpers::getOrCreateDirectWrapper(CompilerState &cs, core::SymbolRef sym) {
+    auto name = "direct_" + IREmitterHelpers::getFunctionName(cs, sym);
+    return getOrCreateFunctionWithName(cs, name, cs.getDirectWrapperFunctionType(), llvm::Function::ExternalLinkage,
+                                       true);
+}
+
 llvm::Function *IREmitterHelpers::getOrCreateFunction(CompilerState &cs, core::SymbolRef sym) {
     ENFORCE(!isClassStaticInit(cs, sym), "use special helper instead");
     return getOrCreateFunctionWithName(cs, IREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
