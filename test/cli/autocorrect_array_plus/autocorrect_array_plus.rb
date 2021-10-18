@@ -15,3 +15,6 @@ ints.+(
 
 ints +
   strings
+
+# TODO(jez) Detect this, suggest `ints = ints.concat(strings)`
+ints += strings
