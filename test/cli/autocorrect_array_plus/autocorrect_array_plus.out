@@ -9,6 +9,12 @@ autocorrect_array_plus.rb:6: Expected `T::Enumerable[Integer]` but found `T::Arr
     autocorrect_array_plus.rb:4:
      4 |strings = T::Array[String].new
                   ^^^^^^^^^^^^^^^^^^^^
+  Note:
+    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
+  Autocorrect: Done
+    autocorrect_array_plus.rb:6: Replaced with `.concat(strings)`
+     6 |ints + strings
+            ^^^^^^^^^^
 
 autocorrect_array_plus.rb:8: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
      8 |ints + (strings)
@@ -21,6 +27,12 @@ autocorrect_array_plus.rb:8: Expected `T::Enumerable[Integer]` but found `T::Arr
     autocorrect_array_plus.rb:4:
      4 |strings = T::Array[String].new
                   ^^^^^^^^^^^^^^^^^^^^
+  Note:
+    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
+  Autocorrect: Done
+    autocorrect_array_plus.rb:8: Replaced with `.concat(strings)`
+     8 |ints + (strings)
+            ^^^^^^^^^^^^
 
 autocorrect_array_plus.rb:9: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
      9 |ints + ((strings))
@@ -33,6 +45,12 @@ autocorrect_array_plus.rb:9: Expected `T::Enumerable[Integer]` but found `T::Arr
     autocorrect_array_plus.rb:4:
      4 |strings = T::Array[String].new
                   ^^^^^^^^^^^^^^^^^^^^
+  Note:
+    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
+  Autocorrect: Done
+    autocorrect_array_plus.rb:9: Replaced with `.concat(strings)`
+     9 |ints + ((strings))
+            ^^^^^^^^^^^^^^
 
 autocorrect_array_plus.rb:10: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
     10 |ints.+(strings)
@@ -45,6 +63,12 @@ autocorrect_array_plus.rb:10: Expected `T::Enumerable[Integer]` but found `T::Ar
     autocorrect_array_plus.rb:4:
      4 |strings = T::Array[String].new
                   ^^^^^^^^^^^^^^^^^^^^
+  Note:
+    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
+  Autocorrect: Done
+    autocorrect_array_plus.rb:10: Replaced with `.concat(strings)`
+    10 |ints.+(strings)
+            ^^^^^^^^^^^
 
 autocorrect_array_plus.rb:12: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
     12 |ints.+(
@@ -58,6 +82,13 @@ autocorrect_array_plus.rb:12: Expected `T::Enumerable[Integer]` but found `T::Ar
     autocorrect_array_plus.rb:4:
      4 |strings = T::Array[String].new
                   ^^^^^^^^^^^^^^^^^^^^
+  Note:
+    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
+  Autocorrect: Done
+    autocorrect_array_plus.rb:12: Replaced with `.concat(strings)`
+    12 |ints.+(
+    13 |  strings
+    14 |)
 
 autocorrect_array_plus.rb:16: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
     16 |ints +
@@ -70,6 +101,12 @@ autocorrect_array_plus.rb:16: Expected `T::Enumerable[Integer]` but found `T::Ar
     autocorrect_array_plus.rb:4:
      4 |strings = T::Array[String].new
                   ^^^^^^^^^^^^^^^^^^^^
+  Note:
+    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
+  Autocorrect: Done
+    autocorrect_array_plus.rb:16: Replaced with `.concat(strings)`
+    16 |ints +
+    17 |  strings
 Errors: 6
 
 --------------------------------------------------------------------------
@@ -79,15 +116,12 @@ Errors: 6
 ints = T::Array[Integer].new
 strings = T::Array[String].new
 
-ints + strings
+ints.concat(strings)
 
-ints + (strings)
-ints + ((strings))
-ints.+(strings)
+ints.concat(strings)
+ints.concat(strings)
+ints.concat(strings)
 
-ints.+(
-  strings
-)
+ints.concat(strings)
 
-ints +
-  strings
+ints.concat(strings)
