@@ -12,8 +12,6 @@ module T::Private; end
 module T::Private::Abstract; end
 module T::Private::Types; end
 
-require 'set'
-
 # Each section is a group that I believe need a fixed ordering. There is also
 # an ordering between groups.
 

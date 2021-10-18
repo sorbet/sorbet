@@ -8,8 +8,6 @@ module T::Types
 
     attr_reader :values
 
-    # TODO Ideally Hash would not be accepted but there are a lot of uses with prop enum.
-    sig {params(values: T.any(Array, Set, Hash, T::Range[T.untyped])).void}
     def initialize(values)
       @values = values
     end

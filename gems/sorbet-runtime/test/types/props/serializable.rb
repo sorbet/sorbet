@@ -1089,7 +1089,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
   describe 'with a module prop type' do
     before do
-      T::Configuration.scalar_types += [ModulePropStruct::Scalar.name]
+      T::Configuration.scalar_types = T::Configuration.scalar_types.keys + [ModulePropStruct::Scalar.name]
     end
 
     after do

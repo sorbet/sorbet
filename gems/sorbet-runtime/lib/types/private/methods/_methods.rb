@@ -2,13 +2,13 @@
 # typed: false
 
 module T::Private::Methods
-  @installed_hooks = Set.new
+  @installed_hooks = {}
   @signatures_by_method = {}
   @sig_wrappers = {}
   @sigs_that_raised = {}
   # stores method names that were declared final without regard for where.
   # enables early rejection of names that we know can't induce final method violations.
-  @was_ever_final_names = Set.new
+  @was_ever_final_names = {}
   # maps from modules to the set of final methods declared in that module.
   # we also overload entries slightly: if the value is nil, that means that the
   # module has final methods somewhere along its ancestor chain, but does not itself
@@ -190,10 +190,11 @@ module T::Private::Methods
     m = is_singleton_method ? mod.singleton_class : mod
     methods = @modules_with_final[m]
     if methods.nil?
-      methods = Set.new
+      methods = {}
       @modules_with_final[m] = methods
     end
-    methods.add(method_name)
+    methods[method_name] = true
+    nil
   end
 
   def self.note_module_deals_with_final(mod)
@@ -276,7 +277,7 @@ module T::Private::Methods
 
     @sig_wrappers[key] = sig_block
     if current_declaration.final
-      @was_ever_final_names.add(method_name)
+      @was_ever_final_names[method_name] = true
       # use hook_mod, not mod, because for example, we want class C to be marked as having final if we def C.foo as
       # final. change this to mod to see some final_method tests fail.
       note_module_deals_with_final(hook_mod)
@@ -527,7 +528,7 @@ module T::Private::Methods
 
   def self.install_hooks(mod)
     return if @installed_hooks.include?(mod)
-    @installed_hooks << mod
+    @installed_hooks[mod] = true
 
     if mod == TOP_SELF
       # self at the top-level of a file is weirdly special in Ruby
