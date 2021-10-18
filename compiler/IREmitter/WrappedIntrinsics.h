@@ -60,6 +60,8 @@
     {core::Symbols::String(), "<<", CMethod{"sorbet_int_rb_str_concat"}},
     {core::Symbols::String(), "==", CMethod{"sorbet_int_rb_str_equal"}},
     {core::Symbols::String(), "===", CMethod{"sorbet_int_rb_str_equal"}},
+    {core::Symbols::String(), "[]", CMethod{"sorbet_int_rb_str_aref_m"}},
+    {core::Symbols::String(), "slice", CMethod{"sorbet_int_rb_str_aref_m"}},
     {core::Symbols::String(), "dump", CMethod{"sorbet_int_rb_str_dump"}},
     {core::Symbols::String(), "eql?", CMethod{"sorbet_int_rb_str_eql"}},
     {core::Symbols::String(), "freeze", CMethod{"sorbet_int_rb_str_freeze"}},
