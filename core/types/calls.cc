@@ -3117,6 +3117,69 @@ public:
     }
 } Array_compact;
 
+class Array_plus : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.suppressErrors || res.main.errors.empty() || args.numPosArgs != 1) {
+            return;
+        }
+
+        const auto finder = [](const auto &e) { return e->what == core::errors::Infer::MethodArgumentMismatch; };
+        if (absl::c_count_if(res.main.errors, finder) != 1) {
+            // Want exactly one, just just at least one
+            return;
+        }
+
+        const auto iter = absl::c_find_if(res.main.errors, finder);
+        ENFORCE(iter != res.main.errors.end(), "c_count above should have guarannteed a result");
+        const auto argMismatchErrorIdx = iter - res.main.errors.begin();
+        const auto argMismatchError = std::move(*iter); // will drop when going out of scope (after we replace it)
+
+        auto dispatchArgs = DispatchArgs{
+            core::Names::concat(),
+            args.locs,
+            args.numPosArgs,
+            // x.+(y) is the same arity as x.concat(y)
+            args.args,
+            args.selfType,
+            args.fullType,
+            args.thisType,
+            args.block,
+            args.originForUninitialized,
+            args.isPrivateOk,
+            args.suppressErrors,
+        };
+        auto dispatched = args.selfType.dispatchCall(gs, dispatchArgs);
+
+        if (!dispatched.main.errors.empty()) {
+            return;
+        }
+
+        if (auto e = gs.beginError(argMismatchError->loc, core::errors::Infer::MethodArgumentMismatch)) {
+            e.setHeader("{}", argMismatchError->header);
+            for (const auto &section : argMismatchError->sections) {
+                e.addErrorSection(std::move(section));
+            }
+            for (const auto &autocorrect : argMismatchError->autocorrects) {
+                e.addAutocorrect(std::move(autocorrect));
+            }
+
+            e.addErrorNote("If the desired behavior is to widen the type to `{}`, use `{}` instead",
+                           dispatched.returnType.show(gs), "Array#concat");
+
+            auto replaceBegin = args.locs.receiver.endPos();
+            auto replaceEnd = args.locs.call.endPos();
+            auto replaceLoc = core::Loc(args.locs.file, replaceBegin, replaceEnd);
+            if (replaceLoc.exists() && args.locs.args[0].exists()) {
+                auto arg0Loc = core::Loc(args.locs.file, args.locs.args[0]);
+                e.replaceWith("Replace with `concat`", replaceLoc, ".concat({})", arg0Loc.source(gs).value());
+            }
+
+            res.main.errors[argMismatchErrorIdx] = e.build();
+        }
+    }
+} Array_plus;
+
 class Array_zip : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -3394,6 +3457,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::flatten(), &Array_flatten},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::product(), &Array_product},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::compact(), &Array_compact},
+    {Symbols::Array(), Intrinsic::Kind::Instance, Names::plus(), &Array_plus},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::zip(), &Array_zip},
 
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},

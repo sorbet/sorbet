@@ -131,12 +131,12 @@ void ErrorBuilder::_setHeader(string &&header) {
     this->header = move(header);
 }
 
-void ErrorBuilder::addErrorSection(ErrorSection &&section) {
+void ErrorBuilder::addErrorSection(const ErrorSection &&section) {
     ENFORCE(state == State::WillBuild);
     this->sections.emplace_back(move(section));
 }
 
-void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
+void ErrorBuilder::addAutocorrect(const AutocorrectSuggestion &&autocorrect) {
     ENFORCE(state == State::WillBuild);
     for (auto &edit : autocorrect.edits) {
         u4 n = edit.loc.endPos() - edit.loc.beginPos();
