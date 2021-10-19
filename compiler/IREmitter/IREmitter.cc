@@ -930,6 +930,8 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
         (func->arg_begin() + 1)->setName("argArray");
         (func->arg_begin() + 2)->setName("selfRaw");
         (func->arg_begin() + 3)->setName("cfp");
+        (func->arg_begin() + 4)->setName("calling");
+        (func->arg_begin() + 5)->setName("callData");
     }
     func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
     func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
