@@ -41,9 +41,7 @@ ruby(
         "@com_stripe_ruby_typer//sorbet_version:sorbet_version_srcs",
         "@com_stripe_ruby_typer//compiler/IREmitter/Payload:vm_payload_srcs",
     ],
-    gems = [
-        "@bundler_stripe//file",
-    ],
+    gems = [],
     linkopts = select({
         "@com_stripe_ruby_typer//tools/config:linux": [
             "-Wl,-Bsymbolic-functions",
