@@ -10,13 +10,13 @@ def thread_current
   Thread.current
 end
 
-# INITIAL-LABEL: define i64 @"func_Object#14thread_current
+# INITIAL-LABEL: define internal i64 @"func_Object#14thread_current
 # INITIAL-NOT: call i64 @sorbet_i_send
 # INITIAL: call i64 @sorbet_Thread_current
 # INITIAL-NOT: call i64 @sorbet_i_send
 # INITIAL{LITERAL}: }
 
-# OPT-LABEL: define i64 @"func_Object#14thread_current
+# OPT-LABEL: define internal i64 @"func_Object#14thread_current
 # OPT-NOT: call i64 @callFuncWithCache
 # OPT: call i64 @rb_thread_current
 # OPT-NOT: call i64 @callFuncWithCache
@@ -27,11 +27,11 @@ def thread_aref_constant(thread)
   thread[:my_key]
 end
 
-# INITIAL-LABEL: define i64 @"func_Object#20thread_aref_constant
+# INITIAL-LABEL: define internal i64 @"func_Object#20thread_aref_constant
 # INITIAL: call i64 @sorbet_Thread_square_br_symarg
 # INITIAL{LITERAL}: }
 
-# OPT-LABEL: define i64 @"func_Object#20thread_aref_constant
+# OPT-LABEL: define internal i64 @"func_Object#20thread_aref_constant
 # OPT-NOT: call i64 @rb_id2sym
 # OPT: call i64 @rb_thread_local_aref
 # OPT-NOT: call i64 @rb_id2sym
@@ -42,7 +42,7 @@ def thread_aref(thread, key)
   thread[key]
 end
 
-# INITIAL-LABEL: define i64 @"func_Object#11thread_aref
+# INITIAL-LABEL: define internal i64 @"func_Object#11thread_aref
 # INITIAL: call i64 @sorbet_Thread_square_br
 # INITIAL{LITERAL}: }
 
@@ -51,11 +51,11 @@ def thread_aset_constant(thread, val)
   thread[:my_key] = val
 end
 
-# INITIAL-LABEL: define i64 @"func_Object#20thread_aset_constant
+# INITIAL-LABEL: define internal i64 @"func_Object#20thread_aset_constant
 # INITIAL: call i64 @sorbet_Thread_square_br_eq_symarg
 # INITIAL{LITERAL}: }
 
-# OPT-LABEL: define i64 @"func_Object#20thread_aset_constant
+# OPT-LABEL: define internal i64 @"func_Object#20thread_aset_constant
 # OPT-NOT: call i64 @rb_id2sym
 # OPT: call i64 @sorbet_Thread_square_br_eq_symarg
 # OPT-NOT: call i64 @rb_id2sym
@@ -66,7 +66,7 @@ def thread_aset(thread, key, val)
   thread[key] = val
 end
 
-# INITIAL-LABEL: define i64 @"func_Object#11thread_aset
+# INITIAL-LABEL: define internal i64 @"func_Object#11thread_aset
 # INITIAL: call i64 @sorbet_Thread_square_br_eq
 # INITIAL{LITERAL}: }
 

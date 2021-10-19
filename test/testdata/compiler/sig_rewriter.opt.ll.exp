@@ -409,7 +409,7 @@ rb_vm_check_ints.exit1.i.i:                       ; preds = %56, %entry
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define noundef i64 @"func_A#3foo"(i32 %argc, i64* nocapture nofree readnone %argArray, i64 %selfRaw, %struct.rb_control_frame_struct* nocapture nonnull writeonly align 8 dereferenceable(8) %cfp, i8* nocapture nofree readnone %0, i8* nocapture nofree readnone %1) #7 !dbg !56 {
+define internal noundef i64 @"func_A#3foo"(i32 %argc, i64* nocapture nofree readnone %argArray, i64 %selfRaw, %struct.rb_control_frame_struct* nocapture nonnull writeonly align 8 dereferenceable(8) %cfp, i8* nocapture nofree readnone %0, i8* nocapture nofree readnone %1) #7 !dbg !56 {
 functionEntryInitializers:
   %2 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %cfp, i64 0, i32 0
   store i64* getelementptr inbounds ([14 x i64], [14 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %2, align 8, !tbaa !20

@@ -5,7 +5,7 @@
 
 class NotArray
   def size
-    # LOWERED-label: define i64 @"func_NotArray#size"
+    # LOWERED-label: define internal i64 @"func_NotArray#size"
     "hello there"
   end
 end
@@ -13,7 +13,7 @@ end
 # Verify that breaking will prevent the type assertion on the result of the call
 # to `Array#map`
 def main1
-  # LOWERED-LABEL: define i64 @"func_Object#5main1"
+  # LOWERED-LABEL: define internal i64 @"func_Object#5main1"
 
   xs = [1,2,3]
 
@@ -27,7 +27,7 @@ end
 # Verify that not breaking will permit the type assertion on the result of the
 # call to `Array#map`
 def main2
-  # LOWERED-LABEL: define i64 @"func_Object#5main2"
+  # LOWERED-LABEL: define internal i64 @"func_Object#5main2"
 
   xs = [1,2,3]
 
