@@ -127,7 +127,10 @@ if "${command[@]}"; then
 
   if [[ -n "${EMIT_SYNCBACK:-}" && -n "$explicit_llvmir" ]]; then
     echo '### BEGIN SYNCBACK ###'
-    find "$orig_llvmir" -name '*.ll'
+    for source in "${rb_files[@]}"; do
+      # compgen returns non-zero when the glob doesn't match
+      compgen -G "${orig_llvmir}/${source}.*ll" || true
+    done
     echo '### END SYNCBACK ###'
   fi
 
