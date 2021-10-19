@@ -8,6 +8,7 @@ module Opus::Types::Test
     class Base; end
     class Sub < Base; end
     class WithMixin; include Mixin1; end
+    class ReloadedClass; end
 
     private def counting_allocations
       before = GC.stat[:total_allocated_objects]
@@ -100,6 +101,29 @@ module Opus::Types::Test
 
         _ = T::Types::Simple::Private::Pool.type_for_module(m)
         assert_equal(ivars, m.instance_variables)
+      end
+
+      it "shows a detailed error for constant reloading problems" do
+        klass = ReloadedClass
+
+        expected_id = ReloadedClass.__id__
+        type = T::Utils.coerce(ReloadedClass)
+        Opus::Types::Test::TypesTest.send(:remove_const, :ReloadedClass)
+
+        Opus::Types::Test::TypesTest.const_set(:ReloadedClass, Class.new)
+        actual_id = ReloadedClass.__id__
+        obj = ReloadedClass.new
+        Opus::Types::Test::TypesTest.send(:remove_const, :ReloadedClass)
+
+        msg = check_error_message_for_obj(type, obj)
+        assert_equal(<<~MSG.strip, msg)
+          Expected type #{klass}, got type #{klass} with hash #{obj.hash}
+
+          The expected type and received object type have the same name but refer to different constants.
+          Expected type is #{klass} with object id #{expected_id}, but received type is #{klass} with object id #{actual_id}.
+
+          There might be a constant reloading problem in your application.
+        MSG
       end
     end
 

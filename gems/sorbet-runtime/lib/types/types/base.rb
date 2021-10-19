@@ -133,7 +133,7 @@ module T::Types
       if valid?(obj)
         nil
       else
-        "Expected type #{self.name}, got #{describe_obj(obj)}"
+        error_message(obj)
       end
     end
 
@@ -141,8 +141,12 @@ module T::Types
       if recursively_valid?(obj)
         nil
       else
-        "Expected type #{self.name}, got #{describe_obj(obj)}"
+        error_message(obj)
       end
+    end
+
+    private def error_message(obj)
+      "Expected type #{self.name}, got #{describe_obj(obj)}"
     end
 
     def validate!(obj)

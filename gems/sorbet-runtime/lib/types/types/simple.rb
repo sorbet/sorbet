@@ -34,6 +34,23 @@ module T::Types
       end
     end
 
+    # overrides Base
+    private def error_message(obj)
+      error_message = super(obj)
+      actual_name = obj.class.name
+
+      return error_message unless name == actual_name
+
+      <<~MSG.strip
+        #{error_message}
+
+        The expected type and received object type have the same name but refer to different constants.
+        Expected type is #{name} with object id #{@raw_type.__id__}, but received type is #{actual_name} with object id #{obj.class.__id__}.
+
+        There might be a constant reloading problem in your application.
+      MSG
+    end
+
     def to_nilable
       @nilable ||= T::Types::Union.new([self, T::Utils::Nilable::NIL_TYPE])
     end
