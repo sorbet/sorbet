@@ -116,20 +116,6 @@ llvm::Function *IREmitterHelpers::lookupFunction(CompilerState &cs, core::Symbol
     auto *func = cs.module->getFunction(IREmitterHelpers::getFunctionName(cs, sym));
     return func;
 }
-llvm::Function *IREmitterHelpers::getOrCreateFunctionWeak(CompilerState &cs, core::SymbolRef sym) {
-    ENFORCE(!isClassStaticInit(cs, sym), "use special helper instead");
-    auto *fn = getOrCreateFunctionWithName(cs, IREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
-                                           llvm::Function::WeakAnyLinkage);
-    // Ensure that the arguments have consistent naming.
-    fn->arg_begin()->setName("argc");
-    (fn->arg_begin() + 1)->setName("argArray");
-    (fn->arg_begin() + 2)->setName("selfRaw");
-    (fn->arg_begin() + 3)->setName("cfp");
-    (fn->arg_begin() + 4)->setName("calling");
-    (fn->arg_begin() + 5)->setName("callData");
-
-    return fn;
-}
 
 llvm::Function *IREmitterHelpers::getOrCreateDirectWrapper(CompilerState &cs, core::SymbolRef sym) {
     auto name = "direct_" + IREmitterHelpers::getFunctionName(cs, sym);
