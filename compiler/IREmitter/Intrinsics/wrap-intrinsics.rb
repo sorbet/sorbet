@@ -268,6 +268,7 @@ module Intrinsics
       "String#+",
       "String#<<",
       "String#==",
+      "String#[]",
       "String#dump",
       "String#encoding",
       "String#eql?",
@@ -277,6 +278,7 @@ module Intrinsics
       "String#intern",
       "String#length",
       "String#ord",
+      "String#slice",
       "String#succ",
     ], T::Set[String])
 
@@ -562,6 +564,7 @@ module Intrinsics
           case method.argc
           when ::Intrinsics::Unlimited
             strio << "    return #{method.c_name}(argc, args, obj);\n"
+            strio << "}\n"
 
           when ::Intrinsics::ArgRubyArray
             puts "Need to implement calling convention -2"

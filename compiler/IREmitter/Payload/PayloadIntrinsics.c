@@ -544,6 +544,16 @@ VALUE sorbet_int_rb_str_equal(VALUE recv, ID fun, int argc, VALUE *const restric
     return rb_str_equal(recv, arg_0);
 }
 
+// String#[]
+// String#slice
+// Calling convention: -1
+extern VALUE sorbet_rb_str_aref_m(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_str_aref_m(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk,
+                               VALUE closure) {
+    return sorbet_rb_str_aref_m(argc, args, recv);
+}
+
 // String#dump
 // Calling convention: 0
 extern VALUE rb_str_dump(VALUE obj);

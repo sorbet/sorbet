@@ -1190,7 +1190,7 @@
 * [✔  ] `rb_str_plus` (`String#+`)
 * [✔  ] `rb_str_times` (`String#*`)
 * [   ] `rb_str_format_m` (`String#%`)
-* [   ] `rb_str_aref_m` (`String#[]`)
+* [  ✔] `rb_str_aref_m` (`String#[]`)
 * [   ] `rb_str_aset_m` (`String#[]=`)
 * [   ] `rb_str_insert` (`String#insert`)
 * [✔  ] `rb_str_length` (`String#length`)
@@ -1564,4 +1564,4 @@
 
 ## Stats
 * Total:   1488
-* Visible: 234
+* Visible: 235
