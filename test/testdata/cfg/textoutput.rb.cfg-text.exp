@@ -2,12 +2,7 @@ method ::<Class:<root>>#<static-init> {
 
 bb0(rubyBlockId=0):
     blockargs=()
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {
-      klass = <S <C <U <root>>> $1>
-      targs = [
-        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)
-      ]
-    });
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <cfgAlias>$6: T.class_of(<Magic>) = alias <C <Magic>>
     <cfgAlias>$8: T.class_of(A) = alias <C A>
     <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$8: T.class_of(A))
@@ -169,12 +164,7 @@ method ::<Class:A>#<static-init> {
 
 bb0(rubyBlockId=0):
     blockargs=()
-    <self>: T.class_of(A) = cast(<self>: NilClass, AppliedType {
-      klass = <S <C <U A>> $1>
-      targs = [
-        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U A>> $1><C <U <AttachedClass>>>)
-      ]
-    });
+    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
     <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <statTemp>$7: Symbol(:f) = :f
     <statTemp>$8: Symbol(:normal) = :normal
