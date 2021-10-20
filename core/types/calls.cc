@@ -3157,10 +3157,12 @@ public:
 
         if (auto e = gs.beginError(argMismatchError->loc, core::errors::Infer::MethodArgumentMismatch)) {
             e.setHeader("{}", argMismatchError->header);
-            for (const auto &section : argMismatchError->sections) {
+            // This copies the section intentionally (no reference) to hack around const-ness
+            for (auto section : argMismatchError->sections) {
                 e.addErrorSection(std::move(section));
             }
-            for (const auto &autocorrect : argMismatchError->autocorrects) {
+            // This copies the section intentionally (no reference) to hack around const-ness
+            for (auto autocorrect : argMismatchError->autocorrects) {
                 e.addAutocorrect(std::move(autocorrect));
             }
 
