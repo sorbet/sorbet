@@ -31,7 +31,7 @@ module T::Types
     end
 
     def new(*args)
-      # Fine for this to blow up, because hopefully if they're tryign to make a
+      # Fine for this to blow up, because hopefully if they're trying to make a
       # Set, they don't mind putting (or already have put) a `require 'set'` in
       # their program directly.
       Set.new(*T.unsafe(args))
