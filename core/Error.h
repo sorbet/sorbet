@@ -147,7 +147,7 @@ public:
         ENFORCE(state != State::DidBuild);
         return state == State::WillBuild;
     }
-    void addErrorSection(const ErrorSection &&section);
+    void addErrorSection(ErrorSection &&section);
     template <typename... Args> void addErrorLine(Loc loc, ConstExprStr msg, const Args &...args) {
         std::string formatted = ErrorColors::format(msg.str, args...);
         addErrorSection(ErrorSection({ErrorLine(loc, formatted)}));
@@ -161,7 +161,7 @@ public:
         _setHeader(move(formatted));
     }
 
-    void addAutocorrect(const AutocorrectSuggestion &&autocorrect);
+    void addAutocorrect(AutocorrectSuggestion &&autocorrect);
     template <typename... Args>
     void replaceWith(const std::string &title, Loc loc, ConstExprStr replacement, const Args &...args) {
         std::string formatted = fmt::format(replacement.str, args...);
