@@ -107,7 +107,25 @@ autocorrect_array_plus.rb:16: Expected `T::Enumerable[Integer]` but found `T::Ar
     autocorrect_array_plus.rb:16: Replaced with `.concat(strings)`
     16 |ints +
     17 |  strings
-Errors: 6
+
+autocorrect_array_plus.rb:19: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
+    19 |ints += strings
+        ^^^^^^^^^^^^^^^
+  Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#L448:
+     448 |        arg0: T::Enumerable[Elem],
+                  ^^^^
+  Got `T::Array[String]` originating from:
+    autocorrect_array_plus.rb:4:
+     4 |strings = T::Array[String].new
+                  ^^^^^^^^^^^^^^^^^^^^
+  Note:
+    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
+  Autocorrect: Done
+    autocorrect_array_plus.rb:19: Replaced with ` = ints.concat(strings)`
+    19 |ints += strings
+            ^^^^^^^^^^^
+Errors: 7
 
 --------------------------------------------------------------------------
 
@@ -125,3 +143,5 @@ ints.concat(strings)
 ints.concat(strings)
 
 ints.concat(strings)
+
+ints = ints.concat(strings)

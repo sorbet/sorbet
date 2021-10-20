@@ -3174,7 +3174,16 @@ public:
             auto replaceLoc = core::Loc(args.locs.file, replaceBegin, replaceEnd);
             if (replaceLoc.exists() && args.locs.args[0].exists()) {
                 auto arg0Loc = core::Loc(args.locs.file, args.locs.args[0]);
-                e.replaceWith("Replace with `concat`", replaceLoc, ".concat({})", arg0Loc.source(gs).value());
+                auto replaceLocSource = replaceLoc.source(gs).value();
+                if (absl::StartsWith(absl::StripLeadingAsciiWhitespace(replaceLocSource), "+=")) {
+                    auto recvSource = core::Loc(args.locs.file, args.locs.receiver).source(gs);
+                    if (recvSource.has_value()) {
+                        e.replaceWith("Replace with `concat`", replaceLoc, " = {}.concat({})", recvSource.value(),
+                                      arg0Loc.source(gs).value());
+                    }
+                } else {
+                    e.replaceWith("Replace with `concat`", replaceLoc, ".concat({})", arg0Loc.source(gs).value());
+                }
             }
 
             res.main.errors[argMismatchErrorIdx] = e.build();
