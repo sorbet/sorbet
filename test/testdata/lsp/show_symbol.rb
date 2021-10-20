@@ -34,6 +34,7 @@ module Outer
       extend T::Sig
       sig {void}
       def self.foo
+        #      ^ show-symbol: Outer::Middle::Inner.foo
         # This is kind of ugly. It's possible that we want to return @foo here.
         @foo = T.let(@foo, T.nilable(String))
         #             ^ show-symbol: T.class_of(Outer::Middle::Inner)#@foo
@@ -47,6 +48,7 @@ module Outer
 
       sig {params(x: Integer).void}
       def bar(x)
+        # ^ show-symbol: Outer::Middle::Inner#bar
         Kernel.puts(x)
         #           ^ show-symbol: null
       end
