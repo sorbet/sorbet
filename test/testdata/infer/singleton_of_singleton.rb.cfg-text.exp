@@ -1,0 +1,71 @@
+method ::<Class:<root>>#<static-init> {
+
+bb0[rubyBlockId=0, firstDead=8]():
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
+    <cfgAlias>$7: T.class_of(A) = alias <C A>
+    <statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(A))
+    <cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$12: T.class_of(A) = alias <C A>
+    <statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(A))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::<Class:A>#foo {
+
+bb0[rubyBlockId=0, firstDead=6]():
+    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$6: Symbol(:bar) = :bar
+    <statTemp>$7: Symbol(:normal) = :normal
+    <returnMethodTemp>$2: Symbol(:bar) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(A), <statTemp>$6: Symbol(:bar), <statTemp>$7: Symbol(:normal))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:bar)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::<Class:A>#bar {
+
+bb0[rubyBlockId=0, firstDead=3]():
+    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <returnMethodTemp>$2: T.class_of(A) = <self>
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.class_of(A)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::<Class:A>#<static-init> {
+
+bb0[rubyBlockId=0, firstDead=6]():
+    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$6: Symbol(:foo) = :foo
+    <statTemp>$7: Symbol(:normal) = :normal
+    <returnMethodTemp>$2: Symbol(:foo) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(A), <statTemp>$6: Symbol(:foo), <statTemp>$7: Symbol(:normal))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+

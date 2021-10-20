@@ -245,18 +245,16 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 --- cfg-text start ---
 method ::<Class:<root>>#<static-init> {
 
-bb0(rubyBlockId=0):
-    blockargs=()
+bb0[rubyBlockId=0, firstDead=3]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <returnMethodTemp>$2: Integer(1) = 1
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
-    <unconditional>(bb0 -> bb1)
+    <unconditional> -> bb1
 
 # backedges
-#  bb0(rubyBlockId=0)
-bb1(rubyBlockId=0):
-    blockargs=()
-    <unconditional>(bb1 -> bb1)
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
 }
 
@@ -276,7 +274,7 @@ class <C <U <root>>> < <C <U Object>> ()
 
 --- symbol-table-raw end ---
 --- checking diff ---
-1,17d0
+1,15d0
 1,24d0
 1,9d0
 < 
@@ -303,12 +301,10 @@ class <C <U <root>>> < <C <U Object>> ()
 <     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
 <     <returnMethodTemp>$2: Integer(1) = 1
 <     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-<     <unconditional>(bb0 -> bb1)
-<     <unconditional>(bb1 -> bb1)
+<     <unconditional> -> bb1
+<     <unconditional> -> bb1
 <     ClassDef{
 <     EmptyTree
-<     blockargs=()
-<     blockargs=()
 <     def self.<static-init><<static-init>$CENSORED>(<blk>)
 <     end
 <     }
@@ -319,11 +315,11 @@ class <C <U <root>>> < <C <U Object>> ()
 <   end
 <   expr = EmptyTree
 <   stats = [
-< #  bb0(rubyBlockId=0)
+< # - bb0(rubyBlockId=0)
 < # backedges
 < InsSeq{
-< bb0(rubyBlockId=0):
-< bb1(rubyBlockId=0):
+< bb0[rubyBlockId=0, firstDead=3]():
+< bb1[rubyBlockId=0, firstDead=-1]():
 < begin
 < end
 < method ::<Class:<root>>#<static-init> {

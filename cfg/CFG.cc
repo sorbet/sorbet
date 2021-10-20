@@ -244,22 +244,15 @@ string CFG::toTextualString(const core::GlobalState &gs) const {
     string symbolName = this->symbol.showFullName(gs);
     fmt::format_to(std::back_inserter(buf), "method {} {{\n\n", symbolName);
     for (auto &basicBlock : this->basicBlocks) {
-        auto text = basicBlock->toTextualString(gs, *this);
-        auto lines = absl::StrSplit(text, "\n");
-
         if (!basicBlock->backEdges.empty()) {
             fmt::format_to(std::back_inserter(buf), "# backedges\n");
             for (auto *backEdge : basicBlock->backEdges) {
-                fmt::format_to(std::back_inserter(buf), "#  bb{}(rubyBlockId={})\n", backEdge->id,
+                fmt::format_to(std::back_inserter(buf), "# - bb{}(rubyBlockId={})\n", backEdge->id,
                                backEdge->rubyBlockId);
             }
         }
-        fmt::format_to(std::back_inserter(buf),
-                       "bb{}(rubyBlockId={}):\n"
-                       "    {}"
-                       "(bb{} -> bb{})\n\n",
-                       basicBlock->id, basicBlock->rubyBlockId, fmt::join(lines.begin(), lines.end(), "\n    "),
-                       basicBlock->id, basicBlock->bexit.thenb->id);
+
+        fmt::format_to(std::back_inserter(buf), "{}\n", basicBlock->toTextualString(gs, *this));
     }
     fmt::format_to(std::back_inserter(buf), "}}");
     return to_string(buf);
@@ -272,7 +265,7 @@ string CFG::showRaw(core::Context ctx) const {
                    "subgraph \"cluster_{}\" {{\n"
                    "    label = \"{}\";\n"
                    "    color = blue;\n\n",
-                   symbolName, symbolName, symbolName, symbolName);
+                   symbolName, symbolName);
     for (auto &basicBlock : this->basicBlocks) {
         auto text = basicBlock->showRaw(ctx, *this);
         auto lines = absl::StrSplit(text, "\n");
@@ -320,18 +313,28 @@ string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
 
 string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "blockargs=({})\n",
+    fmt::format_to(std::back_inserter(buf), "bb{}[rubyBlockId={}, firstDead={}]({}):\n", this->id, this->rubyBlockId,
+                   this->firstDeadInstructionIdx,
                    fmt::map_join(
                        this->args.begin(), this->args.end(),
                        ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
 
     if (this->outerLoops > 0) {
-        fmt::format_to(std::back_inserter(buf), "outerLoops: {}\n", this->outerLoops);
+        fmt::format_to(std::back_inserter(buf), "    # outerLoops: {}\n", this->outerLoops);
     }
     for (const Binding &exp : this->exprs) {
-        fmt::format_to(std::back_inserter(buf), "{} = {}\n", exp.bind.toString(gs, cfg), exp.value.toString(gs, cfg));
+        fmt::format_to(std::back_inserter(buf), "    {} = {}\n", exp.bind.toString(gs, cfg),
+                       exp.value.toString(gs, cfg));
     }
-    fmt::format_to(std::back_inserter(buf), "{}", this->bexit.cond.toString(gs, cfg));
+
+    if (this->bexit.thenb == this->bexit.elseb) {
+        fmt::format_to(std::back_inserter(buf), "    {} -> bb{}\n", this->bexit.cond.variable.toString(gs, cfg),
+                       this->bexit.thenb->id);
+    } else {
+        fmt::format_to(std::back_inserter(buf), "    {} -> ({} ? bb{} : bb{})\n",
+                       this->bexit.cond.variable.toString(gs, cfg), this->bexit.cond.type.show(gs),
+                       this->bexit.thenb->id, this->bexit.elseb->id);
+    }
     return to_string(buf);
 }
 
