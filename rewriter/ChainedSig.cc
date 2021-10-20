@@ -11,26 +11,9 @@ struct ChainedSigWalk {
 
     ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
-        ast::Send *sigSend;
 
-        // Emit an error if using invalid type syntax in a chained sig context e.g.: sig.params(...) {}
-        if (send->fun == core::Names::params() || send->fun == core::Names::returns() ||
-            send->fun == core::Names::void_() || send->fun == core::Names::bind() ||
-            send->fun == core::Names::checked() || send->fun == core::Names::onFailure() ||
-            send->fun == core::Names::typeParameters()) {
-            sigSend = ast::cast_tree<ast::Send>(send->recv);
-
-            if (sigSend != nullptr && sigSend->fun == core::Names::sig()) {
-                if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
-                    e.setHeader("Cannot use `{}` outside of a sig block", send->fun.toString(ctx));
-                }
-
-                // We already know this signature is invalid, so no need to emit two errors for it
-                if (incompleteSigs.back()->loc == sigSend->loc) {
-                    incompleteSigs.pop_back();
-                }
-            }
-
+        // Return early if we identify things like `params` being invoked on `sig`
+        if (invalidChainedStatement(ctx, send)) {
             return tree;
         }
 
@@ -48,7 +31,7 @@ struct ChainedSigWalk {
             return tree;
         }
 
-        sigSend = ast::cast_tree<ast::Send>(send->recv);
+        ast::Send *sigSend = ast::cast_tree<ast::Send>(send->recv);
 
         // Make sure the first receiver is sig. E.g.: `sig.abstract {}`, `sig.override.final {}`
         if (sigSend == nullptr || !firstReceiverIsSig(sigSend)) {
@@ -94,13 +77,10 @@ struct ChainedSigWalk {
             incompleteSigs.pop_back();
         }
 
-        ast::Send::ARGS_store args;
-
         // For all other cases, we have to re-write the block
         // E.g.: `sig.abstract { void }` -> `sig { abstract.void }`
         auto *block = ast::cast_tree<ast::Block>(send->block);
         auto blockBody = ast::cast_tree<ast::Send>(block->body);
-        ast::ExpressionPtr newBlockReceiver;
 
         // If the blockBody is not a send, then we have a sequence of instructions inside the signature block
         if (blockBody == nullptr) {
@@ -111,45 +91,7 @@ struct ChainedSigWalk {
             return tree;
         }
 
-        auto treeCopy = send->deepCopy();
-        auto sendCopy = ast::cast_tree<ast::Send>(treeCopy);
-
-        // Go through each part of the chained sig and make sure it's not duplicated inside the block
-        // E.g.: `sig.abstract { abstract.void }`
-        while (sendCopy && sendCopy->fun != core::Names::sig()) {
-            checkDuplicates(ctx, blockBody, sendCopy->fun);
-
-            sendCopy = ast::cast_tree<ast::Send>(sendCopy->recv);
-        }
-
-        sendCopy = ast::cast_tree<ast::Send>(treeCopy);
-        bool isFinal = false;
-
-        // Create a new receiver for the block to move the statements chained on sig inside. Also, finds out whether the
-        // signature is final or not
-        newBlockReceiver = std::move(blockBody->recv);
-        do {
-            if (sendCopy->fun != core::Names::final_()) {
-                newBlockReceiver = ast::MK::Send(sendCopy->loc, std::move(newBlockReceiver), sendCopy->fun,
-                                                 sendCopy->numPosArgs, std::move(sendCopy->args));
-            } else {
-                isFinal = true;
-            }
-
-            sendCopy = ast::cast_tree<ast::Send>(sendCopy->recv);
-        } while (sendCopy && sendCopy->fun != core::Names::sig());
-
-        // If the signature is final, we need the `:final` positional argument
-        if (isFinal) {
-            args.emplace_back(ast::MK::Symbol(sendCopy->loc, core::Names::final_()));
-        }
-
-        // Create the new body, composed of the chained statements that were moved inside and the original block
-        auto newBody = ast::MK::Send(send->loc, std::move(newBlockReceiver), blockBody->fun, blockBody->numPosArgs,
-                                     std::move(blockBody->args));
-
-        return ast::MK::Send(send->loc, std::move(sendCopy->recv), core::Names::sig(), args.size(), std::move(args), {},
-                             ast::MK::Block0(send->block.loc(), std::move(newBody)));
+        return buildReplacement(ctx, send, blockBody);
     }
 
     bool firstReceiverIsSig(ast::Send *send) {
@@ -186,6 +128,77 @@ struct ChainedSigWalk {
 
             sigStatement = ast::cast_tree<ast::Send>(sigStatement->recv);
         }
+    }
+
+    bool invalidChainedStatement(core::MutableContext ctx, ast::Send *send) {
+        if (send->fun == core::Names::params() || send->fun == core::Names::returns() ||
+            send->fun == core::Names::void_() || send->fun == core::Names::bind() ||
+            send->fun == core::Names::checked() || send->fun == core::Names::onFailure() ||
+            send->fun == core::Names::typeParameters()) {
+            auto receiver = ast::cast_tree<ast::Send>(send->recv);
+
+            while (receiver && receiver->fun != core::Names::sig()) {
+                receiver = ast::cast_tree<ast::Send>(receiver->recv);
+            }
+
+            if (receiver) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
+                    e.setHeader("Cannot use `{}` outside of a sig block", send->fun.toString(ctx));
+                }
+
+                // We already know this signature is invalid, so no need to emit two errors for it
+                if (incompleteSigs.back()->loc == send->recv.loc()) {
+                    incompleteSigs.pop_back();
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    ast::ExpressionPtr buildReplacement(core::MutableContext ctx, ast::Send *send, ast::Send *blockBody) {
+        ast::Send::ARGS_store args;
+        auto treeCopy = send->deepCopy();
+        auto sendCopy = ast::cast_tree<ast::Send>(treeCopy);
+
+        // Go through each part of the chained sig and make sure it's not duplicated inside the block
+        // E.g.: `sig.abstract { abstract.void }`
+        while (sendCopy && sendCopy->fun != core::Names::sig()) {
+            checkDuplicates(ctx, blockBody, sendCopy->fun);
+
+            sendCopy = ast::cast_tree<ast::Send>(sendCopy->recv);
+        }
+
+        sendCopy = ast::cast_tree<ast::Send>(treeCopy);
+        bool isFinal = false;
+
+        // Create a new receiver for the block to move the statements chained on sig inside. Also, finds out whether the
+        // signature is final or not
+        ast::ExpressionPtr newBlockReceiver = std::move(blockBody->recv);
+        do {
+            if (sendCopy->fun != core::Names::final_()) {
+                newBlockReceiver = ast::MK::Send(sendCopy->loc, std::move(newBlockReceiver), sendCopy->fun,
+                                                 sendCopy->numPosArgs, std::move(sendCopy->args));
+            } else {
+                isFinal = true;
+            }
+
+            sendCopy = ast::cast_tree<ast::Send>(sendCopy->recv);
+        } while (sendCopy && sendCopy->fun != core::Names::sig());
+
+        // If the signature is final, we need the `:final` positional argument
+        if (isFinal) {
+            args.emplace_back(ast::MK::Symbol(sendCopy->loc, core::Names::final_()));
+        }
+
+        // Create the new body, composed of the chained statements that were moved inside and the original block
+        auto newBody = ast::MK::Send(send->loc, std::move(newBlockReceiver), blockBody->fun, blockBody->numPosArgs,
+                                     std::move(blockBody->args));
+
+        return ast::MK::Send(send->loc, std::move(sendCopy->recv), core::Names::sig(), args.size(), std::move(args), {},
+                             ast::MK::Block0(send->block.loc(), std::move(newBody)));
     }
 };
 
