@@ -49,7 +49,6 @@ module Outer
 
       sig {params(x: Integer).void}
       def bar(x)
-        # TODO(jez) Does it make sense to just return the variable name here?
         Kernel.puts(x)
         #           ^ show-symbol: null
       end

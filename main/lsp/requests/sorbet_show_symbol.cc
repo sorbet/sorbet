@@ -36,6 +36,9 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
         } else if (auto f = resp->isField()) {
             sym = f->symbol;
         } else {
+            // At time of writing, we decided that it only makes sense to respond with information in
+            // this request when there's a Symbol (in the GlobalState sense), and not to respond
+            // with results for say local variables and other things not in the symbol table.
             response->result = variant<JSONNullObject, unique_ptr<SymbolInformation>>(JSONNullObject());
             return response;
         }
