@@ -15,9 +15,8 @@ module First
         NestedConstant = 1
         # ^ show-symbol: First::Second::Third::Fourth::NestedConstant
 
-        # TODO(jez) We should find a way to not dealias this
         NestedClassAlias = Integer
-        # ^ show-symbol: Integer
+        # ^ show-symbol: First::Second::Third::Fourth::NestedClassAlias
 
         NestedTypeMember = type_member
         # ^ show-symbol: First::Second::Third::Fourth::NestedTypeMember

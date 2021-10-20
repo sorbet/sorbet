@@ -79,8 +79,12 @@ ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, 
     return tree;
 }
 
-void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery, core::SymbolRef symbol) {
+namespace {
+
+void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery,
+                  core::SymbolRef symbolBeforeDealias) {
     // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
+    auto symbol = symbolBeforeDealias.data(ctx)->dealias(ctx);
     while (lit && symbol.exists() && lit->original) {
         auto &unresolved = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(lit->original);
         if (lspQuery.matchesLoc(core::Loc(ctx.file, lit->loc)) || lspQuery.matchesSymbol(symbol)) {
@@ -102,21 +106,24 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
                 scopes = {symbol.data(ctx)->owner};
             }
 
-            auto resp = core::lsp::ConstantResponse(symbol, core::Loc(ctx.file, lit->loc), scopes, unresolved.cnst, tp);
+            auto resp = core::lsp::ConstantResponse(symbol, symbolBeforeDealias, core::Loc(ctx.file, lit->loc), scopes,
+                                                    unresolved.cnst, tp);
             core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
         }
         lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope);
         if (lit) {
-            symbol = lit->symbol.data(ctx)->dealias(ctx);
+            symbolBeforeDealias = lit->symbol;
+            symbol = symbolBeforeDealias.data(ctx)->dealias(ctx);
         }
     }
 }
 
+} // namespace
+
 ast::ExpressionPtr DefLocSaver::postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
     auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-    auto symbol = lit.symbol.data(ctx)->dealias(ctx);
-    matchesQuery(ctx, &lit, lspQuery, symbol);
+    matchesQuery(ctx, &lit, lspQuery, lit.symbol);
     return tree;
 }
 
