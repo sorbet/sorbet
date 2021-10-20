@@ -1,103 +1,107 @@
-digraph "hash.rb" {
-subgraph "cluster_::<Class:<root>>#<static-init>" {
-    label = "::<Class:<root>>#<static-init>";
-    color = blue;
+method ::<Class:<root>>#<static-init> {
 
-    "bb::<Class:<root>>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$7: T.class_of(TestHash) = alias <C TestHash>\l<statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(TestHash))\l<cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$12: T.class_of(TestHash) = alias <C TestHash>\l<statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(TestHash))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
+bb0[rubyBlockId=0, firstDead=8]():
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
+    <cfgAlias>$7: T.class_of(TestHash) = alias <C TestHash>
+    <statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(TestHash))
+    <cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$12: T.class_of(TestHash) = alias <C TestHash>
+    <statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(TestHash))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
 
-    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
-    "bb::<Class:<root>>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::TestHash#something" {
-    label = "::TestHash#something";
-    color = blue;
+method ::TestHash#something {
 
-    "bb::TestHash#something_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestHash = cast(<self>: NilClass, TestHash);\l<returnMethodTemp>$2: Integer(17) = 17\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(17)\l<unconditional>\l"
-    ];
+bb0[rubyBlockId=0, firstDead=3]():
+    <self>: TestHash = cast(<self>: NilClass, TestHash);
+    <returnMethodTemp>$2: Integer(17) = 17
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(17)
+    <unconditional> -> bb1
 
-    "bb::TestHash#something_0" -> "bb::TestHash#something_1" [style="bold"];
-    "bb::TestHash#something_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::TestHash#something_1" -> "bb::TestHash#something_1" [style="bold"];
 }
 
-subgraph "cluster_::TestHash#test" {
-    label = "::TestHash#test";
-    color = blue;
+method ::TestHash#test {
 
-    "bb::TestHash#test_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestHash = cast(<self>: NilClass, TestHash);\l<hashTemp>$3: T.untyped = <self>: TestHash.something()\l<hashTemp>$4: Symbol(:bar) = :bar\l<statTemp>$8: Integer(1) = 1\l<statTemp>$9: Integer(2) = 2\l<hashTemp>$6: Integer = <statTemp>$8: Integer(1).+(<statTemp>$9: Integer(2))\l<hashTemp>$7: Integer(2) = 2\l<magic>$10: T.class_of(<Magic>) = alias <C <Magic>>\l<returnMethodTemp>$2: T::Hash[T.untyped, T.untyped] = <magic>$10: T.class_of(<Magic>).<build-hash>(<hashTemp>$3: T.untyped, <hashTemp>$4: Symbol(:bar), <hashTemp>$6: Integer, <hashTemp>$7: Integer(2))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Hash[T.untyped, T.untyped]\l<unconditional>\l"
-    ];
+bb0[rubyBlockId=0, firstDead=10]():
+    <self>: TestHash = cast(<self>: NilClass, TestHash);
+    <hashTemp>$3: T.untyped = <self>: TestHash.something()
+    <hashTemp>$4: Symbol(:bar) = :bar
+    <statTemp>$8: Integer(1) = 1
+    <statTemp>$9: Integer(2) = 2
+    <hashTemp>$6: Integer = <statTemp>$8: Integer(1).+(<statTemp>$9: Integer(2))
+    <hashTemp>$7: Integer(2) = 2
+    <magic>$10: T.class_of(<Magic>) = alias <C <Magic>>
+    <returnMethodTemp>$2: T::Hash[T.untyped, T.untyped] = <magic>$10: T.class_of(<Magic>).<build-hash>(<hashTemp>$3: T.untyped, <hashTemp>$4: Symbol(:bar), <hashTemp>$6: Integer, <hashTemp>$7: Integer(2))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Hash[T.untyped, T.untyped]
+    <unconditional> -> bb1
 
-    "bb::TestHash#test_0" -> "bb::TestHash#test_1" [style="bold"];
-    "bb::TestHash#test_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::TestHash#test_1" -> "bb::TestHash#test_1" [style="bold"];
 }
 
-subgraph "cluster_::TestHash#test_shaped" {
-    label = "::TestHash#test_shaped";
-    color = blue;
+method ::TestHash#test_shaped {
 
-    "bb::TestHash#test_shaped_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestHash = cast(<self>: NilClass, TestHash);\l<hashTemp>$3: Integer(1) = 1\l<hashTemp>$4: Integer(2) = 2\l<hashTemp>$5: Integer(2) = 2\l<hashTemp>$6: Integer(3) = 3\l<hashTemp>$7: Symbol(:foo) = :foo\l<hashTemp>$8: Symbol(:bar) = :bar\l<hashTemp>$9: Symbol(:baz) = :baz\l<hashTemp>$10: T.untyped = <self>: TestHash.something()\l<magic>$12: T.class_of(<Magic>) = alias <C <Magic>>\l<returnMethodTemp>$2: {Integer(1) => Integer(2), Integer(2) => Integer(3), foo: Symbol(:bar), baz: T.untyped} = <magic>$12: T.class_of(<Magic>).<build-hash>(<hashTemp>$3: Integer(1), <hashTemp>$4: Integer(2), <hashTemp>$5: Integer(2), <hashTemp>$6: Integer(3), <hashTemp>$7: Symbol(:foo), <hashTemp>$8: Symbol(:bar), <hashTemp>$9: Symbol(:baz), <hashTemp>$10: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: {Integer(1) => Integer(2), Integer(2) => Integer(3), foo: Symbol(:bar), baz: T.untyped}\l<unconditional>\l"
-    ];
+bb0[rubyBlockId=0, firstDead=12]():
+    <self>: TestHash = cast(<self>: NilClass, TestHash);
+    <hashTemp>$3: Integer(1) = 1
+    <hashTemp>$4: Integer(2) = 2
+    <hashTemp>$5: Integer(2) = 2
+    <hashTemp>$6: Integer(3) = 3
+    <hashTemp>$7: Symbol(:foo) = :foo
+    <hashTemp>$8: Symbol(:bar) = :bar
+    <hashTemp>$9: Symbol(:baz) = :baz
+    <hashTemp>$10: T.untyped = <self>: TestHash.something()
+    <magic>$12: T.class_of(<Magic>) = alias <C <Magic>>
+    <returnMethodTemp>$2: {Integer(1) => Integer(2), Integer(2) => Integer(3), foo: Symbol(:bar), baz: T.untyped} = <magic>$12: T.class_of(<Magic>).<build-hash>(<hashTemp>$3: Integer(1), <hashTemp>$4: Integer(2), <hashTemp>$5: Integer(2), <hashTemp>$6: Integer(3), <hashTemp>$7: Symbol(:foo), <hashTemp>$8: Symbol(:bar), <hashTemp>$9: Symbol(:baz), <hashTemp>$10: T.untyped)
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: {Integer(1) => Integer(2), Integer(2) => Integer(3), foo: Symbol(:bar), baz: T.untyped}
+    <unconditional> -> bb1
 
-    "bb::TestHash#test_shaped_0" -> "bb::TestHash#test_shaped_1" [style="bold"];
-    "bb::TestHash#test_shaped_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::TestHash#test_shaped_1" -> "bb::TestHash#test_shaped_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:TestHash>#<static-init>" {
-    label = "::<Class:TestHash>#<static-init>";
-    color = blue;
+method ::<Class:TestHash>#<static-init> {
 
-    "bb::<Class:TestHash>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(TestHash) = cast(<self>: NilClass, T.class_of(TestHash));\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$7: Symbol(:something) = :something\l<statTemp>$8: Symbol(:normal) = :normal\l<statTemp>$3: Symbol(:something) = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestHash), <statTemp>$7: Symbol(:something), <statTemp>$8: Symbol(:normal))\l<cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$13: Symbol(:test) = :test\l<statTemp>$14: Symbol(:normal) = :normal\l<statTemp>$9: Symbol(:test) = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestHash), <statTemp>$13: Symbol(:test), <statTemp>$14: Symbol(:normal))\l<cfgAlias>$17: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$19: Symbol(:test_shaped) = :test_shaped\l<statTemp>$20: Symbol(:normal) = :normal\l<statTemp>$15: Symbol(:test_shaped) = <cfgAlias>$17: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestHash), <statTemp>$19: Symbol(:test_shaped), <statTemp>$20: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
+bb0[rubyBlockId=0, firstDead=14]():
+    <self>: T.class_of(TestHash) = cast(<self>: NilClass, T.class_of(TestHash));
+    <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$7: Symbol(:something) = :something
+    <statTemp>$8: Symbol(:normal) = :normal
+    <statTemp>$3: Symbol(:something) = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestHash), <statTemp>$7: Symbol(:something), <statTemp>$8: Symbol(:normal))
+    <cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$13: Symbol(:test) = :test
+    <statTemp>$14: Symbol(:normal) = :normal
+    <statTemp>$9: Symbol(:test) = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestHash), <statTemp>$13: Symbol(:test), <statTemp>$14: Symbol(:normal))
+    <cfgAlias>$17: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$19: Symbol(:test_shaped) = :test_shaped
+    <statTemp>$20: Symbol(:normal) = :normal
+    <statTemp>$15: Symbol(:test_shaped) = <cfgAlias>$17: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestHash), <statTemp>$19: Symbol(:test_shaped), <statTemp>$20: Symbol(:normal))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
 
-    "bb::<Class:TestHash>#<static-init>_0" -> "bb::<Class:TestHash>#<static-init>_1" [style="bold"];
-    "bb::<Class:TestHash>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
-
-    "bb::<Class:TestHash>#<static-init>_1" -> "bb::<Class:TestHash>#<static-init>_1" [style="bold"];
-}
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
 }
 

@@ -1,437 +1,388 @@
-digraph "examples.rb" {
-subgraph "cluster_::<Class:<root>>#<static-init>" {
-    label = "::<Class:<root>>#<static-init>";
-    color = blue;
+method ::<Class:<root>>#<static-init> {
 
-    "bb::<Class:<root>>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$7: T.class_of(Examples) = alias <C Examples>\l<statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(Examples))\l<cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$12: T.class_of(Examples) = alias <C Examples>\l<statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(Examples))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
+bb0[rubyBlockId=0, firstDead=8]():
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
+    <cfgAlias>$7: T.class_of(Examples) = alias <C Examples>
+    <statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(Examples))
+    <cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$12: T.class_of(Examples) = alias <C Examples>
+    <statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(Examples))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
 
-    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
-    "bb::<Class:<root>>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::Examples#i_like_ifs" {
-    label = "::Examples#i_like_ifs";
-    color = blue;
+method ::Examples#i_like_ifs {
 
-    "bb::Examples#i_like_ifs_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Examples = cast(<self>: NilClass, Examples);\l<ifTemp>$3: TrueClass = true\l<ifTemp>$3: TrueClass\l"
-    ];
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Examples = cast(<self>: NilClass, Examples);
+    <ifTemp>$3: TrueClass = true
+    <ifTemp>$3 -> (TrueClass ? bb2 : bb3)
 
-    "bb::Examples#i_like_ifs_0" -> "bb::Examples#i_like_ifs_2" [style="bold"];
-    "bb::Examples#i_like_ifs_0" -> "bb::Examples#i_like_ifs_3" [style="tapered"];
+# backedges
+# - bb2(rubyBlockId=0)
+# - bb3(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1](<returnMethodTemp>$2):
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional> -> bb1
 
-    "bb::Examples#i_like_ifs_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb2[rubyBlockId=0, firstDead=2]():
+    <returnTemp>$4: Integer(1) = 1
+    <returnMethodTemp>$2: T.noreturn = return <returnTemp>$4: Integer(1)
+    <unconditional> -> bb1
 
-    "bb::Examples#i_like_ifs_1" -> "bb::Examples#i_like_ifs_1" [style="bold"];
-    "bb::Examples#i_like_ifs_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0]()\l<returnTemp>$4: Integer(1) = 1\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$4: Integer(1)\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb3[rubyBlockId=0, firstDead=0]():
+    <returnTemp>$5 = 2
+    <returnMethodTemp>$2 = return <returnTemp>$5
+    <unconditional> -> bb1
 
-    "bb::Examples#i_like_ifs_2" -> "bb::Examples#i_like_ifs_1" [style="bold"];
-    "bb::Examples#i_like_ifs_3" [
-        shape = rectangle;
-        color = red;
-        label = "block[id=3, rubyBlockId=0]()\l<returnTemp>$5 = 2\l<returnMethodTemp>$2 = return <returnTemp>$5\l<unconditional>\l"
-    ];
-
-    "bb::Examples#i_like_ifs_3" -> "bb::Examples#i_like_ifs_1" [style="bold"];
 }
 
-subgraph "cluster_::Examples#i_like_exps" {
-    label = "::Examples#i_like_exps";
-    color = blue;
+method ::Examples#i_like_exps {
 
-    "bb::Examples#i_like_exps_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Examples = cast(<self>: NilClass, Examples);\l<ifTemp>$3: TrueClass = true\l<ifTemp>$3: TrueClass\l"
-    ];
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Examples = cast(<self>: NilClass, Examples);
+    <ifTemp>$3: TrueClass = true
+    <ifTemp>$3 -> (TrueClass ? bb2 : bb3)
 
-    "bb::Examples#i_like_exps_0" -> "bb::Examples#i_like_exps_2" [style="bold"];
-    "bb::Examples#i_like_exps_0" -> "bb::Examples#i_like_exps_3" [style="tapered"];
+# backedges
+# - bb4(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::Examples#i_like_exps_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb2[rubyBlockId=0, firstDead=-1]():
+    <returnMethodTemp>$2: Integer(1) = 1
+    <unconditional> -> bb4
 
-    "bb::Examples#i_like_exps_1" -> "bb::Examples#i_like_exps_1" [style="bold"];
-    "bb::Examples#i_like_exps_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0]()\l<returnMethodTemp>$2: Integer(1) = 1\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb3[rubyBlockId=0, firstDead=0]():
+    <returnMethodTemp>$2 = 2
+    <unconditional> -> bb4
 
-    "bb::Examples#i_like_exps_2" -> "bb::Examples#i_like_exps_4" [style="bold"];
-    "bb::Examples#i_like_exps_3" [
-        shape = rectangle;
-        color = red;
-        label = "block[id=3, rubyBlockId=0]()\l<returnMethodTemp>$2 = 2\l<unconditional>\l"
-    ];
+# backedges
+# - bb2(rubyBlockId=0)
+# - bb3(rubyBlockId=0)
+bb4[rubyBlockId=0, firstDead=1](<returnMethodTemp>$2: Integer(1)):
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
+    <unconditional> -> bb1
 
-    "bb::Examples#i_like_exps_3" -> "bb::Examples#i_like_exps_4" [style="bold"];
-    "bb::Examples#i_like_exps_4" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=4, rubyBlockId=0](<returnMethodTemp>$2: Integer(1))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
-    ];
-
-    "bb::Examples#i_like_exps_4" -> "bb::Examples#i_like_exps_1" [style="bold"];
 }
 
-subgraph "cluster_::Examples#return_in_one_branch1" {
-    label = "::Examples#return_in_one_branch1";
-    color = blue;
+method ::Examples#return_in_one_branch1 {
 
-    "bb::Examples#return_in_one_branch1_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Examples = cast(<self>: NilClass, Examples);\l<ifTemp>$3: TrueClass = true\l<ifTemp>$3: TrueClass\l"
-    ];
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Examples = cast(<self>: NilClass, Examples);
+    <ifTemp>$3: TrueClass = true
+    <ifTemp>$3 -> (TrueClass ? bb2 : bb3)
 
-    "bb::Examples#return_in_one_branch1_0" -> "bb::Examples#return_in_one_branch1_2" [style="bold"];
-    "bb::Examples#return_in_one_branch1_0" -> "bb::Examples#return_in_one_branch1_3" [style="tapered"];
+# backedges
+# - bb2(rubyBlockId=0)
+# - bb3(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::Examples#return_in_one_branch1_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb2[rubyBlockId=0, firstDead=2]():
+    <returnTemp>$4: Integer(1) = 1
+    <returnMethodTemp>$2: T.noreturn = return <returnTemp>$4: Integer(1)
+    <unconditional> -> bb1
 
-    "bb::Examples#return_in_one_branch1_1" -> "bb::Examples#return_in_one_branch1_1" [style="bold"];
-    "bb::Examples#return_in_one_branch1_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0]()\l<returnTemp>$4: Integer(1) = 1\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$4: Integer(1)\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb3[rubyBlockId=0, firstDead=0]():
+    <returnMethodTemp>$2 = 2
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional> -> bb1
 
-    "bb::Examples#return_in_one_branch1_2" -> "bb::Examples#return_in_one_branch1_1" [style="bold"];
-    "bb::Examples#return_in_one_branch1_3" [
-        shape = rectangle;
-        color = red;
-        label = "block[id=3, rubyBlockId=0]()\l<returnMethodTemp>$2 = 2\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
-    ];
-
-    "bb::Examples#return_in_one_branch1_3" -> "bb::Examples#return_in_one_branch1_1" [style="bold"];
 }
 
-subgraph "cluster_::Examples#return_in_one_branch2" {
-    label = "::Examples#return_in_one_branch2";
-    color = blue;
+method ::Examples#return_in_one_branch2 {
 
-    "bb::Examples#return_in_one_branch2_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Examples = cast(<self>: NilClass, Examples);\l<ifTemp>$3: TrueClass = true\l<ifTemp>$3: TrueClass\l"
-    ];
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Examples = cast(<self>: NilClass, Examples);
+    <ifTemp>$3: TrueClass = true
+    <ifTemp>$3 -> (TrueClass ? bb2 : bb3)
 
-    "bb::Examples#return_in_one_branch2_0" -> "bb::Examples#return_in_one_branch2_2" [style="bold"];
-    "bb::Examples#return_in_one_branch2_0" -> "bb::Examples#return_in_one_branch2_3" [style="tapered"];
+# backedges
+# - bb2(rubyBlockId=0)
+# - bb3(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::Examples#return_in_one_branch2_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb2[rubyBlockId=0, firstDead=2]():
+    <returnMethodTemp>$2: Integer(1) = 1
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
+    <unconditional> -> bb1
 
-    "bb::Examples#return_in_one_branch2_1" -> "bb::Examples#return_in_one_branch2_1" [style="bold"];
-    "bb::Examples#return_in_one_branch2_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0]()\l<returnMethodTemp>$2: Integer(1) = 1\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb3[rubyBlockId=0, firstDead=0]():
+    <returnTemp>$4 = 2
+    <returnMethodTemp>$2 = return <returnTemp>$4
+    <unconditional> -> bb1
 
-    "bb::Examples#return_in_one_branch2_2" -> "bb::Examples#return_in_one_branch2_1" [style="bold"];
-    "bb::Examples#return_in_one_branch2_3" [
-        shape = rectangle;
-        color = red;
-        label = "block[id=3, rubyBlockId=0]()\l<returnTemp>$4 = 2\l<returnMethodTemp>$2 = return <returnTemp>$4\l<unconditional>\l"
-    ];
-
-    "bb::Examples#return_in_one_branch2_3" -> "bb::Examples#return_in_one_branch2_1" [style="bold"];
 }
 
-subgraph "cluster_::Examples#variables" {
-    label = "::Examples#variables";
-    color = blue;
+method ::Examples#variables {
 
-    "bb::Examples#variables_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Examples = cast(<self>: NilClass, Examples);\l<ifTemp>$4: TrueClass = true\l<ifTemp>$4: TrueClass\l"
-    ];
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Examples = cast(<self>: NilClass, Examples);
+    <ifTemp>$4: TrueClass = true
+    <ifTemp>$4 -> (TrueClass ? bb2 : bb3)
 
-    "bb::Examples#variables_0" -> "bb::Examples#variables_2" [style="bold"];
-    "bb::Examples#variables_0" -> "bb::Examples#variables_3" [style="tapered"];
+# backedges
+# - bb7(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::Examples#variables_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb2[rubyBlockId=0, firstDead=-1]():
+    a: Integer(1) = 1
+    <unconditional> -> bb4
 
-    "bb::Examples#variables_1" -> "bb::Examples#variables_1" [style="bold"];
-    "bb::Examples#variables_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0]()\la: Integer(1) = 1\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb3[rubyBlockId=0, firstDead=0]():
+    a = 2
+    <unconditional> -> bb4
 
-    "bb::Examples#variables_2" -> "bb::Examples#variables_4" [style="bold"];
-    "bb::Examples#variables_3" [
-        shape = rectangle;
-        color = red;
-        label = "block[id=3, rubyBlockId=0]()\la = 2\l<unconditional>\l"
-    ];
+# backedges
+# - bb2(rubyBlockId=0)
+# - bb3(rubyBlockId=0)
+bb4[rubyBlockId=0, firstDead=-1](a: Integer(1)):
+    <ifTemp>$6: FalseClass = false
+    <ifTemp>$6 -> (FalseClass ? bb5 : bb6)
 
-    "bb::Examples#variables_3" -> "bb::Examples#variables_4" [style="bold"];
-    "bb::Examples#variables_4" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=4, rubyBlockId=0](a: Integer(1))\l<ifTemp>$6: FalseClass = false\l<ifTemp>$6: FalseClass\l"
-    ];
+# backedges
+# - bb4(rubyBlockId=0)
+bb5[rubyBlockId=0, firstDead=0](a: Integer(1)):
+    b = 1
+    <unconditional> -> bb7
 
-    "bb::Examples#variables_4" -> "bb::Examples#variables_5" [style="bold"];
-    "bb::Examples#variables_4" -> "bb::Examples#variables_6" [style="tapered"];
+# backedges
+# - bb4(rubyBlockId=0)
+bb6[rubyBlockId=0, firstDead=-1](a: Integer(1)):
+    b: Integer(2) = 2
+    <unconditional> -> bb7
 
-    "bb::Examples#variables_5" [
-        shape = rectangle;
-        color = red;
-        label = "block[id=5, rubyBlockId=0](a: Integer(1))\lb = 1\l<unconditional>\l"
-    ];
+# backedges
+# - bb5(rubyBlockId=0)
+# - bb6(rubyBlockId=0)
+bb7[rubyBlockId=0, firstDead=2](a: Integer(1), b: Integer(2)):
+    <returnMethodTemp>$2: Integer = a: Integer(1).+(b: Integer(2))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
+    <unconditional> -> bb1
 
-    "bb::Examples#variables_5" -> "bb::Examples#variables_7" [style="bold"];
-    "bb::Examples#variables_6" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=6, rubyBlockId=0](a: Integer(1))\lb: Integer(2) = 2\l<unconditional>\l"
-    ];
-
-    "bb::Examples#variables_6" -> "bb::Examples#variables_7" [style="bold"];
-    "bb::Examples#variables_7" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=7, rubyBlockId=0](a: Integer(1), b: Integer(2))\l<returnMethodTemp>$2: Integer = a: Integer(1).+(b: Integer(2))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
-    ];
-
-    "bb::Examples#variables_7" -> "bb::Examples#variables_1" [style="bold"];
 }
 
-subgraph "cluster_::Examples#variables_and_loop" {
-    label = "::Examples#variables_and_loop";
-    color = blue;
+method ::Examples#variables_and_loop {
 
-    "bb::Examples#variables_and_loop_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Examples = cast(<self>: NilClass, Examples);\lcond: T.untyped = load_arg(cond)\l<ifTemp>$4: TrueClass = true\l<ifTemp>$4: TrueClass\l"
-    ];
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Examples = cast(<self>: NilClass, Examples);
+    cond: T.untyped = load_arg(cond)
+    <ifTemp>$4: TrueClass = true
+    <ifTemp>$4 -> (TrueClass ? bb2 : bb3)
 
-    "bb::Examples#variables_and_loop_0" -> "bb::Examples#variables_and_loop_2" [style="bold"];
-    "bb::Examples#variables_and_loop_0" -> "bb::Examples#variables_and_loop_3" [style="tapered"];
+# backedges
+# - bb7(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::Examples#variables_and_loop_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb2[rubyBlockId=0, firstDead=-1](cond: T.untyped):
+    a: Integer(1) = 1
+    <unconditional> -> bb5
 
-    "bb::Examples#variables_and_loop_1" -> "bb::Examples#variables_and_loop_1" [style="bold"];
-    "bb::Examples#variables_and_loop_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0](cond: T.untyped)\la: Integer(1) = 1\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb3[rubyBlockId=0, firstDead=0](cond: T.untyped):
+    a = 2
+    <unconditional> -> bb5
 
-    "bb::Examples#variables_and_loop_2" -> "bb::Examples#variables_and_loop_5" [style="bold"];
-    "bb::Examples#variables_and_loop_3" [
-        shape = rectangle;
-        color = red;
-        label = "block[id=3, rubyBlockId=0](cond: T.untyped)\la = 2\l<unconditional>\l"
-    ];
+# backedges
+# - bb2(rubyBlockId=0)
+# - bb3(rubyBlockId=0)
+# - bb9(rubyBlockId=0)
+# - bb10(rubyBlockId=0)
+bb5[rubyBlockId=0, firstDead=-1](cond: T.untyped, b: NilClass):
+    # outerLoops: 1
+    <whileTemp>$6: TrueClass = true
+    <whileTemp>$6 -> (TrueClass ? bb8 : bb7)
 
-    "bb::Examples#variables_and_loop_3" -> "bb::Examples#variables_and_loop_5" [style="bold"];
-    "bb::Examples#variables_and_loop_5" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=5, rubyBlockId=0](cond: T.untyped, b: NilClass)\louterLoops: 1\l<whileTemp>$6: TrueClass = true\l<whileTemp>$6: TrueClass\l"
-    ];
+# backedges
+# - bb5(rubyBlockId=0)
+bb7[rubyBlockId=0, firstDead=0](b: NilClass):
+    <returnMethodTemp>$2 = b
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional> -> bb1
 
-    "bb::Examples#variables_and_loop_5" -> "bb::Examples#variables_and_loop_8" [style="bold"];
-    "bb::Examples#variables_and_loop_5" -> "bb::Examples#variables_and_loop_7" [style="tapered"];
+# backedges
+# - bb5(rubyBlockId=0)
+bb8[rubyBlockId=0, firstDead=-1](cond: T.untyped, b: NilClass):
+    # outerLoops: 1
+    cond -> (T.untyped ? bb9 : bb10)
 
-    "bb::Examples#variables_and_loop_7" [
-        shape = rectangle;
-        color = red;
-        label = "block[id=7, rubyBlockId=0](b: NilClass)\l<returnMethodTemp>$2 = b\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
-    ];
+# backedges
+# - bb8(rubyBlockId=0)
+bb9[rubyBlockId=0, firstDead=-1](cond: T.untyped, b: NilClass):
+    # outerLoops: 1
+    b: T.untyped = 1
+    <unconditional> -> bb5
 
-    "bb::Examples#variables_and_loop_7" -> "bb::Examples#variables_and_loop_1" [style="bold"];
-    "bb::Examples#variables_and_loop_8" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=8, rubyBlockId=0](cond: T.untyped, b: NilClass)\louterLoops: 1\lcond: T.untyped\l"
-    ];
+# backedges
+# - bb8(rubyBlockId=0)
+bb10[rubyBlockId=0, firstDead=-1](cond: T.nilable(FalseClass), b: NilClass):
+    # outerLoops: 1
+    b: T.untyped = 2
+    <unconditional> -> bb5
 
-    "bb::Examples#variables_and_loop_8" -> "bb::Examples#variables_and_loop_9" [style="bold"];
-    "bb::Examples#variables_and_loop_8" -> "bb::Examples#variables_and_loop_10" [style="tapered"];
-
-    "bb::Examples#variables_and_loop_9" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=9, rubyBlockId=0](cond: T.untyped, b: NilClass)\louterLoops: 1\lb: T.untyped = 1\l<unconditional>\l"
-    ];
-
-    "bb::Examples#variables_and_loop_9" -> "bb::Examples#variables_and_loop_5" [style="bold"];
-    "bb::Examples#variables_and_loop_10" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=10, rubyBlockId=0](cond: T.nilable(FalseClass), b: NilClass)\louterLoops: 1\lb: T.untyped = 2\l<unconditional>\l"
-    ];
-
-    "bb::Examples#variables_and_loop_10" -> "bb::Examples#variables_and_loop_5" [style="bold"];
 }
 
-subgraph "cluster_::Examples#variables_loop_if" {
-    label = "::Examples#variables_loop_if";
-    color = blue;
+method ::Examples#variables_loop_if {
 
-    "bb::Examples#variables_loop_if_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Examples = cast(<self>: NilClass, Examples);\lcond: T.untyped = load_arg(cond)\l<unconditional>\l"
-    ];
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Examples = cast(<self>: NilClass, Examples);
+    cond: T.untyped = load_arg(cond)
+    <unconditional> -> bb2
 
-    "bb::Examples#variables_loop_if_0" -> "bb::Examples#variables_loop_if_2" [style="bold"];
-    "bb::Examples#variables_loop_if_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb4(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::Examples#variables_loop_if_1" -> "bb::Examples#variables_loop_if_1" [style="bold"];
-    "bb::Examples#variables_loop_if_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0](cond: T.untyped, b: NilClass)\louterLoops: 1\l<whileTemp>$4: TrueClass = true\l<whileTemp>$4: TrueClass\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+# - bb6(rubyBlockId=0)
+# - bb7(rubyBlockId=0)
+bb2[rubyBlockId=0, firstDead=-1](cond: T.untyped, b: NilClass):
+    # outerLoops: 1
+    <whileTemp>$4: TrueClass = true
+    <whileTemp>$4 -> (TrueClass ? bb5 : bb4)
 
-    "bb::Examples#variables_loop_if_2" -> "bb::Examples#variables_loop_if_5" [style="bold"];
-    "bb::Examples#variables_loop_if_2" -> "bb::Examples#variables_loop_if_4" [style="tapered"];
+# backedges
+# - bb2(rubyBlockId=0)
+bb4[rubyBlockId=0, firstDead=0](b: NilClass):
+    <returnMethodTemp>$2 = b
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional> -> bb1
 
-    "bb::Examples#variables_loop_if_4" [
-        shape = rectangle;
-        color = red;
-        label = "block[id=4, rubyBlockId=0](b: NilClass)\l<returnMethodTemp>$2 = b\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
-    ];
+# backedges
+# - bb2(rubyBlockId=0)
+bb5[rubyBlockId=0, firstDead=-1](cond: T.untyped, b: NilClass):
+    # outerLoops: 1
+    cond -> (T.untyped ? bb6 : bb7)
 
-    "bb::Examples#variables_loop_if_4" -> "bb::Examples#variables_loop_if_1" [style="bold"];
-    "bb::Examples#variables_loop_if_5" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=5, rubyBlockId=0](cond: T.untyped, b: NilClass)\louterLoops: 1\lcond: T.untyped\l"
-    ];
+# backedges
+# - bb5(rubyBlockId=0)
+bb6[rubyBlockId=0, firstDead=-1](cond: T.untyped, b: NilClass):
+    # outerLoops: 1
+    b: T.untyped = 1
+    <unconditional> -> bb2
 
-    "bb::Examples#variables_loop_if_5" -> "bb::Examples#variables_loop_if_6" [style="bold"];
-    "bb::Examples#variables_loop_if_5" -> "bb::Examples#variables_loop_if_7" [style="tapered"];
+# backedges
+# - bb5(rubyBlockId=0)
+bb7[rubyBlockId=0, firstDead=-1](cond: T.nilable(FalseClass), b: NilClass):
+    # outerLoops: 1
+    b: T.untyped = 2
+    <unconditional> -> bb2
 
-    "bb::Examples#variables_loop_if_6" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=6, rubyBlockId=0](cond: T.untyped, b: NilClass)\louterLoops: 1\lb: T.untyped = 1\l<unconditional>\l"
-    ];
-
-    "bb::Examples#variables_loop_if_6" -> "bb::Examples#variables_loop_if_2" [style="bold"];
-    "bb::Examples#variables_loop_if_7" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=7, rubyBlockId=0](cond: T.nilable(FalseClass), b: NilClass)\louterLoops: 1\lb: T.untyped = 2\l<unconditional>\l"
-    ];
-
-    "bb::Examples#variables_loop_if_7" -> "bb::Examples#variables_loop_if_2" [style="bold"];
 }
 
-subgraph "cluster_::Examples#take_arguments" {
-    label = "::Examples#take_arguments";
-    color = blue;
+method ::Examples#take_arguments {
 
-    "bb::Examples#take_arguments_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Examples = cast(<self>: NilClass, Examples);\li: T.untyped = load_arg(i)\l<ifTemp>$3: FalseClass = false\l<ifTemp>$3: FalseClass\l"
-    ];
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Examples = cast(<self>: NilClass, Examples);
+    i: T.untyped = load_arg(i)
+    <ifTemp>$3: FalseClass = false
+    <ifTemp>$3 -> (FalseClass ? bb2 : bb3)
 
-    "bb::Examples#take_arguments_0" -> "bb::Examples#take_arguments_2" [style="bold"];
-    "bb::Examples#take_arguments_0" -> "bb::Examples#take_arguments_3" [style="tapered"];
+# backedges
+# - bb4(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::Examples#take_arguments_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb2[rubyBlockId=0, firstDead=0]():
+    <returnMethodTemp>$2 = 2
+    <unconditional> -> bb4
 
-    "bb::Examples#take_arguments_1" -> "bb::Examples#take_arguments_1" [style="bold"];
-    "bb::Examples#take_arguments_2" [
-        shape = rectangle;
-        color = red;
-        label = "block[id=2, rubyBlockId=0]()\l<returnMethodTemp>$2 = 2\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb3[rubyBlockId=0, firstDead=-1](i: T.untyped):
+    <returnMethodTemp>$2: T.untyped = i
+    <unconditional> -> bb4
 
-    "bb::Examples#take_arguments_2" -> "bb::Examples#take_arguments_4" [style="bold"];
-    "bb::Examples#take_arguments_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=0](i: T.untyped)\l<returnMethodTemp>$2: T.untyped = i\l<unconditional>\l"
-    ];
+# backedges
+# - bb2(rubyBlockId=0)
+# - bb3(rubyBlockId=0)
+bb4[rubyBlockId=0, firstDead=1](<returnMethodTemp>$2: T.untyped):
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <unconditional> -> bb1
 
-    "bb::Examples#take_arguments_3" -> "bb::Examples#take_arguments_4" [style="bold"];
-    "bb::Examples#take_arguments_4" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=4, rubyBlockId=0](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
-    ];
-
-    "bb::Examples#take_arguments_4" -> "bb::Examples#take_arguments_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:Examples>#<static-init>" {
-    label = "::<Class:Examples>#<static-init>";
-    color = blue;
+method ::<Class:Examples>#<static-init> {
 
-    "bb::<Class:Examples>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Examples) = cast(<self>: NilClass, T.class_of(Examples));\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$7: Symbol(:i_like_ifs) = :i_like_ifs\l<statTemp>$8: Symbol(:normal) = :normal\l<statTemp>$3: Symbol(:i_like_ifs) = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$7: Symbol(:i_like_ifs), <statTemp>$8: Symbol(:normal))\l<cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$13: Symbol(:i_like_exps) = :i_like_exps\l<statTemp>$14: Symbol(:normal) = :normal\l<statTemp>$9: Symbol(:i_like_exps) = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$13: Symbol(:i_like_exps), <statTemp>$14: Symbol(:normal))\l<cfgAlias>$17: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$19: Symbol(:return_in_one_branch1) = :return_in_one_branch1\l<statTemp>$20: Symbol(:normal) = :normal\l<statTemp>$15: Symbol(:return_in_one_branch1) = <cfgAlias>$17: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$19: Symbol(:return_in_one_branch1), <statTemp>$20: Symbol(:normal))\l<cfgAlias>$23: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$25: Symbol(:return_in_one_branch2) = :return_in_one_branch2\l<statTemp>$26: Symbol(:normal) = :normal\l<statTemp>$21: Symbol(:return_in_one_branch2) = <cfgAlias>$23: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$25: Symbol(:return_in_one_branch2), <statTemp>$26: Symbol(:normal))\l<cfgAlias>$29: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$31: Symbol(:variables) = :variables\l<statTemp>$32: Symbol(:normal) = :normal\l<statTemp>$27: Symbol(:variables) = <cfgAlias>$29: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$31: Symbol(:variables), <statTemp>$32: Symbol(:normal))\l<cfgAlias>$35: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$37: Symbol(:variables_and_loop) = :variables_and_loop\l<statTemp>$38: Symbol(:normal) = :normal\l<statTemp>$33: Symbol(:variables_and_loop) = <cfgAlias>$35: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$37: Symbol(:variables_and_loop), <statTemp>$38: Symbol(:normal))\l<cfgAlias>$41: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$43: Symbol(:variables_loop_if) = :variables_loop_if\l<statTemp>$44: Symbol(:normal) = :normal\l<statTemp>$39: Symbol(:variables_loop_if) = <cfgAlias>$41: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$43: Symbol(:variables_loop_if), <statTemp>$44: Symbol(:normal))\l<cfgAlias>$47: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$49: Symbol(:take_arguments) = :take_arguments\l<statTemp>$50: Symbol(:normal) = :normal\l<statTemp>$45: Symbol(:take_arguments) = <cfgAlias>$47: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$49: Symbol(:take_arguments), <statTemp>$50: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
+bb0[rubyBlockId=0, firstDead=34]():
+    <self>: T.class_of(Examples) = cast(<self>: NilClass, T.class_of(Examples));
+    <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$7: Symbol(:i_like_ifs) = :i_like_ifs
+    <statTemp>$8: Symbol(:normal) = :normal
+    <statTemp>$3: Symbol(:i_like_ifs) = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$7: Symbol(:i_like_ifs), <statTemp>$8: Symbol(:normal))
+    <cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$13: Symbol(:i_like_exps) = :i_like_exps
+    <statTemp>$14: Symbol(:normal) = :normal
+    <statTemp>$9: Symbol(:i_like_exps) = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$13: Symbol(:i_like_exps), <statTemp>$14: Symbol(:normal))
+    <cfgAlias>$17: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$19: Symbol(:return_in_one_branch1) = :return_in_one_branch1
+    <statTemp>$20: Symbol(:normal) = :normal
+    <statTemp>$15: Symbol(:return_in_one_branch1) = <cfgAlias>$17: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$19: Symbol(:return_in_one_branch1), <statTemp>$20: Symbol(:normal))
+    <cfgAlias>$23: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$25: Symbol(:return_in_one_branch2) = :return_in_one_branch2
+    <statTemp>$26: Symbol(:normal) = :normal
+    <statTemp>$21: Symbol(:return_in_one_branch2) = <cfgAlias>$23: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$25: Symbol(:return_in_one_branch2), <statTemp>$26: Symbol(:normal))
+    <cfgAlias>$29: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$31: Symbol(:variables) = :variables
+    <statTemp>$32: Symbol(:normal) = :normal
+    <statTemp>$27: Symbol(:variables) = <cfgAlias>$29: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$31: Symbol(:variables), <statTemp>$32: Symbol(:normal))
+    <cfgAlias>$35: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$37: Symbol(:variables_and_loop) = :variables_and_loop
+    <statTemp>$38: Symbol(:normal) = :normal
+    <statTemp>$33: Symbol(:variables_and_loop) = <cfgAlias>$35: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$37: Symbol(:variables_and_loop), <statTemp>$38: Symbol(:normal))
+    <cfgAlias>$41: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$43: Symbol(:variables_loop_if) = :variables_loop_if
+    <statTemp>$44: Symbol(:normal) = :normal
+    <statTemp>$39: Symbol(:variables_loop_if) = <cfgAlias>$41: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$43: Symbol(:variables_loop_if), <statTemp>$44: Symbol(:normal))
+    <cfgAlias>$47: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$49: Symbol(:take_arguments) = :take_arguments
+    <statTemp>$50: Symbol(:normal) = :normal
+    <statTemp>$45: Symbol(:take_arguments) = <cfgAlias>$47: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Examples), <statTemp>$49: Symbol(:take_arguments), <statTemp>$50: Symbol(:normal))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
 
-    "bb::<Class:Examples>#<static-init>_0" -> "bb::<Class:Examples>#<static-init>_1" [style="bold"];
-    "bb::<Class:Examples>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
-
-    "bb::<Class:Examples>#<static-init>_1" -> "bb::<Class:Examples>#<static-init>_1" [style="bold"];
-}
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
 }
 

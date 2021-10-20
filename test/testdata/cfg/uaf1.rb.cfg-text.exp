@@ -1,143 +1,133 @@
-digraph "uaf1.rb" {
-subgraph "cluster_::<Class:<root>>#<static-init>" {
-    label = "::<Class:<root>>#<static-init>";
-    color = blue;
+method ::<Class:<root>>#<static-init> {
 
-    "bb::<Class:<root>>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$7: T.class_of(A) = alias <C A>\l<statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(A))\l<cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$12: T.class_of(A) = alias <C A>\l<statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(A))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
+bb0[rubyBlockId=0, firstDead=8]():
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
+    <cfgAlias>$7: T.class_of(A) = alias <C A>
+    <statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(A))
+    <cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$12: T.class_of(A) = alias <C A>
+    <statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(A))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
 
-    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
-    "bb::<Class:<root>>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::A#initialize" {
-    label = "::A#initialize";
-    color = blue;
+method ::A#initialize {
 
-    "bb::A#initialize_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: A = cast(<self>: NilClass, A);\l<statTemp>$3: T.untyped = <self>: A.spec_list()\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <statTemp>$3: T.untyped.map()\l<selfRestore>$6: A = <self>\l<unconditional>\l"
-    ];
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: A = cast(<self>: NilClass, A);
+    <statTemp>$3: T.untyped = <self>: A.spec_list()
+    <block-pre-call-temp>$5: Sorbet::Private::Static::Void = <statTemp>$3: T.untyped.map()
+    <selfRestore>$6: A = <self>
+    <unconditional> -> bb2
 
-    "bb::A#initialize_0" -> "bb::A#initialize_2" [style="bold"];
-    "bb::A#initialize_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb3(rubyBlockId=0)
+# - bb10(rubyBlockId=4)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::A#initialize_1" -> "bb::A#initialize_1" [style="bold"];
-    "bb::A#initialize_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$8: NilClass, <gotoDeadTemp>$15: NilClass)\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+# - bb13(rubyBlockId=1)
+bb2[rubyBlockId=1, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$8: NilClass, <gotoDeadTemp>$15: NilClass):
+    # outerLoops: 1
+    <block-call> -> (NilClass ? bb5 : bb3)
 
-    "bb::A#initialize_2" -> "bb::A#initialize_5" [style="bold"];
-    "bb::A#initialize_2" -> "bb::A#initialize_3" [style="tapered"];
+# backedges
+# - bb2(rubyBlockId=1)
+bb3[rubyBlockId=0, firstDead=2](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A):
+    <returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$5, map>
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <unconditional> -> bb1
 
-    "bb::A#initialize_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=0](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A)\l<returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$5, map>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
-    ];
+# backedges
+# - bb2(rubyBlockId=1)
+bb5[rubyBlockId=1, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$8: NilClass, <gotoDeadTemp>$15: NilClass):
+    # outerLoops: 1
+    <self>: A = loadSelf
+    <magic>$10: T.class_of(<Magic>) = alias <C <Magic>>
+    <exceptionValue>$9: T.untyped = <get-current-exception>
+    <exceptionValue>$9 -> (T.untyped ? bb7 : bb8)
 
-    "bb::A#initialize_3" -> "bb::A#initialize_1" [style="bold"];
-    "bb::A#initialize_5" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=5, rubyBlockId=1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$8: NilClass, <gotoDeadTemp>$15: NilClass)\louterLoops: 1\l<self>: A = loadSelf\l<magic>$10: T.class_of(<Magic>) = alias <C <Magic>>\l<exceptionValue>$9: T.untyped = <get-current-exception>\l<exceptionValue>$9: T.untyped\l"
-    ];
+# backedges
+# - bb5(rubyBlockId=1)
+# - bb8(rubyBlockId=2)
+bb7[rubyBlockId=3, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$8: T.nilable(Integer), <exceptionValue>$9: T.untyped, <magic>$10: T.class_of(<Magic>), <gotoDeadTemp>$15: NilClass):
+    # outerLoops: 1
+    se$1: T.untyped = <exceptionValue>$9
+    <cfgAlias>$13: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$14: T.untyped = se$1: T.untyped.is_a?(<cfgAlias>$13: T.class_of(StandardError))
+    <isaCheckTemp>$14 -> (T.untyped ? bb11 : bb12)
 
-    "bb::A#initialize_5" -> "bb::A#initialize_7" [style="bold"];
-    "bb::A#initialize_5" -> "bb::A#initialize_8" [style="tapered"];
+# backedges
+# - bb5(rubyBlockId=1)
+bb8[rubyBlockId=2, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <magic>$10: T.class_of(<Magic>), <gotoDeadTemp>$15: NilClass):
+    # outerLoops: 1
+    <blockReturnTemp>$8: Integer(1) = 1
+    <exceptionValue>$9: T.untyped = <get-current-exception>
+    <exceptionValue>$9 -> (T.untyped ? bb7 : bb9)
 
-    "bb::A#initialize_7" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=7, rubyBlockId=3](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$8: T.nilable(Integer), <exceptionValue>$9: T.untyped, <magic>$10: T.class_of(<Magic>), <gotoDeadTemp>$15: NilClass)\louterLoops: 1\lse$1: T.untyped = <exceptionValue>$9\l<cfgAlias>$13: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$14: T.untyped = se$1: T.untyped.is_a?(<cfgAlias>$13: T.class_of(StandardError))\l<isaCheckTemp>$14: T.untyped\l"
-    ];
+# backedges
+# - bb8(rubyBlockId=2)
+bb9[rubyBlockId=5, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$8: Integer(1), <gotoDeadTemp>$15: NilClass):
+    # outerLoops: 1
+    <unconditional> -> bb10
 
-    "bb::A#initialize_7" -> "bb::A#initialize_11" [style="bold"];
-    "bb::A#initialize_7" -> "bb::A#initialize_12" [style="tapered"];
+# backedges
+# - bb9(rubyBlockId=5)
+# - bb11(rubyBlockId=3)
+# - bb12(rubyBlockId=3)
+bb10[rubyBlockId=4, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$8: T.nilable(Integer), <gotoDeadTemp>$15: T.nilable(TrueClass)):
+    # outerLoops: 1
+    <gotoDeadTemp>$15 -> (T.nilable(TrueClass) ? bb1 : bb13)
 
-    "bb::A#initialize_8" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=8, rubyBlockId=2](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <magic>$10: T.class_of(<Magic>), <gotoDeadTemp>$15: NilClass)\louterLoops: 1\l<blockReturnTemp>$8: Integer(1) = 1\l<exceptionValue>$9: T.untyped = <get-current-exception>\l<exceptionValue>$9: T.untyped\l"
-    ];
+# backedges
+# - bb7(rubyBlockId=3)
+bb11[rubyBlockId=3, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <magic>$10: T.class_of(<Magic>), <gotoDeadTemp>$15: NilClass):
+    # outerLoops: 1
+    <exceptionValue>$9: NilClass = nil
+    <keepForCfgTemp>$11: Sorbet::Private::Static::Void = <magic>$10: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$9: NilClass)
+    <blockReturnTemp>$8: Integer(2) = 2
+    <unconditional> -> bb10
 
-    "bb::A#initialize_8" -> "bb::A#initialize_7" [style="bold"];
-    "bb::A#initialize_8" -> "bb::A#initialize_9" [style="tapered"];
+# backedges
+# - bb7(rubyBlockId=3)
+bb12[rubyBlockId=3, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$8: T.nilable(Integer)):
+    # outerLoops: 1
+    <gotoDeadTemp>$15: TrueClass = true
+    <unconditional> -> bb10
 
-    "bb::A#initialize_9" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=9, rubyBlockId=5](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$8: Integer(1), <gotoDeadTemp>$15: NilClass)\louterLoops: 1\l<unconditional>\l"
-    ];
+# backedges
+# - bb10(rubyBlockId=4)
+bb13[rubyBlockId=1, firstDead=1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$8: Integer, <gotoDeadTemp>$15: NilClass):
+    # outerLoops: 1
+    <blockReturnTemp>$17: T.noreturn = blockreturn<map> <blockReturnTemp>$8: Integer
+    <unconditional> -> bb2
 
-    "bb::A#initialize_9" -> "bb::A#initialize_10" [style="bold"];
-    "bb::A#initialize_10" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=10, rubyBlockId=4](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$8: T.nilable(Integer), <gotoDeadTemp>$15: T.nilable(TrueClass))\louterLoops: 1\l<gotoDeadTemp>$15: T.nilable(TrueClass)\l"
-    ];
-
-    "bb::A#initialize_10" -> "bb::A#initialize_1" [style="bold"];
-    "bb::A#initialize_10" -> "bb::A#initialize_13" [style="tapered"];
-
-    "bb::A#initialize_11" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=11, rubyBlockId=3](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <magic>$10: T.class_of(<Magic>), <gotoDeadTemp>$15: NilClass)\louterLoops: 1\l<exceptionValue>$9: NilClass = nil\l<keepForCfgTemp>$11: Sorbet::Private::Static::Void = <magic>$10: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$9: NilClass)\l<blockReturnTemp>$8: Integer(2) = 2\l<unconditional>\l"
-    ];
-
-    "bb::A#initialize_11" -> "bb::A#initialize_10" [style="bold"];
-    "bb::A#initialize_12" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=12, rubyBlockId=3](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$8: T.nilable(Integer))\louterLoops: 1\l<gotoDeadTemp>$15: TrueClass = true\l<unconditional>\l"
-    ];
-
-    "bb::A#initialize_12" -> "bb::A#initialize_10" [style="bold"];
-    "bb::A#initialize_13" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=13, rubyBlockId=1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$8: Integer, <gotoDeadTemp>$15: NilClass)\louterLoops: 1\l<blockReturnTemp>$17: T.noreturn = blockreturn<map> <blockReturnTemp>$8: Integer\l<unconditional>\l"
-    ];
-
-    "bb::A#initialize_13" -> "bb::A#initialize_2" [style="bold"];
 }
 
-subgraph "cluster_::<Class:A>#<static-init>" {
-    label = "::<Class:A>#<static-init>";
-    color = blue;
+method ::<Class:A>#<static-init> {
 
-    "bb::<Class:A>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));\l<cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:initialize) = :initialize\l<statTemp>$7: Symbol(:normal) = :normal\l<returnMethodTemp>$2: Symbol(:initialize) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(A), <statTemp>$6: Symbol(:initialize), <statTemp>$7: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:initialize)\l<unconditional>\l"
-    ];
+bb0[rubyBlockId=0, firstDead=6]():
+    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$6: Symbol(:initialize) = :initialize
+    <statTemp>$7: Symbol(:normal) = :normal
+    <returnMethodTemp>$2: Symbol(:initialize) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(A), <statTemp>$6: Symbol(:initialize), <statTemp>$7: Symbol(:normal))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:initialize)
+    <unconditional> -> bb1
 
-    "bb::<Class:A>#<static-init>_0" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
-    "bb::<Class:A>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
-
-    "bb::<Class:A>#<static-init>_1" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
-}
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
 }
 

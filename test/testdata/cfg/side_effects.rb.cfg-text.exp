@@ -1,86 +1,75 @@
-digraph "side_effects.rb" {
-subgraph "cluster_::<Class:<root>>#<static-init>" {
-    label = "::<Class:<root>>#<static-init>";
-    color = blue;
+method ::<Class:<root>>#<static-init> {
 
-    "bb::<Class:<root>>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$7: T.class_of(Side) = alias <C Side>\l<statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(Side))\l<cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$12: T.class_of(Side) = alias <C Side>\l<statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(Side))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
+bb0[rubyBlockId=0, firstDead=8]():
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
+    <cfgAlias>$7: T.class_of(Side) = alias <C Side>
+    <statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(Side))
+    <cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$12: T.class_of(Side) = alias <C Side>
+    <statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(Side))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
 
-    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
-    "bb::<Class:<root>>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::Side#foo" {
-    label = "::Side#foo";
-    color = blue;
+method ::Side#foo {
 
-    "bb::Side#foo_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Side = cast(<self>: NilClass, Side);\lcond: T.untyped = load_arg(cond)\la: Integer(1) = 1\l<statTemp>$4: Integer(1) = a\l<statTemp>$5: Integer(1) = a\lcond: T.untyped\l"
-    ];
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Side = cast(<self>: NilClass, Side);
+    cond: T.untyped = load_arg(cond)
+    a: Integer(1) = 1
+    <statTemp>$4: Integer(1) = a
+    <statTemp>$5: Integer(1) = a
+    cond -> (T.untyped ? bb2 : bb3)
 
-    "bb::Side#foo_0" -> "bb::Side#foo_2" [style="bold"];
-    "bb::Side#foo_0" -> "bb::Side#foo_3" [style="tapered"];
+# backedges
+# - bb4(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
-    "bb::Side#foo_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb2[rubyBlockId=0, firstDead=-1](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
+    a: TrueClass = true
+    <unconditional> -> bb4
 
-    "bb::Side#foo_1" -> "bb::Side#foo_1" [style="bold"];
-    "bb::Side#foo_2" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=2, rubyBlockId=0](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1))\la: TrueClass = true\l<unconditional>\l"
-    ];
+# backedges
+# - bb0(rubyBlockId=0)
+bb3[rubyBlockId=0, firstDead=-1](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
+    a: Integer(2) = 2
+    <unconditional> -> bb4
 
-    "bb::Side#foo_2" -> "bb::Side#foo_4" [style="bold"];
-    "bb::Side#foo_3" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=3, rubyBlockId=0](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1))\la: Integer(2) = 2\l<unconditional>\l"
-    ];
+# backedges
+# - bb2(rubyBlockId=0)
+# - bb3(rubyBlockId=0)
+bb4[rubyBlockId=0, firstDead=2](a: T.any(TrueClass, Integer), <statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
+    <returnMethodTemp>$2: T.untyped = <statTemp>$4: Integer(1).foo(<statTemp>$5: Integer(1), a: T.any(TrueClass, Integer))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <unconditional> -> bb1
 
-    "bb::Side#foo_3" -> "bb::Side#foo_4" [style="bold"];
-    "bb::Side#foo_4" [
-        shape = rectangle;
-        color = black;
-        label = "block[id=4, rubyBlockId=0](a: T.any(TrueClass, Integer), <statTemp>$4: Integer(1), <statTemp>$5: Integer(1))\l<returnMethodTemp>$2: T.untyped = <statTemp>$4: Integer(1).foo(<statTemp>$5: Integer(1), a: T.any(TrueClass, Integer))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
-    ];
-
-    "bb::Side#foo_4" -> "bb::Side#foo_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:Side>#<static-init>" {
-    label = "::<Class:Side>#<static-init>";
-    color = blue;
+method ::<Class:Side>#<static-init> {
 
-    "bb::<Class:Side>#<static-init>_0" [
-        shape = invhouse;
-        color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Side) = cast(<self>: NilClass, T.class_of(Side));\l<cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:foo) = :foo\l<statTemp>$7: Symbol(:normal) = :normal\l<returnMethodTemp>$2: Symbol(:foo) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Side), <statTemp>$6: Symbol(:foo), <statTemp>$7: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)\l<unconditional>\l"
-    ];
+bb0[rubyBlockId=0, firstDead=6]():
+    <self>: T.class_of(Side) = cast(<self>: NilClass, T.class_of(Side));
+    <cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$6: Symbol(:foo) = :foo
+    <statTemp>$7: Symbol(:normal) = :normal
+    <returnMethodTemp>$2: Symbol(:foo) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Side), <statTemp>$6: Symbol(:foo), <statTemp>$7: Symbol(:normal))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)
+    <unconditional> -> bb1
 
-    "bb::<Class:Side>#<static-init>_0" -> "bb::<Class:Side>#<static-init>_1" [style="bold"];
-    "bb::<Class:Side>#<static-init>_1" [
-        shape = parallelogram;
-        color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
-
-    "bb::<Class:Side>#<static-init>_1" -> "bb::<Class:Side>#<static-init>_1" [style="bold"];
-}
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
 }
 
