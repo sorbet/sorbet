@@ -126,7 +126,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$7: FalseClass = false\l<statTemp>$8: Symbol(:f) = :f\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(<root>), <statTemp>$7: FalseClass, <statTemp>$8: Symbol(:f))\l<selfRestore>$10: T.class_of(<root>) = <self>\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>\l<statTemp>$7: FalseClass = false\l<statTemp>$8: Symbol(:f) = :f\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static::ResolvedSig).sig(<self>: T.class_of(<root>), <statTemp>$7: FalseClass, <statTemp>$8: Symbol(:f))\l<selfRestore>$10: T.class_of(<root>) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_2" [style="bold"];
@@ -192,7 +192,7 @@ subgraph "cluster_::<Class:Base>#<static-init>" {
     "bb::<Class:Base>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<C Klass>$10: <Type: T.class_of(Base)::Klass> = alias <C Klass>\l<self>: T.class_of(Base)[T.class_of(Base)::Klass] = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Base>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Base>> $1><C <U <AttachedClass>>>)\l    <C <U Klass>> = SelfTypeParam(<S <C <U Base>> $1><C <U Klass>>)\l  ]\l});\l<cfgAlias>$6: T.class_of(T::Generic) = alias <C Generic>\l<cfgAlias>$8: T.class_of(T) = alias <C T>\l<statTemp>$3: T.class_of(Base)[T.class_of(Base)::Klass] = <self>: T.class_of(Base)[T.class_of(Base)::Klass].extend(<cfgAlias>$6: T.class_of(T::Generic))\l<C Klass>$10: T.untyped = <self>: T.class_of(Base)[T.class_of(Base)::Klass].type_template()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<C Klass>$10: <Type: T.class_of(Base)::Klass> = alias <C Klass>\l<self>: T.class_of(Base)[T.class_of(Base)::Klass] = cast(<self>: NilClass, T.class_of(Base)[T.class_of(Base)::Klass]);\l<cfgAlias>$6: T.class_of(T::Generic) = alias <C Generic>\l<cfgAlias>$8: T.class_of(T) = alias <C T>\l<statTemp>$3: T.class_of(Base)[T.class_of(Base)::Klass] = <self>: T.class_of(Base)[T.class_of(Base)::Klass].extend(<cfgAlias>$6: T.class_of(T::Generic))\l<C Klass>$10: T.untyped = <self>: T.class_of(Base)[T.class_of(Base)::Klass].type_template()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:Base>#<static-init>_0" -> "bb::<Class:Base>#<static-init>_1" [style="bold"];
@@ -212,7 +212,7 @@ subgraph "cluster_::<Class:Concrete>#<static-init>" {
     "bb::<Class:Concrete>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<C Klass>$10: <Type: String> = alias <C Klass>\l<self>: T.class_of(Concrete) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Concrete>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Concrete>> $1><C <U <AttachedClass>>>)\l    <C <U Klass>> = String\l  ]\l});\l<cfgAlias>$6: T.class_of(T::Generic) = alias <C Generic>\l<cfgAlias>$8: T.class_of(T) = alias <C T>\l<statTemp>$3: T.class_of(Concrete) = <self>: T.class_of(Concrete).extend(<cfgAlias>$6: T.class_of(T::Generic))\l<hashTemp>$12: Symbol(:fixed) = :fixed\l<cfgAlias>$14: T.class_of(String) = alias <C String>\l<C Klass>$10: T.untyped = <self>: T.class_of(Concrete).type_template(<hashTemp>$12: Symbol(:fixed), <cfgAlias>$14: T.class_of(String))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<C Klass>$10: <Type: String> = alias <C Klass>\l<self>: T.class_of(Concrete) = cast(<self>: NilClass, T.class_of(Concrete));\l<cfgAlias>$6: T.class_of(T::Generic) = alias <C Generic>\l<cfgAlias>$8: T.class_of(T) = alias <C T>\l<statTemp>$3: T.class_of(Concrete) = <self>: T.class_of(Concrete).extend(<cfgAlias>$6: T.class_of(T::Generic))\l<hashTemp>$12: Symbol(:fixed) = :fixed\l<cfgAlias>$14: T.class_of(String) = alias <C String>\l<C Klass>$10: T.untyped = <self>: T.class_of(Concrete).type_template(<hashTemp>$12: Symbol(:fixed), <cfgAlias>$14: T.class_of(String))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:Concrete>#<static-init>_0" -> "bb::<Class:Concrete>#<static-init>_1" [style="bold"];
@@ -232,7 +232,7 @@ subgraph "cluster_::<Class:Other>#<static-init>" {
     "bb::<Class:Other>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Other) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Other>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Other>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Other) = cast(<self>: NilClass, T.class_of(Other));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:Other>#<static-init>_0" -> "bb::<Class:Other>#<static-init>_1" [style="bold"];

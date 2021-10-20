@@ -6,7 +6,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$6: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$8: T.class_of(C1) = alias <C C1>\l<statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$8: T.class_of(C1))\l<cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$13: T.class_of(C1) = alias <C C1>\l<statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$13: T.class_of(C1))\l<cfgAlias>$17: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$19: T.class_of(C2) = alias <C C2>\l<statTemp>$15: Sorbet::Private::Static::Void = <cfgAlias>$17: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$19: T.class_of(C2))\l<cfgAlias>$22: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$24: T.class_of(C2) = alias <C C2>\l<statTemp>$20: Sorbet::Private::Static::Void = <cfgAlias>$22: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$24: T.class_of(C2))\l<cfgAlias>$28: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$30: T.class_of(C3) = alias <C C3>\l<statTemp>$26: Sorbet::Private::Static::Void = <cfgAlias>$28: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$30: T.class_of(C3))\l<cfgAlias>$33: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$35: T.class_of(C3) = alias <C C3>\l<statTemp>$31: Sorbet::Private::Static::Void = <cfgAlias>$33: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$35: T.class_of(C3))\l<cfgAlias>$39: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$41: T.class_of(C4) = alias <C C4>\l<statTemp>$37: Sorbet::Private::Static::Void = <cfgAlias>$39: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$41: T.class_of(C4))\l<cfgAlias>$44: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$46: T.class_of(C4) = alias <C C4>\l<statTemp>$42: Sorbet::Private::Static::Void = <cfgAlias>$44: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$46: T.class_of(C4))\l<cfgAlias>$50: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$52: T.class_of(C5) = alias <C C5>\l<statTemp>$48: Sorbet::Private::Static::Void = <cfgAlias>$50: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$52: T.class_of(C5))\l<cfgAlias>$55: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$57: T.class_of(C5) = alias <C C5>\l<statTemp>$53: Sorbet::Private::Static::Void = <cfgAlias>$55: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$57: T.class_of(C5))\l<cfgAlias>$61: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$63: T.class_of(C6) = alias <C C6>\l<statTemp>$59: Sorbet::Private::Static::Void = <cfgAlias>$61: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$63: T.class_of(C6))\l<cfgAlias>$66: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$68: T.class_of(C6) = alias <C C6>\l<statTemp>$64: Sorbet::Private::Static::Void = <cfgAlias>$66: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$68: T.class_of(C6))\l<cfgAlias>$72: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$74: T.class_of(C7) = alias <C C7>\l<statTemp>$70: Sorbet::Private::Static::Void = <cfgAlias>$72: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$74: T.class_of(C7))\l<cfgAlias>$77: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$79: T.class_of(C7) = alias <C C7>\l<statTemp>$75: Sorbet::Private::Static::Void = <cfgAlias>$77: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$79: T.class_of(C7))\l<cfgAlias>$83: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$85: T.class_of(C8) = alias <C C8>\l<statTemp>$81: Sorbet::Private::Static::Void = <cfgAlias>$83: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$85: T.class_of(C8))\l<cfgAlias>$88: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$90: T.class_of(C8) = alias <C C8>\l<statTemp>$86: Sorbet::Private::Static::Void = <cfgAlias>$88: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$90: T.class_of(C8))\l<cfgAlias>$94: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$96: T.class_of(C9) = alias <C C9>\l<statTemp>$92: Sorbet::Private::Static::Void = <cfgAlias>$94: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$96: T.class_of(C9))\l<cfgAlias>$99: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$101: T.class_of(C9) = alias <C C9>\l<statTemp>$97: Sorbet::Private::Static::Void = <cfgAlias>$99: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$101: T.class_of(C9))\l<cfgAlias>$105: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$107: T.class_of(C10) = alias <C C10>\l<statTemp>$103: Sorbet::Private::Static::Void = <cfgAlias>$105: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$107: T.class_of(C10))\l<cfgAlias>$110: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$112: T.class_of(C10) = alias <C C10>\l<statTemp>$108: Sorbet::Private::Static::Void = <cfgAlias>$110: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$112: T.class_of(C10))\l<cfgAlias>$116: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$118: T.class_of(C11) = alias <C C11>\l<statTemp>$114: Sorbet::Private::Static::Void = <cfgAlias>$116: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$118: T.class_of(C11))\l<cfgAlias>$121: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$123: T.class_of(C11) = alias <C C11>\l<statTemp>$119: Sorbet::Private::Static::Void = <cfgAlias>$121: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$123: T.class_of(C11))\l<cfgAlias>$127: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$129: T.class_of(C12) = alias <C C12>\l<statTemp>$125: Sorbet::Private::Static::Void = <cfgAlias>$127: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$129: T.class_of(C12))\l<cfgAlias>$132: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$134: T.class_of(C12) = alias <C C12>\l<statTemp>$130: Sorbet::Private::Static::Void = <cfgAlias>$132: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$134: T.class_of(C12))\l<cfgAlias>$138: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$140: T.class_of(C13) = alias <C C13>\l<statTemp>$136: Sorbet::Private::Static::Void = <cfgAlias>$138: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$140: T.class_of(C13))\l<cfgAlias>$143: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$145: T.class_of(C13) = alias <C C13>\l<statTemp>$141: Sorbet::Private::Static::Void = <cfgAlias>$143: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$145: T.class_of(C13))\l<cfgAlias>$149: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$151: T.class_of(C13) = alias <C C13>\l<statTemp>$147: Sorbet::Private::Static::Void = <cfgAlias>$149: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$151: T.class_of(C13))\l<cfgAlias>$154: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$156: T.class_of(C13) = alias <C C13>\l<statTemp>$152: Sorbet::Private::Static::Void = <cfgAlias>$154: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$156: T.class_of(C13))\l<cfgAlias>$160: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$162: T.class_of(C13) = alias <C C13>\l<statTemp>$158: Sorbet::Private::Static::Void = <cfgAlias>$160: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$162: T.class_of(C13))\l<cfgAlias>$165: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$167: T.class_of(C13) = alias <C C13>\l<statTemp>$163: Sorbet::Private::Static::Void = <cfgAlias>$165: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$167: T.class_of(C13))\l<cfgAlias>$171: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$173: T.class_of(C13) = alias <C C13>\l<statTemp>$169: Sorbet::Private::Static::Void = <cfgAlias>$171: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$173: T.class_of(C13))\l<cfgAlias>$176: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$178: T.class_of(C13) = alias <C C13>\l<statTemp>$174: Sorbet::Private::Static::Void = <cfgAlias>$176: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$178: T.class_of(C13))\l<cfgAlias>$182: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$184: T.class_of(C13) = alias <C C13>\l<statTemp>$180: Sorbet::Private::Static::Void = <cfgAlias>$182: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$184: T.class_of(C13))\l<cfgAlias>$187: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$189: T.class_of(C13) = alias <C C13>\l<statTemp>$185: Sorbet::Private::Static::Void = <cfgAlias>$187: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$189: T.class_of(C13))\l<cfgAlias>$193: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$195: T.class_of(C13) = alias <C C13>\l<statTemp>$191: Sorbet::Private::Static::Void = <cfgAlias>$193: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$195: T.class_of(C13))\l<cfgAlias>$198: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$200: T.class_of(C13) = alias <C C13>\l<statTemp>$196: Sorbet::Private::Static::Void = <cfgAlias>$198: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$200: T.class_of(C13))\l<cfgAlias>$204: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$206: T.class_of(C13) = alias <C C13>\l<statTemp>$202: Sorbet::Private::Static::Void = <cfgAlias>$204: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$206: T.class_of(C13))\l<cfgAlias>$209: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$211: T.class_of(C13) = alias <C C13>\l<statTemp>$207: Sorbet::Private::Static::Void = <cfgAlias>$209: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$211: T.class_of(C13))\l<cfgAlias>$215: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$217: T.class_of(C14) = alias <C C14>\l<statTemp>$213: Sorbet::Private::Static::Void = <cfgAlias>$215: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$217: T.class_of(C14))\l<cfgAlias>$220: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$222: T.class_of(C14) = alias <C C14>\l<statTemp>$218: Sorbet::Private::Static::Void = <cfgAlias>$220: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$222: T.class_of(C14))\l<cfgAlias>$226: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$228: T.class_of(C15) = alias <C C15>\l<statTemp>$224: Sorbet::Private::Static::Void = <cfgAlias>$226: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$228: T.class_of(C15))\l<cfgAlias>$231: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$233: T.class_of(C15) = alias <C C15>\l<statTemp>$229: Sorbet::Private::Static::Void = <cfgAlias>$231: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$233: T.class_of(C15))\l<cfgAlias>$237: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$239: T.class_of(C16) = alias <C C16>\l<statTemp>$235: Sorbet::Private::Static::Void = <cfgAlias>$237: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$239: T.class_of(C16))\l<cfgAlias>$242: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$244: T.class_of(C16) = alias <C C16>\l<statTemp>$240: Sorbet::Private::Static::Void = <cfgAlias>$242: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$244: T.class_of(C16))\l<cfgAlias>$248: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$250: T.class_of(C17) = alias <C C17>\l<statTemp>$246: Sorbet::Private::Static::Void = <cfgAlias>$248: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$250: T.class_of(C17))\l<cfgAlias>$253: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$255: T.class_of(C17) = alias <C C17>\l<statTemp>$251: Sorbet::Private::Static::Void = <cfgAlias>$253: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$255: T.class_of(C17))\l<cfgAlias>$259: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$261: T.class_of(C18) = alias <C C18>\l<statTemp>$257: Sorbet::Private::Static::Void = <cfgAlias>$259: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$261: T.class_of(C18))\l<cfgAlias>$264: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$266: T.class_of(C18) = alias <C C18>\l<statTemp>$262: Sorbet::Private::Static::Void = <cfgAlias>$264: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$266: T.class_of(C18))\l<cfgAlias>$270: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$272: T.class_of(C19) = alias <C C19>\l<statTemp>$268: Sorbet::Private::Static::Void = <cfgAlias>$270: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$272: T.class_of(C19))\l<cfgAlias>$275: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$277: T.class_of(C19) = alias <C C19>\l<statTemp>$273: Sorbet::Private::Static::Void = <cfgAlias>$275: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$277: T.class_of(C19))\l<cfgAlias>$281: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$283: T.class_of(C20) = alias <C C20>\l<statTemp>$279: Sorbet::Private::Static::Void = <cfgAlias>$281: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$283: T.class_of(C20))\l<cfgAlias>$286: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$288: T.class_of(C20) = alias <C C20>\l<statTemp>$284: Sorbet::Private::Static::Void = <cfgAlias>$286: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$288: T.class_of(C20))\l<cfgAlias>$292: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$294: T.class_of(A) = alias <C A>\l<statTemp>$290: Sorbet::Private::Static::Void = <cfgAlias>$292: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$294: T.class_of(A))\l<cfgAlias>$297: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$299: T.class_of(A) = alias <C A>\l<statTemp>$295: Sorbet::Private::Static::Void = <cfgAlias>$297: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$299: T.class_of(A))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<cfgAlias>$6: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$8: T.class_of(C1) = alias <C C1>\l<statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$8: T.class_of(C1))\l<cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$13: T.class_of(C1) = alias <C C1>\l<statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$13: T.class_of(C1))\l<cfgAlias>$17: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$19: T.class_of(C2) = alias <C C2>\l<statTemp>$15: Sorbet::Private::Static::Void = <cfgAlias>$17: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$19: T.class_of(C2))\l<cfgAlias>$22: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$24: T.class_of(C2) = alias <C C2>\l<statTemp>$20: Sorbet::Private::Static::Void = <cfgAlias>$22: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$24: T.class_of(C2))\l<cfgAlias>$28: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$30: T.class_of(C3) = alias <C C3>\l<statTemp>$26: Sorbet::Private::Static::Void = <cfgAlias>$28: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$30: T.class_of(C3))\l<cfgAlias>$33: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$35: T.class_of(C3) = alias <C C3>\l<statTemp>$31: Sorbet::Private::Static::Void = <cfgAlias>$33: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$35: T.class_of(C3))\l<cfgAlias>$39: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$41: T.class_of(C4) = alias <C C4>\l<statTemp>$37: Sorbet::Private::Static::Void = <cfgAlias>$39: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$41: T.class_of(C4))\l<cfgAlias>$44: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$46: T.class_of(C4) = alias <C C4>\l<statTemp>$42: Sorbet::Private::Static::Void = <cfgAlias>$44: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$46: T.class_of(C4))\l<cfgAlias>$50: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$52: T.class_of(C5) = alias <C C5>\l<statTemp>$48: Sorbet::Private::Static::Void = <cfgAlias>$50: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$52: T.class_of(C5))\l<cfgAlias>$55: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$57: T.class_of(C5) = alias <C C5>\l<statTemp>$53: Sorbet::Private::Static::Void = <cfgAlias>$55: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$57: T.class_of(C5))\l<cfgAlias>$61: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$63: T.class_of(C6) = alias <C C6>\l<statTemp>$59: Sorbet::Private::Static::Void = <cfgAlias>$61: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$63: T.class_of(C6))\l<cfgAlias>$66: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$68: T.class_of(C6) = alias <C C6>\l<statTemp>$64: Sorbet::Private::Static::Void = <cfgAlias>$66: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$68: T.class_of(C6))\l<cfgAlias>$72: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$74: T.class_of(C7) = alias <C C7>\l<statTemp>$70: Sorbet::Private::Static::Void = <cfgAlias>$72: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$74: T.class_of(C7))\l<cfgAlias>$77: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$79: T.class_of(C7) = alias <C C7>\l<statTemp>$75: Sorbet::Private::Static::Void = <cfgAlias>$77: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$79: T.class_of(C7))\l<cfgAlias>$83: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$85: T.class_of(C8) = alias <C C8>\l<statTemp>$81: Sorbet::Private::Static::Void = <cfgAlias>$83: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$85: T.class_of(C8))\l<cfgAlias>$88: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$90: T.class_of(C8) = alias <C C8>\l<statTemp>$86: Sorbet::Private::Static::Void = <cfgAlias>$88: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$90: T.class_of(C8))\l<cfgAlias>$94: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$96: T.class_of(C9) = alias <C C9>\l<statTemp>$92: Sorbet::Private::Static::Void = <cfgAlias>$94: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$96: T.class_of(C9))\l<cfgAlias>$99: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$101: T.class_of(C9) = alias <C C9>\l<statTemp>$97: Sorbet::Private::Static::Void = <cfgAlias>$99: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$101: T.class_of(C9))\l<cfgAlias>$105: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$107: T.class_of(C10) = alias <C C10>\l<statTemp>$103: Sorbet::Private::Static::Void = <cfgAlias>$105: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$107: T.class_of(C10))\l<cfgAlias>$110: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$112: T.class_of(C10) = alias <C C10>\l<statTemp>$108: Sorbet::Private::Static::Void = <cfgAlias>$110: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$112: T.class_of(C10))\l<cfgAlias>$116: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$118: T.class_of(C11) = alias <C C11>\l<statTemp>$114: Sorbet::Private::Static::Void = <cfgAlias>$116: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$118: T.class_of(C11))\l<cfgAlias>$121: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$123: T.class_of(C11) = alias <C C11>\l<statTemp>$119: Sorbet::Private::Static::Void = <cfgAlias>$121: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$123: T.class_of(C11))\l<cfgAlias>$127: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$129: T.class_of(C12) = alias <C C12>\l<statTemp>$125: Sorbet::Private::Static::Void = <cfgAlias>$127: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$129: T.class_of(C12))\l<cfgAlias>$132: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$134: T.class_of(C12) = alias <C C12>\l<statTemp>$130: Sorbet::Private::Static::Void = <cfgAlias>$132: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$134: T.class_of(C12))\l<cfgAlias>$138: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$140: T.class_of(C13) = alias <C C13>\l<statTemp>$136: Sorbet::Private::Static::Void = <cfgAlias>$138: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$140: T.class_of(C13))\l<cfgAlias>$143: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$145: T.class_of(C13) = alias <C C13>\l<statTemp>$141: Sorbet::Private::Static::Void = <cfgAlias>$143: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$145: T.class_of(C13))\l<cfgAlias>$149: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$151: T.class_of(C13) = alias <C C13>\l<statTemp>$147: Sorbet::Private::Static::Void = <cfgAlias>$149: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$151: T.class_of(C13))\l<cfgAlias>$154: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$156: T.class_of(C13) = alias <C C13>\l<statTemp>$152: Sorbet::Private::Static::Void = <cfgAlias>$154: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$156: T.class_of(C13))\l<cfgAlias>$160: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$162: T.class_of(C13) = alias <C C13>\l<statTemp>$158: Sorbet::Private::Static::Void = <cfgAlias>$160: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$162: T.class_of(C13))\l<cfgAlias>$165: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$167: T.class_of(C13) = alias <C C13>\l<statTemp>$163: Sorbet::Private::Static::Void = <cfgAlias>$165: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$167: T.class_of(C13))\l<cfgAlias>$171: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$173: T.class_of(C13) = alias <C C13>\l<statTemp>$169: Sorbet::Private::Static::Void = <cfgAlias>$171: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$173: T.class_of(C13))\l<cfgAlias>$176: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$178: T.class_of(C13) = alias <C C13>\l<statTemp>$174: Sorbet::Private::Static::Void = <cfgAlias>$176: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$178: T.class_of(C13))\l<cfgAlias>$182: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$184: T.class_of(C13) = alias <C C13>\l<statTemp>$180: Sorbet::Private::Static::Void = <cfgAlias>$182: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$184: T.class_of(C13))\l<cfgAlias>$187: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$189: T.class_of(C13) = alias <C C13>\l<statTemp>$185: Sorbet::Private::Static::Void = <cfgAlias>$187: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$189: T.class_of(C13))\l<cfgAlias>$193: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$195: T.class_of(C13) = alias <C C13>\l<statTemp>$191: Sorbet::Private::Static::Void = <cfgAlias>$193: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$195: T.class_of(C13))\l<cfgAlias>$198: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$200: T.class_of(C13) = alias <C C13>\l<statTemp>$196: Sorbet::Private::Static::Void = <cfgAlias>$198: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$200: T.class_of(C13))\l<cfgAlias>$204: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$206: T.class_of(C13) = alias <C C13>\l<statTemp>$202: Sorbet::Private::Static::Void = <cfgAlias>$204: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$206: T.class_of(C13))\l<cfgAlias>$209: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$211: T.class_of(C13) = alias <C C13>\l<statTemp>$207: Sorbet::Private::Static::Void = <cfgAlias>$209: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$211: T.class_of(C13))\l<cfgAlias>$215: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$217: T.class_of(C14) = alias <C C14>\l<statTemp>$213: Sorbet::Private::Static::Void = <cfgAlias>$215: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$217: T.class_of(C14))\l<cfgAlias>$220: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$222: T.class_of(C14) = alias <C C14>\l<statTemp>$218: Sorbet::Private::Static::Void = <cfgAlias>$220: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$222: T.class_of(C14))\l<cfgAlias>$226: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$228: T.class_of(C15) = alias <C C15>\l<statTemp>$224: Sorbet::Private::Static::Void = <cfgAlias>$226: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$228: T.class_of(C15))\l<cfgAlias>$231: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$233: T.class_of(C15) = alias <C C15>\l<statTemp>$229: Sorbet::Private::Static::Void = <cfgAlias>$231: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$233: T.class_of(C15))\l<cfgAlias>$237: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$239: T.class_of(C16) = alias <C C16>\l<statTemp>$235: Sorbet::Private::Static::Void = <cfgAlias>$237: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$239: T.class_of(C16))\l<cfgAlias>$242: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$244: T.class_of(C16) = alias <C C16>\l<statTemp>$240: Sorbet::Private::Static::Void = <cfgAlias>$242: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$244: T.class_of(C16))\l<cfgAlias>$248: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$250: T.class_of(C17) = alias <C C17>\l<statTemp>$246: Sorbet::Private::Static::Void = <cfgAlias>$248: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$250: T.class_of(C17))\l<cfgAlias>$253: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$255: T.class_of(C17) = alias <C C17>\l<statTemp>$251: Sorbet::Private::Static::Void = <cfgAlias>$253: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$255: T.class_of(C17))\l<cfgAlias>$259: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$261: T.class_of(C18) = alias <C C18>\l<statTemp>$257: Sorbet::Private::Static::Void = <cfgAlias>$259: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$261: T.class_of(C18))\l<cfgAlias>$264: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$266: T.class_of(C18) = alias <C C18>\l<statTemp>$262: Sorbet::Private::Static::Void = <cfgAlias>$264: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$266: T.class_of(C18))\l<cfgAlias>$270: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$272: T.class_of(C19) = alias <C C19>\l<statTemp>$268: Sorbet::Private::Static::Void = <cfgAlias>$270: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$272: T.class_of(C19))\l<cfgAlias>$275: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$277: T.class_of(C19) = alias <C C19>\l<statTemp>$273: Sorbet::Private::Static::Void = <cfgAlias>$275: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$277: T.class_of(C19))\l<cfgAlias>$281: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$283: T.class_of(C20) = alias <C C20>\l<statTemp>$279: Sorbet::Private::Static::Void = <cfgAlias>$281: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$283: T.class_of(C20))\l<cfgAlias>$286: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$288: T.class_of(C20) = alias <C C20>\l<statTemp>$284: Sorbet::Private::Static::Void = <cfgAlias>$286: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$288: T.class_of(C20))\l<cfgAlias>$292: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$294: T.class_of(A) = alias <C A>\l<statTemp>$290: Sorbet::Private::Static::Void = <cfgAlias>$292: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$294: T.class_of(A))\l<cfgAlias>$297: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$299: T.class_of(A) = alias <C A>\l<statTemp>$295: Sorbet::Private::Static::Void = <cfgAlias>$297: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$299: T.class_of(A))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -26,7 +26,7 @@ subgraph "cluster_::<Class:C1>#<static-init>" {
     "bb::<Class:C1>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C1) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C1>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C1>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C1) = cast(<self>: NilClass, T.class_of(C1));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C1>#<static-init>_0" -> "bb::<Class:C1>#<static-init>_1" [style="bold"];
@@ -46,7 +46,7 @@ subgraph "cluster_::<Class:C2>#<static-init>" {
     "bb::<Class:C2>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C2) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C2>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C2>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C2) = cast(<self>: NilClass, T.class_of(C2));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C2>#<static-init>_0" -> "bb::<Class:C2>#<static-init>_1" [style="bold"];
@@ -66,7 +66,7 @@ subgraph "cluster_::<Class:C3>#<static-init>" {
     "bb::<Class:C3>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C3) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C3>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C3>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C3) = cast(<self>: NilClass, T.class_of(C3));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C3>#<static-init>_0" -> "bb::<Class:C3>#<static-init>_1" [style="bold"];
@@ -86,7 +86,7 @@ subgraph "cluster_::<Class:C4>#<static-init>" {
     "bb::<Class:C4>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C4) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C4>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C4>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C4) = cast(<self>: NilClass, T.class_of(C4));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C4>#<static-init>_0" -> "bb::<Class:C4>#<static-init>_1" [style="bold"];
@@ -106,7 +106,7 @@ subgraph "cluster_::<Class:C5>#<static-init>" {
     "bb::<Class:C5>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C5) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C5>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C5>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C5) = cast(<self>: NilClass, T.class_of(C5));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C5>#<static-init>_0" -> "bb::<Class:C5>#<static-init>_1" [style="bold"];
@@ -126,7 +126,7 @@ subgraph "cluster_::<Class:C6>#<static-init>" {
     "bb::<Class:C6>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C6) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C6>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C6>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C6) = cast(<self>: NilClass, T.class_of(C6));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C6>#<static-init>_0" -> "bb::<Class:C6>#<static-init>_1" [style="bold"];
@@ -146,7 +146,7 @@ subgraph "cluster_::<Class:C7>#<static-init>" {
     "bb::<Class:C7>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C7) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C7>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C7>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C7) = cast(<self>: NilClass, T.class_of(C7));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C7>#<static-init>_0" -> "bb::<Class:C7>#<static-init>_1" [style="bold"];
@@ -166,7 +166,7 @@ subgraph "cluster_::<Class:C8>#<static-init>" {
     "bb::<Class:C8>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C8) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C8>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C8>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C8) = cast(<self>: NilClass, T.class_of(C8));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C8>#<static-init>_0" -> "bb::<Class:C8>#<static-init>_1" [style="bold"];
@@ -186,7 +186,7 @@ subgraph "cluster_::<Class:C9>#<static-init>" {
     "bb::<Class:C9>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C9) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C9>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C9>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C9) = cast(<self>: NilClass, T.class_of(C9));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C9>#<static-init>_0" -> "bb::<Class:C9>#<static-init>_1" [style="bold"];
@@ -206,7 +206,7 @@ subgraph "cluster_::<Class:C10>#<static-init>" {
     "bb::<Class:C10>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C10) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C10>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C10>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C10) = cast(<self>: NilClass, T.class_of(C10));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C10>#<static-init>_0" -> "bb::<Class:C10>#<static-init>_1" [style="bold"];
@@ -226,7 +226,7 @@ subgraph "cluster_::<Class:C11>#<static-init>" {
     "bb::<Class:C11>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C11) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C11>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C11>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C11) = cast(<self>: NilClass, T.class_of(C11));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C11>#<static-init>_0" -> "bb::<Class:C11>#<static-init>_1" [style="bold"];
@@ -246,7 +246,7 @@ subgraph "cluster_::<Class:C12>#<static-init>" {
     "bb::<Class:C12>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C12) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C12>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C12>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C12) = cast(<self>: NilClass, T.class_of(C12));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C12>#<static-init>_0" -> "bb::<Class:C12>#<static-init>_1" [style="bold"];
@@ -266,7 +266,7 @@ subgraph "cluster_::<Class:C13>#<static-init>" {
     "bb::<Class:C13>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
@@ -286,7 +286,7 @@ subgraph "cluster_::<Class:C13>#<static-init>" {
     "bb::<Class:C13>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
@@ -306,7 +306,7 @@ subgraph "cluster_::<Class:C13>#<static-init>" {
     "bb::<Class:C13>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
@@ -326,7 +326,7 @@ subgraph "cluster_::<Class:C13>#<static-init>" {
     "bb::<Class:C13>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
@@ -346,7 +346,7 @@ subgraph "cluster_::<Class:C13>#<static-init>" {
     "bb::<Class:C13>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
@@ -366,7 +366,7 @@ subgraph "cluster_::<Class:C13>#<static-init>" {
     "bb::<Class:C13>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
@@ -386,7 +386,7 @@ subgraph "cluster_::<Class:C13>#<static-init>" {
     "bb::<Class:C13>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
@@ -406,7 +406,7 @@ subgraph "cluster_::<Class:C14>#<static-init>" {
     "bb::<Class:C14>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C14) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C14>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C14>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C14) = cast(<self>: NilClass, T.class_of(C14));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C14>#<static-init>_0" -> "bb::<Class:C14>#<static-init>_1" [style="bold"];
@@ -426,7 +426,7 @@ subgraph "cluster_::<Class:C15>#<static-init>" {
     "bb::<Class:C15>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C15) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C15>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C15>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C15) = cast(<self>: NilClass, T.class_of(C15));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C15>#<static-init>_0" -> "bb::<Class:C15>#<static-init>_1" [style="bold"];
@@ -446,7 +446,7 @@ subgraph "cluster_::<Class:C16>#<static-init>" {
     "bb::<Class:C16>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C16) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C16>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C16>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C16) = cast(<self>: NilClass, T.class_of(C16));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C16>#<static-init>_0" -> "bb::<Class:C16>#<static-init>_1" [style="bold"];
@@ -466,7 +466,7 @@ subgraph "cluster_::<Class:C17>#<static-init>" {
     "bb::<Class:C17>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C17) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C17>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C17>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C17) = cast(<self>: NilClass, T.class_of(C17));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C17>#<static-init>_0" -> "bb::<Class:C17>#<static-init>_1" [style="bold"];
@@ -486,7 +486,7 @@ subgraph "cluster_::<Class:C18>#<static-init>" {
     "bb::<Class:C18>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C18) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C18>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C18>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C18) = cast(<self>: NilClass, T.class_of(C18));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C18>#<static-init>_0" -> "bb::<Class:C18>#<static-init>_1" [style="bold"];
@@ -506,7 +506,7 @@ subgraph "cluster_::<Class:C19>#<static-init>" {
     "bb::<Class:C19>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C19) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C19>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C19>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C19) = cast(<self>: NilClass, T.class_of(C19));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C19>#<static-init>_0" -> "bb::<Class:C19>#<static-init>_1" [style="bold"];
@@ -526,7 +526,7 @@ subgraph "cluster_::<Class:C20>#<static-init>" {
     "bb::<Class:C20>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C20) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C20>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C20>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C20) = cast(<self>: NilClass, T.class_of(C20));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C20>#<static-init>_0" -> "bb::<Class:C20>#<static-init>_1" [style="bold"];
@@ -546,7 +546,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U A>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U A>> $1><C <U <AttachedClass>>>)\l  ]\l});\linvite: T.untyped = load_arg(invite)\l<statTemp>$6: Integer(1) = 1\l<ifTemp>$5: T::Boolean = <statTemp>$6: Integer(1).===(invite: T.untyped)\l<ifTemp>$5: T::Boolean\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));\linvite: T.untyped = load_arg(invite)\l<statTemp>$6: Integer(1) = 1\l<ifTemp>$5: T::Boolean = <statTemp>$6: Integer(1).===(invite: T.untyped)\l<ifTemp>$5: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_0" -> "bb::<Class:A>#send_beta_invitation_2" [style="bold"];
@@ -893,7 +893,7 @@ subgraph "cluster_::<Class:A>#<static-init>" {
     "bb::<Class:A>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U A>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U A>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:send_beta_invitation) = :send_beta_invitation\l<statTemp>$7: Symbol(:normal) = :normal\l<returnMethodTemp>$2: Symbol(:send_beta_invitation) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(A), <statTemp>$6: Symbol(:send_beta_invitation), <statTemp>$7: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:send_beta_invitation)\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));\l<cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:send_beta_invitation) = :send_beta_invitation\l<statTemp>$7: Symbol(:normal) = :normal\l<returnMethodTemp>$2: Symbol(:send_beta_invitation) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(A), <statTemp>$6: Symbol(:send_beta_invitation), <statTemp>$7: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:send_beta_invitation)\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#<static-init>_0" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
