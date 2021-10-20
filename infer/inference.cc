@@ -222,6 +222,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
         core::Loc madeBlockDead;
         int i = 0;
+        bool previousIsUnsafe = false;
         for (cfg::Binding &bind : bb->exprs) {
             i++;
             if (!current.isDead || !ctx.state.lspQuery.isEmpty()) {
@@ -239,6 +240,29 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                             e.setHeader("This code is untyped");
                             e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.", "typed: strong",
                                            "typed: strict");
+                        }
+                    }
+                }
+                if (cfg::isa_instruction<cfg::Send>(bind.value)) {
+                    if (cfg::InstructionPtr::cast<cfg::Send>(bind.value).fun.toString(ctx.state) == "unsafe") {
+                        previousIsUnsafe = true;
+                    }
+                    if (cfg::InstructionPtr::cast<cfg::Send>(bind.value).recv.type.isUntyped() && !previousIsUnsafe) {
+                        auto name = "";
+                        if (cfg::InstructionPtr::cast<cfg::Send>(bind.value)
+                                .recv.variable.isSyntheticTemporary(ctx.state, *cfg)) {
+                            name = "this expression";
+                        } else {
+                            name = cfg::InstructionPtr::cast<cfg::Send>(bind.value)
+                                       .recv.variable.toString(ctx.state, *cfg)
+                                       .c_str();
+                        }
+
+                        if (auto e = ctx.beginError(cfg::InstructionPtr::cast<cfg::Send>(bind.value).receiverLoc,
+                                                    core::errors::Infer::CallOnUntyped)) {
+                            e.setHeader("`{}` is not guaranteed to exists on `{}`, as it's `T.untyped`",
+                                        cfg::InstructionPtr::cast<cfg::Send>(bind.value).fun.toString(ctx.state), name);
+                            previousIsUnsafe = false;
                         }
                     }
                 }

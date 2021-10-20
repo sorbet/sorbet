@@ -130,7 +130,11 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
             tags.push_back(DiagnosticTag::Unnecessary);
             diagnostic->tags = move(tags);
         }
-        diagnostic->severity = DiagnosticSeverity::Error;
+        if (error->what.code == sorbet::core::errors::Infer::CallOnUntyped.code) {
+            diagnostic->severity = DiagnosticSeverity::Warning;
+        } else {
+            diagnostic->severity = DiagnosticSeverity::Error;
+        }
 
         if (!error->autocorrects.empty()) {
             diagnostic->message += " (fix available)";
