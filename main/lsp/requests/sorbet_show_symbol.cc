@@ -35,7 +35,14 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
             sym = d->symbol;
         } else if (auto f = resp->isField()) {
             sym = f->symbol;
-        } else {
+        } else if (auto s = resp->isSend()) {
+            if (s->dispatchResult->secondary == nullptr) {
+                // Multiple results not currently supported.
+                sym = s->dispatchResult->main.method;
+            }
+        }
+
+        if (!sym.exists()) {
             // At time of writing, we decided that it only makes sense to respond with information in
             // this request when there's a Symbol (in the GlobalState sense), and not to respond
             // with results for say local variables and other things not in the symbol table.

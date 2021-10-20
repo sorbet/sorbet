@@ -40,9 +40,8 @@ module Outer
         #             ^ show-symbol: T.class_of(Outer::Middle::Inner)#@foo
       end
 
-      # TODO(jez) We should probably do method calls too, but I was lazy
       foo
-      # ^ show-symbol: null
+      # ^ show-symbol: Outer::Middle::Inner.foo
 
       puts(:foo)
       #    ^ show-symbol: null
