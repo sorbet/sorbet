@@ -609,6 +609,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             makeField("workspace", makeOptional(WorkspaceOptions)),
             // Unused in Sorbet.
             // makeField("experimental", makeOptional(JSONAny)),
+            // -- Sorbet extensions --
+            makeField("sorbetShowSymbolProvider", makeOptional(JSONBool)),
         },
         classTypes);
 
