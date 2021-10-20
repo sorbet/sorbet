@@ -3126,13 +3126,13 @@ public:
 
         const auto finder = [](const auto &e) { return e->what == core::errors::Infer::MethodArgumentMismatch; };
         if (absl::c_count_if(res.main.errors, finder) != 1) {
-            // Want exactly one, just just at least one
+            // Want exactly one, not at least one
             return;
         }
 
         const auto iter = absl::c_find_if(res.main.errors, finder);
-        ENFORCE(iter != res.main.errors.end(), "c_count above should have guarannteed a result");
-        const auto argMismatchErrorIdx = iter - res.main.errors.begin();
+        ENFORCE(iter != res.main.errors.end(), "c_count above should have guaranteed a result");
+        const auto argMismatchErrorIdx = std::distance(res.main.errors.begin(), iter);
         const auto argMismatchError = std::move(*iter); // will drop when going out of scope (after we replace it)
 
         auto dispatchArgs = DispatchArgs{
