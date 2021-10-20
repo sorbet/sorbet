@@ -247,12 +247,12 @@ string CFG::toTextualString(const core::GlobalState &gs) const {
         if (!basicBlock->backEdges.empty()) {
             fmt::format_to(std::back_inserter(buf), "# backedges\n");
             for (auto *backEdge : basicBlock->backEdges) {
-                fmt::format_to(std::back_inserter(buf), "#  bb{}(rubyBlockId={})\n", backEdge->id,
+                fmt::format_to(std::back_inserter(buf), "# - bb{}(rubyBlockId={})\n", backEdge->id,
                                backEdge->rubyBlockId);
             }
         }
 
-        fmt::format_to(std::back_inserter(buf), "{}", basicBlock->toTextualString(gs, *this));
+        fmt::format_to(std::back_inserter(buf), "{}\n", basicBlock->toTextualString(gs, *this));
     }
     fmt::format_to(std::back_inserter(buf), "}}");
     return to_string(buf);
@@ -326,12 +326,20 @@ string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) 
         fmt::format_to(std::back_inserter(buf), "    {} = {}\n", exp.bind.toString(gs, cfg),
                        exp.value.toString(gs, cfg));
     }
-    fmt::format_to(std::back_inserter(buf), "    {}", this->bexit.cond.toString(gs, cfg));
+
+    // if (this->variable == LocalRef::unconditional() || this->type == nullptr) {
+    //     return ;
+    // } else {
+    //     return fmt::format("{}: {}", this->variable.toString(gs, cfg), );
+    // }
+    // fmt::format_to(std::back_inserter(buf), "    {} -> ", this->bexit.cond.toString(gs, cfg));
     if (this->bexit.thenb == this->bexit.elseb) {
-        fmt::format_to(std::back_inserter(buf), " -> bb{}\n\n", this->bexit.thenb->id);
+        fmt::format_to(std::back_inserter(buf), "    {} -> bb{}\n", this->bexit.cond.variable.toString(gs, cfg),
+                       this->bexit.thenb->id);
     } else {
-        fmt::format_to(std::back_inserter(buf), " ? -> bb{} : -> bb{}\n\n", this->bexit.thenb->id,
-                       this->bexit.elseb->id);
+        fmt::format_to(std::back_inserter(buf), "    {} -> ({} ? bb{} : bb{})\n",
+                       this->bexit.cond.variable.toString(gs, cfg), this->bexit.cond.type.show(gs),
+                       this->bexit.thenb->id, this->bexit.elseb->id);
     }
     return to_string(buf);
 }
