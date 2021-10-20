@@ -327,12 +327,6 @@ string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) 
                        exp.value.toString(gs, cfg));
     }
 
-    // if (this->variable == LocalRef::unconditional() || this->type == nullptr) {
-    //     return ;
-    // } else {
-    //     return fmt::format("{}: {}", this->variable.toString(gs, cfg), );
-    // }
-    // fmt::format_to(std::back_inserter(buf), "    {} -> ", this->bexit.cond.toString(gs, cfg));
     if (this->bexit.thenb == this->bexit.elseb) {
         fmt::format_to(std::back_inserter(buf), "    {} -> bb{}\n", this->bexit.cond.variable.toString(gs, cfg),
                        this->bexit.thenb->id);
