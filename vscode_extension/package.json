@@ -1,0 +1,313 @@
+{
+  "name": "sorbet-vscode-extension",
+  "displayName": "Ruby Sorbet",
+  "description": "Ruby IDE features, powered by Sorbet.",
+  "author": "#sorbet-extension",
+  "license": "UNLICENSED",
+  "version": "0.3.6",
+  "publisher": "stripe",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sorbet/sorbet"
+  },
+  "engines": {
+    "vscode": "^1.43.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "ruby",
+    "sorbet",
+    "language-server"
+  ],
+  "activationEvents": [
+    "onCommand:sorbet.configure",
+    "onCommand:sorbet.disable",
+    "onCommand:sorbet.enable",
+    "onCommand:sorbet.restart",
+    "onCommand:sorbet.showOutput",
+    "onLanguage:ruby",
+    "workspaceContains:sorbet/*"
+  ],
+  "languages": [
+    {
+      "id": "ruby",
+      "extensions": [
+        ".rb",
+        ".rbi",
+        ".srb"
+      ],
+      "aliases": [
+        "Ruby"
+      ]
+    }
+  ],
+  "main": "./out/src/extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "sorbet.configure",
+        "title": "Configure",
+        "category": "Sorbet"
+      },
+      {
+        "command": "sorbet.disable",
+        "title": "Disable",
+        "category": "Sorbet"
+      },
+      {
+        "command": "sorbet.enable",
+        "title": "Enable",
+        "category": "Sorbet"
+      },
+      {
+        "command": "sorbet.restart",
+        "title": "Restart",
+        "category": "Sorbet"
+      },
+      {
+        "command": "sorbet.showOutput",
+        "title": "Show Output",
+        "category": "Sorbet"
+      }
+    ],
+    "configuration": {
+      "title": "Sorbet",
+      "properties": {
+        "sorbet.enabled": {
+          "description": "Enable Sorbet Ruby IDE features",
+          "type": "boolean"
+        },
+        "sorbet.selectedLspConfigId": {
+          "description": "The default configuration to use from `sorbet.userLspConfigs` or `sorbet.lspConfigs`.  If unset, defaults to the first item in `sorbet.userLspConfigs` or `sorbet.lspConfigs`.",
+          "type": "string"
+        },
+        "sorbet.lspConfigs": {
+          "description": "Standard Ruby LSP configurations.  If you commit your VSCode settings to source control, you probably want to commit *this* setting, not `sorbet.userLspConfigs`.",
+          "type": "array",
+          "default": [
+            {
+              "id": "stable",
+              "name": "Sorbet",
+              "description": "Stable Sorbet Ruby IDE features",
+              "cwd": "${workspaceFolder}",
+              "command": [
+                "bundle",
+                "exec",
+                "srb",
+                "typecheck",
+                "--lsp"
+              ]
+            },
+            {
+              "id": "beta",
+              "name": "Sorbet (Beta)",
+              "description": "Beta Sorbet Ruby IDE features",
+              "cwd": "${workspaceFolder}",
+              "command": [
+                "bundle",
+                "exec",
+                "srb",
+                "typecheck",
+                "--lsp",
+                "--enable-all-beta-lsp-features"
+              ]
+            },
+            {
+              "id": "experimental",
+              "name": "Sorbet (Experimental)",
+              "description": "Experimental Sorbet Ruby IDE features (warning: crashy, for developers only)",
+              "cwd": "${workspaceFolder}",
+              "command": [
+                "bundle",
+                "exec",
+                "srb",
+                "typecheck",
+                "--lsp",
+                "--enable-all-experimental-lsp-features"
+              ]
+            }
+          ],
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "description",
+              "command"
+            ],
+            "properties": {
+              "id": {
+                "description": "See `sorbet.selectedLspConfigId`",
+                "type": "string"
+              },
+              "name": {
+                "description": "Short-form human-readable label for configuration",
+                "type": "string"
+              },
+              "description": {
+                "description": "Long-form human-readable description of configuration",
+                "type": "string"
+              },
+              "cwd": {
+                "description": "Current working directory when launching sorbet",
+                "type": "string",
+                "format": "uri-reference",
+                "default": "${workspaceFolder}"
+              },
+              "command": {
+                "description": "Full command line to invoke sorbet",
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "sorbet.userLspConfigs": {
+          "description": "Custom user LSP configurations that supplement `sorbet.lspConfigs` (and override configurations with the same id).  If you commit your VSCode settings to source control, you probably want to commit `sorbet.lspConfigs`, not this value.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "description",
+              "command"
+            ],
+            "properties": {
+              "id": {
+                "description": "See `sorbet.selectedLspConfigId`",
+                "type": "string"
+              },
+              "name": {
+                "description": "Short-form human-readable label for configuration",
+                "type": "string"
+              },
+              "description": {
+                "description": "Long-form human-readable description of configuration",
+                "type": "string"
+              },
+              "cwd": {
+                "description": "Current working directory when launching sorbet",
+                "type": "string",
+                "format": "uri-reference",
+                "default": "${workspaceFolder}"
+              },
+              "command": {
+                "description": "Full command line to invoke sorbet",
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "default": {
+              "id": "my-custom-configuration",
+              "name": "My Custom Sorbet Configuration",
+              "description": "A longer description of this Sorbet Configuration for use in hover text",
+              "cwd": "${workspaceFolder}",
+              "command": [
+                "bundle",
+                "exec",
+                "srb",
+                "typecheck",
+                "--your",
+                "--flags",
+                "--here"
+              ]
+            }
+          }
+        },
+        "sorbet.revealOutputOnError": {
+          "type": "boolean",
+          "description": "Show the extension output window on errors.",
+          "default": false
+        },
+        "sorbet.configFilePatterns": {
+          "type": "array",
+          "description": "List of workspace file patterns that contribute to Sorbet's configuration.  Changes to any of those files should trigger a restart of any actively running Sorbet language server.",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/sorbet/config",
+            "**/Gemfile",
+            "**/Gemfile.lock"
+          ]
+        }
+      }
+    },
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "sorbet.configure",
+          "when": "editorLangId == ruby"
+        },
+        {
+          "command": "sorbet.disable",
+          "when": "editorLangId == ruby"
+        },
+        {
+          "command": "sorbet.enable",
+          "when": "editorLangId == ruby"
+        },
+        {
+          "command": "sorbet.restart",
+          "when": "editorLangId == ruby"
+        },
+        {
+          "command": "sorbet.showOutput",
+          "when": "editorLangId == ruby"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "integrity": "yarn-integrity",
+    "watch": "tsc -w -p ./",
+    "lint": "eslint --ext .ts ./src",
+    "prettier": "prettier --write 'src/**/*.ts'",
+    "test": "yarn compile && ./scripts/run_tests.sh .",
+    "test:ci": "node --preserve-symlinks-main ./out/scripts/runTests.js .",
+    "vscode-install": "yarn install && yarn compile && yarn vsce package --out sorbet.vsix && code --force --install-extension sorbet.vsix"
+  },
+  "dependencies": {
+    "async": "^2.3.0",
+    "elegant-spinner": "^2.0.0",
+    "lodash": "^4.17.3",
+    "minimatch": "^3.0.3",
+    "vscode-languageclient": "6.1.3"
+  },
+  "devDependencies": {
+    "@types/elegant-spinner": "^1.0.0",
+    "@types/glob": "^7.1.1",
+    "@types/lodash": "^4.14.144",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^10.11.7",
+    "@types/sinon": "^7.5.0",
+    "@types/vscode": "~1.43",
+    "@typescript-eslint/parser": "^2.7.0",
+    "eslint": "^5.9.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-eslint-comments": "^3.1.2",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-react": "^7.16.0",
+    "glob": "^7.1.4",
+    "mocha": "^6.2.0",
+    "mocha-junit-reporter": "^1.23.1",
+    "power-assert": "^1.2.0",
+    "prettier": "^1.19.1",
+    "sinon": "^7.5.0",
+    "typescript": "^3.7.2",
+    "vsce": "~1.75",
+    "vscode-languageserver": "^6.1.1",
+    "vscode-test": "^1.0.2"
+  }
+}
