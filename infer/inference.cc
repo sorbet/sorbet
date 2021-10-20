@@ -222,6 +222,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
         core::Loc madeBlockDead;
         int i = 0;
+        string previousFunctionName = "";
         for (cfg::Binding &bind : bb->exprs) {
             i++;
             if (!current.isDead || !ctx.state.lspQuery.isEmpty()) {
@@ -241,6 +242,26 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                                            "typed: strict");
                         }
                     }
+                }
+                if (cfg::isa_instruction<cfg::Send>(bind.value)) {
+                    auto sendValue = &cfg::InstructionPtr::cast<cfg::Send>(bind.value);
+                    auto functionName = sendValue->fun.toString(ctx.state);
+                    if (functionName != "is_a?" && functionName != "prop_get_logic") {
+                        if (sendValue->recv.type.isUntyped() && previousFunctionName != "unsafe") {
+                            auto name = "";
+                            if (sendValue->recv.variable.isSyntheticTemporary(ctx.state, *cfg)) {
+                                name = "this expression";
+                            } else {
+                                name = sendValue->recv.variable.toString(ctx.state, *cfg).c_str();
+                            }
+
+                            if (auto e = ctx.beginError(sendValue->receiverLoc, core::errors::Infer::CallOnUntyped)) {
+                                e.setHeader("`{}` is not guaranteed to exists on `{}`, as it's `T.untyped`",
+                                            sendValue->fun.toString(ctx.state), name);
+                            }
+                        }
+                    }
+                    previousFunctionName = functionName;
                 }
                 ENFORCE(bind.bind.type);
                 bind.bind.type.sanityCheck(ctx);

@@ -12,7 +12,7 @@ class MyStruct < T::Struct
   sig {override.params(struct: T::Hash[String, T.untyped]).returns(MyStruct)}
   def self.from_hash(struct)
     if struct.key?('hash_by')
-      struct = struct.merge({'hash_by' => struct['hash_by'].to_sym})
+      struct = struct.merge({'hash_by' => T.unsafe(struct['hash_by']).to_sym})
     end
     super(struct)
   end
