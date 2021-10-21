@@ -61,7 +61,6 @@ class T::Props::Decorator
   VALID_RULE_KEYS = T.let(%i[
     enum
     foreign
-    foreign_hint_only
     ifunset
     immutable
     override
@@ -359,12 +358,7 @@ class T::Props::Decorator
     # get at the property (e.g., Chalk::ODM::Document exposes `get` and `set`).
     define_getter_and_setter(name, rules) unless rules[:without_accessors]
 
-    if rules[:foreign] && rules[:foreign_hint_only]
-      raise ArgumentError.new(":foreign and :foreign_hint_only are mutually exclusive.")
-    end
-
     handle_foreign_option(name, cls, rules, rules[:foreign]) if rules[:foreign]
-    handle_foreign_hint_only_option(name, cls, rules[:foreign_hint_only]) if rules[:foreign_hint_only]
     handle_redaction_option(name, rules[:redaction]) if rules[:redaction]
   end
 
@@ -484,42 +478,6 @@ class T::Props::Decorator
     end
   end
 
-  sig do
-    params(
-      prop_name: Symbol,
-      prop_cls: Module,
-      foreign_hint_only: T.untyped,
-    )
-    .void
-  end
-  private def handle_foreign_hint_only_option(prop_name, prop_cls, foreign_hint_only)
-    if ![String, Array].include?(prop_cls) && !prop_cls.is_a?(T::Props::CustomType)
-      raise ArgumentError.new(
-        "`foreign_hint_only` can only be used with String or Array prop types"
-      )
-    end
-
-    validate_foreign_option(
-      :foreign_hint_only, foreign_hint_only,
-      valid_type_msg: "an individual or array of a model class, or a Proc returning such."
-    )
-
-    unless foreign_hint_only.is_a?(Proc)
-      T::Configuration.soft_assert_handler(<<~MESSAGE, storytime: {prop: prop_name, value: foreign_hint_only}, notify: 'jerry')
-        Please use a Proc that returns a model class instead of the model class itself as the argument to `foreign_hint_only`. In other words:
-
-          instead of `prop :foo, String, foreign_hint_only: FooModel`
-          use `prop :foo, String, foreign_hint_only: -> {FooModel}`
-
-          OR
-
-          instead of `prop :foo, String, foreign_hint_only: [FooModel, BarModel]`
-          use `prop :foo, String, foreign_hint_only: -> {[FooModel, BarModel]}`
-
-      MESSAGE
-    end
-  end
-
   # checked(:never) - Rules hash is expensive to check
   sig do
     params(
@@ -598,8 +556,8 @@ class T::Props::Decorator
       # keep them from being lurky performance hits by issuing a bunch of un-batched DB queries.
       # We could potentially address that by porting over something like AmbiguousIDLoader.
       raise ArgumentError.new(
-        "Using an array for `foreign` is no longer supported. Instead, use `foreign_hint_only` " \
-        "with an array or a Proc that returns an array, e.g., foreign_hint_only: -> {[Foo, Bar]}"
+        "Using an array for `foreign` is no longer supported. Instead, please use a union type of " \
+        "token types for the prop type, e.g., T.any(Opus::Autogen::Tokens::FooModelToken, Opus::Autogen::Tokens::BarModelToken)"
       )
     end
 
