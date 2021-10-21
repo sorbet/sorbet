@@ -824,3 +824,17 @@ iter_retry:
     }
     return retval;
 }
+
+/* cf. vm_opt_aref */
+VALUE sorbet_vm_aref(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg) {
+    if (!SPECIAL_CONST_P(recv)) {
+        if (RBASIC_CLASS(recv) == rb_cHash && BASIC_OP_UNREDEFINED_P(BOP_AREF, HASH_REDEFINED_OP_FLAG)) {
+            return rb_hash_aref(recv, arg);
+        }
+    }
+    VALUE *sp = reg_cfp->sp;
+    *(sp + 0) = recv;
+    *(sp + 1) = arg;
+    reg_cfp->sp += 2;
+    return sorbet_callFuncWithCache(cache, VM_BLOCK_HANDLER_NONE);
+}

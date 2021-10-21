@@ -632,6 +632,45 @@ public:
     }
 } DefinedInstanceVar;
 
+class SquareBrackets : public NameBasedIntrinsicMethod {
+public:
+    SquareBrackets() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
+
+    // For cases where we don't have any type information, try to do something
+    // analogous to what the VM would do with the opt_aref instruction.
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto *send = mcctx.send;
+        if (send->args.size() != 1) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        }
+        // [] calls with blocks need to be handled differently.
+        if (mcctx.blk.has_value()) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        }
+        // If we had some kind of type information for the receiver, assume that we
+        // have already tested for a fast path earlier; this way we don't waste
+        // extra time doing another test that didn't work the first time.
+        if (!send->recv.type.isUntyped()) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        }
+
+        auto &cs = mcctx.cs;
+        auto &builder = mcctx.builder;
+        auto *cache = mcctx.getInlineCache();
+        auto *recv = mcctx.varGetRecv();
+        auto &args = mcctx.getStackArgs();
+        ENFORCE(args.size() == 1);
+
+        return builder.CreateCall(
+            cs.getFunction("sorbet_vm_aref"),
+            {Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId), cache, recv, args[0]});
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::squareBrackets()};
+    }
+} SquareBrackets;
+
 static const vector<CallCMethod> knownCMethods{
     {"<expand-splat>", "sorbet_expandSplatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::Array()},
@@ -665,7 +704,7 @@ vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
     vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineClassIntrinsic,  &IdentityIntrinsic,
                                                  &CallWithBlock,      &ExceptionRetry,        &BuildHash,
                                                  &CallWithSplat,      &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic,
-                                                 &DefinedClassVar,    &DefinedInstanceVar};
+                                                 &DefinedClassVar,    &DefinedInstanceVar,    &SquareBrackets};
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }

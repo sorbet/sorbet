@@ -193,6 +193,8 @@ SORBET_ALIVE(VALUE, sorbet_run_exception_handling,
 
 SORBET_ALIVE(VALUE, sorbet_rb_iterate,
              (VALUE(*body)(VALUE), VALUE data1, rb_block_call_func_t bl_proc, int minArgs, int maxArgs, VALUE data2));
+SORBET_ALIVE(VALUE, sorbet_vm_aref,
+             (rb_control_frame_t * cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg));
 
 // The next several functions exist to convert Ruby definitions into LLVM IR, and
 // are always inlined as a consequence.
