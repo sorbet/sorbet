@@ -1,3 +1,0 @@
-load("//dev/vscode_extensions/scripts:rules.bzl", "register_vscode_extension")
-
-register_vscode_extension(node_modules = "@vscode_sorbet_node_modules")

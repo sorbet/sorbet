@@ -5,7 +5,7 @@
   "author": "#sorbet-extension",
   "license": "UNLICENSED",
   "version": "0.3.6",
-  "publisher": "stripe",
+  "publisher": "sorbet",
   "repository": {
     "type": "git",
     "url": "https://github.com/sorbet/sorbet"
@@ -274,7 +274,8 @@
     "prettier": "prettier --write 'src/**/*.ts'",
     "test": "yarn compile && ./scripts/run_tests.sh .",
     "test:ci": "node --preserve-symlinks-main ./out/scripts/runTests.js .",
-    "vscode-install": "yarn install && yarn compile && yarn vsce package --out sorbet.vsix && code --force --install-extension sorbet.vsix"
+    "generate-package": "yarn install && yarn compile && yarn vsce package --out sorbet.vsix",
+    "vscode-install": "yarn generate-package && code --force --install-extension sorbet.vsix"
   },
   "dependencies": {
     "async": "^2.3.0",
