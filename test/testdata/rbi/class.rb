@@ -21,3 +21,17 @@ C = Class.new(Parent) do |cls|
   foo
 end
 C.foo
+
+Class.new do
+  T.reveal_type(self) # error: Revealed type: `Class`
+
+  include Kernel
+end.new
+
+def bar
+  Class.new do
+    T.reveal_type(self) # error: Revealed type: `Class`
+
+    include Kernel
+  end.new
+end

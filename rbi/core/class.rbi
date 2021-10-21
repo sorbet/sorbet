@@ -171,14 +171,14 @@ class Class < Module
   end
   sig do
     params(
-        blk: T.proc.params(arg0: Class).returns(BasicObject),
+        blk: T.proc.bind(Class).params(arg0: Class).returns(BasicObject),
     )
     .void
   end
   sig do
     params(
         superclass: Class,
-        blk: T.proc.params(arg0: Class).returns(BasicObject),
+        blk: T.proc.bind(Class).params(arg0: Class).returns(BasicObject),
     )
     .void
   end
