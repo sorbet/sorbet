@@ -59,7 +59,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     static unique_ptr<WorkerPool> workers = WorkerPool::create(0, *logger);
     commonGs->trace("starting run");
     unique_ptr<core::GlobalState> gs;
-    { gs = commonGs->deepCopy(true); }
+    {
+        auto reserveSymtabCapacity = true;
+        auto keepId = true;
+        gs = commonGs->deepCopy(reserveSymtabCapacity, keepId);
+    }
     string inputData((const char *)data, size);
     vector<ast::ParsedFile> indexed;
     vector<core::FileRef> inputFiles;

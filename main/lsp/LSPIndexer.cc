@@ -210,7 +210,9 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     updates.epoch = 0;
     updates.canTakeFastPath = false;
     updates.updatedFileIndexes = move(indexed);
-    updates.updatedGS = initialGS->deepCopy();
+
+    auto reserveSymtabCapacity = true;
+    updates.updatedGS = initialGS->deepCopy(reserveSymtabCapacity, false);
 
     // Restore error queue, as initialGS will be used on the LSPLoop thread from now on.
     initialGS->errorQueue = move(savedErrorQueue);
@@ -325,7 +327,8 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
         mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
     } else {
         // Completely replace `pendingTypecheckUpdates` if this was a slow path update.
-        update.updatedGS = initialGS->deepCopy();
+        auto reserveSymtabCapacity = true;
+        update.updatedGS = initialGS->deepCopy(reserveSymtabCapacity, false);
         pendingTypecheckUpdates = update.copy();
     }
 
