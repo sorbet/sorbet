@@ -838,3 +838,107 @@ VALUE sorbet_vm_aref(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *ca
     reg_cfp->sp += 2;
     return sorbet_callFuncWithCache(cache, VM_BLOCK_HANDLER_NONE);
 }
+
+/* cf. vm_opt_plus */
+VALUE sorbet_vm_plus(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg) {
+    if (FIXNUM_2_P(recv, arg)) {
+        return rb_fix_plus_fix(recv, arg);
+    }
+    VALUE *sp = reg_cfp->sp;
+    *(sp + 0) = recv;
+    *(sp + 1) = arg;
+    reg_cfp->sp += 2;
+    return sorbet_callFuncWithCache(cache, VM_BLOCK_HANDLER_NONE);
+}
+
+/* cf. vm_opt_minus */
+VALUE sorbet_vm_minus(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg) {
+    if (FIXNUM_2_P(recv, arg)) {
+        return rb_fix_minus_fix(recv, arg);
+    }
+    VALUE *sp = reg_cfp->sp;
+    *(sp + 0) = recv;
+    *(sp + 1) = arg;
+    reg_cfp->sp += 2;
+    return sorbet_callFuncWithCache(cache, VM_BLOCK_HANDLER_NONE);
+
+}
+
+/* TODO(froydnj): We did the easiest thing here, but the VM has more cases for strings
+ * and floats in these comparison functions, which we might want to add as well.
+ */
+
+/* cf. vm_opt_eq */
+VALUE sorbet_vm_eqeq(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg) {
+    if (FIXNUM_2_P(recv, arg)) {
+        return recv == arg ? Qtrue : Qfalse;
+    }
+    VALUE *sp = reg_cfp->sp;
+    *(sp + 0) = recv;
+    *(sp + 1) = arg;
+    reg_cfp->sp += 2;
+    return sorbet_callFuncWithCache(cache, VM_BLOCK_HANDLER_NONE);
+}
+
+/* cf. vm_opt_neq */
+VALUE sorbet_vm_neq(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg) {
+    if (FIXNUM_2_P(recv, arg)) {
+        return recv != arg ? Qtrue : Qfalse;
+    }
+    VALUE *sp = reg_cfp->sp;
+    *(sp + 0) = recv;
+    *(sp + 1) = arg;
+    reg_cfp->sp += 2;
+    return sorbet_callFuncWithCache(cache, VM_BLOCK_HANDLER_NONE);
+}
+
+/* cf. vm_opt_leq */
+VALUE sorbet_vm_leq(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg) {
+    if (FIXNUM_2_P(recv, arg)) {
+        return (SIGNED_VALUE)recv <= (SIGNED_VALUE)arg ? Qtrue : Qfalse;
+    }
+    VALUE *sp = reg_cfp->sp;
+    *(sp + 0) = recv;
+    *(sp + 1) = arg;
+    reg_cfp->sp += 2;
+    return sorbet_callFuncWithCache(cache, VM_BLOCK_HANDLER_NONE);
+}
+
+/* cf. vm_opt_lt */
+VALUE sorbet_vm_lt(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg) {
+    if (FIXNUM_2_P(recv, arg)) {
+
+        return (SIGNED_VALUE)recv < (SIGNED_VALUE)arg ? Qtrue : Qfalse;
+    }
+    VALUE *sp = reg_cfp->sp;
+    *(sp + 0) = recv;
+    *(sp + 1) = arg;
+    reg_cfp->sp += 2;
+    return sorbet_callFuncWithCache(cache, VM_BLOCK_HANDLER_NONE);
+}
+
+/* cf. vm_opt_geq */
+VALUE sorbet_vm_geq(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg) {
+    if (FIXNUM_2_P(recv, arg)) {
+        return (SIGNED_VALUE)recv >= (SIGNED_VALUE)arg ? Qtrue : Qfalse;
+    }
+    VALUE *sp = reg_cfp->sp;
+    *(sp + 0) = recv;
+    *(sp + 1) = arg;
+    reg_cfp->sp += 2;
+    return sorbet_callFuncWithCache(cache, VM_BLOCK_HANDLER_NONE);
+}
+
+/* cf. vm_opt_gt */
+VALUE sorbet_vm_gt(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg) {
+    if (FIXNUM_2_P(recv, arg)) {
+        return (SIGNED_VALUE)recv > (SIGNED_VALUE)arg ? Qtrue : Qfalse;
+    }
+    VALUE *sp = reg_cfp->sp;
+    *(sp + 0) = recv;
+    *(sp + 1) = arg;
+    reg_cfp->sp += 2;
+    return sorbet_callFuncWithCache(cache, VM_BLOCK_HANDLER_NONE);
+}
+
+
