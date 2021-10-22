@@ -131,7 +131,7 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
             diagnostic->tags = move(tags);
         }
         if (error->what.code == sorbet::core::errors::Infer::CallOnUntyped.code) {
-            diagnostic->severity = DiagnosticSeverity::Warning;
+            diagnostic->severity = DiagnosticSeverity::Error;
         } else {
             diagnostic->severity = DiagnosticSeverity::Error;
         }
