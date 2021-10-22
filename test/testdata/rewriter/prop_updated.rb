@@ -18,7 +18,7 @@ class A < Chalk::ODM::Document
 
   sig {params(opts: T::Hash[T.untyped, T.untyped]).void}
   def self.updated_prop(opts={})
-    opts[:extra] = opts.fetch(:extra, {}).merge(DEPRECATED_dynamic_prop: true)
+    opts[:extra] = T.unsafe(opts.fetch(:extra, {})).merge(DEPRECATED_dynamic_prop: true)
     self.prop(:updated, T.nilable(Chalk::ODM::DeprecatedNumeric), opts)
   end
 

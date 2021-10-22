@@ -8,7 +8,7 @@ ARGF.each_line
 ARGF.each_line(sep=$/) { |line| nil }
 ARGF.each_line(sep=$/, 1) { |line| nil }
 ARGF.each_line do |line|
-  puts ARGF.filename if ARGF.lineno == 1
+  puts ARGF.filename if T.unsafe(ARGF.lineno) == 1
   puts "#{ARGF.lineno}: #{line}"
 end
 

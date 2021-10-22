@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def self.updated_prop<<todo method>>(opts = {}, &<blk>)
       begin
-        opts.[]=(:extra, opts.fetch(:extra, {}).merge(:DEPRECATED_dynamic_prop, true))
+        opts.[]=(:extra, <emptyTree>::<C T>.unsafe(opts.fetch(:extra, {})).merge(:DEPRECATED_dynamic_prop, true))
         <self>.prop(:updated, <emptyTree>::<C T>.nilable(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>), opts)
       end
     end
