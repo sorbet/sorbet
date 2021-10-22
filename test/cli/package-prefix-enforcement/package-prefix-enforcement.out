@@ -25,4 +25,8 @@ nested/nested.test.rb:9: Constants may not be defined outside of the enclosing p
 nested/nested.test.rb:16: Class or method definition must match enclosing package namespace `Test::Root::Nested` https://srb.help/3713
     16 |module Root::Nested::ShouldBeInTestPrefix
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 7
+
+critic_prefix/real.test.rb:13: Constants may not be defined outside of the enclosing package namespace `Critic::SomePkg` https://srb.help/3713
+    13 |SomeOtherNamespace::SomePkg::SomeConst = 4
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 8
