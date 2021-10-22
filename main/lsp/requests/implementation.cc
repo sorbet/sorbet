@@ -71,12 +71,6 @@ ImplementationTask::ImplementationTask(const LSPConfiguration &config, MessageId
 
 unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentImplementation);
-    if (!config.opts.lspGoToImplementationEnabled) {
-        response->error = make_unique<ResponseError>(
-            (int)LSPErrorCodes::InvalidRequest,
-            "The `Go To Implementation` LSP feature is experimental and disabled by default.");
-        return response;
-    }
 
     const core::GlobalState &gs = typechecker.state();
     auto queryResult =

@@ -104,9 +104,6 @@ Usage:
       --enable-experimental-lsp-signature-help
                                 Enable experimental LSP feature: Signature
                                 Help
-      --enable-experimental-lsp-go-to-implementation
-                                Enable experimental LSP feature: Go To
-                                Implementation
       --enable-experimental-requires-ancestor
                                 Enable experimental `requires_ancestor`
                                 annotation
