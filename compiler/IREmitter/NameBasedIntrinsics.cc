@@ -632,21 +632,23 @@ public:
     }
 } DefinedInstanceVar;
 
-class SquareBrackets : public NameBasedIntrinsicMethod {
-public:
-    SquareBrackets() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
+class UntypedSpecialization : public NameBasedIntrinsicMethod {
+    const core::NameRef rubyMethod;
+    const u4 arity;
+    const string_view cMethod;
 
-    // For cases where we don't have any type information, try to do something
-    // analogous to what the VM would do with the opt_aref instruction.
+public:
+    UntypedSpecialization(core::NameRef rubyMethod, u4 arity, string_view cMethod)
+        : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled}, rubyMethod(rubyMethod), arity(arity),
+          cMethod(cMethod) {}
+
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
         auto *send = mcctx.send;
-        if (send->args.size() != 1) {
+        if (send->args.size() != this->arity) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
-        // [] calls with blocks need to be handled differently.
-        if (mcctx.blk.has_value()) {
-            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
-        }
+        // Should be taken care of by specifying Intrinsics::HandleBlock::Unhandled.
+        ENFORCE(!mcctx.blk.has_value());
         // If we had some kind of type information for the receiver, assume that we
         // have already tested for a fast path earlier; this way we don't waste
         // extra time doing another test that didn't work the first time.
@@ -659,17 +661,24 @@ public:
         auto *cache = mcctx.getInlineCache();
         auto *recv = mcctx.varGetRecv();
         auto &args = mcctx.getStackArgs();
-        ENFORCE(args.size() == 1);
+        ENFORCE(args.size() == this->arity);
+        ENFORCE(this->arity == 1 || this->arity == 2);
 
-        return builder.CreateCall(
-            cs.getFunction("sorbet_vm_aref"),
-            {Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId), cache, recv, args[0]});
+        auto *cFunction = cs.getFunction(llvm::StringRef{this->cMethod.data(), this->cMethod.size()});
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+
+        InlinedVector<llvm::Value *, 5> funcArgs{cfp, cache, recv, args[0]};
+        if (this->arity == 2) {
+            funcArgs.emplace_back(args[1]);
+        }
+
+        return builder.CreateCall(cFunction, llvm::ArrayRef{&funcArgs[0], funcArgs.size()});
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {core::Names::squareBrackets()};
+        return {rubyMethod};
     }
-} SquareBrackets;
+};
 
 static const vector<CallCMethod> knownCMethods{
     {"<expand-splat>", "sorbet_expandSplatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
@@ -700,12 +709,19 @@ static const vector<CallCMethod> knownCMethods{
      core::Symbols::Hash()},
 };
 
+static const vector<UntypedSpecialization> untypedSpecializations{
+    {core::Names::squareBrackets(), 1, "sorbet_vm_aref"sv},
+};
+
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
     vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineClassIntrinsic,  &IdentityIntrinsic,
                                                  &CallWithBlock,      &ExceptionRetry,        &BuildHash,
                                                  &CallWithSplat,      &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic,
-                                                 &DefinedClassVar,    &DefinedInstanceVar,    &SquareBrackets};
+                                                 &DefinedClassVar,    &DefinedInstanceVar};
     for (auto &method : knownCMethods) {
+        ret.emplace_back(&method);
+    }
+    for (auto &method : untypedSpecializations) {
         ret.emplace_back(&method);
     }
     return ret;
