@@ -243,7 +243,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         }
                     }
                 }
-                if (cfg::isa_instruction<cfg::Send>(bind.value)) {
+                if (cfg::isa_instruction<cfg::Send>(bind.value) &&
+                    cfg::InstructionPtr::cast<cfg::Send>(bind.value).fun.toString(ctx.state) != "is_a?") {
                     if (cfg::InstructionPtr::cast<cfg::Send>(bind.value).fun.toString(ctx.state) == "unsafe") {
                         previousIsUnsafe = true;
                     }
