@@ -205,12 +205,10 @@ SORBET_ALIVE(VALUE, sorbet_vm_neq,
              (rb_control_frame_t * cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg));
 SORBET_ALIVE(VALUE, sorbet_vm_leq,
              (rb_control_frame_t * cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg));
-SORBET_ALIVE(VALUE, sorbet_vm_lt,
-             (rb_control_frame_t * cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg));
+SORBET_ALIVE(VALUE, sorbet_vm_lt, (rb_control_frame_t * cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg));
 SORBET_ALIVE(VALUE, sorbet_vm_geq,
              (rb_control_frame_t * cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg));
-SORBET_ALIVE(VALUE, sorbet_vm_gt,
-             (rb_control_frame_t * cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg));
+SORBET_ALIVE(VALUE, sorbet_vm_gt, (rb_control_frame_t * cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg));
 
 // The next several functions exist to convert Ruby definitions into LLVM IR, and
 // are always inlined as a consequence.

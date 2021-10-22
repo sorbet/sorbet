@@ -861,7 +861,6 @@ VALUE sorbet_vm_minus(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *c
     *(sp + 1) = arg;
     reg_cfp->sp += 2;
     return sorbet_callFuncWithCache(cache, VM_BLOCK_HANDLER_NONE);
-
 }
 
 /* TODO(froydnj): We did the easiest thing here, but the VM has more cases for strings
@@ -907,7 +906,6 @@ VALUE sorbet_vm_leq(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *cac
 /* cf. vm_opt_lt */
 VALUE sorbet_vm_lt(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg) {
     if (FIXNUM_2_P(recv, arg)) {
-
         return (SIGNED_VALUE)recv < (SIGNED_VALUE)arg ? Qtrue : Qfalse;
     }
     VALUE *sp = reg_cfp->sp;
@@ -940,5 +938,3 @@ VALUE sorbet_vm_gt(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *cach
     reg_cfp->sp += 2;
     return sorbet_callFuncWithCache(cache, VM_BLOCK_HANDLER_NONE);
 }
-
-
