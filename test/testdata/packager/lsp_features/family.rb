@@ -3,6 +3,7 @@
 
 module Simpsons
   #    ^^^^^^^^ symbol-search: "Simpsons", name = "Simpsons", container = "Simpsons"
+  #    ^        show-symbol: Simpsons
   class Family
       # ^^^^^^ def: family
       extend T::Sig
@@ -12,8 +13,10 @@ module Simpsons
           Bart::CatchPhrase
       #   ^^^^ usage: bart
       #   ^^^^ hover: T.class_of(Bart)
+      #   ^    show-symbol: Bart
           #     ^^^^^^^^^^^ usage: catchphrase
           #     ^^^^^^^^^^^ hover: String("Don\'t have a cow, man.")
+          #     ^           show-symbol: Bart::CatchPhrase
       end
 
       sig {returns(Bart::Character)}
@@ -24,6 +27,7 @@ module Simpsons
       #   ^^^^ usage: bart
           #     ^^^^^^^^^ usage: character
           #     ^^^^^^^^^ hover: T.class_of(Bart::Character)
+          #     ^         show-symbol: Bart::Character
           #     ^^^^^^^^^ hover: Character class description
           #               ^^^ hover: Description of Character initialize
           Bart::C # error: Unable to resolve constant `C`

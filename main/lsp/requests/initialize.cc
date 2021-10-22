@@ -29,6 +29,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     serverCap->referencesProvider = true;
     serverCap->implementationProvider = opts.lspGoToImplementationEnabled;
     serverCap->documentFormattingProvider = rubyfmt_enabled && opts.lspDocumentFormatRubyfmtEnabled;
+    serverCap->sorbetShowSymbolProvider = true;
 
     auto codeActionProvider = make_unique<CodeActionOptions>();
     codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix, CodeActionKind::SourceFixAllSorbet};

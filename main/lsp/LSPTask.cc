@@ -50,6 +50,8 @@ ConstExprStr LSPTask::methodString() const {
             return "initialized";
         case LSPMethod::SorbetReadFile:
             return "sorbet.readFile";
+        case LSPMethod::SorbetShowSymbol:
+            return "sorbet.showSymbol";
         case LSPMethod::SorbetWatchmanFileChange:
             return "sorbet.watchmanFileChange";
         case LSPMethod::SorbetWorkspaceEdit:

@@ -204,6 +204,9 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
             case LSPMethod::SorbetReadFile:
                 return make_unique<SorbetReadFileTask>(*config, id,
                                                        move(get<unique_ptr<TextDocumentIdentifier>>(rawParams)));
+            case LSPMethod::SorbetShowSymbol:
+                return make_unique<SorbetShowSymbolTask>(*config, id,
+                                                         move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
             case LSPMethod::Shutdown:
                 return make_unique<ShutdownTask>(*config, id);
             case LSPMethod::SorbetError:
