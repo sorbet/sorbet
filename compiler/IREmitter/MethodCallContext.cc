@@ -39,16 +39,18 @@ void MethodCallContext::finalize() {
 
 void MethodCallContext::initArgsAndCache() {
     ENFORCE(!this->isFinalized);
+    ENFORCE(!this->rubyStackArgs.has_value());
+    ENFORCE(this->inlineCache == nullptr);
 
     auto saved = this->builder.saveIP();
 
     this->builder.SetInsertPoint(this->sendEntry);
-    auto [stack, keywords, cacheFlags] = IREmitterHelpers::buildSendArgs(*this, this->send->recv.variable, 0);
-    this->stack = stack;
+
+    this->rubyStackArgs.emplace(IREmitterHelpers::buildSendArgs(*this, this->send->recv.variable, 0));
 
     auto methodName = std::string(this->send->fun.shortName(this->cs));
     this->inlineCache =
-        IREmitterHelpers::makeInlineCache(this->cs, this->builder, methodName, cacheFlags, stack.size(), keywords);
+        IREmitterHelpers::makeInlineCache(this->cs, this->builder, methodName, this->rubyStackArgs->flags, this->rubyStackArgs->stack.size(), this->rubyStackArgs->keywords);
 
     builder.restoreIP(saved);
 }
@@ -96,12 +98,12 @@ void MethodCallContext::emitMethodSearch() {
     this->methodSearchPerformed = true;
 }
 
-const std::vector<llvm::Value *> &MethodCallContext::getStackArgs() {
+const RubyStackArgs &MethodCallContext::getStackArgs() {
     if (this->inlineCache == nullptr) {
         this->initArgsAndCache();
     }
 
-    return this->stack;
+    return this->rubyStackArgs.value();
 }
 
 } // namespace sorbet::compiler

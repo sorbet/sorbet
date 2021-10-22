@@ -541,7 +541,7 @@ llvm::Value *IREmitterHelpers::callViaRubyVMSimple(MethodCallContext &mcctx) {
     auto rubyBlockId = mcctx.rubyBlockId;
     auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
 
-    auto &stack = mcctx.getStackArgs();
+    auto &stack = mcctx.getStackArgs().stack;
     auto *cache = mcctx.getInlineCache();
     auto *recv = mcctx.varGetRecv();
 

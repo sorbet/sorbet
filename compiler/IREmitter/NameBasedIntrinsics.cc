@@ -661,15 +661,15 @@ public:
         auto *cache = mcctx.getInlineCache();
         auto *recv = mcctx.varGetRecv();
         auto &args = mcctx.getStackArgs();
-        ENFORCE(args.size() == this->arity);
+        ENFORCE(args.stack.size() == this->arity);
         ENFORCE(this->arity == 1 || this->arity == 2);
 
         auto *cFunction = cs.getFunction(llvm::StringRef{this->cMethod.data(), this->cMethod.size()});
         auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
 
-        InlinedVector<llvm::Value *, 5> funcArgs{cfp, cache, recv, args[0]};
+        InlinedVector<llvm::Value *, 5> funcArgs{cfp, cache, recv, args.stack[0]};
         if (this->arity == 2) {
-            funcArgs.emplace_back(args[1]);
+            funcArgs.emplace_back(args.stack[1]);
         }
 
         return builder.CreateCall(cFunction, llvm::ArrayRef{&funcArgs[0], funcArgs.size()});
