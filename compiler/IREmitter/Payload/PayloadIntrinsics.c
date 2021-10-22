@@ -499,6 +499,17 @@ VALUE sorbet_int_rb_int_powm(VALUE recv, ID fun, int argc, VALUE *const restrict
     return rb_int_powm(argc, args, recv);
 }
 
+// Regexp#encoding
+// String#encoding
+// Calling convention: 0
+extern VALUE rb_obj_encoding(VALUE obj);
+
+VALUE sorbet_int_rb_obj_encoding(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk,
+                                 VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_encoding(recv);
+}
+
 // String#*
 // Calling convention: 1
 extern VALUE rb_str_times(VALUE obj, VALUE arg_0);
