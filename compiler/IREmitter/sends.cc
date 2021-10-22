@@ -333,12 +333,8 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
     return fillSendArgArray(mcctx, 0);
 }
 
-IREmitterHelpers::RubyStackArgs::RubyStackArgs(std::vector<llvm::Value *> stack, std::vector<std::string_view> keywords,
-                                               CallCacheFlags flags)
-    : stack{std::move(stack)}, keywords{std::move(keywords)}, flags{flags} {}
-
-IREmitterHelpers::RubyStackArgs IREmitterHelpers::buildSendArgs(MethodCallContext &mcctx, cfg::LocalRef recv,
-                                                                const std::size_t offset) {
+RubyStackArgs IREmitterHelpers::buildSendArgs(MethodCallContext &mcctx, cfg::LocalRef recv,
+                                              const std::size_t offset) {
     auto &cs = mcctx.cs;
     auto &irctx = mcctx.irctx;
     auto &builder = mcctx.builder;
@@ -395,7 +391,7 @@ IREmitterHelpers::RubyStackArgs IREmitterHelpers::buildSendArgs(MethodCallContex
         flags.fcall = true;
     }
 
-    return IREmitterHelpers::RubyStackArgs(std::move(stack), std::move(keywords), flags);
+    return RubyStackArgs(std::move(stack), std::move(keywords), flags);
 }
 
 namespace {
