@@ -711,6 +711,14 @@ static const vector<CallCMethod> knownCMethods{
 
 static const vector<UntypedSpecialization> untypedSpecializations{
     {core::Names::squareBrackets(), 1, "sorbet_vm_aref"sv},
+    {core::Names::plus(), 1, "sorbet_vm_plus"sv},
+    {core::Names::minus(), 1, "sorbet_vm_minus"sv},
+    {core::Names::eqeq(), 1, "sorbet_vm_eqeq"sv},
+    {core::Names::neq(), 1, "sorbet_vm_neq"sv},
+    {core::Names::leq(), 1, "sorbet_vm_leq"sv},
+    {core::Names::lessThan(), 1, "sorbet_vm_lt"sv},
+    {core::Names::geq(), 1, "sorbet_vm_geq"sv},
+    {core::Names::greaterThan(), 1, "sorbet_vm_gt"sv},
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
