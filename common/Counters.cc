@@ -147,6 +147,10 @@ void counterConsume(CounterState cs) {
         counters.compiled += method.second.compiled;
         counters.interpreted += method.second.interpreted;
     }
+
+    for (auto &method : cs.counters->uniqueResolutions) {
+        counterState.uniqueResolutions[method.first].insert(method.second.begin(), method.second.end());
+    }
 }
 
 void counterAdd(ConstExprStr counter, unsigned long value) {
@@ -184,6 +188,10 @@ void incrementMethodResolved(bool callerIsCompiled, string methodFullName) {
     } else {
         counters.interpreted += 1;
     }
+}
+
+void addResolvedClass(std::string methodName, std::string recvName) {
+    counterState.uniqueResolutions[methodName].insert(recvName);
 }
 
 int genThreadId() {
@@ -434,7 +442,7 @@ string getCounterStatistics() {
     }
 
     {
-        fmt::format_to(std::back_inserter(buf), "Resolved Methods: \n");
+        fmt::format_to(std::back_inserter(buf), "Resolved Methods:\n");
 
         std::vector<pair<string_view, CounterImpl::MethodCounts>> entries;
 
@@ -450,6 +458,16 @@ string getCounterStatistics() {
                            entry.first, entry.second.total(), entry.second.compiled, entry.second.interpreted);
         }
     }
+
+    {
+        fmt::format_to(std::back_inserter(buf), "Unique Resolutions:\n");
+
+        for (const auto &method : counterState.uniqueResolutions) {
+            fmt::format_to(std::back_inserter(buf),
+                    "{{\"method\": \"{}\", \"receivers\": [{}]}}\n", method.first, fmt::join(method.second, ", "));
+        }
+    }
+
     return to_string(buf);
 }
 

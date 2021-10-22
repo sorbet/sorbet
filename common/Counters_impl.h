@@ -57,6 +57,9 @@ struct CounterImpl {
         }
     };
     UnorderedMap<std::string, MethodCounts> methodCounters;
+
+    // method -> set of receiver types
+    UnorderedMap<std::string, UnorderedSet<std::string>> uniqueResolutions;
 };
 } // namespace sorbet
 

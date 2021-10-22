@@ -718,6 +718,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     incrementMethodResolved(args.callLoc().file().data(gs).compiledLevel == CompiledLevel::True,
                             method.showFullName(gs));
+    addResolvedClass(method.data(gs)->name.show(gs), symbol.show(gs));
 
     if (data->isGenericMethod()) {
         constr->defineDomain(gs, data->typeArguments());

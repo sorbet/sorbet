@@ -80,6 +80,7 @@ void counterConsume(CounterState cs);
 
 // slow, and shouldn't be merged to master
 void incrementMethodResolved(bool callerIsCompiled, std::string methodFullName);
+void addResolvedClass(std::string methodName, std::string recvName);
 
 void prodCounterInc(ConstExprStr counter);
 void prodCounterAdd(ConstExprStr counter, unsigned long value);
