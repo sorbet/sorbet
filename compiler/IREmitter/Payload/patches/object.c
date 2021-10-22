@@ -110,3 +110,11 @@ VALUE sorbet_definedIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const r
     }
     return rb_str_new2("constant");
 }
+
+VALUE sorbet_vm_class_alloc(VALUE klass) {
+    return rb_class_alloc(klass);
+}
+
+VALUE (*sorbet_vm_Class_new_func(void))(ANYARGS) {
+    return rb_class_s_new;
+}
