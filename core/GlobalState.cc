@@ -1684,7 +1684,7 @@ bool GlobalState::unfreezeSymbolTable() {
     return old;
 }
 
-unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
+unique_ptr<GlobalState> GlobalState::deepCopy(bool reserveSymtabCapacity, bool keepId) const {
     Timer timeit(tracer(), "GlobalState::deepCopy", this->creation);
     this->sanityCheck();
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
@@ -1743,26 +1743,32 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->namesByHash.reserve(this->namesByHash.size());
     result->namesByHash = this->namesByHash;
 
-    result->classAndModules.reserve(this->classAndModules.capacity());
+    result->classAndModules.reserve(reserveSymtabCapacity ? this->classAndModules.capacity()
+                                                          : this->classAndModules.size());
     for (auto &sym : this->classAndModules) {
         result->classAndModules.emplace_back(sym.deepCopy(*result, keepId));
     }
-    result->methods.reserve(this->methods.capacity());
+
+    result->methods.reserve(reserveSymtabCapacity ? this->methods.capacity() : this->methods.size());
     for (auto &sym : this->methods) {
         result->methods.emplace_back(sym.deepCopy(*result, keepId));
     }
-    result->fields.reserve(this->fields.capacity());
+
+    result->fields.reserve(reserveSymtabCapacity ? this->fields.capacity() : this->fields.size());
     for (auto &sym : this->fields) {
         result->fields.emplace_back(sym.deepCopy(*result, keepId));
     }
-    result->typeArguments.reserve(this->typeArguments.capacity());
+
+    result->typeArguments.reserve(reserveSymtabCapacity ? this->typeArguments.capacity() : this->typeArguments.size());
     for (auto &sym : this->typeArguments) {
         result->typeArguments.emplace_back(sym.deepCopy(*result, keepId));
     }
-    result->typeMembers.reserve(this->typeMembers.capacity());
+
+    result->typeMembers.reserve(reserveSymtabCapacity ? this->typeMembers.capacity() : this->typeMembers.size());
     for (auto &sym : this->typeMembers) {
         result->typeMembers.emplace_back(sym.deepCopy(*result, keepId));
     }
+
     result->pathPrefix = this->pathPrefix;
     for (auto &semanticExtension : this->semanticExtensions) {
         result->semanticExtensions.emplace_back(semanticExtension->deepCopy(*this, *result));

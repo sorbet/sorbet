@@ -476,7 +476,8 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
 
     workers.multiplexJob("indexSuppliedFiles", [baseGs, &opts, fileq, resultq, &kvstore]() {
         Timer timeit(baseGs->tracer(), "indexSuppliedFilesWorker");
-        unique_ptr<core::GlobalState> localGs = baseGs->deepCopy();
+        auto reserveSymtabCapacity = false;
+        unique_ptr<core::GlobalState> localGs = baseGs->deepCopy(reserveSymtabCapacity, false);
         IndexThreadResultPack threadResult;
 
         {
