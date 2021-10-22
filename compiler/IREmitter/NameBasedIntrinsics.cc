@@ -260,13 +260,13 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
 
 class CallCMethod : public NameBasedIntrinsicMethod {
 protected:
-    string_view rubyMethod;
+    core::NameRef rubyMethod;
     string cMethod;
     ShouldTakeReceiver takesReceiver;
     core::ClassOrModuleRef klass;
 
 public:
-    CallCMethod(string_view rubyMethod, string cMethod, ShouldTakeReceiver takesReceiver,
+    CallCMethod(core::NameRef rubyMethod, string cMethod, ShouldTakeReceiver takesReceiver,
                 Intrinsics::HandleBlock supportsBlocks, core::ClassOrModuleRef klass = core::ClassOrModuleRef{})
         : NameBasedIntrinsicMethod(supportsBlocks), rubyMethod(rubyMethod), cMethod(cMethod),
           takesReceiver(takesReceiver), klass(klass){};
@@ -275,7 +275,7 @@ public:
         return buildCMethodCall(mcctx, cMethod, takesReceiver, klass);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {cs.gs.lookupNameUTF8(rubyMethod)};
+        return {rubyMethod};
     }
 };
 
@@ -672,31 +672,32 @@ public:
 } SquareBrackets;
 
 static const vector<CallCMethod> knownCMethods{
-    {"<expand-splat>", "sorbet_expandSplatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+    {core::Names::expandSplat(), "sorbet_expandSplatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::Array()},
-    {"<splat>", "sorbet_splatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled, core::Symbols::Array()},
-    {"defined?", "sorbet_definedIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<build-keyword-args>", "sorbet_buildHashIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
-     core::Symbols::Hash()},
-    {"<build-array>", "sorbet_buildArrayIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+    {core::Names::splat(), "sorbet_splatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::Array()},
-    {"<build-range>", "sorbet_buildRangeIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+    {core::Names::defined_p(), "sorbet_definedIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {core::Names::buildArray(), "sorbet_buildArrayIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::Symbols::Array()},
+    {core::Names::buildRange(), "sorbet_buildRangeIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::ClassOrModuleRef()},
-    {"<string-interpolate>", "sorbet_stringInterpolate", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+    {core::Names::stringInterpolate(), "sorbet_stringInterpolate", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::String()},
-    {"<self-new>", "sorbet_selfNew", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<block-break>", "sorbet_block_break", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"!", "sorbet_bang", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"nil?", "sorbet_nil_p", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<check-match-array>", "sorbet_check_match_array", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+    {core::Names::selfNew(), "sorbet_selfNew", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {core::Names::blockBreak(), "sorbet_block_break", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {core::Names::bang(), "sorbet_bang", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
+    {core::Names::nil_p(), "sorbet_nil_p", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
+    {core::Names::checkMatchArray(), "sorbet_check_match_array", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::ClassOrModuleRef()},
 
     // for kwsplat building
-    {"<to-hash-dup>", "sorbet_magic_toHashDup", NoReceiver, Intrinsics::HandleBlock::Unhandled, core::Symbols::Hash()},
-    {"<to-hash-nodup>", "sorbet_magic_toHashNoDup", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+    {core::Names::toHashDup(), "sorbet_magic_toHashDup", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::Hash()},
-    {"<merge-hash>", "sorbet_magic_mergeHash", NoReceiver, Intrinsics::HandleBlock::Unhandled, core::Symbols::Hash()},
-    {"<merge-hash-values>", "sorbet_magic_mergeHashValues", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+    {core::Names::toHashNoDup(), "sorbet_magic_toHashNoDup", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::Symbols::Hash()},
+    {core::Names::mergeHash(), "sorbet_magic_mergeHash", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::Symbols::Hash()},
+    {core::Names::mergeHashValues(), "sorbet_magic_mergeHashValues", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::Hash()},
 };
 
