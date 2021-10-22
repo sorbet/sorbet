@@ -515,6 +515,8 @@ const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
 //    (with a subtype check on the key type, once we have generics)
 DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::ClassOrModuleRef symbol,
                                   const vector<TypePtr> &targs) {
+    addResolvedClass(args.name.show(gs), symbol.show(gs));
+
     if (symbol == core::Symbols::untyped()) {
         return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
                               Symbols::noMethod());
@@ -718,7 +720,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     incrementMethodResolved(args.callLoc().file().data(gs).compiledLevel == CompiledLevel::True,
                             method.showFullName(gs));
-    addResolvedClass(method.data(gs)->name.show(gs), symbol.show(gs));
 
     if (data->isGenericMethod()) {
         constr->defineDomain(gs, data->typeArguments());

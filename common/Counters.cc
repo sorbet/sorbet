@@ -463,8 +463,9 @@ string getCounterStatistics() {
         fmt::format_to(std::back_inserter(buf), "Unique Resolutions:\n");
 
         for (const auto &method : counterState.uniqueResolutions) {
-            fmt::format_to(std::back_inserter(buf),
-                    "{{\"method\": \"{}\", \"receivers\": [{}]}}\n", method.first, fmt::join(method.second, ", "));
+            fmt::format_to(
+                std::back_inserter(buf), "{{\"method\": \"{}\", \"receivers\": [{}]}}\n", method.first,
+                fmt::map_join(method.second, ", ", [](const auto &str) { return fmt::format("\"{}\"", str); }));
         }
     }
 
