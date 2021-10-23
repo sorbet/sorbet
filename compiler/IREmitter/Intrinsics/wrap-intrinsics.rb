@@ -229,6 +229,8 @@ module Intrinsics
       "Array#initialize_copy",
       "Array#last",
       "Array#rassoc",
+      "Array#replace",
+      "Array#slice",
       "Array#sort!",
       "Array#sort",
       "Float#*",
@@ -242,6 +244,7 @@ module Intrinsics
       "Float#abs",
       "Float#finite?",
       "Float#infinite?",
+      "Float#magnitude",
       "Integer#%",
       "Integer#&",
       "Integer#*",
@@ -252,6 +255,7 @@ module Intrinsics
       "Integer#/",
       "Integer#<<",
       "Integer#<=>",
+      "Integer#==",
       "Integer#===",
       "Integer#>",
       "Integer#>=",
@@ -262,12 +266,16 @@ module Intrinsics
       "Integer#gcd",
       "Integer#gcdlcm",
       "Integer#lcm",
+      "Integer#magnitude",
+      "Integer#modulo",
       "Integer#odd?",
       "Integer#pow",
+      "Regexp#encoding",
       "String#*",
       "String#+",
       "String#<<",
       "String#==",
+      "String#===",
       "String#[]",
       "String#dump",
       "String#encoding",
@@ -277,9 +285,13 @@ module Intrinsics
       "String#inspect",
       "String#intern",
       "String#length",
+      "String#next",
       "String#ord",
+      "String#replace",
+      "String#size",
       "String#slice",
       "String#succ",
+      "String#to_sym",
     ], T::Set[String])
 
     sig {params(topdir: String, ruby: String, ruby_source: String).void}
@@ -299,6 +311,17 @@ module Intrinsics
 
       # group methods together
       grouped_methods = methods.values.flatten.group_by(&:c_name).values
+
+      # if there are multiple methods with the same underlying C implementation,
+      # then they should all be specified as intrinsics.
+      grouped_methods.each do |methods|
+        next unless methods.any? {|method| method_whitelisted?(method)}
+        unless methods.all? {|method| method_whitelisted?(method)}
+          ruby_methods = methods.map {|method| "#{method.klass}##{method.rb_name}"}
+          raise "Must specify all of #{ruby_methods} as intrinsics"
+        end
+      end
+
       # ensure consistent output order
       grouped_methods.sort_by! do |methods|
         method = methods.fetch(0)
