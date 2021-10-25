@@ -178,6 +178,92 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
     end
   end
 
+  describe "invalid invocations outside declaration block" do
+    it "is invalid to invoke params" do
+      assert_raises(T::Private::Methods::DeclBuilder::BuilderError,
+                    "Can't invoke params outside of a signature declaration block") do
+        Class.new do
+          extend T::Sig
+
+          sig.params(number: Integer) {void}
+          def foo(number); end
+        end
+      end
+    ensure
+      cleanup_leftover_declaration
+    end
+
+    it "is invalid to invoke returns" do
+      assert_raises(T::Private::Methods::DeclBuilder::BuilderError,
+                    "Can't invoke returns outside of a signature declaration block") do
+        Class.new do
+          extend T::Sig
+
+          sig.returns(Integer) {}
+          def foo; end
+        end
+      end
+    ensure
+      cleanup_leftover_declaration
+    end
+
+    it "is invalid to invoke void" do
+      assert_raises(T::Private::Methods::DeclBuilder::BuilderError,
+                    "Can't invoke void outside of a signature declaration block") do
+        Class.new do
+          extend T::Sig
+
+          sig.void {}
+          def foo; end
+        end
+      end
+    ensure
+      cleanup_leftover_declaration
+    end
+
+    it "is invalid to invoke bind" do
+      assert_raises(T::Private::Methods::DeclBuilder::BuilderError,
+                    "Can't invoke bind outside of a signature declaration block") do
+        Class.new do
+          extend T::Sig
+
+          sig.bind(Object) {void}
+          def foo; end
+        end
+      end
+    ensure
+      cleanup_leftover_declaration
+    end
+
+    it "is invalid to invoke checked" do
+      assert_raises(T::Private::Methods::DeclBuilder::BuilderError,
+                    "Can't invoke checked outside of a signature declaration block") do
+        Class.new do
+          extend T::Sig
+
+          sig.checked(:never) {void}
+          def foo; end
+        end
+      end
+    ensure
+      cleanup_leftover_declaration
+    end
+
+    it "is invalid to invoke on_failure" do
+      assert_raises(T::Private::Methods::DeclBuilder::BuilderError,
+                    "Can't invoke on_failure outside of a signature declaration block") do
+        Class.new do
+          extend T::Sig
+
+          sig.on_failure(:soft, notify: "me") {void}
+          def foo; end
+        end
+      end
+    ensure
+      cleanup_leftover_declaration
+    end
+  end
+
   private
 
   def cleanup_leftover_declaration

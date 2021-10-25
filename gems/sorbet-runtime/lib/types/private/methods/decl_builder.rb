@@ -38,6 +38,16 @@ module T::Private::Methods
       end
     end
 
+    # Verify if we're trying to invoke the method outside of a signature block. Notice that we need to check if it's a
+    # proc, because this is valid and would lead to a false positive: `T.type_alias { T.proc.params(a: Integer).void }`
+    private def check_running_inside_block!(method_name)
+      unless @inside_sig_block || decl.mod == T::Private::Methods::PROC_TYPE
+        raise BuilderError.new(
+          "Can't invoke #{method_name} outside of a signature declaration block"
+        )
+      end
+    end
+
     def initialize(mod, raw)
       # TODO RUBYPLAT-1278 - with ruby 2.5, use kwargs here
       @decl = Declaration.new(
@@ -66,6 +76,8 @@ module T::Private::Methods
 
     def params(**params)
       check_live!
+      check_running_inside_block!(__method__)
+
       if !decl.params.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .params twice")
       end
@@ -80,6 +92,8 @@ module T::Private::Methods
 
     def returns(type)
       check_live!
+      check_running_inside_block!(__method__)
+
       if decl.returns.is_a?(T::Private::Types::Void)
         raise BuilderError.new("You can't call .returns after calling .void.")
       end
@@ -94,6 +108,8 @@ module T::Private::Methods
 
     def void
       check_live!
+      check_running_inside_block!(__method__)
+
       if !decl.returns.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .void after calling .returns.")
       end
@@ -105,6 +121,8 @@ module T::Private::Methods
 
     def bind(type)
       check_live!
+      check_running_inside_block!(__method__)
+
       if !decl.bind.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .bind multiple times in a signature.")
       end
@@ -116,6 +134,7 @@ module T::Private::Methods
 
     def checked(level)
       check_live!
+      check_running_inside_block!(__method__)
 
       if !decl.checked.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .checked multiple times in a signature.")
@@ -134,6 +153,7 @@ module T::Private::Methods
 
     def on_failure(*args)
       check_live!
+      check_running_inside_block!(__method__)
 
       if !decl.on_failure.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .on_failure multiple times in a signature.")
@@ -255,6 +275,7 @@ module T::Private::Methods
     #  def map(&blk); end
     def type_parameters(*names)
       check_live!
+      check_running_inside_block!(__method__)
 
       names.each do |name|
         raise BuilderError.new("not a symbol: #{name}") unless name.is_a?(Symbol)
