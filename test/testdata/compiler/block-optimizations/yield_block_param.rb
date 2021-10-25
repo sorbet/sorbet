@@ -8,15 +8,15 @@ def boo(&blk)
   yield
 end
 
-# INITIAL-LABEL: "func_Object#3boo"
+# INITIAL-LABEL: define internal i64 @"func_Object#3boo"
 # INITIAL-NOT: call i64 @sorbet_getMethodBlockAsProc
 # INITIAL-NOT: call i64 @rb_block_proc
-# INITIAL: call i64 @sorbet_callBlock
+# INITIAL: call i64 @sorbet_vm_callBlock
 # INITIAL-NOT: call i64 @sorbet_getMethodBlockAsProc
 # INITIAL-NOT: call i64 @rb_block_proc
 # INITIAL{LITERAL}: }
 
-# OPT-LABEL: "func_Object#3boo"
+# OPT-LABEL: define internal i64 @"func_Object#3boo"
 # OPT-NOT: call i64 @sorbet_getMethodBlockAsProc
 # OPT-NOT: call i64 @rb_block_proc
 # OPT: call i64 @sorbet_vm_callBlock

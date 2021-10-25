@@ -13,15 +13,15 @@ def boo(array, &blk)
   end
 end
 
-# INITIAL-LABEL: define i64 @"func_Object#boo"
+# INITIAL-LABEL: define internal i64 @"func_Object#3boo"
 # INITIAL: call i64 @sorbet_getMethodBlockAsProc
 # INITIAL{LITERAL}: }
 
-# OPT-LABEL: define i64 @"func_Object#boo"
+# OPT-LABEL: define internal i64 @"func_Object#3boo"
 # OPT: call i64 @rb_block_proc
 # OPT{LITERAL}: }
 
-# INITIAL-LABEL: define internal i64 @"func_Object#boo$block_1"
+# INITIAL-LABEL: define internal i64 @"func_Object#3boo$block_1"
 # INITIAL-NOT: call i64 @sorbet_getMethodBlockAsProc
 # INITIAL-NOT: call i64 @rb_block_proc
 # INITIAL: @sorbet_i_send(%struct.FunctionInlineCache* @ic_call

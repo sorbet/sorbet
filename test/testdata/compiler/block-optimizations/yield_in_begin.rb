@@ -13,24 +13,24 @@ def boo(&blk)
   end
 end
 
-# INITIAL-LABEL: define i64 @"func_Object#boo"
+# INITIAL-LABEL: define internal i64 @"func_Object#3boo"
 # INITIAL-NOT: call i64 @sorbet_getMethodBlockAsProc
 # INITIAL: call i64 @sorbet_run_exception_handling{{.*}}
 # INITIAL-NOT: call i64 @sorbet_getMethodBlockAsProc
 # INITIAL{LITERAL}: }
 
-# INITIAL-LABEL: define internal i64 @"func_Object#boo$block_1"
+# INITIAL-LABEL: define internal i64 @"func_Object#3boo$block_1"
 # INITIAL-NOT: call i64 @sorbet_getMethodBlockAsProc
 # INITIAL-NOT: call i64 @rb_block_proc
-# INITIAL: call i64 @sorbet_callBlock
+# INITIAL: call i64 @sorbet_vm_callBlock
 # INITIAL-NOT: call i64 @sorbet_getMethodBlockAsProc
 # INITIAL-NOT: call i64 @rb_block_proc
 # INITIAL{LITERAL}: }
 
-# OPT-LABEL: define internal noundef i64 @"func_Object#boo$block_1"
+# OPT-LABEL: define internal noundef i64 @"func_Object#3boo$block_1"
 # OPT-NOT: call i64 @sorbet_getMethodBlockAsProc
 # OPT-NOT: call i64 @rb_block_proc
-# OPT: call i64 @rb_yield_values_kw
+# OPT: call i64 @sorbet_vm_callBlock
 # OPT-NOT: call i64 @sorbet_getMethodBlockAsProc
 # OPT-NOT: call i64 @rb_block_proc
 # OPT{LITERAL}: }

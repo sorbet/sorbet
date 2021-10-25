@@ -16,17 +16,17 @@ def boo(&blk)
   end
 end
 
-# INITIAL-LABEL: define i64 @"func_Object#boo"
+# INITIAL-LABEL: define internal i64 @"func_Object#3boo"
 # INITIAL: call i64 @sorbet_getMethodBlockAsProc
 # INITIAL: call i64 @sorbet_run_exception_handling{{.*}}
 # INITIAL{LITERAL}: }
 
-# OPT-LABEL: define i64 @"func_Object#boo"
+# OPT-LABEL: define internal i64 @"func_Object#3boo"
 # OPT: call i64 @rb_block_proc
 # OPT: call i64 @sorbet_run_exception_handling{{.*}}
 # OPT{LITERAL}: }
 
-# INITIAL-LABEL: define internal i64 @"func_Object#boo$block_2"
+# INITIAL-LABEL: define internal i64 @"func_Object#3boo$block_2"
 # INITIAL-NOT: call i64 @sorbet_getMethodBlockAsProc
 # INITIAL-NOT: call i64 @rb_block_proc
 # INITIAL: @sorbet_i_send(%struct.FunctionInlineCache* @ic_call
