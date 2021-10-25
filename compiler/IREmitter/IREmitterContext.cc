@@ -168,13 +168,9 @@ class TrackCaptures final {
 public:
     UnorderedMap<cfg::LocalRef, optional<int>> privateUsages;
     UnorderedMap<cfg::LocalRef, int> escapedIndexes;
-    int escapedIndexCounter;
-    bool usesBlockArg;
-    cfg::LocalRef blkArg;
-
-    TrackCaptures()
-        : privateUsages{}, escapedIndexes{}, escapedIndexCounter{0},
-          usesBlockArg{false}, blkArg{cfg::LocalRef::noVariable()} {}
+    int escapedIndexCounter = 0;
+    bool usesBlockArg = false;
+    cfg::LocalRef blkArg = cfg::LocalRef::noVariable();
 
     void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv) {
         if (lv == cfg::LocalRef::selfVariable()) {
