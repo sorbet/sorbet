@@ -251,7 +251,8 @@ class TrackCaptures final {
         // TODO: handle call-with-splat-and-block.
         if (context.kind == CaptureContext::Kind::SendArgument &&
             context.send->fun == core::Names::callWithBlock() &&
-            context.send->args[2].variable == lv) {
+            context.send->args[2].variable == lv &&
+            context.send->args[0].variable != lv) {
             return BlockArgUsage::SameFrameAsTopLevel;
         }
 
