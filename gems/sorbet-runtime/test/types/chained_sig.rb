@@ -17,6 +17,19 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
       end
     end
 
+    it "raises when trying use final twice in a chained style" do
+      assert_raises(T::Private::Methods::DeclBuilder::BuilderError, "You can't call .final multiple times in a signature.") do
+        Class.new do
+          extend T::Sig
+
+          sig.final.final {void}
+          def bar; end
+        end
+      end
+    ensure
+      cleanup_leftover_declaration
+    end
+
     it "raises when trying use final twice" do
       assert_raises(T::Private::Methods::DeclBuilder::BuilderError, ".final cannot be repeated in a single signature") do
         Class.new do

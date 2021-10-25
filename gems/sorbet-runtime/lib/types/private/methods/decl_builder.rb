@@ -31,7 +31,10 @@ module T::Private::Methods
 
     private def check_sig_block_is_unset!
       if T::Private::DeclState.current.active_declaration.blk
-        raise BuilderError.new("Cannot define two separate signature blocks")
+        raise BuilderError.new(
+          "Two sig builder methods were passed blocks. " \
+          "Please pass a block to only one builder (conventionally, to the last sig builder method)"
+        )
       end
     end
 
@@ -49,7 +52,7 @@ module T::Private::Methods
         nil, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
         raw,
-        false, # final
+        ARG_NOT_PROVIDED, # final
       )
       @inside_sig_block = false
     end
@@ -167,9 +170,14 @@ module T::Private::Methods
     def final(&blk)
       check_live!
 
+      if !decl.final.equal?(ARG_NOT_PROVIDED)
+        raise BuilderError.new("You can't call .final multiple times in a signature.")
+      end
+
       if @inside_sig_block
         raise BuilderError.new(
-          "The syntax for declaring a method final is `sig(:final) {...}` or `sig.final {...}`, not `sig {final. ...}`"
+          "Unlike other sig annotations, the `final` annotation must remain outside the sig block, " \
+          "using either `sig(:final) {...}` or `sig.final {...}`, not `sig {final. ...}"
         )
       end
 
@@ -186,7 +194,7 @@ module T::Private::Methods
     end
 
     def final?
-      decl.final
+      !decl.final.equal?(ARG_NOT_PROVIDED) && decl.final
     end
 
     def override(allow_incompatible: false, &blk)
