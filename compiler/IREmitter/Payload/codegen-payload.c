@@ -159,6 +159,7 @@ SORBET_ALIVE(void, sorbet_vm_define_method,
              (VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq, bool isSelf));
 
 SORBET_ALIVE(VALUE, sorbet_vm_fstring_new, (const char *ptr, long len));
+SORBET_ALIVE(VALUE, sorbet_vm_str_uplus, (VALUE str));
 
 extern void sorbet_throwReturn(rb_execution_context_t *ec, VALUE retval) __attribute__((noreturn));
 KEEP_ALIVE(sorbet_throwReturn);
@@ -1787,6 +1788,12 @@ VALUE sorbet_selfNew(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk
     rb_check_arity(argc, 1, UNLIMITED_ARGUMENTS);
     VALUE obj = argv[0];
     return rb_funcallv(obj, rb_intern("new"), argc - 1, argv + 1);
+}
+
+SORBET_INLINE
+VALUE sorbet_int_str_uplus(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk, VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+    return sorbet_vm_str_uplus(recv);
 }
 
 // ****
