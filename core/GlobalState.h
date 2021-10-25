@@ -224,7 +224,7 @@ public:
 
     bool sleepInSlowPath = false;
 
-    std::unique_ptr<GlobalState> deepCopy(bool reserveSymtabCapacity, bool keepId) const;
+    std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;
 
     // Contains a path prefix that should be stripped from all printed paths.

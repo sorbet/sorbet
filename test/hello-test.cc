@@ -177,10 +177,8 @@ TEST_CASE("CloneSubstitutePayload") {
     sorbet::core::GlobalState gs(errorQueue);
     sorbet::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
 
-    auto reserveSymtabCapacity = true;
-    auto keepId = false;
-    auto c1 = gs.deepCopy(reserveSymtabCapacity, keepId);
-    auto c2 = gs.deepCopy(reserveSymtabCapacity, keepId);
+    auto c1 = gs.deepCopy();
+    auto c2 = gs.deepCopy();
 
     sorbet::core::NameRef n1;
     {
