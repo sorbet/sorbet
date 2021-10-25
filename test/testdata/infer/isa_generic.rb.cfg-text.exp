@@ -141,7 +141,7 @@ bb2[rubyBlockId=1, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-tem
 # backedges
 # - bb2(rubyBlockId=1)
 bb3[rubyBlockId=0, firstDead=-1](<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(<root>)):
-    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$9, sig>
+    <statTemp>$3: T::Private::Methods::DeclBuilder = Solve<<block-pre-call-temp>$9, sig>
     <self>: T.class_of(<root>) = <selfRestore>$10
     <cfgAlias>$26: T.class_of(Sorbet::Private::Static::ResolvedSig) = alias <C ResolvedSig>
     <statTemp>$28: FalseClass = false
@@ -175,7 +175,7 @@ bb6[rubyBlockId=2, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-tem
 # backedges
 # - bb6(rubyBlockId=2)
 bb7[rubyBlockId=0, firstDead=35](<block-pre-call-temp>$30: Sorbet::Private::Static::Void, <selfRestore>$31: T.class_of(<root>)):
-    <statTemp>$24: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$30, sig>
+    <statTemp>$24: T::Private::Methods::DeclBuilder = Solve<<block-pre-call-temp>$30, sig>
     <self>: T.class_of(<root>) = <selfRestore>$31
     <cfgAlias>$48: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$50: T.class_of(T) = alias <C T>
