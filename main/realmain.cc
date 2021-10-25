@@ -480,10 +480,11 @@ int realmain(int argc, char *argv[]) {
     if (opts.sleepInSlowPath) {
         gs->sleepInSlowPath = true;
     }
-    gs->preallocateTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
-                          opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
-                          opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
-                          opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
+    gs->preallocateSymbolTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
+                                opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
+                                opts.reserveTypeMemberTableCapacity);
+    gs->preallocateNameTables(opts.reserveUtf8NameTableCapacity, opts.reserveConstantNameTableCapacity,
+                              opts.reserveUniqueNameTableCapacity);
     for (auto code : opts.isolateErrorCode) {
         gs->onlyShowErrorClass(code);
     }
