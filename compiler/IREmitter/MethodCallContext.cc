@@ -50,7 +50,8 @@ void MethodCallContext::initArgsAndCache() {
 
     auto methodName = std::string(this->send->fun.shortName(this->cs));
     this->inlineCache =
-        IREmitterHelpers::makeInlineCache(this->cs, this->builder, methodName, this->rubyStackArgs->flags, this->rubyStackArgs->stack.size(), this->rubyStackArgs->keywords);
+        IREmitterHelpers::makeInlineCache(this->cs, this->builder, methodName, this->rubyStackArgs->flags,
+                                          this->rubyStackArgs->stack.size(), this->rubyStackArgs->keywords);
 
     builder.restoreIP(saved);
 }

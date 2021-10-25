@@ -333,8 +333,7 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
     return fillSendArgArray(mcctx, 0);
 }
 
-RubyStackArgs IREmitterHelpers::buildSendArgs(MethodCallContext &mcctx, cfg::LocalRef recv,
-                                              const std::size_t offset) {
+RubyStackArgs IREmitterHelpers::buildSendArgs(MethodCallContext &mcctx, cfg::LocalRef recv, const std::size_t offset) {
     auto &cs = mcctx.cs;
     auto &irctx = mcctx.irctx;
     auto &builder = mcctx.builder;

@@ -12,7 +12,7 @@ class CompilerState;
 
 struct RubyStackArgs {
     RubyStackArgs(std::vector<llvm::Value *> stack, std::vector<std::string_view> keywords, CallCacheFlags flags)
-    : stack{std::move(stack)}, keywords{std::move(keywords)}, flags(flags) {}
+        : stack{std::move(stack)}, keywords{std::move(keywords)}, flags(flags) {}
 
     std::vector<llvm::Value *> stack;
     std::vector<std::string_view> keywords;

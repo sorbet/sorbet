@@ -608,8 +608,8 @@ public:
         auto afterNew = llvm::BasicBlock::Create(cs, "afterNew", builder.GetInsertBlock()->getParent());
 
         auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
-        auto *allocatedObject = builder.CreateCall(cs.getFunction("sorbet_maybeAllocateObjectFastPath"),
-                                                   {klass, newCache});
+        auto *allocatedObject =
+            builder.CreateCall(cs.getFunction("sorbet_maybeAllocateObjectFastPath"), {klass, newCache});
         auto *isUndef = Payload::testIsUndef(cs, builder, allocatedObject);
         builder.CreateCondBr(isUndef, slowCall, fastCall);
 
@@ -620,8 +620,7 @@ public:
         builder.SetInsertPoint(slowCall);
         Payload::pushRubyStackVector(cs, builder, cfp, klass, rubyStackArgs.stack);
         auto *nullBHForNew = Payload::vmBlockHandlerNone(cs, builder);
-        auto *slowValue = builder.CreateCall(cs.getFunction("sorbet_callFuncWithCache"),
-                                             {newCache, nullBHForNew});
+        auto *slowValue = builder.CreateCall(cs.getFunction("sorbet_callFuncWithCache"), {newCache, nullBHForNew});
         builder.CreateBr(afterNew);
 
         builder.SetInsertPoint(fastCall);
@@ -635,8 +634,7 @@ public:
                                                                   rubyStackArgs.stack.size(), rubyStackArgs.keywords);
         auto *nullBHForInitialize = Payload::vmBlockHandlerNone(cs, builder);
         Payload::pushRubyStackVector(cs, builder, cfp, allocatedObject, rubyStackArgs.stack);
-        builder.CreateCall(cs.getFunction("sorbet_callFuncWithCache"),
-                           {initializeCache, nullBHForInitialize});
+        builder.CreateCall(cs.getFunction("sorbet_callFuncWithCache"), {initializeCache, nullBHForInitialize});
         builder.CreateBr(afterNew);
 
         builder.SetInsertPoint(afterNew);
