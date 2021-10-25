@@ -314,6 +314,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
   end
 
+  class <emptyTree>::<C InvalidInvocationAfterBlock><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>, :final) do ||
+      <self>.void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <emptyTree>.checked(:never)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+
   class <emptyTree>::<C ValidDoubleChain><<C <todo sym>>> < (::<todo sym>)
     ::Sorbet::Private::Static.sig(<self>, :final) do ||
       <self>.override().void()

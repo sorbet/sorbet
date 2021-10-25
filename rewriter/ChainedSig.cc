@@ -46,7 +46,7 @@ struct ChainedSigWalk {
         // If we never find a send where the first receiver is a `sig` and the last invocation has the declaration
         // block, then we add the error later on
         if (send->block == nullptr) {
-            if (incompleteSigs.back()->loc == sigSend->loc) {
+            if (incompleteSigs.back() == sigSend) {
                 incompleteSigs.pop_back();
                 incompleteSigs.push_back(send);
             }
@@ -73,7 +73,7 @@ struct ChainedSigWalk {
 
         // This is the continuation of the previous `sig` send by chaining other methods
         // remove it from the incomplete sigs, so that we don't add errors to it
-        if (incompleteSigs.back()->loc == sigSend->loc) {
+        if (incompleteSigs.back() == sigSend) {
             incompleteSigs.pop_back();
         }
 
@@ -136,6 +136,7 @@ struct ChainedSigWalk {
             send->fun == core::Names::checked() || send->fun == core::Names::onFailure() ||
             send->fun == core::Names::typeParameters()) {
             auto receiver = ast::cast_tree<ast::Send>(send->recv);
+            auto originalReceiver = ast::cast_tree<ast::Send>(send->recv);
 
             while (receiver && receiver->fun != core::Names::sig()) {
                 receiver = ast::cast_tree<ast::Send>(receiver->recv);
@@ -147,7 +148,7 @@ struct ChainedSigWalk {
                 }
 
                 // We already know this signature is invalid, so no need to emit two errors for it
-                if (incompleteSigs.back()->loc == send->recv.loc()) {
+                if (incompleteSigs.back() == originalReceiver) {
                     incompleteSigs.pop_back();
                 }
             }

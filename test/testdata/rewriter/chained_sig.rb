@@ -168,6 +168,15 @@ class DuplicateButMissingBlock
 # ^^^^^^^ error: Method `DuplicateButMissingBlock#foo` implements an abstract method `Interface#foo` but is not declared with `override.`
 end
 
+class InvalidInvocationAfterBlock
+  extend T::Sig
+
+  sig.final { void }.checked(:never)
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot use `checked` outside of a sig block
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Method `checked` does not exist on `NilClass`
+  def foo; end
+end
+
 class ValidDoubleChain
   extend T::Sig
   include Interface
