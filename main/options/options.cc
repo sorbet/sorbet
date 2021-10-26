@@ -350,6 +350,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                "Extra parent directories which contain package files. "
                                "This option must be used in conjunction with --stripe-packages",
                                cxxopts::value<vector<string>>(), "string");
+    options.add_options("dev")("secondary-test-namespaces",
+                               "Secondary top-level namespaces which contain test code"
+                               "This option must be used in conjunction with --stripe-packages",
+                               cxxopts::value<vector<string>>(), "string");
 
     options.add_options("advanced")(
         "autogen-autoloader-exclude-require",
@@ -860,6 +864,15 @@ void readOptions(Options &opts,
                     throw EarlyReturnWithCode(1);
                 }
                 opts.extraPackageFilesDirectoryPrefixes.emplace_back(dirName);
+            }
+        }
+        if (raw.count("secondary-test-namespaces")) {
+            if (!opts.stripePackages) {
+                logger->error("--secondary-test-namespaces can only be specified in --stripe-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+            for (const string &ns : raw["secondary-test-namespaces"].as<vector<string>>()) {
+                opts.secondaryTestNamespaces.emplace_back(ns);
             }
         }
 
