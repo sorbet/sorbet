@@ -193,10 +193,18 @@ public:
     const Kind kind;
     const cfg::Send *send = nullptr;
 
-    static CaptureContext methodArg() { return CaptureContext(Kind::MethodArgument); }
-    static CaptureContext receiver(cfg::Send *send) { return CaptureContext(Kind::Receiver, send); }
-    static CaptureContext sendArg(cfg::Send *send) { return CaptureContext(Kind::SendArgument, send); }
-    static CaptureContext general() { return CaptureContext(Kind::General); }
+    static CaptureContext methodArg() {
+        return CaptureContext(Kind::MethodArgument);
+    }
+    static CaptureContext receiver(cfg::Send *send) {
+        return CaptureContext(Kind::Receiver, send);
+    }
+    static CaptureContext sendArg(cfg::Send *send) {
+        return CaptureContext(Kind::SendArgument, send);
+    }
+    static CaptureContext general() {
+        return CaptureContext(Kind::General);
+    }
 };
 
 // Bundle up a bunch of state used for capture tracking to simplify the interface in findCaptures below.
@@ -224,8 +232,7 @@ class TrackCaptures final {
         }
 
         ENFORCE(blockArgUsage == BlockArgUsage::SameFrameAsTopLevel);
-        ENFORCE(context.kind == CaptureContext::Kind::Receiver
-                || context.kind == CaptureContext::Kind::SendArgument);
+        ENFORCE(context.kind == CaptureContext::Kind::Receiver || context.kind == CaptureContext::Kind::SendArgument);
 
         // If we're in a block that wouldn't have the same frame as the toplevel,
         // the block is captured.
@@ -238,8 +245,7 @@ class TrackCaptures final {
 
         // Sending `call` to a block is how we represent `yield`, and does not capture
         // the block.
-        if (context.kind == CaptureContext::Kind::Receiver &&
-            context.send->fun == core::Names::call()) {
+        if (context.kind == CaptureContext::Kind::Receiver && context.send->fun == core::Names::call()) {
             // We should have called this via call-with-block.
             ENFORCE(context.send->link == nullptr);
             return BlockArgUsage::SameFrameAsTopLevel;
@@ -249,10 +255,8 @@ class TrackCaptures final {
         // that does not capture the block.
         //
         // TODO: handle call-with-splat-and-block.
-        if (context.kind == CaptureContext::Kind::SendArgument &&
-            context.send->fun == core::Names::callWithBlock() &&
-            context.send->args[2].variable == lv &&
-            context.send->args[0].variable != lv) {
+        if (context.kind == CaptureContext::Kind::SendArgument && context.send->fun == core::Names::callWithBlock() &&
+            context.send->args[2].variable == lv && context.send->args[0].variable != lv) {
             return BlockArgUsage::SameFrameAsTopLevel;
         }
 
@@ -295,8 +299,7 @@ public:
     const UnorderedMap<cfg::LocalRef, Alias> &aliases;
     const vector<int> &blockLevels;
 
-    TrackCaptures(const UnorderedMap<cfg::LocalRef, Alias> &aliases,
-                  const vector<int> &blockLevels)
+    TrackCaptures(const UnorderedMap<cfg::LocalRef, Alias> &aliases, const vector<int> &blockLevels)
         : aliases(aliases), blockLevels(blockLevels) {}
 
     void trackBlockRead(cfg::BasicBlock *bb, cfg::LocalRef lv, CaptureContext context = CaptureContext::general()) {
@@ -348,8 +351,8 @@ public:
 /* if local variable is only used in block X, it maps the local variable to X, otherwise, it maps local variable to a
  * negative number */
 CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
-                               const UnorderedMap<cfg::LocalRef, Alias> &aliases, const vector<int> &exceptionHandlingBlockHeaders,
-                               const vector<int> &blockLevels) {
+                               const UnorderedMap<cfg::LocalRef, Alias> &aliases,
+                               const vector<int> &exceptionHandlingBlockHeaders, const vector<int> &blockLevels) {
     TrackCaptures usage(aliases, blockLevels);
 
     int argId = -1;
