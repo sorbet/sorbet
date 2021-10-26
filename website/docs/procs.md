@@ -221,7 +221,7 @@ Like with `T.cast`, the full range of Sorbet types can be used in the `T.bind`
 annotation. For example, here is a more complicated example that uses `T.any`
 with `T.bind`:
 
-<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Concern%0A%20%20def%20included(%26block)%0A%20%20end%0Aend%0A%0Amodule%20Taggeable%0A%20%20extend%20Concern%0A%0A%20%20included%20do%0A%20%20%20%20T.bind(self%2C%20T.any(Post%2C%20Article))%0A%0A%20%20%20%20create_tag!%0A%20%20end%0Aend%0A%0Aclass%20Post%0A%20%20include%20Taggeable%0A%0A%20%20def%20self.create_tag!%0A%20%20end%0Aend%0A%0Aclass%20Article%0A%20%20include%20Taggeable%0Aend">
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Concern%0A%20%20def%20included%28%26block%29%0A%20%20end%0Aend%0A%0Amodule%20Taggable%0A%20%20extend%20Concern%0A%0A%20%20included%20do%0A%20%20%20%20T.bind%28self%2C%20T.any%28Post%2C%20Article%29%29%0A%0A%20%20%20%20create_tag!%0A%20%20end%0Aend%0A%0Aclass%20Post%0A%20%20include%20Taggable%0A%0A%20%20def%20create_tag!%0A%20%20end%0Aend%0A%0Aclass%20Article%0A%20%20include%20Taggable%0Aend">
   → View on sorbet.run
 </a>
 
