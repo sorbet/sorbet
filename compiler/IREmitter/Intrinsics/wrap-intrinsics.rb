@@ -245,6 +245,7 @@ module Intrinsics
       "Float#finite?",
       "Float#infinite?",
       "Float#magnitude",
+      "Hash#fetch",
       "Integer#%",
       "Integer#&",
       "Integer#*",
