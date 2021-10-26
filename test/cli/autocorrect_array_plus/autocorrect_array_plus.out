@@ -174,7 +174,7 @@ autocorrect_array_plus.rb:22: Expected `T::Enumerable[{String("foo") => String("
     22 |[{"foo" => "bar"}] + [{}]
                              ^^^^
   Note:
-    If the desired behavior is to widen the type to `T::Array[T::Hash[T.untyped, T.untyped]]`, use `Array#concat` instead
+    If the desired behavior is to widen the type to `[{String("foo") => String("bar")}, {}]`, use `Array#concat` instead
   Autocorrect: Done
     autocorrect_array_plus.rb:22: Replaced with `.concat([{}])`
     22 |[{"foo" => "bar"}] + [{}]

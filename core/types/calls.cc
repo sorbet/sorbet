@@ -2524,7 +2524,7 @@ public:
 class Tuple_squareBrackets : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.selfType);
+        auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
         TypePtr argType = nullptr;
         if (args.args.size() == 1) {
@@ -2554,7 +2554,7 @@ public:
 class Tuple_last : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.selfType);
+        auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
@@ -2571,7 +2571,7 @@ public:
 class Tuple_first : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.selfType);
+        auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
@@ -2588,7 +2588,7 @@ public:
 class Tuple_minMax : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.selfType);
+        auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
@@ -2613,7 +2613,7 @@ class Tuple_concat : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         vector<TypePtr> elems;
-        auto *tuple = cast_type<TupleType>(args.selfType);
+        auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
         elems = tuple->elems;
         for (auto elem : args.args) {
@@ -2690,7 +2690,7 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
 class Shape_squareBracketsEq : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto &shape = cast_type_nonnull<ShapeType>(args.selfType);
+        auto &shape = cast_type_nonnull<ShapeType>(args.thisType);
 
         if (args.args.size() != 2) {
             // Skip over cases for which arg matching should report errors
@@ -2751,7 +2751,7 @@ public:
 class Shape_merge : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *shape = cast_type<ShapeType>(args.selfType);
+        auto *shape = cast_type<ShapeType>(args.thisType);
         ENFORCE(shape);
 
         if (args.args.empty() || args.block != nullptr) {
@@ -3143,7 +3143,8 @@ public:
             args.args,
             args.selfType,
             args.fullType,
-            args.thisType,
+            // Reset thisType to selfType. dispatchCallProxyType will widen to underlying if needed
+            args.selfType,
             args.block,
             args.originForUninitialized,
             args.isPrivateOk,
