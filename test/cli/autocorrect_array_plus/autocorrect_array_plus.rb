@@ -13,10 +13,10 @@ ints.+(
   strings
 )
 
-ints +
-  strings
+ints + strings
 
 ints += strings
-ints+=strings
-ints +=
-    strings
+ints += strings
+ints += strings
+
+[{"foo" => "bar"}] + [{}]
