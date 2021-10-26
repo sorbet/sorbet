@@ -1,68 +1,3 @@
-Exception::raise(): core/types/calls.cc:2617 enforced condition tuple has failed: (no message provided)
-
-Backtrace:
-  #3 0xa83322 
-  #4 0x183a33e sorbet::core::(anonymous namespace)::Tuple_concat::apply()
-  #5 0x181a881 sorbet::core::TupleType::dispatchCall()
-  #6 0x1803b85 sorbet::core::(anonymous namespace)::CALL_MEMBER_impl_dispatchCall<>::call<>()
-  #7 0x180357a sorbet::core::TypePtr::dispatchCall()
-  #8 0x183ef4c sorbet::core::(anonymous namespace)::Array_plus::apply()
-  #9 0x182367e sorbet::core::(anonymous namespace)::dispatchCallSymbol()
-  #10 0x1824848 sorbet::core::AppliedType::dispatchCall()
-  #11 0x1803be5 sorbet::core::(anonymous namespace)::CALL_MEMBER_impl_dispatchCall<>::call<>()
-  #12 0x180359f sorbet::core::TypePtr::dispatchCall()
-  #13 0x1819450 sorbet::core::(anonymous namespace)::dispatchCallProxyType()
-  #14 0x181aa39 sorbet::core::TupleType::dispatchCall()
-  #15 0x1803b85 sorbet::core::(anonymous namespace)::CALL_MEMBER_impl_dispatchCall<>::call<>()
-  #16 0x180357a sorbet::core::TypePtr::dispatchCall()
-  #17 0x1181133 sorbet::infer::Environment::processBinding()::$_7::operator()()
-  #18 0x1180863 sorbet::typecaseHelper<>()
-  #19 0x117c364 sorbet::typecase<>()
-  #20 0x117a4fc sorbet::infer::Environment::processBinding()
-  #21 0x116705f sorbet::infer::Inference::run()
-  #22 0xe47815 sorbet::realmain::pipeline::CFGCollectorAndTyper::preTransformMethodDef()
-  #23 0xe475e2 sorbet::ast::CALL_MEMBER_impl_preTransformMethodDef<>::call<>()
-  #24 0xe456a0 sorbet::ast::TreeMapper<>::mapMethodDef()
-  #25 0xe4418d sorbet::ast::TreeMapper<>::mapIt()
-  #26 0xe455b5 sorbet::ast::TreeMapper<>::mapClassDef()
-  #27 0xe44109 sorbet::ast::TreeMapper<>::mapIt()
-  #28 0xe471b5 sorbet::ast::TreeMapper<>::mapInsSeq()
-  #29 0xe44d44 sorbet::ast::TreeMapper<>::mapIt()
-  #30 0xe34bad sorbet::ast::TreeMap::apply<>()
-  #31 0xe20db5 sorbet::realmain::pipeline::typecheckOne()
-  #32 0xe2fc94 sorbet::realmain::pipeline::typecheck()::$_3::operator()()
-  #33 0xe2f99d std::__1::__invoke<>()
-  #34 0xe2f94d std::__1::__invoke_void_return_wrapper<>::__call<>()
-  #35 0xe2f91d std::__1::__function::__alloc_func<>::operator()()
-  #36 0xe2eae9 std::__1::__function::__func<>::operator()()
-  #37 0x1811172 std::__1::__function::__value_func<>::operator()()
-  #38 0x1811015 std::__1::function<>::operator()()
-  #39 0x18a9b03 sorbet::WorkerPoolImpl::multiplexJob()
-  #40 0xe23c66 sorbet::realmain::pipeline::typecheck()
-  #41 0xa76ccf sorbet::realmain::realmain()
-  #42 0xa729a2 main
-  #43 0x7f382e1b70b3 __libc_start_main
-  #44 0xa728ae _start
-
-autocorrect_array_plus.rb:22: Failed to type (backtrace is above) https://srb.help/1001
-    22 |[{"foo" => "bar"}] + [{}]
-        ^^^^^^^^^^^^^^^^^^^^^^^^^
-
-autocorrect_array_plus.rb:3: Failed to process tree (backtrace is above) https://srb.help/1001
-     3 |ints = T::Array[Integer].new
-     4 |strings = T::Array[String].new
-     5 |
-     6 |ints + strings
-     7 |
-       |...
-    18 |ints += strings
-    19 |ints += strings
-    20 |ints += strings
-    21 |
-    22 |[{"foo" => "bar"}] + [{}]
-
-autocorrect_array_plus.rb: Exception in cfg+infer: autocorrect_array_plus.rb (backtrace is above) https://srb.help/1001
-
 autocorrect_array_plus.rb:6: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
      6 |ints + strings
         ^^^^^^^^^^^^^^
@@ -226,7 +161,25 @@ autocorrect_array_plus.rb:20: Expected `T::Enumerable[Integer]` but found `T::Ar
     autocorrect_array_plus.rb:20: Replaced with ` = ints.concat(strings)`
     20 |ints += strings
             ^^^^^^^^^^^
-Errors: 12
+
+autocorrect_array_plus.rb:22: Expected `T::Enumerable[{String("foo") => String("bar")}]` but found `[{}]` for argument `arg0` https://srb.help/7002
+    22 |[{"foo" => "bar"}] + [{}]
+                             ^^^^
+  Expected `T::Enumerable[{String("foo") => String("bar")}]` for argument `arg0` of method `Array#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#L448:
+     448 |        arg0: T::Enumerable[Elem],
+                  ^^^^
+  Got `[{}] (1-tuple)` originating from:
+    autocorrect_array_plus.rb:22:
+    22 |[{"foo" => "bar"}] + [{}]
+                             ^^^^
+  Note:
+    If the desired behavior is to widen the type to `T::Array[T::Hash[T.untyped, T.untyped]]`, use `Array#concat` instead
+  Autocorrect: Done
+    autocorrect_array_plus.rb:22: Replaced with `.concat([{}])`
+    22 |[{"foo" => "bar"}] + [{}]
+                          ^^^^^^^
+Errors: 10
 
 --------------------------------------------------------------------------
 
@@ -249,4 +202,4 @@ ints = ints.concat(strings)
 ints = ints.concat(strings)
 ints = ints.concat(strings)
 
-[{"foo" => "bar"}] + [{}]
+[{"foo" => "bar"}].concat([{}])
