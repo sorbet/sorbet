@@ -4,6 +4,7 @@
 #include "cfg/CFG.h"
 #include "compiler/Core/ForwardDeclarations.h"
 #include "compiler/IREmitter/CallCacheFlags.h"
+#include "compiler/IREmitter/RubyStackArgs.h"
 #include "core/core.h"
 #include <string_view>
 #include <vector>
@@ -91,14 +92,6 @@ public:
     static llvm::Value *buildS4(CompilerState &cs, int i);
 
     static llvm::Value *emitMethodCall(MethodCallContext &mcctx);
-
-    struct RubyStackArgs {
-        RubyStackArgs(std::vector<llvm::Value *> stack, std::vector<std::string_view> keywords, CallCacheFlags flags);
-
-        std::vector<llvm::Value *> stack;
-        std::vector<std::string_view> keywords;
-        CallCacheFlags flags;
-    };
 
     static RubyStackArgs buildSendArgs(MethodCallContext &mcctx, cfg::LocalRef recv, const std::size_t offset);
 

@@ -163,18 +163,27 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, const UnorderedMap<cfg::Lo
     return {std::move(llvmVariables), std::move(selfVariables)};
 }
 
+struct CapturedVariables {
+    // LocalRefs that are only referenced from a single block.  Maps from variables
+    // to the block in which they are referenced.
+    UnorderedMap<cfg::LocalRef, int> privateVariables;
+
+    // LocalRefs referenced from multiple blocks.  Maps from variables to their index
+    // in the local variable area on the Ruby stack.
+    UnorderedMap<cfg::LocalRef, int> escapedVariableIndexes;
+
+    // Whether the ruby method uses a block argument.
+    bool usesBlockArgs;
+};
+
 // Bundle up a bunch of state used for capture tracking to simplify the interface in findCaptures below.
 class TrackCaptures final {
 public:
     UnorderedMap<cfg::LocalRef, optional<int>> privateUsages;
     UnorderedMap<cfg::LocalRef, int> escapedIndexes;
-    int escapedIndexCounter;
-    bool usesBlockArg;
-    cfg::LocalRef blkArg;
-
-    TrackCaptures()
-        : privateUsages{}, escapedIndexes{}, escapedIndexCounter{0},
-          usesBlockArg{false}, blkArg{cfg::LocalRef::noVariable()} {}
+    int escapedIndexCounter = 0;
+    bool usesBlockArg = false;
+    cfg::LocalRef blkArg = cfg::LocalRef::noVariable();
 
     void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv) {
         if (lv == cfg::LocalRef::selfVariable()) {
@@ -194,7 +203,7 @@ public:
         }
     }
 
-    tuple<UnorderedMap<cfg::LocalRef, int>, UnorderedMap<cfg::LocalRef, int>, bool> finalize() {
+    CapturedVariables finalize() {
         // privateUsages entries that have nullopt values are only interesting to the
         // capture analysis process, so remove them
         UnorderedMap<cfg::LocalRef, int> realPrivateUsages;
@@ -206,15 +215,14 @@ public:
             realPrivateUsages[entry.first] = entry.second.value();
         }
 
-        return {std::move(realPrivateUsages), std::move(escapedIndexes), usesBlockArg};
+        return CapturedVariables{std::move(realPrivateUsages), std::move(escapedIndexes), usesBlockArg};
     }
 };
 
 /* if local variable is only used in block X, it maps the local variable to X, otherwise, it maps local variable to a
  * negative number */
-tuple<UnorderedMap<cfg::LocalRef, int>, UnorderedMap<cfg::LocalRef, int>, bool>
-findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
-             const vector<int> &exceptionHandlingBlockHeaders) {
+CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
+                               const vector<int> &exceptionHandlingBlockHeaders) {
     TrackCaptures usage;
 
     int argId = -1;

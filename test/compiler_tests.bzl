@@ -56,7 +56,7 @@ def compiler_tests(suite_name, all_paths, extra_args = [], tags = []):
         # All of the expectations (if this test is a single file)
         if tests[name]["isMultiFile"]:
             exp_sources = []
-            test_sources = native.glob(["{}__*.rb".format(name)])
+            test_sources = native.glob(["{}__*.rb".format(name), "{}__*.rbi".format(name)])
         else:
             exp_sources = native.glob(["{}.*.exp".format(name)])
             test_sources = [sentinel]

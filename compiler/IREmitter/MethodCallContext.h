@@ -4,6 +4,7 @@
 #include "llvm/IR/IRBuilder.h"
 
 #include "compiler/Core/ForwardDeclarations.h"
+#include "compiler/IREmitter/RubyStackArgs.h"
 
 #include <optional>
 #include <vector>
@@ -22,7 +23,7 @@ class MethodCallContext {
     llvm::Value *recv = nullptr;
 
     llvm::Value *inlineCache = nullptr;
-    std::vector<llvm::Value *> stack{};
+    std::optional<RubyStackArgs> rubyStackArgs;
 
     bool isFinalized = false;
 
@@ -69,8 +70,9 @@ public:
     // generated code will potentially query the inline cache without initializing it.
     void emitMethodSearch();
 
-    // Get the args that would be pushed to the ruby stack (the receiver will be the first element)
-    const std::vector<llvm::Value *> &getStackArgs();
+    // Get the args that would be pushed to the ruby stack along with other information
+    // pertinent to the call (the receiver will be the first element of .stack).
+    const RubyStackArgs &getStackArgs();
 
     // Return the function associated with the block, nullptr if blk is std::nullopt.
     llvm::Function *blkAsFunction() const;

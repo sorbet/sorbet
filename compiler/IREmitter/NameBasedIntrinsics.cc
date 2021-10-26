@@ -260,13 +260,13 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
 
 class CallCMethod : public NameBasedIntrinsicMethod {
 protected:
-    string_view rubyMethod;
+    core::NameRef rubyMethod;
     string cMethod;
     ShouldTakeReceiver takesReceiver;
     core::ClassOrModuleRef klass;
 
 public:
-    CallCMethod(string_view rubyMethod, string cMethod, ShouldTakeReceiver takesReceiver,
+    CallCMethod(core::NameRef rubyMethod, string cMethod, ShouldTakeReceiver takesReceiver,
                 Intrinsics::HandleBlock supportsBlocks, core::ClassOrModuleRef klass = core::ClassOrModuleRef{})
         : NameBasedIntrinsicMethod(supportsBlocks), rubyMethod(rubyMethod), cMethod(cMethod),
           takesReceiver(takesReceiver), klass(klass){};
@@ -275,7 +275,7 @@ public:
         return buildCMethodCall(mcctx, cMethod, takesReceiver, klass);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {cs.gs.lookupNameUTF8(rubyMethod)};
+        return {rubyMethod};
     }
 };
 
@@ -590,6 +590,66 @@ public:
     }
 } CallWithSplatAndBlock;
 
+class NewIntrinsic : public NameBasedIntrinsicMethod {
+public:
+    NewIntrinsic() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
+        auto &builder = mcctx.builder;
+        auto &irctx = mcctx.irctx;
+        int rubyBlockId = mcctx.rubyBlockId;
+
+        auto *klass = mcctx.varGetRecv();
+        auto *newCache = mcctx.getInlineCache();
+
+        auto slowCall = llvm::BasicBlock::Create(cs, "slowNew", builder.GetInsertBlock()->getParent());
+        auto fastCall = llvm::BasicBlock::Create(cs, "fastNew", builder.GetInsertBlock()->getParent());
+        auto afterNew = llvm::BasicBlock::Create(cs, "afterNew", builder.GetInsertBlock()->getParent());
+
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
+        auto *allocatedObject =
+            builder.CreateCall(cs.getFunction("sorbet_maybeAllocateObjectFastPath"), {klass, newCache});
+        auto *isUndef = Payload::testIsUndef(cs, builder, allocatedObject);
+        builder.CreateCondBr(isUndef, slowCall, fastCall);
+
+        // We're pushing these arguments always, the only question is what we actually
+        // wind up calling with them.
+        auto &rubyStackArgs = mcctx.getStackArgs();
+
+        builder.SetInsertPoint(slowCall);
+        Payload::pushRubyStackVector(cs, builder, cfp, klass, rubyStackArgs.stack);
+        auto *nullBHForNew = Payload::vmBlockHandlerNone(cs, builder);
+        auto *slowValue = builder.CreateCall(cs.getFunction("sorbet_callFuncWithCache"), {newCache, nullBHForNew});
+        builder.CreateBr(afterNew);
+
+        builder.SetInsertPoint(fastCall);
+
+        // Whatever the flags on the `new` call were, the call to initialize is always
+        // allowed to call a private method.
+        CallCacheFlags flags = rubyStackArgs.flags;
+        flags.fcall = true;
+
+        auto *initializeCache = IREmitterHelpers::makeInlineCache(cs, builder, "initialize", flags,
+                                                                  rubyStackArgs.stack.size(), rubyStackArgs.keywords);
+        auto *nullBHForInitialize = Payload::vmBlockHandlerNone(cs, builder);
+        Payload::pushRubyStackVector(cs, builder, cfp, allocatedObject, rubyStackArgs.stack);
+        builder.CreateCall(cs.getFunction("sorbet_callFuncWithCache"), {initializeCache, nullBHForInitialize});
+        builder.CreateBr(afterNew);
+
+        builder.SetInsertPoint(afterNew);
+        auto *objectPhi = builder.CreatePHI(builder.getInt64Ty(), 2, "initializedObject");
+        objectPhi->addIncoming(slowValue, slowCall);
+        objectPhi->addIncoming(allocatedObject, fastCall);
+
+        return objectPhi;
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::new_()};
+    }
+} NewIntrinsic;
+
 class DefinedClassVar : public NameBasedIntrinsicMethod {
 public:
     DefinedClassVar() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
@@ -632,41 +692,105 @@ public:
     }
 } DefinedInstanceVar;
 
+class UntypedSpecialization : public NameBasedIntrinsicMethod {
+    const core::NameRef rubyMethod;
+    const u4 arity;
+    const string_view cMethod;
+
+public:
+    UntypedSpecialization(core::NameRef rubyMethod, u4 arity, string_view cMethod)
+        : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled}, rubyMethod(rubyMethod), arity(arity),
+          cMethod(cMethod) {}
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto *send = mcctx.send;
+        if (send->args.size() != this->arity) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        }
+        // Should be taken care of by specifying Intrinsics::HandleBlock::Unhandled.
+        ENFORCE(!mcctx.blk.has_value());
+        // If we had some kind of type information for the receiver, assume that we
+        // have already tested for a fast path earlier; this way we don't waste
+        // extra time doing another test that didn't work the first time.
+        if (!send->recv.type.isUntyped()) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        }
+
+        auto &cs = mcctx.cs;
+        auto &builder = mcctx.builder;
+        auto *cache = mcctx.getInlineCache();
+        auto *recv = mcctx.varGetRecv();
+        auto &args = mcctx.getStackArgs();
+        ENFORCE(args.stack.size() == this->arity);
+        ENFORCE(this->arity == 1 || this->arity == 2);
+
+        auto *cFunction = cs.getFunction(llvm::StringRef{this->cMethod.data(), this->cMethod.size()});
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+
+        InlinedVector<llvm::Value *, 5> funcArgs{cfp, cache, recv, args.stack[0]};
+        if (this->arity == 2) {
+            funcArgs.emplace_back(args.stack[1]);
+        }
+
+        return builder.CreateCall(cFunction, llvm::ArrayRef{&funcArgs[0], funcArgs.size()});
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {rubyMethod};
+    }
+};
+
 static const vector<CallCMethod> knownCMethods{
-    {"<expand-splat>", "sorbet_expandSplatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+    {core::Names::expandSplat(), "sorbet_expandSplatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::Array()},
-    {"<splat>", "sorbet_splatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled, core::Symbols::Array()},
-    {"defined?", "sorbet_definedIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<build-keyword-args>", "sorbet_buildHashIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
-     core::Symbols::Hash()},
-    {"<build-array>", "sorbet_buildArrayIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+    {core::Names::splat(), "sorbet_splatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::Array()},
-    {"<build-range>", "sorbet_buildRangeIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+    {core::Names::defined_p(), "sorbet_definedIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {core::Names::buildArray(), "sorbet_buildArrayIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::Symbols::Array()},
+    {core::Names::buildRange(), "sorbet_buildRangeIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::ClassOrModuleRef()},
-    {"<string-interpolate>", "sorbet_stringInterpolate", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+    {core::Names::stringInterpolate(), "sorbet_stringInterpolate", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::String()},
-    {"<self-new>", "sorbet_selfNew", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<block-break>", "sorbet_block_break", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"!", "sorbet_bang", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"nil?", "sorbet_nil_p", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<check-match-array>", "sorbet_check_match_array", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+    {core::Names::selfNew(), "sorbet_selfNew", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {core::Names::blockBreak(), "sorbet_block_break", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {core::Names::bang(), "sorbet_bang", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
+    {core::Names::nil_p(), "sorbet_nil_p", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
+    {core::Names::checkMatchArray(), "sorbet_check_match_array", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::ClassOrModuleRef()},
 
     // for kwsplat building
-    {"<to-hash-dup>", "sorbet_magic_toHashDup", NoReceiver, Intrinsics::HandleBlock::Unhandled, core::Symbols::Hash()},
-    {"<to-hash-nodup>", "sorbet_magic_toHashNoDup", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+    {core::Names::toHashDup(), "sorbet_magic_toHashDup", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::Hash()},
-    {"<merge-hash>", "sorbet_magic_mergeHash", NoReceiver, Intrinsics::HandleBlock::Unhandled, core::Symbols::Hash()},
-    {"<merge-hash-values>", "sorbet_magic_mergeHashValues", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+    {core::Names::toHashNoDup(), "sorbet_magic_toHashNoDup", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::Hash()},
+    {core::Names::mergeHash(), "sorbet_magic_mergeHash", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::Symbols::Hash()},
+    {core::Names::mergeHashValues(), "sorbet_magic_mergeHashValues", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::Symbols::Hash()},
+};
+
+static const vector<UntypedSpecialization> untypedSpecializations{
+    {core::Names::squareBrackets(), 1, "sorbet_vm_aref"sv},
+    {core::Names::plus(), 1, "sorbet_vm_plus"sv},
+    {core::Names::minus(), 1, "sorbet_vm_minus"sv},
+    {core::Names::eqeq(), 1, "sorbet_vm_eqeq"sv},
+    {core::Names::neq(), 1, "sorbet_vm_neq"sv},
+    {core::Names::leq(), 1, "sorbet_vm_leq"sv},
+    {core::Names::lessThan(), 1, "sorbet_vm_lt"sv},
+    {core::Names::geq(), 1, "sorbet_vm_geq"sv},
+    {core::Names::greaterThan(), 1, "sorbet_vm_gt"sv},
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
     vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineClassIntrinsic,  &IdentityIntrinsic,
                                                  &CallWithBlock,      &ExceptionRetry,        &BuildHash,
                                                  &CallWithSplat,      &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic,
-                                                 &DefinedClassVar,    &DefinedInstanceVar};
+                                                 &DefinedClassVar,    &DefinedInstanceVar,    &NewIntrinsic};
     for (auto &method : knownCMethods) {
+        ret.emplace_back(&method);
+    }
+    for (auto &method : untypedSpecializations) {
         ret.emplace_back(&method);
     }
     return ret;

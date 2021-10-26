@@ -924,6 +924,7 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Integer(), "!=", CMethod{"sorbet_rb_int_neq"}},
     {core::Symbols::Integer(), "times", CMethod{"sorbet_rb_int_dotimes", core::Symbols::Enumerator()},
      CMethod{"sorbet_rb_int_dotimes_withBlock", core::Symbols::Integer()}},
+    {core::Symbols::String(), "+@", CMethod{"sorbet_int_str_uplus", core::Symbols::String()}},
     {core::Symbols::Symbol(), "==", CMethod{"sorbet_rb_sym_equal"}},
     {core::Symbols::Symbol(), "===", CMethod{"sorbet_rb_sym_equal"}},
     {core::Symbols::Kernel(), "is_a?", CMethod{"sorbet_rb_obj_is_kind_of"}, nullopt, {"rb_obj_is_kind_of"}},

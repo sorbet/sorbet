@@ -1,0 +1,257 @@
+method ::Object#baz1 {
+
+bb0[rubyBlockId=0, firstDead=5]():
+    <self>: Object = cast(<self>: NilClass, Object);
+    a: String("foo") = "foo"
+    b: T.nilable(Integer) = a: String("foo").getbyte(a: String("foo"))
+    <returnMethodTemp>$2: T.nilable(Integer) = b
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::Object#baz2 {
+
+bb0[rubyBlockId=0, firstDead=6]():
+    <self>: Object = cast(<self>: NilClass, Object);
+    a: String("foo") = "foo"
+    <statTemp>$5: String("foo") = "foo"
+    b: T.nilable(Integer) = a: String("foo").getbyte(<statTemp>$5: String("foo"))
+    <returnMethodTemp>$2: T.nilable(Integer) = b
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::Object#baz3 {
+
+bb0[rubyBlockId=0, firstDead=6]():
+    <self>: Object = cast(<self>: NilClass, Object);
+    <statTemp>$3: String("foo") = "foo"
+    <statTemp>$4: String("foo") = "foo"
+    b: T.nilable(Integer) = <statTemp>$3: String("foo").getbyte(<statTemp>$4: String("foo"))
+    <returnMethodTemp>$2: T.nilable(Integer) = b
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::Object#baz4 {
+
+bb0[rubyBlockId=0, firstDead=6]():
+    <self>: Object = cast(<self>: NilClass, Object);
+    <statTemp>$3: T.untyped = <self>: Object.a()
+    <statTemp>$5: String("foo") = "foo"
+    b: T.untyped = <statTemp>$3: T.untyped.getbyte(<statTemp>$5: String("foo"))
+    <returnMethodTemp>$2: T.untyped = b
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::Object#baz5 {
+
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Object = cast(<self>: NilClass, Object);
+    cond: T.untyped = load_arg(cond)
+    cond -> (T.untyped ? bb2 : bb3)
+
+# backedges
+# - bb4(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb2[rubyBlockId=0, firstDead=-1]():
+    b: Integer(1) = 1
+    <unconditional> -> bb4
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb3[rubyBlockId=0, firstDead=-1]():
+    b: String("foo") = "foo"
+    <unconditional> -> bb4
+
+# backedges
+# - bb2(rubyBlockId=0)
+# - bb3(rubyBlockId=0)
+bb4[rubyBlockId=0, firstDead=5](b: T.any(Integer, String)):
+    <statTemp>$5: T.any(Integer, String) = b
+    <statTemp>$6: Integer(1) = 1
+    b: T.untyped = <statTemp>$5: T.any(Integer, String).getbyte(<statTemp>$6: Integer(1))
+    <returnMethodTemp>$2: T.untyped = b
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <unconditional> -> bb1
+
+}
+
+method ::Object#baz6 {
+
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Object = cast(<self>: NilClass, Object);
+    cond: T.untyped = load_arg(cond)
+    cond -> (T.untyped ? bb2 : bb3)
+
+# backedges
+# - bb4(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb2[rubyBlockId=0, firstDead=-1]():
+    b: Integer(1) = 1
+    <unconditional> -> bb4
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb3[rubyBlockId=0, firstDead=-1]():
+    b: String("foo") = "foo"
+    <unconditional> -> bb4
+
+# backedges
+# - bb2(rubyBlockId=0)
+# - bb3(rubyBlockId=0)
+bb4[rubyBlockId=0, firstDead=5](b: T.any(Integer, String)):
+    <statTemp>$5: String("foo") = "foo"
+    <statTemp>$6: T.any(Integer, String) = b
+    b: T.nilable(Integer) = <statTemp>$5: String("foo").getbyte(<statTemp>$6: T.any(Integer, String))
+    <returnMethodTemp>$2: T.nilable(Integer) = b
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)
+    <unconditional> -> bb1
+
+}
+
+method ::Object#baz7 {
+
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Object = cast(<self>: NilClass, Object);
+    cond: T.untyped = load_arg(cond)
+    cond -> (T.untyped ? bb2 : bb4)
+
+# backedges
+# - bb4(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb2[rubyBlockId=0, firstDead=-1]():
+    b: Integer(1) = 1
+    <unconditional> -> bb4
+
+# backedges
+# - bb0(rubyBlockId=0)
+# - bb2(rubyBlockId=0)
+bb4[rubyBlockId=0, firstDead=5](b: T.nilable(Integer)):
+    <statTemp>$5: String("foo") = "foo"
+    <statTemp>$6: T.nilable(Integer) = b
+    b: T.nilable(Integer) = <statTemp>$5: String("foo").getbyte(<statTemp>$6: T.nilable(Integer))
+    <returnMethodTemp>$2: T.nilable(Integer) = b
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)
+    <unconditional> -> bb1
+
+}
+
+method ::Object#baz8 {
+
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Object = cast(<self>: NilClass, Object);
+    <unconditional> -> bb2
+
+# backedges
+# - bb3(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+# - bb5(rubyBlockId=0)
+bb2[rubyBlockId=0, firstDead=-1]():
+    # outerLoops: 1
+    <whileTemp>$3: TrueClass = true
+    <whileTemp>$3 -> (TrueClass ? bb5 : bb3)
+
+# backedges
+# - bb2(rubyBlockId=0)
+bb3[rubyBlockId=0, firstDead=0]():
+    <returnMethodTemp>$2 = nil
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional> -> bb1
+
+# backedges
+# - bb2(rubyBlockId=0)
+bb5[rubyBlockId=0, firstDead=-1]():
+    # outerLoops: 1
+    b: Integer(1) = 1
+    <unconditional> -> bb2
+
+}
+
+method ::<Class:<root>>#<static-init> {
+
+bb0[rubyBlockId=0, firstDead=34]():
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$7: Symbol(:baz1) = :baz1
+    <statTemp>$8: Symbol(:normal) = :normal
+    <statTemp>$3: Symbol(:baz1) = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$7: Symbol(:baz1), <statTemp>$8: Symbol(:normal))
+    <cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$13: Symbol(:baz2) = :baz2
+    <statTemp>$14: Symbol(:normal) = :normal
+    <statTemp>$9: Symbol(:baz2) = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$13: Symbol(:baz2), <statTemp>$14: Symbol(:normal))
+    <cfgAlias>$17: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$19: Symbol(:baz3) = :baz3
+    <statTemp>$20: Symbol(:normal) = :normal
+    <statTemp>$15: Symbol(:baz3) = <cfgAlias>$17: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$19: Symbol(:baz3), <statTemp>$20: Symbol(:normal))
+    <cfgAlias>$23: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$25: Symbol(:baz4) = :baz4
+    <statTemp>$26: Symbol(:normal) = :normal
+    <statTemp>$21: Symbol(:baz4) = <cfgAlias>$23: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$25: Symbol(:baz4), <statTemp>$26: Symbol(:normal))
+    <cfgAlias>$29: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$31: Symbol(:baz5) = :baz5
+    <statTemp>$32: Symbol(:normal) = :normal
+    <statTemp>$27: Symbol(:baz5) = <cfgAlias>$29: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$31: Symbol(:baz5), <statTemp>$32: Symbol(:normal))
+    <cfgAlias>$35: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$37: Symbol(:baz6) = :baz6
+    <statTemp>$38: Symbol(:normal) = :normal
+    <statTemp>$33: Symbol(:baz6) = <cfgAlias>$35: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$37: Symbol(:baz6), <statTemp>$38: Symbol(:normal))
+    <cfgAlias>$41: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$43: Symbol(:baz7) = :baz7
+    <statTemp>$44: Symbol(:normal) = :normal
+    <statTemp>$39: Symbol(:baz7) = <cfgAlias>$41: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$43: Symbol(:baz7), <statTemp>$44: Symbol(:normal))
+    <cfgAlias>$47: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$49: Symbol(:baz8) = :baz8
+    <statTemp>$50: Symbol(:normal) = :normal
+    <statTemp>$45: Symbol(:baz8) = <cfgAlias>$47: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$49: Symbol(:baz8), <statTemp>$50: Symbol(:normal))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+

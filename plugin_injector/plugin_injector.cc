@@ -305,7 +305,6 @@ public:
 
         unique_ptr<llvm::Module> module = move(threadState->combinedModule);
         unique_ptr<llvm::DIBuilder> debug = move(threadState->debugInfo);
-        llvm::DICompileUnit *compileUnit = threadState->compileUnit;
         threadState->compileUnit = nullptr;
 
         // It is possible, though unusual, to never have typecheck() called.
@@ -339,7 +338,6 @@ public:
 
         debug->finalize();
 
-        compiler::CompilerState cs(gs, lctx, module.get(), debug.get(), compileUnit, f, nullptr, nullptr);
         string fileName = objectFileName(gs, f);
         ensureOutputDir(compiledOutputDir.value(), fileName);
         if (irOutputDir.has_value()) {
