@@ -1,3 +1,4 @@
+# -- test/testdata/packager/invalid_imports_and_exports/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(123)
@@ -57,6 +58,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/invalid_imports_and_exports/a.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C A_Package$1><<C <todo sym>>> < ()
     module <emptyTree>::<C A><<C <todo sym>>> < ()
@@ -95,6 +97,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/invalid_imports_and_exports/b/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C A>)
@@ -140,6 +143,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/invalid_imports_and_exports/b/b.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C B_Package$1><<C <todo sym>>> < ()
     module <emptyTree>::<C B><<C <todo sym>>> < ()

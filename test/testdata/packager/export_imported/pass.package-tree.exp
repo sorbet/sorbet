@@ -1,3 +1,4 @@
+# -- test/testdata/packager/export_imported/a/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C B>)
@@ -17,6 +18,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/export_imported/b/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BClass>)
@@ -31,6 +33,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/export_imported/b/b.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C B_Package$1><<C <todo sym>>> < ()
     class <emptyTree>::<C B>::<C BClass><<C <todo sym>>> < (::<todo sym>)
