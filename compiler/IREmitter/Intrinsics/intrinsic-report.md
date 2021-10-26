@@ -490,7 +490,7 @@
 * [✔  ] `rb_hash_aref` (`Hash#[]`)
 * [   ] `rb_hash_hash` (`Hash#hash`)
 * [   ] `rb_hash_eql` (`Hash#eql?`)
-* [  ✔] `rb_hash_fetch_m` (`Hash#fetch`)
+* [   ] `rb_hash_fetch_m` (`Hash#fetch`)
 * [✔  ] `rb_hash_aset` (`Hash#[]=`)
 * [✔  ] `rb_hash_aset` (`Hash#store`)
 * [   ] `rb_hash_default` (`Hash#default`)
@@ -1564,4 +1564,4 @@
 
 ## Stats
 * Total:   1488
-* Visible: 236
+* Visible: 235
