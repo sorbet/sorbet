@@ -160,8 +160,10 @@ private:
 public:
     CallCMethod(core::ClassOrModuleRef rubyClass, string_view rubyMethod, CMethod cMethod,
                 optional<CMethod> cMethodWithBlock = nullopt, vector<string> expectedRubyCFuncs = {})
-        : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled), rubyClass(rubyClass), rubyMethod(rubyMethod),
-          cMethod(cMethod), cMethodWithBlock(cMethodWithBlock), expectedRubyCFuncs(expectedRubyCFuncs){};
+        : SymbolBasedIntrinsicMethod(cMethodWithBlock.has_value() ? Intrinsics::HandleBlock::Handled
+                                                                  : Intrinsics::HandleBlock::Unhandled),
+          rubyClass(rubyClass), rubyMethod(rubyMethod), cMethod(cMethod), cMethodWithBlock(cMethodWithBlock),
+          expectedRubyCFuncs(expectedRubyCFuncs){};
 
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
         auto &cs = mcctx.cs;
