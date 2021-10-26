@@ -302,28 +302,18 @@ public:
             return tree;
         }
 
-        bool startScope = nameParts.size() == 0;
-        ast::UnresolvedConstantLit *constantLit;
-        if (startScope) {
-            constantLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
-            pushConstantLit(constantLit);
+        if (nameParts.size() > 0 && nameParts.size() > requiredNamespace().size()) {
+            // At this depth we can stop checking the prefixes since beyond the end of the prefix.
+            skipPush++;
+            return tree;
         }
 
+        auto &constantLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
+        pushConstantLit(&constantLit);
         auto &pkgName = requiredNamespace();
 
-        if (!startScope) {
-            if (nameParts.size() > pkgName.size()) {
-                // At this depth we can stop checking the prefixes since beyond the end of the prefix.
-                skipPush++;
-                return tree;
-            }
-
-            constantLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
-            pushConstantLit(constantLit);
-        }
-
         if (rootConsts == 0 && !sharesPrefix(pkgName, nameParts)) {
-            if (auto e = ctx.beginError(constantLit->loc, core::errors::Packager::DefinitionPackageMismatch)) {
+            if (auto e = ctx.beginError(constantLit.loc, core::errors::Packager::DefinitionPackageMismatch)) {
                 e.setHeader(
                     "Class or method definition must match enclosing package namespace `{}`",
                     fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx); }));
@@ -356,17 +346,9 @@ public:
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
 
         if (lhs != nullptr && rootConsts == 0) {
-            bool startScope = nameParts.size() == 0;
-            if (startScope) {
+            if (nameParts.size() == 0 || nameParts.size() < requiredNamespace().size()) {
                 pushConstantLit(lhs);
-            }
-
-            auto &pkgName = requiredNamespace();
-
-            if (startScope || nameParts.size() < pkgName.size()) {
-                if (!startScope) {
-                    pushConstantLit(lhs);
-                }
+                auto &pkgName = requiredNamespace();
 
                 if (rootConsts == 0 && !isPrefix(pkgName, nameParts)) {
                     if (auto e = ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
