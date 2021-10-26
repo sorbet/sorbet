@@ -1,3 +1,4 @@
+# -- test/testdata/packager/export_for_test/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C RootPkg><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
   end
@@ -8,6 +9,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
+# -- test/testdata/packager/export_for_test/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Opus>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C Opus>::<C Foo>::<C Bar>)
@@ -75,6 +77,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/export_for_test/foo/bar/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package$1>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>)
@@ -91,12 +94,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/export_for_test/foo/bar/bar.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C BarClass><<C <todo sym>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/export_for_test/foo/bar/bar.test.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageTests>>::<C Opus_Foo_Bar_Package$1><<C <todo sym>>> < ()
     module <emptyTree>::<C Test>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < ()
@@ -105,6 +110,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/export_for_test/foo/foo.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package$1><<C <todo sym>>> < ()
     module <emptyTree>::<C Opus>::<C Foo><<C <todo sym>>> < ()
@@ -151,6 +157,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/export_for_test/foo/foo.test.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageTests>>::<C Opus_Foo_Package$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Test>::<C Opus>::<C Foo>::<C FooTest><<C <todo sym>>> < (::<todo sym>)
@@ -180,6 +187,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/export_for_test/test_imported/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Opus>::<C TestImported><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Opus_TestImported_Package$1>::<C Opus>::<C TestImported>::<C TIClass>)
@@ -196,6 +204,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/export_for_test/test_imported/test_imported.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Opus_TestImported_Package$1><<C <todo sym>>> < ()
     module <emptyTree>::<C Opus>::<C TestImported><<C <todo sym>>> < ()
@@ -204,6 +213,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/export_for_test/test_imported/test_imported.test.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageTests>>::<C Opus_TestImported_Package$1><<C <todo sym>>> < ()
     module <emptyTree>::<C Test>::<C Opus>::<C TestImported><<C <todo sym>>> < ()
@@ -212,6 +222,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/export_for_test/util/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Opus>::<C Util><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package$1>::<C Opus>::<C Util>::<C UtilClass>)
@@ -236,6 +247,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/export_for_test/util/util.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package$1><<C <todo sym>>> < ()
     module <emptyTree>::<C Opus>::<C Util><<C <todo sym>>> < ()
@@ -275,6 +287,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/export_for_test/util/util.test.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageTests>>::<C Opus_Util_Package$1><<C <todo sym>>> < ()
     module <emptyTree>::<C Test>::<C Opus>::<C Util><<C <todo sym>>> < ()

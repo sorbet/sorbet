@@ -600,6 +600,7 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
         what = packager::Packager::run(gs, workers, move(what), opts.extraPackageFilesDirectoryPrefixes);
         if (opts.print.Packager.enabled) {
             for (auto &f : what) {
+                opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());
                 opts.print.Packager.fmt("{}\n", f.tree.toStringWithTabs(gs, 0));
             }
         }

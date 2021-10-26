@@ -1,3 +1,4 @@
+# -- test/testdata/packager/nested_packages/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Package><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C Package>::<C Subpackage>)
@@ -21,6 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/nested_packages/mainpackage.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Package>::<C PackageClass><<C <todo sym>>> < (::<todo sym>)
@@ -38,6 +40,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/nested_packages/subpackage/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Package>::<C Subpackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C Package>)
@@ -61,6 +64,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
+# -- test/testdata/packager/nested_packages/subpackage/subpackage.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass><<C <todo sym>>> < (::<todo sym>)
