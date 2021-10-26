@@ -21,8 +21,7 @@ namespace {
 
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 constexpr core::NameRef TEST_NAME = core::Names::Constants::Test();
-const vector<core::NameRef> SECONDARY_TEST_NAMESPACES{core::Names::Constants::Critic(),
-                                                      core::Names::Constants::Minitest()};
+vector<core::NameRef> secondaryTestNamespaceRefs;
 
 bool isTestFile(const core::GlobalState &gs, core::File &file) {
     return absl::EndsWith(file.path(), ".test.rb") || absl::StartsWith(file.path(), "./test/") ||
@@ -34,7 +33,7 @@ bool isPrimaryTestNamespace(const core::NameRef &ns) {
 }
 
 bool isSecondaryTestNamespace(const core::NameRef &ns) {
-    return absl::c_find(SECONDARY_TEST_NAMESPACES, ns) != SECONDARY_TEST_NAMESPACES.end();
+    return absl::c_find(secondaryTestNamespaceRefs, ns) != secondaryTestNamespaceRefs.end();
 }
 
 bool isTestNamespace(const core::NameRef &ns) {
@@ -997,10 +996,16 @@ vector<ast::ParsedFile> rewritePackagedFilesFast(core::GlobalState &gs, vector<a
 }
 
 vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files,
-                                      const vector<std::string> &extraPackageFilesDirectoryPrefixes) {
+                                      const vector<std::string> &extraPackageFilesDirectoryPrefixes,
+                                      const vector<std::string> &secondaryTestNamespaces) {
     Timer timeit(gs.tracer(), "packager");
     // Ensure files are in canonical order.
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
+
+    // Record secondary test namespaces
+    for (const string &ns : secondaryTestNamespaces) {
+        secondaryTestNamespaceRefs.emplace_back(gs.enterNameConstant(ns));
+    }
 
     // Step 1: Find packages and determine their imports/exports.
     {
@@ -1093,7 +1098,8 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
 }
 
 vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files,
-                                                 const vector<std::string> &extraPackageFilesDirectoryPrefixes) {
+                                                 const vector<std::string> &extraPackageFilesDirectoryPrefixes,
+                                                 const vector<std::string> &secondaryTestNamespaces) {
     // However, if only source files have changed the existing PackageDB can be used to re-process
     // the changed files only.
     // TODO(nroman-stripe) This could be further incrementalized to avoid processing all packages by
@@ -1104,7 +1110,8 @@ vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<a
     if (packageDefChanged) {
         ENFORCE(checkContainsAllPackages(gs, files));
         auto emptyWorkers = WorkerPool::create(0, gs.tracer());
-        files = Packager::run(gs, *emptyWorkers, move(files), extraPackageFilesDirectoryPrefixes);
+        files =
+            Packager::run(gs, *emptyWorkers, move(files), extraPackageFilesDirectoryPrefixes, secondaryTestNamespaces);
     } else {
         files = rewritePackagedFilesFast(gs, move(files));
     }

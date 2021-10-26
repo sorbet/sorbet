@@ -451,8 +451,6 @@ NameDef names[] = {
     {"noMethod", "<no-method>", false},
     {"NoTypeArgument", "<no-type-argument>", true},
     {"NoTypeMember", "<no-type-member>", true},
-    {"Critic", "Critic", true},
-    {"Minitest", "Minitest", true},
     {"Opus", "Opus", true},
     {"T", "T", true},
     {"BasicObject", "BasicObject", true},
