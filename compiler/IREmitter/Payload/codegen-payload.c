@@ -158,6 +158,8 @@ SORBET_ALIVE(void, sorbet_vm_register_sig,
 SORBET_ALIVE(void, sorbet_vm_define_method,
              (VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq, bool isSelf));
 
+SORBET_ALIVE(VALUE, sorbet_maybeAllocateObjectFastPath, (VALUE recv, struct FunctionInlineCache *newCache));
+
 SORBET_ALIVE(VALUE, sorbet_vm_fstring_new, (const char *ptr, long len));
 SORBET_ALIVE(VALUE, sorbet_vm_str_uplus, (VALUE str));
 

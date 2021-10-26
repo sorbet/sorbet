@@ -938,3 +938,23 @@ VALUE sorbet_vm_gt(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *cach
     reg_cfp->sp += 2;
     return sorbet_callFuncWithCache(cache, VM_BLOCK_HANDLER_NONE);
 }
+
+/* See the patched object.c.  */
+extern VALUE sorbet_vm_class_alloc(VALUE klass);
+extern VALUE (*sorbet_vm_Class_new_func(void))();
+
+VALUE sorbet_maybeAllocateObjectFastPath(VALUE recv, struct FunctionInlineCache *newCache) {
+    sorbet_vmMethodSearch(newCache, recv);
+    rb_method_definition_t *newDef = newCache->cd.cc.me->def;
+    if (newDef->type != VM_METHOD_TYPE_CFUNC) {
+        return Qundef;
+    }
+    if (newDef->body.cfunc.func != sorbet_vm_Class_new_func()) {
+        return Qundef;
+    }
+
+    // OK, we verified that we're calling the relevant C function.  This is going
+    // to perform a ridiculously expensive search for the allocation function,
+    // perhaps someday we should try to cache this.
+    return sorbet_vm_class_alloc(recv);
+}

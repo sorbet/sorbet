@@ -590,6 +590,66 @@ public:
     }
 } CallWithSplatAndBlock;
 
+class NewIntrinsic : public NameBasedIntrinsicMethod {
+public:
+    NewIntrinsic() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
+        auto &builder = mcctx.builder;
+        auto &irctx = mcctx.irctx;
+        int rubyBlockId = mcctx.rubyBlockId;
+
+        auto *klass = mcctx.varGetRecv();
+        auto *newCache = mcctx.getInlineCache();
+
+        auto slowCall = llvm::BasicBlock::Create(cs, "slowNew", builder.GetInsertBlock()->getParent());
+        auto fastCall = llvm::BasicBlock::Create(cs, "fastNew", builder.GetInsertBlock()->getParent());
+        auto afterNew = llvm::BasicBlock::Create(cs, "afterNew", builder.GetInsertBlock()->getParent());
+
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
+        auto *allocatedObject =
+            builder.CreateCall(cs.getFunction("sorbet_maybeAllocateObjectFastPath"), {klass, newCache});
+        auto *isUndef = Payload::testIsUndef(cs, builder, allocatedObject);
+        builder.CreateCondBr(isUndef, slowCall, fastCall);
+
+        // We're pushing these arguments always, the only question is what we actually
+        // wind up calling with them.
+        auto &rubyStackArgs = mcctx.getStackArgs();
+
+        builder.SetInsertPoint(slowCall);
+        Payload::pushRubyStackVector(cs, builder, cfp, klass, rubyStackArgs.stack);
+        auto *nullBHForNew = Payload::vmBlockHandlerNone(cs, builder);
+        auto *slowValue = builder.CreateCall(cs.getFunction("sorbet_callFuncWithCache"), {newCache, nullBHForNew});
+        builder.CreateBr(afterNew);
+
+        builder.SetInsertPoint(fastCall);
+
+        // Whatever the flags on the `new` call were, the call to initialize is always
+        // allowed to call a private method.
+        CallCacheFlags flags = rubyStackArgs.flags;
+        flags.fcall = true;
+
+        auto *initializeCache = IREmitterHelpers::makeInlineCache(cs, builder, "initialize", flags,
+                                                                  rubyStackArgs.stack.size(), rubyStackArgs.keywords);
+        auto *nullBHForInitialize = Payload::vmBlockHandlerNone(cs, builder);
+        Payload::pushRubyStackVector(cs, builder, cfp, allocatedObject, rubyStackArgs.stack);
+        builder.CreateCall(cs.getFunction("sorbet_callFuncWithCache"), {initializeCache, nullBHForInitialize});
+        builder.CreateBr(afterNew);
+
+        builder.SetInsertPoint(afterNew);
+        auto *objectPhi = builder.CreatePHI(builder.getInt64Ty(), 2, "initializedObject");
+        objectPhi->addIncoming(slowValue, slowCall);
+        objectPhi->addIncoming(allocatedObject, fastCall);
+
+        return objectPhi;
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::new_()};
+    }
+} NewIntrinsic;
+
 class DefinedClassVar : public NameBasedIntrinsicMethod {
 public:
     DefinedClassVar() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
@@ -661,15 +721,15 @@ public:
         auto *cache = mcctx.getInlineCache();
         auto *recv = mcctx.varGetRecv();
         auto &args = mcctx.getStackArgs();
-        ENFORCE(args.size() == this->arity);
+        ENFORCE(args.stack.size() == this->arity);
         ENFORCE(this->arity == 1 || this->arity == 2);
 
         auto *cFunction = cs.getFunction(llvm::StringRef{this->cMethod.data(), this->cMethod.size()});
         auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
 
-        InlinedVector<llvm::Value *, 5> funcArgs{cfp, cache, recv, args[0]};
+        InlinedVector<llvm::Value *, 5> funcArgs{cfp, cache, recv, args.stack[0]};
         if (this->arity == 2) {
-            funcArgs.emplace_back(args[1]);
+            funcArgs.emplace_back(args.stack[1]);
         }
 
         return builder.CreateCall(cFunction, llvm::ArrayRef{&funcArgs[0], funcArgs.size()});
@@ -726,7 +786,7 @@ vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
     vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineClassIntrinsic,  &IdentityIntrinsic,
                                                  &CallWithBlock,      &ExceptionRetry,        &BuildHash,
                                                  &CallWithSplat,      &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic,
-                                                 &DefinedClassVar,    &DefinedInstanceVar};
+                                                 &DefinedClassVar,    &DefinedInstanceVar,    &NewIntrinsic};
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }
