@@ -613,6 +613,11 @@ ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> 
     Timer timeit(gs.tracer(), "name");
     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+
+    gs.preallocateSymbolTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
+                               opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
+                               opts.reserveTypeMemberTableCapacity);
+
     auto result = namer::Namer::run(gs, move(what), workers);
 
     return result;
