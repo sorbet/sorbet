@@ -90,7 +90,7 @@ public:
     const ErrorClass what;
     const std::string header;
     const bool isSilenced;
-    const std::vector<AutocorrectSuggestion> autocorrects;
+    std::vector<AutocorrectSuggestion> autocorrects;
     const std::vector<ErrorSection> sections;
 
     bool isCritical() const;
