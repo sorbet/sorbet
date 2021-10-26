@@ -941,7 +941,7 @@ VALUE sorbet_vm_gt(rb_control_frame_t *reg_cfp, struct FunctionInlineCache *cach
 
 /* See the patched object.c.  */
 extern VALUE sorbet_vm_class_alloc(VALUE klass);
-extern VALUE (*sorbet_vm_Class_new_func(void))(ANYARGS);
+extern VALUE (*sorbet_vm_Class_new_func(void))();
 
 VALUE sorbet_maybeAllocateObjectFastPath(VALUE recv, struct FunctionInlineCache *newCache) {
     sorbet_vmMethodSearch(newCache, recv);

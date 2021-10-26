@@ -115,6 +115,6 @@ VALUE sorbet_vm_class_alloc(VALUE klass) {
     return rb_class_alloc(klass);
 }
 
-VALUE (*sorbet_vm_Class_new_func(void))(ANYARGS) {
+VALUE (*sorbet_vm_Class_new_func(void))() {
     return rb_class_s_new;
 }
