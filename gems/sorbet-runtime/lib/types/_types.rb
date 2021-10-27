@@ -127,10 +127,10 @@ module T
   # exception at runtime if the value doesn't match the type.
   #
   # Compared to `T.let`, `T.cast` is _trusted_ by static system.
-  def self.cast(value, type, checked: true)
+  def self.cast(value, type=nil, checked: true, &blk)
     return value unless checked
 
-    Private::Casts.cast(value, type, cast_method: "T.cast")
+    Private::Casts.cast(value, type || blk.call, cast_method: "T.cast", &blk)
   end
 
   # Tells the typechecker to declare a variable of type `type`. Use
@@ -142,10 +142,10 @@ module T
   #
   # If `checked` is true, raises an exception at runtime if the value
   # doesn't match the type.
-  def self.let(value, type, checked: true)
+  def self.let(value, type=nil, checked: true, &blk)
     return value unless checked
 
-    Private::Casts.cast(value, type, cast_method: "T.let")
+    Private::Casts.cast(value, type || blk.call, cast_method: "T.let", &blk)
   end
 
   # Tells the type checker to treat `self` in the current block as `type`.
@@ -161,20 +161,20 @@ module T
   #
   # If `checked` is true, raises an exception at runtime if the value
   # doesn't match the type (this is the default).
-  def self.bind(value, type, checked: true)
+  def self.bind(value, type=nil, checked: true, &blk)
     return value unless checked
 
-    Private::Casts.cast(value, type, cast_method: "T.bind")
+    Private::Casts.cast(value, type || blk.call, cast_method: "T.bind", &blk)
   end
 
   # Tells the typechecker to ensure that `value` is of type `type` (if not, the typechecker will
   # fail). Use this for debugging typechecking errors, or to ensure that type information is
   # statically known and being checked appropriately. If `checked` is true, raises an exception at
   # runtime if the value doesn't match the type.
-  def self.assert_type!(value, type, checked: true)
+  def self.assert_type!(value, type=nil, checked: true, &blk)
     return value unless checked
 
-    Private::Casts.cast(value, type, cast_method: "T.assert_type!")
+    Private::Casts.cast(value, type || blk.call, cast_method: "T.assert_type!", &blk)
   end
 
   # For the static type checker, strips all type information from a value
