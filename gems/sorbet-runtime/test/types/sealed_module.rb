@@ -158,6 +158,15 @@ class Opus::Types::Test::SealedModuleTest < Critic::Unit::UnitTest
     assert_match(/was declared sealed and can only be inherited in/, err.message)
   end
 
+  it "errors when grandparent is sealed, and grand child is in another file" do
+    require_relative './fixtures/sealed_module/grandparent__1'
+
+    err = assert_raises(RuntimeError) do
+      require_relative './fixtures/sealed_module/grandparent__2'
+    end
+    assert_match(/does not seem to be a sealed module/, err.message)
+  end
+
   it "allows whitelisting certain sealed violations" do
     require_relative './fixtures/sealed_module/whitelist_violation__1'
     require_relative './fixtures/sealed_module/whitelist_violation__2'

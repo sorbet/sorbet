@@ -3,11 +3,11 @@
 
 module T::Private::Sealed
   module NoInherit
-    def inherited(other)
+    def inherited(child)
       super
       this_line = Kernel.caller.find {|line| !line.match(/in `inherited'$/)}
-      T::Private::Sealed.validate_inheritance(this_line, self, 'inherited')
-      @sorbet_sealed_module_all_subclasses << other
+      T::Private::Sealed.validate_inheritance(this_line, self, child, 'inherited')
+      @sorbet_sealed_module_all_subclasses << child
     end
 
     def sealed_subclasses
@@ -20,18 +20,18 @@ module T::Private::Sealed
   end
 
   module NoIncludeExtend
-    def included(other)
+    def included(child)
       super
       this_line = Kernel.caller.find {|line| !line.match(/in `included'$/)}
-      T::Private::Sealed.validate_inheritance(this_line, self, 'included')
-      @sorbet_sealed_module_all_subclasses << other
+      T::Private::Sealed.validate_inheritance(this_line, self, child, 'included')
+      @sorbet_sealed_module_all_subclasses << child
     end
 
-    def extended(other)
+    def extended(child)
       super
       this_line = Kernel.caller.find {|line| !line.match(/in `extended'$/)}
-      T::Private::Sealed.validate_inheritance(this_line, self, 'extended')
-      @sorbet_sealed_module_all_subclasses << other
+      T::Private::Sealed.validate_inheritance(this_line, self, child, 'extended')
+      @sorbet_sealed_module_all_subclasses << child
     end
 
     def sealed_subclasses
@@ -68,12 +68,15 @@ module T::Private::Sealed
     mod.instance_variable_defined?(:@sorbet_sealed_module_decl_file)
   end
 
-  def self.validate_inheritance(this_line, parent, verb)
+  def self.validate_inheritance(this_line, parent, child, verb)
     this_file = this_line&.split(':')&.first
     decl_file = parent.instance_variable_get(:@sorbet_sealed_module_decl_file)
 
-    if !this_file || !decl_file
-      raise "Couldn't determine enough file information for checking sealed modules"
+    if !this_file
+      raise "Could not use backtrace to determine file for #{verb} child #{child}"
+    end
+    if !decl_file
+      raise "#{parent} does not seem to be a sealed module (#{verb} by #{child})"
     end
 
     if !this_file.start_with?(decl_file)
