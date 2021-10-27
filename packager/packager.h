@@ -77,15 +77,10 @@ namespace sorbet::packager {
 class Packager final {
 public:
     static std::vector<ast::ParsedFile> run(core::GlobalState &gs, WorkerPool &workers,
-                                            std::vector<ast::ParsedFile> files,
-                                            const std::vector<std::string> &extraPackageFilesDirectoryPrefixes,
-                                            const std::vector<std::string> &secondaryTestNamespaces);
+                                            std::vector<ast::ParsedFile> files);
 
     // Run packager incrementally. Note: `files` must contain all packages files. Does not support package changes.
-    static std::vector<ast::ParsedFile>
-    runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> files,
-                   const std::vector<std::string> &extraPackageFilesDirectoryPrefixes,
-                   const std::vector<std::string> &secondaryTestNamespaces);
+    static std::vector<ast::ParsedFile> runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> files);
 
     Packager() = delete;
 };

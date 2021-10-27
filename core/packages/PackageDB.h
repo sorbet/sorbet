@@ -19,6 +19,8 @@ public:
 };
 
 class PackageDB final {
+    friend class core::GlobalState;
+
 public:
     NameRef enterPackage(std::unique_ptr<PackageInfo> pkg);
     NameRef lookupPackage(NameRef pkgMangledName) const;
@@ -38,7 +40,13 @@ public:
     PackageDB &operator=(const PackageDB &) = delete;
     PackageDB &operator=(PackageDB &&) = default;
 
+    const std::vector<core::NameRef> &secondaryTestPackageNamespaceRefs() const;
+    const std::vector<std::string> &extraPackageFilesDirectoryPrefixes() const;
+
 private:
+    std::vector<NameRef> secondaryTestPackageNamespaceRefs_;
+    std::vector<std::string> extraPackageFilesDirectoryPrefixes_;
+
     UnorderedMap<core::NameRef, std::unique_ptr<packages::PackageInfo>> packages;
     UnorderedMap<std::string, core::NameRef> packagesByPathPrefix;
     bool frozen = true;

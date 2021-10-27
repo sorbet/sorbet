@@ -113,6 +113,14 @@ bool PackageDB::empty() const {
     return packages.empty();
 }
 
+const std::vector<core::NameRef> &PackageDB::secondaryTestPackageNamespaceRefs() const {
+    return secondaryTestPackageNamespaceRefs_;
+}
+
+const std::vector<std::string> &PackageDB::extraPackageFilesDirectoryPrefixes() const {
+    return extraPackageFilesDirectoryPrefixes_;
+}
+
 PackageDB PackageDB::deepCopy() const {
     ENFORCE(frozen);
     PackageDB result;
@@ -120,6 +128,8 @@ PackageDB PackageDB::deepCopy() const {
     for (auto const &[nr, pkgInfo] : this->packages) {
         result.packages[nr] = pkgInfo->deepCopy();
     }
+    result.secondaryTestPackageNamespaceRefs_ = this->secondaryTestPackageNamespaceRefs_;
+    result.extraPackageFilesDirectoryPrefixes_ = this->extraPackageFilesDirectoryPrefixes_;
     result.packagesByPathPrefix = this->packagesByPathPrefix;
     return result;
 }

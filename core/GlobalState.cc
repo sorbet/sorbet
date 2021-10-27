@@ -1908,6 +1908,17 @@ const packages::PackageDB &GlobalState::packageDB() const {
     return packageDB_;
 }
 
+void GlobalState::setPackagerOptions(const std::vector<std::string> &secondaryTestPackageNamespaces,
+                                     const std::vector<std::string> &extraPackageFilesDirectoryPrefixes) {
+    ENFORCE(packageDB_.secondaryTestPackageNamespaceRefs_.size() == 0);
+
+    for (const string &ns : secondaryTestPackageNamespaces) {
+        packageDB_.secondaryTestPackageNamespaceRefs_.emplace_back(enterNameConstant(ns));
+    }
+
+    packageDB_.extraPackageFilesDirectoryPrefixes_ = extraPackageFilesDirectoryPrefixes;
+}
+
 packages::UnfreezePackages GlobalState::unfreezePackages() {
     return packageDB_.unfreeze();
 }

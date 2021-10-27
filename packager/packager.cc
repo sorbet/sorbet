@@ -21,23 +21,24 @@ namespace {
 
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 constexpr core::NameRef TEST_NAME = core::Names::Constants::Test();
-vector<core::NameRef> secondaryTestNamespaceRefs;
 
 bool isTestFile(const core::GlobalState &gs, core::File &file) {
+    // TODO: (aadi-stripe, 11/26/2021) see if these can all be changed to use getPrintablePath
     return absl::EndsWith(file.path(), ".test.rb") || absl::StartsWith(file.path(), "./test/") ||
            absl::StrContains(gs.getPrintablePath(file.path()), "/test/");
 }
 
-bool isPrimaryTestNamespace(const core::NameRef &ns) {
+bool isPrimaryTestNamespace(const core::NameRef ns) {
     return ns == TEST_NAME;
 }
 
-bool isSecondaryTestNamespace(const core::NameRef &ns) {
-    return absl::c_find(secondaryTestNamespaceRefs, ns) != secondaryTestNamespaceRefs.end();
+bool isSecondaryTestNamespace(const core::GlobalState &gs, const core::NameRef ns) {
+    const vector<core::NameRef> &secondaryTestPackageNamespaceRefs = gs.packageDB().secondaryTestPackageNamespaceRefs();
+    return absl::c_find(secondaryTestPackageNamespaceRefs, ns) != secondaryTestPackageNamespaceRefs.end();
 }
 
-bool isTestNamespace(const core::NameRef &ns) {
-    return isPrimaryTestNamespace(ns) || isSecondaryTestNamespace(ns);
+bool isTestNamespace(const core::GlobalState &gs, const core::NameRef ns) {
+    return isPrimaryTestNamespace(ns) || isSecondaryTestNamespace(gs, ns);
 }
 
 struct FullyQualifiedName {
@@ -245,13 +246,14 @@ ast::ExpressionPtr parts2literal(const vector<core::NameRef> &parts, core::LocOf
 // Prefix a constant reference with a name: `Foo::Bar` -> `<REGISTRY>::<name>::Foo::Bar`
 // Registry is either <PackageRegistry> or <PackageTests>. The latter if following the convention
 // that if scope starts with `Test::`.
-ast::ExpressionPtr prependPackageScope(ast::ExpressionPtr scope, core::NameRef mangledName) {
+ast::ExpressionPtr prependPackageScope(const core::GlobalState &gs, ast::ExpressionPtr scope,
+                                       core::NameRef mangledName) {
     auto *lastConstLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(scope);
     while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
         lastConstLit = constLit;
     }
     core::NameRef registryName = core::Names::Constants::PackageRegistry();
-    if (isTestNamespace(lastConstLit->cnst)) {
+    if (isTestNamespace(gs, lastConstLit->cnst)) {
         registryName = core::Names::Constants::PackageTests();
     }
     lastConstLit->scope = name2Expr(mangledName, name2Expr(registryName));
@@ -301,7 +303,7 @@ public:
             return tree;
         }
 
-        if (nameParts.size() > 0 && nameParts.size() > requiredNamespace().size()) {
+        if (nameParts.size() > 0 && nameParts.size() > requiredNamespace(ctx.state).size()) {
             // At this depth we can stop checking the prefixes since beyond the end of the prefix.
             skipPush++;
             return tree;
@@ -309,7 +311,7 @@ public:
 
         auto &constantLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
         pushConstantLit(&constantLit);
-        auto &pkgName = requiredNamespace();
+        auto &pkgName = requiredNamespace(ctx.state);
 
         if (rootConsts == 0 && !sharesPrefix(pkgName, nameParts)) {
             if (auto e = ctx.beginError(constantLit.loc, core::errors::Packager::DefinitionPackageMismatch)) {
@@ -345,9 +347,9 @@ public:
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
 
         if (lhs != nullptr && rootConsts == 0) {
-            if (nameParts.size() == 0 || nameParts.size() < requiredNamespace().size()) {
+            if (nameParts.size() == 0 || nameParts.size() < requiredNamespace(ctx.state).size()) {
                 pushConstantLit(lhs);
-                auto &pkgName = requiredNamespace();
+                auto &pkgName = requiredNamespace(ctx.state);
 
                 if (rootConsts == 0 && !isPrefix(pkgName, nameParts)) {
                     if (auto e = ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
@@ -393,9 +395,9 @@ private:
         }
     }
 
-    const vector<core::NameRef> &requiredNamespace() const {
+    const vector<core::NameRef> &requiredNamespace(const core::GlobalState &gs) const {
         if (isTestFile) {
-            if (isSecondaryTestNamespace(pkg.name.fullName.parts[0]) && !isPrimaryTestNamespace(nameParts[0])) {
+            if (!isPrimaryTestNamespace(nameParts[0]) && isSecondaryTestNamespace(gs, pkg.name.fullName.parts[0])) {
                 return pkg.name.fullName.parts;
             }
             return pkg.name.fullTestPkgName.parts;
@@ -446,7 +448,7 @@ struct PackageInfoFinder {
             if (auto target = verifyConstant(ctx, core::Names::export_(), send.args[0])) {
                 exported.emplace_back(getFullyQualifiedName(ctx, target), ExportType::Public);
                 // Transform the constant lit to refer to the target within the mangled package namespace.
-                send.args[0] = prependInternalPackageName(move(send.args[0]));
+                send.args[0] = prependInternalPackageName(ctx.state, move(send.args[0]));
             }
         }
         if (send.fun == core::Names::export_for_test() && send.args.size() == 1) {
@@ -454,7 +456,7 @@ struct PackageInfoFinder {
             if (auto target = verifyConstant(ctx, core::Names::export_for_test(), send.args[0])) {
                 auto fqn = getFullyQualifiedName(ctx, target);
                 ENFORCE(fqn.parts.size() > 0);
-                if (isTestNamespace(fqn.parts[0])) {
+                if (isTestNamespace(ctx.state, fqn.parts[0])) {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidExportForTest)) {
                         e.setHeader("Packages may not {} names in the `{}::` namespace", send.fun.toString(ctx),
                                     fqn.parts[0].show(ctx));
@@ -463,7 +465,7 @@ struct PackageInfoFinder {
                     exported.emplace_back(move(fqn), ExportType::PrivateTest);
                 }
                 // Transform the constant lit to refer to the target within the mangled package namespace.
-                send.args[0] = prependInternalPackageName(move(send.args[0]));
+                send.args[0] = prependInternalPackageName(ctx.state, move(send.args[0]));
             }
         }
 
@@ -512,8 +514,8 @@ struct PackageInfoFinder {
     }
 
     // Bar::Baz => <PackageRegistry>::Foo_Package::Bar::Baz
-    ast::ExpressionPtr prependInternalPackageName(ast::ExpressionPtr scope) {
-        return prependPackageScope(move(scope), this->info->name.mangledName);
+    ast::ExpressionPtr prependInternalPackageName(const core::GlobalState &gs, ast::ExpressionPtr scope) {
+        return prependPackageScope(gs, move(scope), this->info->name.mangledName);
     }
 
     // Generate a list of FQNs exported by this package. No export may be a prefix of another.
@@ -742,11 +744,11 @@ public:
 
     // Make add imports for the test package for all normal code exported by its corresponding
     // "normal" package.
-    void mergeSelfExportsForTest(const PackageInfoImpl &pkg) {
+    void mergeSelfExportsForTest(core::Context ctx, const PackageInfoImpl &pkg) {
         for (const auto &exp : pkg.exports) {
             const auto &parts = exp.parts();
             ENFORCE(parts.size() > 0);
-            if (!isTestNamespace(parts[0])) { // Only add imports for non-test
+            if (!isTestNamespace(ctx.state, parts[0])) { // Only add imports for non-test
                 auto loc = exp.fqn.loc.offsets();
                 addImport(pkg, loc, exp.fqn, ImportType::Test);
             }
@@ -790,7 +792,7 @@ private:
         });
         for (auto const &[nameRef, child] : childPairs) {
             // Ignore the entire `Test::*` part of import tree if we are not in a test context.
-            if (moduleType != ImportType::Test && parts.empty() && isTestNamespace(nameRef)) {
+            if (moduleType != ImportType::Test && parts.empty() && isTestNamespace(ctx.state, nameRef)) {
                 continue;
             }
             parts.emplace_back(nameRef);
@@ -818,7 +820,7 @@ private:
                 // module A::B::C
                 //   D = <Mangled A::B>::A::B::C::D
                 // end
-                auto assignRhs = prependPackageScope(parts2literal(parts, core::LocOffsets::none()),
+                auto assignRhs = prependPackageScope(ctx.state, parts2literal(parts, core::LocOffsets::none()),
                                                      node->source.packageMangledName);
                 auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
                                               std::move(assignRhs));
@@ -948,7 +950,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
 
         importedPackages = treeBuilder.makeModule(ctx, ImportType::Normal);
 
-        treeBuilder.mergeSelfExportsForTest(package);
+        treeBuilder.mergeSelfExportsForTest(ctx, package);
         testImportedPackages = treeBuilder.makeModule(ctx, ImportType::Test);
     }
 
@@ -995,17 +997,10 @@ vector<ast::ParsedFile> rewritePackagedFilesFast(core::GlobalState &gs, vector<a
     return files;
 }
 
-vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files,
-                                      const vector<std::string> &extraPackageFilesDirectoryPrefixes,
-                                      const vector<std::string> &secondaryTestNamespaces) {
+vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "packager");
     // Ensure files are in canonical order.
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
-
-    // Record secondary test namespaces
-    for (const string &ns : secondaryTestNamespaces) {
-        secondaryTestNamespaceRefs.emplace_back(gs.enterNameConstant(ns));
-    }
 
     // Step 1: Find packages and determine their imports/exports.
     {
@@ -1016,7 +1011,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
             if (FileOps::getFileName(file.file.data(gs).path()) == PACKAGE_FILE_NAME) {
                 file.file.data(gs).sourceType = core::File::Type::Package;
                 core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-                auto pkg = getPackageInfo(ctx, file, extraPackageFilesDirectoryPrefixes);
+                auto pkg = getPackageInfo(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
                 if (pkg == nullptr) {
                     // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
                     // surfaced that error to the user. Nothing to do here.
@@ -1097,9 +1092,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
     return files;
 }
 
-vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files,
-                                                 const vector<std::string> &extraPackageFilesDirectoryPrefixes,
-                                                 const vector<std::string> &secondaryTestNamespaces) {
+vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
     // However, if only source files have changed the existing PackageDB can be used to re-process
     // the changed files only.
     // TODO(nroman-stripe) This could be further incrementalized to avoid processing all packages by
@@ -1110,8 +1103,7 @@ vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<a
     if (packageDefChanged) {
         ENFORCE(checkContainsAllPackages(gs, files));
         auto emptyWorkers = WorkerPool::create(0, gs.tracer());
-        files =
-            Packager::run(gs, *emptyWorkers, move(files), extraPackageFilesDirectoryPrefixes, secondaryTestNamespaces);
+        files = Packager::run(gs, *emptyWorkers, move(files));
     } else {
         files = rewritePackagedFilesFast(gs, move(files));
     }
