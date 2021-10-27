@@ -448,7 +448,7 @@ struct PackageInfoFinder {
             if (auto target = verifyConstant(ctx, core::Names::export_(), send.args[0])) {
                 exported.emplace_back(getFullyQualifiedName(ctx, target), ExportType::Public);
                 // Transform the constant lit to refer to the target within the mangled package namespace.
-                send.args[0] = prependInternalPackageName(ctx.state, move(send.args[0]));
+                send.args[0] = prependInternalPackageName(ctx, move(send.args[0]));
             }
         }
         if (send.fun == core::Names::export_for_test() && send.args.size() == 1) {
@@ -465,7 +465,7 @@ struct PackageInfoFinder {
                     exported.emplace_back(move(fqn), ExportType::PrivateTest);
                 }
                 // Transform the constant lit to refer to the target within the mangled package namespace.
-                send.args[0] = prependInternalPackageName(ctx.state, move(send.args[0]));
+                send.args[0] = prependInternalPackageName(ctx, move(send.args[0]));
             }
         }
 
@@ -748,7 +748,7 @@ public:
         for (const auto &exp : pkg.exports) {
             const auto &parts = exp.parts();
             ENFORCE(parts.size() > 0);
-            if (!isTestNamespace(ctx.state, parts[0])) { // Only add imports for non-test
+            if (!isTestNamespace(ctx, parts[0])) { // Only add imports for non-test
                 auto loc = exp.fqn.loc.offsets();
                 addImport(pkg, loc, exp.fqn, ImportType::Test);
             }
@@ -792,7 +792,7 @@ private:
         });
         for (auto const &[nameRef, child] : childPairs) {
             // Ignore the entire `Test::*` part of import tree if we are not in a test context.
-            if (moduleType != ImportType::Test && parts.empty() && isTestNamespace(ctx.state, nameRef)) {
+            if (moduleType != ImportType::Test && parts.empty() && isTestNamespace(ctx, nameRef)) {
                 continue;
             }
             parts.emplace_back(nameRef);
@@ -820,7 +820,7 @@ private:
                 // module A::B::C
                 //   D = <Mangled A::B>::A::B::C::D
                 // end
-                auto assignRhs = prependPackageScope(ctx.state, parts2literal(parts, core::LocOffsets::none()),
+                auto assignRhs = prependPackageScope(ctx, parts2literal(parts, core::LocOffsets::none()),
                                                      node->source.packageMangledName);
                 auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
                                               std::move(assignRhs));
