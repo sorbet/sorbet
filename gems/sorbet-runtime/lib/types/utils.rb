@@ -31,8 +31,8 @@ module T::Utils
   # type `type`, including recursively through collections. Note that
   # in some cases this runtime check can be very expensive, especially
   # with large collections of objects.
-  def self.check_type_recursive!(value, type)
-    T::Private::Casts.cast_recursive(value, type, cast_method: "T.check_type_recursive!")
+  def self.check_type_recursive!(value, type=nil, &blk)
+    T::Private::Casts.cast_recursive(value, type || blk.call, cast_method: "T.check_type_recursive!")
   end
 
   # Returns the set of all methods (public, protected, private) defined on a module or its
