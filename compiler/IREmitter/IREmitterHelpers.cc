@@ -461,6 +461,7 @@ llvm::Value *CallCacheFlags::build(CompilerState &cs, llvm::IRBuilderBase &build
         {&CallCacheFlags::kwarg, "sorbet_vmCallKwarg", "VM_CALL_KWARG"},
         {&CallCacheFlags::kw_splat, "sorbet_vmCallKwSplat", "VM_CALL_KW_SPLAT"},
         {&CallCacheFlags::fcall, "sorbet_vmCallFCall", "VM_CALL_FCALL"},
+        {&CallCacheFlags::blockarg, "sorbet_vmCallArgsBlockarg", "VM_CALL_ARGS_BLOCKARG"},
     };
 
     llvm::Value *acc = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, false));

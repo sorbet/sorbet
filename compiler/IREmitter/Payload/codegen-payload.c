@@ -2234,6 +2234,11 @@ unsigned int sorbet_vmCallFCall() {
     return VM_CALL_FCALL;
 }
 
+SORBET_INLINE
+unsigned int sorbet_vmCallArgsBlockarg() {
+    return VM_CALL_ARGS_BLOCKARG;
+}
+
 // static struct rb_kwarg_call_data test_cd = {0};
 
 SORBET_INLINE

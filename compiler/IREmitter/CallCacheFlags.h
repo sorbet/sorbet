@@ -13,6 +13,7 @@ struct CallCacheFlags {
     bool kwarg = false;
     bool kw_splat = false;
     bool fcall = false;
+    bool blockarg = false;
 
     llvm::Value *build(CompilerState &cs, llvm::IRBuilderBase &builder);
 };
