@@ -753,6 +753,12 @@ void GlobalState::preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 f
     u4 constantNameSizeScaled = nextPowerOfTwo(constantNameSize);
     u4 uniqueNameSizeScaled = nextPowerOfTwo(uniqueNameSize);
 
+    // When preallocating in release builds, large initial reservations aren't necessarily a problem on hosts with lots
+    // of cores available as we use jemalloc as the allocator. An effect of this is that larger allocations will be
+    // mapped with MAP_NORESERVE, and will only be backed by real memory if they're used. As a result, the large number
+    // of threads spawned during indexing (where no symbol table entries are created) won't end up allocating memory to
+    // back the symbol tables when the global state is copied in each thread.
+
     // Note: reserve is a no-op if size is < current capacity.
     classAndModules.reserve(classAndModulesSizeScaled);
     methods.reserve(methodsSizeScaled);
