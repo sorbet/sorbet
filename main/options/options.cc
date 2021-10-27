@@ -350,6 +350,11 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                "Extra parent directories which contain package files. "
                                "This option must be used in conjunction with --stripe-packages",
                                cxxopts::value<vector<string>>(), "string");
+    options.add_options("dev")(
+        "secondary-test-package-namespaces",
+        "Secondary top-level namespaces which contain test code (in addition to Test, which is primary). "
+        "This option must be used in conjunction with --stripe-packages",
+        cxxopts::value<vector<string>>(), "string");
 
     options.add_options("advanced")(
         "autogen-autoloader-exclude-require",
@@ -860,6 +865,21 @@ void readOptions(Options &opts,
                     throw EarlyReturnWithCode(1);
                 }
                 opts.extraPackageFilesDirectoryPrefixes.emplace_back(dirName);
+            }
+        }
+        if (raw.count("secondary-test-package-namespaces")) {
+            if (!opts.stripePackages) {
+                logger->error("--secondary-test-package-namespaces can only be specified in --stripe-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+            std::regex nsValid("[A-Z][a-zA-Z0-9]+");
+            for (const string &ns : raw["secondary-test-package-namespaces"].as<vector<string>>()) {
+                if (!std::regex_match(ns, nsValid)) {
+                    logger->error("--secondary-test-package-namespaces must contain items that start with a capital "
+                                  "letter and are alphanumeric.");
+                    throw EarlyReturnWithCode(1);
+                }
+                opts.secondaryTestPackageNamespaces.emplace_back(ns);
             }
         }
 

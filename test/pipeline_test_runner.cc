@@ -279,15 +279,23 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
-    vector<std::string> extraPackageFilesDirectoryPrefixes;
     if (enablePackager) {
+        vector<std::string> extraPackageFilesDirectoryPrefixes;
+        vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
+
         auto extraDir = StringPropertyAssertion::getValue("extra-package-files-directory-prefix", assertions);
         if (extraDir.has_value()) {
             extraPackageFilesDirectoryPrefixes.emplace_back(extraDir.value());
         }
 
+        {
+            core::UnfreezeNameTable packageNS(*gs);
+            core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
+            gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryPrefixes);
+        }
+
         // Packager runs over all trees.
-        trees = packager::Packager::run(*gs, *workers, move(trees), extraPackageFilesDirectoryPrefixes);
+        trees = packager::Packager::run(*gs, *workers, move(trees));
         for (auto &tree : trees) {
             handler.addObserved(*gs, "package-tree", [&]() {
                 return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
@@ -566,7 +574,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     trees = move(newTrees);
     if (enablePackager) {
-        trees = packager::Packager::runIncremental(*gs, move(trees), extraPackageFilesDirectoryPrefixes);
+        trees = packager::Packager::runIncremental(*gs, move(trees));
         for (auto &tree : trees) {
             handler.addObserved(*gs, "package-tree", [&]() {
                 return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));

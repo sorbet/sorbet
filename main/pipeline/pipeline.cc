@@ -225,7 +225,7 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
 #ifndef SORBET_REALMAIN_MIN
         if (opts.stripePackages) {
             Timer timeit(gs.tracer(), "incremental_packager");
-            what = packager::Packager::runIncremental(gs, move(what), opts.extraPackageFilesDirectoryPrefixes);
+            what = packager::Packager::runIncremental(gs, move(what));
         }
 #endif
         {
@@ -597,7 +597,12 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
 #ifndef SORBET_REALMAIN_MIN
     if (opts.stripePackages) {
         Timer timeit(gs.tracer(), "package");
-        what = packager::Packager::run(gs, workers, move(what), opts.extraPackageFilesDirectoryPrefixes);
+        {
+            core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
+            core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
+            gs.setPackagerOptions(opts.secondaryTestPackageNamespaces, opts.extraPackageFilesDirectoryPrefixes);
+        }
+        what = packager::Packager::run(gs, workers, move(what));
         if (opts.print.Packager.enabled) {
             for (auto &f : what) {
                 opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());

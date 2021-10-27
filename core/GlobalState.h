@@ -153,6 +153,8 @@ public:
     FileRef findFileByPath(std::string_view path) const;
 
     const packages::PackageDB &packageDB() const;
+    void setPackagerOptions(const std::vector<std::string> &secondaryTestPackageNamespaces,
+                            const std::vector<std::string> &extraPackageFilesDirectoryPrefixes);
     packages::UnfreezePackages unfreezePackages();
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName);
