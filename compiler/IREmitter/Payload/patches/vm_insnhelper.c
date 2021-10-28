@@ -958,3 +958,21 @@ VALUE sorbet_maybeAllocateObjectFastPath(VALUE recv, struct FunctionInlineCache 
     // perhaps someday we should try to cache this.
     return sorbet_vm_class_alloc(recv);
 }
+
+/* See the patched object.c.  */
+extern VALUE (*sorbet_vm_Kernel_instance_variable_get_func(void))(VALUE obj, VALUE iv);
+
+VALUE sorbet_vm_instance_variable_get(struct FunctionInlineCache *getCache, IVC varCache, rb_control_frame_t *reg_cfp,
+                                      VALUE recv, ID var) {
+    sorbet_vmMethodSearch(getCache, recv);
+    rb_method_definition_t *getDef = getCache->cd.cc.me->def;
+    if (getDef->type == VM_METHOD_TYPE_CFUNC && getDef->body.cfunc.func == sorbet_vm_Kernel_instance_variable_get_func()) {
+        return sorbet_vm_getivar(recv, var, varCache);
+    }
+
+    VALUE *sp = reg_cfp->sp;
+    *(sp + 0) = recv;
+    *(sp + 1) = rb_id2sym(var);
+    reg_cfp->sp += 2;
+    return sorbet_callFuncWithCache(getCache, VM_BLOCK_HANDLER_NONE);
+}
