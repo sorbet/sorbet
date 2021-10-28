@@ -123,14 +123,22 @@ module T
   end
 
   # Tells the typechecker that `value` is of type `type`. Use this to get additional checking after
-  # an expression that the typechecker is unable to analyze. If `checked` is true, raises an
-  # exception at runtime if the value doesn't match the type.
+  # an expression that the typechecker is unable to analyze. If `checked` is :always, raises an
+  # exception at runtime if the value doesn't match the type (defaults to `T::Configuration.default_checked_level`).
   #
   # Compared to `T.let`, `T.cast` is _trusted_ by static system.
-  def self.cast(value, type, checked: true)
-    return value unless checked
+  def self.cast(value, type, checked: nil)
+    default_checked_level = T::Private::RuntimeLevels.default_checked_level
+    check_tests = T::Private::RuntimeLevels.check_tests?
 
-    Private::Casts.cast(value, type, cast_method: "T.cast")
+    T::Private::ClassUtils.replace_method(self.singleton_class, :cast) do |value, type, checked: nil|
+      checked = :always if checked == true # Backward compatibility, used to be a T:Boolean
+      checked = :never if checked == false # Backward compatibility, used to be a T:Boolean
+      checked ||= default_checked_level
+      return value unless checked == :always || (checked == :tests && check_tests)
+
+      Private::Casts.cast(value, type, cast_method: "T.cast")
+    end.bind(self).call(value, type, checked: checked)
   end
 
   # Tells the typechecker to declare a variable of type `type`. Use
@@ -140,12 +148,20 @@ module T
   #
   # Compared to `T.cast`, `T.let` is _checked_ by static system.
   #
-  # If `checked` is true, raises an exception at runtime if the value
-  # doesn't match the type.
-  def self.let(value, type, checked: true)
-    return value unless checked
+  # If `checked` is :always, raises an exception at runtime if the value
+  # doesn't match the type (defaults to `T::Configuration.default_checked_level`).
+  def self.let(value, type, checked: nil)
+    default_checked_level = T::Private::RuntimeLevels.default_checked_level
+    check_tests = T::Private::RuntimeLevels.check_tests?
 
-    Private::Casts.cast(value, type, cast_method: "T.let")
+    T::Private::ClassUtils.replace_method(self.singleton_class, :let) do |value, type, checked: nil|
+      checked = :always if checked == true # Backward compatibility, used to be a T:Boolean
+      checked = :never if checked == false # Backward compatibility, used to be a T:Boolean
+      checked ||= default_checked_level
+      return value unless checked == :always || (checked == :tests && check_tests)
+
+      Private::Casts.cast(value, type, cast_method: "T.let")
+    end.bind(self).call(value, type, checked: checked)
   end
 
   # Tells the type checker to treat `self` in the current block as `type`.
@@ -159,22 +175,38 @@ module T
   #
   # `T.bind` behaves like `T.cast` in that it is assumed to be true statically.
   #
-  # If `checked` is true, raises an exception at runtime if the value
-  # doesn't match the type (this is the default).
-  def self.bind(value, type, checked: true)
-    return value unless checked
+  # If `checked` is :always, raises an exception at runtime if the value
+  # doesn't match the type (defaults to `T::Configuration.default_checked_level`).
+  def self.bind(value, type, checked: nil)
+    default_checked_level = T::Private::RuntimeLevels.default_checked_level
+    check_tests = T::Private::RuntimeLevels.check_tests?
 
-    Private::Casts.cast(value, type, cast_method: "T.bind")
+    T::Private::ClassUtils.replace_method(self.singleton_class, :bind) do |value, type, checked: nil|
+      checked = :always if checked == true # Backward compatibility, used to be a T:Boolean
+      checked = :never if checked == false # Backward compatibility, used to be a T:Boolean
+      checked ||= default_checked_level
+      return value unless checked == :always || (checked == :tests && check_tests)
+
+      Private::Casts.cast(value, type, cast_method: "T.bind")
+    end.bind(self).call(value, type, checked: checked)
   end
 
   # Tells the typechecker to ensure that `value` is of type `type` (if not, the typechecker will
   # fail). Use this for debugging typechecking errors, or to ensure that type information is
-  # statically known and being checked appropriately. If `checked` is true, raises an exception at
-  # runtime if the value doesn't match the type.
-  def self.assert_type!(value, type, checked: true)
-    return value unless checked
+  # statically known and being checked appropriately. If `checked` is :always, raises an exception at
+  # runtime if the value doesn't match the type (defaults to `T::Configuration.default_checked_level`).
+  def self.assert_type!(value, type, checked: nil)
+    default_checked_level = T::Private::RuntimeLevels.default_checked_level
+    check_tests = T::Private::RuntimeLevels.check_tests?
 
-    Private::Casts.cast(value, type, cast_method: "T.assert_type!")
+    T::Private::ClassUtils.replace_method(self.singleton_class, :assert_type!) do |value, type, checked: nil|
+      checked = :always if checked == true # Backward compatibility, used to be a T:Boolean
+      checked = :never if checked == false # Backward compatibility, used to be a T:Boolean
+      checked ||= default_checked_level
+      return value unless checked == :always || (checked == :tests && check_tests)
+
+      Private::Casts.cast(value, type, cast_method: "T.assert_type!")
+    end.bind(self).call(value, type, checked: checked)
   end
 
   # For the static type checker, strips all type information from a value
