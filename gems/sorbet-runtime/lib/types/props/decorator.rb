@@ -61,7 +61,6 @@ class T::Props::Decorator
   VALID_RULE_KEYS = T.let(%i[
     enum
     foreign
-    ifunset
     immutable
     override
     redaction
@@ -141,8 +140,8 @@ class T::Props::Decorator
   # For performance, don't use named params here.
   # Passing in rules here is purely a performance optimization.
   #
-  # Note this path is NOT used by generated getters on instances,
-  # unless `ifunset` is used on the prop, or `prop_get` is overridden.
+  # Note this path is NOT used by generated getters on instances
+  # unless `prop_get` is overridden.
   #
   # checked(:never) - O(prop accesses)
   sig do
@@ -158,8 +157,6 @@ class T::Props::Decorator
     val = instance.instance_variable_get(rules[:accessor_key])
     if !val.nil?
       val
-    elsif (d = rules[:ifunset])
-      T::Props::Utils.deep_clone_object(d)
     else
       nil
     end
@@ -377,7 +374,7 @@ class T::Props::Decorator
         end
       end
 
-      if method(:prop_get).owner != T::Props::Decorator || rules.key?(:ifunset)
+      if method(:prop_get).owner != T::Props::Decorator
         @class.send(:define_method, name) do
           T.unsafe(self.class).decorator.prop_get(self, name, rules)
         end

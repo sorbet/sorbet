@@ -46,7 +46,6 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
     include T::Props
 
     prop :prop1, String
-    prop :prop2, Integer, ifunset: 42
     prop :shadowed, String
 
     orig_verbose = $VERBOSE
@@ -102,7 +101,6 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
       d.prop1 = 'hi'
       d.prop3 = {'foo' => 'bar'}
       assert_equal('hi', d.prop1)
-      assert_equal(42, d.prop2)
       assert_equal('bar', d.prop3['foo'])
     end
 
@@ -141,26 +139,6 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
         [:prop1],
         AddsPropsToClassWithPropGetOverride.decorator.field_accesses,
       )
-    end
-  end
-
-  describe 'ifunset' do
-    before do
-      @doc = SubProps.new
-    end
-
-    it 'is used by getter' do
-      assert_equal(42, @doc.prop2)
-    end
-
-    it 'is used by decorator#prop_get' do
-      assert_equal(42, @doc.class.decorator.prop_get(@doc, :prop2))
-    end
-
-    # This distinction seems subtle and, given that it has no relationship
-    # to the method names, pretty confusing. But code relies on it.
-    it 'is not used by decorator#get' do
-      assert_nil(@doc.class.decorator.get(@doc, :prop2))
     end
   end
 

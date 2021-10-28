@@ -14,7 +14,6 @@ module SorbetBenchmarks
 
     class ExampleStruct < T::Struct
       prop :prop, Integer
-      prop :ifunset, T.nilable(Integer), ifunset: 0
     end
 
     # Note we manually unroll loops 10x since loop overhead may be non-negligible here
@@ -56,25 +55,6 @@ module SorbetBenchmarks
         end
       end
       puts "T::Struct getter, fast path, μs/iter:"
-      puts result
-
-      struct = ExampleStruct.new(prop: 0)
-      10_000.times {struct.ifunset}
-      result = Benchmark.measure do
-        100_000.times do
-          struct.ifunset
-          struct.ifunset
-          struct.ifunset
-          struct.ifunset
-          struct.ifunset
-          struct.ifunset
-          struct.ifunset
-          struct.ifunset
-          struct.ifunset
-          struct.ifunset
-        end
-      end
-      puts "T::Struct getter, with ifunset, μs/iter:"
       puts result
     end
   end
