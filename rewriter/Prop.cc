@@ -334,14 +334,15 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
     } else if (ret.ifunset == nullptr) {
         if (knownNonModel(propContext.syntacticSuperClass)) {
-            auto isAttrReader = true;
+            ast::MethodDef::Flags flags;
+            flags.isAttrReader = true;
             if (wantTypedInitialize(propContext.syntacticSuperClass)) {
-                nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName), isAttrReader));
+                nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName), flags));
             } else {
                 // Need to hide the instance variable access, because there wasn't a typed constructor to declare it
                 auto ivarGet = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::instanceVariableGet(),
                                               ast::MK::Symbol(nameLoc, ivarName));
-                nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(ivarGet), isAttrReader));
+                nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(ivarGet), flags));
             }
         } else {
             // Models have a custom decorator, which means we have to forward the prop get to it.
