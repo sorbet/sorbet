@@ -76,7 +76,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:qux, <emptyTree>::<C Symbol>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :qux, :normal)
+    ::Sorbet::Private::Static.keep_def(<self>, :qux, :genericPropGetter)
 
     ::Sorbet::Private::Static.keep_def(<self>, :qux=, :normal)
   end

@@ -133,13 +133,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.const(:not_a_symbol, <emptyTree>::<C String>, :computed_by, "not_a_symbol", :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :not_a_symbol, :normal)
+    ::Sorbet::Private::Static.keep_def(<self>, :not_a_symbol, :genericPropGetter)
 
     symbol_in_variable = :symbol_in_variable
 
     <self>.const(:symbol_in_variable, <emptyTree>::<C String>, :computed_by, symbol_in_variable, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :symbol_in_variable, :normal)
+    ::Sorbet::Private::Static.keep_def(<self>, :symbol_in_variable, :genericPropGetter)
 
     <self>.const(:num_unknown_type, <emptyTree>::<C Integer>, :computed_by, :compute_num_unknown_type, :without_accessors, true)
 

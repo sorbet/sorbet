@@ -63,7 +63,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:my_child_method, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method, :normal)
+    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method, :genericPropGetter)
 
     ::Sorbet::Private::Static.keep_def(<self>, :my_child_method=, :normal)
   end

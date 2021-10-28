@@ -123,7 +123,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy, :normal)
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy, :genericPropGetter)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy=, :normal)
 
@@ -131,7 +131,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc, :normal)
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc, :genericPropGetter)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc=, :normal)
 
@@ -139,7 +139,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         :not_a_type
       end, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid, :normal)
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid, :genericPropGetter)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid=, :normal)
   end
