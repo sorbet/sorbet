@@ -70,6 +70,11 @@ const users = [
     image: 'img/workforce-logo.png',
     infoLink: 'https://www.workforce.com/',
   },
+  {
+    caption: 'Chime',
+    image: 'img/chime-logo.svg',
+    infoLink: 'https://www.chime.com/',
+  },
 ];
 
 const siteConfig = {
