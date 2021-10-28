@@ -183,6 +183,7 @@ public:
             auto shortName = methodName.shortName(cs);
 
             auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 3);
+            flags.blockarg = true;
             auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
             Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyBlockId),
                                          stack);
@@ -556,6 +557,7 @@ public:
         auto recv = send->args[0].variable;
 
         auto [flags, splatArray] = prepareSplatArgs(mcctx, send->args[2], send->args[3]);
+        flags.blockarg = true;
         auto *blockHandler = prepareBlockHandler(mcctx, send->args[4]);
 
         auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
