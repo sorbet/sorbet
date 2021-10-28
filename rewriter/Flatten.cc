@@ -368,7 +368,9 @@ public:
         auto name = methodDef.name;
         auto keepName = methodDef.flags.isSelfMethod ? core::Names::keepSelfDef() : core::Names::keepDef();
 
-        auto kind = methodDef.flags.genericPropGetter ? core::Names::genericPropGetter() : methodDef.flags.isAttrReader ? core::Names::attrReader() : core::Names::normal();
+        auto kind = methodDef.flags.genericPropGetter ? core::Names::genericPropGetter()
+                    : methodDef.flags.isAttrReader    ? core::Names::attrReader()
+                                                      : core::Names::normal();
         auto discardable = methodDef.flags.discardDef;
         methods.addExpr(*md, move(tree));
 

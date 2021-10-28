@@ -473,8 +473,7 @@ public:
         } else {
             const bool isPropGetter = methodKind == core::Names::genericPropGetter();
 
-            ENFORCE(methodKind == core::Names::normal() ||
-                    isPropGetter ||
+            ENFORCE(methodKind == core::Names::normal() || isPropGetter ||
                         (methodKind == core::Names::attrReader() && funcSym.data(cs)->isFinalMethod()),
                     "Unknown method kind: {}", methodKind.show(cs));
 
@@ -485,7 +484,9 @@ public:
             auto *stackFrameVar = Payload::rubyStackFrameVar(cs, builder, mcctx.irctx, funcSym);
             auto *stackFrame = builder.CreateLoad(stackFrameVar, "stackFrame");
 
-            const char *payloadFuncName = isSelf ? "sorbet_defineMethodSingleton" : isPropGetter ? "sorbet_definePropGetter" : "sorbet_defineMethod";
+            const char *payloadFuncName = isSelf         ? "sorbet_defineMethodSingleton"
+                                          : isPropGetter ? "sorbet_definePropGetter"
+                                                         : "sorbet_defineMethod";
             auto rubyFunc = cs.getFunction(payloadFuncName);
             auto *paramInfo = buildParamInfo(cs, builder, mcctx.irctx, funcSym, mcctx.rubyBlockId);
             builder.CreateCall(rubyFunc, {klass, name, funcHandle, paramInfo, stackFrame});

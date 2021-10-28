@@ -508,7 +508,8 @@ static VALUE sorbet_getTPropsDecorator() {
 /* See the patched proc.c */
 extern VALUE sorbet_vm_rb_mod_instance_method(VALUE mod, VALUE vid);
 
-void sorbet_vm_define_prop_getter(VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq) {
+void sorbet_vm_define_prop_getter(VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp,
+                                  rb_iseq_t *iseq) {
     /* See T::Props::Decorator#define_getter_and_setter.  */
     ID prop_get = rb_intern("prop_get");
     VALUE decorator = rb_funcall(klass, rb_intern("decorator"), 0);
