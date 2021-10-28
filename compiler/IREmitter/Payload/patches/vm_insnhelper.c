@@ -966,7 +966,8 @@ VALUE sorbet_vm_instance_variable_get(struct FunctionInlineCache *getCache, IVC 
                                       VALUE recv, ID var) {
     sorbet_vmMethodSearch(getCache, recv);
     rb_method_definition_t *getDef = getCache->cd.cc.me->def;
-    if (getDef->type == VM_METHOD_TYPE_CFUNC && getDef->body.cfunc.func == sorbet_vm_Kernel_instance_variable_get_func()) {
+    if (getDef->type == VM_METHOD_TYPE_CFUNC &&
+        getDef->body.cfunc.func == sorbet_vm_Kernel_instance_variable_get_func()) {
         return sorbet_vm_getivar(recv, var, varCache);
     }
 

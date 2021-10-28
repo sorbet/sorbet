@@ -823,11 +823,10 @@ static const vector<UntypedSpecialization> untypedSpecializations{
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
-    vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineClassIntrinsic,  &IdentityIntrinsic,
-                                                 &CallWithBlock,      &ExceptionRetry,        &BuildHash,
-                                                 &CallWithSplat,      &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic,
-                                                 &DefinedClassVar,    &DefinedInstanceVar,    &NewIntrinsic,
-            &InstanceVariableGet};
+    vector<const NameBasedIntrinsicMethod *> ret{
+        &DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic,     &CallWithBlock,           &ExceptionRetry,
+        &BuildHash,          &CallWithSplat,        &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic, &DefinedClassVar,
+        &DefinedInstanceVar, &NewIntrinsic,         &InstanceVariableGet};
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }
