@@ -179,7 +179,19 @@ autocorrect_array_plus.rb:22: Expected `T::Enumerable[{String("foo") => String("
     autocorrect_array_plus.rb:22: Replaced with `.concat([{}])`
     22 |[{"foo" => "bar"}] + [{}]
                           ^^^^^^^
-Errors: 10
+
+autocorrect_array_plus.rb:24: Expected `T::Enumerable[String]` but found `String("")` for argument `arg0` https://srb.help/7002
+    24 |strings + ""
+                  ^^
+  Expected `T::Enumerable[String]` for argument `arg0` of method `Array#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#L448:
+     448 |        arg0: T::Enumerable[Elem],
+                  ^^^^
+  Got `String("")` originating from:
+    autocorrect_array_plus.rb:24:
+    24 |strings + ""
+                  ^^
+Errors: 11
 
 --------------------------------------------------------------------------
 
@@ -203,3 +215,5 @@ ints = ints.concat(strings)
 ints = ints.concat(strings)
 
 [{"foo" => "bar"}].concat([{}])
+
+strings + ""
