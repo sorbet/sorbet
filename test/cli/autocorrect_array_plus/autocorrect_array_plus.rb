@@ -20,3 +20,5 @@ ints += strings
 ints += strings
 
 [{"foo" => "bar"}] + [{}]
+
+strings + ""

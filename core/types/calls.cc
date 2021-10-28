@@ -3130,11 +3130,6 @@ public:
             return;
         }
 
-        const auto iter = absl::c_find_if(res.main.errors, finder);
-        ENFORCE(iter != res.main.errors.end(), "c_count above should have guaranteed a result");
-        const auto argMismatchErrorIdx = std::distance(res.main.errors.begin(), iter);
-        const auto argMismatchError = std::move(*iter); // will drop when going out of scope (after we replace it)
-
         auto dispatchArgs = DispatchArgs{
             core::Names::concat(),
             args.locs,
@@ -3155,6 +3150,12 @@ public:
         if (!dispatched.main.errors.empty()) {
             return;
         }
+
+        const auto iter = absl::c_find_if(res.main.errors, finder);
+        ENFORCE(iter != res.main.errors.end(), "c_count above should have guaranteed a result");
+
+        const auto argMismatchErrorIdx = std::distance(res.main.errors.begin(), iter);
+        const auto &argMismatchError = *iter;
 
         if (auto e = gs.beginError(argMismatchError->loc, core::errors::Infer::MethodArgumentMismatch)) {
             e.setHeader("{}", argMismatchError->header);
