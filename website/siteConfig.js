@@ -15,6 +15,7 @@ const users = [
     image: 'img/coinbase-logo.png',
     infoLink: 'https://www.coinbase.com/',
   },
+  // End Sorbet early adopters. Please alphabetize below this comment.
   {
     caption: 'Atrium',
     image: 'img/atrium-logo.jpg',
@@ -24,6 +25,11 @@ const users = [
     caption: 'Chan Zuckerberg Initiative',
     image: 'img/czi-logo.svg',
     infoLink: 'https://chanzuckerberg.com/',
+  },
+  {
+    caption: 'Chime',
+    image: 'img/chime-logo.svg',
+    infoLink: 'https://www.chime.com/',
   },
   {
     caption: 'Factorial',
