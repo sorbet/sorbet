@@ -364,9 +364,10 @@ public:
         bool isRewriterSynthesized : 1;
         bool isAttrReader : 1;
         bool discardDef : 1;
+        bool genericPropGetter : 1;
 
         // In C++20 we can replace this with bit field initialzers
-        Flags() : isSelfMethod(false), isRewriterSynthesized(false), isAttrReader(false), discardDef(false) {}
+        Flags() : isSelfMethod(false), isRewriterSynthesized(false), isAttrReader(false), discardDef(false), genericPropGetter(false) {}
     };
     CheckSize(Flags, 1, 1);
 

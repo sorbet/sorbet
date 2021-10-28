@@ -345,6 +345,9 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
                 nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(ivarGet), flags));
             }
         } else {
+            ast::MethodDef::Flags flags;
+            flags.genericPropGetter = true;
+
             // Models have a custom decorator, which means we have to forward the prop get to it.
             // If this is actually a T::InexactStruct or Chalk::ODM::Document sub-sub-class, this implementation is
             // correct but does extra work.
@@ -361,7 +364,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
                                                ast::MK::Self(loc), ast::MK::Symbol(nameLoc, name), std::move(arg2));
 
             auto insSeq = ast::MK::InsSeq1(loc, std::move(assign), std::move(propGetLogic));
-            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
+            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq), flags));
         }
     } else {
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
