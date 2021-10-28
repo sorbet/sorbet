@@ -942,7 +942,9 @@ llvm::Value *indexForLocalVariable(CompilerState &cs, const IREmitterContext &ir
     return llvm::ConstantInt::get(cs, llvm::APInt(64, escapeId, true));
 }
 
-llvm::Value *buildInstanceVariableCache(CompilerState &cs, std::string_view name) {
+} // namespace
+
+llvm::Value *Payload::buildInstanceVariableCache(CompilerState &cs, std::string_view name) {
     auto *cacheTy = llvm::StructType::getTypeByName(cs, "struct.iseq_inline_iv_cache_entry");
     ENFORCE(cacheTy != nullptr);
     auto *zero = llvm::ConstantAggregateZero::get(cacheTy);
@@ -950,8 +952,6 @@ llvm::Value *buildInstanceVariableCache(CompilerState &cs, std::string_view name
     return new llvm::GlobalVariable(*cs.module, cacheTy, false, llvm::GlobalVariable::InternalLinkage, zero,
                                     llvm::Twine("ivc_") + string(name));
 }
-
-} // namespace
 
 llvm::Value *Payload::getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilderBase &builder,
                                                  const IREmitterContext &irctx) {

@@ -694,6 +694,44 @@ public:
     }
 } DefinedInstanceVar;
 
+class InstanceVariableGet : public NameBasedIntrinsicMethod {
+public:
+    InstanceVariableGet() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        if (mcctx.send->args.size() != 1) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        }
+
+        auto &cs = mcctx.cs;
+        auto &builder = mcctx.builder;
+        auto &var = mcctx.send->args[0].type;
+        if (!core::isa_type<core::LiteralType>(var)) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        }
+        auto lit = core::cast_type_nonnull<core::LiteralType>(var);
+        if (lit.literalKind != core::LiteralType::LiteralTypeKind::Symbol) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        }
+
+        auto varName = lit.asName(cs);
+        auto varNameStr = varName.shortName(cs);
+
+        auto *callCache = mcctx.getInlineCache();
+        auto *ivarCache = Payload::buildInstanceVariableCache(cs, varNameStr);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *recv = mcctx.varGetRecv();
+        auto *ivarID = Payload::idIntern(cs, builder, varNameStr);
+
+        return builder.CreateCall(cs.getFunction("sorbet_vm_instance_variable_get"),
+                                  {callCache, ivarCache, cfp, recv, ivarID});
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::instanceVariableGet()};
+    }
+} InstanceVariableGet;
+
 class UntypedSpecialization : public NameBasedIntrinsicMethod {
     const core::NameRef rubyMethod;
     const u4 arity;
@@ -785,10 +823,10 @@ static const vector<UntypedSpecialization> untypedSpecializations{
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
-    vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineClassIntrinsic,  &IdentityIntrinsic,
-                                                 &CallWithBlock,      &ExceptionRetry,        &BuildHash,
-                                                 &CallWithSplat,      &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic,
-                                                 &DefinedClassVar,    &DefinedInstanceVar,    &NewIntrinsic};
+    vector<const NameBasedIntrinsicMethod *> ret{
+        &DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic,     &CallWithBlock,           &ExceptionRetry,
+        &BuildHash,          &CallWithSplat,        &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic, &DefinedClassVar,
+        &DefinedInstanceVar, &NewIntrinsic,         &InstanceVariableGet};
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }
