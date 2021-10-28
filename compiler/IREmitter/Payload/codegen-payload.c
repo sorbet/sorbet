@@ -141,6 +141,7 @@ SORBET_ALIVE(_Bool, sorbet_i_isa_Untyped, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_Hash, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_Array, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_Regexp, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_Rational, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_String, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_Proc, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_Thread, (VALUE) __attribute__((const)));
@@ -343,6 +344,7 @@ SORBET_ATTRIBUTE(const)
 _Bool sorbet_isa_Rational(VALUE obj) {
     return RB_TYPE_P(obj, T_RATIONAL);
 }
+KEEP_ALIVE(sorbet_isa_Rational);
 
 SORBET_ATTRIBUTE(const)
 _Bool sorbet_isa_String(VALUE obj) {

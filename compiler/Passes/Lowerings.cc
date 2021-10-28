@@ -289,6 +289,7 @@ const vector<pair<llvm::StringRef, llvm::StringRef>> TypeTest::intrinsicMap{
     {"sorbet_i_isa_Hash", "sorbet_isa_Hash"},
     {"sorbet_i_isa_Array", "sorbet_isa_Array"},
     {"sorbet_i_isa_Regexp", "sorbet_isa_Regexp"},
+    {"sorbet_i_isa_Rational", "sorbet_isa_Rational"},
     {"sorbet_i_isa_String", "sorbet_isa_String"},
     {"sorbet_i_isa_Proc", "sorbet_isa_Proc"},
     {"sorbet_i_isa_Thread", "sorbet_isa_Thread"},
