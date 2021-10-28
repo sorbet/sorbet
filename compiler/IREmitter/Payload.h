@@ -72,6 +72,7 @@ public:
                                      llvm::Value *argCountRaw, llvm::Value *argArrayRaw);
     static core::Loc setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc,
                                    core::Loc methodStart, core::Loc lastLoc, llvm::AllocaInst *lineNumberPtr);
+    static llvm::Value *buildInstanceVariableCache(CompilerState &cs, std::string_view name);
     static llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilderBase &builder,
                                                    const IREmitterContext &irctx);
     static llvm::Value *varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBuilderBase &builder,
