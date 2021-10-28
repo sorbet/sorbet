@@ -26,6 +26,11 @@ const users = [
     infoLink: 'https://chanzuckerberg.com/',
   },
   {
+    caption: 'Chime',
+    image: 'img/chime-logo.svg',
+    infoLink: 'https://www.chime.com/',
+  },
+  {
     caption: 'Factorial',
     image: 'img/factorial-logo.png',
     infoLink: 'https://factorialhr.com/',
@@ -69,11 +74,6 @@ const users = [
     caption: 'Workforce.com',
     image: 'img/workforce-logo.png',
     infoLink: 'https://www.workforce.com/',
-  },
-  {
-    caption: 'Chime',
-    image: 'img/chime-logo.svg',
-    infoLink: 'https://www.chime.com/',
   },
 ];
 
