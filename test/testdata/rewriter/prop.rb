@@ -54,8 +54,8 @@ class AdvancedODM
     prop :foreign_proc, String, foreign: proc {ForeignClass}
     prop :foreign_invalid, String, foreign: proc { :not_a_type }
 
-    prop :ifunset, String, ifunset: ''
-    prop :ifunset_nilable, T.nilable(String), ifunset: ''
+    prop :ifunset, String, ifunset: '' # error: `ifunset:` is not a valid prop option
+    prop :ifunset_nilable, T.nilable(String), ifunset: '' # error: `ifunset:` is not a valid prop option
 
     prop :empty_hash_rules, String, {}
     prop :hash_rules, String, { enum: ["hello", "goodbye" ] }

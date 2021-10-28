@@ -290,6 +290,9 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
 
         auto [ifunsetKey, ifunset] = ASTUtil::extractHashValue(ctx, *rules, core::Names::ifunset());
         if (ifunset != nullptr) {
+            if (auto e = ctx.beginError(ifunsetKey.loc(), core::errors::Rewriter::IfunsetUnsupported)) {
+                e.setHeader("`{}` is not a valid prop option", "ifunset:");
+            }
             ret.ifunset = std::move(ifunset);
         }
     }
