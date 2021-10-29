@@ -527,24 +527,6 @@ void sorbet_vm_define_prop_getter(VALUE klass, const char *name, rb_sorbet_func_
         return;
     }
 
-    VALUE sig_table = sigs_for_methods();
-    VALUE mod_entry = rb_hash_lookup2(sig_table, klass, Qnil);
-    VALUE built_sig = Qnil;
-    ID id = rb_intern(name);
-    if (mod_entry != Qnil) {
-        built_sig = rb_hash_delete(mod_entry, ID2SYM(id));
-    }
-
-    struct method_block_params params;
-    params.klass = klass;
-    params.name = name;
-    params.id = id;
-    params.methodPtr = methodPtr;
-    params.paramp = paramp;
-    params.iseq = iseq;
-    params.isSelf = false;
-
-    VALUE methods = MOD_CONST_GET("T::Private::Methods");
-    VALUE args[] = {klass, built_sig};
-    rb_block_call(methods, rb_intern("_with_declared_signature"), 2, args, define_method_block, (VALUE)&params);
+    const bool isSelf = false;
+    return sorbet_vm_define_method(klass, name, method, params, iseq, isSelf);
 }
