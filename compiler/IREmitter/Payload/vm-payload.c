@@ -506,7 +506,7 @@ static VALUE sorbet_getTPropsDecorator() {
 }
 
 /* See the patched proc.c */
-extern VALUE sorbet_vm_rb_mod_instance_method(VALUE mod, VALUE vid);
+extern VALUE sorbet_vm_method_owner(VALUE obj);
 
 void sorbet_vm_define_prop_getter(VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp,
                                   rb_iseq_t *iseq) {
@@ -528,5 +528,5 @@ void sorbet_vm_define_prop_getter(VALUE klass, const char *name, rb_sorbet_func_
     }
 
     const bool isSelf = false;
-    return sorbet_vm_define_method(klass, name, method, params, iseq, isSelf);
+    sorbet_vm_define_method(klass, name, methodPtr, paramp, iseq, isSelf);
 }
