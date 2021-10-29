@@ -69,7 +69,7 @@ module Project::Foo::FooNonForcing
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
   def self.good_check_is_bar(arg)
-    if T::NonForcingConstants.non_forcing_is_a?(arg, "Project::Bar::Bar", package: "Project::Bar")
+    if T::NonForcingConstants.non_forcing_is_a?(arg, "Bar", package: "Project::Bar")
       true
     else
       false

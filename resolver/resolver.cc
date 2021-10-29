@@ -1876,21 +1876,41 @@ class ResolveTypeMembersAndFieldsWalk {
         // we'll check to find out whether the first part is `""` or not, which means we're testing whether the string
         // did or did not begin with `::`.
         vector<string> parts = absl::StrSplit(shortName, "::");
-        // we want package mode to be theoretically compatible with non-package mode, so this special case exists for
-        // that: if we are given a package `A::B`, and a constant `C::D`, then we want to treat that like the user
-        // just wrote `::A::B::C::D`.
-        if (packageType && ctx.state.packageDB().empty()) {
+        if (packageType) {
+            // there's a little bit of a complexity here: we want
+            // `non_forcing_is_a?("C::D", package: "A::B")` to be
+            // looking for, more or less, `A::B::C::D`. We want this
+            // _regardless_ of whether we're in packaged mode or not,
+            // in fact: in non-packaged mode, we should treat this as
+            // looking for `::A::B::C::D`, and in packaged mode, we're
+            // looking for `A::B::C::D` nested inside the desugared
+            // `PkgRegistry::Pkg_A_B` namespace.
+            if (parts.front() == "") {
+                if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                    e.setHeader("The string given to `{}` should not be an absolute constant reference if a "
+                                "package name is also provided",
+                                method);
+                }
+                return;
+            }
             auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
             auto name = package.asName(ctx).shortName(ctx);
             vector<string> pkgParts = absl::StrSplit(name, "::");
             // add the initial empty string to mimic the leading `::`
-            pkgParts.insert(pkgParts.begin(), "");
+            if (ctx.state.packageDB().empty()) {
+                pkgParts.insert(pkgParts.begin(), "");
+            }
             // and now add the rest of `parts` to it
             pkgParts.insert(pkgParts.end(), parts.begin(), parts.end());
             // and then treat this new vector as the parts to walk over
             parts = move(pkgParts);
-            // we want to make sure we don't take the package path if we've done this
-            packageType = nullptr;
+            // the path down below tries to find out if `packageType`
+            // is null to find out whether it should look up a package
+            // or not, so if we're not in package mode set
+            // `packageType` to null
+            if (ctx.state.packageDB().empty()) {
+                packageType = nullptr;
+            }
         }
 
         core::SymbolRef current;
@@ -1909,15 +1929,6 @@ class ResolveTypeMembersAndFieldsWalk {
                     current = core::Symbols::root();
                     continue;
                 } else {
-                    if (part == "") {
-                        if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                            e.setHeader("The string given to `{}` should not be an absolute constant reference if a "
-                                        "package name is also provided",
-                                        method);
-                        }
-                        return;
-                    }
-
                     auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
                     auto packageName = package.asName(ctx);
                     auto mangledName = packageName.lookupMangledPackageName(ctx.state);
