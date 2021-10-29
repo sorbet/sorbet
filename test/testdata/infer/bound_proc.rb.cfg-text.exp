@@ -81,7 +81,7 @@ bb2[rubyBlockId=1, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-tem
 
 # backedges
 # - bb2(rubyBlockId=1)
-bb3[rubyBlockId=0, firstDead=23](<block-pre-call-temp>$115: Sorbet::Private::Static::Void, <selfRestore>$116: T.class_of(<root>)):
+bb3[rubyBlockId=0, firstDead=29](<block-pre-call-temp>$115: Sorbet::Private::Static::Void, <selfRestore>$116: T.class_of(<root>)):
     <statTemp>$112: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$115, class_helper>
     <self>: T.class_of(<root>) = <selfRestore>$116
     <cfgAlias>$134: T.class_of(T) = alias <C T>
@@ -104,6 +104,12 @@ bb3[rubyBlockId=0, firstDead=23](<block-pre-call-temp>$115: Sorbet::Private::Sta
     <cfgAlias>$166: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <cfgAlias>$168: T.class_of(ThisSelf) = alias <C ThisSelf>
     <statTemp>$164: Sorbet::Private::Static::Void = <cfgAlias>$166: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$168: T.class_of(ThisSelf))
+    <cfgAlias>$172: T.class_of(<Magic>) = alias <C <Magic>>
+    <cfgAlias>$174: T.class_of(Rescues) = alias <C Rescues>
+    <statTemp>$170: Sorbet::Private::Static::Void = <cfgAlias>$172: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$174: T.class_of(Rescues))
+    <cfgAlias>$177: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$179: T.class_of(Rescues) = alias <C Rescues>
+    <statTemp>$175: Sorbet::Private::Static::Void = <cfgAlias>$177: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$179: T.class_of(Rescues))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -859,6 +865,369 @@ bb0[rubyBlockId=0, firstDead=9]():
 # - bb0(rubyBlockId=0)
 bb1[rubyBlockId=0, firstDead=-1]():
     <unconditional> -> bb1
+
+}
+
+method ::<Class:Rescues>#takes_block {
+
+bb0[rubyBlockId=0, firstDead=2]():
+    <self>: T.class_of(Rescues) = cast(<self>: NilClass, T.class_of(Rescues));
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::Rescues#foo {
+
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Rescues = cast(<self>: NilClass, Rescues);
+    <magic>$14: T.class_of(<Magic>) = alias <C <Magic>>
+    <exceptionValue>$3: T.untyped = <get-current-exception>
+    <self>: String = cast(<castTemp>$10: NilClass, String);
+    <exceptionValue>$3 -> (T.untyped ? bb3 : bb4)
+
+# backedges
+# - bb6(rubyBlockId=3)
+# - bb9(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+# - bb4(rubyBlockId=1)
+bb3[rubyBlockId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$3: T.untyped, <magic>$14: T.class_of(<Magic>)):
+    <cfgAlias>$17: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$18: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<cfgAlias>$17: T.class_of(StandardError))
+    <isaCheckTemp>$18 -> (T.untyped ? bb7 : bb8)
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb4[rubyBlockId=1, firstDead=-1](<self>: String, <magic>$14: T.class_of(<Magic>)):
+    <cfgAlias>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$9: T.class_of(String) = alias <C String>
+    <statTemp>$5: Sorbet::Private::Static::Void = <cfgAlias>$7: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$9: T.class_of(String))
+    <castTemp>$10: String = <self>
+    <self>: String = cast(<castTemp>$10: String, String);
+    <cfgAlias>$12: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: String = <cfgAlias>$12: T.class_of(T).reveal_type(<self>: String)
+    <exceptionValue>$3: T.untyped = <get-current-exception>
+    <exceptionValue>$3 -> (T.untyped ? bb3 : bb5)
+
+# backedges
+# - bb4(rubyBlockId=1)
+bb5[rubyBlockId=4, firstDead=-1](<self>: String, <returnMethodTemp>$2: String):
+    <unconditional> -> bb6
+
+# backedges
+# - bb5(rubyBlockId=4)
+# - bb7(rubyBlockId=2)
+# - bb8(rubyBlockId=2)
+bb6[rubyBlockId=3, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <gotoDeadTemp>$22: T.nilable(TrueClass)):
+    <cfgAlias>$25: T.class_of(T) = alias <C T>
+    <throwAwayTemp>$23: String = <cfgAlias>$25: T.class_of(T).reveal_type(<self>: String)
+    <gotoDeadTemp>$22 -> (T.nilable(TrueClass) ? bb1 : bb9)
+
+# backedges
+# - bb3(rubyBlockId=2)
+bb7[rubyBlockId=2, firstDead=-1](<self>: String, <magic>$14: T.class_of(<Magic>)):
+    <exceptionValue>$3: NilClass = nil
+    <keepForCfgTemp>$15: Sorbet::Private::Static::Void = <magic>$14: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
+    <cfgAlias>$20: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: String = <cfgAlias>$20: T.class_of(T).reveal_type(<self>: String)
+    <unconditional> -> bb6
+
+# backedges
+# - bb3(rubyBlockId=2)
+bb8[rubyBlockId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String)):
+    <gotoDeadTemp>$22: TrueClass = true
+    <unconditional> -> bb6
+
+# backedges
+# - bb6(rubyBlockId=3)
+bb9[rubyBlockId=0, firstDead=1](<returnMethodTemp>$2: String):
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String
+    <unconditional> -> bb1
+
+}
+
+method ::Rescues#bar {
+
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Rescues = cast(<self>: NilClass, Rescues);
+    <magic>$14: T.class_of(<Magic>) = alias <C <Magic>>
+    <exceptionValue>$3: T.untyped = <get-current-exception>
+    <self>: String = cast(<castTemp>$10: NilClass, String);
+    <self>: Integer = cast(<castTemp>$25: NilClass, Integer);
+    <self>: Float = cast(<castTemp>$37: NilClass, Float);
+    <exceptionValue>$3 -> (T.untyped ? bb3 : bb4)
+
+# backedges
+# - bb6(rubyBlockId=3)
+# - bb9(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+# - bb4(rubyBlockId=1)
+bb3[rubyBlockId=2, firstDead=-1](<self>: T.any(Float, String), <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$3: T.untyped, <magic>$14: T.class_of(<Magic>)):
+    <cfgAlias>$17: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$18: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<cfgAlias>$17: T.class_of(StandardError))
+    <isaCheckTemp>$18 -> (T.untyped ? bb7 : bb8)
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb4[rubyBlockId=1, firstDead=-1](<self>: Float, <magic>$14: T.class_of(<Magic>)):
+    <cfgAlias>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$9: T.class_of(String) = alias <C String>
+    <statTemp>$5: Sorbet::Private::Static::Void = <cfgAlias>$7: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$9: T.class_of(String))
+    <castTemp>$10: Float = <self>
+    <self>: String = cast(<castTemp>$10: Float, String);
+    <cfgAlias>$12: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: String = <cfgAlias>$12: T.class_of(T).reveal_type(<self>: String)
+    <exceptionValue>$3: T.untyped = <get-current-exception>
+    <exceptionValue>$3 -> (T.untyped ? bb3 : bb5)
+
+# backedges
+# - bb4(rubyBlockId=1)
+bb5[rubyBlockId=4, firstDead=-1](<self>: String, <returnMethodTemp>$2: String):
+    <unconditional> -> bb6
+
+# backedges
+# - bb5(rubyBlockId=4)
+# - bb7(rubyBlockId=2)
+# - bb8(rubyBlockId=2)
+bb6[rubyBlockId=3, firstDead=-1](<self>: T.any(Float, String, Integer), <returnMethodTemp>$2: T.nilable(T.any(String, Integer)), <gotoDeadTemp>$29: T.nilable(TrueClass)):
+    <cfgAlias>$34: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$36: T.class_of(Float) = alias <C Float>
+    <statTemp>$32: Sorbet::Private::Static::Void = <cfgAlias>$34: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$36: T.class_of(Float))
+    <castTemp>$37: T.any(Float, String, Integer) = <self>
+    <self>: Float = cast(<castTemp>$37: T.any(Float, String, Integer), Float);
+    <cfgAlias>$39: T.class_of(T) = alias <C T>
+    <throwAwayTemp>$30: Float = <cfgAlias>$39: T.class_of(T).reveal_type(<self>: Float)
+    <gotoDeadTemp>$29 -> (T.nilable(TrueClass) ? bb1 : bb9)
+
+# backedges
+# - bb3(rubyBlockId=2)
+bb7[rubyBlockId=2, firstDead=-1](<self>: T.any(Float, String), <magic>$14: T.class_of(<Magic>)):
+    <exceptionValue>$3: NilClass = nil
+    <keepForCfgTemp>$15: Sorbet::Private::Static::Void = <magic>$14: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
+    <cfgAlias>$22: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$24: T.class_of(Integer) = alias <C Integer>
+    <statTemp>$20: Sorbet::Private::Static::Void = <cfgAlias>$22: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$24: T.class_of(Integer))
+    <castTemp>$25: T.any(Float, String) = <self>
+    <self>: Integer = cast(<castTemp>$25: T.any(Float, String), Integer);
+    <cfgAlias>$27: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: Integer = <cfgAlias>$27: T.class_of(T).reveal_type(<self>: Integer)
+    <unconditional> -> bb6
+
+# backedges
+# - bb3(rubyBlockId=2)
+bb8[rubyBlockId=2, firstDead=-1](<self>: T.any(Float, String), <returnMethodTemp>$2: T.nilable(String)):
+    <gotoDeadTemp>$29: TrueClass = true
+    <unconditional> -> bb6
+
+# backedges
+# - bb6(rubyBlockId=3)
+bb9[rubyBlockId=0, firstDead=1](<returnMethodTemp>$2: T.any(Integer, String)):
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.any(Integer, String)
+    <unconditional> -> bb1
+
+}
+
+method ::Rescues#baz {
+
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: Rescues = cast(<self>: NilClass, Rescues);
+    <cfgAlias>$5: T.class_of(T) = alias <C T>
+    <statTemp>$3: Rescues = <cfgAlias>$5: T.class_of(T).reveal_type(<self>: Rescues)
+    <magic>$18: T.class_of(<Magic>) = alias <C <Magic>>
+    <exceptionValue>$7: T.untyped = <get-current-exception>
+    <self>: String = cast(<castTemp>$14: NilClass, String);
+    <exceptionValue>$7 -> (T.untyped ? bb3 : bb4)
+
+# backedges
+# - bb6(rubyBlockId=3)
+# - bb9(rubyBlockId=0)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+# - bb4(rubyBlockId=1)
+bb3[rubyBlockId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$7: T.untyped, <magic>$18: T.class_of(<Magic>)):
+    <cfgAlias>$21: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$22: T.untyped = <exceptionValue>$7: T.untyped.is_a?(<cfgAlias>$21: T.class_of(StandardError))
+    <isaCheckTemp>$22 -> (T.untyped ? bb7 : bb8)
+
+# backedges
+# - bb0(rubyBlockId=0)
+bb4[rubyBlockId=1, firstDead=-1](<self>: String, <magic>$18: T.class_of(<Magic>)):
+    <cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$13: T.class_of(String) = alias <C String>
+    <statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$13: T.class_of(String))
+    <castTemp>$14: String = <self>
+    <self>: String = cast(<castTemp>$14: String, String);
+    <cfgAlias>$16: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: String = <cfgAlias>$16: T.class_of(T).reveal_type(<self>: String)
+    <exceptionValue>$7: T.untyped = <get-current-exception>
+    <exceptionValue>$7 -> (T.untyped ? bb3 : bb5)
+
+# backedges
+# - bb4(rubyBlockId=1)
+bb5[rubyBlockId=4, firstDead=-1](<returnMethodTemp>$2: String):
+    <unconditional> -> bb6
+
+# backedges
+# - bb5(rubyBlockId=4)
+# - bb7(rubyBlockId=2)
+# - bb8(rubyBlockId=2)
+bb6[rubyBlockId=3, firstDead=-1](<returnMethodTemp>$2: T.nilable(String), <gotoDeadTemp>$26: T.nilable(TrueClass)):
+    <gotoDeadTemp>$26 -> (T.nilable(TrueClass) ? bb1 : bb9)
+
+# backedges
+# - bb3(rubyBlockId=2)
+bb7[rubyBlockId=2, firstDead=-1](<self>: String, <magic>$18: T.class_of(<Magic>)):
+    <exceptionValue>$7: NilClass = nil
+    <keepForCfgTemp>$19: Sorbet::Private::Static::Void = <magic>$18: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$7: NilClass)
+    <cfgAlias>$24: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: String = <cfgAlias>$24: T.class_of(T).reveal_type(<self>: String)
+    <unconditional> -> bb6
+
+# backedges
+# - bb3(rubyBlockId=2)
+bb8[rubyBlockId=2, firstDead=-1](<returnMethodTemp>$2: T.nilable(String)):
+    <gotoDeadTemp>$26: TrueClass = true
+    <unconditional> -> bb6
+
+# backedges
+# - bb6(rubyBlockId=3)
+bb9[rubyBlockId=0, firstDead=1](<returnMethodTemp>$2: String):
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String
+    <unconditional> -> bb1
+
+}
+
+method ::<Class:Rescues>#<static-init> {
+
+bb0[rubyBlockId=0, firstDead=-1]():
+    <self>: T.class_of(Rescues) = cast(<self>: NilClass, T.class_of(Rescues));
+    <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$7: Symbol(:takes_block) = :takes_block
+    <statTemp>$8: Symbol(:normal) = :normal
+    <statTemp>$3: Symbol(:takes_block) = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(Rescues), <statTemp>$7: Symbol(:takes_block), <statTemp>$8: Symbol(:normal))
+    <block-pre-call-temp>$11: Sorbet::Private::Static::Void = <self>: T.class_of(Rescues).takes_block()
+    <selfRestore>$12: T.class_of(Rescues) = <self>
+    <unconditional> -> bb2
+
+# backedges
+# - bb3(rubyBlockId=0)
+# - bb10(rubyBlockId=4)
+bb1[rubyBlockId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyBlockId=0)
+# - bb13(rubyBlockId=1)
+bb2[rubyBlockId=1, firstDead=-1](<self>: T.class_of(Rescues), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.class_of(Rescues), <blockReturnTemp>$14: NilClass, <castTemp>$22: NilClass, <gotoDeadTemp>$34: NilClass):
+    # outerLoops: 1
+    <block-call> -> (NilClass ? bb5 : bb3)
+
+# backedges
+# - bb2(rubyBlockId=1)
+bb3[rubyBlockId=0, firstDead=15](<block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.class_of(Rescues)):
+    <statTemp>$9: T.untyped = Solve<<block-pre-call-temp>$11, takes_block>
+    <self>: T.class_of(Rescues) = <selfRestore>$12
+    <cfgAlias>$39: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$41: Symbol(:foo) = :foo
+    <statTemp>$42: Symbol(:normal) = :normal
+    <statTemp>$37: Symbol(:foo) = <cfgAlias>$39: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Rescues), <statTemp>$41: Symbol(:foo), <statTemp>$42: Symbol(:normal))
+    <cfgAlias>$45: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$47: Symbol(:bar) = :bar
+    <statTemp>$48: Symbol(:normal) = :normal
+    <statTemp>$43: Symbol(:bar) = <cfgAlias>$45: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Rescues), <statTemp>$47: Symbol(:bar), <statTemp>$48: Symbol(:normal))
+    <cfgAlias>$51: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$53: Symbol(:baz) = :baz
+    <statTemp>$54: Symbol(:normal) = :normal
+    <statTemp>$49: Symbol(:baz) = <cfgAlias>$51: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Rescues), <statTemp>$53: Symbol(:baz), <statTemp>$54: Symbol(:normal))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb2(rubyBlockId=1)
+bb5[rubyBlockId=1, firstDead=-1](<self>: T.class_of(Rescues), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.class_of(Rescues), <blockReturnTemp>$14: NilClass, <castTemp>$22: NilClass, <gotoDeadTemp>$34: NilClass):
+    # outerLoops: 1
+    <self>: T.class_of(Rescues) = loadSelf
+    <magic>$26: T.class_of(<Magic>) = alias <C <Magic>>
+    <exceptionValue>$15: T.untyped = <get-current-exception>
+    <self>: Integer = cast(<castTemp>$22: NilClass, Integer);
+    <exceptionValue>$15 -> (T.untyped ? bb7 : bb8)
+
+# backedges
+# - bb5(rubyBlockId=1)
+# - bb8(rubyBlockId=2)
+bb7[rubyBlockId=3, firstDead=-1](<self>: Integer, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.class_of(Rescues), <blockReturnTemp>$14: T.nilable(Integer), <exceptionValue>$15: T.untyped, <castTemp>$22: T.nilable(Integer), <magic>$26: T.class_of(<Magic>), <gotoDeadTemp>$34: NilClass):
+    # outerLoops: 1
+    <cfgAlias>$29: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$30: T.untyped = <exceptionValue>$15: T.untyped.is_a?(<cfgAlias>$29: T.class_of(StandardError))
+    <isaCheckTemp>$30 -> (T.untyped ? bb11 : bb12)
+
+# backedges
+# - bb5(rubyBlockId=1)
+bb8[rubyBlockId=2, firstDead=-1](<self>: Integer, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.class_of(Rescues), <magic>$26: T.class_of(<Magic>), <gotoDeadTemp>$34: NilClass):
+    # outerLoops: 1
+    <cfgAlias>$19: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$21: T.class_of(Integer) = alias <C Integer>
+    <statTemp>$17: Sorbet::Private::Static::Void = <cfgAlias>$19: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$21: T.class_of(Integer))
+    <castTemp>$22: Integer = <self>
+    <self>: Integer = cast(<castTemp>$22: Integer, Integer);
+    <cfgAlias>$24: T.class_of(T) = alias <C T>
+    <blockReturnTemp>$14: Integer = <cfgAlias>$24: T.class_of(T).reveal_type(<self>: Integer)
+    <exceptionValue>$15: T.untyped = <get-current-exception>
+    <exceptionValue>$15 -> (T.untyped ? bb7 : bb9)
+
+# backedges
+# - bb8(rubyBlockId=2)
+bb9[rubyBlockId=5, firstDead=-1](<self>: Integer, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.class_of(Rescues), <blockReturnTemp>$14: Integer, <castTemp>$22: Integer, <gotoDeadTemp>$34: NilClass):
+    # outerLoops: 1
+    <unconditional> -> bb10
+
+# backedges
+# - bb9(rubyBlockId=5)
+# - bb11(rubyBlockId=3)
+# - bb12(rubyBlockId=3)
+bb10[rubyBlockId=4, firstDead=-1](<self>: Integer, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.class_of(Rescues), <blockReturnTemp>$14: T.nilable(Integer), <castTemp>$22: T.nilable(Integer), <gotoDeadTemp>$34: T.nilable(TrueClass)):
+    # outerLoops: 1
+    <gotoDeadTemp>$34 -> (T.nilable(TrueClass) ? bb1 : bb13)
+
+# backedges
+# - bb7(rubyBlockId=3)
+bb11[rubyBlockId=3, firstDead=-1](<self>: Integer, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.class_of(Rescues), <castTemp>$22: T.nilable(Integer), <magic>$26: T.class_of(<Magic>), <gotoDeadTemp>$34: NilClass):
+    # outerLoops: 1
+    <exceptionValue>$15: NilClass = nil
+    <keepForCfgTemp>$27: Sorbet::Private::Static::Void = <magic>$26: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$15: NilClass)
+    <cfgAlias>$32: T.class_of(T) = alias <C T>
+    <blockReturnTemp>$14: Integer = <cfgAlias>$32: T.class_of(T).reveal_type(<self>: Integer)
+    <unconditional> -> bb10
+
+# backedges
+# - bb7(rubyBlockId=3)
+bb12[rubyBlockId=3, firstDead=-1](<self>: Integer, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.class_of(Rescues), <blockReturnTemp>$14: T.nilable(Integer), <castTemp>$22: T.nilable(Integer)):
+    # outerLoops: 1
+    <gotoDeadTemp>$34: TrueClass = true
+    <unconditional> -> bb10
+
+# backedges
+# - bb10(rubyBlockId=4)
+bb13[rubyBlockId=1, firstDead=1](<self>: Integer, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.class_of(Rescues), <blockReturnTemp>$14: Integer, <castTemp>$22: T.nilable(Integer), <gotoDeadTemp>$34: NilClass):
+    # outerLoops: 1
+    <blockReturnTemp>$36: T.noreturn = blockreturn<takes_block> <blockReturnTemp>$14: Integer
+    <unconditional> -> bb2
 
 }
 
