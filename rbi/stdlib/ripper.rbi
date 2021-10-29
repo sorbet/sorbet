@@ -215,3 +215,11 @@ class Ripper::Filter
   # zero or more of the `Ripper::EXPR_*` constants.
   def state; end
 end
+
+class Ripper::SexpBuilder < ::Ripper
+  sig {returns(String)}
+  def error; end
+end
+
+class Ripper::SexpBuilderPP < Ripper::SexpBuilder
+end
