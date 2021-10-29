@@ -1929,7 +1929,6 @@ class ResolveTypeMembersAndFieldsWalk {
                     current = core::Symbols::root();
                     continue;
                 } else {
-
                     auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
                     auto packageName = package.asName(ctx);
                     auto mangledName = packageName.lookupMangledPackageName(ctx.state);
