@@ -977,3 +977,16 @@ VALUE sorbet_vm_instance_variable_get(struct FunctionInlineCache *getCache, IVC 
     reg_cfp->sp += 2;
     return sorbet_callFuncWithCache(getCache, VM_BLOCK_HANDLER_NONE);
 }
+
+VALUE sorbet_vm_class(struct FunctionInlineCache *classCache, rb_control_frame_t *reg_cfp, VALUE recv) {
+    sorbet_vmMethodSearch(classCache, recv);
+    rb_method_definition_t *classDef = classCache->cd.cc.me->def;
+    // We know that this function is the definition of Kernel#class.
+    if (classDef->type == VM_METHOD_TYPE_CFUNC && classDef->body.cfunc.func == rb_obj_class) {
+        return rb_obj_class(recv);
+    }
+    VALUE *sp = reg_cfp->sp;
+    *(sp + 0) = recv;
+    reg_cfp->sp += 1;
+    return sorbet_callFuncWithCache(classCache, VM_BLOCK_HANDLER_NONE);
+}
