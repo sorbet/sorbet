@@ -686,6 +686,10 @@ class ChildTwo < T::Struct
 end
 ```
 
+## 5046 
+
+In `typed: strict` the `Array` and `Hash` aliases needs to be the expanded `T::Array[T.untyped]` or `T::Hash[T.untyped, T.untyped]` types respectively.
+
 ## 5047
 
 A class or module tried to inherit, include, or extend a final class or module.
