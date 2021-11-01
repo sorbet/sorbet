@@ -686,9 +686,26 @@ class ChildTwo < T::Struct
 end
 ```
 
-## 5046 
+## 5046
 
-In `typed: strict` the `Array` and `Hash` aliases needs to be the expanded `T::Array[T.untyped]` or `T::Hash[T.untyped, T.untyped]` types respectively.
+Generic classes must be passed all their generic type arguments when being used
+as types. For example:
+
+```ruby
+T.let([], Array)              # error
+T.let([], T::Array[Integer])  # ok
+```
+
+Many classes in the standard library are generic classes ([see
+here](stdlib.md)), and must be passed type arguments, including `Array` and
+`Hash`. Any user-defined generic classes must similarly be provided type
+arguments when used.
+
+For legacy reasons relating to the intial rollout of Sorbet, this error is only
+reported at `# typed: strict` for standard library generic classes and `# typed:
+true` for all user-defined generic classes. (In an ideal world, it would have
+always been reported at `# typed: true`, and we might change this in the
+future.)
 
 ## 5047
 
