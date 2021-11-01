@@ -961,6 +961,7 @@ VALUE sorbet_maybeAllocateObjectFastPath(VALUE recv, struct FunctionInlineCache 
 
 /* See the patched object.c.  */
 extern VALUE (*sorbet_vm_Kernel_instance_variable_get_func(void))(VALUE obj, VALUE iv);
+extern VALUE (*sorbet_vm_Kernel_instance_variable_set_func(void))(VALUE obj, VALUE iv, VALUE value);
 
 VALUE sorbet_vm_instance_variable_get(struct FunctionInlineCache *getCache, IVC varCache, rb_control_frame_t *reg_cfp,
                                       VALUE recv, ID var) {
@@ -976,6 +977,24 @@ VALUE sorbet_vm_instance_variable_get(struct FunctionInlineCache *getCache, IVC 
     *(sp + 1) = rb_id2sym(var);
     reg_cfp->sp += 2;
     return sorbet_callFuncWithCache(getCache, VM_BLOCK_HANDLER_NONE);
+}
+
+VALUE sorbet_vm_instance_variable_set(struct FunctionInlineCache *setCache, IVC varCache, rb_control_frame_t *reg_cfp,
+                                      VALUE recv, ID var, VALUE value) {
+    sorbet_vmMethodSearch(setCache, recv);
+    rb_method_definition_t *setDef = setCache->cd.cc.me->def;
+    if (setDef->type == VM_METHOD_TYPE_CFUNC &&
+        setDef->body.cfunc.func == sorbet_vm_Kernel_instance_variable_set_func()) {
+        sorbet_vm_setivar(recv, var, value, varCache);
+        return value;
+    }
+
+    VALUE *sp = reg_cfp->sp;
+    *(sp + 0) = recv;
+    *(sp + 1) = rb_id2sym(var);
+    *(sp + 2) = value;
+    reg_cfp->sp += 3;
+    return sorbet_callFuncWithCache(setCache, VM_BLOCK_HANDLER_NONE);
 }
 
 VALUE sorbet_vm_class(struct FunctionInlineCache *classCache, rb_control_frame_t *reg_cfp, VALUE recv) {
