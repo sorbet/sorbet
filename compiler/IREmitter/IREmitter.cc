@@ -28,7 +28,7 @@ namespace sorbet::compiler {
 
 namespace {
 
-vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::SymbolRef method,
+vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::MethodRef method,
                                                       const IREmitterContext &irctx) {
     auto ty = irctx.rubyBlockType[blockId];
     ENFORCE(ty == FunctionType::Block || ty == FunctionType::Method || ty == FunctionType::StaticInitFile ||
