@@ -278,6 +278,7 @@ NameDef names[] = {
 
     {"instance"},
     {"normal"},
+    {"genericPropGetter"},
 
     {"raise"},
     {"rewriterRaiseUnimplemented", "Sorbet rewriter pass partially unimplemented"},

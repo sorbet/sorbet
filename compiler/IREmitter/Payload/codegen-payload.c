@@ -158,6 +158,8 @@ SORBET_ALIVE(void, sorbet_vm_register_sig,
              (VALUE isSelf, VALUE method, VALUE self, VALUE arg, rb_block_call_func_t block));
 SORBET_ALIVE(void, sorbet_vm_define_method,
              (VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq, bool isSelf));
+SORBET_ALIVE(void, sorbet_vm_define_prop_getter,
+             (VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq));
 
 SORBET_ALIVE(VALUE, sorbet_maybeAllocateObjectFastPath, (VALUE recv, struct FunctionInlineCache *newCache));
 SORBET_ALIVE(VALUE, sorbet_vm_instance_variable_get,
@@ -469,6 +471,11 @@ VALUE sorbet_defineNestedClass(VALUE owner, const char *name, VALUE super) {
 SORBET_INLINE
 void sorbet_defineMethod(VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq) {
     sorbet_vm_define_method(klass, name, methodPtr, paramp, iseq, false);
+}
+
+SORBET_INLINE
+void sorbet_definePropGetter(VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq) {
+    sorbet_vm_define_prop_getter(klass, name, methodPtr, paramp, iseq);
 }
 
 // this DOES override existing methods

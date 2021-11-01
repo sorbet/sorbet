@@ -1666,7 +1666,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :foo }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -5500,7 +5500,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :default }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -5563,7 +5563,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :t_nilable }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -5615,7 +5615,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :array }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -5681,7 +5681,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :t_array }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -5751,7 +5751,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :hash_of }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -5805,7 +5805,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :const_explicit }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -5840,7 +5840,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :const }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -5882,7 +5882,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :enum_prop }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -5939,7 +5939,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -6010,7 +6010,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_lazy }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -6080,7 +6080,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_proc }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -6147,7 +6147,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_invalid }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -6324,7 +6324,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :empty_hash_rules }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -6391,7 +6391,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :hash_rules }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -6927,7 +6927,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :token }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -6974,7 +6974,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :created }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -7412,7 +7412,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :token }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
 
@@ -7461,7 +7461,7 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :created }
-            Literal{ value = :normal }
+            Literal{ value = :genericPropGetter }
           ]
         }
       ]

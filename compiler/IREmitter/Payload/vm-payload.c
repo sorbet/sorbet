@@ -499,3 +499,34 @@ void sorbet_vm_define_method(VALUE klass, const char *name, rb_sorbet_func_t met
     VALUE args[] = {klass, built_sig};
     rb_block_call(methods, rb_intern("_with_declared_signature"), 2, args, define_method_block, (VALUE)&params);
 }
+
+static VALUE sorbet_getTPropsDecorator() {
+    static const char decorator[] = "T::Props::Decorator";
+    return sorbet_getConstant(decorator, sizeof(decorator));
+}
+
+/* See the patched proc.c */
+extern VALUE sorbet_vm_method_owner(VALUE obj);
+
+void sorbet_vm_define_prop_getter(VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp,
+                                  rb_iseq_t *iseq) {
+    /* See T::Props::Decorator#define_getter_and_setter.  */
+    ID prop_get = rb_intern("prop_get");
+    VALUE decorator = rb_funcall(klass, rb_intern("decorator"), 0);
+    VALUE prop_get_method = rb_obj_method(decorator, rb_id2sym(prop_get));
+    VALUE method_owner = sorbet_vm_method_owner(prop_get_method);
+    /* The code that the compiler generated was fully general, accessing instance variables
+     * and going through any available prop_get_logic method.  In the case where prop_get
+     * is known to be defined from T::Props::Decorator, we can use the attr_reader fastpath,
+     * which is significantly faster.
+     */
+    if (method_owner == sorbet_getTPropsDecorator()) {
+        ID method_name = rb_intern(name);
+        ID attriv = rb_intern_str(rb_sprintf("@%" PRIsVALUE, rb_id2str(method_name)));
+        rb_add_method(klass, method_name, VM_METHOD_TYPE_IVAR, (void *)attriv, METHOD_VISI_PUBLIC);
+        return;
+    }
+
+    const bool isSelf = false;
+    sorbet_vm_define_method(klass, name, methodPtr, paramp, iseq, isSelf);
+}

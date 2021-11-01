@@ -451,7 +451,7 @@ public:
         auto funcNameRef = litName.asName(cs);
         auto name = Payload::toCString(cs, funcNameRef.show(cs), builder);
 
-        // Third arg: method kind (normal or attr_reader)
+        // Third arg: method kind (normal, attr_reader, or genericPropGetter)
         auto litMethodKind = core::cast_type_nonnull<core::LiteralType>(send->args[2].type);
         ENFORCE(litMethodKind.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         auto methodKind = litMethodKind.asName(cs);
@@ -465,21 +465,34 @@ public:
         ENFORCE(funcSym.exists());
         ENFORCE(funcSym.data(cs)->isMethod());
 
-        if (methodKind == core::Names::attrReader() && !funcSym.data(cs)->isFinalMethod()) {
+        // We are going to rely on compiled final methods having their return values checked.
+        const bool needsTypechecking = funcSym.data(cs)->isFinalMethod();
+
+        if (methodKind == core::Names::attrReader() && !needsTypechecking) {
             const char *payloadFuncName = isSelf ? "sorbet_defineIvarMethodSingleton" : "sorbet_defineIvarMethod";
             auto payloadFunc = cs.getFunction(payloadFuncName);
 
             builder.CreateCall(payloadFunc, {klass, name});
         } else {
-            ENFORCE(methodKind == core::Names::normal() ||
-                        (methodKind == core::Names::attrReader() && funcSym.data(cs)->isFinalMethod()),
+            const bool isPropGetter = methodKind == core::Names::genericPropGetter();
+
+            ENFORCE(methodKind == core::Names::normal() || isPropGetter ||
+                        (methodKind == core::Names::attrReader() && needsTypechecking),
                     "Unknown method kind: {}", methodKind.show(cs));
 
+            if (isPropGetter) {
+                ENFORCE(!isSelf);
+            }
             auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
             auto *stackFrameVar = Payload::rubyStackFrameVar(cs, builder, mcctx.irctx, funcSym);
             auto *stackFrame = builder.CreateLoad(stackFrameVar, "stackFrame");
 
-            const char *payloadFuncName = isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod";
+            // If a prop getter doesn't necessarily need to be typechecked, then we can
+            // decide at runtime whether to use the fully-general compiled version of
+            // the getter or whether to use a fast attr_reader-based version.
+            const char *payloadFuncName = isSelf                                 ? "sorbet_defineMethodSingleton"
+                                          : (isPropGetter && !needsTypechecking) ? "sorbet_definePropGetter"
+                                                                                 : "sorbet_defineMethod";
             auto rubyFunc = cs.getFunction(payloadFuncName);
             auto *paramInfo = buildParamInfo(cs, builder, mcctx.irctx, funcSym, mcctx.rubyBlockId);
             builder.CreateCall(rubyFunc, {klass, name, funcHandle, paramInfo, stackFrame});

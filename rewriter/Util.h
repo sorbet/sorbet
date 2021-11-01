@@ -22,10 +22,11 @@ public:
     static ast::ExpressionPtr mkKwArgsHash(const ast::Send *send);
 
     static ast::ExpressionPtr mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::ExpressionPtr rhs,
-                                    bool isAttrReader = false);
+                                    ast::MethodDef::Flags flags = ast::MethodDef::Flags());
 
     static ast::ExpressionPtr mkSet(core::Context ctx, core::LocOffsets loc, core::NameRef name,
-                                    core::LocOffsets argLoc, ast::ExpressionPtr rhs);
+                                    core::LocOffsets argLoc, ast::ExpressionPtr rhs,
+                                    ast::MethodDef::Flags flags = ast::MethodDef::Flags());
 
     static ast::ExpressionPtr mkNilable(core::LocOffsets loc, ast::ExpressionPtr type);
 
