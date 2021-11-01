@@ -35,7 +35,7 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
         ENFORCE(false);
     }
     sym = IREmitterHelpers::fixupOwningSymbol(gs, sym);
-    ENFORCE(sym.data(gs)->isClassOrModule());
+    ENFORCE(sym.isClassOrModule());
     return sym;
 }
 
@@ -496,7 +496,7 @@ public:
         }
         auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
         ENFORCE(funcSym.exists());
-        ENFORCE(funcSym.data(cs)->isMethod());
+        ENFORCE(funcSym.isMethod());
 
         // We are going to rely on compiled final methods having their return values checked.
         const bool needsTypechecking = funcSym.data(cs)->isFinalMethod();

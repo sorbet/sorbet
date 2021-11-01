@@ -189,7 +189,6 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     int moduleCount = 0;
     for (size_t i = 1; i < gs.methodsUsed(); ++i) {
         auto ref = core::MethodRef(gs, i);
-        ENFORCE(ref.data(gs)->isMethod());
         auto loc = ref.data(gs)->loc();
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
             methodCount++;
@@ -379,7 +378,6 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
 
         core::ClassOrModuleRef singleton;
         for (auto ancst : sym.data(gs)->mixins()) {
-            ENFORCE(ancst.data(gs)->isClassOrModule());
             // Reading the fake property created in resolver#resolveClassMethodsJob(){}
             auto mixedInClassMethods = ancst.data(gs)->findMember(gs, core::Names::mixedInClassMethods());
             if (!mixedInClassMethods.exists()) {

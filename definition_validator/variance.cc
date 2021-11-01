@@ -169,7 +169,7 @@ private:
                 // This can be introduced by `module_function`, which in its
                 // current implementation will alias an instance method as a
                 // class method.
-                if (aliasSym.data(ctx)->isMethod()) {
+                if (aliasSym.isMethod()) {
                     validateMethod(ctx, polarity, aliasSym.asMethodRef());
                 } else {
                     Exception::raise("Unexpected type alias: {}", type.toString(ctx));

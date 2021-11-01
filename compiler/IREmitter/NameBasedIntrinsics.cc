@@ -34,7 +34,7 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
         ENFORCE(false);
     }
     sym = IREmitterHelpers::fixupOwningSymbol(gs, sym);
-    ENFORCE(sym.data(gs)->isClassOrModule());
+    ENFORCE(sym.isClassOrModule());
     return sym;
 }
 

@@ -404,13 +404,13 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
             return response;
         }
 
-        if (defResp->symbol.data(gs)->isMethod() && isupper(params->newName[0])) {
+        if (defResp->symbol.isMethod() && isupper(params->newName[0])) {
             response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                                          "Method names must begin with an lowercase letter.");
             return response;
         }
 
-        if (defResp->symbol.isClassOrModule() || defResp->symbol.data(gs)->isMethod()) {
+        if (defResp->symbol.isClassOrModule() || defResp->symbol.isMethod()) {
             if (isValidRenameLocation(defResp->symbol, gs, response)) {
                 getRenameEdits(typechecker, defResp->symbol, params->newName, response);
             }

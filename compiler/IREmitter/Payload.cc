@@ -227,11 +227,11 @@ std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
 } // namespace
 
 llvm::Value *Payload::getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &builder) {
-    ENFORCE(sym.data(cs)->isClassOrModule() || sym.data(cs)->isStaticField() || sym.data(cs)->isTypeMember());
+    ENFORCE(sym.isClassOrModule() || sym.data(cs)->isStaticField() || sym.data(cs)->isTypeMember());
     sym = IREmitterHelpers::fixupOwningSymbol(cs, sym);
     auto str = showClassName(cs, sym);
     ENFORCE(str.length() < 2 || (str[0] != ':'), "implementation assumes that strings dont start with ::");
-    auto functionName = sym.data(cs)->isClassOrModule() ? "sorbet_i_getRubyClass" : "sorbet_i_getRubyConstant";
+    auto functionName = sym.isClassOrModule() ? "sorbet_i_getRubyClass" : "sorbet_i_getRubyConstant";
     return builder.CreateCall(
         cs.getFunction(functionName),
         {Payload::toCString(cs, str, builder), llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});

@@ -925,7 +925,7 @@ class SymbolDefiner {
 
     void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<ast::ParsedArg> &parsedArgs) {
         auto sym = ctx.owner.data(ctx)->dealias(ctx);
-        if (!sym.data(ctx)->isMethod()) {
+        if (!sym.isMethod()) {
             return;
         }
         if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {

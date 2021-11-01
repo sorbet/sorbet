@@ -1389,7 +1389,7 @@ class ResolveTypeMembersAndFieldsWalk {
         core::ClassOrModuleRef scope;
         auto uid = job.ident;
         if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
-            if (!ctx.owner.data(ctx)->isClassOrModule()) {
+            if (!ctx.owner.isClassOrModule()) {
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                     e.setHeader("The class variable `{}` must be declared at class scope", uid->name.show(ctx));
                 }
@@ -1399,11 +1399,11 @@ class ResolveTypeMembersAndFieldsWalk {
         } else {
             // we need to check nested block counts because we want all fields to be declared on top level of either
             // class or body, rather then nested in some block
-            if (job.atTopLevel && ctx.owner.data(ctx)->isClassOrModule()) {
+            if (job.atTopLevel && ctx.owner.isClassOrModule()) {
                 // Declaring a class instance variable
             } else if (job.atTopLevel && ctx.owner.name(ctx) == core::Names::initialize()) {
                 // Declaring a instance variable
-            } else if (ctx.owner.data(ctx)->isMethod() && ctx.owner.owner(ctx).data(ctx)->isSingletonClass(ctx) &&
+            } else if (ctx.owner.isMethod() && ctx.owner.owner(ctx).data(ctx)->isSingletonClass(ctx) &&
                        !core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
                 // Declaring a class instance variable in a static method
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {

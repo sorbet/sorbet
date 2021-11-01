@@ -317,7 +317,7 @@ static const vector<core::NameRef> readerNames = {
 void populateFieldAccessorType(const core::GlobalState &gs, AccessorInfo &info) {
     auto method = info.readerSymbol.exists() ? info.readerSymbol : info.writerSymbol;
     ENFORCE(method.exists());
-    ENFORCE(method.data(gs)->isMethod());
+
     // Check definition site of method for `prop`, `const`, etc. The loc for the method should begin with
     // `def|prop|const|...`.
     auto methodSource = method.data(gs)->loc().source(gs);
@@ -390,13 +390,13 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
         info.fieldSymbol = symbol.asFieldRef();
         baseName = string_view(symbolName).substr(1);
     } else if (absl::EndsWith(symbolName, "=")) {
-        if (!symbol.data(gs)->isMethod()) {
+        if (!symbol.isMethod()) {
             return info;
         }
         info.writerSymbol = symbol.asMethodRef();
         baseName = string_view(symbolName).substr(0, symbolName.length() - 1);
     } else {
-        if (!symbol.data(gs)->isMethod()) {
+        if (!symbol.isMethod()) {
             return info;
         }
         info.readerSymbol = symbol.asMethodRef();

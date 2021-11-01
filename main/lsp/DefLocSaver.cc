@@ -55,7 +55,7 @@ ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, 
         core::ClassOrModuleRef klass;
         // Logic cargo culted from `global2Local` in `walker_build.cc`.
         if (id.kind == ast::UnresolvedIdent::Kind::Instance) {
-            ENFORCE(ctx.owner.data(ctx)->isMethod());
+            ENFORCE(ctx.owner.isMethod());
             klass = ctx.owner.owner(ctx).asClassOrModuleRef();
         } else {
             // Class var.
