@@ -34,21 +34,20 @@ string getFunctionNamePrefix(CompilerState &cs, core::SymbolRef sym) {
     } else {
         suffix = name.toString(cs);
     }
-    string prefix = IREmitterHelpers::isRootishSymbol(cs, sym.data(cs)->owner)
-                        ? ""
-                        : getFunctionNamePrefix(cs, sym.data(cs)->owner) + "::";
+    string prefix =
+        IREmitterHelpers::isRootishSymbol(cs, sym.owner(cs)) ? "" : getFunctionNamePrefix(cs, sym.owner(cs)) + "::";
 
     return prefix + suffix;
 }
 } // namespace
 
 string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym) {
-    auto maybeAttachedOwner = sym.data(cs)->owner.data(cs)->attachedClass(cs);
+    auto maybeAttachedOwner = sym.owner(cs).data(cs)->attachedClass(cs);
     string prefix = "func_";
     if (maybeAttachedOwner.exists()) {
         prefix = prefix + getFunctionNamePrefix(cs, maybeAttachedOwner) + ".";
     } else {
-        prefix = prefix + getFunctionNamePrefix(cs, sym.data(cs)->owner) + "#";
+        prefix = prefix + getFunctionNamePrefix(cs, sym.owner(cs)) + "#";
     }
 
     auto name = sym.name(cs);
@@ -378,7 +377,7 @@ std::string IREmitterHelpers::showClassNameWithoutOwner(const core::GlobalState 
     // the above calls are done inside NameRef, which doesn't have the necessary
     // symbol ownership information to do this sort of munging.  So we have to
     // duplicate the Symbol logic here.
-    if (sym.data(gs)->owner != core::Symbols::PackageRegistry() || !name.isPackagerName(gs)) {
+    if (sym.owner(gs) != core::Symbols::PackageRegistry() || !name.isPackagerName(gs)) {
         return withoutOwnerStr;
     }
 
@@ -434,7 +433,7 @@ IREmitterHelpers::isFinalMethod(const core::GlobalState &gs, core::TypePtr recvT
         return std::nullopt;
     }
 
-    auto file = funSym.data(gs)->loc().file();
+    auto file = funSym.loc(gs).file();
     if (file.data(gs).compiledLevel != core::CompiledLevel::True) {
         return std::nullopt;
     }

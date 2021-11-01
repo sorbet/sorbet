@@ -426,9 +426,9 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
     }
 
     optional<string> documentation = nullopt;
-    auto whatFile = what.data(gs)->loc().file();
+    auto whatFile = what.loc(gs).file();
     if (whatFile.exists()) {
-        documentation = findDocumentation(whatFile.data(gs).source(), what.data(gs)->loc().beginPos());
+        documentation = findDocumentation(whatFile.data(gs).source(), what.loc(gs).beginPos());
     }
 
     auto prettyType = prettyTypeForConstant(gs, what);
@@ -702,9 +702,9 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     }
 
     optional<string> documentation = nullopt;
-    auto whatFile = what.data(gs)->loc().file();
+    auto whatFile = what.loc(gs).file();
     if (whatFile.exists()) {
-        documentation = findDocumentation(whatFile.data(gs).source(), what.data(gs)->loc().beginPos());
+        documentation = findDocumentation(whatFile.data(gs).source(), what.loc(gs).beginPos());
     }
 
     auto prettyType = prettyTypeForMethod(gs, maybeAlias, receiverType, nullptr, constraint);

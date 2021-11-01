@@ -773,7 +773,7 @@ class SymbolDefiner {
 
     void emitRedefinedConstantError(core::MutableContext ctx, core::Loc errorLoc, core::SymbolRef symbol,
                                     core::SymbolRef renamedSymbol) {
-        emitRedefinedConstantError(ctx, errorLoc, symbol.show(ctx), renamedSymbol.data(ctx)->loc());
+        emitRedefinedConstantError(ctx, errorLoc, symbol.show(ctx), renamedSymbol.loc(ctx));
     }
 
     core::ClassOrModuleRef ensureIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
@@ -781,21 +781,21 @@ class SymbolDefiner {
         // Common case: Everything is fine, user is trying to define a symbol on a class or module.
         if (scope.isClassOrModule()) {
             // Check if original symbol was mangled away. If so, complain.
-            auto renamedSymbol = ctx.state.findRenamedSymbol(scope.data(ctx)->owner, scope);
+            auto renamedSymbol = ctx.state.findRenamedSymbol(scope.owner(ctx), scope);
             if (renamedSymbol.exists()) {
                 if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
                     auto constLitName = name.show(ctx);
                     auto scopeName = scope.show(ctx);
                     e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
                                 scopeName, scopeName);
-                    e.addErrorLine(renamedSymbol.data(ctx)->loc(), "`{}` defined here", scopeName);
+                    e.addErrorLine(renamedSymbol.loc(ctx), "`{}` defined here", scopeName);
                 }
             }
             return scope.asClassOrModuleRef();
         }
 
         // Check if class was already mangled.
-        auto klassSymbol = ctx.state.lookupClassSymbol(scope.data(ctx)->owner.asClassOrModuleRef(), scope.name(ctx));
+        auto klassSymbol = ctx.state.lookupClassSymbol(scope.owner(ctx).asClassOrModuleRef(), scope.name(ctx));
         if (klassSymbol.exists()) {
             return klassSymbol;
         }
@@ -805,13 +805,13 @@ class SymbolDefiner {
             auto newOwnerName = scope.show(ctx);
             e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, newOwnerName,
                         newOwnerName);
-            e.addErrorLine(scope.data(ctx)->loc(), "`{}` defined here", newOwnerName);
+            e.addErrorLine(scope.loc(ctx), "`{}` defined here", newOwnerName);
         }
         // Mangle this one out of the way, and re-enter a symbol with this name as a class.
         auto scopeName = scope.name(ctx);
         ctx.state.mangleRenameSymbol(scope, scopeName);
-        auto scopeKlass = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc),
-                                                     scope.data(ctx)->owner.asClassOrModuleRef(), scopeName);
+        auto scopeKlass =
+            ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope.owner(ctx).asClassOrModuleRef(), scopeName);
         scopeKlass.data(ctx)->singletonClass(ctx); // force singleton class into existance
         return scopeKlass;
     }
@@ -936,14 +936,14 @@ class SymbolDefiner {
                     e.setHeader(
                         "Method alias `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
                         ctx.owner.show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
-                    e.addErrorLine(ctx.owner.data(ctx)->loc(), "Previous alias definition");
-                    e.addErrorLine(sym.data(ctx)->loc(), "Dealiased definition");
+                    e.addErrorLine(ctx.owner.loc(ctx), "Previous alias definition");
+                    e.addErrorLine(sym.loc(ctx), "Dealiased definition");
                 } else {
                     // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
                                 sym.show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                    e.addErrorLine(sym.loc(ctx), "Previous definition");
                 }
             }
             return;
@@ -957,7 +957,7 @@ class SymbolDefiner {
                     e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
                                 methodArg.local.toString(ctx), methodArg.flags.isKeyword ? "keyword" : "non-keyword");
                     e.addErrorLine(
-                        sym.data(ctx)->loc(),
+                        sym.loc(ctx),
                         "The corresponding argument `{}` in the previous definition was {}a keyword argument",
                         symArg.show(ctx), symArg.flags.isKeyword ? "" : "not ");
                 }
@@ -976,7 +976,7 @@ class SymbolDefiner {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
                                 methodArg.local.toString(ctx), methodArg.flags.isRepeated ? "splat" : "non-splat");
-                    e.addErrorLine(sym.data(ctx)->loc(),
+                    e.addErrorLine(sym.loc(ctx),
                                    "The corresponding argument `{}` in the previous definition was {}a splat argument",
                                    symArg.show(ctx), symArg.flags.isRepeated ? "" : "not ");
                 }
@@ -987,7 +987,7 @@ class SymbolDefiner {
                     e.setHeader(
                         "Method `{}` redefined with mismatched keyword argument name. Expected: `{}`, got: `{}`",
                         sym.show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                    e.addErrorLine(sym.loc(ctx), "Previous definition");
                 }
                 return;
             }
@@ -1122,17 +1122,16 @@ class SymbolDefiner {
         auto declLoc = core::Loc(ctx.file, klass.declLoc);
         if (!symbol.isClassOrModule()) {
             // we might have already mangled the class symbol, so see if we have a symbol that is a class already
-            auto klassSymbol =
-                ctx.state.lookupClassSymbol(symbol.data(ctx)->owner.asClassOrModuleRef(), symbol.name(ctx));
+            auto klassSymbol = ctx.state.lookupClassSymbol(symbol.owner(ctx).asClassOrModuleRef(), symbol.name(ctx));
             if (klassSymbol.exists()) {
                 return klassSymbol;
             }
 
-            emitRedefinedConstantError(ctx, core::Loc(ctx.file, klass.loc), symbol.show(ctx), symbol.data(ctx)->loc());
+            emitRedefinedConstantError(ctx, core::Loc(ctx.file, klass.loc), symbol.show(ctx), symbol.loc(ctx));
 
             auto origName = symbol.name(ctx);
             ctx.state.mangleRenameSymbol(symbol, symbol.name(ctx));
-            klassSymbol = ctx.state.enterClassSymbol(declLoc, symbol.data(ctx)->owner.asClassOrModuleRef(), origName);
+            klassSymbol = ctx.state.enterClassSymbol(declLoc, symbol.owner(ctx).asClassOrModuleRef(), origName);
             klassSymbol.data(ctx)->setIsModule(isModule);
 
             auto oldSymCount = ctx.state.classAndModulesUsed();
@@ -1153,7 +1152,7 @@ class SymbolDefiner {
             }
         } else {
             symbol.data(ctx)->setIsModule(isModule);
-            auto renamed = ctx.state.findRenamedSymbol(symbol.data(ctx)->owner, symbol);
+            auto renamed = ctx.state.findRenamedSymbol(symbol.owner(ctx), symbol);
             if (renamed.exists()) {
                 emitRedefinedConstantError(ctx, core::Loc(ctx.file, klass.loc), symbol, renamed);
             }
@@ -1250,7 +1249,7 @@ class SymbolDefiner {
         auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
         if (!sym.exists() && currSym.exists()) {
             emitRedefinedConstantError(ctx, core::Loc(ctx.file, staticField.asgnLoc), staticField.name.show(ctx),
-                                       currSym.data(ctx)->loc());
+                                       currSym.loc(ctx));
             ctx.state.mangleRenameSymbol(currSym, currSym.name(ctx));
         }
         if (sym.exists()) {
@@ -1258,7 +1257,7 @@ class SymbolDefiner {
             auto renamedSym = ctx.state.findRenamedSymbol(scope, sym);
             if (renamedSym.exists()) {
                 emitRedefinedConstantError(ctx, core::Loc(ctx.file, staticField.asgnLoc),
-                                           renamedSym.data(ctx)->name.show(ctx), renamedSym.data(ctx)->loc());
+                                           renamedSym.data(ctx)->name.show(ctx), renamedSym.loc(ctx));
             }
         }
         sym = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, staticField.lhsLoc), scope, name);
@@ -1336,7 +1335,7 @@ class SymbolDefiner {
             auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
             if (oldSym.exists()) {
                 emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc), oldSym.show(ctx),
-                                           oldSym.data(ctx)->loc());
+                                           oldSym.loc(ctx));
                 ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name);
             }
             sym =
@@ -1349,10 +1348,10 @@ class SymbolDefiner {
             if (isTypeTemplate) {
                 auto context = ctx.owner.enclosingClass(ctx);
                 oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
-                if (oldSym.exists() && !(oldSym.data(ctx)->loc() == core::Loc(ctx.file, typeMember.asgnLoc) ||
-                                         oldSym.data(ctx)->loc().isTombStoned(ctx))) {
+                if (oldSym.exists() && !(oldSym.loc(ctx) == core::Loc(ctx.file, typeMember.asgnLoc) ||
+                                         oldSym.loc(ctx).isTombStoned(ctx))) {
                     emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc), typeMember.name.show(ctx),
-                                               oldSym.data(ctx)->loc());
+                                               oldSym.loc(ctx));
                     ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
                 }
                 auto alias =
@@ -1700,7 +1699,7 @@ public:
         core::SymbolRef maybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
         if (!maybeScope.isClassOrModule()) {
             auto scopeName = maybeScope.name(ctx);
-            maybeScope = ctx.state.lookupClassSymbol(maybeScope.data(ctx)->owner.asClassOrModuleRef(), scopeName);
+            maybeScope = ctx.state.lookupClassSymbol(maybeScope.owner(ctx).asClassOrModuleRef(), scopeName);
         }
         auto scope = maybeScope.asClassOrModuleRef();
 

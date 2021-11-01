@@ -56,7 +56,7 @@ ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, 
         // Logic cargo culted from `global2Local` in `walker_build.cc`.
         if (id.kind == ast::UnresolvedIdent::Kind::Instance) {
             ENFORCE(ctx.owner.data(ctx)->isMethod());
-            klass = ctx.owner.data(ctx)->owner.asClassOrModuleRef();
+            klass = ctx.owner.owner(ctx).asClassOrModuleRef();
         } else {
             // Class var.
             klass = ctx.owner.enclosingClass(ctx);
@@ -71,7 +71,7 @@ ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, 
             (lspQuery.matchesSymbol(sym) || lspQuery.matchesLoc(core::Loc(ctx.file, id.loc)))) {
             core::TypeAndOrigins tp;
             tp.type = sym.data(ctx)->resultType;
-            tp.origins.emplace_back(sym.data(ctx)->loc());
+            tp.origins.emplace_back(sym.loc(ctx));
             core::lsp::QueryResponse::pushQueryResponse(
                 ctx, core::lsp::FieldResponse(sym.asFieldRef(), core::Loc(ctx.file, id.loc), id.name, tp));
         }
@@ -90,7 +90,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
         if (lspQuery.matchesLoc(core::Loc(ctx.file, lit->loc)) || lspQuery.matchesSymbol(symbol)) {
             // This basically approximates the cfg::Alias case from Environment::processBinding.
             core::TypeAndOrigins tp;
-            tp.origins.emplace_back(symbol.data(ctx)->loc());
+            tp.origins.emplace_back(symbol.loc(ctx));
 
             if (symbol.isClassOrModule()) {
                 tp.type = symbol.data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();

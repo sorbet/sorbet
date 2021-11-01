@@ -64,7 +64,7 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) 
             break;
         case ast::UnresolvedIdent::Kind::Instance:
             ENFORCE(cctx.ctx.owner.data(cctx.ctx)->isMethod());
-            klass = cctx.ctx.owner.data(cctx.ctx)->owner.asClassOrModuleRef();
+            klass = cctx.ctx.owner.owner(cctx.ctx).asClassOrModuleRef();
             break;
         case ast::UnresolvedIdent::Kind::Global:
             klass = core::Symbols::root();

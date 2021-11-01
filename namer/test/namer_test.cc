@@ -139,7 +139,7 @@ TEST_CASE("namer tests") {
         REQUIRE_EQ(2, fooInfo->members().size());
 
         auto barSym = fooInfo->members().at(gs.enterNameUTF8("bar"));
-        REQUIRE_EQ(fooSym, barSym.data(gs)->owner);
+        REQUIRE_EQ(fooSym, barSym.owner(gs));
     }
 }
 

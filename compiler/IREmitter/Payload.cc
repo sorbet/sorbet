@@ -218,7 +218,7 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, 
 
 namespace {
 std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
-    auto owner = sym.data(gs)->owner;
+    auto owner = sym.owner(gs);
     bool includeOwner = !IREmitterHelpers::isRootishSymbol(gs, owner);
     string ownerStr = includeOwner ? showClassName(gs, owner) + "::" : "";
     return ownerStr + IREmitterHelpers::showClassNameWithoutOwner(gs, sym);
@@ -1025,7 +1025,7 @@ void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, l
             case Alias::AliasKind::Constant: {
                 auto sym = alias.constantSym;
                 auto name = sym.name(cs.gs).show(cs.gs);
-                auto owner = sym.data(cs.gs)->owner;
+                auto owner = sym.owner(cs.gs);
                 builder.CreateCall(cs.getFunction("sorbet_setConstant"),
                                    {Payload::getRubyConstant(cs, owner, builder), Payload::toCString(cs, name, builder),
                                     llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});

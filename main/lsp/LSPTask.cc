@@ -373,7 +373,7 @@ LSPTask::getReferencesToAccessor(LSPTypecheckerDelegate &typechecker, const Acce
 AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolRef symbol) const {
     AccessorInfo info;
 
-    core::SymbolRef owner = symbol.data(gs)->owner;
+    core::SymbolRef owner = symbol.owner(gs);
     if (!owner.exists() || !owner.isClassOrModule()) {
         return info;
     }

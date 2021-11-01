@@ -1067,7 +1067,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             }
                         } else if (data->isField()) {
                             tp.type = core::Types::resultTypeAsSeenFrom(
-                                ctx, symbol.data(ctx)->resultType, symbol.data(ctx)->owner.asClassOrModuleRef(),
+                                ctx, symbol.data(ctx)->resultType, symbol.owner(ctx).asClassOrModuleRef(),
                                 ctx.owner.enclosingClass(ctx),
                                 ctx.owner.enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx));
                         } else {

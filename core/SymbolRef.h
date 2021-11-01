@@ -8,6 +8,7 @@ namespace sorbet::core {
 class Symbol;
 class GlobalState;
 class NameRef;
+class Loc;
 struct SymbolDataDebugCheck {
     const GlobalState &gs;
     const unsigned int symbolCountAtCreation;
@@ -410,6 +411,8 @@ public:
     ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     core::NameRef name(const GlobalState &gs) const;
+    core::SymbolRef owner(const GlobalState &gs) const;
+    core::Loc loc(const GlobalState &gs) const;
     // Prints the fully qualified name of the symbol in a format that is suitable for showing to the user (e.g.
     // "Owner::SymbolName")
     std::string showFullName(const GlobalState &gs) const;

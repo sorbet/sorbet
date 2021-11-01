@@ -29,7 +29,7 @@ class AutogenWalk {
         vector<core::NameRef> out;
         while (sym.exists() && sym != core::Symbols::root()) {
             out.emplace_back(sym.name(ctx));
-            sym = sym.data(ctx)->owner;
+            sym = sym.owner(ctx);
         }
         reverse(out.begin(), out.end());
         return out;

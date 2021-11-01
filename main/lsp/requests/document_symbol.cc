@@ -102,7 +102,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
             core::SymbolRef ref(gs, kind, idx);
             if (!hideSymbol(gs, ref) &&
                 // a bit counter-intuitive, but this actually should be `!= fref`, as it prevents duplicates.
-                (ref.data(gs)->owner.data(gs)->loc().file() != fref || ref.data(gs)->owner == core::Symbols::root())) {
+                (ref.owner(gs).loc(gs).file() != fref || ref.data(gs)->owner == core::Symbols::root())) {
                 for (auto definitionLocation : ref.data(gs)->locs()) {
                     if (definitionLocation.file() == fref) {
                         auto data = symbolRef2DocumentSymbol(gs, ref, fref);

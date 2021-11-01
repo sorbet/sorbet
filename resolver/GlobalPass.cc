@@ -62,7 +62,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
         return false;
     }
     if (!my.isTypeMember()) {
-        if (auto e = gs.beginError(my.data(gs)->loc(), core::errors::Resolver::NotATypeVariable)) {
+        if (auto e = gs.beginError(my.loc(gs), core::errors::Resolver::NotATypeVariable)) {
             e.setHeader("Type variable `{}` needs to be declared as `= type_member(SOMETHING)`", name.show(gs));
         }
         auto synthesizedName = gs.freshNameUnique(core::UniqueNameKind::TypeVarName, name, 1);
@@ -112,11 +112,10 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
                 core::SymbolRef my = dealiasAt(gs, tp.asTypeMemberRef(), sym, typeAliases);
                 ENFORCE(my.exists(), "resolver failed to register type member aliases");
                 if (sym.data(gs)->typeMembers()[i] != my) {
-                    if (auto e = gs.beginError(my.data(gs)->loc(), core::errors::Resolver::TypeMembersInWrongOrder)) {
+                    if (auto e = gs.beginError(my.loc(gs), core::errors::Resolver::TypeMembersInWrongOrder)) {
                         e.setHeader("Type members for `{}` repeated in wrong order", sym.show(gs));
-                        e.addErrorLine(my.data(gs)->loc(), "Found type member with name `{}`", my.name(gs).show(gs));
-                        e.addErrorLine(sym.data(gs)->typeMembers()[i].data(gs)->loc(),
-                                       "Expected type member with name `{}`",
+                        e.addErrorLine(my.loc(gs), "Found type member with name `{}`", my.name(gs).show(gs));
+                        e.addErrorLine(sym.data(gs)->typeMembers()[i].loc(gs), "Expected type member with name `{}`",
                                        sym.data(gs)->typeMembers()[i].name(gs).show(gs));
                         e.addErrorLine(tp.data(gs)->loc(), "`{}` defined in parent here:", tp.name(gs).show(gs));
                     }
@@ -151,7 +150,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
 
             auto myVariance = tp.data(gs)->variance();
             if (myVariance != core::Variance::Invariant) {
-                auto loc = tp.data(gs)->loc();
+                auto loc = tp.loc(gs);
                 if (!loc.file().data(gs).isPayload()) {
                     if (auto e = gs.beginError(loc, core::errors::Resolver::VariantTypeMemberInClass)) {
                         e.setHeader("Classes can only have invariant type members");

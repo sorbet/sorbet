@@ -195,7 +195,7 @@ void SymbolMatcher::updatePartialMatch(core::SymbolRef symbolRef, string_view::c
     partialMatch = partialMatchSymbol(shortName, queryBegin, queryEnd, true, ceilingScore);
     for (auto previousAncestorRef = symbolRef, ancestorRef = symbolData->owner;
          previousAncestorRef != ancestorRef && ancestorRef.exists();
-         previousAncestorRef = ancestorRef, ancestorRef = ancestorRef.data(gs)->owner) {
+         previousAncestorRef = ancestorRef, ancestorRef = ancestorRef.owner(gs)) {
         auto &ancestorMatch = getPartialMatch(ancestorRef);
         auto ancestorEnd = ancestorMatch.matchEnd;
         if (ancestorEnd == queryBegin || ancestorEnd == nullptr) {
@@ -277,7 +277,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
                 }
                 for (auto previousAncestorRef = symbolRef, ancestorRef = symbolData->owner;
                      previousAncestorRef != ancestorRef && ancestorRef.exists();
-                     previousAncestorRef = ancestorRef, ancestorRef = ancestorRef.data(gs)->owner) {
+                     previousAncestorRef = ancestorRef, ancestorRef = ancestorRef.owner(gs)) {
                     auto [ancestorScore, ancestorEnd] = getPartialMatch(ancestorRef);
                     if (ancestorEnd == queryBegin || ancestorEnd == nullptr) {
                         break; // no further ancestor will be of any help

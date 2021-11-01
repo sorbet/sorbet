@@ -760,8 +760,8 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                 }
             }
 
-            base = base.data(gs)->owner;
-        } while (best.distance > 0 && base.data(gs)->owner.exists() && base != Symbols::root());
+            base = base.owner(gs);
+        } while (best.distance > 0 && base.owner(gs).exists() && base != Symbols::root());
     }
 
     // At this point, `result` is in a deterministic order, and is ordered with _decreasing_ edit distance
@@ -1320,7 +1320,7 @@ string SymbolRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
     }
 }
 
-core::NameRef SymbolRef::name(const GlobalState &gs) const {
+NameRef SymbolRef::name(const GlobalState &gs) const {
     switch (kind()) {
         case SymbolRef::Kind::ClassOrModule:
             return asClassOrModuleRef().data(gs)->name;
@@ -1332,6 +1332,36 @@ core::NameRef SymbolRef::name(const GlobalState &gs) const {
             return asTypeArgumentRef().data(gs)->name;
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->name;
+    }
+}
+
+SymbolRef SymbolRef::owner(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->owner;
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->owner;
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->owner;
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->owner;
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->owner;
+    }
+}
+
+Loc SymbolRef::loc(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->loc();
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->loc();
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->loc();
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->loc();
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->loc();
     }
 }
 

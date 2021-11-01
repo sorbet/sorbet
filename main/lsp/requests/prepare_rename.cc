@@ -10,7 +10,7 @@ namespace sorbet::realmain::lsp {
 namespace {
 variant<JSONNullObject, unique_ptr<PrepareRenameResult>> getPrepareRenameResult(const core::GlobalState &gs,
                                                                                 core::SymbolRef symbol) {
-    auto range = Range::fromLoc(gs, symbol.data(gs)->loc());
+    auto range = Range::fromLoc(gs, symbol.loc(gs));
     if (range == nullptr) {
         return JSONNullObject();
     }

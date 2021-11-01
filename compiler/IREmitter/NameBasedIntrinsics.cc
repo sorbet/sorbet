@@ -85,8 +85,8 @@ public:
             auto classNameCStr = Payload::toCString(cs, IREmitterHelpers::showClassNameWithoutOwner(cs, sym), builder);
             auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
 
-            if (!IREmitterHelpers::isRootishSymbol(cs, sym.data(cs)->owner)) {
-                auto getOwner = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
+            if (!IREmitterHelpers::isRootishSymbol(cs, sym.owner(cs))) {
+                auto getOwner = Payload::getRubyConstant(cs, sym.owner(cs), builder);
                 if (isModule) {
                     module = builder.CreateCall(cs.getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
                 } else {

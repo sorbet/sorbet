@@ -899,8 +899,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             } else if (sym.isStaticField(ctx)) {
                 if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Constant `{}` is not a class or type alias", maybeAliased.show(ctx));
-                    e.addErrorLine(sym.data(ctx)->loc(),
-                                   "If you are trying to define a type alias, you should use `{}` here",
+                    e.addErrorLine(sym.loc(ctx), "If you are trying to define a type alias, you should use `{}` here",
                                    "T.type_alias");
                 }
                 result.type = core::Types::untypedUntracked();

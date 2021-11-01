@@ -693,7 +693,7 @@ private:
         if (isAllowListed(ctx, sym)) {
             return;
         }
-        checkLoc(ctx, sym.data(ctx)->loc());
+        checkLoc(ctx, sym.loc(ctx));
     }
 
 public:

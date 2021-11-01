@@ -75,12 +75,10 @@ public:
             while (current.data(gs)->isOverloaded()) {
                 i++;
                 auto overloadName = gs.lookupNameUnique(core::UniqueNameKind::Overload, methodName, i);
-                auto overloadSym = primaryMethod.data(gs)->owner.data(gs)->findMember(gs, overloadName);
+                auto overloadSym = primaryMethod.owner(gs).data(gs)->findMember(gs, overloadName);
                 ENFORCE(overloadSym.exists());
 
                 auto overload = overloadSym.asMethodRef();
-                ENFORCE(overload.exists());
-
                 if (core::Types::isSubType(gs, intrinsicResultType, overload.data(gs)->resultType)) {
                     return;
                 }
