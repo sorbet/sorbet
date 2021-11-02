@@ -169,6 +169,8 @@ SORBET_ALIVE(VALUE, sorbet_vm_instance_variable_set,
              (struct FunctionInlineCache * getCache, struct iseq_inline_iv_cache_entry *varCache,
               rb_control_frame_t *cfp, VALUE recv, ID var, VALUE value));
 SORBET_ALIVE(VALUE, sorbet_vm_class, (struct FunctionInlineCache * classCache, rb_control_frame_t *cfp, VALUE recv));
+SORBET_ALIVE(VALUE, sorbet_vm_isa_p,
+             (struct FunctionInlineCache * classCache, rb_control_frame_t *cfp, VALUE recv, VALUE klass));
 
 SORBET_ALIVE(VALUE, sorbet_vm_fstring_new, (const char *ptr, long len));
 SORBET_ALIVE(VALUE, sorbet_vm_str_uplus, (VALUE str));
