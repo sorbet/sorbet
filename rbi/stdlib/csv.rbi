@@ -1376,6 +1376,9 @@ class CSV::Table < Object
   sig { returns(T::Enumerator[T.untyped]) }
   def each(&block); end
 
+  sig { returns(T::Boolean) }
+  def empty?; end
+
   # Returns the headers for the first row of this table (assumed to match all
   # other rows). The headers
   # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) passed to
@@ -1388,6 +1391,9 @@ class CSV::Table < Object
   # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   sig { returns(String) }
   def inspect; end
+
+  sig { returns(Integer) }
+  def length; end
 
   # The current access mode for indexing and iteration.
   sig { returns(Symbol) }
@@ -1406,6 +1412,9 @@ class CSV::Table < Object
     ).returns(T.self_type)
   end
   def push(*rows); end
+
+  sig { returns(Integer) }
+  def size; end
 
   # Returns the table as an
   # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of Arrays. Headers
