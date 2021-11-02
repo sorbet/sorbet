@@ -491,6 +491,10 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
             }
         }
 
+        prodHistogramInc("utf8_names_used", localGs->utf8NamesUsed());
+        prodHistogramInc("constant_names_used", localGs->utf8NamesUsed());
+        prodHistogramInc("unique_names_used", localGs->uniqueNamesUsed());
+
         if (!threadResult.res.trees.empty()) {
             threadResult.counters = getAndClearThreadCounters();
             threadResult.res.gs = move(localGs);
