@@ -942,8 +942,6 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::String(), "+@", CMethod{"sorbet_int_str_uplus", core::Symbols::String()}},
     {core::Symbols::Symbol(), "==", CMethod{"sorbet_rb_sym_equal"}},
     {core::Symbols::Symbol(), "===", CMethod{"sorbet_rb_sym_equal"}},
-    {core::Symbols::Kernel(), "is_a?", CMethod{"sorbet_rb_obj_is_kind_of"}, nullopt, {"rb_obj_is_kind_of"}},
-    {core::Symbols::Kernel(), "kind_of?", CMethod{"sorbet_rb_obj_is_kind_of"}, nullopt, {"rb_obj_is_kind_of"}},
 #include "WrappedIntrinsics.h"
 };
 

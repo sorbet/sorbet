@@ -793,6 +793,29 @@ public:
     }
 } ClassIntrinsic;
 
+class IsAIntrinsic : public NameBasedIntrinsicMethod {
+public:
+    IsAIntrinsic() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        if (mcctx.send->args.size() != 1) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        }
+
+        auto &cs = mcctx.cs;
+        auto &builder = mcctx.builder;
+        auto *callCache = mcctx.getInlineCache();
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *recv = mcctx.varGetRecv();
+        auto *var = Payload::varGet(cs, mcctx.send->args[0].variable, builder, mcctx.irctx, mcctx.rubyBlockId);
+        return builder.CreateCall(cs.getFunction("sorbet_vm_isa_p"), {callCache, cfp, recv, var});
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::isA_p(), core::Names::kindOf_p()};
+    }
+} IsAIntrinsic;
+
 class UntypedSpecialization : public NameBasedIntrinsicMethod {
     const core::NameRef rubyMethod;
     const u4 arity;
@@ -887,7 +910,8 @@ vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
     vector<const NameBasedIntrinsicMethod *> ret{
         &DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic,     &CallWithBlock,           &ExceptionRetry,
         &BuildHash,          &CallWithSplat,        &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic, &DefinedClassVar,
-        &DefinedInstanceVar, &NewIntrinsic,         &InstanceVariableGet,   &InstanceVariableSet,     &ClassIntrinsic};
+        &DefinedInstanceVar, &NewIntrinsic,         &InstanceVariableGet,   &InstanceVariableSet,     &ClassIntrinsic,
+        &IsAIntrinsic};
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }
