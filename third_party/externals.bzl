@@ -310,12 +310,12 @@ package(default_visibility = ["//visibility:public"])
     )
 
     http_archive(
-        name = "io_bazel_rules_rust",
-        sha256 = "5ed804fcd10a506a5b8e9e59bc6b3b7f43bc30c87ce4670e6f78df43604894fd",
-        strip_prefix = "rules_rust-fdf9655ba95616e0314b4e0ebab40bb0c5fe005c",
+        name = "rules_rust",
+        sha256 = "727b93eb5d57ec411f2afda7e3993e22d7772d0b2555ba745c3dec7323ea955a",
+        strip_prefix = "rules_rust-0768a7f00de134910c3cbdab7bbfdd011d995766",
 
-        # Master branch as of 2019-10-07
-        urls = _github_public_urls("bazelbuild/rules_rust/archive/fdf9655ba95616e0314b4e0ebab40bb0c5fe005c.tar.gz"),
+        # Master branch as of 2021-06-29
+        urls = _github_public_urls("bazelbuild/rules_rust/archive/0768a7f00de134910c3cbdab7bbfdd011d995766.tar.gz"),
     )
 
     http_archive(
