@@ -54,5 +54,5 @@ module T::Helpers
   #   end
   #
   # TODO: implement the checks in sorbet-runtime.
-  def requires_ancestor(*mods, &block); end
+  def requires_ancestor(&block); end
 end

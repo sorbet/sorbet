@@ -108,8 +108,8 @@ module T::Helpers
 
   def mixes_in_class_methods(mod, *mods); end
 
-  sig { params(mods: Module, block: T.nilable(T.proc.returns(Module))).void }
-  def requires_ancestor(*mods, &block); end
+  sig { params(block: T.proc.returns(Module)).void }
+  def requires_ancestor(&block); end
 end
 
 module T::Array
