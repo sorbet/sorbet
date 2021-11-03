@@ -661,9 +661,9 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
 
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "scope = {}\n", this->scope.showRaw(gs, tabs + 1));
-    printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "cnst = {}\n", this->cnst.showRaw(gs));
+    printTabs(buf, tabs + 1);
+    fmt::format_to(std::back_inserter(buf), "scope = {}\n", this->scope.showRaw(gs, tabs + 1));
     printTabs(buf, tabs);
     fmt::format_to(std::back_inserter(buf), "}}");
     return fmt::to_string(buf);
@@ -681,11 +681,11 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
 
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "orig = {}\n",
-                   this->original ? this->original.showRaw(gs, tabs + 1) : "nullptr");
-    printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "symbol = ({} {})\n", this->symbol.showKind(gs),
                    this->symbol.showFullName(gs));
+    printTabs(buf, tabs + 1);
+    fmt::format_to(std::back_inserter(buf), "orig = {}\n",
+                   this->original ? this->original.showRaw(gs, tabs + 1) : "nullptr");
     if (!resolutionScopes.empty()) {
         printTabs(buf, tabs + 1);
         fmt::format_to(std::back_inserter(buf), "resolutionScopes = [{}]\n",
