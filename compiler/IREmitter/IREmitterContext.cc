@@ -76,9 +76,9 @@ AliasesAndKeywords setupAliasesAndKeywords(CompilerState &cs, const cfg::CFG &cf
                     auto shortName = name.shortName(cs);
                     ENFORCE(!(shortName.size() > 0 && shortName[0] == '$'));
 
-                    if (i->what.data(cs)->isField()) {
+                    if (i->what.isField(cs)) {
                         res.aliases[bind.bind.variable] = Alias::forInstanceField(name);
-                    } else if (i->what.data(cs)->isStaticField()) {
+                    } else if (i->what.isStaticField(cs)) {
                         if (shortName.size() > 2 && shortName[0] == '@' && shortName[1] == '@') {
                             res.aliases[bind.bind.variable] = Alias::forClassField(name);
                         } else {
