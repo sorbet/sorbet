@@ -166,7 +166,9 @@ llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
 
         if (intrinsics.size() == 1 && intrinsics[0].method->skipFastPathTest(mcctx, intrinsics[0].klass)) {
             auto fastPathRes = intrinsics[0].method->makeCall(mcctx);
-            Payload::afterIntrinsic(cs, builder);
+            if (intrinsics[0].method->needsAfterIntrinsicProcessing()) {
+                Payload::afterIntrinsic(cs, builder);
+            }
             auto fastPathEnd = builder.GetInsertBlock();
             builder.CreateBr(afterSend);
             builder.SetInsertPoint(afterSend);
@@ -189,7 +191,9 @@ llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
             builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, alternative);
             builder.SetInsertPoint(fastPath);
             auto fastPathRes = intrinsic.method->makeCall(mcctx);
-            Payload::afterIntrinsic(cs, builder);
+            if (intrinsic.method->needsAfterIntrinsicProcessing()) {
+                Payload::afterIntrinsic(cs, builder);
+            }
             auto fastPathEnd = builder.GetInsertBlock();
             builder.CreateBr(afterSend);
             phi->addIncoming(fastPathRes, fastPathEnd);

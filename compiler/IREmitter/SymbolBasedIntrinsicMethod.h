@@ -40,6 +40,13 @@ public:
     // You should not typically be returning true from this.
     virtual bool skipFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass) const;
 
+    // Returns whether we should be calling Payload::afterIntrinsic to handle any
+    // post-intrinsic processing (e.g. checking whether VM-level interrupts have arrived).
+    // The default is to call.
+    //
+    // You should not typically be returning false from this.
+    virtual bool needsAfterIntrinsicProcessing() const;
+
     SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock blockHandled) : blockHandled(blockHandled){};
     virtual ~SymbolBasedIntrinsicMethod() = default;
     static std::vector<const SymbolBasedIntrinsicMethod *> &definedIntrinsics(const core::GlobalState &gs);

@@ -994,6 +994,10 @@ bool SymbolBasedIntrinsicMethod::skipFastPathTest(MethodCallContext &mcctx,
     return false;
 }
 
+bool SymbolBasedIntrinsicMethod::needsAfterIntrinsicProcessing() const {
+    return true;
+}
+
 void SymbolBasedIntrinsicMethod::sanityCheck(const core::GlobalState &gs) const {}
 
 vector<const SymbolBasedIntrinsicMethod *> &SymbolBasedIntrinsicMethod::definedIntrinsics(const core::GlobalState &gs) {
