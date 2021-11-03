@@ -588,6 +588,12 @@ void GlobalState::initEmpty() {
                  .untypedArg(Names::arg0())
                  .buildWithResult(Types::void_());
 
+    // Synthesize <Magic>.magic_include(self: T.untyped, arg: T.untyped) => Void
+    // method = enterMethod(*this, Symbols::MagicSingleton(), Names::magicInclude())
+    //              .untypedArg(Names::selfLocal())
+    //              .untypedArg(Names::arg0())
+    //              .buildWithResult(Types::void_());
+
     // Synthesize <Magic>.<check-match-array>(pattern: T.untyped, splatArray: T.untyped) => T.untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::checkMatchArray())
                  .untypedArg(Names::arg0())

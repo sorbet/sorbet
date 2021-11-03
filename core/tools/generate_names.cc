@@ -423,6 +423,8 @@ NameDef names[] = {
     {"PackageSpec", "PackageSpec", true},
     {"PackageRegistry", "<PackageRegistry>", true},
     {"PackageTests", "<PackageTests>", true},
+    {"magicInclude", "magic_include"}, // TODO untypeable name
+    {"magic_ancestor", "<magic_ancestor>"},
 
     // Compiler
     {"runningCompiled_p", "running_compiled?"},

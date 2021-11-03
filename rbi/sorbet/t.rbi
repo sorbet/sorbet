@@ -108,6 +108,8 @@ module T::Helpers
 
   def mixes_in_class_methods(mod, *mods); end
 
+  def magic_include(mod, *mods); end
+
   sig { params(mods: Module, block: T.nilable(T.proc.returns(Module))).void }
   def requires_ancestor(*mods, &block); end
 end

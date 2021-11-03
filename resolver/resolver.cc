@@ -172,6 +172,18 @@ private:
         const ClassMethodsResolutionItem &operator=(const ClassMethodsResolutionItem &) = delete;
     };
 
+    struct MagicIncludeResolutionItem {
+        core::FileRef file;
+        core::SymbolRef owner;
+        ast::Send *send;
+
+        MagicIncludeResolutionItem(MagicIncludeResolutionItem &&) noexcept = default;
+        MagicIncludeResolutionItem &operator=(MagicIncludeResolutionItem &&rhs) noexcept = default;
+
+        MagicIncludeResolutionItem(const MagicIncludeResolutionItem &) = delete;
+        const MagicIncludeResolutionItem &operator=(const MagicIncludeResolutionItem &) = delete;
+    };
+
     struct RequireAncestorResolutionItem {
         core::FileRef file;
         core::SymbolRef owner;
@@ -189,6 +201,7 @@ private:
     vector<ClassAliasResolutionItem> todoClassAliases_;
     vector<TypeAliasResolutionItem> todoTypeAliases_;
     vector<ClassMethodsResolutionItem> todoClassMethods_;
+    vector<MagicIncludeResolutionItem> todoMagicIncludes_;
     vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
 
     static core::SymbolRef resolveLhs(core::Context ctx, const shared_ptr<Nesting> &nesting, core::NameRef name) {
@@ -256,6 +269,20 @@ private:
             }
             core::SymbolRef resolved = id->symbol.data(ctx)->dealias(ctx);
             core::SymbolRef result = resolved.data(ctx)->findMember(ctx, c.cnst);
+            if (!result.exists()) {
+                // core::SymbolRef resultT = resolved.data(ctx)->findMemberTransitive(ctx, c.cnst);
+                // if (resultT.exists()) {
+                //     fmt::print("FOUND TRANS {}\n", c.cnst.show(ctx));
+                //     // result = resultT;
+                // }
+                core::SymbolRef magicAnc = resolved.data(ctx)->findMember(ctx, core::Names::magic_ancestor());
+                fmt::print("HAS MAGIC {} ({})\n", magicAnc.exists(), c.cnst.show(ctx));
+                if (magicAnc.exists()) {
+                    auto x = magicAnc.data(ctx)->findMember(ctx, c.cnst);
+                    fmt::print("FOUND MAGIC {}\n", x.show(ctx));
+                    result = x;
+                }
+            }
 
             // Private constants are allowed to be resolved, when there is no scope set (the scope is checked above),
             // otherwise we should error out. Private constant references _are not_ enforced inside RBI files.
@@ -375,6 +402,7 @@ private:
             return true;
         }
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
+        fmt::print("resolveJob {}\n", original.cnst.show(ctx));
         auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
         if (!resolved.exists()) {
             return false;
@@ -716,6 +744,23 @@ private:
         owner.data(gs)->recordRequiredAncestor(gs, id->symbol.asClassOrModuleRef(), blockLoc);
     }
 
+    static void resolveMagicIncludeJob(core::GlobalState &gs, const MagicIncludeResolutionItem &todo) {
+        auto owner = todo.owner;
+        auto send = todo.send;
+        auto loc = core::Loc(todo.file, send->loc);
+
+        // TODO TODO REASONABLE ERRORS MESSAGES
+        fmt::print("resolveMagicIncludeJob {} {}\n", loc.showRaw(gs), send->args.size());
+        ENFORCE(owner.data(gs)->isClassOrModuleModule());
+        auto &magicAncestor = owner.data(gs)->members()[core::Names::magic_ancestor()];
+        ENFORCE(!magicAncestor.exists(), "Cannot set this more than once");
+        ENFORCE(send->args.size() == 1);
+        auto *cnstLit = ast::cast_tree<ast::ConstantLit>(send->args[0]);
+        ENFORCE(cnstLit != nullptr);
+        ENFORCE(cnstLit->symbol.exists());
+        magicAncestor = cnstLit->symbol;
+    }
+
     static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {
         ENFORCE(job.ancestor->symbol.exists(), "Ancestor must exist, or we can't check whether it's sealed.");
         auto ancestorSym = job.ancestor->symbol.data(ctx)->dealias(ctx);
@@ -885,6 +930,11 @@ public:
                     auto item = RequireAncestorResolutionItem{ctx.file, ctx.owner, &send};
                     this->todoRequiredAncestors_.emplace_back(move(item));
                 }
+            } else if (send.fun == core::Names::magicInclude()) {
+                fmt::print("magic include {}\n", send.showRaw(ctx)); // TODO
+                // TODO ENFORCE PACKAGE NESS
+                auto item = MagicIncludeResolutionItem{ctx.file, ctx.owner, &send};
+                this->todoMagicIncludes_.emplace_back(move(item));
             }
         } else {
             auto recvAsConstantLit = ast::cast_tree<ast::ConstantLit>(send.recv);
@@ -936,6 +986,7 @@ public:
         vector<ClassAliasResolutionItem> todoClassAliases_;
         vector<TypeAliasResolutionItem> todoTypeAliases_;
         vector<ClassMethodsResolutionItem> todoClassMethods_;
+        vector<MagicIncludeResolutionItem> todoMagicIncludes_;
         vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
         vector<ast::ParsedFile> trees;
     };
@@ -984,6 +1035,7 @@ public:
                                          move(constants.todoClassAliases_),
                                          move(constants.todoTypeAliases_),
                                          move(constants.todoClassMethods_),
+                                         move(constants.todoMagicIncludes_),
                                          move(constants.todoRequiredAncestors_),
                                          move(partiallyResolvedTrees)};
                 auto computedTreesCount = result.trees.size();
@@ -996,6 +1048,7 @@ public:
         vector<ClassAliasResolutionItem> todoClassAliases;
         vector<TypeAliasResolutionItem> todoTypeAliases;
         vector<ClassMethodsResolutionItem> todoClassMethods;
+        vector<MagicIncludeResolutionItem> todoMagicIncludes;
         vector<RequireAncestorResolutionItem> todoRequiredAncestors;
 
         {
@@ -1017,6 +1070,9 @@ public:
                     todoClassMethods.insert(todoClassMethods.end(),
                                             make_move_iterator(threadResult.todoClassMethods_.begin()),
                                             make_move_iterator(threadResult.todoClassMethods_.end()));
+                    todoMagicIncludes.insert(todoMagicIncludes.end(),
+                                            make_move_iterator(threadResult.todoMagicIncludes_.begin()),
+                                            make_move_iterator(threadResult.todoMagicIncludes_.end()));
                     todoRequiredAncestors.insert(todoRequiredAncestors.end(),
                                                  make_move_iterator(threadResult.todoRequiredAncestors_.begin()),
                                                  make_move_iterator(threadResult.todoRequiredAncestors_.end()));
@@ -1039,6 +1095,9 @@ public:
             return locCompare(core::Loc(lhs.file, (*lhs.rhs).loc()), core::Loc(rhs.file, (*rhs.rhs).loc()));
         });
         fast_sort(todoClassMethods, [](const auto &lhs, const auto &rhs) -> bool {
+            return locCompare(core::Loc(lhs.file, lhs.send->loc), core::Loc(rhs.file, rhs.send->loc));
+        });
+        fast_sort(todoMagicIncludes, [](const auto &lhs, const auto &rhs) -> bool {
             return locCompare(core::Loc(lhs.file, lhs.send->loc), core::Loc(rhs.file, rhs.send->loc));
         });
         fast_sort(todoRequiredAncestors, [](const auto &lhs, const auto &rhs) -> bool {
@@ -1116,6 +1175,19 @@ public:
                 todoTypeAliases.erase(it, todoTypeAliases.end());
                 progress = progress || (origSize != todoTypeAliases.size());
                 categoryCounterAdd("resolve.constants.typealiases", "retry", origSize - todoTypeAliases.size());
+            }
+            {
+                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.magic_includes");
+                int origSize = todoMagicIncludes.size();
+                auto it = remove_if(todoMagicIncludes.begin(), todoMagicIncludes.end(),
+                                    [&gs](MagicIncludeResolutionItem &it) -> bool {
+                                        core::MutableContext ctx(gs, core::Symbols::root(), it.file);
+                                        resolveMagicIncludeJob(ctx, it);
+                                        return true; // XXX TODO
+                                    });
+                todoMagicIncludes.erase(it, todoMagicIncludes.end());
+                progress = progress || (origSize != todoMagicIncludes.size());
+
             }
         }
 
