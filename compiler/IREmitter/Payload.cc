@@ -227,7 +227,7 @@ std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
 } // namespace
 
 llvm::Value *Payload::getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &builder) {
-    ENFORCE(sym.isClassOrModule() || sym.isStaticField(cs) || sym.data(cs)->isTypeMember());
+    ENFORCE(sym.isClassOrModule() || sym.isStaticField(cs) || sym.isTypeMember());
     sym = IREmitterHelpers::fixupOwningSymbol(cs, sym);
     auto str = showClassName(cs, sym);
     ENFORCE(str.length() < 2 || (str[0] != ':'), "implementation assumes that strings dont start with ::");
