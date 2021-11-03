@@ -501,7 +501,7 @@ llvm::DISubprogram *getDebugScope(CompilerState &cs, cfg::CFG &cfg, llvm::DIScop
     auto owner = cfg.symbol.data(cs)->owner;
     std::string diName(owner.name(cs).shortName(cs));
 
-    if (owner.data(cs)->isSingletonClass(cs)) {
+    if (owner.isSingletonClass(cs)) {
         diName += ".";
     } else {
         diName += "#";

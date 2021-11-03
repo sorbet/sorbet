@@ -413,6 +413,7 @@ public:
     core::NameRef name(const GlobalState &gs) const;
     core::SymbolRef owner(const GlobalState &gs) const;
     core::Loc loc(const GlobalState &gs) const;
+    bool isSingletonClass(const GlobalState &gs) const;
     // Prints the fully qualified name of the symbol in a format that is suitable for showing to the user (e.g.
     // "Owner::SymbolName")
     std::string showFullName(const GlobalState &gs) const;

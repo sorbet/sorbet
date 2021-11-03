@@ -452,7 +452,7 @@ string ClassOrModuleRef::show(const GlobalState &gs) const {
 
 string MethodRef::show(const GlobalState &gs) const {
     auto sym = data(gs);
-    if (sym->owner.isClassOrModule() && sym->owner.data(gs)->isSingletonClass(gs)) {
+    if (sym->owner.isClassOrModule() && sym->owner.isSingletonClass(gs)) {
         return absl::StrCat(sym->owner.data(gs)->attachedClass(gs).show(gs), ".", sym->name.show(gs));
     }
     return showInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
@@ -1362,6 +1362,15 @@ Loc SymbolRef::loc(const GlobalState &gs) const {
             return asTypeArgumentRef().data(gs)->loc();
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->loc();
+    }
+}
+
+bool SymbolRef::isSingletonClass(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->isSingletonClass(gs);
+        default:
+            return false;
     }
 }
 

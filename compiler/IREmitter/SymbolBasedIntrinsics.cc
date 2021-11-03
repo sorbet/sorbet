@@ -465,7 +465,7 @@ public:
         // If we're defining the method on `T.class_of(T.class_of(X))`, we need to
         // programatically access the class, rather than letting getRubyConstant do
         // that work for us.
-        if (ownerSym.data(cs)->isSingletonClass(cs)) {
+        if (ownerSym.isSingletonClass(cs)) {
             auto attachedClass = ownerSym.data(cs)->attachedClass(cs);
             ENFORCE(attachedClass.exists());
             if (attachedClass.data(cs)->isSingletonClass(cs)) {
