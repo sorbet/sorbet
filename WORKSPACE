@@ -42,9 +42,11 @@ bison_register_toolchains(
     # (up to 3.7.6) include code flagged by this warning.
     extra_copts = ["-Wno-implicit-const-int-float-conversion"],
     mirrors = [
+        "https://sorbet-deps.s3-us-west-2.amazonaws.com/bison/",
         "https://mirrors.kernel.org/gnu/bison/",
         "https://ftp.gnu.org/gnu/bison/",
     ],
+    version = "3.3.2",
 )
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
