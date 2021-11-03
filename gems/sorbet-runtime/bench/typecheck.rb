@@ -72,17 +72,21 @@ module SorbetBenchmarks
       end
 
       type = T::Utils.coerce(T.nilable(Integer))
-      time_block("T::Types::Union#valid?", iterations_in_block: 10) do
+      time_block("T.nilable(Integer).valid?", iterations_in_block: 5) do
         type.valid?(0)
         type.valid?(1)
         type.valid?(2)
         type.valid?(nil)
         type.valid?(false)
+      end
+
+      type = T::Utils.coerce(T.any(Integer, Float, T::Boolean))
+      time_block("T.any(Integer, Float, T::Boolean).valid?", iterations_in_block: 5) do
         type.valid?(0)
         type.valid?(1)
         type.valid?(2)
         type.valid?(nil)
-        type.valid?(false)
+        type.valid?('hi')
       end
 
       time_block("T.let(..., Integer)") do
