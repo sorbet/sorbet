@@ -279,6 +279,20 @@ VALUE sorbet_int_rb_hash_fetch_m(VALUE recv, ID fun, int argc, VALUE *const rest
     return sorbet_rb_hash_fetch_m(argc, args, recv);
 }
 
+// Hash#include?
+// Hash#member?
+// Hash#has_key?
+// Hash#key?
+// Calling convention: 1
+extern VALUE rb_hash_has_key(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_hash_has_key(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk,
+                                 VALUE closure) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_hash_has_key(recv, arg_0);
+}
+
 // Integer#%
 // Integer#modulo
 // Calling convention: 1
