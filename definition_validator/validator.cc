@@ -264,9 +264,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 }
 
 void validateOverriding(const core::Context ctx, core::MethodRef method) {
-    auto klass = method.data(ctx)->owner;
+    auto klass = method.data(ctx)->owner.asClassOrModuleRef();
     auto name = method.data(ctx)->name;
-    ENFORCE(klass.isClassOrModule());
     auto klassData = klass.data(ctx);
     InlinedVector<core::MethodRef, 4> overridenMethods;
 
