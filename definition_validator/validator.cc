@@ -392,7 +392,7 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::ClassOrM
         // We only care about method symbols that exist.
         if (!sym.exists() || !sym.isMethod() ||
             // Method is 'final', and passes the check.
-            sym.data(gs)->isFinalMethod() ||
+            sym.asMethodRef().data(gs)->isFinalMethod() ||
             // <static-init> is a fake method Sorbet synthesizes for typechecking.
             sym.name(gs) == core::Names::staticInit() ||
             // <unresolved-ancestors> is a fake method Sorbet synthesizes to ensure class hierarchy changes in IDE take

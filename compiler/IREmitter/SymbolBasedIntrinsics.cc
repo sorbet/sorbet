@@ -494,9 +494,8 @@ public:
             // TODO Figure out if this speicial case is right
             lookupSym = core::Symbols::Object();
         }
-        auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
+        auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef).asMethodRef();
         ENFORCE(funcSym.exists());
-        ENFORCE(funcSym.isMethod());
 
         // We are going to rely on compiled final methods having their return values checked.
         const bool needsTypechecking = funcSym.data(cs)->isFinalMethod();

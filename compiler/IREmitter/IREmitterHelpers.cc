@@ -431,7 +431,7 @@ IREmitterHelpers::isFinalMethod(const core::GlobalState &gs, core::TypePtr recvT
         return std::nullopt;
     }
 
-    if (!funSym.data(gs)->isFinalMethod()) {
+    if (!funSym.asMethodRef().data(gs)->isFinalMethod()) {
         return std::nullopt;
     }
 
