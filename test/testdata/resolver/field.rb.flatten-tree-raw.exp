@@ -5,8 +5,8 @@ InsSeq{
       kind = class
       name = EmptyTree<<C <U <root>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
         MethodDef{
@@ -36,8 +36,8 @@ InsSeq{
             }]
           rhs = Send{
             recv = ConstantLit{
-              orig = nullptr
               symbol = (module ::Sorbet::Private::Static)
+              orig = nullptr
             }
             fun = <U keep_def>
             block = nullptr
