@@ -96,6 +96,7 @@ enum class Phase {
     REWRITER,
     LOCAL_VARS,
     NAMER,
+    PACKAGER,
     RESOLVER,
     CFG,
     INFERENCER,
