@@ -6,6 +6,8 @@ module T::Types
   class Union < Base
     attr_reader :types
 
+    # Don't use Union.new directly, use `Private::Pool.union_of_types`
+    # inside sorbet-runtime and `T.any` elsewhere.
     def initialize(types)
       @types = types.flat_map do |type|
         type = T::Utils.coerce(type)
@@ -20,11 +22,16 @@ module T::Types
 
     # overrides Base
     def name
-      type_shortcuts(@types)
+      # Use the attr_reader here so we can override it in SimplePairUnion
+      type_shortcuts(types)
     end
 
     private def type_shortcuts(types)
       if types.size == 1
+        # We shouldn't generally get here but it's possible if initializing the type
+        # evades Sorbet's static check and we end up on the slow path, or if someone
+        # is using the T:Types::Union constructor directly (the latter possibility
+        # is why we don't just move the `uniq` into `Private::Pool.union_of_types`).
         return types[0].name
       end
       nilable = T::Utils.coerce(NilClass)
@@ -62,27 +69,45 @@ module T::Types
         EMPTY_ARRAY = [].freeze
         private_constant :EMPTY_ARRAY
 
+        # Try to use `to_nilable` on a type to get memoization, or failing that
+        # try to at least use SimplePairUnion to get faster init and typechecking.
+        #
+        # We aren't guaranteed to detect a simple `T.nilable(<Module>)` type here
+        # in cases where there are duplicate types, nested unions, etc.
+        #
+        # That's ok, because returning is SimplePairUnion an optimization which
+        # isn't necessary for correctness.
+        #
         # @param type_a [T::Types::Base]
         # @param type_b [T::Types::Base]
         # @param types [Array] optional array of additional T::Types::Base instances
         def self.union_of_types(type_a, type_b, types=EMPTY_ARRAY)
-          if types.empty?
-            # We aren't guaranteed to detect a simple `T.nilable(<Module>)` type here
-            # in cases where there are duplicate types, nested unions, etc.
-            #
-            # That's ok, because this is an optimization which isn't necessary for
-            # correctness.
-            if type_b == T::Utils::Nilable::NIL_TYPE && type_a.is_a?(T::Types::Simple)
+          if !types.empty?
+            # Slow path
+            return Union.new([type_a, type_b] + types)
+          elsif !type_a.is_a?(T::Types::Simple) || !type_b.is_a?(T::Types::Simple)
+            # Slow path
+            return Union.new([type_a, type_b])
+          end
+
+          begin
+            if type_b == T::Utils::Nilable::NIL_TYPE
               type_a.to_nilable
-            elsif type_a == T::Utils::Nilable::NIL_TYPE && type_b.is_a?(T::Types::Simple)
+            elsif type_a == T::Utils::Nilable::NIL_TYPE
               type_b.to_nilable
             else
-              Union.new([type_a, type_b])
+              T::Private::Types::SimplePairUnion.new(type_a, type_b)
             end
-          else
-            # This can't be a `T.nilable(<Module>)` case unless there are duplicates,
-            # which is possible but unexpected.
-            Union.new([type_a, type_b] + types)
+          rescue T::Private::Types::SimplePairUnion::DuplicateType
+            # Slow path
+            #
+            # This shouldn't normally be possible due to static checks,
+            # but we can get here if we're constructing a type dynamically.
+            #
+            # Relying on the duplicate check in the constructor has the
+            # advantage that we avoid it when we hit the memoized case
+            # of `to_nilable`.
+            type_a
           end
         end
       end

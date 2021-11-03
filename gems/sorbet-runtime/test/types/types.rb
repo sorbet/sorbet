@@ -224,6 +224,29 @@ module Opus::Types::Test
         assert_equal(x.hash, y.hash)
       end
 
+      it 'pools correctly for simple nilable types' do
+        x = T::Types::Union::Private::Pool.union_of_types(
+          T::Utils.coerce(String),
+          T::Utils.coerce(NilClass),
+        )
+        y = T::Types::Union::Private::Pool.union_of_types(
+          T::Utils.coerce(String),
+          T::Utils.coerce(NilClass),
+        )
+        assert_equal(x.object_id, y.object_id)
+        assert_equal(
+          T::Private::Types::SimplePairUnion,
+          x.class,
+        )
+      end
+
+      it 'uses fast path for T::Boolean' do
+        assert_equal(
+          T::Private::Types::SimplePairUnion,
+          T::Boolean.aliased_type.class,
+        )
+      end
+
       it 'deduplicates type, fast path' do
         assert_equal(
           'Integer',

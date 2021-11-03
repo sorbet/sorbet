@@ -56,6 +56,7 @@ require_relative 'types/private/types/not_typed'
 require_relative 'types/private/types/void'
 require_relative 'types/private/types/string_holder'
 require_relative 'types/private/types/type_alias'
+require_relative 'types/private/types/simple_pair_union'
 
 require_relative 'types/types/type_variable'
 require_relative 'types/types/type_member'

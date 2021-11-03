@@ -52,7 +52,10 @@ module T::Types
     end
 
     def to_nilable
-      @nilable ||= T::Types::Union.new([self, T::Utils::Nilable::NIL_TYPE])
+      @nilable ||= T::Private::Types::SimplePairUnion.new(
+        self,
+        T::Utils::Nilable::NIL_TYPE,
+      )
     end
 
     module Private
