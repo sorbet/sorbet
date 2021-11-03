@@ -79,19 +79,16 @@ gemfile_lock_deps(
     ],
 )
 
-load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
+load("@rules_rust//rust:repositories.bzl", "rust_repositories")
 
 rust_repositories(
     edition = "2018",
     version = "1.51.0",
 )
 
-load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
 load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories")
 
 node_repositories()
-
-bazel_version(name = "bazel_version")
 
 BAZEL_VERSION = "4.2.1"
 
