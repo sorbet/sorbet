@@ -2,8 +2,8 @@ ClassDef{
   kind = class
   name = EmptyTree<<C <U <root>>>>
   ancestors = [ConstantLit{
-      orig = nullptr
       symbol = (class ::<todo sym>)
+      orig = nullptr
     }]
   rhs = [
     MethodDef{
@@ -22,8 +22,8 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U T>>
+                scope = EmptyTree
               }
               fun = <U let>
               block = nullptr
@@ -32,8 +32,8 @@ ClassDef{
                 Literal{ value = 42 }
                 Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U T>>
+                    scope = EmptyTree
                   }
                   fun = <U untyped>
                   block = nullptr
@@ -51,8 +51,8 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U T>>
+                scope = EmptyTree
               }
               fun = <U let>
               block = nullptr
@@ -61,16 +61,16 @@ ClassDef{
                 Literal{ value = 42 }
                 Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U T>>
+                    scope = EmptyTree
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U Integer>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -84,8 +84,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -99,8 +99,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -119,8 +119,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -134,8 +134,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -154,8 +154,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -169,8 +169,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -189,8 +189,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -204,8 +204,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -224,8 +224,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -239,8 +239,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -259,8 +259,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -274,8 +274,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -294,8 +294,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -309,8 +309,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -329,8 +329,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -344,8 +344,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -364,8 +364,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -379,8 +379,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -399,8 +399,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -414,8 +414,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -434,8 +434,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -449,8 +449,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -469,8 +469,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -484,8 +484,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -504,8 +504,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -519,8 +519,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -539,8 +539,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -557,8 +557,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -577,8 +577,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -595,8 +595,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -615,8 +615,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -636,8 +636,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -656,8 +656,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -674,8 +674,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -694,8 +694,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -712,8 +712,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -732,8 +732,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -753,8 +753,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -773,8 +773,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -788,8 +788,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -808,8 +808,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -823,8 +823,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -843,8 +843,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -861,8 +861,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -881,8 +881,8 @@ ClassDef{
             }
             rhs = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (class ::<Magic>)
+                orig = nullptr
               }
               fun = <U <build-range>>
               block = nullptr
@@ -899,8 +899,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -920,8 +920,8 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = ConstantLit{
-                  orig = nullptr
                   symbol = (class ::<Magic>)
+                  orig = nullptr
                 }
                 fun = <U <build-range>>
                 block = nullptr
@@ -941,8 +941,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -962,8 +962,8 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = ConstantLit{
-                  orig = nullptr
                   symbol = (class ::<Magic>)
+                  orig = nullptr
                 }
                 fun = <U <build-range>>
                 block = nullptr
@@ -983,8 +983,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1003,8 +1003,8 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U Range>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -1015,8 +1015,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1035,8 +1035,8 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U Range>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -1048,8 +1048,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1068,8 +1068,8 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U Range>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -1082,8 +1082,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1102,8 +1102,8 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U Range>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -1117,8 +1117,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1137,8 +1137,8 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U Range>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -1151,8 +1151,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1171,8 +1171,8 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U Range>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -1185,8 +1185,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1205,8 +1205,8 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U Range>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -1219,8 +1219,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1239,8 +1239,8 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U Range>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -1253,8 +1253,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1273,8 +1273,8 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U Range>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -1287,8 +1287,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1307,8 +1307,8 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U Range>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -1324,8 +1324,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1344,8 +1344,8 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U Range>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -1361,8 +1361,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1381,8 +1381,8 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U Range>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -1401,8 +1401,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1422,8 +1422,8 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U Range>>
+                  scope = EmptyTree
                 }
                 fun = <U new>
                 block = nullptr
@@ -1442,8 +1442,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1463,8 +1463,8 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U Range>>
+                  scope = EmptyTree
                 }
                 fun = <U new>
                 block = nullptr
@@ -1483,8 +1483,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1503,11 +1503,11 @@ ClassDef{
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
-                scope = UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <C <U T>>
-                }
                 cnst = <C <U Range>>
+                scope = UnresolvedConstantLit{
+                  cnst = <C <U T>>
+                  scope = EmptyTree
+                }
               }
               fun = <U new>
               block = nullptr
@@ -1518,8 +1518,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1539,19 +1539,19 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
                   cnst = <C <U Range>>
+                  scope = UnresolvedConstantLit{
+                    cnst = <C <U T>>
+                    scope = EmptyTree
+                  }
                 }
                 fun = <U []>
                 block = nullptr
                 pos_args = 1
                 args = [
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U Integer>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -1564,8 +1564,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1585,19 +1585,19 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
                   cnst = <C <U Range>>
+                  scope = UnresolvedConstantLit{
+                    cnst = <C <U T>>
+                    scope = EmptyTree
+                  }
                 }
                 fun = <U []>
                 block = nullptr
                 pos_args = 1
                 args = [
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U Integer>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -1612,8 +1612,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1633,19 +1633,19 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
                   cnst = <C <U Range>>
+                  scope = UnresolvedConstantLit{
+                    cnst = <C <U T>>
+                    scope = EmptyTree
+                  }
                 }
                 fun = <U []>
                 block = nullptr
                 pos_args = 1
                 args = [
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U Integer>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -1661,8 +1661,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1682,19 +1682,19 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
                   cnst = <C <U Range>>
+                  scope = UnresolvedConstantLit{
+                    cnst = <C <U T>>
+                    scope = EmptyTree
+                  }
                 }
                 fun = <U []>
                 block = nullptr
                 pos_args = 1
                 args = [
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U Integer>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -1709,8 +1709,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1730,19 +1730,19 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
                   cnst = <C <U Range>>
+                  scope = UnresolvedConstantLit{
+                    cnst = <C <U T>>
+                    scope = EmptyTree
+                  }
                 }
                 fun = <U []>
                 block = nullptr
                 pos_args = 1
                 args = [
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U Integer>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -1757,8 +1757,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1778,19 +1778,19 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
                   cnst = <C <U Range>>
+                  scope = UnresolvedConstantLit{
+                    cnst = <C <U T>>
+                    scope = EmptyTree
+                  }
                 }
                 fun = <U []>
                 block = nullptr
                 pos_args = 1
                 args = [
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U Integer>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -1805,8 +1805,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1826,19 +1826,19 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
                   cnst = <C <U Range>>
+                  scope = UnresolvedConstantLit{
+                    cnst = <C <U T>>
+                    scope = EmptyTree
+                  }
                 }
                 fun = <U []>
                 block = nullptr
                 pos_args = 1
                 args = [
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U Integer>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -1853,8 +1853,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1874,11 +1874,11 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
                   cnst = <C <U Range>>
+                  scope = UnresolvedConstantLit{
+                    cnst = <C <U T>>
+                    scope = EmptyTree
+                  }
                 }
                 fun = <U []>
                 block = nullptr
@@ -1886,8 +1886,8 @@ ClassDef{
                 args = [
                   Send{
                     recv = UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U T>>
+                      scope = EmptyTree
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -1908,8 +1908,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1929,19 +1929,19 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
                   cnst = <C <U Range>>
+                  scope = UnresolvedConstantLit{
+                    cnst = <C <U T>>
+                    scope = EmptyTree
+                  }
                 }
                 fun = <U []>
                 block = nullptr
                 pos_args = 1
                 args = [
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U Integer>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -1959,8 +1959,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -1980,19 +1980,19 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
                   cnst = <C <U Range>>
+                  scope = UnresolvedConstantLit{
+                    cnst = <C <U T>>
+                    scope = EmptyTree
+                  }
                 }
                 fun = <U []>
                 block = nullptr
                 pos_args = 1
                 args = [
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U Integer>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -2010,8 +2010,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -2031,19 +2031,19 @@ ClassDef{
             rhs = Send{
               recv = Send{
                 recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
                   cnst = <C <U Range>>
+                  scope = UnresolvedConstantLit{
+                    cnst = <C <U T>>
+                    scope = EmptyTree
+                  }
                 }
                 fun = <U []>
                 block = nullptr
                 pos_args = 1
                 args = [
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U Integer>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -2064,8 +2064,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -2086,19 +2086,19 @@ ClassDef{
               recv = Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U T>>
-                    }
                     cnst = <C <U Range>>
+                    scope = UnresolvedConstantLit{
+                      cnst = <C <U T>>
+                      scope = EmptyTree
+                    }
                   }
                   fun = <U []>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U Integer>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -2119,8 +2119,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -2141,19 +2141,19 @@ ClassDef{
               recv = Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U T>>
-                    }
                     cnst = <C <U Range>>
+                    scope = UnresolvedConstantLit{
+                      cnst = <C <U T>>
+                      scope = EmptyTree
+                    }
                   }
                   fun = <U []>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U String>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -2175,8 +2175,8 @@ ClassDef{
         ],
         expr = Send{
           recv = UnresolvedConstantLit{
-            scope = EmptyTree
             cnst = <C <U T>>
+            scope = EmptyTree
           }
           fun = <U reveal_type>
           block = nullptr

@@ -2,8 +2,8 @@ ClassDef{
   kind = class
   name = EmptyTree<<C <U <root>>>>
   ancestors = [ConstantLit{
-      orig = nullptr
       symbol = (class ::<todo sym>)
+      orig = nullptr
     }]
   rhs = [
     MethodDef{
@@ -244,8 +244,8 @@ ClassDef{
 
     Send{
       recv = UnresolvedConstantLit{
-        scope = EmptyTree
         cnst = <C <U Kernel>>
+        scope = EmptyTree
       }
       fun = <U lambda>
       block = Block {
@@ -267,8 +267,8 @@ ClassDef{
 
     Send{
       recv = UnresolvedConstantLit{
-        scope = EmptyTree
         cnst = <C <U Kernel>>
+        scope = EmptyTree
       }
       fun = <U lambda>
       block = Block {
@@ -322,8 +322,8 @@ ClassDef{
 
     Send{
       recv = UnresolvedConstantLit{
-        scope = EmptyTree
         cnst = <C <U Kernel>>
+        scope = EmptyTree
       }
       fun = <U lambda>
       block = Block {

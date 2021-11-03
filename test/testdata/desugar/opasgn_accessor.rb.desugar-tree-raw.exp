@@ -2,19 +2,19 @@ ClassDef{
   kind = class
   name = EmptyTree<<C <U <root>>>>
   ancestors = [ConstantLit{
-      orig = nullptr
       symbol = (class ::<todo sym>)
+      orig = nullptr
     }]
   rhs = [
     ClassDef{
       kind = class
       name = UnresolvedConstantLit{
-        scope = EmptyTree
         cnst = <C <U A>>
+        scope = EmptyTree
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
         Send{
@@ -26,11 +26,11 @@ ClassDef{
           pos_args = 1
           args = [
             UnresolvedConstantLit{
-              scope = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U T>>
-              }
               cnst = <C <U Sig>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
             }
           ]
         }
@@ -53,16 +53,16 @@ ClassDef{
               args = [
                 Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U T>>
+                    scope = EmptyTree
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U String>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -95,8 +95,8 @@ ClassDef{
       }
       rhs = Send{
         recv = UnresolvedConstantLit{
-          scope = EmptyTree
           cnst = <C <U A>>
+          scope = EmptyTree
         }
         fun = <U new>
         block = nullptr

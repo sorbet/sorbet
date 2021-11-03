@@ -2,8 +2,8 @@ ClassDef{
   kind = class
   name = EmptyTree<<C <U <root>>>>
   ancestors = [ConstantLit{
-      orig = nullptr
       symbol = (class ::<todo sym>)
+      orig = nullptr
     }]
   rhs = [
     MethodDef{
@@ -17,8 +17,8 @@ ClassDef{
         stats = [
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -27,8 +27,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U SomeODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -46,8 +46,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -56,8 +56,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U SomeODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -76,8 +76,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -86,8 +86,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U SomeODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -105,8 +105,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -115,8 +115,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U SomeODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -135,8 +135,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -145,8 +145,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U AdvancedODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -164,8 +164,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -174,8 +174,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U AdvancedODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -193,8 +193,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -203,8 +203,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U AdvancedODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -222,8 +222,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -232,8 +232,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U AdvancedODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -251,8 +251,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -261,8 +261,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U AdvancedODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -281,8 +281,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U AdvancedODM>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -299,8 +299,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -309,8 +309,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U AdvancedODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -329,8 +329,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U AdvancedODM>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -347,8 +347,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -357,8 +357,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U AdvancedODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -377,8 +377,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U AdvancedODM>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -395,8 +395,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -405,8 +405,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U AdvancedODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -424,8 +424,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -434,8 +434,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U AdvancedODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -453,8 +453,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -463,8 +463,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U AdvancedODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -483,8 +483,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U AdvancedODM>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -500,8 +500,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -510,8 +510,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U PropHelpers>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -530,8 +530,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U PropHelpers>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -549,8 +549,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U PropHelpers>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -567,8 +567,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -577,8 +577,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U PropHelpers>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -597,8 +597,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U PropHelpers>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -616,8 +616,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U PropHelpers>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -634,8 +634,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -644,8 +644,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U PropHelpers2>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -664,8 +664,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U PropHelpers2>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -683,8 +683,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U PropHelpers2>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -701,8 +701,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -711,8 +711,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U PropHelpers2>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -731,8 +731,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U PropHelpers2>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -749,8 +749,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -759,8 +759,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U EncryptedProp>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -778,8 +778,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -788,8 +788,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U EncryptedProp>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -808,8 +808,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U EncryptedProp>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -827,8 +827,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U EncryptedProp>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -846,8 +846,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U EncryptedProp>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -864,8 +864,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -874,8 +874,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U AdvancedODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -893,8 +893,8 @@ ClassDef{
           }
           Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U reveal_type>
             block = nullptr
@@ -903,8 +903,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U AdvancedODM>>
+                    scope = EmptyTree
                   }
                   fun = <U new>
                   block = nullptr
@@ -923,8 +923,8 @@ ClassDef{
           Send{
             recv = Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U AdvancedODM>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -943,8 +943,8 @@ ClassDef{
         expr = Send{
           recv = Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U AdvancedODM>>
+              scope = EmptyTree
             }
             fun = <U new>
             block = nullptr
@@ -965,12 +965,12 @@ ClassDef{
     ClassDef{
       kind = class
       name = UnresolvedConstantLit{
-        scope = EmptyTree
         cnst = <C <U NotAODM>>
+        scope = EmptyTree
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
         MethodDef{
@@ -988,8 +988,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_self_def>
           block = nullptr
@@ -1037,8 +1037,8 @@ ClassDef{
           args = [
             Literal{ value = "not_a_symbol" }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
           ]
         }
@@ -1053,8 +1053,8 @@ ClassDef{
           args = [
             Literal{ value = :foo }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Literal{ value = "not_a_hash" }
           ]
@@ -1070,8 +1070,8 @@ ClassDef{
           args = [
             Literal{ value = "too" }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Hash{
               pairs = [
@@ -1091,8 +1091,8 @@ ClassDef{
           args = [
             Literal{ value = :company_name }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Literal{ value = :nonempty_string }
           ]
@@ -1109,8 +1109,8 @@ ClassDef{
             Literal{ value = :day }
             Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U IntegerParam>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -1136,8 +1136,8 @@ ClassDef{
             Literal{ value = :name }
             Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U StringParam>>
+                scope = EmptyTree
               }
               fun = <U alphanumeric>
               block = nullptr
@@ -1159,14 +1159,14 @@ ClassDef{
             Literal{ value = :how_many }
             Send{
               recv = UnresolvedConstantLit{
-                scope = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U Opus>>
-                  }
-                  cnst = <C <U Param>>
-                }
                 cnst = <C <U CaseParam>>
+                scope = UnresolvedConstantLit{
+                  cnst = <C <U Param>>
+                  scope = UnresolvedConstantLit{
+                    cnst = <C <U Opus>>
+                    scope = EmptyTree
+                  }
+                }
               }
               fun = <U new>
               block = nullptr
@@ -1184,22 +1184,22 @@ ClassDef{
                 }
                 Send{
                   recv = UnresolvedConstantLit{
-                    scope = UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = EmptyTree
-                        cnst = <C <U Opus>>
-                      }
-                      cnst = <C <U Param>>
-                    }
                     cnst = <C <U ParamSpecsParam>>
+                    scope = UnresolvedConstantLit{
+                      cnst = <C <U Param>>
+                      scope = UnresolvedConstantLit{
+                        cnst = <C <U Opus>>
+                        scope = EmptyTree
+                      }
+                    }
                   }
                   fun = <U new>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U Default>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -1219,8 +1219,8 @@ ClassDef{
             Literal{ value = :optional_param }
             Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U IntegerParam>>
+                scope = EmptyTree
               }
               fun = <U new>
               block = nullptr
@@ -1236,18 +1236,18 @@ ClassDef{
     ClassDef{
       kind = class
       name = UnresolvedConstantLit{
-        scope = EmptyTree
         cnst = <C <U SomeODM>>
+        scope = EmptyTree
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -1262,8 +1262,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -1271,8 +1271,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -1341,8 +1341,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -1359,8 +1359,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U String>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -1369,8 +1369,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -1378,8 +1378,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -1399,8 +1399,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -1439,8 +1439,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -1456,16 +1456,16 @@ ClassDef{
               args = [
                 Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U T>>
+                    scope = EmptyTree
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U String>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -1489,8 +1489,8 @@ ClassDef{
             } }]
           rhs = Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U cast>
             block = nullptr
@@ -1498,8 +1498,8 @@ ClassDef{
             args = [
               Send{
                 recv = UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U T>>
+                  scope = EmptyTree
                 }
                 fun = <U unsafe>
                 block = nullptr
@@ -1510,16 +1510,16 @@ ClassDef{
               }
               Send{
                 recv = UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U T>>
+                  scope = EmptyTree
                 }
                 fun = <U nilable>
                 block = nullptr
                 pos_args = 1
                 args = [
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U String>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -1529,8 +1529,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -1547,8 +1547,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U String>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -1557,8 +1557,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -1583,8 +1583,8 @@ ClassDef{
             } }]
           rhs = Send{
             recv = UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U T>>
+              scope = EmptyTree
             }
             fun = <U cast>
             block = nullptr
@@ -1592,8 +1592,8 @@ ClassDef{
             args = [
               Literal{ value = nil }
               UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U String>>
+                scope = EmptyTree
               }
             ]
           }
@@ -1608,11 +1608,11 @@ ClassDef{
           pos_args = 1
           args = [
             UnresolvedConstantLit{
-              scope = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U T>>
-              }
               cnst = <C <U Sig>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
             }
           ]
         }
@@ -1626,11 +1626,11 @@ ClassDef{
           pos_args = 1
           args = [
             UnresolvedConstantLit{
-              scope = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U T>>
-              }
               cnst = <C <U Props>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
             }
           ]
         }
@@ -1645,8 +1645,8 @@ ClassDef{
           args = [
             Literal{ value = :foo }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Literal{ value = :without_accessors }
             Literal{ value = true }
@@ -1655,8 +1655,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -1672,8 +1672,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -1689,8 +1689,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -1706,8 +1706,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -1726,12 +1726,12 @@ ClassDef{
     ClassDef{
       kind = class
       name = UnresolvedConstantLit{
-        scope = EmptyTree
         cnst = <C <U ForeignClass>>
+        scope = EmptyTree
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
       ]
@@ -1740,18 +1740,18 @@ ClassDef{
     ClassDef{
       kind = class
       name = UnresolvedConstantLit{
-        scope = EmptyTree
         cnst = <C <U AdvancedODM>>
+        scope = EmptyTree
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -1766,8 +1766,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -1775,8 +1775,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -1845,8 +1845,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -1863,8 +1863,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U String>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -1873,8 +1873,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -1882,8 +1882,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -1903,8 +1903,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -1943,8 +1943,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -1960,16 +1960,16 @@ ClassDef{
               args = [
                 Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U T>>
+                    scope = EmptyTree
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U String>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -1979,8 +1979,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -2049,8 +2049,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -2068,16 +2068,16 @@ ClassDef{
                   Literal{ value = :arg0 }
                   Send{
                     recv = UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U T>>
+                      scope = EmptyTree
                     }
                     fun = <U nilable>
                     block = nullptr
                     pos_args = 1
                     args = [
                       UnresolvedConstantLit{
-                        scope = EmptyTree
                         cnst = <C <U String>>
+                        scope = EmptyTree
                       }
                     ]
                   }
@@ -2089,16 +2089,16 @@ ClassDef{
               args = [
                 Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U T>>
+                    scope = EmptyTree
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U String>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -2108,8 +2108,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -2129,8 +2129,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -2169,8 +2169,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -2185,8 +2185,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U Array>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -2194,8 +2194,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -2264,8 +2264,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -2282,8 +2282,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U Array>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -2292,8 +2292,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U Array>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -2301,8 +2301,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -2322,8 +2322,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -2362,8 +2362,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -2379,19 +2379,19 @@ ClassDef{
               args = [
                 Send{
                   recv = UnresolvedConstantLit{
-                    scope = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U T>>
-                    }
                     cnst = <C <U Array>>
+                    scope = UnresolvedConstantLit{
+                      cnst = <C <U T>>
+                      scope = EmptyTree
+                    }
                   }
                   fun = <U []>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U String>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -2401,8 +2401,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -2471,8 +2471,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -2490,19 +2490,19 @@ ClassDef{
                   Literal{ value = :arg0 }
                   Send{
                     recv = UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = EmptyTree
-                        cnst = <C <U T>>
-                      }
                       cnst = <C <U Array>>
+                      scope = UnresolvedConstantLit{
+                        cnst = <C <U T>>
+                        scope = EmptyTree
+                      }
                     }
                     fun = <U []>
                     block = nullptr
                     pos_args = 1
                     args = [
                       UnresolvedConstantLit{
-                        scope = EmptyTree
                         cnst = <C <U String>>
+                        scope = EmptyTree
                       }
                     ]
                   }
@@ -2514,19 +2514,19 @@ ClassDef{
               args = [
                 Send{
                   recv = UnresolvedConstantLit{
-                    scope = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U T>>
-                    }
                     cnst = <C <U Array>>
+                    scope = UnresolvedConstantLit{
+                      cnst = <C <U T>>
+                      scope = EmptyTree
+                    }
                   }
                   fun = <U []>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U String>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -2536,8 +2536,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -2557,8 +2557,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -2597,8 +2597,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -2614,23 +2614,23 @@ ClassDef{
               args = [
                 Send{
                   recv = UnresolvedConstantLit{
-                    scope = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U T>>
-                    }
                     cnst = <C <U Hash>>
+                    scope = UnresolvedConstantLit{
+                      cnst = <C <U T>>
+                      scope = EmptyTree
+                    }
                   }
                   fun = <U []>
                   block = nullptr
                   pos_args = 2
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U Symbol>>
+                      scope = EmptyTree
                     }
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U String>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -2640,8 +2640,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -2710,8 +2710,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -2729,23 +2729,23 @@ ClassDef{
                   Literal{ value = :arg0 }
                   Send{
                     recv = UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = EmptyTree
-                        cnst = <C <U T>>
-                      }
                       cnst = <C <U Hash>>
+                      scope = UnresolvedConstantLit{
+                        cnst = <C <U T>>
+                        scope = EmptyTree
+                      }
                     }
                     fun = <U []>
                     block = nullptr
                     pos_args = 2
                     args = [
                       UnresolvedConstantLit{
-                        scope = EmptyTree
                         cnst = <C <U Symbol>>
+                        scope = EmptyTree
                       }
                       UnresolvedConstantLit{
-                        scope = EmptyTree
                         cnst = <C <U String>>
+                        scope = EmptyTree
                       }
                     ]
                   }
@@ -2757,23 +2757,23 @@ ClassDef{
               args = [
                 Send{
                   recv = UnresolvedConstantLit{
-                    scope = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U T>>
-                    }
                     cnst = <C <U Hash>>
+                    scope = UnresolvedConstantLit{
+                      cnst = <C <U T>>
+                      scope = EmptyTree
+                    }
                   }
                   fun = <U []>
                   block = nullptr
                   pos_args = 2
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U Symbol>>
+                      scope = EmptyTree
                     }
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U String>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -2783,8 +2783,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -2804,8 +2804,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -2844,8 +2844,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -2860,8 +2860,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -2869,8 +2869,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -2939,8 +2939,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -2955,8 +2955,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -2964,8 +2964,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -3034,8 +3034,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -3050,8 +3050,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -3059,8 +3059,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -3129,8 +3129,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -3147,8 +3147,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U String>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -3157,8 +3157,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -3166,8 +3166,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -3185,16 +3185,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -3209,8 +3209,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -3225,8 +3225,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -3234,8 +3234,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -3304,8 +3304,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -3322,8 +3322,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U String>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -3332,8 +3332,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -3341,8 +3341,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -3362,8 +3362,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -3402,8 +3402,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -3421,8 +3421,8 @@ ClassDef{
                   Literal{ value = :opts }
                   Send{
                     recv = ConstantLit{
-                      orig = nullptr
                       symbol = (module ::T)
+                      orig = nullptr
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -3438,16 +3438,16 @@ ClassDef{
               args = [
                 Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T)
+                    orig = nullptr
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U ForeignClass>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -3457,8 +3457,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -3476,16 +3476,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -3500,8 +3500,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -3519,8 +3519,8 @@ ClassDef{
                   Literal{ value = :opts }
                   Send{
                     recv = ConstantLit{
-                      orig = nullptr
                       symbol = (module ::T)
+                      orig = nullptr
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -3535,8 +3535,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U ForeignClass>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -3544,8 +3544,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -3563,16 +3563,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -3587,8 +3587,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -3603,8 +3603,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -3612,8 +3612,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -3682,8 +3682,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -3700,8 +3700,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U String>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -3710,8 +3710,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -3719,8 +3719,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -3740,8 +3740,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -3780,8 +3780,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -3799,8 +3799,8 @@ ClassDef{
                   Literal{ value = :opts }
                   Send{
                     recv = ConstantLit{
-                      orig = nullptr
                       symbol = (module ::T)
+                      orig = nullptr
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -3816,16 +3816,16 @@ ClassDef{
               args = [
                 Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T)
+                    orig = nullptr
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U ForeignClass>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -3835,8 +3835,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -3854,16 +3854,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -3878,8 +3878,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -3897,8 +3897,8 @@ ClassDef{
                   Literal{ value = :opts }
                   Send{
                     recv = ConstantLit{
-                      orig = nullptr
                       symbol = (module ::T)
+                      orig = nullptr
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -3913,8 +3913,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U ForeignClass>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -3922,8 +3922,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -3941,16 +3941,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -3965,8 +3965,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -3981,8 +3981,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -3990,8 +3990,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -4060,8 +4060,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -4078,8 +4078,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U String>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -4088,8 +4088,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -4097,8 +4097,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -4118,8 +4118,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -4158,8 +4158,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -4177,8 +4177,8 @@ ClassDef{
                   Literal{ value = :opts }
                   Send{
                     recv = ConstantLit{
-                      orig = nullptr
                       symbol = (module ::T)
+                      orig = nullptr
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -4194,16 +4194,16 @@ ClassDef{
               args = [
                 Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T)
+                    orig = nullptr
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U ForeignClass>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -4213,8 +4213,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -4232,16 +4232,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -4256,8 +4256,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -4275,8 +4275,8 @@ ClassDef{
                   Literal{ value = :opts }
                   Send{
                     recv = ConstantLit{
-                      orig = nullptr
                       symbol = (module ::T)
+                      orig = nullptr
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -4291,8 +4291,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U ForeignClass>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -4300,8 +4300,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -4319,16 +4319,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -4343,8 +4343,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -4359,8 +4359,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -4368,8 +4368,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -4438,8 +4438,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -4456,8 +4456,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U String>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -4466,8 +4466,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -4475,8 +4475,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -4496,8 +4496,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -4536,8 +4536,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -4555,8 +4555,8 @@ ClassDef{
                   Literal{ value = :opts }
                   Send{
                     recv = ConstantLit{
-                      orig = nullptr
                       symbol = (module ::T)
+                      orig = nullptr
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -4572,8 +4572,8 @@ ClassDef{
               args = [
                 Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T)
+                    orig = nullptr
                   }
                   fun = <U untyped>
                   block = nullptr
@@ -4587,8 +4587,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -4606,16 +4606,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -4630,8 +4630,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -4649,8 +4649,8 @@ ClassDef{
                   Literal{ value = :opts }
                   Send{
                     recv = ConstantLit{
-                      orig = nullptr
                       symbol = (module ::T)
+                      orig = nullptr
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -4666,8 +4666,8 @@ ClassDef{
               args = [
                 Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T)
+                    orig = nullptr
                   }
                   fun = <U untyped>
                   block = nullptr
@@ -4681,8 +4681,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -4700,16 +4700,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -4724,8 +4724,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -4740,8 +4740,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -4749,8 +4749,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -4765,16 +4765,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -4789,8 +4789,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -4807,8 +4807,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U String>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -4817,8 +4817,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -4826,8 +4826,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -4847,8 +4847,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -4887,8 +4887,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -4904,16 +4904,16 @@ ClassDef{
               args = [
                 Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U T>>
+                    scope = EmptyTree
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U String>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -4923,8 +4923,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -4939,16 +4939,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -4963,8 +4963,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -4982,16 +4982,16 @@ ClassDef{
                   Literal{ value = :arg0 }
                   Send{
                     recv = UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U T>>
+                      scope = EmptyTree
                     }
                     fun = <U nilable>
                     block = nullptr
                     pos_args = 1
                     args = [
                       UnresolvedConstantLit{
-                        scope = EmptyTree
                         cnst = <C <U String>>
+                        scope = EmptyTree
                       }
                     ]
                   }
@@ -5003,16 +5003,16 @@ ClassDef{
               args = [
                 Send{
                   recv = UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U T>>
+                    scope = EmptyTree
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = EmptyTree
                       cnst = <C <U String>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -5022,8 +5022,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -5043,8 +5043,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -5083,8 +5083,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -5099,8 +5099,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -5108,8 +5108,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -5178,8 +5178,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -5196,8 +5196,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U String>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -5206,8 +5206,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -5215,8 +5215,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -5236,8 +5236,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -5276,8 +5276,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -5292,8 +5292,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -5301,8 +5301,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -5371,8 +5371,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -5389,8 +5389,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   UnresolvedConstantLit{
-                    scope = EmptyTree
                     cnst = <C <U String>>
+                    scope = EmptyTree
                   }
                 ]
               }
@@ -5399,8 +5399,8 @@ ClassDef{
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -5408,8 +5408,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -5427,16 +5427,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -5458,11 +5458,11 @@ ClassDef{
           pos_args = 1
           args = [
             UnresolvedConstantLit{
-              scope = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U T>>
-              }
               cnst = <C <U Props>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
             }
           ]
         }
@@ -5477,8 +5477,8 @@ ClassDef{
           args = [
             Literal{ value = :default }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Literal{ value = :default }
             Literal{ value = "" }
@@ -5489,8 +5489,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5506,8 +5506,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5532,16 +5532,16 @@ ClassDef{
             Literal{ value = :t_nilable }
             Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U T>>
+                scope = EmptyTree
               }
               fun = <U nilable>
               block = nullptr
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -5552,8 +5552,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5569,8 +5569,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5594,8 +5594,8 @@ ClassDef{
           args = [
             Literal{ value = :array }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U Array>>
+              scope = EmptyTree
             }
             Literal{ value = :without_accessors }
             Literal{ value = true }
@@ -5604,8 +5604,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5621,8 +5621,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5647,19 +5647,19 @@ ClassDef{
             Literal{ value = :t_array }
             Send{
               recv = UnresolvedConstantLit{
-                scope = UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <C <U T>>
-                }
                 cnst = <C <U Array>>
+                scope = UnresolvedConstantLit{
+                  cnst = <C <U T>>
+                  scope = EmptyTree
+                }
               }
               fun = <U []>
               block = nullptr
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -5670,8 +5670,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5687,8 +5687,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5713,23 +5713,23 @@ ClassDef{
             Literal{ value = :hash_of }
             Send{
               recv = UnresolvedConstantLit{
-                scope = UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <C <U T>>
-                }
                 cnst = <C <U Hash>>
+                scope = UnresolvedConstantLit{
+                  cnst = <C <U T>>
+                  scope = EmptyTree
+                }
               }
               fun = <U []>
               block = nullptr
               pos_args = 2
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U Symbol>>
+                  scope = EmptyTree
                 }
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -5740,8 +5740,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5757,8 +5757,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5782,8 +5782,8 @@ ClassDef{
           args = [
             Literal{ value = :const_explicit }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Literal{ value = :immutable }
             Literal{ value = true }
@@ -5794,8 +5794,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5819,8 +5819,8 @@ ClassDef{
           args = [
             Literal{ value = :const }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Literal{ value = :without_accessors }
             Literal{ value = true }
@@ -5829,8 +5829,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5854,8 +5854,8 @@ ClassDef{
           args = [
             Literal{ value = :enum_prop }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Literal{ value = :enum }
             Array{
@@ -5871,8 +5871,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5888,8 +5888,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5913,13 +5913,13 @@ ClassDef{
           args = [
             Literal{ value = :foreign }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Literal{ value = :foreign }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U ForeignClass>>
+              scope = EmptyTree
             }
             Literal{ value = :without_accessors }
             Literal{ value = true }
@@ -5928,8 +5928,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5945,8 +5945,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -5970,22 +5970,22 @@ ClassDef{
           args = [
             Literal{ value = :foreign_lazy }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Literal{ value = :foreign }
             Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U Kernel>>
+                scope = EmptyTree
               }
               fun = <U lambda>
               block = Block {
                 args = [
                 ]
                 body = UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U ForeignClass>>
+                  scope = EmptyTree
                 }
               }
               pos_args = 0
@@ -5999,8 +5999,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6016,8 +6016,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6041,8 +6041,8 @@ ClassDef{
           args = [
             Literal{ value = :foreign_proc }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Literal{ value = :foreign }
             Send{
@@ -6054,8 +6054,8 @@ ClassDef{
                 args = [
                 ]
                 body = UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U ForeignClass>>
+                  scope = EmptyTree
                 }
               }
               pos_args = 0
@@ -6069,8 +6069,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6086,8 +6086,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6111,8 +6111,8 @@ ClassDef{
           args = [
             Literal{ value = :foreign_invalid }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Literal{ value = :foreign }
             Send{
@@ -6136,8 +6136,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6153,8 +6153,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6178,8 +6178,8 @@ ClassDef{
           args = [
             Literal{ value = :ifunset }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Literal{ value = :ifunset }
             Literal{ value = "" }
@@ -6190,8 +6190,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6207,8 +6207,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6233,16 +6233,16 @@ ClassDef{
             Literal{ value = :ifunset_nilable }
             Send{
               recv = UnresolvedConstantLit{
-                scope = EmptyTree
                 cnst = <C <U T>>
+                scope = EmptyTree
               }
               fun = <U nilable>
               block = nullptr
               pos_args = 1
               args = [
                 UnresolvedConstantLit{
-                  scope = EmptyTree
                   cnst = <C <U String>>
+                  scope = EmptyTree
                 }
               ]
             }
@@ -6255,8 +6255,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6272,8 +6272,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6297,8 +6297,8 @@ ClassDef{
           args = [
             Literal{ value = :empty_hash_rules }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Hash{
               pairs = [
@@ -6313,8 +6313,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6330,8 +6330,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6355,8 +6355,8 @@ ClassDef{
           args = [
             Literal{ value = :hash_rules }
             UnresolvedConstantLit{
-              scope = EmptyTree
               cnst = <C <U String>>
+              scope = EmptyTree
             }
             Hash{
               pairs = [
@@ -6380,8 +6380,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6397,8 +6397,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6417,12 +6417,12 @@ ClassDef{
     ClassDef{
       kind = class
       name = UnresolvedConstantLit{
-        scope = EmptyTree
         cnst = <C <U PropHelpers>>
+        scope = EmptyTree
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
         MethodDef{
@@ -6465,8 +6465,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -6481,8 +6481,8 @@ ClassDef{
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (class ::String)
+                  orig = nullptr
                 }
               ]
             }
@@ -6490,8 +6490,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -6560,8 +6560,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -6578,8 +6578,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   ConstantLit{
-                    orig = nullptr
                     symbol = (class ::String)
+                    orig = nullptr
                   }
                 ]
               }
@@ -6588,8 +6588,8 @@ ClassDef{
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (class ::String)
+                  orig = nullptr
                 }
               ]
             }
@@ -6597,8 +6597,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -6618,8 +6618,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -6658,8 +6658,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -6674,8 +6674,8 @@ ClassDef{
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (class ::Float)
+                  orig = nullptr
                 }
               ]
             }
@@ -6683,8 +6683,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -6753,8 +6753,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -6771,8 +6771,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   ConstantLit{
-                    orig = nullptr
                     symbol = (class ::Float)
+                    orig = nullptr
                   }
                 ]
               }
@@ -6781,8 +6781,8 @@ ClassDef{
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (class ::Float)
+                  orig = nullptr
                 }
               ]
             }
@@ -6790,8 +6790,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -6811,8 +6811,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -6858,19 +6858,19 @@ ClassDef{
           pos_args = 1
           args = [
             UnresolvedConstantLit{
-              scope = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U T>>
-              }
               cnst = <C <U Props>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
             }
           ]
         }
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_self_def>
           block = nullptr
@@ -6886,8 +6886,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_self_def>
           block = nullptr
@@ -6916,8 +6916,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6933,8 +6933,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6963,8 +6963,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -6980,8 +6980,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -7000,12 +7000,12 @@ ClassDef{
     ClassDef{
       kind = class
       name = UnresolvedConstantLit{
-        scope = EmptyTree
         cnst = <C <U PropHelpers2>>
+        scope = EmptyTree
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
         MethodDef{
@@ -7048,8 +7048,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -7064,8 +7064,8 @@ ClassDef{
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (class ::String)
+                  orig = nullptr
                 }
               ]
             }
@@ -7073,8 +7073,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -7143,8 +7143,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -7161,8 +7161,8 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   ConstantLit{
-                    orig = nullptr
                     symbol = (class ::String)
+                    orig = nullptr
                   }
                 ]
               }
@@ -7171,8 +7171,8 @@ ClassDef{
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (class ::String)
+                  orig = nullptr
                 }
               ]
             }
@@ -7180,8 +7180,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -7201,8 +7201,8 @@ ClassDef{
               Send{
                 recv = Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T::Configuration)
+                    orig = nullptr
                   }
                   fun = <U prop_freeze_handler>
                   block = nullptr
@@ -7241,8 +7241,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -7257,8 +7257,8 @@ ClassDef{
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (class ::Float)
+                  orig = nullptr
                 }
               ]
             }
@@ -7266,8 +7266,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -7343,19 +7343,19 @@ ClassDef{
           pos_args = 1
           args = [
             UnresolvedConstantLit{
-              scope = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U T>>
-              }
               cnst = <C <U Props>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
             }
           ]
         }
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_self_def>
           block = nullptr
@@ -7371,8 +7371,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_self_def>
           block = nullptr
@@ -7401,8 +7401,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -7418,8 +7418,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -7450,8 +7450,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -7470,18 +7470,18 @@ ClassDef{
     ClassDef{
       kind = class
       name = UnresolvedConstantLit{
-        scope = UnresolvedConstantLit{
-          scope = UnresolvedConstantLit{
-            scope = EmptyTree
-            cnst = <C <U Chalk>>
-          }
-          cnst = <C <U ODM>>
-        }
         cnst = <C <U Document>>
+        scope = UnresolvedConstantLit{
+          cnst = <C <U ODM>>
+          scope = UnresolvedConstantLit{
+            cnst = <C <U Chalk>>
+            scope = EmptyTree
+          }
+        }
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
       ]
@@ -7490,33 +7490,33 @@ ClassDef{
     ClassDef{
       kind = class
       name = UnresolvedConstantLit{
-        scope = UnresolvedConstantLit{
-          scope = UnresolvedConstantLit{
-            scope = UnresolvedConstantLit{
-              scope = UnresolvedConstantLit{
-                scope = UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <C <U Opus>>
-                }
-                cnst = <C <U DB>>
-              }
-              cnst = <C <U Model>>
-            }
-            cnst = <C <U Mixins>>
-          }
-          cnst = <C <U Encryptable>>
-        }
         cnst = <C <U EncryptedValue>>
+        scope = UnresolvedConstantLit{
+          cnst = <C <U Encryptable>>
+          scope = UnresolvedConstantLit{
+            cnst = <C <U Mixins>>
+            scope = UnresolvedConstantLit{
+              cnst = <C <U Model>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U DB>>
+                scope = UnresolvedConstantLit{
+                  cnst = <C <U Opus>>
+                  scope = EmptyTree
+                }
+              }
+            }
+          }
+        }
       }<<C <U <todo sym>>>>
       ancestors = [UnresolvedConstantLit{
-          scope = UnresolvedConstantLit{
-            scope = UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <C <U Chalk>>
-            }
-            cnst = <C <U ODM>>
-          }
           cnst = <C <U Document>>
+          scope = UnresolvedConstantLit{
+            cnst = <C <U ODM>>
+            scope = UnresolvedConstantLit{
+              cnst = <C <U Chalk>>
+              scope = EmptyTree
+            }
+          }
         }]
       rhs = [
       ]
@@ -7525,12 +7525,12 @@ ClassDef{
     ClassDef{
       kind = class
       name = UnresolvedConstantLit{
-        scope = EmptyTree
         cnst = <C <U EncryptedProp>>
+        scope = EmptyTree
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
         MethodDef{
@@ -7554,8 +7554,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -7571,16 +7571,16 @@ ClassDef{
               args = [
                 Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T)
+                    orig = nullptr
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     ConstantLit{
-                      orig = nullptr
                       symbol = (class ::String)
+                      orig = nullptr
                     }
                   ]
                 }
@@ -7590,8 +7590,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -7606,16 +7606,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -7630,8 +7630,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -7647,31 +7647,31 @@ ClassDef{
               args = [
                 Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T)
+                    orig = nullptr
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = UnresolvedConstantLit{
-                                scope = EmptyTree
-                                cnst = <C <U Opus>>
-                              }
-                              cnst = <C <U DB>>
-                            }
-                            cnst = <C <U Model>>
-                          }
-                          cnst = <C <U Mixins>>
-                        }
-                        cnst = <C <U Encryptable>>
-                      }
                       cnst = <C <U EncryptedValue>>
+                      scope = UnresolvedConstantLit{
+                        cnst = <C <U Encryptable>>
+                        scope = UnresolvedConstantLit{
+                          cnst = <C <U Mixins>>
+                          scope = UnresolvedConstantLit{
+                            cnst = <C <U Model>>
+                            scope = UnresolvedConstantLit{
+                              cnst = <C <U DB>>
+                              scope = UnresolvedConstantLit{
+                                cnst = <C <U Opus>>
+                                scope = EmptyTree
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   ]
                 }
@@ -7681,8 +7681,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -7697,16 +7697,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -7721,8 +7721,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -7740,16 +7740,16 @@ ClassDef{
                   Literal{ value = :arg0 }
                   Send{
                     recv = ConstantLit{
-                      orig = nullptr
                       symbol = (module ::T)
+                      orig = nullptr
                     }
                     fun = <U nilable>
                     block = nullptr
                     pos_args = 1
                     args = [
                       ConstantLit{
-                        orig = nullptr
                         symbol = (class ::String)
+                        orig = nullptr
                       }
                     ]
                   }
@@ -7761,16 +7761,16 @@ ClassDef{
               args = [
                 Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T)
+                    orig = nullptr
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     ConstantLit{
-                      orig = nullptr
                       symbol = (class ::String)
+                      orig = nullptr
                     }
                   ]
                 }
@@ -7780,8 +7780,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -7799,16 +7799,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -7823,8 +7823,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -7842,31 +7842,31 @@ ClassDef{
                   Literal{ value = :arg0 }
                   Send{
                     recv = ConstantLit{
-                      orig = nullptr
                       symbol = (module ::T)
+                      orig = nullptr
                     }
                     fun = <U nilable>
                     block = nullptr
                     pos_args = 1
                     args = [
                       UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = UnresolvedConstantLit{
-                                scope = UnresolvedConstantLit{
-                                  scope = EmptyTree
-                                  cnst = <C <U Opus>>
-                                }
-                                cnst = <C <U DB>>
-                              }
-                              cnst = <C <U Model>>
-                            }
-                            cnst = <C <U Mixins>>
-                          }
-                          cnst = <C <U Encryptable>>
-                        }
                         cnst = <C <U EncryptedValue>>
+                        scope = UnresolvedConstantLit{
+                          cnst = <C <U Encryptable>>
+                          scope = UnresolvedConstantLit{
+                            cnst = <C <U Mixins>>
+                            scope = UnresolvedConstantLit{
+                              cnst = <C <U Model>>
+                              scope = UnresolvedConstantLit{
+                                cnst = <C <U DB>>
+                                scope = UnresolvedConstantLit{
+                                  cnst = <C <U Opus>>
+                                  scope = EmptyTree
+                                }
+                              }
+                            }
+                          }
+                        }
                       }
                     ]
                   }
@@ -7878,31 +7878,31 @@ ClassDef{
               args = [
                 Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T)
+                    orig = nullptr
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = UnresolvedConstantLit{
-                                scope = EmptyTree
-                                cnst = <C <U Opus>>
-                              }
-                              cnst = <C <U DB>>
-                            }
-                            cnst = <C <U Model>>
-                          }
-                          cnst = <C <U Mixins>>
-                        }
-                        cnst = <C <U Encryptable>>
-                      }
                       cnst = <C <U EncryptedValue>>
+                      scope = UnresolvedConstantLit{
+                        cnst = <C <U Encryptable>>
+                        scope = UnresolvedConstantLit{
+                          cnst = <C <U Mixins>>
+                          scope = UnresolvedConstantLit{
+                            cnst = <C <U Model>>
+                            scope = UnresolvedConstantLit{
+                              cnst = <C <U DB>>
+                              scope = UnresolvedConstantLit{
+                                cnst = <C <U Opus>>
+                                scope = EmptyTree
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   ]
                 }
@@ -7912,8 +7912,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -7931,16 +7931,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -7955,8 +7955,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -7972,16 +7972,16 @@ ClassDef{
               args = [
                 Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T)
+                    orig = nullptr
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     ConstantLit{
-                      orig = nullptr
                       symbol = (class ::String)
+                      orig = nullptr
                     }
                   ]
                 }
@@ -7991,8 +7991,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -8007,16 +8007,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -8031,8 +8031,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U sig>
           block = Block {
@@ -8048,31 +8048,31 @@ ClassDef{
               args = [
                 Send{
                   recv = ConstantLit{
-                    orig = nullptr
                     symbol = (module ::T)
+                    orig = nullptr
                   }
                   fun = <U nilable>
                   block = nullptr
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = UnresolvedConstantLit{
-                                scope = EmptyTree
-                                cnst = <C <U Opus>>
-                              }
-                              cnst = <C <U DB>>
-                            }
-                            cnst = <C <U Model>>
-                          }
-                          cnst = <C <U Mixins>>
-                        }
-                        cnst = <C <U Encryptable>>
-                      }
                       cnst = <C <U EncryptedValue>>
+                      scope = UnresolvedConstantLit{
+                        cnst = <C <U Encryptable>>
+                        scope = UnresolvedConstantLit{
+                          cnst = <C <U Mixins>>
+                          scope = UnresolvedConstantLit{
+                            cnst = <C <U Model>>
+                            scope = UnresolvedConstantLit{
+                              cnst = <C <U DB>>
+                              scope = UnresolvedConstantLit{
+                                cnst = <C <U Opus>>
+                                scope = EmptyTree
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   ]
                 }
@@ -8082,8 +8082,8 @@ ClassDef{
           pos_args = 1
           args = [
             ConstantLit{
-              orig = nullptr
               symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
             }
           ]
         }
@@ -8098,16 +8098,16 @@ ClassDef{
           rhs = Send{
             recv = Send{
               recv = ConstantLit{
-                orig = nullptr
                 symbol = (module ::T)
+                orig = nullptr
               }
               fun = <U unsafe>
               block = nullptr
               pos_args = 1
               args = [
                 ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Kernel)
+                  orig = nullptr
                 }
               ]
             }
@@ -8129,19 +8129,19 @@ ClassDef{
           pos_args = 1
           args = [
             UnresolvedConstantLit{
-              scope = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U T>>
-              }
               cnst = <C <U Props>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
             }
           ]
         }
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_self_def>
           block = nullptr
@@ -8157,8 +8157,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -8174,8 +8174,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -8191,8 +8191,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -8208,8 +8208,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -8225,8 +8225,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -8242,8 +8242,8 @@ ClassDef{
 
         Send{
           recv = ConstantLit{
-            orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
           }
           fun = <U keep_def>
           block = nullptr
@@ -8261,8 +8261,8 @@ ClassDef{
 
     Send{
       recv = ConstantLit{
-        orig = nullptr
         symbol = (module ::Sorbet::Private::Static)
+        orig = nullptr
       }
       fun = <U keep_def>
       block = nullptr

@@ -2,16 +2,16 @@ ClassDef{
   kind = class
   name = EmptyTree<<C <U <root>>>>
   ancestors = [ConstantLit{
-      orig = nullptr
       symbol = (class ::<todo sym>)
+      orig = nullptr
     }]
   rhs = [
     UnresolvedConstantLit{
-      scope = ConstantLit{
-        orig = nullptr
-        symbol = (class ::<root>)
-      }
       cnst = <C <U TopLevelConst>>
+      scope = ConstantLit{
+        symbol = (class ::<root>)
+        orig = nullptr
+      }
     }
   ]
 }

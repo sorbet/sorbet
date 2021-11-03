@@ -5,8 +5,8 @@ InsSeq{
       kind = class
       name = EmptyTree<<C <U <root>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
         MethodDef{
@@ -19,34 +19,34 @@ InsSeq{
             stats = [
               Send{
                 recv = ConstantLit{
-                  orig = nullptr
                   symbol = (class ::<Magic>)
+                  orig = nullptr
                 }
                 fun = <U <define-top-class-or-module>>
                 block = nullptr
                 pos_args = 1
                 args = [
                   ConstantLit{
-                    orig = nullptr
                     symbol = (class ::A)
+                    orig = nullptr
                   }
                 ]
               }
               Send{
                 recv = ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Sorbet::Private::Static)
+                  orig = nullptr
                 }
                 fun = <U keep_for_ide>
                 block = nullptr
                 pos_args = 1
                 args = [
                   ConstantLit{
-                    orig = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U A>>
-                    }
                     symbol = (class ::A)
+                    orig = UnresolvedConstantLit{
+                      cnst = <C <U A>>
+                      scope = EmptyTree
+                    }
                   }
                 ]
               }
@@ -59,15 +59,15 @@ InsSeq{
     ClassDef{
       kind = class
       name = ConstantLit{
-        orig = UnresolvedConstantLit{
-          scope = EmptyTree
-          cnst = <C <U A>>
-        }
         symbol = (class ::A)
+        orig = UnresolvedConstantLit{
+          cnst = <C <U A>>
+          scope = EmptyTree
+        }
       }<<C <U A>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
         MethodDef{
@@ -98,11 +98,11 @@ InsSeq{
               localVariable = <U <blk>>
             }]
           rhs = ConstantLit{
-            orig = UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <C <U DOES_NOT_EXIST>>
-            }
             symbol = (module ::Sorbet::Private::Static::StubModule)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U DOES_NOT_EXIST>>
+              scope = EmptyTree
+            }
             resolutionScopes = [::A, ::<root>]
           }
         }
@@ -194,8 +194,8 @@ InsSeq{
             stats = [
               Send{
                 recv = ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Sorbet::Private::Static)
+                  orig = nullptr
                 }
                 fun = <U keep_for_typechecking>
                 block = nullptr
@@ -203,22 +203,22 @@ InsSeq{
                 args = [
                   Send{
                     recv = ConstantLit{
-                      orig = UnresolvedConstantLit{
-                        scope = EmptyTree
-                        cnst = <C <U T>>
-                      }
                       symbol = (module ::T)
+                      orig = UnresolvedConstantLit{
+                        cnst = <C <U T>>
+                        scope = EmptyTree
+                      }
                     }
                     fun = <U nilable>
                     block = nullptr
                     pos_args = 1
                     args = [
                       ConstantLit{
-                        orig = UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <C <U Integer>>
-                        }
                         symbol = (class ::Integer)
+                        orig = UnresolvedConstantLit{
+                          cnst = <C <U Integer>>
+                          scope = EmptyTree
+                        }
                       }
                     ]
                   }
@@ -244,8 +244,8 @@ InsSeq{
             stats = [
               Send{
                 recv = ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Sorbet::Private::Static)
+                  orig = nullptr
                 }
                 fun = <U keep_def>
                 block = nullptr
@@ -260,8 +260,8 @@ InsSeq{
               }
               Send{
                 recv = ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Sorbet::Private::Static)
+                  orig = nullptr
                 }
                 fun = <U keep_def>
                 block = nullptr
@@ -276,8 +276,8 @@ InsSeq{
               }
               Send{
                 recv = ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Sorbet::Private::Static)
+                  orig = nullptr
                 }
                 fun = <U keep_def>
                 block = nullptr
@@ -292,8 +292,8 @@ InsSeq{
               }
               Send{
                 recv = ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Sorbet::Private::Static)
+                  orig = nullptr
                 }
                 fun = <U keep_def>
                 block = nullptr
@@ -308,8 +308,8 @@ InsSeq{
               }
               Send{
                 recv = ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Sorbet::Private::Static)
+                  orig = nullptr
                 }
                 fun = <U keep_def>
                 block = nullptr
@@ -324,8 +324,8 @@ InsSeq{
               }
               Send{
                 recv = ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Sorbet::Private::Static)
+                  orig = nullptr
                 }
                 fun = <U keep_def>
                 block = nullptr
@@ -340,8 +340,8 @@ InsSeq{
               }
               Send{
                 recv = ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Sorbet::Private::Static)
+                  orig = nullptr
                 }
                 fun = <U keep_def>
                 block = nullptr
@@ -356,8 +356,8 @@ InsSeq{
               }
               Send{
                 recv = ConstantLit{
-                  orig = nullptr
                   symbol = (module ::Sorbet::Private::Static)
+                  orig = nullptr
                 }
                 fun = <U keep_def>
                 block = nullptr
