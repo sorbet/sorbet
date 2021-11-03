@@ -142,8 +142,6 @@ declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #1
 ; Function Attrs: noreturn
 declare void @rb_raise(i64, i8*, ...) local_unnamed_addr #0
 
-declare i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct*, i32) local_unnamed_addr #1
-
 ; Function Attrs: allocsize(0,1)
 declare noalias nonnull i8* @ruby_xcalloc(i64, i64) local_unnamed_addr #2
 
@@ -323,29 +321,12 @@ entry:
   %40 = getelementptr inbounds i8, i8* %36, i64 4, !dbg !48
   call void @llvm.memset.p0i8.i64(i8* nonnull align 4 %40, i8 0, i64 28, i1 false) #11, !dbg !48
   call void @sorbet_vm_define_method(i64 %24, i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*, i8*, i8*)* noundef @"func_Object#3foo", i8* nonnull %36, %struct.rb_iseq_struct* %stackFrame22.i, i1 noundef zeroext false) #11, !dbg !48
-  %41 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !48, !tbaa !14
-  %42 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %41, i64 0, i32 5, !dbg !48
-  %43 = load i32, i32* %42, align 8, !dbg !48, !tbaa !49
-  %44 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %41, i64 0, i32 6, !dbg !48
-  %45 = load i32, i32* %44, align 4, !dbg !48, !tbaa !50
-  %46 = xor i32 %45, -1, !dbg !48
-  %47 = and i32 %46, %43, !dbg !48
-  %48 = icmp eq i32 %47, 0, !dbg !48
-  br i1 %48, label %"func_<root>.17<static-init>$152.exit", label %49, !dbg !48, !prof !51
-
-49:                                               ; preds = %entry
-  %50 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %41, i64 0, i32 8, !dbg !48
-  %51 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %50, align 8, !dbg !48, !tbaa !52
-  %52 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %51, i32 noundef 0) #11, !dbg !48
-  br label %"func_<root>.17<static-init>$152.exit", !dbg !48
-
-"func_<root>.17<static-init>$152.exit":           ; preds = %entry, %49
   store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 12), i64** %23, align 8, !dbg !48, !tbaa !14
-  %53 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %17, i64 0, i32 1, !dbg !26
-  %54 = load i64*, i64** %53, align 8, !dbg !26
-  store i64 %14, i64* %54, align 8, !dbg !26, !tbaa !6
-  %55 = getelementptr inbounds i64, i64* %54, i64 1, !dbg !26
-  store i64* %55, i64** %53, align 8, !dbg !26
+  %41 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %17, i64 0, i32 1, !dbg !26
+  %42 = load i64*, i64** %41, align 8, !dbg !26
+  store i64 %14, i64* %42, align 8, !dbg !26, !tbaa !6
+  %43 = getelementptr inbounds i64, i64* %42, i64 1, !dbg !26
+  store i64* %43, i64** %41, align 8, !dbg !26
   %send = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_foo, i64 0), !dbg !26
   ret void
 }
@@ -431,7 +412,3 @@ attributes #12 = { nounwind allocsize(0,1) }
 !46 = distinct !DISubprogram(name: "A.<static-init>", linkageName: "func_A.13<static-init>L61", scope: null, file: !4, line: 4, type: !11, scopeLine: 4, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
 !47 = distinct !DILocation(line: 4, column: 1, scope: !27)
 !48 = !DILocation(line: 5, column: 1, scope: !27)
-!49 = !{!38, !33, i64 40}
-!50 = !{!38, !33, i64 44}
-!51 = !{!"branch_weights", i32 2000, i32 1}
-!52 = !{!38, !15, i64 56}
