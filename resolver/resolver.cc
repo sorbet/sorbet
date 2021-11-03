@@ -276,10 +276,10 @@ private:
                 //     // result = resultT;
                 // }
                 core::SymbolRef magicAnc = resolved.data(ctx)->findMember(ctx, core::Names::magic_ancestor());
-                fmt::print("HAS MAGIC {} ({})\n", magicAnc.exists(), c.cnst.show(ctx));
+                // fmt::print("HAS MAGIC {} ({})\n", magicAnc.exists(), c.cnst.show(ctx));
                 if (magicAnc.exists()) {
                     auto x = magicAnc.data(ctx)->findMember(ctx, c.cnst);
-                    fmt::print("FOUND MAGIC {}\n", x.show(ctx));
+                    // fmt::print("FOUND MAGIC {}\n", x.show(ctx));
                     result = x;
                 }
             }
@@ -402,7 +402,7 @@ private:
             return true;
         }
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
-        fmt::print("resolveJob {}\n", original.cnst.show(ctx));
+        // fmt::print("resolveJob {}\n", original.cnst.show(ctx));
         auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
         if (!resolved.exists()) {
             return false;
@@ -750,7 +750,7 @@ private:
         auto loc = core::Loc(todo.file, send->loc);
 
         // TODO TODO REASONABLE ERRORS MESSAGES
-        fmt::print("resolveMagicIncludeJob {} {}\n", loc.showRaw(gs), send->args.size());
+        // fmt::print("resolveMagicIncludeJob {} {}\n", loc.showRaw(gs), send->args.size());
         ENFORCE(owner.data(gs)->isClassOrModuleModule());
         auto &magicAncestor = owner.data(gs)->members()[core::Names::magic_ancestor()];
         ENFORCE(!magicAncestor.exists(), "Cannot set this more than once");
@@ -931,7 +931,7 @@ public:
                     this->todoRequiredAncestors_.emplace_back(move(item));
                 }
             } else if (send.fun == core::Names::magicInclude()) {
-                fmt::print("magic include {}\n", send.showRaw(ctx)); // TODO
+                // fmt::print("magic include {}\n", send.showRaw(ctx)); // TODO
                 // TODO ENFORCE PACKAGE NESS
                 auto item = MagicIncludeResolutionItem{ctx.file, ctx.owner, &send};
                 this->todoMagicIncludes_.emplace_back(move(item));
