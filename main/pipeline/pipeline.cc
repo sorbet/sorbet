@@ -226,6 +226,9 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
         if (opts.stripePackages) {
             Timer timeit(gs.tracer(), "incremental_packager");
             what = packager::Packager::runIncremental(gs, move(what));
+            if (opts.stopAfterPhase == options::Phase::PACKAGER) {
+                return what;
+            }
         }
 #endif
         {
@@ -708,7 +711,10 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
     try {
         // packager intentionally runs outside of rewriter so that its output does not get cached.
         what = package(*gs, move(what), opts, workers);
-
+        if (opts.stopAfterPhase == options::Phase::PACKAGER) {
+            return ast::ParsedFilesOrCancelled(move(what));
+        }
+ 
         auto result = name(*gs, move(what), opts, workers);
         if (!result.hasResult()) {
             return result;
