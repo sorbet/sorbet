@@ -19,8 +19,8 @@ ClassDef{
   kind = class
   name = EmptyTree<<C <U <root>>>>
   ancestors = [ConstantLit{
-      orig = nullptr
       symbol = (class ::<todo sym>)
+      orig = nullptr
     }]
   rhs = [
     Literal{ value = 1 }
@@ -37,8 +37,8 @@ ClassDef{
   kind = class
   name = EmptyTree<<C <U <root>>>>
   ancestors = [ConstantLit{
-      orig = nullptr
       symbol = (class ::<todo sym>)
+      orig = nullptr
     }]
   rhs = [
     Literal{ value = 1 }
@@ -55,8 +55,8 @@ ClassDef{
   kind = class
   name = EmptyTree<<C <U <root>>>>
   ancestors = [ConstantLit{
-      orig = nullptr
       symbol = (class ::<todo sym>)
+      orig = nullptr
     }]
   rhs = [
     Literal{ value = 1 }
@@ -78,8 +78,8 @@ InsSeq{
       kind = class
       name = EmptyTree<<C <U <root>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
         Literal{ value = 1 }
@@ -104,8 +104,8 @@ InsSeq{
       kind = class
       name = EmptyTree<<C <U <root>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
         Literal{ value = 1 }
@@ -134,8 +134,8 @@ InsSeq{
       kind = class
       name = EmptyTree<<C <U <root>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
         MethodDef{
@@ -171,8 +171,8 @@ InsSeq{
       kind = class
       name = EmptyTree<<C <U <root>>>>
       ancestors = [ConstantLit{
-          orig = nullptr
           symbol = (class ::<todo sym>)
+          orig = nullptr
         }]
       rhs = [
         MethodDef{
