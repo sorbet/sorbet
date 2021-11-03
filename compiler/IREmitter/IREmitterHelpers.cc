@@ -22,20 +22,21 @@ using namespace std;
 namespace sorbet::compiler {
 
 namespace {
-string getFunctionNamePrefix(CompilerState &cs, core::SymbolRef sym) {
+string getFunctionNamePrefix(CompilerState &cs, core::ClassOrModuleRef sym) {
     auto maybeAttached = sym.data(cs)->attachedClass(cs);
     if (maybeAttached.exists()) {
         return getFunctionNamePrefix(cs, maybeAttached) + ".singleton_class";
     }
     string suffix;
-    auto name = sym.name(cs);
+    auto name = sym.data(cs)->name;
     if (name.kind() == core::NameKind::CONSTANT && name.dataCnst(cs)->original.kind() == core::NameKind::UTF8) {
         suffix = string(name.shortName(cs));
     } else {
         suffix = name.toString(cs);
     }
-    string prefix =
-        IREmitterHelpers::isRootishSymbol(cs, sym.owner(cs)) ? "" : getFunctionNamePrefix(cs, sym.owner(cs)) + "::";
+    string prefix = IREmitterHelpers::isRootishSymbol(cs, sym.data(cs)->owner)
+                        ? ""
+                        : getFunctionNamePrefix(cs, sym.data(cs)->owner.asClassOrModuleRef()) + "::";
 
     return prefix + suffix;
 }
@@ -47,7 +48,7 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
     if (maybeAttachedOwner.exists()) {
         prefix = prefix + getFunctionNamePrefix(cs, maybeAttachedOwner) + ".";
     } else {
-        prefix = prefix + getFunctionNamePrefix(cs, sym.owner(cs)) + "#";
+        prefix = prefix + getFunctionNamePrefix(cs, sym.owner(cs).asClassOrModuleRef()) + "#";
     }
 
     auto name = sym.name(cs);
