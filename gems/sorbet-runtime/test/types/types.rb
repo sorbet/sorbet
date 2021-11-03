@@ -128,34 +128,82 @@ module Opus::Types::Test
     end
 
     describe "Union" do
-      before do
-        @type = T.nilable(Integer)
+      describe "with simple nilable type" do
+        before do
+          @type = T.nilable(Integer)
+        end
+
+        it "passes a validation with a non-nil value" do
+          msg = check_error_message_for_obj(@type, 1)
+          assert_nil(msg)
+        end
+
+        it "passes a validation with a nil value" do
+          msg = check_error_message_for_obj(@type, nil)
+          assert_nil(msg)
+        end
+
+        it "fails a validation with a different type" do
+          msg = check_error_message_for_obj(@type, "1")
+          assert_equal("Expected type T.nilable(Integer), got type String with value \"1\"", msg)
+        end
+
+        it 'valid? does not allocate' do
+          allocs_when_valid = counting_allocations {@type.valid?(0)}
+          assert_equal(0, allocs_when_valid)
+
+          allocs_when_invalid = counting_allocations {@type.valid?(0.1)}
+          assert_equal(0, allocs_when_invalid)
+        end
+
+        it 'can hand back its underlying types' do
+          value = @type.types.map(&:raw_type)
+          assert_equal([Integer, NilClass], value)
+        end
       end
 
-      it "passes a validation with a non-nil value" do
-        msg = check_error_message_for_obj(@type, 1)
-        assert_nil(msg)
-      end
+      describe "with complex type" do
+        before do
+          @type = T.nilable(T.any(Integer, T::Boolean))
+        end
 
-      it "passes a validation with a nil value" do
-        msg = check_error_message_for_obj(@type, nil)
-        assert_nil(msg)
-      end
+        it "passes a validation with a non-nil value" do
+          msg = check_error_message_for_obj(@type, 1)
+          assert_nil(msg)
+        end
 
-      it "fails a validation with a different type" do
-        msg = check_error_message_for_obj(@type, "1")
-        assert_equal("Expected type T.nilable(Integer), got type String with value \"1\"", msg)
+        it "passes a validation with a nil value" do
+          msg = check_error_message_for_obj(@type, nil)
+          assert_nil(msg)
+        end
+
+        it "fails a validation with a different type" do
+          msg = check_error_message_for_obj(@type, "1")
+          assert_equal("Expected type T.nilable(T.any(Integer, T::Boolean)), got type String with value \"1\"", msg)
+        end
+
+        it 'valid? does not allocate' do
+          allocs_when_valid = counting_allocations {@type.valid?(0)}
+          assert_equal(0, allocs_when_valid)
+
+          allocs_when_invalid = counting_allocations {@type.valid?(0.1)}
+          assert_equal(0, allocs_when_invalid)
+        end
+
+        it 'can hand back its underlying types' do
+          value = @type.types.map(&:raw_type)
+          assert_equal([Integer, TrueClass, FalseClass, NilClass], value)
+        end
       end
 
       it "simplifies a union containing another union" do
-        type = T.any(@type, T.nilable(String))
+        type = T.any(T.nilable(Integer), T.nilable(String))
         assert_equal("T.nilable(T.any(Integer, String))", type.name)
       end
 
-      it 'can hand back its underlying types' do
-        type = T.any(Integer, T::Boolean, NilClass)
-        value = type.types.map(&:raw_type)
-        assert_equal([Integer, TrueClass, FalseClass, NilClass], value)
+      it "simplifies doubly-nested union" do
+        type = T.any(T.nilable(T.any(Integer, Float)), String)
+        assert_equal("T.nilable(T.any(Float, Integer, String))", type.name)
       end
 
       it "does not crash on anonymous classes" do
@@ -168,14 +216,6 @@ module Opus::Types::Test
         assert_equal("T.any(Integer, String)", type.name)
       end
 
-      it 'valid? does not allocate' do
-        allocs_when_valid = counting_allocations {@type.valid?(0)}
-        assert_equal(0, allocs_when_valid)
-
-        allocs_when_invalid = counting_allocations {@type.valid?(0.1)}
-        assert_equal(0, allocs_when_invalid)
-      end
-
       it 'uses structural, not reference, equality' do
         x = T::Types::Union.new([String, NilClass])
         y = T::Types::Union.new([String, NilClass])
@@ -184,16 +224,18 @@ module Opus::Types::Test
         assert_equal(x.hash, y.hash)
       end
 
-      it 'pools correctly for simple nilable types' do
-        x = T::Types::Union::Private::Pool.union_of_types(
-          T::Utils.coerce(String),
-          T::Utils.coerce(NilClass),
+      it 'deduplicates type, fast path' do
+        assert_equal(
+          'Integer',
+          T.any(Integer, Integer).name,
         )
-        y = T::Types::Union::Private::Pool.union_of_types(
-          T::Utils.coerce(String),
-          T::Utils.coerce(NilClass),
+      end
+
+      it 'deduplicates type, slow path' do
+        assert_equal(
+          'T.all(Opus::Types::Test::TypesTest::Mixin1, Opus::Types::Test::TypesTest::Mixin2)',
+          T.any(T.all(Mixin1, Mixin2), T.all(Mixin1, Mixin2)).name,
         )
-        assert_equal(x.object_id, y.object_id)
       end
     end
 
