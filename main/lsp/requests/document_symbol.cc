@@ -46,7 +46,8 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
     }
 
     string prefix;
-    if (sym->owner.exists() && sym->owner.isClassOrModule() && sym->owner.data(gs)->attachedClass(gs).exists()) {
+    if (sym->owner.exists() && sym->owner.isClassOrModule() &&
+        sym->owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()) {
         prefix = "self.";
     }
     auto result = make_unique<DocumentSymbol>(prefix + sym->name.show(gs), kind, move(range), move(selectionRange));
