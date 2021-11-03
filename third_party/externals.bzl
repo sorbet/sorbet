@@ -314,7 +314,7 @@ package(default_visibility = ["//visibility:public"])
         sha256 = "727b93eb5d57ec411f2afda7e3993e22d7772d0b2555ba745c3dec7323ea955a",
         strip_prefix = "rules_rust-0768a7f00de134910c3cbdab7bbfdd011d995766",
 
-        # Master branch as of 2019-10-07
+        # Master branch as of 2021-06-29
         urls = _github_public_urls("bazelbuild/rules_rust/archive/0768a7f00de134910c3cbdab7bbfdd011d995766.tar.gz"),
     )
 
