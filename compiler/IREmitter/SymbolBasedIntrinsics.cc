@@ -25,7 +25,7 @@
 using namespace std;
 namespace sorbet::compiler {
 namespace {
-core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
+core::ClassOrModuleRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     core::SymbolRef sym;
     if (core::isa_type<core::ClassType>(typ)) {
         sym = core::cast_type_nonnull<core::ClassType>(typ).symbol;
@@ -36,7 +36,7 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     }
     sym = IREmitterHelpers::fixupOwningSymbol(gs, sym);
     ENFORCE(sym.isClassOrModule());
-    return sym;
+    return sym.asClassOrModuleRef();
 }
 
 class CMethod final {
@@ -465,7 +465,7 @@ public:
         // If we're defining the method on `T.class_of(T.class_of(X))`, we need to
         // programatically access the class, rather than letting getRubyConstant do
         // that work for us.
-        if (ownerSym.isSingletonClass(cs)) {
+        if (ownerSym.data(cs)->isSingletonClass(cs)) {
             auto attachedClass = ownerSym.data(cs)->attachedClass(cs);
             ENFORCE(attachedClass.exists());
             if (attachedClass.data(cs)->isSingletonClass(cs)) {

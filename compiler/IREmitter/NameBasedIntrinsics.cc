@@ -24,7 +24,7 @@
 using namespace std;
 namespace sorbet::compiler {
 namespace {
-core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
+core::ClassOrModuleRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     core::SymbolRef sym;
     if (core::isa_type<core::ClassType>(typ)) {
         sym = core::cast_type_nonnull<core::ClassType>(typ).symbol;
@@ -34,8 +34,7 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
         ENFORCE(false);
     }
     sym = IREmitterHelpers::fixupOwningSymbol(gs, sym);
-    ENFORCE(sym.isClassOrModule());
-    return sym;
+    return sym.asClassOrModuleRef();
 }
 
 class DoNothingIntrinsic : public NameBasedIntrinsicMethod {
@@ -85,8 +84,8 @@ public:
             auto classNameCStr = Payload::toCString(cs, IREmitterHelpers::showClassNameWithoutOwner(cs, sym), builder);
             auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
 
-            if (!IREmitterHelpers::isRootishSymbol(cs, sym.owner(cs))) {
-                auto getOwner = Payload::getRubyConstant(cs, sym.owner(cs), builder);
+            if (!IREmitterHelpers::isRootishSymbol(cs, sym.data(cs)->owner)) {
+                auto getOwner = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
                 if (isModule) {
                     module = builder.CreateCall(cs.getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
                 } else {
