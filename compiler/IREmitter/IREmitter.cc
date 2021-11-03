@@ -1054,10 +1054,10 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     cs.runCheapOptimizations(func);
 }
 
-void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, string_view objectName) {
+void IREmitter::buildInitFor(CompilerState &cs, const core::MethodRef &sym, string_view objectName) {
     llvm::IRBuilder<> builder(cs);
 
-    auto owner = sym.owner(cs);
+    auto owner = sym.data(cs)->owner;
     auto isRoot = IREmitterHelpers::isRootishSymbol(cs, owner);
     llvm::Function *entryFunc;
 
@@ -1101,7 +1101,7 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
 
         builder.CreateCall(cs.getFunction("sorbet_globalConstructors"), {realpath});
 
-        core::SymbolRef staticInit = cs.gs.lookupStaticInitForFile(sym.loc(cs));
+        core::MethodRef staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc());
 
         // Call the LLVM method that was made by run() from this Init_ method
         auto staticInitName = IREmitterHelpers::getFunctionName(cs, staticInit);

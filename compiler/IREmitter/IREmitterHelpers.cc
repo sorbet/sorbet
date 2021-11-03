@@ -42,8 +42,8 @@ string getFunctionNamePrefix(CompilerState &cs, core::ClassOrModuleRef sym) {
 }
 } // namespace
 
-string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym) {
-    auto owner = sym.owner(cs).asClassOrModuleRef();
+string IREmitterHelpers::getFunctionName(CompilerState &cs, core::MethodRef sym) {
+    auto owner = sym.data(cs)->owner.asClassOrModuleRef();
     auto maybeAttachedOwner = owner.data(cs)->attachedClass(cs);
     string prefix = "func_";
     if (maybeAttachedOwner.exists()) {
@@ -52,7 +52,7 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
         prefix = prefix + getFunctionNamePrefix(cs, owner) + "#";
     }
 
-    auto name = sym.name(cs);
+    auto name = sym.data(cs)->name;
     string suffix;
     if (name.kind() == core::NameKind::UTF8) {
         suffix = string(name.shortName(cs));
@@ -78,19 +78,19 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
     return prefix + mangled;
 }
 
-bool IREmitterHelpers::isFileStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
-    auto name = sym.name(gs);
+bool IREmitterHelpers::isFileStaticInit(const core::GlobalState &gs, core::MethodRef sym) {
+    auto name = sym.data(gs)->name;
     if (name.kind() != core::NameKind::UNIQUE) {
         return false;
     }
     return name.dataUnique(gs)->original == core::Names::staticInit();
 }
 
-bool IREmitterHelpers::isClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
-    return sym.name(gs) == core::Names::staticInit();
+bool IREmitterHelpers::isClassStaticInit(const core::GlobalState &gs, core::MethodRef sym) {
+    return sym.data(gs)->name == core::Names::staticInit();
 }
 
-bool IREmitterHelpers::isFileOrClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
+bool IREmitterHelpers::isFileOrClassStaticInit(const core::GlobalState &gs, core::MethodRef sym) {
     return isFileStaticInit(gs, sym) || isClassStaticInit(gs, sym);
 }
 
@@ -112,30 +112,30 @@ getOrCreateFunctionWithName(CompilerState &cs, std::string name, llvm::FunctionT
 
 }; // namespace
 
-llvm::Function *IREmitterHelpers::lookupFunction(CompilerState &cs, core::SymbolRef sym) {
+llvm::Function *IREmitterHelpers::lookupFunction(CompilerState &cs, core::MethodRef sym) {
     ENFORCE(!isClassStaticInit(cs, sym), "use special helper instead");
     auto *func = cs.module->getFunction(IREmitterHelpers::getFunctionName(cs, sym));
     return func;
 }
 
-llvm::Function *IREmitterHelpers::getOrCreateDirectWrapper(CompilerState &cs, core::SymbolRef sym) {
+llvm::Function *IREmitterHelpers::getOrCreateDirectWrapper(CompilerState &cs, core::MethodRef sym) {
     auto name = "direct_" + IREmitterHelpers::getFunctionName(cs, sym);
     return getOrCreateFunctionWithName(cs, name, cs.getDirectWrapperFunctionType(), llvm::Function::ExternalLinkage,
                                        true);
 }
 
-llvm::Function *IREmitterHelpers::getOrCreateFunction(CompilerState &cs, core::SymbolRef sym) {
+llvm::Function *IREmitterHelpers::getOrCreateFunction(CompilerState &cs, core::MethodRef sym) {
     ENFORCE(!isClassStaticInit(cs, sym), "use special helper instead");
     return getOrCreateFunctionWithName(cs, IREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
                                        llvm::Function::InternalLinkage, true);
 }
 
-llvm::Function *IREmitterHelpers::getOrCreateStaticInit(CompilerState &cs, core::SymbolRef sym, core::LocOffsets loc) {
+llvm::Function *IREmitterHelpers::getOrCreateStaticInit(CompilerState &cs, core::MethodRef sym, core::LocOffsets loc) {
     ENFORCE(isClassStaticInit(cs, sym), "use general helper instead");
     auto name = IREmitterHelpers::getFunctionName(cs, sym) + "L" + to_string(loc.beginPos());
     return getOrCreateFunctionWithName(cs, name, cs.getRubyFFIType(), llvm::Function::InternalLinkage, true);
 }
-llvm::Function *IREmitterHelpers::getInitFunction(CompilerState &cs, core::SymbolRef sym) {
+llvm::Function *IREmitterHelpers::getInitFunction(CompilerState &cs, core::MethodRef sym) {
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
     auto linkageType = llvm::Function::InternalLinkage;
     auto baseName = IREmitterHelpers::getFunctionName(cs, sym);
@@ -331,7 +331,7 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
     }
 }
 
-bool IREmitterHelpers::hasBlockArgument(CompilerState &cs, int blockId, core::SymbolRef method,
+bool IREmitterHelpers::hasBlockArgument(CompilerState &cs, int blockId, core::MethodRef method,
                                         const IREmitterContext &irctx) {
     auto ty = irctx.rubyBlockType[blockId];
     if (!(ty == FunctionType::Block || ty == FunctionType::Method || ty == FunctionType::StaticInitFile ||
@@ -440,7 +440,7 @@ IREmitterHelpers::isFinalMethod(const core::GlobalState &gs, core::TypePtr recvT
         return std::nullopt;
     }
 
-    return IREmitterHelpers::FinalMethodInfo{recvSym, funSym, file};
+    return IREmitterHelpers::FinalMethodInfo{recvSym, funSym.asMethodRef(), file};
 }
 
 llvm::Value *KnownFunction::getFunction(CompilerState &cs, llvm::IRBuilderBase &builder) const {

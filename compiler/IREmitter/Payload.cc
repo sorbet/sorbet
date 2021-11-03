@@ -674,7 +674,7 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
 }
 
 // The common suffix for stack frame related global names.
-string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx, core::SymbolRef methodSym,
+string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx, core::MethodRef methodSym,
                                int rubyBlockId) {
     auto name = IREmitterHelpers::getFunctionName(cs, methodSym);
 
@@ -694,7 +694,7 @@ string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx,
 }
 
 llvm::GlobalVariable *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                        core::SymbolRef methodSym, int rubyBlockId) {
+                                        core::MethodRef methodSym, int rubyBlockId) {
     auto tp = iseqType(cs);
     auto name = getStackFrameGlobalName(cs, irctx, methodSym, rubyBlockId);
     string rawName = "stackFramePrecomputed_" + name;
@@ -742,7 +742,7 @@ llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &bui
 } // namespace
 
 llvm::Value *Payload::rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                        core::SymbolRef methodSym) {
+                                        core::MethodRef methodSym) {
     return ::sorbet::compiler::rubyStackFrameVar(cs, builder, irctx, methodSym, 0);
 }
 

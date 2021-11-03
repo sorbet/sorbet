@@ -21,6 +21,7 @@ class GlobalState;
 class Loc;
 class MutableContext;
 class SymbolRef;
+class MethodRef;
 class NameRef;
 } // namespace sorbet::core
 

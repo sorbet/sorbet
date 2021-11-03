@@ -25,7 +25,7 @@ using namespace std;
 namespace sorbet::compiler {
 namespace {
 core::ClassOrModuleRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
-    core::SymbolRef sym;
+    core::ClassOrModuleRef sym;
     if (core::isa_type<core::ClassType>(typ)) {
         sym = core::cast_type_nonnull<core::ClassType>(typ).symbol;
     } else if (auto appliedType = core::cast_type<core::AppliedType>(typ)) {
@@ -33,8 +33,8 @@ core::ClassOrModuleRef typeToSym(const core::GlobalState &gs, core::TypePtr typ)
     } else {
         ENFORCE(false);
     }
-    sym = IREmitterHelpers::fixupOwningSymbol(gs, sym);
-    return sym.asClassOrModuleRef();
+    sym = IREmitterHelpers::fixupOwningSymbol(gs, sym).asClassOrModuleRef();
+    return sym;
 }
 
 class DoNothingIntrinsic : public NameBasedIntrinsicMethod {

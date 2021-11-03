@@ -275,7 +275,7 @@ protected:
 };
 
 void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                             core::SymbolRef funcSym, int rubyBlockId, llvm::Value *param) {
+                             core::MethodRef funcSym, int rubyBlockId, llvm::Value *param) {
     // Following the comment in vm_core.h:
     // https://github.com/ruby/ruby/blob/344a824ef9d4b6152703d02d7ffa042abd4252c1/vm_core.h#L321-L342
     // Comment reproduced here to make things somewhat easier to follow.
@@ -439,7 +439,7 @@ void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, co
 
 // TODO(froydnj): we need to do something like this for blocks as well.
 llvm::Value *buildParamInfo(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                            core::SymbolRef funcSym, int rubyBlockId) {
+                            core::MethodRef funcSym, int rubyBlockId) {
     auto *paramInfo = builder.CreateCall(cs.getFunction("sorbet_allocateParamInfo"), {}, "parameterInfo");
 
     emitParamInitialization(cs, builder, irctx, funcSym, rubyBlockId, paramInfo);
