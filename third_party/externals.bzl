@@ -269,11 +269,12 @@ package(default_visibility = ["//visibility:public"])
         strip_prefix = "rules_ragel-f99f17fcad2e155646745f4827ac636a3b5d4d15",
     )
 
+    # This branch: https://github.com/sorbet/rules_bison/tree/sorbet
     http_archive(
         name = "rules_bison",
-        urls = _github_public_urls("jmillikin/rules_bison/archive/478079b28605a38000eaf83719568d756b3383a0.zip"),
-        sha256 = "d662d200f4e2a868f6873d666402fa4d413f07ba1a433591c5f60ac601157fb9",
-        strip_prefix = "rules_bison-478079b28605a38000eaf83719568d756b3383a0",
+        urls = _github_public_urls("sorbet/rules_bison/archive/e351b4d80b9084495f30a945db2284b95a7ed457.zip"),
+        sha256 = "9d09309367ac177efaa3a01fb8d05da2ae620eb9d230f58e6ae1f103010e1579",
+        strip_prefix = "rules_bison-e351b4d80b9084495f30a945db2284b95a7ed457",
     )
 
     http_archive(
