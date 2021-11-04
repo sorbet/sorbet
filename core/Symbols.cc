@@ -86,7 +86,7 @@ vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClassOrModule()); // should be removed when we have generic methods
     vector<TypePtr> targs;
     for (auto tm : typeMembers()) {
-        auto tmData = tm.data(gs);
+        auto tmData = tm.asTypeMemberRef().data(gs);
         if (tmData->isFixed()) {
             auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
@@ -140,7 +140,7 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
                                ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator();
 
         for (auto &tm : typeMembers()) {
-            auto tmData = tm.data(gs);
+            auto tmData = tm.asTypeMemberRef().data(gs);
             auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
 
@@ -171,20 +171,20 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
 
 bool Symbol::derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const {
     if (isClassOrModuleLinearizationComputed()) {
-        for (SymbolRef a : mixins()) {
+        for (ClassOrModuleRef a : mixins()) {
             if (a == sym) {
                 return true;
             }
         }
     } else {
-        for (SymbolRef a : mixins()) {
+        for (ClassOrModuleRef a : mixins()) {
             if (a == sym || a.data(gs)->derivesFrom(gs, sym)) {
                 return true;
             }
         }
     }
     if (this->superClass().exists()) {
-        return SymbolRef(sym) == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
+        return sym == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
     }
     return false;
 }
@@ -215,10 +215,10 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
 }
 
 bool SymbolRef::isField(const GlobalState &gs) const {
-    return isFieldOrStaticField() && data(gs)->isField();
+    return isFieldOrStaticField() && asFieldRef().data(gs)->isField();
 }
 bool SymbolRef::isStaticField(const GlobalState &gs) const {
-    return isFieldOrStaticField() && data(gs)->isStaticField();
+    return isFieldOrStaticField() && asFieldRef().data(gs)->isStaticField();
 }
 
 SymbolData SymbolRef::data(GlobalState &gs) const {
@@ -479,7 +479,7 @@ string TypeMemberRef::show(const GlobalState &gs) const {
 }
 
 TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
-    auto owner = ctx.owner;
+    auto owner = ctx.owner.asMethodRef();
     auto klass = owner.enclosingClass(ctx);
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
     if (instantiated == nullptr) {
@@ -704,14 +704,14 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
 
     // Find the closest by following outer scopes
     {
-        SymbolRef base = ref(gs);
+        ClassOrModuleRef base = ref(gs).asClassOrModuleRef();
         do {
             // follow outer scopes
 
             // find scopes that would be considered for search
             vector<ClassOrModuleRef> candidateScopes;
             vector<Symbol::FuzzySearchResult> scopeBest;
-            candidateScopes.emplace_back(base.asClassOrModuleRef());
+            candidateScopes.emplace_back(base);
             int i = 0;
             // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
             while (i < candidateScopes.size()) {
@@ -760,8 +760,8 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                 }
             }
 
-            base = base.owner(gs);
-        } while (best.distance > 0 && base.owner(gs).exists() && base != Symbols::root());
+            base = base.data(gs)->owner.asClassOrModuleRef();
+        } while (best.distance > 0 && base.data(gs)->owner.exists() && base != Symbols::root());
     }
 
     // At this point, `result` is in a deterministic order, and is ordered with _decreasing_ edit distance

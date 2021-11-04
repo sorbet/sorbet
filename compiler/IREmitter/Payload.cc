@@ -939,9 +939,7 @@ llvm::Value *Payload::buildInstanceVariableCache(CompilerState &cs, std::string_
 
 llvm::Value *Payload::getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilderBase &builder,
                                                  const IREmitterContext &irctx) {
-    auto sym = irctx.cfg.symbol.data(cs)->owner;
-    ENFORCE(sym.data(cs)->isClassOrModule());
-
+    auto sym = irctx.cfg.symbol.data(cs)->owner.asClassOrModuleRef();
     return Payload::getRubyConstant(cs, sym.data(cs)->topAttachedClass(cs), builder);
 }
 

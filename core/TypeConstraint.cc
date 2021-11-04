@@ -16,7 +16,7 @@ void TypeConstraint::defineDomain(const GlobalState &gs, const InlinedVector<Sym
     // test/testdata/infer/generic_methods/countraints_crosstalk.rb
     for (const auto &tp : typeParams) {
         ENFORCE(tp.isTypeArgument());
-        auto typ = cast_type<TypeVar>(tp.data(gs)->resultType);
+        auto typ = cast_type<TypeVar>(tp.asTypeArgumentRef().data(gs)->resultType);
         ENFORCE(typ != nullptr);
 
         if (tp.data(gs)->isCovariant()) {
