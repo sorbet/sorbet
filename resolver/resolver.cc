@@ -2277,11 +2277,9 @@ public:
         }
 
         auto sym = id->symbol;
-        auto data = sym.data(ctx);
-
         auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
-        if (send && (data->isTypeAlias() || data->isTypeMember())) {
-            ENFORCE(!data->isTypeMember() || send->recv.isSelfReference());
+        if (send && (sym.isTypeAlias(ctx) || sym.isTypeMember())) {
+            ENFORCE(!sym.isTypeMember() || send->recv.isSelfReference());
 
             // This is for a special case that happens with the generation of
             // reflection.rbi: it re-creates the type aliases of the payload,
@@ -2291,7 +2289,7 @@ public:
             // > module T
             // >   Boolean = T.let(nil, T.untyped)
             // > end
-            if (data->isTypeAlias() && send->fun == core::Names::let()) {
+            if (sym.isTypeAlias(ctx) && send->fun == core::Names::let()) {
                 todoUntypedResultTypes_.emplace_back(sym);
                 return tree;
             }
@@ -2299,7 +2297,7 @@ public:
             ENFORCE(send->fun == core::Names::typeAlias() || send->fun == core::Names::typeMember() ||
                     send->fun == core::Names::typeTemplate());
 
-            auto owner = sym.owner(ctx);
+            auto owner = sym.owner(ctx).asClassOrModuleRef();
 
             dependencies_.emplace_back(owner.data(ctx)->superClass());
 
@@ -2308,7 +2306,7 @@ public:
             }
 
             todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, send, std::move(dependencies_), ctx.file});
-        } else if (data->isStaticField()) {
+        } else if (sym.isStaticField(ctx)) {
             ResolveStaticFieldItem job{ctx.file, sym.asFieldRef(), &asgn};
             auto resultType = tryResolveStaticField(ctx, job);
             if (resultType != core::Types::todo()) {
