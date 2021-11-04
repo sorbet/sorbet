@@ -762,7 +762,6 @@ public:
         return modRhs;
     }
 
-private:
     void addImport(const PackageInfoImpl &importedPackage, core::LocOffsets loc, const FullyQualifiedName &exportFqn,
                    ImportType importType) {
         ImportTree *node = &root;
@@ -776,6 +775,7 @@ private:
         node->source = {importedPackage.name.mangledName, loc, importType};
     }
 
+private:
     void makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts, ast::ClassDef::RHS_store &modRhs,
                     ImportType moduleType, ImportTree::Source parentSrc) {
         auto newParentSrc = parentSrc;
@@ -923,47 +923,65 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
         }
     }
 
+    // {
+    //     UnorderedMap<core::NameRef, core::LocOffsets> importedNames;
+    //     ImportTreeBuilder treeBuilder(package);
+    //     for (auto &import : package.importedPackageNames) {
+    //         auto &imported = import.name;
+    //         auto &importedPackage = packageDB.getPackageInfo(imported.mangledName);
+    //         if (!importedPackage.exists()) {
+    //             if (auto e = ctx.beginError(imported.loc, core::errors::Packager::PackageNotFound)) {
+    //                 e.setHeader("Cannot find package `{}`", imported.toString(ctx));
+    //             }
+    //             continue;
+    //         }
+
+    //         if (importedNames.contains(imported.mangledName)) {
+    //             if (auto e = ctx.beginError(imported.loc, core::errors::Packager::InvalidImportOrExport)) {
+    //                 e.setHeader("Duplicate package import `{}`", imported.toString(ctx));
+    //                 e.addErrorLine(core::Loc(ctx.file, importedNames[imported.mangledName]),
+    //                                "Previous package import found here");
+    //             }
+    //         } else {
+    //             importedNames[imported.mangledName] = imported.loc;
+    //             treeBuilder.mergeImports(PackageInfoImpl::from(importedPackage), import);
+    //         }
+    //     }
+
+    //     importedPackages = treeBuilder.makeModule(ctx, ImportType::Normal);
+
+    //     treeBuilder.mergeSelfExportsForTest(ctx, package);
+    //     testImportedPackages = treeBuilder.makeModule(ctx, ImportType::Test);
+    // }
+
+    // auto packageNamespace =
+    //     ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
+    //                     name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(importedPackages));
+    // auto testPackageNamespace =
+    //     ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
+    //                     name2Expr(core::Names::Constants::PackageTests()), {}, std::move(testImportedPackages));
+
+    // auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
+    // rootKlass.rhs.emplace_back(move(packageNamespace));
+    // rootKlass.rhs.emplace_back(move(testPackageNamespace));
+
+    ast::ClassDef::RHS_store exportedConstants;
     {
-        UnorderedMap<core::NameRef, core::LocOffsets> importedNames;
         ImportTreeBuilder treeBuilder(package);
-        for (auto &import : package.importedPackageNames) {
-            auto &imported = import.name;
-            auto &importedPackage = packageDB.getPackageInfo(imported.mangledName);
-            if (!importedPackage.exists()) {
-                if (auto e = ctx.beginError(imported.loc, core::errors::Packager::PackageNotFound)) {
-                    e.setHeader("Cannot find package `{}`", imported.toString(ctx));
-                }
-                continue;
+        for (auto &ex : package.exports) {
+            if (ex.type != ExportType::Public) {
+                continue; // TODO is this needed?
             }
-
-            if (importedNames.contains(imported.mangledName)) {
-                if (auto e = ctx.beginError(imported.loc, core::errors::Packager::InvalidImportOrExport)) {
-                    e.setHeader("Duplicate package import `{}`", imported.toString(ctx));
-                    e.addErrorLine(core::Loc(ctx.file, importedNames[imported.mangledName]),
-                                   "Previous package import found here");
-                }
-            } else {
-                importedNames[imported.mangledName] = imported.loc;
-                treeBuilder.mergeImports(PackageInfoImpl::from(importedPackage), import);
-            }
+            treeBuilder.addImport(package, ex.fqn.loc.offsets(), ex.fqn, ImportType::Normal); // TODO is this the right loc?
         }
-
-        importedPackages = treeBuilder.makeModule(ctx, ImportType::Normal);
-
-        treeBuilder.mergeSelfExportsForTest(ctx, package);
-        testImportedPackages = treeBuilder.makeModule(ctx, ImportType::Test);
+        exportedConstants = treeBuilder.makeModule(ctx, ImportType::Normal);
     }
-
     auto packageNamespace =
         ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                        name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(importedPackages));
-    auto testPackageNamespace =
-        ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                        name2Expr(core::Names::Constants::PackageTests()), {}, std::move(testImportedPackages));
+                        name2Expr(core::Names::Constants::PackageExports()), {}, std::move(exportedConstants));
 
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     rootKlass.rhs.emplace_back(move(packageNamespace));
-    rootKlass.rhs.emplace_back(move(testPackageNamespace));
     return file;
 }
 
