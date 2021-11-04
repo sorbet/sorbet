@@ -316,6 +316,7 @@ public:
         return kind() == Kind::TypeMember;
     }
 
+    bool isTypeAlias(const GlobalState &gs) const;
     bool isField(const GlobalState &gs) const;
     bool isStaticField(const GlobalState &gs) const;
 

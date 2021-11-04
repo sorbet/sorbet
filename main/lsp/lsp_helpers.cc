@@ -237,7 +237,7 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
         result = resultType == nullptr ? core::Types::untyped(gs, constant) : resultType;
     }
 
-    if (constant.data(gs)->isTypeAlias()) {
+    if (constant.isTypeAlias(gs)) {
         // By wrapping the type in `MetaType`, it displays as `<Type: Foo>` rather than `Foo`.
         result = core::make_type<core::MetaType>(result);
     }

@@ -623,7 +623,7 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto maybeAliased = obj->symbol;
-            if (maybeAliased.data(ctx)->isTypeAlias()) {
+            if (maybeAliased.isTypeAlias(ctx)) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a T.type_alias");
                 }
@@ -748,7 +748,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             auto maybeAliased = i.symbol;
             ENFORCE(maybeAliased.exists());
 
-            if (maybeAliased.data(ctx)->isTypeAlias()) {
+            if (maybeAliased.isTypeAlias(ctx)) {
                 result.type = maybeAliased.data(ctx)->resultType;
                 return;
             }

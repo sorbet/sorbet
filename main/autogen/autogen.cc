@@ -263,13 +263,13 @@ public:
 
         // if the RHS is _also_ a constant, then this is an alias
         auto *rhs = ast::cast_tree<ast::ConstantLit>(original.rhs);
-        if (rhs && rhs->symbol.exists() && !rhs->symbol.data(ctx)->isTypeAlias()) {
+        if (rhs && rhs->symbol.exists() && !rhs->symbol.isTypeAlias(ctx)) {
             def.type = Definition::Type::Alias;
             // since this is a `post`- method, then we've already created a `Reference` for the constant on the
             // RHS. Mark this `Definition` as an alias for it.
             ENFORCE(refMap.count(original.rhs.get()));
             def.aliased_ref = refMap[original.rhs.get()];
-        } else if (lhs->symbol.exists() && lhs->symbol.data(ctx)->isTypeAlias()) {
+        } else if (lhs->symbol.exists() && lhs->symbol.isTypeAlias(ctx)) {
             // if the LHS has already been annotated as a type alias by the namer, the definition is (by definition,
             // hah) a type alias.
             def.type = Definition::Type::TypeAlias;

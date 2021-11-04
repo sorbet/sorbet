@@ -214,6 +214,10 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
     return SymbolRef(gs, type, distance);
 }
 
+bool SymbolRef::isTypeAlias(const GlobalState &gs) const {
+    return isFieldOrStaticField() && asFieldRef().data(gs)->isTypeAlias();
+}
+
 bool SymbolRef::isField(const GlobalState &gs) const {
     return isFieldOrStaticField() && asFieldRef().data(gs)->isField();
 }
