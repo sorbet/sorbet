@@ -84,7 +84,8 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
 
   describe "duplicate sig blocks" do
     it "raises when chaining overridable after a block has already been set" do
-      assert_raises(T::Private::Methods::DeclBuilder::BuilderError, "Cannot define two separate signature blocks") do
+      assert_raises(T::Private::Methods::DeclBuilder::BuilderError,
+                    "Cannot add more signature statements after the declaration block.") do
         Class.new do
           extend T::Sig
 
@@ -97,7 +98,8 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
     end
 
     it "raises when chaining override after a block has already been set" do
-      assert_raises(T::Private::Methods::DeclBuilder::BuilderError, "Cannot define two separate signature blocks") do
+      assert_raises(T::Private::Methods::DeclBuilder::BuilderError,
+                    "Cannot add more signature statements after the declaration block.") do
         Class.new do
           extend T::Sig
 
@@ -110,7 +112,8 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
     end
 
     it "raises when chaining abstract after a block has already been set" do
-      assert_raises(T::Private::Methods::DeclBuilder::BuilderError, "Cannot define two separate signature blocks") do
+      assert_raises(T::Private::Methods::DeclBuilder::BuilderError,
+                    "Cannot add more signature statements after the declaration block.") do
         Class.new do
           extend T::Sig
 
@@ -123,7 +126,8 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
     end
 
     it "raises when chaining final after a block has already been set" do
-      assert_raises(T::Private::Methods::DeclBuilder::BuilderError, "Cannot define two separate signature blocks") do
+      assert_raises(T::Private::Methods::DeclBuilder::BuilderError,
+                    "Cannot add more signature statements after the declaration block.") do
         Class.new do
           extend T::Sig
 
@@ -256,6 +260,33 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
           extend T::Sig
 
           sig.on_failure(:soft, notify: "me") {void}
+          def foo; end
+        end
+      end
+    ensure
+      cleanup_leftover_declaration
+    end
+  end
+
+  describe "invalid invocations after declaration block" do
+    it "is invalid to invoke after the declaration block" do
+      interface = Module.new do
+        extend T::Sig
+        extend T::Helpers
+
+        interface!
+
+        sig.abstract {void}
+        def foo; end
+      end
+
+      assert_raises(T::Private::Methods::DeclBuilder::BuilderError,
+                    "Cannot add more signature statements after the declaration block.") do
+        Class.new do
+          extend T::Sig
+          include interface
+
+          sig.final {void}.override
           def foo; end
         end
       end

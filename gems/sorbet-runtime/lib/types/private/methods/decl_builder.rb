@@ -30,10 +30,9 @@ module T::Private::Methods
     end
 
     private def check_sig_block_is_unset!
-      if T::Private::DeclState.current.active_declaration.blk
+      if T::Private::DeclState.current.active_declaration&.blk
         raise BuilderError.new(
-          "Two sig builder methods were passed blocks. " \
-          "Please pass a block to only one builder (conventionally, to the last sig builder method)"
+          "Cannot add more signature statements after the declaration block."
         )
       end
     end
@@ -179,8 +178,9 @@ module T::Private::Methods
         raise BuilderError.new("`.abstract` cannot be combined with `.override` or `.overridable`.")
       end
 
+      check_sig_block_is_unset!
+
       if blk
-        check_sig_block_is_unset!
         T::Private::DeclState.current.active_declaration.blk = blk
       end
 
@@ -205,8 +205,9 @@ module T::Private::Methods
 
       decl.final = true
 
+      check_sig_block_is_unset!
+
       if blk
-        check_sig_block_is_unset!
         T::Private::DeclState.current.active_declaration.blk = blk
       end
 
@@ -232,8 +233,9 @@ module T::Private::Methods
         raise BuilderError.new("`.override` cannot be combined with `.abstract`.")
       end
 
+      check_sig_block_is_unset!
+
       if blk
-        check_sig_block_is_unset!
         T::Private::DeclState.current.active_declaration.blk = blk
       end
 
@@ -254,8 +256,9 @@ module T::Private::Methods
         raise BuilderError.new(".overridable cannot be repeated in a single signature")
       end
 
+      check_sig_block_is_unset!
+
       if blk
-        check_sig_block_is_unset!
         T::Private::DeclState.current.active_declaration.blk = blk
       end
 
