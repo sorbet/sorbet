@@ -116,17 +116,14 @@ struct ChainedSigWalk {
     }
 
     void checkDuplicates(core::MutableContext ctx, ast::Send *sigBlock, core::NameRef fun) {
-        auto expr = sigBlock->deepCopy();
-        ast::Send *sigStatement = ast::cast_tree<ast::Send>(expr);
-
-        while (sigStatement) {
-            if (sigStatement->fun == fun) {
-                if (auto e = ctx.beginError(sigStatement->loc, core::errors::Rewriter::InvalidChainedSig)) {
+        while (sigBlock) {
+            if (sigBlock->fun == fun) {
+                if (auto e = ctx.beginError(sigBlock->loc, core::errors::Rewriter::InvalidChainedSig)) {
                     e.setHeader("Duplicate invocation of `{}` in signature declaration", fun.toString(ctx));
                 }
             }
 
-            sigStatement = ast::cast_tree<ast::Send>(sigStatement->recv);
+            sigBlock = ast::cast_tree<ast::Send>(sigBlock->recv);
         }
     }
 
