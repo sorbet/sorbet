@@ -89,9 +89,7 @@ class DuplicateBlock
   include Interface
 
   sig.override { void }.final { void }
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot chain two blocks in a single `sig`
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Method `final` does not exist on `NilClass`
-                              # ^^^^ error: Method `void` does not exist on `T.class_of(DuplicateBlock)`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot add more signature statements after the declaration block
   def foo; end
 end
 
@@ -108,9 +106,7 @@ class WithoutRuntime
   def bar(a); end
 
   T::Sig::WithoutRuntime.sig.override { void }.final { void }
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot chain two blocks in a single `sig`
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Method `final` does not exist on `NilClass`
-                                                     # ^^^^ error: Method `void` does not exist on `T.class_of(WithoutRuntime)`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot add more signature statements after the declaration block
   def foo; end
 end
 
@@ -162,8 +158,8 @@ class DuplicateButMissingBlock
   include Interface
 
   sig.final { void }.override
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot add more signature statements after the declaration block
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Method `override` does not exist on `NilClass`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Signature declarations expect a block
   def foo; end
 # ^^^^^^^ error: Method `DuplicateButMissingBlock#foo` implements an abstract method `Interface#foo` but is not declared with `override.`
 end

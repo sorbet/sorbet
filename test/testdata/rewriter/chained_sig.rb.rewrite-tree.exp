@@ -156,7 +156,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C DuplicateBlock><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    ::Sorbet::Private::Static.sig(<self>, :final) do ||
       <self>.override().void()
     end
 
@@ -167,10 +167,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <self>.include(<emptyTree>::<C Interface>)
-
-    <emptyTree>.final() do ||
-      <self>.void()
-    end
 
     ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
   end
@@ -190,7 +186,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.sig(<emptyTree>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    ::Sorbet::Private::Static.sig(<emptyTree>::<C T>::<C Sig>::<C WithoutRuntime>, :final) do ||
       <self>.override().void()
     end
 
@@ -207,10 +203,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>.params(:a, <emptyTree>::<C Integer>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
-
-    <emptyTree>.final() do ||
-      <self>.void()
-    end
 
     ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
   end

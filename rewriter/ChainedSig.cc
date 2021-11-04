@@ -7,9 +7,13 @@ using namespace std;
 namespace sorbet::rewriter {
 
 struct ChainedSigWalk {
-    vector<ast::Send *> incompleteSigs;
+    // The previousSigSend is used to allow us to add errors to `sig` with missing block wihtout accidentally adding it
+    // to a chained sig. E.g.:
+    // `sig` -> error no block
+    // `sig.final {}` -> no error. Need to prevent adding the error when we receive `sig` by itself
+    ast::Send *previousSigSend;
 
-    ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr preTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
 
         // Return early if we identify things like `params` being invoked on `sig`
@@ -17,11 +21,12 @@ struct ChainedSigWalk {
             return tree;
         }
 
-        // When we receive a `sig` send, we don't know ahead of time of whether it's a chained sig
-        // or an incomplete `sig` without a block. Save it for later, so that we can add errors
-        // to sigs missing block parameters
-        if (send->fun == core::Names::sig() && send->block == nullptr) {
-            incompleteSigs.push_back(send);
+        if (send->fun == core::Names::sig() && send->block == nullptr && send != previousSigSend) {
+            if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
+                e.setHeader("Signature declarations expect a block");
+                e.addErrorNote("Complete the signature by adding a block declaration: sig `{}`", "{ ... }");
+            }
+
             return tree;
         }
 
@@ -46,35 +51,12 @@ struct ChainedSigWalk {
         // If we never find a send where the first receiver is a `sig` and the last invocation has the declaration
         // block, then we add the error later on
         if (send->block == nullptr) {
-            if (incompleteSigs.back() == sigSend) {
-                incompleteSigs.pop_back();
-                incompleteSigs.push_back(send);
-            }
-
-            // Add an error if the previous part of the signature already declared a block
-            // E.g.: sig.final {}.override
-            if (sigSend->block != nullptr) {
-                if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
-                    e.setHeader("Cannot add more signature statements after the declaration block");
-                }
-            }
-
-            return tree;
-        }
-
-        // If someone writes something like `sig.final {}.override {}`, then we would try to pop incomplete sigs twice
-        if (incompleteSigs.empty()) {
             if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
-                e.setHeader("Cannot chain two blocks in a single `{}`", "sig");
+                e.setHeader("Signature declarations expect a block");
+                e.addErrorNote("Complete the signature by adding a block declaration: sig `{}`", "{ ... }");
             }
 
             return tree;
-        }
-
-        // This is the continuation of the previous `sig` send by chaining other methods
-        // remove it from the incomplete sigs, so that we don't add errors to it
-        if (incompleteSigs.back() == sigSend) {
-            incompleteSigs.pop_back();
         }
 
         // For all other cases, we have to re-write the block
@@ -97,22 +79,13 @@ struct ChainedSigWalk {
     bool firstReceiverIsSig(ast::Send *send) {
         do {
             if (send->fun == core::Names::sig()) {
+                this->previousSigSend = send;
                 return true;
             }
             send = ast::cast_tree<ast::Send>(send->recv);
         } while (send);
 
         return false;
-    }
-
-    // For all remaining incompleteSigs, emit an error of missing block parameter
-    void emitIncompleteSigErrors(core::MutableContext ctx) {
-        for (ast::Send *sig : incompleteSigs) {
-            if (auto e = ctx.beginError(sig->loc, core::errors::Rewriter::InvalidChainedSig)) {
-                e.setHeader("Signature declarations expect a block");
-                e.addErrorNote("Complete the signature by adding a block declaration: sig `{}`", "{ ... }");
-            }
-        }
     }
 
     void checkDuplicates(core::MutableContext ctx, ast::Send *sigBlock, core::NameRef fun) {
@@ -133,20 +106,16 @@ struct ChainedSigWalk {
             send->fun == core::Names::checked() || send->fun == core::Names::onFailure() ||
             send->fun == core::Names::typeParameters()) {
             auto receiver = ast::cast_tree<ast::Send>(send->recv);
-            auto originalReceiver = ast::cast_tree<ast::Send>(send->recv);
 
             while (receiver && receiver->fun != core::Names::sig()) {
                 receiver = ast::cast_tree<ast::Send>(receiver->recv);
             }
 
             if (receiver) {
+                this->previousSigSend = receiver;
+
                 if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
                     e.setHeader("Cannot use `{}` outside of a sig block", send->fun.toString(ctx));
-                }
-
-                // We already know this signature is invalid, so no need to emit two errors for it
-                if (incompleteSigs.back() == originalReceiver) {
-                    incompleteSigs.pop_back();
                 }
             }
 
@@ -184,6 +153,14 @@ struct ChainedSigWalk {
             }
 
             sendCopy = ast::cast_tree<ast::Send>(sendCopy->recv);
+
+            // If a previous receiver has a block, then we need to add an error to prevent signatures like this:
+            // `sig.final {}.override{}
+            if (sendCopy->block) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
+                    e.setHeader("Cannot add more signature statements after the declaration block");
+                }
+            }
         } while (sendCopy && sendCopy->fun != core::Names::sig());
 
         // If the signature is final, we need the `:final` positional argument
@@ -202,9 +179,6 @@ struct ChainedSigWalk {
 
 ast::ExpressionPtr ChainedSig::run(core::MutableContext &ctx, ast::ExpressionPtr tree) {
     ChainedSigWalk walker;
-    auto ast = ast::TreeMap::apply(ctx, walker, std::move(tree));
-
-    walker.emitIncompleteSigErrors(ctx);
-    return ast;
+    return ast::TreeMap::apply(ctx, walker, std::move(tree));
 }
 } // namespace sorbet::rewriter
