@@ -260,6 +260,20 @@ ast::ExpressionPtr prependPackageScope(const core::GlobalState &gs, ast::Express
     return scope;
 }
 
+ast::ExpressionPtr prependPackageExportsScope(const core::GlobalState &gs, ast::ExpressionPtr scope,
+                                       core::NameRef mangledName) {
+    auto *lastConstLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(scope);
+    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
+        lastConstLit = constLit;
+    }
+    core::NameRef registryName = core::Names::Constants::PackageExports();
+    // if (isTestNamespace(gs, lastConstLit->cnst)) {
+    //     registryName = core::Names::Constants::PackageTests();
+    // }
+    lastConstLit->scope = name2Expr(mangledName, name2Expr(registryName));
+    return scope;
+}
+
 ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
     auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (target == nullptr) {
@@ -755,10 +769,10 @@ public:
         }
     }
 
-    ast::ClassDef::RHS_store makeModule(core::Context ctx, ImportType moduleType) {
+    ast::ClassDef::RHS_store makeModule(core::Context ctx, ImportType moduleType, bool magicInclude) {
         vector<core::NameRef> parts;
         ast::ClassDef::RHS_store modRhs;
-        makeModule(ctx, &root, parts, modRhs, moduleType, ImportTree::Source());
+        makeModule(ctx, &root, parts, modRhs, moduleType, ImportTree::Source(), magicInclude);
         return modRhs;
     }
 
@@ -777,7 +791,7 @@ public:
 
 private:
     void makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts, ast::ClassDef::RHS_store &modRhs,
-                    ImportType moduleType, ImportTree::Source parentSrc) {
+                    ImportType moduleType, ImportTree::Source parentSrc, bool magicInclude) {
         auto newParentSrc = parentSrc;
         if (node->source.exists() && !parentSrc.exists()) {
             newParentSrc = node->source;
@@ -796,7 +810,7 @@ private:
                 continue;
             }
             parts.emplace_back(nameRef);
-            makeModule(ctx, child, parts, modRhs, moduleType, newParentSrc);
+            makeModule(ctx, child, parts, modRhs, moduleType, newParentSrc, magicInclude);
             parts.pop_back();
         }
 
@@ -814,6 +828,15 @@ private:
                         e.addErrorLine(core::Loc(ctx.file, parentSrc.importLoc), "Conflict from");
                     }
                 }
+            } else if (magicInclude) {
+                core::LocOffsets todoLoc; // TODO
+                ast::ClassDef::RHS_store rhs;
+                auto includedName = prependPackageExportsScope(ctx, parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
+                auto send = ast::MK::Send1(todoLoc, ast::MK::Self(todoLoc), core::Names::magicInclude(), move(includedName));
+                rhs.emplace_back(move(send));
+                auto mod = ast::MK::Module(core::LocOffsets::none(), todoLoc, importModuleName(parts, todoLoc), {},
+                                           std::move(rhs));
+                modRhs.emplace_back(std::move(mod));
             } else if (moduleType == ImportType::Test || node->source.importType == ImportType::Normal) {
                 // Construct a module containing an assignment for an imported name:
                 // For name `A::B::C::D` imported from package `A::B` construct:
@@ -965,7 +988,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
     // rootKlass.rhs.emplace_back(move(packageNamespace));
     // rootKlass.rhs.emplace_back(move(testPackageNamespace));
 
-    ast::ClassDef::RHS_store exportedConstants;
+    ast::ClassDef::RHS_store rhs;
     {
         ImportTreeBuilder treeBuilder(package);
         for (auto &ex : package.exports) {
@@ -974,14 +997,31 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
             }
             treeBuilder.addImport(package, ex.fqn.loc.offsets(), ex.fqn, ImportType::Normal); // TODO is this the right loc?
         }
-        exportedConstants = treeBuilder.makeModule(ctx, ImportType::Normal);
+        rhs = treeBuilder.makeModule(ctx, ImportType::Normal, false);
+    }
+    auto exportsNS =
+        ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
+                        name2Expr(core::Names::Constants::PackageExports()), {}, std::move(rhs));
+
+    auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
+    rootKlass.rhs.emplace_back(move(exportsNS));
+
+    rhs.clear();
+    {
+        ImportTreeBuilder treeBuilder(package);
+        for (auto &imp : package.importedPackageNames) {
+            if (imp.type != ImportType::Normal) {
+                continue;
+            }
+            treeBuilder.addImport(package, imp.name.fullName.loc.offsets(), imp.name.fullName, ImportType::Normal);
+        }
+        rhs = treeBuilder.makeModule(ctx, ImportType::Normal, true);
     }
     auto packageNamespace =
         ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                        name2Expr(core::Names::Constants::PackageExports()), {}, std::move(exportedConstants));
-
-    auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
+                        name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(rhs));
     rootKlass.rhs.emplace_back(move(packageNamespace));
+
     return file;
 }
 
