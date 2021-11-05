@@ -6,15 +6,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C B>::<C BClass>)
   end
 
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageExports>><<C <todo sym>>> < ()
     module <emptyTree>::<C A_Package$1>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BClass>
+      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C B>::<C BClass>
     end
   end
 
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
     module <emptyTree>::<C A_Package$1>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C B>::<C BClass>
+      <self>.magic_include(<emptyTree>::<C <PackageExports>>::<C B_Package$1>::<C B>)
     end
   end
 end
@@ -24,13 +24,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BClass>)
   end
 
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageExports>><<C <todo sym>>> < ()
     module <emptyTree>::<C B_Package$1>::<C B><<C <todo sym>>> < ()
       <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BClass>
     end
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
   end
 end
 # -- test/testdata/packager/export_imported/b/b.rb --

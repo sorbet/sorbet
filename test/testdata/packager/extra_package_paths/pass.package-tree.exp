@@ -6,23 +6,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.import(<emptyTree>::<C Project>::<C Baz>)
   end
 
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Baz><<C <todo sym>>> < ()
-      <emptyTree>::<C C> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package$1>::<C Project>::<C Baz>::<C C>
-    end
-
-    module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C B>
+  module <emptyTree>::<C <PackageExports>><<C <todo sym>>> < ()
+    class <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C <Magic>><<C <todo sym>>> < ()
     end
   end
 
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
     module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Baz><<C <todo sym>>> < ()
-      <emptyTree>::<C C> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package$1>::<C Project>::<C Baz>::<C C>
+      <self>.magic_include(<emptyTree>::<C <PackageExports>>::<C Project_Baz_Package$1>::<C Project>::<C Baz>)
     end
 
     module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C B>
+      <self>.magic_include(<emptyTree>::<C <PackageExports>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>)
     end
   end
 end
@@ -60,13 +55,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package$1>::<C Project>::<C Baz>::<C C>)
   end
 
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageExports>><<C <todo sym>>> < ()
     module <emptyTree>::<C Project_Baz_Package$1>::<C Project>::<C Baz><<C <todo sym>>> < ()
       <emptyTree>::<C C> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package$1>::<C Project>::<C Baz>::<C C>
     end
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
   end
 end
 # -- test/testdata/packager/extra_package_paths/extra/Project_Baz/c.rb --
@@ -111,12 +106,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C B>)
   end
 
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageExports>><<C <todo sym>>> < ()
     module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
       <emptyTree>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C B>
     end
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
   end
 end
