@@ -213,9 +213,3 @@ module Test7
     def c3; end
   end
 end
-
-module NoBlock
-  extend T::Helpers
-  requires_ancestor Kernel
-# ^^^^^^^^^^^^^^^^^^^^^^^^ error: `requires_ancestor` only accepts a block
-end

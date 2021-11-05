@@ -663,7 +663,7 @@ private:
 
         auto *block = ast::cast_tree<ast::Block>(send->block);
 
-        if (!send->args.empty() || block == nullptr) {
+        if (!send->args.empty()) {
             if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidRequiredAncestor)) {
                 e.setHeader("`{}` only accepts a block", send->fun.show(gs));
                 e.addErrorNote("Use {} to auto-correct using the new syntax",
