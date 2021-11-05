@@ -253,8 +253,8 @@ class Set < Object
   def flatten!(); end
 
   sig do
-    type_parameters(:U).params(
-        enum: T.nilable(T::Enumerable[T.type_parameter(:U)]),
+    params(
+        enum: T.nilable(T::Enumerable[BasicObject]),
     )
     .void
   end
