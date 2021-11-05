@@ -889,6 +889,14 @@ class Module < Object
   end
   def include(*arg0); end
 
+  sig do
+    params(
+        arg0: Module,
+    )
+    .returns(T.self_type)
+  end
+  def magic_include(*arg0); end # TODO TODO TODO
+
   # Returns `true` if *module* is included in *mod* or one of *mod*'s ancestors.
   #
   # ```ruby

@@ -279,7 +279,11 @@ private:
                 // fmt::print("HAS MAGIC {} ({})\n", magicAnc.exists(), c.cnst.show(ctx));
                 if (magicAnc.exists()) {
                     auto x = magicAnc.data(ctx)->findMember(ctx, c.cnst);
-                    // fmt::print("FOUND MAGIC {}\n", x.show(ctx));
+                    // fmt::print("FOUND MAGIC {}\n{}\n", x.show(ctx), magicAnc.showRaw(ctx));
+                    // for (auto [nr, sf] : magicAnc.data(ctx)->members()) {
+                    //     fmt::print("  -> {}\n", nr.show(ctx));
+                    // }
+                    // fmt::print("END MAGIC\n", x.show(ctx), magicAnc.showRaw(ctx));
                     result = x;
                 }
             }
@@ -753,11 +757,17 @@ private:
         // fmt::print("resolveMagicIncludeJob {} {}\n", loc.showRaw(gs), send->args.size());
         ENFORCE(owner.data(gs)->isClassOrModuleModule());
         auto &magicAncestor = owner.data(gs)->members()[core::Names::magic_ancestor()];
-        ENFORCE(!magicAncestor.exists(), "Cannot set this more than once");
+        // ENFORCE(!magicAncestor.exists(), "Cannot set this more than once");
         ENFORCE(send->args.size() == 1);
         auto *cnstLit = ast::cast_tree<ast::ConstantLit>(send->args[0]);
         ENFORCE(cnstLit != nullptr);
+        // if (!cnstLit->symbol.exists()) {
+        //     fmt::print("Not exist\n{}\n", cnstLit->showRaw(gs));
+        // }
+        // fmt::print("SETUP\n{}\n", cnstLit->symbol.show(gs));
         ENFORCE(cnstLit->symbol.exists());
+        // TODO what should I actually be enforcing here??
+        ENFORCE(!magicAncestor.exists() || magicAncestor == cnstLit->symbol, "Cannot change magicAncestor");
         magicAncestor = cnstLit->symbol;
     }
 
@@ -1071,8 +1081,8 @@ public:
                                             make_move_iterator(threadResult.todoClassMethods_.begin()),
                                             make_move_iterator(threadResult.todoClassMethods_.end()));
                     todoMagicIncludes.insert(todoMagicIncludes.end(),
-                                            make_move_iterator(threadResult.todoMagicIncludes_.begin()),
-                                            make_move_iterator(threadResult.todoMagicIncludes_.end()));
+                                             make_move_iterator(threadResult.todoMagicIncludes_.begin()),
+                                             make_move_iterator(threadResult.todoMagicIncludes_.end()));
                     todoRequiredAncestors.insert(todoRequiredAncestors.end(),
                                                  make_move_iterator(threadResult.todoRequiredAncestors_.begin()),
                                                  make_move_iterator(threadResult.todoRequiredAncestors_.end()));
@@ -1187,7 +1197,6 @@ public:
                                     });
                 todoMagicIncludes.erase(it, todoMagicIncludes.end());
                 progress = progress || (origSize != todoMagicIncludes.size());
-
             }
         }
 

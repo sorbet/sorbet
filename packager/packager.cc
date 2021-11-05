@@ -261,7 +261,7 @@ ast::ExpressionPtr prependPackageScope(const core::GlobalState &gs, ast::Express
 }
 
 ast::ExpressionPtr prependPackageExportsScope(const core::GlobalState &gs, ast::ExpressionPtr scope,
-                                       core::NameRef mangledName) {
+                                              core::NameRef mangledName) {
     auto *lastConstLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(scope);
     while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
         lastConstLit = constLit;
@@ -272,6 +272,17 @@ ast::ExpressionPtr prependPackageExportsScope(const core::GlobalState &gs, ast::
     // }
     lastConstLit->scope = name2Expr(mangledName, name2Expr(registryName));
     return scope;
+}
+
+// Returns <toPrepend>::<constLit>
+ast::ExpressionPtr prependConstLit(ast::ExpressionPtr constLit, ast::ExpressionPtr toPrepend) {
+    auto *lastConstLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(constLit);
+    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
+        lastConstLit = constLit;
+    }
+    ENFORCE(ast::isa_tree<ast::UnresolvedConstantLit>(toPrepend));
+    lastConstLit->scope = move(toPrepend);
+    return constLit;
 }
 
 ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
@@ -831,11 +842,13 @@ private:
             } else if (magicInclude) {
                 core::LocOffsets todoLoc; // TODO
                 ast::ClassDef::RHS_store rhs;
-                auto includedName = prependPackageExportsScope(ctx, parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
-                auto send = ast::MK::Send1(todoLoc, ast::MK::Self(todoLoc), core::Names::magicInclude(), move(includedName));
+                auto includedName = prependPackageExportsScope(ctx, parts2literal(parts, core::LocOffsets::none()),
+                                                               node->source.packageMangledName);
+                auto send =
+                    ast::MK::Send1(todoLoc, ast::MK::Self(todoLoc), core::Names::magicInclude(), move(includedName));
                 rhs.emplace_back(move(send));
-                auto mod = ast::MK::Module(core::LocOffsets::none(), todoLoc, importModuleName(parts, todoLoc), {},
-                                           std::move(rhs));
+                auto mod = ast::MK::Module(core::LocOffsets::none(), todoLoc,
+                                           importModuleNameForInclude(parts, todoLoc), {}, std::move(rhs));
                 modRhs.emplace_back(std::move(mod));
             } else if (moduleType == ImportType::Test || node->source.importType == ImportType::Normal) {
                 // Construct a module containing an assignment for an imported name:
@@ -870,6 +883,17 @@ private:
         ast::ExpressionPtr name = name2Expr(pkgMangledName);
         for (auto part = parts.begin(); part < parts.end() - 1; part++) {
             name = name2Expr(*part, move(name));
+        }
+        // Put the loc on the outer name:
+        auto &lit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(name);
+        return ast::MK::UnresolvedConstant(importLoc, move(lit.scope), lit.cnst);
+    }
+
+    // XXX Same as above except uses full parts instead of stopping by one
+    ast::ExpressionPtr importModuleNameForInclude(vector<core::NameRef> &parts, core::LocOffsets importLoc) const {
+        ast::ExpressionPtr name = name2Expr(pkgMangledName);
+        for (auto part : parts) {
+            name = name2Expr(part, move(name));
         }
         // Put the loc on the outer name:
         auto &lit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(name);
@@ -927,9 +951,6 @@ bool checkContainsAllPackages(const core::GlobalState &gs, const vector<ast::Par
 //    end
 // ...to __package.rb files to set up the package namespace.
 ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
-    ast::ClassDef::RHS_store importedPackages;
-    ast::ClassDef::RHS_store testImportedPackages;
-
     const auto &packageDB = ctx.state.packageDB();
     auto &absPkg = packageDB.getPackageForFile(ctx, file.file);
     if (!absPkg.exists()) {
@@ -995,13 +1016,25 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
             if (ex.type != ExportType::Public) {
                 continue; // TODO is this needed?
             }
-            treeBuilder.addImport(package, ex.fqn.loc.offsets(), ex.fqn, ImportType::Normal); // TODO is this the right loc?
+            treeBuilder.addImport(package, ex.fqn.loc.offsets(), ex.fqn,
+                                  ImportType::Normal); // TODO is this the right loc?
         }
+
         rhs = treeBuilder.makeModule(ctx, ImportType::Normal, false);
+        if (rhs.empty()) {
+            // If there were no exports add stub class so that imports can still resolve to
+            // something:
+            // class <PackageExports>::MANGLED_PACKAGE_NAME::A::B::<Magic>; end
+            auto stubName =
+                name2Expr(core::Names::Constants::Magic(),
+                          prependConstLit(parts2literal(package.name.fullName.parts, core::LocOffsets::none()),
+                                          name2Expr(package.mangledName())));
+            auto stubClass = ast::MK::Class(core::LocOffsets::none(), core::LocOffsets::none(), move(stubName), {}, {});
+            rhs.emplace_back(move(stubClass));
+        }
     }
-    auto exportsNS =
-        ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                        name2Expr(core::Names::Constants::PackageExports()), {}, std::move(rhs));
+    auto exportsNS = ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
+                                     name2Expr(core::Names::Constants::PackageExports()), {}, std::move(rhs));
 
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     rootKlass.rhs.emplace_back(move(exportsNS));
@@ -1013,13 +1046,14 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
             if (imp.type != ImportType::Normal) {
                 continue;
             }
-            treeBuilder.addImport(package, imp.name.fullName.loc.offsets(), imp.name.fullName, ImportType::Normal);
+            auto &importedPackage = PackageInfoImpl::from(packageDB.getPackageInfo(imp.name.mangledName));
+            treeBuilder.addImport(importedPackage, imp.name.fullName.loc.offsets(), imp.name.fullName,
+                                  ImportType::Normal);
         }
         rhs = treeBuilder.makeModule(ctx, ImportType::Normal, true);
     }
-    auto packageNamespace =
-        ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                        name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(rhs));
+    auto packageNamespace = ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
+                                            name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(rhs));
     rootKlass.rhs.emplace_back(move(packageNamespace));
 
     return file;
