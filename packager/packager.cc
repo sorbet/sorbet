@@ -1056,6 +1056,23 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
                                             name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(rhs));
     rootKlass.rhs.emplace_back(move(packageNamespace));
 
+    rhs.clear();
+    {
+        // ImportTreeBuilder treeBuilder(package);
+        // for (auto &imp : package.importedPackageNames) {
+        //     if (imp.type != ImportType::Normal) {
+        //         continue;
+        //     }
+        //     auto &importedPackage = PackageInfoImpl::from(packageDB.getPackageInfo(imp.name.mangledName));
+        //     treeBuilder.addImport(importedPackage, imp.name.fullName.loc.offsets(), imp.name.fullName,
+        //                           ImportType::Normal);
+        // }
+        // rhs = treeBuilder.makeModule(ctx, ImportType::Normal, true);
+    }
+    auto testPackageNamespace = ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
+                                                name2Expr(core::Names::Constants::PackageTests()), {}, std::move(rhs));
+    rootKlass.rhs.emplace_back(move(testPackageNamespace));
+
     return file;
 }
 
