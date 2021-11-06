@@ -160,6 +160,53 @@ out-of-bounds. If you would rather raise an exception than handle `nil`, use the
 [0, 1, 2].fetch(3) # IndexError: index 3 outside of array bounds
 ```
 
+## The types for `Array#sample` are weird
+
+```ruby
+T.reveal_type([1, 2, 3].sample) # Revealed type: T.nilable(T.any(Integer, T::Array[Integer]))
+```
+
+`Array#sample` has a complex method signature, in that its return type differs
+based on the caller array's size and a positional argument, _and_ it accepts a
+keyword argument. This is unlikely to be improved, see
+[#2530](https://github.com/sorbet/sorbet/pull/2530) and
+[#2248](https://github.com/sorbet/sorbet/pull/2248) for past discussion.
+
+To work around this, use `T.cast` to help Sorbet understand your context. If
+that gets annoying, and you always use `sample` the same way, you could override
+the built in sig in [an RBI](rbi.md).
+
+For example, if you are confident you'll never call `sample` on an empty array:
+
+```ruby
+class Array
+  extend T::Sig
+
+  sig do
+    params(arg0: Integer, random: Random::Formatter)
+    .returns(T.any(Elem, T::Array[Elem]))
+  end
+  def sample(arg0=T.unsafe(nil), random: T.unsafe(nil)); end
+end
+```
+
+Or if you never call it with an argument:
+
+```ruby
+class Array
+  extend T::Sig
+
+  sig do
+    params(arg0: Integer, random: Random::Formatter)
+    .returns(Elem) # or T.nilable(Elem), to also support empty arrays
+  end
+  def sample(arg0=T.unsafe(nil), random: T.unsafe(nil)); end
+end
+```
+
+> Overriding std lib RBIs can make type checking less safe, since Sorbet will
+> now have an incorrect understanding of how the std lib behaves.
+
 ## Why is `super` is untyped, even when the parent method has a `sig`?
 
 Sorbet can't know what the "parent method" is 100% of the time. For example,
