@@ -686,6 +686,27 @@ class ChildTwo < T::Struct
 end
 ```
 
+## 5046
+
+Generic classes must be passed all their generic type arguments when being used
+as types. For example:
+
+```ruby
+T.let([], Array)              # error
+T.let([], T::Array[Integer])  # ok
+```
+
+Many classes in the standard library are generic classes
+([see here](stdlib.md)), and must be passed type arguments, including `Array`
+and `Hash`. Any user-defined generic classes must similarly be provided type
+arguments when used.
+
+For legacy reasons relating to the intial rollout of Sorbet, this error is only
+reported at `# typed: strict` for standard library generic classes and
+`# typed: true` for all user-defined generic classes. (In an ideal world, it
+would have always been reported at `# typed: true`, and we might change this in
+the future.)
+
 ## 5047
 
 A class or module tried to inherit, include, or extend a final class or module.
