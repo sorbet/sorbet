@@ -696,16 +696,16 @@ T.let([], Array)              # error
 T.let([], T::Array[Integer])  # ok
 ```
 
-Many classes in the standard library are generic classes ([see
-here](stdlib.md)), and must be passed type arguments, including `Array` and
-`Hash`. Any user-defined generic classes must similarly be provided type
+Many classes in the standard library are generic classes
+([see here](stdlib.md)), and must be passed type arguments, including `Array`
+and `Hash`. Any user-defined generic classes must similarly be provided type
 arguments when used.
 
 For legacy reasons relating to the intial rollout of Sorbet, this error is only
-reported at `# typed: strict` for standard library generic classes and `# typed:
-true` for all user-defined generic classes. (In an ideal world, it would have
-always been reported at `# typed: true`, and we might change this in the
-future.)
+reported at `# typed: strict` for standard library generic classes and
+`# typed: true` for all user-defined generic classes. (In an ideal world, it
+would have always been reported at `# typed: true`, and we might change this in
+the future.)
 
 ## 5047
 
