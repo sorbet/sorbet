@@ -22,8 +22,8 @@ bool isCopyableType(const ast::ExpressionPtr &typeExpr) {
     return true;
 }
 
-// if expr is of the form `@var = local`, and `local` is typed, then replace it with with `@var = T.let(local,
-// type_of_local)`
+// if expr is of the form `@var = x`, and `x` is a literal or a typed local,
+// then replace it with with `@var = T.let(x, type_of_x)`
 void maybeAddLet(core::MutableContext ctx, ast::ExpressionPtr &expr,
                  const UnorderedMap<core::NameRef, const ast::ExpressionPtr *> &argTypeMap) {
     auto assn = ast::cast_tree<ast::Assign>(expr);
@@ -36,16 +36,23 @@ void maybeAddLet(core::MutableContext ctx, ast::ExpressionPtr &expr,
         return;
     }
 
-    auto rhs = ast::cast_tree<ast::UnresolvedIdent>(assn->rhs);
-    if (rhs == nullptr || rhs->kind != ast::UnresolvedIdent::Kind::Local) {
-        return;
-    }
-
-    auto typeExpr = argTypeMap.find(rhs->name);
-    if (typeExpr != argTypeMap.end() && isCopyableType(*typeExpr->second)) {
-        auto loc = rhs->loc;
-        auto newLet = ast::MK::Let(loc, move(assn->rhs), (*typeExpr->second).deepCopy());
+    if (auto lit = ast::cast_tree<ast::Literal>(assn->rhs)) {
+        auto underlying = core::isa_type<core::LiteralType>(lit->value) ? lit->value.underlying(ctx) : lit->value;
+        auto klass = core::cast_type_nonnull<core::ClassType>(underlying);
+        auto loc = lit->loc;
+        auto newLet = ast::MK::Let(loc, move(assn->rhs), ast::MK::Constant(loc, klass.symbol));
         assn->rhs = move(newLet);
+    } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(assn->rhs)) {
+        if (ident->kind != ast::UnresolvedIdent::Kind::Local) {
+            return;
+        }
+
+        auto typeExpr = argTypeMap.find(ident->name);
+        if (typeExpr != argTypeMap.end() && isCopyableType(*typeExpr->second)) {
+            auto loc = ident->loc;
+            auto newLet = ast::MK::Let(loc, move(assn->rhs), (*typeExpr->second).deepCopy());
+            assn->rhs = move(newLet);
+        }
     }
 }
 
@@ -139,23 +146,22 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
     checkSigReturnType(ctx, bodyBlock);
 
     // walk through, find the `params()` invocation, and get its hash
-    auto *params = findParams(bodyBlock);
-    if (params == nullptr) {
-        return;
-    }
-
     // build a lookup table that maps from names to the types they have
-    auto [kwStart, kwEnd] = params->kwArgsRange();
     UnorderedMap<core::NameRef, const ast::ExpressionPtr *> argTypeMap;
-    for (int i = kwStart; i < kwEnd; i += 2) {
-        auto *argName = ast::cast_tree<ast::Literal>(params->args[i]);
-        auto *argVal = &params->args[i + 1];
-        if (argName->isSymbol(ctx)) {
-            argTypeMap[argName->asSymbol(ctx)] = argVal;
+    auto *params = findParams(bodyBlock);
+    if (params != nullptr) {
+        auto [kwStart, kwEnd] = params->kwArgsRange();
+        for (int i = kwStart; i < kwEnd; i += 2) {
+            auto *argName = ast::cast_tree<ast::Literal>(params->args[i]);
+            auto *argVal = &params->args[i + 1];
+            if (argName->isSymbol(ctx)) {
+                argTypeMap[argName->asSymbol(ctx)] = argVal;
+            }
         }
     }
 
     // look through the rhs to find statements of the form `@var = local`
+    // or `@var = 0` (or any other literal)
     if (auto stmts = ast::cast_tree<ast::InsSeq>(methodDef->rhs)) {
         for (auto &s : stmts->stats) {
             maybeAddLet(ctx, s, argTypeMap);
