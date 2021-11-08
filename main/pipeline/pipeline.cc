@@ -714,7 +714,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         if (opts.stopAfterPhase == options::Phase::PACKAGER) {
             return ast::ParsedFilesOrCancelled(move(what));
         }
- 
+
         auto result = name(*gs, move(what), opts, workers);
         if (!result.hasResult()) {
             return result;

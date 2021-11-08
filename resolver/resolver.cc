@@ -1931,7 +1931,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 } else {
                     auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
                     auto packageName = package.asName(ctx);
-                    auto mangledName = packageName.lookupMangledPackageName(ctx.state);
+                    auto mangledName = packageName.lookupMangledPrivatePackageName(ctx.state);
                     // if the mangled name doesn't exist, then this means probably there's no package named this
                     if (!mangledName.exists()) {
                         if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {

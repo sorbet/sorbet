@@ -66,6 +66,9 @@ struct NameRefDebugCheck {
     void check(const GlobalSubstitution &subst) const;
 };
 
+constexpr int PACKAGE_SUFFIX_LEN = 8;          // Length of string "_Package"
+constexpr int PACKAGE_PRIVATE_SUFFIX_LEN = 16; // Length of string "_Package_Private"
+
 class NameRef final : private DebugOnlyCheck<NameRefDebugCheck> {
 private:
     // NameKind takes up this many bits in _id.
@@ -172,7 +175,7 @@ public:
 
     NameRef prepend(GlobalState &gs, std::string_view s) const;
 
-    NameRef lookupMangledPackageName(const GlobalState &gs) const;
+    NameRef lookupMangledPrivatePackageName(const GlobalState &gs) const;
 
     bool isClassName(const GlobalState &gs) const;
 
@@ -184,6 +187,7 @@ public:
     // Convenience method to avoid forgeting to unwrap the first layer (NameKind::CONSTANT)
     // before checking for UniqueNameKind::Packager.
     bool isPackagerName(const GlobalState &gs) const;
+    bool isPackagerPrivateName(const GlobalState &gs) const;
 
     bool isValidConstantName(const GlobalState &gs) const;
 

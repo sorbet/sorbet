@@ -32,6 +32,7 @@ enum class UniqueNameKind : u1 {
                           // test/resolver/stub_missing_class_alias.rb
     TEnum,
     Packager,
+    PackagerPrivate,
 };
 
 struct UniqueName final {
