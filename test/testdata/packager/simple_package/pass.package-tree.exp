@@ -3,42 +3,47 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Project>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C Project>::<C Foo>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C Bar>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package_Private$1>::<C Project>::<C Bar>::<C Bar>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C CallsFoo>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package_Private$1>::<C Project>::<C Bar>::<C CallsFoo>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C CallsBar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C CallsBar>
-    end
-
-    module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C Foo>
+    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project><<C <todo sym>>> < ()
+      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>
     end
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project>::<C Bar><<C <todo sym>>> < ()
+      <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package_Private$1>::<C Project>::<C Bar>::<C Bar>
+    end
+
+    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project>::<C Bar><<C <todo sym>>> < ()
+      <emptyTree>::<C CallsFoo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package_Private$1>::<C Project>::<C Bar>::<C CallsFoo>
+    end
+
+    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project><<C <todo sym>>> < ()
+      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>
+    end
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
     module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Bar><<C <todo sym>>> < ()
-      <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C Bar>
+      <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package_Private$1>::<C Project>::<C Bar>::<C Bar>
     end
 
     module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Bar><<C <todo sym>>> < ()
-      <emptyTree>::<C CallsFoo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C CallsFoo>
+      <emptyTree>::<C CallsFoo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package_Private$1>::<C Project>::<C Bar>::<C CallsFoo>
     end
+  end
 
-    module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C CallsBar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C CallsBar>
-    end
-
-    module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C Foo>
-    end
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
 # -- test/testdata/packager/simple_package/bar/bar.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package_Private$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Project>::<C Bar>::<C Bar><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.params(:value, <emptyTree>::<C Integer>).void()
@@ -56,7 +61,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/simple_package/bar/calls_foo.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package_Private$1><<C <todo sym>>> < ()
     module <emptyTree>::<C Project>::<C Bar>::<C CallsFoo><<C <todo sym>>> < ()
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.returns(<emptyTree>::<C Project>::<C Foo>::<C Foo>)
@@ -87,42 +92,47 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C Project>::<C Bar>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C Foo>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo>::<C Foo>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C CallsBar>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo>::<C CallsBar>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Bar><<C <todo sym>>> < ()
-      <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C Bar>
-    end
-
-    module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Bar><<C <todo sym>>> < ()
-      <emptyTree>::<C CallsFoo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C CallsFoo>
+    module <emptyTree>::<C Project_Foo_Package_Private$1>::<C Project><<C <todo sym>>> < ()
+      <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>
     end
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Bar><<C <todo sym>>> < ()
-      <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C Bar>
+    module <emptyTree>::<C Project_Foo_Package_Private$1>::<C Project><<C <todo sym>>> < ()
+      <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>
     end
 
-    module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Bar><<C <todo sym>>> < ()
-      <emptyTree>::<C CallsFoo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C CallsFoo>
+    module <emptyTree>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
+      <emptyTree>::<C CallsBar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo>::<C CallsBar>
+    end
+
+    module <emptyTree>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
+      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo>::<C Foo>
+    end
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
+      <emptyTree>::<C CallsBar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo>::<C CallsBar>
     end
 
     module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C CallsBar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C CallsBar>
+      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo>::<C Foo>
     end
+  end
 
-    module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C Foo>
-    end
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
 # -- test/testdata/packager/simple_package/foo/calls_bar.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1><<C <todo sym>>> < ()
     module <emptyTree>::<C Project>::<C Foo>::<C CallsBar><<C <todo sym>>> < ()
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.returns(<emptyTree>::<C Project>::<C Bar>::<C Bar>)
@@ -140,7 +150,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/simple_package/foo/foo.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Project>::<C Foo>::<C Foo><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.params(:value, <emptyTree>::<C Integer>).void()

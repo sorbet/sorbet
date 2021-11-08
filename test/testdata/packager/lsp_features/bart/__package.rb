@@ -7,12 +7,17 @@ class Bart < PackageSpec
     # ^^^^ symbol-search: "Bart", name = "Bart", container = "(nothing)"
     # ^ show-symbol: Bart
     export Bart::Character
+    #      ^^^^ symbol-search: "Bart", name = "Bart", container = "Bart"
+    #      ^^^^ def: bart 1 not-def-of-self
+    #      ^^^^ usage: bartmod
     #            ^^^^^^^^^ usage: character
     #            ^^^^^^^^^ hover: Character class description
-    #      ^^^^^^^^^^^^^^^ symbol-search: "Bart", name = "Bart", container = "<PackageTests>::Bart_Package"
+    #      ^^^^^^^^^^^^^^^ symbol-search: "Bart", name = "Bart", container = "<PackageTests>::Bart_Package_Private"
     #            ^ show-symbol: Bart::Character
     #      ^ show-symbol: Bart
     export Bart::CatchPhrase
+    #      ^^^^ def: bart 2 not-def-of-self
+    #      ^^^^ usage: bartmod
     #            ^^^^^^^^^^^ usage: catchphrase
     #            ^ show-symbol: Bart::CatchPhrase
 end
