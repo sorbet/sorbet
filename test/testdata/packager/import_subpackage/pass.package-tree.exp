@@ -5,35 +5,50 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Root_Package$1>::<C Root>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Root_B_Package$1>::<C Root>::<C B>::<C Foo>
+    module <emptyTree>::<C Root_Package_Private$1>::<C Root><<C <todo sym>>> < ()
+      <emptyTree>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C Root_B_Package$1>::<C Root>::<C B>
     end
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Root_Package$1>::<C Root>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Root_B_Package$1>::<C Root>::<C B>::<C Foo>
+    module <emptyTree>::<C Root_Package_Private$1>::<C Root><<C <todo sym>>> < ()
+      <emptyTree>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C Root_B_Package$1>::<C Root>::<C B>
     end
-  end
-end
-# -- test/testdata/packager/import_subpackage/a/b/__package.rb --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Root>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Root_B_Package$1>::<C Root>::<C B>::<C Foo>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Root_B_Package$1>::<C Root>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Root_B_Package$1>::<C Root>::<C B>::<C Foo>
+  end
+end
+# -- test/testdata/packager/import_subpackage/a/b/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Root>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Root_B_Package_Private$1>::<C Root>::<C B>::<C Foo>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Root_B_Package_Private$1>::<C Root>::<C B><<C <todo sym>>> < ()
+      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Root_B_Package_Private$1>::<C Root>::<C B>::<C Foo>
     end
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Root_B_Package$1>::<C Root>::<C B><<C <todo sym>>> < ()
+      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Root_B_Package_Private$1>::<C Root>::<C B>::<C Foo>
+    end
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
 # -- test/testdata/packager/import_subpackage/a/b/foo.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Root_B_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C Root_B_Package_Private$1><<C <todo sym>>> < ()
     module <emptyTree>::<C Root>::<C B>::<C Foo><<C <todo sym>>> < ()
     end
   end

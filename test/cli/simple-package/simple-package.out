@@ -1,9 +1,20 @@
-foo/foo.rb:12: Unable to resolve constant `BardClass` https://srb.help/5002
-    12 |    Project::Bar::BardClass
+foo/foo.rb:13: Unable to resolve constant `BardClass` https://srb.help/5002
+    13 |    Project::Bar::BardClass
             ^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    foo/foo.rb:12: Replace with `Project::Bar::BarClass`
-    12 |    Project::Bar::BardClass
+    foo/foo.rb:13: Replace with `Project::Bar::BarClass`
+    13 |    Project::Bar::BardClass
             ^^^^^^^^^^^^^^^^^^^^^^^
-    foo/__package.rb: Did you mean: `Project::Bar::BarClass`?
-Errors: 1
+    bar/__package.rb: Did you mean: `Project::Bar::BarClass`?
+
+foo/foo.rb:14: Unable to resolve constant `UnexportedClass` https://srb.help/5002
+    14 |    Project::Bar::UnexportedClass
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    foo/foo.rb:14: Replace with `Gem::Package::TarReader::UnexpectedEOF`
+    14 |    Project::Bar::UnexportedClass
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/rubygems.rbi#L2901: Did you mean: `Gem::Package::TarReader::UnexpectedEOF`?
+    2901 |class Gem::Package::TarReader::UnexpectedEOF < StandardError
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 2

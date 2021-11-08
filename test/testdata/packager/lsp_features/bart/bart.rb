@@ -2,6 +2,7 @@
 # typed: strict
 
 module Bart
+  #    ^^^^ def: bartmod
   #    ^^^^ symbol-search: "Bart", name = "Bart", container = "Bart"
       CatchPhrase = "Don't have a cow, man."
   #   ^^^^^^^^^^^ def: catchphrase

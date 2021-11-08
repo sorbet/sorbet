@@ -19,48 +19,57 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.export(<self>.method())
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C REFERENCE>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C REFERENCE>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C AClass>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AClass>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C AModule>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AModule>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C A_Package$1>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BClass>
-    end
-
-    module <emptyTree>::<C A_Package$1>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C BModule> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BModule>
+    module <emptyTree>::<C A_Package_Private$1><<C <todo sym>>> < ()
+      <emptyTree>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>
     end
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C A_Package_Private$1>::<C A><<C <todo sym>>> < ()
+      <emptyTree>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AClass>
+    end
+
+    module <emptyTree>::<C A_Package_Private$1>::<C A><<C <todo sym>>> < ()
+      <emptyTree>::<C AModule> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AModule>
+    end
+
+    module <emptyTree>::<C A_Package_Private$1>::<C A><<C <todo sym>>> < ()
+      <emptyTree>::<C REFERENCE> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C REFERENCE>
+    end
+
+    module <emptyTree>::<C A_Package_Private$1><<C <todo sym>>> < ()
+      <emptyTree>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>
+    end
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
     module <emptyTree>::<C A_Package$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C AClass>
+      <emptyTree>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AClass>
     end
 
     module <emptyTree>::<C A_Package$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C AModule> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C AModule>
+      <emptyTree>::<C AModule> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AModule>
     end
 
     module <emptyTree>::<C A_Package$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C REFERENCE> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C REFERENCE>
+      <emptyTree>::<C REFERENCE> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C REFERENCE>
     end
+  end
 
-    module <emptyTree>::<C A_Package$1>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BClass>
-    end
-
-    module <emptyTree>::<C A_Package$1>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C BModule> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BModule>
-    end
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
 # -- test/testdata/packager/invalid_imports_and_exports/a.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C A_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1><<C <todo sym>>> < ()
     module <emptyTree>::<C A><<C <todo sym>>> < ()
       <emptyTree>::<C REFERENCE> = <emptyTree>::<C ASecondClass>
 
@@ -102,50 +111,47 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C A>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BClass>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BClass>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BModule>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BModule>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C B_Package$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C AClass>
-    end
-
-    module <emptyTree>::<C B_Package$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C AModule> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C AModule>
-    end
-
-    module <emptyTree>::<C B_Package$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C REFERENCE> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C REFERENCE>
+    module <emptyTree>::<C B_Package_Private$1><<C <todo sym>>> < ()
+      <emptyTree>::<C A> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>
     end
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C B_Package$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C AClass>
+    module <emptyTree>::<C B_Package_Private$1><<C <todo sym>>> < ()
+      <emptyTree>::<C A> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>
     end
 
-    module <emptyTree>::<C B_Package$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C AModule> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C AModule>
+    module <emptyTree>::<C B_Package_Private$1>::<C B><<C <todo sym>>> < ()
+      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BClass>
     end
 
-    module <emptyTree>::<C B_Package$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C REFERENCE> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C REFERENCE>
+    module <emptyTree>::<C B_Package_Private$1>::<C B><<C <todo sym>>> < ()
+      <emptyTree>::<C BModule> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BModule>
+    end
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+    module <emptyTree>::<C B_Package$1>::<C B><<C <todo sym>>> < ()
+      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BClass>
     end
 
     module <emptyTree>::<C B_Package$1>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BClass>
+      <emptyTree>::<C BModule> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BModule>
     end
+  end
 
-    module <emptyTree>::<C B_Package$1>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C BModule> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BModule>
-    end
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
 # -- test/testdata/packager/invalid_imports_and_exports/b/b.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C B_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1><<C <todo sym>>> < ()
     module <emptyTree>::<C B><<C <todo sym>>> < ()
       class <emptyTree>::<C BClass><<C <todo sym>>> < (::<todo sym>)
         ::Sorbet::Private::Static.sig(<self>) do ||
