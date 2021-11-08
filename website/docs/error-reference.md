@@ -697,7 +697,7 @@ T.let([], T::Array[Integer])  # ok
 ```
 
 Many classes in the standard library are generic classes
-([see here](stdlib.md)), and must be passed type arguments, including `Array`
+([see here](stdlib-generics.md)), and must be passed type arguments, including `Array`
 and `Hash`. Any user-defined generic classes must similarly be provided type
 arguments when used.
 
