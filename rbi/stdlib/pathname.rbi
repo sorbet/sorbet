@@ -245,19 +245,19 @@ class Pathname < Object
   sig do
     params(
         p1: T.any(String, Pathname),
-        p2: String,
+        p2: Integer,
     )
     .returns(T::Array[Pathname])
   end
   sig do
     params(
         p1: T.any(String, Pathname),
-        p2: String,
+        p2: Integer,
         blk: T.proc.params(arg0: Pathname).void,
     )
     .returns(NilClass)
   end
-  def self.glob(p1, p2=T.unsafe(nil), &blk); end
+  def self.glob(p1, p2=0, &blk); end
 
   def initialize(p); end
 
@@ -842,6 +842,23 @@ class Pathname < Object
   # [`File.ftype`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-ftype).
   sig {returns(String)}
   def ftype(); end
+
+  sig do
+    params(
+        p1: T.any(String, Pathname),
+        p2: Integer,
+    )
+    .returns(T::Array[Pathname])
+  end
+  sig do
+    params(
+        p1: T.any(String, Pathname),
+        p2: Integer,
+        blk: T.proc.params(arg0: Pathname).void
+    )
+    .returns(NilClass)
+  end
+  def glob(p1, p2=0, &blk); end
 
   # See
   # [`FileTest.grpowned?`](https://docs.ruby-lang.org/en/2.7.0/FileTest.html#method-i-grpowned-3F).
