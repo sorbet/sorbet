@@ -52,6 +52,7 @@ _TEST_RUNNERS = {
     "PosTests": ":pipeline_test_runner",
     "LSPTests": ":lsp_test_runner",
     "WhitequarkParserTests": ":parser_test_runner",
+    "PackagerTests": ":pipeline_test_runner",
 }
 
 def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_args = [], tags = []):

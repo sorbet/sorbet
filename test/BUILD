@@ -200,6 +200,18 @@ pipeline_tests(
 )
 
 pipeline_tests(
+    "test_corpus_packager",
+    glob(
+        [
+            "testdata/packager/**/*.rb",
+            "testdata/packager/**/*.exp",
+        ],
+    ),
+    "PackagerTests",
+    filter = "PackagerTests",
+)
+
+pipeline_tests(
     "whitequark_parser_corpus",
     glob([
         "whitequark/**/*.rb",
@@ -234,6 +246,11 @@ test_suite(
 test_suite(
     name = "whitequark_parser_tests",
     tests = ["whitequark_parser_corpus"],
+)
+
+test_suite(
+    name = "test_packager",
+    tests = ["test_corpus_packager"],
 )
 
 load(":compiler_tests.bzl", "compiler_tests")
