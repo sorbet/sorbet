@@ -211,7 +211,7 @@ Usage:
                                 Like --ignore, but it only affects `-p
                                 autogen-subclasses`.
       --stop-after phase        Stop After: [init, parser, desugarer,
-                                rewriter, local-vars, namer, resolver, cfg,
+                                rewriter, local-vars, namer, packager, resolver, cfg,
                                 inferencer] (default: inferencer)
       --no-stdlib               Do not load included rbi files for stdlib
       --skip-rewriter-passes    Do not run Rewriter passess
