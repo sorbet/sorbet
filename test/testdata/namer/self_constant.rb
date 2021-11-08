@@ -4,7 +4,7 @@ class A
  self::B = 1
 end
 
-T.reveal_type(A::B) # error: Integer(1)
+T.reveal_type(A::B) # error: Integer
 
 class C
   class self::D
