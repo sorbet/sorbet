@@ -3086,6 +3086,8 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
         inputq->push(move(tree), 1);
     }
 
+    trees.clear();
+
     workers.multiplexJob("resolveSignaturesWalk", [&gs, inputq, outputq]() -> void {
         ResolveSignaturesWalk walk;
         ResolveSignaturesWalk::ResolveSignaturesWalkResult output;
@@ -3108,15 +3110,14 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
     });
 
     vector<ResolveSignaturesWalk::ResolveFileSignatures> combinedFileJobs;
-    vector<ast::ParsedFile> combinedTrees;
     {
         ResolveSignaturesWalk::ResolveSignaturesWalkResult threadResult;
         for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                combinedTrees.insert(combinedTrees.end(), make_move_iterator(threadResult.trees.begin()),
-                                     make_move_iterator(threadResult.trees.end()));
+                trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
+                             make_move_iterator(threadResult.trees.end()));
                 combinedFileJobs.insert(combinedFileJobs.end(), make_move_iterator(threadResult.fileSigs.begin()),
                                         make_move_iterator(threadResult.fileSigs.end()));
             }
@@ -3144,7 +3145,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
         }
     }
 
-    return move(combinedTrees);
+    return move(trees);
 }
 
 void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
