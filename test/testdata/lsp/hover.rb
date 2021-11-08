@@ -6,7 +6,7 @@ class BigFoo; extend T::Sig
 # The docs for FOO_CONSTANT
   FOO_CONSTANT = 1
 # ^^^^^^^^^^^^ hover: The docs for FOO_CONSTANT
-# ^^^^^^^^^^^^ hover: Integer(1)
+# ^^^^^^^^^^^^ hover: Integer
 
   # Docs for Bar#static_variable
   @@static_variable = T.let('asdf', String)
@@ -133,7 +133,7 @@ def main
 # ^ hover: T::Hash[T.untyped, T.untyped]
 
   boo = BigFoo::FOO_CONSTANT
-              # ^^^^^^^^^^^^ hover: Integer(1)
+              # ^^^^^^^^^^^^ hover: Integer
               # ^^^^^^^^^^^^ hover: The docs for FOO_CONSTANT
       # ^^^^^^ hover: T.class_of(BigFoo)
       # ^^^^^^ hover: The docs for BigFoo

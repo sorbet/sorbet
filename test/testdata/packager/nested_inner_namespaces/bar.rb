@@ -7,13 +7,13 @@ module RootPackage::Bar
   def main(a)
     if a > 10
       RootPackage::Foo::Constant
-      #                 ^^^^^^^^ hover: String("Foo")
+      #                 ^^^^^^^^ hover: String
     elsif a < 4
       RootPackage::Foo::Bar::Constant
-      #                      ^^^^^^^^ hover: String("Bar")
+      #                      ^^^^^^^^ hover: String
     else
       RootPackage::Foo::Bar::Baz::Constant
-      #                           ^^^^^^^^ hover: String("Baz")
+      #                           ^^^^^^^^ hover: String
     end
   end
 end

@@ -15,7 +15,7 @@ module Simpsons
       #   ^^^^ hover: T.class_of(Bart)
       #   ^    show-symbol: Bart
           #     ^^^^^^^^^^^ usage: catchphrase
-          #     ^^^^^^^^^^^ hover: String("Don\'t have a cow, man.")
+          #     ^^^^^^^^^^^ hover: String
           #     ^           show-symbol: Bart::CatchPhrase
       end
 
