@@ -2917,8 +2917,6 @@ end
 class Pathname
   def fnmatch?(*arg); end
 
-  def glob(*arg); end
-
   def make_symlink(arg); end
 end
 
