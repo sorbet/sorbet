@@ -567,9 +567,9 @@ as types. For example:</p>
 T.let([], T::Array[Integer])  <span class="hljs-comment"># ok</span>
 </code></pre>
 <p>Many classes in the standard library are generic classes
-(<a href="stdlib.md">see here</a>), and must be passed type arguments, including <code>Array</code>
-and <code>Hash</code>. Any user-defined generic classes must similarly be provided type
-arguments when used.</p>
+(<a href="/docs/stdlib-generics">see here</a>), and must be passed type arguments, including
+<code>Array</code> and <code>Hash</code>. Any user-defined generic classes must similarly be provided
+type arguments when used.</p>
 <p>For legacy reasons relating to the intial rollout of Sorbet, this error is only
 reported at <code># typed: strict</code> for standard library generic classes and
 <code># typed: true</code> for all user-defined generic classes. (In an ideal world, it
