@@ -37,7 +37,11 @@ suggest_t_must.rb:8: Method `even?` does not exist on `NilClass` component of `T
     suggest_t_must.rb:8: Replaced with ` {|x| T.must(x).even?}`
      8 |T::Array[T.nilable(Integer)].new.map(&:even?)
                                             ^^^^^^^^^
-Errors: 3
+
+suggest_t_must.rb:20: Reassigning field with a value of wrong type: `T.nilable(Integer)` is not a subtype of `Integer` https://srb.help/7013
+    20 |    @result = xs[i]
+                      ^^^^^
+Errors: 4
 
 --------------------------------------------------------------------------
 
@@ -49,3 +53,17 @@ T.must(foo)[0]
 "hi" + T.must(foo)
 
 T::Array[T.nilable(Integer)].new.map {|x| T.must(x).even?}
+
+class A
+  extend T::Sig
+
+  sig {void}
+  def initialize
+    @result = T.let(0, Integer)
+  end
+
+  sig {params(xs: T::Array[Integer], i: Integer).void}
+  def main(xs, i)
+    @result = xs[i]
+  end
+end
