@@ -9,8 +9,13 @@ public:
 
     std::string dedent(std::string_view str);
 
+    void interrupt() {
+        at_line_begin = false;
+    }
+
 private:
     unsigned int dedentLevel;
+    bool at_line_begin = true;
     unsigned int spacesToRemove;
 };
 
