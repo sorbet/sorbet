@@ -1414,9 +1414,18 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     case cfg::CFG::MIN_LOOP_FIELD:
                         if (!asGoodAs) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::FieldReassignmentTypeMismatch)) {
-                                e.setHeader(
-                                    "Reassigning field with a value of wrong type: `{}` is not a subtype of `{}`",
-                                    tp.type.show(ctx), cur.type.show(ctx));
+                                e.setHeader("Expected `{}` but found `{}` for field", cur.type.show(ctx),
+                                            tp.type.show(ctx));
+
+                                // It owuld be nice to be able to actually show the name of the field in the error
+                                // message, but we don't have a convenient way to compute this at the moment.
+                                e.addErrorSection(cur.explainExpected(ctx, "field defined here", ownerLoc));
+                                e.addErrorSection(tp.explainGot(ctx, ownerLoc));
+                                auto replaceLoc = core::Loc(ctx.file, bind.loc);
+                                // We are not processing a method call, so there is no constraint.
+                                auto &constr = core::TypeConstraint::EmptyFrozenConstraint;
+                                core::TypeDrivenAutocorrect::maybeAutocorrect(ctx, e, replaceLoc, constr, cur.type,
+                                                                              tp.type);
                             }
                             tp = cur;
                         }

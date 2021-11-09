@@ -68,6 +68,12 @@ ErrorSection TypeAndOrigins::explainExpected(const GlobalState &gs, TypePtr type
     return ErrorSection(header, {ErrorLine{origin, ""}});
 }
 
+ErrorSection TypeAndOrigins::explainExpected(const GlobalState &gs, const string &for_,
+                                             Loc originForUninitialized) const {
+    auto header = ErrorColors::format("Expected `{}` for {}:", this->type.showWithMoreInfo(gs), for_);
+    return ErrorSection(header, this->origins2Explanations(gs, originForUninitialized));
+}
+
 ErrorSection TypeAndOrigins::explainGot(const GlobalState &gs, Loc originForUninitialized) const {
     auto header = ErrorColors::format("Got `{}` originating from:", this->type.showWithMoreInfo(gs));
     return ErrorSection(header, this->origins2Explanations(gs, originForUninitialized));
