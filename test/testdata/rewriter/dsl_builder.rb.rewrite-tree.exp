@@ -176,7 +176,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::T.unsafe(<self>).dsl_required(:implied_string, <emptyTree>::<C String>, :implied, "foo")
 
-    <self>.dsl_optional(:no_getter_or_setter, <emptyTree>::<C String>, :skip_getter, true, :skip_setter, true)
+    ::T.unsafe(<self>).dsl_optional(:no_getter, <emptyTree>::<C String>, :skip_getter, true)
+
+    ::T.unsafe(<self>).dsl_optional(:no_setter, <emptyTree>::<C String>, :skip_setter, true)
+
+    ::T.unsafe(<self>).dsl_optional(:no_getter_or_setter, <emptyTree>::<C String>, :skip_getter, true, :skip_setter, true)
 
     ::T.unsafe(<self>).dsl_optional(:class_of, <emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>))
 
