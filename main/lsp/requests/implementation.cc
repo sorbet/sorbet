@@ -44,7 +44,7 @@ const MethodImplementationResults findMethodImplementations(const core::GlobalSt
     auto childClasses = getSubclassesSlow(gs, owningClassSymbolRef, includeOwner);
     auto methodName = method.data(gs)->name;
     for (const auto &childClass : childClasses) {
-        auto methodImplementation = childClass.data(gs)->findMember(gs, methodName);
+        auto methodImplementation = childClass.data(gs)->findMethod(gs, methodName);
         locations.push_back(methodImplementation.data(gs)->loc());
     }
 
@@ -59,7 +59,7 @@ core::SymbolRef findOverridedMethod(const core::GlobalState &gs, const core::Sym
         if (!mixin.data(gs)->isClassOrModule() && !mixin.data(gs)->isAbstract()) {
             continue;
         }
-        return mixin.data(gs)->findMember(gs, method.data(gs)->name);
+        return mixin.data(gs)->findMethod(gs, method.data(gs)->name);
     }
     return core::Symbols::noSymbol();
 }

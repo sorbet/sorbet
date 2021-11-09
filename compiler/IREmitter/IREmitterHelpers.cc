@@ -426,21 +426,21 @@ IREmitterHelpers::isFinalMethod(const core::GlobalState &gs, core::TypePtr recvT
         return std::nullopt;
     }
 
-    auto funSym = recvSym.data(gs)->findMember(gs, fun);
+    auto funSym = recvSym.data(gs)->findMethod(gs, fun);
     if (!funSym.exists()) {
         return std::nullopt;
     }
 
-    if (!funSym.asMethodRef().data(gs)->isFinalMethod()) {
+    if (!funSym.data(gs)->isFinalMethod()) {
         return std::nullopt;
     }
 
-    auto file = funSym.loc(gs).file();
+    auto file = funSym.data(gs)->loc().file();
     if (file.data(gs).compiledLevel != core::CompiledLevel::True) {
         return std::nullopt;
     }
 
-    return IREmitterHelpers::FinalMethodInfo{recvSym, funSym.asMethodRef(), file};
+    return IREmitterHelpers::FinalMethodInfo{recvSym, funSym, file};
 }
 
 llvm::Value *KnownFunction::getFunction(CompilerState &cs, llvm::IRBuilderBase &builder) const {

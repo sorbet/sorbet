@@ -74,9 +74,8 @@ public:
             while (current.data(gs)->isOverloaded()) {
                 i++;
                 auto overloadName = gs.lookupNameUnique(core::UniqueNameKind::Overload, methodName, i);
-                auto overloadSym = primaryMethod.data(gs)->owner.data(gs)->findMember(gs, overloadName);
-                ENFORCE(overloadSym.exists());
-                auto overload = overloadSym.asMethodRef();
+                auto overload = primaryMethod.data(gs)->owner.data(gs)->findMethod(gs, overloadName);
+                ENFORCE(overload.exists());
                 if (core::Types::isSubType(gs, intrinsicResultType, overload.data(gs)->resultType)) {
                     return;
                 }
@@ -492,7 +491,7 @@ public:
             // TODO Figure out if this speicial case is right
             lookupSym = core::Symbols::Object();
         }
-        auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef).asMethodRef();
+        auto funcSym = lookupSym.data(cs)->findMethod(cs, funcNameRef);
         ENFORCE(funcSym.exists());
 
         // We are going to rely on compiled final methods having their return values checked.

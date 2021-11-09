@@ -310,9 +310,9 @@ core::MethodRef closestOverridenMethod(core::Context ctx, core::ClassOrModuleRef
     ENFORCE(enclosingClass->isClassOrModuleLinearizationComputed(), "Should have been linearized by resolver");
 
     for (const auto &mixin : enclosingClass->mixins()) {
-        auto mixinMethod = mixin.data(ctx)->findMember(ctx, name);
+        auto mixinMethod = mixin.data(ctx)->findMethod(ctx, name);
         if (mixinMethod.exists()) {
-            return mixinMethod.asMethodRef();
+            return mixinMethod;
         }
     }
 
@@ -321,9 +321,9 @@ core::MethodRef closestOverridenMethod(core::Context ctx, core::ClassOrModuleRef
         return core::Symbols::noMethod();
     }
 
-    auto superMethod = superClass.data(ctx)->findMember(ctx, name);
+    auto superMethod = superClass.data(ctx)->findMethod(ctx, name);
     if (superMethod.exists()) {
-        return superMethod.asMethodRef();
+        return superMethod;
     } else {
         return closestOverridenMethod(ctx, superClass, name);
     }

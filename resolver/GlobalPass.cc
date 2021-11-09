@@ -379,7 +379,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
         core::ClassOrModuleRef singleton;
         for (auto ancst : sym.data(gs)->mixins()) {
             // Reading the fake property created in resolver#resolveClassMethodsJob(){}
-            auto mixedInClassMethods = ancst.data(gs)->findMember(gs, core::Names::mixedInClassMethods());
+            auto mixedInClassMethods = ancst.data(gs)->findMethod(gs, core::Names::mixedInClassMethods());
             if (!mixedInClassMethods.exists()) {
                 continue;
             }

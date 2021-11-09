@@ -294,15 +294,15 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
     }
 
     if (klassData->superClass().exists()) {
-        auto superMethod = klassData->superClass().data(ctx)->findMemberTransitive(ctx, name);
+        auto superMethod = klassData->superClass().data(ctx)->findMethodTransitive(ctx, name);
         if (superMethod.exists()) {
-            overridenMethods.emplace_back(superMethod.asMethodRef());
+            overridenMethods.emplace_back(superMethod);
         }
     }
     for (const auto &mixin : klassData->mixins()) {
-        auto superMethod = mixin.data(ctx)->findMember(ctx, name);
+        auto superMethod = mixin.data(ctx)->findMethod(ctx, name);
         if (superMethod.exists()) {
-            overridenMethods.emplace_back(superMethod.asMethodRef());
+            overridenMethods.emplace_back(superMethod);
         }
     }
 

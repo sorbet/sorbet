@@ -119,6 +119,12 @@ public:
         return ref;
     }
 
+    std::string toString(const GlobalState &gs) const {
+        bool showFull = false;
+        bool showRaw = false;
+        return toStringWithOptions(gs, 0, showFull, showRaw);
+    }
+
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
 

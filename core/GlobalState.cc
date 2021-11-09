@@ -2011,9 +2011,9 @@ MethodRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
 
 MethodRef GlobalState::lookupStaticInitForClass(ClassOrModuleRef klass) const {
     auto classData = klass.data(*this);
-    auto ref = classData->lookupSingletonClass(*this).data(*this)->findMember(*this, core::Names::staticInit());
+    auto ref = classData->lookupSingletonClass(*this).data(*this)->findMethod(*this, core::Names::staticInit());
     ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.toString(*this));
-    return ref.asMethodRef();
+    return ref;
 }
 
 MethodRef GlobalState::staticInitForFile(Loc loc) {
