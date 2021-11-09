@@ -571,6 +571,7 @@ struct PackageInfoFinder {
             case core::Names::test_import().rawId():
             case core::Names::export_().rawId():
             case core::Names::export_for_test().rawId():
+            case core::Names::restrict_to_service().rawId():
                 return true;
             default:
                 return false;
