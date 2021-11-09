@@ -41,6 +41,7 @@ public:
     LocalRef blockBreakTarget;
     int loops;
     bool isInsideRubyBlock;
+    bool breakIsJump;
     BasicBlock *nextScope;
     BasicBlock *breakScope;
     BasicBlock *rescueScope;
@@ -52,6 +53,7 @@ public:
 
     CFGContext withTarget(LocalRef target);
     CFGContext withBlockBreakTarget(LocalRef blockBreakTarget);
+    CFGContext withLoopBreakTarget(LocalRef blockBreakTarget);
     CFGContext withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope, bool insideRubyBlock = false);
     CFGContext withSendAndBlockLink(const std::shared_ptr<core::SendAndBlockLink> &link);
 
