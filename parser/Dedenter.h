@@ -14,7 +14,7 @@ public:
     }
 
 private:
-    unsigned int dedentLevel;
+    const unsigned int dedentLevel;
     bool at_line_begin = true;
     unsigned int spacesToRemove;
 };
