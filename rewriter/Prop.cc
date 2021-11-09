@@ -547,9 +547,6 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
 } // namespace
 
 void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
-    if (ctx.state.runningUnderAutogen) {
-        return;
-    }
     auto syntacticSuperClass = SyntacticSuperClass::Unknown;
     if (!klass->ancestors.empty()) {
         auto &superClass = klass->ancestors[0];
