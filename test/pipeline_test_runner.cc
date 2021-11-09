@@ -274,7 +274,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 gs->runningUnderAutogen = true;
                 core::UnfreezeNameTable nameTableAccess(*gs);
                 core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
-                rewriten = testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
+                rewriten = testSerialize(
+                    *gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
             }
             core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
             localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewriten)));
