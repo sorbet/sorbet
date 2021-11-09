@@ -269,8 +269,15 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             handler.addObserved(*gs, "index-tree", [&]() { return localNamed.tree.toString(*gs); });
             handler.addObserved(*gs, "index-tree-raw", [&]() { return localNamed.tree.showRaw(*gs); });
         } else {
+            ast::ParsedFile rewriten;
+            {
+                gs->runningUnderAutogen = true;
+                core::UnfreezeNameTable nameTableAccess(*gs);
+                core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
+                rewriten = testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
+            }
             core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
-            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(desugared)));
+            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewriten)));
             if (test.expectations.contains("rewrite-tree-raw") || test.expectations.contains("rewrite-tree")) {
                 FAIL_CHECK("Running Rewriter passes with autogen isn't supported");
             }
