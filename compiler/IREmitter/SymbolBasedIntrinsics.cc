@@ -509,6 +509,9 @@ public:
     virtual bool skipFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass) const override {
         return true;
     }
+    virtual bool needsAfterIntrinsicProcessing() const override {
+        return false;
+    }
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
         return {core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs)};
     };
@@ -558,6 +561,9 @@ public:
     virtual bool skipFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass) const override {
         return true;
     }
+    virtual bool needsAfterIntrinsicProcessing() const override {
+        return false;
+    }
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
         return {core::Symbols::Sorbet_Private_Static_ResolvedSig().data(gs)->lookupSingletonClass(gs)};
     };
@@ -576,6 +582,9 @@ public:
 
     virtual bool skipFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass) const override {
         return true;
+    }
+    virtual bool needsAfterIntrinsicProcessing() const override {
+        return false;
     }
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
         return {core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs)};
@@ -992,6 +1001,10 @@ llvm::Value *SymbolBasedIntrinsicMethod::receiverFastPathTest(MethodCallContext 
 bool SymbolBasedIntrinsicMethod::skipFastPathTest(MethodCallContext &mcctx,
                                                   core::ClassOrModuleRef potentialClass) const {
     return false;
+}
+
+bool SymbolBasedIntrinsicMethod::needsAfterIntrinsicProcessing() const {
+    return true;
 }
 
 void SymbolBasedIntrinsicMethod::sanityCheck(const core::GlobalState &gs) const {}
