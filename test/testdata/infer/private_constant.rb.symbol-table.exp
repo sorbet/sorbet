@@ -4,8 +4,8 @@ class ::<root> < ::Object ()
       argument <blk><block> @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
   module ::Foo < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/infer/private_constant.rb:3
     static-field ::Foo::ANOTHER_PRIVATE_CONST : private -> TrueClass @ test/testdata/infer/private_constant.rb:10
-    static-field ::Foo::A_PRIVATE_CONST : private -> String("private") @ test/testdata/infer/private_constant.rb:7
-    static-field ::Foo::A_PUBLIC_CONST -> String("public") @ test/testdata/infer/private_constant.rb:6
+    static-field ::Foo::A_PRIVATE_CONST : private -> String @ test/testdata/infer/private_constant.rb:7
+    static-field ::Foo::A_PUBLIC_CONST -> String @ test/testdata/infer/private_constant.rb:6
     class ::Foo::AnotherPrivateClass < ::Object () : private @ test/testdata/infer/private_constant.rb:22
     class ::Foo::<Class:AnotherPrivateClass>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/infer/private_constant.rb:22
       type-member(+) ::Foo::<Class:AnotherPrivateClass>::<AttachedClass> -> T.attached_class (of Foo::AnotherPrivateClass) @ test/testdata/infer/private_constant.rb:22

@@ -7,6 +7,6 @@ module R; end
 # "wins", because the first definition of the class is what counts
 
 # this should not resolve as a class, so this will be an error
-x = R.x # error: Method `x` does not exist on `Integer` component of `Integer(5)`
+x = R.x # error: Method `x` does not exist on `Integer`
 # this should resolve as the constant, so this would be fine
 puts R + 1

@@ -1442,7 +1442,7 @@ class ResolveTypeMembersAndFieldsWalk {
     [[nodiscard]] static core::TypePtr resolveConstantType(core::Context ctx, const ast::ExpressionPtr &expr) {
         core::TypePtr result;
         typecase(
-            expr, [&](const ast::Literal &a) { result = a.value; },
+            expr, [&](const ast::Literal &a) { result = core::Types::dropLiteral(ctx, a.value); },
             [&](const ast::Cast &cast) {
                 if (cast.type == core::Types::todo()) {
                     return;
