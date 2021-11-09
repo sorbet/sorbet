@@ -1417,7 +1417,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 e.setHeader("Expected `{}` but found `{}` for field", cur.type.show(ctx),
                                             tp.type.show(ctx));
 
-                                // It owuld be nice to be able to actually show the name of the field in the error
+                                // It would be nice to be able to actually show the name of the field in the error
                                 // message, but we don't have a convenient way to compute this at the moment.
                                 e.addErrorSection(cur.explainExpected(ctx, "field defined here", ownerLoc));
                                 e.addErrorSection(tp.explainGot(ctx, ownerLoc));
