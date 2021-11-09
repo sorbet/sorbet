@@ -41,7 +41,7 @@ class MyTest
     end
 
     after do
-        @foo = nil # error: Reassigning field
+        @foo = nil # error: Expected `Integer` but found `NilClass` for field
         instance_helper
     end
 
