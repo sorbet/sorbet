@@ -6,7 +6,7 @@ class TestDSLBuilder
   dsl_required :implied_string, String, implied: "foo"
   dsl_optional :no_getter, String, skip_getter: true
   dsl_optional :no_setter, String, skip_setter: true
-  dsl_optional :no_getter_or_setter, String, skip_getter: true, skip_setter: true # error: does not exist
+  dsl_optional :no_getter_or_setter, String, skip_getter: true, skip_setter: true
   dsl_optional :class_of, T.class_of(Integer)
 
   dsl_optional :root_const, ::Integer
