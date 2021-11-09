@@ -76,7 +76,10 @@ string Dedenter::dedent(string_view str) {
     }
 
     if (!out.empty() && out.back() == '\n') {
+        at_line_begin = true;
         spacesToRemove = dedentLevel;
+    } else {
+        at_line_begin = false;
     }
     return out;
 }
