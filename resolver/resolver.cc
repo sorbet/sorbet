@@ -3145,7 +3145,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
         }
     }
 
-    return move(trees);
+    return trees;
 }
 
 void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
