@@ -259,6 +259,37 @@ void IREmitterHelpers::emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &buil
     buildTypeTestPassFailBlocks(cs, builder, value, typeTest, expectedType, description);
 }
 
+void IREmitterHelpers::emitTypeTestForRestArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *value,
+                                              const core::TypePtr &expectedType, std::string_view description) {
+    auto *fun = builder.GetInsertBlock()->getParent();
+    auto *initBlock = llvm::BasicBlock::Create(cs, "restTypeTestInit", fun);
+    auto *headerBlock = llvm::BasicBlock::Create(cs, "restTypeTestHeader", fun);
+    auto *bodyBlock = llvm::BasicBlock::Create(cs, "restTypeTestBody", fun);
+    auto *continuationBlock = llvm::BasicBlock::Create(cs, "restTypeTestFinished", fun);
+
+    builder.CreateBr(initBlock);
+    builder.SetInsertPoint(initBlock);
+    auto *loopIndex = buildS4(cs, 0);
+    auto *loopEnd = builder.CreateCall(cs.getFunction("sorbet_rubyArrayLen"), {value}, "restArgLength");
+    builder.CreateBr(headerBlock);
+
+    builder.SetInsertPoint(headerBlock);
+    auto *indexPhi = builder.CreatePHI(builder.getInt32Ty(), 2, "loopIndexPhi");
+    auto *moreToGo = builder.CreateICmpSLT(indexPhi, loopEnd, "moreToGo");
+    builder.CreateCondBr(moreToGo, bodyBlock, continuationBlock);
+
+    builder.SetInsertPoint(bodyBlock);
+    auto *element = builder.CreateCall(cs.getFunction("sorbet_rubyArrayAref"), {value, indexPhi}, "element");
+    auto *typeTest = Payload::typeTest(cs, builder, element, expectedType);
+    buildTypeTestPassFailBlocks(cs, builder, element, typeTest, expectedType, description);
+    auto *incrementedIndex = builder.CreateAdd(indexPhi, buildS4(cs, 1));
+    indexPhi->addIncoming(loopIndex, initBlock);
+    indexPhi->addIncoming(incrementedIndex, builder.GetInsertBlock());
+    builder.CreateBr(headerBlock);
+
+    builder.SetInsertPoint(continuationBlock);
+}
+
 llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilderBase &builder,
                                               const core::TypePtr &lit) {
     if (lit.derivesFrom(cs, core::Symbols::FalseClass())) {
