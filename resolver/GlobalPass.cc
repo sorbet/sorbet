@@ -143,14 +143,15 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
 
     if (sym.data(gs)->isClassOrModuleClass()) {
         for (core::SymbolRef tp : sym.data(gs)->typeMembers()) {
+            auto tm = tp.asTypeMemberRef();
             // AttachedClass is covariant, but not controlled by the user.
-            if (tp.name(gs) == core::Names::Constants::AttachedClass()) {
+            if (tm.data(gs)->name == core::Names::Constants::AttachedClass()) {
                 continue;
             }
 
-            auto myVariance = tp.data(gs)->variance();
+            auto myVariance = tm.data(gs)->variance();
             if (myVariance != core::Variance::Invariant) {
-                auto loc = tp.loc(gs);
+                auto loc = tm.data(gs)->loc();
                 if (!loc.file().data(gs).isPayload()) {
                     if (auto e = gs.beginError(loc, core::errors::Resolver::VariantTypeMemberInClass)) {
                         e.setHeader("Classes can only have invariant type members");
