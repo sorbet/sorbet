@@ -33,7 +33,14 @@ namespace sorbet::parser {
 string Dedenter::dedent(string_view str) {
     string out;
 
-    auto lines = absl::StrSplit(str, "\\\n");
+    vector<string_view> lines = absl::StrSplit(str, "\\\n");
+    if (!at_line_begin && !lines.empty()) {
+        out.append(lines[0]);
+        if (lines.size() > 1) {
+            out.push_back('\n');
+        }
+        lines.erase(lines.begin());
+    }
 
     for (auto line : lines) {
         spacesToRemove = dedentLevel;
@@ -69,7 +76,10 @@ string Dedenter::dedent(string_view str) {
     }
 
     if (!out.empty() && out.back() == '\n') {
+        at_line_begin = true;
         spacesToRemove = dedentLevel;
+    } else {
+        at_line_begin = false;
     }
     return out;
 }
@@ -672,6 +682,7 @@ public:
                         unique_ptr<Node> newstr = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
                         parts.emplace_back(std::move(newstr));
                     } else {
+                        dedenter.interrupt();
                         parts.emplace_back(std::move(p));
                     }
                 }
@@ -689,6 +700,7 @@ public:
                         unique_ptr<Node> newstr = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
                         parts.emplace_back(std::move(newstr));
                     } else {
+                        dedenter.interrupt();
                         parts.emplace_back(std::move(p));
                     }
                 }
