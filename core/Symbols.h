@@ -540,6 +540,7 @@ public:
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
     MethodRef findMethod(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberNoDealias(const GlobalState &gs, NameRef name) const;
+    MethodRef findMethodNoDealias(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name) const;
     MethodRef findMethodTransitive(const GlobalState &gs, NameRef name) const;
     SymbolRef findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const;

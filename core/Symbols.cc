@@ -584,6 +584,14 @@ SymbolRef Symbol::findMemberNoDealias(const GlobalState &gs, NameRef name) const
     return fnd->second;
 }
 
+MethodRef Symbol::findMethodNoDealias(const GlobalState &gs, NameRef name) const {
+    auto sym = findMemberNoDealias(gs, name);
+    if (!sym.isMethod()) {
+        return Symbols::noMethod();
+    }
+    return sym.asMethodRef();
+}
+
 SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name) const {
     return findMemberTransitiveInternal(gs, name, Flags::NONE, Flags::NONE, 100);
 }

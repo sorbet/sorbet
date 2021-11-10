@@ -1733,11 +1733,9 @@ class ResolveTypeMembersAndFieldsWalk {
     }
 
     static void resolveMethodAlias(core::MutableContext ctx, const ResolveMethodAliasItem &job) {
-        core::SymbolRef member = ctx.owner.data(ctx)->findMemberNoDealias(ctx, job.toName);
-        // TODO(jvilk): Would be nice to have findMember that returned MethodRef.
-        core::MethodRef toMethod = core::Symbols::noMethod();
-        if (member.exists()) {
-            toMethod = member.data(ctx)->dealiasMethod(ctx);
+        core::MethodRef toMethod = ctx.owner.data(ctx)->findMethodNoDealias(ctx, job.toName);
+        if (toMethod.exists()) {
+            toMethod = toMethod.data(ctx)->dealiasMethod(ctx);
         }
 
         if (!toMethod.exists()) {
@@ -1748,7 +1746,7 @@ class ResolveTypeMembersAndFieldsWalk {
             toMethod = core::Symbols::Sorbet_Private_Static_badAliasMethodStub();
         }
 
-        core::SymbolRef fromMethod = ctx.owner.data(ctx)->findMemberNoDealias(ctx, job.fromName);
+        core::MethodRef fromMethod = ctx.owner.data(ctx)->findMethodNoDealias(ctx, job.fromName);
         if (fromMethod.exists() && fromMethod.data(ctx)->dealiasMethod(ctx) != toMethod) {
             if (auto e = ctx.beginError(job.loc, core::errors::Resolver::BadAliasMethod)) {
                 auto dealiased = fromMethod.data(ctx)->dealiasMethod(ctx);
