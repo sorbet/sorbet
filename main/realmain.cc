@@ -600,11 +600,10 @@ int realmain(int argc, char *argv[]) {
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
-            if (opts.stopAfterPhase != options::Phase::PACKAGER) {
-                indexed = move(pipeline::typecheck(gs, move(indexed), opts, *workers).result());
-                if (gs->hadCriticalError()) {
-                    gs->errorQueue->flushAllErrors(*gs);
-                }
+
+            indexed = move(pipeline::typecheck(gs, move(indexed), opts, *workers).result());
+            if (gs->hadCriticalError()) {
+                gs->errorQueue->flushAllErrors(*gs);
             }
         }
 
