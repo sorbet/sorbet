@@ -185,6 +185,14 @@ CFGContext CFGContext::withTarget(LocalRef target) {
 CFGContext CFGContext::withBlockBreakTarget(LocalRef blockBreakTarget) {
     auto ret = CFGContext(*this);
     ret.blockBreakTarget = blockBreakTarget;
+    ret.breakIsJump = false;
+    return ret;
+}
+
+CFGContext CFGContext::withLoopBreakTarget(LocalRef blockBreakTarget) {
+    auto ret = CFGContext(*this);
+    ret.blockBreakTarget = blockBreakTarget;
+    ret.breakIsJump = true;
     return ret;
 }
 

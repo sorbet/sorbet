@@ -207,10 +207,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 // finishHeader
                 LocalRef bodySym = cctx.newTemporary(core::Names::statTemp());
 
-                auto body = walk(cctx.withTarget(bodySym)
-                                     .withLoopScope(headerBlock, continueBlock)
-                                     .withBlockBreakTarget(cctx.target),
-                                 a.body, bodyBlock);
+                auto body = walk(
+                    cctx.withTarget(bodySym).withLoopScope(headerBlock, continueBlock).withLoopBreakTarget(cctx.target),
+                    a.body, bodyBlock);
                 unconditionalJump(body, headerBlock, cctx.inWhat, a.loc);
 
                 synthesizeExpr(breakNotCalledBlock, cctx.target, a.loc, make_insn<Literal>(core::Types::nilClass()));
@@ -581,22 +580,25 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 auto blockBreakAssign = cctx.newTemporary(core::Names::blockBreakAssign());
                 afterBreak->exprs.emplace_back(blockBreakAssign, a.loc, make_insn<Ident>(exprSym));
 
-                // call intrinsic for break
-                auto magic = cctx.newTemporary(core::Names::magic());
-                auto ignored = cctx.newTemporary(core::Names::blockBreak());
-                synthesizeExpr(afterBreak, magic, a.loc, make_insn<Alias>(core::Symbols::Magic()));
-                InlinedVector<LocalRef, 2> args{exprSym};
-                InlinedVector<core::LocOffsets, 2> locs{core::LocOffsets::none()};
-                auto isPrivateOk = false;
+                // Only emit `<blockBreak>` in a block context
+                if (!cctx.breakIsJump) {
+                    // call intrinsic for break
+                    auto magic = cctx.newTemporary(core::Names::magic());
+                    auto ignored = cctx.newTemporary(core::Names::blockBreak());
+                    synthesizeExpr(afterBreak, magic, a.loc, make_insn<Alias>(core::Symbols::Magic()));
+                    InlinedVector<LocalRef, 2> args{exprSym};
+                    InlinedVector<core::LocOffsets, 2> locs{core::LocOffsets::none()};
+                    auto isPrivateOk = false;
 
-                // This represents the throw in the Ruby VM to the appropriate control frame.
-                // It needs to come prior to the assignment (which shouldn't really be here,
-                // but see above for the rationale) because the actual assignment is a) done
-                // by the VM itself; and b) may not actually happen depending on the frames
-                // that the break unwinds through.
-                synthesizeExpr(afterBreak, ignored, core::LocOffsets::none(),
-                               make_insn<Send>(magic, core::Names::blockBreak(), core::LocOffsets::none(), args.size(),
-                                               args, locs, isPrivateOk));
+                    // This represents the throw in the Ruby VM to the appropriate control frame.
+                    // It needs to come prior to the assignment (which shouldn't really be here,
+                    // but see above for the rationale) because the actual assignment is a) done
+                    // by the VM itself; and b) may not actually happen depending on the frames
+                    // that the break unwinds through.
+                    synthesizeExpr(afterBreak, ignored, core::LocOffsets::none(),
+                                   make_insn<Send>(magic, core::Names::blockBreak(), core::LocOffsets::none(),
+                                                   args.size(), args, locs, isPrivateOk));
+                }
 
                 afterBreak->exprs.emplace_back(cctx.blockBreakTarget, a.loc, make_insn<Ident>(blockBreakAssign));
 
