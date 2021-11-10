@@ -420,7 +420,11 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         return nullopt;
     }
 
-    fmt::format_to(std::back_inserter(ss), "sig {{");
+    fmt::format_to(std::back_inserter(ss), "sig");
+    if (enclosingClass.data(ctx)->isClassOrModuleFinal()) {
+        fmt::format_to(std::back_inserter(ss), "(:final)");
+    }
+    fmt::format_to(std::back_inserter(ss), " {{");
 
     ENFORCE(!methodSymbol.data(ctx)->arguments().empty(), "There should always be at least one arg (the block arg).");
     bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->arguments().size() == 1 &&

@@ -377,7 +377,7 @@ suggest-sig.rb:204: This function does not have a `sig` https://srb.help/7017
      204 |  def returns_int; 42; end
             ^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:204: Inserted `sig {returns(Integer)}
+    suggest-sig.rb:204: Inserted `sig(:final) {returns(Integer)}
   `
      204 |  def returns_int; 42; end
             ^
@@ -614,6 +614,6 @@ class MyFinalClass
 
   final!
 
-  sig {returns(Integer)}
+  sig(:final) {returns(Integer)}
   def returns_int; 42; end
 end
