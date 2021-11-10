@@ -154,10 +154,10 @@ public:
     PackageName name;
 
     // Private namespace of the package. We do not put this in the PackageName struct above because the former
-    // is used to not only hold package name information as part of PackageInfoImpl, but also created for every imported
-    // package when a package is enumerating its imports. In that context, the private name is unnecessary and would
-    // take up an unnecessary extra reference, which would contribute O(packages * imports) in space. Putting
-    // it here ensures only O(packages) space complexity for the private name.
+    // is used to not only hold package name information in PackageInfoImpl, but also created for every imported
+    // package during import enumeration. In that context, the private name is unnecessary and would
+    // take up an extra reference, which would contribute O(packages * imports) in space. Putting
+    // it here ensures only O(packages) space complexity.
     core::NameRef privateMangledName;
 
     // loc for the package definition. Used for error messages.
@@ -741,6 +741,9 @@ class ImportTree final {
         core::NameRef packageMangledName;
         core::LocOffsets importLoc;
         ImportType importType;
+
+        // This bit is set to true if the import is added as part of a fully-enumerated set
+        // of exports from a package.
         bool isEnumeratedImport;
 
         bool exists() {
@@ -807,6 +810,8 @@ public:
     ImportTreeBuilder &operator=(const ImportTreeBuilder &) = delete;
     ImportTreeBuilder &operator=(ImportTreeBuilder &&) = default;
 
+    // Add the imports of a package into the import tree. These are used for building the Normal and Test modules
+    // in the package's internal namespace.
     void mergeImports(core::Context ctx, const PackageInfoImpl &package) {
         const auto &packageDB = ctx.state.packageDB();
         UnorderedMap<core::NameRef, core::LocOffsets> importedNames;
@@ -833,27 +838,30 @@ public:
                 // (11/8/2021) timing analysis suggests that it doesn't.
                 //
                 // Determine whether the current package either imports a suffix of the imported name, or itself is a
-                // suffix of the imported name. This bit is passed into mergeImportsFromImportedPackage, specifically
-                // into the "enumerateExportsInFull" parameter.
+                // suffix of the imported name. Based on this, we determine whether to enumerate and alias all exports
+                // from an imported package or only alias the top-level export.
                 //
-                // To save on memory usage by reducing the number of nodes created in the AST, we individually alias
-                // exported constants from the imported package only when there would be an import conflict otherwise -
-                // i.e., when this is either a subpackage of the imported name or imports a subpackage of the imported
-                // name.
+                // Essentially, to save on memory usage by reducing the number of nodes created in the AST, we
+                // individually alias exported constants from the imported package if & only if there would be an import
+                // conflict otherwise; i.e., when the given package is either a subpackage of the imported name or also
+                // imports a subpackage of the imported name.
                 const bool isOrImportsSubpackage =
                     absl::c_any_of(package.importedPackageNames,
                                    [&](const auto &otherImport) -> bool {
                                        return otherImport.name.fullName.isSuffix(imported.fullName);
                                    }) ||
                     package.name.fullName.isSuffix(imported.fullName);
-                mergeImportsFromImportedPackage(ctx, PackageInfoImpl::from(importedPackage), import,
-                                                isOrImportsSubpackage);
+                if (isOrImportsSubpackage) {
+                    mergeAllExportsFromImportedPackage(ctx, PackageInfoImpl::from(importedPackage), import);
+                } else {
+                    mergeTopLevelExportFromImportedPackage(ctx, PackageInfoImpl::from(importedPackage), import);
+                }
             }
         }
     }
 
-    // Make add imports for the test package for all normal code exported by its corresponding
-    // "normal" package.
+    // Add the exports of a package as "self-imports" into the import tree. These are used for building the package's
+    // Test, ExportMappingNormal and ExportMappingTest modules.
     void mergeSelfExports(core::Context ctx, const PackageInfoImpl &pkg, ExportType type) {
         for (const auto &exp : pkg.exports) {
             if (exp.type != type)
@@ -882,34 +890,36 @@ private:
         return moduleType == ModuleType::ExportMappingNormal || moduleType == ModuleType::ExportMappingTest;
     }
 
-    void mergeImportsFromImportedPackage(core::Context ctx, const PackageInfoImpl &importedPackage,
-                                         const Import &import, bool enumerateExportsInFull) {
-        if (enumerateExportsInFull) {
-            // Enumerate and add all exported names from the imported package
-            for (const auto &exp : importedPackage.exports) {
-                if (exp.type == ExportType::Public) {
-                    addImport(ctx, importedPackage, import.name.loc, exp.fqn, import.type, true);
-                }
+    // Enumerate and add all exported names from an imported package into the import tree
+    void mergeAllExportsFromImportedPackage(core::Context ctx, const PackageInfoImpl &importedPackage,
+                                            const Import &import) {
+        for (const auto &exp : importedPackage.exports) {
+            if (exp.type == ExportType::Public) {
+                addImport(ctx, importedPackage, import.name.loc, exp.fqn, import.type, true);
             }
-        } else {
-            // Add only the top-level namespaces
-            const bool exportsTestConstant = absl::c_any_of(importedPackage.exports, [&](const auto &exp) -> bool {
-                return exp.type == ExportType::Public && isPrimaryTestNamespace(exp.fqn.parts[0]);
-            });
-            const bool exportsRealConstant = absl::c_any_of(importedPackage.exports, [&](const auto &exp) -> bool {
-                return exp.type == ExportType::Public && !isPrimaryTestNamespace(exp.fqn.parts[0]);
-            });
-
-            // If a Test:: constant is publicly exported, we add the top-level test package namespace.
-            if (exportsTestConstant)
-                addImport(ctx, importedPackage, import.name.loc, import.name.fullTestPkgName, import.type, false);
-
-            // If a non-test constant is publicly exported, we add the top-level package namespace.
-            if (exportsRealConstant)
-                addImport(ctx, importedPackage, import.name.loc, import.name.fullName, import.type, false);
         }
     }
 
+    // Add the entire top-level exported namespaces of an imported package into the import tree
+    void mergeTopLevelExportFromImportedPackage(core::Context ctx, const PackageInfoImpl &importedPackage,
+                                                const Import &import) {
+        const bool exportsTestConstant = absl::c_any_of(importedPackage.exports, [&](const auto &exp) -> bool {
+            return exp.type == ExportType::Public && isPrimaryTestNamespace(exp.fqn.parts[0]);
+        });
+        const bool exportsRealConstant = absl::c_any_of(importedPackage.exports, [&](const auto &exp) -> bool {
+            return exp.type == ExportType::Public && !isPrimaryTestNamespace(exp.fqn.parts[0]);
+        });
+
+        // If a Test:: constant is publicly exported, we add the top-level test package namespace.
+        if (exportsTestConstant)
+            addImport(ctx, importedPackage, import.name.loc, import.name.fullTestPkgName, import.type, false);
+
+        // If a non-test constant is publicly exported, we add the top-level package namespace.
+        if (exportsRealConstant)
+            addImport(ctx, importedPackage, import.name.loc, import.name.fullName, import.type, false);
+    }
+
+    // Add an individual imported name into the import tree.
     void addImport(core::Context ctx, const PackageInfoImpl &importedPackage, core::LocOffsets loc,
                    const FullyQualifiedName &exportFqn, ImportType importType, bool isEnumeratedImport) {
         ImportTree *node = &root;
@@ -929,6 +939,12 @@ private:
         node->source = {importedPackage.name.mangledName, loc, importType, isEnumeratedImport};
     }
 
+    // Method that makes a wrapper module for an import, of the form:
+    // module PkgMangledName::PkgName
+    //   Import = ImportedPkgMangledName::ImportedPkgName::Export
+    // end
+    //
+    // This method in fact creates a wrapper module recursively for the entire import tree of a package.
     void makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts, ast::ClassDef::RHS_store &modRhs,
                     ModuleType moduleType, ImportTree::Source parentSrc) {
         auto newParentSrc = parentSrc;
@@ -1021,6 +1037,8 @@ private:
         }
     }
 
+    // Create an error that represents an import conflict; namely a package importing two names where one is a
+    // prefix of another. This is disallowed, as it would (rightly) cause a redefinition error in the namer pass.
     void addImportConflictError(core::Context ctx, const core::LocOffsets &loc, const core::LocOffsets &otherLoc,
                                 const vector<core::NameRef> &nameParts) {
         if (auto e = ctx.beginError(loc, core::errors::Packager::ImportConflict)) {
@@ -1032,6 +1050,7 @@ private:
         }
     }
 
+    // Name of the wrapper module for a given import, prefixed with the mangled name of the package.
     ast::ExpressionPtr importModuleName(vector<core::NameRef> &parts, core::LocOffsets importLoc,
                                         ModuleType moduleType) const {
         // Export mapping modules are built in the public (_Package) namespace, whereas other modules are built in
@@ -1047,6 +1066,7 @@ private:
     }
 };
 
+// Given a packaged file, wrap it in the _Package_Private mangled namespace of its package.
 ast::ParsedFile wrapFileInPackageModule(core::Context ctx, ast::ParsedFile file, core::NameRef packageMangledName,
                                         const PackageInfoImpl &pkg, bool isTestFile) {
     if (ast::isa_tree<ast::EmptyTree>(file.tree)) {

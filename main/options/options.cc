@@ -158,7 +158,6 @@ const vector<StopAfterOptions> stop_after_options({
     {"rewriter", Phase::REWRITER},
     {"local-vars", Phase::LOCAL_VARS},
     {"namer", Phase::NAMER},
-    {"packager", Phase::PACKAGER},
     {"resolver", Phase::RESOLVER},
     {"cfg", Phase::CFG},
     {"inferencer", Phase::INFERENCER},
