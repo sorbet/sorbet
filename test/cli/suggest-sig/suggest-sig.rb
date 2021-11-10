@@ -194,3 +194,12 @@ module KwHashSendSuggest
   end
 
 end
+
+class MyFinalClass
+  extend T::Sig
+  extend T::Helpers
+
+  final!
+
+  def returns_int; 42; end
+end
