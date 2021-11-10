@@ -682,7 +682,8 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
             } else {
                 // All singletons have an AttachedClass type member, created by
                 // `singletonClass`
-                auto attachedClass = ctx.owner.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+                auto attachedClass =
+                    ctx.owner.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass()).asTypeMemberRef();
                 return TypeSyntax::ResultType{attachedClass.data(ctx)->resultType, core::Symbols::noClassOrModule()};
             }
         case core::Names::noreturn().rawId():

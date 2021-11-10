@@ -69,11 +69,12 @@ ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, 
         const core::lsp::Query &lspQuery = ctx.state.lspQuery;
         if (sym.exists() && sym.isFieldOrStaticField() &&
             (lspQuery.matchesSymbol(sym) || lspQuery.matchesLoc(core::Loc(ctx.file, id.loc)))) {
+            auto field = sym.asFieldRef();
             core::TypeAndOrigins tp;
-            tp.type = sym.data(ctx)->resultType;
-            tp.origins.emplace_back(sym.loc(ctx));
+            tp.type = field.data(ctx)->resultType;
+            tp.origins.emplace_back(field.data(ctx)->loc());
             core::lsp::QueryResponse::pushQueryResponse(
-                ctx, core::lsp::FieldResponse(sym.asFieldRef(), core::Loc(ctx.file, id.loc), id.name, tp));
+                ctx, core::lsp::FieldResponse(field, core::Loc(ctx.file, id.loc), id.name, tp));
         }
     }
     return tree;

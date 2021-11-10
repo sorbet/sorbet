@@ -626,10 +626,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             } else {
                 if (symbol.data(gs)->isClassOrModuleModule()) {
-                    auto objMeth = core::Symbols::Object().data(gs)->findMemberTransitive(gs, args.name);
-                    if (objMeth.exists() && objMeth.owner(gs).data(gs)->isClassOrModuleModule()) {
+                    auto objMeth = core::Symbols::Object().data(gs)->findMethodTransitive(gs, args.name);
+                    if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isClassOrModuleModule()) {
                         e.addErrorNote("Did you mean to `{}` in this module?",
-                                       fmt::format("include {}", objMeth.owner(gs).name(gs).show(gs)));
+                                       fmt::format("include {}", objMeth.data(gs)->owner.name(gs).show(gs)));
                     }
                 }
                 auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);

@@ -99,11 +99,11 @@ void addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symb
     // find the target method definition in each subclass
     for (auto c : subclasses) {
         auto classSymbol = c.data(gs);
-        auto member = classSymbol->findMember(gs, symbolData->name);
+        auto member = classSymbol->findMethod(gs, symbolData->name);
         if (!member.exists()) {
             continue;
         }
-        methods.tryEnqueue(member.asMethodRef());
+        methods.tryEnqueue(member);
     }
 }
 

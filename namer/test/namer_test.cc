@@ -113,8 +113,11 @@ TEST_CASE("namer tests") {
             sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
             runNamer(gs, move(localTree));
         }
-        const auto &rootScope =
-            core::Symbols::root().data(gs)->findMember(gs, gs.enterNameConstant(testClass_str)).data(gs);
+        const auto &rootScope = core::Symbols::root()
+                                    .data(gs)
+                                    ->findMember(gs, gs.enterNameConstant(testClass_str))
+                                    .asClassOrModuleRef()
+                                    .data(gs);
 
         REQUIRE_EQ(3, rootScope->members().size());
         auto fooSym = rootScope->members().at(gs.enterNameConstant("Foo"));
@@ -130,8 +133,11 @@ TEST_CASE("namer tests") {
             sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
             runNamer(gs, move(localTree));
         }
-        const auto &rootScope =
-            core::Symbols::root().data(gs)->findMember(gs, gs.enterNameConstant(testClass_str)).data(gs);
+        const auto &rootScope = core::Symbols::root()
+                                    .data(gs)
+                                    ->findMember(gs, gs.enterNameConstant(testClass_str))
+                                    .asClassOrModuleRef()
+                                    .data(gs);
 
         REQUIRE_EQ(3, rootScope->members().size());
         auto fooSym = rootScope->members().at(gs.enterNameConstant("Foo"));

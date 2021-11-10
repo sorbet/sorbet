@@ -1336,7 +1336,7 @@ class SymbolDefiner {
             if (oldSym.exists()) {
                 emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc), oldSym.show(ctx),
                                            oldSym.loc(ctx));
-                ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name);
+                ctx.state.mangleRenameSymbol(oldSym, oldSym.name(ctx));
             }
             sym =
                 ctx.state.enterTypeMember(core::Loc(ctx.file, typeMember.asgnLoc), onSymbol, typeMember.name, variance);
