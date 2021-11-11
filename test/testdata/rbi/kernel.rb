@@ -19,6 +19,10 @@ T.assert_type!(Kernel.rand(1.0..1.0), Float)
 T.assert_type!(Kernel.rand(36**8), Numeric)
 T.assert_type!(Kernel.rand((36**8..36**9)), Numeric)
 
+# to_s
+T.assert_type!(10.to_s, String)
+T.assert_type!(10.to_s(36), String)
+
 # make sure we don't regress and mark `loop` as returning `nil`
 x = loop {break 1}
 T.assert_type!(x, Integer)

@@ -645,8 +645,8 @@ module Kernel
   end
   def to_enum(method=T.unsafe(nil), *args, &blk); end
 
-  sig {returns(String)}
-  def to_s(); end
+  sig {params(arg: Integer).returns(String)}
+  def to_s(*arg); end
 
   sig {returns(T.self_type)}
   def trust(); end
