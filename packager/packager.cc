@@ -66,7 +66,7 @@ struct FullyQualifiedName {
             return false;
         }
 
-        return std::equal(parts.begin(), parts.begin() + prefix.parts.size(), prefix.parts.begin());
+        return std::equal(prefix.parts.begin(), prefix.parts.end(), parts.begin());
     }
 };
 
@@ -579,8 +579,7 @@ struct PackageInfoFinder {
         // TODO(nroman) If this is too slow could probably be sped up with lexigraphic sort.
         for (auto longer = exported.begin() + 1; longer != exported.end(); longer++) {
             for (auto shorter = exported.begin(); shorter != longer; shorter++) {
-                if (std::equal(longer->parts().begin(), longer->parts().begin() + shorter->parts().size(),
-                               shorter->parts().begin()) &&
+                if (std::equal(shorter->parts().begin(), shorter->parts().end(), longer->parts().begin()) &&
                     !allowedExportPrefix(ctx, *shorter, *longer)) {
                     if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
                         e.setHeader(
