@@ -365,12 +365,12 @@ std::string IREmitterHelpers::showClassNameWithoutOwner(const core::GlobalState 
 
     if (name.isPackagerPrivateName(gs)) {
         // Remove _Package_Private before de-munging
-        return absl::StrReplaceAll(withoutOwnerStr.substr(0, withoutOwnerStr.size() - core::PACKAGE_PRIVATE_SUFFIX_LEN),
-                                   {{"_", "::"}});
+        return absl::StrReplaceAll(
+            withoutOwnerStr.substr(0, withoutOwnerStr.size() - core::PACKAGE_PRIVATE_SUFFIX.size()), {{"_", "::"}});
     }
 
     // Remove _Package before de-munging
-    return absl::StrReplaceAll(withoutOwnerStr.substr(0, withoutOwnerStr.size() - core::PACKAGE_SUFFIX_LEN),
+    return absl::StrReplaceAll(withoutOwnerStr.substr(0, withoutOwnerStr.size() - core::PACKAGE_SUFFIX.size()),
                                {{"_", "::"}});
 }
 
