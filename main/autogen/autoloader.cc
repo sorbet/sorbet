@@ -418,7 +418,10 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
                 ENFORCE(child->qname.package);
                 auto namespaceName = child->qname.package->show(gs);
                 // this package name will include the suffix _Package on the end, and we want to remove that
-                constexpr int suffixLen = char_traits<char>::length("_Package");
+                constexpr int suffixLen = core::PACKAGE_SUFFIX.size();
+
+                // TODO (ngroman, aadi-stripe) Determine if we need to check _Package_Private here in this autoloader
+                // context.
                 ENFORCE(namespaceName.size() > suffixLen);
                 string packageName = namespaceName.substr(0, namespaceName.size() - suffixLen);
                 auto pkgSubdir = join(subdir, packageName);

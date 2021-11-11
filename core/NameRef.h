@@ -66,8 +66,8 @@ struct NameRefDebugCheck {
     void check(const GlobalSubstitution &subst) const;
 };
 
-constexpr int PACKAGE_SUFFIX_LEN = 8;          // Length of string "_Package"
-constexpr int PACKAGE_PRIVATE_SUFFIX_LEN = 16; // Length of string "_Package_Private"
+constexpr std::string_view PACKAGE_SUFFIX = "_Package";
+constexpr std::string_view PACKAGE_PRIVATE_SUFFIX = "_Package_Private";
 
 class NameRef final : private DebugOnlyCheck<NameRefDebugCheck> {
 private:

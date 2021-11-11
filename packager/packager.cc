@@ -110,6 +110,9 @@ enum class ImportType {
 //   is used by other packages when they import this package).
 // ExportMappingTest: suffixed with _Package, it maps exports of a package that are in the "Test::" namespace into its
 //   publicly available test namespace (this is used by other packages when they import this package).
+//
+// A package cannot access an external package's _Package_Private module, but a package's private module can access
+// an external package's public interface (which is the public _Package module).
 enum class ModuleType { Normal, Test, ExportMappingNormal, ExportMappingTest };
 
 struct Import {
@@ -231,7 +234,7 @@ PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit 
     pName.fullTestPkgName = pName.fullName.withPrefix(TEST_NAME);
 
     // Foo::Bar => Foo_Bar_Package
-    auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx)), "_Package");
+    auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx)), core::PACKAGE_SUFFIX);
     auto utf8Name = ctx.state.enterNameUTF8(mangledName);
     auto packagerName = ctx.state.freshNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
     pName.mangledName = ctx.state.enterNameConstant(packagerName);
@@ -551,7 +554,7 @@ struct PackageInfoFinder {
         return tree;
     }
 
-    // Bar::Baz => <PackageRegistry>::Foo_Package::Bar::Baz
+    // Bar::Baz => <PackageRegistry>::Foo_Package_Private::Bar::Baz
     ast::ExpressionPtr prependInternalPackageName(const core::GlobalState &gs, ast::ExpressionPtr scope) {
         return prependPackageScope(gs, move(scope), this->info->privateMangledName);
     }
@@ -724,7 +727,7 @@ unique_ptr<PackageInfoImpl> getPackageInfo(core::MutableContext ctx, ast::Parsed
     if (finder.info) {
         finder.info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
         const string_view shortName = finder.info->name.mangledName.shortName(ctx.state);
-        const string_view dirNameFromShortName = shortName.substr(0, shortName.find("_Package"));
+        const string_view dirNameFromShortName = shortName.substr(0, shortName.find(core::PACKAGE_SUFFIX));
 
         for (const string &prefix : extraPackageFilesDirectoryPrefixes) {
             string additionalDirPath = absl::StrCat(prefix, dirNameFromShortName, "/");
@@ -774,8 +777,9 @@ class ImportTree final {
             }
 
             // Don't build mappings in the main (normal) package module for internal imports.
-            if (isSelfImport() && moduleType == ModuleType::Normal)
+            if (isSelfImport() && moduleType == ModuleType::Normal) {
                 return true;
+            }
 
             return false;
         }
@@ -831,31 +835,33 @@ public:
                     e.addErrorLine(core::Loc(ctx.file, importedNames[imported.mangledName]),
                                    "Previous package import found here");
                 }
-            } else {
-                importedNames[imported.mangledName] = imported.loc;
 
-                // TODO (aadi-stripe): fix this so it's not quadratic (if it ends up causing runtime bloat). Currently
-                // (11/8/2021) timing analysis suggests that it doesn't.
-                //
-                // Determine whether the current package either imports a suffix of the imported name, or itself is a
-                // suffix of the imported name. Based on this, we determine whether to enumerate and alias all exports
-                // from an imported package or only alias the top-level export.
-                //
-                // Essentially, to save on memory usage by reducing the number of nodes created in the AST, we
-                // individually alias exported constants from the imported package if & only if there would be an import
-                // conflict otherwise; i.e., when the given package is either a subpackage of the imported name or also
-                // imports a subpackage of the imported name.
-                const bool isOrImportsSubpackage =
-                    absl::c_any_of(package.importedPackageNames,
-                                   [&](const auto &otherImport) -> bool {
-                                       return otherImport.name.fullName.isSuffix(imported.fullName);
-                                   }) ||
-                    package.name.fullName.isSuffix(imported.fullName);
-                if (isOrImportsSubpackage) {
-                    mergeAllExportsFromImportedPackage(ctx, PackageInfoImpl::from(importedPackage), import);
-                } else {
-                    mergeTopLevelExportFromImportedPackage(ctx, PackageInfoImpl::from(importedPackage), import);
-                }
+                continue;
+            }
+
+            importedNames[imported.mangledName] = imported.loc;
+
+            // TODO (aadi-stripe): fix this so it's not quadratic (if it ends up causing runtime bloat). Currently
+            // (11/8/2021) timing analysis suggests that it doesn't.
+            //
+            // Determine whether the current package either imports a suffix of the imported name, or itself is a
+            // suffix of the imported name. Based on this, we determine whether to enumerate and alias all exports
+            // from an imported package or only alias the top-level export.
+            //
+            // Essentially, to save on memory usage by reducing the number of nodes created in the AST, we
+            // individually alias exported constants from the imported package if & only if there would be an import
+            // conflict otherwise; i.e., when the given package is either a subpackage of the imported name or also
+            // imports a subpackage of the imported name.
+            const bool isOrImportsSubpackage =
+                absl::c_any_of(package.importedPackageNames,
+                               [&](const auto &otherImport) -> bool {
+                                   return otherImport.name.fullName.isSuffix(imported.fullName);
+                               }) ||
+                package.name.fullName.isSuffix(imported.fullName);
+            if (isOrImportsSubpackage) {
+                mergeAllExportsFromImportedPackage(ctx, PackageInfoImpl::from(importedPackage), import);
+            } else {
+                mergeTopLevelExportFromImportedPackage(ctx, PackageInfoImpl::from(importedPackage), import);
             }
         }
     }
@@ -864,8 +870,9 @@ public:
     // Test, ExportMappingNormal and ExportMappingTest modules.
     void mergeSelfExports(core::Context ctx, const PackageInfoImpl &pkg, ExportType type) {
         for (const auto &exp : pkg.exports) {
-            if (exp.type != type)
+            if (exp.type != type) {
                 continue;
+            }
 
             const auto &parts = exp.parts();
             ENFORCE(parts.size() > 0);
@@ -911,12 +918,14 @@ private:
         });
 
         // If a Test:: constant is publicly exported, we add the top-level test package namespace.
-        if (exportsTestConstant)
+        if (exportsTestConstant) {
             addImport(ctx, importedPackage, import.name.loc, import.name.fullTestPkgName, import.type, false);
+        }
 
         // If a non-test constant is publicly exported, we add the top-level package namespace.
-        if (exportsRealConstant)
+        if (exportsRealConstant) {
             addImport(ctx, importedPackage, import.name.loc, import.name.fullName, import.type, false);
+        }
     }
 
     // Add an individual imported name into the import tree.
@@ -936,7 +945,7 @@ private:
         if (node->source.exists() && importType != ImportType::Self) {
             addImportConflictError(ctx, loc, node->source.importLoc, exportFqn.parts);
         }
-        node->source = {importedPackage.name.mangledName, loc, importType, isEnumeratedImport};
+        node->source = ImportTree::Source{importedPackage.name.mangledName, loc, importType, isEnumeratedImport};
     }
 
     // Method that makes a wrapper module for an import, of the form:
@@ -948,7 +957,7 @@ private:
     void makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts, ast::ClassDef::RHS_store &modRhs,
                     ModuleType moduleType, ImportTree::Source parentSrc) {
         auto newParentSrc = parentSrc;
-        ImportTree::Source &source = node->source;
+        auto &source = node->source;
         if (source.exists() && !parentSrc.exists()) {
             newParentSrc = node->source;
         }
@@ -963,12 +972,14 @@ private:
         for (auto const &[nameRef, child] : childPairs) {
             if (parts.empty()) {
                 // Ignore the entire `Test::*` part of import tree if we are not in a test context.
-                if (isNonTestModule(moduleType) && isTestNamespace(ctx, nameRef))
+                if (isNonTestModule(moduleType) && isTestNamespace(ctx, nameRef)) {
                     continue;
+                }
 
                 // Ignore non-test constants for the test export mapping module.
-                if (moduleType == ModuleType::ExportMappingTest && !isTestNamespace(ctx, nameRef))
+                if (moduleType == ModuleType::ExportMappingTest && !isTestNamespace(ctx, nameRef)) {
                     continue;
+                }
             }
 
             parts.emplace_back(nameRef);
@@ -978,20 +989,23 @@ private:
 
         if (source.exists()) {
             // If we do not need to map the given import for the given module type, return
-            if (source.skipBuildMappingFor(moduleType))
+            if (source.skipBuildMappingFor(moduleType)) {
                 return;
+            }
 
             const bool isSelfImport = source.isSelfImport();
             // For the test module, we do not need to map self-imports (i.e. exports from the current package) that
             // begin with "Test::".
-            if (moduleType == ModuleType::Test && isSelfImport && isTestNamespace(ctx, parts[0]))
+            if (moduleType == ModuleType::Test && isSelfImport && isTestNamespace(ctx, parts[0])) {
                 return;
+            }
 
             if (parentSrc.exists()) {
                 // A conflicting import exists. Only report errors while constructing the test output
                 // to avoid duplicate errors because test imports are a superset of normal imports.
-                if (moduleType == ModuleType::Test && !isSelfImport)
+                if (moduleType == ModuleType::Test && !isSelfImport) {
                     addImportConflictError(ctx, source.importLoc, parentSrc.importLoc, parts);
+                }
 
                 return;
             }
@@ -1109,13 +1123,23 @@ bool checkContainsAllPackages(const core::GlobalState &gs, const vector<ast::Par
 } // namespace
 
 // Add:
-//    module <PackageRegistry>::Mangled_Name_Package
+//    module <PackageRegistry>::Mangled_Name_Package_Private
 //      module A::B::C
 //        D = Mangled_Imported_Package::A::B::C::D
 //      end
 //      ...
 //    end
-// ...to __package.rb files to set up the package namespace.
+//
+//    for external imports, and
+//
+//    module <PackageRegistry>::Mangled_Name_Package
+//      module F
+//        G = Mangled_Name_Package_Private::G
+//      end
+//      ...
+//    end
+//
+// ...for self-mapping, to __package.rb files to set up the package namespace.
 ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
     ast::ClassDef::RHS_store importedPackages;
     ast::ClassDef::RHS_store testImportedPackages;
