@@ -6,7 +6,7 @@ module M
   include Kernel
 
   def self.included(klass)
-    puts "hello from C::M.included"
+    puts "hello from M.included"
 
     klass.instance_eval do
       puts "hello from the instance_eval block"
