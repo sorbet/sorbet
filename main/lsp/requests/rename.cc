@@ -59,7 +59,7 @@ public:
     }
 
     ~LocalRenamer() {}
-    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
+    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
         if (invalid) {
             return;
         }
@@ -310,9 +310,10 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerInterface &type
                 locations.emplace_back(reference->getLoc());
             }
 
-            auto renamer = make_unique<LocalRenamer>(gs, config, localName.show(gs), params->newName, locations);
-            renamer->rename(resp);
-            response->result = renamer->buildEdit();
+            shared_ptr<AbstractRenamer> renamer =
+                make_shared<LocalRenamer>(gs, config, localName.show(gs), params->newName, locations);
+            renamer->rename(resp, core::SymbolRef{});
+            enrichResponse(response, renamer);
         }
     }
 

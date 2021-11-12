@@ -17,40 +17,6 @@ const SendResponse *QueryResponse::isSend() const {
     return get_if<SendResponse>(&response);
 }
 
-const std::optional<core::Loc> IdentResponse::getIdentNameLoc(const core::GlobalState &gs) const {
-    auto expr = termLoc.source(gs);
-    if (!expr.has_value()) {
-        return nullopt;
-    }
-
-    core::LocOffsets offsets = termLoc.offsets();
-    offsets.beginLoc--;
-    core::Loc loc = core::Loc(termLoc.file(), offsets);
-    auto source = loc.source(gs);
-
-    // Return early if we matched a symbol literal
-    if (source.has_value() && source.value()[0] == ':') {
-        return nullopt;
-    }
-
-    // When targeting a local variable in assignment, we get back the location of the entire assignment. Get rid of
-    // everything after and including the equals
-    string::size_type equalsOffset = expr.value().find_first_of("=");
-    if (equalsOffset != string::npos) {
-        while (expr.value()[equalsOffset - 1] == ' ' && equalsOffset > 0) {
-            equalsOffset--;
-        }
-
-        offsets = termLoc.offsets();
-        offsets.endLoc = offsets.beginLoc + equalsOffset;
-        auto identLocation = core::Loc(termLoc.file(), offsets);
-
-        return optional<core::Loc>(identLocation);
-    }
-
-    return optional<core::Loc>(termLoc);
-}
-
 const optional<core::Loc> SendResponse::getMethodNameLoc(const core::GlobalState &gs) const {
     return (this->funLoc.exists() && !this->funLoc.empty()) ? make_optional<core::Loc>(this->funLoc) : nullopt;
 }
