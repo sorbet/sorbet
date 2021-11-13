@@ -28,7 +28,7 @@ bool Context::permitOverloadDefinitions(const core::GlobalState &gs, FileRef sig
     if (!owner.exists()) {
         return false;
     }
-    for (auto loc : owner.data(gs)->locs()) {
+    for (auto loc : owner.locs(gs)) {
         auto &file = loc.file().data(gs);
         if ((file.isPayload() || file.isStdlib()) && owner != Symbols::root() &&
             (owner != Symbols::Object() || sigLoc.data(gs).isStdlib())) {

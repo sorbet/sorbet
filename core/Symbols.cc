@@ -1432,6 +1432,21 @@ bool SymbolRef::isPrintable(const GlobalState &gs) const {
     }
 }
 
+const InlinedVector<Loc, 2> &SymbolRef::locs(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->locs();
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->locs();
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->locs();
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->locs();
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->locs();
+    }
+}
+
 string ArgInfo::show(const GlobalState &gs) const {
     return fmt::format("{}", this->argumentName(gs));
 }
