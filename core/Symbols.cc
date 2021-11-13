@@ -1462,6 +1462,26 @@ const TypePtr &SymbolRef::resultType(const GlobalState &gs) const {
     }
 }
 
+void SymbolRef::setResultType(GlobalState &gs, const TypePtr &typePtr) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            asClassOrModuleRef().data(gs)->resultType = typePtr;
+            return;
+        case SymbolRef::Kind::Method:
+            asMethodRef().data(gs)->resultType = typePtr;
+            return;
+        case SymbolRef::Kind::FieldOrStaticField:
+            asFieldRef().data(gs)->resultType = typePtr;
+            return;
+        case SymbolRef::Kind::TypeArgument:
+            asTypeArgumentRef().data(gs)->resultType = typePtr;
+            return;
+        case SymbolRef::Kind::TypeMember:
+            asTypeMemberRef().data(gs)->resultType = typePtr;
+            return;
+    }
+}
+
 string ArgInfo::show(const GlobalState &gs) const {
     return fmt::format("{}", this->argumentName(gs));
 }
@@ -1721,7 +1741,7 @@ void Symbol::recordRequiredAncestorInternal(GlobalState &gs, Symbol::RequiredAnc
     ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", ref(gs).show(gs));
 
     // We store the required ancestors into a fake property called `<required-ancestors>`
-    auto ancestors = this->findMember(gs, prop);
+    auto ancestors = this->findMethod(gs, prop);
     if (!ancestors.exists()) {
         ancestors = gs.enterMethodSymbol(ancestor.loc, this->ref(gs).asClassOrModuleRef(), prop);
         ancestors.data(gs)->locs_.clear(); // Remove the original location
@@ -1731,7 +1751,7 @@ void Symbol::recordRequiredAncestorInternal(GlobalState &gs, Symbol::RequiredAnc
         ancestors.data(gs)->resultType = make_type<TupleType>(move(tsymbols));
 
         // Create the first argument typed as a tuple to store RequiredAncestor.origin
-        auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), ancestors.asMethodRef(), core::Names::arg());
+        auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), ancestors, core::Names::arg());
         vector<TypePtr> torigins;
         arg.type = make_type<TupleType>(move(torigins));
     }

@@ -426,6 +426,7 @@ public:
     bool isPrintable(const GlobalState &gs) const;
     const InlinedVector<Loc, 2> &locs(const GlobalState &gs) const;
     const TypePtr &resultType(const GlobalState &gs) const;
+    void setResultType(GlobalState &gs, const TypePtr &typePtr) const;
     // Prints the fully qualified name of the symbol in a format that is suitable for showing to the user (e.g.
     // "Owner::SymbolName")
     std::string showFullName(const GlobalState &gs) const;

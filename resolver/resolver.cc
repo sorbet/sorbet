@@ -416,12 +416,12 @@ private:
                 e.setHeader("Type aliases are not allowed in generic classes");
                 e.addErrorLine(enclosingTypeMember.data(ctx)->loc(), "Here is enclosing generic member");
             }
-            job.lhs.data(ctx)->resultType = core::Types::untyped(ctx, job.lhs);
+            job.lhs.setResultType(ctx, core::Types::untyped(ctx, job.lhs));
             return true;
         }
         if (isFullyResolved(ctx, rhs)) {
             // this todo will be resolved during ResolveTypeMembersAndFieldsWalk below
-            job.lhs.data(ctx)->resultType = core::make_type<core::ClassType>(core::Symbols::todo());
+            job.lhs.setResultType(ctx, core::make_type<core::ClassType>(core::Symbols::todo()));
             return true;
         }
 
@@ -450,16 +450,16 @@ private:
                     e.replaceWith("Declare as type alias", rhsLoc, "T.type_alias {{{}}}", rhsLoc.source(ctx).value());
                 }
             }
-            it.lhs.data(ctx)->resultType = core::Types::untypedUntracked();
+            it.lhs.setResultType(ctx, core::Types::untypedUntracked());
             return true;
         } else {
             if (rhsSym.data(ctx)->dealias(ctx) != it.lhs) {
-                it.lhs.data(ctx)->resultType = core::make_type<core::AliasType>(rhsSym);
+                it.lhs.setResultType(ctx, core::make_type<core::AliasType>(rhsSym));
             } else {
                 if (auto e = ctx.state.beginError(it.lhs.loc(ctx), core::errors::Resolver::RecursiveClassAlias)) {
                     e.setHeader("Class alias aliases to itself");
                 }
-                it.lhs.data(ctx)->resultType = core::Types::untypedUntracked();
+                it.lhs.setResultType(ctx, core::Types::untypedUntracked());
             }
             return true;
         }
@@ -1700,8 +1700,9 @@ class ResolveTypeMembersAndFieldsWalk {
         auto allowSelfType = true;
         auto allowRebind = false;
         auto allowTypeMember = true;
-        lhs.data(ctx)->resultType = TypeSyntax::getResultType(
-            ctx, block->body, ParsedSig{}, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
+        lhs.setResultType(ctx,
+                          TypeSyntax::getResultType(ctx, block->body, ParsedSig{},
+                                                    TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs}));
     }
 
     static bool resolveJob(core::MutableContext ctx, ResolveAssignItem &job, vector<bool> &resolvedAttachedClasses) {
@@ -2405,7 +2406,7 @@ public:
 
         for (auto &threadTodo : combinedTodoUntypedResultTypes) {
             for (auto sym : threadTodo) {
-                sym.data(gs)->resultType = core::Types::untypedUntracked();
+                sym.setResultType(gs, core::Types::untypedUntracked());
             }
         }
 
@@ -2452,18 +2453,16 @@ public:
         if (!combinedTodoAssigns.empty()) {
             for (auto &threadTodos : combinedTodoAssigns) {
                 for (auto &job : threadTodos) {
-                    auto data = job.lhs.data(gs);
-
-                    if (data->isTypeMember()) {
-                        data->resultType = core::make_type<core::LambdaParam>(job.lhs.asTypeMemberRef(),
-                                                                              core::Types::untypedUntracked(),
-                                                                              core::Types::untypedUntracked());
+                    if (job.lhs.isTypeMember()) {
+                        job.lhs.setResultType(gs, core::make_type<core::LambdaParam>(job.lhs.asTypeMemberRef(),
+                                                                                     core::Types::untypedUntracked(),
+                                                                                     core::Types::untypedUntracked()));
                     } else {
-                        data->resultType = core::Types::untypedUntracked();
+                        job.lhs.setResultType(gs, core::Types::untypedUntracked());
                     }
 
-                    if (auto e = gs.beginError(data->loc(), core::errors::Resolver::TypeMemberCycle)) {
-                        auto flavor = data->isTypeAlias() ? "alias" : "member";
+                    if (auto e = gs.beginError(job.lhs.loc(gs), core::errors::Resolver::TypeMemberCycle)) {
+                        auto flavor = job.lhs.isTypeAlias(gs) ? "alias" : "member";
                         e.setHeader("Type {} `{}` is involved in a cycle", flavor, job.lhs.show(gs));
                     }
                 }
