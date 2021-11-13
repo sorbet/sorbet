@@ -1220,8 +1220,8 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
     }
 
     auto typeMembers = sym->typeArguments();
-    auto it =
-        remove_if(typeMembers.begin(), typeMembers.end(), [&gs](auto &sym) -> bool { return sym.data(gs)->isFixed(); });
+    auto it = remove_if(typeMembers.begin(), typeMembers.end(),
+                        [&gs](auto &sym) -> bool { return sym.asTypeArgumentRef().data(gs)->isFixed(); });
     typeMembers.erase(it, typeMembers.end());
     if (!typeMembers.empty()) {
         fmt::format_to(std::back_inserter(buf), "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
