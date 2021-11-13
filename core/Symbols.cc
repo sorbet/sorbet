@@ -1402,6 +1402,36 @@ bool SymbolRef::isSingletonClass(const GlobalState &gs) const {
     }
 }
 
+std::vector<std::pair<NameRef, SymbolRef>> SymbolRef::membersStableOrderSlow(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->membersStableOrderSlow(gs);
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->membersStableOrderSlow(gs);
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->membersStableOrderSlow(gs);
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->membersStableOrderSlow(gs);
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->membersStableOrderSlow(gs);
+    }
+}
+
+bool SymbolRef::isPrintable(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->isPrintable(gs);
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->isPrintable(gs);
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->isPrintable(gs);
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->isPrintable(gs);
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->isPrintable(gs);
+    }
+}
+
 string ArgInfo::show(const GlobalState &gs) const {
     return fmt::format("{}", this->argumentName(gs));
 }
