@@ -85,7 +85,7 @@ namespace {
 void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery,
                   core::SymbolRef symbolBeforeDealias) {
     // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
-    auto symbol = symbolBeforeDealias.data(ctx)->dealias(ctx);
+    auto symbol = symbolBeforeDealias.dealias(ctx);
     while (lit && symbol.exists() && lit->original) {
         auto &unresolved = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(lit->original);
         if (lspQuery.matchesLoc(core::Loc(ctx.file, lit->loc)) || lspQuery.matchesSymbol(symbol)) {
@@ -94,7 +94,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             tp.origins.emplace_back(symbol.loc(ctx));
 
             if (symbol.isClassOrModule()) {
-                tp.type = symbol.data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();
+                tp.type = symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();
             } else {
                 auto resultType = symbol.resultType(ctx);
                 tp.type = resultType == nullptr ? core::Types::untyped(ctx, symbol) : resultType;
@@ -104,7 +104,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             if (symbol == core::Symbols::StubModule()) {
                 scopes = *lit->resolutionScopes;
             } else {
-                scopes = {symbol.data(ctx)->owner};
+                scopes = {symbol.owner(ctx)};
             }
 
             auto resp = core::lsp::ConstantResponse(symbol, symbolBeforeDealias, core::Loc(ctx.file, lit->loc), scopes,
@@ -114,7 +114,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
         lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope);
         if (lit) {
             symbolBeforeDealias = lit->symbol;
-            symbol = symbolBeforeDealias.data(ctx)->dealias(ctx);
+            symbol = symbolBeforeDealias.dealias(ctx);
         }
     }
 }

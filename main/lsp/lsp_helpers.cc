@@ -223,7 +223,7 @@ string prettyTypeForMethod(const core::GlobalState &gs, core::MethodRef method, 
 string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant) {
     // Request that the constant already be dealiased, rather than dealias here to avoid defensively dealiasing.
     // We should understand where dealias calls go.
-    ENFORCE(constant == constant.data(gs)->dealias(gs));
+    ENFORCE(constant == constant.dealias(gs));
 
     core::TypePtr result;
     if (constant.isClassOrModule()) {

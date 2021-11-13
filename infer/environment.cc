@@ -1046,7 +1046,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 ENFORCE(ctx.file.data(ctx).hasParseErrors || !tp.origins.empty(), "Inferencer did not assign location");
             },
             [&](cfg::Alias &a) {
-                core::SymbolRef symbol = a.what.data(ctx)->dealias(ctx);
+                core::SymbolRef symbol = a.what.dealias(ctx);
                 const auto &data = symbol.data(ctx);
                 if (data->isClassOrModule()) {
                     auto singletonClass = data->lookupSingletonClass(ctx);

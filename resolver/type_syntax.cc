@@ -635,7 +635,7 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            auto sym = maybeAliased.data(ctx)->dealias(ctx);
+            auto sym = maybeAliased.dealias(ctx);
             if (sym.isStaticField(ctx)) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a constant field");
@@ -771,7 +771,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 }
             }
 
-            auto sym = maybeAliased.data(ctx)->dealias(ctx);
+            auto sym = maybeAliased.dealias(ctx);
             if (sym.isClassOrModule()) {
                 // the T::Type generics internally have a typeArity of 0, so this allows us to check against them in the
                 // same way that we check against types like `Array`
@@ -1057,7 +1057,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             } else {
                 corrected = recvi->symbol;
             }
-            corrected = corrected.data(ctx)->dealias(ctx);
+            corrected = corrected.dealias(ctx);
 
             if (!corrected.isClassOrModule()) {
                 if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {

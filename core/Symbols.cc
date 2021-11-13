@@ -562,7 +562,7 @@ u2 Symbol::addMixinPlaceholder(const GlobalState &gs) {
 SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
     auto ret = findMemberNoDealias(gs, name);
     if (ret.exists()) {
-        return ret.data(gs)->dealias(gs);
+        return ret.dealias(gs);
     }
     return ret;
 }
@@ -1479,6 +1479,21 @@ void SymbolRef::setResultType(GlobalState &gs, const TypePtr &typePtr) const {
         case SymbolRef::Kind::TypeMember:
             asTypeMemberRef().data(gs)->resultType = typePtr;
             return;
+    }
+}
+
+SymbolRef SymbolRef::dealias(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->dealias(gs);
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->dealias(gs);
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->dealias(gs);
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->dealias(gs);
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->dealias(gs);
     }
 }
 

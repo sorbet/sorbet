@@ -163,7 +163,7 @@ private:
             },
 
             [&](const core::AliasType &alias) {
-                auto aliasSym = alias.symbol.data(ctx)->dealias(ctx);
+                auto aliasSym = alias.symbol.dealias(ctx);
 
                 // This can be introduced by `module_function`, which in its
                 // current implementation will alias an instance method as a

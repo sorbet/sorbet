@@ -255,7 +255,7 @@ private:
             if (!sym.exists()) {
                 return core::Symbols::noSymbol();
             }
-            core::SymbolRef resolved = id->symbol.data(ctx)->dealias(ctx);
+            core::SymbolRef resolved = id->symbol.dealias(ctx);
             core::SymbolRef result = resolved.data(ctx)->findMember(ctx, c.cnst);
 
             // Private constants are allowed to be resolved, when there is no scope set (the scope is checked above),
@@ -314,7 +314,7 @@ private:
         bool alreadyReported = false;
         job.out->resolutionScopes = make_unique<ast::ConstantLit::ResolutionScopes>();
         if (auto *id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
-            auto originalScope = id->symbol.data(ctx)->dealias(ctx);
+            auto originalScope = id->symbol.dealias(ctx);
             if (originalScope == core::Symbols::StubModule()) {
                 // If we were trying to resolve some literal like C::D but `C` itself was already stubbed,
                 // no need to also report that `D` is missing.
@@ -453,7 +453,7 @@ private:
             it.lhs.setResultType(ctx, core::Types::untypedUntracked());
             return true;
         } else {
-            if (rhsSym.data(ctx)->dealias(ctx) != it.lhs) {
+            if (rhsSym.dealias(ctx) != it.lhs) {
                 it.lhs.setResultType(ctx, core::make_type<core::AliasType>(rhsSym));
             } else {
                 if (auto e = ctx.state.beginError(it.lhs.loc(ctx), core::errors::Resolver::RecursiveClassAlias)) {
@@ -519,7 +519,7 @@ private:
                 }
                 resolved = stubSymbolForAncestor(job);
             } else {
-                resolved = ancestorSym.data(ctx)->dealias(ctx);
+                resolved = ancestorSym.dealias(ctx);
             }
 
             if (!resolved.isClassOrModule()) {
@@ -744,7 +744,7 @@ private:
 
     static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {
         ENFORCE(job.ancestor->symbol.exists(), "Ancestor must exist, or we can't check whether it's sealed.");
-        auto ancestorSym = job.ancestor->symbol.data(ctx)->dealias(ctx);
+        auto ancestorSym = job.ancestor->symbol.dealias(ctx);
 
         if (!ancestorSym.data(ctx)->isClassOrModuleSealed()) {
             return;
@@ -2096,7 +2096,7 @@ public:
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
 
         if (trackDependencies_) {
-            core::SymbolRef symbol = lit.symbol.data(ctx)->dealias(ctx);
+            core::SymbolRef symbol = lit.symbol.dealias(ctx);
             if (symbol == core::Symbols::T()) {
                 return tree;
             }

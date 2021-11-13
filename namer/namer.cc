@@ -383,7 +383,7 @@ class SymbolFinder {
     FoundDefinitionRef squashNames(core::Context ctx, const ast::ExpressionPtr &node) {
         if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
-            auto sym = id->symbol.data(ctx)->dealias(ctx);
+            auto sym = id->symbol.dealias(ctx);
             ENFORCE(sym.exists());
             return foundDefs->addSymbol(sym);
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
@@ -924,7 +924,7 @@ class SymbolDefiner {
     }
 
     void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<ast::ParsedArg> &parsedArgs) {
-        auto sym = ctx.owner.data(ctx)->dealias(ctx);
+        auto sym = ctx.owner.dealias(ctx);
         if (!sym.isMethod()) {
             return;
         }
@@ -1433,7 +1433,7 @@ class TreeSymbolizer {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
             if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
-                return id->symbol.data(ctx)->dealias(ctx);
+                return id->symbol.dealias(ctx);
             }
             if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node)) {
                 if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
@@ -1461,7 +1461,7 @@ class TreeSymbolizer {
         if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
             existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
             if (existing.exists()) {
-                existing = existing.data(ctx.state)->dealias(ctx.state);
+                existing = existing.dealias(ctx.state);
             }
         }
         // NameInserter should have created this symbol.
