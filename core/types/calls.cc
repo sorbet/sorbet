@@ -1695,7 +1695,7 @@ public:
         for (auto mem : attachedClass.data(gs)->typeMembers()) {
             ++i;
 
-            auto memData = mem.data(gs);
+            auto memData = mem.asTypeMemberRef().data(gs);
 
             auto *memType = cast_type<LambdaParam>(memData->resultType);
             ENFORCE(memType != nullptr);

@@ -1101,14 +1101,14 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             // we can only check bounds when a LambdaParam is present.
             if (!isSelfTypeT1) {
                 auto self2 = cast_type_nonnull<SelfTypeParam>(t2);
-                if (auto *lambdaParam = cast_type<LambdaParam>(self2.definition.data(gs)->resultType)) {
+                if (auto *lambdaParam = cast_type<LambdaParam>(self2.definition.resultType(gs))) {
                     return Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode);
                 } else {
                     return false;
                 }
             } else if (!isSelfTypeT2) {
                 auto self1 = cast_type_nonnull<SelfTypeParam>(t1);
-                if (auto *lambdaParam = cast_type<LambdaParam>(self1.definition.data(gs)->resultType)) {
+                if (auto *lambdaParam = cast_type<LambdaParam>(self1.definition.resultType(gs))) {
                     return Types::isSubTypeUnderConstraint(gs, constr, lambdaParam->upperBound, t2, mode);
                 } else {
                     return false;
@@ -1120,8 +1120,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     return true;
                 }
 
-                auto *lambda1 = cast_type<LambdaParam>(self1.definition.data(gs)->resultType);
-                auto *lambda2 = cast_type<LambdaParam>(self2.definition.data(gs)->resultType);
+                auto *lambda1 = cast_type<LambdaParam>(self1.definition.resultType(gs));
+                auto *lambda2 = cast_type<LambdaParam>(self2.definition.resultType(gs));
                 return lambda1 && lambda2 &&
                        Types::isSubTypeUnderConstraint(gs, constr, lambda1->upperBound, lambda2->lowerBound, mode);
             }

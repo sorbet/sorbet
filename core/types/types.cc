@@ -734,8 +734,8 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
         [&](const SelfTypeParam &param) {
             auto sym = param.definition;
             if (sym.owner(ctx) == ctx.owner) {
-                ENFORCE(isa_type<LambdaParam>(sym.data(ctx)->resultType));
-                ret = sym.data(ctx)->resultType;
+                ENFORCE(isa_type<LambdaParam>(sym.resultType(ctx)));
+                ret = sym.resultType(ctx);
             } else {
                 ret = type;
             }

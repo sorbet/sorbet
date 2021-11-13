@@ -9,6 +9,7 @@ class Symbol;
 class GlobalState;
 class NameRef;
 class Loc;
+class TypePtr;
 struct SymbolDataDebugCheck {
     const GlobalState &gs;
     const unsigned int symbolCountAtCreation;
@@ -424,6 +425,7 @@ public:
     std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlow(const GlobalState &gs) const;
     bool isPrintable(const GlobalState &gs) const;
     const InlinedVector<Loc, 2> &locs(const GlobalState &gs) const;
+    const TypePtr &resultType(const GlobalState &gs) const;
     // Prints the fully qualified name of the symbol in a format that is suitable for showing to the user (e.g.
     // "Owner::SymbolName")
     std::string showFullName(const GlobalState &gs) const;

@@ -1447,6 +1447,21 @@ const InlinedVector<Loc, 2> &SymbolRef::locs(const GlobalState &gs) const {
     }
 }
 
+const TypePtr &SymbolRef::resultType(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->resultType;
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->resultType;
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->resultType;
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->resultType;
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->resultType;
+    }
+}
+
 string ArgInfo::show(const GlobalState &gs) const {
     return fmt::format("{}", this->argumentName(gs));
 }

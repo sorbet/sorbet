@@ -96,7 +96,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             if (symbol.isClassOrModule()) {
                 tp.type = symbol.data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();
             } else {
-                auto resultType = symbol.data(ctx)->resultType;
+                auto resultType = symbol.resultType(ctx);
                 tp.type = resultType == nullptr ? core::Types::untyped(ctx, symbol) : resultType;
             }
 

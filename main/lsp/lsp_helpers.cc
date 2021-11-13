@@ -233,7 +233,7 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
         }
         result = targetClass.data(gs)->externalType();
     } else {
-        auto resultType = constant.data(gs)->resultType;
+        auto resultType = constant.resultType(gs);
         result = resultType == nullptr ? core::Types::untyped(gs, constant) : resultType;
     }
 

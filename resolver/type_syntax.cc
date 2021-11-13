@@ -750,7 +750,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             ENFORCE(maybeAliased.exists());
 
             if (maybeAliased.isTypeAlias(ctx)) {
-                result.type = maybeAliased.data(ctx)->resultType;
+                result.type = maybeAliased.resultType(ctx);
                 return;
             }
 
@@ -763,10 +763,10 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             // times as wanted, and assigned into different constants each time. As much as possible, we
             // want there to be one name for every type; making an alias for a type should always be
             // syntactically declared with T.type_alias.
-            if (core::isa_type<core::ClassType>(maybeAliased.data(ctx)->resultType)) {
-                auto resultType = core::cast_type_nonnull<core::ClassType>(maybeAliased.data(ctx)->resultType);
+            if (core::isa_type<core::ClassType>(maybeAliased.resultType(ctx))) {
+                auto resultType = core::cast_type_nonnull<core::ClassType>(maybeAliased.resultType(ctx));
                 if (resultType.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
-                    result.type = maybeAliased.data(ctx)->resultType;
+                    result.type = maybeAliased.resultType(ctx);
                     return;
                 }
             }
