@@ -1243,7 +1243,7 @@ class A
 
   sig { void }
   def foo
-    @x = 'not an integer' # error: Reassigning field with a value of wrong type: `String("not an integer")` is not a subtype of `Integer`
+    @x = 'not an integer' # error: Expected `Integer` but found `String("not an integer")` for field
   end
 end
 ```
@@ -1258,7 +1258,7 @@ type specified with `T.let` should be enlarged:
 Similarly, Sorbet will reject constants reassigned with different types:
 
 ```rb
-FOO = 42 # error: Reassigning field with a value of wrong type: `Integer(42)` is not a subtype of `String("Hello, world!")`
+FOO = 42 # error: Expected `String("Hello, world!")` but found `Integer(42)` for field
 FOO = "Hello, world!"
 ```
 

@@ -6,6 +6,6 @@ class Foo
 
   def foo
     @ivar = 2
-    @ivar = "ss" # error: Reassigning field with a value of wrong type: `String("ss")` is not a subtype of `Integer`
+    @ivar = "ss" # error: Expected `Integer` but found `String("ss")` for field
   end
 end
