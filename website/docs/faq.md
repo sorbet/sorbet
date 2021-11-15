@@ -160,7 +160,7 @@ out-of-bounds. If you would rather raise an exception than handle `nil`, use the
 [0, 1, 2].fetch(3) # IndexError: index 3 outside of array bounds
 ```
 
-## Sigs are vague for std lib methods that accept keyword arguments & have multiple return types
+## Sigs are vague for stdlib methods that accept keyword arguments & have multiple return types
 
 You might notice this when calling `Array#sample`, `Pathname#find`, or other std
 lib methods that accept a keyword argument and can have different return types
