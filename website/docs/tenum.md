@@ -40,7 +40,7 @@ end
 ```
 
 > The `T.cast` is necessary because of how
-> [Sorbet behaves with `Array#sample`](faq.md#sigs-are-vague-for-std-lib-methods-that-accept-keyword-arguments--have-multiple-return-types).
+> [Sorbet behaves with `Array#sample`](faq.md#sigs-are-vague-for-stdlib-methods-that-accept-keyword-arguments--have-multiple-return-types).
 
 ## Exhaustiveness
 
