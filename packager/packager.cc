@@ -846,10 +846,9 @@ public:
             // suffix of the imported name. Based on this, we determine whether to enumerate and alias all exports
             // from an imported package or only alias the top-level export.
             //
-            // Essentially, to save on memory usage by reducing the number of nodes created in the AST, we
-            // individually alias exported constants from the imported package if & only if there would be an import
-            // conflict otherwise; i.e., when the given package is either a subpackage of the imported name or also
-            // imports a subpackage of the imported name.
+            // This approach saves memory by adding package aliases in the common case, falling back on naming a whole
+            // package tree only when a package and subpackage of it are both imported.
+
             const bool isOrImportsSubpackage =
                 absl::c_any_of(package.importedPackageNames,
                                [&](const auto &otherImport) -> bool {
