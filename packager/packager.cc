@@ -97,23 +97,24 @@ enum class ImportType {
     Normal,
     Test, // test_import
 
-    // "self-import": This represents code that is exported by a package, and is therefore "imported" (i.e. remapped)
-    // into its private test namespace and its public->private mapping.
-    Self,
+    // "friend-import": This represents code that is re-mapped into a package's own public->private mapping or
+    // its private test namespace.
+    Friend,
 };
 
 // There are 4 kinds of virtual modules inserted into the AST.
-// Normal: suffixed with _Package_Private, it maps external imports of a package into its namespace.
-// Test: suffixed with _Package_Private, it maps external imports, exports and self-test exports of a package into its
+// Private: suffixed with _Package_Private, it maps external imports of a package into its namespace.
+// PrivateTest: suffixed with _Package_Private, it maps external imports, exports and self-test exports of a package
+// into its
 //   test namespace.
-// ExportMappingNormal: suffixed with _Package, it maps exports of a package into its publicly available namespace (this
+// Public: suffixed with _Package, it maps exports of a package into its publicly available namespace (this
 //   is used by other packages when they import this package).
-// ExportMappingTest: suffixed with _Package, it maps exports of a package that are in the "Test::" namespace into its
+// PublicTest: suffixed with _Package, it maps exports of a package that are in the "Test::" namespace into its
 //   publicly available test namespace (this is used by other packages when they import this package).
 //
 // A package cannot access an external package's _Package_Private module, but a package's private module can access
 // an external package's public interface (which is the public _Package module).
-enum class ModuleType { Normal, Test, ExportMappingNormal, ExportMappingTest };
+enum class ModuleType { Private, PrivateTest, Public, PublicTest };
 
 struct Import {
     PackageName name;
@@ -752,8 +753,8 @@ class ImportTree final {
             return importLoc.exists();
         }
 
-        bool isSelfImport() {
-            return importType == ImportType::Self;
+        bool isFriendImport() {
+            return importType == ImportType::Friend;
         }
 
         bool isNormalImport() {
@@ -761,18 +762,17 @@ class ImportTree final {
         }
 
         bool isSelfOrTestImport() {
-            return importType == ImportType::Self || importType == ImportType::Test;
+            return importType == ImportType::Friend || importType == ImportType::Test;
         }
 
         bool skipBuildMappingFor(ModuleType moduleType) {
-            // Don't build mappings in the export mapping modules for external imports.
-            if (!isSelfImport() &&
-                (moduleType == ModuleType::ExportMappingNormal || moduleType == ModuleType::ExportMappingTest)) {
+            // Don't build mappings in the export-mapping/public modules for non-friend imports.
+            if (!isFriendImport() && (moduleType == ModuleType::Public || moduleType == ModuleType::PublicTest)) {
                 return true;
             }
 
             // Don't build mappings in the main (normal) package module for internal imports.
-            if (isSelfImport() && moduleType == ModuleType::Normal) {
+            if (isFriendImport() && moduleType == ModuleType::Private) {
                 return true;
             }
 
@@ -836,7 +836,8 @@ public:
 
             importedNames[imported.mangledName] = imported.loc;
 
-            // TODO (aadi-stripe, 2022-02-01): re-run timing analysis to see if the quadratic implementation should be revisited.
+            // TODO (aadi-stripe, 2022-02-01): re-run timing analysis to see if the quadratic implementation should be
+            // revisited.
             //
             // Determine whether the current package either imports a suffix of the imported name, or itself is a
             // suffix of the imported name. Based on this, we determine whether to enumerate and alias all exports
@@ -859,9 +860,9 @@ public:
         }
     }
 
-    // Add the exports of a package as "self-imports" into the import tree. These are used for building the package's
-    // Test, ExportMappingNormal and ExportMappingTest modules.
-    void mergeSelfExports(core::Context ctx, const PackageInfoImpl &pkg, ExportType type) {
+    // Add the exports of a package as "friend-imports" into the import tree. These are used for building the package's
+    // Test, Public and PublicTest modules.
+    void mergePublicInterface(core::Context ctx, const PackageInfoImpl &pkg, ExportType type) {
         for (const auto &exp : pkg.exports) {
             if (exp.type != type) {
                 continue;
@@ -870,7 +871,7 @@ public:
             const auto &parts = exp.parts();
             ENFORCE(parts.size() > 0);
             auto loc = exp.fqn.loc.offsets();
-            addImport(ctx, pkg, loc, exp.fqn, ImportType::Self, true);
+            addImport(ctx, pkg, loc, exp.fqn, ImportType::Friend, true);
         }
     }
 
@@ -883,11 +884,11 @@ public:
 
 private:
     const bool isNonTestModule(ModuleType moduleType) const {
-        return moduleType == ModuleType::ExportMappingNormal || moduleType == ModuleType::Normal;
+        return moduleType == ModuleType::Public || moduleType == ModuleType::Private;
     }
 
-    const bool isExportMappingModule(ModuleType moduleType) const {
-        return moduleType == ModuleType::ExportMappingNormal || moduleType == ModuleType::ExportMappingTest;
+    const bool isPublicModule(ModuleType moduleType) const {
+        return moduleType == ModuleType::Public || moduleType == ModuleType::PublicTest;
     }
 
     // Enumerate and add all exported names from an imported package into the import tree
@@ -935,7 +936,7 @@ private:
 
         // If the node already has an import source, this is a conflicting import.
         // See test/cli/package-import-conflicts/ for an example.
-        if (node->source.exists() && importType != ImportType::Self) {
+        if (node->source.exists() && importType != ImportType::Friend) {
             addImportConflictError(ctx, loc, node->source.importLoc, exportFqn.parts);
         }
         node->source = ImportTree::Source{importedPackage.name.mangledName, loc, importType, isEnumeratedImport};
@@ -969,8 +970,8 @@ private:
                     continue;
                 }
 
-                // Ignore non-test constants for the test export mapping module.
-                if (moduleType == ModuleType::ExportMappingTest && !isTestNamespace(ctx, nameRef)) {
+                // Ignore non-test constants for the public test module.
+                if (moduleType == ModuleType::PublicTest && !isTestNamespace(ctx, nameRef)) {
                     continue;
                 }
             }
@@ -986,30 +987,30 @@ private:
                 return;
             }
 
-            const bool isSelfImport = source.isSelfImport();
-            // For the test module, we do not need to map self-imports (i.e. exports from the current package) that
+            const bool isFriendImport = source.isFriendImport();
+            // For the test module, we do not need to map friend-imports (i.e. exports from the current package) that
             // begin with "Test::".
-            if (moduleType == ModuleType::Test && isSelfImport && isTestNamespace(ctx, parts[0])) {
+            if (moduleType == ModuleType::PrivateTest && isFriendImport && isTestNamespace(ctx, parts[0])) {
                 return;
             }
 
             if (parentSrc.exists()) {
                 // A conflicting import exists. Only report errors while constructing the test output
                 // to avoid duplicate errors because test imports are a superset of normal imports.
-                if (moduleType == ModuleType::Test && !isSelfImport) {
+                if (moduleType == ModuleType::PrivateTest && !isFriendImport) {
                     addImportConflictError(ctx, source.importLoc, parentSrc.importLoc, parts);
                 }
 
                 return;
             }
 
-            if (moduleType != ModuleType::Normal || source.isNormalImport()) {
+            if (moduleType != ModuleType::Private || source.isNormalImport()) {
                 // Construct a module containing an assignment for an imported name:
                 // For name `A::B::C::D` imported from package `A::B` construct:
                 // module A::B::C
                 //   D = <Mangled A::B>::A::B::C::D
                 // end
-                const auto &sourceMangledName = isSelfImport ? privatePkgMangledName : source.packageMangledName;
+                const auto &sourceMangledName = isFriendImport ? privatePkgMangledName : source.packageMangledName;
                 auto assignRhs =
                     prependPackageScope(ctx, parts2literal(parts, core::LocOffsets::none()), sourceMangledName);
 
@@ -1026,7 +1027,7 @@ private:
                 //                               ^^^  jump to actual definition of `Baz` class
                 //
                 // In the case of un-enumerated imports, we don't use the loc at the import site,
-                // but effectively use the one from the export site (due to the export mapping module).
+                // but effectively use the one from the export site (due to the export-mapping/public module).
                 // This results in the following behavior:
                 // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
                 //                     ^^^^^^^^       jump to package file of `Foo::Bar`
@@ -1034,7 +1035,7 @@ private:
 
                 // Ensure import's do not add duplicate loc-s in the test_module
                 const bool useImportLoc =
-                    source.isEnumeratedImport && (moduleType != ModuleType::Test || source.isSelfOrTestImport());
+                    source.isEnumeratedImport && (moduleType != ModuleType::PrivateTest || source.isSelfOrTestImport());
                 const auto &importLoc = useImportLoc ? source.importLoc : core::LocOffsets::none();
 
                 auto mod = ast::MK::Module(core::LocOffsets::none(), importLoc,
@@ -1063,7 +1064,7 @@ private:
         // Export mapping modules are built in the public (_Package) namespace, whereas other modules are built in
         // the private (_Package_Private) namespace.
         ast::ExpressionPtr name =
-            isExportMappingModule(moduleType) ? name2Expr(pkgMangledName) : name2Expr(privatePkgMangledName);
+            isPublicModule(moduleType) ? name2Expr(pkgMangledName) : name2Expr(privatePkgMangledName);
         for (auto part = parts.begin(); part < parts.end() - 1; part++) {
             name = name2Expr(*part, move(name));
         }
@@ -1136,8 +1137,8 @@ bool checkContainsAllPackages(const core::GlobalState &gs, const vector<ast::Par
 ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
     ast::ClassDef::RHS_store importedPackages;
     ast::ClassDef::RHS_store testImportedPackages;
-    ast::ClassDef::RHS_store exportMappingNormal;
-    ast::ClassDef::RHS_store exportMappingTest;
+    ast::ClassDef::RHS_store publicMapping;
+    ast::ClassDef::RHS_store publicTestMapping;
 
     const auto &packageDB = ctx.state.packageDB();
     auto &absPkg = packageDB.getPackageForFile(ctx, file.file);
@@ -1160,19 +1161,19 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
 
         // Merge public exports of this package into tree builder in order to "self-map" them
         // from the package's private module to its public-facing module
-        treeBuilder.mergeSelfExports(ctx, package, ExportType::Public);
-        exportMappingNormal = treeBuilder.makeModule(ctx, ModuleType::ExportMappingNormal);
-        exportMappingTest = treeBuilder.makeModule(ctx, ModuleType::ExportMappingTest);
+        treeBuilder.mergePublicInterface(ctx, package, ExportType::Public);
+        publicMapping = treeBuilder.makeModule(ctx, ModuleType::Public);
+        publicTestMapping = treeBuilder.makeModule(ctx, ModuleType::PublicTest);
 
         // Merge imports of package into tree builder in order to map external package modules
         // into this package's private module
         treeBuilder.mergeImports(ctx, package);
-        importedPackages = treeBuilder.makeModule(ctx, ModuleType::Normal);
+        importedPackages = treeBuilder.makeModule(ctx, ModuleType::Private);
 
         // Merge self-test exports package into tree builder in order to "self-map" them (in addition
         // to the public exports and imports of this package) into the package's private test module
-        treeBuilder.mergeSelfExports(ctx, package, ExportType::PrivateTest);
-        testImportedPackages = treeBuilder.makeModule(ctx, ModuleType::Test);
+        treeBuilder.mergePublicInterface(ctx, package, ExportType::PrivateTest);
+        testImportedPackages = treeBuilder.makeModule(ctx, ModuleType::PrivateTest);
     }
 
     // Create wrapper modules
@@ -1182,19 +1183,19 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
     auto testPackageNamespace =
         ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
                         name2Expr(core::Names::Constants::PackageTests()), {}, std::move(testImportedPackages));
-    auto exportMappingNormalNamespace =
+    auto publicMappingNamespace =
         ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                        name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(exportMappingNormal));
-    auto exportMappingTestNamespace =
+                        name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(publicMapping));
+    auto publicTestMappingNamespace =
         ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                        name2Expr(core::Names::Constants::PackageTests()), {}, std::move(exportMappingTest));
+                        name2Expr(core::Names::Constants::PackageTests()), {}, std::move(publicTestMapping));
 
     // Add wrapper modules to root of the tree
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     rootKlass.rhs.emplace_back(move(packageNamespace));
     rootKlass.rhs.emplace_back(move(testPackageNamespace));
-    rootKlass.rhs.emplace_back(move(exportMappingNormalNamespace));
-    rootKlass.rhs.emplace_back(move(exportMappingTestNamespace));
+    rootKlass.rhs.emplace_back(move(publicMappingNamespace));
+    rootKlass.rhs.emplace_back(move(publicTestMappingNamespace));
 
     return file;
 }
