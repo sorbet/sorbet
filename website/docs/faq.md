@@ -222,7 +222,7 @@ class Array
 end
 ```
 
-> Overriding std lib RBIs can make type checking less safe, since Sorbet will
+> Overriding stdlib RBIs can make type checking less safe, since Sorbet will
 > now have an incorrect understanding of how the stdlib behaves.
 
 Another alternative is to define new methods that are stricter about arguments,
