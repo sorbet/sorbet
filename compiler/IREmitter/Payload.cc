@@ -435,28 +435,6 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, 
     return ret;
 }
 
-llvm::Value *Payload::typeTestForBlock(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
-                                       const core::TypePtr &type) {
-    core::SymbolRef procSym;
-
-    // We are deliberately not being exhaustive here and only handling the "easy"
-    // Proc-like types.  T.any(proc-ish, proc-ish) and similar does not seem like
-    // they are worth the trouble.
-    if (core::isa_type<core::ClassType>(type)) {
-        auto ct = core::cast_type_nonnull<core::ClassType>(type);
-        procSym = ct.symbol;
-    } else if (core::isa_type<core::AppliedType>(type)) {
-        auto at = core::cast_type_nonnull<core::AppliedType>(type);
-        procSym = at.klass;
-    }
-
-    if (procSym.exists() && (procSym == core::Symbols::Proc() || isProc(procSym))) {
-        return builder.CreateCall(cs.getFunction("sorbet_block_isa_proc"), {});
-    }
-
-    return typeTest(cs, builder, val, type);
-}
-
 // Emit an `llvm.assume` intrinsic with the result of a `Payload::typeTest` with the given symbol. For example, this can
 // be used assert that a value will be an array.
 //
