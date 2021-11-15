@@ -755,10 +755,6 @@ class ImportTree final {
             return importType == ImportType::Self;
         }
 
-        bool isTestImport() {
-            return importType == ImportType::Test;
-        }
-
         bool isNormalImport() {
             return importType == ImportType::Normal;
         }
