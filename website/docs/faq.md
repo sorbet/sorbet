@@ -163,8 +163,8 @@ out-of-bounds. If you would rather raise an exception than handle `nil`, use the
 ## Sigs are vague for stdlib methods that accept keyword arguments & have multiple return types
 
 You might notice this when calling `Array#sample`, `Pathname#find`, or other
-stdlib methods that accept a keyword argument and can have different return types
-based on arguments:
+stdlib methods that accept a keyword argument and can have different return
+types based on arguments:
 
 ```ruby
 T.reveal_type([1, 2, 3].sample) # Revealed type: T.nilable(T.any(Integer, T::Array[Integer]))
@@ -222,8 +222,8 @@ class Array
 end
 ```
 
-> Overriding stdlib RBIs can make type checking less safe, since Sorbet will
-> now have an incorrect understanding of how the stdlib behaves.
+> Overriding stdlib RBIs can make type checking less safe, since Sorbet will now
+> have an incorrect understanding of how the stdlib behaves.
 
 Another alternative is to define new methods that are stricter about arguments,
 and use these in place of stdlib methods:
