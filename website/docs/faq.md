@@ -226,7 +226,7 @@ end
 > now have an incorrect understanding of how the std lib behaves.
 
 Another alternative is to define new methods that are stricter about arguments,
-and use these in place of std lib methods:
+and use these in place of stdlib methods:
 
 ```ruby
 class Array
