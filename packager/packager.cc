@@ -840,8 +840,7 @@ public:
 
             importedNames[imported.mangledName] = imported.loc;
 
-            // TODO (aadi-stripe): fix this so it's not quadratic (if it ends up causing runtime bloat). Currently
-            // (11/8/2021) timing analysis suggests that it doesn't.
+            // TODO (aadi-stripe, 2022-02-01): re-run timing analysis to see if the quadratic implementation should be revisited.
             //
             // Determine whether the current package either imports a suffix of the imported name, or itself is a
             // suffix of the imported name. Based on this, we determine whether to enumerate and alias all exports
