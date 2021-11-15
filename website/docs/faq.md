@@ -170,7 +170,7 @@ based on arguments:
 T.reveal_type([1, 2, 3].sample) # Revealed type: T.nilable(T.any(Integer, T::Array[Integer]))
 ```
 
-The sig in Sorbet's std lib is quite wide, since it has to cover every possible
+The sig in Sorbet's stdlib is quite wide, since it has to cover every possible
 return type. Sorbet does not have good support for this for methods that accept
 keyword arguments. [#37](https://github.com/sorbet/sorbet/issues/37) is the
 original report of this.
