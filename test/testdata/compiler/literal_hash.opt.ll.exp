@@ -352,23 +352,23 @@ entry:
   %hashLiteral.i = load i64, i64* @ruby_hashLiteral1, align 8, !dbg !34
   %duplicatedHash.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral.i) #7, !dbg !34
   store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %50, align 8, !dbg !34, !tbaa !15
-  %hashLiteral81.i = load i64, i64* @ruby_hashLiteral2, align 8, !dbg !35
-  %duplicatedHash82.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral81.i) #7, !dbg !35
+  %hashLiteral80.i = load i64, i64* @ruby_hashLiteral2, align 8, !dbg !35
+  %duplicatedHash81.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral80.i) #7, !dbg !35
   store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 9), i64** %50, align 8, !dbg !35, !tbaa !15
-  %hashLiteral88.i = load i64, i64* @ruby_hashLiteral3, align 8, !dbg !36
-  %duplicatedHash89.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral88.i) #7, !dbg !36
+  %hashLiteral87.i = load i64, i64* @ruby_hashLiteral3, align 8, !dbg !36
+  %duplicatedHash88.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral87.i) #7, !dbg !36
   store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 10), i64** %50, align 8, !dbg !36, !tbaa !15
-  %hashLiteral95.i = load i64, i64* @ruby_hashLiteral4, align 8, !dbg !37
-  %duplicatedHash96.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral95.i) #7, !dbg !37
+  %hashLiteral94.i = load i64, i64* @ruby_hashLiteral4, align 8, !dbg !37
+  %duplicatedHash95.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral94.i) #7, !dbg !37
   store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 11), i64** %50, align 8, !dbg !37, !tbaa !15
-  %hashLiteral102.i = load i64, i64* @ruby_hashLiteral5, align 8, !dbg !38
-  %duplicatedHash103.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral102.i) #7, !dbg !38
+  %hashLiteral101.i = load i64, i64* @ruby_hashLiteral5, align 8, !dbg !38
+  %duplicatedHash102.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral101.i) #7, !dbg !38
   store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 12), i64** %50, align 8, !dbg !38, !tbaa !15
-  %hashLiteral109.i = load i64, i64* @ruby_hashLiteral6, align 8, !dbg !39
-  %duplicatedHash110.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral109.i) #7, !dbg !39
+  %hashLiteral108.i = load i64, i64* @ruby_hashLiteral6, align 8, !dbg !39
+  %duplicatedHash109.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral108.i) #7, !dbg !39
   store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 13), i64** %50, align 8, !dbg !39, !tbaa !15
-  %hashLiteral116.i = load i64, i64* @ruby_hashLiteral7, align 8, !dbg !40
-  %duplicatedHash117.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral116.i) #7, !dbg !40
+  %hashLiteral115.i = load i64, i64* @ruby_hashLiteral7, align 8, !dbg !40
+  %duplicatedHash116.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral115.i) #7, !dbg !40
   store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 14), i64** %50, align 8, !dbg !40, !tbaa !15
   %51 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %44, i64 0, i32 1, !dbg !10
   %52 = load i64*, i64** %51, align 8, !dbg !10
@@ -376,17 +376,17 @@ entry:
   %53 = getelementptr inbounds i64, i64* %52, i64 1, !dbg !10
   store i64 %duplicatedHash.i, i64* %53, align 8, !dbg !10, !tbaa !6
   %54 = getelementptr inbounds i64, i64* %53, i64 1, !dbg !10
-  store i64 %duplicatedHash82.i, i64* %54, align 8, !dbg !10, !tbaa !6
+  store i64 %duplicatedHash81.i, i64* %54, align 8, !dbg !10, !tbaa !6
   %55 = getelementptr inbounds i64, i64* %54, i64 1, !dbg !10
-  store i64 %duplicatedHash89.i, i64* %55, align 8, !dbg !10, !tbaa !6
+  store i64 %duplicatedHash88.i, i64* %55, align 8, !dbg !10, !tbaa !6
   %56 = getelementptr inbounds i64, i64* %55, i64 1, !dbg !10
-  store i64 %duplicatedHash96.i, i64* %56, align 8, !dbg !10, !tbaa !6
+  store i64 %duplicatedHash95.i, i64* %56, align 8, !dbg !10, !tbaa !6
   %57 = getelementptr inbounds i64, i64* %56, i64 1, !dbg !10
-  store i64 %duplicatedHash103.i, i64* %57, align 8, !dbg !10, !tbaa !6
+  store i64 %duplicatedHash102.i, i64* %57, align 8, !dbg !10, !tbaa !6
   %58 = getelementptr inbounds i64, i64* %57, i64 1, !dbg !10
-  store i64 %duplicatedHash110.i, i64* %58, align 8, !dbg !10, !tbaa !6
+  store i64 %duplicatedHash109.i, i64* %58, align 8, !dbg !10, !tbaa !6
   %59 = getelementptr inbounds i64, i64* %58, i64 1, !dbg !10
-  store i64 %duplicatedHash117.i, i64* %59, align 8, !dbg !10, !tbaa !6
+  store i64 %duplicatedHash116.i, i64* %59, align 8, !dbg !10, !tbaa !6
   %60 = getelementptr inbounds i64, i64* %59, i64 1, !dbg !10
   store i64* %60, i64** %51, align 8, !dbg !10
   %send = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts, i64 0), !dbg !10

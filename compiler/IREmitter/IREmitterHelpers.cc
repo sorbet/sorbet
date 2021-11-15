@@ -463,4 +463,25 @@ llvm::Value *CallCacheFlags::build(CompilerState &cs, llvm::IRBuilderBase &build
     return acc;
 }
 
+bool IREmitterHelpers::canPassThroughBlockViaRubyVM(MethodCallContext &mcctx, cfg::LocalRef blkVar) {
+    auto &irctx = mcctx.irctx;
+    auto rubyBlockId = mcctx.rubyBlockId;
+
+    // TODO: all of this logic needs to be modified for blocks that take blocks.
+    if (irctx.blockArgUsage != BlockArgUsage::SameFrameAsTopLevel) {
+        return false;
+    }
+
+    ENFORCE(IREmitterHelpers::hasBlockArgument(mcctx.cs, 0, irctx.cfg.symbol, irctx));
+
+    // The block for the send is not at the same level as the toplevel.
+    if (irctx.rubyBlockLevel[rubyBlockId] != 0) {
+        return false;
+    }
+
+    ENFORCE(!irctx.rubyBlockArgs.empty());
+
+    return blkVar == irctx.rubyBlockArgs[0].back();
+}
+
 } // namespace sorbet::compiler

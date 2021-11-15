@@ -506,7 +506,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                 // make the last instruction in all the required args point at the first check block
                 builder.SetInsertPoint(fillRequiredArgs);
                 //
-                if (blkArgName.exists() && irctx.usesBlockArgs) {
+                if (blkArgName.exists() && irctx.blockArgUsage == BlockArgUsage::Captured) {
                     // TODO: I don't think this correctly handles blocks with block args
                     Payload::varSet(cs, blkArgName, builder.CreateCall(cs.getFunction("sorbet_getMethodBlockAsProc")),
                                     builder, irctx, 0);

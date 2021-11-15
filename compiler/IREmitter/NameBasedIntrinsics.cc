@@ -134,10 +134,7 @@ llvm::Value *prepareBlockHandler(MethodCallContext &mcctx, cfg::VariableUseSite 
     auto &irctx = mcctx.irctx;
     auto rubyBlockId = mcctx.rubyBlockId;
 
-    // If our current block has a block argument and we are passing it though, we don't have to reify it into a full
-    // proc; we can set things up so the Ruby VM will pass the block argument along and avoid extra allocations.
-    if (IREmitterHelpers::hasBlockArgument(cs, rubyBlockId, irctx.cfg.symbol, irctx) &&
-        blkVar.variable == irctx.rubyBlockArgs[rubyBlockId].back()) {
+    if (IREmitterHelpers::canPassThroughBlockViaRubyVM(mcctx, blkVar.variable)) {
         return Payload::getPassedBlockHandler(cs, mcctx.builder);
     } else {
         // TODO(perf) `makeBlockHandlerProc` uses `to_proc` under the hood, and could be rewritten here to make an

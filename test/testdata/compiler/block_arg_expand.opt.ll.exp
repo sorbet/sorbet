@@ -989,13 +989,13 @@ forward_sorbet_rb_array_each_withBlock.exit.i:    ; preds = %rb_array_len.exit.i
 
 rb_check_arity.1.exit.i8.i:                       ; preds = %114, %forward_sorbet_rb_array_each_withBlock.exit.i
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 13), i64** %38, align 8, !dbg !80, !tbaa !15
-  %rubyId_each66.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !93
+  %rubyId_each65.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !93
   %118 = bitcast %struct.sorbet_inlineIntrinsicEnv* %5 to i8*, !dbg !93
   call void @llvm.lifetime.start.p0i8(i64 noundef 40, i8* noundef nonnull %118) #13, !dbg !93
   %119 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %5, i64 0, i32 0, !dbg !93
   store i64 %42, i64* %119, align 8, !dbg !93, !tbaa !81
   %120 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %5, i64 0, i32 1, !dbg !93
-  store i64 %rubyId_each66.i, i64* %120, align 8, !dbg !93, !tbaa !83
+  store i64 %rubyId_each65.i, i64* %120, align 8, !dbg !93, !tbaa !83
   %121 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %5, i64 0, i32 2, !dbg !93
   store i32 0, i32* %121, align 8, !dbg !93, !tbaa !84
   %122 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %5, i64 0, i32 3, !dbg !93
@@ -1130,13 +1130,13 @@ forward_sorbet_rb_array_each_withBlock.1.exit.i:  ; preds = %rb_array_len.exit.i
 
 rb_check_arity.1.exit.i14.i:                      ; preds = %200, %forward_sorbet_rb_array_each_withBlock.1.exit.i
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 18), i64** %38, align 8, !dbg !93, !tbaa !15
-  %rubyId_each78.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !106
+  %rubyId_each77.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !106
   %204 = bitcast %struct.sorbet_inlineIntrinsicEnv* %4 to i8*, !dbg !106
   call void @llvm.lifetime.start.p0i8(i64 noundef 40, i8* noundef nonnull %204) #13, !dbg !106
   %205 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %4, i64 0, i32 0, !dbg !106
   store i64 %42, i64* %205, align 8, !dbg !106, !tbaa !81
   %206 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %4, i64 0, i32 1, !dbg !106
-  store i64 %rubyId_each78.i, i64* %206, align 8, !dbg !106, !tbaa !83
+  store i64 %rubyId_each77.i, i64* %206, align 8, !dbg !106, !tbaa !83
   %207 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %4, i64 0, i32 2, !dbg !106
   store i32 0, i32* %207, align 8, !dbg !106, !tbaa !84
   %208 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %4, i64 0, i32 3, !dbg !106
@@ -1271,13 +1271,13 @@ forward_sorbet_rb_array_each_withBlock.3.exit.i:  ; preds = %rb_array_len.exit.i
 
 rb_check_arity.1.exit.i21.i:                      ; preds = %286, %forward_sorbet_rb_array_each_withBlock.3.exit.i
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 23), i64** %38, align 8, !dbg !106, !tbaa !15
-  %rubyId_each90.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !118
+  %rubyId_each89.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !118
   %290 = bitcast %struct.sorbet_inlineIntrinsicEnv* %3 to i8*, !dbg !118
   call void @llvm.lifetime.start.p0i8(i64 noundef 40, i8* noundef nonnull %290) #13, !dbg !118
   %291 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %3, i64 0, i32 0, !dbg !118
   store i64 %42, i64* %291, align 8, !dbg !118, !tbaa !81
   %292 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %3, i64 0, i32 1, !dbg !118
-  store i64 %rubyId_each90.i, i64* %292, align 8, !dbg !118, !tbaa !83
+  store i64 %rubyId_each89.i, i64* %292, align 8, !dbg !118, !tbaa !83
   %293 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %3, i64 0, i32 2, !dbg !118
   store i32 0, i32* %293, align 8, !dbg !118, !tbaa !84
   %294 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %3, i64 0, i32 3, !dbg !118
@@ -1392,13 +1392,13 @@ forward_sorbet_rb_array_each_withBlock.6.exit.i:  ; preds = %rb_array_len.exit.i
 
 rb_check_arity.1.exit.i.i:                        ; preds = %359, %forward_sorbet_rb_array_each_withBlock.6.exit.i
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 28), i64** %38, align 8, !dbg !118, !tbaa !15
-  %rubyId_each102.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !125
+  %rubyId_each101.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !125
   %363 = bitcast %struct.sorbet_inlineIntrinsicEnv* %7 to i8*, !dbg !125
   call void @llvm.lifetime.start.p0i8(i64 noundef 40, i8* noundef nonnull %363) #13, !dbg !125
   %364 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %7, i64 0, i32 0, !dbg !125
   store i64 %42, i64* %364, align 8, !dbg !125, !tbaa !81
   %365 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %7, i64 0, i32 1, !dbg !125
-  store i64 %rubyId_each102.i, i64* %365, align 8, !dbg !125, !tbaa !83
+  store i64 %rubyId_each101.i, i64* %365, align 8, !dbg !125, !tbaa !83
   %366 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %7, i64 0, i32 2, !dbg !125
   store i32 0, i32* %366, align 8, !dbg !125, !tbaa !84
   %367 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %7, i64 0, i32 3, !dbg !125
