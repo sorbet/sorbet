@@ -115,6 +115,15 @@ VALUE sorbet_int_rb_ary_replace(VALUE recv, ID fun, int argc, VALUE *const restr
     return rb_ary_replace(recv, arg_0);
 }
 
+// Array#join
+// Calling convention: -1
+extern VALUE sorbet_rb_ary_join_m(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_ary_join_m(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk,
+                               VALUE closure) {
+    return sorbet_rb_ary_join_m(argc, args, recv);
+}
+
 // Array#last
 // Calling convention: -1
 extern VALUE rb_ary_last(int argc, const VALUE *args, VALUE obj);

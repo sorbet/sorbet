@@ -227,6 +227,7 @@ module Intrinsics
       "Array#delete",
       "Array#include?",
       "Array#initialize_copy",
+      "Array#join",
       "Array#last",
       "Array#rassoc",
       "Array#replace",
