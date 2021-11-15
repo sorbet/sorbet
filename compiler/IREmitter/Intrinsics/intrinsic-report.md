@@ -34,7 +34,7 @@
 * [   ] `rb_ary_index` (`Array#find_index`)
 * [   ] `rb_ary_index` (`Array#index`)
 * [   ] `rb_ary_rindex` (`Array#rindex`)
-* [   ] `rb_ary_join_m` (`Array#join`)
+* [  ✔] `rb_ary_join_m` (`Array#join`)
 * [   ] `rb_ary_reverse_m` (`Array#reverse`)
 * [   ] `rb_ary_reverse_bang` (`Array#reverse!`)
 * [   ] `rb_ary_rotate_m` (`Array#rotate`)
@@ -1564,4 +1564,4 @@
 
 ## Stats
 * Total:   1488
-* Visible: 236
+* Visible: 237
