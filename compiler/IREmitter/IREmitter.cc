@@ -745,15 +745,17 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
 
                     // Argument values are loaded by `setupArguments`, we just need to check their type here
                     auto &argInfo = arguments[i.argId];
+                    // The runtime doesn't check types for blocks, so we don't either.
+                    if (argInfo.flags.isBlock) {
+                        return;
+                    }
+
                     auto local = irctx.rubyBlockArgs[0][i.argId];
                     auto var = Payload::varGet(cs, local, builder, irctx, 0);
                     if (auto &expectedType = argInfo.type) {
                         auto description = fmt::format("Parameter '{}'", bind.bind.variable.toString(cs, cfg));
-                        if (argInfo.flags.isBlock) {
-                            IREmitterHelpers::emitTypeTestForBlock(cs, builder, var, expectedType, description);
-                        } else {
-                            IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, description);
-                        }
+                        ENFORCE(!argInfo.flags.isBlock);
+                        IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, description);
                     }
                 },
                 [&](cfg::LoadYieldParams &i) {

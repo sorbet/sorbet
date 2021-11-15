@@ -49,8 +49,6 @@ public:
     static llvm::Value *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);
     static llvm::Value *typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                  const core::TypePtr &type);
-    static llvm::Value *typeTestForBlock(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
-                                         const core::TypePtr &type);
     static void assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                            core::ClassOrModuleRef sym);
     static llvm::Value *boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *u1);

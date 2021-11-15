@@ -259,18 +259,6 @@ void IREmitterHelpers::emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &buil
     buildTypeTestPassFailBlocks(cs, builder, value, typeTest, expectedType, description);
 }
 
-void IREmitterHelpers::emitTypeTestForBlock(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *value,
-                                            const core::TypePtr &expectedType, std::string_view description) {
-    // Checking for blocks is special.  We don't want to materialize the block (`value`)
-    // unless we absolutely have to, so we check the type of blocks by poking at the
-    // RubyVM.  (We obviously have materialized the block at this point since we have
-    // `value` to inspect, but we have an LLVM optimization pass that will delete the
-    // materialization if the result of the materialization is unused.  So we don't
-    // want to add any more uses than we have to.)
-    auto *typeTest = Payload::typeTestForBlock(cs, builder, value, expectedType);
-    buildTypeTestPassFailBlocks(cs, builder, value, typeTest, expectedType, description);
-}
-
 llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilderBase &builder,
                                               const core::TypePtr &lit) {
     if (lit.derivesFrom(cs, core::Symbols::FalseClass())) {
