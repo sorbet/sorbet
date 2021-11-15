@@ -441,6 +441,11 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
             counterConsume(move(threadResult.counters));
             if (ret.gs == nullptr) {
                 ret.gs = move(threadResult.res.gs);
+
+                // this is the global state that wins, so reallocate its name tables to the full amount requested
+                ret.gs->preallocateNameTables(opts.reserveUtf8NameTableCapacity, opts.reserveConstantNameTableCapacity,
+                                              opts.reserveUniqueNameTableCapacity);
+
                 ENFORCE(ret.trees.empty());
                 ret.trees = move(threadResult.res.trees);
             } else {

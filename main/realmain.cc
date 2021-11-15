@@ -480,8 +480,13 @@ int realmain(int argc, char *argv[]) {
     if (opts.sleepInSlowPath) {
         gs->sleepInSlowPath = true;
     }
-    gs->preallocateNameTables(opts.reserveUtf8NameTableCapacity, opts.reserveConstantNameTableCapacity,
-                              opts.reserveUniqueNameTableCapacity);
+
+    // initially preallocate the name tables at half the requested capacity when sorbet will run threaded
+    if (workers->size() > 1 && opts.inputFileNames.size() >= 3) {
+        gs->preallocateNameTables(opts.reserveUtf8NameTableCapacity / 2, opts.reserveConstantNameTableCapacity / 2,
+                                  opts.reserveUniqueNameTableCapacity / 2);
+    }
+
     for (auto code : opts.isolateErrorCode) {
         gs->onlyShowErrorClass(code);
     }
