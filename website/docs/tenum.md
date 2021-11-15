@@ -35,9 +35,12 @@ can be used:
 ```ruby
 sig {returns(Suit)}
 def random_suit
-  Suit.values.sample
+  T.cast(Suit.values.sample, Suit)
 end
 ```
+
+> The `T.cast` is necessary because of how
+> [Sorbet behaves with `Array#sample`](faq.md#sigs-are-vague-for-stdlib-methods-that-accept-keyword-arguments--have-multiple-return-types).
 
 ## Exhaustiveness
 

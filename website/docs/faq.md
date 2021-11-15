@@ -160,6 +160,90 @@ out-of-bounds. If you would rather raise an exception than handle `nil`, use the
 [0, 1, 2].fetch(3) # IndexError: index 3 outside of array bounds
 ```
 
+## Sigs are vague for stdlib methods that accept keyword arguments & have multiple return types
+
+You might notice this when calling `Array#sample`, `Pathname#find`, or other
+stdlib methods that accept a keyword argument and can have different return
+types based on arguments:
+
+```ruby
+T.reveal_type([1, 2, 3].sample) # Revealed type: T.nilable(T.any(Integer, T::Array[Integer]))
+```
+
+The sig in Sorbet's stdlib is quite wide, since it has to cover every possible
+return type. Sorbet does not have good support for this for methods that accept
+keyword arguments. [#37](https://github.com/sorbet/sorbet/issues/37) is the
+original report of this.
+[#2248](https://github.com/sorbet/sorbet/pull/2248#issuecomment-562728417) has
+an explanation of why this is hard to fix in Sorbet.
+
+To work around this, you'll need to use `T.cast`.
+
+```ruby
+item = T.cast([1, 2, 3].sample, Integer)
+T.reveal_type(item) # Revealed type: Integer
+```
+
+In some cases - for example, with complex number conversion methods in
+`Kernel` - the Sorbet team has chosen to ship technically incorrect RBIs that
+are much more pragmatic. See [#1144](https://github.com/sorbet/sorbet/pull/1144)
+for an example. You can do the same for other cases you find annoying, but you
+take on the risk of always need to call the method correctly based on your new
+sig.
+
+For example, if you are confident you'll never call `Array#sample` on an empty
+array, use this [RBI](rbi.md) to not have to worry about `nil` returns.
+
+```ruby
+class Array
+  extend T::Sig
+
+  sig do
+    params(arg0: Integer, random: Random::Formatter)
+    .returns(T.any(Elem, T::Array[Elem]))
+  end
+  def sample(arg0=T.unsafe(nil), random: T.unsafe(nil)); end
+end
+```
+
+Or if you never call it with an argument (you always do `[1,2,3].sample`, never
+`[1,2,3].sample(2)`), use this RBI to always get an element (not an array) as
+your return type:
+
+```ruby
+class Array
+  extend T::Sig
+
+  sig do
+    params(arg0: Integer, random: Random::Formatter)
+    .returns(Elem) # or T.nilable(Elem), to also support empty arrays
+  end
+  def sample(arg0=T.unsafe(nil), random: T.unsafe(nil)); end
+end
+```
+
+> Overriding stdlib RBIs can make type checking less safe, since Sorbet will now
+> have an incorrect understanding of how the stdlib behaves.
+
+Another alternative is to define new methods that are stricter about arguments,
+and use these in place of stdlib methods:
+
+```ruby
+class Array
+  extend T::Sig
+
+  sig { returns(Elem) } # or T.nilable(Elem) unless you're confident this is never called on empty arrays
+  def sample_one
+    T.cast(sample, Elem)
+  end
+
+  sig { params(n: Integer).returns(T::Array[Elem]) }
+  def sample_n(n)
+    T.cast(sample(n), T::Array[Elem])
+  end
+end
+```
+
 ## Why is `super` is untyped, even when the parent method has a `sig`?
 
 Sorbet can't know what the "parent method" is 100% of the time. For example,
