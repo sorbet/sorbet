@@ -162,8 +162,8 @@ out-of-bounds. If you would rather raise an exception than handle `nil`, use the
 
 ## Sigs are vague for stdlib methods that accept keyword arguments & have multiple return types
 
-You might notice this when calling `Array#sample`, `Pathname#find`, or other std
-lib methods that accept a keyword argument and can have different return types
+You might notice this when calling `Array#sample`, `Pathname#find`, or other
+stdlib methods that accept a keyword argument and can have different return types
 based on arguments:
 
 ```ruby
