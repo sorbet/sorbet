@@ -760,7 +760,7 @@ class ImportTree final {
             return importType == ImportType::Normal;
         }
 
-        bool isSelfOrTestImport() {
+        bool isFriendOrTestImport() {
             return importType == ImportType::Friend || importType == ImportType::Test;
         }
 
@@ -1033,8 +1033,8 @@ private:
                 //                               ^^^  jump to actual definition of `Baz` class
 
                 // Ensure import's do not add duplicate loc-s in the test_module
-                const bool useImportLoc =
-                    source.isEnumeratedImport && (moduleType != ModuleType::PrivateTest || source.isSelfOrTestImport());
+                const bool useImportLoc = source.isEnumeratedImport &&
+                                          (moduleType != ModuleType::PrivateTest || source.isFriendOrTestImport());
                 const auto &importLoc = useImportLoc ? source.importLoc : core::LocOffsets::none();
 
                 auto mod = ast::MK::Module(core::LocOffsets::none(), importLoc,
