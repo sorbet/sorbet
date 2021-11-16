@@ -784,8 +784,6 @@ public:
     ErrorSection explainExpected(const GlobalState &gs, const std::string &for_, Loc originForUninitialized) const;
     ErrorSection explainGot(const GlobalState &gs, Loc originForUninitialized) const;
 
-    static void elaborateOnExplanation(const GlobalState &gs, ErrorBuilder &e, TypePtr expected, TypePtr got);
-
     ~TypeAndOrigins() noexcept;
     TypeAndOrigins() = default;
     TypeAndOrigins(const TypeAndOrigins &) = default;

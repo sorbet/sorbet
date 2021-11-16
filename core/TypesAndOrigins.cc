@@ -1,4 +1,3 @@
-#include "Symbols.h"
 #include "Types.h"
 #include "common/sort.h"
 
@@ -78,48 +77,6 @@ ErrorSection TypeAndOrigins::explainExpected(const GlobalState &gs, const string
 ErrorSection TypeAndOrigins::explainGot(const GlobalState &gs, Loc originForUninitialized) const {
     auto header = ErrorColors::format("Got `{}` originating from:", this->type.showWithMoreInfo(gs));
     return ErrorSection(header, this->origins2Explanations(gs, originForUninitialized));
-}
-
-namespace {
-
-[[nodiscard]] bool checkForAttachedClassHint(const GlobalState &gs, ErrorBuilder &e, const SelfTypeParam expected,
-                                             const ClassType got) {
-    if (expected.definition.data(gs)->name != Names::Constants::AttachedClass()) {
-        return false;
-    }
-
-    auto attachedClass = got.symbol.data(gs)->lookupSingletonClass(gs);
-    if (!attachedClass.exists()) {
-        return false;
-    }
-
-    if (attachedClass != expected.definition.data(gs)->owner.asClassOrModuleRef()) {
-        return false;
-    }
-
-    auto gotStr = got.show(gs);
-    auto expectedStr = expected.show(gs);
-    e.addErrorNote(
-        "`{}` is incompatible with `{}` because when this method is called on a subclass `{}` will represent a more "
-        "specific subclass, meaning `{}` will not be specific enough. See https://sorbet.org/docs/attached-class for "
-        "more.",
-        gotStr, expectedStr, expectedStr, gotStr);
-    return true;
-}
-} // namespace
-
-void TypeAndOrigins::elaborateOnExplanation(const GlobalState &gs, ErrorBuilder &e, const TypePtr expected,
-                                            const TypePtr got) {
-    auto selfTypeParamExpected = isa_type<SelfTypeParam>(expected);
-    auto classTypeGot = isa_type<ClassType>(got);
-    if (selfTypeParamExpected && classTypeGot) {
-        if (checkForAttachedClassHint(gs, e, cast_type_nonnull<SelfTypeParam>(expected),
-                                      cast_type_nonnull<ClassType>(got))) {
-            return;
-        }
-    }
-
-    // TODO(jez) More elaborate explanations
 }
 
 TypeAndOrigins::~TypeAndOrigins() noexcept {
