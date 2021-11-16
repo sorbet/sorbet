@@ -1,11 +1,11 @@
-imports_both_reversed/__package.rb:4: Conflicting import sources for `A::B::C` https://srb.help/3714
-     4 |  import A::B
-                 ^^^^
-    imports_both_reversed/__package.rb:5: Conflict from
+imports_both_reversed/__package.rb:5: Conflicting import sources for `A::B` https://srb.help/3714
      5 |  import A
                  ^
+    imports_both_reversed/__package.rb:4: Conflict from
+     4 |  import A::B
+                 ^^^^
 
-imports_both/__package.rb:5: Conflicting import sources for `A::B::C` https://srb.help/3714
+imports_both/__package.rb:5: Conflicting import sources for `A::B` https://srb.help/3714
      5 |  import A::B
                  ^^^^
     imports_both/__package.rb:4: Conflict from

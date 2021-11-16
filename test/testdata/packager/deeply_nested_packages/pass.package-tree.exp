@@ -3,34 +3,47 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Package><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C Package>::<C Subpackage>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Package_Package_Private$1>::<C Package>::<C PackageClass>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C InnerClass>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Package_Package_Private$1>::<C Package>::<C InnerClass>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Package_Package$1>::<C Package>::<C Subpackage><<C <todo sym>>> < ()
-      <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>::<C SubpackageClass>
+    module <emptyTree>::<C Package_Package_Private$1>::<C Package><<C <todo sym>>> < ()
+      <emptyTree>::<C Subpackage> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>
     end
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Package_Package_Private$1>::<C Package><<C <todo sym>>> < ()
+      <emptyTree>::<C InnerClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package_Private$1>::<C Package>::<C InnerClass>
+    end
+
+    module <emptyTree>::<C Package_Package_Private$1>::<C Package><<C <todo sym>>> < ()
+      <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package_Private$1>::<C Package>::<C PackageClass>
+    end
+
+    module <emptyTree>::<C Package_Package_Private$1>::<C Package><<C <todo sym>>> < ()
+      <emptyTree>::<C Subpackage> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>
+    end
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
     module <emptyTree>::<C Package_Package$1>::<C Package><<C <todo sym>>> < ()
-      <emptyTree>::<C InnerClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C InnerClass>
+      <emptyTree>::<C InnerClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package_Private$1>::<C Package>::<C InnerClass>
     end
 
     module <emptyTree>::<C Package_Package$1>::<C Package><<C <todo sym>>> < ()
-      <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>
+      <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package_Private$1>::<C Package>::<C PackageClass>
     end
+  end
 
-    module <emptyTree>::<C Package_Package$1>::<C Package>::<C Subpackage><<C <todo sym>>> < ()
-      <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>::<C SubpackageClass>
-    end
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
 # -- test/testdata/packager/deeply_nested_packages/mainpackage.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C Package_Package_Private$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Package>::<C PackageClass><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.returns(<emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass>)
@@ -48,7 +61,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/deeply_nested_packages/subdirectory/inner_class.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C Package_Package_Private$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Package>::<C InnerClass><<C <todo sym>>> < (::<todo sym>)
     end
   end
@@ -58,36 +71,45 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Package>::<C Subpackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C Package>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>::<C SubpackageClass>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package_Private$1>::<C Package>::<C Subpackage>::<C SubpackageClass>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Package_Subpackage_Package$1>::<C Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C Package_Subpackage_Package_Private$1>::<C Package><<C <todo sym>>> < ()
       <emptyTree>::<C InnerClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C InnerClass>
     end
 
-    module <emptyTree>::<C Package_Subpackage_Package$1>::<C Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C Package_Subpackage_Package_Private$1>::<C Package><<C <todo sym>>> < ()
       <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>
     end
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Package_Subpackage_Package$1>::<C Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C Package_Subpackage_Package_Private$1>::<C Package><<C <todo sym>>> < ()
       <emptyTree>::<C InnerClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C InnerClass>
     end
 
-    module <emptyTree>::<C Package_Subpackage_Package$1>::<C Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C Package_Subpackage_Package_Private$1>::<C Package><<C <todo sym>>> < ()
       <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>
     end
 
-    module <emptyTree>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage><<C <todo sym>>> < ()
-      <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>::<C SubpackageClass>
+    module <emptyTree>::<C Package_Subpackage_Package_Private$1>::<C Package>::<C Subpackage><<C <todo sym>>> < ()
+      <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package_Private$1>::<C Package>::<C Subpackage>::<C SubpackageClass>
     end
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage><<C <todo sym>>> < ()
+      <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package_Private$1>::<C Package>::<C Subpackage>::<C SubpackageClass>
+    end
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
 # -- test/testdata/packager/deeply_nested_packages/subdirectory/subpackage/subpackage.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package_Private$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.returns(<emptyTree>::<C Package>::<C PackageClass>)

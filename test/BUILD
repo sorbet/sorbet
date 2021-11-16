@@ -200,6 +200,18 @@ pipeline_tests(
 )
 
 pipeline_tests(
+    "test_packager",
+    glob(
+        [
+            "testdata/packager/**/*.rb",
+            "testdata/packager/**/*.exp",
+        ],
+    ),
+    "PackagerTests",
+    filter = "PackagerTests",
+)
+
+pipeline_tests(
     "whitequark_parser_corpus",
     glob([
         "whitequark/**/*.rb",

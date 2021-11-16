@@ -5,36 +5,42 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.test_import(<emptyTree>::<C Project>::<C TestOnly>)
 
-    <self>.export_for_test(<emptyTree>::<C <PackageRegistry>>::<C Project_MainLib_Package$1>::<C Project>::<C MainLib>::<C Lib>)
+    <self>.export_for_test(<emptyTree>::<C <PackageRegistry>>::<C Project_MainLib_Package_Private$1>::<C Project>::<C MainLib>::<C Lib>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_MainLib_Package$1>::<C Project>::<C Util><<C <todo sym>>> < ()
-      <emptyTree>::<C MyUtil> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1>::<C Project>::<C Util>::<C MyUtil>
+    module <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Project><<C <todo sym>>> < ()
+      <emptyTree>::<C Util> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1>::<C Project>::<C Util>
     end
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_MainLib_Package$1>::<C Project>::<C MainLib><<C <todo sym>>> < ()
-      <emptyTree>::<C Lib> = <emptyTree>::<C <PackageRegistry>>::<C Project_MainLib_Package$1>::<C Project>::<C MainLib>::<C Lib>
+    module <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Project>::<C MainLib><<C <todo sym>>> < ()
+      <emptyTree>::<C Lib> = <emptyTree>::<C <PackageRegistry>>::<C Project_MainLib_Package_Private$1>::<C Project>::<C MainLib>::<C Lib>
     end
 
-    module <emptyTree>::<C Project_MainLib_Package$1>::<C Project>::<C TestOnly><<C <todo sym>>> < ()
-      <emptyTree>::<C SomeHelper> = <emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package$1>::<C Project>::<C TestOnly>::<C SomeHelper>
+    module <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Project><<C <todo sym>>> < ()
+      <emptyTree>::<C TestOnly> = <emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package$1>::<C Project>::<C TestOnly>
     end
 
-    module <emptyTree>::<C Project_MainLib_Package$1>::<C Project>::<C Util><<C <todo sym>>> < ()
-      <emptyTree>::<C MyUtil> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1>::<C Project>::<C Util>::<C MyUtil>
+    module <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Project><<C <todo sym>>> < ()
+      <emptyTree>::<C Util> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1>::<C Project>::<C Util>
     end
 
-    module <emptyTree>::<C Project_MainLib_Package$1>::<C Test>::<C Project>::<C Util><<C <todo sym>>> < ()
-      <emptyTree>::<C UtilHelper> = <emptyTree>::<C <PackageTests>>::<C Project_Util_Package$1>::<C Test>::<C Project>::<C Util>::<C UtilHelper>
+    module <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Test>::<C Project><<C <todo sym>>> < ()
+      <emptyTree>::<C Util> = <emptyTree>::<C <PackageTests>>::<C Project_Util_Package$1>::<C Test>::<C Project>::<C Util>
     end
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
 # -- test/testdata/packager/simple_test_import/main_lib/lib.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_MainLib_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_MainLib_Package_Private$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Project>::<C MainLib>::<C Lib><<C <todo sym>>> < (::<todo sym>)
       <emptyTree>::<C Project>::<C Util>::<C MyUtil>.new()
 
@@ -48,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/simple_test_import/main_lib/lib.test.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageTests>>::<C Project_MainLib_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageTests>>::<C Project_MainLib_Package_Private$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Test>::<C Project>::<C MainLib>::<C LibTest><<C <todo sym>>> < (::<todo sym>)
       <emptyTree>::<C Project>::<C MainLib>::<C Lib>.new()
 
@@ -65,21 +71,30 @@ end
 # -- test/testdata/packager/simple_test_import/test_only/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Project>::<C TestOnly><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package$1>::<C Project>::<C TestOnly>::<C SomeHelper>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package_Private$1>::<C Project>::<C TestOnly>::<C SomeHelper>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_TestOnly_Package$1>::<C Project>::<C TestOnly><<C <todo sym>>> < ()
-      <emptyTree>::<C SomeHelper> = <emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package$1>::<C Project>::<C TestOnly>::<C SomeHelper>
+    module <emptyTree>::<C Project_TestOnly_Package_Private$1>::<C Project>::<C TestOnly><<C <todo sym>>> < ()
+      <emptyTree>::<C SomeHelper> = <emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package_Private$1>::<C Project>::<C TestOnly>::<C SomeHelper>
     end
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Project_TestOnly_Package$1>::<C Project>::<C TestOnly><<C <todo sym>>> < ()
+      <emptyTree>::<C SomeHelper> = <emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package_Private$1>::<C Project>::<C TestOnly>::<C SomeHelper>
+    end
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
 # -- test/testdata/packager/simple_test_import/test_only/some_helper.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package_Private$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Project>::<C TestOnly>::<C SomeHelper><<C <todo sym>>> < (::<todo sym>)
     end
   end
@@ -87,37 +102,49 @@ end
 # -- test/testdata/packager/simple_test_import/util/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Project>::<C Util><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1>::<C Project>::<C Util>::<C MyUtil>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package_Private$1>::<C Project>::<C Util>::<C MyUtil>)
 
-    <self>.export(<emptyTree>::<C <PackageTests>>::<C Project_Util_Package$1>::<C Test>::<C Project>::<C Util>::<C UtilHelper>)
+    <self>.export(<emptyTree>::<C <PackageTests>>::<C Project_Util_Package_Private$1>::<C Test>::<C Project>::<C Util>::<C UtilHelper>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Project_Util_Package_Private$1>::<C Project>::<C Util><<C <todo sym>>> < ()
+      <emptyTree>::<C MyUtil> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package_Private$1>::<C Project>::<C Util>::<C MyUtil>
+    end
+  end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
     module <emptyTree>::<C Project_Util_Package$1>::<C Project>::<C Util><<C <todo sym>>> < ()
-      <emptyTree>::<C MyUtil> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1>::<C Project>::<C Util>::<C MyUtil>
+      <emptyTree>::<C MyUtil> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package_Private$1>::<C Project>::<C Util>::<C MyUtil>
+    end
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    module <emptyTree>::<C Project_Util_Package$1>::<C Test>::<C Project>::<C Util><<C <todo sym>>> < ()
+      <emptyTree>::<C UtilHelper> = <emptyTree>::<C <PackageTests>>::<C Project_Util_Package_Private$1>::<C Test>::<C Project>::<C Util>::<C UtilHelper>
     end
   end
 end
 # -- test/testdata/packager/simple_test_import/util/my_util.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package_Private$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Project>::<C Util>::<C MyUtil><<C <todo sym>>> < (::<todo sym>)
     end
   end
 end
 # -- test/testdata/packager/simple_test_import/util/unexported.test.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageTests>>::<C Project_Util_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageTests>>::<C Project_Util_Package_Private$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Test>::<C Project>::<C Util>::<C Unexported><<C <todo sym>>> < (::<todo sym>)
     end
   end
 end
 # -- test/testdata/packager/simple_test_import/util/util_helper.test.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageTests>>::<C Project_Util_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageTests>>::<C Project_Util_Package_Private$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Test>::<C Project>::<C Util>::<C UtilHelper><<C <todo sym>>> < (::<todo sym>)
     end
   end

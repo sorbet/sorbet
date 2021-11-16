@@ -51,10 +51,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
+
+  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
+  end
+
+  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+  end
 end
 # -- test/testdata/packager/invalid_package_control_flow/package_spec_additions.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C MyPackage_Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C MyPackage_Package_Private$1><<C <todo sym>>> < ()
     class ::<root>::<C PackageSpec><<C <todo sym>>> < (::<todo sym>)
       def self.some_method<<todo method>>(x, &<blk>)
         <emptyTree>

@@ -72,6 +72,9 @@ string NameRef::showRaw(const GlobalState &gs) const {
                 case UniqueNameKind::Packager:
                     kind = "G";
                     break;
+                case UniqueNameKind::PackagerPrivate:
+                    kind = "V";
+                    break;
             }
             if (gs.censorForSnapshotTests && unique->uniqueNameKind == UniqueNameKind::Namer &&
                 unique->original == core::Names::staticInit()) {
@@ -184,6 +187,7 @@ bool NameRef::isClassName(const GlobalState &gs) const {
                     return dataUnique(gs)->original.isClassName(gs);
                 case UniqueNameKind::ResolverMissingClass:
                 case UniqueNameKind::Packager:
+                case UniqueNameKind::PackagerPrivate:
                 case UniqueNameKind::Parser:
                 case UniqueNameKind::Desugar:
                 case UniqueNameKind::Namer:
@@ -212,7 +216,18 @@ bool NameRef::isPackagerName(const GlobalState &gs) const {
         return false;
     }
     auto original = dataCnst(gs)->original;
-    return original.kind() == NameKind::UNIQUE && original.dataUnique(gs)->uniqueNameKind == UniqueNameKind::Packager;
+    return original.kind() == NameKind::UNIQUE &&
+           (original.dataUnique(gs)->uniqueNameKind == UniqueNameKind::Packager ||
+            original.dataUnique(gs)->uniqueNameKind == UniqueNameKind::PackagerPrivate);
+}
+
+bool NameRef::isPackagerPrivateName(const GlobalState &gs) const {
+    if (kind() != NameKind::CONSTANT) {
+        return false;
+    }
+    auto original = dataCnst(gs)->original;
+    return original.kind() == NameKind::UNIQUE &&
+           original.dataUnique(gs)->uniqueNameKind == UniqueNameKind::PackagerPrivate;
 }
 
 bool NameRef::isValidConstantName(const GlobalState &gs) const {
@@ -224,6 +239,7 @@ bool NameRef::isValidConstantName(const GlobalState &gs) const {
                 case UniqueNameKind::ResolverMissingClass:
                 case UniqueNameKind::TEnum:
                 case UniqueNameKind::Packager:
+                case UniqueNameKind::PackagerPrivate:
                     return true;
                 case UniqueNameKind::Parser:
                 case UniqueNameKind::Desugar:
@@ -369,17 +385,17 @@ NameRef NameRef::prepend(GlobalState &gs, string_view s) const {
     return gs.enterNameUTF8(nameEq);
 }
 
-NameRef NameRef::lookupMangledPackageName(const GlobalState &gs) const {
+NameRef NameRef::lookupMangledPrivatePackageName(const GlobalState &gs) const {
     auto name = this->dataUtf8(gs);
     auto parts = absl::StrSplit(name->utf8, "::");
-    string mangledName = absl::StrCat(absl::StrJoin(parts, "_"), "_Package");
+    string mangledName = absl::StrCat(absl::StrJoin(parts, "_"), core::PACKAGE_PRIVATE_SUFFIX);
 
     auto utf8Name = gs.lookupNameUTF8(mangledName);
     if (!utf8Name.exists()) {
         return utf8Name;
     }
 
-    auto packagerName = gs.lookupNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
+    auto packagerName = gs.lookupNameUnique(core::UniqueNameKind::PackagerPrivate, utf8Name, 1);
     if (!packagerName.exists()) {
         return packagerName;
     }
