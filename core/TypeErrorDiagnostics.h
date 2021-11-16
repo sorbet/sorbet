@@ -1,5 +1,5 @@
-#ifndef SORBET_TYPE_DRIVEN_AUTOCORRECT_H
-#define SORBET_TYPE_DRIVEN_AUTOCORRECT_H
+#ifndef SORBET_TYPE_ERROR_DIAGNOSTICS_H
+#define SORBET_TYPE_ERROR_DIAGNOSTICS_H
 
 #include "core/Error.h"
 #include "core/GlobalState.h"
@@ -8,7 +8,7 @@
 
 namespace sorbet::core {
 
-class TypeDrivenAutocorrect final {
+class TypeErrorDiagnostics final {
 public:
     // Uses heuristics to insert an autocorrect that converts from `expectedType` to `actualType`.
     //
@@ -18,6 +18,8 @@ public:
     // Statefully accumulates the autocorrect directly onto the provided `ErrorBuilder`.
     static void maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc, TypeConstraint &constr,
                                  TypePtr expectedType, TypePtr actualType);
+
+    static void explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr expected, const TypePtr got);
 };
 
 } // namespace sorbet::core

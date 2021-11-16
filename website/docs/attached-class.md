@@ -174,3 +174,40 @@ class Parent
   def self.problem(x); end
 end
 ```
+
+## `T.attached_class` common problems
+
+One common problem people encounter when using `T.attached_class` looks
+something like this:
+
+```ruby
+# typed: true
+
+class Parent
+  extend T::Sig
+
+  sig {returns(T.attached_class)}
+  def self.make
+    Parent.new # (1) Sorbet reports an error here
+  end
+end
+
+class Child < Parent; end
+
+T.reveal_type(Child.make) # Revealed type: `Child`
+```
+
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Parent%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Breturns%28T.attached_class%29%7D%0A%20%20def%20self.make%0A%20%20%20%20Parent.new%0A%20%20end%0Aend%0A%0Aclass%20Child%20%3C%20Parent%3B%20end%0A%0AT.reveal_type%28Child.make%29%20%23%20reveals%20Child)
+
+In this example, the program attempts to return `Parent.new` from `self.make`,
+instead of just `self.new`. There is a key difference: `Parent.new` will
+**always** make an instance of `Parent`, while `self.new` will make an instance
+of the particular subclass that `self.make` was called on.
+
+For this reason, Sorbet has to report an error at comment `(1)` above. If we
+consider the `Child` class that inherits from `Parent`, the `T.attached_class`
+type suggests to the caller that `Child.make` will return a `Child` instance
+(the `T.reveal_type` confirms this).
+
+Since `Parent.new` is not an instance of `Child` or any other potential
+subclasses of `Parent`, Sorbet must reject the code at `(1)`.

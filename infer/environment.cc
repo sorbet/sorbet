@@ -3,7 +3,7 @@
 #include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/TypeConstraint.h"
-#include "core/TypeDrivenAutocorrect.h"
+#include "core/TypeErrorDiagnostics.h"
 #include <algorithm> // find, remove_if
 
 template struct std::pair<sorbet::core::LocalVariable, std::shared_ptr<sorbet::core::Type>>;
@@ -1246,10 +1246,11 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         e.addErrorSection(
                             core::TypeAndOrigins::explainExpected(ctx, methodReturnType, ownerData->loc(), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
+                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, methodReturnType, typeAndOrigin.type);
                         if (i.whatLoc != inWhat.implicitReturnLoc) {
                             auto replaceLoc = core::Loc(ctx.file, i.whatLoc);
-                            core::TypeDrivenAutocorrect::maybeAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
-                                                                          typeAndOrigin.type);
+                            core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
+                                                                         typeAndOrigin.type);
                         }
                     }
                 }
@@ -1282,6 +1283,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             core::TypeAndOrigins::explainExpected(ctx, expectedType, bspec.loc, "block result type"));
 
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
+                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, expectedType, typeAndOrigin.type);
                     }
                 }
 
@@ -1421,11 +1423,12 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 // message, but we don't have a convenient way to compute this at the moment.
                                 e.addErrorSection(cur.explainExpected(ctx, "field defined here", ownerLoc));
                                 e.addErrorSection(tp.explainGot(ctx, ownerLoc));
+                                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, cur.type, tp.type);
                                 auto replaceLoc = core::Loc(ctx.file, bind.loc);
                                 // We are not processing a method call, so there is no constraint.
                                 auto &constr = core::TypeConstraint::EmptyFrozenConstraint;
-                                core::TypeDrivenAutocorrect::maybeAutocorrect(ctx, e, replaceLoc, constr, cur.type,
-                                                                              tp.type);
+                                core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, cur.type,
+                                                                             tp.type);
                             }
                             tp = cur;
                         }
