@@ -9,7 +9,16 @@ namespace sorbet::compiler {
 
 struct IREmitterContext;
 struct Alias;
+struct EscapedUse;
 class CompilerState;
+
+struct EscapedVariableInfo {
+    const EscapedUse &use;
+    // The index of the variable within the frame.
+    llvm::Value *index;
+    // The number of frames to traverse.
+    llvm::Value *level;
+};
 
 // This class serves as forwarder to payload.c, which are the c wrappers for
 // Ruby functions. These functions can (and do) use information known during
@@ -78,9 +87,8 @@ public:
     static void varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, llvm::IRBuilderBase &builder,
                        const IREmitterContext &irctx, int rubyBlockId);
 
-    static std::tuple<llvm::Value *, llvm::Value *> escapedVariableIndexAndLevel(CompilerState &cs, cfg::LocalRef local,
-                                                                                 const IREmitterContext &irctx,
-                                                                                 int rubyBlockId);
+    static EscapedVariableInfo escapedVariableInfo(CompilerState &cs, cfg::LocalRef local,
+                                                   const IREmitterContext &irctx, int rubyBlockId);
 
     static llvm::Value *retrySingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
     static llvm::Value *voidSingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
