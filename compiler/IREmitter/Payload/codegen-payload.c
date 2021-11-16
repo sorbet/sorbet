@@ -623,6 +623,11 @@ int sorbet_rubyArrayLen(VALUE array) {
 }
 
 SORBET_INLINE
+VALUE sorbet_rubyArrayArefUnchecked(VALUE array, int i) {
+    return RARRAY_AREF(array, i);
+}
+
+SORBET_INLINE
 const VALUE *sorbet_rubyArrayInnerPtr(VALUE array) {
     // there's also a transient version of this function if we ever decide to want more speed. transient stands for that
     // we _should not_ allow to execute any code between getting these pointers and reading elements from

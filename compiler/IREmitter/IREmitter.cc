@@ -754,8 +754,13 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     auto var = Payload::varGet(cs, local, builder, irctx, 0);
                     if (auto &expectedType = argInfo.type) {
                         auto description = fmt::format("Parameter '{}'", bind.bind.variable.toString(cs, cfg));
-                        ENFORCE(!argInfo.flags.isBlock);
-                        IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, description);
+                        if (argInfo.flags.isRepeated && !argInfo.flags.isKeyword) {
+                            // Signature types for rest arguments apply to each individual element of
+                            // the rest arg, not the actual argument itself.
+                            IREmitterHelpers::emitTypeTestForRestArg(cs, builder, var, expectedType, description);
+                        } else {
+                            IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, description);
+                        }
                     }
                 },
                 [&](cfg::LoadYieldParams &i) {
