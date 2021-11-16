@@ -331,9 +331,16 @@ string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) 
         fmt::format_to(std::back_inserter(buf), "    {} -> bb{}\n", this->bexit.cond.variable.toString(gs, cfg),
                        this->bexit.thenb->id);
     } else {
+        // nullptr can sometimes happen in valid use cases. One concrete case: `<get-current-exception>` is an
+        // instruction designed to support exception handling in the Sorbet Compiler. It always comes in a
+        // `rescue` block, but the `rescue` block might unconditionally raise before the inferencer assigns a type
+        // to the binding containing the `<get-current-exception>` instruction. The compiler doesn't
+        // actually care about the type of the bexit.cond, so this is acceptable. It does mean that
+        // we have to check whether the type is set here before attempting to print something.
+        auto condType = this->bexit.cond.type == nullptr ? "<nullptr>" : this->bexit.cond.type.show(gs);
         fmt::format_to(std::back_inserter(buf), "    {} -> ({} ? bb{} : bb{})\n",
-                       this->bexit.cond.variable.toString(gs, cfg), this->bexit.cond.type.show(gs),
-                       this->bexit.thenb->id, this->bexit.elseb->id);
+                       this->bexit.cond.variable.toString(gs, cfg), condType, this->bexit.thenb->id,
+                       this->bexit.elseb->id);
     }
     return to_string(buf);
 }
