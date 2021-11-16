@@ -38,6 +38,7 @@ compilation_database(
         "//parser:generate_ast",
         "//namer:namer_test",
         "//main/options:options_test",
+        "//main/minimize:minimize",
         "//main/lsp:lsp_test",
         "//main/lsp:lsp_preprocessor_test",
         "//main/lsp:lsp_file_updates_test",

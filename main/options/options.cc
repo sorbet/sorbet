@@ -78,6 +78,7 @@ const vector<PrintOptions> print_options({
     {"autogen-autoloader", &Printers::AutogenAutoloader, true, false},
     {"autogen-subclasses", &Printers::AutogenSubclasses},
     {"package-tree", &Printers::Packager, false},
+    {"minimize-rbi", &Printers::MinimizeRBI},
 });
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -780,6 +781,10 @@ void readOptions(Options &opts,
         opts.noErrorCount = raw["no-error-count"].as<bool>();
         opts.noStdlib = raw["no-stdlib"].as<bool>();
         opts.minimizeRBI = raw["minimize-rbi"].as<string>();
+        if (!opts.minimizeRBI.empty() && !opts.print.MinimizeRBI.enabled) {
+            logger->error("--minimize-rbi must also include --print=minimize-rbi");
+            throw EarlyReturnWithCode(1);
+        }
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
         opts.storeState = raw["store-state"].as<string>();
         opts.forceHashing = raw["force-hashing"].as<bool>();

@@ -31,6 +31,7 @@
 #include "core/serialize/serialize.h"
 #include "hashing/hashing.h"
 #include "main/cache/cache.h"
+#include "main/minimize/minimize.h"
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
 #include "payload/payload.h"
@@ -581,7 +582,7 @@ int realmain(int argc, char *argv[]) {
 
         // TODO(jez) Change name of option?
         if (!opts.minimizeRBI.empty()) {
-            // TODO(jez) What would it mean for us to accept a vector of RBIs?
+            // TODO(jez) What would it mean for us to accept a vector of RBIs? (Tricky to combine with --print)
             // TODO(jez) Do something to ensure that `opts.minimizeRBI` file is not a file Sorbet
             // already knew about.
             inputFilesForMinimize = pipeline::reserveFiles(gs, {opts.minimizeRBI});
@@ -696,15 +697,11 @@ int realmain(int argc, char *argv[]) {
                 fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.show(*gsForMinimize), name.rawId(),
                            sym.show(*gsForMinimize), sym.rawId());
             }
+            fmt::print("-------------------------------------------------------------------------\n");
+
+            Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
 
             // -------- TODO(jez) --------
-            // Probably doesn't make sense to reuse mergeIndexResults because it's doing a lot of
-            // concurrency stuff to merge the index results as soon as they come in. We really just
-            // need to run the Substitute::run treewalk once.
-            //
-            // It's unlikely that Substitute::run is already in scope. We should probably start
-            // thinking about factoring our code out into a new package like `main/minimize/`.
-
             // Share the original gs's error queue
             // 1.  Launch sorbet a second time to compute second GlobalState
             //     a.  Factor code out of realmain to be able to reuse code? Or maybe just implement manually?
