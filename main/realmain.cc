@@ -18,6 +18,7 @@
 #endif
 
 #include "absl/strings/str_cat.h"
+#include "ast/substitute/substitute.h" // TODO(jez) don't commit this
 #include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/sort.h"
@@ -47,6 +48,25 @@ namespace spd = spdlog;
 using namespace std;
 
 namespace sorbet::realmain {
+
+namespace {
+// TODO(jez) Delete this or expose a proper helper in core/Symbols.cc instead of duplicating code.
+bool symbolIsHiddenFromPrinting(core::GlobalState &gs, core::SymbolRef sym) {
+    if (sym.isSynthetic()) {
+        return true;
+    }
+    if (sym.data(gs)->locs().empty()) {
+        return true;
+    }
+    for (auto loc : sym.data(gs)->locs()) {
+        if (loc.file().data(gs).sourceType == core::File::Type::Payload) {
+            return true;
+        }
+    }
+    return false;
+}
+} // namespace
+
 shared_ptr<spd::logger> logger;
 int returnCode;
 
@@ -452,9 +472,10 @@ int realmain(int argc, char *argv[]) {
     }
     unique_ptr<WorkerPool> workers = WorkerPool::create(opts.threads, *logger);
 
+    //
     auto errorFlusher = make_shared<core::ErrorFlusherStdout>();
     unique_ptr<core::GlobalState> gs =
-        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, errorFlusher)));
+        make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, errorFlusher));
     gs->pathPrefix = opts.pathPrefix;
     gs->errorUrlBase = opts.errorUrlBase;
     gs->semanticExtensions = move(extensions);
@@ -510,6 +531,13 @@ int realmain(int argc, char *argv[]) {
     gs->suggestUnsafe = opts.suggestUnsafe;
 
     logger->trace("done building initial global state");
+
+    unique_ptr<core::GlobalState> gsForMinimize;
+    if (!opts.minimizeRBI.empty()) {
+        // Copy all the CLI-provided options and initialization onto the GlobalState we'll use for
+        // minimizeRBI below, taking care to copy before populating it with any file information.
+        gsForMinimize = gs->deepCopy();
+    }
 
     if (opts.runLSP) {
 #ifdef SORBET_REALMAIN_MIN
@@ -604,6 +632,84 @@ int realmain(int argc, char *argv[]) {
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
+        }
+
+        if (!opts.minimizeRBI.empty()) {
+            // TODO(jez) Change name of option?
+            // TODO(jez) Do something to ensure that `opts.minimizeRBI` file is not a file Sorbet
+            // already knew about.
+            // TODO(jez) What would it mean for us to accept a vector of RBIs?
+            // TODO(jez) Double check that you didn't use gs whe you meant to gsForMinimize
+            // TODO(jez) Is it worth factoring this stuff out to a helper? (leaning towards no)
+            // TODO(jez) Is it worth forcing the input file to be an RBI? Or should we drop that from the name?
+            // TODO(jez) Put Timer's in here wherever there are gaps in the web trace file
+            auto minimizeInputFiles = pipeline::reserveFiles(gsForMinimize, vector<string>{opts.minimizeRBI});
+
+            // TODO(jez) kvstore is an input here. Should we make an attempt to add this RBI file to
+            // the cache? I don't think so.
+            auto indexed = pipeline::index(gsForMinimize, minimizeInputFiles, opts, *workers, kvstore);
+            if (gsForMinimize->hadCriticalError()) {
+                gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
+            }
+
+            indexed = move(pipeline::resolve(gsForMinimize, move(indexed), opts, *workers).result());
+            if (gsForMinimize->hadCriticalError()) {
+                gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
+            }
+
+            // TODO(jez) Test that shows that `-p` options work with second global state
+            indexed = move(pipeline::typecheck(gsForMinimize, move(indexed), opts, *workers).result());
+            if (gsForMinimize->hadCriticalError()) {
+                gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
+            }
+
+            gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
+            // TODO(jez) Flush error COUNT from this run (actually, looks like this might already
+            // happen because the errorQueue is shared?)
+            // TODO(jez) What do do about autocorrects? Ban combining the two options?
+            // TODO(jez) Handle hadCriticalError
+
+            fmt::print("-------------------------------------------------------------------------\n");
+            for (const auto &[name, sym] : core::Symbols::root().data(*gs)->membersStableOrderSlow(*gs)) {
+                if (symbolIsHiddenFromPrinting(*gs, sym)) {
+                    continue;
+                }
+                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.show(*gs), name.rawId(), sym.show(*gs),
+                           sym.rawId());
+            }
+            fmt::print("-------------------------------------------------------------------------\n");
+            for (const auto &[name, sym] :
+                 core::Symbols::root().data(*gsForMinimize)->membersStableOrderSlow(*gsForMinimize)) {
+                if (symbolIsHiddenFromPrinting(*gsForMinimize, sym)) {
+                    continue;
+                }
+                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.show(*gsForMinimize), name.rawId(),
+                           sym.show(*gsForMinimize), sym.rawId());
+            }
+
+            // -------- TODO(jez) --------
+            // Probably doesn't make sense to reuse mergeIndexResults because it's doing a lot of
+            // concurrency stuff to merge the index results as soon as they come in. We really just
+            // need to run the Substitute::run treewalk once.
+            //
+            // It's unlikely that Substitute::run is already in scope. We should probably start
+            // thinking about factoring our code out into a new package like `main/minimize/`.
+
+            // Share the original gs's error queue
+            // 1.  Launch sorbet a second time to compute second GlobalState
+            //     a.  Factor code out of realmain to be able to reuse code? Or maybe just implement manually?
+            //     b.  Probably going to have to use GlobalSubstitution so that the NameRef's are
+            //         comparable
+            //         - Will have to take great care to never compare core::SymbolRef (should be possible)
+            // 2.  Port diff algorithm from Ruby to find things in gsForMinimize but not in gs
+            //     -   Not clear what the output of this step should be...
+            //         - core::GlobalState?
+            //         - some proto definition?
+            //         - direct to RBI string?
+            // 3.  Serialize the diff to an RBI
+            //     -   Might be nice to have this as its own thing? Like to serialize Sorbet's whole
+            //         static knowledge to an RBI?
+            //     -   Would let people ship RBIs for their Sorbet gems
         }
 
         if (opts.suggestTyped) {
@@ -734,6 +840,7 @@ int realmain(int argc, char *argv[]) {
             intentionallyLeakMemory(e.tree.release());
         }
         intentionallyLeakMemory(gs.release());
+        // TODO(jez) Handle gsForMinimize and the tree you created for that
     }
 
     // je_malloc_stats_print(nullptr, nullptr, nullptr); // uncomment this to print jemalloc statistics
