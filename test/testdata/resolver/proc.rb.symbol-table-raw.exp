@@ -1,26 +1,26 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=45:4}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=45:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
   class <C <U TestProc>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=3:15}
-    method <C <U TestProc>><U bad> (x, y, z, w, <blk>) -> NilClass @ Loc {file=test/testdata/resolver/proc.rb start=33:3 end=33:22}
+    method <C <U TestProc>>#<U bad> (x, y, z, w, <blk>) -> NilClass @ Loc {file=test/testdata/resolver/proc.rb start=33:3 end=33:22}
       argument x<> -> T.proc.returns(T.untyped) @ Loc {file=test/testdata/resolver/proc.rb start=24:7 end=24:8}
       argument y<> -> T.proc.returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=25:7 end=25:8}
       argument z<> -> T.proc.returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=27:7 end=27:8}
       argument w<> -> T.proc.params(arg0: Symbol).returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=30:7 end=30:8}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
-    method <C <U TestProc>><U foo> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=37:3 end=37:13}
+    method <C <U TestProc>>#<U foo> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=37:3 end=37:13}
       argument x<> -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=36:15 end=36:16}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
-    method <C <U TestProc>><U foo1> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=44:3 end=44:14}
+    method <C <U TestProc>>#<U foo1> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=44:3 end=44:14}
       argument x<> -> T.proc.params(arg0: Integer).returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=41:7 end=41:8}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
-    method <C <U TestProc>><U good1> (blk) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=10:3 end=10:18}
+    method <C <U TestProc>>#<U good1> (blk) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=10:3 end=10:18}
       argument blk<block> -> T.proc.params(arg0: Integer).returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=7:12 end=7:15}
-    method <C <U TestProc>><U good2> (blk) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=18:3 end=18:18}
+    method <C <U TestProc>>#<U good2> (blk) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=18:3 end=18:18}
       argument blk<block> -> T.proc.params(arg0: T::Array[String]).returns(T::Array[Integer]) @ Loc {file=test/testdata/resolver/proc.rb start=15:12 end=15:15}
   class <S <C <U TestProc>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/proc.rb start=3:7 end=3:15}
-    type-member(+) <S <C <U TestProc>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U TestProc>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=TestProc) @ Loc {file=test/testdata/resolver/proc.rb start=3:7 end=3:15}
-    method <S <C <U TestProc>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=45:4}
+    type-member(+) <S <C <U TestProc>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U TestProc>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=TestProc) @ Loc {file=test/testdata/resolver/proc.rb start=3:7 end=3:15}
+    method <S <C <U TestProc>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=45:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
 

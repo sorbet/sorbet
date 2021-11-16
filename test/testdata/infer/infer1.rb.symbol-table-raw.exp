@@ -1,25 +1,25 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=2:1 end=50:4}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=2:1 end=50:4}
       argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
   class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi start=removed end=removed}
-    method <C <U Object>><U baz1> : private (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=2:1 end=2:9}
+    method <C <U Object>>#<U baz1> : private (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=2:1 end=2:9}
       argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
-    method <C <U Object>><U baz2> : private (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=7:1 end=7:9}
+    method <C <U Object>>#<U baz2> : private (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=7:1 end=7:9}
       argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
-    method <C <U Object>><U baz3> : private (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=12:1 end=12:9}
+    method <C <U Object>>#<U baz3> : private (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=12:1 end=12:9}
       argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
-    method <C <U Object>><U baz4> : private (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=16:1 end=16:9}
+    method <C <U Object>>#<U baz4> : private (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=16:1 end=16:9}
       argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
-    method <C <U Object>><U baz5> : private (cond, <blk>) @ Loc {file=test/testdata/infer/infer1.rb start=20:1 end=20:15}
+    method <C <U Object>>#<U baz5> : private (cond, <blk>) @ Loc {file=test/testdata/infer/infer1.rb start=20:1 end=20:15}
       argument cond<> @ Loc {file=test/testdata/infer/infer1.rb start=20:10 end=20:14}
       argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
-    method <C <U Object>><U baz6> : private (cond, <blk>) @ Loc {file=test/testdata/infer/infer1.rb start=29:1 end=29:15}
+    method <C <U Object>>#<U baz6> : private (cond, <blk>) @ Loc {file=test/testdata/infer/infer1.rb start=29:1 end=29:15}
       argument cond<> @ Loc {file=test/testdata/infer/infer1.rb start=29:10 end=29:14}
       argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
-    method <C <U Object>><U baz7> : private (cond, <blk>) @ Loc {file=test/testdata/infer/infer1.rb start=38:1 end=38:15}
+    method <C <U Object>>#<U baz7> : private (cond, <blk>) @ Loc {file=test/testdata/infer/infer1.rb start=38:1 end=38:15}
       argument cond<> @ Loc {file=test/testdata/infer/infer1.rb start=38:10 end=38:14}
       argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
-    method <C <U Object>><U baz8> : private (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=46:1 end=46:9}
+    method <C <U Object>>#<U baz8> : private (<blk>) @ Loc {file=test/testdata/infer/infer1.rb start=46:1 end=46:9}
       argument <blk><block> @ Loc {file=test/testdata/infer/infer1.rb start=??? end=???}
 

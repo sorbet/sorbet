@@ -1,14 +1,14 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/desugar/destructure.rb start=2:1 end=9:4}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/desugar/destructure.rb start=2:1 end=9:4}
       argument <blk><block> @ Loc {file=test/testdata/desugar/destructure.rb start=??? end=???}
   class <C <U Destructure>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/destructure.rb start=2:1 end=2:18}
-    method <C <U Destructure>><U f> ((x,y), z, <blk>) @ Loc {file=test/testdata/desugar/destructure.rb start=3:3 end=3:18}
+    method <C <U Destructure>>#<U f> ((x,y), z, <blk>) @ Loc {file=test/testdata/desugar/destructure.rb start=3:3 end=3:18}
       argument (x,y)<> @ Loc {file=test/testdata/desugar/destructure.rb start=3:9 end=3:14}
       argument z<> @ Loc {file=test/testdata/desugar/destructure.rb start=3:16 end=3:17}
       argument <blk><block> @ Loc {file=test/testdata/desugar/destructure.rb start=??? end=???}
   class <S <C <U Destructure>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/destructure.rb start=2:7 end=2:18}
-    type-member(+) <S <C <U Destructure>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U Destructure>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=Destructure) @ Loc {file=test/testdata/desugar/destructure.rb start=2:7 end=2:18}
-    method <S <C <U Destructure>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/destructure.rb start=2:1 end=9:4}
+    type-member(+) <S <C <U Destructure>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Destructure>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Destructure) @ Loc {file=test/testdata/desugar/destructure.rb start=2:7 end=2:18}
+    method <S <C <U Destructure>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/destructure.rb start=2:1 end=9:4}
       argument <blk><block> @ Loc {file=test/testdata/desugar/destructure.rb start=??? end=???}
 
