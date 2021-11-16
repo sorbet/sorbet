@@ -282,11 +282,21 @@ bool hasOptimizedTest(core::ClassOrModuleRef sym) {
     return absl::c_any_of(optimizedTypeTests, [sym](const auto &pair) { return pair.first == sym; });
 }
 
-bool hasOptimizedTest(const core::TypePtr &type) {
-    bool res = false;
+core::ClassOrModuleRef hasOptimizedTest(const core::TypePtr &type) {
+    core::ClassOrModuleRef res;
     typecase(
-        type, [&res](const core::ClassType &ct) { res = hasOptimizedTest(ct.symbol); },
-        [&res](const core::AppliedType &at) { res = hasOptimizedTest(at.klass); }, [](const core::TypePtr &def) {});
+        type,
+        [&res](const core::ClassType &ct) {
+            if (hasOptimizedTest(ct.symbol)) {
+                res = ct.symbol;
+            }
+        },
+        [&res](const core::AppliedType &at) {
+            if (hasOptimizedTest(at.klass)) {
+                res = at.klass;
+            }
+        },
+        [](const core::TypePtr &def) {});
 
     return res;
 }
@@ -362,7 +372,7 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, 
             // flatten the or, and order it so that the optimized type tests show up first
             vector<core::TypePtr> parts;
             flattenOrType(parts, ct);
-            absl::c_partition(parts, [](const auto &ty) { return hasOptimizedTest(ty); });
+            absl::c_partition(parts, [](const auto &ty) { return hasOptimizedTest(ty).exists(); });
 
             // forward-declare the exit
             auto *fun = builder.GetInsertBlock()->getParent();
@@ -398,7 +408,7 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, 
             // flatten the and, and order it so that the optimized type tests show up first
             vector<core::TypePtr> parts;
             flattenAndType(parts, ct);
-            absl::c_partition(parts, [](const auto &ty) { return hasOptimizedTest(ty); });
+            absl::c_partition(parts, [](const auto &ty) { return hasOptimizedTest(ty).exists(); });
 
             // forward-declare the exit
             auto *fun = builder.GetInsertBlock()->getParent();
@@ -545,16 +555,18 @@ void fillLocals(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitter
                 int baseOffset, llvm::Value *locals) {
     // The map used to store escaped variables isn't stable, so we first sort it into a vector. This isn't great, but
     // without this step the locals are processed in random order, making the llvm output unstable.
-    vector<pair<cfg::LocalRef, int>> escapedVariables{};
+    vector<pair<cfg::LocalRef, EscapedUse>> escapedVariables{};
     for (auto &entry : irctx.escapedVariableIndices) {
         escapedVariables.emplace_back(entry);
     }
 
-    fast_sort(escapedVariables, [](const auto &left, const auto &right) -> bool { return left.second < right.second; });
+    fast_sort(escapedVariables, [](const auto &left, const auto &right) -> bool {
+        return left.second.localIndex < right.second.localIndex;
+    });
 
     for (auto &entry : escapedVariables) {
         auto *id = Payload::idIntern(cs, builder, entry.first.data(irctx.cfg)._name.shortName(cs));
-        auto *offset = llvm::ConstantInt::get(cs, llvm::APInt(32, baseOffset + entry.second, false));
+        auto *offset = llvm::ConstantInt::get(cs, llvm::APInt(32, baseOffset + entry.second.localIndex, false));
         llvm::Value *indices[] = {offset};
         builder.CreateStore(id, builder.CreateGEP(locals, indices));
     }
@@ -939,12 +951,12 @@ llvm::Value *Payload::getClassVariableStoreClass(CompilerState &cs, llvm::IRBuil
     return Payload::getRubyConstant(cs, sym.data(cs)->topAttachedClass(cs), builder);
 }
 
-std::tuple<llvm::Value *, llvm::Value *> Payload::escapedVariableIndexAndLevel(CompilerState &cs, cfg::LocalRef local,
-                                                                               const IREmitterContext &irctx,
-                                                                               int rubyBlockId) {
-    auto *index = indexForLocalVariable(cs, irctx, rubyBlockId, irctx.escapedVariableIndices.at(local));
+EscapedVariableInfo Payload::escapedVariableInfo(CompilerState &cs, cfg::LocalRef local, const IREmitterContext &irctx,
+                                                 int rubyBlockId) {
+    auto &escapedUse = irctx.escapedVariableIndices.at(local);
+    auto *index = indexForLocalVariable(cs, irctx, rubyBlockId, escapedUse.localIndex);
     auto level = irctx.rubyBlockLevel[rubyBlockId];
-    return {index, llvm::ConstantInt::get(cs, llvm::APInt(64, level, true))};
+    return EscapedVariableInfo{escapedUse, index, llvm::ConstantInt::get(cs, llvm::APInt(64, level, true))};
 }
 
 llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBuilderBase &builder,
@@ -985,8 +997,22 @@ llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBui
     }
     if (irctx.escapedVariableIndices.contains(local)) {
         auto *cfp = getCFPForBlock(cs, builder, irctx, rubyBlockId);
-        auto [index, level] = escapedVariableIndexAndLevel(cs, local, irctx, rubyBlockId);
-        return builder.CreateCall(cs.getFunction("sorbet_readLocal"), {cfp, index, level});
+        auto info = escapedVariableInfo(cs, local, irctx, rubyBlockId);
+        auto *value = builder.CreateCall(cs.getFunction("sorbet_readLocal"), {cfp, info.index, info.level});
+        // If we ever wrote to this local, we cannot guarantee that the type has
+        // been checked prior to the access from the locals array.
+        if (info.use.used == LocalUsedHow::WrittenTo) {
+            return value;
+        }
+
+        core::ClassOrModuleRef klass = hasOptimizedTest(info.use.type);
+        if (!klass.exists()) {
+            return value;
+        }
+
+        Payload::assumeType(cs, builder, value, klass);
+
+        return value;
     }
 
     // normal local variable
@@ -1040,8 +1066,8 @@ void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, l
     }
     if (irctx.escapedVariableIndices.contains(local)) {
         auto *cfp = getCFPForBlock(cs, builder, irctx, rubyBlockId);
-        auto [index, level] = escapedVariableIndexAndLevel(cs, local, irctx, rubyBlockId);
-        builder.CreateCall(cs.getFunction("sorbet_writeLocal"), {cfp, index, level, var});
+        auto info = escapedVariableInfo(cs, local, irctx, rubyBlockId);
+        builder.CreateCall(cs.getFunction("sorbet_writeLocal"), {cfp, info.index, info.level, var});
         return;
     }
 

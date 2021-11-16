@@ -107,6 +107,15 @@ constexpr bool functionTypeNeedsPostprocessing(FunctionType ty) {
 
 struct Alias;
 
+struct EscapedUse {
+    // Index into the local variables array from the environment.
+    int localIndex;
+    LocalUsedHow used;
+    // If this escaped variable comes from a method argument, this is the declared
+    // type of that argument.  Otherwise, this is nullptr.
+    core::TypePtr type;
+};
+
 struct BlockArity {
     int min = 0;
     int max = 0;
@@ -192,8 +201,11 @@ struct IREmitterContext {
     // idx: cfg::BasicBlock::rubyBlockId;
     std::vector<llvm::AllocaInst *> sendArgArrayByBlock;
 
-    // TODO(jez) document escapedVariableIndices
-    UnorderedMap<cfg::LocalRef, int> escapedVariableIndices;
+    // Local variables that escape, i.e. are referenced from multiple Ruby blocks, are
+    // stored in the Ruby frame's environment.  That storage may live on the Ruby stack
+    // or in heap-allocated memory.  Either way, this maps from escaped local variables
+    // to details on their use.
+    UnorderedMap<cfg::LocalRef, EscapedUse> escapedVariableIndices;
 
     // When arguments have defaults, the use of the default is guarded by a call to ArgPresent. The ArgPresent variables
     // are initialized during setupArguments, but need to be available by argument index.

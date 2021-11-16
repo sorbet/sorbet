@@ -46,10 +46,11 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
     auto *closure = Payload::buildLocalsOffset(cs);
     auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
 
-    auto [index, level] = Payload::escapedVariableIndexAndLevel(cs, exceptionValue, irctx, bodyRubyBlockId);
-    auto *v = builder.CreateCall(cs.getFunction("sorbet_run_exception_handling"),
-                                 {ec, irctx.rubyBlocks2Functions[bodyRubyBlockId], pc, closure, cfp, handlersFunc,
-                                  elseFunc, ensureFunc, Payload::retrySingleton(cs, builder, irctx), index, level});
+    auto info = Payload::escapedVariableInfo(cs, exceptionValue, irctx, bodyRubyBlockId);
+    auto *v =
+        builder.CreateCall(cs.getFunction("sorbet_run_exception_handling"),
+                           {ec, irctx.rubyBlocks2Functions[bodyRubyBlockId], pc, closure, cfp, handlersFunc, elseFunc,
+                            ensureFunc, Payload::retrySingleton(cs, builder, irctx), info.index, info.level});
 
     auto *exceptionContinue = llvm::BasicBlock::Create(cs, "exception-continue", currentFunc);
     auto *exceptionReturn = llvm::BasicBlock::Create(cs, "exception-return", currentFunc);
