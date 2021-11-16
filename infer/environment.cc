@@ -1250,7 +1250,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         if (i.whatLoc != inWhat.implicitReturnLoc) {
                             auto replaceLoc = core::Loc(ctx.file, i.whatLoc);
                             core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
-                                                                          typeAndOrigin.type);
+                                                                         typeAndOrigin.type);
                         }
                     }
                 }
@@ -1428,7 +1428,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 // We are not processing a method call, so there is no constraint.
                                 auto &constr = core::TypeConstraint::EmptyFrozenConstraint;
                                 core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, cur.type,
-                                                                              tp.type);
+                                                                             tp.type);
                             }
                             tp = cur;
                         }
