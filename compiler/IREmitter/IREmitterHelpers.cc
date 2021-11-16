@@ -279,7 +279,7 @@ void IREmitterHelpers::emitTypeTestForRestArg(CompilerState &cs, llvm::IRBuilder
     builder.CreateCondBr(moreToGo, bodyBlock, continuationBlock);
 
     builder.SetInsertPoint(bodyBlock);
-    auto *element = builder.CreateCall(cs.getFunction("sorbet_rubyArrayAref"), {value, indexPhi}, "element");
+    auto *element = builder.CreateCall(cs.getFunction("sorbet_rubyArrayArefUnchecked"), {value, indexPhi}, "element");
     auto *typeTest = Payload::typeTest(cs, builder, element, expectedType);
     buildTypeTestPassFailBlocks(cs, builder, element, typeTest, expectedType, description);
     auto *incrementedIndex = builder.CreateAdd(indexPhi, buildS4(cs, 1));

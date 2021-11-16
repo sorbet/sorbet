@@ -623,7 +623,7 @@ int sorbet_rubyArrayLen(VALUE array) {
 }
 
 SORBET_INLINE
-VALUE sorbet_rubyArrayAref(VALUE array, int i) {
+VALUE sorbet_rubyArrayArefUnchecked(VALUE array, int i) {
     return RARRAY_AREF(array, i);
 }
 
