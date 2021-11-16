@@ -42,6 +42,7 @@ steps:
 
   - label: ":linux: test-compiler.sh"
     command: .buildkite/test-compiler.sh
+    artifact_paths: _out_/profile.json
     <<: *elastic
 
   - wait: ~

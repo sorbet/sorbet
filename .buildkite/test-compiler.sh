@@ -29,10 +29,14 @@ echo "--- building ruby with gcc"
 ./bazel build @sorbet_ruby_2_7//:ruby --crosstool_top=@bazel_tools//tools/cpp:toolchain
 
 echo "+++ running tests"
+
+mkdir -p _out_
+
 # `-c opt` is required, otherwise the tests are too slow
 # forcedebug is really the ~only thing in `--config=dbg` we care about.
 # must come after `-c opt` because `-c opt` will define NDEBUG on its own
 ./bazel test //test:compiler //test/cli/compiler \
+  --experimental_generate_json_trace_profile --profile=_out_/profile.json \
   -c opt \
   --config=forcedebug \
   --test_summary=terse \
