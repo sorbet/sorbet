@@ -15,6 +15,12 @@ struct ChainedSigWalk {
 
     ast::ExpressionPtr preTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
+        ast::Send *sigSend = ast::cast_tree<ast::Send>(send->recv);
+
+        // Make sure the first receiver is sig. E.g.: `sig.abstract {}`, `sig.override.final {}`
+        if (send->fun != core::Names::sig() && (sigSend == nullptr || !firstReceiverIsSig(sigSend))) {
+            return tree;
+        }
 
         // Return early if we identify things like `params` being invoked on `sig`
         if (invalidChainedStatement(ctx, send)) {
@@ -33,13 +39,6 @@ struct ChainedSigWalk {
         // Return early unless it's one of the sends we are interested in
         if (send->fun != core::Names::abstract() && send->fun != core::Names::final_() &&
             send->fun != core::Names::override_() && send->fun != core::Names::overridable()) {
-            return tree;
-        }
-
-        ast::Send *sigSend = ast::cast_tree<ast::Send>(send->recv);
-
-        // Make sure the first receiver is sig. E.g.: `sig.abstract {}`, `sig.override.final {}`
-        if (sigSend == nullptr || !firstReceiverIsSig(sigSend)) {
             return tree;
         }
 
@@ -105,18 +104,8 @@ struct ChainedSigWalk {
             send->fun == core::Names::void_() || send->fun == core::Names::bind() ||
             send->fun == core::Names::checked() || send->fun == core::Names::onFailure() ||
             send->fun == core::Names::typeParameters()) {
-            auto receiver = ast::cast_tree<ast::Send>(send->recv);
-
-            while (receiver && receiver->fun != core::Names::sig()) {
-                receiver = ast::cast_tree<ast::Send>(receiver->recv);
-            }
-
-            if (receiver) {
-                this->previousSigSend = receiver;
-
-                if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
-                    e.setHeader("Cannot use `{}` outside of a sig block", send->fun.toString(ctx));
-                }
+            if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
+                e.setHeader("Cannot use `{}` outside of a sig block", send->fun.toString(ctx));
             }
 
             return true;
