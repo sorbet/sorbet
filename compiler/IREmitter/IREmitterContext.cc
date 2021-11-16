@@ -267,9 +267,10 @@ class TrackCaptures final {
     struct PrivateUse {
         optional<int> rubyBlockId;
         LocalUsedHow used;
+        core::TypePtr type;
     };
 
-    void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv, LocalUsedHow use, CaptureContext context) {
+    void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv, const core::TypePtr &type, LocalUsedHow use, CaptureContext context) {
         if (lv == cfg::LocalRef::selfVariable()) {
             return;
         }
@@ -289,7 +290,7 @@ class TrackCaptures final {
                 if (store.rubyBlockId.value() != bb->rubyBlockId) {
                     store.rubyBlockId = nullopt;
                     LocalUsedHow how = use == LocalUsedHow::ReadOnly ? store.used : LocalUsedHow::WrittenTo;
-                    escapedIndexes[lv] = EscapedUse{escapedIndexCounter, how};
+                    escapedIndexes[lv] = EscapedUse{escapedIndexCounter, how, store.type};
                     escapedIndexCounter += 1;
                 } else if (use == LocalUsedHow::WrittenTo) {
                     store.used = LocalUsedHow::WrittenTo;
@@ -305,7 +306,7 @@ class TrackCaptures final {
                 }
             }
         } else {
-            privateUsages[lv] = PrivateUse{bb->rubyBlockId, use};
+            privateUsages[lv] = PrivateUse{bb->rubyBlockId, use, type};
         }
     }
 
@@ -322,15 +323,15 @@ public:
         : aliases(aliases), blockLevels(blockLevels) {}
 
     void trackBlockRead(cfg::BasicBlock *bb, cfg::LocalRef lv, CaptureContext context = CaptureContext::general()) {
-        trackBlockUsage(bb, lv, LocalUsedHow::ReadOnly, context);
+        trackBlockUsage(bb, lv, nullptr, LocalUsedHow::ReadOnly, context);
     }
 
     void trackBlockWrite(cfg::BasicBlock *bb, cfg::LocalRef lv, CaptureContext context = CaptureContext::general()) {
-        trackBlockUsage(bb, lv, LocalUsedHow::WrittenTo, context);
+        trackBlockUsage(bb, lv, nullptr, LocalUsedHow::WrittenTo, context);
     }
 
-    void trackBlockArgument(cfg::BasicBlock *bb, cfg::LocalRef lv) {
-        trackBlockUsage(bb, lv, LocalUsedHow::ReadOnly, CaptureContext::methodArg());
+    void trackBlockArgument(cfg::BasicBlock *bb, cfg::LocalRef lv, const core::TypePtr &type) {
+        trackBlockUsage(bb, lv, type, LocalUsedHow::ReadOnly, CaptureContext::methodArg());
     }
 
     CapturedVariables finalize() {
@@ -361,7 +362,7 @@ public:
             if (blockArgUsage == BlockArgUsage::Captured) {
                 // Assume the worst about how the block is used.
                 auto how = LocalUsedHow::WrittenTo;
-                escapedIndexes[blkArg] = EscapedUse{escapedIndexCounter, how};
+                escapedIndexes[blkArg] = EscapedUse{escapedIndexCounter, how, nullptr};
                 escapedIndexCounter += 1;
             }
         }
@@ -378,6 +379,7 @@ CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cf
     TrackCaptures usage(aliases, blockLevels);
 
     int argId = -1;
+    auto &methodArguments = cfg.symbol.data(cs)->arguments();
     for (auto &arg : mdef.args) {
         argId += 1;
         ast::Local const *local = nullptr;
@@ -388,10 +390,11 @@ CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cf
         }
         ENFORCE(local);
         auto localRef = cfg.enterLocal(local->localVariable);
+        auto &argInfo = methodArguments[argId];
         if (cfg.symbol.data(cs)->arguments()[argId].flags.isBlock) {
             usage.blkArg = localRef;
         }
-        usage.trackBlockArgument(cfg.entry(), localRef);
+        usage.trackBlockArgument(cfg.entry(), localRef, argInfo.type);
     }
 
     for (auto &bb : cfg.basicBlocks) {

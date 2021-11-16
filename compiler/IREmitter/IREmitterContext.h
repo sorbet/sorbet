@@ -111,6 +111,9 @@ struct EscapedUse {
     // Index into the local variables array from the environment.
     int localIndex;
     LocalUsedHow used;
+    // If this escaped variable comes from a method argument, this is the declared
+    // type of that argument.  Otherwise, this is nullptr.
+    core::TypePtr type;
 };
 
 struct BlockArity {
