@@ -18,7 +18,6 @@
 #endif
 
 #include "absl/strings/str_cat.h"
-#include "ast/substitute/substitute.h" // TODO(jez) don't commit this
 #include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/sort.h"
