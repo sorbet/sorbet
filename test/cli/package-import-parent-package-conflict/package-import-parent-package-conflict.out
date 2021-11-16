@@ -1,0 +1,4 @@
+parent/child/__package.rb:4: Importing Parent is not allowed, as it exports a prefix of the current package https://srb.help/3714
+     4 |  import Parent
+                 ^^^^^^
+Errors: 1
