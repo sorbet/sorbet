@@ -8,7 +8,7 @@
 
 namespace sorbet::core {
 
-class TypeDrivenAutocorrect final {
+class TypeErrorDiagnostics final {
 public:
     // Uses heuristics to insert an autocorrect that converts from `expectedType` to `actualType`.
     //

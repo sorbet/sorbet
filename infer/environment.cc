@@ -3,7 +3,7 @@
 #include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/TypeConstraint.h"
-#include "core/TypeDrivenAutocorrect.h"
+#include "core/TypeErrorDiagnostics.h"
 #include <algorithm> // find, remove_if
 
 template struct std::pair<sorbet::core::LocalVariable, std::shared_ptr<sorbet::core::Type>>;
@@ -1249,7 +1249,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         core::TypeAndOrigins::elaborateOnExplanation(ctx, e, methodReturnType, typeAndOrigin.type);
                         if (i.whatLoc != inWhat.implicitReturnLoc) {
                             auto replaceLoc = core::Loc(ctx.file, i.whatLoc);
-                            core::TypeDrivenAutocorrect::maybeAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
+                            core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
                                                                           typeAndOrigin.type);
                         }
                     }
@@ -1427,7 +1427,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 auto replaceLoc = core::Loc(ctx.file, bind.loc);
                                 // We are not processing a method call, so there is no constraint.
                                 auto &constr = core::TypeConstraint::EmptyFrozenConstraint;
-                                core::TypeDrivenAutocorrect::maybeAutocorrect(ctx, e, replaceLoc, constr, cur.type,
+                                core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, cur.type,
                                                                               tp.type);
                             }
                             tp = cur;

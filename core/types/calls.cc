@@ -7,7 +7,7 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/TypeConstraint.h"
-#include "core/TypeDrivenAutocorrect.h"
+#include "core/TypeErrorDiagnostics.h"
 #include "core/Types.h"
 #include "core/errors/infer.h"
 #include "core/errors/resolver.h"
@@ -197,7 +197,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
         }
         e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
         core::TypeAndOrigins::elaborateOnExplanation(gs, e, expectedType, argTpe.type);
-        TypeDrivenAutocorrect::maybeAutocorrect(gs, e, loc, constr, expectedType, argTpe.type);
+        TypeErrorDiagnostics::maybeAutocorrect(gs, e, loc, constr, expectedType, argTpe.type);
         return e.build();
     }
     return nullptr;

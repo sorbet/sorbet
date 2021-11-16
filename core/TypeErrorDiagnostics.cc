@@ -1,10 +1,10 @@
-#include "core/TypeDrivenAutocorrect.h"
+#include "core/TypeErrorDiagnostics.h"
 
 using namespace std;
 
 namespace sorbet::core {
 
-void TypeDrivenAutocorrect::maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc, TypeConstraint &constr,
+void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc, TypeConstraint &constr,
                                              TypePtr expectedType, TypePtr actualType) {
     if (!loc.exists()) {
         return;
