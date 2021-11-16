@@ -100,8 +100,9 @@ namespace {
     auto gotStr = got.show(gs);
     auto expectedStr = expected.show(gs);
     e.addErrorNote(
-        "`{}` is incompatible with `{}` because when this method is called on a subclass, `{}` will represent a more "
-        "specific subclass, and `{}` will not be specific enough. See https://sorbet.org/docs/attached-class for more.",
+        "`{}` is incompatible with `{}` because when this method is called on a subclass `{}` will represent a more "
+        "specific subclass, meaning `{}` will not be specific enough. See https://sorbet.org/docs/attached-class for "
+        "more.",
         gotStr, expectedStr, expectedStr, gotStr);
     return true;
 }
