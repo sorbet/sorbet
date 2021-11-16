@@ -17,7 +17,7 @@ T.assert_type!([1, 2].first, Integer)
 T.assert_type!([1, 2].last, Integer)
 
 
-# Empty arrays are T::Array[T.untyped]
+# Empty arrays start as zero-tuples but decay to T::Array[T.untyped] (not T::Array[T.noreturn])
 empty = []
 T.assert_type!(empty, T::Array[T.untyped])
 T.assert_type!(empty[0], NilClass)

@@ -81,6 +81,11 @@ TypePtr Types::Boolean() {
     return res;
 }
 
+TypePtr Types::nilable(const TypePtr &t) {
+    static auto res = OrType::make_shared(nilClass(), t);
+    return res;
+}
+
 TypePtr Types::Integer() {
     static auto res = make_type<ClassType>(Symbols::Integer());
     return res;
@@ -276,14 +281,6 @@ TypePtr Types::dropLiteral(const GlobalState &gs, const TypePtr &tp) {
     return tp;
 }
 
-TypePtr Types::lubAll(const GlobalState &gs, const vector<TypePtr> &elements) {
-    TypePtr acc = Types::bottom();
-    for (auto &el : elements) {
-        acc = Types::lub(gs, acc, el);
-    }
-    return acc;
-}
-
 TypePtr Types::arrayOf(const GlobalState &gs, const TypePtr &elem) {
     vector<TypePtr> targs{move(elem)};
     return make_type<AppliedType>(Symbols::Array(), move(targs));
@@ -294,10 +291,14 @@ TypePtr Types::rangeOf(const GlobalState &gs, const TypePtr &elem) {
     return make_type<AppliedType>(Symbols::Range(), move(targs));
 }
 
-TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &elem) {
-    vector<TypePtr> tupleArgs{Types::Symbol(), elem};
-    vector<TypePtr> targs{Types::Symbol(), elem, make_type<TupleType>(move(tupleArgs))};
+TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &keyType, const TypePtr &valueType) {
+    vector<TypePtr> tupleArgs{keyType, valueType};
+    vector<TypePtr> targs{keyType, valueType, make_type<TupleType>(move(tupleArgs))};
     return make_type<AppliedType>(Symbols::Hash(), move(targs));
+}
+
+TypePtr Types::hashOfSymbolKey(const GlobalState &gs, const TypePtr &valueType) {
+    return hashOf(gs, Types::Symbol(), valueType);
 }
 
 TypePtr Types::dropNil(const GlobalState &gs, const TypePtr &from) {
@@ -323,6 +324,15 @@ void sanityCheckProxyType(const GlobalState &gs, TypePtr underlying) {
     ENFORCE(isa_type<ClassType>(underlying) || isa_type<AppliedType>(underlying));
     underlying.sanityCheck(gs);
 }
+
+TypePtr lubAllDropLiteral(const GlobalState &gs, const vector<TypePtr> &elements) {
+    TypePtr acc = Types::bottom();
+    for (auto &el : elements) {
+        acc = Types::lub(gs, acc, Types::dropLiteral(gs, el));
+    }
+    return acc;
+}
+
 } // namespace
 
 LiteralType::LiteralType(int64_t val) : value(val), literalKind(LiteralTypeKind::Integer) {
@@ -417,15 +427,51 @@ ShapeType::ShapeType(vector<TypePtr> keys, vector<TypePtr> values) : keys(move(k
     categoryCounterInc("types.allocated", "shapetype");
 }
 
+// TODO(jez) memoize?
 TypePtr ShapeType::underlying(const GlobalState &gs) const {
-    return Types::hashOfUntyped();
+    if (this->keys.empty()) {
+        // We could imagine one day making this an error in `typed: strict`, and requiring type
+        // annotations on empty literal hashes.
+        return Types::hashOfUntyped();
+    } else {
+        auto keysLub = lubAllDropLiteral(gs, this->keys);
+        if (keysLub.isTrueOrFalseClass()) {
+            keysLub = Types::Boolean();
+        }
+        auto valuesLub = lubAllDropLiteral(gs, this->values);
+        if (valuesLub.isTrueOrFalseClass()) {
+            valuesLub = Types::Boolean();
+        } else if (isa_type<OrType>(valuesLub)) {
+            auto hasBoolean = Types::isSubType(gs, Types::trueClass(), valuesLub) ||
+                              Types::isSubType(gs, Types::falseClass(), valuesLub);
+            if (hasBoolean) {
+                auto hasNil = Types::isSubType(gs, Types::nilClass(), valuesLub);
+                if (hasNil) {
+                    valuesLub = Types::nilable(Types::Boolean());
+                } else {
+                    valuesLub = Types::Boolean();
+                }
+            } else {
+                auto valuesOr = cast_type_nonnull<OrType>(valuesLub);
+                if (!(valuesOr.left.isNilClass() && isa_type<ClassType>(valuesOr.right)) &&
+                    !(valuesOr.right.isNilClass() && isa_type<ClassType>(valuesOr.left))) {
+                    valuesLub = Types::untypedUntracked();
+                }
+            }
+        }
+        return Types::hashOf(gs, keysLub, valuesLub);
+    }
 }
 
+// TODO(jez) memoize?
 TypePtr TupleType::underlying(const GlobalState &gs) const {
     if (this->elems.empty()) {
+        // We could imagine one day making this an error in `typed: strict`, and requiring type
+        // annotations on empty literal arrays.
         return Types::arrayOfUntyped();
     } else {
-        return Types::arrayOf(gs, Types::dropLiteral(gs, Types::lubAll(gs, this->elems)));
+        // TODO(jez) memoize?
+        return Types::arrayOf(gs, lubAllDropLiteral(gs, this->elems));
     }
 }
 

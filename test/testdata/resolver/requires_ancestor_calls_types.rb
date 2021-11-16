@@ -174,6 +174,9 @@ module Test8
     def shape
       {ra1: self, ra2: self}
     end
+
+    def foo; end
+    def bar; end
   end
 end
 
