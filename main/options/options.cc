@@ -17,7 +17,6 @@
 #include "sys/stat.h"
 #include "third_party/licenses/licenses.h"
 
-namespace spd = spdlog;
 using namespace std;
 
 namespace sorbet::realmain::options {
