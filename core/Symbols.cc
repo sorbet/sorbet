@@ -900,10 +900,11 @@ string showFullNameInternal(const GlobalState &gs, core::SymbolRef owner, core::
     return absl::StrCat(ownerStr, separator, name.show(gs));
 }
 
-string toStringFullNameInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name) {
+string toStringFullNameInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name,
+                                string_view separator) {
     bool includeOwner = owner.exists() && owner != Symbols::root();
     string ownerStr = includeOwner ? owner.toStringFullName(gs) : "";
-    return absl::StrCat(ownerStr, name.showRaw(gs));
+    return absl::StrCat(ownerStr, includeOwner ? separator : "", name.showRaw(gs)); // TODO(jez) includeOwner required?
 }
 } // namespace
 
@@ -973,27 +974,27 @@ string SymbolRef::toStringFullName(const GlobalState &gs) const {
 
 string ClassOrModuleRef::toStringFullName(const GlobalState &gs) const {
     auto sym = dataAllowingNone(gs);
-    return toStringFullNameInternal(gs, sym->owner, sym->name);
+    return toStringFullNameInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
 }
 
 string MethodRef::toStringFullName(const GlobalState &gs) const {
     auto sym = data(gs);
-    return toStringFullNameInternal(gs, sym->owner, sym->name);
+    return toStringFullNameInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
 }
 
 string FieldRef::toStringFullName(const GlobalState &gs) const {
     auto sym = data(gs);
-    return toStringFullNameInternal(gs, sym->owner, sym->name);
+    return toStringFullNameInternal(gs, sym->owner, sym->name, sym->isStaticField() ? COLON_SEPARATOR : HASH_SEPARATOR);
 }
 
 string TypeArgumentRef::toStringFullName(const GlobalState &gs) const {
     auto sym = data(gs);
-    return toStringFullNameInternal(gs, sym->owner, sym->name);
+    return toStringFullNameInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
 }
 
 string TypeMemberRef::toStringFullName(const GlobalState &gs) const {
     auto sym = data(gs);
-    return toStringFullNameInternal(gs, sym->owner, sym->name);
+    return toStringFullNameInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
 }
 
 bool Symbol::isPrintable(const GlobalState &gs) const {
