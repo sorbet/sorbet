@@ -402,7 +402,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         };
 
         // CFG
-        if (test.expectations.contains("cfg") || test.expectations.contains("cfg-raw")) {
+        if (test.expectations.contains("cfg") || test.expectations.contains("cfg-raw") ||
+            test.expectations.contains("cfg-text")) {
             checkTree();
             checkPragma("cfg");
             CFGCollectorAndTyper collector;
@@ -435,6 +436,17 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 dot << "}" << '\n';
                 return dot.str();
             });
+
+            handler.addObserved(
+                *gs, "cfg-text",
+                [&]() {
+                    stringstream dot;
+                    for (auto &cfg : collector.cfgs) {
+                        dot << cfg->toTextualString(ctx) << '\n' << '\n';
+                    }
+                    return dot.str();
+                },
+                false);
         }
 
         // If there is a tree left with a typed: pragma, run the inferencer

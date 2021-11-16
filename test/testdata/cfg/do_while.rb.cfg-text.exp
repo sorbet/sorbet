@@ -32,8 +32,6 @@ bb5[rubyBlockId=0, firstDead=-1](<self>: T.class_of(<root>)):
 bb6[rubyBlockId=0, firstDead=-1](<self>: T.class_of(<root>)):
     # outerLoops: 1
     <block-break-assign>$12: NilClass = <returnTemp>$11
-    <magic>$13: T.class_of(<Magic>) = alias <C <Magic>>
-    <block-break>$14: T.untyped = <magic>$13: T.class_of(<Magic>).<block-break>(<returnTemp>$11: NilClass)
     <unconditional> -> bb8
 
 # backedges
@@ -42,8 +40,8 @@ bb6[rubyBlockId=0, firstDead=-1](<self>: T.class_of(<root>)):
 # - bb11(rubyBlockId=0)
 bb8[rubyBlockId=0, firstDead=-1](<self>: T.class_of(<root>)):
     # outerLoops: 1
-    <whileTemp>$16: TrueClass = true
-    <whileTemp>$16 -> (TrueClass ? bb11 : bb10)
+    <whileTemp>$14: TrueClass = true
+    <whileTemp>$14 -> (TrueClass ? bb11 : bb10)
 
 # backedges
 # - bb8(rubyBlockId=0)
@@ -56,18 +54,16 @@ bb10[rubyBlockId=0, firstDead=-1](<self>: T.class_of(<root>)):
 # - bb8(rubyBlockId=0)
 bb11[rubyBlockId=0, firstDead=-1](<self>: T.class_of(<root>)):
     # outerLoops: 1
-    <statTemp>$20: Integer(2) = 2
-    <statTemp>$18: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$20: Integer(2))
-    <ifTemp>$21: TrueClass = true
-    <ifTemp>$21 -> (TrueClass ? bb12 : bb8)
+    <statTemp>$18: Integer(2) = 2
+    <statTemp>$16: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$18: Integer(2))
+    <ifTemp>$19: TrueClass = true
+    <ifTemp>$19 -> (TrueClass ? bb12 : bb8)
 
 # backedges
 # - bb11(rubyBlockId=0)
 bb12[rubyBlockId=0, firstDead=-1](<self>: T.class_of(<root>)):
     # outerLoops: 1
-    <block-break-assign>$23: NilClass = <returnTemp>$22
-    <magic>$24: T.class_of(<Magic>) = alias <C <Magic>>
-    <block-break>$25: T.untyped = <magic>$24: T.class_of(<Magic>).<block-break>(<returnTemp>$22: NilClass)
+    <block-break-assign>$21: NilClass = <returnTemp>$20
     <unconditional> -> bb10
 
 # backedges
@@ -75,8 +71,8 @@ bb12[rubyBlockId=0, firstDead=-1](<self>: T.class_of(<root>)):
 # - bb17(rubyBlockId=0)
 bb14[rubyBlockId=0, firstDead=-1](<self>: T.class_of(<root>), x: Integer(0)):
     # outerLoops: 1
-    <whileTemp>$28: FalseClass = false
-    <whileTemp>$28 -> (FalseClass ? bb17 : bb16)
+    <whileTemp>$24: FalseClass = false
+    <whileTemp>$24 -> (FalseClass ? bb17 : bb16)
 
 # backedges
 # - bb14(rubyBlockId=0)
@@ -88,8 +84,8 @@ bb16[rubyBlockId=0, firstDead=-1](<self>: T.class_of(<root>), x: Integer(0)):
 # - bb14(rubyBlockId=0)
 bb17[rubyBlockId=0, firstDead=0](<self>: T.class_of(<root>), x: Integer(0)):
     # outerLoops: 1
-    <statTemp>$32 = 2
-    <statTemp>$30 = <self>.puts(<statTemp>$32)
+    <statTemp>$28 = 2
+    <statTemp>$26 = <self>.puts(<statTemp>$28)
     x = 1
     <unconditional> -> bb14
 
@@ -98,14 +94,14 @@ bb17[rubyBlockId=0, firstDead=0](<self>: T.class_of(<root>), x: Integer(0)):
 # - bb21(rubyBlockId=0)
 bb18[rubyBlockId=0, firstDead=-1](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0)):
     # outerLoops: 1
-    <statTemp>$36: TrueClass = true
-    <whileTemp>$35: FalseClass = <statTemp>$36: TrueClass.!()
-    <whileTemp>$35 -> (FalseClass ? bb21 : bb20)
+    <statTemp>$32: TrueClass = true
+    <whileTemp>$31: FalseClass = <statTemp>$32: TrueClass.!()
+    <whileTemp>$31 -> (FalseClass ? bb21 : bb20)
 
 # backedges
 # - bb18(rubyBlockId=0)
 bb20[rubyBlockId=0, firstDead=2](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0)):
-    <statTemp>$41: NilClass = <self>: T.class_of(<root>).puts(x: Integer(0), y: Integer(0))
+    <statTemp>$37: NilClass = <self>: T.class_of(<root>).puts(x: Integer(0), y: Integer(0))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -113,8 +109,8 @@ bb20[rubyBlockId=0, firstDead=2](<self>: T.class_of(<root>), x: Integer(0), y: I
 # - bb18(rubyBlockId=0)
 bb21[rubyBlockId=0, firstDead=0](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0)):
     # outerLoops: 1
-    <statTemp>$40 = 2
-    <statTemp>$38 = <self>.puts(<statTemp>$40)
+    <statTemp>$36 = 2
+    <statTemp>$34 = <self>.puts(<statTemp>$36)
     y = 1
     <unconditional> -> bb18
 
