@@ -29,12 +29,13 @@ module T::Private::Methods
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
 
-  DeclarationBlock = Struct.new(:mod, :loc, :blk, :final, :raw)
+  DeclarationBlock = Struct.new(:mod, :loc, :blk, :raw, :decl_builder)
 
   def self.declare_sig(mod, loc, arg, &blk)
-    T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, loc, arg, &blk)
+    declaration = _declare_sig_internal(mod, loc, arg, &blk)
+    T::Private::DeclState.current.active_declaration = declaration
 
-    nil
+    declaration.decl_builder
   end
 
   # See tests for how to use this.  But you shouldn't be using this.
@@ -54,7 +55,10 @@ module T::Private::Methods
       raise "Invalid argument to `sig`: #{arg}"
     end
 
-    DeclarationBlock.new(mod, loc, blk, arg == :final, raw)
+    decl_builder = DeclBuilder.new(mod, raw)
+    decl_builder.final if arg == :final # needed for backwards compatibility with sig(:final) {...}
+
+    DeclarationBlock.new(mod, loc, blk, raw, decl_builder)
   end
 
   def self._with_declared_signature(mod, declblock, &blk)
@@ -213,7 +217,7 @@ module T::Private::Methods
     current_declaration = T::Private::DeclState.current.active_declaration
     mod = is_singleton_method ? hook_mod.singleton_class : hook_mod
 
-    if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
+    if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.decl_builder.final?)
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
     end
     # Don't compute mod.ancestors if we don't need to bother checking final-ness.
@@ -277,7 +281,7 @@ module T::Private::Methods
     end
 
     @sig_wrappers[key] = sig_block
-    if current_declaration.final
+    if current_declaration.decl_builder.final?
       @was_ever_final_names[method_name] = true
       # use hook_mod, not mod, because for example, we want class C to be marked as having final if we def C.foo as
       # final. change this to mod to see some final_method tests fail.
@@ -346,10 +350,9 @@ module T::Private::Methods
   end
 
   def self.run_builder(declaration_block)
-    builder = DeclBuilder.new(declaration_block.mod, declaration_block.raw)
-    builder
-      .instance_exec(&declaration_block.blk)
-      .finalize!
+    declaration_block
+      .decl_builder
+      .run!(&declaration_block.blk)
       .decl
   end
 
