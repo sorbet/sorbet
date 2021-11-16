@@ -23,55 +23,61 @@ namespace sorbet::realmain::options {
 struct PrintOptions {
     string option;
     PrinterConfig Printers::*config;
-    bool supportsCaching = false;
-    bool supportsFlush = true; // If false, printer is responsible for flushing its own output.
+
+    // Whether the option is compatible with --cache-dir.
+    // (Some printers only run in a phase of pipeline.cc that runs if a tree is not cached)
+    bool supportsCaching = true;
+
+    // If false, printer is responsible for flushing its own output.
+    // Otherwise, just using opts.print.MyPrinter.print(...) with a string will be enough.
+    bool supportsFlush = true;
 };
 
 const vector<PrintOptions> print_options({
-    {"parse-tree", &Printers::ParseTree},
-    {"parse-tree-json", &Printers::ParseTreeJson},
-    {"parse-tree-json-with-locs", &Printers::ParseTreeJsonWithLocs},
-    {"parse-tree-whitequark", &Printers::ParseTreeWhitequark},
-    {"desugar-tree", &Printers::DesugarTree},
-    {"desugar-tree-raw", &Printers::DesugarTreeRaw},
-    {"rewrite-tree", &Printers::RewriterTree},
-    {"rewrite-tree-raw", &Printers::RewriterTreeRaw},
-    {"index-tree", &Printers::IndexTree, true},
-    {"index-tree-raw", &Printers::IndexTreeRaw, true},
-    {"name-tree", &Printers::NameTree, true},
-    {"name-tree-raw", &Printers::NameTreeRaw, true},
-    {"resolve-tree", &Printers::ResolveTree, true},
-    {"resolve-tree-raw", &Printers::ResolveTreeRaw, true},
-    {"flatten-tree", &Printers::FlattenTree, true},
-    {"flatten-tree-raw", &Printers::FlattenTreeRaw, true},
-    {"ast", &Printers::AST, true},
-    {"ast-raw", &Printers::ASTRaw, true},
-    {"cfg", &Printers::CFG, true},
-    {"cfg-raw", &Printers::CFGRaw, true},
-    {"cfg-text", &Printers::CFGText, true},
-    {"symbol-table", &Printers::SymbolTable, true},
-    {"symbol-table-raw", &Printers::SymbolTableRaw, true},
-    {"symbol-table-json", &Printers::SymbolTableJson, true},
-    {"symbol-table-proto", &Printers::SymbolTableProto, true},
+    {"parse-tree", &Printers::ParseTree, false},
+    {"parse-tree-json", &Printers::ParseTreeJson, false},
+    {"parse-tree-json-with-locs", &Printers::ParseTreeJsonWithLocs, false},
+    {"parse-tree-whitequark", &Printers::ParseTreeWhitequark, false},
+    {"desugar-tree", &Printers::DesugarTree, false},
+    {"desugar-tree-raw", &Printers::DesugarTreeRaw, false},
+    {"rewrite-tree", &Printers::RewriterTree, false},
+    {"rewrite-tree-raw", &Printers::RewriterTreeRaw, false},
+    {"index-tree", &Printers::IndexTree},
+    {"index-tree-raw", &Printers::IndexTreeRaw},
+    {"name-tree", &Printers::NameTree},
+    {"name-tree-raw", &Printers::NameTreeRaw},
+    {"resolve-tree", &Printers::ResolveTree},
+    {"resolve-tree-raw", &Printers::ResolveTreeRaw},
+    {"flatten-tree", &Printers::FlattenTree},
+    {"flatten-tree-raw", &Printers::FlattenTreeRaw},
+    {"ast", &Printers::AST},
+    {"ast-raw", &Printers::ASTRaw},
+    {"cfg", &Printers::CFG},
+    {"cfg-raw", &Printers::CFGRaw},
+    {"cfg-text", &Printers::CFGText},
+    {"symbol-table", &Printers::SymbolTable},
+    {"symbol-table-raw", &Printers::SymbolTableRaw},
+    {"symbol-table-json", &Printers::SymbolTableJson},
+    {"symbol-table-proto", &Printers::SymbolTableProto},
     {"symbol-table-messagepack", &Printers::SymbolTableMessagePack, true, false},
-    {"symbol-table-full", &Printers::SymbolTableFull, true},
-    {"symbol-table-full-raw", &Printers::SymbolTableFullRaw, true},
-    {"symbol-table-full-json", &Printers::SymbolTableFullJson, true},
-    {"symbol-table-full-proto", &Printers::SymbolTableFullProto, true},
+    {"symbol-table-full", &Printers::SymbolTableFull},
+    {"symbol-table-full-raw", &Printers::SymbolTableFullRaw},
+    {"symbol-table-full-json", &Printers::SymbolTableFullJson},
+    {"symbol-table-full-proto", &Printers::SymbolTableFullProto},
     {"symbol-table-full-messagepack", &Printers::SymbolTableFullMessagePack, true, false},
-    {"file-table-json", &Printers::FileTableJson, true},
-    {"file-table-proto", &Printers::FileTableProto, true},
+    {"file-table-json", &Printers::FileTableJson},
+    {"file-table-proto", &Printers::FileTableProto},
     {"file-table-messagepack", &Printers::FileTableMessagePack, true, false},
-    {"file-table-full-json", &Printers::FileTableFullJson, true},
-    {"file-table-full-proto", &Printers::FileTableFullProto, true},
+    {"file-table-full-json", &Printers::FileTableFullJson},
+    {"file-table-full-proto", &Printers::FileTableFullProto},
     {"file-table-full-messagepack", &Printers::FileTableFullMessagePack, true, false},
-    {"missing-constants", &Printers::MissingConstants, true},
-    {"autogen", &Printers::Autogen, true},
-    {"autogen-msgpack", &Printers::AutogenMsgPack, true},
-    {"autogen-classlist", &Printers::AutogenClasslist, true},
+    {"missing-constants", &Printers::MissingConstants},
+    {"autogen", &Printers::Autogen},
+    {"autogen-msgpack", &Printers::AutogenMsgPack},
+    {"autogen-classlist", &Printers::AutogenClasslist},
     {"autogen-autoloader", &Printers::AutogenAutoloader, true, false},
-    {"autogen-subclasses", &Printers::AutogenSubclasses, true},
-    {"package-tree", &Printers::Packager},
+    {"autogen-subclasses", &Printers::AutogenSubclasses},
+    {"package-tree", &Printers::Packager, false},
 });
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
