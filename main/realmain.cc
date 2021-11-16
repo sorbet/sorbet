@@ -480,6 +480,7 @@ int realmain(int argc, char *argv[]) {
     gs->errorUrlBase = opts.errorUrlBase;
     gs->semanticExtensions = move(extensions);
     vector<ast::ParsedFile> indexed;
+    vector<ast::ParsedFile> indexedForMinimize;
 
     gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
@@ -532,12 +533,7 @@ int realmain(int argc, char *argv[]) {
 
     logger->trace("done building initial global state");
 
-    unique_ptr<core::GlobalState> gsForMinimize;
-    if (!opts.minimizeRBI.empty()) {
-        // Copy all the CLI-provided options and initialization onto the GlobalState we'll use for
-        // minimizeRBI below, taking care to copy before populating it with any file information.
-        gsForMinimize = gs->deepCopy();
-    }
+    // TODO(jez) Note: this is where you used to initialize gsForMinimize
 
     if (opts.runLSP) {
 #ifdef SORBET_REALMAIN_MIN
@@ -558,7 +554,6 @@ int realmain(int argc, char *argv[]) {
 #endif
     } else {
         Timer timeall(logger, "wall_time");
-        vector<core::FileRef> inputFiles;
         logger->trace("Files: ");
 
         if (!opts.storeState.empty()) {
@@ -566,7 +561,8 @@ int realmain(int argc, char *argv[]) {
             hashing::Hashing::computeFileHashes(gs->getFiles(), *logger, *workers, opts);
         }
 
-        { inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames); }
+        auto inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames);
+        vector<core::FileRef> inputFilesForMinimize;
 
         {
             core::UnfreezeFileTable fileTableAccess(*gs);
@@ -584,6 +580,14 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
+        // TODO(jez) Change name of option?
+        if (!opts.minimizeRBI.empty()) {
+            // TODO(jez) What would it mean for us to accept a vector of RBIs?
+            // TODO(jez) Do something to ensure that `opts.minimizeRBI` file is not a file Sorbet
+            // already knew about.
+            inputFilesForMinimize = pipeline::reserveFiles(gs, {opts.minimizeRBI});
+        }
+
         {
             if (!opts.storeState.empty() || opts.forceHashing) {
                 // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
@@ -591,11 +595,26 @@ int realmain(int argc, char *argv[]) {
             } else {
                 indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore);
             }
+
+            if (!opts.minimizeRBI.empty()) {
+                // Uses the same `gs` as the rest of the pipepine, so that the NameRef's reuse existing IDs
+                indexedForMinimize = pipeline::index(gs, inputFilesForMinimize, opts, *workers, kvstore);
+            }
+
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
         }
         cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed);
+        // TODO(jez) Should we care that we're not caching the result of indexing `unknown.rbi`?
+
+        // TODO(jez) Double check that you didn't use gs whe you meant to gsForMinimize
+        unique_ptr<core::GlobalState> gsForMinimize;
+        if (!opts.minimizeRBI.empty()) {
+            // Duplicate GlobalState after indexing so that the NameRef's are comparable.
+            // Duplicate before resolving so that the contents of the symbol table are not shared.
+            gsForMinimize = gs->deepCopy();
+        }
 
         if (gs->runningUnderAutogen) {
 #ifdef SORBET_REALMAIN_MIN
@@ -634,31 +653,23 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
+        // TODO(jez) Is it worth factoring this stuff out to a helper? (leaning towards no)
         if (!opts.minimizeRBI.empty()) {
-            // TODO(jez) Change name of option?
-            // TODO(jez) Do something to ensure that `opts.minimizeRBI` file is not a file Sorbet
-            // already knew about.
-            // TODO(jez) What would it mean for us to accept a vector of RBIs?
-            // TODO(jez) Double check that you didn't use gs whe you meant to gsForMinimize
-            // TODO(jez) Is it worth factoring this stuff out to a helper? (leaning towards no)
-            // TODO(jez) Is it worth forcing the input file to be an RBI? Or should we drop that from the name?
+            // TODO(jez) Is it worth forcing the input file to be an RBI? Or should we drop that from the option name?
+            // Maybe just call it --minimize-to-rbi?
             // TODO(jez) Put Timer's in here wherever there are gaps in the web trace file
-            auto minimizeInputFiles = pipeline::reserveFiles(gsForMinimize, vector<string>{opts.minimizeRBI});
 
-            // TODO(jez) kvstore is an input here. Should we make an attempt to add this RBI file to
-            // the cache? I don't think so.
-            auto indexed = pipeline::index(gsForMinimize, minimizeInputFiles, opts, *workers, kvstore);
-            if (gsForMinimize->hadCriticalError()) {
-                gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
-            }
-
-            indexed = move(pipeline::resolve(gsForMinimize, move(indexed), opts, *workers).result());
+            indexedForMinimize =
+                move(pipeline::resolve(gsForMinimize, move(indexedForMinimize), opts, *workers).result());
             if (gsForMinimize->hadCriticalError()) {
                 gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
             }
 
             // TODO(jez) Test that shows that `-p` options work with second global state
-            indexed = move(pipeline::typecheck(gsForMinimize, move(indexed), opts, *workers).result());
+            // We have to run pipeline::typecheck because the symbol-table printers only run in this phase.
+            // (We could potentially consider moving them.)
+            indexedForMinimize =
+                move(pipeline::typecheck(gsForMinimize, move(indexedForMinimize), opts, *workers).result());
             if (gsForMinimize->hadCriticalError()) {
                 gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
             }
