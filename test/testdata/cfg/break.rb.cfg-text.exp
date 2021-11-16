@@ -256,8 +256,8 @@ bb19[rubyBlockId=0, firstDead=-1]():
 # - bb19(rubyBlockId=0)
 # - bb22(rubyBlockId=0)
 bb20[rubyBlockId=0, firstDead=3](c: T.nilable(Symbol)):
-    <cfgAlias>$105: T.class_of(T) = alias <C T>
-    <statTemp>$103: T.nilable(Symbol) = <cfgAlias>$105: T.class_of(T).reveal_type(c: T.nilable(Symbol))
+    <cfgAlias>$103: T.class_of(T) = alias <C T>
+    <statTemp>$101: T.nilable(Symbol) = <cfgAlias>$103: T.class_of(T).reveal_type(c: T.nilable(Symbol))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -277,8 +277,6 @@ bb22[rubyBlockId=0, firstDead=-1]():
     # outerLoops: 1
     <returnTemp>$99: Symbol(:abc) = :abc
     <block-break-assign>$100: Symbol(:abc) = <returnTemp>$99
-    <magic>$101: T.class_of(<Magic>) = alias <C <Magic>>
-    <block-break>$102: T.untyped = <magic>$101: T.class_of(<Magic>).<block-break>(<returnTemp>$99: Symbol(:abc))
     c: Symbol(:abc) = <block-break-assign>$100
     <unconditional> -> bb20
 

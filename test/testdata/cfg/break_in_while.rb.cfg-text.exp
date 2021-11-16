@@ -7,8 +7,8 @@ bb0[rubyBlockId=0, firstDead=-1]():
 # backedges
 # - bb4(rubyBlockId=0)
 bb1[rubyBlockId=0, firstDead=-1](<self>):
-    <statTemp>$11 = <self>
-    <statTemp>$4 = <statTemp>$11.dead()
+    <statTemp>$9 = <self>
+    <statTemp>$4 = <statTemp>$9.dead()
     <unconditional> -> bb1
 
 # backedges
@@ -37,8 +37,6 @@ bb5[rubyBlockId=0, firstDead=-1]():
     # outerLoops: 1
     <returnTemp>$7: Integer(2) = 2
     <block-break-assign>$8: Integer(2) = <returnTemp>$7
-    <magic>$9: T.class_of(<Magic>) = alias <C <Magic>>
-    <block-break>$10: T.untyped = <magic>$9: T.class_of(<Magic>).<block-break>(<returnTemp>$7: Integer(2))
     <returnMethodTemp>$2: Integer(2) = <block-break-assign>$8
     <unconditional> -> bb4
 
