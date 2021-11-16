@@ -170,7 +170,7 @@ struct CapturedVariables {
 
     // LocalRefs referenced from multiple blocks.  Maps from variables to their index
     // in the local variable area on the Ruby stack.
-    UnorderedMap<cfg::LocalRef, int> escapedVariableIndexes;
+    UnorderedMap<cfg::LocalRef, EscapedUse> escapedVariableIndexes;
 
     // Whether the ruby method uses a block argument.
     BlockArgUsage usesBlockArgs;
@@ -264,6 +264,11 @@ class TrackCaptures final {
         return BlockArgUsage::Captured;
     }
 
+    struct PrivateUse {
+        optional<int> rubyBlockId;
+        LocalUsedHow used;
+    };
+
     void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv, LocalUsedHow use, CaptureContext context) {
         if (lv == cfg::LocalRef::selfVariable()) {
             return;
@@ -280,19 +285,33 @@ class TrackCaptures final {
         auto fnd = privateUsages.find(lv);
         if (fnd != privateUsages.end()) {
             auto &store = fnd->second;
-            if (store && store.value() != bb->rubyBlockId) {
-                store = nullopt;
-                escapedIndexes[lv] = escapedIndexCounter;
-                escapedIndexCounter += 1;
+            if (store.rubyBlockId.has_value()) {
+                if (store.rubyBlockId.value() != bb->rubyBlockId) {
+                    store.rubyBlockId = nullopt;
+                    LocalUsedHow how = use == LocalUsedHow::ReadOnly ? store.used : LocalUsedHow::WrittenTo;
+                    escapedIndexes[lv] = EscapedUse{escapedIndexCounter, how};
+                    escapedIndexCounter += 1;
+                } else if (use == LocalUsedHow::WrittenTo) {
+                    store.used = LocalUsedHow::WrittenTo;
+                }
+            } else {
+                // If this ref exists in privateUsages, but does not have an associated
+                // rubyBlockId, then it must have escaped, and we need to update its
+                // status there.
+                const auto &escaped = escapedIndexes.find(lv);
+                ENFORCE(escaped != escapedIndexes.end());
+                if (use == LocalUsedHow::WrittenTo) {
+                    escaped->second.used = LocalUsedHow::WrittenTo;
+                }
             }
         } else {
-            privateUsages[lv] = bb->rubyBlockId;
+            privateUsages[lv] = PrivateUse{bb->rubyBlockId, use};
         }
     }
 
 public:
-    UnorderedMap<cfg::LocalRef, optional<int>> privateUsages;
-    UnorderedMap<cfg::LocalRef, int> escapedIndexes;
+    UnorderedMap<cfg::LocalRef, PrivateUse> privateUsages;
+    UnorderedMap<cfg::LocalRef, EscapedUse> escapedIndexes;
     int escapedIndexCounter = 0;
     BlockArgUsage blockArgUsage = BlockArgUsage::None;
     cfg::LocalRef blkArg = cfg::LocalRef::noVariable();
@@ -319,11 +338,12 @@ public:
         // capture analysis process, so remove them
         UnorderedMap<cfg::LocalRef, int> realPrivateUsages;
         for (auto &entry : privateUsages) {
-            if (!entry.second.has_value()) {
+            auto &tracker = entry.second;
+            if (!tracker.rubyBlockId.has_value()) {
                 continue;
             }
 
-            realPrivateUsages[entry.first] = entry.second.value();
+            realPrivateUsages[entry.first] = tracker.rubyBlockId.value();
         }
 
         if (blkArg.exists()) {
@@ -339,7 +359,9 @@ public:
             // ...but we still need to note that it is a legitimate local variable
             // if it was captured in some way.
             if (blockArgUsage == BlockArgUsage::Captured) {
-                escapedIndexes[blkArg] = escapedIndexCounter;
+                // Assume the worst about how the block is used.
+                auto how = LocalUsedHow::WrittenTo;
+                escapedIndexes[blkArg] = EscapedUse{escapedIndexCounter, how};
                 escapedIndexCounter += 1;
             }
         }

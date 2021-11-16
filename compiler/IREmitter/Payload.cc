@@ -545,16 +545,16 @@ void fillLocals(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitter
                 int baseOffset, llvm::Value *locals) {
     // The map used to store escaped variables isn't stable, so we first sort it into a vector. This isn't great, but
     // without this step the locals are processed in random order, making the llvm output unstable.
-    vector<pair<cfg::LocalRef, int>> escapedVariables{};
+    vector<pair<cfg::LocalRef, EscapedUse>> escapedVariables{};
     for (auto &entry : irctx.escapedVariableIndices) {
         escapedVariables.emplace_back(entry);
     }
 
-    fast_sort(escapedVariables, [](const auto &left, const auto &right) -> bool { return left.second < right.second; });
+    fast_sort(escapedVariables, [](const auto &left, const auto &right) -> bool { return left.second.localIndex < right.second.localIndex; });
 
     for (auto &entry : escapedVariables) {
         auto *id = Payload::idIntern(cs, builder, entry.first.data(irctx.cfg)._name.shortName(cs));
-        auto *offset = llvm::ConstantInt::get(cs, llvm::APInt(32, baseOffset + entry.second, false));
+        auto *offset = llvm::ConstantInt::get(cs, llvm::APInt(32, baseOffset + entry.second.localIndex, false));
         llvm::Value *indices[] = {offset};
         builder.CreateStore(id, builder.CreateGEP(locals, indices));
     }
@@ -942,7 +942,7 @@ llvm::Value *Payload::getClassVariableStoreClass(CompilerState &cs, llvm::IRBuil
 std::tuple<llvm::Value *, llvm::Value *> Payload::escapedVariableIndexAndLevel(CompilerState &cs, cfg::LocalRef local,
                                                                                const IREmitterContext &irctx,
                                                                                int rubyBlockId) {
-    auto *index = indexForLocalVariable(cs, irctx, rubyBlockId, irctx.escapedVariableIndices.at(local));
+    auto *index = indexForLocalVariable(cs, irctx, rubyBlockId, irctx.escapedVariableIndices.at(local).localIndex);
     auto level = irctx.rubyBlockLevel[rubyBlockId];
     return {index, llvm::ConstantInt::get(cs, llvm::APInt(64, level, true))};
 }
