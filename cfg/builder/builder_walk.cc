@@ -777,6 +777,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         auto self = cctx.inWhat.enterLocal(core::LocalVariable::selfVariable());
                         current->exprs.emplace_back(self, c.loc, make_insn<Cast>(tmp, c.type, core::Names::cast()));
                         current->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(self));
+
+                        if (cctx.rescueScope) {
+                            cctx.rescueScope->exprs.emplace_back(self, c.loc,
+                                                                 make_insn<Cast>(tmp, c.type, core::Names::cast()));
+                            cctx.rescueScope->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(self));
+                        }
                     } else {
                         if (auto e = cctx.ctx.beginError(what.loc(), core::errors::CFG::MalformedTBind)) {
                             e.setHeader("`{}` can only be used with `{}`", "T.bind", "self");

@@ -133,3 +133,45 @@ module ThisSelf
     this.puts
   end
 end
+
+class Rescues
+  def self.takes_block(&block); end
+
+  takes_block do
+    T.bind(self, Integer)
+    T.reveal_type(self) # error: type: `Integer`
+  rescue
+    T.reveal_type(self) # error: type: `Integer`
+  end
+
+  def foo
+    T.bind(self, String)
+    T.reveal_type(self) # error: type: `String`
+  rescue
+    T.reveal_type(self) # error: type: `String`
+  ensure
+    T.reveal_type(self) # error: type: `String`
+  end
+
+  def bar
+    T.bind(self, String)
+    T.reveal_type(self) # error: type: `String`
+  rescue
+    T.bind(self, Integer)
+    T.reveal_type(self) # error: type: `Integer`
+  ensure
+    T.bind(self, Float)
+    T.reveal_type(self) # error: type: `Float`
+  end
+
+  def baz
+    T.reveal_type(self) # error: type: `Rescues`
+
+    begin
+      T.bind(self, String)
+      T.reveal_type(self) # error: type: `String`
+    rescue
+      T.reveal_type(self) # error: type: `String`
+    end
+  end
+end
