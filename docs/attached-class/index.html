@@ -217,7 +217,36 @@ of a signature, you’ll get an error:</p>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">problem</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/noreturn"><span class="arrow-prev">← </span><span>T.noreturn</span></a><a class="docs-next button" href="/docs/intersection-types"><span>Intersection Types</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#typing-factory-methods">Typing factory methods</a></li><li><a href="#tattached_class-as-an-argument"><code>T.attached_class</code> as an argument?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2021 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<h2><a class="anchor" aria-hidden="true" id="tattached_class-common-problems"></a><a href="#tattached_class-common-problems" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.attached_class</code> common problems</h2>
+<p>One common problem people encounter when using <code>T.attached_class</code> looks
+something like this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
+  extend T::Sig
+
+  sig {returns(T.attached_class)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">make</span></span>
+    Parent.new <span class="hljs-comment"># (1) Sorbet reports an error here</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent;</span> <span class="hljs-keyword">end</span>
+
+T.reveal_type(Child.make) <span class="hljs-comment"># Revealed type: `Child`</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Parent%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Breturns%28T.attached_class%29%7D%0A%20%20def%20self.make%0A%20%20%20%20Parent.new%0A%20%20end%0Aend%0A%0Aclass%20Child%20%3C%20Parent%3B%20end%0A%0AT.reveal_type%28Child.make%29%20%23%20reveals%20Child">→ View on sorbet.run</a></p>
+<p>In this example, the program attempts to return <code>Parent.new</code> from <code>self.make</code>,
+instead of just <code>self.new</code>. There is a key difference: <code>Parent.new</code> will
+<strong>always</strong> make an instance of <code>Parent</code>, while <code>self.new</code> will make an instance
+of the particular subclass that <code>self.make</code> was called on.</p>
+<p>For this reason, Sorbet has to report an error at comment <code>(1)</code> above. If we
+consider the <code>Child</code> class that inherits from <code>Parent</code>, the <code>T.attached_class</code>
+type suggests to the caller that <code>Child.make</code> will return a <code>Child</code> instance
+(the <code>T.reveal_type</code> confirms this).</p>
+<p>Since <code>Parent.new</code> is not an instance of <code>Child</code> or any other potential
+subclasses of <code>Parent</code>, Sorbet must reject the code at <code>(1)</code>.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/noreturn"><span class="arrow-prev">← </span><span>T.noreturn</span></a><a class="docs-next button" href="/docs/intersection-types"><span>Intersection Types</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#typing-factory-methods">Typing factory methods</a></li><li><a href="#tattached_class-as-an-argument"><code>T.attached_class</code> as an argument?</a></li><li><a href="#tattached_class-common-problems"><code>T.attached_class</code> common problems</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2021 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
