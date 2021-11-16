@@ -437,13 +437,16 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 return dot.str();
             });
 
-            handler.addObserved(*gs, "cfg-text", [&]() {
-                stringstream dot;
-                for (auto &cfg : collector.cfgs) {
-                    dot << cfg->toTextualString(ctx) << '\n' << '\n';
-                }
-                return dot.str();
-            });
+            handler.addObserved(
+                *gs, "cfg-text",
+                [&]() {
+                    stringstream dot;
+                    for (auto &cfg : collector.cfgs) {
+                        dot << cfg->toTextualString(ctx) << '\n' << '\n';
+                    }
+                    return dot.str();
+                },
+                false);
         }
 
         // If there is a tree left with a typed: pragma, run the inferencer
