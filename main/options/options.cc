@@ -402,6 +402,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("stop-after", to_string(all_stop_after),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
+    options.add_options("dev")("minimize-rbi", "TODO(jez)", cxxopts::value<std::string>()->default_value(""),
+                               "<file.rbi>");
     options.add_options("dev")("skip-rewriter-passes", "Do not run Rewriter passess");
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
     options.add_options("dev")("stress-incremental-resolver",
@@ -772,6 +774,7 @@ void readOptions(Options &opts,
 
         opts.noErrorCount = raw["no-error-count"].as<bool>();
         opts.noStdlib = raw["no-stdlib"].as<bool>();
+        opts.minimizeRBI = raw["minimize-rbi"].as<string>();
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
         opts.storeState = raw["store-state"].as<string>();
         opts.forceHashing = raw["force-hashing"].as<bool>();
