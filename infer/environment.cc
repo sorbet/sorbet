@@ -1246,6 +1246,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         e.addErrorSection(
                             core::TypeAndOrigins::explainExpected(ctx, methodReturnType, ownerData->loc(), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
+                        core::TypeAndOrigins::elaborateOnExplanation(ctx, e, methodReturnType, typeAndOrigin.type);
                         if (i.whatLoc != inWhat.implicitReturnLoc) {
                             auto replaceLoc = core::Loc(ctx.file, i.whatLoc);
                             core::TypeDrivenAutocorrect::maybeAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
