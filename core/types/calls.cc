@@ -196,7 +196,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
         }
         e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
-        core::TypeAndOrigins::explainTypeMismatch(gs, e, expectedType, argTpe.type);
+        core::TypeErrorDiagnostics::explainTypeMismatch(gs, e, expectedType, argTpe.type);
         TypeErrorDiagnostics::maybeAutocorrect(gs, e, loc, constr, expectedType, argTpe.type);
         return e.build();
     }
