@@ -22,6 +22,23 @@ end
 # OPT-NOT: call i64 @callFuncWithCache
 # OPT{LITERAL}: }
 
+sig {returns(Thread)}
+def thread_main
+  Thread.main
+end
+
+# INITIAL-LABEL: define internal i64 @"func_Object#11thread_main
+# INITIAL-NOT: call i64 @sorbet_i_send
+# INITIAL: call i64 @sorbet_Thread_main
+# INITIAL-NOT: call i64 @sorbet_i_send
+# INITIAL{LITERAL}: }
+
+# OPT-LABEL: define internal i64 @"func_Object#11thread_main
+# OPT-NOT: call i64 @callFuncWithCache
+# OPT: call i64 @rb_thread_main
+# OPT-NOT: call i64 @callFuncWithCache
+# OPT{LITERAL}: }
+
 sig {params(thread: Thread).returns(T.untyped)}
 def thread_aref_constant(thread)
   thread[:my_key]

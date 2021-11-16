@@ -958,6 +958,7 @@ static const vector<CallCMethodSingleton> knownCMethodsSingleton{
     {core::Symbols::T(), "unsafe", CMethod{"sorbet_T_unsafe"}},
     {core::Symbols::T(), "must", CMethod{"sorbet_T_must"}},
     {core::Symbols::Thread(), "current", CMethod{"sorbet_Thread_current", core::Symbols::Thread()}},
+    {core::Symbols::Thread(), "main", CMethod{"sorbet_Thread_main", core::Symbols::Thread()}},
 };
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs(const core::GlobalState &gs) {

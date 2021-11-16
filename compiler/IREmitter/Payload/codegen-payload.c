@@ -831,6 +831,12 @@ VALUE sorbet_Thread_current(VALUE recv, ID fun, int argc, const VALUE *const res
     return rb_thread_current();
 }
 
+SORBET_INLINE
+VALUE sorbet_Thread_main(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                         VALUE closure) {
+    return rb_thread_main();
+}
+
 // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/thread.c#L3281-L3287
 SORBET_INLINE
 VALUE sorbet_Thread_square_br(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
