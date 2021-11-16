@@ -269,7 +269,7 @@ class ::<root> < ::Object ()
 --- symbol-table-raw start ---
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=-e start=1:1 end=1:2}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=-e start=1:1 end=1:2}
       argument <blk><block> @ Loc {file=-e start=??? end=???}
 
 --- symbol-table-raw end ---
