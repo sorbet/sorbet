@@ -282,11 +282,11 @@ bool hasOptimizedTest(core::ClassOrModuleRef sym) {
     return absl::c_any_of(optimizedTypeTests, [sym](const auto &pair) { return pair.first == sym; });
 }
 
-bool hasOptimizedTest(const core::TypePtr &type) {
-    bool res = false;
+core::ClassOrModuleRef hasOptimizedTest(const core::TypePtr &type) {
+    core::ClassOrModuleRef res;
     typecase(
-        type, [&res](const core::ClassType &ct) { res = hasOptimizedTest(ct.symbol); },
-        [&res](const core::AppliedType &at) { res = hasOptimizedTest(at.klass); }, [](const core::TypePtr &def) {});
+             type, [&res](const core::ClassType &ct) { if (hasOptimizedTest(ct.symbol)) { res = ct.symbol; } },
+             [&res](const core::AppliedType &at) { if (hasOptimizedTest(at.klass)) { res = at.klass; } }, [](const core::TypePtr &def) {});
 
     return res;
 }
@@ -362,7 +362,7 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, 
             // flatten the or, and order it so that the optimized type tests show up first
             vector<core::TypePtr> parts;
             flattenOrType(parts, ct);
-            absl::c_partition(parts, [](const auto &ty) { return hasOptimizedTest(ty); });
+            absl::c_partition(parts, [](const auto &ty) { return hasOptimizedTest(ty).exists(); });
 
             // forward-declare the exit
             auto *fun = builder.GetInsertBlock()->getParent();
@@ -398,7 +398,7 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, 
             // flatten the and, and order it so that the optimized type tests show up first
             vector<core::TypePtr> parts;
             flattenAndType(parts, ct);
-            absl::c_partition(parts, [](const auto &ty) { return hasOptimizedTest(ty); });
+            absl::c_partition(parts, [](const auto &ty) { return hasOptimizedTest(ty).exists(); });
 
             // forward-declare the exit
             auto *fun = builder.GetInsertBlock()->getParent();
@@ -995,15 +995,8 @@ llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBui
             return value;
         }
 
-        core::ClassOrModuleRef klass;
-        typecase(
-            info.use.type, [&klass](const core::ClassType &ct) { klass = ct.symbol; },
-            [&klass](const core::AppliedType &at) { klass = at.klass; }, [](const core::TypePtr &def) {});
+        core::ClassOrModuleRef klass = hasOptimizedTest(info.use.type);
         if (!klass.exists()) {
-            return value;
-        }
-
-        if (!hasOptimizedTest(klass)) {
             return value;
         }
 
