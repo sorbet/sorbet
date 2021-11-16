@@ -285,8 +285,18 @@ bool hasOptimizedTest(core::ClassOrModuleRef sym) {
 core::ClassOrModuleRef hasOptimizedTest(const core::TypePtr &type) {
     core::ClassOrModuleRef res;
     typecase(
-             type, [&res](const core::ClassType &ct) { if (hasOptimizedTest(ct.symbol)) { res = ct.symbol; } },
-             [&res](const core::AppliedType &at) { if (hasOptimizedTest(at.klass)) { res = at.klass; } }, [](const core::TypePtr &def) {});
+        type,
+        [&res](const core::ClassType &ct) {
+            if (hasOptimizedTest(ct.symbol)) {
+                res = ct.symbol;
+            }
+        },
+        [&res](const core::AppliedType &at) {
+            if (hasOptimizedTest(at.klass)) {
+                res = at.klass;
+            }
+        },
+        [](const core::TypePtr &def) {});
 
     return res;
 }
