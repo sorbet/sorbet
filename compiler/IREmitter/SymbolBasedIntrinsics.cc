@@ -917,6 +917,7 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Array(), "all?", CMethod{"sorbet_rb_array_all"}, CMethod{"sorbet_rb_array_all_withBlock"}},
     {core::Symbols::Array(), "compact", CMethod{"sorbet_rb_array_compact", core::Symbols::Array()}},
     {core::Symbols::Array(), "compact!", CMethod{"sorbet_rb_array_compact_bang"}},
+    {core::Symbols::Array(), "to_ary", CMethod{"sorbet_returnRecv", core::Symbols::Array()}},
     {core::Symbols::Array(), "to_h", CMethod{"sorbet_rb_array_to_h", core::Symbols::Hash()}},
     {core::Symbols::Array(), "size", CMethod{"sorbet_rb_array_len", core::Symbols::Integer()}},
     {core::Symbols::Array(), "length", CMethod{"sorbet_rb_array_len", core::Symbols::Integer()}},
@@ -929,6 +930,7 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Hash(), "each_with_object", CMethod{"sorbet_rb_hash_each_with_object", core::Symbols::Enumerator()},
      CMethod{"sorbet_rb_hash_each_with_object_withBlock"}},
     {core::Symbols::Hash(), "any?", CMethod{"sorbet_rb_hash_any"}, CMethod{"sorbet_rb_hash_any_withBlock"}},
+    {core::Symbols::Hash(), "to_hash", CMethod{"sorbet_returnRecv", core::Symbols::Hash()}},
     {core::Symbols::TrueClass(), "|", CMethod{"sorbet_int_bool_true"}},
     {core::Symbols::FalseClass(), "|", CMethod{"sorbet_int_bool_and"}},
     {core::Symbols::TrueClass(), "&", CMethod{"sorbet_int_bool_and"}},
@@ -943,6 +945,8 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Integer(), "<", CMethod{"sorbet_rb_int_lt"}},
     {core::Symbols::Integer(), ">=", CMethod{"sorbet_rb_int_ge"}},
     {core::Symbols::Integer(), "<=", CMethod{"sorbet_rb_int_le"}},
+    {core::Symbols::Integer(), "to_i", CMethod{"sorbet_returnRecv", core::Symbols::Integer()}},
+    {core::Symbols::Integer(), "to_int", CMethod{"sorbet_returnRecv", core::Symbols::Integer()}},
     {core::Symbols::Integer(), "to_s", CMethod{"sorbet_rb_int_to_s", core::Symbols::String()}},
     {core::Symbols::Integer(), "==", CMethod{"sorbet_rb_int_equal"}},
     {core::Symbols::Integer(), "!=", CMethod{"sorbet_rb_int_neq"}},
@@ -951,6 +955,7 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::String(), "+@", CMethod{"sorbet_int_str_uplus", core::Symbols::String()}},
     {core::Symbols::Symbol(), "==", CMethod{"sorbet_rb_sym_equal"}},
     {core::Symbols::Symbol(), "===", CMethod{"sorbet_rb_sym_equal"}},
+    {core::Symbols::Symbol(), "to_sym", CMethod{"sorbet_returnRecv"}},
 #include "WrappedIntrinsics.h"
 };
 

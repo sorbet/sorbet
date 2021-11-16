@@ -1811,6 +1811,12 @@ VALUE sorbet_selfNew(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk
 }
 
 SORBET_INLINE
+VALUE sorbet_returnRecv(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                        VALUE closure) {
+    return recv;
+}
+
+SORBET_INLINE
 VALUE sorbet_int_str_uplus(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk, VALUE closure) {
     rb_check_arity(argc, 0, 0);
     return sorbet_vm_str_uplus(recv);
