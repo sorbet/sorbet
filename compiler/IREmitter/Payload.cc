@@ -550,7 +550,9 @@ void fillLocals(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitter
         escapedVariables.emplace_back(entry);
     }
 
-    fast_sort(escapedVariables, [](const auto &left, const auto &right) -> bool { return left.second.localIndex < right.second.localIndex; });
+    fast_sort(escapedVariables, [](const auto &left, const auto &right) -> bool {
+        return left.second.localIndex < right.second.localIndex;
+    });
 
     for (auto &entry : escapedVariables) {
         auto *id = Payload::idIntern(cs, builder, entry.first.data(irctx.cfg)._name.shortName(cs));
@@ -939,8 +941,8 @@ llvm::Value *Payload::getClassVariableStoreClass(CompilerState &cs, llvm::IRBuil
     return Payload::getRubyConstant(cs, sym.data(cs)->topAttachedClass(cs), builder);
 }
 
-EscapedVariableInfo Payload::escapedVariableInfo(CompilerState &cs, cfg::LocalRef local,
-                                                 const IREmitterContext &irctx, int rubyBlockId) {
+EscapedVariableInfo Payload::escapedVariableInfo(CompilerState &cs, cfg::LocalRef local, const IREmitterContext &irctx,
+                                                 int rubyBlockId) {
     auto &escapedUse = irctx.escapedVariableIndices.at(local);
     auto *index = indexForLocalVariable(cs, irctx, rubyBlockId, escapedUse.localIndex);
     auto level = irctx.rubyBlockLevel[rubyBlockId];
@@ -994,10 +996,9 @@ llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBui
         }
 
         core::ClassOrModuleRef klass;
-        typecase(info.use.type,
-                 [&klass](const core::ClassType &ct) { klass = ct.symbol; },
-                 [&klass](const core::AppliedType &at) { klass = at.klass; },
-                 [](const core::TypePtr &def) {});
+        typecase(
+            info.use.type, [&klass](const core::ClassType &ct) { klass = ct.symbol; },
+            [&klass](const core::AppliedType &at) { klass = at.klass; }, [](const core::TypePtr &def) {});
         if (!klass.exists()) {
             return value;
         }

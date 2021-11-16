@@ -270,7 +270,8 @@ class TrackCaptures final {
         core::TypePtr type;
     };
 
-    void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv, const core::TypePtr &type, LocalUsedHow use, CaptureContext context) {
+    void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv, const core::TypePtr &type, LocalUsedHow use,
+                         CaptureContext context) {
         if (lv == cfg::LocalRef::selfVariable()) {
             return;
         }
