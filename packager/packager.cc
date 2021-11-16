@@ -1237,7 +1237,6 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
     Timer timeit(gs.tracer(), "packager");
     // Ensure files are in canonical order.
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
-    fmt::print(stderr, "RUN PACKAGER\n");
 
     // Step 1: Find packages and determine their imports/exports.
     {

@@ -175,7 +175,6 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     vector<core::NameHash> changedHashes;
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
-    fmt::print(stderr, "BEGIN loop run fast path\n");
     {
         vector<pair<core::NameHash, u4>> changedMethodHashes;
         for (auto &f : updates.updatedFiles) {
@@ -184,7 +183,6 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             // path logic in LSPPreprocessor.
             ENFORCE(fref.exists());
             ENFORCE(f->getFileHash() != nullptr);
-            fmt::print(stderr, " - {} {}\n", f->path(), fref.exists());
             if (f->sourceType == core::File::Type::Package) {
                 // Only relevant in --stripe-packages mode. Package declarations do not have method
                 // hashes. Instead we rely on recomputing packages if any __package.rb source
@@ -214,14 +212,12 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             }
         }
 
-
         changedHashes.reserve(changedMethodHashes.size());
         for (auto &changedMethodHash : changedMethodHashes) {
             changedHashes.push_back(changedMethodHash.first);
         }
         core::NameHash::sortAndDedupe(changedHashes);
     }
-    fmt::print(stderr, "END loop run fast path\n");
 
     int i = -1;
     // N.B.: We'll iterate over the changed files, too, but it's benign if we re-add them since we dedupe `subset`.
@@ -249,11 +245,6 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     }
     // Remove any duplicate files.
     fast_sort(subset);
-    fmt::print(stderr, "START\n");
-    for (auto fr : subset) {
-        fmt::print(stderr, " xx{}\n", fr.data(*gs).path());
-    }
-    fmt::print(stderr, "END\n");
     subset.resize(std::distance(subset.begin(), std::unique(subset.begin(), subset.end())));
 
     config->logger->debug("Taking fast path");
