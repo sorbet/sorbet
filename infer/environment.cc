@@ -1283,6 +1283,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             core::TypeAndOrigins::explainExpected(ctx, expectedType, bspec.loc, "block result type"));
 
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
+                        core::TypeAndOrigins::elaborateOnExplanation(ctx, e, expectedType, typeAndOrigin.type);
                     }
                 }
 
@@ -1422,6 +1423,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 // message, but we don't have a convenient way to compute this at the moment.
                                 e.addErrorSection(cur.explainExpected(ctx, "field defined here", ownerLoc));
                                 e.addErrorSection(tp.explainGot(ctx, ownerLoc));
+                                core::TypeAndOrigins::elaborateOnExplanation(ctx, e, cur.type, tp.type);
                                 auto replaceLoc = core::Loc(ctx.file, bind.loc);
                                 // We are not processing a method call, so there is no constraint.
                                 auto &constr = core::TypeConstraint::EmptyFrozenConstraint;
