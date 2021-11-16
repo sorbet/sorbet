@@ -986,7 +986,29 @@ llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBui
     if (irctx.escapedVariableIndices.contains(local)) {
         auto *cfp = getCFPForBlock(cs, builder, irctx, rubyBlockId);
         auto info = escapedVariableInfo(cs, local, irctx, rubyBlockId);
-        return builder.CreateCall(cs.getFunction("sorbet_readLocal"), {cfp, info.index, info.level});
+        auto *value = builder.CreateCall(cs.getFunction("sorbet_readLocal"), {cfp, info.index, info.level});
+        // If we ever wrote to this local, we cannot guarantee that the type has
+        // been checked prior to the access from the locals array.
+        if (info.use.used == LocalUsedHow::WrittenTo) {
+            return value;
+        }
+
+        core::ClassOrModuleRef klass;
+        typecase(info.use.type,
+                 [&klass](const core::ClassType &ct) { klass = ct.symbol; },
+                 [&klass](const core::AppliedType &at) { klass = at.klass; },
+                 [](const core::TypePtr &def) {});
+        if (!klass.exists()) {
+            return value;
+        }
+
+        if (!hasOptimizedTest(klass)) {
+            return value;
+        }
+
+        Payload::assumeType(cs, builder, value, klass);
+
+        return value;
     }
 
     // normal local variable
