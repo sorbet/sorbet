@@ -933,23 +933,6 @@ string SymbolRef::showFullName(const GlobalState &gs) const {
 
 string ClassOrModuleRef::showFullName(const GlobalState &gs) const {
     auto sym = dataAllowingNone(gs);
-    if (sym->owner == core::Symbols::PackageRegistry()) {
-        // Pretty print package name (only happens when `--stripe-packages` is enabled)
-        if (sym->name.isPackagerName(gs)) {
-            auto nameStr = sym->name.shortName(gs);
-            if (sym->name.isPackagerPrivateName(gs)) {
-                // Foo_Bar_Package_Private => Foo::Bar
-                // Remove _Package_Private before de-munging
-                return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - core::PACKAGE_PRIVATE_SUFFIX.size()),
-                                           {{"_", "::"}});
-            } else {
-                // Foo_Bar_Package => Foo::Bar
-                // Remove _Package before de-munging
-                return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - core::PACKAGE_SUFFIX.size()),
-                                           {{"_", "::"}});
-            }
-        }
-    }
     return showFullNameInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
 }
 
