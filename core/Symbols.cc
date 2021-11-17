@@ -1048,7 +1048,10 @@ string_view SymbolRef::showKind(const GlobalState &gs) const {
 }
 
 string_view ClassOrModuleRef::showKind(const GlobalState &gs) const {
-    if (dataAllowingNone(gs)->isClassOrModuleClass()) {
+    auto sym = dataAllowingNone(gs);
+    if (!sym->isClassModuleSet()) {
+        return "class-or-module"sv;
+    } else if (sym->isClassOrModuleClass()) {
         return "class"sv;
     } else {
         return "module"sv;
