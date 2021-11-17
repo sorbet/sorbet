@@ -408,7 +408,8 @@ string AppliedType::show(const GlobalState &gs) const {
     }
     auto it = targs.begin();
     for (auto typeMember : typeMembers) {
-        if (typeMember.data(gs)->isFixed()) {
+        auto tm = typeMember.asTypeMemberRef();
+        if (tm.data(gs)->isFixed()) {
             it = targs.erase(it);
         } else if (typeMember.name(gs) == core::Names::Constants::AttachedClass()) {
             it = targs.erase(it);
