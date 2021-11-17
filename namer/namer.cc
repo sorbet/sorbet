@@ -869,7 +869,7 @@ class SymbolDefiner {
     }
 
     void defineArgs(core::MutableContext ctx, const vector<ast::ParsedArg> &parsedArgs) {
-        auto methodData = ctx.owner.data(ctx);
+        auto methodData = ctx.owner.asMethodRef().data(ctx);
         bool inShadows = false;
         bool intrinsic = isIntrinsic(methodData);
         bool swapArgs = intrinsic && (methodData->arguments().size() == 1);
@@ -902,7 +902,7 @@ class SymbolDefiner {
     }
 
     bool paramsMatch(core::MutableContext ctx, core::MethodRef method, const vector<ast::ParsedArg> &parsedArgs) {
-        auto sym = method.data(ctx)->dealias(ctx);
+        auto sym = method.data(ctx)->dealias(ctx).asMethodRef();
         if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
             return false;
         }
@@ -926,29 +926,31 @@ class SymbolDefiner {
         if (!sym.isMethod()) {
             return;
         }
-        if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
+        auto symMethod = sym.asMethodRef();
+        if (symMethod.data(ctx)->arguments().size() != parsedArgs.size()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                 if (sym != ctx.owner) {
                     // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader(
                         "Method alias `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                        ctx.owner.show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
+                        ctx.owner.show(ctx), symMethod.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
                     e.addErrorLine(ctx.owner.loc(ctx), "Previous alias definition");
-                    e.addErrorLine(sym.loc(ctx), "Dealiased definition");
+                    e.addErrorLine(symMethod.data(ctx)->loc(), "Dealiased definition");
                 } else {
                     // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                                sym.show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
-                    e.addErrorLine(sym.loc(ctx), "Previous definition");
+                                symMethod.show(ctx), symMethod.data(ctx)->arguments().size() - 1,
+                                parsedArgs.size() - 1);
+                    e.addErrorLine(symMethod.data(ctx)->loc(), "Previous definition");
                 }
             }
             return;
         }
         for (int i = 0; i < parsedArgs.size(); i++) {
             auto &methodArg = parsedArgs[i];
-            auto &symArg = sym.data(ctx)->arguments()[i];
+            auto &symArg = symMethod.data(ctx)->arguments()[i];
 
             if (symArg.flags.isKeyword != methodArg.flags.isKeyword) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
@@ -1037,8 +1039,8 @@ class SymbolDefiner {
             } else {
                 // if the symbol does exist, then we're running in incremental mode, and we need to compare it to
                 // the previously defined equivalent to re-report any errors
-                auto replacedSym = ctx.state.findRenamedSymbol(owner, matchingSym);
-                if (replacedSym.exists() && !paramsMatch(ctx, replacedSym.asMethodRef(), parsedArgs) &&
+                auto replacedSym = ctx.state.findRenamedSymbol(owner, matchingSym).asMethodRef();
+                if (replacedSym.exists() && !paramsMatch(ctx, replacedSym, parsedArgs) &&
                     !isIntrinsic(replacedSym.data(ctx))) {
                     paramMismatchErrors(ctx.withOwner(replacedSym), declLoc, parsedArgs);
                 }
@@ -1102,9 +1104,9 @@ class SymbolDefiner {
         auto constant = ctx.state.lookupSymbol(owner, constantNameRef);
         if (constant.exists() && mod.name == core::Names::privateConstant()) {
             if (constant.isClassOrModule()) {
-                constant.data(ctx)->setClassOrModulePrivate();
+                constant.asClassOrModuleRef().data(ctx)->setClassOrModulePrivate();
             } else if (constant.isStaticField(ctx)) {
-                constant.data(ctx)->setStaticFieldPrivate();
+                constant.asFieldRef().data(ctx)->setStaticFieldPrivate();
             } else if (constant.isTypeMember()) {
                 // Visibility on type members is special (even more restrictive than private),
                 // so we ignore requests to mark type members private.
@@ -1137,25 +1139,28 @@ class SymbolDefiner {
             ENFORCE(newSingleton.id() >= oldSymCount,
                     "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
             return klassSymbol;
-        } else if (symbol.data(ctx)->isClassModuleSet() && isModule != symbol.data(ctx)->isClassOrModuleModule()) {
+        }
+
+        auto klassSymbol = symbol.asClassOrModuleRef();
+        if (klassSymbol.data(ctx)->isClassModuleSet() && isModule != klassSymbol.data(ctx)->isClassOrModuleModule()) {
             if (auto e = ctx.state.beginError(declLoc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("`{}` was previously defined as a `{}`", symbol.show(ctx),
-                            symbol.data(ctx)->isClassOrModuleModule() ? "module" : "class");
+                            klassSymbol.data(ctx)->isClassOrModuleModule() ? "module" : "class");
 
-                for (auto loc : symbol.data(ctx)->locs()) {
+                for (auto loc : klassSymbol.data(ctx)->locs()) {
                     if (loc != declLoc) {
                         e.addErrorLine(loc, "Previous definition");
                     }
                 }
             }
         } else {
-            symbol.data(ctx)->setIsModule(isModule);
+            klassSymbol.data(ctx)->setIsModule(isModule);
             auto renamed = ctx.state.findRenamedSymbol(symbol.owner(ctx), symbol);
             if (renamed.exists()) {
                 emitRedefinedConstantError(ctx, core::Loc(ctx.file, klass.loc), symbol, renamed);
             }
         }
-        return symbol.asClassOrModuleRef();
+        return klassSymbol;
     }
 
     core::ClassOrModuleRef insertClass(core::MutableContext ctx, const FoundClass &klass) {
@@ -1194,7 +1199,7 @@ class SymbolDefiner {
     void modifyClass(core::MutableContext ctx, const Modifier &mod) {
         ENFORCE(mod.kind == Modifier::Kind::Class);
         const auto fun = mod.name;
-        auto symbolData = ctx.owner.data(ctx);
+        auto symbolData = ctx.owner.asClassOrModuleRef().data(ctx);
         if (fun == core::Names::declareFinal()) {
             symbolData->setClassOrModuleFinal();
             symbolData->singletonClass(ctx).data(ctx)->setClassOrModuleFinal();
@@ -1232,7 +1237,7 @@ class SymbolDefiner {
 
     core::FieldRef insertStaticField(core::MutableContext ctx, const FoundStaticField &staticField) {
         // forbid dynamic constant definition
-        auto ownerData = ctx.owner.data(ctx);
+        auto ownerData = ctx.owner.asClassOrModuleRef().data(ctx);
         if (!ownerData->isClassOrModule() && !ownerData->isRewriterSynthesized()) {
             if (auto e = ctx.state.beginError(core::Loc(ctx.file, staticField.asgnLoc),
                                               core::errors::Namer::DynamicConstantAssignment)) {
@@ -1255,7 +1260,7 @@ class SymbolDefiner {
             auto renamedSym = ctx.state.findRenamedSymbol(scope, sym);
             if (renamedSym.exists()) {
                 emitRedefinedConstantError(ctx, core::Loc(ctx.file, staticField.asgnLoc),
-                                           renamedSym.data(ctx)->name.show(ctx), renamedSym.loc(ctx));
+                                           renamedSym.name(ctx).show(ctx), renamedSym.loc(ctx));
             }
         }
         sym = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, staticField.lhsLoc), scope, name);
@@ -1281,7 +1286,8 @@ class SymbolDefiner {
         core::Variance variance = core::Variance::Invariant;
         const bool isTypeTemplate = typeMember.isTypeTemplete;
 
-        auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner.asClassOrModuleRef();
+        auto onSymbol = isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->singletonClass(ctx)
+                                       : ctx.owner.asClassOrModuleRef();
 
         core::NameRef foundVariance = typeMember.varianceName;
         if (foundVariance.exists()) {
@@ -1745,7 +1751,8 @@ public:
             }
 
             bool isTypeTemplate = send->fun == core::Names::typeTemplate();
-            auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
+            auto onSymbol =
+                isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
             ENFORCE(onSymbol.exists());
             core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol.asClassOrModuleRef(), typeName->cnst);
             ENFORCE(sym.exists());
