@@ -85,7 +85,7 @@
 # may not be entirely thread-safe. If you access the same
 # [`Tempfile`](https://docs.ruby-lang.org/en/2.7.0/Tempfile.html) object from
 # multiple threads then you should protect it with a mutex.
-class Tempfile < File
+class Tempfile
   extend T::Sig
 
   extend T::Generic
