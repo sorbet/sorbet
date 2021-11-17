@@ -277,6 +277,15 @@ class Tempfile
 
   sig do
     params(
+        amount: Integer,
+        whence: Integer,
+    )
+    .returns(Integer)
+  end
+  def seek(amount, whence=T.unsafe(nil)); end
+
+  sig do
+    params(
         length: Integer,
         outbuf: String,
     )
