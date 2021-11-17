@@ -1068,8 +1068,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 tp.type = core::make_type<core::MetaType>(core::make_type<core::SelfTypeParam>(symbol));
                             }
                         } else if (symbol.isField(ctx)) {
+                            auto field = symbol.asFieldRef();
                             tp.type = core::Types::resultTypeAsSeenFrom(
-                                ctx, symbol.data(ctx)->resultType, symbol.owner(ctx).asClassOrModuleRef(),
+                                ctx, field.data(ctx)->resultType, symbol.owner(ctx).asClassOrModuleRef(),
                                 ctx.owner.enclosingClass(ctx),
                                 ctx.owner.enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx));
                         } else {
@@ -1241,12 +1242,12 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
                                                            core::UntypedMode::AlwaysCompatible)) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
-                        auto ownerData = ctx.owner.data(ctx);
+                        auto owner = ctx.owner;
                         e.setHeader("Expected `{}` but found `{}` for method result type", methodReturnType.show(ctx),
                                     typeAndOrigin.type.show(ctx));
-                        auto for_ = core::ErrorColors::format("result type of method `{}`", ownerData->name.show(ctx));
+                        auto for_ = core::ErrorColors::format("result type of method `{}`", owner.name(ctx).show(ctx));
                         e.addErrorSection(
-                            core::TypeAndOrigins::explainExpected(ctx, methodReturnType, ownerData->loc(), for_));
+                            core::TypeAndOrigins::explainExpected(ctx, methodReturnType, owner.loc(ctx), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                         core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, methodReturnType, typeAndOrigin.type);
                         if (i.whatLoc != inWhat.implicitReturnLoc) {
