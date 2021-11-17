@@ -16,3 +16,11 @@ VALUE sorbet_rb_array_square_br_slowpath(VALUE recv, ID fun, int argc, const VAL
 VALUE rb_ary_compact_bang_forwarder(VALUE ary) {
     return rb_ary_compact_bang(ary);
 }
+
+VALUE sorbet_ary_make_hash(VALUE ary) {
+    return ary_make_hash(ary);
+}
+
+void sorbet_ary_recycle_hash(VALUE hash) {
+    ary_recycle_hash(hash);
+}

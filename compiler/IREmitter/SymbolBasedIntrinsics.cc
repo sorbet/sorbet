@@ -921,6 +921,8 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Array(), "to_h", CMethod{"sorbet_rb_array_to_h", core::Symbols::Hash()}},
     {core::Symbols::Array(), "size", CMethod{"sorbet_rb_array_len", core::Symbols::Integer()}},
     {core::Symbols::Array(), "length", CMethod{"sorbet_rb_array_len", core::Symbols::Integer()}},
+    {core::Symbols::Array(), "uniq", CMethod("sorbet_rb_array_uniq", core::Symbols::Array()),
+     CMethod("sorbet_rb_array_uniq_withBlock", core::Symbols::Array())},
     {core::Symbols::Hash(), "[]", CMethod{"sorbet_rb_hash_square_br"}},
     {core::Symbols::Hash(), "[]=", CMethod{"sorbet_rb_hash_square_br_eq"}},
     {core::Symbols::Hash(), "each_pair", CMethod{"sorbet_rb_hash_each_pair", core::Symbols::Enumerator()},

@@ -126,3 +126,7 @@ VALUE (*sorbet_vm_Kernel_instance_variable_get_func(void))(VALUE obj, VALUE iv) 
 VALUE (*sorbet_vm_Kernel_instance_variable_set_func(void))(VALUE obj, VALUE iv, VALUE value) {
     return rb_obj_ivar_set;
 }
+
+void sorbet_rbasic_set_class(VALUE obj, VALUE klass) {
+    RBASIC_SET_CLASS(obj, klass);
+}

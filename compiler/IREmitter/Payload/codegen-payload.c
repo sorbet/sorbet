@@ -113,6 +113,8 @@ SORBET_ALIVE(VALUE, sorbet_stringInterpolate,
 SORBET_ALIVE(VALUE, sorbet_rb_array_square_br_slowpath,
              (VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure));
 SORBET_ALIVE(VALUE, rb_ary_compact_bang_forwarder, (VALUE recv));
+SORBET_ALIVE(VALUE, sorbet_ary_make_hash, (VALUE ary));
+SORBET_ALIVE(void, sorbet_ary_recycle_hash, (VALUE hash));
 
 SORBET_ALIVE(void, sorbet_hashUpdate, (VALUE hash, VALUE other));
 
@@ -160,6 +162,8 @@ SORBET_ALIVE(void, sorbet_vm_define_method,
              (VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq, bool isSelf));
 SORBET_ALIVE(void, sorbet_vm_define_prop_getter,
              (VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq));
+
+SORBET_ALIVE(void, sorbet_rbasic_set_class, (VALUE obj, VALUE klass));
 
 SORBET_ALIVE(VALUE, sorbet_maybeAllocateObjectFastPath, (VALUE recv, struct FunctionInlineCache *newCache));
 SORBET_ALIVE(VALUE, sorbet_vm_instance_variable_get,
@@ -1286,6 +1290,80 @@ VALUE sorbet_rb_array_empty(VALUE recv, ID fun, int argc, const VALUE *const res
         return Qtrue;
     }
     return Qfalse;
+}
+
+// This is the no-block version of rb_ary_uniq: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L5018-L5041
+SORBET_INLINE
+VALUE sorbet_rb_array_uniq(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                           VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+    VALUE ary = recv;
+
+    VALUE hash, uniq;
+
+    if (RARRAY_LEN(ary) <= 1) {
+        hash = 0;
+        uniq = rb_ary_dup(ary);
+    }
+    else {
+        hash = sorbet_ary_make_hash(ary);
+        uniq = rb_hash_values(hash);
+    }
+    sorbet_rbasic_set_class(uniq, rb_obj_class(ary));
+    if (hash) {
+        sorbet_ary_recycle_hash(hash);
+    }
+
+    return uniq;
+}
+
+// This is the block version of rb_ary_uniq: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L5018-L5041
+SORBET_INLINE
+VALUE sorbet_rb_array_uniq_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                     const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
+    rb_check_arity(argc, 0, 0);
+    VALUE ary = recv;
+
+    // must push a frame for the captured block
+    sorbet_pushBlockFrame(captured);
+
+    VALUE hash, uniq;
+
+    if (RARRAY_LEN(ary) <= 1) {
+        hash = 0;
+        uniq = rb_ary_dup(ary);
+    }
+    else {
+        // inline of ary_tmp_hash_new
+        long size = RARRAY_LEN(ary);
+        hash = rb_hash_new_with_size(size);
+
+        RBASIC_CLEAR_CLASS(hash);
+
+        // inline of ary_make_hash_by
+        for (int i = 0; i < RARRAY_LEN(ary); ++i) {
+            // inline of rb_ary_elt
+            VALUE v;
+            long len = RARRAY_LEN(ary);
+            if (len == 0) v = Qnil;
+            else if (i < 0 || len <= i) {
+                v = Qnil;
+            }
+            else v = RARRAY_AREF(ary, i);
+    
+            VALUE k = blk(v, closure, 1, &v, Qnil);
+            rb_hash_add_new_element(hash, k, v);
+        }
+        uniq = rb_hash_values(hash);
+    }
+    sorbet_rbasic_set_class(uniq, rb_obj_class(ary));
+    if (hash) {
+        sorbet_ary_recycle_hash(hash);
+    }
+
+    sorbet_popFrame();
+
+    return uniq;
 }
 
 SORBET_INLINE
