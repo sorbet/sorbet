@@ -1047,41 +1047,43 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
             },
             [&](cfg::Alias &a) {
                 core::SymbolRef symbol = a.what.dealias(ctx);
-                const auto &data = symbol.data(ctx);
-                if (data->isClassOrModule()) {
-                    auto singletonClass = data->lookupSingletonClass(ctx);
+                if (symbol.isClassOrModule()) {
+                    auto singletonClass = symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
                     ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
                     tp.type = singletonClass.data(ctx)->externalType();
                     tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
-                } else if (data->isField() || (data->isStaticField() && !data->isTypeAlias()) || data->isTypeMember()) {
-                    if (data->resultType != nullptr) {
-                        if (data->isTypeMember()) {
-                            if (data->isFixed()) {
+                } else if (symbol.isField(ctx) || (symbol.isStaticField(ctx) && !symbol.isTypeAlias(ctx)) ||
+                           symbol.isTypeMember()) {
+                    auto resultType = symbol.resultType(ctx);
+                    if (resultType != nullptr) {
+                        if (symbol.isTypeMember()) {
+                            auto tm = symbol.asTypeMemberRef();
+                            if (tm.data(ctx)->isFixed()) {
                                 // pick the upper bound here, as
                                 // isFixed() => lowerBound == upperBound.
-                                auto lambdaParam = core::cast_type<core::LambdaParam>(data->resultType);
+                                auto lambdaParam = core::cast_type<core::LambdaParam>(resultType);
                                 ENFORCE(lambdaParam != nullptr);
                                 tp.type = core::make_type<core::MetaType>(lambdaParam->upperBound);
                             } else {
                                 tp.type = core::make_type<core::MetaType>(core::make_type<core::SelfTypeParam>(symbol));
                             }
-                        } else if (data->isField()) {
+                        } else if (symbol.isField(ctx)) {
                             tp.type = core::Types::resultTypeAsSeenFrom(
                                 ctx, symbol.data(ctx)->resultType, symbol.owner(ctx).asClassOrModuleRef(),
                                 ctx.owner.enclosingClass(ctx),
                                 ctx.owner.enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx));
                         } else {
-                            tp.type = data->resultType;
+                            tp.type = resultType;
                         }
-                        tp.origins.emplace_back(data->loc());
+                        tp.origins.emplace_back(symbol.loc(ctx));
                     } else {
                         tp.origins.emplace_back(core::Loc::none());
                         tp.type = core::Types::untyped(ctx, symbol);
                     }
-                } else if (data->isTypeAlias()) {
-                    ENFORCE(data->resultType != nullptr);
-                    tp.origins.emplace_back(data->loc());
-                    tp.type = core::make_type<core::MetaType>(data->resultType);
+                } else if (symbol.isTypeAlias(ctx)) {
+                    ENFORCE(symbol.resultType(ctx) != nullptr);
+                    tp.origins.emplace_back(symbol.loc(ctx));
+                    tp.type = core::make_type<core::MetaType>(symbol.resultType(ctx));
                 } else {
                     Exception::notImplemented();
                 }
