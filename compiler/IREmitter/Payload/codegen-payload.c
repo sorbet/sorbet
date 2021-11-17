@@ -726,6 +726,14 @@ VALUE in), VALUE closure) { return rb_hash_foreach(hash, func, closure);
 // ****                       Operations on Strings
 // ****
 
+// The address of the static symbol rb_str_to_s, for guarding the String#to_s
+// intrinsic.
+extern VALUE (*sorbet_rb_str_to_s_func(void))(VALUE);
+KEEP_ALIVE(sorbet_rb_str_to_s_func);
+
+// A wrapper for rb_str_to_s
+SORBET_ALIVE(VALUE, sorbet_rb_str_to_s, (VALUE));
+
 SORBET_INLINE
 const char *sorbet_rubyStringToCPtr(VALUE value) {
     return RSTRING_PTR(value);

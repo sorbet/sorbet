@@ -45,6 +45,12 @@ module M
   def self.symbol_to_sym(x)
     x.to_sym
   end
+
+  sig {params(x: String).returns(String)}
+  def self.string_to_s(x)
+    x.to_s
+  end
+
 end
 
 
@@ -56,3 +62,9 @@ p M.integer_to_i(10)
 p M.integer_to_int(20)
 
 p M.symbol_to_sym(:foo)
+
+class StringSubclass < String
+end
+
+p M.string_to_s("hello!")
+p M.string_to_s(StringSubclass.new)
