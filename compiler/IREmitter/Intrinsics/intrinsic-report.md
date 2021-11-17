@@ -14,7 +14,7 @@
 * [   ] `rb_ary_aset` (`Array#[]=`)
 * [✔  ] `rb_ary_at` (`Array#at`)
 * [   ] `rb_ary_fetch` (`Array#fetch`)
-* [   ] `rb_ary_first` (`Array#first`)
+* [  ✔] `rb_ary_first` (`Array#first`)
 * [✔  ] `rb_ary_last` (`Array#last`)
 * [   ] `rb_ary_concat_multi` (`Array#concat`)
 * [   ] `rb_ary_union_multi` (`Array#union`)
@@ -1564,4 +1564,4 @@
 
 ## Stats
 * Total:   1488
-* Visible: 237
+* Visible: 238

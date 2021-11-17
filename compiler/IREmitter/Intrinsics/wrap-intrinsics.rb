@@ -225,6 +225,7 @@ module Intrinsics
       "Array#at",
       "Array#clear",
       "Array#delete",
+      "Array#first",
       "Array#include?",
       "Array#initialize_copy",
       "Array#join",

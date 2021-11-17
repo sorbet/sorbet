@@ -92,6 +92,15 @@ VALUE sorbet_int_rb_ary_delete(VALUE recv, ID fun, int argc, VALUE *const restri
     return rb_ary_delete(recv, arg_0);
 }
 
+// Array#first
+// Calling convention: -1
+extern VALUE sorbet_rb_ary_first(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_ary_first(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk,
+                              VALUE closure) {
+    return sorbet_rb_ary_first(argc, args, recv);
+}
+
 // Array#include?
 // Calling convention: 1
 extern VALUE rb_ary_includes(VALUE obj, VALUE arg_0);
