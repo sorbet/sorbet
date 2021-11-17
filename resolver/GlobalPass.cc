@@ -20,7 +20,7 @@ core::SymbolRef dealiasAt(const core::GlobalState &gs, core::TypeMemberRef tpara
         return tparam;
     } else {
         core::ClassOrModuleRef cursor;
-        if (tparam.data(gs)->owner.data(gs)->derivesFrom(gs, klass)) {
+        if (tparam.data(gs)->owner.asClassOrModuleRef().data(gs)->derivesFrom(gs, klass)) {
             cursor = tparam.data(gs)->owner.asClassOrModuleRef();
         } else if (klass.data(gs)->derivesFrom(gs, tparam.data(gs)->owner.asClassOrModuleRef())) {
             cursor = klass;
@@ -117,7 +117,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
                         e.addErrorLine(my.loc(gs), "Found type member with name `{}`", my.name(gs).show(gs));
                         e.addErrorLine(sym.data(gs)->typeMembers()[i].loc(gs), "Expected type member with name `{}`",
                                        sym.data(gs)->typeMembers()[i].name(gs).show(gs));
-                        e.addErrorLine(tp.data(gs)->loc(), "`{}` defined in parent here:", tp.name(gs).show(gs));
+                        e.addErrorLine(tp.loc(gs), "`{}` defined in parent here:", tp.name(gs).show(gs));
                     }
                     int foundIdx = 0;
                     while (foundIdx < sym.data(gs)->typeMembers().size() &&
