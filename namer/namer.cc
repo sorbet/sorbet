@@ -1039,8 +1039,8 @@ class SymbolDefiner {
             } else {
                 // if the symbol does exist, then we're running in incremental mode, and we need to compare it to
                 // the previously defined equivalent to re-report any errors
-                auto replacedSym = ctx.state.findRenamedSymbol(owner, matchingSym).asMethodRef();
-                if (replacedSym.exists() && !paramsMatch(ctx, replacedSym, parsedArgs) &&
+                auto replacedSym = ctx.state.findRenamedSymbol(owner, matchingSym);
+                if (replacedSym.exists() && !paramsMatch(ctx, replacedSym.asMethodRef(), parsedArgs) &&
                     !isIntrinsic(replacedSym.data(ctx))) {
                     paramMismatchErrors(ctx.withOwner(replacedSym), declLoc, parsedArgs);
                 }
