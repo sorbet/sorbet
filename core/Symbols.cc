@@ -2027,12 +2027,6 @@ vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const Globa
         if (compareRaw != 0) {
             return compareRaw < 0;
         }
-        auto lhsSym = lhs.second.showRaw(gs);
-        auto rhsSym = rhs.second.showRaw(gs);
-        auto compareSym = lhsSym.compare(rhsSym);
-        if (compareSym != 0) {
-            return compareSym < 0;
-        }
         ENFORCE(false, "no stable sort");
         return 0;
     });
