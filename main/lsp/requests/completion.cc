@@ -242,10 +242,10 @@ vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const 
     return result;
 }
 
-string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatchResult, core::SymbolRef method,
+string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatchResult, core::MethodRef method,
                      const core::TypePtr &receiverType, const core::TypeConstraint *constraint, u2 totalArgs) {
     fmt::memory_buffer result;
-    fmt::format_to(std::back_inserter(result), "{}", method.name(gs).shortName(gs));
+    fmt::format_to(std::back_inserter(result), "{}", method.data(gs)->name.shortName(gs));
     auto nextTabstop = 1;
 
     /* If we are completing an existing send that either has some arguments
@@ -380,7 +380,7 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
 
     // Intuition for when to use maybeAlias vs what: if it needs to know the original name: maybeAlias.
     // If it needs to know the types / arity: what. Default to `what` if you don't know.
-    auto what = maybeAlias.data(gs)->dealias(gs);
+    auto what = maybeAlias.dealias(gs);
 
     auto item = make_unique<CompletionItem>(label);
 
@@ -389,14 +389,15 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
     item->sortText = fmt::format("{:06d}", sortIdx);
 
     if (what.isClassOrModule()) {
-        if (what.data(gs)->isClassOrModuleClass()) {
-            if (what.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
+        auto whatKlass = what.asClassOrModuleRef();
+        if (whatKlass.data(gs)->isClassOrModuleClass()) {
+            if (whatKlass.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
                 item->kind = CompletionItemKind::Enum;
             } else {
                 item->kind = CompletionItemKind::Class;
             }
         } else {
-            if (what.data(gs)->isClassOrModuleAbstract() || what.data(gs)->isClassOrModuleInterface()) {
+            if (whatKlass.data(gs)->isClassOrModuleAbstract() || whatKlass.data(gs)->isClassOrModuleInterface()) {
                 item->kind = CompletionItemKind::Interface;
             } else {
                 item->kind = CompletionItemKind::Module;
@@ -669,7 +670,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
 
     // Intuition for when to use maybeAlias vs what: if it needs to know the original name: maybeAlias.
     // If it needs to know the types / arity: what. Default to `what` if you don't know.
-    auto what = maybeAlias.data(gs)->dealias(gs);
+    auto what = maybeAlias.data(gs)->dealias(gs).asMethodRef();
 
     if (what == core::Symbols::sig()) {
         if (auto item = trySuggestSig(typechecker, clientConfig, what, receiverType, queryLoc, prefix, sortIdx)) {
@@ -702,9 +703,9 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     }
 
     optional<string> documentation = nullopt;
-    auto whatFile = what.loc(gs).file();
+    auto whatFile = what.data(gs)->loc().file();
     if (whatFile.exists()) {
-        documentation = findDocumentation(whatFile.data(gs).source(), what.loc(gs).beginPos());
+        documentation = findDocumentation(whatFile.data(gs).source(), what.data(gs)->loc().beginPos());
     }
 
     auto prettyType = prettyTypeForMethod(gs, maybeAlias, receiverType, nullptr, constraint);
@@ -732,7 +733,7 @@ void CompletionTask::findSimilarConstants(const core::GlobalState &gs, const cor
     for (auto scope : resp.scopes) {
         // TODO(jez) This membersStableOrderSlow is the only ordering we have on constant items right now.
         // We should probably at least sort by whether the prefix of the suggested constant matches.
-        for (auto [_name, sym] : scope.data(gs)->membersStableOrderSlow(gs)) {
+        for (auto [_name, sym] : scope.membersStableOrderSlow(gs)) {
             if (isSimilarConstant(gs, prefix, sym)) {
                 items.push_back(getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, items.size()));
             }
