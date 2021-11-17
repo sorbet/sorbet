@@ -320,15 +320,13 @@ core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef
     core::SymbolRef owner = ofWhat;
     while (true) {
         ENFORCE(owner.exists(), "non-existing owner in contextClass");
-        const auto &data = owner.data(gs);
-
-        if (data->isClassOrModule()) {
+        if (owner.isClassOrModule()) {
             return owner.asClassOrModuleRef();
         }
-        if (data->name == core::Names::staticInit()) {
-            owner = data->owner.data(gs)->attachedClass(gs);
+        if (owner.name(gs) == core::Names::staticInit()) {
+            owner = owner.owner(gs).asClassOrModuleRef().data(gs)->attachedClass(gs);
         } else {
-            owner = data->owner;
+            owner = owner.owner(gs);
         }
     }
 }
