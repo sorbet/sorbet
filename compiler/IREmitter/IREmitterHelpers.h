@@ -73,14 +73,15 @@ struct KnownFunction {
     // Implicit constructor from a string for backwards compability
     KnownFunction(std::string name) : KnownFunction(Type::Symbol, std::move(name)) {}
 
-    KnownFunction(Type type, std::string name) : type{type}, name{std::move(name)} {}
-
     static KnownFunction cached(std::string name) {
         return KnownFunction{Type::CachedSymbol, std::move(name)};
     }
 
     // Fetch the function referenced from the payload.
     llvm::Value *getFunction(CompilerState &cs, llvm::IRBuilderBase &builder) const;
+
+private:
+    KnownFunction(Type type, std::string name) : type{type}, name{std::move(name)} {}
 };
 
 class IREmitterHelpers {
