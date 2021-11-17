@@ -85,7 +85,7 @@
 # may not be entirely thread-safe. If you access the same
 # [`Tempfile`](https://docs.ruby-lang.org/en/2.7.0/Tempfile.html) object from
 # multiple threads then you should protect it with a mutex.
-class Tempfile < File
+class Tempfile
   extend T::Sig
 
   extend T::Generic
@@ -274,4 +274,30 @@ class Tempfile < File
   # [`delete`](https://docs.ruby-lang.org/en/2.7.0/Tempfile.html#method-i-delete)
   sig {returns(T::Boolean)}
   def unlink; end
+
+  sig do
+    params(
+        amount: Integer,
+        whence: Integer,
+    )
+    .returns(Integer)
+  end
+  def seek(amount, whence=T.unsafe(nil)); end
+
+  sig do
+    params(
+        length: Integer,
+        outbuf: String,
+    )
+    .returns(String)
+  end
+  def read(length=T.unsafe(nil), outbuf=T.unsafe(nil)); end
+
+  sig do
+    params(
+        arg0: Object,
+    )
+    .returns(Integer)
+  end
+  def write(arg0); end
 end
