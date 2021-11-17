@@ -102,7 +102,7 @@ protected:
     string_view rubyMethod;
     CMethod cMethod;
     optional<CMethod> cMethodWithBlock;
-    vector<string> expectedRubyCFuncs;
+    vector<KnownFunction> expectedRubyCFuncs;
 
 private:
     // Generate a one-off function that looks like the following:
@@ -159,7 +159,7 @@ private:
 
 public:
     CallCMethod(core::ClassOrModuleRef rubyClass, string_view rubyMethod, CMethod cMethod,
-                optional<CMethod> cMethodWithBlock = nullopt, vector<string> expectedRubyCFuncs = {})
+                optional<CMethod> cMethodWithBlock = nullopt, vector<KnownFunction> expectedRubyCFuncs = {})
         : SymbolBasedIntrinsicMethod(cMethodWithBlock.has_value() ? Intrinsics::HandleBlock::Handled
                                                                   : Intrinsics::HandleBlock::Unhandled),
           rubyClass(rubyClass), rubyMethod(rubyMethod), cMethod(cMethod), cMethodWithBlock(cMethodWithBlock),
