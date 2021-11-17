@@ -274,4 +274,21 @@ class Tempfile
   # [`delete`](https://docs.ruby-lang.org/en/2.7.0/Tempfile.html#method-i-delete)
   sig {returns(T::Boolean)}
   def unlink; end
+
+  sig do
+    params(
+        length: Integer,
+        outbuf: String,
+    )
+    .returns(String)
+  end
+  def read(length=T.unsafe(nil), outbuf=T.unsafe(nil)); end
+
+  sig do
+    params(
+        arg0: Object,
+    )
+    .returns(Integer)
+  end
+  def write(arg0); end
 end

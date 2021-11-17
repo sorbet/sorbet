@@ -1886,8 +1886,8 @@ class IO < Object
   # doesn't move the current file offset.
   sig do
     params(
-        src: T.any(String, IO),
-        dst: T.any(String, IO),
+        src: T.any(String, IO, Tempfile),
+        dst: T.any(String, IO, Tempfile),
         copy_length: Integer,
         src_offset: Integer,
     )
