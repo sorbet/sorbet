@@ -663,7 +663,7 @@ private:
         auto isAbstract = klass.data(gs)->isClassOrModuleAbstract();
         if (isAbstract) {
             for (auto [name, sym] : klass.data(gs)->members()) {
-                if (sym.exists() && sym.isMethod() && sym.data(gs)->isAbstract()) {
+                if (sym.exists() && sym.isMethod() && sym.asMethodRef().data(gs)->isAbstract()) {
                     abstract.emplace_back(sym.asMethodRef());
                 }
             }
@@ -751,7 +751,7 @@ public:
     ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         auto methodData = methodDef.symbol.data(ctx);
-        auto ownerData = methodData->owner.data(ctx);
+        auto ownerData = methodData->owner.asClassOrModuleRef().data(ctx);
 
         // Only perform this check if this isn't a module from the stdlib, and
         // if there are type members in the owning context.
