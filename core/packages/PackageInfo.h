@@ -12,6 +12,7 @@ namespace sorbet::core::packages {
 class PackageInfo {
 public:
     virtual core::NameRef mangledName() const = 0;
+    virtual const std::vector<core::NameRef> &fullName() const = 0;
     virtual const std::vector<std::string> &pathPrefixes() const = 0;
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
     virtual core::Loc definitionLoc() const = 0;

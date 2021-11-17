@@ -12,6 +12,11 @@ public:
         return NameRef::noName();
     }
 
+    const vector<core::NameRef> &fullName() const {
+        ENFORCE(false);
+        return emptyName;
+    }
+
     const vector<string> &pathPrefixes() const {
         ENFORCE(false);
         return prefixes;
@@ -31,6 +36,7 @@ public:
 
 private:
     const vector<string> prefixes;
+    const vector<core::NameRef> emptyName;
 };
 static const NonePackage NONE_PKG;
 } // namespace
@@ -53,11 +59,12 @@ NameRef PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
     ENFORCE(!frozen);
     ENFORCE(writerThread == this_thread::get_id(), "PackageDB writes are not thread safe");
     auto nr = pkg->mangledName();
-    auto prev = packages.find(nr);
-    if (prev == packages.end()) {
+    auto prev = packages_.find(nr);
+    if (prev == packages_.end()) {
         for (const auto &prefix : pkg->pathPrefixes()) {
             packagesByPathPrefix[prefix] = nr;
         }
+        mangledNames.emplace_back(nr);
     } else {
         // Package files do not have full featured content hashing. If the contents of one changes
         // we always run slow-path and fully rebuild the set of packages. In some cases, the LSP
@@ -66,14 +73,15 @@ NameRef PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
         ENFORCE(prev->second->definitionLoc() == pkg->definitionLoc());
         ENFORCE(prev->second->pathPrefixes() == pkg->pathPrefixes());
     }
-    packages[nr] = move(pkg);
+    packages_[nr] = move(pkg);
+    ENFORCE(mangledNames.size() == packages_.size());
     return nr;
 }
 
 NameRef PackageDB::lookupPackage(NameRef pkgMangledName) const {
     ENFORCE(pkgMangledName.exists());
-    auto it = packages.find(pkgMangledName);
-    if (it == packages.end()) {
+    auto it = packages_.find(pkgMangledName);
+    if (it == packages_.end()) {
         return NameRef::noName();
     }
     return it->first;
@@ -102,15 +110,19 @@ const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, cor
 }
 
 const PackageInfo &PackageDB::getPackageInfo(core::NameRef mangledName) const {
-    auto it = packages.find(mangledName);
-    if (it == packages.end()) {
+    auto it = packages_.find(mangledName);
+    if (it == packages_.end()) {
         return NONE_PKG;
     }
     return *it->second;
 }
 
 bool PackageDB::empty() const {
-    return packages.empty();
+    return packages_.empty();
+}
+
+const vector<core::NameRef> &PackageDB::packages() const {
+    return mangledNames;
 }
 
 const std::vector<core::NameRef> &PackageDB::secondaryTestPackageNamespaceRefs() const {
@@ -124,13 +136,14 @@ const std::vector<std::string> &PackageDB::extraPackageFilesDirectoryPrefixes() 
 PackageDB PackageDB::deepCopy() const {
     ENFORCE(frozen);
     PackageDB result;
-    result.packages.reserve(this->packages.size());
-    for (auto const &[nr, pkgInfo] : this->packages) {
-        result.packages[nr] = pkgInfo->deepCopy();
+    result.packages_.reserve(this->packages_.size());
+    for (auto const &[nr, pkgInfo] : this->packages_) {
+        result.packages_[nr] = pkgInfo->deepCopy();
     }
     result.secondaryTestPackageNamespaceRefs_ = this->secondaryTestPackageNamespaceRefs_;
     result.extraPackageFilesDirectoryPrefixes_ = this->extraPackageFilesDirectoryPrefixes_;
     result.packagesByPathPrefix = this->packagesByPathPrefix;
+    result.mangledNames = this->mangledNames;
     return result;
 }
 
