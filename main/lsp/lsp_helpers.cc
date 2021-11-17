@@ -15,30 +15,28 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     if (!sym.exists() || sym == core::Symbols::root() || sym == core::Symbols::PackageRegistry()) {
         return true;
     }
-    auto data = sym.data(gs);
-    if (!data->owner.exists()) {
+    if (!sym.owner(gs).exists()) {
         return true;
     }
-    if (data->isClassOrModule() && data->attachedClass(gs).exists()) {
+    if (sym.isClassOrModule() && sym.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()) {
         return true;
     }
-    if (data->isClassOrModule() && data->superClass() == core::Symbols::StubModule()) {
+    if (sym.isClassOrModule() && sym.asClassOrModuleRef().data(gs)->superClass() == core::Symbols::StubModule()) {
         return true;
     }
+    auto name = sym.name(gs);
     // static-init for a class
-    if (data->name == core::Names::staticInit() ||
+    if (name == core::Names::staticInit() ||
         // <unresolved-ancestors> is a fake method created to ensure IDE takes slow path for class hierarchy changes
-        data->name == core::Names::unresolvedAncestors() || data->name == core::Names::Constants::AttachedClass()) {
+        name == core::Names::unresolvedAncestors() || name == core::Names::Constants::AttachedClass()) {
         return true;
     }
     // static-init for a file
-    if (data->name.kind() == core::NameKind::UNIQUE &&
-        data->name.dataUnique(gs)->original == core::Names::staticInit()) {
+    if (name.kind() == core::NameKind::UNIQUE && name.dataUnique(gs)->original == core::Names::staticInit()) {
         return true;
     }
     // <block>
-    if (data->name.kind() == core::NameKind::UNIQUE &&
-        data->name.dataUnique(gs)->original == core::Names::blockTemp()) {
+    if (name.kind() == core::NameKind::UNIQUE && name.dataUnique(gs)->original == core::Names::blockTemp()) {
         return true;
     }
     return false;
@@ -163,7 +161,7 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method) {
         methodNamePrefix = "self.";
     }
     vector<string> prettyArgs;
-    const auto &arguments = methodData->dealias(gs).data(gs)->arguments();
+    const auto &arguments = methodData->dealias(gs).asMethodRef().data(gs)->arguments();
     ENFORCE(!arguments.empty(), "Should have at least a block arg");
     for (const auto &argSym : arguments) {
         // Don't display synthetic arguments (like blk).
@@ -227,7 +225,7 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
 
     core::TypePtr result;
     if (constant.isClassOrModule()) {
-        auto targetClass = constant;
+        auto targetClass = constant.asClassOrModuleRef();
         if (!targetClass.data(gs)->attachedClass(gs).exists()) {
             targetClass = targetClass.data(gs)->lookupSingletonClass(gs);
         }
@@ -268,27 +266,28 @@ core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &ty
 }
 
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef symbol) {
-    auto sym = symbol.data(gs);
-    if (sym->isClassOrModule()) {
-        if (sym->isClassOrModuleModule()) {
+    if (symbol.isClassOrModule()) {
+        auto klass = symbol.asClassOrModuleRef();
+        if (klass.data(gs)->isClassOrModuleModule()) {
             return SymbolKind::Module;
         }
-        if (sym->isClassOrModuleClass()) {
+        if (klass.data(gs)->isClassOrModuleClass()) {
             return SymbolKind::Class;
         }
-    } else if (sym->isMethod()) {
-        if (sym->name == core::Names::initialize()) {
+    } else if (symbol.isMethod()) {
+        auto method = symbol.asMethodRef();
+        if (method.data(gs)->name == core::Names::initialize()) {
             return SymbolKind::Constructor;
         } else {
             return SymbolKind::Method;
         }
-    } else if (sym->isField()) {
+    } else if (symbol.isField(gs)) {
         return SymbolKind::Field;
-    } else if (sym->isStaticField()) {
+    } else if (symbol.isStaticField(gs)) {
         return SymbolKind::Constant;
-    } else if (sym->isTypeMember()) {
+    } else if (symbol.isTypeMember()) {
         return SymbolKind::TypeParameter;
-    } else if (sym->isTypeArgument()) {
+    } else if (symbol.isTypeArgument()) {
         return SymbolKind::TypeParameter;
     }
     return SymbolKind::Unknown;
