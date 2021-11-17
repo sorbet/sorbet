@@ -144,6 +144,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         AutogenAutoloader,
         AutogenSubclasses,
         Packager,
+        MinimizeRBI,
     });
 }
 
