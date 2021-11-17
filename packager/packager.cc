@@ -145,6 +145,10 @@ public:
         return name.mangledName;
     }
 
+    const vector<core::NameRef> &fullName() const {
+        return name.fullName.parts;
+    }
+
     const std::vector<std::string> &pathPrefixes() const {
         return packagePathPrefixes;
     }
