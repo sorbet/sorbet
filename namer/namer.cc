@@ -824,7 +824,7 @@ class SymbolDefiner {
         core::SymbolRef existing = scope.data(ctx)->findMember(ctx, name);
         if (!existing.exists()) {
             existing = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope, name);
-            existing.data(ctx)->singletonClass(ctx); // force singleton class into existance
+            existing.asClassOrModuleRef().data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
 
         return existing;
