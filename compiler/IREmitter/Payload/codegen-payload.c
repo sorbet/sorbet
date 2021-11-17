@@ -176,6 +176,9 @@ SORBET_ALIVE(VALUE, sorbet_vm_class, (struct FunctionInlineCache * classCache, r
 SORBET_ALIVE(VALUE, sorbet_vm_isa_p,
              (struct FunctionInlineCache * classCache, rb_control_frame_t *cfp, VALUE recv, VALUE klass));
 
+SORBET_ALIVE(VALUE, rb_hash_keys, (VALUE recv));
+SORBET_ALIVE(VALUE, rb_hash_values, (VALUE recv));
+
 SORBET_ALIVE(VALUE, sorbet_vm_fstring_new, (const char *ptr, long len));
 SORBET_ALIVE(VALUE, sorbet_vm_str_uplus, (VALUE str));
 
@@ -1726,6 +1729,18 @@ VALUE sorbet_rb_hash_any_withBlock(VALUE recv, ID fun, int argc, const VALUE *co
     sorbet_popFrame();
 
     return passthrough.retval;
+}
+
+VALUE sorbet_rb_hash_keys(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                          VALUE closure) {
+    sorbet_ensure_arity(argc, 0);
+    return rb_hash_keys(recv);
+}
+
+VALUE sorbet_rb_hash_values(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                            VALUE closure) {
+    sorbet_ensure_arity(argc, 0);
+    return rb_hash_values(recv);
 }
 
 // ****
