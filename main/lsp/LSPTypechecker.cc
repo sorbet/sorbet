@@ -183,6 +183,12 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             // path logic in LSPPreprocessor.
             ENFORCE(fref.exists());
             ENFORCE(f->getFileHash() != nullptr);
+            if (f->sourceType == core::File::Type::Package) {
+                // Only relevant in --stripe-packages mode. Package declarations do not have method
+                // hashes. Instead we rely on recomputing packages if any __package.rb source
+                // changes.
+                continue;
+            }
             if (fref.exists()) {
                 // Update to existing file on fast path
                 ENFORCE(fref.data(*gs).getFileHash() != nullptr);
@@ -222,8 +228,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         }
 
         if (oldFile->sourceType == core::File::Type::Package) {
-            subset.emplace_back(core::FileRef(i));
-            continue;
+            continue; // See note above about --stripe-packages.
         }
 
         ENFORCE(oldFile->getFileHash() != nullptr);
