@@ -442,8 +442,42 @@ IREmitterHelpers::isFinalMethod(const core::GlobalState &gs, core::TypePtr recvT
     return IREmitterHelpers::FinalMethodInfo{recvSym, funSym, file};
 }
 
+llvm::Value *KnownFunction::getFunction(CompilerState &cs, llvm::IRBuilderBase &builder) const {
+    auto *fun = cs.getFunction(this->name);
+    auto *type = cs.getAnyRubyCApiFunctionType()->getPointerTo();
+
+    switch (this->type) {
+        case KnownFunction::Type::Symbol:
+            return builder.CreatePointerCast(fun, type, "fnPtrCast");
+
+        case KnownFunction::Type::CachedSymbol: {
+            // allocate a global to store the return value of the forwarding function
+            string cacheName = "symbolCache_" + this->name;
+
+            auto *cache = static_cast<llvm::GlobalVariable *>(
+                cs.module->getOrInsertGlobal(cacheName, type, [fun, type, &cs, &cacheName] {
+                    auto *null = llvm::ConstantPointerNull::get(type);
+                    auto *ret = new llvm::GlobalVariable(*cs.module, type, false, llvm::GlobalVariable::InternalLinkage,
+                                                         null, cacheName);
+
+                    ret->setAlignment(llvm::MaybeAlign(8));
+
+                    auto globalInitBuilder = llvm::IRBuilder<>(cs);
+                    globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
+
+                    auto *res = globalInitBuilder.CreateCall(fun, {}, "init_" + cacheName);
+                    globalInitBuilder.CreateStore(globalInitBuilder.CreatePointerCast(res, type, "fnPtrCast"), ret);
+
+                    return ret;
+                }));
+
+            return builder.CreateLoad(cache);
+        }
+    }
+}
+
 llvm::Value *IREmitterHelpers::receiverFastPathTestWithCache(MethodCallContext &mcctx,
-                                                             const vector<string> &expectedRubyCFuncs,
+                                                             const vector<KnownFunction> &expectedRubyCFuncs,
                                                              const string &methodNameForDebug) {
     auto &cs = mcctx.cs;
     auto &builder = mcctx.builder;
@@ -454,15 +488,8 @@ llvm::Value *IREmitterHelpers::receiverFastPathTestWithCache(MethodCallContext &
     // We could initialize result with the first result (because expectedRubyCFunc is
     // non-empty), but this makes the code slightly cleaner, and LLVM will optimize.
     llvm::Value *result = builder.getInt1(false);
-    for (const auto &expectedFunc : expectedRubyCFuncs) {
-        auto *expectedFnPtr = cs.getFunction(expectedFunc);
-        if (expectedFnPtr == nullptr) {
-            Exception::raise("Couldn't find expected Ruby C func `{}` in the current Module. Is it static (private)?",
-                             expectedFunc);
-        }
-        auto *fnPtrAsAnyFn =
-            builder.CreatePointerCast(expectedFnPtr, cs.getAnyRubyCApiFunctionType()->getPointerTo(), "fnPtrCast");
-
+    for (const auto &knownFunc : expectedRubyCFuncs) {
+        auto *fnPtrAsAnyFn = knownFunc.getFunction(cs, builder);
         auto current =
             builder.CreateCall(cs.getFunction("sorbet_isCachedMethod"), {cache, fnPtrAsAnyFn, recv}, "isCached");
         result = builder.CreateOr(result, current);

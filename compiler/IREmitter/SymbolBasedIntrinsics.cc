@@ -102,7 +102,7 @@ protected:
     string_view rubyMethod;
     CMethod cMethod;
     optional<CMethod> cMethodWithBlock;
-    vector<string> expectedRubyCFuncs;
+    vector<KnownFunction> expectedRubyCFuncs;
 
 private:
     // Generate a one-off function that looks like the following:
@@ -159,7 +159,7 @@ private:
 
 public:
     CallCMethod(core::ClassOrModuleRef rubyClass, string_view rubyMethod, CMethod cMethod,
-                optional<CMethod> cMethodWithBlock = nullopt, vector<string> expectedRubyCFuncs = {})
+                optional<CMethod> cMethodWithBlock = nullopt, vector<KnownFunction> expectedRubyCFuncs = {})
         : SymbolBasedIntrinsicMethod(cMethodWithBlock.has_value() ? Intrinsics::HandleBlock::Handled
                                                                   : Intrinsics::HandleBlock::Unhandled),
           rubyClass(rubyClass), rubyMethod(rubyMethod), cMethod(cMethod), cMethodWithBlock(cMethodWithBlock),
@@ -953,6 +953,11 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Integer(), "times", CMethod{"sorbet_rb_int_dotimes", core::Symbols::Enumerator()},
      CMethod{"sorbet_rb_int_dotimes_withBlock", core::Symbols::Integer()}},
     {core::Symbols::String(), "+@", CMethod{"sorbet_int_str_uplus", core::Symbols::String()}},
+    {core::Symbols::String(),
+     "to_s",
+     CMethod{"sorbet_int_str_to_s", core::Symbols::String()},
+     std::nullopt,
+     {KnownFunction::cached("sorbet_rb_str_to_s_func")}},
     {core::Symbols::Symbol(), "==", CMethod{"sorbet_rb_sym_equal"}},
     {core::Symbols::Symbol(), "===", CMethod{"sorbet_rb_sym_equal"}},
     {core::Symbols::Symbol(), "to_sym", CMethod{"sorbet_returnRecv"}},

@@ -45,6 +45,17 @@ module M
   def self.symbol_to_sym(x)
     x.to_sym
   end
+
+  # OPT-LABEL: define internal i64 @func_M.11string_to_s
+  # OPT: sorbet_rb_str_to_s
+  # OPT: sorbet_callFuncWithCache
+  # OPT-NOT: sorbet_callFuncWithCache
+  # OPT{LITERAL}: }
+  sig {params(x: String).returns(String)}
+  def self.string_to_s(x)
+    x.to_s
+  end
+
 end
 
 
@@ -56,3 +67,16 @@ p M.integer_to_i(10)
 p M.integer_to_int(20)
 
 p M.symbol_to_sym(:foo)
+
+class StringSubclass < String
+end
+
+class OtherStringSubclass < String
+  def to_s
+    'other string subclass!'
+  end
+end
+
+p M.string_to_s("hello!")
+p M.string_to_s(StringSubclass.new)
+p M.string_to_s(OtherStringSubclass.new)
