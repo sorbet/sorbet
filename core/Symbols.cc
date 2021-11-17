@@ -2027,6 +2027,24 @@ vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const Globa
         if (compareRaw != 0) {
             return compareRaw < 0;
         }
+        int i = -1;
+        const auto &rhsLocs = rhs.second.data(gs)->locs();
+        for (const auto lhsLoc : lhs.second.data(gs)->locs()) {
+            i++;
+            if (i > rhsLocs.size()) {
+                // more locs in lhs, so `lhs < rhs` is `false`
+                return false;
+            }
+            auto rhsLoc = rhsLocs[i];
+            auto compareLoc = lhsLoc.filePosToString(gs).compare(rhsLoc.filePosToString(gs));
+            if (compareLoc != 0) {
+                return compareLoc < 0;
+            }
+        }
+        if (i < rhsLocs.size()) {
+            // more locs in rhs, so `lhs < rhs` is true
+            return true;
+        }
         ENFORCE(false, "no stable sort");
         return 0;
     });
