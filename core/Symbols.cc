@@ -215,14 +215,14 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
 }
 
 bool SymbolRef::isTypeAlias(const GlobalState &gs) const {
-    return isFieldOrStaticField() && asFieldRef().data(gs)->isTypeAlias();
+    return isFieldOrStaticField() && asFieldRef().dataAllowingNone(gs)->isTypeAlias();
 }
 
 bool SymbolRef::isField(const GlobalState &gs) const {
-    return isFieldOrStaticField() && asFieldRef().data(gs)->isField();
+    return isFieldOrStaticField() && asFieldRef().dataAllowingNone(gs)->isField();
 }
 bool SymbolRef::isStaticField(const GlobalState &gs) const {
-    return isFieldOrStaticField() && asFieldRef().data(gs)->isStaticField();
+    return isFieldOrStaticField() && asFieldRef().dataAllowingNone(gs)->isStaticField();
 }
 
 SymbolData SymbolRef::data(GlobalState &gs) const {
@@ -1494,6 +1494,36 @@ SymbolRef SymbolRef::dealias(const GlobalState &gs) const {
             return asTypeArgumentRef().data(gs)->dealias(gs);
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->dealias(gs);
+    }
+}
+
+SymbolRef SymbolRef::findMember(const GlobalState &gs, NameRef name) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->findMember(gs, name);
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->findMember(gs, name);
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->findMember(gs, name);
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->findMember(gs, name);
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->findMember(gs, name);
+    }
+}
+
+SymbolRef SymbolRef::findMemberTransitive(const GlobalState &gs, NameRef name) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->findMemberTransitive(gs, name);
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->findMemberTransitive(gs, name);
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->findMemberTransitive(gs, name);
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->findMemberTransitive(gs, name);
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->findMemberTransitive(gs, name);
     }
 }
 
