@@ -1544,7 +1544,7 @@ class IO < Object
   # ```
   sig do
     params(
-        other_IO_or_path: IO,
+        other_IO_or_path: T.any(IO, Tempfile),
     )
     .returns(IO)
   end
