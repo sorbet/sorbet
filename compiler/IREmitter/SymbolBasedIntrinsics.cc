@@ -955,7 +955,7 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::String(), "+@", CMethod{"sorbet_int_str_uplus", core::Symbols::String()}},
     {core::Symbols::String(),
      "to_s",
-     CMethod{"sorbet_rb_str_to_s", core::Symbols::String()},
+     CMethod{"sorbet_int_str_to_s", core::Symbols::String()},
      std::nullopt,
      {KnownFunction::cached("sorbet_rb_str_to_s_func")}},
     {core::Symbols::Symbol(), "==", CMethod{"sorbet_rb_sym_equal"}},

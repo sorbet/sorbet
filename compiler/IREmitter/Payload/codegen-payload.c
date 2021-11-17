@@ -731,8 +731,11 @@ VALUE in), VALUE closure) { return rb_hash_foreach(hash, func, closure);
 extern VALUE (*sorbet_rb_str_to_s_func(void))(VALUE);
 KEEP_ALIVE(sorbet_rb_str_to_s_func);
 
-// A wrapper for rb_str_to_s
-SORBET_ALIVE(VALUE, sorbet_rb_str_to_s, (VALUE));
+VALUE sorbet_int_str_to_s(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                          VALUE closure) {
+    extern VALUE sorbet_rb_str_to_s(VALUE);
+    return sorbet_rb_str_to_s(recv);
+}
 
 SORBET_INLINE
 const char *sorbet_rubyStringToCPtr(VALUE value) {
