@@ -40,6 +40,7 @@ mkdir -p _out_
   -c opt \
   --config=forcedebug \
   --test_summary=terse \
+  --spawn_strategy=local \
   --test_output=errors || err=$?
 
 echo "--- uploading test results"
