@@ -162,6 +162,15 @@ VALUE sorbet_int_rb_ary_last(VALUE recv, ID fun, int argc, VALUE *const restrict
     return rb_ary_last(argc, args, recv);
 }
 
+// Array#push
+// Calling convention: -1
+extern VALUE sorbet_rb_ary_push_m(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_ary_push_m(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk,
+                               VALUE closure) {
+    return sorbet_rb_ary_push_m(argc, args, recv);
+}
+
 // Array#rassoc
 // Calling convention: 1
 extern VALUE rb_ary_rassoc(VALUE obj, VALUE arg_0);
