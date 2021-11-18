@@ -952,7 +952,7 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Hash(),
      "to_h",
      CMethod{"sorbet_int_hash_to_h", core::Symbols::Hash()},
-     std::nullopt,
+     CMethod{"sorbet_int_hash_to_h_withBlock", core::Symbols::Hash()},
      {KnownFunction::cached("sorbet_rb_hash_to_h_func")}},
     {core::Symbols::Hash(), "to_hash", CMethod{"sorbet_returnRecv", core::Symbols::Hash()}},
     {core::Symbols::TrueClass(), "|", CMethod{"sorbet_int_bool_true"}},

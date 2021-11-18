@@ -695,6 +695,40 @@ VALUE sorbet_int_hash_to_h(VALUE recv, ID fun, int argc, const VALUE *const rest
     return sorbet_rb_hash_to_h(recv);
 }
 
+struct sorbet_int_hash_to_h_closure {
+    BlockFFIType fun;
+    VALUE toplevel_closure;
+    VALUE hash;
+};
+
+// `rb_hash_to_h` uses `rb_yield_values(2, key, value)` in the function given to
+// `rb_hash_foreach`, so we always pass two values through the stack here.
+static int sorbet_int_hash_to_h_withBlock_body(VALUE key, VALUE value, VALUE closure) {
+    VALUE argv[2];
+    argv[0] = key;
+    argv[1] = value;
+    struct sorbet_int_hash_to_h_closure *c = (struct sorbet_int_hash_to_h_closure *)closure;
+    rb_hash_set_pair(c->hash, c->fun(key, c->toplevel_closure, 2, &argv[0], Qnil));
+    return ST_CONTINUE;
+}
+
+SORBET_INLINE
+VALUE sorbet_int_hash_to_h_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                     const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
+    VALUE h = rb_hash_new_with_size(RHASH_SIZE(recv));
+
+    struct sorbet_int_hash_to_h_closure passthrough;
+    passthrough.fun = blk;
+    passthrough.toplevel_closure = closure;
+    passthrough.hash = h;
+
+    sorbet_pushBlockFrame(captured);
+    rb_hash_foreach(recv, sorbet_int_hash_to_h_withBlock_body, (VALUE)&passthrough);
+    sorbet_popFrame();
+
+    return h;
+}
+
 SORBET_INLINE
 VALUE sorbet_newRubyHash() {
     return rb_hash_new();
