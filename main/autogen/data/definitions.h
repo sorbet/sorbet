@@ -179,11 +179,18 @@ struct DSLInfo {
     std::vector<core::NameRef> props;
     std::vector<std::vector<core::NameRef>> ancestors;
 
-    void printName(fmt::memory_buffer &out, const std::vector<core::NameRef> &parts, const core::GlobalState &gs) const;
+    // file
+    core::FileRef file;
+
+    // problem locs
+    std::vector<core::LocOffsets> problemLocs;
+
     void formatString(fmt::memory_buffer &out, const core::GlobalState &gs) const;
 };
 
-void mergeAndFilterGlobalDSLInfo(UnorderedMap<std::vector<core::NameRef>, DSLInfo> &globalDSLInfo);
+void printName(fmt::memory_buffer &out, const std::vector<core::NameRef> &parts, const core::GlobalState &gs);
+UnorderedMap<std::vector<core::NameRef>, DSLInfo>
+mergeAndFilterGlobalDSLInfo(UnorderedMap<std::vector<core::NameRef>, DSLInfo> globalDSLInfo);
 
 struct DSLAnalysisFile {
     // the checksum of this file
@@ -191,6 +198,9 @@ struct DSLAnalysisFile {
 
     // map of class -> DSLInfo
     UnorderedMap<std::vector<core::NameRef>, DSLInfo> dslInfo;
+
+    // file
+    core::FileRef file;
 };
 
 // A `Package` represents Autogen's view of a package file

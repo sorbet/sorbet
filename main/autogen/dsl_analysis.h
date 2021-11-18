@@ -15,4 +15,3 @@ public:
 
 } // namespace sorbet::autogen
 #endif // AUTOGEN_H
-

@@ -9,8 +9,8 @@
 #include "main/autogen/autogen.h"
 #include "main/autogen/autoloader.h"
 #include "main/autogen/crc_builder.h"
-#include "main/autogen/dsl_analysis.h"
 #include "main/autogen/data/version.h"
+#include "main/autogen/dsl_analysis.h"
 #include "main/autogen/packages.h"
 #include "main/autogen/subclasses.h"
 #include "main/lsp/LSPInput.h"
@@ -194,7 +194,6 @@ struct AutogenResult {
         vector<string> classlist;
         optional<autogen::Subclasses::Map> subclasses;
         optional<UnorderedMap<vector<core::NameRef>, autogen::DSLInfo>> dslInfo;
-        /* string dslAnalysisStrVal; */
     };
     CounterState counters;
     vector<pair<int, Serialized>> prints;
@@ -257,7 +256,6 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                     Timer timeit(logger, "dslAnalysisToString");
                     auto daf = autogen::DSLAnalysis::generate(ctx, move(tree2), *crcBuilder);
                     serialized.dslInfo = std::move(daf.dslInfo);
-                    /* serialized.dslAnalysisStrVal = daf.toString(ctx); */
                 }
                 if (opts.print.AutogenMsgPack.enabled) {
                     Timer timeit(logger, "autogenToMsgpack");
@@ -376,20 +374,19 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
 
         for (const auto &el : merged) {
             if (el.dslInfo) {
-                for (auto &it : *el.dslInfo) {
+                for (auto &it : std::move(*el.dslInfo)) {
                     globalDSLInfo.emplace(it.first, it.second);
                 }
-                std::move(*el.dslInfo);
             }
         }
 
-        autogen::mergeAndFilterGlobalDSLInfo(globalDSLInfo);
+        const auto &processedGlobalDSLInfo = autogen::mergeAndFilterGlobalDSLInfo(std::move(globalDSLInfo));
         fmt::memory_buffer out;
-        for (const auto &it : globalDSLInfo) {
+        for (const auto &it : processedGlobalDSLInfo) {
             if (it.second.props.empty()) {
                 continue;
             }
-            it.second.printName(out, it.first, gs);
+            autogen::printName(out, it.first, gs);
             it.second.formatString(out, gs);
         }
 
