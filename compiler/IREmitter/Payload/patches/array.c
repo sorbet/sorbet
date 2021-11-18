@@ -24,3 +24,27 @@ VALUE sorbet_ary_make_hash(VALUE ary) {
 void sorbet_ary_recycle_hash(VALUE hash) {
     ary_recycle_hash(hash);
 }
+
+// This is the no-block version of rb_ary_uniq: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L5018-L5041
+VALUE sorbet_rb_array_uniq(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                           VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+    VALUE ary = recv;
+
+    VALUE hash, uniq;
+
+    if (RARRAY_LEN(ary) <= 1) {
+        hash = 0;
+        uniq = rb_ary_dup(ary);
+    }
+    else {
+        hash = ary_make_hash(ary);
+        uniq = rb_hash_values(hash);
+    }
+    RBASIC_SET_CLASS(uniq, rb_obj_class(ary));
+    if (hash) {
+        ary_recycle_hash(hash);
+    }
+
+    return uniq;
+}

@@ -115,6 +115,8 @@ SORBET_ALIVE(VALUE, sorbet_rb_array_square_br_slowpath,
 SORBET_ALIVE(VALUE, rb_ary_compact_bang_forwarder, (VALUE recv));
 SORBET_ALIVE(VALUE, sorbet_ary_make_hash, (VALUE ary));
 SORBET_ALIVE(void, sorbet_ary_recycle_hash, (VALUE hash));
+SORBET_ALIVE(VALUE, sorbet_rb_array_uniq,
+             (VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure));
 
 SORBET_ALIVE(void, sorbet_hashUpdate, (VALUE hash, VALUE other));
 
@@ -1292,31 +1294,6 @@ VALUE sorbet_rb_array_empty(VALUE recv, ID fun, int argc, const VALUE *const res
     return Qfalse;
 }
 
-// This is the no-block version of rb_ary_uniq: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L5018-L5041
-SORBET_INLINE
-VALUE sorbet_rb_array_uniq(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                           VALUE closure) {
-    sorbet_ensure_arity(argc, 0);
-    VALUE ary = recv;
-
-    VALUE hash, uniq;
-
-    if (RARRAY_LEN(ary) <= 1) {
-        hash = 0;
-        uniq = rb_ary_dup(ary);
-    }
-    else {
-        hash = sorbet_ary_make_hash(ary);
-        uniq = rb_hash_values(hash);
-    }
-    sorbet_rbasic_set_class(uniq, rb_obj_class(ary));
-    if (hash) {
-        sorbet_ary_recycle_hash(hash);
-    }
-
-    return uniq;
-}
-
 // This is the block version of rb_ary_uniq: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L5018-L5041
 SORBET_INLINE
 VALUE sorbet_rb_array_uniq_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
@@ -1342,19 +1319,9 @@ VALUE sorbet_rb_array_uniq_withBlock(VALUE recv, ID fun, int argc, const VALUE *
 
         // inline of ary_make_hash_by
         for (int i = 0; i < RARRAY_LEN(ary); ++i) {
-            // inline of rb_ary_elt
-            VALUE v;
-            long len = RARRAY_LEN(ary);
-            if (len == 0) {
-                v = Qnil;
-            }
-            else if (i < 0 || len <= i) {
-                v = Qnil;
-            }
-            else {
-                v = RARRAY_AREF(ary, i);
-            }
-    
+            // inline of rb_ary_elt, with bounds checking omitted (because of the for loop we're in, we can be sure i
+            // is in bounds at this point)
+            VALUE v = RARRAY_AREF(ary, i);
             VALUE k = blk(v, closure, 1, &v, Qnil);
             rb_hash_add_new_element(hash, k, v);
         }
