@@ -724,41 +724,39 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             }
         }
 
-        if (opts.stopAfterPhase == options::Phase::NAMER) {
-            return ast::ParsedFilesOrCancelled(move(what));
-        }
-
-        ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
-        {
-            Timer timeit(gs->tracer(), "resolving");
-            core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
-            core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
-            auto maybeResult = resolver::Resolver::run(*gs, move(what), workers);
-            if (!maybeResult.hasResult()) {
-                return maybeResult;
+        if (opts.stopAfterPhase != options::Phase::NAMER) {
+            ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
+            {
+                Timer timeit(gs->tracer(), "resolving");
+                core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
+                core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
+                auto maybeResult = resolver::Resolver::run(*gs, move(what), workers);
+                if (!maybeResult.hasResult()) {
+                    return maybeResult;
+                }
+                what = move(maybeResult.result());
             }
-            what = move(maybeResult.result());
-        }
-        if (opts.stressIncrementalResolver) {
-            auto symbolsBefore = gs->symbolsUsedTotal();
-            for (auto &f : what) {
-                // Shift contents of file past current file's EOF, re-run incrementalResolve, assert that no locations
-                // appear before file's old EOF.
-                const int prohibitedLines = f.file.data(*gs).source().size();
-                auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(*gs).source());
-                auto newFile = make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource),
-                                                       f.file.data(*gs).sourceType);
-                gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
-                f.file.data(*gs).strictLevel = decideStrictLevel(*gs, f.file, opts);
-                auto reIndexed = indexOne(opts, *gs, f.file);
-                vector<ast::ParsedFile> toBeReResolved;
-                toBeReResolved.emplace_back(move(reIndexed));
-                auto reresolved = pipeline::incrementalResolve(*gs, move(toBeReResolved), opts);
-                ENFORCE(reresolved.size() == 1);
-                f = checkNoDefinitionsInsideProhibitedLines(*gs, move(reresolved[0]), 0, prohibitedLines);
+            if (opts.stressIncrementalResolver) {
+                auto symbolsBefore = gs->symbolsUsedTotal();
+                for (auto &f : what) {
+                    // Shift contents of file past current file's EOF, re-run incrementalResolve, assert that no
+                    // locations appear before file's old EOF.
+                    const int prohibitedLines = f.file.data(*gs).source().size();
+                    auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(*gs).source());
+                    auto newFile = make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource),
+                                                           f.file.data(*gs).sourceType);
+                    gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
+                    f.file.data(*gs).strictLevel = decideStrictLevel(*gs, f.file, opts);
+                    auto reIndexed = indexOne(opts, *gs, f.file);
+                    vector<ast::ParsedFile> toBeReResolved;
+                    toBeReResolved.emplace_back(move(reIndexed));
+                    auto reresolved = pipeline::incrementalResolve(*gs, move(toBeReResolved), opts);
+                    ENFORCE(reresolved.size() == 1);
+                    f = checkNoDefinitionsInsideProhibitedLines(*gs, move(reresolved[0]), 0, prohibitedLines);
+                }
+                ENFORCE(symbolsBefore == gs->symbolsUsedTotal(),
+                        "Stressing the incremental resolver should not add any new symbols");
             }
-            ENFORCE(symbolsBefore == gs->symbolsUsedTotal(),
-                    "Stressing the incremental resolver should not add any new symbols");
         }
     } catch (SorbetException &) {
         Exception::failInFuzzer();
