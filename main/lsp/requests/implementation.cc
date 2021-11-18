@@ -24,7 +24,7 @@ unique_ptr<ResponseError> makeInvalidRequestError(core::SymbolRef symbol, const 
     return make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams, errorMessage);
 }
 
-const MethodImplementationResults findMethodImplementations(const core::GlobalState &gs, core::SymbolRef method) {
+const MethodImplementationResults findMethodImplementations(const core::GlobalState &gs, core::MethodRef method) {
     MethodImplementationResults res;
     if (!method.data(gs)->isMethod() || !method.data(gs)->isAbstract()) {
         res.error = makeInvalidRequestError(method, gs);
@@ -52,7 +52,7 @@ const MethodImplementationResults findMethodImplementations(const core::GlobalSt
     return res;
 }
 
-core::SymbolRef findOverridedMethod(const core::GlobalState &gs, const core::SymbolRef method) {
+core::MethodRef findOverridedMethod(const core::GlobalState &gs, const core::MethodRef method) {
     auto ownerClass = method.data(gs)->owner.asClassOrModuleRef();
 
     for (auto mixin : ownerClass.data(gs)->mixins()) {
@@ -61,7 +61,7 @@ core::SymbolRef findOverridedMethod(const core::GlobalState &gs, const core::Sym
         }
         return mixin.data(gs)->findMethod(gs, method.data(gs)->name);
     }
-    return core::Symbols::noSymbol();
+    return core::Symbols::noMethod();
 }
 } // namespace
 
@@ -90,13 +90,14 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
     auto queryResponse = move(queryResult.responses[0]);
     if (auto def = queryResponse->isDefinition()) {
         // User called "Go to Implementation" from the abstract function definition
-        core::SymbolRef method = def->symbol;
-        if (!method.data(gs)->isMethod()) {
-            response->error = makeInvalidRequestError(method, gs);
+        core::SymbolRef maybeMethod = def->symbol;
+        if (!maybeMethod.isMethod()) {
+            response->error = makeInvalidRequestError(maybeMethod, gs);
             return response;
         }
 
-        core::SymbolRef overridedMethod = method;
+        auto method = maybeMethod.asMethodRef();
+        core::MethodRef overridedMethod = method;
         if (method.data(gs)->isOverride()) {
             overridedMethod = findOverridedMethod(gs, method);
         }
@@ -112,7 +113,7 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
         }
     } else if (auto constant = queryResponse->isConstant()) {
         // User called "Go to Implementation" from the abstract class reference
-        auto classSymbol = constant->symbol;
+        auto classSymbol = constant->symbol.asClassOrModuleRef();
 
         if (!classSymbol.data(gs)->isClassOrModule() || !classSymbol.data(gs)->isClassOrModuleAbstract()) {
             response->error = makeInvalidRequestError(classSymbol, gs);
@@ -120,8 +121,7 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
         }
 
         auto includeClassSymbol = false;
-        auto classOrModuleRef = classSymbol.asClassOrModuleRef();
-        auto childClasses = getSubclassesSlow(gs, classOrModuleRef, includeClassSymbol);
+        auto childClasses = getSubclassesSlow(gs, classSymbol, includeClassSymbol);
         for (const auto &childClass : childClasses) {
             for (auto loc : childClass.data(gs)->locs()) {
                 addLocIfExists(gs, result, loc);
@@ -138,7 +138,7 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
         }
 
         auto calledMethod = mainResponse.method;
-        core::SymbolRef overridedMethod = calledMethod;
+        auto overridedMethod = calledMethod;
         if (calledMethod.data(gs)->isOverride()) {
             overridedMethod = findOverridedMethod(gs, overridedMethod);
         }
