@@ -10,6 +10,7 @@
 #include "core/core.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "resolver/CorrectTypeAlias.h"
+#include "resolver/SuggestPackage.h"
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
 
@@ -350,6 +351,11 @@ private:
                                    "may need to re-generate the .rbi. Try running:\n"
                                    "  scripts/bin/remote-script sorbet/shim_generation/autogen.rb");
                 } else if (suggestDidYouMean && suggestScope.exists() && suggestScope.isClassOrModule()) {
+                    bool madePackageSuggestions =
+                        SuggestPackage::tryPackageCorrections(ctx, e, job.out->resolutionScopes, original.cnst);
+                    if (madePackageSuggestions) {
+                        return;
+                    }
                     auto suggested = suggestScope.data(ctx)->findMemberFuzzyMatch(ctx, original.cnst);
                     if (suggested.size() > 3) {
                         suggested.resize(3);
