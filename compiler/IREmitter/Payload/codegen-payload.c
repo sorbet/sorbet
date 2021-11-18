@@ -621,6 +621,16 @@ VALUE sorbet_doubleToRubyValue(double u) {
 // ****                       Operations on Arrays
 // ****
 
+extern VALUE (*sorbet_rb_ary_to_a_func(void))(VALUE);
+KEEP_ALIVE(sorbet_rb_ary_to_a_func);
+
+VALUE sorbet_int_ary_to_a(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                          VALUE closure) {
+    extern VALUE sorbet_rb_ary_to_a(VALUE);
+
+    return sorbet_rb_ary_to_a(recv);
+}
+
 SORBET_INLINE
 int sorbet_rubyArrayLen(VALUE array) {
     return RARRAY_LEN(array);

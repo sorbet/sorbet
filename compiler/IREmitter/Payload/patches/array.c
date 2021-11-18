@@ -47,3 +47,11 @@ VALUE sorbet_rb_array_uniq(VALUE recv, ID fun, int argc, const VALUE *const rest
 
     return uniq;
 }
+
+VALUE (*sorbet_rb_ary_to_a_func(void))(VALUE) {
+    return rb_ary_to_a;
+}
+
+VALUE sorbet_rb_ary_to_a(VALUE ary) {
+    return rb_ary_to_a(ary);
+}
