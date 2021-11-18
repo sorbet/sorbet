@@ -902,6 +902,8 @@ static const vector<CallCMethod> knownCMethodsInstance{
     // filter is an alias for select, so we call the same intrinsic
     {core::Symbols::Array(), "filter", CMethod{"sorbet_rb_array_select", core::Symbols::Enumerator()},
      CMethod{"sorbet_rb_array_select_withBlock", core::Symbols::Array()}},
+    {core::Symbols::Array(), "reject", CMethod{"sorbet_rb_array_reject", core::Symbols::Enumerator()},
+     CMethod{"sorbet_rb_array_reject_withBlock", core::Symbols::Array()}},
     {core::Symbols::Array(), "find", CMethod{"sorbet_rb_array_find"}, CMethod{"sorbet_rb_array_find_withBlock"}},
     {core::Symbols::Array(), "collect", CMethod{"sorbet_rb_array_collect", core::Symbols::Enumerator()},
      CMethod{"sorbet_rb_array_collect_withBlock", core::Symbols::Array()}},
@@ -1037,5 +1039,4 @@ vector<const SymbolBasedIntrinsicMethod *> &SymbolBasedIntrinsicMethod::definedI
 
     return ret;
 }
-
 }; // namespace sorbet::compiler
