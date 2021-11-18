@@ -56,6 +56,16 @@ module M
     x.to_s
   end
 
+  # OPT-LABEL: define internal i64 @func_M.10array_to_a
+  # OPT: sorbet_rb_ary_to_a
+  # OPT: sorbet_callFuncWithCache
+  # OPT-NOT: sorbet_callFuncWithCache
+  # OPT{LITERAL}: }
+  sig {params(x: T::Array[T.untyped]).returns(T::Array[T.untyped])}
+  def self.array_to_a(x)
+    x.to_a
+  end
+
 end
 
 
@@ -80,3 +90,16 @@ end
 p M.string_to_s("hello!")
 p M.string_to_s(StringSubclass.new)
 p M.string_to_s(OtherStringSubclass.new)
+
+class ArraySubclass < Array
+end
+
+class OtherArraySubclass < Array
+  def to_a
+    [1,2,3,'other','array','subclass']
+  end
+end
+
+p M.array_to_a([1,2,3,4,5])
+p M.array_to_a(ArraySubclass.new)
+p M.array_to_a(OtherArraySubclass.new)
