@@ -717,6 +717,7 @@ int realmain(int argc, char *argv[]) {
             //     -   Might be nice to have this as its own thing? Like to serialize Sorbet's whole
             //         static knowledge to an RBI?
             //     -   Would let people ship RBIs for their Sorbet gems
+            // 4.  Test harness
         }
 
         if (opts.suggestTyped) {
