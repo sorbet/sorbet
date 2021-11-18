@@ -1296,7 +1296,7 @@ VALUE sorbet_rb_array_empty(VALUE recv, ID fun, int argc, const VALUE *const res
 SORBET_INLINE
 VALUE sorbet_rb_array_uniq(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                            VALUE closure) {
-    rb_check_arity(argc, 0, 0);
+    sorbet_ensure_arity(argc, 0);
     VALUE ary = recv;
 
     VALUE hash, uniq;
@@ -1321,7 +1321,7 @@ VALUE sorbet_rb_array_uniq(VALUE recv, ID fun, int argc, const VALUE *const rest
 SORBET_INLINE
 VALUE sorbet_rb_array_uniq_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                      const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
-    rb_check_arity(argc, 0, 0);
+    sorbet_ensure_arity(argc, 0);
     VALUE ary = recv;
 
     // must push a frame for the captured block
