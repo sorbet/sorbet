@@ -21,7 +21,7 @@
 * [   ] `rb_ary_difference_multi` (`Array#difference`)
 * [   ] `rb_ary_intersection_multi` (`Array#intersection`)
 * [✔  ] `rb_ary_push` (`Array#<<`)
-* [   ] `rb_ary_push_m` (`Array#push`)
+* [  ✔] `rb_ary_push_m` (`Array#push`)
 * [   ] `rb_ary_pop_m` (`Array#pop`)
 * [   ] `rb_ary_shift_m` (`Array#shift`)
 * [   ] `rb_ary_unshift_m` (`Array#unshift`)
@@ -1564,4 +1564,4 @@
 
 ## Stats
 * Total:   1488
-* Visible: 240
+* Visible: 241

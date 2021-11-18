@@ -232,6 +232,7 @@ module Intrinsics
       "Array#initialize_copy",
       "Array#join",
       "Array#last",
+      "Array#push",
       "Array#rassoc",
       "Array#replace",
       "Array#slice",

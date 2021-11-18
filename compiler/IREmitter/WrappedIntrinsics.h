@@ -19,6 +19,7 @@
     {core::Symbols::Array(), "replace", CMethod{"sorbet_int_rb_ary_replace"}},
     {core::Symbols::Array(), "join", CMethod{"sorbet_int_rb_ary_join_m"}},
     {core::Symbols::Array(), "last", CMethod{"sorbet_int_rb_ary_last"}},
+    {core::Symbols::Array(), "push", CMethod{"sorbet_int_rb_ary_push_m"}},
     {core::Symbols::Array(), "rassoc", CMethod{"sorbet_int_rb_ary_rassoc"}},
     {core::Symbols::Array(), "sort", CMethod{"sorbet_int_rb_ary_sort"}},
     {core::Symbols::Array(), "sort!", CMethod{"sorbet_int_rb_ary_sort_bang"}},
