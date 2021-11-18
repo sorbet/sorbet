@@ -22,6 +22,16 @@ module M
     x.to_hash
   end
 
+  # OPT-LABEL: define internal i64 @func_M.9hash_to_h
+  # OPT: sorbet_rb_hash_to_h
+  # OPT: sorbet_callFuncWithCache
+  # OPT-NOT: sorbet_callFuncWithCache
+  # OPT{LITERAL}: }
+  sig {params(x: T::Hash[T.untyped, T.untyped]).returns(T::Hash[T.untyped, T.untyped])}
+  def self.hash_to_h(x)
+    x.to_h
+  end
+
   # OPT-LABEL: define internal i64 @func_M.12integer_to_i
   # OPT-NOT: sorbet_callFuncWithCache
   # OPT{LITERAL}: }
@@ -72,6 +82,12 @@ end
 p M.array_to_ary([1,2,3])
 
 p M.hash_to_hash({x: 'hi', 10 => false})
+
+class HashSubclass < Hash
+end
+
+p M.hash_to_h({x: 'hi', 10 => false})
+p M.hash_to_h(HashSubclass.new)
 
 p M.integer_to_i(10)
 p M.integer_to_int(20)

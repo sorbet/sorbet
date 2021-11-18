@@ -23,3 +23,16 @@ VALUE sorbet_rb_hash_any_forwarder(int argc, VALUE *argv, VALUE hash) {
 void sorbet_hashUpdate(VALUE hash, VALUE other) {
     rb_hash_update(1, &other, hash);
 }
+
+VALUE (*sorbet_rb_hash_to_h_func(void))(VALUE) {
+    return rb_hash_to_h;
+}
+
+// The no-block version of `rb_hash_to_h`
+VALUE sorbet_rb_hash_to_h(VALUE hash) {
+    if (rb_obj_class(hash) != rb_cHash) {
+        const VALUE flags = RBASIC(hash)->flags;
+        hash = hash_dup(hash, rb_cHash, flags & RHASH_PROC_DEFAULT);
+    }
+    return hash;
+}

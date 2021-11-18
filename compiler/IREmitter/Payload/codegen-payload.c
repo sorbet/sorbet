@@ -685,6 +685,16 @@ VALUE sorbet_arrayNewFromValues(int argc, VALUE *argv) {
 // ****                       Operations on Hashes
 // ****
 
+extern VALUE (*sorbet_rb_hash_to_h_func(void))(VALUE);
+KEEP_ALIVE(sorbet_rb_hash_to_h_func);
+
+SORBET_INLINE
+VALUE sorbet_int_hash_to_h(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                           VALUE closure) {
+    extern VALUE sorbet_rb_hash_to_h(VALUE);
+    return sorbet_rb_hash_to_h(recv);
+}
+
 SORBET_INLINE
 VALUE sorbet_newRubyHash() {
     return rb_hash_new();
