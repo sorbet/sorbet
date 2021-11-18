@@ -165,6 +165,91 @@ string ParsedFile::toString(const core::GlobalState &gs, int version) const {
     return to_string(out);
 }
 
+void DSLInfo::printName(fmt::memory_buffer &out, const std::vector<core::NameRef> &parts, const core::GlobalState &gs) const {
+    for (auto &part : parts) {
+        if (part == parts.back()) {
+            fmt::format_to(std::back_inserter(out),
+                         "{}\n",
+                         part.show(gs));
+        } else {
+            fmt::format_to(std::back_inserter(out),
+                         "{}::",
+                         part.show(gs));
+        }
+    }
+}
+
+// Pretty-print a `DSLInfo object`
+void DSLInfo::formatString(fmt::memory_buffer &out, const core::GlobalState &gs) const {
+    if (props.empty()) {
+      fmt::format_to(std::back_inserter(out),
+                   "{}\n", "[empty]");
+        return;
+    }
+
+    fmt::format_to(std::back_inserter(out),
+                 "{}\n", "[ancestors");
+    for (auto &ancst : ancestors) {
+        fmt::format_to(std::back_inserter(out),
+                 "{}", "  ");
+        printName(out, ancst, gs);
+    }
+    fmt::format_to(std::back_inserter(out),
+                 "{}\n", "]");
+
+    for (auto &prop : props) {
+        fmt::format_to(std::back_inserter(out),
+                     "[prop name={}]\n",
+                     prop.show(gs));
+    }
+
+    fmt::format_to(std::back_inserter(out), "{}", "\n");
+}
+
+void mergeAndFilterGlobalDSLInfo(UnorderedMap<std::vector<core::NameRef>, DSLInfo> &globalDSLInfo) {
+    const std::vector<core::NameRef> CHALK_ODM_MODEL = {core::Names::Constants::Chalk(), core::Names::Constants::ODM(), core::Names::Constants::Model()};
+    std::vector<std::vector<core::NameRef>> toRemove;
+    
+    for (auto &it : globalDSLInfo) {
+        const std::vector<core::NameRef> &klass = it.first;
+        DSLInfo &info = it.second;
+        UnorderedSet<std::vector<core::NameRef>> allAncestors;
+        std::deque<std::vector<core::NameRef>> queue;
+
+        queue.insert(queue.end(), info.ancestors.begin(), info.ancestors.end());
+        while (!queue.empty()) {
+            std::vector<core::NameRef> curAncst = queue.at(0);
+            queue.pop_front();
+            allAncestors.insert(curAncst);
+
+            auto curAncstInfo = globalDSLInfo.find(curAncst);
+            if (curAncstInfo == globalDSLInfo.end()) {
+                continue;
+            }
+
+            queue.insert(queue.end(), curAncstInfo->second.ancestors.begin(), curAncstInfo->second.ancestors.end());
+        }
+
+        if (allAncestors.find(CHALK_ODM_MODEL) == allAncestors.end()) {
+            toRemove.emplace_back(klass);
+            continue;
+        }
+
+        for (const std::vector<core::NameRef> &ancst : allAncestors) {
+            auto ancstInfoIt = globalDSLInfo.find(ancst);
+            if (ancstInfoIt == globalDSLInfo.end()) {
+                continue;
+            }
+            auto &ancstInfo = ancstInfoIt->second;
+            info.props.insert(info.props.end(), ancstInfo.props.begin(), ancstInfo.props.end());
+        }
+    }
+
+    for (std::vector<core::NameRef> &rem : toRemove) {
+        globalDSLInfo.erase(rem);
+    }
+}
+
 // List every class name defined in this `ParsedFile`.
 vector<string> ParsedFile::listAllClasses(core::Context ctx) {
     vector<string> out;

@@ -82,6 +82,7 @@ struct Printers {
     PrinterConfig AutogenClasslist;
     PrinterConfig AutogenAutoloader;
     PrinterConfig AutogenSubclasses;
+    PrinterConfig DSLAnalysis;
     PrinterConfig Packager;
     // Ensure everything here is in PrinterConfig::printers().
 

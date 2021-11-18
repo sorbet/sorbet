@@ -175,6 +175,24 @@ struct ParsedFile {
     std::vector<std::string> listAllClasses(core::Context ctx);
 };
 
+struct DSLInfo {
+    std::vector<core::NameRef> props;
+    std::vector<std::vector<core::NameRef>> ancestors;
+
+    void printName(fmt::memory_buffer &out, const std::vector<core::NameRef> &parts, const core::GlobalState &gs) const;
+    void formatString(fmt::memory_buffer &out, const core::GlobalState &gs) const;
+};
+
+void mergeAndFilterGlobalDSLInfo(UnorderedMap<std::vector<core::NameRef>, DSLInfo> &globalDSLInfo);
+
+struct DSLAnalysisFile {
+    // the checksum of this file
+    u4 cksum;
+
+    // map of class -> DSLInfo
+    UnorderedMap<std::vector<core::NameRef>, DSLInfo> dslInfo;
+};
+
 // A `Package` represents Autogen's view of a package file
 struct Package {
     // the original file AST from Sorbet
