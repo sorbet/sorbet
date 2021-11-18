@@ -80,7 +80,7 @@
 * [   ] `rb_ary_uniq_bang` (`Array#uniq!`)
 * [   ] `rb_ary_compact` (`Array#compact`)
 * [   ] `rb_ary_compact_bang` (`Array#compact!`)
-* [   ] `rb_ary_flatten` (`Array#flatten`)
+* [  ✔] `rb_ary_flatten` (`Array#flatten`)
 * [   ] `rb_ary_flatten_bang` (`Array#flatten!`)
 * [   ] `rb_ary_count` (`Array#count`)
 * [   ] `rb_ary_shuffle_bang` (`Array#shuffle!`)
@@ -1564,4 +1564,4 @@
 
 ## Stats
 * Total:   1488
-* Visible: 241
+* Visible: 242
