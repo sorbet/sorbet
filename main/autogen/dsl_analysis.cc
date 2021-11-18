@@ -25,18 +25,6 @@ class DSLAnalysisWalk {
         return out;
     }
 
-    // Convert a constant literal into a fully qualified name
-    vector<core::NameRef> constantName(core::Context ctx, ast::ConstantLit *cnst) {
-        vector<core::NameRef> out;
-        while (cnst != nullptr && cnst->original != nullptr) {
-            auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
-            out.emplace_back(original.cnst);
-            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
-        }
-        reverse(out.begin(), out.end());
-        return out;
-    }
-
 public:
     DSLAnalysisWalk(core::FileRef a_file) {
         validScope = true;
