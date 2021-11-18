@@ -237,7 +237,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         while (current.data(gs)->isOverloaded()) {
             i++;
             NameRef overloadName = gs.lookupNameUnique(UniqueNameKind::Overload, primary.data(gs)->name, i);
-            MethodRef overload = primary.data(gs)->owner.data(gs)->findMethod(gs, overloadName);
+            MethodRef overload = primary.data(gs)->owner.asClassOrModuleRef().data(gs)->findMethod(gs, overloadName);
             if (!overload.exists()) {
                 Exception::raise("Corruption of overloads?");
             } else {
@@ -627,7 +627,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             } else {
                 if (symbol.data(gs)->isClassOrModuleModule()) {
                     auto objMeth = core::Symbols::Object().data(gs)->findMethodTransitive(gs, args.name);
-                    if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isClassOrModuleModule()) {
+                    if (objMeth.exists() &&
+                        objMeth.data(gs)->owner.asClassOrModuleRef().data(gs)->isClassOrModuleModule()) {
                         e.addErrorNote("Did you mean to `{}` in this module?",
                                        fmt::format("include {}", objMeth.data(gs)->owner.name(gs).show(gs)));
                     }
@@ -640,7 +641,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         auto possibleSymbol = alternative.symbol;
                         if (!possibleSymbol.isClassOrModule() &&
                             (!possibleSymbol.isMethod() ||
-                             (possibleSymbol.data(gs)->isMethodPrivate() && !args.isPrivateOk))) {
+                             (possibleSymbol.asMethodRef().data(gs)->isMethodPrivate() && !args.isPrivateOk))) {
                             continue;
                         }
 
