@@ -19,6 +19,17 @@ VALUE sorbet_int_rb_ary_plus(VALUE recv, ID fun, int argc, VALUE *const restrict
     return rb_ary_plus(recv, arg_0);
 }
 
+// Array#-
+// Calling convention: 1
+extern VALUE sorbet_rb_ary_diff(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_ary_diff(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk,
+                             VALUE closure) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return sorbet_rb_ary_diff(recv, arg_0);
+}
+
 // Array#<<
 // Calling convention: 1
 extern VALUE rb_ary_push(VALUE obj, VALUE arg_0);

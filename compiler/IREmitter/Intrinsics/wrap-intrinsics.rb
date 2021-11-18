@@ -218,6 +218,7 @@ module Intrinsics
 
     METHOD_WHITELIST = T.let(Set[
       "Array#+",
+      "Array#-",
       "Array#<<",
       "Array#<=>",
       "Array#[]",
