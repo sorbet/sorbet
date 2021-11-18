@@ -165,8 +165,6 @@ SORBET_ALIVE(void, sorbet_vm_define_method,
 SORBET_ALIVE(void, sorbet_vm_define_prop_getter,
              (VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq));
 
-SORBET_ALIVE(void, sorbet_rbasic_set_class, (VALUE obj, VALUE klass));
-
 SORBET_ALIVE(VALUE, sorbet_maybeAllocateObjectFastPath, (VALUE recv, struct FunctionInlineCache *newCache));
 SORBET_ALIVE(VALUE, sorbet_vm_instance_variable_get,
              (struct FunctionInlineCache * getCache, struct iseq_inline_iv_cache_entry *varCache,
@@ -1327,7 +1325,7 @@ VALUE sorbet_rb_array_uniq_withBlock(VALUE recv, ID fun, int argc, const VALUE *
         }
         uniq = rb_hash_values(hash);
     }
-    sorbet_rbasic_set_class(uniq, rb_obj_class(ary));
+    RBASIC_SET_CLASS(uniq, rb_obj_class(ary));
     if (hash) {
         sorbet_ary_recycle_hash(hash);
     }
