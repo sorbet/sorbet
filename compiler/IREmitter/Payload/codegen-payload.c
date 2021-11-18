@@ -1345,11 +1345,15 @@ VALUE sorbet_rb_array_uniq_withBlock(VALUE recv, ID fun, int argc, const VALUE *
             // inline of rb_ary_elt
             VALUE v;
             long len = RARRAY_LEN(ary);
-            if (len == 0) v = Qnil;
+            if (len == 0) {
+                v = Qnil;
+            }
             else if (i < 0 || len <= i) {
                 v = Qnil;
             }
-            else v = RARRAY_AREF(ary, i);
+            else {
+                v = RARRAY_AREF(ary, i);
+            }
     
             VALUE k = blk(v, closure, 1, &v, Qnil);
             rb_hash_add_new_element(hash, k, v);
