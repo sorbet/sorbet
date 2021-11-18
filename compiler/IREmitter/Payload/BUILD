@@ -68,7 +68,10 @@ payload_files = [
     copts = [
         "-Wno-gcc-compat",
         "-fembed-bitcode",
-        "-std=c99",
+        # Note that we use -std=gnu99 here (instead of -std=c99) because we
+        # borrow a lot of code from Ruby (via, e.g., internal.h), and that code
+        # sometimes depends on GNU extensions (e.g. the "typeof" keyword).
+        "-std=gnu99",
         "-O1",
         "-g",
         "-fPIC",
