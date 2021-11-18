@@ -70,7 +70,7 @@
 * [✔  ] `rb_ary_rassoc` (`Array#rassoc`)
 * [✔  ] `rb_ary_plus` (`Array#+`)
 * [   ] `rb_ary_times` (`Array#*`)
-* [   ] `rb_ary_diff` (`Array#-`)
+* [  ✔] `rb_ary_diff` (`Array#-`)
 * [   ] `rb_ary_and` (`Array#&`)
 * [   ] `rb_ary_or` (`Array#|`)
 * [   ] `rb_ary_max` (`Array#max`)

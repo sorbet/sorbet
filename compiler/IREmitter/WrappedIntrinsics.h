@@ -3,6 +3,7 @@
 
 // clang-format off
     {core::Symbols::Array(), "+", CMethod{"sorbet_int_rb_ary_plus"}},
+    {core::Symbols::Array(), "-", CMethod{"sorbet_int_rb_ary_diff"}},
     {core::Symbols::Array(), "<<", CMethod{"sorbet_int_rb_ary_push"}},
     {core::Symbols::Array(), "<=>", CMethod{"sorbet_int_rb_ary_cmp"}},
     {core::Symbols::Array(), "[]", CMethod{"sorbet_int_rb_ary_aref"}},
