@@ -92,6 +92,15 @@ VALUE sorbet_int_rb_ary_clear(VALUE recv, ID fun, int argc, VALUE *const restric
     return rb_ary_clear(recv);
 }
 
+// Array#concat
+// Calling convention: -1
+extern VALUE sorbet_rb_ary_concat_multi(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_ary_concat_multi(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk,
+                                     VALUE closure) {
+    return sorbet_rb_ary_concat_multi(argc, args, recv);
+}
+
 // Array#delete
 // Calling convention: 1
 extern VALUE rb_ary_delete(VALUE obj, VALUE arg_0);

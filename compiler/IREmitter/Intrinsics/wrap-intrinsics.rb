@@ -225,6 +225,7 @@ module Intrinsics
       "Array#assoc",
       "Array#at",
       "Array#clear",
+      "Array#concat",
       "Array#delete",
       "Array#first",
       "Array#include?",

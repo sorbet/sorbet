@@ -16,7 +16,7 @@
 * [   ] `rb_ary_fetch` (`Array#fetch`)
 * [  ✔] `rb_ary_first` (`Array#first`)
 * [✔  ] `rb_ary_last` (`Array#last`)
-* [   ] `rb_ary_concat_multi` (`Array#concat`)
+* [  ✔] `rb_ary_concat_multi` (`Array#concat`)
 * [   ] `rb_ary_union_multi` (`Array#union`)
 * [   ] `rb_ary_difference_multi` (`Array#difference`)
 * [   ] `rb_ary_intersection_multi` (`Array#intersection`)
@@ -1564,4 +1564,4 @@
 
 ## Stats
 * Total:   1488
-* Visible: 238
+* Visible: 240
