@@ -11,10 +11,10 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
 
 void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::SymbolRef sym, core::FileRef filter,
                                          vector<unique_ptr<DocumentSymbol>> &out) {
-    for (auto mem : sym.data(gs)->membersStableOrderSlow(gs)) {
+    for (auto mem : sym.membersStableOrderSlow(gs)) {
         if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
             bool foundThisFile = false;
-            for (auto loc : mem.second.data(gs)->locs()) {
+            for (auto loc : mem.second.locs(gs)) {
                 foundThisFile = foundThisFile || loc.file() == filter;
             }
             if (!foundThisFile) {
@@ -33,24 +33,25 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
     if (!symRef.exists()) {
         return nullptr;
     }
-    auto sym = symRef.data(gs);
-    if (!sym->loc().file().exists() || hideSymbol(gs, symRef)) {
+    auto loc = symRef.loc(gs);
+    if (!loc.file().exists() || hideSymbol(gs, symRef)) {
         return nullptr;
     }
     auto kind = symbolRef2SymbolKind(gs, symRef);
     // TODO: this range should cover body. Currently it doesn't.
-    auto range = Range::fromLoc(gs, sym->loc());
-    auto selectionRange = Range::fromLoc(gs, sym->loc());
+    auto range = Range::fromLoc(gs, loc);
+    auto selectionRange = Range::fromLoc(gs, loc);
     if (range == nullptr || selectionRange == nullptr) {
         return nullptr;
     }
 
     string prefix;
-    if (sym->owner.exists() && sym->owner.isClassOrModule() &&
-        sym->owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()) {
+    auto owner = symRef.owner(gs);
+    if (owner.exists() && owner.isClassOrModule() && owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()) {
         prefix = "self.";
     }
-    auto result = make_unique<DocumentSymbol>(prefix + sym->name.show(gs), kind, move(range), move(selectionRange));
+    auto result =
+        make_unique<DocumentSymbol>(prefix + symRef.name(gs).show(gs), kind, move(range), move(selectionRange));
 
     // Previous versions of VSCode have a bug that requires this non-optional field to be present.
     // This previously tried to include the method signature but due to issues where large signatures were not readable
@@ -60,8 +61,8 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
 
     vector<unique_ptr<DocumentSymbol>> children;
     symbolRef2DocumentSymbolWalkMembers(gs, symRef, filter, children);
-    if (sym->isClassOrModule()) {
-        auto singleton = sym->lookupSingletonClass(gs);
+    if (symRef.isClassOrModule()) {
+        auto singleton = symRef.asClassOrModuleRef().data(gs)->lookupSingletonClass(gs);
         if (singleton.exists()) {
             symbolRef2DocumentSymbolWalkMembers(gs, singleton, filter, children);
         }
@@ -103,8 +104,8 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
             core::SymbolRef ref(gs, kind, idx);
             if (!hideSymbol(gs, ref) &&
                 // a bit counter-intuitive, but this actually should be `!= fref`, as it prevents duplicates.
-                (ref.owner(gs).loc(gs).file() != fref || ref.data(gs)->owner == core::Symbols::root())) {
-                for (auto definitionLocation : ref.data(gs)->locs()) {
+                (ref.owner(gs).loc(gs).file() != fref || ref.owner(gs) == core::Symbols::root())) {
+                for (auto definitionLocation : ref.locs(gs)) {
                     if (definitionLocation.file() == fref) {
                         auto data = symbolRef2DocumentSymbol(gs, ref, fref);
                         if (data) {
