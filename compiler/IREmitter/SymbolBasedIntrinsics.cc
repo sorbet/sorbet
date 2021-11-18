@@ -1039,4 +1039,5 @@ vector<const SymbolBasedIntrinsicMethod *> &SymbolBasedIntrinsicMethod::definedI
 
     return ret;
 }
+
 }; // namespace sorbet::compiler
