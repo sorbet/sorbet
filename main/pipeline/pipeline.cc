@@ -724,41 +724,39 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             }
         }
 
-        if (opts.stopAfterPhase == options::Phase::NAMER) {
-            return ast::ParsedFilesOrCancelled(move(what));
-        }
-
-        ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
-        {
-            Timer timeit(gs->tracer(), "resolving");
-            core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
-            core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
-            auto maybeResult = resolver::Resolver::run(*gs, move(what), workers);
-            if (!maybeResult.hasResult()) {
-                return maybeResult;
+        if (opts.stopAfterPhase != options::Phase::NAMER) {
+            ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
+            {
+                Timer timeit(gs->tracer(), "resolving");
+                core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
+                core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
+                auto maybeResult = resolver::Resolver::run(*gs, move(what), workers);
+                if (!maybeResult.hasResult()) {
+                    return maybeResult;
+                }
+                what = move(maybeResult.result());
             }
-            what = move(maybeResult.result());
-        }
-        if (opts.stressIncrementalResolver) {
-            auto symbolsBefore = gs->symbolsUsedTotal();
-            for (auto &f : what) {
-                // Shift contents of file past current file's EOF, re-run incrementalResolve, assert that no locations
-                // appear before file's old EOF.
-                const int prohibitedLines = f.file.data(*gs).source().size();
-                auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(*gs).source());
-                auto newFile = make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource),
-                                                       f.file.data(*gs).sourceType);
-                gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
-                f.file.data(*gs).strictLevel = decideStrictLevel(*gs, f.file, opts);
-                auto reIndexed = indexOne(opts, *gs, f.file);
-                vector<ast::ParsedFile> toBeReResolved;
-                toBeReResolved.emplace_back(move(reIndexed));
-                auto reresolved = pipeline::incrementalResolve(*gs, move(toBeReResolved), opts);
-                ENFORCE(reresolved.size() == 1);
-                f = checkNoDefinitionsInsideProhibitedLines(*gs, move(reresolved[0]), 0, prohibitedLines);
+            if (opts.stressIncrementalResolver) {
+                auto symbolsBefore = gs->symbolsUsedTotal();
+                for (auto &f : what) {
+                    // Shift contents of file past current file's EOF, re-run incrementalResolve, assert that no
+                    // locations appear before file's old EOF.
+                    const int prohibitedLines = f.file.data(*gs).source().size();
+                    auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(*gs).source());
+                    auto newFile = make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource),
+                                                           f.file.data(*gs).sourceType);
+                    gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
+                    f.file.data(*gs).strictLevel = decideStrictLevel(*gs, f.file, opts);
+                    auto reIndexed = indexOne(opts, *gs, f.file);
+                    vector<ast::ParsedFile> toBeReResolved;
+                    toBeReResolved.emplace_back(move(reIndexed));
+                    auto reresolved = pipeline::incrementalResolve(*gs, move(toBeReResolved), opts);
+                    ENFORCE(reresolved.size() == 1);
+                    f = checkNoDefinitionsInsideProhibitedLines(*gs, move(reresolved[0]), 0, prohibitedLines);
+                }
+                ENFORCE(symbolsBefore == gs->symbolsUsedTotal(),
+                        "Stressing the incremental resolver should not add any new symbols");
             }
-            ENFORCE(symbolsBefore == gs->symbolsUsedTotal(),
-                    "Stressing the incremental resolver should not add any new symbols");
         }
     } catch (SorbetException &) {
         Exception::failInFuzzer();
@@ -777,6 +775,149 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             }
         }
     }
+
+    if (opts.print.SymbolTable.enabled) {
+        opts.print.SymbolTable.fmt("{}\n", gs->toString());
+    }
+    if (opts.print.SymbolTableRaw.enabled) {
+        opts.print.SymbolTableRaw.fmt("{}\n", gs->showRaw());
+    }
+
+#ifndef SORBET_REALMAIN_MIN
+    if (opts.print.SymbolTableJson.enabled) {
+        auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
+        if (opts.print.SymbolTableJson.outputPath.empty()) {
+            core::Proto::toJSON(root, cout);
+        } else {
+            stringstream buf;
+            core::Proto::toJSON(root, buf);
+            opts.print.SymbolTableJson.print(buf.str());
+        }
+    }
+    if (opts.print.SymbolTableProto.enabled) {
+        auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
+        if (opts.print.SymbolTableProto.outputPath.empty()) {
+            root.SerializeToOstream(&cout);
+        } else {
+            string buf;
+            root.SerializeToString(&buf);
+            opts.print.SymbolTableProto.print(buf);
+        }
+    }
+    if (opts.print.SymbolTableMessagePack.enabled) {
+        auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
+        stringstream buf;
+        core::Proto::toJSON(root, buf);
+        auto str = buf.str();
+        rapidjson::Document document;
+        document.Parse(str);
+        mpack_writer_t writer;
+        if (opts.print.SymbolTableMessagePack.outputPath.empty()) {
+            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
+        } else {
+            mpack_writer_init_filename(&writer, opts.print.SymbolTableMessagePack.outputPath.c_str());
+        }
+        json2msgpack::json2msgpack(document, &writer);
+        if (mpack_writer_destroy(&writer)) {
+            Exception::raise("failed to write msgpack");
+        }
+    }
+    if (opts.print.SymbolTableFullJson.enabled) {
+        auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
+        if (opts.print.SymbolTableJson.outputPath.empty()) {
+            core::Proto::toJSON(root, cout);
+        } else {
+            stringstream buf;
+            core::Proto::toJSON(root, buf);
+            opts.print.SymbolTableJson.print(buf.str());
+        }
+    }
+    if (opts.print.SymbolTableFullProto.enabled) {
+        auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
+        if (opts.print.SymbolTableFullProto.outputPath.empty()) {
+            root.SerializeToOstream(&cout);
+        } else {
+            string buf;
+            root.SerializeToString(&buf);
+            opts.print.SymbolTableFullProto.print(buf);
+        }
+    }
+    if (opts.print.SymbolTableFullMessagePack.enabled) {
+        auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
+        stringstream buf;
+        core::Proto::toJSON(root, buf);
+        auto str = buf.str();
+        rapidjson::Document document;
+        document.Parse(str);
+        mpack_writer_t writer;
+        if (opts.print.SymbolTableFullMessagePack.outputPath.empty()) {
+            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
+        } else {
+            mpack_writer_init_filename(&writer, opts.print.SymbolTableFullMessagePack.outputPath.c_str());
+        }
+        json2msgpack::json2msgpack(document, &writer);
+        if (mpack_writer_destroy(&writer)) {
+            Exception::raise("failed to write msgpack");
+        }
+    }
+#endif
+    if (opts.print.SymbolTableFull.enabled) {
+        opts.print.SymbolTableFull.fmt("{}\n", gs->toStringFull());
+    }
+    if (opts.print.SymbolTableFullRaw.enabled) {
+        opts.print.SymbolTableFullRaw.fmt("{}\n", gs->showRawFull());
+    }
+
+#ifndef SORBET_REALMAIN_MIN
+    if (opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled) {
+        if (opts.print.FileTableProto.enabled && opts.print.FileTableFullProto.enabled) {
+            Exception::raise("file-table-proto and file-table-full-proto are mutually exclusive print options");
+        }
+        auto files = core::Proto::filesToProto(*gs, opts.print.FileTableFullProto.enabled);
+        if (opts.print.FileTableProto.outputPath.empty()) {
+            files.SerializeToOstream(&cout);
+        } else {
+            string buf;
+            files.SerializeToString(&buf);
+            opts.print.FileTableProto.print(buf);
+        }
+    }
+    if (opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled) {
+        if (opts.print.FileTableJson.enabled && opts.print.FileTableFullJson.enabled) {
+            Exception::raise("file-table-json and file-table-full-json are mutually exclusive print options");
+        }
+        auto files = core::Proto::filesToProto(*gs, opts.print.FileTableFullJson.enabled);
+        if (opts.print.FileTableJson.outputPath.empty()) {
+            core::Proto::toJSON(files, cout);
+        } else {
+            stringstream buf;
+            core::Proto::toJSON(files, buf);
+            opts.print.FileTableJson.print(buf.str());
+        }
+    }
+    if (opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled) {
+        if (opts.print.FileTableMessagePack.enabled && opts.print.FileTableFullMessagePack.enabled) {
+            Exception::raise("file-table-msgpack and file-table-full-msgpack are mutually exclusive print options");
+        }
+        auto files = core::Proto::filesToProto(*gs, opts.print.FileTableFullMessagePack.enabled);
+        stringstream buf;
+        core::Proto::toJSON(files, buf);
+        auto str = buf.str();
+        rapidjson::Document document;
+        document.Parse(str);
+        mpack_writer_t writer;
+        if (opts.print.FileTableMessagePack.outputPath.empty()) {
+            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
+        } else {
+            mpack_writer_init_filename(&writer, opts.print.FileTableMessagePack.outputPath.c_str());
+        }
+        json2msgpack::json2msgpack(document, &writer);
+        if (mpack_writer_destroy(&writer)) {
+            Exception::raise("failed to write msgpack");
+        }
+    }
+#endif
+
     if (opts.print.MissingConstants.enabled) {
         what = printMissingConstants(*gs, opts, move(what));
     }
@@ -914,147 +1055,6 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
             extension->finishTypecheck(*gs);
         }
 
-        if (opts.print.SymbolTable.enabled) {
-            opts.print.SymbolTable.fmt("{}\n", gs->toString());
-        }
-        if (opts.print.SymbolTableRaw.enabled) {
-            opts.print.SymbolTableRaw.fmt("{}\n", gs->showRaw());
-        }
-
-#ifndef SORBET_REALMAIN_MIN
-        if (opts.print.SymbolTableJson.enabled) {
-            auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
-            if (opts.print.SymbolTableJson.outputPath.empty()) {
-                core::Proto::toJSON(root, cout);
-            } else {
-                stringstream buf;
-                core::Proto::toJSON(root, buf);
-                opts.print.SymbolTableJson.print(buf.str());
-            }
-        }
-        if (opts.print.SymbolTableProto.enabled) {
-            auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
-            if (opts.print.SymbolTableProto.outputPath.empty()) {
-                root.SerializeToOstream(&cout);
-            } else {
-                string buf;
-                root.SerializeToString(&buf);
-                opts.print.SymbolTableProto.print(buf);
-            }
-        }
-        if (opts.print.SymbolTableMessagePack.enabled) {
-            auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
-            stringstream buf;
-            core::Proto::toJSON(root, buf);
-            auto str = buf.str();
-            rapidjson::Document document;
-            document.Parse(str);
-            mpack_writer_t writer;
-            if (opts.print.SymbolTableMessagePack.outputPath.empty()) {
-                mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-            } else {
-                mpack_writer_init_filename(&writer, opts.print.SymbolTableMessagePack.outputPath.c_str());
-            }
-            json2msgpack::json2msgpack(document, &writer);
-            if (mpack_writer_destroy(&writer)) {
-                Exception::raise("failed to write msgpack");
-            }
-        }
-        if (opts.print.SymbolTableFullJson.enabled) {
-            auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
-            if (opts.print.SymbolTableJson.outputPath.empty()) {
-                core::Proto::toJSON(root, cout);
-            } else {
-                stringstream buf;
-                core::Proto::toJSON(root, buf);
-                opts.print.SymbolTableJson.print(buf.str());
-            }
-        }
-        if (opts.print.SymbolTableFullProto.enabled) {
-            auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
-            if (opts.print.SymbolTableFullProto.outputPath.empty()) {
-                root.SerializeToOstream(&cout);
-            } else {
-                string buf;
-                root.SerializeToString(&buf);
-                opts.print.SymbolTableFullProto.print(buf);
-            }
-        }
-        if (opts.print.SymbolTableFullMessagePack.enabled) {
-            auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
-            stringstream buf;
-            core::Proto::toJSON(root, buf);
-            auto str = buf.str();
-            rapidjson::Document document;
-            document.Parse(str);
-            mpack_writer_t writer;
-            if (opts.print.SymbolTableFullMessagePack.outputPath.empty()) {
-                mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-            } else {
-                mpack_writer_init_filename(&writer, opts.print.SymbolTableFullMessagePack.outputPath.c_str());
-            }
-            json2msgpack::json2msgpack(document, &writer);
-            if (mpack_writer_destroy(&writer)) {
-                Exception::raise("failed to write msgpack");
-            }
-        }
-#endif
-        if (opts.print.SymbolTableFull.enabled) {
-            opts.print.SymbolTableFull.fmt("{}\n", gs->toStringFull());
-        }
-        if (opts.print.SymbolTableFullRaw.enabled) {
-            opts.print.SymbolTableFullRaw.fmt("{}\n", gs->showRawFull());
-        }
-
-#ifndef SORBET_REALMAIN_MIN
-        if (opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled) {
-            if (opts.print.FileTableProto.enabled && opts.print.FileTableFullProto.enabled) {
-                Exception::raise("file-table-proto and file-table-full-proto are mutually exclusive print options");
-            }
-            auto files = core::Proto::filesToProto(*gs, opts.print.FileTableFullProto.enabled);
-            if (opts.print.FileTableProto.outputPath.empty()) {
-                files.SerializeToOstream(&cout);
-            } else {
-                string buf;
-                files.SerializeToString(&buf);
-                opts.print.FileTableProto.print(buf);
-            }
-        }
-        if (opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled) {
-            if (opts.print.FileTableJson.enabled && opts.print.FileTableFullJson.enabled) {
-                Exception::raise("file-table-json and file-table-full-json are mutually exclusive print options");
-            }
-            auto files = core::Proto::filesToProto(*gs, opts.print.FileTableFullJson.enabled);
-            if (opts.print.FileTableJson.outputPath.empty()) {
-                core::Proto::toJSON(files, cout);
-            } else {
-                stringstream buf;
-                core::Proto::toJSON(files, buf);
-                opts.print.FileTableJson.print(buf.str());
-            }
-        }
-        if (opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled) {
-            if (opts.print.FileTableMessagePack.enabled && opts.print.FileTableFullMessagePack.enabled) {
-                Exception::raise("file-table-msgpack and file-table-full-msgpack are mutually exclusive print options");
-            }
-            auto files = core::Proto::filesToProto(*gs, opts.print.FileTableFullMessagePack.enabled);
-            stringstream buf;
-            core::Proto::toJSON(files, buf);
-            auto str = buf.str();
-            rapidjson::Document document;
-            document.Parse(str);
-            mpack_writer_t writer;
-            if (opts.print.FileTableMessagePack.outputPath.empty()) {
-                mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-            } else {
-                mpack_writer_init_filename(&writer, opts.print.FileTableMessagePack.outputPath.c_str());
-            }
-            json2msgpack::json2msgpack(document, &writer);
-            if (mpack_writer_destroy(&writer)) {
-                Exception::raise("failed to write msgpack");
-            }
-        }
-#endif
         // Error queue is re-used across runs, so reset the flush count to ignore files flushed during typecheck.
         gs->errorQueue->filesFlushedCount = 0;
 
