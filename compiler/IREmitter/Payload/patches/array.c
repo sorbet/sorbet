@@ -36,8 +36,7 @@ VALUE sorbet_rb_array_uniq(VALUE recv, ID fun, int argc, const VALUE *const rest
     if (RARRAY_LEN(ary) <= 1) {
         hash = 0;
         uniq = rb_ary_dup(ary);
-    }
-    else {
+    } else {
         hash = ary_make_hash(ary);
         uniq = rb_hash_values(hash);
     }

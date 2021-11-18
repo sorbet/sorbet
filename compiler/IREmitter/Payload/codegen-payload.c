@@ -1307,8 +1307,7 @@ VALUE sorbet_rb_array_uniq_withBlock(VALUE recv, ID fun, int argc, const VALUE *
     if (RARRAY_LEN(ary) <= 1) {
         hash = 0;
         uniq = rb_ary_dup(ary);
-    }
-    else {
+    } else {
         // inline of ary_tmp_hash_new
         long size = RARRAY_LEN(ary);
         hash = rb_hash_new_with_size(size);
