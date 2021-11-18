@@ -664,19 +664,12 @@ int realmain(int argc, char *argv[]) {
             if (gsForMinimize->hadCriticalError()) {
                 gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
             }
-
-            // TODO(jez) Test that shows that `-p` options work with second global state
-            // We have to run pipeline::typecheck because the symbol-table printers only run in this phase.
-            // (We could potentially consider moving them.)
-            indexedForMinimize =
-                move(pipeline::typecheck(gsForMinimize, move(indexedForMinimize), opts, *workers).result());
-            if (gsForMinimize->hadCriticalError()) {
-                gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
-            }
-
-            gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
             // TODO(jez) Flush error COUNT from this run (actually, looks like this might already
             // happen because the errorQueue is shared?)
+            gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
+
+            // TODO(jez) Test that shows that `-p symbol-table` options work with second global state
+
             // TODO(jez) What do do about autocorrects? Ban combining the two options?
             // TODO(jez) Handle hadCriticalError
 
