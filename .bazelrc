@@ -138,11 +138,6 @@ test:buildfarm --test_output=errors
 build:buildfarm-sanitized-linux --config=test-sanitized-linux --config=buildfarm
 build:buildfarm-sanitized-mac --config=test-sanitized-mac --config=buildfarm --config=shared-libs
 
-build:travis --config=test-sanitized-linux
-test:travis --ram_utilization_factor=10
-test:travis --test_strategy=standalone
-test:travis --test_output=errors
-
 ##
 ## Shared fragments of configuration
 ##
