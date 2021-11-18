@@ -68,7 +68,7 @@ payload_files = [
     copts = [
         "-Wno-gcc-compat",
         "-fembed-bitcode",
-        "-std=c99",
+        "-std=gnu99",
         "-O1",
         "-g",
         "-fPIC",
