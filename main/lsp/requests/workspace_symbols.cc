@@ -74,8 +74,7 @@ SymbolMatcher::SymbolMatcher(const LSPConfiguration &config, const core::GlobalS
 vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformations(core::SymbolRef symRef,
                                                                                   size_t maxLocations) {
     vector<unique_ptr<SymbolInformation>> results;
-    auto sym = symRef.data(gs);
-    for (auto loc : sym->locs()) {
+    for (auto loc : symRef.locs(gs)) {
         if (results.size() >= maxLocations) {
             break;
         }
@@ -90,7 +89,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
         // Therefore have the name be the fully qualified name if it makes sense (e.g. Foo::Bar instead of Bar)
         auto result =
             make_unique<SymbolInformation>(symRef.show(gs), symbolRef2SymbolKind(gs, symRef), std::move(location));
-        auto container = sym->owner;
+        auto container = symRef.owner(gs);
         if (container != core::Symbols::root()) {
             result->containerName = container.show(gs);
         }
@@ -186,14 +185,14 @@ PartialMatch partialMatchSymbol(string_view symbol, string_view::const_iterator 
 
 void SymbolMatcher::updatePartialMatch(core::SymbolRef symbolRef, string_view::const_iterator queryBegin,
                                        string_view::const_iterator queryEnd, size_t &ceilingScore) {
-    auto symbolData = symbolRef.data(gs);
-    if (!isEligibleSymbol(symbolData->name, gs)) {
+    auto name = symbolRef.name(gs);
+    if (!isEligibleSymbol(name, gs)) {
         return;
     }
-    auto shortName = symbolData->name.shortName(gs);
+    auto shortName = name.shortName(gs);
     auto &partialMatch = getPartialMatch(symbolRef);
     partialMatch = partialMatchSymbol(shortName, queryBegin, queryEnd, true, ceilingScore);
-    for (auto previousAncestorRef = symbolRef, ancestorRef = symbolData->owner;
+    for (auto previousAncestorRef = symbolRef, ancestorRef = symbolRef.owner(gs);
          previousAncestorRef != ancestorRef && ancestorRef.exists();
          previousAncestorRef = ancestorRef, ancestorRef = ancestorRef.owner(gs)) {
         auto &ancestorMatch = getPartialMatch(ancestorRef);
@@ -264,18 +263,18 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
                 if (!symbolRef.exists()) {
                     continue;
                 }
-                auto symbolData = symbolRef.data(gs);
-                if (!isEligibleSymbol(symbolData->name, gs)) {
+                auto name = symbolRef.name(gs);
+                if (!isEligibleSymbol(name, gs)) {
                     continue;
                 }
-                auto shortName = symbolData->name.shortName(gs);
+                auto shortName = name.shortName(gs);
                 uint bestScore = ceilingScore;
                 auto [partialScore, partialMatchEnd] =
                     partialMatchSymbol(shortName, queryBegin, queryEnd, false, ceilingScore);
                 if (partialMatchEnd == queryEnd) {
                     bestScore = partialScore;
                 }
-                for (auto previousAncestorRef = symbolRef, ancestorRef = symbolData->owner;
+                for (auto previousAncestorRef = symbolRef, ancestorRef = symbolRef.owner(gs);
                      previousAncestorRef != ancestorRef && ancestorRef.exists();
                      previousAncestorRef = ancestorRef, ancestorRef = ancestorRef.owner(gs)) {
                     auto [ancestorScore, ancestorEnd] = getPartialMatch(ancestorRef);
