@@ -16,10 +16,11 @@ void TypeConstraint::defineDomain(const GlobalState &gs, const InlinedVector<Sym
     // test/testdata/infer/generic_methods/countraints_crosstalk.rb
     for (const auto &tp : typeParams) {
         ENFORCE(tp.isTypeArgument());
-        auto typ = cast_type<TypeVar>(tp.asTypeArgumentRef().data(gs)->resultType);
+        auto ta = tp.asTypeArgumentRef();
+        auto typ = cast_type<TypeVar>(ta.data(gs)->resultType);
         ENFORCE(typ != nullptr);
 
-        if (tp.data(gs)->isCovariant()) {
+        if (ta.data(gs)->isCovariant()) {
             findLowerBound(typ->sym) = Types::bottom();
         } else {
             findUpperBound(typ->sym) = Types::top();
