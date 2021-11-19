@@ -187,15 +187,6 @@ void DSLInfo::formatString(fmt::memory_buffer &out, const core::GlobalState &gs)
         fmt::format_to(std::back_inserter(out), "{}\n", "]");
     }
 
-    if (!ancestors.empty()) {
-        fmt::format_to(std::back_inserter(out), "{}\n", "[ancestors");
-        for (auto &ancst : ancestors) {
-            fmt::format_to(std::back_inserter(out), "{}", "  ");
-            autogen::printName(out, ancst, gs);
-        }
-        fmt::format_to(std::back_inserter(out), "{}\n", "]");
-    }
-
     for (auto &prop : props) {
         fmt::format_to(std::back_inserter(out), "[prop name={}]\n", prop.show(gs));
     }
