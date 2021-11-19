@@ -1235,7 +1235,7 @@
 * [   ] `rb_str_swapcase_bang` (`String#swapcase!`)
 * [   ] `rb_str_hex` (`String#hex`)
 * [   ] `rb_str_oct` (`String#oct`)
-* [   ] `rb_str_split_m` (`String#split`)
+* [  ✔] `rb_str_split_m` (`String#split`)
 * [   ] `rb_str_lines` (`String#lines`)
 * [   ] `rb_str_bytes` (`String#bytes`)
 * [   ] `rb_str_chars` (`String#chars`)
@@ -1564,4 +1564,4 @@
 
 ## Stats
 * Total:   1488
-* Visible: 243
+* Visible: 245
