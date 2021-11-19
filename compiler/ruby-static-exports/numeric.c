@@ -9,3 +9,7 @@ VALUE sorbet_flo_lt(VALUE obj, VALUE arg_0) {
 VALUE sorbet_flo_le(VALUE obj, VALUE arg_0) {
     return flo_le(obj, arg_0);
 }
+
+VALUE sorbet_int_to_f(VALUE obj) {
+    return int_to_f(obj);
+}

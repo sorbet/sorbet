@@ -578,6 +578,15 @@ VALUE sorbet_int_rb_int_powm(VALUE recv, ID fun, int argc, VALUE *const restrict
     return rb_int_powm(argc, args, recv);
 }
 
+// Integer#to_f
+// Calling convention: 0
+extern VALUE sorbet_int_to_f(VALUE obj);
+
+VALUE sorbet_int_int_to_f(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk, VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+    return sorbet_int_to_f(recv);
+}
+
 // Regexp#encoding
 // String#encoding
 // Calling convention: 0
