@@ -62,8 +62,10 @@ public:
     void addMissingImportSuggestions(core::ErrorBuilder &e, PackageMatch &match) {
         vector<core::ErrorLine> lines;
         auto &otherPkg = db().getPackageInfo(match.mangledName);
+        auto importName = core::packages::PackageDB::isTestFile(ctx, ctx.file.data(ctx)) ? core::Names::test_import()
+                                                                                         : core::Names::import();
         lines.emplace_back(core::ErrorLine::from(
-            otherPkg.definitionLoc(), "Do you need to `{}` package `{}`?", "import",
+            otherPkg.definitionLoc(), "Do you need to `{}` package `{}`?", importName.show(ctx),
             fmt::map_join(otherPkg.fullName(), "::", [&](auto nr) -> string { return nr.show(ctx); })));
         // TODO(nroman-stripe) Add automatic fixers
         e.addErrorSection(core::ErrorSection(lines));

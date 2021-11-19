@@ -45,6 +45,9 @@ public:
     const std::vector<core::NameRef> &secondaryTestPackageNamespaceRefs() const;
     const std::vector<std::string> &extraPackageFilesDirectoryPrefixes() const;
 
+    // NB: Do not call in hot path, this is SLOW due to string comparison!
+    static bool isTestFile(const core::GlobalState &gs, const core::File &file);
+
 private:
     std::vector<NameRef> secondaryTestPackageNamespaceRefs_;
     std::vector<std::string> extraPackageFilesDirectoryPrefixes_;
