@@ -10,7 +10,7 @@ namespace {
 // Count the number of name parts in a symbol. Length should be same as `symbol2NameParts`.
 size_t nameLen(core::Context ctx, core::SymbolRef symbol) {
     auto len = 0;
-    while (symbol != core::Symbols::root() && !symbol.data(ctx)->name.isPackagerName(ctx)) {
+    while (symbol.exists() && symbol != core::Symbols::root() && !symbol.data(ctx)->name.isPackagerName(ctx)) {
         ++len;
         symbol = symbol.data(ctx)->owner;
     }
@@ -20,7 +20,7 @@ size_t nameLen(core::Context ctx, core::SymbolRef symbol) {
 // Add all name parts for a symbol to a vector, exclude internal names used by packager.
 void symbol2NameParts(core::Context ctx, core::SymbolRef symbol, vector<core::NameRef> &out) {
     ENFORCE(out.empty());
-    while (symbol != core::Symbols::root() && !symbol.data(ctx)->name.isPackagerName(ctx)) {
+    while (symbol.exists() && symbol != core::Symbols::root() && !symbol.data(ctx)->name.isPackagerName(ctx)) {
         out.emplace_back(symbol.data(ctx)->name);
         symbol = symbol.data(ctx)->owner;
     }
@@ -102,6 +102,9 @@ private:
 
 bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder &e,
                                            const ast::ConstantLit::ResolutionScopes &scopes, core::NameRef name) {
+    if (ctx.state.packageDB().empty()) {
+        return false;
+    }
     ENFORCE(!scopes.empty());
     PackageContext pkgCtx(ctx);
     if (!pkgCtx.currentPkg.exists()) {
