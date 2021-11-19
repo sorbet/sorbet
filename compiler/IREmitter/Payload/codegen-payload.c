@@ -697,7 +697,7 @@ VALUE sorbet_int_hash_to_h(VALUE recv, ID fun, int argc, const VALUE *const rest
 
 struct sorbet_int_hash_to_h_closure {
     BlockFFIType fun;
-    VALUE toplevel_closure;
+    VALUE closure_for_block;
     VALUE hash;
 };
 
@@ -708,7 +708,7 @@ static int sorbet_int_hash_to_h_withBlock_body(VALUE key, VALUE value, VALUE clo
     argv[0] = key;
     argv[1] = value;
     struct sorbet_int_hash_to_h_closure *c = (struct sorbet_int_hash_to_h_closure *)closure;
-    rb_hash_set_pair(c->hash, c->fun(key, c->toplevel_closure, 2, &argv[0], Qnil));
+    rb_hash_set_pair(c->hash, c->fun(key, c->closure_for_block, 2, &argv[0], Qnil));
     return ST_CONTINUE;
 }
 
@@ -719,7 +719,7 @@ VALUE sorbet_int_hash_to_h_withBlock(VALUE recv, ID fun, int argc, const VALUE *
 
     struct sorbet_int_hash_to_h_closure passthrough;
     passthrough.fun = blk;
-    passthrough.toplevel_closure = closure;
+    passthrough.closure_for_block = closure;
     passthrough.hash = h;
 
     sorbet_pushBlockFrame(captured);
