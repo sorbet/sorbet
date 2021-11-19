@@ -84,11 +84,18 @@ private:
     // package matches.
     void findPackagesWithPrefix(const vector<core::NameRef> &prefix, vector<PackageMatch> &matches) const {
         ENFORCE(prefix.size() > 0);
+        // If the search prefix starts with `Test` ignore it while searching matching package names.
+        auto prefixBegin = prefix.begin();
+        if (*prefixBegin == core::Names::Constants::Test() && prefix.size() > 1) {
+            ++prefixBegin;
+        }
+        auto prefixSize = prefix.end() - prefixBegin;
+
         for (auto name : db().packages()) {
             auto &other = db().getPackageInfo(name);
             auto &fullName = other.fullName();
-            if (fullName.size() >= prefix.size() && canImport(other) &&
-                std::equal(fullName.begin(), fullName.begin() + prefix.size(), prefix.begin())) {
+            if (fullName.size() >= prefixSize && canImport(other) &&
+                std::equal(fullName.begin(), fullName.begin() + prefixSize, prefixBegin)) {
                 matches.emplace_back(PackageMatch{name});
             }
         }
@@ -117,7 +124,9 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
     if (missingImports.empty()) {
         return false;
     }
-
+    if (missingImports.size() > 5) {
+        missingImports.resize(5);
+    }
     for (auto match : missingImports) {
         pkgCtx.addMissingImportSuggestions(e, match);
     }
