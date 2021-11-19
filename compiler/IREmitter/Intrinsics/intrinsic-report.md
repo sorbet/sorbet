@@ -1251,7 +1251,7 @@
 * [✔  ] `rb_str_intern` (`String#to_sym`)
 * [✔  ] `rb_str_ord` (`String#ord`)
 * [   ] `rb_str_include` (`String#include?`)
-* [   ] `rb_str_start_with` (`String#start_with?`)
+* [  ✔] `rb_str_start_with` (`String#start_with?`)
 * [   ] `rb_str_end_with` (`String#end_with?`)
 * [   ] `rb_str_scan` (`String#scan`)
 * [   ] `rb_str_ljust` (`String#ljust`)
@@ -1564,4 +1564,4 @@
 
 ## Stats
 * Total:   1488
-* Visible: 242
+* Visible: 243

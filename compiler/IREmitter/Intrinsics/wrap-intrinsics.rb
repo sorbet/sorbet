@@ -301,6 +301,7 @@ module Intrinsics
       "String#replace",
       "String#size",
       "String#slice",
+      "String#start_with?",
       "String#succ",
       "String#to_sym",
     ], T::Set[String])
