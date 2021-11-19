@@ -11,10 +11,10 @@ foo/foo.rb:14: Unable to resolve constant `UnexportedClass` https://srb.help/500
     14 |    Project::Bar::UnexportedClass
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    foo/foo.rb:14: Replace with `Gem::Package::TarReader::UnexpectedEOF`
+    foo/foo.rb:14: Replace with `Project::Bar::UnexportedClass`
     14 |    Project::Bar::UnexportedClass
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/rubygems.rbi#L2901: Did you mean: `Gem::Package::TarReader::UnexpectedEOF`?
-    2901 |class Gem::Package::TarReader::UnexpectedEOF < StandardError
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    bar/bar.rb:14: Did you mean: `Project::Bar::UnexportedClass`?
+    14 |  class UnexportedClass; end
+          ^^^^^^^^^^^^^^^^^^^^^
 Errors: 2
