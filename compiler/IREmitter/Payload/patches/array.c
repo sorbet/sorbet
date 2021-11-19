@@ -55,3 +55,7 @@ VALUE (*sorbet_rb_ary_to_a_func(void))(VALUE) {
 VALUE sorbet_rb_ary_to_a(VALUE ary) {
     return rb_ary_to_a(ary);
 }
+
+void sorbet_rb_ary_set_len(VALUE ary, long n) {
+    ARY_SET_LEN(ary, n);
+}

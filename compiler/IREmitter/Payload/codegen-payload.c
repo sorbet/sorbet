@@ -117,6 +117,7 @@ SORBET_ALIVE(VALUE, sorbet_ary_make_hash, (VALUE ary));
 SORBET_ALIVE(void, sorbet_ary_recycle_hash, (VALUE hash));
 SORBET_ALIVE(VALUE, sorbet_rb_array_uniq,
              (VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure));
+SORBET_ALIVE(void, sorbet_rb_ary_set_len, (VALUE ary, long n));
 
 SORBET_ALIVE(void, sorbet_hashUpdate, (VALUE hash, VALUE other));
 
@@ -1062,6 +1063,102 @@ VALUE sorbet_rb_array_reject_withBlock(VALUE recv, ID fun, int argc, const VALUE
             rb_ary_push(result, val);
         }
     }
+
+    sorbet_popFrame();
+
+    return result;
+}
+
+// This is the no-block version of rb_ary_reject_bang: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L3588-L3594
+SORBET_INLINE
+VALUE sorbet_rb_array_reject_bang(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                  VALUE closure) {
+    sorbet_ensure_arity(argc, 0);
+    return rb_enumeratorize_with_size(recv, ID2SYM(fun), argc, argv, sorbet_array_enum_length);
+}
+
+// Borrowed from https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L3228-L3231, extended with blk and closure.
+struct sorbet_select_bang_arg {
+    VALUE ary;
+    long len[2];
+    BlockFFIType blk;
+    VALUE closure;
+};
+
+// Borrowed from https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L3545-L3561
+static VALUE
+sorbet_reject_bang_i(VALUE a)
+{
+    volatile struct sorbet_select_bang_arg *arg = (void *)a;
+    VALUE ary = arg->ary;
+    BlockFFIType blk = arg->blk;
+    VALUE closure = arg->closure;
+    long i1, i2;
+
+    for (i1 = i2 = 0; i1 < RARRAY_LEN(ary); arg->len[0] = ++i1) {
+        VALUE v = RARRAY_AREF(ary, i1);
+        if (RTEST(blk(v, closure, 1, &v, Qnil))) {
+            continue;
+        }
+        if (i1 != i2) {
+            rb_ary_store(ary, i2, v);
+        }
+        arg->len[1] = ++i2;
+    }
+    return (i1 == i2) ? Qnil : ary;
+}
+
+// Borrowed from https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L3251-L3270
+static VALUE
+sorbet_select_bang_ensure(VALUE a)
+{
+    volatile struct sorbet_select_bang_arg *arg = (void *)a;
+    VALUE ary = arg->ary;
+    long len = RARRAY_LEN(ary);
+    long i1 = arg->len[0], i2 = arg->len[1];
+
+    if (i2 < len && i2 < i1) {
+        long tail = 0;
+        if (i1 < len) {
+            tail = len - i1;
+            RARRAY_PTR_USE_TRANSIENT(ary, ptr, {
+                MEMMOVE(ptr + i2, ptr + i1, VALUE, tail);
+            });
+        }
+        // NOTE: This was originally ARY_SET_LEN, which is naturally inlined but whose definition is local to array.c.
+        // I think wrapping this in a function is reasonable since it will only fire in the exceptional case.
+        sorbet_rb_ary_set_len(ary, i2 + tail);
+    }
+    return ary;
+}
+
+// This is the block version of rb_ary_reject_bang: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L3588-L3594
+// In that version the for loop uses `rb_yield`, whereas we call the block function pointer directly.
+SORBET_INLINE
+VALUE sorbet_rb_array_reject_bang_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                            const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
+    sorbet_ensure_arity(argc, 0);
+
+    // must push a frame for the captured block
+    sorbet_pushBlockFrame(captured);
+
+    rb_ary_modify(recv);
+
+    // begin inline of ary_reject_bang
+    struct sorbet_select_bang_arg args;
+
+    // begin inline of rb_ary_modify_check
+    rb_check_frozen(recv);
+    // we skip the ary_verify call from rb_ary_modify_check because that's a no-op unless ARRAY_DEBUG is defined.
+    // end inline of rb_ary_modify_check
+
+    args.ary = recv;
+    args.len[0] = 0;
+    args.len[1] = 0;
+    args.blk = blk;
+    args.closure = closure;
+    VALUE result = rb_ensure(sorbet_reject_bang_i, (VALUE)&args, sorbet_select_bang_ensure, (VALUE)&args);
+    // end inline of ary_reject_bang
 
     sorbet_popFrame();
 
