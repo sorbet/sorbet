@@ -51,7 +51,7 @@ public:
 
         const vector<core::NameRef> className = symbolName(ctx, original.symbol);
         nestingScopes.emplace_back(className);
-        dslInfo.emplace(className, DSLInfo{{}, ancestors, file, {}});
+        dslInfo.emplace(className, DSLInfo{{}, ancestors, file, {}, {}});
 
         return tree;
     }
@@ -82,7 +82,19 @@ public:
             } else {
                 dslInfo[curScope].problemLocs.emplace_back(original->loc);
             }
+
+            return tree;
         }
+
+        if (original->fun == core::Names::modelDsl()) {
+            auto *cnst = ast::cast_tree<ast::ConstantLit>(original->args.front());
+            if (!validScope || cnst == nullptr || cnst->original == nullptr) {
+                return tree;
+            }
+
+            dslInfo[curScope].model = symbolName(ctx, cnst->symbol);
+        }
+
         return tree;
     }
 

@@ -172,6 +172,13 @@ void DSLInfo::formatString(fmt::memory_buffer &out, const core::GlobalState &gs)
         return;
     }
 
+    if (!model.empty()) {
+        fmt::format_to(std::back_inserter(out), "{}\n", "[model");
+        fmt::format_to(std::back_inserter(out), "{}", "  ");
+        autogen::printName(out, model, gs);
+        fmt::format_to(std::back_inserter(out), "{}\n", "]");
+    }
+
     if (!problemLocs.empty()) {
         fmt::format_to(std::back_inserter(out), "{}\n", "[problem_locs");
         for (const auto &loc : problemLocs) {
@@ -210,6 +217,8 @@ UnorderedMap<std::vector<core::NameRef>, DSLInfo>
 mergeAndFilterGlobalDSLInfo(UnorderedMap<std::vector<core::NameRef>, DSLInfo> globalDSLInfo) {
     const std::vector<core::NameRef> CHALK_ODM_MODEL = {core::Names::Constants::Chalk(), core::Names::Constants::ODM(),
                                                         core::Names::Constants::Model()};
+    const std::vector<core::NameRef> CHALK_ODM_MUTATOR = {
+        core::Names::Constants::Chalk(), core::Names::Constants::ODM(), core::Names::Constants::Mutator()};
     UnorderedMap<std::vector<core::NameRef>, DSLInfo> result;
 
     for (auto &it : globalDSLInfo) {
@@ -232,20 +241,37 @@ mergeAndFilterGlobalDSLInfo(UnorderedMap<std::vector<core::NameRef>, DSLInfo> gl
             queue.insert(queue.end(), curAncstInfo->second.ancestors.begin(), curAncstInfo->second.ancestors.end());
         }
 
-        if (allAncestors.find(CHALK_ODM_MODEL) == allAncestors.end()) {
+        if (allAncestors.find(CHALK_ODM_MODEL) != allAncestors.end() && info.model.empty()) {
+            // Models
+            for (const std::vector<core::NameRef> &ancst : allAncestors) {
+                auto ancstInfoIt = globalDSLInfo.find(ancst);
+                if (ancstInfoIt == globalDSLInfo.end()) {
+                    continue;
+                }
+                auto &ancstInfo = ancstInfoIt->second;
+                info.props.insert(info.props.end(), ancstInfo.props.begin(), ancstInfo.props.end());
+            }
+
+            result.emplace(klass, std::move(info));
+        } else if (allAncestors.find(CHALK_ODM_MUTATOR) != allAncestors.end() && !info.model.empty()) {
+            // Mutators
+            result.emplace(klass, std::move(info));
+        }
+    }
+
+    for (auto &it : result) {
+        const std::vector<core::NameRef> &klass = it.first;
+        DSLInfo info = it.second;
+        const auto &model = info.model;
+        if (model.empty() || result.find(model) == result.end()) {
+            // Not a mutator, or not one with a corresponding model
             continue;
         }
 
-        for (const std::vector<core::NameRef> &ancst : allAncestors) {
-            auto ancstInfoIt = globalDSLInfo.find(ancst);
-            if (ancstInfoIt == globalDSLInfo.end()) {
-                continue;
-            }
-            auto &ancstInfo = ancstInfoIt->second;
-            info.props.insert(info.props.end(), ancstInfo.props.begin(), ancstInfo.props.end());
-        }
+        info.props = result[model].props;
+        info.problemLocs = result[model].problemLocs;
 
-        result.emplace(klass, std::move(info));
+        result[klass] = std::move(info);
     }
 
     return result;

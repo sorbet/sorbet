@@ -265,6 +265,7 @@ NameDef names[] = {
     {"DB", "DB", true},
     {"Model", "Model", true},
     {"Mixins", "Mixins", true},
+    {"Mutator", "Mutator", true},
     {"Encryptable", "Encryptable", true},
     {"EncryptedValue", "EncryptedValue", true},
     {"Command", "Command", true},
@@ -517,6 +518,9 @@ NameDef names[] = {
     {"Autogen", "Autogen", true},
     {"Tokens", "Tokens", true},
     {"AccountModelMerchantToken", "AccountModelMerchantToken", true},
+
+    // Model DSL
+    {"modelDsl", "model"},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {
