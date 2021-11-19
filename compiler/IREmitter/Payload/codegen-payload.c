@@ -1086,9 +1086,7 @@ struct sorbet_select_bang_arg {
 };
 
 // Borrowed from https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L3545-L3561
-static VALUE
-sorbet_reject_bang_i(VALUE a)
-{
+static VALUE sorbet_reject_bang_i(VALUE a) {
     volatile struct sorbet_select_bang_arg *arg = (void *)a;
     VALUE ary = arg->ary;
     BlockFFIType blk = arg->blk;
@@ -1109,9 +1107,7 @@ sorbet_reject_bang_i(VALUE a)
 }
 
 // Borrowed from https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L3251-L3270
-static VALUE
-sorbet_select_bang_ensure(VALUE a)
-{
+static VALUE sorbet_select_bang_ensure(VALUE a) {
     volatile struct sorbet_select_bang_arg *arg = (void *)a;
     VALUE ary = arg->ary;
     long len = RARRAY_LEN(ary);
@@ -1121,9 +1117,7 @@ sorbet_select_bang_ensure(VALUE a)
         long tail = 0;
         if (i1 < len) {
             tail = len - i1;
-            RARRAY_PTR_USE_TRANSIENT(ary, ptr, {
-                MEMMOVE(ptr + i2, ptr + i1, VALUE, tail);
-            });
+            RARRAY_PTR_USE_TRANSIENT(ary, ptr, { MEMMOVE(ptr + i2, ptr + i1, VALUE, tail); });
         }
         // NOTE: This was originally ARY_SET_LEN, which is naturally inlined but whose definition is local to array.c.
         // I think wrapping this in a function is reasonable since it will only fire in the exceptional case.
@@ -1135,8 +1129,9 @@ sorbet_select_bang_ensure(VALUE a)
 // This is the block version of rb_ary_reject_bang: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L3588-L3594
 // In that version the for loop uses `rb_yield`, whereas we call the block function pointer directly.
 SORBET_INLINE
-VALUE sorbet_rb_array_reject_bang_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                            const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
+VALUE sorbet_rb_array_reject_bang_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
+                                            BlockFFIType blk, const struct rb_captured_block *captured, VALUE closure,
+                                            int numPositionalArgs) {
     sorbet_ensure_arity(argc, 0);
 
     // must push a frame for the captured block
