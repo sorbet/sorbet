@@ -31,7 +31,7 @@ end
 
 main("Sorbet") # ok!
 main()   # error: Not enough arguments provided
-man("")  # error: Method \`man\` does not exist
+main("")  # error: Method \`man\` does not exist
 \`\`\`
 `;
 
