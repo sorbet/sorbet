@@ -78,7 +78,11 @@ public:
         if (original->fun.rawId() == core::Names::prop().rawId()) {
             auto *lit = ast::cast_tree<ast::Literal>(original->args.front());
             if (validScope && lit && lit->isSymbol(ctx)) {
-                dslInfo[curScope].props.emplace_back(lit->asSymbol(ctx));
+                if (original->args.size() > 1) {
+                    dslInfo[curScope].props.emplace_back(PropInfo{lit->asSymbol(ctx), original->args[1].toString(ctx)});
+                } else {
+                    dslInfo[curScope].props.emplace_back(PropInfo{lit->asSymbol(ctx), {}});
+                }
             } else {
                 dslInfo[curScope].problemLocs.emplace_back(original->loc);
             }

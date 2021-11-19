@@ -175,9 +175,14 @@ struct ParsedFile {
     std::vector<std::string> listAllClasses(core::Context ctx);
 };
 
+struct PropInfo {
+    core::NameRef name;
+    std::optional<std::string> typeStr;
+};
+
 struct DSLInfo {
     // mutator or model
-    std::vector<core::NameRef> props;
+    std::vector<PropInfo> props;
     std::vector<std::vector<core::NameRef>> ancestors;
 
     // file

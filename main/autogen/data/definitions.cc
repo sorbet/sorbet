@@ -188,7 +188,8 @@ void DSLInfo::formatString(fmt::memory_buffer &out, const core::GlobalState &gs)
     }
 
     for (auto &prop : props) {
-        fmt::format_to(std::back_inserter(out), "[prop name={}]\n", prop.show(gs));
+        fmt::format_to(std::back_inserter(out), "[prop name={} type={}]\n", prop.name.show(gs),
+                       prop.typeStr.value_or("none"));
     }
 
     fmt::format_to(std::back_inserter(out), "{}", "\n");
@@ -239,7 +240,7 @@ mergeAndFilterGlobalDSLInfo(UnorderedMap<std::vector<core::NameRef>, DSLInfo> gl
                 if (ancstInfoIt == globalDSLInfo.end()) {
                     continue;
                 }
-                auto &ancstInfo = ancstInfoIt->second;
+                DSLInfo &ancstInfo = ancstInfoIt->second;
                 info.props.insert(info.props.end(), ancstInfo.props.begin(), ancstInfo.props.end());
             }
 
