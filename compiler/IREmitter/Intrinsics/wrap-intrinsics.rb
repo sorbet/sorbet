@@ -228,6 +228,7 @@ module Intrinsics
       "Array#concat",
       "Array#delete",
       "Array#first",
+      "Array#flatten",
       "Array#include?",
       "Array#initialize_copy",
       "Array#join",

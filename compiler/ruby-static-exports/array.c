@@ -17,3 +17,7 @@ VALUE sorbet_rb_ary_concat_multi(int argc, const VALUE *args, VALUE obj) {
 VALUE sorbet_rb_ary_diff(VALUE obj, VALUE arg_0) {
     return rb_ary_diff(obj, arg_0);
 }
+
+VALUE sorbet_rb_ary_flatten(int argc, const VALUE *args, VALUE obj) {
+    return rb_ary_flatten(argc, args, obj);
+}

@@ -14,6 +14,7 @@
     {core::Symbols::Array(), "concat", CMethod{"sorbet_int_rb_ary_concat_multi"}},
     {core::Symbols::Array(), "delete", CMethod{"sorbet_int_rb_ary_delete"}},
     {core::Symbols::Array(), "first", CMethod{"sorbet_int_rb_ary_first"}},
+    {core::Symbols::Array(), "flatten", CMethod{"sorbet_int_rb_ary_flatten"}},
     {core::Symbols::Array(), "include?", CMethod{"sorbet_int_rb_ary_includes"}},
     {core::Symbols::Array(), "initialize_copy", CMethod{"sorbet_int_rb_ary_replace"}},
     {core::Symbols::Array(), "replace", CMethod{"sorbet_int_rb_ary_replace"}},
