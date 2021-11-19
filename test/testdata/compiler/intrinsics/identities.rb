@@ -97,10 +97,14 @@ class HashSubclass < Hash
 end
 
 p M.hash_to_h({x: 'hi', 10 => false})
+p M.hash_to_h({x: 'hi', 10 => false}).class
 p M.hash_to_h(HashSubclass.new)
+p M.hash_to_h(HashSubclass.new).class
 
 p M.hash_to_h_withBlock({x: 'hi', 10 => false})
+p M.hash_to_h_withBlock({x: 'hi', 10 => false}).class
 p M.hash_to_h_withBlock(HashSubclass.new)
+p M.hash_to_h_withBlock(HashSubclass.new).class
 
 p M.integer_to_i(10)
 p M.integer_to_int(20)
