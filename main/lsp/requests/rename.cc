@@ -15,7 +15,7 @@ namespace sorbet::realmain::lsp {
 namespace {
 bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalState &gs,
                            unique_ptr<ResponseMessage> &response) {
-    auto locs = symbol.data(gs)->locs();
+    auto locs = symbol.locs(gs);
     string filetype;
     for (auto loc : locs) {
         if (loc.file().data(gs).isRBI()) {
@@ -311,12 +311,11 @@ public:
 void RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, string newName,
                                 unique_ptr<ResponseMessage> &responseMsg) {
     const core::GlobalState &gs = typechecker.state();
-    auto symbolData = symbol.data(gs);
-    auto originalName = symbolData->name.show(gs);
+    auto originalName = symbol.name(gs).show(gs);
     unique_ptr<Renamer> renamer;
 
     UniqueSymbolQueue symbolQueue;
-    if (symbolData->isMethod()) {
+    if (symbol.isMethod()) {
         renamer = make_unique<MethodRenamer>(gs, config, symbolQueue, originalName, newName);
         addSubclassRelatedMethods(gs, symbol.asMethodRef(), symbolQueue);
     } else {
