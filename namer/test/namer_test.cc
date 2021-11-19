@@ -68,7 +68,7 @@ TEST_CASE("namer tests") {
         REQUIRE_EQ(core::Symbols::root(), objectScope->owner.asClassOrModuleRef());
 
         REQUIRE_EQ(4, objectScope->members().size());
-        auto methodSym = objectScope->members().at(gs.enterNameUTF8("hello_world"));
+        auto methodSym = objectScope->members().at(gs.enterNameUTF8("hello_world")).asMethodRef();
         const auto &symbol = methodSym.data(gs);
         REQUIRE_EQ(core::Symbols::Object(), symbol->owner.asClassOrModuleRef());
         REQUIRE_EQ(1, symbol->arguments().size());
@@ -120,7 +120,7 @@ TEST_CASE("namer tests") {
                                     .data(gs);
 
         REQUIRE_EQ(3, rootScope->members().size());
-        auto fooSym = rootScope->members().at(gs.enterNameConstant("Foo"));
+        auto fooSym = rootScope->members().at(gs.enterNameConstant("Foo")).asClassOrModuleRef();
         const auto &fooInfo = fooSym.data(gs);
         REQUIRE_EQ(1, fooInfo->members().size());
     }
@@ -140,7 +140,7 @@ TEST_CASE("namer tests") {
                                     .data(gs);
 
         REQUIRE_EQ(3, rootScope->members().size());
-        auto fooSym = rootScope->members().at(gs.enterNameConstant("Foo"));
+        auto fooSym = rootScope->members().at(gs.enterNameConstant("Foo")).asClassOrModuleRef();
         const auto &fooInfo = fooSym.data(gs);
         REQUIRE_EQ(2, fooInfo->members().size());
 
