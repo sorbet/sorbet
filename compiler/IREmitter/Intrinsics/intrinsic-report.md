@@ -750,7 +750,7 @@
 * [   ] `int_ord` (`Integer#ord`)
 * [   ] `int_to_i` (`Integer#to_i`)
 * [   ] `int_to_i` (`Integer#to_int`)
-* [   ] `int_to_f` (`Integer#to_f`)
+* [  ✔] `int_to_f` (`Integer#to_f`)
 * [   ] `int_floor` (`Integer#floor`)
 * [   ] `int_ceil` (`Integer#ceil`)
 * [   ] `int_truncate` (`Integer#truncate`)
@@ -1564,4 +1564,4 @@
 
 ## Stats
 * Total:   1488
-* Visible: 242
+* Visible: 243

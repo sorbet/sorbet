@@ -281,6 +281,7 @@ module Intrinsics
       "Integer#modulo",
       "Integer#odd?",
       "Integer#pow",
+      "Integer#to_f",
       "Regexp#encoding",
       "String#*",
       "String#+",
