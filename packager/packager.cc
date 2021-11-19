@@ -22,12 +22,6 @@ namespace {
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 constexpr core::NameRef TEST_NAME = core::Names::Constants::Test();
 
-bool isTestFile(const core::GlobalState &gs, core::File &file) {
-    // TODO: (aadi-stripe, 11/26/2021) see if these can all be changed to use getPrintablePath
-    return absl::EndsWith(file.path(), ".test.rb") || absl::StartsWith(file.path(), "./test/") ||
-           absl::StrContains(gs.getPrintablePath(file.path()), "/test/");
-}
-
 bool isPrimaryTestNamespace(const core::NameRef ns) {
     return ns == TEST_NAME;
 }
@@ -1214,8 +1208,8 @@ ast::ParsedFile rewritePackagedFile(core::GlobalState &gs, ast::ParsedFile parse
 
         // Wrap the file in a package module (ending with _Package_Private) to put it by default in the package's
         // private namespace (private-by-default paradigm).
-        parsedFile =
-            wrapFileInPackageModule(ctx, move(parsedFile), pkgImpl.privateMangledName, pkgImpl, isTestFile(gs, file));
+        parsedFile = wrapFileInPackageModule(ctx, move(parsedFile), pkgImpl.privateMangledName, pkgImpl,
+                                             core::packages::PackageDB::isTestFile(gs, file));
     } else {
         // Don't transform, but raise an error on the first line.
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
