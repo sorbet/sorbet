@@ -87,6 +87,7 @@
     {core::Symbols::String(), "length", CMethod{"sorbet_int_rb_str_length"}},
     {core::Symbols::String(), "size", CMethod{"sorbet_int_rb_str_length"}},
     {core::Symbols::String(), "ord", CMethod{"sorbet_int_rb_str_ord"}},
+    {core::Symbols::String(), "start_with?", CMethod{"sorbet_int_rb_str_start_with"}},
     {core::Symbols::String(), "succ", CMethod{"sorbet_int_rb_str_succ"}},
     {core::Symbols::String(), "next", CMethod{"sorbet_int_rb_str_succ"}},
     // clang-format on

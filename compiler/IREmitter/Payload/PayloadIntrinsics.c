@@ -736,6 +736,15 @@ VALUE sorbet_int_rb_str_ord(VALUE recv, ID fun, int argc, VALUE *const restrict 
     return rb_str_ord(recv);
 }
 
+// String#start_with?
+// Calling convention: -1
+extern VALUE sorbet_rb_str_start_with(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_str_start_with(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk,
+                                   VALUE closure) {
+    return sorbet_rb_str_start_with(argc, args, recv);
+}
+
 // String#succ
 // String#next
 // Calling convention: 0
