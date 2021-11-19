@@ -407,15 +407,23 @@ public:
         return TypeArgumentRef::fromRaw(unsafeTableIndex());
     }
 
+private:
+    // TODO(jvilk): Remove these methods so we can have separate classes per symbol type (e.g., Symbol ->
+    // {ClassOrModule, Method, ...}). These are currently used in methods on SymbolRef and friend classes -- but not for
+    // long.
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
     SymbolData dataAllowingNone(GlobalState &gs) const;
     ConstSymbolData dataAllowingNone(const GlobalState &gs) const;
 
+public:
     bool operator==(const SymbolRef &rhs) const;
 
     bool operator!=(const SymbolRef &rhs) const;
 
+    // TODO(jvilk): Remove as many of these methods as possible in favor of callsites using .data on the more specific
+    // symbol *Ref classes (e.g., ClassOrModuleRef). These were introduced to wean the codebase from calling
+    // SymbolRef::data.
     ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     core::NameRef name(const GlobalState &gs) const;
@@ -430,6 +438,8 @@ public:
     SymbolRef dealias(const GlobalState &gs) const;
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name) const;
+    // End methods that should be removed.
+
     // Prints the fully qualified name of the symbol in a format that is suitable for showing to the user (e.g.
     // "Owner::SymbolName")
     std::string showFullName(const GlobalState &gs) const;
