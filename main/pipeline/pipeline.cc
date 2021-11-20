@@ -707,7 +707,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                                     const options::Options &opts, WorkerPool &workers) {
     try {
         // packager intentionally runs outside of rewriter so that its output does not get cached.
-        what = package(*gs, move(what), opts, workers);
+        // what = package(*gs, move(what), opts, workers);
 
         auto result = name(*gs, move(what), opts, workers);
         if (!result.hasResult()) {

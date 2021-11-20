@@ -227,6 +227,7 @@ public:
     bool sleepInSlowPath = false;
 
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
+    void _overwriteNameTablesFrom(const GlobalState &fromGS, bool keepId);
     mutable std::shared_ptr<ErrorQueue> errorQueue;
 
     // Contains a path prefix that should be stripped from all printed paths.

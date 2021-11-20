@@ -485,6 +485,8 @@ int realmain(int argc, char *argv[]) {
     gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
     logger->trace("building initial global state");
+    // TODO(jez) An option might be to just set kvstore to nullptr if you want to ignore the
+    // intersection of --cache-dir and --minimize-rbi.
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(opts);
     payload::createInitialGlobalState(gs, opts, kvstore);
     if (opts.silenceErrors) {
@@ -614,6 +616,13 @@ int realmain(int argc, char *argv[]) {
             // Duplicate GlobalState after indexing so that the NameRef's are comparable.
             // Duplicate before resolving so that the contents of the symbol table are not shared.
             gsForMinimize = gs->deepCopy();
+
+            // auto onlyInFirstNameGS = core::NameRef::fromRaw(*gs, 8790);
+            // auto onlyInFirstNameMin = core::NameRef::fromRaw(*gsForMinimize, 8790);
+            // fmt::print("gs  gs  : {}\n", onlyInFirstNameGS.show(*gs));
+            // fmt::print("gs  min : {}{}\n", onlyInFirstNameGS.show(*gsForMinimize));
+            // fmt::print("min gs  : {}\n", onlyInFirstNameMin.show(*gs));
+            // fmt::print("min min : {}{}\n", onlyInFirstNameMin.show(*gsForMinimize));
         }
 
         if (gs->runningUnderAutogen) {
@@ -659,6 +668,51 @@ int realmain(int argc, char *argv[]) {
             // Maybe just call it --minimize-to-rbi?
             // TODO(jez) Put Timer's in here wherever there are gaps in the web trace file
 
+            fmt::print("-------------------------------------------------------------------------\n");
+            for (const auto &[name, sym] : core::Symbols::root().data(*gs)->membersStableOrderSlow(*gs)) {
+                if (symbolIsHiddenFromPrinting(*gs, sym)) {
+                    continue;
+                }
+                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gs), name.rawId(), sym.show(*gs),
+                           sym.rawId());
+            }
+            fmt::print("-------------------------------------------------------------------------\n");
+            for (const auto &[name, sym] :
+                 core::Symbols::root().data(*gsForMinimize)->membersStableOrderSlow(*gsForMinimize)) {
+                if (symbolIsHiddenFromPrinting(*gsForMinimize, sym)) {
+                    continue;
+                }
+                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gsForMinimize), name.rawId(),
+                           sym.show(*gsForMinimize), sym.rawId());
+            }
+            fmt::print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+
+            // pipeline::resolve will have also entered some names (mostly singleton class names,
+            // but there are others). To have comparable NameRef IDs, we have to enter those names into our
+            // gsForMinimize before calling pipeline::resolve again. The easiest and fastest way to do this is
+            // just to just copy everything name-related from `gs`, overwriting what existed in `gsForMinimize`.
+
+            // As far as I could tell, this flag was designed for the fuzzer. Not super sure what it does exactly.
+            auto useMemcpy = false;
+            gsForMinimize->_overwriteNameTablesFrom(*gs, useMemcpy);
+
+            for (const auto &[name, sym] : core::Symbols::root().data(*gs)->membersStableOrderSlow(*gs)) {
+                if (symbolIsHiddenFromPrinting(*gs, sym)) {
+                    continue;
+                }
+                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gs), name.rawId(), sym.show(*gs),
+                           sym.rawId());
+            }
+            fmt::print("-------------------------------------------------------------------------\n");
+            for (const auto &[name, sym] :
+                 core::Symbols::root().data(*gsForMinimize)->membersStableOrderSlow(*gsForMinimize)) {
+                if (symbolIsHiddenFromPrinting(*gsForMinimize, sym)) {
+                    continue;
+                }
+                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gsForMinimize), name.rawId(),
+                           sym.show(*gsForMinimize), sym.rawId());
+            }
+            fmt::print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
             indexedForMinimize =
                 move(pipeline::resolve(gsForMinimize, move(indexedForMinimize), opts, *workers).result());
             if (gsForMinimize->hadCriticalError()) {
@@ -678,7 +732,7 @@ int realmain(int argc, char *argv[]) {
                 if (symbolIsHiddenFromPrinting(*gs, sym)) {
                     continue;
                 }
-                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.show(*gs), name.rawId(), sym.show(*gs),
+                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gs), name.rawId(), sym.show(*gs),
                            sym.rawId());
             }
             fmt::print("-------------------------------------------------------------------------\n");
@@ -687,7 +741,7 @@ int realmain(int argc, char *argv[]) {
                 if (symbolIsHiddenFromPrinting(*gsForMinimize, sym)) {
                     continue;
                 }
-                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.show(*gsForMinimize), name.rawId(),
+                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gsForMinimize), name.rawId(),
                            sym.show(*gsForMinimize), sym.rawId());
             }
             fmt::print("-------------------------------------------------------------------------\n");

@@ -1207,6 +1207,7 @@ NameRef GlobalState::lookupNameUTF8(string_view nm) const {
 }
 
 NameRef GlobalState::enterNameUTF8(string_view nm) {
+    fmt::print("nm = {}, ", nm);
     const auto hs = _hash(nm);
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
@@ -1219,6 +1220,7 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
             auto name = NameRef::fromRaw(*this, bucket.second);
             if (name.kind() == NameKind::UTF8 && name.dataUtf8(*this)->utf8 == nm) {
                 counterInc("names.utf8.hit");
+                fmt::print("name.rawId() = {}\n", name.rawId());
                 return name;
             } else {
                 counterInc("names.hash_collision.utf8");
@@ -1253,6 +1255,7 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
     categoryCounterInc("names", "utf8");
 
     wasModified_ = true;
+    fmt::print("name.rawId() = {}\n", name.rawId());
     return name;
 }
 
@@ -1693,6 +1696,34 @@ bool GlobalState::unfreezeSymbolTable() {
     return old;
 }
 
+void GlobalState::_overwriteNameTablesFrom(const GlobalState &fromGS, bool keepId) {
+    this->utf8Names.reserve(fromGS.utf8Names.capacity());
+    this->constantNames.reserve(fromGS.constantNames.capacity());
+    this->uniqueNames.reserve(fromGS.uniqueNames.capacity());
+    if (keepId) {
+        this->utf8Names.resize(fromGS.utf8Names.size());
+        ::memcpy(this->utf8Names.data(), fromGS.utf8Names.data(), fromGS.utf8Names.size() * sizeof(UTF8Name));
+        this->constantNames.resize(fromGS.constantNames.size());
+        ::memcpy(this->constantNames.data(), fromGS.constantNames.data(),
+                 fromGS.constantNames.size() * sizeof(ConstantName));
+        this->uniqueNames.resize(fromGS.uniqueNames.size());
+        ::memcpy(this->uniqueNames.data(), fromGS.uniqueNames.data(), fromGS.uniqueNames.size() * sizeof(UniqueName));
+    } else {
+        for (auto &utf8Name : fromGS.utf8Names) {
+            this->utf8Names.emplace_back(utf8Name.deepCopy(*this));
+        }
+        for (auto &constantName : fromGS.constantNames) {
+            this->constantNames.emplace_back(constantName.deepCopy(*this));
+        }
+        for (auto &uniqueName : fromGS.uniqueNames) {
+            this->uniqueNames.emplace_back(uniqueName.deepCopy(*this));
+        }
+    }
+
+    this->namesByHash.reserve(fromGS.namesByHash.size());
+    this->namesByHash = fromGS.namesByHash;
+}
+
 unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     Timer timeit(tracer(), "GlobalState::deepCopy", this->creation);
     this->sanityCheck();
@@ -1726,31 +1757,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->suppressedErrorClasses = this->suppressedErrorClasses;
     result->onlyErrorClasses = this->onlyErrorClasses;
     result->suggestUnsafe = this->suggestUnsafe;
-    result->utf8Names.reserve(this->utf8Names.capacity());
-    result->constantNames.reserve(this->constantNames.capacity());
-    result->uniqueNames.reserve(this->uniqueNames.capacity());
-    if (keepId) {
-        result->utf8Names.resize(this->utf8Names.size());
-        ::memcpy(result->utf8Names.data(), this->utf8Names.data(), this->utf8Names.size() * sizeof(UTF8Name));
-        result->constantNames.resize(this->constantNames.size());
-        ::memcpy(result->constantNames.data(), this->constantNames.data(),
-                 this->constantNames.size() * sizeof(ConstantName));
-        result->uniqueNames.resize(this->uniqueNames.size());
-        ::memcpy(result->uniqueNames.data(), this->uniqueNames.data(), this->uniqueNames.size() * sizeof(UniqueName));
-    } else {
-        for (auto &utf8Name : this->utf8Names) {
-            result->utf8Names.emplace_back(utf8Name.deepCopy(*result));
-        }
-        for (auto &constantName : this->constantNames) {
-            result->constantNames.emplace_back(constantName.deepCopy(*result));
-        }
-        for (auto &uniqueName : this->uniqueNames) {
-            result->uniqueNames.emplace_back(uniqueName.deepCopy(*result));
-        }
-    }
-
-    result->namesByHash.reserve(this->namesByHash.size());
-    result->namesByHash = this->namesByHash;
+    result->_overwriteNameTablesFrom(*this, keepId);
 
     result->classAndModules.reserve(this->classAndModules.capacity());
     for (auto &sym : this->classAndModules) {
