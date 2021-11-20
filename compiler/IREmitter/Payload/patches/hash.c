@@ -49,17 +49,15 @@ VALUE sorbet_rb_hash_fetch_m(VALUE recv, ID fun, int argc, const VALUE *const re
 
     if (hash_stlike_lookup(recv, key, &val)) {
         return (VALUE)val;
-    }
-    else {
+    } else {
         if (argc == 1) {
             VALUE desc = rb_protect(rb_inspect, key, 0);
             if (NIL_P(desc)) {
                 desc = rb_any_to_s(key);
             }
             desc = rb_str_ellipsize(desc, 65);
-            rb_key_err_raise(rb_sprintf("key not found: %"PRIsVALUE, desc), recv, key);
-        }
-        else {
+            rb_key_err_raise(rb_sprintf("key not found: %" PRIsVALUE, desc), recv, key);
+        } else {
             return argv[1];
         }
     }
