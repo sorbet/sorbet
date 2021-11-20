@@ -178,6 +178,8 @@ SORBET_ALIVE(VALUE, sorbet_vm_isa_p,
 
 SORBET_ALIVE(VALUE, rb_hash_keys, (VALUE recv));
 SORBET_ALIVE(VALUE, rb_hash_values, (VALUE recv));
+SORBET_ALIVE(VALUE, sorbet_rb_hash_fetch_m,
+             (VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure));
 
 SORBET_ALIVE(VALUE, sorbet_vm_fstring_new, (const char *ptr, long len));
 SORBET_ALIVE(VALUE, sorbet_vm_str_uplus, (VALUE str));

@@ -251,7 +251,6 @@ module Intrinsics
       "Float#finite?",
       "Float#infinite?",
       "Float#magnitude",
-      "Hash#fetch",
       "Hash#has_key?",
       "Hash#include?",
       "Hash#key?",

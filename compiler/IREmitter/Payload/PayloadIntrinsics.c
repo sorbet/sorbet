@@ -326,15 +326,6 @@ VALUE sorbet_int_rb_flo_is_infinite_p(VALUE recv, ID fun, int argc, VALUE *const
     return rb_flo_is_infinite_p(recv);
 }
 
-// Hash#fetch
-// Calling convention: -1
-extern VALUE sorbet_rb_hash_fetch_m(int argc, const VALUE *args, VALUE obj);
-
-VALUE sorbet_int_rb_hash_fetch_m(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk,
-                                 VALUE closure) {
-    return sorbet_rb_hash_fetch_m(argc, args, recv);
-}
-
 // Hash#include?
 // Hash#member?
 // Hash#has_key?

@@ -11,7 +11,7 @@ def one_arg(hash, key)
 end
 
 # INITIAL-LABEL: define internal i64 @"func_Object#7one_arg"
-# INITIAL: call i64 @sorbet_int_rb_hash_fetch_m
+# INITIAL: call i64 @sorbet_rb_hash_fetch_m
 # INITIAL{LITERAL}: }
 
 sig {params(hash: T::Hash[T.untyped, T.untyped], key: T.untyped, default: T.untyped).returns(T.untyped)}
@@ -20,7 +20,7 @@ def two_arg(hash, key, default)
 end
 
 # INITIAL-LABEL: define internal i64 @"func_Object#7two_arg"
-# INITIAL: call i64 @sorbet_int_rb_hash_fetch_m
+# INITIAL: call i64 @sorbet_rb_hash_fetch_m
 # INITIAL{LITERAL}: }
 
 sig {params(hash: T::Hash[T.untyped, T.untyped], key: T.untyped, blk: T.untyped).returns(T.untyped)}
@@ -31,7 +31,7 @@ def block_arg(hash, key, &blk)
 end
 
 # INITIAL-LABEL: define internal i64 @"func_Object#9block_arg"
-# INITIAL-NOT: call i64 @sorbet_int_rb_hash_fetch_m
+# INITIAL-NOT: call i64 @sorbet_rb_hash_fetch_m
 # INITIAL{LITERAL}: }
 
 p one_arg({key: 5}, :key)

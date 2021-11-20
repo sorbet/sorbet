@@ -36,7 +36,6 @@
     {core::Symbols::Float(), "magnitude", CMethod{"sorbet_int_rb_float_abs"}},
     {core::Symbols::Float(), "finite?", CMethod{"sorbet_int_rb_flo_is_finite_p"}},
     {core::Symbols::Float(), "infinite?", CMethod{"sorbet_int_rb_flo_is_infinite_p"}},
-    {core::Symbols::Hash(), "fetch", CMethod{"sorbet_int_rb_hash_fetch_m"}},
     {core::Symbols::Hash(), "include?", CMethod{"sorbet_int_rb_hash_has_key"}},
     {core::Symbols::Hash(), "member?", CMethod{"sorbet_int_rb_hash_has_key"}},
     {core::Symbols::Hash(), "has_key?", CMethod{"sorbet_int_rb_hash_has_key"}},
