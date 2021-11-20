@@ -11,12 +11,25 @@ long sorbet_hash_string(VALUE a) {
     return any_hash(a, NULL);
 }
 
-/* Our intrinsic wrapping could write essentially this function out automagically,
- * but we do fancy things for Hash#any? and blocks, so we have to do everything
- * manually.
- */
+// The no-block version of rb_hash_any_p, with any logic conditional on a block
+// being present removed.
 VALUE sorbet_rb_hash_any_forwarder(int argc, VALUE *argv, VALUE hash) {
-    return rb_hash_any_p(argc, argv, hash);
+    VALUE args[2];
+    args[0] = Qfalse;
+
+    rb_check_arity(argc, 0, 1);
+    if (RHASH_EMPTY_P(hash)) {
+        return Qfalse;
+    }
+
+    if (argc) {
+        args[1] = argv[0];
+        rb_hash_foreach(hash, any_p_i_pattern, (VALUE)args);
+        return args[0];
+    } else {
+        /* yields pairs, never false */
+        return Qtrue;
+    }
 }
 
 // Avoid dispatch through the VM by calling the body of `rb_hash_update` directly.
