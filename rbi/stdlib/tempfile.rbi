@@ -300,4 +300,7 @@ class Tempfile
     .returns(Integer)
   end
   def write(arg0); end
+
+  sig {returns(T.self_type)}
+  def flush(); end
 end
