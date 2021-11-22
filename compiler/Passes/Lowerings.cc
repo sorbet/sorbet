@@ -736,6 +736,116 @@ static llvm::RegisterPass<RemoveUnnecessaryHashDupsPass> AA("removeUnnecessaryHa
                                                             false  // Analysis Pass
 );
 
+class ReorganizeTypeTestFastPathsPass : public llvm::ModulePass {
+public:
+    static char ID;
+
+    ReorganizeTypeTestFastPathsPass() : llvm::ModulePass(ID) {}
+
+    void getAnalysisUsage(llvm::AnalysisUsage &usage) const override {
+        usage.addRequired<llvm::DominatorTreeWrapperPass>();
+    }
+
+    struct FastPathChoice {
+        llvm::BasicBlock *fastPathExit;
+        llvm::PHINode *testBlockPhiNode;
+        llvm::BasicBlock *fastPathEntrance;
+
+        FastPathChoice(llvm::BasicBlock *fastPathExit, llvm::PHINode *testBlockPhiNode,
+                       llvm::BasicBlock *fastPathEntrance)
+            : fastPathExit{fastPathExit}, testBlockPhiNode{testBlockPhiNode}, fastPathEntrance{fastPathEntrance} {}
+    };
+
+    struct CallInstVisitor : public llvm::InstVisitor<CallInstVisitor> {
+        llvm::ModulePass *pass;
+        vector<FastPathChoice> fastPaths;
+
+        CallInstVisitor(llvm::ModulePass *pass) : pass{pass} {}
+
+        void visitCallInst(llvm::CallInst &ci) {
+            // is this a function that starts with `sorbet_i_isa`
+            auto *func = ci.getCalledFunction();
+            if (func == nullptr || !func->getName().startswith("sorbet_i_isa_")) {
+                return;
+            }
+
+            // does the basic block have only three instructions?
+            // - phi node for incoming values
+            // - call to type testing intrinsic
+            // - branch instruction
+            if (ci.getParent()->size() != 3) {
+                return;
+            }
+
+            // and it's argument comes from a phi node in the same block
+            auto *phi = llvm::dyn_cast<llvm::PHINode>(ci.getOperand(0));
+            if (phi == nullptr || phi->getParent() != ci.getParent()) {
+                return;
+            }
+
+            auto *testExit = llvm::dyn_cast<llvm::BranchInst>(&ci.getParent()->back());
+            if (testExit == nullptr || testExit->isUnconditional() || testExit->getCondition() != &ci) {
+                return;
+            }
+
+            auto &domTree =
+                this->pass->getAnalysis<llvm::DominatorTreeWrapperPass>(*ci.getParent()->getParent()).getDomTree();
+
+            // find the predecessor block that asserts the type we're looking for
+            for (auto *block : phi->blocks()) {
+                auto *jump = llvm::dyn_cast<llvm::BranchInst>(&block->back());
+                if (jump == nullptr || !jump->isUnconditional()) {
+                    continue;
+                }
+
+                auto *val = phi->getIncomingValueForBlock(block);
+                for (auto *user : val->users()) {
+                    auto *otherCall = llvm::dyn_cast<llvm::CallInst>(user);
+                    if (otherCall == nullptr || otherCall->getCalledFunction() != func) {
+                        continue;
+                    }
+
+                    if (!domTree.dominates(otherCall, jump)) {
+                        continue;
+                    }
+
+                    fastPaths.emplace_back(block, phi, testExit->getSuccessor(0));
+
+                    return;
+                }
+            }
+        }
+    };
+
+    bool runOnModule(llvm::Module &mod) override {
+        CallInstVisitor visitor{this};
+
+        visitor.visit(mod);
+
+        if (visitor.fastPaths.empty()) {
+            return false;
+        }
+
+        for (auto &fastPath : visitor.fastPaths) {
+            // redirect the block
+            fastPath.fastPathExit->back().setSuccessor(0, fastPath.fastPathEntrance);
+
+            // remove the incoming phi edge
+            fastPath.testBlockPhiNode->removeIncomingValue(fastPath.fastPathExit);
+        }
+
+        return true;
+    }
+};
+
+char ReorganizeTypeTestFastPathsPass::ID = 0;
+
+static llvm::RegisterPass<ReorganizeTypeTestFastPathsPass> AB("reorganizeTypeTestFastPathsPass",
+                                                              "Rorganize type test fast paths",
+                                                              false, // Only looks at CFG
+                                                              false  // Analysis Pass
+);
+
 } // namespace
 const std::vector<llvm::ModulePass *> Passes::standardLowerings() {
     // LLVM pass manager is going to destuct them, so we need to allocate them every time
@@ -752,5 +862,9 @@ llvm::ModulePass *Passes::createDeleteUnusedInlineCachesPass() {
 
 llvm::ModulePass *Passes::createRemoveUnnecessaryHashDupsPass() {
     return new RemoveUnnecessaryHashDupsPass();
+}
+
+llvm::ModulePass *Passes::createReorganizeTypeTestFastPathsPass() {
+    return new ReorganizeTypeTestFastPathsPass();
 }
 } // namespace sorbet::compiler

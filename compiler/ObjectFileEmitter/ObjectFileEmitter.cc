@@ -401,6 +401,7 @@ void ObjectFileEmitter::init() {
     // still exist in some fashion.
     pm.add(Passes::createDeleteUnusedSorbetIntrinsticsPass());
     pm.add(Passes::createDeleteUnusedInlineCachesPass());
+    pm.add(Passes::createReorganizeTypeTestFastPathsPass());
     pm.add(llvm::createAlwaysInlinerLegacyPass(false)); // Force inline functions early
     pm.add(llvm::createGlobalDCEPass());                // Remove dead fns and globals. We benefit from this a lot
     // Module passes
