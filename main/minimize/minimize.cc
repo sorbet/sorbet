@@ -8,18 +8,6 @@ namespace sorbet::realmain {
 
 namespace {
 
-// TODO(jez) Might make sense to just factor this into Symbols.h
-enum class SymbolKind {
-    UNKNOWN_TYPE = 0,
-    CLASS_OR_MODULE = 1,
-    STATIC_FIELD = 2,
-    FIELD = 3,
-    METHOD = 4,
-    // ARGUMENT = 5,
-    TYPE_MEMBER = 6,
-    TYPE_ARGUMENT = 7,
-};
-
 core::MethodRef closestOverridenMethod(const core::GlobalState &gs, core::SymbolRef enclosingClassSymbol,
                                        core::NameRef name) {
     auto enclosingClass = enclosingClassSymbol.data(gs);
@@ -45,10 +33,12 @@ core::MethodRef closestOverridenMethod(const core::GlobalState &gs, core::Symbol
     }
 }
 
-void writeClassDef(const core::GlobalState &rbiGS, options::PrinterConfig &outfile, core::SymbolRef rbiEntry) {
+void writeClassDef(const core::GlobalState &rbiGS, options::PrinterConfig &outfile, core::SymbolRef rbiEntry,
+                   bool &wroteClassDef) {
     auto defType = rbiEntry.data(rbiGS)->isClassOrModuleClass() ? "class" : "module";
     // TODO(jez) Does missing methods ignore super classes?
     outfile.fmt("{} ::{}\n", defType, rbiEntry.data(rbiGS)->name.shortName(rbiGS));
+    wroteClassDef = true;
 }
 
 // TODO(jez) These names were chosen to match as closely as possible with names used in missing_methods.rbi.
@@ -125,8 +115,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
         // when entering the method.
 
         if (!wroteClassDef) {
-            writeClassDef(rbiGS, outfile, rbiClass);
-            wroteClassDef = true;
+            writeClassDef(rbiGS, outfile, rbiClass, wroteClassDef);
         }
 
         // TODO(jez) eventually might want to extend this to serialize any type information that was present
@@ -204,9 +193,6 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
         // TODO(jez) This is not actually used except to pass information to serializeMethods and
         // serializeIncludes, but those methods could easily recompute it from their arguemnts.
         auto myClassIsSingleton = rbiEntry.data(rbiGS)->isSingletonClass(rbiGS);
-        // if (myClassIsSingleton && absl::StartsWith(rbiEntryName.shortName(rbiGS), "OnlyInSecond")) {
-        //     stopInDebugger();
-        // }
 
         // auto myClass = rbiEntry;
         if (rbiEntry == core::Symbols::T()) {
@@ -228,8 +214,7 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
 
         auto wroteClassDef = false;
         if (!sourceEntry.exists()) {
-            writeClassDef(rbiGS, outfile, rbiEntry);
-            wroteClassDef = true;
+            writeClassDef(rbiGS, outfile, rbiEntry, wroteClassDef);
         }
 
         serializeMethods(sourceGS, rbiGS, outfile, sourceEntry, rbiEntry, myClassIsSingleton, wroteClassDef);
