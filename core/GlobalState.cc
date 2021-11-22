@@ -1207,7 +1207,6 @@ NameRef GlobalState::lookupNameUTF8(string_view nm) const {
 }
 
 NameRef GlobalState::enterNameUTF8(string_view nm) {
-    fmt::print("nm = {}, ", nm);
     const auto hs = _hash(nm);
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
@@ -1220,7 +1219,6 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
             auto name = NameRef::fromRaw(*this, bucket.second);
             if (name.kind() == NameKind::UTF8 && name.dataUtf8(*this)->utf8 == nm) {
                 counterInc("names.utf8.hit");
-                fmt::print("name.rawId() = {}\n", name.rawId());
                 return name;
             } else {
                 counterInc("names.hash_collision.utf8");
@@ -1255,7 +1253,6 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
     categoryCounterInc("names", "utf8");
 
     wasModified_ = true;
-    fmt::print("name.rawId() = {}\n", name.rawId());
     return name;
 }
 
