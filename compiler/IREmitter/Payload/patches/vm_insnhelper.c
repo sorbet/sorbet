@@ -771,15 +771,12 @@ VALUE sorbet_vm_callBlock(rb_control_frame_t *cfp, int argc, const VALUE *const 
 }
 
 // This is a version of rb_iterate specialized to the case where we know the block is non-null and its arity.
-VALUE sorbet_rb_iterate(VALUE (*it_proc)(VALUE), VALUE data1, rb_block_call_func_t bl_proc, int minArgs, int maxArgs,
-                        VALUE data2) {
+VALUE sorbet_rb_iterate(VALUE (*it_proc)(VALUE), VALUE data1, const struct vm_ifunc *ifunc) {
     rb_execution_context_t *ec = GET_EC();
     rb_control_frame_t *const cfp = ec->cfp;
 
     enum ruby_tag_type state;
     volatile VALUE retval = Qnil;
-
-    const struct vm_ifunc *const ifunc = rb_vm_ifunc_new(bl_proc, (void *)data2, minArgs, maxArgs);
 
     EC_PUSH_TAG(ec);
     state = EC_EXEC_TAG();

@@ -1115,16 +1115,13 @@ llvm::Value *Payload::callFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &
 }
 
 llvm::Value *Payload::callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
-                                             bool usesBreak, llvm::Value *blockFun, int blkMinArgs, int blkMaxArgs,
-                                             llvm::Value *closure) {
-    auto *minArgs = IREmitterHelpers::buildS4(cs, blkMinArgs);
-    auto *maxArgs = IREmitterHelpers::buildS4(cs, blkMaxArgs);
+                                             bool usesBreak, llvm::Value *ifunc) {
     if (usesBreak) {
         return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache"),
-                                  {cache, blockFun, minArgs, maxArgs, closure}, "sendWithBlock");
+                                  {cache, ifunc}, "sendWithBlock");
     } else {
         return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache_noBreak"),
-                                  {cache, blockFun, minArgs, maxArgs, closure}, "sendWithBlock");
+                                  {cache, ifunc}, "sendWithBlock");
     }
 }
 

@@ -193,8 +193,10 @@ public:
             // called by the vm.
             bool usesBreak = mcctx.irctx.blockUsesBreak[mcctx.blk.value()];
             if (usesBreak) {
+                auto *ifunc = builder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
+                                                 {blk, minArgs, maxArgs, offset});
                 res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock"),
-                                         {forwarder, recv, id, args.argc, args.argv, blk, minArgs, maxArgs, offset},
+                                         {forwarder, recv, id, args.argc, args.argv, ifunc, offset},
                                          "rawSendResultWithBlock");
             } else {
                 // Since the block doesn't use break we can make two optimizations:
@@ -203,8 +205,10 @@ public:
                 //    better
                 // 2. Emit a type assertion on the result of the function, as we know that there won't be non-local
                 //    control flow based on the use of `break` that could change the type of the returned value
+                auto *ifunc = builder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
+                                                 {blk, minArgs, maxArgs, offset});
                 res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock_noBreak"),
-                                         {forwarder, recv, id, args.argc, args.argv, blk, minArgs, maxArgs, offset},
+                                         {forwarder, recv, id, args.argc, args.argv, ifunc, offset},
                                          "rawSendResultWithBlock");
                 cMethodWithBlock->assertResultType(cs, builder, res);
             }

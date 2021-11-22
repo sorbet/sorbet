@@ -498,8 +498,10 @@ public:
                 // blocks require a locals offset parameter
                 llvm::Value *localsOffset = Payload::buildLocalsOffset(cs);
                 ENFORCE(localsOffset != nullptr);
+                auto *ifunc = builder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
+                                                 {blk, blkMinArgs, blkMaxArgs, localsOffset});
                 return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
-                                          {argc, argv, kwSplatFlag, blk, blkMinArgs, blkMaxArgs, localsOffset},
+                                          {argc, argv, kwSplatFlag, ifunc},
                                           "rawSendResult");
             } else {
                 return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {argc, argv, kwSplatFlag},
@@ -522,8 +524,9 @@ public:
                 auto *closure = Payload::buildLocalsOffset(cs);
                 auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
                 auto usesBreak = irctx.blockUsesBreak[mcctx.blk.value()];
-                return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, blk, arity.min,
-                                                       arity.max, closure);
+                auto *ifunc = builder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
+                                                 {blk, IREmitterHelpers::buildS4(cs, arity.min), IREmitterHelpers::buildS4(cs, arity.max), closure});
+                return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, ifunc);
             } else {
                 auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.builder);
                 return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);

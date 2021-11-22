@@ -434,8 +434,10 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
             auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
             auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
             auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
+            auto *ifunc = builder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
+                                             {blk, blkMinArgs, blkMaxArgs, localsOffset});
             return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
-                                      {args.argc, args.argv, args.kw_splat, blk, blkMinArgs, blkMaxArgs, localsOffset},
+                                      {args.argc, args.argv, args.kw_splat, ifunc},
                                       "rawSendResult");
         }
 

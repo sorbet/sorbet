@@ -358,8 +358,10 @@ public:
 
             auto *callImpl = blkUsesBreak->equalsInt(1) ? module.getFunction("sorbet_callFuncBlockWithCache")
                                                         : module.getFunction("sorbet_callFuncBlockWithCache_noBreak");
-
-            return builder.CreateCall(callImpl, {cache, blk, blkMinArgs, blkMaxArgs, closure}, "sendWithBlock");
+            auto *buildIfunc = module.getFunction("sorbet_buildBlockIfunc");
+            ENFORCE(buildIfunc);
+            auto *ifunc = builder.CreateCall(buildIfunc, {blk, blkMinArgs, blkMaxArgs, closure});
+            return builder.CreateCall(callImpl, {cache, ifunc}, "sendWithBlock");
         }
     }
 } SorbetSend;
