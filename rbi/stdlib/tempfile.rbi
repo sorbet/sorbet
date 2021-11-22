@@ -88,9 +88,6 @@
 class Tempfile
   extend T::Sig
 
-  extend T::Generic
-  Elem = type_member(:out, fixed: String)
-
   # Creates a temporary file as usual
   # [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) object (not
   # [`Tempfile`](https://docs.ruby-lang.org/en/2.7.0/Tempfile.html)). It doesn't
