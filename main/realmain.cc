@@ -668,24 +668,25 @@ int realmain(int argc, char *argv[]) {
             // Maybe just call it --minimize-to-rbi?
             // TODO(jez) Put Timer's in here wherever there are gaps in the web trace file
 
-            fmt::print("-------------------------------------------------------------------------\n");
-            for (const auto &[name, sym] : core::Symbols::root().data(*gs)->membersStableOrderSlow(*gs)) {
-                if (symbolIsHiddenFromPrinting(*gs, sym)) {
-                    continue;
-                }
-                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gs), name.rawId(), sym.show(*gs),
-                           sym.rawId());
-            }
-            fmt::print("-------------------------------------------------------------------------\n");
-            for (const auto &[name, sym] :
-                 core::Symbols::root().data(*gsForMinimize)->membersStableOrderSlow(*gsForMinimize)) {
-                if (symbolIsHiddenFromPrinting(*gsForMinimize, sym)) {
-                    continue;
-                }
-                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gsForMinimize), name.rawId(),
-                           sym.show(*gsForMinimize), sym.rawId());
-            }
-            fmt::print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+            // fmt::print("-------------------------------------------------------------------------\n");
+            // for (const auto &[name, sym] : core::Symbols::root().data(*gs)->membersStableOrderSlow(*gs)) {
+            //     if (symbolIsHiddenFromPrinting(*gs, sym)) {
+            //         continue;
+            //     }
+            //     fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gs), name.rawId(),
+            //     sym.show(*gs),
+            //                sym.rawId());
+            // }
+            // fmt::print("-------------------------------------------------------------------------\n");
+            // for (const auto &[name, sym] :
+            //      core::Symbols::root().data(*gsForMinimize)->membersStableOrderSlow(*gsForMinimize)) {
+            //     if (symbolIsHiddenFromPrinting(*gsForMinimize, sym)) {
+            //         continue;
+            //     }
+            //     fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gsForMinimize), name.rawId(),
+            //                sym.show(*gsForMinimize), sym.rawId());
+            // }
+            // fmt::print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 
             // pipeline::resolve will have also entered some names (mostly singleton class names,
             // but there are others). To have comparable NameRef IDs, we have to enter those names into our
@@ -696,23 +697,24 @@ int realmain(int argc, char *argv[]) {
             auto useMemcpy = false;
             gsForMinimize->_overwriteNameTablesFrom(*gs, useMemcpy);
 
-            for (const auto &[name, sym] : core::Symbols::root().data(*gs)->membersStableOrderSlow(*gs)) {
-                if (symbolIsHiddenFromPrinting(*gs, sym)) {
-                    continue;
-                }
-                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gs), name.rawId(), sym.show(*gs),
-                           sym.rawId());
-            }
-            fmt::print("-------------------------------------------------------------------------\n");
-            for (const auto &[name, sym] :
-                 core::Symbols::root().data(*gsForMinimize)->membersStableOrderSlow(*gsForMinimize)) {
-                if (symbolIsHiddenFromPrinting(*gsForMinimize, sym)) {
-                    continue;
-                }
-                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gsForMinimize), name.rawId(),
-                           sym.show(*gsForMinimize), sym.rawId());
-            }
-            fmt::print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+            // for (const auto &[name, sym] : core::Symbols::root().data(*gs)->membersStableOrderSlow(*gs)) {
+            //     if (symbolIsHiddenFromPrinting(*gs, sym)) {
+            //         continue;
+            //     }
+            //     fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gs), name.rawId(),
+            //     sym.show(*gs),
+            //                sym.rawId());
+            // }
+            // fmt::print("-------------------------------------------------------------------------\n");
+            // for (const auto &[name, sym] :
+            //      core::Symbols::root().data(*gsForMinimize)->membersStableOrderSlow(*gsForMinimize)) {
+            //     if (symbolIsHiddenFromPrinting(*gsForMinimize, sym)) {
+            //         continue;
+            //     }
+            //     fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gsForMinimize), name.rawId(),
+            //                sym.show(*gsForMinimize), sym.rawId());
+            // }
+            // fmt::print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
             indexedForMinimize =
                 move(pipeline::resolve(gsForMinimize, move(indexedForMinimize), opts, *workers).result());
             if (gsForMinimize->hadCriticalError()) {
@@ -727,24 +729,25 @@ int realmain(int argc, char *argv[]) {
             // TODO(jez) What do do about autocorrects? Ban combining the two options?
             // TODO(jez) Handle hadCriticalError
 
-            fmt::print("-------------------------------------------------------------------------\n");
-            for (const auto &[name, sym] : core::Symbols::root().data(*gs)->membersStableOrderSlow(*gs)) {
-                if (symbolIsHiddenFromPrinting(*gs, sym)) {
-                    continue;
-                }
-                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gs), name.rawId(), sym.show(*gs),
-                           sym.rawId());
-            }
-            fmt::print("-------------------------------------------------------------------------\n");
-            for (const auto &[name, sym] :
-                 core::Symbols::root().data(*gsForMinimize)->membersStableOrderSlow(*gsForMinimize)) {
-                if (symbolIsHiddenFromPrinting(*gsForMinimize, sym)) {
-                    continue;
-                }
-                fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gsForMinimize), name.rawId(),
-                           sym.show(*gsForMinimize), sym.rawId());
-            }
-            fmt::print("-------------------------------------------------------------------------\n");
+            // fmt::print("-------------------------------------------------------------------------\n");
+            // for (const auto &[name, sym] : core::Symbols::root().data(*gs)->membersStableOrderSlow(*gs)) {
+            //     if (symbolIsHiddenFromPrinting(*gs, sym)) {
+            //         continue;
+            //     }
+            //     fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gs), name.rawId(),
+            //     sym.show(*gs),
+            //                sym.rawId());
+            // }
+            // fmt::print("-------------------------------------------------------------------------\n");
+            // for (const auto &[name, sym] :
+            //      core::Symbols::root().data(*gsForMinimize)->membersStableOrderSlow(*gsForMinimize)) {
+            //     if (symbolIsHiddenFromPrinting(*gsForMinimize, sym)) {
+            //         continue;
+            //     }
+            //     fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gsForMinimize), name.rawId(),
+            //                sym.show(*gsForMinimize), sym.rawId());
+            // }
+            // fmt::print("-------------------------------------------------------------------------\n");
 
             Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
 
