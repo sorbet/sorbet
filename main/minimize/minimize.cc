@@ -8,6 +8,66 @@ namespace sorbet::realmain {
 
 namespace {
 
+const vector<core::SymbolRef> IGNORED_BY_SYMBOL = {
+    // Kernel is very common and produces a lot of missing_methods churn, but is rarely necessary
+    // for type-checking. (It also sometimes gets inferred even when Sorbet already statically knows
+    // about Kernel, which can cause dangling references to deleted classes.)
+    core::Symbols::Kernel(),
+};
+
+const vector<string_view> IGNORED_BY_FULL_NAME = {
+    // These modules are Sorbet-internal and aren't necessary for static typechecking, so they
+    // aren't necessary and they cause a fair bit of missing_methods churn
+    "T::Private::Methods::MethodHooks",    "T::Private::Methods::SingletonMethodHooks",
+    "T::Private::Abstract::Hooks",         "T::Private::MixesInClassMethods",
+    "T::Private::Final::NoInherit",        "T::Private::Final::NoIncludeExtend",
+    "T::Private::Sealed::NoIncludeExtend", "T::InterfaceWrapper::Helpers",
+};
+
+enum class OutputCategory {
+    External = 1,
+    Util,
+    Opus,
+    GraphQL,
+    AutogenProto,
+    Autogen,
+    Flatfiles,
+    Model,
+    Mutator,
+    Chalk,
+};
+
+OutputCategory outputCategoryFromClassName(string_view fullName) {
+    if (absl::StrContains(fullName, "Flatfiles")) {
+        return OutputCategory::Flatfiles;
+    } else if (absl::StrContains(fullName, "::Mutator")) {
+        return OutputCategory::Mutator;
+    } else if (absl::StrContains(fullName, "::Model")) {
+        return OutputCategory::Model;
+    } else if (absl::StrContains(fullName, "::Model")) {
+        if (absl::StartsWith(fullName, "Plaid")) {
+            return OutputCategory::External;
+        } else {
+            return OutputCategory::Model;
+        }
+    } else if (absl::StrContains(fullName, "::Autogen::Proto")) {
+        return OutputCategory::AutogenProto;
+    } else if (absl::StrContains(fullName, "::Autogen")) {
+        return OutputCategory::Autogen;
+    } else if (absl::StrContains(fullName, "::GraphQL")) {
+        return OutputCategory::GraphQL;
+    } else if (absl::StartsWith(fullName, "Opus")) {
+        return OutputCategory::Opus;
+    } else if (absl::StartsWith(fullName, "Chalk")) {
+        return OutputCategory::Chalk;
+    } else if (absl::StartsWith(fullName, "PrisonGuard") || absl::StartsWith(fullName, "Critic") ||
+               absl::StartsWith(fullName, "Primus")) {
+        return OutputCategory::Util;
+    } else {
+        return OutputCategory::External;
+    }
+}
+
 core::MethodRef closestOverridenMethod(const core::GlobalState &gs, core::SymbolRef enclosingClassSymbol,
                                        core::NameRef name) {
     auto enclosingClass = enclosingClassSymbol.data(gs);
@@ -35,6 +95,9 @@ core::MethodRef closestOverridenMethod(const core::GlobalState &gs, core::Symbol
 
 void writeClassDef(const core::GlobalState &rbiGS, options::PrinterConfig &outfile, core::SymbolRef rbiEntry,
                    bool &wroteClassDef) {
+    if (rbiEntry.data(rbiGS)->isSingletonClass(rbiGS)) {
+        rbiEntry = rbiEntry.data(rbiGS)->attachedClass(rbiGS);
+    }
     auto defType = rbiEntry.data(rbiGS)->isClassOrModuleClass() ? "class" : "module";
     // TODO(jez) Does missing methods ignore super classes?
     outfile.fmt("{} ::{}\n", defType, rbiEntry.data(rbiGS)->name.shortName(rbiGS));
@@ -166,6 +229,51 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
     }
 }
 
+void serializeIncludes(const core::GlobalState &sourceGS, const core::GlobalState &rbiGS,
+                       options::PrinterConfig &outfile, core::SymbolRef sourceClass, core::SymbolRef rbiClass,
+                       bool isSingleton, bool &wroteClassDef) {
+    auto sourceClassMixinsFullNames = vector<string>{};
+    if (sourceClass.exists()) {
+        for (auto sourceMixin : sourceClass.data(sourceGS)->mixins()) {
+            sourceClassMixinsFullNames.emplace_back(sourceMixin.show(sourceGS));
+        }
+    }
+
+    for (auto rbiMixin : rbiClass.data(rbiGS)->mixins()) {
+        if (!rbiMixin.exists()) {
+            continue;
+        }
+
+        auto rbiMixinFullName = rbiMixin.show(rbiGS);
+        if (sourceClass.exists()) {
+            // SymbolRef IDs are NOT COMPARABLE, because we have to resolve with separate GlobalStates
+            // to know what is defined where. Have to compare with string names here.
+            if (absl::c_any_of(sourceClassMixinsFullNames,
+                               [&](const string &mixin) { return mixin == rbiMixinFullName; })) {
+                continue;
+            }
+        }
+
+        if (absl::c_any_of(IGNORED_BY_SYMBOL, [&](auto sym) { return sym == rbiMixin; })) {
+            continue;
+        }
+
+        if (absl::c_any_of(IGNORED_BY_FULL_NAME, [&](auto fullName) { return fullName == rbiMixinFullName; })) {
+            continue;
+        }
+
+        auto keyword = isSingleton ? "extend"sv : "include"sv;
+        // Don't prefix pay-server includes with :: -- it will break rigorous packages.
+        auto cbase = outputCategoryFromClassName(rbiMixinFullName) == OutputCategory::External ? "" : "::";
+
+        if (!wroteClassDef) {
+            writeClassDef(rbiGS, outfile, rbiClass, wroteClassDef);
+        }
+
+        outfile.fmt("  {} {}{}\n", keyword, cbase, rbiMixinFullName);
+    }
+}
+
 void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState &rbiGS,
                       options::PrinterConfig &outfile, core::SymbolRef sourceClass, core::SymbolRef rbiClass) {
     ENFORCE(rbiClass.exists());
@@ -218,7 +326,7 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
         }
 
         serializeMethods(sourceGS, rbiGS, outfile, sourceEntry, rbiEntry, myClassIsSingleton, wroteClassDef);
-        // TODO(jez) serialize_includes
+        serializeIncludes(sourceGS, rbiGS, outfile, sourceEntry, rbiEntry, myClassIsSingleton, wroteClassDef);
         // TODO(jez) the pay-server version doesn't handle static fields and type members
 
         if (wroteClassDef) {
