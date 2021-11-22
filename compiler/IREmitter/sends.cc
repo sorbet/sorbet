@@ -525,25 +525,24 @@ llvm::Value *IREmitterHelpers::callViaRubyVMSimple(MethodCallContext &mcctx) {
     auto *cache = mcctx.getInlineCache();
     auto *recv = mcctx.varGetRecv();
 
-    auto *closure = Payload::buildLocalsOffset(mcctx.cs);
     vector<llvm::Value *> args;
     args.emplace_back(cache);
 
     if (auto *blk = mcctx.blkAsFunction()) {
+        auto *closure = Payload::buildLocalsOffset(mcctx.cs);
         auto blkId = mcctx.blk.value();
         args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(irctx.blockUsesBreak[blkId]))));
-        args.emplace_back(blk);
-
-        auto &arity = irctx.rubyBlockArity[mcctx.blk.value()];
-        args.emplace_back(IREmitterHelpers::buildS4(cs, arity.min));
-        args.emplace_back(IREmitterHelpers::buildS4(cs, arity.max));
+        auto &arity = irctx.rubyBlockArity[blkId];
+        auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
+        auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
+        auto *blkIfunc = builder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
+                                            {blk, blkMinArgs, blkMaxArgs, closure});
+        args.emplace_back(blkIfunc);
     } else {
         args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(false))));
-        args.emplace_back(llvm::ConstantPointerNull::get(llvm::PointerType::getUnqual(cs.getRubyBlockFFIType())));
-        args.emplace_back(IREmitterHelpers::buildS4(cs, 0));
-        args.emplace_back(IREmitterHelpers::buildS4(cs, 0));
+        auto *vmIfuncType = llvm::StructType::getTypeByName(cs, "struct.vm_ifunc");
+        args.emplace_back(llvm::ConstantPointerNull::get(llvm::PointerType::getUnqual(vmIfuncType)));
     }
-    args.emplace_back(closure);
     args.emplace_back(cfp);
     args.emplace_back(recv);
     for (auto *arg : stack) {

@@ -301,8 +301,7 @@ public:
     //
     //   %3 = call ... @sorbet_i_send(%struct.FunctionInlineCache* @ic_puts,
     //                                i1 false,
-    //                                i64 (i64, i64, i32, i64*, i64)* null,
-    //                                i32 0, i32 0,
+    //                                %struct.vm_ifunc* null,
     //                                %struct.rb_control_frame_struct* %cfp,
     //                                i64 %selfRaw,
     //                                i64 %rubyStr_a
@@ -329,26 +328,24 @@ public:
     // Line 8 corresponds to the sorbet_callFuncWithCache call.
     virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module,
                                      llvm::CallInst *instr) const override {
-        // Make sure cache, blk, closure, cfp and self are passed in.
-        ENFORCE(instr->arg_size() >= 5);
+        // Make sure cache, blkUsesBreak, blk, cfp and self are passed in.
+        const int recvArgOffset = 4;
+        ENFORCE(instr->arg_size() >= (recvArgOffset + 1));
 
         llvm::IRBuilder<> builder(instr);
         auto *cache = instr->getArgOperand(0);
-        auto *blk = instr->getArgOperand(2);
-        auto *blkMinArgs = instr->getArgOperand(3);
-        auto *blkMaxArgs = instr->getArgOperand(4);
-        auto *closure = instr->getArgOperand(5);
-        auto *cfp = instr->getArgOperand(6);
+        auto *blkIfunc = instr->getArgOperand(2);
+        auto *cfp = instr->getArgOperand(3);
 
         auto *spPtr = builder.CreateCall(module.getFunction("sorbet_get_sp"), {cfp});
         auto spPtrType = llvm::dyn_cast<llvm::PointerType>(spPtr->getType());
         llvm::Value *sp = builder.CreateLoad(spPtrType->getElementType(), spPtr);
-        for (auto iter = std::next(instr->arg_begin(), 7); iter < instr->arg_end(); ++iter) {
+        for (auto iter = std::next(instr->arg_begin(), recvArgOffset); iter < instr->arg_end(); ++iter) {
             sp = builder.CreateCall(module.getFunction("sorbet_pushValueStack"), {sp, iter->get()});
         }
         builder.CreateStore(sp, spPtr);
 
-        if (llvm::isa<llvm::ConstantPointerNull>(blk)) {
+        if (llvm::isa<llvm::ConstantPointerNull>(blkIfunc)) {
             auto *blockHandler =
                 builder.CreateCall(module.getFunction("sorbet_vmBlockHandlerNone"), {}, "VM_BLOCK_HANDLER_NONE");
             return builder.CreateCall(module.getFunction("sorbet_callFuncWithCache"), {cache, blockHandler}, "send");
@@ -358,10 +355,8 @@ public:
 
             auto *callImpl = blkUsesBreak->equalsInt(1) ? module.getFunction("sorbet_callFuncBlockWithCache")
                                                         : module.getFunction("sorbet_callFuncBlockWithCache_noBreak");
-            auto *buildIfunc = module.getFunction("sorbet_buildBlockIfunc");
-            ENFORCE(buildIfunc);
-            auto *ifunc = builder.CreateCall(buildIfunc, {blk, blkMinArgs, blkMaxArgs, closure});
-            return builder.CreateCall(callImpl, {cache, ifunc}, "sendWithBlock");
+
+            return builder.CreateCall(callImpl, {cache, blkIfunc}, "sendWithBlock");
         }
     }
 } SorbetSend;
