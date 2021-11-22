@@ -758,22 +758,26 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             yetToGoDeeper.pop_back();
             for (auto member : thisIter.data(gs)->members()) {
                 if (member.second.exists() && member.first.exists() && member.first.kind() == NameKind::CONSTANT &&
-                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {
+                    (member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 || member.first.isPackagerName(gs))) {
                     if (member.second.isClassOrModule() &&
                         member.second.data(gs)->derivesFrom(gs, core::Symbols::StubModule())) {
                         continue;
                     }
-                    auto thisDistance = Levenstein::distance(
-                        currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
-                    if (thisDistance <= globalBestDistance) {
-                        if (thisDistance < globalBestDistance) {
-                            globalBest.clear();
+                    // Mangled packager names are not matched, but we do descend into them to search
+                    // deeper.
+                    if (member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {
+                        auto thisDistance = Levenstein::distance(
+                            currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
+                        if (thisDistance <= globalBestDistance) {
+                            if (thisDistance < globalBestDistance) {
+                                globalBest.clear();
+                            }
+                            globalBestDistance = thisDistance;
+                            best.distance = thisDistance;
+                            best.symbol = member.second;
+                            best.name = member.first;
+                            globalBest.emplace_back(best);
                         }
-                        globalBestDistance = thisDistance;
-                        best.distance = thisDistance;
-                        best.symbol = member.second;
-                        best.name = member.first;
-                        globalBest.emplace_back(best);
                     }
                     if (member.second.isClassOrModule()) {
                         yetToGoDeeper.emplace_back(member.second.asClassOrModuleRef());
