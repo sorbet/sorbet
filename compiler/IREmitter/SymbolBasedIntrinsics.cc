@@ -904,6 +904,8 @@ static const vector<CallCMethod> knownCMethodsInstance{
      CMethod{"sorbet_rb_array_select_withBlock", core::Symbols::Array()}},
     {core::Symbols::Array(), "reject", CMethod{"sorbet_rb_array_reject", core::Symbols::Enumerator()},
      CMethod{"sorbet_rb_array_reject_withBlock", core::Symbols::Array()}},
+    {core::Symbols::Array(), "reject!", CMethod{"sorbet_rb_array_reject_bang", core::Symbols::Enumerator()},
+     CMethod{"sorbet_rb_array_reject_bang_withBlock", core::Symbols::Array()}},
     {core::Symbols::Array(), "find", CMethod{"sorbet_rb_array_find"}, CMethod{"sorbet_rb_array_find_withBlock"}},
     {core::Symbols::Array(), "collect", CMethod{"sorbet_rb_array_collect", core::Symbols::Enumerator()},
      CMethod{"sorbet_rb_array_collect_withBlock", core::Symbols::Array()}},
