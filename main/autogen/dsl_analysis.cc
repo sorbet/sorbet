@@ -75,6 +75,51 @@ class DSLAnalysisWalk {
         return std::nullopt;
     }
 
+    std::optional<ast::ExpressionPtr> transformTypeForMutator(core::Context ctx, ast::ExpressionPtr &propType) {
+        auto *send = ast::cast_tree<ast::Send>(propType);
+        if (send) {
+            if (send->fun == core::Names::nilable()) {
+                auto innerType = transformTypeForMutator(ctx, send->args[0]);
+                if (innerType.has_value()) {
+                    auto *innerSend = ast::cast_tree<ast::Send>(*innerType);
+                    if (innerSend && innerSend->fun == core::Names::untyped()) {
+                        return innerType;
+                    }
+
+                    ast::Send::ARGS_store args;
+                    args.emplace_back(std::move(*innerType));
+
+                    return ast::MK::Send(propType.loc(), std::move(send->recv), core::Names::nilable(), 1,
+                                         std::move(args));
+                }
+            }
+
+            if (send->fun == core::Names::enum_() || send->fun == core::Names::deprecatedEnum()) {
+                return ast::MK::Send(propType.loc(), std::move(send->recv), core::Names::untyped(), 0, {});
+            }
+
+            if (send->fun == core::Names::squareBrackets()) {
+                // Typed hash, array
+                return ast::MK::Send(
+                    propType.loc(),
+                    ast::MK::UnresolvedConstant(propType.loc(), ast::MK::EmptyTree(), core::Names::Constants::T()),
+                    core::Names::untyped(), 0, {});
+            }
+
+            return std::nullopt;
+        }
+
+        if (ast::cast_tree<ast::Array>(propType) || ast::cast_tree<ast::Hash>(propType)) {
+            // Untyped hash, array
+            return ast::MK::Send(
+                propType.loc(),
+                ast::MK::UnresolvedConstant(propType.loc(), ast::MK::EmptyTree(), core::Names::Constants::T()),
+                core::Names::untyped(), 0, {});
+        }
+
+        return std::nullopt;
+    }
+
 public:
     DSLAnalysisWalk(core::FileRef a_file) {
         validScope = true;
@@ -138,15 +183,22 @@ public:
                 auto *lit = ast::cast_tree<ast::Literal>(original->args.front());
                 if (lit && lit->isSymbol(ctx)) {
                     if (original->args.size() > 1) {
-                        dslInfo[curScope].props.emplace_back(
-                            PropInfo{lit->asSymbol(ctx), original->args[1].toString(ctx)});
+                        auto maybeTransformedType = transformTypeForMutator(ctx, original->args[1]);
+                        if (maybeTransformedType.has_value()) {
+                            dslInfo[curScope].props.emplace_back(
+                                PropInfo{lit->asSymbol(ctx), (*maybeTransformedType).toString(ctx)});
+                        } else {
+                            dslInfo[curScope].props.emplace_back(
+                                PropInfo{lit->asSymbol(ctx), (original->args[1]).toString(ctx)});
+                        }
                     } else {
                         dslInfo[curScope].props.emplace_back(PropInfo{lit->asSymbol(ctx), std::nullopt});
                     }
-                } else {
-                    dslInfo[curScope].problemLocs.emplace_back(original->loc);
+
+                    return tree;
                 }
 
+                dslInfo[curScope].problemLocs.emplace_back(original->loc);
                 return tree;
             }
 
