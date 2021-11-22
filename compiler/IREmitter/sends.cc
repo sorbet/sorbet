@@ -529,14 +529,9 @@ llvm::Value *IREmitterHelpers::callViaRubyVMSimple(MethodCallContext &mcctx) {
     args.emplace_back(cache);
 
     if (auto *blk = mcctx.blkAsFunction()) {
-        auto *closure = Payload::buildLocalsOffset(mcctx.cs);
         auto blkId = mcctx.blk.value();
         args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(irctx.blockUsesBreak[blkId]))));
-        auto &arity = irctx.rubyBlockArity[blkId];
-        auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
-        auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
-        auto *blkIfunc = builder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
-                                            {blk, blkMinArgs, blkMaxArgs, closure});
+        auto *blkIfunc = Payload::buildBlockIfunc(cs, builder, irctx, blkId);
         args.emplace_back(blkIfunc);
     } else {
         args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(false))));

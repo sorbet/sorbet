@@ -491,15 +491,8 @@ public:
             auto *kwSplatFlag = llvm::ConstantInt::get(cs, llvm::APInt(32, flags.kw_splat ? 1 : 0));
 
             if (auto *blk = mcctx.blkAsFunction()) {
-                auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
-                auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
-                auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
-
-                // blocks require a locals offset parameter
-                llvm::Value *localsOffset = Payload::buildLocalsOffset(cs);
-                ENFORCE(localsOffset != nullptr);
-                auto *ifunc = builder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
-                                                 {blk, blkMinArgs, blkMaxArgs, localsOffset});
+                auto blkId = mcctx.blk.value();
+                auto *ifunc = Payload::buildBlockIfunc(cs, builder, irctx, blkId);
                 return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
                                           {argc, argv, kwSplatFlag, ifunc},
                                           "rawSendResult");
@@ -521,11 +514,9 @@ public:
 
             // Call the receiver.
             if (auto *blk = mcctx.blkAsFunction()) {
-                auto *closure = Payload::buildLocalsOffset(cs);
-                auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
-                auto usesBreak = irctx.blockUsesBreak[mcctx.blk.value()];
-                auto *ifunc = builder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
-                                                 {blk, IREmitterHelpers::buildS4(cs, arity.min), IREmitterHelpers::buildS4(cs, arity.max), closure});
+                auto blkId = mcctx.blk.value();
+                auto usesBreak = irctx.blockUsesBreak[blkId];
+                auto *ifunc = Payload::buildBlockIfunc(cs, builder, irctx, blkId);
                 return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, ifunc);
             } else {
                 auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.builder);

@@ -1162,4 +1162,15 @@ llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &bui
 llvm::Value *Payload::buildLocalsOffset(CompilerState &cs) {
     return llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true));
 }
+
+llvm::Value *Payload::buildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx, int blkId) {
+    auto *blk = irctx.rubyBlocks2Functions[blkId];
+    auto &arity = irctx.rubyBlockArity[blkId];
+    auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
+    auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
+    auto *offset = buildLocalsOffset(cs);
+
+    return builder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"), {blk, blkMinArgs, blkMaxArgs, offset});
+}
+
 } // namespace sorbet::compiler
