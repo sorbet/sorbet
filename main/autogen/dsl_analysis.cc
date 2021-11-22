@@ -17,7 +17,7 @@ const std::vector<u4> KNOWN_PROP_METHODS = {
 
 struct PropInfoInternal {
     core::NameRef name;
-    ast::ExpressionPtr typeExp;
+    std::optional<ast::ExpressionPtr> typeExp;
 };
 
 class DSLAnalysisWalk {
@@ -39,6 +39,23 @@ class DSLAnalysisWalk {
 
     std::optional<PropInfoInternal> parseProp(core::Context ctx, ast::Send *send) {
         switch (send->fun.rawId()) {
+            case core::Names::prop().rawId(): {
+                auto *lit = ast::cast_tree<ast::Literal>(send->args.front());
+                if (lit && lit->isSymbol(ctx)) {
+                    if (send->args.size() > 1) {
+                        auto maybeTransformedType = transformTypeForMutator(ctx, send->args[1]);
+                        if (maybeTransformedType.has_value()) {
+                            return PropInfoInternal{lit->asSymbol(ctx), std::move(*maybeTransformedType)};
+                        } else {
+                            return PropInfoInternal{lit->asSymbol(ctx), std::move(send->args[1])};
+                        }
+                    }
+
+                    return PropInfoInternal{lit->asSymbol(ctx), std::nullopt};
+                }
+
+                break;
+            }
             case core::Names::tokenProp().rawId():
             case core::Names::timestampedTokenProp().rawId():
                 return PropInfoInternal{
@@ -110,7 +127,6 @@ class DSLAnalysisWalk {
         }
 
         if (ast::cast_tree<ast::Array>(propType) || ast::cast_tree<ast::Hash>(propType)) {
-            // Untyped hash, array
             return ast::MK::Send(
                 propType.loc(),
                 ast::MK::UnresolvedConstant(propType.loc(), ast::MK::EmptyTree(), core::Names::Constants::T()),
@@ -175,39 +191,19 @@ public:
         bool isProp = absl::c_any_of(KNOWN_PROP_METHODS, [&](const auto &nrid) -> bool { return nrid == funId; });
         if (isProp) {
             if (!validScope) {
-                dslInfo[curScope].problemLocs.emplace_back(original->loc);
-                return tree;
-            }
-
-            if (funId == core::Names::prop().rawId()) {
-                auto *lit = ast::cast_tree<ast::Literal>(original->args.front());
-                if (lit && lit->isSymbol(ctx)) {
-                    if (original->args.size() > 1) {
-                        auto maybeTransformedType = transformTypeForMutator(ctx, original->args[1]);
-                        if (maybeTransformedType.has_value()) {
-                            dslInfo[curScope].props.emplace_back(
-                                PropInfo{lit->asSymbol(ctx), (*maybeTransformedType).toString(ctx)});
-                        } else {
-                            dslInfo[curScope].props.emplace_back(
-                                PropInfo{lit->asSymbol(ctx), (original->args[1]).toString(ctx)});
-                        }
-                    } else {
-                        dslInfo[curScope].props.emplace_back(PropInfo{lit->asSymbol(ctx), std::nullopt});
-                    }
-
-                    return tree;
-                }
-
-                dslInfo[curScope].problemLocs.emplace_back(original->loc);
+                dslInfo[curScope].problemLocs.emplace_back(std::move(original->loc));
                 return tree;
             }
 
             const auto propInfo = parseProp(ctx, original);
             if (propInfo.has_value()) {
-                dslInfo[curScope].props.emplace_back(
-                    PropInfo{std::move((*propInfo).name), std::move((*propInfo).typeExp).toString(ctx)});
+                std::optional<std::string> typeStr;
+                if ((*propInfo).typeExp.has_value()) {
+                    typeStr = std::move(*((*propInfo).typeExp)).toString(ctx);
+                }
+                dslInfo[curScope].props.emplace_back(PropInfo{std::move((*propInfo).name), std::move(typeStr)});
             } else {
-                dslInfo[curScope].problemLocs.emplace_back(original->loc);
+                dslInfo[curScope].problemLocs.emplace_back(std::move(original->loc));
             }
 
             return tree;
