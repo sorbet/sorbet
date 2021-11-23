@@ -22,7 +22,8 @@ public:
     virtual bool exists() const final;
 
     // autocorrects
-    virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState& gs, const PackageInfo& pkg, bool isTestImport) const = 0;
+    virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
+                                                                 bool isTestImport) const = 0;
 
     virtual ~PackageInfo() = 0;
     PackageInfo() = default;

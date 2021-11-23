@@ -71,12 +71,10 @@ TEST_CASE("Simple add import") {
     sorbet::core::GlobalState gs(errorQueue);
     gs.initEmpty();
 
-    auto test = TestPackageFile::create(
-        gs,
-        "my_package/__package.rb",
-        "class Opus::MyPackage < PackageSpec\n  import Opus::SomethingeElse\nend\n");
+    auto test = TestPackageFile::create(gs, "my_package/__package.rb",
+                                        "class Opus::MyPackage < PackageSpec\n  import Opus::SomethingeElse\nend\n");
 
-    auto& package = gs.packageDB().getPackageForFile(gs, test.fileRef);
+    auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
     ENFORCE(package.exists());
     gs.tracer().error("Got a package: {}", package.mangledName().show(gs));
     auto addImport = package.addImport(gs, package, false);
@@ -89,4 +87,4 @@ TEST_CASE("Simple add import") {
 
     CHECK_EQ("Yes", "Yes");
 }
-}
+} // namespace sorbet

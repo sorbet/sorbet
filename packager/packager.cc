@@ -87,7 +87,7 @@ struct PackageName {
         return absl::StrJoin(fullName.parts, "::", NameFormatter(gs));
     }
 
-    bool operator==(const PackageName& rhs) const {
+    bool operator==(const PackageName &rhs) const {
         return mangledName == rhs.mangledName;
     }
 };
@@ -194,7 +194,8 @@ public:
     explicit PackageInfoImpl(const PackageInfoImpl &) = default;
     PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;
 
-    optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo& pkg, bool isTestImport) const {
+    optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
+                                                    bool isTestImport) const {
         auto &info = PackageInfoImpl::from(pkg);
         for (auto import : importedPackageNames) {
             // check if we already import this, and if so, don't
@@ -218,8 +219,8 @@ public:
         // finding the import that directly preceeds it, if any
         core::AutocorrectSuggestion suggestion(
             fmt::format("Import `{}` in package `{}`", info.name.toString(gs), name.toString(gs)),
-            {{insertionLoc, fmt::format("\n  {} {}", isTestImport ? "test_import" : "import", info.name.toString(gs))}}
-            );
+            {{insertionLoc,
+              fmt::format("\n  {} {}", isTestImport ? "test_import" : "import", info.name.toString(gs))}});
         return {suggestion};
     }
 };

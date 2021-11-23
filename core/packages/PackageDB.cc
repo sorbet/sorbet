@@ -1,6 +1,6 @@
-#include "core/AutocorrectSuggestion.h"
 #include "core/packages/PackageDB.h"
 #include "absl/strings/match.h"
+#include "core/AutocorrectSuggestion.h"
 #include "core/GlobalState.h"
 #include "core/Loc.h"
 
@@ -35,7 +35,8 @@ public:
         return Loc::none();
     }
 
-    std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState& gs, const PackageInfo& pkg, bool isTestImport) const {
+    std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
+                                                         bool isTestImport) const {
         return {};
     }
 
