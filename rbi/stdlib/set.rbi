@@ -177,6 +177,11 @@ class Set < Object
   sig { void }
   def compare_by_identity; end
 
+  # Returns `true`` if the set will compare its elements by their identity.
+  # Also see [`Set#compare_by_identity`](https://docs.ruby-lang.org/en/2.7.0/Set.html#method-i-compare_by_identity).
+  sig { returns(T::Boolean) }
+  def compare_by_identity?; end
+
   # Deletes the given object from the set and returns self. Use `subtract` to
   # delete many items at once.
   sig do
