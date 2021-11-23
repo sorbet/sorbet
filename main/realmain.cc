@@ -50,21 +50,21 @@ using namespace std;
 namespace sorbet::realmain {
 
 namespace {
-// TODO(jez) Delete this or expose a proper helper in core/Symbols.cc instead of duplicating code.
-bool symbolIsHiddenFromPrinting(core::GlobalState &gs, core::SymbolRef sym) {
-    if (sym.isSynthetic()) {
-        return true;
-    }
-    if (sym.data(gs)->locs().empty()) {
-        return true;
-    }
-    for (auto loc : sym.data(gs)->locs()) {
-        if (loc.file().data(gs).sourceType == core::File::Type::Payload) {
-            return true;
-        }
-    }
-    return false;
-}
+// // TODO(jez) Delete this or expose a proper helper in core/Symbols.cc instead of duplicating code.
+// bool symbolIsHiddenFromPrinting(core::GlobalState &gs, core::SymbolRef sym) {
+//     if (sym.isSynthetic()) {
+//         return true;
+//     }
+//     if (sym.data(gs)->locs().empty()) {
+//         return true;
+//     }
+//     for (auto loc : sym.data(gs)->locs()) {
+//         if (loc.file().data(gs).sourceType == core::File::Type::Payload) {
+//             return true;
+//         }
+//     }
+//     return false;
+// }
 } // namespace
 
 shared_ptr<spd::logger> logger;

@@ -99,8 +99,10 @@ void writeClassDef(const core::GlobalState &rbiGS, options::PrinterConfig &outfi
         rbiEntry = rbiEntry.data(rbiGS)->attachedClass(rbiGS);
     }
     auto defType = rbiEntry.data(rbiGS)->isClassOrModuleClass() ? "class" : "module";
+    auto fullName = rbiEntry.show(rbiGS);
+    auto cbase = outputCategoryFromClassName(fullName) == OutputCategory::External ? "::" : "";
     // TODO(jez) Does missing methods ignore super classes?
-    outfile.fmt("{} ::{}\n", defType, rbiEntry.data(rbiGS)->name.shortName(rbiGS));
+    outfile.fmt("{} {}{}\n", defType, cbase, fullName);
     wroteClassDef = true;
 }
 
@@ -197,7 +199,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
             for (auto &rbiParameter : rbiParameters) {
                 if (first) {
                     first = false;
-                } else {
+                } else if (!(rbiParameter.flags.isBlock && rbiParameter.isSyntheticBlockArgument())) {
                     outfile.fmt(", ");
                 }
 
@@ -264,7 +266,7 @@ void serializeIncludes(const core::GlobalState &sourceGS, const core::GlobalStat
 
         auto keyword = isSingleton ? "extend"sv : "include"sv;
         // Don't prefix pay-server includes with :: -- it will break rigorous packages.
-        auto cbase = outputCategoryFromClassName(rbiMixinFullName) == OutputCategory::External ? "" : "::";
+        auto cbase = outputCategoryFromClassName(rbiMixinFullName) == OutputCategory::External ? "::" : "";
 
         if (!wroteClassDef) {
             writeClassDef(rbiGS, outfile, rbiClass, wroteClassDef);
