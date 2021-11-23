@@ -286,7 +286,7 @@ class Tempfile
         length: Integer,
         outbuf: String,
     )
-    .returns(String)
+    .returns(T.nilable(String))
   end
   def read(length=T.unsafe(nil), outbuf=T.unsafe(nil)); end
 
