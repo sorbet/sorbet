@@ -1,11 +1,14 @@
 #ifndef SORBET_CORE_PACKAGES_PACKAGEINFO_H
 #define SORBET_CORE_PACKAGES_PACKAGEINFO_H
 
+#include <optional>
 #include <vector>
 
 namespace sorbet::core {
+class GlobalState;
 class NameRef;
 class Loc;
+struct AutocorrectSuggestion;
 } // namespace sorbet::core
 
 namespace sorbet::core::packages {
@@ -17,6 +20,9 @@ public:
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
     virtual core::Loc definitionLoc() const = 0;
     virtual bool exists() const final;
+
+    // autocorrects
+    virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState& gs, const PackageInfo& pkg, bool isTestImport) const = 0;
 
     virtual ~PackageInfo() = 0;
     PackageInfo() = default;
