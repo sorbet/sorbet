@@ -68,28 +68,17 @@ OutputCategory outputCategoryFromClassName(string_view fullName) {
     }
 }
 
-core::MethodRef closestOverridenMethod(const core::GlobalState &gs, core::SymbolRef enclosingClassSymbol,
-                                       core::NameRef name) {
-    auto enclosingClass = enclosingClassSymbol.data(gs);
-    ENFORCE(enclosingClass->isClassOrModuleLinearizationComputed(), "Should have been linearized by resolver");
-
-    for (const auto &mixin : enclosingClass->mixins()) {
-        auto mixinMethod = mixin.data(gs)->findMember(gs, name);
-        if (mixinMethod.exists()) {
-            return mixinMethod.asMethodRef();
-        }
-    }
-
-    auto superClass = enclosingClass->superClass();
-    if (!superClass.exists()) {
-        return core::Symbols::noMethod();
-    }
-
-    auto superMethod = superClass.data(gs)->findMember(gs, name);
-    if (superMethod.exists()) {
-        return superMethod.asMethodRef();
-    } else {
-        return closestOverridenMethod(gs, superClass, name);
+core::NameRef rbiNameToSourceName(const core::GlobalState &sourceGS, const core::GlobalState &rbiGS,
+                                  core::NameRef rbiName) {
+    switch (rbiName.kind()) {
+        case core::NameKind::UTF8:
+            return sourceGS.lookupNameUTF8(rbiName.dataUtf8(rbiGS)->utf8);
+        case core::NameKind::CONSTANT:
+            return sourceGS.lookupNameConstant(rbiNameToSourceName(sourceGS, rbiGS, rbiName.dataCnst(rbiGS)->original));
+        case core::NameKind::UNIQUE:
+            auto rbiUnique = rbiName.dataUnique(rbiGS);
+            return sourceGS.lookupNameUnique(rbiUnique->uniqueNameKind,
+                                             rbiNameToSourceName(sourceGS, rbiGS, rbiUnique->original), rbiUnique->num);
     }
 }
 
@@ -179,10 +168,20 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
             }
         }
 
-        auto rbiMethod = rbiEntry.asMethodRef();
-        auto superMethod = closestOverridenMethod(rbiGS, rbiClass, rbiEntryName);
-        if (superMethod.exists() && (rbiMethod.data(rbiGS)->isAbstract() == superMethod.data(rbiGS)->isAbstract())) {
-            continue;
+        if (sourceClass.exists()) {
+            // We already `continue`'d earlier for this case. If this ENFORCE were not true, findMemberTransitive
+            // will not actually find a super method, just the same method in sourceGS.
+            ENFORCE(sourceMembersByName.find(rbiEntryName.show(rbiGS)) == sourceMembersByName.end());
+
+            // Have to find the superMethod in sourceGS, because otherwise the `isAbstract` bit won't be set
+            auto sourceSuperMethod = sourceClass.data(sourceGS)->findMemberTransitive(
+                sourceGS, rbiNameToSourceName(sourceGS, rbiGS, rbiEntryName));
+            if (sourceSuperMethod.exists() && !sourceSuperMethod.data(sourceGS)->isAbstract()) {
+                // Sorbet will fall back to dispatching to the parent method, which might have a sig.
+                // But if the parent is abstract, and we don't serialize a method, Sorbet will
+                // complain about the method not being implemented when it was, just not visibly.
+                continue;
+            }
         }
 
         // TODO(jez) Can we forward the source_location comment from the RBI file?
@@ -200,7 +199,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
         auto isSingleton = rbiClass.data(rbiGS)->isSingletonClass(rbiGS);
         outfile.fmt("  def {}{}(", isSingleton ? "self." : "", rbiEntryShortName);
 
-        auto &rbiParameters = rbiMethod.data(rbiGS)->arguments();
+        auto &rbiParameters = rbiEntry.data(rbiGS)->arguments();
         if (rbiParameters.size() == 3 && rbiParameters[1].name == core::Names::fwdKwargs()) {
             // The positional and block parameters get their names normalized to make overload
             // checking easier. The only reliable way to detect `...` syntax is by looking at the
