@@ -116,6 +116,19 @@ void writeClassDef(const core::GlobalState &rbiGS, options::PrinterConfig &outfi
 void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState &rbiGS,
                       options::PrinterConfig &outfile, core::SymbolRef sourceClass, core::SymbolRef rbiClass,
                       bool isSingleton, bool &wroteClassDef) {
+    // TODO(jez) factor this into a helper
+    auto sourceMembersByName = UnorderedMap<string, core::SymbolRef>{};
+    if (sourceClass.exists()) {
+        for (auto [sourceEntryName, sourceEntry] : sourceClass.data(sourceGS)->members()) {
+            if (!sourceEntry.exists()) {
+                ENFORCE(sourceClass == core::Symbols::root());
+                continue;
+            }
+            // Using show not showRaw so that overloads are collapsed into one entry.
+            sourceMembersByName[sourceEntryName.show(sourceGS)] = sourceEntry;
+        }
+    }
+
     for (auto rbiMembersIt : rbiClass.data(rbiGS)->membersStableOrderSlow(rbiGS)) {
         auto rbiEntryName = rbiMembersIt.first;
         auto rbiEntry = rbiMembersIt.second;
@@ -124,10 +137,8 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
         }
 
         if (sourceClass.exists()) {
-            // Mixes names entered across global states, which is why it's important equal names have
-            // equal IDs across GlobalStates.
-            auto sourceEntry = sourceClass.data(sourceGS)->findMember(sourceGS, rbiEntryName);
-            if (sourceEntry.exists()) {
+            auto sourceEntryIt = sourceMembersByName.find(rbiEntryName.show(rbiGS));
+            if (sourceEntryIt != sourceMembersByName.end()) {
                 continue;
             }
         }
@@ -279,11 +290,23 @@ void serializeIncludes(const core::GlobalState &sourceGS, const core::GlobalStat
 void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState &rbiGS,
                       options::PrinterConfig &outfile, core::SymbolRef sourceClass, core::SymbolRef rbiClass) {
     ENFORCE(rbiClass.exists());
+
+    auto sourceMembersByName = UnorderedMap<string, core::SymbolRef>{};
+    if (sourceClass.exists()) {
+        for (auto [sourceEntryName, sourceEntry] : sourceClass.data(sourceGS)->members()) {
+            if (!sourceEntry.exists()) {
+                ENFORCE(sourceClass == core::Symbols::root());
+                continue;
+            }
+            sourceMembersByName[sourceEntryName.showRaw(sourceGS)] = sourceEntry;
+        }
+    }
+
     for (auto rbiMembersIt : rbiClass.data(rbiGS)->membersStableOrderSlow(rbiGS)) {
         auto rbiEntryName = rbiMembersIt.first;
         auto rbiEntry = rbiMembersIt.second;
         if (!rbiEntry.exists()) {
-            // Symbols::noSymbol() is a valid symbol owned by root that we have to skip
+            ENFORCE(rbiClass == core::Symbols::root());
             continue;
         }
 
@@ -312,7 +335,10 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
 
         auto sourceEntry = core::Symbols::noSymbol();
         if (sourceClass.exists()) {
-            sourceEntry = sourceClass.data(sourceGS)->findMember(sourceGS, rbiEntryName);
+            auto sourceEntryIt = sourceMembersByName.find(rbiEntryName.showRaw(rbiGS));
+            if (sourceEntryIt != sourceMembersByName.end()) {
+                sourceEntry = sourceEntryIt->second;
+            }
         }
 
         if (sourceEntry.exists() && !sourceEntry.data(sourceGS)->isClassOrModule()) {
