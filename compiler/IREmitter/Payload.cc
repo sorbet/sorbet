@@ -1166,16 +1166,15 @@ llvm::Value *Payload::buildLocalsOffset(CompilerState &cs) {
 llvm::Value *Payload::buildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx, int blkId) {
     auto *blk = irctx.rubyBlocks2Functions[blkId];
     auto &arity = irctx.rubyBlockArity[blkId];
-    auto *buildFunc = cs.getFunction("sorbet_buildBlockIfunc");
     auto rawName = fmt::format("{}_ifunc", (string)blk->getName());
 
-    auto *globalTy = llvm::cast<llvm::PointerType>(buildFunc->getReturnType());
+    auto *globalTy = llvm::Type::getInt64Ty(cs);
 
     auto *global = cs.module->getOrInsertGlobal(rawName, globalTy, [&cs, &blk, &rawName, &globalTy, &arity]() {
             auto globalInitBuilder = llvm::IRBuilder<>(cs);
 
             auto isConstant = false;
-            auto *zero = llvm::ConstantPointerNull::get(globalTy);
+            auto *zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
             auto global = new llvm::GlobalVariable(*cs.module, globalTy, isConstant, llvm::GlobalVariable::InternalLinkage, zero, rawName);
 
             globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
@@ -1185,12 +1184,15 @@ llvm::Value *Payload::buildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &bu
             auto *offset = buildLocalsOffset(cs);
             auto *ifunc = globalInitBuilder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
         {blk, blkMinArgs, blkMaxArgs, offset});
-            globalInitBuilder.CreateStore(ifunc, global);
+            auto *asValue = globalInitBuilder.CreateBitOrPointerCast(ifunc, globalTy);
+            auto *globalIndex = globalInitBuilder.CreateCall(cs.getFunction("sorbet_globalConstRegister"), {asValue});
+            globalInitBuilder.CreateStore(globalIndex, global);
 
             return global;
         });
 
-    return builder.CreateLoad(global);
+    auto *globalIndex = builder.CreateLoad(global);
+    return builder.CreateCall(cs.getFunction("sorbet_globalConstFetchIfunc"), {globalIndex});
 }
 
 } // namespace sorbet::compiler
