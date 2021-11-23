@@ -131,6 +131,29 @@ cc_test(
 )
 
 cc_test(
+    name = "pkg-autocorrects-test",
+    size = "small",
+    srcs = ["pkg_autocorrects_test.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//ast",
+        "//ast/desugar",
+        "//common",
+        "//common/concurrency",
+        "//core",
+        "//local_vars",
+        "//packager",
+        "//parser",
+        "@doctest",
+        "@doctest//:doctest_main",
+    ],
+)
+
+cc_test(
     name = "error-check-test",
     size = "small",
     srcs = ["error-check-test.cc"],
