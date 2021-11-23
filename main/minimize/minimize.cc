@@ -353,8 +353,8 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
             writeClassDef(rbiGS, outfile, rbiEntry, wroteClassDef);
         }
 
-        serializeMethods(sourceGS, rbiGS, outfile, sourceEntry, rbiEntry, myClassIsSingleton, wroteClassDef);
         serializeIncludes(sourceGS, rbiGS, outfile, sourceEntry, rbiEntry, myClassIsSingleton, wroteClassDef);
+        serializeMethods(sourceGS, rbiGS, outfile, sourceEntry, rbiEntry, myClassIsSingleton, wroteClassDef);
         // TODO(jez) the pay-server version doesn't handle static fields and type members
 
         if (wroteClassDef) {
