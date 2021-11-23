@@ -171,6 +171,12 @@ class Set < Object
   sig {returns(T.self_type)}
   def clear(); end
 
+  # Makes the set compare its elements by their identity and returns self.
+  # This method may not be supported by all subclasses of
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html).
+  sig { void }
+  def compare_by_identity; end
+
   # Deletes the given object from the set and returns self. Use `subtract` to
   # delete many items at once.
   sig do
