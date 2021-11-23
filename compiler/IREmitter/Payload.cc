@@ -1117,11 +1117,10 @@ llvm::Value *Payload::callFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &
 llvm::Value *Payload::callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                              bool usesBreak, llvm::Value *ifunc) {
     if (usesBreak) {
-        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache"),
-                                  {cache, ifunc}, "sendWithBlock");
+        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache"), {cache, ifunc}, "sendWithBlock");
     } else {
-        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache_noBreak"),
-                                  {cache, ifunc}, "sendWithBlock");
+        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache_noBreak"), {cache, ifunc},
+                                  "sendWithBlock");
     }
 }
 
@@ -1163,7 +1162,8 @@ llvm::Value *Payload::buildLocalsOffset(CompilerState &cs) {
     return llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true));
 }
 
-llvm::Value *Payload::buildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx, int blkId) {
+llvm::Value *Payload::buildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                                      int blkId) {
     auto *blk = irctx.rubyBlocks2Functions[blkId];
     auto &arity = irctx.rubyBlockArity[blkId];
     auto rawName = fmt::format("{}_ifunc", (string)blk->getName());
@@ -1171,25 +1171,26 @@ llvm::Value *Payload::buildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &bu
     auto *globalTy = llvm::Type::getInt64Ty(cs);
 
     auto *global = cs.module->getOrInsertGlobal(rawName, globalTy, [&cs, &blk, &rawName, &globalTy, &arity]() {
-            auto globalInitBuilder = llvm::IRBuilder<>(cs);
+        auto globalInitBuilder = llvm::IRBuilder<>(cs);
 
-            auto isConstant = false;
-            auto *zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
-            auto global = new llvm::GlobalVariable(*cs.module, globalTy, isConstant, llvm::GlobalVariable::InternalLinkage, zero, rawName);
+        auto isConstant = false;
+        auto *zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
+        auto global = new llvm::GlobalVariable(*cs.module, globalTy, isConstant, llvm::GlobalVariable::InternalLinkage,
+                                               zero, rawName);
 
-            globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
+        globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
 
-            auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
-            auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
-            auto *offset = buildLocalsOffset(cs);
-            auto *ifunc = globalInitBuilder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
-        {blk, blkMinArgs, blkMaxArgs, offset});
-            auto *asValue = globalInitBuilder.CreateBitOrPointerCast(ifunc, globalTy);
-            auto *globalIndex = globalInitBuilder.CreateCall(cs.getFunction("sorbet_globalConstRegister"), {asValue});
-            globalInitBuilder.CreateStore(globalIndex, global);
+        auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
+        auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
+        auto *offset = buildLocalsOffset(cs);
+        auto *ifunc = globalInitBuilder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
+                                                   {blk, blkMinArgs, blkMaxArgs, offset});
+        auto *asValue = globalInitBuilder.CreateBitOrPointerCast(ifunc, globalTy);
+        auto *globalIndex = globalInitBuilder.CreateCall(cs.getFunction("sorbet_globalConstRegister"), {asValue});
+        globalInitBuilder.CreateStore(globalIndex, global);
 
-            return global;
-        });
+        return global;
+    });
 
     auto *globalIndex = builder.CreateLoad(global);
     return builder.CreateCall(cs.getFunction("sorbet_globalConstFetchIfunc"), {globalIndex});

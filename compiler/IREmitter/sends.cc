@@ -437,8 +437,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
             auto *ifunc = builder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
                                              {blk, blkMinArgs, blkMaxArgs, localsOffset});
             return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
-                                      {args.argc, args.argv, args.kw_splat, ifunc},
-                                      "rawSendResult");
+                                      {args.argc, args.argv, args.kw_splat, ifunc}, "rawSendResult");
         }
 
         return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {args.argc, args.argv, args.kw_splat},

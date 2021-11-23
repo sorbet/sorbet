@@ -215,8 +215,7 @@ SORBET_ALIVE(VALUE, sorbet_run_exception_handling,
               // The special value indicating that we need to retry.
               VALUE retrySingleton, long exceptionValueIndex, long exceptionValueLevel));
 
-SORBET_ALIVE(VALUE, sorbet_rb_iterate,
-             (VALUE(*body)(VALUE), VALUE data1, const struct vm_ifunc *ifunc));
+SORBET_ALIVE(VALUE, sorbet_rb_iterate, (VALUE(*body)(VALUE), VALUE data1, const struct vm_ifunc *ifunc));
 SORBET_ALIVE(VALUE, sorbet_vm_aref,
              (rb_control_frame_t * cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg));
 SORBET_ALIVE(VALUE, sorbet_vm_plus,

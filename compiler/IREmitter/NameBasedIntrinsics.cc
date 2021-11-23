@@ -493,8 +493,7 @@ public:
             if (auto *blk = mcctx.blkAsFunction()) {
                 auto blkId = mcctx.blk.value();
                 auto *ifunc = Payload::buildBlockIfunc(cs, builder, irctx, blkId);
-                return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
-                                          {argc, argv, kwSplatFlag, ifunc},
+                return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"), {argc, argv, kwSplatFlag, ifunc},
                                           "rawSendResult");
             } else {
                 return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {argc, argv, kwSplatFlag},
