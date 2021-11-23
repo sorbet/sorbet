@@ -24,6 +24,7 @@ compilation_database(
         "//test/fuzz:fuzz_dash_e",
         "//test/fuzz:fuzz_dash_e_impl",
         "//test:print_document_symbols",
+        "//test:pkg-autocorrects-test",
         "//test:pipeline_test_runner",
         "//test:parser_test_runner",
         "//test:lsp_test_runner",
