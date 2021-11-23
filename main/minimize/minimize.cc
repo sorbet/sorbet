@@ -115,8 +115,8 @@ void writeClassDef(const core::GlobalState &rbiGS, options::PrinterConfig &outfi
 
 void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState &rbiGS,
                       options::PrinterConfig &outfile, core::SymbolRef sourceClass, core::SymbolRef rbiClass,
-                      bool isSingleton, bool &wroteClassDef) {
-    // TODO(jez) factor this into a helper
+                      bool &wroteClassDef) {
+    // TODO(jez) factor this into a helper?
     auto sourceMembersByName = UnorderedMap<string, core::SymbolRef>{};
     if (sourceClass.exists()) {
         for (auto [sourceEntryName, sourceEntry] : sourceClass.data(sourceGS)->members()) {
@@ -197,6 +197,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
         // TODO(jez) eventually might want to extend this to serialize any type information that was present
         // TODO(jez) You're already hard-coding only two levels of this (no singleton of singleton).
         // Get rid of the double pass, and just do instance methods and singleton class methods in one pass.
+        auto isSingleton = rbiClass.data(rbiGS)->isSingletonClass(rbiGS);
         outfile.fmt("  def {}{}(", isSingleton ? "self." : "", rbiEntryShortName);
 
         auto &rbiParameters = rbiMethod.data(rbiGS)->arguments();
@@ -244,7 +245,8 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
 
 void serializeIncludes(const core::GlobalState &sourceGS, const core::GlobalState &rbiGS,
                        options::PrinterConfig &outfile, core::SymbolRef sourceClass, core::SymbolRef rbiClass,
-                       bool isSingleton, bool &wroteClassDef) {
+                       bool &wroteClassDef) {
+    ENFORCE(rbiClass.exists());
     auto sourceClassMixinsFullNames = vector<string>{};
     if (sourceClass.exists()) {
         for (auto sourceMixin : sourceClass.data(sourceGS)->mixins()) {
@@ -275,6 +277,7 @@ void serializeIncludes(const core::GlobalState &sourceGS, const core::GlobalStat
             continue;
         }
 
+        auto isSingleton = rbiClass.data(rbiGS)->isSingletonClass(rbiGS);
         auto keyword = isSingleton ? "extend"sv : "include"sv;
         // Don't prefix pay-server includes with :: -- it will break rigorous packages.
         auto cbase = outputCategoryFromClassName(rbiMixinFullName) == OutputCategory::External ? "::" : "";
@@ -310,24 +313,27 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
             continue;
         }
 
-        // Special methods we use to store things on the symbol table. Not meant to be printed.
-        if (rbiEntryName == core::Names::singleton() ||             //
-            rbiEntryName == core::Names::attached() ||              //
-            rbiEntryName == core::Names::mixedInClassMethods() ||   //
-            rbiEntryName == core::Names::Constants::AttachedClass() //
-        ) {
-            continue;
-        }
+        // // TODO(jez) Is this needed still? Could we replace this with a check for whether the current symbol is a
+        // class?
+        // // Special methods we use to store things on the symbol table. Not meant to be printed.
+        // if (rbiEntryName == core::Names::singleton() ||             //
+        //     rbiEntryName == core::Names::attached() ||              //
+        //     rbiEntryName == core::Names::mixedInClassMethods() ||   //
+        //     rbiEntryName == core::Names::Constants::AttachedClass() //
+        // ) {
+        //     continue;
+        // }
 
         if (!rbiEntry.data(rbiGS)->isClassOrModule()) {
             continue;
         }
 
-        // TODO(jez) This is not actually used except to pass information to serializeMethods and
-        // serializeIncludes, but those methods could easily recompute it from their arguemnts.
-        auto myClassIsSingleton = rbiEntry.data(rbiGS)->isSingletonClass(rbiGS);
+        if (rbiEntry.data(rbiGS)->isSingletonClass(rbiGS)) {
+            // We're going to have serializeIncludes and serializeMethods serialize both the
+            // instance and singleton methods at the same time.
+            continue;
+        }
 
-        // auto myClass = rbiEntry;
         if (rbiEntry == core::Symbols::T()) {
             // We specifically don't typecheck anything in T:: since it is hardcoded into sorbet
             continue;
@@ -353,8 +359,18 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
             writeClassDef(rbiGS, outfile, rbiEntry, wroteClassDef);
         }
 
-        serializeIncludes(sourceGS, rbiGS, outfile, sourceEntry, rbiEntry, myClassIsSingleton, wroteClassDef);
-        serializeMethods(sourceGS, rbiGS, outfile, sourceEntry, rbiEntry, myClassIsSingleton, wroteClassDef);
+        auto sourceEntrySingleton = sourceEntry.exists() ? sourceEntry.data(sourceGS)->lookupSingletonClass(sourceGS)
+                                                         : core::Symbols::noSymbol();
+        auto rbiEntrySingleton = rbiEntry.data(rbiGS)->lookupSingletonClass(rbiGS);
+
+        serializeIncludes(sourceGS, rbiGS, outfile, sourceEntry, rbiEntry, wroteClassDef);
+        if (rbiEntrySingleton.exists()) {
+            serializeIncludes(sourceGS, rbiGS, outfile, sourceEntrySingleton, rbiEntrySingleton, wroteClassDef);
+        }
+        serializeMethods(sourceGS, rbiGS, outfile, sourceEntry, rbiEntry, wroteClassDef);
+        if (rbiEntrySingleton.exists()) {
+            serializeMethods(sourceGS, rbiGS, outfile, sourceEntrySingleton, rbiEntrySingleton, wroteClassDef);
+        }
         // TODO(jez) the pay-server version doesn't handle static fields and type members
 
         if (wroteClassDef) {
