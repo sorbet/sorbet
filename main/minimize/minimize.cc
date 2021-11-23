@@ -95,7 +95,7 @@ core::MethodRef closestOverridenMethod(const core::GlobalState &gs, core::Symbol
 
 void writeClassDef(const core::GlobalState &rbiGS, options::PrinterConfig &outfile, core::SymbolRef rbiEntry,
                    bool &wroteClassDef) {
-    if (rbiEntry.data(rbiGS)->isSingletonClass(rbiGS)) {
+    while (rbiEntry.data(rbiGS)->isSingletonClass(rbiGS)) {
         rbiEntry = rbiEntry.data(rbiGS)->attachedClass(rbiGS);
     }
     auto defType = rbiEntry.data(rbiGS)->isClassOrModuleClass() ? "class" : "module";
