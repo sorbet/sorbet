@@ -18,10 +18,11 @@ const vector<core::SymbolRef> IGNORED_BY_SYMBOL = {
 const vector<string_view> IGNORED_BY_FULL_NAME = {
     // These modules are Sorbet-internal and aren't necessary for static typechecking, so they
     // aren't necessary and they cause a fair bit of missing_methods churn
-    "T::Private::Methods::MethodHooks",    "T::Private::Methods::SingletonMethodHooks",
-    "T::Private::Abstract::Hooks",         "T::Private::MixesInClassMethods",
-    "T::Private::Final::NoInherit",        "T::Private::Final::NoIncludeExtend",
-    "T::Private::Sealed::NoIncludeExtend", "T::InterfaceWrapper::Helpers",
+    "T::Private::Methods::MethodHooks", "T::Private::Methods::SingletonMethodHooks",
+    "T::Private::Abstract::Hooks",      "T::Private::MixesInClassMethods",
+    "T::Private::Final::NoInherit",     "T::Private::Final::NoIncludeExtend",
+    "T::Private::Sealed::NoInherit",    "T::Private::Sealed::NoIncludeExtend",
+    "T::InterfaceWrapper::Helpers",
 };
 
 enum class OutputCategory {
@@ -158,8 +159,13 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
             if ((rbiEntryShortName != "=="sv) &&  //
                 (rbiEntryShortName != "==="sv) && //
                 (rbiEntryShortName != "<=>"sv) && //
+                (rbiEntryShortName != "<"sv) &&   //
+                (rbiEntryShortName != "<="sv) &&  //
+                (rbiEntryShortName != ">"sv) &&   //
+                (rbiEntryShortName != ">="sv) &&  //
                 (rbiEntryShortName != "!~"sv) &&  //
                 (rbiEntryShortName != "=~"sv) &&  //
+                (rbiEntryShortName != "<<"sv) &&  //
                 (rbiEntryShortName != "[]"sv) &&  //
                 (rbiEntryShortName != "[]="sv)    //
             ) {
@@ -222,7 +228,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
                     outfile.fmt("*{}", rbiParameterShortName);
                 } else if (rbiParameter.flags.isKeyword) {
                     if (rbiParameter.flags.isDefault) {
-                        outfile.fmt("{}: ::T.unsafe(nil)", rbiParameterShortName);
+                        outfile.fmt("{}: T.unsafe(nil)", rbiParameterShortName);
                     } else {
                         outfile.fmt("{}:", rbiParameterShortName);
                     }
@@ -231,7 +237,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
                         outfile.fmt("&{}", rbiParameterShortName);
                     }
                 } else if (rbiParameter.flags.isDefault) {
-                    outfile.fmt("{}=::T.unsafe(nil)", rbiParameterShortName);
+                    outfile.fmt("{}=T.unsafe(nil)", rbiParameterShortName);
                 } else {
                     outfile.fmt("{}", rbiParameterShortName);
                 }
