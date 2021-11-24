@@ -517,9 +517,6 @@ NameDef names[] = {
     {"Autogen", "Autogen", true},
     {"Tokens", "Tokens", true},
     {"AccountModelMerchantToken", "AccountModelMerchantToken", true},
-
-    // Debugging:
-    {"ClearingSubmissionRecord", "ClearingSubmissionRecord", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

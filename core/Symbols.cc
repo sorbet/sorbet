@@ -547,7 +547,6 @@ bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional
 size_t Symbol::addStubMixin(const GlobalState &gs) {
     ENFORCE(isClassOrModule());
     mixins_.emplace_back(ClassOrModuleRef());
-    fmt::print("STUB {}\n", mixins_.size() - 1);
     return mixins_.size() - 1;
 }
 

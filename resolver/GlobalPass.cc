@@ -291,26 +291,12 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
     ENFORCE_NO_TIMER(ofClass.exists());
     auto data = ofClass.data(gs);
     if (!data->isClassOrModuleLinearizationComputed()) {
-        bool rp_debug = false;
-        if (data->name == core::Names::Constants::ClearingSubmissionRecord() && ofClass.show(gs) == "Opus::Ops::CartesBancaires::Model::ClearingSubmissionRecord") {
-            fmt::print(stderr, "LIN: {}\n", ofClass.showFullName(gs));
-            rp_debug = true;
-        }
-        if (rp_debug) {
-            int i = 0;
-            for (auto mixin : data->mixins()) {
-                fmt::print(stderr, "  ORIG_MIX {}: {}\n", i++, mixin.showFullName(gs));
-            }
-        }
         if (data->superClass().exists()) {
             computeClassLinearization(gs, data->superClass());
         }
         InlinedVector<core::ClassOrModuleRef, 4> currentMixins = data->mixins();
         InlinedVector<core::ClassOrModuleRef, 4> newMixins;
         for (auto mixin : currentMixins) {
-            if (rp_debug) {
-                fmt::print(stderr, "CUR MIX: {}\n", mixin.showFullName(gs));
-            }
             if (mixin == data->superClass()) {
                 continue;
             }
@@ -339,12 +325,6 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
             for (auto oldMixin : currentMixins) {
                 ENFORCE(ofClass.data(gs)->derivesFrom(gs, oldMixin), "{} no longer derives from {}",
                         ofClass.showFullName(gs), oldMixin.showFullName(gs));
-            }
-        }
-        if (rp_debug) {
-            int i = 0;
-            for (auto mixin : data->mixins()) {
-                fmt::print("  MIX {}: {}\n", i++, mixin.showFullName(gs));
             }
         }
     }
