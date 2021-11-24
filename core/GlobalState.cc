@@ -296,6 +296,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::StubModule());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
     ENFORCE(id == Symbols::StubMixin());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::PlaceholderMixin());
+    ENFORCE(id == Symbols::PlaceholderMixin());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubSuperClass());
     ENFORCE(id == Symbols::StubSuperClass());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerable());
