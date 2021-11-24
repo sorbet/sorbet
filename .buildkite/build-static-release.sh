@@ -26,6 +26,8 @@ echo will run with $CONFIG_OPTS
 mkdir gems/sorbet-static/libexec/
 cp bazel-bin/main/sorbet gems/sorbet-static/libexec/
 
+rbenv install --skip-existing
+
 pushd gems/sorbet-static
 git_commit_count=$(git rev-list --count HEAD)
 release_version="0.5.${git_commit_count}"

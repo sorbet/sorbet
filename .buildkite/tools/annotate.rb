@@ -19,8 +19,7 @@ job_pattern = '-(.*).xml' if !job_pattern || job_pattern.empty?
 failure_format = ENV['BUILDKITE_PLUGIN_JUNIT_ANNOTATE_FAILURE_FORMAT']
 failure_format = 'classname' if !failure_format || failure_format.empty?
 
-class Failure < Struct.new(:name, :failed_test, :body, :job, :type)
-end
+Failure = Struct.new(:name, :failed_test, :body, :job, :type)
 
 junit_report_files = Dir.glob(File.join(junits_dir, "**", "*"))
 testcases = 0

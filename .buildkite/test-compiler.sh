@@ -64,6 +64,7 @@ function cleanup {
 
 trap cleanup EXIT
 
+rbenv install --skip-existing
 .buildkite/tools/annotate.rb _tmp_/log/junit > "$annotation_path"
 cat "$annotation_path"
 
