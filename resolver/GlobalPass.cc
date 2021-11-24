@@ -297,6 +297,7 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
         InlinedVector<core::ClassOrModuleRef, 4> currentMixins = data->mixins();
         InlinedVector<core::ClassOrModuleRef, 4> newMixins;
         for (auto mixin : currentMixins) {
+            ENFORCE(mixin != core::Symbols::PlaceholderMixin(), "Resolver failed to replace all placeholders");
             if (mixin == data->superClass()) {
                 continue;
             }
