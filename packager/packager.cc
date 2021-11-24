@@ -209,7 +209,7 @@ public:
         // first let's try adding it to the end of the imports.
         if (!importedPackageNames.empty()) {
             auto lastOffset = importedPackageNames.back().name.loc;
-            insertionLoc = loc.adjust(gs, lastOffset.endPos(), lastOffset.endPos());
+            insertionLoc = {info.loc.file(), lastOffset.endPos(), lastOffset.endPos()};
         } else {
             // TODO: fix this case
             return nullopt;

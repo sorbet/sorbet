@@ -68,23 +68,48 @@ struct TestPackageFile {
 };
 
 TEST_CASE("Simple add import") {
-    sorbet::core::GlobalState gs(errorQueue);
+    core::GlobalState gs(errorQueue);
     gs.initEmpty();
 
-    auto test = TestPackageFile::create(gs, "my_package/__package.rb",
-                                        "class Opus::MyPackage < PackageSpec\n  import Opus::SomethingeElse\nend\n");
+    string pkg_source = "class Opus::MyPackage < PackageSpec\n"
+                        "  import Opus::SomethingElse\n"
+                        "end\n";
+
+    string expected = "class Opus::MyPackage < PackageSpec\n"
+                      "  import Opus::SomethingElse\n"
+                      "  import Opus::MyPackage\n"
+                      "end\n";
+
+    auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
 
     auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
     ENFORCE(package.exists());
-    gs.tracer().error("Got a package: {}", package.mangledName().show(gs));
     auto addImport = package.addImport(gs, package, false);
-    if (addImport) {
-        gs.tracer().error("Got an autocorrect: {}", addImport->edits.front().replacement);
-    } else {
-        gs.tracer().error("No autocorrect");
-    }
-    gs.tracer().error(":: {}", test.parsedFile.tree.toString(gs));
+    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = addImport->apply(pkg_source);
+    CHECK_EQ(expected, replaced);
+}
 
-    CHECK_EQ("Yes", "Yes");
+TEST_CASE("Simple test import") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
+
+    string pkg_source = "class Opus::MyPackage < PackageSpec\n"
+                        "  import Opus::SomethingElse\n"
+                        "end\n";
+
+    string expected = "class Opus::MyPackage < PackageSpec\n"
+                      "  import Opus::SomethingElse\n"
+                      "  test_import Opus::MyPackage\n"
+                      "end\n";
+
+    auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
+
+    auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
+    ENFORCE(package.exists());
+    auto addImport = package.addImport(gs, package, true);
+    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = addImport->apply(pkg_source);
+    CHECK_EQ(expected, replaced);
 }
 } // namespace sorbet

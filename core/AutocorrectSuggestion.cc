@@ -26,6 +26,27 @@ bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
     return false;
 }
 
+string AutocorrectSuggestion::apply(const std::string_view source) {
+    UnorderedSet<Loc> seen;
+    vector<AutocorrectSuggestion::Edit> edits = move(this->edits);
+
+    auto compare = [](const AutocorrectSuggestion::Edit &left, const AutocorrectSuggestion::Edit &right) {
+        return left.loc.beginPos() > right.loc.beginPos();
+    };
+    fast_sort(edits, compare);
+
+    string replaced{source};
+    for (auto &edit : edits) {
+        auto start = edit.loc.beginPos();
+        auto end = edit.loc.endPos();
+        fmt::print("check it out: replaced is {} and replacement is {}", replaced, edit.replacement);
+        fmt::print("start={}, end={}", start, end);
+        replaced = absl::StrCat(replaced.substr(0, start), edit.replacement, replaced.substr(end, -1));
+    }
+
+    return replaced;
+}
+
 UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(const GlobalState &gs, FileSystem &fs,
                                                            const vector<AutocorrectSuggestion> &autocorrects) {
     UnorderedMap<FileRef, string> sources;
