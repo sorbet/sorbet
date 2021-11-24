@@ -46,8 +46,6 @@ string AutocorrectSuggestion::unsafeApplyToString(const std::string_view source)
     for (auto &edit : edits) {
         auto start = edit.loc.beginPos();
         auto end = edit.loc.endPos();
-        fmt::print("check it out: replaced is {} and replacement is {}", replaced, edit.replacement);
-        fmt::print("start={}, end={}", start, end);
         replaced = absl::StrCat(replaced.substr(0, start), edit.replacement, replaced.substr(end, -1));
     }
 

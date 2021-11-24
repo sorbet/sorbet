@@ -112,4 +112,93 @@ TEST_CASE("Simple test import") {
     auto replaced = addImport->unsafeApplyToString(pkg_source);
     CHECK_EQ(expected, replaced);
 }
+
+TEST_CASE("Add import with only existing exports") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
+
+    string pkg_source = "class Opus::MyPackage < PackageSpec\n"
+                        "  export Opus::SomethingElse\n"
+                        "end\n";
+
+    string expected = "class Opus::MyPackage < PackageSpec\n"
+                      "  import Opus::MyPackage\n"
+                      "  export Opus::SomethingElse\n"
+                      "end\n";
+
+    auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
+
+    auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
+    ENFORCE(package.exists());
+    auto addImport = package.addImport(gs, package, false);
+    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = addImport->unsafeApplyToString(pkg_source);
+    CHECK_EQ(expected, replaced);
+}
+
+TEST_CASE("Add test import with only existing exports") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
+
+    string pkg_source = "class Opus::MyPackage < PackageSpec\n"
+                        "  export Opus::SomethingElse\n"
+                        "end\n";
+
+    string expected = "class Opus::MyPackage < PackageSpec\n"
+                      "  test_import Opus::MyPackage\n"
+                      "  export Opus::SomethingElse\n"
+                      "end\n";
+
+    auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
+
+    auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
+    ENFORCE(package.exists());
+    auto addImport = package.addImport(gs, package, true);
+    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = addImport->unsafeApplyToString(pkg_source);
+    CHECK_EQ(expected, replaced);
+}
+
+TEST_CASE("Add import to package with neither imports nor exports") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
+
+    string pkg_source = "class Opus::MyPackage < PackageSpec\n"
+                        "end\n";
+
+    string expected = "class Opus::MyPackage < PackageSpec\n"
+                      "  import Opus::MyPackage\n"
+                      "end\n";
+
+    auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
+
+    auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
+    ENFORCE(package.exists());
+    auto addImport = package.addImport(gs, package, false);
+    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = addImport->unsafeApplyToString(pkg_source);
+    CHECK_EQ(expected, replaced);
+}
+
+TEST_CASE("Add test import to package with neither imports nor exports") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
+
+    string pkg_source = "class Opus::MyPackage < PackageSpec\n"
+                        "end\n";
+
+    string expected = "class Opus::MyPackage < PackageSpec\n"
+                      "  test_import Opus::MyPackage\n"
+                      "end\n";
+
+    auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
+
+    auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
+    ENFORCE(package.exists());
+    auto addImport = package.addImport(gs, package, true);
+    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = addImport->unsafeApplyToString(pkg_source);
+    CHECK_EQ(expected, replaced);
+}
+
 } // namespace sorbet

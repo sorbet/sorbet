@@ -211,9 +211,29 @@ public:
             auto lastOffset = importedPackageNames.back().name.loc;
             insertionLoc = {info.loc.file(), lastOffset.endPos(), lastOffset.endPos()};
         } else {
-            // TODO: fix this case
-            return nullopt;
+            // if we don't have any imports, then we can try adding it
+            // either before the first export, or if we have no
+            // exports, then right before the final `end`
+            u4 exportLoc;
+            if (!exports.empty()) {
+                exportLoc = exports.front().fqn.loc.beginPos() - "export "sv.size() - 1;
+            } else {
+                exportLoc = info.loc.endPos() - "end"sv.size() - 1;
+            }
+            // we want to find the end of the last non-empty line, so
+            // let's do something gross: walk backward until we find non-whitespace
+            const auto &file_source = info.loc.file().data(gs).source();
+            while (isspace(file_source[exportLoc])) {
+                exportLoc--;
+                // this shouldn't happen in a well-formatted
+                // `__package.rb` file, but just to be safe
+                if (exportLoc == 0) {
+                    return nullopt;
+                }
+            }
+            insertionLoc = {info.loc.file(), exportLoc + 1, exportLoc + 1};
         }
+        ENFORCE(insertionLoc.exists());
 
         // now find the appropriate place for it, specifically by
         // finding the import that directly preceeds it, if any
