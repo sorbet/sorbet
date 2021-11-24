@@ -10,8 +10,12 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//ast",
+        "//common/concurrency",
+        "//common/kvstore",
         "//core",
         "//main/options",
+        "//main/pipeline",
         "@spdlog",
     ],
 )

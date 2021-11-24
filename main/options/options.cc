@@ -781,6 +781,7 @@ void readOptions(Options &opts,
 
         opts.noErrorCount = raw["no-error-count"].as<bool>();
         opts.noStdlib = raw["no-stdlib"].as<bool>();
+        // TODO(jez) Change name of option?
         opts.minimizeRBI = raw["minimize-rbi"].as<string>();
         if (!opts.minimizeRBI.empty() && !opts.print.MinimizeRBI.enabled) {
             // TODO(jez) Test for this

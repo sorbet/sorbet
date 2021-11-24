@@ -1,5 +1,7 @@
 #include "main/minimize/minimize.h"
 #include "absl/strings/match.h"
+#include "core/ErrorQueue.h"
+#include "main/pipeline/pipeline.h"
 #include <optional>
 
 using namespace std;
@@ -387,6 +389,35 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
 }
 
 } // namespace
+
+void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &rbiGS, options::Options &opts,
+                                          WorkerPool &workers, std::string minimizeRBI) {
+    // TODO(jez) Put Timer's in here wherever there are gaps in the web trace file
+    // TODO(jez) What would it mean for us to accept a vector of RBIs? (Tricky to combine with --print)
+    // TODO(jez) Is it worth forcing the input file to be an RBI? Or should we drop that from the option name?
+    // Maybe just call it --minimize-to-rbi?
+    // TODO(jez) Do something to ensure that `opts.minimizeRBI` file is not a file Sorbet already knew about.
+    auto inputFilesForMinimize = pipeline::reserveFiles(rbiGS, {minimizeRBI});
+
+    // I'm ignoring everything relating to caching here, because missing methods is likely
+    // to run on a new _unknown.rbi file every time and I didn't want to think about it.
+    // If this phase gets slow, we can consider whether caching would speed things up.
+    auto indexedForMinimize = pipeline::index(rbiGS, inputFilesForMinimize, opts, workers, nullptr);
+    if (rbiGS->hadCriticalError()) {
+        rbiGS->errorQueue->flushAllErrors(*rbiGS);
+    }
+
+    // TODO(jez) Test that shows that `-p symbol-table` options work with second global state
+    indexedForMinimize = move(pipeline::resolve(rbiGS, move(indexedForMinimize), opts, workers).result());
+    if (rbiGS->hadCriticalError()) {
+        rbiGS->errorQueue->flushAllErrors(*rbiGS);
+    }
+
+    rbiGS->errorQueue->flushAllErrors(*rbiGS);
+
+    // indexedForMinimize goes out of scope here, and destructors run
+    // If this becomes too slow, we can consider using intentionallyLeakMemory
+}
 
 void Minimize::writeDiff(const core::GlobalState &sourceGS, const core::GlobalState &rbiGS,
                          options::PrinterConfig &outfile) {

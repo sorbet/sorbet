@@ -614,37 +614,9 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        // TODO(jez) Put Timer's in here wherever there are gaps in the web trace file
-        // TODO(jez) Change name of option?
-        // TODO(jez) Is it worth factoring this stuff out to a helper? (leaning towards no)
         if (!opts.minimizeRBI.empty()) {
-            // TODO(jez) What would it mean for us to accept a vector of RBIs? (Tricky to combine with --print)
-            // TODO(jez) Is it worth forcing the input file to be an RBI? Or should we drop that from the option name?
-            // Maybe just call it --minimize-to-rbi?
-            // TODO(jez) Do something to ensure that `opts.minimizeRBI` file is not a file Sorbet already knew about.
-            auto inputFilesForMinimize = pipeline::reserveFiles(gsForMinimize, {opts.minimizeRBI});
-
-            // I'm ignoring everything relating to caching here, because missing methods is likely
-            // to run on a new _unknown.rbi file every time and I didn't want to think about it.
-            // If this phase gets slow, we can consider whether caching would speed things up.
-            auto indexedForMinimize = pipeline::index(gsForMinimize, inputFilesForMinimize, opts, *workers, nullptr);
-            if (gsForMinimize->hadCriticalError()) {
-                gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
-            }
-
-            // TODO(jez) Test that shows that `-p symbol-table` options work with second global state
-            indexedForMinimize =
-                move(pipeline::resolve(gsForMinimize, move(indexedForMinimize), opts, *workers).result());
-            if (gsForMinimize->hadCriticalError()) {
-                gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
-            }
-
-            gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
-
+            Minimize::indexAndResolveForMinimize(gsForMinimize, opts, *workers, opts.minimizeRBI);
             Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
-
-            // indexedForMinimize goes out of scope here, and destructors run
-            // If this becomes too slow, we can consider using intentionallyLeakMemory
         }
 
         if (opts.suggestTyped) {
