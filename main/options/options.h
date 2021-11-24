@@ -22,6 +22,7 @@ public:
         print(fmt::format(msg.str, std::forward<Args>(args)...));
     }
     void flush();
+    std::string flushToString();
 
     PrinterConfig();
     PrinterConfig(const PrinterConfig &) = default;

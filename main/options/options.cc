@@ -101,6 +101,11 @@ void PrinterConfig::flush() {
     FileOps::write(outputPath, to_string(state->buf));
 };
 
+string PrinterConfig::flushToString() {
+    absl::MutexLock lck(&state->mutex);
+    return to_string(state->buf);
+};
+
 vector<reference_wrapper<PrinterConfig>> Printers::printers() {
     return vector<reference_wrapper<PrinterConfig>>({
         ParseTree,
