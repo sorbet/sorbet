@@ -1096,6 +1096,7 @@ class Hash < Object
     )
     .returns(T::Hash[K, V])
   end
+  sig {returns(T::Enumerator[[K, V]])}
   def select(&blk); end
 
   # Returns a hash containing only the given keys and their values.
@@ -1126,6 +1127,7 @@ class Hash < Object
     )
     .returns(T::Hash[K, V])
   end
+  sig {returns(T::Enumerator[[K, V]])}
   def filter(&blk); end
 
   # Equivalent to
