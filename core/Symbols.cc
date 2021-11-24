@@ -502,7 +502,7 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     return Types::arrayOf(ctx, instantiated);
 }
 
-bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional<size_t> index) {
+bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional<u2> index) {
     ENFORCE(isClassOrModule());
     // Note: Symbols without an explicit declaration may not have class or module set. They default to modules in
     // GlobalPass.cc. We also do not complain if the mixin is BasicObject.
@@ -514,7 +514,7 @@ bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional
         // semantically important!)
         // This is the 99% common case.
         if (index.has_value()) {
-            size_t i = index.value();
+            auto i = index.value();
             ENFORCE(mixins_.size() > i);
             ENFORCE(!mixins_[i].exists());
             mixins_[i] = sym;
@@ -544,9 +544,10 @@ bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional
     return isValidMixin;
 }
 
-size_t Symbol::addStubMixin(const GlobalState &gs) {
+u2 Symbol::addStubMixin(const GlobalState &gs) {
     ENFORCE(isClassOrModule());
     mixins_.emplace_back(ClassOrModuleRef());
+    ENFORCE(mixins_.size() < numeric_limits<u2>::max());
     return mixins_.size() - 1;
 }
 

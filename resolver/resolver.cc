@@ -126,7 +126,7 @@ private:
 
         bool isSuperclass; // true if superclass, false for mixin
         bool isInclude;    // true if include, false if extend
-        std::optional<size_t> mixinInd;
+        std::optional<u2> mixinIndex;
 
         AncestorResolutionItem() = default;
         AncestorResolutionItem(AncestorResolutionItem &&rhs) noexcept = default;
@@ -507,7 +507,11 @@ private:
 
             if (!resolved.isClassOrModule()) {
                 if (!lastRun) {
-                    job.mixinInd = job.klass.data(ctx)->addStubMixin(ctx);
+                    if (!job.isSuperclass) {
+                        // This is an include or extend. Add a stub to fill in later to preserve
+                        // ordering of mixins.
+                        job.mixinIndex = job.klass.data(ctx)->addStubMixin(ctx);
+                    }
                     return false;
                 }
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
@@ -524,7 +528,7 @@ private:
                 e.addErrorLine(resolvedClass.data(ctx)->loc(), "Class definition");
             }
             resolvedClass = stubSymbolForAncestor(job);
-        } else if (resolvedClass.data(ctx)->derivesFrom(ctx, job.klass)) {
+        } else if (resolvedClass.data(ctx)->derivesFrom(ctx, job.klass)) { // TODO problem if already a stub
             if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
                             job.klass.show(ctx), resolvedClass.show(ctx));
@@ -550,7 +554,7 @@ private:
                 }
             }
         } else {
-            if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinInd)) {
+            if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinIndex)) {
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::IncludesNonModule)) {
                     e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
                                 resolvedClass.show(ctx));
