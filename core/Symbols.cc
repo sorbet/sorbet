@@ -516,7 +516,7 @@ bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional
         if (index.has_value()) {
             auto i = index.value();
             ENFORCE(mixins_.size() > i);
-            ENFORCE(mixins_[i] == core::Symbols::StubMixin());
+            ENFORCE(mixins_[i] == core::Symbols::PlaceholderMixin());
             mixins_[i] = sym;
         } else {
             mixins_.emplace_back(sym);
@@ -546,8 +546,8 @@ bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional
 
 u2 Symbol::addMixinPlaceholder(const GlobalState &gs) {
     ENFORCE(isClassOrModule());
-    ENFORCE(ref(gs) != core::Symbols::StubMixin(), "Created a cycle through StubMixin");
-    mixins_.emplace_back(core::Symbols::StubMixin());
+    ENFORCE(ref(gs) != core::Symbols::PlaceholderMixin(), "Created a cycle through PlaceholderMixin");
+    mixins_.emplace_back(core::Symbols::PlaceholderMixin());
     ENFORCE(mixins_.size() < numeric_limits<u2>::max());
     return mixins_.size() - 1;
 }
