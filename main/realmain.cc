@@ -48,25 +48,6 @@ namespace spd = spdlog;
 using namespace std;
 
 namespace sorbet::realmain {
-
-namespace {
-// // TODO(jez) Delete this or expose a proper helper in core/Symbols.cc instead of duplicating code.
-// bool symbolIsHiddenFromPrinting(core::GlobalState &gs, core::SymbolRef sym) {
-//     if (sym.isSynthetic()) {
-//         return true;
-//     }
-//     if (sym.data(gs)->locs().empty()) {
-//         return true;
-//     }
-//     for (auto loc : sym.data(gs)->locs()) {
-//         if (loc.file().data(gs).sourceType == core::File::Type::Payload) {
-//             return true;
-//         }
-//     }
-//     return false;
-// }
-} // namespace
-
 shared_ptr<spd::logger> logger;
 int returnCode;
 
@@ -472,21 +453,17 @@ int realmain(int argc, char *argv[]) {
     }
     unique_ptr<WorkerPool> workers = WorkerPool::create(opts.threads, *logger);
 
-    //
     auto errorFlusher = make_shared<core::ErrorFlusherStdout>();
     unique_ptr<core::GlobalState> gs =
-        make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, errorFlusher));
+        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, errorFlusher)));
     gs->pathPrefix = opts.pathPrefix;
     gs->errorUrlBase = opts.errorUrlBase;
     gs->semanticExtensions = move(extensions);
     vector<ast::ParsedFile> indexed;
-    vector<ast::ParsedFile> indexedForMinimize;
 
     gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
     logger->trace("building initial global state");
-    // TODO(jez) An option might be to just set kvstore to nullptr if you want to ignore the
-    // intersection of --cache-dir and --minimize-rbi.
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(opts);
     payload::createInitialGlobalState(gs, opts, kvstore);
     if (opts.silenceErrors) {
@@ -535,7 +512,12 @@ int realmain(int argc, char *argv[]) {
 
     logger->trace("done building initial global state");
 
-    // TODO(jez) Note: this is where you used to initialize gsForMinimize
+    unique_ptr<core::GlobalState> gsForMinimize;
+    if (!opts.minimizeRBI.empty()) {
+        // Copy GlobalState after createInitialGlobalState and option handling, but before rest of
+        // pipeline, so that it represents an "empty" GlobalState.
+        gsForMinimize = gs->deepCopy();
+    }
 
     if (opts.runLSP) {
 #ifdef SORBET_REALMAIN_MIN
@@ -556,6 +538,7 @@ int realmain(int argc, char *argv[]) {
 #endif
     } else {
         Timer timeall(logger, "wall_time");
+        vector<core::FileRef> inputFiles;
         logger->trace("Files: ");
 
         if (!opts.storeState.empty()) {
@@ -563,8 +546,7 @@ int realmain(int argc, char *argv[]) {
             hashing::Hashing::computeFileHashes(gs->getFiles(), *logger, *workers, opts);
         }
 
-        auto inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames);
-        vector<core::FileRef> inputFilesForMinimize;
+        { inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames); }
 
         {
             core::UnfreezeFileTable fileTableAccess(*gs);
@@ -582,14 +564,6 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        // TODO(jez) Change name of option?
-        if (!opts.minimizeRBI.empty()) {
-            // TODO(jez) What would it mean for us to accept a vector of RBIs? (Tricky to combine with --print)
-            // TODO(jez) Do something to ensure that `opts.minimizeRBI` file is not a file Sorbet
-            // already knew about.
-            inputFilesForMinimize = pipeline::reserveFiles(gs, {opts.minimizeRBI});
-        }
-
         {
             if (!opts.storeState.empty() || opts.forceHashing) {
                 // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
@@ -597,33 +571,11 @@ int realmain(int argc, char *argv[]) {
             } else {
                 indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore);
             }
-
-            if (!opts.minimizeRBI.empty()) {
-                // Uses the same `gs` as the rest of the pipepine, so that the NameRef's reuse existing IDs
-                indexedForMinimize = pipeline::index(gs, inputFilesForMinimize, opts, *workers, kvstore);
-            }
-
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
         }
         cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed);
-        // TODO(jez) Should we care that we're not caching the result of indexing `unknown.rbi`?
-
-        // TODO(jez) Double check that you didn't use gs whe you meant to gsForMinimize
-        unique_ptr<core::GlobalState> gsForMinimize;
-        if (!opts.minimizeRBI.empty()) {
-            // Duplicate GlobalState after indexing so that the NameRef's are comparable.
-            // Duplicate before resolving so that the contents of the symbol table are not shared.
-            gsForMinimize = gs->deepCopy();
-
-            // auto onlyInFirstNameGS = core::NameRef::fromRaw(*gs, 8790);
-            // auto onlyInFirstNameMin = core::NameRef::fromRaw(*gsForMinimize, 8790);
-            // fmt::print("gs  gs  : {}\n", onlyInFirstNameGS.show(*gs));
-            // fmt::print("gs  min : {}{}\n", onlyInFirstNameGS.show(*gsForMinimize));
-            // fmt::print("min gs  : {}\n", onlyInFirstNameMin.show(*gs));
-            // fmt::print("min min : {}{}\n", onlyInFirstNameMin.show(*gsForMinimize));
-        }
 
         if (gs->runningUnderAutogen) {
 #ifdef SORBET_REALMAIN_MIN
@@ -662,112 +614,36 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
+        // TODO(jez) Put Timer's in here wherever there are gaps in the web trace file
+        // TODO(jez) Change name of option?
         // TODO(jez) Is it worth factoring this stuff out to a helper? (leaning towards no)
         if (!opts.minimizeRBI.empty()) {
+            // TODO(jez) What would it mean for us to accept a vector of RBIs? (Tricky to combine with --print)
             // TODO(jez) Is it worth forcing the input file to be an RBI? Or should we drop that from the option name?
             // Maybe just call it --minimize-to-rbi?
-            // TODO(jez) Put Timer's in here wherever there are gaps in the web trace file
+            // TODO(jez) Do something to ensure that `opts.minimizeRBI` file is not a file Sorbet already knew about.
+            auto inputFilesForMinimize = pipeline::reserveFiles(gsForMinimize, {opts.minimizeRBI});
 
-            // fmt::print("-------------------------------------------------------------------------\n");
-            // for (const auto &[name, sym] : core::Symbols::root().data(*gs)->membersStableOrderSlow(*gs)) {
-            //     if (symbolIsHiddenFromPrinting(*gs, sym)) {
-            //         continue;
-            //     }
-            //     fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gs), name.rawId(),
-            //     sym.show(*gs),
-            //                sym.rawId());
-            // }
-            // fmt::print("-------------------------------------------------------------------------\n");
-            // for (const auto &[name, sym] :
-            //      core::Symbols::root().data(*gsForMinimize)->membersStableOrderSlow(*gsForMinimize)) {
-            //     if (symbolIsHiddenFromPrinting(*gsForMinimize, sym)) {
-            //         continue;
-            //     }
-            //     fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gsForMinimize), name.rawId(),
-            //                sym.show(*gsForMinimize), sym.rawId());
-            // }
-            // fmt::print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-
-            // pipeline::resolve will have also entered some names (mostly singleton class names,
-            // but there are others). To have comparable NameRef IDs, we have to enter those names into our
-            // gsForMinimize before calling pipeline::resolve again. The easiest and fastest way to do this is
-            // just to just copy everything name-related from `gs`, overwriting what existed in `gsForMinimize`.
-
-            // As far as I could tell, this flag was designed for the fuzzer. Not super sure what it does exactly.
-            auto useMemcpy = false;
-            gsForMinimize->_overwriteNameTablesFrom(*gs, useMemcpy);
-
-            // for (const auto &[name, sym] : core::Symbols::root().data(*gs)->membersStableOrderSlow(*gs)) {
-            //     if (symbolIsHiddenFromPrinting(*gs, sym)) {
-            //         continue;
-            //     }
-            //     fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gs), name.rawId(),
-            //     sym.show(*gs),
-            //                sym.rawId());
-            // }
-            // fmt::print("-------------------------------------------------------------------------\n");
-            // for (const auto &[name, sym] :
-            //      core::Symbols::root().data(*gsForMinimize)->membersStableOrderSlow(*gsForMinimize)) {
-            //     if (symbolIsHiddenFromPrinting(*gsForMinimize, sym)) {
-            //         continue;
-            //     }
-            //     fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gsForMinimize), name.rawId(),
-            //                sym.show(*gsForMinimize), sym.rawId());
-            // }
-            // fmt::print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-            indexedForMinimize =
-                move(pipeline::resolve(gsForMinimize, move(indexedForMinimize), opts, *workers).result());
+            // I'm ignoring everything relating to caching here, because missing methods is likely
+            // to run on a new _unknown.rbi file every time and I didn't want to think about it.
+            // If this phase gets slow, we can consider whether caching would speed things up.
+            auto indexedForMinimize = pipeline::index(gsForMinimize, inputFilesForMinimize, opts, *workers, nullptr);
             if (gsForMinimize->hadCriticalError()) {
                 gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
             }
-            // TODO(jez) Flush error COUNT from this run (actually, looks like this might already
-            // happen because the errorQueue is shared?)
-            gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
 
             // TODO(jez) Test that shows that `-p symbol-table` options work with second global state
+            indexedForMinimize = pipeline::resolve(gsForMinimize, move(indexedForMinimize), opts, *workers).result();
+            if (gsForMinimize->hadCriticalError()) {
+                gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
+            }
 
-            // TODO(jez) What do do about autocorrects? Ban combining the two options?
-            // TODO(jez) Handle hadCriticalError
-
-            // fmt::print("-------------------------------------------------------------------------\n");
-            // for (const auto &[name, sym] : core::Symbols::root().data(*gs)->membersStableOrderSlow(*gs)) {
-            //     if (symbolIsHiddenFromPrinting(*gs, sym)) {
-            //         continue;
-            //     }
-            //     fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gs), name.rawId(),
-            //     sym.show(*gs),
-            //                sym.rawId());
-            // }
-            // fmt::print("-------------------------------------------------------------------------\n");
-            // for (const auto &[name, sym] :
-            //      core::Symbols::root().data(*gsForMinimize)->membersStableOrderSlow(*gsForMinimize)) {
-            //     if (symbolIsHiddenFromPrinting(*gsForMinimize, sym)) {
-            //         continue;
-            //     }
-            //     fmt::print("name={}, name._id={}, sym={}, sym._id={}\n", name.showRaw(*gsForMinimize), name.rawId(),
-            //                sym.show(*gsForMinimize), sym.rawId());
-            // }
-            // fmt::print("-------------------------------------------------------------------------\n");
+            gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
 
             Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
 
-            // -------- TODO(jez) --------
-            // Share the original gs's error queue
-            // 1.  Launch sorbet a second time to compute second GlobalState
-            //     a.  Factor code out of realmain to be able to reuse code? Or maybe just implement manually?
-            //     b.  Probably going to have to use GlobalSubstitution so that the NameRef's are
-            //         comparable
-            //         - Will have to take great care to never compare core::SymbolRef (should be possible)
-            // 2.  Port diff algorithm from Ruby to find things in gsForMinimize but not in gs
-            //     -   Not clear what the output of this step should be...
-            //         - core::GlobalState?
-            //         - some proto definition?
-            //         - direct to RBI string?
-            // 3.  Serialize the diff to an RBI
-            //     -   Might be nice to have this as its own thing? Like to serialize Sorbet's whole
-            //         static knowledge to an RBI?
-            //     -   Would let people ship RBIs for their Sorbet gems
-            // 4.  Test harness
+            // indexedForMinimize goes out of scope here, and destructors run
+            // If this becomes too slow, we can consider using intentionallyLeakMemory
         }
 
         if (opts.suggestTyped) {
@@ -884,7 +760,7 @@ int realmain(int argc, char *argv[]) {
         }
     }
 #endif
-    if (!gs || gs->hadCriticalError()) {
+    if (!gs || gs->hadCriticalError() || (gsForMinimize && gsForMinimize->hadCriticalError())) {
         returnCode = 10;
     } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.supressNonCriticalErrors) {
         returnCode = 1;
@@ -898,7 +774,7 @@ int realmain(int argc, char *argv[]) {
             intentionallyLeakMemory(e.tree.release());
         }
         intentionallyLeakMemory(gs.release());
-        // TODO(jez) Handle gsForMinimize and the tree you created for that
+        intentionallyLeakMemory(gsForMinimize.release());
     }
 
     // je_malloc_stats_print(nullptr, nullptr, nullptr); // uncomment this to print jemalloc statistics

@@ -783,7 +783,13 @@ void readOptions(Options &opts,
         opts.noStdlib = raw["no-stdlib"].as<bool>();
         opts.minimizeRBI = raw["minimize-rbi"].as<string>();
         if (!opts.minimizeRBI.empty() && !opts.print.MinimizeRBI.enabled) {
+            // TODO(jez) Test for this
             logger->error("--minimize-rbi must also include --print=minimize-rbi");
+            throw EarlyReturnWithCode(1);
+        }
+        if (!opts.minimizeRBI.empty() && opts.autocorrect) {
+            // TODO(jez) Test for this
+            logger->error("--minimize-rbi plus --autocorrect is not implemented");
             throw EarlyReturnWithCode(1);
         }
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
