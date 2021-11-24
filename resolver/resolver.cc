@@ -126,6 +126,7 @@ private:
 
         bool isSuperclass; // true if superclass, false for mixin
         bool isInclude;    // true if include, false if extend
+        std::optional<size_t> mixinInd;
 
         AncestorResolutionItem() = default;
         AncestorResolutionItem(AncestorResolutionItem &&rhs) noexcept = default;
@@ -485,15 +486,27 @@ private:
 
     static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job, bool lastRun) {
         auto ancestorSym = job.ancestor->symbol;
+        bool dbg = job.file.data(ctx).path() == "./example.rb" || job.file.data(ctx).path() == "./example_no_alias.rb";
+        if (dbg) {
+            fmt::print("RESOLVE {} {} {}\n", job.klass.show(ctx), ancestorSym.show(ctx), job.klass.data(ctx)->mixins().size());
+        }
+
         if (!ancestorSym.exists()) {
+            if (dbg) {
+                fmt::print("RET 0\n");
+            }
             return false;
         }
+        // fmt::print("false {}\n", ancestorSym.show(ctx));
 
         core::ClassOrModuleRef resolvedClass;
         {
             core::SymbolRef resolved;
             if (ancestorSym.data(ctx)->isTypeAlias()) {
                 if (!lastRun) {
+                    if (dbg) {
+                        fmt::print("RET 1\n");
+                    }
                     return false;
                 }
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
@@ -506,6 +519,10 @@ private:
 
             if (!resolved.isClassOrModule()) {
                 if (!lastRun) {
+                    if (dbg) {
+                        fmt::print("RET 2 kind={} {}\n", resolved.kind(), resolved.showRaw(ctx));
+                    }
+                    job.mixinInd = job.klass.data(ctx)->addStubMixin(ctx);
                     return false;
                 }
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
@@ -548,7 +565,11 @@ private:
                 }
             }
         } else {
-            if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass)) {
+            if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinInd)) {
+                auto x = resolvedClass.data(ctx)->dealias(ctx);
+                if (x.rawId() != resolvedClass.id()) {
+                    fmt::print(stderr, "WEIRD: {} {} {}\n", ctx.file.data(ctx).path(), resolvedClass.show(ctx), x.show(ctx));
+                }
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::IncludesNonModule)) {
                     e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
                                 resolvedClass.show(ctx));
@@ -560,6 +581,9 @@ private:
 
         if (ancestorPresent) {
             saveAncestorTypeForHashing(ctx, job);
+        }
+        if (dbg) {
+            fmt::print("RET TRUE\n");
         }
         return true;
     }

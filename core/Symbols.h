@@ -142,7 +142,9 @@ public:
 
     // Attempts to add the given mixin to the symbol. If the mixin is invalid because it is not a module, it returns
     // `false` (but still adds the mixin for processing during linearization) and the caller should report an error.
-    [[nodiscard]] bool addMixin(const GlobalState &gs, ClassOrModuleRef sym);
+    [[nodiscard]] bool addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional<size_t> index= std::nullopt);
+
+    size_t addStubMixin(const GlobalState &gs);
 
     inline InlinedVector<SymbolRef, 4> &typeMembers() {
         ENFORCE(isClassOrModule());

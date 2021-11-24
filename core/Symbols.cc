@@ -502,7 +502,7 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     return Types::arrayOf(ctx, instantiated);
 }
 
-bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym) {
+bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional<size_t> index) {
     ENFORCE(isClassOrModule());
     // Note: Symbols without an explicit declaration may not have class or module set. They default to modules in
     // GlobalPass.cc. We also do not complain if the mixin is BasicObject.
@@ -513,8 +513,16 @@ bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym) {
         // Symbol hasn't been linearized yet, so add symbol unconditionally (order matters, so dupes are OK and
         // semantically important!)
         // This is the 99% common case.
-        mixins_.emplace_back(sym);
+        if (index.has_value()) {
+            size_t i = index.value();
+            ENFORCE(mixins_.size() > i);
+            ENFORCE(!mixins_[i].exists());
+            mixins_[i] = sym;
+        } else {
+            mixins_.emplace_back(sym);
+        }
     } else {
+        ENFORCE(!index.has_value());
         // Symbol has been linearized, but we are trying to add another mixin. This is bad behavior and we shouldn't
         // allow it, but we currently allow it for the following circumstances:
         // * To support mixing in items to classes defined in payload, which have already been linearized.
@@ -534,6 +542,13 @@ bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym) {
         }
     }
     return isValidMixin;
+}
+
+size_t Symbol::addStubMixin(const GlobalState &gs) {
+    ENFORCE(isClassOrModule());
+    mixins_.emplace_back(ClassOrModuleRef());
+    fmt::print("STUB {}\n", mixins_.size() - 1);
+    return mixins_.size() - 1;
 }
 
 SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
