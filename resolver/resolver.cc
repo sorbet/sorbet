@@ -508,9 +508,9 @@ private:
             if (!resolved.isClassOrModule()) {
                 if (!lastRun) {
                     if (!job.isSuperclass) {
-                        // This is an include or extend. Add a stub to fill in later to preserve
+                        // This is an include or extend. Add a placeholder to fill in later to preserve
                         // ordering of mixins.
-                        job.mixinIndex = job.klass.data(ctx)->addStubMixin(ctx);
+                        job.mixinIndex = job.klass.data(ctx)->addMixinPlaceholder(ctx);
                     }
                     return false;
                 }

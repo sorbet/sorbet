@@ -145,7 +145,7 @@ public:
     [[nodiscard]] bool addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional<u2> index = std::nullopt);
 
     // Add a placeholder for a mixin and return index in mixins()
-    u2 addStubMixin(const GlobalState &gs);
+    u2 addMixinPlaceholder(const GlobalState &gs);
 
     inline InlinedVector<SymbolRef, 4> &typeMembers() {
         ENFORCE(isClassOrModule());

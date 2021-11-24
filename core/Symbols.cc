@@ -544,7 +544,7 @@ bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional
     return isValidMixin;
 }
 
-u2 Symbol::addStubMixin(const GlobalState &gs) {
+u2 Symbol::addMixinPlaceholder(const GlobalState &gs) {
     ENFORCE(isClassOrModule());
     ENFORCE(ref(gs) != core::Symbols::StubMixin(), "Created a cycle through StubMixin");
     mixins_.emplace_back(core::Symbols::StubMixin());
