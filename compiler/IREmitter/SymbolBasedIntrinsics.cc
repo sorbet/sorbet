@@ -962,8 +962,8 @@ static const vector<CallCMethod> knownCMethodsInstance{
      CMethod{"sorbet_rb_hash_merge_withBlock", core::Symbols::Hash()}},
     {core::Symbols::Hash(), "merge!", CMethod{"sorbet_rb_hash_update", core::Symbols::Hash()},
      CMethod{"sorbet_rb_hash_update_withBlock", core::Symbols::Hash()}},
-    // TODO(aprocter): `update` needs a sig before we can declare a return type here
-    {core::Symbols::Hash(), "update", CMethod{"sorbet_rb_hash_update"}, CMethod{"sorbet_rb_hash_update_withBlock"}},
+    {core::Symbols::Hash(), "update", CMethod{"sorbet_rb_hash_update", core::Symbols::Hash()},
+     CMethod{"sorbet_rb_hash_update_withBlock", core::Symbols::Hash()}},
     {core::Symbols::TrueClass(), "|", CMethod{"sorbet_int_bool_true"}},
     {core::Symbols::FalseClass(), "|", CMethod{"sorbet_int_bool_and"}},
     {core::Symbols::TrueClass(), "&", CMethod{"sorbet_int_bool_and"}},
