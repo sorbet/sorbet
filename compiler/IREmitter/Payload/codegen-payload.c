@@ -181,7 +181,8 @@ SORBET_ALIVE(VALUE, rb_hash_keys, (VALUE recv));
 SORBET_ALIVE(VALUE, rb_hash_values, (VALUE recv));
 SORBET_ALIVE(VALUE, sorbet_rb_hash_fetch_m,
              (VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure));
-SORBET_ALIVE(VALUE, sorbet_rb_hash_update, (VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure));
+SORBET_ALIVE(VALUE, sorbet_rb_hash_update,
+             (VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure));
 SORBET_ALIVE(int, sorbet_rb_hash_update_withBlock_i, (VALUE key, VALUE value, VALUE argsv));
 
 SORBET_ALIVE(VALUE, sorbet_vm_fstring_new, (const char *ptr, long len));
@@ -1946,10 +1947,10 @@ VALUE sorbet_rb_hash_update_withBlock(VALUE recv, ID fun, int argc, const VALUE 
     // must push a frame for the captured block
     sorbet_pushBlockFrame(captured);
 
-    for (i = 0; i < argc; i++){
-       VALUE hash = rb_to_hash_type(argv[i]);
-       struct sorbet_rb_hash_update_withBlock_i_args args = {recv, closure, blk};
-       rb_hash_foreach(hash, sorbet_rb_hash_update_withBlock_i, (VALUE)&args);
+    for (i = 0; i < argc; i++) {
+        VALUE hash = rb_to_hash_type(argv[i]);
+        struct sorbet_rb_hash_update_withBlock_i_args args = {recv, closure, blk};
+        rb_hash_foreach(hash, sorbet_rb_hash_update_withBlock_i, (VALUE)&args);
     }
 
     sorbet_popFrame();
@@ -1957,17 +1958,21 @@ VALUE sorbet_rb_hash_update_withBlock(VALUE recv, ID fun, int argc, const VALUE 
     return recv;
 }
 
-// No-block version of Hash#merge: https://github.com/ruby/ruby/blob/ac7c2754c004cdb3618738e315d2e2cb5f68a3a8/hash.c#L3973-L3977
+// No-block version of Hash#merge:
+// https://github.com/ruby/ruby/blob/ac7c2754c004cdb3618738e315d2e2cb5f68a3a8/hash.c#L3973-L3977
 SORBET_INLINE
-VALUE sorbet_rb_hash_merge(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_hash_merge(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                           VALUE closure) {
     return sorbet_rb_hash_update(rb_hash_dup(recv), fun, argc, argv, blk, closure);
 }
 
-// Block version of Hash#merge: https://github.com/ruby/ruby/blob/ac7c2754c004cdb3618738e315d2e2cb5f68a3a8/hash.c#L3973-L3977
+// Block version of Hash#merge:
+// https://github.com/ruby/ruby/blob/ac7c2754c004cdb3618738e315d2e2cb5f68a3a8/hash.c#L3973-L3977
 SORBET_INLINE
 VALUE sorbet_rb_hash_merge_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                      const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
-    return sorbet_rb_hash_update_withBlock(rb_hash_dup(recv), fun, argc, argv, blk, captured, closure, numPositionalArgs);
+    return sorbet_rb_hash_update_withBlock(rb_hash_dup(recv), fun, argc, argv, blk, captured, closure,
+                                           numPositionalArgs);
 }
 
 // ****
