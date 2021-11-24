@@ -633,7 +633,8 @@ int realmain(int argc, char *argv[]) {
             }
 
             // TODO(jez) Test that shows that `-p symbol-table` options work with second global state
-            indexedForMinimize = pipeline::resolve(gsForMinimize, move(indexedForMinimize), opts, *workers).result();
+            indexedForMinimize =
+                move(pipeline::resolve(gsForMinimize, move(indexedForMinimize), opts, *workers).result());
             if (gsForMinimize->hadCriticalError()) {
                 gsForMinimize->errorQueue->flushAllErrors(*gsForMinimize);
             }
