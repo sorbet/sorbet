@@ -1,0 +1,6 @@
+# typed: true
+
+class ::FlexLoanRepaymentWindow
+  def starts_at_(); end
+end
+
