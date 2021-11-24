@@ -26,9 +26,16 @@ bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
     return false;
 }
 
-string AutocorrectSuggestion::apply(const std::string_view source) {
+string AutocorrectSuggestion::unsafeApplyToString(const std::string_view source) {
     UnorderedSet<Loc> seen;
     vector<AutocorrectSuggestion::Edit> edits = move(this->edits);
+
+    if (edits.size() > 1) {
+        auto file = edits.front().loc.file();
+        for (int i = 1; i < edits.size(); i++) {
+            ENFORCE(edits[i].loc.file() == file, "All edits in `unsafeApplyToString` need to apply to the same file");
+        }
+    }
 
     auto compare = [](const AutocorrectSuggestion::Edit &left, const AutocorrectSuggestion::Edit &right) {
         return left.loc.beginPos() > right.loc.beginPos();

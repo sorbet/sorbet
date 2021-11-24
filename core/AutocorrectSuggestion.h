@@ -18,8 +18,9 @@ struct AutocorrectSuggestion {
 
     AutocorrectSuggestion(std::string title, std::vector<Edit> edits) : title(title), edits(edits) {}
 
-    // Apply a single `AutocorrectSuggestion` to a string, yielding the autocorrected source
-    std::string apply(const std::string_view source);
+    // Apply a single `AutocorrectSuggestion` to a string, yielding the autocorrected source.
+    // This is useful for testing that an autocorrect does what we want.
+    std::string unsafeApplyToString(const std::string_view source);
 
     // Reads all the files to be edited, and then accumulates all the edits that need to be applied
     // to those files into a resulting string with all edits applied. Does not write those back out

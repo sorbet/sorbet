@@ -86,7 +86,7 @@ TEST_CASE("Simple add import") {
     ENFORCE(package.exists());
     auto addImport = package.addImport(gs, package, false);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->apply(pkg_source);
+    auto replaced = addImport->unsafeApplyToString(pkg_source);
     CHECK_EQ(expected, replaced);
 }
 
@@ -109,7 +109,7 @@ TEST_CASE("Simple test import") {
     ENFORCE(package.exists());
     auto addImport = package.addImport(gs, package, true);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->apply(pkg_source);
+    auto replaced = addImport->unsafeApplyToString(pkg_source);
     CHECK_EQ(expected, replaced);
 }
 } // namespace sorbet
