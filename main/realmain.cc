@@ -615,7 +615,7 @@ int realmain(int argc, char *argv[]) {
         }
 
         if (!opts.minimizeRBI.empty()) {
-            Minimize::indexAndResolveForMinimize(gsForMinimize, opts, *workers, opts.minimizeRBI);
+            Minimize::indexAndResolveForMinimize(gs, gsForMinimize, opts, *workers, opts.minimizeRBI);
             Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
         }
 

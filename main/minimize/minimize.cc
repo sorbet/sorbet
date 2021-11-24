@@ -390,13 +390,15 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
 
 } // namespace
 
-void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &rbiGS, options::Options &opts,
-                                          WorkerPool &workers, std::string minimizeRBI) {
+void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &sourceGS, unique_ptr<core::GlobalState> &rbiGS,
+                                          options::Options &opts, WorkerPool &workers, std::string minimizeRBI) {
+    ENFORCE(!sourceGS->findFileByPath(minimizeRBI).exists(),
+            "minimize-rbi will yield empty file because {} was already processed by the main pipeline", minimizeRBI);
+
     // TODO(jez) Put Timer's in here wherever there are gaps in the web trace file
     // TODO(jez) What would it mean for us to accept a vector of RBIs? (Tricky to combine with --print)
     // TODO(jez) Is it worth forcing the input file to be an RBI? Or should we drop that from the option name?
     // Maybe just call it --minimize-to-rbi?
-    // TODO(jez) Do something to ensure that `opts.minimizeRBI` file is not a file Sorbet already knew about.
     auto inputFilesForMinimize = pipeline::reserveFiles(rbiGS, {minimizeRBI});
 
     // I'm ignoring everything relating to caching here, because missing methods is likely
