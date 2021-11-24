@@ -1395,7 +1395,20 @@ class Hash < Object
   # [`Hash#update`](https://docs.ruby-lang.org/en/2.7.0/Hash.html#method-i-update)
   # is an alias for
   # [`Hash#merge!`](https://docs.ruby-lang.org/en/2.7.0/Hash.html#method-i-merge-21).
-  def update(*_, &blk); end
+  sig do
+    type_parameters(:A ,:B).params(
+        other_hash: T::Hash[T.type_parameter(:A), T.type_parameter(:B)],
+    )
+    .returns(T::Hash[T.any(T.type_parameter(:A), K), T.any(T.type_parameter(:B), V)])
+  end
+  sig do
+    type_parameters(:A ,:B).params(
+        other_hash: T::Hash[T.type_parameter(:A), T.type_parameter(:B)],
+        blk: T.proc.params(key: K, oldval: V, newval: T.type_parameter(:B)).returns(T.any(V, T.type_parameter(:B))),
+    )
+    .returns(T::Hash[T.any(T.type_parameter(:A), K), T.any(T.type_parameter(:B), V)])
+  end
+  def update(*other_hash, &blk); end
 
   # Returns `true` if the given value is present for some key in *hsh*.
   #
