@@ -75,3 +75,60 @@ VALUE sorbet_rb_hash_fetch_m(VALUE recv, ID fun, int argc, const VALUE *const re
         }
     }
 }
+
+// No-block version of Hash#update: https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L3869-L3886
+VALUE sorbet_rb_hash_update(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                            VALUE closure) {
+    int i;
+
+    rb_hash_modify(recv);
+    for (i = 0; i < argc; i++) {
+        VALUE hash = to_hash(argv[i]);
+        rb_hash_foreach(hash, rb_hash_update_i, recv);
+    }
+    return recv;
+}
+
+struct sorbet_rb_hash_update_withBlock_callback_args {
+    VALUE value;
+    VALUE closure;
+    BlockFFIType blk;
+};
+
+// Adapted from rb_hash_update_block_callback: https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L3800-L3817
+static int sorbet_rb_hash_update_withBlock_callback(st_data_t *key, st_data_t *value, struct update_arg *arg,
+                                                    int existing) {
+    struct sorbet_rb_hash_update_withBlock_callback_args *callback_args =
+        (struct sorbet_rb_hash_update_withBlock_callback_args *)arg->arg;
+    VALUE newvalue = (VALUE)callback_args->value;
+
+    if (existing) {
+        VALUE closure = callback_args->closure;
+        BlockFFIType blk = callback_args->blk;
+        VALUE block_argv[3] = {(VALUE)*key, (VALUE)*value, newvalue};
+        newvalue = blk((VALUE)*key, closure, 3, &block_argv[0], Qnil);
+        arg->old_value = *value;
+    } else {
+        arg->new_key = *key;
+    }
+    arg->new_value = newvalue;
+    *value = newvalue;
+    return ST_CONTINUE;
+}
+
+NOINSERT_UPDATE_CALLBACK(sorbet_rb_hash_update_withBlock_callback)
+
+struct sorbet_rb_hash_update_withBlock_i_args {
+    VALUE hash;
+    VALUE closure;
+    BlockFFIType blk;
+};
+
+// Adapted from rb_hash_update_block_i: https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L3819-L3824
+int sorbet_rb_hash_update_withBlock_i(VALUE key, VALUE value, VALUE argsv) {
+    struct sorbet_rb_hash_update_withBlock_i_args *args = (struct sorbet_rb_hash_update_withBlock_i_args *)argsv;
+    VALUE hash = args->hash;
+    struct sorbet_rb_hash_update_withBlock_callback_args callback_args = {value, args->closure, args->blk};
+    RHASH_UPDATE(hash, key, sorbet_rb_hash_update_withBlock_callback, (VALUE)&callback_args);
+    return ST_CONTINUE;
+}
