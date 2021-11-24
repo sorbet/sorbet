@@ -1975,6 +1975,50 @@ VALUE sorbet_rb_hash_merge_withBlock(VALUE recv, ID fun, int argc, const VALUE *
                                            numPositionalArgs);
 }
 
+// This is the no-block version of rb_hash_select: https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L2694-L2705
+// In that version, the `RETURN_SIZED_ENUMERATOR` macro is what causes the early return when a block is not passed. In
+// this case, we know that the block wasn't passed, so we always return an enumerator
+SORBET_INLINE
+VALUE sorbet_rb_hash_select(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                            VALUE closure) {
+    sorbet_ensure_arity(argc, 0);
+    return rb_enumeratorize_with_size(recv, ID2SYM(fun), argc, argv, sorbet_hash_enum_size);
+}
+
+struct sorbet_select_i_args {
+    VALUE result;
+    BlockFFIType blk;
+    VALUE closure;
+};
+
+static int sorbet_select_i(VALUE key, VALUE value, VALUE argsv) {
+    struct sorbet_select_i_args *args = (struct sorbet_select_i_args *)argsv;
+    VALUE block_argv[2] = {key, value};
+    if (RTEST(args->blk(key, args->closure, 2, &block_argv[0], Qnil))) {
+        rb_hash_aset(args->result, key, value);
+    }
+    return ST_CONTINUE;
+}
+
+// This is the block version of rb_hash_select: https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L2694-L2705
+SORBET_INLINE
+VALUE sorbet_rb_hash_select_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                      const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
+    sorbet_ensure_arity(argc, 0);
+
+    // must push a frame for the captured block
+    sorbet_pushBlockFrame(captured);
+
+    struct sorbet_select_i_args args = {rb_hash_new(), blk, closure};
+    if (!RHASH_EMPTY_P(recv)) {
+        rb_hash_foreach(recv, sorbet_select_i, (VALUE)&args);
+    }
+
+    sorbet_popFrame();
+
+    return args.result;
+}
+
 // ****
 // ****                       Name Based Intrinsics
 // ****
