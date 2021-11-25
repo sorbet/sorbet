@@ -487,6 +487,11 @@ private:
     static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job, bool lastRun) {
         auto ancestorSym = job.ancestor->symbol;
         if (!ancestorSym.exists()) {
+            if (!lastRun && !job.isSuperclass && !job.mixinIndex.has_value()) {
+                // This is an include or extend. Add a placeholder to fill in later to preserve
+                // ordering of mixins, unless an index is already set.
+                job.mixinIndex = job.klass.data(ctx)->addMixinPlaceholder(ctx);
+            }
             return false;
         }
 
@@ -507,7 +512,7 @@ private:
 
             if (!resolved.isClassOrModule()) {
                 if (!lastRun) {
-                    if (!job.isSuperclass) {
+                    if (!job.isSuperclass && !job.mixinIndex.has_value()) {
                         // This is an include or extend. Add a placeholder to fill in later to preserve
                         // ordering of mixins.
                         job.mixinIndex = job.klass.data(ctx)->addMixinPlaceholder(ctx);
