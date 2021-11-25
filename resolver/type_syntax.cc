@@ -83,14 +83,14 @@ bool TypeSyntax::isSig(core::Context ctx, const ast::Send &send) {
     if (send.fun != core::Names::sig()) {
         return false;
     }
-    if (send.block.get() == nullptr) {
+    if (!send.hasBlock()) {
         return false;
     }
     // NB: this only needs to check for Sorbet::Private::Static.sig and not
     // Sorbet::Private::Static::ResolvedSig.sig, because this function is only
     // used during resolver to identify potential sigs.  We don't create
     // Sorbet::Private::Static::ResolvedSig.sig until after resolver is run.
-    auto nargs = send.args.size();
+    auto nargs = send.numPosArgs;
     if (!(nargs == 1 || nargs == 2)) {
         return false;
     }
@@ -117,7 +117,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
     } else {
         sig.seen.sig = true;
         ENFORCE(sigSend.fun == core::Names::sig());
-        auto block = ast::cast_tree<ast::Block>(sigSend.block);
+        auto block = sigSend.block();
         ENFORCE(block);
         auto send = ast::cast_tree<ast::Send>(block->body);
         if (send) {
@@ -144,7 +144,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
     }
     ENFORCE(!sends.empty());
 
-    if (sigSend.args.size() == 2) {
+    if (sigSend.numPosArgs == 2) {
         auto lit = ast::cast_tree<ast::Literal>(sigSend.args[1]);
         if (lit != nullptr && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::final_()) {
             sig.seen.final = true;
@@ -212,10 +212,10 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     }
                     sig.seen.bind = true;
 
-                    if (send->args.size() != 1) {
+                    if (send->numPosArgs != 1) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", "bind", 1,
-                                        send->args.size());
+                                        send->numPosArgs);
                         }
                         break;
                     }
@@ -254,24 +254,6 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     }
                     sig.seen.params = true;
 
-                    if (send->args.empty()) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            auto paramsStr = send->fun.show(ctx);
-                            e.setHeader("`{}` must be given arguments", paramsStr);
-
-                            core::Loc loc{ctx.file, send->loc};
-                            if (auto orig = loc.source(ctx)) {
-                                auto dot = orig->rfind(".");
-                                if (orig->rfind(".") == string::npos) {
-                                    e.replaceWith("Remove this use of `params`", loc, "");
-                                } else {
-                                    e.replaceWith("Remove this use of `params`", loc, "{}", orig->substr(0, dot));
-                                }
-                            }
-                        }
-                        break;
-                    }
-
                     // `params` only accepts keyword args
                     if (send->numPosArgs != 0) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -289,6 +271,24 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                                         e.replaceWith("Remove braces from keyword args", loc, "{}",
                                                       locSource->substr(1, locSource->size() - 2));
                                     }
+                                }
+                            }
+                        }
+                        break;
+                    }
+
+                    if (!send->hasKwArgs()) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            auto paramsStr = send->fun.show(ctx);
+                            e.setHeader("`{}` must be given arguments", paramsStr);
+
+                            core::Loc loc{ctx.file, send->loc};
+                            if (auto orig = loc.source(ctx)) {
+                                auto dot = orig->rfind(".");
+                                if (orig->rfind(".") == string::npos) {
+                                    e.replaceWith("Remove this use of `params`", loc, "");
+                                } else {
+                                    e.replaceWith("Remove this use of `params`", loc, "{}", orig->substr(0, dot));
                                 }
                             }
                         }
@@ -345,7 +345,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                         break;
                     }
 
-                    if (!send->args.empty()) {
+                    if (send->hasKwArgs()) {
                         auto [posEnd, kwEnd] = send->kwArgsRange();
                         for (auto i = posEnd; i < kwEnd; i += 2) {
                             auto &key = send->args[i];
@@ -389,12 +389,13 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     break;
                 case core::Names::returns().rawId(): {
                     sig.seen.returns = true;
-                    if (send->numPosArgs != send->args.size()) {
+                    if (send->hasKwArgs()) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("`{}` does not accept keyword arguments", send->fun.show(ctx));
                             if (!send->hasKwSplat()) {
-                                auto start = send->args[send->numPosArgs].loc();
-                                auto end = send->args.back().loc();
+                                auto kwArgsRange = send->kwArgsRange();
+                                auto start = send->args[kwArgsRange.first].loc();
+                                auto end = send->args[kwArgsRange.second].loc();
                                 core::Loc argsLoc(ctx.file, start.beginPos(), end.endPos());
                                 if (argsLoc.exists()) {
                                     e.replaceWith("Wrap in braces to make a shape type", argsLoc, "{{{}}}",

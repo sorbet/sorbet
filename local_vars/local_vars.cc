@@ -212,12 +212,12 @@ class LocalNameInserter {
         ENFORCE(ast::isa_tree<ast::Send>(tree));
 
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
-        ENFORCE(original.args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.args[0]));
+        ENFORCE(original.numPosArgs == 1 && ast::isa_tree<ast::ZSuperArgs>(original.args[0]));
 
         // Clear out the args (which are just [ZSuperArgs]) in the original send. (Note that we want this cleared even
         // if we error out below, because later `ENFORCE`s will be triggered if we don't.)
         original.numPosArgs = 0;
-        original.args.clear();
+        original.args.erase(original.args.begin());
 
         if (!scopeStack.back().insideMethod) {
             if (auto e = ctx.beginError(original.loc, core::errors::Namer::SelfOutsideClass)) {
@@ -371,19 +371,22 @@ class LocalNameInserter {
 
             original.recv = ast::MK::Constant(original.loc, core::Symbols::Magic());
 
-            if (original.block != nullptr) {
+            if (original.hasBlock()) {
                 // <call-with-splat> and "do"
                 original.fun = core::Names::callWithSplat();
                 original.numPosArgs = 4;
+                // Re-add block argument
+                sendargs.emplace_back(std::move(original.args.back()));
             } else {
                 // <call-with-splat-and-block>(..., &blk)
                 original.fun = core::Names::callWithSplatAndBlock();
                 original.numPosArgs = 5;
                 sendargs.emplace_back(std::move(blockArg));
+                original.flags.hasBlock = false;
             }
 
             original.args = std::move(sendargs);
-        } else if (original.block == nullptr) {
+        } else if (!original.hasBlock()) {
             // No positional splat and no "do", so we need to forward &<blkvar> with <call-with-block>.
             ast::Send::ARGS_store sendargs;
             sendargs.reserve(3 + posArgsEntries.size() + std::max({1UL, 2 * kwArgKeyEntries.size()}));
@@ -433,6 +436,8 @@ class LocalNameInserter {
                     sendargs.emplace_back(std::move(kwArgValueEntries[i]));
                 }
             }
+            // Re-add original block
+            sendargs.emplace_back(std::move(original.args.back()));
             kwArgKeyEntries.clear();
             kwArgValueEntries.clear();
 
@@ -469,7 +474,7 @@ public:
 
     ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (original.args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.args[0])) {
+        if (original.numPosArgs == 1 && ast::isa_tree<ast::ZSuperArgs>(original.args[0])) {
             return lowerZSuperArgs(ctx, std::move(tree));
         }
 

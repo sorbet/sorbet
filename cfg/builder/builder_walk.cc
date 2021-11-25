@@ -407,16 +407,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 }
 
                 if (s.hasKwSplat()) {
-                    auto &exp = s.args.back();
+                    auto &exp = *s.kwSplat();
                     LocalRef temp = cctx.newTemporary(core::Names::statTemp());
                     current = walk(cctx.withTarget(temp), exp, current);
                     args.emplace_back(temp);
                     argLocs.emplace_back(exp.loc());
                 }
 
-                if (s.block != nullptr) {
+                if (s.hasBlock()) {
                     auto newRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
-                    auto &blockArgs = ast::cast_tree_nonnull<ast::Block>(s.block).args;
+                    auto &blockArgs = s.block()->args;
                     vector<ast::ParsedArg> blockArgFlags = ast::ArgParsing::parseArgs(blockArgs);
                     vector<core::ArgInfo::ArgFlags> argFlags;
                     for (auto &e : blockArgFlags) {
@@ -443,7 +443,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     LocalRef argTemp = cctx.newTemporary(core::Names::blkArg());
                     bodyBlock->exprs.emplace_back(LocalRef::selfVariable(), s.loc,
                                                   make_insn<LoadSelf>(link, LocalRef::selfVariable()));
-                    bodyBlock->exprs.emplace_back(argTemp, s.block.loc(), make_insn<LoadYieldParams>(link));
+                    bodyBlock->exprs.emplace_back(argTemp, s.block()->loc, make_insn<LoadYieldParams>(link));
 
                     auto *argBlock = bodyBlock;
                     for (int i = 0; i < blockArgFlags.size(); ++i) {
@@ -496,10 +496,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                               .withBlockBreakTarget(cctx.target)
                                               .withLoopScope(headerBlock, postBlock, true)
                                               .withSendAndBlockLink(link),
-                                          ast::cast_tree<ast::Block>(s.block)->body, argBlock);
+                                          s.block()->body, argBlock);
                     if (blockLast != cctx.inWhat.deadBlock()) {
                         LocalRef dead = cctx.newTemporary(core::Names::blockReturnTemp());
-                        synthesizeExpr(blockLast, dead, s.block.loc(), make_insn<BlockReturn>(link, blockrv));
+                        synthesizeExpr(blockLast, dead, s.block()->loc, make_insn<BlockReturn>(link, blockrv));
                     }
 
                     unconditionalJump(blockLast, headerBlock, cctx.inWhat, s.loc);

@@ -28,7 +28,7 @@ optional<core::NameRef> getFieldName(core::MutableContext ctx, ast::Send &send) 
 
 ast::Send *asFlatfileDo(ast::ExpressionPtr &stat) {
     auto *send = ast::cast_tree<ast::Send>(stat);
-    if (send != nullptr && send->block != nullptr && send->fun == core::Names::flatfile()) {
+    if (send != nullptr && send->hasBlock() && send->fun == core::Names::flatfile()) {
         return send;
     } else {
         return nullptr;
@@ -66,14 +66,14 @@ void Flatfiles::run(core::MutableContext ctx, ast::ClassDef *klass) {
     vector<ast::ExpressionPtr> methods;
     for (auto &stat : klass->rhs) {
         if (auto flatfileBlock = asFlatfileDo(stat)) {
-            auto &block = ast::cast_tree_nonnull<ast::Block>(flatfileBlock->block);
-            if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block.body)) {
+            auto block = flatfileBlock->block();
+            if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
                 for (auto &stat : insSeq->stats) {
                     handleFieldDefinition(ctx, stat, methods);
                 }
                 handleFieldDefinition(ctx, insSeq->expr, methods);
             } else {
-                handleFieldDefinition(ctx, block.body, methods);
+                handleFieldDefinition(ctx, block->body, methods);
             }
         }
     }

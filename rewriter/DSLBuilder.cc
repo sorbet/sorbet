@@ -84,7 +84,7 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
 
     // We need to keep around the original send for the compiler.
     stats.emplace_back(ast::MK::Send(loc, ast::MK::Unsafe(loc, move(send->recv)), sendFun, send->numPosArgs,
-                                     std::move(send->args), send->flags, move(send->block)));
+                                     std::move(send->args), send->flags));
 
     // def self.<prop>
     if (!skipSetter) {

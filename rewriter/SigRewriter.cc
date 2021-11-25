@@ -36,11 +36,15 @@ bool SigRewriter::run(core::MutableContext &ctx, ast::Send *send) {
         return false;
     }
 
-    if (!(send->args.size() == 0 || send->args.size() == 1)) {
+    if (!(send->numPosArgs == 0 || send->numPosArgs == 1)) {
         return false;
     }
 
-    if (send->block == nullptr) {
+    if (!send->hasBlock()) {
+        return false;
+    }
+
+    if (send->hasKwArgs()) {
         return false;
     }
 

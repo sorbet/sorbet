@@ -23,13 +23,13 @@ bool isKeywordInitKey(const core::GlobalState &gs, const ast::ExpressionPtr &nod
 }
 
 bool isMissingInitialize(const core::GlobalState &gs, const ast::Send *send) {
-    if (send->block == nullptr) {
+    if (!send->hasBlock()) {
         return true;
     }
 
-    auto &block = ast::cast_tree_nonnull<ast::Block>(send->block);
+    auto block = send->block();
 
-    if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block.body)) {
+    if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
         auto methodDef = ast::cast_tree<ast::MethodDef>(insSeq->expr);
 
         if (methodDef && methodDef->name == core::Names::initialize()) {
@@ -162,17 +162,17 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
                                                    ast::MK::RaiseUnimplemented(loc)));
     }
 
-    if (send->block != nullptr) {
-        auto &block = ast::cast_tree_nonnull<ast::Block>(send->block);
+    if (send->hasBlock()) {
+        auto block = send->block();
 
         // Steal the trees, because the run is going to remove the original send node from the tree anyway.
-        if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block.body)) {
+        if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
             for (auto &&stat : insSeq->stats) {
                 body.emplace_back(move(stat));
             }
             body.emplace_back(move(insSeq->expr));
         } else {
-            body.emplace_back(move(block.body));
+            body.emplace_back(move(block->body));
         }
 
         // NOTE: the code in this block _STEALS_ trees. No _return empty_'s should go after it

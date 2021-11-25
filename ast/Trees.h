@@ -701,6 +701,7 @@ public:
 };
 CheckSize(Assign, 24, 8);
 
+class Block;
 EXPRESSION(Send) {
 public:
     const core::LocOffsets loc;
@@ -710,9 +711,10 @@ public:
     struct Flags {
         bool isPrivateOk : 1;
         bool isRewriterSynthesized : 1;
+        bool hasBlock : 1;
 
         // In C++20 we can replace this with bit field initialzers
-        Flags() : isPrivateOk(false), isRewriterSynthesized(false) {}
+        Flags() : isPrivateOk(false), isRewriterSynthesized(false), hasBlock(false) {}
     };
     CheckSize(Flags, 1, 1);
 
@@ -729,31 +731,43 @@ public:
     //
     // for n = numPosArgs, m = number of keyword arg pairs
     //
-    // +--------------------------+-------------------------------+------------------+
-    // | positional arguments     | interleaved keyword arg pairs | optional kwsplat |
-    // +--------------------------+-------------------------------+------------------+
-    // | pos_0, ... , pos_(n - 1) | sym_0, val_0, .. sym_m, val_m | value            |
-    // +--------------------------+-------------------------------+------------------+
+    // +--------------------------+-------------------------------+------------------+----------------+
+    // | positional arguments     | interleaved keyword arg pairs | optional kwsplat | optional block |
+    // +--------------------------+-------------------------------+------------------+----------------+
+    // | pos_0, ... , pos_(n - 1) | sym_0, val_0, .. sym_m, val_m | value            | value          |
+    // +--------------------------+-------------------------------+------------------+----------------+
     //
     // for the following send:
     //
-    // > foo(a, b, c: 10, d: nil)
+    // > foo(a, b, c: 10, d: nil, &blk)
     //
     // the arguments vector would look like the following, with numPosArgs = 2:
     //
-    // > <a, b, c, 10, d, nil>
+    // > <a, b, c, 10, d, nil, &blk>
     ARGS_store args;
 
-    ExpressionPtr block; // null if no block passed
-
-    Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, ARGS_store args,
-         ExpressionPtr block = nullptr, Flags flags = {});
+public:
+    Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, ARGS_store args, Flags flags = {});
 
     ExpressionPtr deepCopy() const;
+
+    // Returns null if no block present.
+    const ast::Block *block() const;
+    ast::Block *block();
+    // Returns null if no kwsplat present.
+    const ExpressionPtr *kwSplat() const;
+    ExpressionPtr *kwSplat();
+    void setBlock(ExpressionPtr block);
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
+
+    void addPosArg(ExpressionPtr ptr);
+
+    std::pair<int, int> posArgsRange() const {
+        return std::make_pair<int, int>(0, numPosArgs);
+    }
 
     // Returned value is [start, end) indices into ast::Send::args.
     std::pair<int, int> kwArgsRange() const {
@@ -761,17 +775,25 @@ public:
         if (hasKwSplat()) {
             res.second = res.second - 1;
         }
+        if (hasBlock()) {
+            res.second = res.second - 1;
+        }
         return res;
+    }
+
+    // True when this send contains a block argument.
+    bool hasBlock() const {
+        return flags.hasBlock;
     }
 
     // True when there are either keyword args, or a keyword splat.
     bool hasKwArgs() const {
-        return args.size() > numPosArgs;
+        return args.size() > (numPosArgs + (hasBlock() ? 1 : 0));
     }
 
     // True when there is a keyword args splat present. hasKwSplat -> hasKwArgs, but not the other way around.
     bool hasKwSplat() const {
-        return (args.size() - numPosArgs) & 0x1;
+        return (args.size() - numPosArgs - (hasBlock() ? 1 : 0)) & 0x1;
     }
 
     void _sanityCheck();

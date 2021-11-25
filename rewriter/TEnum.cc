@@ -42,7 +42,7 @@ bool isTEnum(core::MutableContext ctx, ast::ClassDef *klass) {
 ast::Send *asEnumsDo(ast::ExpressionPtr &stat) {
     auto *send = ast::cast_tree<ast::Send>(stat);
 
-    if (send != nullptr && send->block != nullptr && send->fun == core::Names::enums()) {
+    if (send != nullptr && send->hasBlock() && send->fun == core::Names::enums()) {
         return send;
     } else {
         return nullptr;
@@ -186,15 +186,15 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareSealed()));
     for (auto &stat : oldRHS) {
         if (auto enumsDo = asEnumsDo(stat)) {
-            auto &block = ast::cast_tree_nonnull<ast::Block>(enumsDo->block);
+            auto block = enumsDo->block();
             vector<ast::ExpressionPtr> newStats;
-            if (auto insSeq = ast::cast_tree<ast::InsSeq>(block.body)) {
+            if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
                 for (auto &stat : insSeq->stats) {
                     collectNewStats(ctx, klass, std::move(stat), FromWhere::Inside, newStats);
                 }
                 collectNewStats(ctx, klass, std::move(insSeq->expr), FromWhere::Inside, newStats);
             } else {
-                collectNewStats(ctx, klass, std::move(block.body), FromWhere::Inside, newStats);
+                collectNewStats(ctx, klass, std::move(block->body), FromWhere::Inside, newStats);
             }
 
             ast::InsSeq::STATS_store insSeqStats;
@@ -202,7 +202,7 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
                 insSeqStats.emplace_back(std::move(newStat));
             }
 
-            block.body = ast::MK::InsSeq(block.loc, std::move(insSeqStats), ast::MK::Nil(block.loc));
+            block->body = ast::MK::InsSeq(block->loc, std::move(insSeqStats), ast::MK::Nil(block->loc));
             klass->rhs.emplace_back(std::move(stat));
         } else {
             vector<ast::ExpressionPtr> newStats;

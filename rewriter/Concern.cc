@@ -72,7 +72,7 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
     for (auto &stat : klass->rhs) {
         if (auto *send = ast::cast_tree<ast::Send>(stat)) {
             if (send->fun == core::Names::classMethods()) { // class_methods do ... end
-                if (send->block == nullptr) {
+                if (!send->hasBlock()) {
                     continue;
                 }
                 if (!send->recv.isSelfReference()) {
@@ -80,7 +80,7 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
                 }
                 if (classMethodsNode) {
                     // ClassMethods module already exists. Let's add the block as one of its members
-                    auto *block = ast::cast_tree<ast::Block>(send->block);
+                    auto *block = send->block();
                     auto *classDef = ast::cast_tree<ast::ClassDef>(classMethodsNode);
 
                     if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
@@ -96,7 +96,7 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
                     // members
                     auto loc = send->loc;
                     ast::ClassDef::RHS_store rhs;
-                    auto *block = ast::cast_tree<ast::Block>(send->block);
+                    auto *block = send->block();
                     if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
                         for (auto &stat : insSeq->stats) {
                             rhs.emplace_back(std::move(stat));

@@ -195,7 +195,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
 
     // ----- What's the prop's name? -----
     if (!ret.name.exists()) {
-        if (send->args.empty()) {
+        if (send->numPosArgs == 0) {
             return nullopt;
         }
         auto *sym = ast::cast_tree<ast::Literal>(send->args[0]);
@@ -474,10 +474,13 @@ ast::ExpressionPtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send 
     auto true_ = ast::MK::True(send->loc);
 
     auto *copy = ast::cast_tree<ast::Send>(result);
-    if (copy->hasKwArgs() || copy->args.empty()) {
+    if (copy->hasKwArgs() || copy->numPosArgs == 0) {
         // append to the inline keyword arguments of the send
         auto pos = copy->args.end();
         if (copy->hasKwSplat()) {
+            pos--;
+        }
+        if (copy->hasBlock()) {
             pos--;
         }
 
@@ -485,11 +488,14 @@ ast::ExpressionPtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send 
         pos++;
         copy->args.insert(pos, move(true_));
     } else {
-        if (auto *hash = ast::cast_tree<ast::Hash>(copy->args.back())) {
+        if (auto *hash = ast::cast_tree<ast::Hash>(copy->args[copy->numPosArgs - 1])) {
             hash->keys.emplace_back(move(withoutAccessors));
             hash->values.emplace_back(move(true_));
         } else {
             auto pos = copy->args.end();
+            if (copy->hasBlock()) {
+                pos--;
+            }
             pos = copy->args.insert(pos, move(withoutAccessors));
             pos++;
             copy->args.insert(pos, move(true_));

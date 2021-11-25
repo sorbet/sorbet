@@ -192,6 +192,19 @@ void Send::_sanityCheck() {
     ENFORCE(numPosArgs <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs,
             args.size());
 
+    if (hasBlock() || hasKwSplat() || hasKwArgs()) {
+        ENFORCE(args.size() > numPosArgs);
+    }
+
+    if (hasBlock()) {
+        ENFORCE(block() != nullptr);
+    }
+
+    const int end = args.size() - (hasBlock() ? 1 : 0);
+    for (int i = 0; i < end; i++) {
+        ENFORCE(args[i].tag() != ast::Tag::Block);
+    }
+
     for (auto &node : args) {
         ENFORCE(node);
     }

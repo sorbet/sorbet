@@ -70,7 +70,7 @@ bool isTNilableOrUntyped(const ast::ExpressionPtr &expr) {
 ast::Send *findSendReturns(ast::Send *sharedSig) {
     ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
-    auto block = ast::cast_tree<ast::Block>(sharedSig->block);
+    auto block = sharedSig->block();
     auto body = ast::cast_tree<ast::Send>(block->body);
 
     while (body->fun != core::Names::returns() && body->fun != core::Names::void_()) {
@@ -107,7 +107,7 @@ ast::ExpressionPtr dupReturnsType(ast::Send *sharedSig) {
 // This will raise an error if we've given a type that's not what we want
 void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, ast::Send *sig) {
     // Loop down the chain of recv's until we get to the inner 'sig' node.
-    auto *block = ast::cast_tree<ast::Block>(sig->block);
+    auto *block = sig->block();
     auto *body = ast::cast_tree<ast::Send>(block->body);
     auto *cur = body;
     while (cur != nullptr) {
@@ -124,7 +124,7 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, ast::S
 ast::Send *findSendChecked(ast::Send *sharedSig) {
     ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
-    auto block = ast::cast_tree<ast::Block>(sharedSig->block);
+    auto block = sharedSig->block();
     auto body = ast::cast_tree<ast::Send>(block->body);
 
     while (body != nullptr && body->fun != core::Names::checked()) {

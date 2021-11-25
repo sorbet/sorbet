@@ -657,13 +657,10 @@ public:
                 }
             }
 
-            auto end = send->args.size();
-            if (send->hasKwSplat()) {
-                end -= 1;
-            }
+            auto kwArgsRange = send->kwArgsRange();
 
             // Walk over the keyword args to find bounds annotations
-            for (auto i = send->numPosArgs; i < end; i += 2) {
+            for (auto i = kwArgsRange.first; i < kwArgsRange.second; i += 2) {
                 auto *key = ast::cast_tree<ast::Literal>(send->args[i]);
                 if (key != nullptr && key->isSymbol(ctx)) {
                     switch (key->asSymbol(ctx).rawId()) {
@@ -1516,7 +1513,7 @@ class TreeSymbolizer {
             return;
         }
 
-        if (send->block != nullptr) {
+        if (send->hasBlock()) {
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludePassedBlock)) {
                 e.setHeader("`{}` can not be passed a block", send->fun.show(ctx));
             }

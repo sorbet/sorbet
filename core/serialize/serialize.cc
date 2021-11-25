@@ -929,7 +929,6 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             p.putU4(s.numPosArgs);
             p.putU4(s.args.size());
             pickle(p, s.recv);
-            pickle(p, s.block);
             for (auto &arg : s.args) {
                 pickle(p, arg);
             }
@@ -1217,12 +1216,11 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto numPosArgs = static_cast<u2>(p.getU4());
             auto argsSize = p.getU4();
             auto recv = unpickleExpr(p, gs);
-            ast::ExpressionPtr blk = unpickleExpr(p, gs);
             ast::Send::ARGS_store store(argsSize);
             for (auto &expr : store) {
                 expr = unpickleExpr(p, gs);
             }
-            return ast::MK::Send(loc, std::move(recv), fun, numPosArgs, std::move(store), flags, std::move(blk));
+            return ast::MK::Send(loc, std::move(recv), fun, numPosArgs, std::move(store), flags);
         }
         case ast::Tag::Block: {
             auto loc = unpickleLocOffsets(p);

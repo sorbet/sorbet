@@ -22,6 +22,8 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             return send->deepCopy();
         }
 
+        ENFORCE(!send->hasBlock());
+
         if (send->fun == core::Names::params() && send->numPosArgs == 0 && send->args.size() % 2 == 0) {
             // T.proc.params takes inlined keyword argument pairs, and can't handle kwsplat
             ast::Send::ARGS_store args;
@@ -190,16 +192,17 @@ ast::Send *ASTUtil::castSig(ast::Send *send) {
     if (send->fun != core::Names::sig()) {
         return nullptr;
     }
-    if (send->block.get() == nullptr) {
+    if (!send->hasBlock()) {
         return nullptr;
     }
     // 0 args is common case
     // 1 arg  is `sig(:final)`
     // 2 args is `Sorbet::Private::Static.sig(self, :final)`
-    if (send->args.size() > 2) {
+    // Subtract 1 to ignore the block argument.
+    if (send->args.size() - 1 > 2) {
         return nullptr;
     }
-    auto *block = ast::cast_tree<ast::Block>(send->block);
+    auto *block = send->block();
     ENFORCE(block);
     auto *body = ast::cast_tree<ast::Send>(block->body);
     while (body != nullptr && (body->fun == core::Names::checked() || body->fun == core::Names::onFailure())) {
@@ -213,7 +216,7 @@ ast::Send *ASTUtil::castSig(ast::Send *send) {
 }
 
 ast::ExpressionPtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
-    if (send->args.empty()) {
+    if (!send->hasKwArgs()) {
         return nullptr;
     }
 
@@ -284,10 +287,10 @@ ast::ExpressionPtr ASTUtil::thunkBody(core::MutableContext ctx, ast::ExpressionP
     if (!send->recv.isSelfReference() && !isKernel(send->recv)) {
         return nullptr;
     }
-    if (send->block == nullptr) {
+    if (!send->hasBlock()) {
         return nullptr;
     }
-    auto *block = ast::cast_tree<ast::Block>(send->block);
+    auto *block = send->block();
     if (!block->args.empty()) {
         return nullptr;
     }

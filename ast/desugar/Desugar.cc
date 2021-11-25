@@ -173,7 +173,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
     auto desugaredBody = desugarBody(dctx, loc, blockBody, std::move(destructures));
 
     // TODO the send->block's loc is too big and includes the whole send
-    send->block = MK::Block(loc, std::move(desugaredBody), std::move(args));
+    send->setBlock(MK::Block(loc, std::move(desugaredBody), std::move(args)));
     return res;
 }
 
@@ -776,8 +776,10 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         auto convertedBlock = node2TreeImpl(dctx, std::move(block));
                         Literal *lit;
                         if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol(dctx.ctx)) {
+                            sendargs.emplace_back(symbol2Proc(dctx, std::move(convertedBlock)));
+                            flags.hasBlock = true;
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
-                                           4, std::move(sendargs), flags, symbol2Proc(dctx, std::move(convertedBlock)));
+                                           4, std::move(sendargs), flags);
                         } else {
                             sendargs.emplace_back(std::move(convertedBlock));
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()),
@@ -846,8 +848,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         auto convertedBlock = node2TreeImpl(dctx, std::move(block));
                         Literal *lit;
                         if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol(dctx.ctx)) {
-                            res = MK::Send(loc, std::move(rec), send->method, numPosArgs, std::move(args), flags,
-                                           symbol2Proc(dctx, std::move(convertedBlock)));
+                            flags.hasBlock = true;
+                            args.emplace_back(symbol2Proc(dctx, std::move(convertedBlock)));
+                            res = MK::Send(loc, std::move(rec), send->method, numPosArgs, std::move(args), flags);
                         } else {
                             Send::ARGS_store sendargs;
                             sendargs.emplace_back(std::move(rec));

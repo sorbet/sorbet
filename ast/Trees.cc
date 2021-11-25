@@ -229,11 +229,10 @@ Assign::Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs)
 }
 
 Send::Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, Send::ARGS_store args,
-           ExpressionPtr block, Flags flags)
-    : loc(loc), fun(fun), flags(flags), numPosArgs(numPosArgs), recv(std::move(recv)), args(std::move(args)),
-      block(std::move(block)) {
+           Flags flags)
+    : loc(loc), fun(fun), flags(flags), numPosArgs(numPosArgs), recv(std::move(recv)), args(std::move(args)) {
     categoryCounterInc("trees", "send");
-    if (block) {
+    if (hasBlock()) {
         counterInc("trees.send.with_block");
     }
     histogramInc("trees.send.args", this->args.size());
@@ -378,6 +377,9 @@ template <class T> void printElems(const core::GlobalState &gs, fmt::memory_buff
     bool first = true;
     bool didshadow = false;
     for (auto &a : args) {
+        if (isa_tree<Block>(a)) {
+            continue;
+        }
         if (!first) {
             if (isa_tree<ShadowArg>(a) && !didshadow) {
                 fmt::format_to(std::back_inserter(buf), "; ");
@@ -897,8 +899,8 @@ string Send::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}.{}", this->recv.toStringWithTabs(gs, tabs), this->fun.toString(gs));
     printArgs(gs, buf, this->args, tabs);
-    if (this->block != nullptr) {
-        fmt::format_to(std::back_inserter(buf), "{}", this->block.toStringWithTabs(gs, tabs));
+    if (this->hasBlock()) {
+        fmt::format_to(std::back_inserter(buf), "{}", this->block()->toStringWithTabs(gs, tabs));
     }
 
     return fmt::to_string(buf);
@@ -913,8 +915,8 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
     fmt::format_to(std::back_inserter(buf), "fun = {}\n", this->fun.showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "block = ");
-    if (this->block) {
-        fmt::format_to(std::back_inserter(buf), "{}\n", this->block.showRaw(gs, tabs + 1));
+    if (this->hasBlock()) {
+        fmt::format_to(std::back_inserter(buf), "{}\n", this->block()->showRaw(gs, tabs + 1));
     } else {
         fmt::format_to(std::back_inserter(buf), "nullptr\n");
     }
@@ -923,6 +925,9 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "args = [\n");
     for (auto &a : args) {
+        if (this->hasBlock() && a == args.back()) {
+            continue;
+        }
         printTabs(buf, tabs + 2);
         fmt::format_to(std::back_inserter(buf), "{}\n", a.showRaw(gs, tabs + 2));
     }
@@ -932,6 +937,67 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
     fmt::format_to(std::back_inserter(buf), "}}");
 
     return fmt::to_string(buf);
+}
+
+const ast::Block *Send::block() const {
+    if (hasBlock()) {
+        auto block = ast::cast_tree<ast::Block>(this->args.back());
+        ENFORCE(block);
+        return block;
+    } else {
+        return nullptr;
+    }
+}
+
+ast::Block *Send::block() {
+    if (hasBlock()) {
+        auto block = ast::cast_tree<ast::Block>(this->args.back());
+        // ENFORCE(block, "{} tag {} size {} posArgs {} fun", this->args.back().tag(), this->args.size(), numPosArgs,
+        //        this->fun.rawId());
+        return block;
+    } else {
+        return nullptr;
+    }
+}
+
+const ExpressionPtr *Send::kwSplat() const {
+    if (hasKwSplat()) {
+        auto index = this->args.size() - 1;
+        if (hasBlock()) {
+            index = index - 1;
+        }
+        return &this->args[index];
+    }
+    return nullptr;
+}
+
+ExpressionPtr *Send::kwSplat() {
+    if (hasKwSplat()) {
+        auto index = this->args.size() - 1;
+        if (hasBlock()) {
+            index = index - 1;
+        }
+        return &this->args[index];
+    }
+    return nullptr;
+}
+
+void Send::addPosArg(ExpressionPtr ptr) {
+    this->args.emplace(this->args.begin() + numPosArgs, move(ptr));
+    this->numPosArgs++;
+}
+
+void Send::setBlock(ExpressionPtr block) {
+    if (hasBlock()) {
+        this->args.pop_back();
+        flags.hasBlock = false;
+    }
+
+    if (block != nullptr) {
+        this->args.emplace_back(move(block));
+        flags.hasBlock = true;
+        ENFORCE(this->block() != nullptr);
+    }
 }
 
 string Cast::toStringWithTabs(const core::GlobalState &gs, int tabs) const {

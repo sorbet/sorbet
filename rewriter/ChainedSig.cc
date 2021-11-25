@@ -27,7 +27,7 @@ struct ChainedSigWalk {
             return tree;
         }
 
-        if (send->fun == core::Names::sig() && send->block == nullptr && send != previousSigSend) {
+        if (send->fun == core::Names::sig() && !send->hasBlock() && send != previousSigSend) {
             if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
                 e.setHeader("Signature declarations expect a block");
                 e.addErrorNote("Complete the signature by adding a block declaration: sig `{}`", "{ ... }");
@@ -49,7 +49,7 @@ struct ChainedSigWalk {
         //
         // If we never find a send where the first receiver is a `sig` and the last invocation has the declaration
         // block, then we add the error later on
-        if (send->block == nullptr) {
+        if (!send->hasBlock()) {
             if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
                 e.setHeader("Signature declarations expect a block");
                 e.addErrorNote("Complete the signature by adding a block declaration: sig `{}`", "{ ... }");
@@ -60,7 +60,7 @@ struct ChainedSigWalk {
 
         // For all other cases, we have to re-write the block
         // E.g.: `sig.abstract { void }` -> `sig { abstract.void }`
-        auto *block = ast::cast_tree<ast::Block>(send->block);
+        auto *block = send->block();
         auto blockBody = ast::cast_tree<ast::Send>(block->body);
 
         // If the blockBody is not a send, then we have a sequence of instructions inside the signature block
@@ -135,6 +135,10 @@ struct ChainedSigWalk {
         ast::ExpressionPtr newBlockReceiver = std::move(blockBody->recv);
         do {
             if (sendCopy->fun != core::Names::final_()) {
+                if (sendCopy->hasBlock()) {
+                    // Drop the block argument before moving the arguments.
+                    sendCopy->args.pop_back();
+                }
                 newBlockReceiver = ast::MK::Send(sendCopy->loc, std::move(newBlockReceiver), sendCopy->fun,
                                                  sendCopy->numPosArgs, std::move(sendCopy->args));
             } else {
@@ -145,7 +149,7 @@ struct ChainedSigWalk {
 
             // If a previous receiver has a block, then we need to add an error to prevent signatures like this:
             // `sig.final {}.override{}
-            if (sendCopy->block) {
+            if (sendCopy->hasBlock()) {
                 if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
                     e.setHeader("Cannot add more signature statements after the declaration block");
                 }
@@ -161,8 +165,14 @@ struct ChainedSigWalk {
         auto newBody = ast::MK::Send(send->loc, std::move(newBlockReceiver), blockBody->fun, blockBody->numPosArgs,
                                      std::move(blockBody->args));
 
-        return ast::MK::Send(send->loc, std::move(sendCopy->recv), core::Names::sig(), args.size(), std::move(args), {},
-                             ast::MK::Block0(send->block.loc(), std::move(newBody)));
+        u2 numPosArgs = args.size();
+        args.emplace_back(ast::MK::Block0(send->block()->loc, std::move(newBody)));
+
+        ast::Send::Flags flags;
+        flags.hasBlock = true;
+
+        return ast::MK::Send(send->loc, std::move(sendCopy->recv), core::Names::sig(), numPosArgs, std::move(args),
+                             flags);
     }
 };
 

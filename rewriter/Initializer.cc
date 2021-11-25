@@ -130,7 +130,8 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
     if (sig == nullptr) {
         return;
     }
-    auto *block = ast::cast_tree<ast::Block>(sig->block);
+
+    auto *block = sig->block();
     if (block == nullptr) {
         return;
     }
