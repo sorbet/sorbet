@@ -1,5 +1,6 @@
 #include "main/minimize/minimize.h"
 #include "absl/strings/match.h"
+#include "common/EarlyReturnWithCode.h"
 #include "core/ErrorQueue.h"
 #include "main/pipeline/pipeline.h"
 #include <optional>
@@ -93,22 +94,15 @@ void writeClassDef(const core::GlobalState &rbiGS, options::PrinterConfig &outfi
     auto defType = rbiEntry.data(rbiGS)->isClassOrModuleClass() ? "class" : "module";
     auto fullName = rbiEntry.show(rbiGS);
     auto cbase = outputCategoryFromClassName(fullName) == OutputCategory::External ? "::" : "";
-    // TODO(jez) Does missing methods ignore super classes?
+    // TODO: The old Ruby-powered version did not emit superclasses. Eventually, we might want to
+    // expand this to serialize the superclass if it was not seen in sourceGS
     outfile.fmt("{} {}{}\n", defType, cbase, fullName);
     wroteClassDef = true;
 }
 
-// TODO(jez) These names were chosen to match as closely as possible with names used in missing_methods.rbi.
-// It's possible we want to change them.
-//
-// The code is very much not idiomatic Sorbet code. It's written this way to make it easier to
-// reason about doing exactly what the Ruby implementation does, and we probably want to clean it up
-// once we confirm that it works.
-
 void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState &rbiGS,
                       options::PrinterConfig &outfile, core::SymbolRef sourceClass, core::SymbolRef rbiClass,
                       bool &wroteClassDef) {
-    // TODO(jez) factor this into a helper?
     auto sourceMembersByName = UnorderedMap<string, core::SymbolRef>{};
     if (sourceClass.exists()) {
         for (auto [sourceEntryName, sourceEntry] : sourceClass.data(sourceGS)->members()) {
@@ -171,7 +165,9 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
                 (rbiEntryShortName != "[]"sv) &&  //
                 (rbiEntryShortName != "[]="sv)    //
             ) {
-                // TODO(jez) log invalid name?
+                // The Ruby-powered version would have printed a warning here, but we're going to
+                // skip that because there's not an obvious place to emit the log, and we're going
+                // to swallow these errors downstream anyways.
                 continue;
             }
         }
@@ -192,18 +188,26 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
             }
         }
 
-        // TODO(jez) Can we forward the source_location comment from the RBI file?
-        // Maybe we can ask the lexer for all the comments in a file, and store a list of Locs +
-        // comments on a core::File to make that faster? And then potentially read that in namer
-        // when entering the method.
+        // TODO: The old Ruby-powered version used runtime reflection to record a comment like
+        //
+        //     # definition: lib/foo:123
+        //
+        // We could consider looking for these comments in the opts.minimizeRBI input file, and
+        // forwarding them to our output. For the time being, I've decided not to do this because I
+        // suspect the naive solution would be too slow.
+        //
+        // We might be able to do something like associate a `core::Loc` with each definition
+        // recording the source range corresponding to the doc comment for that definition, which
+        // would make our work here easy, as well as in LSP for hover requests.
 
         if (!wroteClassDef) {
             writeClassDef(rbiGS, outfile, rbiClass, wroteClassDef);
         }
 
-        // TODO(jez) eventually might want to extend this to serialize any type information that was present
-        // TODO(jez) You're already hard-coding only two levels of this (no singleton of singleton).
-        // Get rid of the double pass, and just do instance methods and singleton class methods in one pass.
+        // TODO: The old Ruby-powered version never needed to process RBI files that had sigs or
+        // other type information, so this Sorbet version also ignores it. In the future, we should
+        // probably update this pass to also serialize any new type information.
+
         auto isSingleton = rbiClass.data(rbiGS)->isSingletonClass(rbiGS);
         outfile.fmt("  def {}{}(", isSingleton ? "self." : "", rbiEntryShortName);
 
@@ -320,17 +324,6 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
             continue;
         }
 
-        // // TODO(jez) Is this needed still? Could we replace this with a check for whether the current symbol is a
-        // class?
-        // // Special methods we use to store things on the symbol table. Not meant to be printed.
-        // if (rbiEntryName == core::Names::singleton() ||             //
-        //     rbiEntryName == core::Names::attached() ||              //
-        //     rbiEntryName == core::Names::mixedInClassMethods() ||   //
-        //     rbiEntryName == core::Names::Constants::AttachedClass() //
-        // ) {
-        //     continue;
-        // }
-
         if (!rbiEntry.data(rbiGS)->isClassOrModule()) {
             continue;
         }
@@ -355,9 +348,9 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
         }
 
         if (sourceEntry.exists() && !sourceEntry.data(sourceGS)->isClassOrModule()) {
-            // TODO(jez) It's not clear that these errors matter to log.
-            fmt::print(stderr, "The source says {} is a {} but reflection says it is a {}\n", "TODO(jez)", "TODO(jez)",
-                       "TODO(jez)");
+            // The Ruby-powered version would have printed a warning here, but we're going to
+            // skip that because there's not an obvious place to emit the log, and we're going
+            // to swallow these errors downstream anyways.
             continue;
         }
 
@@ -378,7 +371,10 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
         if (rbiEntrySingleton.exists()) {
             serializeMethods(sourceGS, rbiGS, outfile, sourceEntrySingleton, rbiEntrySingleton, wroteClassDef);
         }
-        // TODO(jez) the pay-server version doesn't handle static fields and type members
+
+        // TODO: The old Ruby-powered version never attempted to handle static fields nor type
+        // members, because those never showed up in any RBI files handed to it.
+        // It would be useful to add support for those here eventually.
 
         if (wroteClassDef) {
             outfile.fmt("end\n\n");
@@ -392,39 +388,38 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
 
 void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &sourceGS, unique_ptr<core::GlobalState> &rbiGS,
                                           options::Options &opts, WorkerPool &workers, std::string minimizeRBI) {
-    ENFORCE(!sourceGS->findFileByPath(minimizeRBI).exists(),
-            "minimize-rbi will yield empty file because {} was already processed by the main pipeline", minimizeRBI);
+    Timer timeit(sourceGS->tracer(), "Minimize::indexAndResolveForMinimize");
 
-    // TODO(jez) Put Timer's in here wherever there are gaps in the web trace file
-    // TODO(jez) What would it mean for us to accept a vector of RBIs? (Tricky to combine with --print)
-    // TODO(jez) Is it worth forcing the input file to be an RBI? Or should we drop that from the option name?
-    // Maybe just call it --minimize-to-rbi?
-    auto inputFilesForMinimize = pipeline::reserveFiles(rbiGS, {minimizeRBI});
+    ENFORCE(!sourceGS->findFileByPath(minimizeRBI).exists(),
+            "--minimize-to-rbi will yield empty file because {} was already processed by the main pipeline",
+            minimizeRBI);
+
+    auto rbiInputFiles = pipeline::reserveFiles(rbiGS, {minimizeRBI});
 
     // I'm ignoring everything relating to caching here, because missing methods is likely
     // to run on a new _unknown.rbi file every time and I didn't want to think about it.
     // If this phase gets slow, we can consider whether caching would speed things up.
-    auto indexedForMinimize = pipeline::index(rbiGS, inputFilesForMinimize, opts, workers, nullptr);
+    auto rbiIndexed = pipeline::index(rbiGS, rbiInputFiles, opts, workers, nullptr);
     if (rbiGS->hadCriticalError()) {
         rbiGS->errorQueue->flushAllErrors(*rbiGS);
     }
 
     // TODO(jez) Test that shows that `-p symbol-table` options work with second global state
-    indexedForMinimize = move(pipeline::resolve(rbiGS, move(indexedForMinimize), opts, workers).result());
+    rbiIndexed = move(pipeline::resolve(rbiGS, move(rbiIndexed), opts, workers).result());
     if (rbiGS->hadCriticalError()) {
         rbiGS->errorQueue->flushAllErrors(*rbiGS);
     }
 
     rbiGS->errorQueue->flushAllErrors(*rbiGS);
 
-    // indexedForMinimize goes out of scope here, and destructors run
+    // rbiIndexed goes out of scope here, and destructors run
     // If this becomes too slow, we can consider using intentionallyLeakMemory
 }
 
 void Minimize::writeDiff(const core::GlobalState &sourceGS, const core::GlobalState &rbiGS,
                          options::PrinterConfig &outfile) {
-    // TODO(jez) Use sed to post-process this to `typed: autogenerated` when you get to rolling this
-    // out in pay-server. Also add a "do not edit" preamble.
+    Timer timeit(sourceGS.tracer(), "Minimize::writeDiff");
+
     outfile.fmt("# typed: true\n\n");
 
     serializeClasses(sourceGS, rbiGS, outfile, core::Symbols::root(), core::Symbols::root());

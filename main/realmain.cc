@@ -615,6 +615,11 @@ int realmain(int argc, char *argv[]) {
         }
 
         if (!opts.minimizeRBI.empty()) {
+            // In the future, we might consider making minimizeRBI be a repeatable option, and run
+            // this block once for each input file.
+            // The trick there is that they would all currently output to the same file, even for
+            // multiple input files if we assume the naive implementation, which might not be the
+            // API we want to expose.
             Minimize::indexAndResolveForMinimize(gs, gsForMinimize, opts, *workers, opts.minimizeRBI);
             Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
         }
