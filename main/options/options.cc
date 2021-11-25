@@ -78,7 +78,7 @@ const vector<PrintOptions> print_options({
     {"autogen-autoloader", &Printers::AutogenAutoloader, true, false},
     {"autogen-subclasses", &Printers::AutogenSubclasses},
     {"package-tree", &Printers::Packager, false},
-    {"minimize-rbi", &Printers::MinimizeRBI},
+    {"minimized-rbi", &Printers::MinimizeRBI},
 });
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -414,7 +414,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("stop-after", to_string(all_stop_after),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
-    options.add_options("dev")("minimize-rbi", "TODO(jez)", cxxopts::value<std::string>()->default_value(""),
+    options.add_options("dev")("minimize-to-rbi", "TODO(jez)", cxxopts::value<std::string>()->default_value(""),
                                "<file.rbi>");
     options.add_options("dev")("skip-rewriter-passes", "Do not run Rewriter passess");
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
@@ -787,15 +787,15 @@ void readOptions(Options &opts,
         opts.noErrorCount = raw["no-error-count"].as<bool>();
         opts.noStdlib = raw["no-stdlib"].as<bool>();
         // TODO(jez) Change name of option?
-        opts.minimizeRBI = raw["minimize-rbi"].as<string>();
+        opts.minimizeRBI = raw["minimize-to-rbi"].as<string>();
         if (!opts.minimizeRBI.empty() && !opts.print.MinimizeRBI.enabled) {
             // TODO(jez) Test for this
-            logger->error("--minimize-rbi must also include --print=minimize-rbi");
+            logger->error("--minimize-to-rbi must also include --print=minimized-rbi");
             throw EarlyReturnWithCode(1);
         }
         if (!opts.minimizeRBI.empty() && opts.autocorrect) {
             // TODO(jez) Test for this
-            logger->error("--minimize-rbi plus --autocorrect is not implemented");
+            logger->error("--minimize-to-rbi plus --autocorrect is not implemented");
             throw EarlyReturnWithCode(1);
         }
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();

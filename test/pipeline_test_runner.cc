@@ -86,7 +86,7 @@ UnorderedSet<string> knownExpectations = {"parse-tree",       "parse-tree-json",
                                           "flatten-tree",     "flatten-tree-raw", "cfg",
                                           "cfg-raw",          "cfg-text",         "autogen",
                                           "document-symbols", "package-tree",     "document-formatting-rubyfmt",
-                                          "autocorrects",     "minimize-rbi"};
+                                          "autocorrects",     "minimized-rbi"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
@@ -383,7 +383,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         auto addNewline = false;
         handler.addObserved(
-            *gs, "minimize-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
+            *gs, "minimized-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
     }
 
     // Simulate what pipeline.cc does: We want to start typeckecking big files first because it helps with better work
