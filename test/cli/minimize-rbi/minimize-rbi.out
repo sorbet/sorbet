@@ -1,0 +1,99 @@
+--minimize-to-rbi must also include --print=minimized-rbi
+--------------------------------------------------------------------------
+--minimize-to-rbi plus --autocorrect is not implemented
+--------------------------------------------------------------------------
+class ::<root> < ::Object ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/cli/minimize-rbi/minimize-rbi.rb:3
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/minimize-rbi.rb start=??? end=???}
+  class ::CommonToBoth < ::Object () @ test/cli/minimize-rbi/minimize-rbi.rb:5
+    method ::CommonToBoth#method_common_to_both (<blk>) @ test/cli/minimize-rbi/minimize-rbi.rb:8
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/minimize-rbi.rb start=??? end=???}
+    method ::CommonToBoth#method_only_in_first (<blk>) @ test/cli/minimize-rbi/minimize-rbi.rb:6
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/minimize-rbi.rb start=??? end=???}
+  class ::<Class:CommonToBoth>[<AttachedClass>] < ::<Class:Object> () @ test/cli/minimize-rbi/minimize-rbi.rb:5
+    type-member(+) ::<Class:CommonToBoth>::<AttachedClass> -> T.attached_class (of CommonToBoth) @ test/cli/minimize-rbi/minimize-rbi.rb:5
+    method ::<Class:CommonToBoth>#<static-init> (<blk>) @ test/cli/minimize-rbi/minimize-rbi.rb:5
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/minimize-rbi.rb start=??? end=???}
+  module ::ModuleCommonToBoth < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/minimize-rbi/minimize-rbi.rb:12
+  class ::<Class:ModuleCommonToBoth>[<AttachedClass>] < ::Module () @ test/cli/minimize-rbi/minimize-rbi.rb:12
+    type-member(+) ::<Class:ModuleCommonToBoth>::<AttachedClass> -> T.attached_class (of ModuleCommonToBoth) @ test/cli/minimize-rbi/minimize-rbi.rb:12
+    method ::<Class:ModuleCommonToBoth>#<static-init> (<blk>) @ test/cli/minimize-rbi/minimize-rbi.rb:12
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/minimize-rbi.rb start=??? end=???}
+  module ::ModuleOnlyInFirst < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/minimize-rbi/minimize-rbi.rb:11
+  class ::<Class:ModuleOnlyInFirst>[<AttachedClass>] < ::Module () @ test/cli/minimize-rbi/minimize-rbi.rb:11
+    type-member(+) ::<Class:ModuleOnlyInFirst>::<AttachedClass> -> T.attached_class (of ModuleOnlyInFirst) @ test/cli/minimize-rbi/minimize-rbi.rb:11
+    method ::<Class:ModuleOnlyInFirst>#<static-init> (<blk>) @ test/cli/minimize-rbi/minimize-rbi.rb:11
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/minimize-rbi.rb start=??? end=???}
+  class ::OnlyInFirst < ::Object () @ test/cli/minimize-rbi/minimize-rbi.rb:3
+  class ::<Class:OnlyInFirst>[<AttachedClass>] < ::<Class:Object> () @ test/cli/minimize-rbi/minimize-rbi.rb:3
+    type-member(+) ::<Class:OnlyInFirst>::<AttachedClass> -> T.attached_class (of OnlyInFirst) @ test/cli/minimize-rbi/minimize-rbi.rb:3
+    method ::<Class:OnlyInFirst>#<static-init> (<blk>) @ test/cli/minimize-rbi/minimize-rbi.rb:3
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/minimize-rbi.rb start=??? end=???}
+
+class ::<root> < ::Object ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:3
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
+  class ::CommonToBoth < ::Object () @ test/cli/minimize-rbi/unknown.rbi:3
+    method ::CommonToBoth#method_common_to_both (<blk>) @ test/cli/minimize-rbi/unknown.rbi:4
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
+    method ::CommonToBoth#method_only_in_second (<blk>) @ test/cli/minimize-rbi/unknown.rbi:6
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
+  class ::<Class:CommonToBoth>[<AttachedClass>] < ::<Class:Object> () @ test/cli/minimize-rbi/unknown.rbi:3
+    type-member(+) ::<Class:CommonToBoth>::<AttachedClass> -> T.attached_class (of CommonToBoth) @ test/cli/minimize-rbi/unknown.rbi:3
+    method ::<Class:CommonToBoth>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:3
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
+  module ::ModuleCommonToBoth < ::Sorbet:No errors! Great job.
+:Private::Static::ImplicitModuleSuperclass () @ test/cli/minimize-rbi/unknown.rbi:22
+  class ::<Class:ModuleCommonToBoth>[<AttachedClass>] < ::Module () @ test/cli/minimize-rbi/unknown.rbi:22
+    type-member(+) ::<Class:ModuleCommonToBoth>::<AttachedClass> -> T.attached_class (of ModuleCommonToBoth) @ test/cli/minimize-rbi/unknown.rbi:22
+    method ::<Class:ModuleCommonToBoth>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:22
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
+  module ::ModuleOnlyInSecond < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/minimize-rbi/unknown.rbi:23
+  class ::<Class:ModuleOnlyInSecond>[<AttachedClass>] < ::Module () @ test/cli/minimize-rbi/unknown.rbi:23
+    type-member(+) ::<Class:ModuleOnlyInSecond>::<AttachedClass> -> T.attached_class (of ModuleOnlyInSecond) @ test/cli/minimize-rbi/unknown.rbi:23
+    method ::<Class:ModuleOnlyInSecond>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:23
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
+  class ::OnlyInSecond < ::Object (ModuleCommonToBoth) @ test/cli/minimize-rbi/unknown.rbi:9
+    method ::OnlyInSecond#<< (other, <blk>) @ test/cli/minimize-rbi/unknown.rbi:19
+      argument other<> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=19:10 end=19:15}
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
+    method ::OnlyInSecond#foo (x1, x2, x5, x3, x4, x6, x7) @ test/cli/minimize-rbi/unknown.rbi:13
+      argument x1<> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:11 end=13:13}
+      argument x2<optional> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:15 end=13:17}
+      argument x5<repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:24 end=13:26}
+      argument x3<keyword> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:28 end=13:31}
+      argument x4<optional, keyword> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:33 end=13:36}
+      argument x6<keyword, repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:42 end=13:46}
+      argument x7<block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:49 end=13:51}
+    method ::OnlyInSecond#fwd_args (..., <fwd-kwargs>, ...) @ test/cli/minimize-rbi/unknown.rbi:15
+      argument ...<repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=15:16 end=15:19}
+      argument <fwd-kwargs><keyword, repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=15:16 end=15:19}
+      argument ...<block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=15:16 end=15:19}
+  class ::<Class:OnlyInSecond>[<AttachedClass>] < ::<Class:Object> (ModuleOnlyInSecond) @ test/cli/minimize-rbi/unknown.rbi:9
+    type-member(+) ::<Class:OnlyInSecond>::<AttachedClass> -> T.attached_class (of OnlyInSecond) @ test/cli/minimize-rbi/unknown.rbi:9
+    method ::<Class:OnlyInSecond>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:9
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
+    method ::<Class:OnlyInSecond>#self_method (x, <blk>) @ test/cli/minimize-rbi/unknown.rbi:17
+      argument x<> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=17:24 end=17:25}
+      argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
+
+# typed: true
+
+class ::CommonToBoth
+  def method_only_in_second(); end
+end
+
+module ::ModuleOnlyInSecond
+end
+
+class ::OnlyInSecond
+  include ::ModuleCommonToBoth
+  extend ::ModuleOnlyInSecond
+  def <<(other); end
+  def foo(x1, x2=T.unsafe(nil), *x5, x3:, x4: T.unsafe(nil), **x6, &x7); end
+  def fwd_args(...); end
+  def self.self_method(x); end
+end
+

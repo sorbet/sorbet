@@ -790,12 +790,10 @@ void readOptions(Options &opts,
         opts.noStdlib = raw["no-stdlib"].as<bool>();
         opts.minimizeRBI = raw["minimize-to-rbi"].as<string>();
         if (!opts.minimizeRBI.empty() && !opts.print.MinimizeRBI.enabled) {
-            // TODO(jez) Test for this
             logger->error("--minimize-to-rbi must also include --print=minimized-rbi");
             throw EarlyReturnWithCode(1);
         }
         if (!opts.minimizeRBI.empty() && opts.autocorrect) {
-            // TODO(jez) Test for this
             logger->error("--minimize-to-rbi plus --autocorrect is not implemented");
             throw EarlyReturnWithCode(1);
         }

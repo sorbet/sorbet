@@ -404,7 +404,6 @@ void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &sourceG
         rbiGS->errorQueue->flushAllErrors(*rbiGS);
     }
 
-    // TODO(jez) Test that shows that `-p symbol-table` options work with second global state
     rbiIndexed = move(pipeline::resolve(rbiGS, move(rbiIndexed), opts, workers).result());
     if (rbiGS->hadCriticalError()) {
         rbiGS->errorQueue->flushAllErrors(*rbiGS);
