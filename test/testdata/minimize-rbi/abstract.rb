@@ -1,6 +1,7 @@
 # typed: strict
 
 module PaymentRecord
+  extend T::Sig
   extend T::Helpers
   interface!
   sig {abstract.void}
@@ -8,10 +9,12 @@ module PaymentRecord
   end
 end
 
-module CardPaymentRecord
+module CardPaymentRecord # error: Missing definition for abstract method `PaymentRecord#fx_currency`
   include PaymentRecord
 end
 
-class Card
-  include CardPaymentRecord
-end
+  class Card
+# ^^^^^^^^^^ error: Missing definition for abstract method `PaymentRecord#fx_currency`
+# ^^^^^^^^^^ error: Missing definition for abstract method `PaymentRecord#fx_currency`
+    include CardPaymentRecord
+  end
