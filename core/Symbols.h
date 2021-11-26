@@ -716,6 +716,8 @@ private:
         ENFORCE(isClassOrModule());
         flags &= ~Symbol::Flags::CLASS_OR_MODULE_LINEARIZATION_COMPUTED;
     }
+
+    void addMixinAt(ClassOrModuleRef sym, std::optional<u2> index);
 };
 // CheckSize(Symbol, 144, 8); // This is under too much churn to be worth checking
 

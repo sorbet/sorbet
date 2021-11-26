@@ -502,6 +502,17 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     return Types::arrayOf(ctx, instantiated);
 }
 
+void Symbol::addMixinAt(ClassOrModuleRef sym, std::optional<u2> index) {
+    if (index.has_value()) {
+        auto i = index.value();
+        ENFORCE(mixins_.size() > i);
+        ENFORCE(mixins_[i] == core::Symbols::PlaceholderMixin());
+        mixins_[i] = sym;
+    } else {
+        mixins_.emplace_back(sym);
+    }
+}
+
 bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional<u2> index) {
     ENFORCE(isClassOrModule());
     // Note: Symbols without an explicit declaration may not have class or module set. They default to modules in
@@ -513,16 +524,8 @@ bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional
         // Symbol hasn't been linearized yet, so add symbol unconditionally (order matters, so dupes are OK and
         // semantically important!)
         // This is the 99% common case.
-        if (index.has_value()) {
-            auto i = index.value();
-            ENFORCE(mixins_.size() > i);
-            ENFORCE(mixins_[i] == core::Symbols::PlaceholderMixin());
-            mixins_[i] = sym;
-        } else {
-            mixins_.emplace_back(sym);
-        }
+        addMixinAt(sym, index);
     } else {
-        ENFORCE(!index.has_value());
         // Symbol has been linearized, but we are trying to add another mixin. This is bad behavior and we shouldn't
         // allow it, but we currently allow it for the following circumstances:
         // * To support mixing in items to classes defined in payload, which have already been linearized.
@@ -536,7 +539,7 @@ bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional
             auto parent = superClass();
             // Don't include as mixin if it derives from the parent class (as in GlobalPass.cc's `maybeAddMixin`)
             if (!parent.exists() || !parent.data(gs)->derivesFrom(gs, sym)) {
-                mixins_.emplace_back(sym);
+                addMixinAt(sym, index);
                 unsetClassOrModuleLinearizationComputed();
             }
         }
