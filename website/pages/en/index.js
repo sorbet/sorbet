@@ -124,11 +124,6 @@ class Index extends React.Component {
                     'Sorbet is multithreaded, scaling linearly across cores on your CPU. It checks your types in seconds, giving you feedback as you code.\n\n[Get started with Sorbet →](docs/adopting)',
                 },
                 {
-                  title: 'IDE-ready',
-                  content:
-                    "Sorbet works with your favorite editor to provide IDE features like autocomplete and jump to definition. It's easy to add to your CI setup.\n\n[Try Sorbet online →](https://sorbet.run)",
-                },
-                {
                   title: 'Gradual by design',
                   content:
                     'Sorbet works with normal Ruby, so you can keep using your existing toolchain. Add Sorbet types to your codebase one file at a time.\n\n[Learn what makes Sorbet gradual →](docs/gradual)',
