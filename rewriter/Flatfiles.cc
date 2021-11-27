@@ -11,13 +11,13 @@ using namespace std;
 
 namespace sorbet::rewriter {
 optional<core::NameRef> getFieldName(core::MutableContext ctx, ast::Send &send) {
-    if (auto propLit = ast::cast_tree<ast::Literal>(send.args.front())) {
+    if (auto propLit = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
         if (propLit->isSymbol(ctx)) {
             return propLit->asSymbol(ctx);
         }
     }
-    if (send.args.size() >= 2) {
-        if (auto propLit = ast::cast_tree<ast::Literal>(send.args[1])) {
+    if (send.numPosArgs() >= 2) {
+        if (auto propLit = ast::cast_tree<ast::Literal>(send.getPosArg(1))) {
             if (propLit->isSymbol(ctx)) {
                 return propLit->asSymbol(ctx);
             }
@@ -39,7 +39,7 @@ void handleFieldDefinition(core::MutableContext ctx, ast::ExpressionPtr &stat, v
     if (auto send = ast::cast_tree<ast::Send>(stat)) {
         if ((send->fun != core::Names::from() && send->fun != core::Names::field() &&
              send->fun != core::Names::pattern()) ||
-            !send->recv.isSelfReference() || send->args.size() < 1) {
+            !send->recv.isSelfReference() || send->numPosArgs() < 1) {
             return;
         }
         auto name = getFieldName(ctx, *send);

@@ -31,8 +31,8 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
 
         case Tag::Send: {
             auto *exp = reinterpret_cast<const Send *>(tree);
-            return make_expression<Send>(exp->loc, deepCopy(avoid, exp->recv), exp->fun, exp->numPosArgs,
-                                         deepCopyVec(avoid, exp->args), exp->flags);
+            return make_expression<Send>(exp->loc, deepCopy(avoid, exp->recv), exp->fun, exp->numPosArgs(),
+                                         deepCopyVec(avoid, exp->rawArgs()), exp->flags);
         }
 
         case Tag::ClassDef: {

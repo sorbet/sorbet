@@ -926,10 +926,10 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             // Can replace this with std::bit_cast in C++20
             memcpy(&flags, &s.flags, sizeof(flags));
             p.putU1(flags);
-            p.putU4(s.numPosArgs);
-            p.putU4(s.args.size());
+            p.putU4(s.numPosArgs());
+            p.putU4(s.rawArgs().size());
             pickle(p, s.recv);
-            for (auto &arg : s.args) {
+            for (auto &arg : s.rawArgs()) {
                 pickle(p, arg);
             }
             break;

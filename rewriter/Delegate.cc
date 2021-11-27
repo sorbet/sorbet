@@ -44,18 +44,14 @@ vector<ast::ExpressionPtr> Delegate::run(core::MutableContext ctx, const ast::Se
         return empty;
     }
 
-    if (send->args.empty()) {
+    if (send->numPosArgs() == 0) {
+        // there has to be at least one positional argument
         return empty;
     }
 
     auto optionsTree = ASTUtil::mkKwArgsHash(send);
     auto options = ast::cast_tree<ast::Hash>(optionsTree);
     if (!options) {
-        return empty;
-    }
-
-    if (send->numPosArgs == 0) {
-        // there has to be at least one positional argument
         return empty;
     }
 
@@ -93,8 +89,8 @@ vector<ast::ExpressionPtr> Delegate::run(core::MutableContext ctx, const ast::Se
     }
 
     vector<ast::ExpressionPtr> methodStubs;
-    for (int i = 0; i < send->numPosArgs; i++) {
-        auto *lit = ast::cast_tree<ast::Literal>(send->args[i]);
+    for (int i = 0; i < send->numPosArgs(); i++) {
+        auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(i));
         if (!lit || !lit->isSymbol(ctx)) {
             return empty;
         }

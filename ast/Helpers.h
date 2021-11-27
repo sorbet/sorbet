@@ -136,8 +136,7 @@ public:
             // the LHS might be a send of the form x.y=(), in which case we add the RHS to the arguments list and get
             // x.y=(rhs)
             ENFORCE(!s->hasBlock() && !s->hasKwArgs());
-            s->args.emplace_back(std::move(rhs));
-            s->numPosArgs++;
+            s->addPosArg(std::move(rhs));
             return lhs;
         } else if (auto *seq = cast_tree<ast::InsSeq>(lhs)) {
             // the LHS might be a sequence, which means that it's the result of a safe navigation operator, like
@@ -147,7 +146,7 @@ public:
             if (auto *cond = cast_tree<ast::If>(seq->expr)) {
                 if (auto *s = cast_tree<ast::Send>(cond->elsep)) {
                     ENFORCE(!s->hasBlock() && !s->hasKwArgs());
-                    s->args.emplace_back(std::move(rhs));
+                    s->addPosArg(std::move(rhs));
                     return lhs;
                 }
             }

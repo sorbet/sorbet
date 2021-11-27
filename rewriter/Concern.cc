@@ -19,11 +19,10 @@ bool doesExtendConcern(core::MutableContext ctx, ast::ClassDef *klass) {
                 if (send.fun != core::Names::extend()) {
                     return;
                 }
-                auto &args = send.args;
-                if (args.empty()) {
+                if (send.numPosArgs() == 0) {
                     return;
                 }
-                auto *firstArg = ast::cast_tree<ast::UnresolvedConstantLit>(args.at(0));
+                auto *firstArg = ast::cast_tree<ast::UnresolvedConstantLit>(send.getPosArg(0));
                 if (firstArg == nullptr) {
                     return;
                 }

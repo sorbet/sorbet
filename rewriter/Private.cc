@@ -14,11 +14,11 @@ namespace sorbet::rewriter {
 vector<ast::ExpressionPtr> Private::run(core::MutableContext ctx, ast::Send *send) {
     vector<ast::ExpressionPtr> empty;
 
-    if (send->args.size() != 1) {
+    if (send->numPosArgs() != 1) {
         return empty;
     }
 
-    auto mdef = ast::cast_tree<ast::MethodDef>(send->args[0]);
+    auto mdef = ast::cast_tree<ast::MethodDef>(send->getPosArg(0));
     if (mdef == nullptr) {
         return empty;
     }

@@ -36,10 +36,10 @@ void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     if (name2->cnst != core::Names::Constants::ActiveRecord()) {
         return;
     }
-    if (send->args.size() != 1 && !send->hasKwArgs()) {
+    if (send->numPosArgs() != 1 && !send->hasKwArgs()) {
         return;
     }
-    auto arg = ast::cast_tree<ast::Literal>(send->args[0]);
+    auto arg = ast::cast_tree<ast::Literal>(send->getPosArg(0));
     if (!arg) {
         return;
     }

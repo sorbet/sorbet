@@ -73,7 +73,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
     }
 
     if (!ast::MK::isRootScope(recv->scope) || recv->cnst != core::Symbols::Struct().data(ctx)->name ||
-        send->fun != core::Names::new_() || send->args.empty()) {
+        send->fun != core::Names::new_() || (send->numPosArgs() == 0 && !send->hasKwArgs())) {
         return empty;
     }
 
@@ -85,25 +85,23 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
 
     bool keywordInit = false;
     if (send->hasKwArgs()) {
-        if (send->numPosArgs == 0) {
+        if (send->numPosArgs() == 0) {
             // leave bad usages like `Struct.new(keyword_init: true)` untouched so we error later
             return empty;
         }
         if (send->hasKwSplat()) {
             return empty;
         }
-        auto [posEnd, kwEnd] = send->kwArgsRange();
-        if (kwEnd - posEnd != 2) {
+
+        if (send->numKwArgs() != 1) {
             return empty;
         }
 
-        auto &key = send->args[posEnd];
-        if (!isKeywordInitKey(ctx, key)) {
+        if (!isKeywordInitKey(ctx, send->getKwKey(0))) {
             return empty;
         }
 
-        auto &value = send->args[posEnd + 1];
-        if (auto *lit = ast::cast_tree<ast::Literal>(value)) {
+        if (auto *lit = ast::cast_tree<ast::Literal>(send->getKwValue(0))) {
             if (lit->isTrue(ctx)) {
                 keywordInit = true;
             } else if (!lit->isFalse(ctx)) {
@@ -114,8 +112,8 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         }
     }
 
-    for (int i = 0; i < send->numPosArgs; i++) {
-        auto *sym = ast::cast_tree<ast::Literal>(send->args[i]);
+    for (int i = 0; i < send->numPosArgs(); i++) {
+        auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(i));
         if (!sym || !sym->isSymbol(ctx)) {
             return empty;
         }

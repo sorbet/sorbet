@@ -27,14 +27,14 @@ ast::ExpressionPtr InterfaceWrapper::run(core::MutableContext ctx, ast::Send *se
         return nullptr;
     }
 
-    if (send->args.size() != 1) {
+    if (send->numPosArgs() != 1) {
         if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::BadWrapInstance)) {
             e.setHeader("Wrong number of arguments to `{}`. Expected: `{}`, got: `{}`", "wrap_instance", 0,
-                        send->args.size());
+                        send->numPosArgs());
         }
         return nullptr;
     }
 
-    return ast::MK::Let(send->loc, move(send->args.front()), move(send->recv));
+    return ast::MK::Let(send->loc, move(send->getPosArg(0)), move(send->recv));
 }
 } // namespace sorbet::rewriter

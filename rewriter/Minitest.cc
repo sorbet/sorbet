@@ -22,8 +22,8 @@ public:
         auto loc = asgn.loc;
         auto raiseUnimplemented = ast::MK::RaiseUnimplemented(loc);
         if (auto send = ast::cast_tree<ast::Send>(asgn.rhs)) {
-            if (send->fun == core::Names::let() && send->numPosArgs == 2) {
-                auto rhs = ast::MK::Let(loc, move(raiseUnimplemented), send->args[1].deepCopy());
+            if (send->fun == core::Names::let() && send->numPosArgs() == 2) {
+                auto rhs = ast::MK::Let(loc, move(raiseUnimplemented), send->getPosArg(1).deepCopy());
                 return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(rhs));
             }
         }
@@ -70,7 +70,7 @@ public:
     // we treat those the same way we treat classes
     ast::ExpressionPtr preTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
-        if (send->recv.isSelfReference() && send->numPosArgs == 1 && send->fun == core::Names::describe()) {
+        if (send->recv.isSelfReference() && send->numPosArgs() == 1 && send->fun == core::Names::describe()) {
             classDepth++;
         }
         return tree;
@@ -78,7 +78,7 @@ public:
 
     ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
-        if (send->recv.isSelfReference() && send->numPosArgs == 1 && send->fun == core::Names::describe()) {
+        if (send->recv.isSelfReference() && send->numPosArgs() == 1 && send->fun == core::Names::describe()) {
             classDepth--;
             if (classDepth == 0) {
                 movedConstants.emplace_back(move(tree));
@@ -158,8 +158,29 @@ bool canMoveIntoMethodDef(const ast::ExpressionPtr &exp) {
         return absl::c_all_of(hash->keys, [](auto &elem) { return canMoveIntoMethodDef(elem); }) &&
                absl::c_all_of(hash->values, [](auto &elem) { return canMoveIntoMethodDef(elem); });
     } else if (auto *send = ast::cast_tree<ast::Send>(exp)) {
-        return canMoveIntoMethodDef(send->recv) &&
-               absl::c_all_of(send->args, [](auto &elem) { return canMoveIntoMethodDef(elem); });
+        if (!canMoveIntoMethodDef(send->recv)) {
+            return false;
+        }
+        const auto numPosArgs = send->numPosArgs();
+        for (auto i = 0; i < numPosArgs; ++i) {
+            if (!canMoveIntoMethodDef(send->getPosArg(i))) {
+                return false;
+            }
+        }
+
+        const auto numKwArgs = send->numKwArgs();
+        for (auto i = 0; i < numKwArgs; ++i) {
+            // Keys are always symbol literals.
+            if (!canMoveIntoMethodDef(send->getKwValue(i))) {
+                return false;
+            }
+        }
+
+        if (send->hasKwSplat() && !canMoveIntoMethodDef(*send->kwSplat())) {
+            return false;
+        }
+
+        return true;
     } else if (ast::isa_tree<ast::UnresolvedConstantLit>(exp)) {
         return true;
     }
@@ -184,10 +205,10 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
     // this statement must be a send
     if (auto *send = ast::cast_tree<ast::Send>(stmt)) {
         // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
-        if (send->fun == core::Names::it() && send->numPosArgs == 1 && send->hasBlock() &&
+        if (send->fun == core::Names::it() && send->numPosArgs() == 1 && send->hasBlock() &&
             send->block()->args.size() == 0) {
             // we use this for the name of our test
-            auto argString = to_s(ctx, send->args.front());
+            auto argString = to_s(ctx, send->getPosArg(0));
             auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
 
             // pull constants out of the block
@@ -311,7 +332,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         return nullptr;
     }
 
-    if ((send->fun == core::Names::testEach() || send->fun == core::Names::testEachHash()) && send->numPosArgs == 1) {
+    if ((send->fun == core::Names::testEach() || send->fun == core::Names::testEachHash()) && send->numPosArgs() == 1) {
         if ((send->fun == core::Names::testEach() && block->args.size() < 1) ||
             (send->fun == core::Names::testEachHash() && block->args.size() != 2)) {
             if (auto e = ctx.beginError(block->loc, core::errors::Rewriter::BadTestEach)) {
@@ -322,19 +343,19 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         }
         // if this has the form `test_each(expr) { |arg | .. }`, then start by trying to convert `expr` into a thing we
         // can freely copy into methoddef scope
-        auto iteratee = getIteratee(send->args.front());
+        auto iteratee = getIteratee(send->getPosArg(0));
         // and then reconstruct the send but with a modified body
         return ast::MK::Send(
             send->loc, ast::MK::Self(send->loc), send->fun, 1,
             ast::MK::SendArgs(
-                move(send->args.front()),
+                move(send->getPosArg(0)),
                 ast::MK::Block(block->loc,
                                prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args, {}, iteratee),
                                std::move(block->args))),
             send->flags);
     }
 
-    if (send->numPosArgs == 0 && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
+    if (send->numPosArgs() == 0 && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
         auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::initialize();
         ConstantMover constantMover;
         block->body = ast::TreeMap::apply(ctx, constantMover, move(block->body));
@@ -343,10 +364,10 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
-    if (send->numPosArgs != 1) {
+    if (send->numPosArgs() != 1) {
         return nullptr;
     }
-    auto &arg = send->args[0];
+    auto &arg = send->getPosArg(0);
     auto argString = to_s(ctx, arg);
 
     if (send->fun == core::Names::describe()) {
@@ -371,7 +392,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         const bool bodyIsClass = false;
         auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, send->loc, std::move(name),
                                                            prepareBody(ctx, bodyIsClass, std::move(block->body))));
-        method = ast::MK::InsSeq1(send->loc, send->args.front().deepCopy(), move(method));
+        method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 

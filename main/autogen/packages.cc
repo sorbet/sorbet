@@ -45,14 +45,14 @@ public:
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         // we're not going to report errors about ill-formed things here: those errors should get reported elsewhere,
         // and instead we'll bail if things don't look like we expect
-        if (send.args.size() != 1) {
+        if (send.numPosArgs() != 1) {
             return tree;
         }
         if (send.fun != core::Names::export_() && send.fun != core::Names::import()) {
             return tree;
         }
 
-        auto cnst = ast::cast_tree<ast::ConstantLit>(send.args.front());
+        auto cnst = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
         if (!cnst) {
             return tree;
         }

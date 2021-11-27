@@ -212,12 +212,16 @@ class LocalNameInserter {
         ENFORCE(ast::isa_tree<ast::Send>(tree));
 
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
-        ENFORCE(original.numPosArgs == 1 && ast::isa_tree<ast::ZSuperArgs>(original.args[0]));
+        ENFORCE(original.numPosArgs() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.getPosArg(0)));
+
+        ast::ExpressionPtr originalBlock;
+        if (original.hasBlock()) {
+            originalBlock = move(*original.rawBlock());
+        }
 
         // Clear out the args (which are just [ZSuperArgs]) in the original send. (Note that we want this cleared even
         // if we error out below, because later `ENFORCE`s will be triggered if we don't.)
-        original.numPosArgs = 0;
-        original.args.erase(original.args.begin());
+        original.clearArgs();
 
         if (!scopeStack.back().insideMethod) {
             if (auto e = ctx.beginError(original.loc, core::errors::Namer::SelfOutsideClass)) {
@@ -333,18 +337,17 @@ class LocalNameInserter {
             original.loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), core::Names::super()));
 
         if (posArgsArray != nullptr) {
-            ast::Send::ARGS_store sendargs;
             // We wrap self with T.unsafe in order to get around the requirement for <call-with-splat> and
             // <call-with-splat-and-block> that the shapes of the splatted hashes be known statically. This is a bit of
             // a hack, but 'super' is currently treated as untyped anyway.
-            sendargs.emplace_back(ast::MK::Unsafe(original.loc, std::move(original.recv)));
-            sendargs.emplace_back(std::move(method));
+            original.addPosArg(ast::MK::Unsafe(original.loc, std::move(original.recv)));
+            original.addPosArg(std::move(method));
 
             // For <call-with-splat> and <call-with-splat-and-block> posargs are always passed in an array.
             if (posArgsArray == nullptr) {
                 posArgsArray = ast::MK::Array(original.loc, std::move(posArgsEntries));
             }
-            sendargs.emplace_back(std::move(posArgsArray));
+            original.addPosArg(std::move(posArgsArray));
 
             // For <call-with-splat> and <call-with-splat-and-block>, the kwargs array can either be a
             // [:key, val, :key, val, ...] array or a one-element [kwargshash] array, depending on whether splatting
@@ -367,46 +370,38 @@ class LocalNameInserter {
             } else {
                 boxedKwArgs = ast::MK::Nil(original.loc);
             }
-            sendargs.emplace_back(std::move(boxedKwArgs));
+            original.addPosArg(std::move(boxedKwArgs));
 
             original.recv = ast::MK::Constant(original.loc, core::Symbols::Magic());
 
-            if (original.hasBlock()) {
+            if (originalBlock != nullptr) {
                 // <call-with-splat> and "do"
                 original.fun = core::Names::callWithSplat();
-                original.numPosArgs = 4;
                 // Re-add block argument
-                sendargs.emplace_back(std::move(original.args.back()));
+                original.setBlock(std::move(originalBlock));
             } else {
                 // <call-with-splat-and-block>(..., &blk)
                 original.fun = core::Names::callWithSplatAndBlock();
-                original.numPosArgs = 5;
-                sendargs.emplace_back(std::move(blockArg));
-                original.flags.hasBlock = false;
+                original.addPosArg(std::move(blockArg));
             }
-
-            original.args = std::move(sendargs);
-        } else if (!original.hasBlock()) {
+        } else if (originalBlock == nullptr) {
             // No positional splat and no "do", so we need to forward &<blkvar> with <call-with-block>.
-            ast::Send::ARGS_store sendargs;
-            sendargs.reserve(3 + posArgsEntries.size() + std::max({1UL, 2 * kwArgKeyEntries.size()}));
-            sendargs.emplace_back(std::move(original.recv));
-            sendargs.emplace_back(std::move(method));
-            sendargs.emplace_back(std::move(blockArg));
+            original.reserveArguments(3 + posArgsEntries.size() + std::max({1UL, 2 * kwArgKeyEntries.size()}));
+            original.addPosArg(std::move(original.recv));
+            original.addPosArg(std::move(method));
+            original.addPosArg(std::move(blockArg));
 
             for (auto &arg : posArgsEntries) {
-                sendargs.emplace_back(std::move(arg));
+                original.addPosArg(std::move(arg));
             }
             posArgsEntries.clear();
-            u2 numPosArgs = sendargs.size();
 
             if (kwArgsHash != nullptr) {
-                sendargs.emplace_back(std::move(kwArgsHash));
+                original.setKwSplat(std::move(kwArgsHash));
             } else {
                 ENFORCE(kwArgKeyEntries.size() == kwArgValueEntries.size());
                 for (size_t i = 0; i < kwArgKeyEntries.size(); i++) {
-                    sendargs.emplace_back(std::move(kwArgKeyEntries[i]));
-                    sendargs.emplace_back(std::move(kwArgValueEntries[i]));
+                    original.addKwArg(std::move(kwArgKeyEntries[i]), std::move(kwArgValueEntries[i]));
                 }
             }
             kwArgKeyEntries.clear();
@@ -414,35 +409,27 @@ class LocalNameInserter {
 
             original.recv = ast::MK::Constant(original.loc, core::Symbols::Magic());
             original.fun = core::Names::callWithBlock();
-            original.numPosArgs = numPosArgs;
-            original.args = std::move(sendargs);
         } else {
             // No positional splat and we have a "do", so we can synthesize an ordinary send.
-            ast::Send::ARGS_store sendargs;
-            sendargs.reserve(posArgsEntries.size() + std::max({1UL, 2 * kwArgKeyEntries.size()}));
+            original.reserveArguments(posArgsEntries.size() + std::max({1UL, 2 * kwArgKeyEntries.size()}));
 
             for (auto &arg : posArgsEntries) {
-                sendargs.emplace_back(std::move(arg));
+                original.addPosArg(std::move(arg));
             }
             posArgsEntries.clear();
-            u2 numPosArgs = sendargs.size();
 
             if (kwArgsHash != nullptr) {
-                sendargs.emplace_back(std::move(kwArgsHash));
+                original.setKwSplat(std::move(kwArgsHash));
             } else {
                 ENFORCE(kwArgKeyEntries.size() == kwArgValueEntries.size());
                 for (size_t i = 0; i < kwArgKeyEntries.size(); i++) {
-                    sendargs.emplace_back(std::move(kwArgKeyEntries[i]));
-                    sendargs.emplace_back(std::move(kwArgValueEntries[i]));
+                    original.addKwArg(std::move(kwArgKeyEntries[i]), std::move(kwArgValueEntries[i]));
                 }
             }
             // Re-add original block
-            sendargs.emplace_back(std::move(original.args.back()));
+            original.setBlock(std::move(originalBlock));
             kwArgKeyEntries.clear();
             kwArgValueEntries.clear();
-
-            original.numPosArgs = numPosArgs;
-            original.args = std::move(sendargs);
         }
 
         return tree;
@@ -474,7 +461,7 @@ public:
 
     ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (original.numPosArgs == 1 && ast::isa_tree<ast::ZSuperArgs>(original.args[0])) {
+        if (original.numPosArgs() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.getPosArg(0))) {
             return lowerZSuperArgs(ctx, std::move(tree));
         }
 

@@ -21,7 +21,7 @@ bool isFinal(const ast::ExpressionPtr &stmt) {
         return false;
     }
 
-    if (!send->args.empty()) {
+    if (!send->rawArgs().empty()) {
         return false;
     }
 
@@ -46,11 +46,11 @@ bool isIncludeSingleton(const ast::ExpressionPtr &stmt) {
         return false;
     }
 
-    if (send->args.size() != 1 || send->hasKwArgs()) {
+    if (send->numPosArgs() != 1 || send->hasKwArgs()) {
         return false;
     }
 
-    auto *sym = ast::cast_tree<ast::UnresolvedConstantLit>(send->args.front());
+    auto *sym = ast::cast_tree<ast::UnresolvedConstantLit>(send->getPosArg(0));
     if (sym == nullptr || sym->cnst != core::Names::Constants::Singleton()) {
         return false;
     }
@@ -77,7 +77,7 @@ void Singleton::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     {
         auto sig = ast::MK::Sig0(loc, ast::MK::Send0(loc, ast::MK::T(loc), core::Names::attachedClass()));
         if (finalKlass) {
-            ast::cast_tree_nonnull<ast::Send>(sig).args.emplace_back(ast::MK::Symbol(loc, core::Names::final_()));
+            ast::cast_tree_nonnull<ast::Send>(sig).addPosArg(ast::MK::Symbol(loc, core::Names::final_()));
         }
         newRHS.emplace_back(std::move(sig));
     }

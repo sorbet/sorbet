@@ -137,10 +137,11 @@ struct ChainedSigWalk {
             if (sendCopy->fun != core::Names::final_()) {
                 if (sendCopy->hasBlock()) {
                     // Drop the block argument before moving the arguments.
-                    sendCopy->args.pop_back();
+                    sendCopy->setBlock(nullptr);
                 }
-                newBlockReceiver = ast::MK::Send(sendCopy->loc, std::move(newBlockReceiver), sendCopy->fun,
-                                                 sendCopy->numPosArgs, std::move(sendCopy->args));
+                auto numPosArgs = sendCopy->numPosArgs();
+                newBlockReceiver = ast::MK::Send(sendCopy->loc, std::move(newBlockReceiver), sendCopy->fun, numPosArgs,
+                                                 std::move(sendCopy->rawArgs()));
             } else {
                 isFinal = true;
             }
@@ -161,18 +162,17 @@ struct ChainedSigWalk {
             args.emplace_back(ast::MK::Symbol(sendCopy->loc, core::Names::final_()));
         }
 
+        if (blockBody->hasBlock()) {
+            blockBody->setBlock(nullptr);
+        }
+
         // Create the new body, composed of the chained statements that were moved inside and the original block
-        auto newBody = ast::MK::Send(send->loc, std::move(newBlockReceiver), blockBody->fun, blockBody->numPosArgs,
-                                     std::move(blockBody->args));
+        auto newBody = ast::MK::Send(send->loc, std::move(newBlockReceiver), blockBody->fun, blockBody->numPosArgs(),
+                                     std::move(blockBody->rawArgs()));
 
-        u2 numPosArgs = args.size();
-        args.emplace_back(ast::MK::Block0(send->block()->loc, std::move(newBody)));
-
-        ast::Send::Flags flags;
-        flags.hasBlock = true;
-
-        return ast::MK::Send(send->loc, std::move(sendCopy->recv), core::Names::sig(), numPosArgs, std::move(args),
-                             flags);
+        auto rv = ast::MK::Send(send->loc, std::move(sendCopy->recv), core::Names::sig(), args.size(), std::move(args));
+        ast::cast_tree_nonnull<ast::Send>(rv).setBlock(ast::MK::Block0(send->block()->loc, std::move(newBody)));
+        return rv;
     }
 };
 

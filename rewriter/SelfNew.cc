@@ -7,16 +7,30 @@ namespace sorbet::rewriter {
 
 namespace {
 ast::ExpressionPtr convertSelfNew(core::MutableContext ctx, ast::Send *send) {
+    auto numPosArgs = send->numPosArgs();
     ast::Send::ARGS_store args;
 
     args.emplace_back(std::move(send->recv));
 
-    for (auto &arg : send->args) {
-        args.emplace_back(std::move(arg));
+    for (auto i = 0; i < numPosArgs; ++i) {
+        args.emplace_back(std::move(send->getPosArg(i)));
     }
 
-    auto numPosArgs = send->numPosArgs + 1;
-    return ast::MK::SelfNew(send->loc, numPosArgs, std::move(args), send->flags);
+    const auto numKwArgs = send->numKwArgs();
+    for (auto i = 0; i < numKwArgs; ++i) {
+        args.emplace_back(std::move(send->getKwKey(i)));
+        args.emplace_back(std::move(send->getKwValue(i)));
+    }
+
+    if (send->hasKwSplat()) {
+        args.emplace_back(std::move(*send->kwSplat()));
+    }
+
+    if (send->hasBlock()) {
+        args.emplace_back(std::move(*send->rawBlock()));
+    }
+
+    return ast::MK::SelfNew(send->loc, numPosArgs + 1, std::move(args), send->flags);
 }
 
 bool isSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {
@@ -24,11 +38,11 @@ bool isSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {
         return false;
     }
 
-    if (!send->args[0].isSelfReference()) {
+    if (!send->getPosArg(0).isSelfReference()) {
         return false;
     }
 
-    auto *lit = ast::cast_tree<ast::Literal>(send->args[1]);
+    auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(1));
     if (lit == nullptr) {
         return false;
     }
@@ -50,17 +64,13 @@ bool isSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {
 }
 
 ast::ExpressionPtr convertSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {
-    ast::Send::ARGS_store args;
-
-    for (auto &arg : send->args) {
-        args.emplace_back(std::move(arg));
-    }
-
+    auto flags = send->flags;
+    ast::Send::ARGS_store args = std::move(send->rawArgs());
     auto magic = ast::MK::Constant(send->loc, core::Symbols::Magic());
     args[0] = std::move(magic);
     args[1] = ast::MK::Symbol(send->loc, core::Names::selfNew());
 
-    return ast::MK::Send(send->loc, std::move(send->recv), send->fun, send->numPosArgs, std::move(args), send->flags);
+    return ast::MK::Send(send->loc, std::move(send->recv), send->fun, send->numPosArgs(), std::move(args), flags);
 }
 } // namespace
 

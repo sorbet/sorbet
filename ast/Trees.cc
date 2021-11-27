@@ -230,7 +230,7 @@ Assign::Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs)
 
 Send::Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, Send::ARGS_store args,
            Flags flags)
-    : loc(loc), fun(fun), flags(flags), numPosArgs(numPosArgs), recv(std::move(recv)), args(std::move(args)) {
+    : loc(loc), fun(fun), flags(flags), numPosArgs_(numPosArgs), recv(std::move(recv)), args(std::move(args)) {
     categoryCounterInc("trees", "send");
     if (hasBlock()) {
         counterInc("trees.send.with_block");
@@ -921,7 +921,7 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
         fmt::format_to(std::back_inserter(buf), "nullptr\n");
     }
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "pos_args = {}\n", this->numPosArgs);
+    fmt::format_to(std::back_inserter(buf), "pos_args = {}\n", this->numPosArgs_);
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "args = [\n");
     for (auto &a : args) {
@@ -960,6 +960,20 @@ ast::Block *Send::block() {
     }
 }
 
+const ExpressionPtr *Send::rawBlock() const {
+    if (hasBlock()) {
+        return &this->args.back();
+    }
+    return nullptr;
+}
+
+ExpressionPtr *Send::rawBlock() {
+    if (hasBlock()) {
+        return &this->args.back();
+    }
+    return nullptr;
+}
+
 const ExpressionPtr *Send::kwSplat() const {
     if (hasKwSplat()) {
         auto index = this->args.size() - 1;
@@ -982,9 +996,21 @@ ExpressionPtr *Send::kwSplat() {
     return nullptr;
 }
 
+void Send::clearArgs() {
+    this->args.clear();
+    this->flags.hasBlock = false;
+    this->numPosArgs_ = 0;
+}
+
 void Send::addPosArg(ExpressionPtr ptr) {
-    this->args.emplace(this->args.begin() + numPosArgs, move(ptr));
-    this->numPosArgs++;
+    this->args.emplace(this->args.begin() + numPosArgs_, move(ptr));
+    this->numPosArgs_++;
+}
+
+void Send::insertPosArg(u2 index, ExpressionPtr arg) {
+    ENFORCE(index <= numPosArgs_);
+    this->args.emplace(this->args.begin() + index, std::move(arg));
+    this->numPosArgs_++;
 }
 
 void Send::setBlock(ExpressionPtr block) {
@@ -998,6 +1024,15 @@ void Send::setBlock(ExpressionPtr block) {
         flags.hasBlock = true;
         ENFORCE(this->block() != nullptr);
     }
+}
+
+void Send::setKwSplat(ExpressionPtr splat) {
+    this->args.emplace(this->args.begin() + numPosArgs_, move(splat));
+}
+
+void Send::addKwArg(ExpressionPtr key, ExpressionPtr value) {
+    auto it = this->args.emplace(this->args.end() - (hasBlock() ? 1 : 0) - (hasKwSplat() ? 1 : 0), move(key));
+    this->args.emplace(it + 1, move(value));
 }
 
 string Cast::toStringWithTabs(const core::GlobalState &gs, int tabs) const {

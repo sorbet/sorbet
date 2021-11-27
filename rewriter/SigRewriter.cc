@@ -36,7 +36,7 @@ bool SigRewriter::run(core::MutableContext &ctx, ast::Send *send) {
         return false;
     }
 
-    if (!(send->numPosArgs == 0 || send->numPosArgs == 1)) {
+    if (!(send->numPosArgs() == 0 || send->numPosArgs() == 1)) {
         return false;
     }
 
@@ -51,9 +51,8 @@ bool SigRewriter::run(core::MutableContext &ctx, ast::Send *send) {
     // Keep track of old receiver at this point so that we can report whether a method called
     // sig with the right arity even existed at this point.
     auto oldRecv = std::move(send->recv);
-    send->numPosArgs += 1;
     send->recv = ast::MK::Constant(send->loc, core::Symbols::Sorbet_Private_Static());
-    send->args.emplace(send->args.begin(), std::move(oldRecv));
+    send->insertPosArg(0, std::move(oldRecv));
     return true;
 }
 

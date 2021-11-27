@@ -720,13 +720,16 @@ public:
 
     Flags flags;
 
-    u2 numPosArgs;
+private:
+    u2 numPosArgs_;
 
+public:
     ExpressionPtr recv;
 
     static constexpr int EXPECTED_ARGS_COUNT = 2;
     using ARGS_store = InlinedVector<ExpressionPtr, EXPECTED_ARGS_COUNT>;
 
+private:
     // The arguments vector has the following layout:
     //
     // for n = numPosArgs, m = number of keyword arg pairs
@@ -744,6 +747,8 @@ public:
     // the arguments vector would look like the following, with numPosArgs = 2:
     //
     // > <a, b, c, 10, d, nil, &blk>
+    //
+    // We make the args store private to avoid code that is tightly bound to this layout.
     ARGS_store args;
 
 public:
@@ -754,31 +759,89 @@ public:
     // Returns null if no block present.
     const ast::Block *block() const;
     ast::Block *block();
+    const ExpressionPtr *rawBlock() const;
+    ExpressionPtr *rawBlock();
     // Returns null if no kwsplat present.
     const ExpressionPtr *kwSplat() const;
     ExpressionPtr *kwSplat();
     void setBlock(ExpressionPtr block);
+    void setKwSplat(ExpressionPtr splat);
+    void addKwArg(ExpressionPtr key, ExpressionPtr value);
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void addPosArg(ExpressionPtr ptr);
+    void insertPosArg(u2 index, ExpressionPtr arg);
 
-    std::pair<int, int> posArgsRange() const {
-        return std::make_pair<int, int>(0, numPosArgs);
+    // Reserve the given number of arguments. Each positional argument takes 1 slot, kw args take 2, splat takes 1, and
+    // block takes 1.
+    void reserveArguments(size_t hint) {
+        this->args.reserve(hint);
     }
 
-    // Returned value is [start, end) indices into ast::Send::args.
-    std::pair<int, int> kwArgsRange() const {
-        auto res = std::make_pair<int, int>(numPosArgs, args.size());
-        if (hasKwSplat()) {
-            res.second = res.second - 1;
-        }
-        if (hasBlock()) {
-            res.second = res.second - 1;
-        }
-        return res;
+    // Returns the raw arguments vector. Please avoid using unless absolutely necessary; it is easier to manipulate the
+    // arguments via the Send.
+    ARGS_store &rawArgs() {
+        return args;
+    }
+
+    // Returns the raw arguments vector. Please avoid using unless absolutely necessary; it is easier to manipulate the
+    // arguments via the Send.
+    const ARGS_store &rawArgs() const {
+        return args;
+    }
+
+    u2 numPosArgs() const {
+        return numPosArgs_;
+    }
+
+    u2 numKwArgs() const {
+        u2 range = args.size() - numPosArgs_ - (hasKwSplat() ? 1 : 0) - (hasBlock() ? 1 : 0);
+        ENFORCE(range % 2 == 0);
+        return range / 2;
+    }
+
+    ExpressionPtr &getPosArg(u2 idx) {
+        ENFORCE(idx < numPosArgs_);
+        return args[idx];
+    }
+
+    const ExpressionPtr &getPosArg(u2 idx) const {
+        ENFORCE(idx < numPosArgs_);
+        return args[idx];
+    }
+
+    // Remove all arguments to the function, including the block argument.
+    void clearArgs();
+
+    ExpressionPtr &getKwKey(u2 argnum) {
+        ENFORCE(argnum < numKwArgs());
+        auto rawIdx = numPosArgs_ + (argnum * 2);
+        return args[rawIdx];
+    }
+
+    const ExpressionPtr &getKwKey(u2 argnum) const {
+        ENFORCE(argnum < numKwArgs());
+        auto rawIdx = numPosArgs_ + (argnum * 2);
+        return args[rawIdx];
+    }
+
+    ExpressionPtr &getKwValue(u2 argnum) {
+        ENFORCE(argnum < numKwArgs());
+        auto rawIdx = numPosArgs_ + (argnum * 2) + 1;
+        return args[rawIdx];
+    }
+
+    const ExpressionPtr &getKwValue(u2 argnum) const {
+        ENFORCE(argnum < numKwArgs());
+        auto rawIdx = numPosArgs_ + (argnum * 2) + 1;
+        return args[rawIdx];
+    }
+
+    std::pair<int, int> posArgsRange() const {
+        return std::make_pair<int, int>(0, numPosArgs_);
     }
 
     // True when this send contains a block argument.
@@ -788,12 +851,12 @@ public:
 
     // True when there are either keyword args, or a keyword splat.
     bool hasKwArgs() const {
-        return args.size() > (numPosArgs + (hasBlock() ? 1 : 0));
+        return args.size() > (numPosArgs_ + (hasBlock() ? 1 : 0));
     }
 
     // True when there is a keyword args splat present. hasKwSplat -> hasKwArgs, but not the other way around.
     bool hasKwSplat() const {
-        return (args.size() - numPosArgs - (hasBlock() ? 1 : 0)) & 0x1;
+        return (args.size() - numPosArgs_ - (hasBlock() ? 1 : 0)) & 0x1;
     }
 
     void _sanityCheck();

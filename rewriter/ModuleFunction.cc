@@ -21,7 +21,7 @@ void ModuleFunction::run(core::MutableContext ctx, ast::ClassDef *cdef) {
         if (auto send = ast::cast_tree<ast::Send>(stat)) {
             // we only care about sends if they're `module_function`
             if (send->fun == core::Names::moduleFunction() && send->recv.isSelfReference()) {
-                if (send->args.size() == 0) {
+                if (send->rawArgs().size() == 0) {
                     // a `module_function` with no args changes the way that every subsequent method definition works so
                     // we set this flag so we know that the rest of the defns should be rewritten
                     moduleFunctionActive = true;
@@ -110,7 +110,7 @@ vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Se
         return stats;
     }
 
-    for (auto &arg : send->args) {
+    for (auto &arg : send->rawArgs()) {
         if (ast::isa_tree<ast::MethodDef>(arg)) {
             return ModuleFunction::rewriteDefn(ctx, arg, prevStat);
         } else if (auto lit = ast::cast_tree<ast::Literal>(arg)) {

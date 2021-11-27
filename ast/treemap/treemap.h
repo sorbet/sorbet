@@ -345,7 +345,7 @@ private:
                 "block was mapped into not-a block");
 
         cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
-        for (auto &arg : cast_tree_nonnull<Send>(v).args) {
+        for (auto &arg : cast_tree_nonnull<Send>(v).rawArgs()) {
             arg = mapIt(std::move(arg), ctx);
             ENFORCE(arg != nullptr);
         }
@@ -811,7 +811,7 @@ private:
                 "block was mapped into not-a block");
 
         cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
-        for (auto &arg : cast_tree_nonnull<Send>(v).args) {
+        for (auto &arg : cast_tree_nonnull<Send>(v).rawArgs()) {
             arg = mapIt(std::move(arg), ctx);
             ENFORCE(arg != nullptr);
         }

@@ -515,20 +515,23 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
     //
     // This means we'll always need statements for as many arguments as the send has, plus two more: one for the
     // temporary assignment and the last for the actual update we're desugaring.
+    ENFORCE(!s->hasKwSplat() && !s->hasKwArgs() && !s->hasBlock());
+    const auto numPosArgs = s->numPosArgs();
     InsSeq::STATS_store stats;
-    stats.reserve(s->args.size() + 2);
+    stats.reserve(numPosArgs + 2);
     core::NameRef tempRecv = dctx.freshNameUnique(s->fun);
     stats.emplace_back(MK::Assign(s->loc, tempRecv, std::move(s->recv)));
     Send::ARGS_store readArgs;
     Send::ARGS_store assgnArgs;
     // these are the arguments for the first send, e.g. x.y(). The number of arguments should be identical to whatever
     // we saw on the LHS.
-    readArgs.reserve(s->args.size());
+    readArgs.reserve(numPosArgs);
     // these are the arguments for the second send, e.g. x.y=(val). That's why we need the space for the extra argument
     // here: to accomodate the call to field= instead of just field.
-    assgnArgs.reserve(s->args.size() + 1);
+    assgnArgs.reserve(numPosArgs + 1);
 
-    for (auto &arg : s->args) {
+    for (auto i = 0; i < numPosArgs; ++i) {
+        auto &arg = s->getPosArg(i);
         auto argLoc = arg.loc();
         core::NameRef name = dctx.freshNameUnique(s->fun);
         stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));
@@ -536,7 +539,7 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
         assgnArgs.emplace_back(MK::Local(argLoc, name));
     }
 
-    return {tempRecv, std::move(stats), s->numPosArgs, std::move(readArgs), std::move(assgnArgs)};
+    return {tempRecv, std::move(stats), numPosArgs, std::move(readArgs), std::move(assgnArgs)};
 }
 
 // while true

@@ -189,11 +189,11 @@ void Retry::_sanityCheck() {}
 void Send::_sanityCheck() {
     ENFORCE(recv);
     ENFORCE(fun.exists());
-    ENFORCE(numPosArgs <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs,
+    ENFORCE(numPosArgs_ <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs_,
             args.size());
 
     if (hasBlock() || hasKwSplat() || hasKwArgs()) {
-        ENFORCE(args.size() > numPosArgs);
+        ENFORCE(args.size() > numPosArgs_);
     }
 
     if (hasBlock()) {

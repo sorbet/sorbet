@@ -86,10 +86,10 @@ bool hasNilableOrUntypedReturns(ast::ExpressionPtr &sharedSig) {
     auto *body = findSendReturns(ASTUtil::castSig(sharedSig));
 
     ENFORCE(body->fun == core::Names::returns());
-    if (body->args.size() != 1) {
+    if (body->numPosArgs() != 1) {
         return false;
     }
-    return isTNilableOrUntyped(body->args[0]);
+    return isTNilableOrUntyped(body->getPosArg(0));
 }
 
 ast::ExpressionPtr dupReturnsType(ast::Send *sharedSig) {
@@ -98,10 +98,10 @@ ast::ExpressionPtr dupReturnsType(ast::Send *sharedSig) {
     auto *body = findSendReturns(ASTUtil::castSig(sharedSig));
 
     ENFORCE(body->fun == core::Names::returns());
-    if (body->args.size() != 1) {
+    if (body->numPosArgs() != 1) {
         return nullptr;
     }
-    return body->args[0].deepCopy();
+    return body->getPosArg(0).deepCopy();
 }
 
 // This will raise an error if we've given a type that's not what we want
@@ -115,7 +115,8 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, ast::S
             if (auto e = ctx.beginError(sig->loc, core::errors::Rewriter::BadAttrType)) {
                 e.setHeader("The type for an `{}` cannot contain `{}`", attrFun.show(ctx), "type_parameters");
             }
-            body->args[0] = ast::MK::Untyped(body->args[0].loc());
+            auto &arg = body->getPosArg(0);
+            arg = ast::MK::Untyped(arg.loc());
         }
         cur = ast::cast_tree<ast::Send>(cur->recv);
     }
@@ -150,12 +151,12 @@ bool sigIsUnchecked(core::MutableContext ctx, ast::Send *sig) {
     }
 
     auto checked = findSendChecked(sig);
-    if (checked == nullptr || checked->args.size() != 1) {
+    if (checked == nullptr || checked->numPosArgs() != 1) {
         // Unknown: default to false
         return false;
     }
 
-    auto lit = ast::cast_tree<ast::Literal>(checked->args[0]);
+    auto lit = ast::cast_tree<ast::Literal>(checked->getPosArg(0));
     if (lit == nullptr || !lit->isSymbol(ctx)) {
         // Unknown: default to false
         return false;
@@ -179,18 +180,17 @@ ast::ExpressionPtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef 
     auto *body = findSendReturns(sig);
 
     ENFORCE(body->fun == core::Names::returns());
-    if (body->args.size() != 1) {
+    if (body->numPosArgs() != 1) {
         return nullptr;
     }
-    ast::ExpressionPtr resultType = body->args[0].deepCopy();
+    ast::ExpressionPtr resultType = body->getPosArg(0).deepCopy();
     ast::Send *cur = body;
     while (cur != nullptr) {
         auto recv = ast::cast_tree<ast::ConstantLit>(cur->recv);
         if ((cur->recv.isSelfReference()) || (recv && recv->symbol == core::Symbols::Sorbet())) {
             auto loc = resultType.loc();
-            auto params = ast::MK::Send2(loc, move(cur->recv), core::Names::params(), ast::MK::Symbol(nameLoc, name),
-                                         move(resultType));
-            ast::cast_tree_nonnull<ast::Send>(params).numPosArgs = 0;
+            auto params = ast::MK::Send0(loc, move(cur->recv), core::Names::params());
+            ast::cast_tree_nonnull<ast::Send>(params).addKwArg(ast::MK::Symbol(nameLoc, name), move(resultType));
             cur->recv = move(params);
             break;
         }
@@ -271,7 +271,9 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
     bool usedPrevSig = false;
 
     if (makeReader) {
-        for (auto &arg : send->args) {
+        const auto numPosArgs = send->numPosArgs();
+        for (auto i = 0; i < numPosArgs; ++i) {
+            auto &arg = send->getPosArg(i);
             auto [name, argLoc] = getName(ctx, arg);
             if (!name.exists()) {
                 return empty;
@@ -296,7 +298,9 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
     }
 
     if (makeWriter) {
-        for (auto &arg : send->args) {
+        const auto numPosArgs = send->numPosArgs();
+        for (auto i = 0; i < numPosArgs; ++i) {
+            auto &arg = send->getPosArg(i);
             auto [name, argLoc] = getName(ctx, arg);
             if (!name.exists()) {
                 return empty;

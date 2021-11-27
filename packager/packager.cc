@@ -463,7 +463,9 @@ struct PackageInfoFinder {
 
         // Sanity check arguments for unrecognized methods
         if (!isSpecMethod(send)) {
-            for (const auto &arg : send.args) {
+            const auto numPosArgs = send.numPosArgs();
+            for (auto i = 0; i < numPosArgs; ++i) {
+                auto &arg = send.getPosArg(i);
                 if (!ast::isa_tree<ast::Literal>(arg)) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Packager::InvalidPackageExpression)) {
                         e.setHeader("Invalid expression in package: Arguments to functions must be literals");
@@ -477,17 +479,19 @@ struct PackageInfoFinder {
             return tree;
         }
 
-        if (send.fun == core::Names::export_() && send.args.size() == 1) {
+        if (send.fun == core::Names::export_() && send.numPosArgs() == 1) {
             // null indicates an invalid export.
-            if (auto target = verifyConstant(ctx, core::Names::export_(), send.args[0])) {
+            if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
+                auto &arg = send.getPosArg(0);
                 exported.emplace_back(getFullyQualifiedName(ctx, target), ExportType::Public);
                 // Transform the constant lit to refer to the target within the mangled package namespace.
-                send.args[0] = prependInternalPackageName(ctx, move(send.args[0]));
+                arg = prependInternalPackageName(ctx, move(send.getPosArg(0)));
             }
         }
-        if (send.fun == core::Names::export_for_test() && send.args.size() == 1) {
+        if (send.fun == core::Names::export_for_test() && send.numPosArgs() == 1) {
             // null indicates an invalid export.
-            if (auto target = verifyConstant(ctx, core::Names::export_for_test(), send.args[0])) {
+            if (auto target = verifyConstant(ctx, core::Names::export_for_test(), send.getPosArg(0))) {
+                auto &arg = send.getPosArg(0);
                 auto fqn = getFullyQualifiedName(ctx, target);
                 ENFORCE(fqn.parts.size() > 0);
                 if (isTestNamespace(ctx.state, fqn.parts[0])) {
@@ -499,13 +503,13 @@ struct PackageInfoFinder {
                     exported.emplace_back(move(fqn), ExportType::PrivateTest);
                 }
                 // Transform the constant lit to refer to the target within the mangled package namespace.
-                send.args[0] = prependInternalPackageName(ctx, move(send.args[0]));
+                arg = prependInternalPackageName(ctx, move(arg));
             }
         }
 
-        if ((send.fun == core::Names::import() || send.fun == core::Names::test_import()) && send.args.size() == 1) {
+        if ((send.fun == core::Names::import() || send.fun == core::Names::test_import()) && send.numPosArgs() == 1) {
             // null indicates an invalid import.
-            if (auto target = verifyConstant(ctx, send.fun, send.args[0])) {
+            if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto name = getPackageName(ctx, target);
                 if (name.mangledName == info->name.mangledName) {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {

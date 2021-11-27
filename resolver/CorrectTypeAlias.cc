@@ -21,18 +21,18 @@ void CorrectTypeAlias::eagerToLazy(core::Context ctx, core::ErrorBuilder &e, ast
     bool wrapHash = false;
 
     if (send->hasKwArgs()) {
-        if (send->numPosArgs != 0) {
+        if (send->numPosArgs() != 0) {
             return;
         }
         wrapHash = true;
     } else {
-        if (send->numPosArgs != 1) {
+        if (send->numPosArgs() != 1) {
             return;
         }
     }
 
-    auto &front = send->args.front();
-    auto &back = send->args.back();
+    auto &front = send->rawArgs().front();
+    auto &back = send->rawArgs().back();
     core::Loc argsLoc{ctx.file, front.loc().join(back.loc())};
 
     if (!argsLoc.exists()) {

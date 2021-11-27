@@ -41,12 +41,12 @@ vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *
         return empty;
     }
 
-    auto argc = send->numPosArgs;
+    auto argc = send->numPosArgs();
     if (argc > 1 || send->hasKwArgs()) {
         return empty;
     }
 
-    if (argc == 1 && !ast::isa_tree<ast::UnresolvedConstantLit>(send->args[0])) {
+    if (argc == 1 && !ast::isa_tree<ast::UnresolvedConstantLit>(send->getPosArg(0))) {
         return empty;
     }
 
@@ -72,7 +72,7 @@ vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *
 
     ast::ClassDef::ANCESTORS_store ancestors;
     if (argc == 1) {
-        ancestors.emplace_back(move(send->args[0]));
+        ancestors.emplace_back(move(send->getPosArg(0)));
     } else {
         ancestors.emplace_back(ast::MK::Constant(send->loc, core::Symbols::todo()));
     }

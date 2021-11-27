@@ -88,11 +88,11 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
             return badConst(ctx, stat.loc(), klass->loc);
         }
 
-        if (rhs->args.size() != 2) {
+        if (rhs->numPosArgs() != 2) {
             return badConst(ctx, stat.loc(), klass->loc);
         }
 
-        auto arg0 = ast::cast_tree<ast::Send>(rhs->args[0]);
+        auto arg0 = ast::cast_tree<ast::Send>(rhs->getPosArg(0));
         if (arg0 == nullptr) {
             return badConst(ctx, stat.loc(), klass->loc);
         }
@@ -126,7 +126,7 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
 
     ast::Send::ARGS_store args;
     auto first = true;
-    for (auto &&arg : rhs->args) {
+    for (auto &&arg : rhs->rawArgs()) {
         if (first) {
             // This is a call to <Magic>.<self-new>, so we need to skip the first arg.
             first = false;
@@ -137,7 +137,7 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
     }
 
     // Remove one from the number of positional arguments to account for the self param to <Magic>.<self-new>
-    auto numPosArgs = rhs->numPosArgs - 1;
+    auto numPosArgs = rhs->numPosArgs() - 1;
 
     ast::Send::Flags flags = {};
     flags.isPrivateOk = true;

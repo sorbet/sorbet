@@ -24,15 +24,16 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
 
         ENFORCE(!send->hasBlock());
 
-        if (send->fun == core::Names::params() && send->numPosArgs == 0 && send->args.size() % 2 == 0) {
+        if (send->fun == core::Names::params() && send->numPosArgs() == 0 && !send->hasKwSplat()) {
             // T.proc.params takes inlined keyword argument pairs, and can't handle kwsplat
             ast::Send::ARGS_store args;
 
-            for (auto i = 0; i < send->args.size(); i += 2) {
-                ENFORCE(ast::isa_tree<ast::Literal>(send->args[i]));
-                args.emplace_back(send->args[i].deepCopy());
+            const auto numKwArgs = send->numKwArgs();
+            for (auto i = 0; i < numKwArgs; ++i) {
+                ENFORCE(ast::isa_tree<ast::Literal>(send->getKwKey(i)));
+                args.emplace_back(send->getKwKey(i).deepCopy());
 
-                auto dupedValue = ASTUtil::dupType(send->args[i + 1]);
+                auto dupedValue = ASTUtil::dupType(send->getKwValue(i));
                 if (dupedValue == nullptr) {
                     return nullptr;
                 }
@@ -43,7 +44,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, 0, std::move(args));
         }
 
-        for (auto &arg : send->args) {
+        for (auto &arg : send->rawArgs()) {
             auto dupArg = dupType(arg);
             if (!dupArg) {
                 // This isn't a Type signature, bail out
@@ -51,7 +52,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             }
             args.emplace_back(std::move(dupArg));
         }
-        return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, send->numPosArgs, std::move(args));
+        return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, send->numPosArgs(), std::move(args));
     }
 
     auto *ident = ast::cast_tree<ast::ConstantLit>(orig);
@@ -198,8 +199,7 @@ ast::Send *ASTUtil::castSig(ast::Send *send) {
     // 0 args is common case
     // 1 arg  is `sig(:final)`
     // 2 args is `Sorbet::Private::Static.sig(self, :final)`
-    // Subtract 1 to ignore the block argument.
-    if (send->args.size() - 1 > 2) {
+    if (send->numPosArgs() + send->numKwArgs() > 2 || send->hasKwSplat()) {
         return nullptr;
     }
     auto *block = send->block();
@@ -223,16 +223,17 @@ ast::ExpressionPtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
     ast::Hash::ENTRY_store keys;
     ast::Hash::ENTRY_store values;
 
-    auto [kwStart, kwEnd] = send->kwArgsRange();
-    for (auto i = kwStart; i < kwEnd; i += 2) {
-        keys.emplace_back(send->args[i].deepCopy());
-        values.emplace_back(send->args[i + 1].deepCopy());
+    const auto numKwArgs = send->numKwArgs();
+    for (auto i = 0; i < numKwArgs; ++i) {
+        keys.emplace_back(send->getKwKey(i).deepCopy());
+        values.emplace_back(send->getKwValue(i).deepCopy());
     }
 
     // handle a double-splat or a hash literal as the last argument
     bool explicitEmptyHash = false;
     if (send->hasKwSplat() || !send->hasKwArgs()) {
-        if (auto *hash = ast::cast_tree<ast::Hash>(send->args.back())) {
+        if (auto *hash = ast::cast_tree<ast::Hash>(send->hasKwSplat() ? *send->kwSplat()
+                                                                      : send->getKwValue(send->numKwArgs() - 1))) {
             explicitEmptyHash = hash->keys.empty();
             for (auto i = 0; i < hash->keys.size(); ++i) {
                 keys.emplace_back(hash->keys[i].deepCopy());
