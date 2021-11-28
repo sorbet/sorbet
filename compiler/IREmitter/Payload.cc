@@ -1183,7 +1183,7 @@ llvm::Value *Payload::getOrBuildBlockIfunc(CompilerState &cs, llvm::IRBuilderBas
         auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
         auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
         auto *offset = buildLocalsOffset(cs);
-        auto *ifunc = globalInitBuilder.CreateCall(cs.getFunction("sorbet_getOrBuildBlockIfunc"),
+        auto *ifunc = globalInitBuilder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
                                                    {blk, blkMinArgs, blkMaxArgs, offset});
         auto *asValue = globalInitBuilder.CreateBitOrPointerCast(ifunc, globalTy);
         auto *globalIndex = globalInitBuilder.CreateCall(cs.getFunction("sorbet_globalConstRegister"), {asValue});
