@@ -120,7 +120,7 @@ public:
 
     static llvm::Value *buildLocalsOffset(CompilerState &cs);
 
-    static llvm::Value *buildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+    static llvm::Value *getOrBuildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                         int blkId);
 };
 } // namespace sorbet::compiler

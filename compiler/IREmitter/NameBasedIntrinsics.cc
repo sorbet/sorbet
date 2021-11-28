@@ -492,7 +492,7 @@ public:
 
             if (auto *blk = mcctx.blkAsFunction()) {
                 auto blkId = mcctx.blk.value();
-                auto *ifunc = Payload::buildBlockIfunc(cs, builder, irctx, blkId);
+                auto *ifunc = Payload::getOrBuildBlockIfunc(cs, builder, irctx, blkId);
                 return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"), {argc, argv, kwSplatFlag, ifunc},
                                           "rawSendResult");
             } else {
@@ -515,7 +515,7 @@ public:
             if (auto *blk = mcctx.blkAsFunction()) {
                 auto blkId = mcctx.blk.value();
                 auto usesBreak = irctx.blockUsesBreak[blkId];
-                auto *ifunc = Payload::buildBlockIfunc(cs, builder, irctx, blkId);
+                auto *ifunc = Payload::getOrBuildBlockIfunc(cs, builder, irctx, blkId);
                 return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, ifunc);
             } else {
                 auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.builder);

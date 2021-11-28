@@ -434,7 +434,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
             auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
             auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
             auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
-            auto *ifunc = builder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
+            auto *ifunc = builder.CreateCall(cs.getFunction("sorbet_getOrBuildBlockIfunc"),
                                              {blk, blkMinArgs, blkMaxArgs, localsOffset});
             return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
                                       {args.argc, args.argv, args.kw_splat, ifunc}, "rawSendResult");
@@ -530,7 +530,7 @@ llvm::Value *IREmitterHelpers::callViaRubyVMSimple(MethodCallContext &mcctx) {
     if (auto *blk = mcctx.blkAsFunction()) {
         auto blkId = mcctx.blk.value();
         args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(irctx.blockUsesBreak[blkId]))));
-        auto *blkIfunc = Payload::buildBlockIfunc(cs, builder, irctx, blkId);
+        auto *blkIfunc = Payload::getOrBuildBlockIfunc(cs, builder, irctx, blkId);
         args.emplace_back(blkIfunc);
     } else {
         args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(false))));

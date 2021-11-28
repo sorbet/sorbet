@@ -190,7 +190,7 @@ public:
             // NOTE: The ruby stack doesn't need to be managed here because the known c intrinsics don't expect to be
             // called by the vm.
             bool usesBreak = mcctx.irctx.blockUsesBreak[blkId];
-            auto *blkIfunc = Payload::buildBlockIfunc(cs, builder, mcctx.irctx, blkId);
+            auto *blkIfunc = Payload::getOrBuildBlockIfunc(cs, builder, mcctx.irctx, blkId);
             if (usesBreak) {
                 res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock"),
                                          {forwarder, recv, id, args.argc, args.argv, blkIfunc, offset},
