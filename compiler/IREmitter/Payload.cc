@@ -1162,8 +1162,8 @@ llvm::Value *Payload::buildLocalsOffset(CompilerState &cs) {
     return llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true));
 }
 
-llvm::Value *Payload::getOrBuildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                      int blkId) {
+llvm::Value *Payload::getOrBuildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                           const IREmitterContext &irctx, int blkId) {
     auto *blk = irctx.rubyBlocks2Functions[blkId];
     auto &arity = irctx.rubyBlockArity[blkId];
     auto rawName = fmt::format("{}_ifunc", (string)blk->getName());
