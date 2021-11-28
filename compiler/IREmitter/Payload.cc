@@ -1115,16 +1115,12 @@ llvm::Value *Payload::callFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &
 }
 
 llvm::Value *Payload::callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
-                                             bool usesBreak, llvm::Value *blockFun, int blkMinArgs, int blkMaxArgs,
-                                             llvm::Value *closure) {
-    auto *minArgs = IREmitterHelpers::buildS4(cs, blkMinArgs);
-    auto *maxArgs = IREmitterHelpers::buildS4(cs, blkMaxArgs);
+                                             bool usesBreak, llvm::Value *ifunc) {
     if (usesBreak) {
-        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache"),
-                                  {cache, blockFun, minArgs, maxArgs, closure}, "sendWithBlock");
+        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache"), {cache, ifunc}, "sendWithBlock");
     } else {
-        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache_noBreak"),
-                                  {cache, blockFun, minArgs, maxArgs, closure}, "sendWithBlock");
+        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache_noBreak"), {cache, ifunc},
+                                  "sendWithBlock");
     }
 }
 
@@ -1165,4 +1161,39 @@ llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &bui
 llvm::Value *Payload::buildLocalsOffset(CompilerState &cs) {
     return llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true));
 }
+
+llvm::Value *Payload::getOrBuildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                           const IREmitterContext &irctx, int blkId) {
+    auto *blk = irctx.rubyBlocks2Functions[blkId];
+    auto &arity = irctx.rubyBlockArity[blkId];
+    auto rawName = fmt::format("{}_ifunc", (string)blk->getName());
+
+    auto *globalTy = llvm::Type::getInt64Ty(cs);
+
+    auto *global = cs.module->getOrInsertGlobal(rawName, globalTy, [&cs, &blk, &rawName, &globalTy, &arity]() {
+        auto globalInitBuilder = llvm::IRBuilder<>(cs);
+
+        auto isConstant = false;
+        auto *zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
+        auto global = new llvm::GlobalVariable(*cs.module, globalTy, isConstant, llvm::GlobalVariable::InternalLinkage,
+                                               zero, rawName);
+
+        globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
+
+        auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
+        auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
+        auto *offset = buildLocalsOffset(cs);
+        auto *ifunc = globalInitBuilder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
+                                                   {blk, blkMinArgs, blkMaxArgs, offset});
+        auto *asValue = globalInitBuilder.CreateBitOrPointerCast(ifunc, globalTy);
+        auto *globalIndex = globalInitBuilder.CreateCall(cs.getFunction("sorbet_globalConstRegister"), {asValue});
+        globalInitBuilder.CreateStore(globalIndex, global);
+
+        return global;
+    });
+
+    auto *globalIndex = builder.CreateLoad(global);
+    return builder.CreateCall(cs.getFunction("sorbet_globalConstFetchIfunc"), {globalIndex});
+}
+
 } // namespace sorbet::compiler

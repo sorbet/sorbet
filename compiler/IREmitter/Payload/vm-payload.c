@@ -98,6 +98,10 @@ VALUE sorbet_globalConstDupHash(long idx) {
     return rb_hash_dup(hash);
 }
 
+struct vm_ifunc *sorbet_globalConstFetchIfunc(long idx) {
+    return (struct vm_ifunc *)sorbet_globalConstFetch(idx);
+}
+
 // ****
 // ****                       Calls
 // ****

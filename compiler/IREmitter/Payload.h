@@ -103,8 +103,7 @@ public:
     static llvm::Value *callFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                           llvm::Value *blockHandler);
     static llvm::Value *callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
-                                               bool usesBreak, llvm::Value *blockFun, int blkMinArgs, int blkMaxArgs,
-                                               llvm::Value *closure);
+                                               bool usesBreak, llvm::Value *ifunc);
     static llvm::Value *callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                        llvm::Value *fn, llvm::Value *argc, llvm::Value *argv, llvm::Value *recv,
                                        llvm::Value *iseq);
@@ -120,6 +119,9 @@ public:
                                        int rubyBlockId);
 
     static llvm::Value *buildLocalsOffset(CompilerState &cs);
+
+    static llvm::Value *getOrBuildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                             const IREmitterContext &irctx, int blkId);
 };
 } // namespace sorbet::compiler
 #endif

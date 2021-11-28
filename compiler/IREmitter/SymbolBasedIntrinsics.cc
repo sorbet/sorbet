@@ -185,16 +185,15 @@ public:
             }
             auto *forwarder = generateForwarder(mcctx);
 
-            auto arity = mcctx.irctx.rubyBlockArity[mcctx.blk.value()];
-            auto *minArgs = IREmitterHelpers::buildS4(cs, arity.min);
-            auto *maxArgs = IREmitterHelpers::buildS4(cs, arity.max);
+            auto blkId = mcctx.blk.value();
 
             // NOTE: The ruby stack doesn't need to be managed here because the known c intrinsics don't expect to be
             // called by the vm.
-            bool usesBreak = mcctx.irctx.blockUsesBreak[mcctx.blk.value()];
+            bool usesBreak = mcctx.irctx.blockUsesBreak[blkId];
+            auto *blkIfunc = Payload::getOrBuildBlockIfunc(cs, builder, mcctx.irctx, blkId);
             if (usesBreak) {
                 res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock"),
-                                         {forwarder, recv, id, args.argc, args.argv, blk, minArgs, maxArgs, offset},
+                                         {forwarder, recv, id, args.argc, args.argv, blkIfunc, offset},
                                          "rawSendResultWithBlock");
             } else {
                 // Since the block doesn't use break we can make two optimizations:
@@ -204,7 +203,7 @@ public:
                 // 2. Emit a type assertion on the result of the function, as we know that there won't be non-local
                 //    control flow based on the use of `break` that could change the type of the returned value
                 res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock_noBreak"),
-                                         {forwarder, recv, id, args.argc, args.argv, blk, minArgs, maxArgs, offset},
+                                         {forwarder, recv, id, args.argc, args.argv, blkIfunc, offset},
                                          "rawSendResultWithBlock");
                 cMethodWithBlock->assertResultType(cs, builder, res);
             }
