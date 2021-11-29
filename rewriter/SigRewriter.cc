@@ -44,7 +44,7 @@ bool SigRewriter::run(core::MutableContext &ctx, ast::Send *send) {
         return false;
     }
 
-    if (send->hasKwArgs()) {
+    if (send->hasKwSplat()) {
         return false;
     }
 

@@ -233,7 +233,7 @@ ast::ExpressionPtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
     bool explicitEmptyHash = false;
     if (send->hasKwSplat() || !send->hasKwArgs()) {
         if (auto *hash = ast::cast_tree<ast::Hash>(send->hasKwSplat() ? *send->kwSplat()
-                                                                      : send->getKwValue(send->numKwArgs() - 1))) {
+                                                                      : send->getPosArg(send->numPosArgs() - 1))) {
             explicitEmptyHash = hash->keys.empty();
             for (auto i = 0; i < hash->keys.size(); ++i) {
                 keys.emplace_back(hash->keys[i].deepCopy());
