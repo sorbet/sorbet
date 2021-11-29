@@ -48,7 +48,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         @using_t_struct_prop = ::T.let(using_t_struct_prop, <emptyTree>::<C Integer>)
         @using_t_struct_const = ::T.let(using_t_struct_const, <emptyTree>::<C Integer>)
-        <self>.<super>(ZSuperArgs)
+        nil
       end
     end
 
