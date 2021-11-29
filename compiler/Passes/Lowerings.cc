@@ -347,19 +347,29 @@ public:
 
         auto *searchSuper = llvm::dyn_cast<llvm::ConstantInt>(instr->getArgOperand(3));
         ENFORCE(searchSuper);
-        ENFORCE(searchSuper->equalsInt(0));
+        bool usesSuper = searchSuper->equalsInt(1);
+        ENFORCE(!usesSuper);
 
         if (llvm::isa<llvm::ConstantPointerNull>(blkIfunc)) {
+            llvm::StringRef func = usesSuper ? llvm::StringRef("sorbet_callSuperFuncWithCache") : llvm::StringRef("sorbet_callFuncWithCache");
             auto *blockHandler =
                 builder.CreateCall(module.getFunction("sorbet_vmBlockHandlerNone"), {}, "VM_BLOCK_HANDLER_NONE");
-            return builder.CreateCall(module.getFunction("sorbet_callFuncWithCache"), {cache, blockHandler}, "send");
+            return builder.CreateCall(module.getFunction(func), {cache, blockHandler}, "send");
         } else {
             auto *blkUsesBreak = llvm::dyn_cast<llvm::ConstantInt>(instr->getArgOperand(1));
             ENFORCE(blkUsesBreak);
+            bool usesBreak = blkUsesBreak->equalsInt(1);
 
-            auto *callImpl = blkUsesBreak->equalsInt(1) ? module.getFunction("sorbet_callFuncBlockWithCache")
-                                                        : module.getFunction("sorbet_callFuncBlockWithCache_noBreak");
+            llvm::StringRef func;
+            if (usesSuper) {
+                func = usesBreak ? llvm::StringRef("sorbet_callSuperFuncBlockWithCache")
+                    : llvm::StringRef("sorbet_callSuperFuncBlockWithCache_noBreak");
+            } else {
+                func = usesBreak ? llvm::StringRef("sorbet_callFuncBlockWithCache")
+                    : llvm::StringRef("sorbet_callFuncBlockWithCache_noBreak");
+            }
 
+            auto *callImpl = module.getFunction(func);
             return builder.CreateCall(callImpl, {cache, blkIfunc}, "sendWithBlock");
         }
     }
