@@ -535,7 +535,7 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
         stats.emplace_back(ast::MK::Assign(prop.loc, ast::MK::Instance(prop.nameLoc, ivarName),
                                            ast::MK::Local(prop.nameLoc, prop.name)));
     }
-    auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::ZSuper(klassDeclLoc));
+    auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::Nil(klassDeclLoc));
 
     vector<ast::ExpressionPtr> result;
     result.emplace_back(ast::MK::SigVoid(klassDeclLoc, std::move(sigArgs)));
