@@ -478,7 +478,7 @@ ast::ExpressionPtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send 
         // append to the inline keyword arguments of the send
         copy->addKwArg(move(withoutAccessors), move(true_));
     } else {
-        if (auto *hash = ast::cast_tree<ast::Hash>(*copy->kwSplat())) {
+        if (auto *hash = ast::cast_tree<ast::Hash>(copy->getPosArg(copy->numPosArgs() - 1))) {
             hash->keys.emplace_back(move(withoutAccessors));
             hash->values.emplace_back(move(true_));
         } else {
