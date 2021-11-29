@@ -29,6 +29,8 @@ public:
     const PackageInfo &getPackageInfo(core::NameRef mangledName) const;
 
     bool empty() const;
+    // Get mangled names for all packages
+    const std::vector<core::NameRef> &packages() const;
 
     PackageDB deepCopy() const;
 
@@ -43,12 +45,17 @@ public:
     const std::vector<core::NameRef> &secondaryTestPackageNamespaceRefs() const;
     const std::vector<std::string> &extraPackageFilesDirectoryPrefixes() const;
 
+    // NB: Do not call in hot path, this is SLOW due to string comparison!
+    static bool isTestFile(const core::GlobalState &gs, const core::File &file);
+
 private:
     std::vector<NameRef> secondaryTestPackageNamespaceRefs_;
     std::vector<std::string> extraPackageFilesDirectoryPrefixes_;
 
-    UnorderedMap<core::NameRef, std::unique_ptr<packages::PackageInfo>> packages;
+    UnorderedMap<core::NameRef, std::unique_ptr<packages::PackageInfo>> packages_;
     UnorderedMap<std::string, core::NameRef> packagesByPathPrefix;
+    std::vector<NameRef> mangledNames;
+
     bool frozen = true;
     std::thread::id writerThread;
 
