@@ -328,14 +328,14 @@ public:
     // Line 8 corresponds to the sorbet_callFuncWithCache call.
     virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module,
                                      llvm::CallInst *instr) const override {
-        // Make sure cache, blkUsesBreak, blk, cfp and self are passed in.
-        const int recvArgOffset = 4;
+        // Make sure cache, blkUsesBreak, blk, searchSuper, cfp and self are passed in.
+        const int recvArgOffset = 5;
         ENFORCE(instr->arg_size() >= (recvArgOffset + 1));
 
         llvm::IRBuilder<> builder(instr);
         auto *cache = instr->getArgOperand(0);
         auto *blkIfunc = instr->getArgOperand(2);
-        auto *cfp = instr->getArgOperand(3);
+        auto *cfp = instr->getArgOperand(4);
 
         auto *spPtr = builder.CreateCall(module.getFunction("sorbet_get_sp"), {cfp});
         auto spPtrType = llvm::dyn_cast<llvm::PointerType>(spPtr->getType());
@@ -344,6 +344,10 @@ public:
             sp = builder.CreateCall(module.getFunction("sorbet_pushValueStack"), {sp, iter->get()});
         }
         builder.CreateStore(sp, spPtr);
+
+        auto *searchSuper = llvm::dyn_cast<llvm::ConstantInt>(instr->getArgOperand(3));
+        ENFORCE(searchSuper);
+        ENFORCE(searchSuper->equalsInt(0));
 
         if (llvm::isa<llvm::ConstantPointerNull>(blkIfunc)) {
             auto *blockHandler =

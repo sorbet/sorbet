@@ -423,6 +423,8 @@ llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx) {
         auto *vmIfuncType = llvm::StructType::getTypeByName(cs, "struct.vm_ifunc");
         args.emplace_back(llvm::ConstantPointerNull::get(llvm::PointerType::getUnqual(vmIfuncType)));
     }
+    auto *searchSuper = llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(false)));
+    args.emplace_back(searchSuper);
     args.emplace_back(cfp);
     args.emplace_back(recv);
     for (auto *arg : stack) {
