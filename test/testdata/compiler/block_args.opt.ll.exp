@@ -159,26 +159,29 @@ declare i64 @rb_int2big(i64) local_unnamed_addr #0
 ; Function Attrs: nofree nosync nounwind readnone speculatable willreturn
 declare { i64, i1 } @llvm.sadd.with.overflow.i64(i64, i64) #3
 
+; Function Attrs: inaccessiblememonly nofree nosync nounwind willreturn
+declare void @llvm.experimental.noalias.scope.decl(metadata) #4
+
 declare i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct*, i32) local_unnamed_addr #0
 
 declare %struct.vm_ifunc* @rb_vm_ifunc_new(i64 (i64, i64, i32, i64*, i64)*, i8*, i32, i32) local_unnamed_addr #0
 
 ; Function Attrs: nounwind ssp uwtable
-define weak i32 @sorbet_getIsReleaseBuild() local_unnamed_addr #4 {
+define weak i32 @sorbet_getIsReleaseBuild() local_unnamed_addr #5 {
   %1 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !6
   tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* noundef getelementptr inbounds ([93 x i8], [93 x i8]* @.str.11, i64 0, i64 0)) #9
   unreachable
 }
 
 ; Function Attrs: nounwind ssp uwtable
-define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #4 {
+define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #5 {
   %1 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !6
   tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* noundef getelementptr inbounds ([95 x i8], [95 x i8]* @.str.10, i64 0, i64 0)) #9
   unreachable
 }
 
 ; Function Attrs: ssp
-define internal i64 @"func_<root>.17<static-init>$152$block_1"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #5 !dbg !10 {
+define internal i64 @"func_<root>.17<static-init>$152$block_1"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #6 !dbg !10 {
 functionEntryInitializers:
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !15
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
@@ -278,7 +281,7 @@ sorbet_rb_int_plus.exit:                          ; preds = %31, %27, %35
 }
 
 ; Function Attrs: sspreq
-define void @Init_block_args() local_unnamed_addr #6 {
+define void @Init_block_args() local_unnamed_addr #7 {
 entry:
   %0 = alloca i64, align 8
   %1 = alloca %struct.sorbet_inlineIntrinsicEnv, align 8
@@ -501,9 +504,6 @@ forward_sorbet_rb_array_collect_withBlock.exit.i: ; preds = %rb_array_len.exit.i
   ret void
 }
 
-; Function Attrs: inaccessiblememonly nofree nosync nounwind willreturn
-declare void @llvm.experimental.noalias.scope.decl(metadata) #7
-
 ; Function Attrs: argmemonly nofree nosync nounwind willreturn writeonly
 declare void @llvm.memset.p0i8.i64(i8* nocapture writeonly, i8, i64, i1 immarg) #8
 
@@ -511,10 +511,10 @@ attributes #0 = { "disable-tail-calls"="false" "frame-pointer"="all" "less-preci
 attributes #1 = { argmemonly nofree nosync nounwind willreturn }
 attributes #2 = { noreturn "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #3 = { nofree nosync nounwind readnone speculatable willreturn }
-attributes #4 = { nounwind ssp uwtable "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #5 = { ssp }
-attributes #6 = { sspreq }
-attributes #7 = { inaccessiblememonly nofree nosync nounwind willreturn }
+attributes #4 = { inaccessiblememonly nofree nosync nounwind willreturn }
+attributes #5 = { nounwind ssp uwtable "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #6 = { ssp }
+attributes #7 = { sspreq }
 attributes #8 = { argmemonly nofree nosync nounwind willreturn writeonly }
 attributes #9 = { noreturn nounwind }
 attributes #10 = { nounwind willreturn }

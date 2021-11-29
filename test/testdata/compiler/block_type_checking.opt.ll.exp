@@ -213,35 +213,38 @@ declare i64 @rb_int2big(i64) local_unnamed_addr #3
 ; Function Attrs: nofree nosync nounwind readnone speculatable willreturn
 declare { i64, i1 } @llvm.sadd.with.overflow.i64(i64, i64) #5
 
+; Function Attrs: inaccessiblememonly nofree nosync nounwind willreturn
+declare void @llvm.experimental.noalias.scope.decl(metadata) #6
+
 declare i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct*, i32) local_unnamed_addr #3
 
 declare %struct.vm_ifunc* @rb_vm_ifunc_new(i64 (i64, i64, i32, i64*, i64)*, i8*, i32, i32) local_unnamed_addr #3
 
 ; Function Attrs: allocsize(0,1)
-declare noalias nonnull i8* @ruby_xcalloc(i64, i64) local_unnamed_addr #6
+declare noalias nonnull i8* @ruby_xcalloc(i64, i64) local_unnamed_addr #7
 
 ; Function Attrs: allocsize(0,1)
-declare noalias nonnull i8* @ruby_xmalloc2(i64, i64) local_unnamed_addr #6
+declare noalias nonnull i8* @ruby_xmalloc2(i64, i64) local_unnamed_addr #7
 
 ; Function Attrs: argmemonly nofree nosync nounwind willreturn
 declare void @llvm.memcpy.p0i8.p0i8.i64(i8* noalias nocapture writeonly, i8* noalias nocapture readonly, i64, i1 immarg) #4
 
 ; Function Attrs: nounwind ssp uwtable
-define weak i32 @sorbet_getIsReleaseBuild() local_unnamed_addr #7 {
+define weak i32 @sorbet_getIsReleaseBuild() local_unnamed_addr #8 {
   %1 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !6
   tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* noundef getelementptr inbounds ([93 x i8], [93 x i8]* @.str.11, i64 0, i64 0)) #16
   unreachable
 }
 
 ; Function Attrs: nounwind ssp uwtable
-define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #7 {
+define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #8 {
   %1 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !6
   tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* noundef getelementptr inbounds ([95 x i8], [95 x i8]* @.str.10, i64 0, i64 0)) #16
   unreachable
 }
 
 ; Function Attrs: nofree nosync nounwind ssp willreturn
-define internal noundef i64 @"func_<root>.17<static-init>$152$block_1"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture nofree readnone %argArray, i64 %blockArg) #8 !dbg !10 {
+define internal noundef i64 @"func_<root>.17<static-init>$152$block_1"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture nofree readnone %argArray, i64 %blockArg) #9 !dbg !10 {
 functionEntryInitializers:
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !15
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
@@ -260,7 +263,7 @@ functionEntryInitializers:
 }
 
 ; Function Attrs: sspreq
-define void @Init_block_type_checking() local_unnamed_addr #9 {
+define void @Init_block_type_checking() local_unnamed_addr #10 {
 entry:
   %positional_table.i.i = alloca i64, i32 2, align 8, !dbg !26
   %locals.i18.i = alloca i64, i32 0, align 8
@@ -539,7 +542,7 @@ fastNew.i:                                        ; preds = %73
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define internal i64 @"func_Foo#3bar"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw, %struct.rb_control_frame_struct* nonnull align 8 dereferenceable(8) %cfp, i8* nocapture nofree readnone %calling, i8* nocapture nofree readnone %callData) #10 !dbg !62 {
+define internal i64 @"func_Foo#3bar"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw, %struct.rb_control_frame_struct* nonnull align 8 dereferenceable(8) %cfp, i8* nocapture nofree readnone %calling, i8* nocapture nofree readnone %callData) #11 !dbg !62 {
 functionEntryInitializers:
   %0 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %cfp, i64 0, i32 0
   store i64* getelementptr inbounds ([19 x i64], [19 x i64]* @iseqEncodedArray, i64 0, i64 9), i64** %0, align 8, !tbaa !15
@@ -653,7 +656,7 @@ codeRepl:                                         ; preds = %43, %sorbet_isa_Int
 }
 
 ; Function Attrs: ssp
-define internal i64 @"func_Foo.13<static-init>L62$block_1"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture nofree readnone %argArray, i64 %blockArg) #11 !dbg !30 {
+define internal i64 @"func_Foo.13<static-init>L62$block_1"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture nofree readnone %argArray, i64 %blockArg) #12 !dbg !30 {
 functionEntryInitializers:
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !15
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
@@ -721,9 +724,6 @@ functionEntryInitializers:
   ret i64 %send45, !dbg !81
 }
 
-; Function Attrs: inaccessiblememonly nofree nosync nounwind willreturn
-declare void @llvm.experimental.noalias.scope.decl(metadata) #12
-
 ; Function Attrs: argmemonly nofree nosync nounwind willreturn writeonly
 declare void @llvm.memset.p0i8.i64(i8* nocapture writeonly, i8, i64, i1 immarg) #13
 
@@ -745,7 +745,7 @@ newFuncRoot:
 declare void @llvm.assume(i1 noundef) #15
 
 ; Function Attrs: ssp
-define linkonce void @"const_recompute_T::Sig"() local_unnamed_addr #11 {
+define linkonce void @"const_recompute_T::Sig"() local_unnamed_addr #12 {
   %1 = tail call i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @"str_T::Sig", i64 0, i64 0), i64 6)
   store i64 %1, i64* @"guarded_const_T::Sig", align 8
   %2 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !49
@@ -754,7 +754,7 @@ define linkonce void @"const_recompute_T::Sig"() local_unnamed_addr #11 {
 }
 
 ; Function Attrs: ssp
-define linkonce void @const_recompute_Foo() local_unnamed_addr #11 {
+define linkonce void @const_recompute_Foo() local_unnamed_addr #12 {
   %1 = tail call i64 @sorbet_getConstant(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo, i64 0, i64 0), i64 3)
   store i64 %1, i64* @guarded_const_Foo, align 8
   %2 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !49
@@ -763,7 +763,7 @@ define linkonce void @const_recompute_Foo() local_unnamed_addr #11 {
 }
 
 ; Function Attrs: ssp
-define linkonce void @const_recompute_T() local_unnamed_addr #11 {
+define linkonce void @const_recompute_T() local_unnamed_addr #12 {
   %1 = tail call i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T, i64 0, i64 0), i64 1)
   store i64 %1, i64* @guarded_const_T, align 8
   %2 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !49
@@ -777,13 +777,13 @@ attributes #2 = { noreturn "disable-tail-calls"="false" "frame-pointer"="all" "l
 attributes #3 = { "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #4 = { argmemonly nofree nosync nounwind willreturn }
 attributes #5 = { nofree nosync nounwind readnone speculatable willreturn }
-attributes #6 = { allocsize(0,1) "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #7 = { nounwind ssp uwtable "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #8 = { nofree nosync nounwind ssp willreturn }
-attributes #9 = { sspreq }
-attributes #10 = { nounwind sspreq uwtable }
-attributes #11 = { ssp }
-attributes #12 = { inaccessiblememonly nofree nosync nounwind willreturn }
+attributes #6 = { inaccessiblememonly nofree nosync nounwind willreturn }
+attributes #7 = { allocsize(0,1) "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #8 = { nounwind ssp uwtable "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #9 = { nofree nosync nounwind ssp willreturn }
+attributes #10 = { sspreq }
+attributes #11 = { nounwind sspreq uwtable }
+attributes #12 = { ssp }
 attributes #13 = { argmemonly nofree nosync nounwind willreturn writeonly }
 attributes #14 = { cold minsize noreturn nounwind sspreq uwtable }
 attributes #15 = { nofree nosync nounwind willreturn }

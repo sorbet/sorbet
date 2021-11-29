@@ -186,26 +186,29 @@ declare i64 @rb_int2big(i64) local_unnamed_addr #2
 ; Function Attrs: nofree nosync nounwind readnone speculatable willreturn
 declare { i64, i1 } @llvm.sadd.with.overflow.i64(i64, i64) #5
 
+; Function Attrs: inaccessiblememonly nofree nosync nounwind willreturn
+declare void @llvm.experimental.noalias.scope.decl(metadata) #6
+
 declare i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct*, i32) local_unnamed_addr #2
 
 declare %struct.vm_ifunc* @rb_vm_ifunc_new(i64 (i64, i64, i32, i64*, i64)*, i8*, i32, i32) local_unnamed_addr #2
 
 ; Function Attrs: nounwind ssp uwtable
-define weak i32 @sorbet_getIsReleaseBuild() local_unnamed_addr #6 {
+define weak i32 @sorbet_getIsReleaseBuild() local_unnamed_addr #7 {
   %1 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !6
   tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* noundef getelementptr inbounds ([93 x i8], [93 x i8]* @.str.11, i64 0, i64 0)) #12
   unreachable
 }
 
 ; Function Attrs: nounwind ssp uwtable
-define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #6 {
+define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #7 {
   %1 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !6
   tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* noundef getelementptr inbounds ([95 x i8], [95 x i8]* @.str.10, i64 0, i64 0)) #12
   unreachable
 }
 
 ; Function Attrs: ssp
-define internal i64 @"func_<root>.17<static-init>$152$block_1"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #7 !dbg !10 {
+define internal i64 @"func_<root>.17<static-init>$152$block_1"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #8 !dbg !10 {
 functionEntryInitializers:
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !15
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
@@ -405,7 +408,7 @@ rb_vm_check_ints.exit:                            ; preds = %sorbet_rb_int_plus.
 }
 
 ; Function Attrs: ssp
-define internal i64 @"func_<root>.17<static-init>$152$block_2"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #7 !dbg !41 {
+define internal i64 @"func_<root>.17<static-init>$152$block_2"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #8 !dbg !41 {
 functionEntryInitializers:
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !15
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
@@ -445,7 +448,7 @@ fillFromDefaultBlockDone1:                        ; preds = %functionEntryInitia
 }
 
 ; Function Attrs: ssp
-define internal i64 @"func_<root>.17<static-init>$152$block_3"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #7 !dbg !47 {
+define internal i64 @"func_<root>.17<static-init>$152$block_3"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #8 !dbg !47 {
 functionEntryInitializers:
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !15
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
@@ -492,7 +495,7 @@ BB16:                                             ; preds = %BB15, %BB14
 }
 
 ; Function Attrs: ssp
-define internal i64 @"func_<root>.17<static-init>$152$block_4"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #7 !dbg !54 {
+define internal i64 @"func_<root>.17<static-init>$152$block_4"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #8 !dbg !54 {
 functionEntryInitializers:
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !15
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
@@ -628,7 +631,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
 }
 
 ; Function Attrs: ssp
-define internal i64 @"func_<root>.17<static-init>$152$block_5"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #7 !dbg !63 {
+define internal i64 @"func_<root>.17<static-init>$152$block_5"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #8 !dbg !63 {
 functionEntryInitializers:
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !15
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
@@ -753,7 +756,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
 }
 
 ; Function Attrs: sspreq
-define void @Init_block_arg_expand() local_unnamed_addr #8 {
+define void @Init_block_arg_expand() local_unnamed_addr #9 {
 entry:
   %0 = alloca i64, align 8
   %1 = alloca i64, align 8
@@ -1531,9 +1534,6 @@ forward_sorbet_rb_array_each_withBlock.10.exit.i: ; preds = %rb_array_len.exit.i
   ret void
 }
 
-; Function Attrs: inaccessiblememonly nofree nosync nounwind willreturn
-declare void @llvm.experimental.noalias.scope.decl(metadata) #9
-
 ; Function Attrs: argmemonly nofree nosync nounwind willreturn writeonly
 declare void @llvm.memset.p0i8.i64(i8* nocapture writeonly, i8, i64, i1 immarg) #10
 
@@ -1550,10 +1550,10 @@ attributes #2 = { "disable-tail-calls"="false" "frame-pointer"="all" "less-preci
 attributes #3 = { argmemonly nofree nosync nounwind willreturn }
 attributes #4 = { noreturn "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #5 = { nofree nosync nounwind readnone speculatable willreturn }
-attributes #6 = { nounwind ssp uwtable "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #7 = { ssp }
-attributes #8 = { sspreq }
-attributes #9 = { inaccessiblememonly nofree nosync nounwind willreturn }
+attributes #6 = { inaccessiblememonly nofree nosync nounwind willreturn }
+attributes #7 = { nounwind ssp uwtable "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #8 = { ssp }
+attributes #9 = { sspreq }
 attributes #10 = { argmemonly nofree nosync nounwind willreturn writeonly }
 attributes #11 = { cold minsize noreturn ssp }
 attributes #12 = { noreturn nounwind }
