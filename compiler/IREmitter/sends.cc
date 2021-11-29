@@ -423,7 +423,7 @@ llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx) {
         auto *vmIfuncType = llvm::StructType::getTypeByName(cs, "struct.vm_ifunc");
         args.emplace_back(llvm::ConstantPointerNull::get(llvm::PointerType::getUnqual(vmIfuncType)));
     }
-    auto *searchSuper = llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(false)));
+    auto *searchSuper = llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(mcctx.send->fun == core::Names::super())));
     args.emplace_back(searchSuper);
     args.emplace_back(cfp);
     args.emplace_back(recv);
@@ -454,31 +454,6 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
             failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
                             "No runtime implementation for Sorbet::Private::Static method exists");
         }
-    }
-
-    // TODO(perf): call
-    // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
-    // to get inline caching.
-    // before this, perf will not be good
-    if (send->fun == core::Names::super()) {
-        // fill in args
-        auto args = IREmitterHelpers::fillSendArgArray(mcctx);
-
-        if (auto *blk = mcctx.blkAsFunction()) {
-            // blocks require a locals offset parameter
-            llvm::Value *localsOffset = Payload::buildLocalsOffset(cs);
-            ENFORCE(localsOffset != nullptr);
-            auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
-            auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
-            auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
-            auto *ifunc = builder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
-                                             {blk, blkMinArgs, blkMaxArgs, localsOffset});
-            return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
-                                      {args.argc, args.argv, args.kw_splat, ifunc}, "rawSendResult");
-        }
-
-        return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {args.argc, args.argv, args.kw_splat},
-                                  "rawSendResult");
     }
 
     // Try to call blocks directly without reifying the block into a proc.
