@@ -124,8 +124,6 @@ public:
     static llvm::Value *makeInlineCache(CompilerState &cs, llvm::IRBuilderBase &build, std::string methodName,
                                         CallCacheFlags flags, int argc, const std::vector<std::string_view> &keywords);
 
-    static llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx);
-
     static llvm::Value *emitMethodCallViaRubyVM(MethodCallContext &mcctx);
 
     static void emitExceptionHandlers(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,

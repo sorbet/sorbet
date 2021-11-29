@@ -422,6 +422,43 @@ static inline VALUE sorbet_vm_sendish(struct rb_execution_context_struct *ec, st
     return Qundef;
 }
 
+static inline VALUE sorbet_vm_sendish_super(struct rb_execution_context_struct *ec,
+                                            struct rb_control_frame_struct *reg_cfp, struct rb_call_data *cd,
+                                            VALUE block_handler) {
+    CALL_INFO ci = &cd->ci;
+    CALL_CACHE cc = &cd->cc;
+    VALUE val;
+    int argc = ci->orig_argc;
+    VALUE recv = TOPN(argc);
+    struct rb_calling_info calling;
+
+    calling.block_handler = block_handler;
+    calling.kw_splat = IS_ARGS_KW_SPLAT(ci) > 0;
+    calling.recv = recv;
+    calling.argc = argc;
+
+    // inlined instead of called via vm_search_method_wrap
+    vm_search_super_method(reg_cfp, cd, recv);
+
+    // We need to avoid using `vm_call_general`, and instead call `sorbet_vm_call_general`. See the comments in
+    // `sorbet_vm_call_method_each_type` for more information.
+    //
+    // Uses UNLIKELY to make the fast path of "call cache hit" faster
+    if (UNLIKELY(cc->call == vm_call_general)) {
+        val = sorbet_vm_call_method(ec, GET_CFP(), &calling, cd);
+    } else {
+        val = cc->call(ec, GET_CFP(), &calling, cd);
+    }
+
+    if (val != Qundef) {
+        return val; /* CFUNC normal return */
+    } else {
+        RESTORE_REGS(); /* CFP pushed in cc->call() */
+    }
+
+    return Qundef;
+}
+
 // This send primitive assumes that all argumenst have been pushed to the ruby stack, and will invoke the vm machinery
 // to execute the send.
 VALUE sorbet_callFuncWithCache(struct FunctionInlineCache *cache, VALUE bh) {
@@ -429,6 +466,23 @@ VALUE sorbet_callFuncWithCache(struct FunctionInlineCache *cache, VALUE bh) {
     rb_control_frame_t *cfp = ec->cfp;
 
     VALUE val = sorbet_vm_sendish(ec, cfp, (struct rb_call_data *)&cache->cd, bh);
+    if (val == Qundef) {
+        VM_ENV_FLAGS_SET(ec->cfp->ep, VM_FRAME_FLAG_FINISH);
+
+        // false here because we don't want to consider jit frames
+        val = rb_vm_exec(ec, false);
+    }
+
+    return val;
+}
+
+// This send primitive assumes that all argumenst have been pushed to the ruby stack, and will invoke the vm machinery
+// to execute the send.
+VALUE sorbet_callSuperFuncWithCache(struct FunctionInlineCache *cache, VALUE bh) {
+    rb_execution_context_t *ec = GET_EC();
+    rb_control_frame_t *cfp = ec->cfp;
+
+    VALUE val = sorbet_vm_sendish_super(ec, cfp, (struct rb_call_data *)&cache->cd, bh);
     if (val == Qundef) {
         VM_ENV_FLAGS_SET(ec->cfp->ep, VM_FRAME_FLAG_FINISH);
 

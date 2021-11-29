@@ -92,6 +92,7 @@ SORBET_ALIVE(void, sorbet_vm_env_write_slowpath, (const VALUE *, int, VALUE));
 SORBET_ALIVE(void, sorbet_setupFunctionInlineCache,
              (struct FunctionInlineCache * cache, ID mid, unsigned int flags, int argc, int num_kwargs, VALUE *keys));
 SORBET_ALIVE(VALUE, sorbet_callFuncWithCache, (struct FunctionInlineCache * cache, VALUE bh));
+SORBET_ALIVE(VALUE, sorbet_callSuperFuncWithCache, (struct FunctionInlineCache * cache, VALUE bh));
 SORBET_ALIVE(void, sorbet_vmMethodSearch, (struct FunctionInlineCache * cache, VALUE recv));
 SORBET_ALIVE(VALUE, sorbet_getPassedBlockHandler, ());
 
@@ -133,7 +134,8 @@ SORBET_ALIVE(VALUE, sorbet_i_getRubyClass, (const char *const className, long cl
 SORBET_ALIVE(VALUE, sorbet_i_getRubyConstant, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_objIsKindOf, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_i_send,
-             (struct FunctionInlineCache *, _Bool blkUsesBreak, struct vm_ifunc *, rb_control_frame_t *, ...));
+             (struct FunctionInlineCache *, _Bool blkUsesBreak, struct vm_ifunc *, bool searchSuper,
+              rb_control_frame_t *, ...));
 
 SORBET_ALIVE(_Bool, sorbet_i_isa_Integer, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_TrueClass, (VALUE) __attribute__((const)));
@@ -2396,6 +2398,21 @@ static VALUE sorbet_iterMethod(VALUE obj) {
     return sorbet_callFuncWithCache(cache, bh);
 }
 
+static VALUE sorbet_iterSuperMethod(VALUE obj) {
+    struct FunctionInlineCache *cache = (struct FunctionInlineCache *)obj;
+
+    // In this case we know that a block handler was set, as we only emit calls to this payload function from sends that
+    // pass a block argument.
+    rb_execution_context_t *ec = GET_EC();
+    VALUE bh = ec->passed_block_handler;
+
+    // It's important that we clear out the passed block handler state in the execution context:
+    // https://github.com/ruby/ruby/blob/ruby_2_7/vm.c#L203-L210
+    ec->passed_block_handler = VM_BLOCK_HANDLER_NONE;
+
+    return sorbet_callSuperFuncWithCache(cache, bh);
+}
+
 SORBET_INLINE
 const struct vm_ifunc *sorbet_buildBlockIfunc(BlockFFIType blockImpl, int blkMinArgs, int blkMaxArgs, VALUE closure) {
     return rb_vm_ifunc_new(blockImpl, (void *)closure, blkMinArgs, blkMaxArgs);
@@ -2407,6 +2424,12 @@ VALUE sorbet_callFuncBlockWithCache(struct FunctionInlineCache *cache, const str
     return sorbet_rb_iterate(sorbet_iterMethod, (VALUE)cache, ifunc);
 }
 KEEP_ALIVE(sorbet_callFuncBlockWithCache);
+
+SORBET_INLINE
+VALUE sorbet_callSuperFuncBlockWithCache(struct FunctionInlineCache *cache, const struct vm_ifunc *ifunc) {
+    return sorbet_rb_iterate(sorbet_iterSuperMethod, (VALUE)cache, ifunc);
+}
+KEEP_ALIVE(sorbet_callSuperFuncBlockWithCache);
 
 SORBET_INLINE
 VALUE sorbet_callFuncBlockWithCache_noBreak(struct FunctionInlineCache *cache, const struct vm_ifunc *ifunc) {
@@ -2428,6 +2451,27 @@ VALUE sorbet_callFuncBlockWithCache_noBreak(struct FunctionInlineCache *cache, c
     return sorbet_callFuncWithCache(cache, VM_BH_FROM_IFUNC_BLOCK(captured));
 }
 KEEP_ALIVE(sorbet_callFuncBlockWithCache_noBreak);
+
+SORBET_INLINE
+VALUE sorbet_callSuperFuncBlockWithCache_noBreak(struct FunctionInlineCache *cache, const struct vm_ifunc *ifunc) {
+    rb_execution_context_t *ec = GET_EC();
+    rb_control_frame_t *cfp = ec->cfp;
+
+    // This is an inlined version of the block handler setup that `rb_iterate` performs. See the following two links for
+    // the use of `rb_vm_ifunc_proc_new` and the setup of the captured block handler.
+    // * https://github.com/ruby/ruby/blob/ruby_2_7/vm_eval.c#L1448
+    // * https://github.com/ruby/ruby/blob/ruby_2_7/vm_eval.c#L1406-L1408
+    struct rb_captured_block *captured = (struct rb_captured_block *)&cfp->self;
+    captured->code.ifunc = ifunc;
+
+    // It's important that we clear out the passed block handler state in the execution context:
+    // https://github.com/ruby/ruby/blob/ruby_2_7/vm.c#L203-L210
+    ec->passed_block_handler = VM_BLOCK_HANDLER_NONE;
+
+    // We don't need to pass the block handler through ec->passed_block_handler in this case.
+    return sorbet_callSuperFuncWithCache(cache, VM_BH_FROM_IFUNC_BLOCK(captured));
+}
+KEEP_ALIVE(sorbet_callSuperFuncBlockWithCache_noBreak);
 
 SORBET_INLINE
 VALUE sorbet_makeBlockHandlerProc(VALUE block) {
