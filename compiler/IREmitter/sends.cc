@@ -403,11 +403,8 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     auto &irctx = mcctx.irctx;
     auto *send = mcctx.send;
 
-    // If we get here with <Magic>, then something has gone wrong.
-    // TODO(froydnj): We want to do the same thing with Sorbet::Private::Static,
-    // but we'd need to do some surgery on either a) making those methods not
-    // be emitted via symbol-based intrinsics or b) making it possible for
-    // (some) symbol-based intrinsics to bypass typechecks completely.
+    // If we get here with <Magic> or Sorbet::Private::Static, then something has
+    // gone wrong.
     if (auto *at = core::cast_type<core::AppliedType>(send->recv.type)) {
         if (at->klass == core::Symbols::MagicSingleton()) {
             failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
