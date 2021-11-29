@@ -350,7 +350,8 @@ public:
         bool usesSuper = searchSuper->equalsInt(1);
 
         if (llvm::isa<llvm::ConstantPointerNull>(blkIfunc)) {
-            llvm::StringRef func = usesSuper ? llvm::StringRef("sorbet_callSuperFuncWithCache") : llvm::StringRef("sorbet_callFuncWithCache");
+            llvm::StringRef func = usesSuper ? llvm::StringRef("sorbet_callSuperFuncWithCache")
+                                             : llvm::StringRef("sorbet_callFuncWithCache");
             auto *blockHandler =
                 builder.CreateCall(module.getFunction("sorbet_vmBlockHandlerNone"), {}, "VM_BLOCK_HANDLER_NONE");
             return builder.CreateCall(module.getFunction(func), {cache, blockHandler}, "send");
@@ -362,10 +363,10 @@ public:
             llvm::StringRef func;
             if (usesSuper) {
                 func = usesBreak ? llvm::StringRef("sorbet_callSuperFuncBlockWithCache")
-                    : llvm::StringRef("sorbet_callSuperFuncBlockWithCache_noBreak");
+                                 : llvm::StringRef("sorbet_callSuperFuncBlockWithCache_noBreak");
             } else {
                 func = usesBreak ? llvm::StringRef("sorbet_callFuncBlockWithCache")
-                    : llvm::StringRef("sorbet_callFuncBlockWithCache_noBreak");
+                                 : llvm::StringRef("sorbet_callFuncBlockWithCache_noBreak");
             }
 
             auto *callImpl = module.getFunction(func);

@@ -423,7 +423,8 @@ llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx) {
         auto *vmIfuncType = llvm::StructType::getTypeByName(cs, "struct.vm_ifunc");
         args.emplace_back(llvm::ConstantPointerNull::get(llvm::PointerType::getUnqual(vmIfuncType)));
     }
-    auto *searchSuper = llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(mcctx.send->fun == core::Names::super())));
+    auto *searchSuper =
+        llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(mcctx.send->fun == core::Names::super())));
     args.emplace_back(searchSuper);
     args.emplace_back(cfp);
     args.emplace_back(recv);
@@ -435,7 +436,7 @@ llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx) {
     return builder.CreateCall(cs.getFunction("sorbet_i_send"), llvm::ArrayRef(args));
 }
 
-}
+} // namespace
 
 llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx) {
     auto &cs = mcctx.cs;

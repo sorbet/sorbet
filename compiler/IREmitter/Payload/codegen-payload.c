@@ -134,7 +134,8 @@ SORBET_ALIVE(VALUE, sorbet_i_getRubyClass, (const char *const className, long cl
 SORBET_ALIVE(VALUE, sorbet_i_getRubyConstant, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_objIsKindOf, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_i_send,
-             (struct FunctionInlineCache *, _Bool blkUsesBreak, struct vm_ifunc *, bool searchSuper, rb_control_frame_t *, ...));
+             (struct FunctionInlineCache *, _Bool blkUsesBreak, struct vm_ifunc *, bool searchSuper,
+              rb_control_frame_t *, ...));
 
 SORBET_ALIVE(_Bool, sorbet_i_isa_Integer, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_TrueClass, (VALUE) __attribute__((const)));

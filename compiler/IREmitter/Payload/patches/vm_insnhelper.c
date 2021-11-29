@@ -422,8 +422,9 @@ static inline VALUE sorbet_vm_sendish(struct rb_execution_context_struct *ec, st
     return Qundef;
 }
 
-static inline VALUE sorbet_vm_sendish_super(struct rb_execution_context_struct *ec, struct rb_control_frame_struct *reg_cfp,
-                                            struct rb_call_data *cd, VALUE block_handler) {
+static inline VALUE sorbet_vm_sendish_super(struct rb_execution_context_struct *ec,
+                                            struct rb_control_frame_struct *reg_cfp, struct rb_call_data *cd,
+                                            VALUE block_handler) {
     CALL_INFO ci = &cd->ci;
     CALL_CACHE cc = &cd->cc;
     VALUE val;
