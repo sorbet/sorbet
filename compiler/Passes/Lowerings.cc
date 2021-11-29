@@ -348,7 +348,6 @@ public:
         auto *searchSuper = llvm::dyn_cast<llvm::ConstantInt>(instr->getArgOperand(3));
         ENFORCE(searchSuper);
         bool usesSuper = searchSuper->equalsInt(1);
-        ENFORCE(!usesSuper);
 
         if (llvm::isa<llvm::ConstantPointerNull>(blkIfunc)) {
             llvm::StringRef func = usesSuper ? llvm::StringRef("sorbet_callSuperFuncWithCache") : llvm::StringRef("sorbet_callFuncWithCache");
