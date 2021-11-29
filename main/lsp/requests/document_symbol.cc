@@ -29,7 +29,7 @@ void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::Symb
             if (!foundThisFile) {
                 continue;
             }
-            auto inner = symbolRef2DocumentSymbol(gs, ref, filter, addedRefs, config);
+            auto inner = symbolRef2DocumentSymbol(gs, ref, filter, addedRefs);
             if (inner) {
                 out.push_back(move(inner));
                 addedRefs.insert(ref);
