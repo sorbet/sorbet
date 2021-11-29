@@ -748,12 +748,83 @@ public:
 
     struct FastPathChoice {
         llvm::BasicBlock *fastPathExit;
-        llvm::PHINode *testBlockPhiNode;
+        llvm::BasicBlock *testBlock;
         llvm::BasicBlock *fastPathEntrance;
+        llvm::BasicBlock *slowPathEntrance;
+        llvm::PHINode *testBlockPhiNode;
+        llvm::CallInst *testCall;
 
-        FastPathChoice(llvm::BasicBlock *fastPathExit, llvm::PHINode *testBlockPhiNode,
-                       llvm::BasicBlock *fastPathEntrance)
-            : fastPathExit{fastPathExit}, testBlockPhiNode{testBlockPhiNode}, fastPathEntrance{fastPathEntrance} {}
+        FastPathChoice(llvm::BasicBlock *fastPathExit, llvm::BasicBlock *testBlock, llvm::BasicBlock *fastPathEntrance,
+                       llvm::BasicBlock *slowPathEntrance, llvm::PHINode *testBlockPhiNode, llvm::CallInst *testCall)
+            : fastPathExit{fastPathExit}, testBlock{testBlock}, fastPathEntrance{fastPathEntrance},
+              slowPathEntrance{slowPathEntrance}, testBlockPhiNode{testBlockPhiNode}, testCall{testCall} {}
+
+        // for each use of `testBlockPhiNode`, determine if it's dominated by the fast or slow path
+        // 1. if fast, replace its use with the phi from the fast path entrance
+        // 2. if slow, leave it alone
+        // 3. if neither, this is in a block where the two paths have joined together, make a new phi node in the
+        //    block and replace it locally
+        void redirect(llvm::ModulePass *pass) {
+            auto &domTree = pass->getAnalysis<llvm::DominatorTreeWrapperPass>(*fastPathExit->getParent()).getDomTree();
+
+            auto *fastEntry = &this->fastPathEntrance->front();
+            auto *slowEntry = &this->slowPathEntrance->front();
+
+            struct Rewrite {
+                llvm::User *user;
+                size_t operand;
+
+                Rewrite(llvm::User *user, size_t operand) : user{user}, operand{operand} {}
+            };
+
+            vector<Rewrite> fastRewrites;
+
+            for (auto &use : this->testBlockPhiNode->uses()) {
+                auto *user = use.getUser();
+                if (user == this->testCall) {
+                    continue;
+                }
+
+                auto *inst = llvm::dyn_cast<llvm::Instruction>(user);
+                if (inst == nullptr) {
+                    continue;
+                }
+
+                if (inst == fastEntry || domTree.dominates(fastEntry, inst)) {
+                    // When the use is dominated by the fast path, it needs to be rewritten.
+                    fastRewrites.emplace_back(user, use.getOperandNo());
+                } else if (inst == slowEntry || domTree.dominates(slowEntry, inst)) {
+                    // When the use is dominated by the slow path, it can be ignored as the existing name will work
+                    // fine.
+                    continue;
+                } else {
+                    // when the use is not dominated by either branch, it's in a block that could be entered from either
+                    // the fast or slow paths. We could handle this by emitting a new phi node to merge the two values,
+                    // but right now it's easier to abort the rewrite.
+                    return;
+                }
+            }
+
+            // add a phi node to the fast path entrance that merges the paths from `fastPathExit` and `testBlock`
+            auto *fastPathPhi = llvm::PHINode::Create(this->testBlockPhiNode->getType(), 2);
+            fastPathPhi->addIncoming(this->testBlockPhiNode->getIncomingValueForBlock(this->fastPathExit),
+                                     this->fastPathExit);
+            fastPathPhi->addIncoming(this->testBlockPhiNode, this->testBlock);
+            {
+                auto &list = this->fastPathEntrance->getInstList();
+                list.insert(list.begin(), fastPathPhi);
+            }
+
+            // redirect the fast path exit to the entrance, fix the phi node in the test block, and update the dom tree.
+            this->fastPathExit->back().setSuccessor(0, this->fastPathEntrance);
+            this->testBlockPhiNode->removeIncomingValue(this->fastPathExit);
+            domTree.deleteEdge(this->fastPathExit, this->testBlock);
+
+            // rewrite the uses on the fast path
+            for (auto &[user, opIndex] : fastRewrites) {
+                user->setOperand(opIndex, fastPathPhi);
+            }
+        }
     };
 
     struct CallInstVisitor : public llvm::InstVisitor<CallInstVisitor> {
@@ -798,18 +869,31 @@ public:
                     continue;
                 }
 
+                // determine if there's a use of the incoming value with a type-checking assertion, roughly the form:
+                //
+                // > %res = call sorbet_i_isa_T(%x)
+                // > call llvm.assume(%res)
+                //
+                // that dominates the exit from the block that enters the test.
                 auto *val = phi->getIncomingValueForBlock(block);
                 for (auto *user : val->users()) {
                     auto *otherCall = llvm::dyn_cast<llvm::CallInst>(user);
-                    if (otherCall == nullptr || otherCall->getCalledFunction() != func) {
+                    if (otherCall == nullptr || otherCall->getCalledFunction() != func || !otherCall->hasOneUser()) {
                         continue;
                     }
 
-                    if (!domTree.dominates(otherCall, jump)) {
+                    auto *assumption = llvm::dyn_cast<llvm::CallBase>(*otherCall->user_begin());
+                    if (assumption == nullptr ||
+                        assumption->getIntrinsicID() != llvm::Intrinsic::IndependentIntrinsics::assume) {
                         continue;
                     }
 
-                    fastPaths.emplace_back(block, phi, testExit->getSuccessor(0));
+                    if (!domTree.dominates(assumption, jump)) {
+                        continue;
+                    }
+
+                    fastPaths.emplace_back(block, ci.getParent(), testExit->getSuccessor(0), testExit->getSuccessor(1),
+                                           phi, &ci);
 
                     return;
                 }
@@ -827,11 +911,7 @@ public:
         }
 
         for (auto &fastPath : visitor.fastPaths) {
-            // redirect the block
-            fastPath.fastPathExit->back().setSuccessor(0, fastPath.fastPathEntrance);
-
-            // remove the incoming phi edge
-            fastPath.testBlockPhiNode->removeIncomingValue(fastPath.fastPathExit);
+            fastPath.redirect(this);
         }
 
         return true;
