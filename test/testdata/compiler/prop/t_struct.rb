@@ -40,3 +40,9 @@ verify_runtime_error{A.new(int: 5, str: "foo", optstr: T.unsafe(29))}
 # Verify extra keyword arguments are not accepted.
 verify_runtime_error{A.send(:new, int: 6, str: "foo", notarg: 19)}
 verify_runtime_error{A.send(:new, 13, int: 7, str: "bar")}
+
+class HasEnumMember < T::Struct
+  prop :lame_enum, String, enum: ["value1", "value2"]
+end
+
+verify_runtime_error {HasEnumMember.new(lame_enum: "bad_value")}
