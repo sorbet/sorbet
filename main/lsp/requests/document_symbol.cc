@@ -8,19 +8,12 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
-                                                         core::FileRef filter,
-                                                         UnorderedSet<core::SymbolRef> &addedRefs);
+                                                         core::FileRef filter);
 
 void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::SymbolRef sym, core::FileRef filter,
-                                         vector<unique_ptr<DocumentSymbol>> &out,
-                                         UnorderedSet<core::SymbolRef> &addedRefs) {
+                                         vector<unique_ptr<DocumentSymbol>> &out) {
     for (auto mem : sym.data(gs)->membersStableOrderSlow(gs)) {
         auto ref = mem.second;
-
-        if (addedRefs.contains(ref)) {
-            continue;
-        }
-
         if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
             bool foundThisFile = false;
             for (auto loc : ref.data(gs)->locs()) {
@@ -29,18 +22,16 @@ void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::Symb
             if (!foundThisFile) {
                 continue;
             }
-            auto inner = symbolRef2DocumentSymbol(gs, ref, filter, addedRefs);
+            auto inner = symbolRef2DocumentSymbol(gs, ref, filter);
             if (inner) {
                 out.push_back(move(inner));
-                addedRefs.insert(ref);
             }
         }
     }
 }
 
 std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
-                                                         core::FileRef filter,
-                                                         UnorderedSet<core::SymbolRef> &addedRefs) {
+                                                         core::FileRef filter) {
     if (!symRef.exists()) {
         return nullptr;
     }
@@ -61,7 +52,6 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
         prefix = "self.";
     }
     auto result = make_unique<DocumentSymbol>(prefix + sym->name.show(gs), kind, move(range), move(selectionRange));
-    addedRefs.insert(symRef);
 
     // Previous versions of VSCode have a bug that requires this non-optional field to be present.
     // This previously tried to include the method signature but due to issues where large signatures were not readable
@@ -70,11 +60,11 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
     result->detail = "";
 
     vector<unique_ptr<DocumentSymbol>> children;
-    symbolRef2DocumentSymbolWalkMembers(gs, symRef, filter, children, addedRefs);
+    symbolRef2DocumentSymbolWalkMembers(gs, symRef, filter, children);
     if (sym->isClassOrModule()) {
         auto singleton = sym->lookupSingletonClass(gs);
         if (singleton.exists()) {
-            symbolRef2DocumentSymbolWalkMembers(gs, singleton, filter, children, addedRefs);
+            symbolRef2DocumentSymbolWalkMembers(gs, singleton, filter, children);
         }
     }
     result->children = move(children);
@@ -109,19 +99,15 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
         {core::SymbolRef::Kind::TypeArgument, gs.typeArgumentsUsed()},
         {core::SymbolRef::Kind::TypeMember, gs.typeMembersUsed()},
     };
-    UnorderedSet<core::SymbolRef> addedRefs;
     for (auto [kind, used] : symbolTypes) {
         for (u4 idx = 1; idx < used; idx++) {
             core::SymbolRef ref(gs, kind, idx);
-            if (addedRefs.contains(ref)) {
-                continue;
-            }
             if (!hideSymbol(gs, ref) &&
                 // a bit counter-intuitive, but this actually should be `!= fref`, as it prevents duplicates.
                 (ref.data(gs)->owner.data(gs)->loc().file() != fref || ref.data(gs)->owner == core::Symbols::root())) {
                 for (auto definitionLocation : ref.data(gs)->locs()) {
                     if (definitionLocation.file() == fref) {
-                        auto data = symbolRef2DocumentSymbol(gs, ref, fref, addedRefs);
+                        auto data = symbolRef2DocumentSymbol(gs, ref, fref);
                         if (data) {
                             result.push_back(move(data));
                             break;
