@@ -92,6 +92,7 @@ SORBET_ALIVE(void, sorbet_vm_env_write_slowpath, (const VALUE *, int, VALUE));
 SORBET_ALIVE(void, sorbet_setupFunctionInlineCache,
              (struct FunctionInlineCache * cache, ID mid, unsigned int flags, int argc, int num_kwargs, VALUE *keys));
 SORBET_ALIVE(VALUE, sorbet_callFuncWithCache, (struct FunctionInlineCache * cache, VALUE bh));
+SORBET_ALIVE(VALUE, sorbet_callSuperFuncWithCache, (struct FunctionInlineCache * cache, VALUE bh));
 SORBET_ALIVE(void, sorbet_vmMethodSearch, (struct FunctionInlineCache * cache, VALUE recv));
 SORBET_ALIVE(VALUE, sorbet_getPassedBlockHandler, ());
 
