@@ -502,7 +502,18 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     return Types::arrayOf(ctx, instantiated);
 }
 
-bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym) {
+void Symbol::addMixinAt(ClassOrModuleRef sym, std::optional<u2> index) {
+    if (index.has_value()) {
+        auto i = index.value();
+        ENFORCE(mixins_.size() > i);
+        ENFORCE(mixins_[i] == core::Symbols::PlaceholderMixin());
+        mixins_[i] = sym;
+    } else {
+        mixins_.emplace_back(sym);
+    }
+}
+
+bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional<u2> index) {
     ENFORCE(isClassOrModule());
     // Note: Symbols without an explicit declaration may not have class or module set. They default to modules in
     // GlobalPass.cc. We also do not complain if the mixin is BasicObject.
@@ -513,7 +524,7 @@ bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym) {
         // Symbol hasn't been linearized yet, so add symbol unconditionally (order matters, so dupes are OK and
         // semantically important!)
         // This is the 99% common case.
-        mixins_.emplace_back(sym);
+        addMixinAt(sym, index);
     } else {
         // Symbol has been linearized, but we are trying to add another mixin. This is bad behavior and we shouldn't
         // allow it, but we currently allow it for the following circumstances:
@@ -528,12 +539,20 @@ bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym) {
             auto parent = superClass();
             // Don't include as mixin if it derives from the parent class (as in GlobalPass.cc's `maybeAddMixin`)
             if (!parent.exists() || !parent.data(gs)->derivesFrom(gs, sym)) {
-                mixins_.emplace_back(sym);
+                addMixinAt(sym, index);
                 unsetClassOrModuleLinearizationComputed();
             }
         }
     }
     return isValidMixin;
+}
+
+u2 Symbol::addMixinPlaceholder(const GlobalState &gs) {
+    ENFORCE(isClassOrModule());
+    ENFORCE(ref(gs) != core::Symbols::PlaceholderMixin(), "Created a cycle through PlaceholderMixin");
+    mixins_.emplace_back(core::Symbols::PlaceholderMixin());
+    ENFORCE(mixins_.size() < numeric_limits<u2>::max());
+    return mixins_.size() - 1;
 }
 
 SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {

@@ -126,6 +126,7 @@ private:
 
         bool isSuperclass; // true if superclass, false for mixin
         bool isInclude;    // true if include, false if extend
+        std::optional<u2> mixinIndex;
 
         AncestorResolutionItem() = default;
         AncestorResolutionItem(AncestorResolutionItem &&rhs) noexcept = default;
@@ -486,6 +487,11 @@ private:
     static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job, bool lastRun) {
         auto ancestorSym = job.ancestor->symbol;
         if (!ancestorSym.exists()) {
+            if (!lastRun && !job.isSuperclass && !job.mixinIndex.has_value()) {
+                // This is an include or extend. Add a placeholder to fill in later to preserve
+                // ordering of mixins, unless an index is already set.
+                job.mixinIndex = job.klass.data(ctx)->addMixinPlaceholder(ctx);
+            }
             return false;
         }
 
@@ -506,6 +512,11 @@ private:
 
             if (!resolved.isClassOrModule()) {
                 if (!lastRun) {
+                    if (!job.isSuperclass && !job.mixinIndex.has_value()) {
+                        // This is an include or extend. Add a placeholder to fill in later to preserve
+                        // ordering of mixins.
+                        job.mixinIndex = job.klass.data(ctx)->addMixinPlaceholder(ctx);
+                    }
                     return false;
                 }
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
@@ -548,7 +559,7 @@ private:
                 }
             }
         } else {
-            if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass)) {
+            if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinIndex)) {
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::IncludesNonModule)) {
                     e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
                                 resolvedClass.show(ctx));

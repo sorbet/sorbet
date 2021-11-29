@@ -142,7 +142,10 @@ public:
 
     // Attempts to add the given mixin to the symbol. If the mixin is invalid because it is not a module, it returns
     // `false` (but still adds the mixin for processing during linearization) and the caller should report an error.
-    [[nodiscard]] bool addMixin(const GlobalState &gs, ClassOrModuleRef sym);
+    [[nodiscard]] bool addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional<u2> index = std::nullopt);
+
+    // Add a placeholder for a mixin and return index in mixins()
+    u2 addMixinPlaceholder(const GlobalState &gs);
 
     inline InlinedVector<SymbolRef, 4> &typeMembers() {
         ENFORCE(isClassOrModule());
@@ -713,6 +716,8 @@ private:
         ENFORCE(isClassOrModule());
         flags &= ~Symbol::Flags::CLASS_OR_MODULE_LINEARIZATION_COMPUTED;
     }
+
+    void addMixinAt(ClassOrModuleRef sym, std::optional<u2> index);
 };
 // CheckSize(Symbol, 144, 8); // This is under too much churn to be worth checking
 
