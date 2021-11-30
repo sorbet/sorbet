@@ -1071,10 +1071,43 @@ public:
 
         bool progress = true;
         bool first = true; // we need to run at least once to force class aliases and type aliases
+        // bool hasPackages = !gs.packageDB().empty();
 
         while (progress && (first || !todo.empty() || !todoAncestors.empty())) {
+            progress = false;
+            prodCounterInc("resolve.constants.retries");
+            if (/*hasPackages &&*/ first) {
+                {
+                    Timer timeit(gs.tracer(), "pkg_warmup.class_aliases");
+                    // This is an optimization. The order should not matter semantically
+                    // This is done as a "pre-step" because the first iteration of this effectively ran in TreeMap.
+                    // every item in todoClassAliases implicitly depends on an item in item in todo
+                    // there would be no point in running the todoClassAliases step before todo
+
+                    int origSize = todoClassAliases.size();
+                    auto it = remove_if(todoClassAliases.begin(), todoClassAliases.end(),
+                                        [&gs](ClassAliasResolutionItem &it) -> bool {
+                                            core::MutableContext ctx(gs, core::Symbols::root(), it.file);
+                                            return it.file.data(ctx).isPackage() && resolveClassAliasJob(ctx, it);
+                                        });
+                    todoClassAliases.erase(it, todoClassAliases.end());
+                    progress = progress || (origSize != todoClassAliases.size());
+                    prodCategoryCounterAdd("resolve.constants.aliases", "warm", origSize - todoClassAliases.size());
+                }
+                // {
+                //     Timer timeit(gs.tracer(), "pkg_warmup.constants");
+                //     int origSize = todo.size();
+                //     auto it = remove_if(todo.begin(), todo.end(), [&gs](ResolutionItem &job) -> bool {
+                //         core::Context ictx(gs, core::Symbols::root(), job.file);
+                //         return resolveJob(ictx, job);
+                //     });
+                //     todo.erase(it, todo.end());
+                //     progress = progress || (origSize != todo.size());
+                //     prodCategoryCounterAdd("resolve.constants.nonancestor", "warm", origSize - todo.size());
+                // }
+            }
             first = false;
-            counterInc("resolve.constants.retries");
+
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.ancestors");
                 // This is an optimization. The order should not matter semantically
@@ -1091,8 +1124,8 @@ public:
                         return resolved;
                     });
                 todoAncestors.erase(it, todoAncestors.end());
-                progress = (origSize != todoAncestors.size());
-                categoryCounterAdd("resolve.constants.ancestor", "retry", origSize - todoAncestors.size());
+                progress = progress || (origSize != todoAncestors.size());
+                prodCategoryCounterAdd("resolve.constants.ancestor", "retry", origSize - todoAncestors.size());
             }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
@@ -1103,7 +1136,7 @@ public:
                 });
                 todo.erase(it, todo.end());
                 progress = progress || (origSize != todo.size());
-                categoryCounterAdd("resolve.constants.nonancestor", "retry", origSize - todo.size());
+                prodCategoryCounterAdd("resolve.constants.nonancestor", "retry", origSize - todo.size());
             }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.class_aliases");
@@ -1120,7 +1153,7 @@ public:
                                     });
                 todoClassAliases.erase(it, todoClassAliases.end());
                 progress = progress || (origSize != todoClassAliases.size());
-                categoryCounterAdd("resolve.constants.aliases", "retry", origSize - todoClassAliases.size());
+                prodCategoryCounterAdd("resolve.constants.aliases", "retry", origSize - todoClassAliases.size());
             }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.type_aliases");
@@ -1132,7 +1165,7 @@ public:
                                     });
                 todoTypeAliases.erase(it, todoTypeAliases.end());
                 progress = progress || (origSize != todoTypeAliases.size());
-                categoryCounterAdd("resolve.constants.typealiases", "retry", origSize - todoTypeAliases.size());
+                prodCategoryCounterAdd("resolve.constants.typealiases", "retry", origSize - todoTypeAliases.size());
             }
         }
 
@@ -1154,8 +1187,8 @@ public:
 
         // We can no longer resolve new constants. All the code below reports errors
 
-        categoryCounterAdd("resolve.constants.nonancestor", "failure", todo.size());
-        categoryCounterAdd("resolve.constants.ancestor", "failure", todoAncestors.size());
+        prodCategoryCounterAdd("resolve.constants.nonancestor", "failure", todo.size());
+        prodCategoryCounterAdd("resolve.constants.ancestor", "failure", todoAncestors.size());
 
         /*
          * Sort errors so we choose a deterministic error to report for each
