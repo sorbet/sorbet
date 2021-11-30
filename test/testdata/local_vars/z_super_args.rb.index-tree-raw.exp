@@ -371,7 +371,7 @@ ClassDef{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
-            flags = {}
+            flags = {privateOk}
             recv = ConstantLit{
               symbol = (class ::<Magic>)
               orig = nullptr
@@ -403,7 +403,7 @@ ClassDef{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
-            flags = {}
+            flags = {privateOk}
             recv = ConstantLit{
               symbol = (class ::<Magic>)
               orig = nullptr
@@ -438,7 +438,7 @@ ClassDef{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
-            flags = {}
+            flags = {privateOk}
             recv = ConstantLit{
               symbol = (class ::<Magic>)
               orig = nullptr
@@ -477,7 +477,7 @@ ClassDef{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
-            flags = {}
+            flags = {privateOk}
             recv = ConstantLit{
               symbol = (class ::<Magic>)
               orig = nullptr
@@ -513,7 +513,7 @@ ClassDef{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
-            flags = {}
+            flags = {privateOk}
             recv = ConstantLit{
               symbol = (class ::<Magic>)
               orig = nullptr
@@ -570,7 +570,7 @@ ClassDef{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
-            flags = {}
+            flags = {privateOk}
             recv = ConstantLit{
               symbol = (class ::<Magic>)
               orig = nullptr
@@ -612,7 +612,7 @@ ClassDef{
               localVariable = <U blk>
             } }]
           rhs = Send{
-            flags = {}
+            flags = {privateOk}
             recv = ConstantLit{
               symbol = (class ::<Magic>)
               orig = nullptr
