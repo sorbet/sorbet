@@ -485,42 +485,35 @@ public:
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         auto methodName = lit.asName(cs);
 
-        if (methodName == core::Names::super()) {
-            auto *argc = builder.CreateCall(cs.getFunction("sorbet_rubyArrayLen"), {splatArray}, "argc");
-            auto *argv = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {splatArray}, "argv");
-            auto *kwSplatFlag = llvm::ConstantInt::get(cs, llvm::APInt(32, flags.kw_splat ? 1 : 0));
+        // setup the inline cache
+        // Note that in the case of calling `super`, the VM's search mechanism will
+        // fetch the method name ID from the method definition itself, not the call
+        // cache, so it's OK that we're saying the cache is for `super`.
+        auto shortName = methodName.shortName(cs);
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(shortName), flags, 1, {});
 
-            if (auto *blk = mcctx.blkAsFunction()) {
-                auto blkId = mcctx.blk.value();
-                auto *ifunc = Payload::getOrBuildBlockIfunc(cs, builder, irctx, blkId);
-                return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"), {argc, argv, kwSplatFlag, ifunc},
-                                          "rawSendResult");
-            } else {
-                return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {argc, argv, kwSplatFlag},
-                                          "rawSendResult");
+        // Push receiver and the splat array.
+        // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
+        // is actually the first arg of the callWithSplat intrinsic method.
+        Payload::pushRubyStackVector(cs, builder, cfp,
+                                     Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId),
+                                     {splatArray});
+
+        // Call the receiver.
+        if (auto *blk = mcctx.blkAsFunction()) {
+            auto blkId = mcctx.blk.value();
+            auto usesBreak = irctx.blockUsesBreak[blkId];
+            auto *ifunc = Payload::getOrBuildBlockIfunc(cs, builder, irctx, blkId);
+            if (methodName == core::Names::super()) {
+                return Payload::callSuperFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, ifunc);
             }
+            return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, ifunc);
         } else {
-            // setup the inline cache
-            auto shortName = methodName.shortName(cs);
-            auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(shortName), flags, 1, {});
-
-            // Push receiver and the splat array.
-            // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
-            // is actually the first arg of the callWithSplat intrinsic method.
-            Payload::pushRubyStackVector(cs, builder, cfp,
-                                         Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId),
-                                         {splatArray});
-
-            // Call the receiver.
-            if (auto *blk = mcctx.blkAsFunction()) {
-                auto blkId = mcctx.blk.value();
-                auto usesBreak = irctx.blockUsesBreak[blkId];
-                auto *ifunc = Payload::getOrBuildBlockIfunc(cs, builder, irctx, blkId);
-                return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, ifunc);
-            } else {
-                auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.builder);
-                return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
+            auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.builder);
+            if (methodName == core::Names::super()) {
+                return Payload::callSuperFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
             }
+            return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
         }
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
