@@ -1132,7 +1132,8 @@ llvm::Value *Payload::callSuperFuncWithCache(CompilerState &cs, llvm::IRBuilderB
 llvm::Value *Payload::callSuperFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                                   bool usesBreak, llvm::Value *ifunc) {
     if (usesBreak) {
-        return builder.CreateCall(cs.getFunction("sorbet_callSuperFuncBlockWithCache"), {cache, ifunc}, "sendWithBlock");
+        return builder.CreateCall(cs.getFunction("sorbet_callSuperFuncBlockWithCache"), {cache, ifunc},
+                                  "sendWithBlock");
     } else {
         return builder.CreateCall(cs.getFunction("sorbet_callSuperFuncBlockWithCache_noBreak"), {cache, ifunc},
                                   "sendWithBlock");

@@ -175,10 +175,8 @@ public:
         auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 3);
         flags.blockarg = true;
         auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
-        Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyBlockId),
-                                     stack);
-        auto *cache =
-            IREmitterHelpers::makeInlineCache(cs, builder, string(shortName), flags, stack.size(), keywords);
+        Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyBlockId), stack);
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, string(shortName), flags, stack.size(), keywords);
         if (methodName == core::Names::super()) {
             return Payload::callSuperFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
         }
@@ -490,9 +488,8 @@ public:
         // Push receiver and the splat array.
         // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
         // is actually the first arg of the callWithSplat intrinsic method.
-        Payload::pushRubyStackVector(cs, builder, cfp,
-                                     Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId),
-                                     {splatArray});
+        Payload::pushRubyStackVector(
+            cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId), {splatArray});
 
         // Call the receiver.
         if (auto *blk = mcctx.blkAsFunction()) {
@@ -553,9 +550,8 @@ public:
         // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
         // is actually the first arg of the callWithSplat intrinsic method.
         auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
-        Payload::pushRubyStackVector(cs, builder, cfp,
-                                     Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId),
-                                     {splatArray});
+        Payload::pushRubyStackVector(
+            cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId), {splatArray});
 
         if (methodName == core::Names::super()) {
             return Payload::callSuperFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);

@@ -107,7 +107,7 @@ public:
     static llvm::Value *callSuperFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                                llvm::Value *blockHandler);
     static llvm::Value *callSuperFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
-                                               bool usesBreak, llvm::Value *ifunc);
+                                                    bool usesBreak, llvm::Value *ifunc);
     static llvm::Value *callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                        llvm::Value *fn, llvm::Value *argc, llvm::Value *argv, llvm::Value *recv,
                                        llvm::Value *iseq);
