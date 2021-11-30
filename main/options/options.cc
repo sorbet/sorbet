@@ -17,68 +17,62 @@
 #include "sys/stat.h"
 #include "third_party/licenses/licenses.h"
 
+namespace spd = spdlog;
 using namespace std;
 
 namespace sorbet::realmain::options {
 struct PrintOptions {
     string option;
     PrinterConfig Printers::*config;
-
-    // Whether the option is compatible with --cache-dir.
-    // (Some printers only run in a phase of pipeline.cc that runs if a tree is not cached)
-    bool supportsCaching = true;
-
-    // If false, printer is responsible for flushing its own output.
-    // Otherwise, just using opts.print.MyPrinter.print(...) with a string will be enough.
-    bool supportsFlush = true;
+    bool supportsCaching = false;
+    bool supportsFlush = true; // If false, printer is responsible for flushing its own output.
 };
 
 const vector<PrintOptions> print_options({
-    {"parse-tree", &Printers::ParseTree, false},
-    {"parse-tree-json", &Printers::ParseTreeJson, false},
-    {"parse-tree-json-with-locs", &Printers::ParseTreeJsonWithLocs, false},
-    {"parse-tree-whitequark", &Printers::ParseTreeWhitequark, false},
-    {"desugar-tree", &Printers::DesugarTree, false},
-    {"desugar-tree-raw", &Printers::DesugarTreeRaw, false},
-    {"rewrite-tree", &Printers::RewriterTree, false},
-    {"rewrite-tree-raw", &Printers::RewriterTreeRaw, false},
-    {"index-tree", &Printers::IndexTree},
-    {"index-tree-raw", &Printers::IndexTreeRaw},
-    {"name-tree", &Printers::NameTree},
-    {"name-tree-raw", &Printers::NameTreeRaw},
-    {"resolve-tree", &Printers::ResolveTree},
-    {"resolve-tree-raw", &Printers::ResolveTreeRaw},
-    {"flatten-tree", &Printers::FlattenTree},
-    {"flatten-tree-raw", &Printers::FlattenTreeRaw},
-    {"ast", &Printers::AST},
-    {"ast-raw", &Printers::ASTRaw},
-    {"cfg", &Printers::CFG},
-    {"cfg-raw", &Printers::CFGRaw},
-    {"cfg-text", &Printers::CFGText},
-    {"symbol-table", &Printers::SymbolTable},
-    {"symbol-table-raw", &Printers::SymbolTableRaw},
-    {"symbol-table-json", &Printers::SymbolTableJson},
-    {"symbol-table-proto", &Printers::SymbolTableProto},
+    {"parse-tree", &Printers::ParseTree},
+    {"parse-tree-json", &Printers::ParseTreeJson},
+    {"parse-tree-json-with-locs", &Printers::ParseTreeJsonWithLocs},
+    {"parse-tree-whitequark", &Printers::ParseTreeWhitequark},
+    {"desugar-tree", &Printers::DesugarTree},
+    {"desugar-tree-raw", &Printers::DesugarTreeRaw},
+    {"rewrite-tree", &Printers::RewriterTree},
+    {"rewrite-tree-raw", &Printers::RewriterTreeRaw},
+    {"index-tree", &Printers::IndexTree, true},
+    {"index-tree-raw", &Printers::IndexTreeRaw, true},
+    {"name-tree", &Printers::NameTree, true},
+    {"name-tree-raw", &Printers::NameTreeRaw, true},
+    {"resolve-tree", &Printers::ResolveTree, true},
+    {"resolve-tree-raw", &Printers::ResolveTreeRaw, true},
+    {"flatten-tree", &Printers::FlattenTree, true},
+    {"flatten-tree-raw", &Printers::FlattenTreeRaw, true},
+    {"ast", &Printers::AST, true},
+    {"ast-raw", &Printers::ASTRaw, true},
+    {"cfg", &Printers::CFG, true},
+    {"cfg-raw", &Printers::CFGRaw, true},
+    {"cfg-text", &Printers::CFGText, true},
+    {"symbol-table", &Printers::SymbolTable, true},
+    {"symbol-table-raw", &Printers::SymbolTableRaw, true},
+    {"symbol-table-json", &Printers::SymbolTableJson, true},
+    {"symbol-table-proto", &Printers::SymbolTableProto, true},
     {"symbol-table-messagepack", &Printers::SymbolTableMessagePack, true, false},
-    {"symbol-table-full", &Printers::SymbolTableFull},
-    {"symbol-table-full-raw", &Printers::SymbolTableFullRaw},
-    {"symbol-table-full-json", &Printers::SymbolTableFullJson},
-    {"symbol-table-full-proto", &Printers::SymbolTableFullProto},
+    {"symbol-table-full", &Printers::SymbolTableFull, true},
+    {"symbol-table-full-raw", &Printers::SymbolTableFullRaw, true},
+    {"symbol-table-full-json", &Printers::SymbolTableFullJson, true},
+    {"symbol-table-full-proto", &Printers::SymbolTableFullProto, true},
     {"symbol-table-full-messagepack", &Printers::SymbolTableFullMessagePack, true, false},
-    {"file-table-json", &Printers::FileTableJson},
-    {"file-table-proto", &Printers::FileTableProto},
+    {"file-table-json", &Printers::FileTableJson, true},
+    {"file-table-proto", &Printers::FileTableProto, true},
     {"file-table-messagepack", &Printers::FileTableMessagePack, true, false},
-    {"file-table-full-json", &Printers::FileTableFullJson},
-    {"file-table-full-proto", &Printers::FileTableFullProto},
+    {"file-table-full-json", &Printers::FileTableFullJson, true},
+    {"file-table-full-proto", &Printers::FileTableFullProto, true},
     {"file-table-full-messagepack", &Printers::FileTableFullMessagePack, true, false},
-    {"missing-constants", &Printers::MissingConstants},
-    {"autogen", &Printers::Autogen},
-    {"autogen-msgpack", &Printers::AutogenMsgPack},
-    {"autogen-classlist", &Printers::AutogenClasslist},
+    {"missing-constants", &Printers::MissingConstants, true},
+    {"autogen", &Printers::Autogen, true},
+    {"autogen-msgpack", &Printers::AutogenMsgPack, true},
+    {"autogen-classlist", &Printers::AutogenClasslist, true},
     {"autogen-autoloader", &Printers::AutogenAutoloader, true, false},
-    {"autogen-subclasses", &Printers::AutogenSubclasses},
-    {"package-tree", &Printers::Packager, false},
-    {"minimized-rbi", &Printers::MinimizeRBI},
+    {"autogen-subclasses", &Printers::AutogenSubclasses, true},
+    {"package-tree", &Printers::Packager},
 });
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -99,11 +93,6 @@ void PrinterConfig::flush() {
     }
     absl::MutexLock lck(&state->mutex);
     FileOps::write(outputPath, to_string(state->buf));
-};
-
-string PrinterConfig::flushToString() {
-    absl::MutexLock lck(&state->mutex);
-    return to_string(state->buf);
 };
 
 vector<reference_wrapper<PrinterConfig>> Printers::printers() {
@@ -149,7 +138,6 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         AutogenAutoloader,
         AutogenSubclasses,
         Packager,
-        MinimizeRBI,
     });
 }
 
@@ -414,10 +402,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("stop-after", to_string(all_stop_after),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
-    options.add_options("dev")("minimize-to-rbi",
-                               "[experimental] Output a minimal RBI contining the diff between Sorbet's view of a "
-                               "codebase and the definitions present in this file",
-                               cxxopts::value<std::string>()->default_value(""), "<file.rbi>");
     options.add_options("dev")("skip-rewriter-passes", "Do not run Rewriter passess");
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
     options.add_options("dev")("stress-incremental-resolver",
@@ -788,15 +772,6 @@ void readOptions(Options &opts,
 
         opts.noErrorCount = raw["no-error-count"].as<bool>();
         opts.noStdlib = raw["no-stdlib"].as<bool>();
-        opts.minimizeRBI = raw["minimize-to-rbi"].as<string>();
-        if (!opts.minimizeRBI.empty() && !opts.print.MinimizeRBI.enabled) {
-            logger->error("--minimize-to-rbi must also include --print=minimized-rbi");
-            throw EarlyReturnWithCode(1);
-        }
-        if (!opts.minimizeRBI.empty() && opts.autocorrect) {
-            logger->error("--minimize-to-rbi plus --autocorrect is not implemented");
-            throw EarlyReturnWithCode(1);
-        }
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
         opts.storeState = raw["store-state"].as<string>();
         opts.forceHashing = raw["force-hashing"].as<bool>();

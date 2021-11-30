@@ -40,7 +40,6 @@ passes=(
   document-symbols
   package-tree
   autocorrects
-  minimized-rbi
 )
 
 ./bazel build //main:sorbet //test:print_document_symbols -c opt
@@ -79,9 +78,8 @@ for this_src in "${rb_src[@]}" DUMMY; do
       args=()
       if [ "$pass" = "autogen" ]; then
         args=("--stop-after=namer --skip-rewriter-passes")
-      elif [ "$pass" = "minimized-rbi" ]; then
-        args=("--minimize-to-rbi=$basename.minimize.rbi")
-      elif [ "$pass" = "package-tree" ]; then
+      fi
+      if [ "$pass" = "package-tree" ]; then
         args=("--stripe-packages")
         extra_prefixes=()
         while IFS='' read -r prefix; do

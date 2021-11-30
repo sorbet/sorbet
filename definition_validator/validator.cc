@@ -535,12 +535,8 @@ void validateSuperClass(core::Context ctx, const core::ClassOrModuleRef sym, con
 
     if (auto e = ctx.state.beginError(core::Loc(sym.data(ctx)->loc().file(), classDef.declLoc),
                                       core::errors::Resolver::NonClassSuperclass)) {
-        auto superClassFqn = superClass.show(ctx);
-        e.setHeader("The super class `{}` of `{}` does not derive from `{}`", superClassFqn, sym.show(ctx),
+        e.setHeader("The super class `{}` of `{}` does not derive from `{}`", superClass.show(ctx), sym.show(ctx),
                     core::Symbols::Class().show(ctx));
-        for (const auto loc : superClass.data(ctx)->locs()) {
-            e.addErrorLine(loc, "{} defined here", superClassFqn);
-        }
     }
 }
 

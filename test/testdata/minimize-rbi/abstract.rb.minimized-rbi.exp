@@ -1,6 +1,0 @@
-# typed: true
-
-class ::Card
-  def fx_currency(); end
-end
-
