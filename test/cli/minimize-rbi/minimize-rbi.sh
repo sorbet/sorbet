@@ -24,9 +24,16 @@ fi
 
 echo --------------------------------------------------------------------------
 
+# We're using temp files because there was some stdout/stderr syncing problems
+
+stderr_log="$(mktemp)"
+trap 'rm -rf "$stderr_log"' EXIT
+
 main/sorbet \
   --silence-dev-message \
   --minimize-to-rbi=test/cli/minimize-rbi/unknown.rbi \
   --print=symbol-table \
   --print=minimized-rbi \
-  test/cli/minimize-rbi/minimize-rbi.rb 2>&1
+  test/cli/minimize-rbi/minimize-rbi.rb 2> "$stderr_log"
+
+cat "$stderr_log"

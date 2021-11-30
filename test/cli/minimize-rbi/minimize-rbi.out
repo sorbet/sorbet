@@ -44,8 +44,7 @@ class ::<root> < ::Object ()
     type-member(+) ::<Class:CommonToBoth>::<AttachedClass> -> T.attached_class (of CommonToBoth) @ test/cli/minimize-rbi/unknown.rbi:3
     method ::<Class:CommonToBoth>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:3
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
-  module ::ModuleCommonToBoth < ::Sorbet:No errors! Great job.
-:Private::Static::ImplicitModuleSuperclass () @ test/cli/minimize-rbi/unknown.rbi:22
+  module ::ModuleCommonToBoth < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/minimize-rbi/unknown.rbi:22
   class ::<Class:ModuleCommonToBoth>[<AttachedClass>] < ::Module () @ test/cli/minimize-rbi/unknown.rbi:22
     type-member(+) ::<Class:ModuleCommonToBoth>::<AttachedClass> -> T.attached_class (of ModuleCommonToBoth) @ test/cli/minimize-rbi/unknown.rbi:22
     method ::<Class:ModuleCommonToBoth>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:22
@@ -97,3 +96,4 @@ class ::OnlyInSecond
   def self.self_method(x); end
 end
 
+No errors! Great job.
