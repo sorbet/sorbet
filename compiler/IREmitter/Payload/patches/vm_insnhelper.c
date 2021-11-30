@@ -1061,6 +1061,25 @@ VALUE sorbet_vm_class(struct FunctionInlineCache *classCache, rb_control_frame_t
     return sorbet_callFuncWithCache(classCache, VM_BLOCK_HANDLER_NONE);
 }
 
+VALUE sorbet_vm_bang(struct FunctionInlineCache *bangCache, rb_control_frame_t *reg_cfp, VALUE recv) {
+    if (recv == Qnil || recv == Qfalse) {
+        return Qtrue;
+    }
+    if (recv == Qtrue) {
+        return Qfalse;
+    }
+    sorbet_vmMethodSearch(bangCache, recv);
+    rb_method_definition_t *bangDef = bangCache->cd.cc.me->def;
+    // cf. vm_opt_not
+    if (bangDef->type == VM_METHOD_TYPE_CFUNC && bangDef->body.cfunc.func == rb_obj_not) {
+        return RTEST(recv) ? Qfalse : Qtrue;
+    }
+    VALUE *sp = reg_cfp->sp;
+    *(sp + 0) = recv;
+    reg_cfp->sp += 1;
+    return sorbet_callFuncWithCache(bangCache, VM_BLOCK_HANDLER_NONE);
+}
+
 VALUE sorbet_vm_isa_p(struct FunctionInlineCache *isaCache, rb_control_frame_t *reg_cfp, VALUE recv, VALUE klass) {
     sorbet_vmMethodSearch(isaCache, recv);
     rb_method_definition_t *isaDef = isaCache->cd.cc.me->def;
