@@ -7,16 +7,6 @@ using namespace std;
 
 namespace sorbet::resolver {
 namespace {
-// Count the number of name parts in a symbol. Length should be same as `symbol2NameParts`.
-size_t nameLen(core::Context ctx, core::SymbolRef symbol) {
-    auto len = 0;
-    while (symbol.exists() && symbol != core::Symbols::root() && !symbol.data(ctx)->name.isPackagerName(ctx)) {
-        ++len;
-        symbol = symbol.data(ctx)->owner;
-    }
-    return len;
-}
-
 // Add all name parts for a symbol to a vector, exclude internal names used by packager.
 void symbol2NameParts(core::Context ctx, core::SymbolRef symbol, vector<core::NameRef> &out) {
     ENFORCE(out.empty());
@@ -48,7 +38,6 @@ public:
         vector<core::NameRef> prefix;
         // Resolution scopes are always longest to shortest. Reserve additional space for the name we're
         // looking for.
-        prefix.reserve(nameLen(ctx, scopes.front()) + 1);
         for (auto scope : scopes) {
             prefix.clear();
             symbol2NameParts(ctx, scope, prefix);
@@ -83,7 +72,7 @@ private:
     // In this case all we search with the prefix `Foo::Bar` and find that the `Foo::Bar::Baz`
     // package matches.
     void findPackagesWithPrefix(const vector<core::NameRef> &prefix, vector<PackageMatch> &matches) const {
-        ENFORCE(prefix.size() > 0);
+        ENFORCE(!prefix.empty());
         // If the search prefix starts with `Test` ignore it while searching matching package names.
         auto prefixBegin = prefix.begin();
         if (*prefixBegin == core::Names::Constants::Test() && prefix.size() > 1) {
