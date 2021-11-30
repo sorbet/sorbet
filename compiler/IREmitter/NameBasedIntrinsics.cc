@@ -805,6 +805,28 @@ public:
     }
 } BangIntrinsic;
 
+class FreezeIntrinsic : public NameBasedIntrinsicMethod {
+public:
+    FreezeIntrinsic() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {}
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        if (!mcctx.send->args.empty()) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        }
+
+        auto &cs = mcctx.cs;
+        auto &builder = mcctx.builder;
+        auto *callCache = mcctx.getInlineCache();
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *recv = mcctx.varGetRecv();
+        return builder.CreateCall(cs.getFunction("sorbet_vm_freeze"), {callCache, cfp, recv});
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::freeze()};
+    }
+} FreezeIntrinsic;
+
 class IsAIntrinsic : public NameBasedIntrinsicMethod {
 public:
     IsAIntrinsic() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
@@ -922,7 +944,7 @@ vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
         &DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic,     &CallWithBlock,           &ExceptionRetry,
         &BuildHash,          &CallWithSplat,        &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic, &DefinedClassVar,
         &DefinedInstanceVar, &NewIntrinsic,         &InstanceVariableGet,   &InstanceVariableSet,     &ClassIntrinsic,
-        &BangIntrinsic,      &IsAIntrinsic};
+        &BangIntrinsic,      &FreezeIntrinsic,      &IsAIntrinsic};
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }
