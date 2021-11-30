@@ -26,29 +26,17 @@ bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
     return false;
 }
 
-string AutocorrectSuggestion::unsafeApplyToString(const std::string_view source) {
+string AutocorrectSuggestion::applySingleEditForTesting(const std::string_view source) {
     UnorderedSet<Loc> seen;
-    vector<AutocorrectSuggestion::Edit> edits = move(this->edits);
 
-    if (edits.size() > 1) {
-        auto file = edits.front().loc.file();
-        for (int i = 1; i < edits.size(); i++) {
-            ENFORCE(edits[i].loc.file() == file, "All edits in `unsafeApplyToString` need to apply to the same file");
-        }
-    }
-
-    auto compare = [](const AutocorrectSuggestion::Edit &left, const AutocorrectSuggestion::Edit &right) {
-        return left.loc.beginPos() > right.loc.beginPos();
-    };
-    fast_sort(edits, compare);
+    ENFORCE(edits.size() <= 1, "applySingleEditForTesting needs either 0 or 1 edits");
 
     string replaced{source};
-    for (auto &edit : edits) {
-        auto start = edit.loc.beginPos();
-        auto end = edit.loc.endPos();
-        replaced = absl::StrCat(replaced.substr(0, start), edit.replacement, replaced.substr(end, -1));
+    if (edits.size() == 1) {
+        auto start = edits.front().loc.beginPos();
+        auto end = edits.front().loc.endPos();
+        replaced = absl::StrCat(replaced.substr(0, start), edits.front().replacement, replaced.substr(end, -1));
     }
-
     return replaced;
 }
 

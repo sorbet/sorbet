@@ -86,7 +86,7 @@ TEST_CASE("Simple add import") {
     ENFORCE(package.exists());
     auto addImport = package.addImport(gs, package, false);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->unsafeApplyToString(pkg_source);
+    auto replaced = addImport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
 }
 
@@ -109,7 +109,7 @@ TEST_CASE("Simple test import") {
     ENFORCE(package.exists());
     auto addImport = package.addImport(gs, package, true);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->unsafeApplyToString(pkg_source);
+    auto replaced = addImport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
 }
 
@@ -132,7 +132,7 @@ TEST_CASE("Add import with only existing exports") {
     ENFORCE(package.exists());
     auto addImport = package.addImport(gs, package, false);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->unsafeApplyToString(pkg_source);
+    auto replaced = addImport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
 }
 
@@ -155,7 +155,7 @@ TEST_CASE("Add test import with only existing exports") {
     ENFORCE(package.exists());
     auto addImport = package.addImport(gs, package, true);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->unsafeApplyToString(pkg_source);
+    auto replaced = addImport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
 }
 
@@ -176,7 +176,7 @@ TEST_CASE("Add import to package with neither imports nor exports") {
     ENFORCE(package.exists());
     auto addImport = package.addImport(gs, package, false);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->unsafeApplyToString(pkg_source);
+    auto replaced = addImport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
 }
 
@@ -197,7 +197,7 @@ TEST_CASE("Add test import to package with neither imports nor exports") {
     ENFORCE(package.exists());
     auto addImport = package.addImport(gs, package, true);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->unsafeApplyToString(pkg_source);
+    auto replaced = addImport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
 }
 
