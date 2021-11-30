@@ -202,7 +202,8 @@ Usage:
                                 file-table-full-json, file-table-full-proto,
                                 file-table-full-messagepack, missing-constants, autogen,
                                 autogen-msgpack, autogen-classlist,
-                                autogen-autoloader, autogen-subclasses, package-tree]
+                                autogen-autoloader, autogen-subclasses, package-tree,
+                                minimized-rbi]
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of
                                 subclasses. This option must be used in
@@ -214,6 +215,11 @@ Usage:
                                 rewriter, local-vars, namer, resolver, cfg,
                                 inferencer] (default: inferencer)
       --no-stdlib               Do not load included rbi files for stdlib
+      --minimize-to-rbi <file.rbi>
+                                [experimental] Output a minimal RBI contining
+                                the diff between Sorbet's view of a codebase
+                                and the definitions present in this file
+                                (default: "")
       --skip-rewriter-passes    Do not run Rewriter passess
       --wait-for-dbg            Wait for debugger on start
       --stress-incremental-resolver

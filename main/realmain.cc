@@ -31,6 +31,7 @@
 #include "core/serialize/serialize.h"
 #include "hashing/hashing.h"
 #include "main/cache/cache.h"
+#include "main/minimize/minimize.h"
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
 #include "payload/payload.h"
@@ -511,6 +512,13 @@ int realmain(int argc, char *argv[]) {
 
     logger->trace("done building initial global state");
 
+    unique_ptr<core::GlobalState> gsForMinimize;
+    if (!opts.minimizeRBI.empty()) {
+        // Copy GlobalState after createInitialGlobalState and option handling, but before rest of
+        // pipeline, so that it represents an "empty" GlobalState.
+        gsForMinimize = gs->deepCopy();
+    }
+
     if (opts.runLSP) {
 #ifdef SORBET_REALMAIN_MIN
         logger->warn("LSP is disabled in sorbet-orig for faster builds");
@@ -604,6 +612,16 @@ int realmain(int argc, char *argv[]) {
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
+        }
+
+        if (!opts.minimizeRBI.empty()) {
+            // In the future, we might consider making minimizeRBI be a repeatable option, and run
+            // this block once for each input file.
+            // The trick there is that they would all currently output to the same file, even for
+            // multiple input files if we assume the naive implementation, which might not be the
+            // API we want to expose.
+            Minimize::indexAndResolveForMinimize(gs, gsForMinimize, opts, *workers, opts.minimizeRBI);
+            Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
         }
 
         if (opts.suggestTyped) {
@@ -720,7 +738,7 @@ int realmain(int argc, char *argv[]) {
         }
     }
 #endif
-    if (!gs || gs->hadCriticalError()) {
+    if (!gs || gs->hadCriticalError() || (gsForMinimize && gsForMinimize->hadCriticalError())) {
         returnCode = 10;
     } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.supressNonCriticalErrors) {
         returnCode = 1;
@@ -734,6 +752,7 @@ int realmain(int argc, char *argv[]) {
             intentionallyLeakMemory(e.tree.release());
         }
         intentionallyLeakMemory(gs.release());
+        intentionallyLeakMemory(gsForMinimize.release());
     }
 
     // je_malloc_stats_print(nullptr, nullptr, nullptr); // uncomment this to print jemalloc statistics
