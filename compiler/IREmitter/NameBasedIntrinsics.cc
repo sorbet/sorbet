@@ -170,24 +170,19 @@ public:
 
         llvm::Value *blockHandler = prepareBlockHandler(mcctx, send->args[2]);
 
+        auto shortName = methodName.shortName(cs);
+
+        auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 3);
+        flags.blockarg = true;
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
+        Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyBlockId),
+                                     stack);
+        auto *cache =
+            IREmitterHelpers::makeInlineCache(cs, builder, string(shortName), flags, stack.size(), keywords);
         if (methodName == core::Names::super()) {
-            // fill in args
-            auto args = IREmitterHelpers::fillSendArgArray(mcctx, 3);
-
-            return builder.CreateCall(cs.getFunction("sorbet_callSuperBlockHandler"),
-                                      {args.argc, args.argv, args.kw_splat, blockHandler}, "rawSendResult");
-        } else {
-            auto shortName = methodName.shortName(cs);
-
-            auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 3);
-            flags.blockarg = true;
-            auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
-            Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyBlockId),
-                                         stack);
-            auto *cache =
-                IREmitterHelpers::makeInlineCache(cs, builder, string(shortName), flags, stack.size(), keywords);
-            return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
+            return Payload::callSuperFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
         }
+        return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
