@@ -22,6 +22,29 @@ bool isCopyableType(const ast::ExpressionPtr &typeExpr) {
     return true;
 }
 
+ast::ExpressionPtr literalToType(core::MutableContext ctx, const core::LocOffsets loc, const core::TypePtr &value) {
+    auto underlying = core::isa_type<core::LiteralType>(value) ? value.underlying(ctx) : value;
+    auto sym = core::cast_type_nonnull<core::ClassType>(underlying).symbol;
+
+    if (sym == core::Symbols::NilClass()) {
+        // Don't infer any type from a literal `nil` because, since this isn't a constant,
+        // it's probably going to be set to something else in some other code path.
+        //
+        // Ideally we might do this for all type inference, but doing so naively would
+        // break flow-sensitive typing. See https://github.com/sorbet/sorbet/issues/4174
+        return nullptr;
+    } else if (sym == core::Symbols::TrueClass() || sym == core::Symbols::FalseClass()) {
+        // Given a literal `true` or `false`, infer `T::Boolean` since it's probable that
+        // some other code path can change the value of the variable.
+        //
+        // Ideally we might do this for all type inference, but doing so naively would
+        // break flow-sensitive typing. See https://github.com/sorbet/sorbet/issues/4174
+        return ast::MK::UnresolvedConstant(loc, ast::MK::T(loc), core::Names::Constants::Boolean());
+    } else {
+        return ast::MK::Constant(loc, sym);
+    }
+}
+
 // if expr is of the form `@var = x`, and `x` is a literal or a typed local,
 // then replace it with with `@var = T.let(x, type_of_x)`
 void maybeAddLet(core::MutableContext ctx, ast::ExpressionPtr &expr,
@@ -37,10 +60,12 @@ void maybeAddLet(core::MutableContext ctx, ast::ExpressionPtr &expr,
     }
 
     if (auto lit = ast::cast_tree<ast::Literal>(assn->rhs)) {
-        auto underlying = core::isa_type<core::LiteralType>(lit->value) ? lit->value.underlying(ctx) : lit->value;
-        auto klass = core::cast_type_nonnull<core::ClassType>(underlying);
-        auto loc = lit->loc;
-        auto newLet = ast::MK::Let(loc, move(assn->rhs), ast::MK::Constant(loc, klass.symbol));
+        auto inferredType = literalToType(ctx, lit->loc, lit->value);
+        if (inferredType == nullptr) {
+            return;
+        }
+
+        auto newLet = ast::MK::Let(lit->loc, move(assn->rhs), move(inferredType));
         assn->rhs = move(newLet);
     } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(assn->rhs)) {
         if (ident->kind != ast::UnresolvedIdent::Kind::Local) {

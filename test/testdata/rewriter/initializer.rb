@@ -68,9 +68,9 @@ class Literals
     T.reveal_type(@str) # error: Revealed type: `String`
     T.reveal_type(@sym) # error: Revealed type: `Symbol`
     T.reveal_type(@float) # error: Revealed type: `Float`
-    T.reveal_type(@nil) # error: Revealed type: `NilClass`
-    T.reveal_type(@true) # error: Revealed type: `TrueClass`
-    T.reveal_type(@false) # error: Revealed type: `FalseClass`
+    T.reveal_type(@nil) # error: Revealed type: `T.untyped`
+    T.reveal_type(@true) # error: Revealed type: `T::Boolean`
+    T.reveal_type(@false) # error: Revealed type: `T::Boolean`
     T.reveal_type(@cls) # error: Revealed type: `T.untyped`
     T.reveal_type(@obj) # error: Revealed type: `T.untyped`
   end
