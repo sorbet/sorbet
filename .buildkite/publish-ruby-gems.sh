@@ -46,6 +46,8 @@ with_backoff() {
   done
 }
 
+rbenv install --skip-existing
+
 # Push the sorbet-static gems first, in case they fail. We don't want to end
 # up in a weird state where 'sorbet' requires a pinned version of
 # sorbet-static, but the sorbet-static gem push failed.
