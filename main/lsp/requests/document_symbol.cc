@@ -79,6 +79,27 @@ bool DocumentSymbolTask::isDelayable() const {
     return true;
 }
 
+bool isOwnerInTheSameFile(const core::GlobalState &gs, core::SymbolRef ref, core::FileRef fref) {
+    auto locs = ref.data(gs)->owner.data(gs)->locs();
+
+    for (auto loc : locs) {
+        if (loc.file() == fref) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool isRefInFile(const core::GlobalState &gs, core::SymbolRef ref, core::FileRef fref) {
+    for (auto definitionLocation : ref.data(gs)->locs()) {
+        if (definitionLocation.file() == fref) {
+            return true;
+        }
+    }
+    return false;
+}
+
 unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentSymbol);
     if (!config.opts.lspDocumentSymbolEnabled) {
@@ -102,17 +123,14 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
     for (auto [kind, used] : symbolTypes) {
         for (u4 idx = 1; idx < used; idx++) {
             core::SymbolRef ref(gs, kind, idx);
-            if (!hideSymbol(gs, ref) &&
-                // a bit counter-intuitive, but this actually should be `!= fref`, as it prevents duplicates.
-                (ref.data(gs)->owner.data(gs)->loc().file() != fref || ref.data(gs)->owner == core::Symbols::root())) {
-                for (auto definitionLocation : ref.data(gs)->locs()) {
-                    if (definitionLocation.file() == fref) {
-                        auto data = symbolRef2DocumentSymbol(gs, ref, fref);
-                        if (data) {
-                            result.push_back(move(data));
-                            break;
-                        }
-                    }
+            // If owner of the ref is in the same file then
+            // the ref will be added to the results during a processing of the owner.
+            // That happens because the `symbolRef2DocumentSymbol` is recursively called for every child of the ref
+            if (!hideSymbol(gs, ref) && (isRefInFile(gs, ref, fref) && !isOwnerInTheSameFile(gs, ref, fref))) {
+                auto data = symbolRef2DocumentSymbol(gs, ref, fref);
+                if (data) {
+                    result.push_back(move(data));
+                    break;
                 }
             }
         }
