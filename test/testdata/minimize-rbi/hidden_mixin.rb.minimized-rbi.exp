@@ -1,6 +1,0 @@
-# typed: true
-
-class ::Class
-  include ::Mocha::ClassMethods
-end
-

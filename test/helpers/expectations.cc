@@ -73,10 +73,7 @@ bool addToExpectations(Expectations &exp, string_view filePath, bool isDirectory
         return false;
     }
 
-    if (absl::EndsWith(filePath, ".minimize.rbi")) {
-        exp.minimizeRBI = filePath;
-        return true;
-    } else if (absl::EndsWith(filePath, ".rb") || absl::EndsWith(filePath, ".rbi")) {
+    if (absl::EndsWith(filePath, ".rb") || absl::EndsWith(filePath, ".rbi")) {
         exp.sourceFiles.emplace_back(filePath);
         return true;
     } else if (absl::EndsWith(filePath, ".exp")) {

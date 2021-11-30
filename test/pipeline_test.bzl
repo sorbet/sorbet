@@ -130,7 +130,6 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
             data += native.glob(["{}.*.exp".format(prefix)])
             data += native.glob(["{}.*.rbupdate".format(prefix)])
             data += native.glob(["{}.*.rbedited".format(prefix)])
-            data += native.glob(["{}.*.minimize.rbi".format(prefix)])
 
         exp_test(
             name = "test_{}/{}".format(test_name_prefix, name),

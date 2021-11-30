@@ -73,7 +73,6 @@ compilation_database(
         "//payload/text:empty",
         "//payload/binary:some",
         "//main:realmain",
-        "//main/minimize:minimize",
         "//main/lsp:lsp",
         "//experimental/rubyfmt:rubyfmt",
         "//main/cache:cache",

@@ -21,7 +21,6 @@ cc_binary(
         "//local_vars",
         "//main/autogen",
         "//main/lsp",
-        "//main/minimize",
         "//main/pipeline/semantic_extension:none",
         "//namer",
         "//packager",
