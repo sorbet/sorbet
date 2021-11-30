@@ -66,6 +66,7 @@
     {core::Symbols::Integer(), "odd?", CMethod{"sorbet_int_rb_int_odd_p"}},
     {core::Symbols::Integer(), "pow", CMethod{"sorbet_int_rb_int_powm"}},
     {core::Symbols::Integer(), "to_f", CMethod{"sorbet_int_int_to_f"}},
+    {core::Symbols::Kernel(), "freeze", CMethod{"sorbet_int_rb_obj_freeze"}},
     {core::Symbols::Regexp(), "encoding", CMethod{"sorbet_int_rb_obj_encoding"}},
     {core::Symbols::String(), "encoding", CMethod{"sorbet_int_rb_obj_encoding"}},
     {core::Symbols::String(), "*", CMethod{"sorbet_int_rb_str_times"}},

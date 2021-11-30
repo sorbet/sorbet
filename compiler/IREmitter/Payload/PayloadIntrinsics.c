@@ -578,6 +578,16 @@ VALUE sorbet_int_int_to_f(VALUE recv, ID fun, int argc, VALUE *const restrict ar
     return sorbet_int_to_f(recv);
 }
 
+// Kernel#freeze
+// Calling convention: 0
+extern VALUE rb_obj_freeze(VALUE obj);
+
+VALUE sorbet_int_rb_obj_freeze(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk,
+                               VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_freeze(recv);
+}
+
 // Regexp#encoding
 // String#encoding
 // Calling convention: 0
