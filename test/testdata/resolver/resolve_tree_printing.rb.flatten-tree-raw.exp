@@ -18,7 +18,7 @@ InsSeq{
           rhs = InsSeq{
             stats = [
               Send{
-                flags = {rewriter}
+                flags = {rewriterSynthesized}
                 recv = ConstantLit{
                   symbol = (class ::<Magic>)
                   orig = nullptr

@@ -1360,7 +1360,7 @@ ClassDef{
         }]
       rhs = [
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1461,7 +1461,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1893,7 +1893,7 @@ ClassDef{
         }]
       rhs = [
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1994,7 +1994,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2098,7 +2098,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2211,7 +2211,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2339,7 +2339,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2440,7 +2440,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2544,7 +2544,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2660,7 +2660,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2794,7 +2794,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2914,7 +2914,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3056,7 +3056,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3157,7 +3157,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3258,7 +3258,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3359,7 +3359,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3417,7 +3417,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -3444,7 +3444,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3545,7 +3545,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3649,7 +3649,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3727,7 +3727,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -3754,7 +3754,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3820,7 +3820,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -3847,7 +3847,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3948,7 +3948,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4052,7 +4052,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4130,7 +4130,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -4157,7 +4157,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4223,7 +4223,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -4250,7 +4250,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4351,7 +4351,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4455,7 +4455,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4533,7 +4533,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -4560,7 +4560,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4626,7 +4626,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -4653,7 +4653,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4754,7 +4754,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4858,7 +4858,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4932,7 +4932,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -4959,7 +4959,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5033,7 +5033,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -5060,7 +5060,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5102,7 +5102,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -5129,7 +5129,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5233,7 +5233,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5287,7 +5287,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -5314,7 +5314,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5442,7 +5442,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5543,7 +5543,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5647,7 +5647,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5748,7 +5748,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5806,7 +5806,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -6901,7 +6901,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7002,7 +7002,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7106,7 +7106,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7207,7 +7207,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7517,7 +7517,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7618,7 +7618,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7722,7 +7722,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8049,7 +8049,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8103,7 +8103,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -8130,7 +8130,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8199,7 +8199,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -8226,7 +8226,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8308,7 +8308,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -8335,7 +8335,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8447,7 +8447,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -8474,7 +8474,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8528,7 +8528,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{
@@ -8555,7 +8555,7 @@ ClassDef{
         }
 
         Send{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8624,7 +8624,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {rewriter}
+            flags = {rewriterSynthesized}
             recv = Send{
               flags = {}
               recv = ConstantLit{

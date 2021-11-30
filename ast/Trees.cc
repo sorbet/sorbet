@@ -913,7 +913,7 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
         stringifiedFlags.emplace_back("privateOk");
     }
     if (this->flags.isRewriterSynthesized) {
-        stringifiedFlags.emplace_back("rewriter");
+        stringifiedFlags.emplace_back("rewriterSynthesized");
     }
 
     printTabs(buf, tabs + 1);
