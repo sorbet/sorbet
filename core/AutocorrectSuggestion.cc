@@ -26,7 +26,7 @@ bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
     return false;
 }
 
-string AutocorrectSuggestion::applySingleEditForTesting(const std::string_view source) {
+const string AutocorrectSuggestion::applySingleEditForTesting(const std::string_view source) const {
     UnorderedSet<Loc> seen;
 
     ENFORCE(edits.size() <= 1, "applySingleEditForTesting needs either 0 or 1 edits");
