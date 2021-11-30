@@ -546,7 +546,7 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
         stringifiedFlags.emplace_back("self");
     }
     if (this->flags.isRewriterSynthesized) {
-        stringifiedFlags.emplace_back("rewriter");
+        stringifiedFlags.emplace_back("rewriterSynthesized");
     }
     fmt::format_to(std::back_inserter(buf), "flags = {{{}}}\n", fmt::join(stringifiedFlags, ", "));
 
