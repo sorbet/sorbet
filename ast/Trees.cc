@@ -908,7 +908,7 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
 
-    auto stringifiedFlags = vector<string>{};
+    vector<string> stringifiedFlags;
     if (this->flags.isPrivateOk) {
         stringifiedFlags.emplace_back("privateOk");
     }
