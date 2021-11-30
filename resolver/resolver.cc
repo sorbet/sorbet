@@ -353,7 +353,7 @@ private:
                                    "  scripts/bin/remote-script sorbet/shim_generation/autogen.rb");
                 } else if (suggestDidYouMean && suggestScope.exists() && suggestScope.isClassOrModule()) {
                     bool madePackageSuggestions =
-                        SuggestPackage::tryPackageCorrections(ctx, e, *job.out->resolutionScopes, original.cnst);
+                        SuggestPackage::tryPackageCorrections(ctx, e, *job.out->resolutionScopes, original);
                     if (madePackageSuggestions) {
                         return;
                     }

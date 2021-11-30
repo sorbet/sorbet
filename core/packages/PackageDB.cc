@@ -37,6 +37,12 @@ public:
 
     std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                          bool isTestImport) const {
+        ENFORCE(false);
+        return nullopt;
+    }
+
+    vector<MissingExportMatch> findMissingExports(core::Context ctx, core::SymbolRef scope, core::NameRef name) const {
+        ENFORCE(false);
         return {};
     }
 
