@@ -1092,3 +1092,16 @@ VALUE sorbet_vm_isa_p(struct FunctionInlineCache *isaCache, rb_control_frame_t *
     reg_cfp->sp += 2;
     return sorbet_callFuncWithCache(isaCache, VM_BLOCK_HANDLER_NONE);
 }
+
+VALUE sorbet_vm_freeze(struct FunctionInlineCache *freezeCache, rb_control_frame_t *reg_cfp, VALUE recv) {
+    sorbet_vmMethodSearch(freezeCache, recv);
+    rb_method_definition_t *freezeDef = freezeCache->cd.cc.me->def;
+    if (freezeDef->type == VM_METHOD_TYPE_CFUNC && freezeDef->body.cfunc.func == rb_obj_freeze) {
+        return rb_obj_freeze(recv);
+    }
+
+    VALUE *sp = reg_cfp->sp;
+    *(sp + 0) = recv;
+    reg_cfp->sp += 1;
+    return sorbet_callFuncWithCache(freezeCache, VM_BLOCK_HANDLER_NONE);
+}

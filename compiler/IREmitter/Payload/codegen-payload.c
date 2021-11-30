@@ -179,6 +179,7 @@ SORBET_ALIVE(VALUE, sorbet_vm_class, (struct FunctionInlineCache * classCache, r
 SORBET_ALIVE(VALUE, sorbet_vm_bang, (struct FunctionInlineCache * bangCache, rb_control_frame_t *cfp, VALUE recv));
 SORBET_ALIVE(VALUE, sorbet_vm_isa_p,
              (struct FunctionInlineCache * classCache, rb_control_frame_t *cfp, VALUE recv, VALUE klass));
+SORBET_ALIVE(VALUE, sorbet_vm_freeze, (struct FunctionInlineCache * classCache, rb_control_frame_t *cfp, VALUE recv));
 
 SORBET_ALIVE(VALUE, rb_hash_keys, (VALUE recv));
 SORBET_ALIVE(VALUE, rb_hash_values, (VALUE recv));
