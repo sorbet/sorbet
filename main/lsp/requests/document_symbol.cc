@@ -123,14 +123,14 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
     for (auto [kind, used] : symbolTypes) {
         for (u4 idx = 1; idx < used; idx++) {
             core::SymbolRef ref(gs, kind, idx);
-            // If owner of the ref is in the same file then
-            // the ref will be added to the results during a processing of the owner.
-            // That happens because the `symbolRef2DocumentSymbol` is recursively called for every child of the ref
-            if (!hideSymbol(gs, ref) && (isRefInFile(gs, ref, fref) && !isOwnerInTheSameFile(gs, ref, fref))) {
-                auto data = symbolRef2DocumentSymbol(gs, ref, fref);
-                if (data) {
+
+            if (!hideSymbol(gs, ref) &&
+                // If owner of the ref is in the same file then
+                // the ref will be added to the results during a processing of the owner.
+                // That happens because the `symbolRef2DocumentSymbol` is recursively called for every child of the ref
+                (isRefInFile(gs, ref, fref) && !isOwnerInTheSameFile(gs, ref, fref))) {
+                if (auto data = symbolRef2DocumentSymbol(gs, ref, fref)) {
                     result.push_back(move(data));
-                    break;
                 }
             }
         }
