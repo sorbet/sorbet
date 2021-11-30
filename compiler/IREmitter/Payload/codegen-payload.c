@@ -176,6 +176,7 @@ SORBET_ALIVE(VALUE, sorbet_vm_instance_variable_set,
              (struct FunctionInlineCache * getCache, struct iseq_inline_iv_cache_entry *varCache,
               rb_control_frame_t *cfp, VALUE recv, ID var, VALUE value));
 SORBET_ALIVE(VALUE, sorbet_vm_class, (struct FunctionInlineCache * classCache, rb_control_frame_t *cfp, VALUE recv));
+SORBET_ALIVE(VALUE, sorbet_vm_bang, (struct FunctionInlineCache * bangCache, rb_control_frame_t *cfp, VALUE recv));
 SORBET_ALIVE(VALUE, sorbet_vm_isa_p,
              (struct FunctionInlineCache * classCache, rb_control_frame_t *cfp, VALUE recv, VALUE klass));
 
@@ -2097,21 +2098,6 @@ VALUE sorbet_int_bool_nand(VALUE recv, ID fun, int argc, const VALUE *const rest
         return Qfalse;
     }
     return Qtrue;
-}
-
-SORBET_INLINE
-VALUE sorbet_bang(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
-    // RTEST is false when the value is Qfalse or Qnil
-    if (RTEST(recv)) {
-        if (recv == Qtrue) {
-            return Qfalse;
-        } else {
-            // slow path - dispatch via the VM
-            return rb_funcallv(recv, fun, argc, argv);
-        }
-    } else {
-        return Qtrue;
-    }
 }
 
 SORBET_INLINE

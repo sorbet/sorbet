@@ -783,6 +783,28 @@ public:
     }
 } ClassIntrinsic;
 
+class BangIntrinsic : public NameBasedIntrinsicMethod {
+public:
+    BangIntrinsic() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        if (mcctx.send->args.size() != 0) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        }
+
+        auto &cs = mcctx.cs;
+        auto &builder = mcctx.builder;
+        auto *callCache = mcctx.getInlineCache();
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *recv = mcctx.varGetRecv();
+        return builder.CreateCall(cs.getFunction("sorbet_vm_bang"), {callCache, cfp, recv});
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::bang()};
+    }
+} BangIntrinsic;
+
 class IsAIntrinsic : public NameBasedIntrinsicMethod {
 public:
     IsAIntrinsic() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
@@ -868,7 +890,6 @@ static const vector<CallCMethod> knownCMethods{
      core::Symbols::String()},
     {core::Names::selfNew(), "sorbet_selfNew", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {core::Names::blockBreak(), "sorbet_block_break", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {core::Names::bang(), "sorbet_bang", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
     {core::Names::nil_p(), "sorbet_nil_p", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
     {core::Names::checkMatchArray(), "sorbet_check_match_array", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::ClassOrModuleRef()},
@@ -901,7 +922,7 @@ vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
         &DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic,     &CallWithBlock,           &ExceptionRetry,
         &BuildHash,          &CallWithSplat,        &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic, &DefinedClassVar,
         &DefinedInstanceVar, &NewIntrinsic,         &InstanceVariableGet,   &InstanceVariableSet,     &ClassIntrinsic,
-        &IsAIntrinsic};
+        &BangIntrinsic,      &IsAIntrinsic};
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }
