@@ -907,6 +907,17 @@ string Send::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
 string Send::showRaw(const core::GlobalState &gs, int tabs) {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
+
+    vector<string> stringifiedFlags;
+    if (this->flags.isPrivateOk) {
+        stringifiedFlags.emplace_back("privateOk");
+    }
+    if (this->flags.isRewriterSynthesized) {
+        stringifiedFlags.emplace_back("rewriterSynthesized");
+    }
+
+    printTabs(buf, tabs + 1);
+    fmt::format_to(std::back_inserter(buf), "flags = {{{}}}\n", fmt::join(stringifiedFlags, ", "));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "recv = {}\n", this->recv.showRaw(gs, tabs + 1));
     printTabs(buf, tabs + 1);

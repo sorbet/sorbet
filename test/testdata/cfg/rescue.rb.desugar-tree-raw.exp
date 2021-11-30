@@ -15,6 +15,7 @@ ClassDef{
         } }]
       rhs = Rescue{
         body = Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -33,6 +34,7 @@ ClassDef{
               name = <D <U <rescueTemp>> $2>
             }
             body = Send{
+              flags = {privateOk}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -45,6 +47,7 @@ ClassDef{
           }
         ]
         else = Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -55,6 +58,7 @@ ClassDef{
           ]
         }
         ensure = Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -108,6 +112,7 @@ ClassDef{
     }
 
     Send{
+      flags = {privateOk}
       recv = Local{
         localVariable = <U <self>>
       }
@@ -116,6 +121,7 @@ ClassDef{
       pos_args = 1
       args = [
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }

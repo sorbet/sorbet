@@ -26,6 +26,7 @@ ClassDef{
         expr = Rescue{
           body = If{
             cond = Send{
+              flags = {}
               recv = UnresolvedIdent{
                 kind = Local
                 name = <U try>
@@ -45,6 +46,7 @@ ClassDef{
                     name = <U try>
                   }
                   rhs = Send{
+                    flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
                       name = <U try>
@@ -59,6 +61,7 @@ ClassDef{
                 }
               ],
               expr = Send{
+                flags = {privateOk}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -83,6 +86,7 @@ ClassDef{
               body = InsSeq{
                 stats = [
                   Send{
+                    flags = {privateOk}
                     recv = Local{
                       localVariable = <U <self>>
                     }
@@ -106,6 +110,7 @@ ClassDef{
     }
 
     Send{
+      flags = {privateOk}
       recv = Local{
         localVariable = <U <self>>
       }
