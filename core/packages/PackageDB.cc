@@ -34,6 +34,11 @@ public:
         return Loc::none();
     }
 
+    vector<MissingExportMatch> findMissingExports(core::Context ctx, core::SymbolRef scope, core::NameRef name) const {
+        ENFORCE(false);
+        return {};
+    }
+
     ~NonePackage() {}
 
 private:

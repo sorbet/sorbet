@@ -7,8 +7,10 @@ namespace sorbet::resolver {
 
 class SuggestPackage final {
 public:
+    // Returns true iff package-specific error messages/corrections were found.
     static bool tryPackageCorrections(core::Context ctx, core::ErrorBuilder &e,
-                                      const ast::ConstantLit::ResolutionScopes &scopes, core::NameRef name);
+                                      const ast::ConstantLit::ResolutionScopes &scopes,
+                                      ast::UnresolvedConstantLit &unresolved);
 
     SuggestPackage() = delete;
 };
