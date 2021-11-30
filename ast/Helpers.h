@@ -388,7 +388,9 @@ public:
     }
 
     static ExpressionPtr ZSuper(core::LocOffsets loc) {
-        return Send1(loc, Self(loc), core::Names::super(), make_expression<ast::ZSuperArgs>(loc));
+        Send::Flags flags;
+        flags.isPrivateOk = true;
+        return Send(loc, Self(loc), core::Names::super(), 1, SendArgs(make_expression<ast::ZSuperArgs>(loc)), flags);
     }
 
     static ExpressionPtr SelfNew(core::LocOffsets loc, int numPosArgs, ast::Send::ARGS_store args,
