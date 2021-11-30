@@ -224,6 +224,16 @@ module Opus::Types::Test
         assert_equal(x.hash, y.hash)
       end
 
+      it 'handles equality between simple pair and complex unions' do
+        x = T::Types::Union.new([String, NilClass])
+        y = T::Private::Types::SimplePairUnion.new(
+          T::Utils.coerce(String),
+          T::Utils.coerce(NilClass),
+        )
+        assert_equal(x, y)
+        assert_equal(x.hash, y.hash)
+      end
+
       it 'pools correctly for simple nilable types' do
         x = T::Types::Union::Private::Pool.union_of_types(
           T::Utils.coerce(String),
