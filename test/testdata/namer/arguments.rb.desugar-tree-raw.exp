@@ -91,6 +91,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {privateOk}
               recv = Local{
                 localVariable = <U <self>>
               }

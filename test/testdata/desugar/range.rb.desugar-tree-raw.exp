@@ -21,6 +21,7 @@ ClassDef{
               name = <U untyped>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U T>>
                 scope = EmptyTree
@@ -31,6 +32,7 @@ ClassDef{
               args = [
                 Literal{ value = 42 }
                 Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U T>>
                     scope = EmptyTree
@@ -50,6 +52,7 @@ ClassDef{
               name = <U nilable>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U T>>
                 scope = EmptyTree
@@ -60,6 +63,7 @@ ClassDef{
               args = [
                 Literal{ value = 42 }
                 Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U T>>
                     scope = EmptyTree
@@ -83,6 +87,7 @@ ClassDef{
               name = <U lr1>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -98,6 +103,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -118,6 +124,7 @@ ClassDef{
               name = <U lr2>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -133,6 +140,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -153,6 +161,7 @@ ClassDef{
               name = <U lr3>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -168,6 +177,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -188,6 +198,7 @@ ClassDef{
               name = <U lr4>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -203,6 +214,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -223,6 +235,7 @@ ClassDef{
               name = <U lr5>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -238,6 +251,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -258,6 +272,7 @@ ClassDef{
               name = <U lr6>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -273,6 +288,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -293,6 +309,7 @@ ClassDef{
               name = <U lr7>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -308,6 +325,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -328,6 +346,7 @@ ClassDef{
               name = <U lr8>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -343,6 +362,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -363,6 +383,7 @@ ClassDef{
               name = <U lr9>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -378,6 +399,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -398,6 +420,7 @@ ClassDef{
               name = <U lr10>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -413,6 +436,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -433,6 +457,7 @@ ClassDef{
               name = <U lr11>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -448,6 +473,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -468,6 +494,7 @@ ClassDef{
               name = <U lr12>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -483,6 +510,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -503,6 +531,7 @@ ClassDef{
               name = <U lr13>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -518,6 +547,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -538,6 +568,7 @@ ClassDef{
               name = <U lr14>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -556,6 +587,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -576,6 +608,7 @@ ClassDef{
               name = <U lr15>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -594,6 +627,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -614,6 +648,7 @@ ClassDef{
               name = <U lr16>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -635,6 +670,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -655,6 +691,7 @@ ClassDef{
               name = <U lr17>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -673,6 +710,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -693,6 +731,7 @@ ClassDef{
               name = <U lr18>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -711,6 +750,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -731,6 +771,7 @@ ClassDef{
               name = <U lr19>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -752,6 +793,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -772,6 +814,7 @@ ClassDef{
               name = <U lr20>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -787,6 +830,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -807,6 +851,7 @@ ClassDef{
               name = <U lr21>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -822,6 +867,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -842,6 +888,7 @@ ClassDef{
               name = <U lr22>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -860,6 +907,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -880,6 +928,7 @@ ClassDef{
               name = <U lr23>
             }
             rhs = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (class ::<Magic>)
                 orig = nullptr
@@ -898,6 +947,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -918,7 +968,9 @@ ClassDef{
               name = <U lr_first>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = ConstantLit{
                   symbol = (class ::<Magic>)
                   orig = nullptr
@@ -940,6 +992,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -960,7 +1013,9 @@ ClassDef{
               name = <U lr_last>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = ConstantLit{
                   symbol = (class ::<Magic>)
                   orig = nullptr
@@ -982,6 +1037,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1002,6 +1058,7 @@ ClassDef{
               name = <U rn1>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Range>>
                 scope = EmptyTree
@@ -1014,6 +1071,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1034,6 +1092,7 @@ ClassDef{
               name = <U rn2>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Range>>
                 scope = EmptyTree
@@ -1047,6 +1106,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1067,6 +1127,7 @@ ClassDef{
               name = <U rn3>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Range>>
                 scope = EmptyTree
@@ -1081,6 +1142,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1101,6 +1163,7 @@ ClassDef{
               name = <U rn4>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Range>>
                 scope = EmptyTree
@@ -1116,6 +1179,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1136,6 +1200,7 @@ ClassDef{
               name = <U rn5>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Range>>
                 scope = EmptyTree
@@ -1150,6 +1215,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1170,6 +1236,7 @@ ClassDef{
               name = <U rn6>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Range>>
                 scope = EmptyTree
@@ -1184,6 +1251,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1204,6 +1272,7 @@ ClassDef{
               name = <U rn7>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Range>>
                 scope = EmptyTree
@@ -1218,6 +1287,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1238,6 +1308,7 @@ ClassDef{
               name = <U rn8>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Range>>
                 scope = EmptyTree
@@ -1252,6 +1323,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1272,6 +1344,7 @@ ClassDef{
               name = <U rn9>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Range>>
                 scope = EmptyTree
@@ -1286,6 +1359,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1306,6 +1380,7 @@ ClassDef{
               name = <U rn10>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Range>>
                 scope = EmptyTree
@@ -1323,6 +1398,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1343,6 +1419,7 @@ ClassDef{
               name = <U rn11>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Range>>
                 scope = EmptyTree
@@ -1360,6 +1437,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1380,6 +1458,7 @@ ClassDef{
               name = <U rn12>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Range>>
                 scope = EmptyTree
@@ -1400,6 +1479,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1420,7 +1500,9 @@ ClassDef{
               name = <U rn_first>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U Range>>
                   scope = EmptyTree
@@ -1441,6 +1523,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1461,7 +1544,9 @@ ClassDef{
               name = <U rn_last>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U Range>>
                   scope = EmptyTree
@@ -1482,6 +1567,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1502,6 +1588,7 @@ ClassDef{
               name = <U tr1>
             }
             rhs = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Range>>
                 scope = UnresolvedConstantLit{
@@ -1517,6 +1604,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1537,7 +1625,9 @@ ClassDef{
               name = <U tr2>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U Range>>
                   scope = UnresolvedConstantLit{
@@ -1563,6 +1653,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1583,7 +1674,9 @@ ClassDef{
               name = <U tr3>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U Range>>
                   scope = UnresolvedConstantLit{
@@ -1611,6 +1704,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1631,7 +1725,9 @@ ClassDef{
               name = <U tr4>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U Range>>
                   scope = UnresolvedConstantLit{
@@ -1660,6 +1756,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1680,7 +1777,9 @@ ClassDef{
               name = <U tr5>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U Range>>
                   scope = UnresolvedConstantLit{
@@ -1708,6 +1807,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1728,7 +1828,9 @@ ClassDef{
               name = <U tr6>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U Range>>
                   scope = UnresolvedConstantLit{
@@ -1756,6 +1858,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1776,7 +1879,9 @@ ClassDef{
               name = <U tr7>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U Range>>
                   scope = UnresolvedConstantLit{
@@ -1804,6 +1909,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1824,7 +1930,9 @@ ClassDef{
               name = <U tr8>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U Range>>
                   scope = UnresolvedConstantLit{
@@ -1852,6 +1960,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1872,7 +1981,9 @@ ClassDef{
               name = <U tr9>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U Range>>
                   scope = UnresolvedConstantLit{
@@ -1885,6 +1996,7 @@ ClassDef{
                 pos_args = 1
                 args = [
                   Send{
+                    flags = {}
                     recv = UnresolvedConstantLit{
                       cnst = <C <U T>>
                       scope = EmptyTree
@@ -1907,6 +2019,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1927,7 +2040,9 @@ ClassDef{
               name = <U tr10>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U Range>>
                   scope = UnresolvedConstantLit{
@@ -1958,6 +2073,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1978,7 +2094,9 @@ ClassDef{
               name = <U tr11>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U Range>>
                   scope = UnresolvedConstantLit{
@@ -2009,6 +2127,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -2029,7 +2148,9 @@ ClassDef{
               name = <U tr12>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U Range>>
                   scope = UnresolvedConstantLit{
@@ -2063,6 +2184,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -2083,8 +2205,11 @@ ClassDef{
               name = <U tr_first>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U Range>>
                     scope = UnresolvedConstantLit{
@@ -2118,6 +2243,7 @@ ClassDef{
             }
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -2138,8 +2264,11 @@ ClassDef{
               name = <U tr_last>
             }
             rhs = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U Range>>
                     scope = UnresolvedConstantLit{
@@ -2174,6 +2303,7 @@ ClassDef{
           }
         ],
         expr = Send{
+          flags = {}
           recv = UnresolvedConstantLit{
             cnst = <C <U T>>
             scope = EmptyTree

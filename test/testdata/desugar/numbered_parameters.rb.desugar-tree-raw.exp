@@ -17,6 +17,7 @@ ClassDef{
     }
 
     Send{
+      flags = {privateOk}
       recv = Local{
         localVariable = <U <self>>
       }
@@ -39,6 +40,7 @@ ClassDef{
     }
 
     Send{
+      flags = {privateOk}
       recv = Local{
         localVariable = <U <self>>
       }
@@ -93,6 +95,7 @@ ClassDef{
     }
 
     Send{
+      flags = {privateOk}
       recv = Local{
         localVariable = <U <self>>
       }
@@ -109,6 +112,7 @@ ClassDef{
           }
         ]
         body = Send{
+          flags = {}
           recv = UnresolvedIdent{
             kind = Local
             name = <U _2>
@@ -130,6 +134,7 @@ ClassDef{
     }
 
     Send{
+      flags = {privateOk}
       recv = Local{
         localVariable = <U <self>>
       }
@@ -152,6 +157,7 @@ ClassDef{
     }
 
     Send{
+      flags = {privateOk}
       recv = Local{
         localVariable = <U <self>>
       }
@@ -206,6 +212,7 @@ ClassDef{
     }
 
     Send{
+      flags = {privateOk}
       recv = Local{
         localVariable = <U <self>>
       }
@@ -222,6 +229,7 @@ ClassDef{
           }
         ]
         body = Send{
+          flags = {}
           recv = UnresolvedIdent{
             kind = Local
             name = <U _2>
@@ -243,6 +251,7 @@ ClassDef{
     }
 
     Send{
+      flags = {}
       recv = UnresolvedConstantLit{
         cnst = <C <U Kernel>>
         scope = EmptyTree
@@ -266,6 +275,7 @@ ClassDef{
     }
 
     Send{
+      flags = {}
       recv = UnresolvedConstantLit{
         cnst = <C <U Kernel>>
         scope = EmptyTree
@@ -321,6 +331,7 @@ ClassDef{
     }
 
     Send{
+      flags = {}
       recv = UnresolvedConstantLit{
         cnst = <C <U Kernel>>
         scope = EmptyTree
@@ -338,6 +349,7 @@ ClassDef{
           }
         ]
         body = Send{
+          flags = {}
           recv = UnresolvedIdent{
             kind = Local
             name = <U _2>
@@ -359,6 +371,7 @@ ClassDef{
     }
 
     Send{
+      flags = {privateOk}
       recv = Local{
         localVariable = <U <self>>
       }

@@ -35,6 +35,7 @@ InsSeq{
               localVariable = <U <blk>>
             }]
           rhs = Send{
+            flags = {}
             recv = ConstantLit{
               symbol = (module ::Sorbet::Private::Static)
               orig = nullptr

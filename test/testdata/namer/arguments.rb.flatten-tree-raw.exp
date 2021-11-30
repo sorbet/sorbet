@@ -18,6 +18,7 @@ InsSeq{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {rewriter}
                 recv = ConstantLit{
                   symbol = (class ::<Magic>)
                   orig = nullptr
@@ -33,6 +34,7 @@ InsSeq{
                 ]
               }
               Send{
+                flags = {}
                 recv = ConstantLit{
                   symbol = (module ::Sorbet::Private::Static)
                   orig = nullptr
@@ -129,6 +131,7 @@ InsSeq{
               }
             ],
             expr = Send{
+              flags = {privateOk}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -209,6 +212,7 @@ InsSeq{
               localVariable = <U <blk>>
             }]
           rhs = Send{
+            flags = {}
             recv = ConstantLit{
               symbol = (module ::Sorbet::Private::Static)
               orig = nullptr
