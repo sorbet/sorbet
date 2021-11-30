@@ -1540,6 +1540,54 @@ VALUE sorbet_rb_hash_square_br_eq(VALUE recv, ID fun, int argc, const VALUE *con
     return rb_hash_aset(recv, argv[0], argv[1]);
 }
 
+// This is the no-block version of rb_hash_delete_m https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L2390-L2409
+SORBET_INLINE
+VALUE sorbet_rb_hash_delete_m(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                              VALUE closure) {
+    sorbet_ensure_arity(argc, 1);
+
+    VALUE val;
+    VALUE key = argv[0];
+
+    // begin inline of rb_hash_modify_check
+    rb_check_frozen(recv);
+    // end inline of rb_hash_modify_check
+
+    val = rb_hash_delete_entry(recv, key);
+
+    if (val != Qundef) {
+        return val;
+    } else {
+        return Qnil;
+    }
+}
+
+// This is the block version of rb_hash_delete_m https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L2390-L2409
+SORBET_INLINE
+VALUE sorbet_rb_hash_delete_m_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
+                                        BlockFFIType blk, const struct rb_captured_block *captured, VALUE closure,
+                                        int numPositionalArgs) {
+    sorbet_ensure_arity(argc, 1);
+
+    VALUE val;
+    VALUE key = argv[0];
+
+    // begin inline of rb_hash_modify_check
+    rb_check_frozen(recv);
+    // end inline of rb_hash_modify_check
+
+    val = rb_hash_delete_entry(recv, key);
+
+    if (val != Qundef) {
+        return val;
+    } else {
+        sorbet_pushBlockFrame(captured);
+        VALUE ret = blk(key, closure, 1, &key, Qnil);
+        sorbet_popFrame();
+        return ret;
+    }
+}
+
 SORBET_INLINE
 VALUE sorbet_rb_int_plus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                          VALUE closure) {
