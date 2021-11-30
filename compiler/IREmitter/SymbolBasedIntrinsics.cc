@@ -956,7 +956,7 @@ static const vector<CallCMethod> knownCMethodsInstance{
      CMethod{"sorbet_int_hash_to_h_withBlock", core::Symbols::Hash()},
      {KnownFunction::cached("sorbet_rb_hash_to_h_func")}},
     {core::Symbols::Hash(), "to_hash", CMethod{"sorbet_returnRecv", core::Symbols::Hash()}},
-    {core::Symbols::Hash(), "fetch", CMethod{"sorbet_rb_hash_fetch_m"}},
+    {core::Symbols::Hash(), "fetch", CMethod{"sorbet_rb_hash_fetch_m"}, CMethod{"sorbet_rb_hash_fetch_m_withBlock"}},
     {core::Symbols::Hash(), "merge", CMethod{"sorbet_rb_hash_merge", core::Symbols::Hash()},
      CMethod{"sorbet_rb_hash_merge_withBlock", core::Symbols::Hash()}},
     {core::Symbols::Hash(), "merge!", CMethod{"sorbet_rb_hash_update", core::Symbols::Hash()},

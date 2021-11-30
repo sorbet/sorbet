@@ -704,6 +704,25 @@ VALUE sorbet_int_hash_to_h(VALUE recv, ID fun, int argc, const VALUE *const rest
     return sorbet_rb_hash_to_h(recv);
 }
 
+SORBET_INLINE
+VALUE sorbet_rb_hash_fetch_m_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                       const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
+    extern VALUE sorbet_hash_stlike_lookup(VALUE hash, VALUE key, VALUE * val);
+
+    rb_check_arity(argc, 1, 2);
+    VALUE key = argv[0];
+    VALUE val;
+
+    if (sorbet_hash_stlike_lookup(recv, key, &val)) {
+        return (VALUE)val;
+    } else {
+        sorbet_pushBlockFrame(captured);
+        val = blk(key, closure, 1, &key, Qnil);
+        sorbet_popFrame();
+        return val;
+    }
+}
+
 struct sorbet_int_hash_to_h_closure {
     BlockFFIType fun;
     VALUE closure_for_block;
