@@ -161,8 +161,12 @@ module T::Types
     end
 
     def ==(other)
-      (T::Utils.resolve_alias(other).class == T::Utils.resolve_alias(self).class) &&
+      case other
+      when T::Types::Base
         other.name == self.name
+      else
+        false
+      end
     end
 
     alias_method :eql?, :==
