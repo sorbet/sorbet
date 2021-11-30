@@ -1,0 +1,44 @@
+foo_class.rb:10: Unable to resolve constant `NotExported` https://srb.help/5002
+    10 |      Foo::Bar::OtherPackage::NotExported
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/other_class.rb:7: Do you need to `export` constant `Foo::Bar::OtherPackage::NotExported`?
+     7 |  class NotExported
+          ^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Defined in package `Foo::Bar::OtherPackage`
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+     4 |  export Foo::Bar::OtherPackage::OtherClass
+     5 |end
+
+foo_class.rb:11: Unable to resolve constant `NotExported` https://srb.help/5002
+    11 |      Bar::OtherPackage::NotExported
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/other_class.rb:7: Do you need to `export` constant `Foo::Bar::OtherPackage::NotExported`?
+     7 |  class NotExported
+          ^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Defined in package `Foo::Bar::OtherPackage`
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+     4 |  export Foo::Bar::OtherPackage::OtherClass
+     5 |end
+
+foo_class.rb:12: Unable to resolve constant `Inner` https://srb.help/5002
+    12 |      Foo::Bar::OtherPackage::Inner::AlsoNotExported
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/other_class.rb:10: Do you need to `export` constant `Foo::Bar::OtherPackage::Inner`?
+    10 |  class Inner::AlsoNotExported
+                ^^^^^
+    other/__package.rb:3: Defined in package `Foo::Bar::OtherPackage`
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+     4 |  export Foo::Bar::OtherPackage::OtherClass
+     5 |end
+
+foo_class.rb:13: Unable to resolve constant `Inner` https://srb.help/5002
+    13 |      Bar::OtherPackage::Inner::AlsoNotExported
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+    other/other_class.rb:10: Do you need to `export` constant `Foo::Bar::OtherPackage::Inner`?
+    10 |  class Inner::AlsoNotExported
+                ^^^^^
+    other/__package.rb:3: Defined in package `Foo::Bar::OtherPackage`
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+     4 |  export Foo::Bar::OtherPackage::OtherClass
+     5 |end
+Errors: 4
