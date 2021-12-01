@@ -1,5 +1,6 @@
 #include "core/packages/PackageDB.h"
 #include "absl/strings/match.h"
+#include "core/AutocorrectSuggestion.h"
 #include "core/GlobalState.h"
 #include "core/Loc.h"
 
@@ -32,6 +33,11 @@ public:
     Loc definitionLoc() const {
         ENFORCE(false);
         return Loc::none();
+    }
+
+    std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
+                                                         bool isTestImport) const {
+        return {};
     }
 
     ~NonePackage() {}

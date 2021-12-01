@@ -9,6 +9,7 @@
 #include "common/concurrency/WorkerPool.h"
 #include "common/formatting.h"
 #include "common/sort.h"
+#include "core/AutocorrectSuggestion.h"
 #include "core/Unfreeze.h"
 #include "core/errors/packager.h"
 #include "core/packages/PackageInfo.h"
@@ -84,6 +85,10 @@ struct PackageName {
     // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
     string toString(const core::GlobalState &gs) const {
         return absl::StrJoin(fullName.parts, "::", NameFormatter(gs));
+    }
+
+    bool operator==(const PackageName &rhs) const {
+        return mangledName == rhs.mangledName;
     }
 };
 
@@ -188,6 +193,56 @@ public:
     PackageInfoImpl() = default;
     explicit PackageInfoImpl(const PackageInfoImpl &) = default;
     PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;
+
+    optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
+                                                    bool isTestImport) const {
+        auto &info = PackageInfoImpl::from(pkg);
+        for (auto import : importedPackageNames) {
+            // check if we already import this, and if so, don't
+            // return an autocorrect
+            if (import.name == info.name) {
+                return nullopt;
+            }
+        }
+
+        core::Loc insertionLoc = loc.adjust(gs, core::INVALID_POS_LOC, core::INVALID_POS_LOC);
+        // first let's try adding it to the end of the imports.
+        if (!importedPackageNames.empty()) {
+            auto lastOffset = importedPackageNames.back().name.loc;
+            insertionLoc = {info.loc.file(), lastOffset.endPos(), lastOffset.endPos()};
+        } else {
+            // if we don't have any imports, then we can try adding it
+            // either before the first export, or if we have no
+            // exports, then right before the final `end`
+            u4 exportLoc;
+            if (!exports.empty()) {
+                exportLoc = exports.front().fqn.loc.beginPos() - "export "sv.size() - 1;
+            } else {
+                exportLoc = info.loc.endPos() - "end"sv.size() - 1;
+            }
+            // we want to find the end of the last non-empty line, so
+            // let's do something gross: walk backward until we find non-whitespace
+            const auto &file_source = info.loc.file().data(gs).source();
+            while (isspace(file_source[exportLoc])) {
+                exportLoc--;
+                // this shouldn't happen in a well-formatted
+                // `__package.rb` file, but just to be safe
+                if (exportLoc == 0) {
+                    return nullopt;
+                }
+            }
+            insertionLoc = {info.loc.file(), exportLoc + 1, exportLoc + 1};
+        }
+        ENFORCE(insertionLoc.exists());
+
+        // now find the appropriate place for it, specifically by
+        // finding the import that directly preceeds it, if any
+        core::AutocorrectSuggestion suggestion(
+            fmt::format("Import `{}` in package `{}`", info.name.toString(gs), name.toString(gs)),
+            {{insertionLoc,
+              fmt::format("\n  {} {}", isTestImport ? "test_import" : "import", info.name.toString(gs))}});
+        return {suggestion};
+    }
 };
 
 void checkPackageName(core::Context ctx, ast::UnresolvedConstantLit *constLit) {

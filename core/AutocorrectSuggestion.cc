@@ -26,6 +26,20 @@ bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
     return false;
 }
 
+const string AutocorrectSuggestion::applySingleEditForTesting(const std::string_view source) const {
+    UnorderedSet<Loc> seen;
+
+    ENFORCE(edits.size() <= 1, "applySingleEditForTesting needs either 0 or 1 edits");
+
+    string replaced{source};
+    if (edits.size() == 1) {
+        auto start = edits.front().loc.beginPos();
+        auto end = edits.front().loc.endPos();
+        replaced = absl::StrCat(replaced.substr(0, start), edits.front().replacement, replaced.substr(end, -1));
+    }
+    return replaced;
+}
+
 UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(const GlobalState &gs, FileSystem &fs,
                                                            const vector<AutocorrectSuggestion> &autocorrects) {
     UnorderedMap<FileRef, string> sources;
