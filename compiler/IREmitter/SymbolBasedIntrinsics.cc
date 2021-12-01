@@ -260,7 +260,8 @@ protected:
 
             i++;
             auto overloadName = gs.lookupNameUnique(core::UniqueNameKind::Overload, methodName, i);
-            auto overloadSym = primaryMethod.data(gs)->owner.data(gs)->findMember(gs, overloadName);
+            auto overloadSym =
+                primaryMethod.data(gs)->owner.asClassOrModuleRef().data(gs)->findMember(gs, overloadName);
             ENFORCE(overloadSym.exists());
 
             current = overloadSym.asMethodRef();
