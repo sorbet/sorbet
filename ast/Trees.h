@@ -784,6 +784,9 @@ public:
     // Insert the given positional argument at the given position, shifting existing arguments over.
     void insertPosArg(u2 index, ExpressionPtr arg);
 
+    // Removes the position argument at the given index.
+    void removePosArg(u2 index);
+
     // Reserve space for the given number of arguments.
     void reserveArguments(size_t posArgs, size_t kwArgs, bool hasSplat, bool hasBlock) {
         this->args.reserve(posArgs + (kwArgs * 2) + (hasSplat ? 1 : 0) + (hasBlock ? 1 : 0));

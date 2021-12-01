@@ -64,13 +64,15 @@ bool isSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {
 }
 
 ast::ExpressionPtr convertSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {
-    auto flags = send->flags;
-    ast::Send::ARGS_store args = std::move(send->rawArgs());
     auto magic = ast::MK::Constant(send->loc, core::Symbols::Magic());
-    args[0] = std::move(magic);
-    args[1] = ast::MK::Symbol(send->loc, core::Names::selfNew());
+    auto &arg0 = send->getPosArg(0);
+    arg0 = std::move(magic);
 
-    return ast::MK::Send(send->loc, std::move(send->recv), send->fun, send->numPosArgs(), std::move(args), flags);
+    auto &arg1 = send->getPosArg(1);
+    arg1 = ast::MK::Symbol(send->loc, core::Names::selfNew());
+
+    // The original expression is now properly mutated, but we need to return an expression not a Send.
+    return send->withNewBody(send->loc, std::move(send->recv), send->fun);
 }
 } // namespace
 
