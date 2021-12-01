@@ -254,7 +254,7 @@ public:
             }
         }
 
-        core::Loc insertionLoc = loc.adjust(gs, core::INVALID_POS_LOC, core::INVALID_POS_LOC);
+        auto insertionLoc = core::Loc::none(loc.file());
         // first let's try adding it to the end of the imports.
         if (!exports.empty()) {
             auto lastOffset = exports.back().fqn.loc;
