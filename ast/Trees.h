@@ -792,17 +792,14 @@ public:
         this->args.reserve(posArgs + (kwArgs * 2) + (hasSplat ? 1 : 0) + (hasBlock ? 1 : 0));
     }
 
-    // Returns the raw arguments vector. Please avoid using unless absolutely necessary; it is easier to manipulate the
-    // arguments via the Send.
-    ARGS_store &rawArgs() {
-        return args;
-    }
-
-    // Returns the raw arguments vector. Please avoid using unless absolutely necessary; it is easier to manipulate the
-    // arguments via the Send.
+    // Returns the raw arguments vector. Please avoid using unless absolutely necessary; it is easier to query
+    // arguments via methods on Send.
     const ARGS_store &rawArgs() const {
         return args;
     }
+
+    // Returns a loc covering the arguments in the send. Does not cover the block argument.
+    core::LocOffsets argsLoc() const;
 
     u2 numPosArgs() const {
         return numPosArgs_;

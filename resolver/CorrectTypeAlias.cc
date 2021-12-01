@@ -31,9 +31,7 @@ void CorrectTypeAlias::eagerToLazy(core::Context ctx, core::ErrorBuilder &e, ast
         }
     }
 
-    auto &front = send->rawArgs().front();
-    auto &back = send->rawArgs().back();
-    core::Loc argsLoc{ctx.file, front.loc().join(back.loc())};
+    core::Loc argsLoc{ctx.file, send->argsLoc()};
 
     if (!argsLoc.exists()) {
         return;

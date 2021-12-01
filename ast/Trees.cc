@@ -984,6 +984,18 @@ const ExpressionPtr *Send::kwSplat() const {
     return nullptr;
 }
 
+core::LocOffsets Send::argsLoc() const {
+    if (!this->hasPosArgs() && !this->hasKwArgs()) {
+        return core::LocOffsets();
+    }
+    auto begin = this->args.begin();
+    auto end = this->args.end() - 1;
+    if (this->hasBlock()) {
+        end = end - 1;
+    }
+    return begin->loc().join(end->loc());
+}
+
 ExpressionPtr *Send::kwSplat() {
     if (hasKwSplat()) {
         auto index = this->args.size() - 1;
