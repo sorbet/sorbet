@@ -2603,6 +2603,26 @@ public:
     }
 } Tuple_minMax;
 
+class Tuple_sum : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto *tuple = cast_type<TupleType>(args.thisType);
+        ENFORCE(tuple);
+
+        if (!args.args.empty()) {
+            return;
+        }
+        if (args.block != nullptr) {
+            return;
+        }
+        if (tuple->elems.empty()) {
+            res.returnType = Types::Integer();
+        } else {
+            res.returnType = tuple->elementType(gs);
+        }
+    }
+} Tuple_sum;
+
 class Tuple_to_a : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -3461,6 +3481,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::last(), &Tuple_last},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::min(), &Tuple_minMax},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::max(), &Tuple_minMax},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::sum(), &Tuple_sum},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::toA(), &Tuple_to_a},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::concat(), &Tuple_concat},
 

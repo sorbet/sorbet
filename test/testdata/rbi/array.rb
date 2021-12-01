@@ -9,7 +9,7 @@ T.assert_type!(T::Array[String].new(3, 'a'), T::Array[String])
 
 # no arg, no block
 T.assert_type!(T::Array[Float].new.sum, T.any(Float, Integer))
-T.assert_type!([Rational(1, 2)].sum, T.any(Rational, Integer))
+T.assert_type!([Rational(1, 2)].sum, Rational)
 # block, no arg
 T.assert_type!([1.0].sum {|f| f.to_i}, Integer)
 T.assert_type!([].sum {|f| Rational(1, 2)}, T.any(Rational, Integer))
