@@ -97,7 +97,6 @@ cc_library(
         "//core",
         "//hashing:hashing-orig",
         "//main/cache:cache-orig",
-        "//main/minimize",
         "//main/options",
         "//main/pipeline:pipeline-orig",
         "//payload:interface",
