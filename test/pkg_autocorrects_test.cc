@@ -201,4 +201,62 @@ TEST_CASE("Add test import to package with neither imports nor exports") {
     CHECK_EQ(expected, replaced);
 }
 
+TEST_CASE("Simple add export") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
+
+    string pkg_source = "class Opus::MyPackage < PackageSpec\n"
+                        "  export Opus::MyPackage::This\n"
+                        "end\n";
+
+    string expected = "class Opus::MyPackage < PackageSpec\n"
+                      "  export Opus::MyPackage::This\n"
+                      "  export Opus::MyPackage::NewExport\n"
+                      "end\n";
+
+    vector<core::NameRef> newExport;
+    {
+        core::UnfreezeNameTable nameTableAccess(gs);
+        newExport = {gs.enterNameUTF8("Opus"), gs.enterNameUTF8("MyPackage"), gs.enterNameUTF8("NewExport")};
+    }
+
+    auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
+
+    auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
+    ENFORCE(package.exists());
+    auto addExport = package.addExport(gs, newExport, false);
+    ENFORCE(addExport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = addExport->applySingleEditForTesting(pkg_source);
+    CHECK_EQ(expected, replaced);
+}
+
+TEST_CASE("Simple add export_for_test") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
+
+    string pkg_source = "class Opus::MyPackage < PackageSpec\n"
+                        "  export Opus::MyPackage::This\n"
+                        "end\n";
+
+    string expected = "class Opus::MyPackage < PackageSpec\n"
+                      "  export Opus::MyPackage::This\n"
+                      "  export_for_test Opus::MyPackage::NewExport\n"
+                      "end\n";
+
+    vector<core::NameRef> newExport;
+    {
+        core::UnfreezeNameTable nameTableAccess(gs);
+        newExport = {gs.enterNameUTF8("Opus"), gs.enterNameUTF8("MyPackage"), gs.enterNameUTF8("NewExport")};
+    }
+
+    auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
+
+    auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
+    ENFORCE(package.exists());
+    auto addExport = package.addExport(gs, newExport, true);
+    ENFORCE(addExport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = addExport->applySingleEditForTesting(pkg_source);
+    CHECK_EQ(expected, replaced);
+}
+
 } // namespace sorbet
