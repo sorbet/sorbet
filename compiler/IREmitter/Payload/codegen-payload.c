@@ -132,7 +132,7 @@ SORBET_ALIVE(VALUE, sorbet_rb_int_ge_slowpath, (VALUE, VALUE));
 
 SORBET_ALIVE(VALUE, sorbet_i_getRubyClass, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_getRubyConstant, (const char *const className, long classNameLen) __attribute__((const)));
-SORBET_ALIVE(VALUE, sorbet_i_objIsKindOf, (VALUE, VALUE));
+SORBET_ALIVE(VALUE, sorbet_i_objIsKindOf, (VALUE, VALUE) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_send,
              (struct FunctionInlineCache *, _Bool blkUsesBreak, struct vm_ifunc *, bool searchSuper,
               rb_control_frame_t *, ...));
@@ -395,11 +395,6 @@ _Bool sorbet_isa_RootSingleton(VALUE obj) {
 KEEP_ALIVE(sorbet_isa_RootSingleton);
 
 SORBET_ATTRIBUTE(const) VALUE rb_class_inherited_p(VALUE, VALUE);
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa(VALUE obj, VALUE class) {
-    return sorbet_i_objIsKindOf(obj, class) == Qtrue;
-}
 
 SORBET_ATTRIBUTE(const)
 _Bool sorbet_isa_class_of(VALUE obj, VALUE class) {
