@@ -21,7 +21,7 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
                     }
                 }
             } else if (send->fun == core::Names::setup() || send->fun == core::Names::teardown()) {
-                if (send->hasBlock() && send->numPosArgs() == 0 && !send->hasKwArgs()) {
+                if (send->hasBlock() && !send->hasPosArgs() && !send->hasKwArgs()) {
                     // send->args only contains block.
                     setupAndTeardownSends.push_back(std::move(stat));
                     continue;

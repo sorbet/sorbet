@@ -515,7 +515,7 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
     //
     // This means we'll always need statements for as many arguments as the send has, plus two more: one for the
     // temporary assignment and the last for the actual update we're desugaring.
-    ENFORCE(!s->hasKwSplat() && !s->hasKwArgs() && !s->hasBlock());
+    ENFORCE(!s->hasKwArgs() && !s->hasBlock());
     const auto numPosArgs = s->numPosArgs();
     InsSeq::STATS_store stats;
     stats.reserve(numPosArgs + 2);
@@ -779,10 +779,10 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         auto convertedBlock = node2TreeImpl(dctx, std::move(block));
                         Literal *lit;
                         if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol(dctx.ctx)) {
-                            sendargs.emplace_back(symbol2Proc(dctx, std::move(convertedBlock)));
-                            flags.hasBlock = true;
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
                                            4, std::move(sendargs), flags);
+                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(
+                                symbol2Proc(dctx, std::move(convertedBlock)));
                         } else {
                             sendargs.emplace_back(std::move(convertedBlock));
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()),
@@ -851,9 +851,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         auto convertedBlock = node2TreeImpl(dctx, std::move(block));
                         Literal *lit;
                         if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol(dctx.ctx)) {
-                            flags.hasBlock = true;
-                            args.emplace_back(symbol2Proc(dctx, std::move(convertedBlock)));
                             res = MK::Send(loc, std::move(rec), send->method, numPosArgs, std::move(args), flags);
+                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(
+                                symbol2Proc(dctx, std::move(convertedBlock)));
                         } else {
                             Send::ARGS_store sendargs;
                             sendargs.emplace_back(std::move(rec));

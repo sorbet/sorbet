@@ -192,7 +192,7 @@ void Send::_sanityCheck() {
     ENFORCE(numPosArgs_ <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs_,
             args.size());
 
-    if (hasBlock() || hasKwSplat() || hasKwArgs()) {
+    if (hasBlock() || hasKwArgs()) {
         ENFORCE(args.size() > numPosArgs_);
     }
 

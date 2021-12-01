@@ -653,7 +653,7 @@ public:
             return foundDefs->addStaticField(move(staticField));
         }
 
-        if (send->numPosArgs() + send->numKwArgs() > 0) {
+        if (send->hasPosArgs() || send->hasKwArgs()) {
             // If there are positional arguments, there might be a variance annotation
             if (send->numPosArgs() > 0) {
                 auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
@@ -1740,7 +1740,7 @@ public:
                                     ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
         }
 
-        if (send->numPosArgs() + send->numKwArgs() > 0) {
+        if (send->hasPosArgs() || send->hasKwArgs()) {
             if (send->numPosArgs() > 1) {
                 if (auto e = ctx.state.beginError(core::Loc(ctx.file, send->loc),
                                                   core::errors::Namer::InvalidTypeDefinition)) {

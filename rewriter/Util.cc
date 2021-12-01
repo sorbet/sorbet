@@ -22,9 +22,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             return send->deepCopy();
         }
 
-        ENFORCE(!send->hasBlock());
-
-        if (send->fun == core::Names::params() && send->numPosArgs() == 0 && !send->hasKwSplat()) {
+        if (send->fun == core::Names::params() && !send->hasPosArgs() && !send->hasKwSplat()) {
             // T.proc.params takes inlined keyword argument pairs, and can't handle kwsplat
             ast::Send::ARGS_store args;
 
@@ -44,6 +42,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, 0, std::move(args));
         }
 
+        ENFORCE(!send->hasBlock());
         for (auto &arg : send->rawArgs()) {
             auto dupArg = dupType(arg);
             if (!dupArg) {
@@ -216,7 +215,7 @@ ast::Send *ASTUtil::castSig(ast::Send *send) {
 }
 
 ast::ExpressionPtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
-    if (!send->hasKwArgs() && send->numPosArgs() == 0) {
+    if (!send->hasKwArgs() && !send->hasPosArgs()) {
         return nullptr;
     }
 

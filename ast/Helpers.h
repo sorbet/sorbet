@@ -135,7 +135,6 @@ public:
         if (auto *s = cast_tree<ast::Send>(lhs)) {
             // the LHS might be a send of the form x.y=(), in which case we add the RHS to the arguments list and get
             // x.y=(rhs)
-            ENFORCE(!s->hasBlock() && !s->hasKwArgs());
             s->addPosArg(std::move(rhs));
             return lhs;
         } else if (auto *seq = cast_tree<ast::InsSeq>(lhs)) {
@@ -145,7 +144,6 @@ public:
             //   { $t = x; if $t == nil then nil else $t.y=(rhs)
             if (auto *cond = cast_tree<ast::If>(seq->expr)) {
                 if (auto *s = cast_tree<ast::Send>(cond->elsep)) {
-                    ENFORCE(!s->hasBlock() && !s->hasKwArgs());
                     s->addPosArg(std::move(rhs));
                     return lhs;
                 }

@@ -57,7 +57,7 @@ vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send 
     bool instancePredicate = true;
     auto symbolArgsBound = send->numPosArgs();
 
-    if (send->rawArgs().empty()) {
+    if (!send->hasPosArgs() && !send->hasKwArgs()) {
         return empty;
     }
 

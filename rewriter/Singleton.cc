@@ -21,7 +21,7 @@ bool isFinal(const ast::ExpressionPtr &stmt) {
         return false;
     }
 
-    if (!send->rawArgs().empty()) {
+    if (send->hasPosArgs() || send->hasKwArgs()) {
         return false;
     }
 

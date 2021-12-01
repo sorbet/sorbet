@@ -756,29 +756,37 @@ public:
 
     ExpressionPtr deepCopy() const;
 
-    // Returns null if no block present.
+    // Returns nullptr if no block present.
     const ast::Block *block() const;
     ast::Block *block();
+
+    // Returns nullptr if no block present.
     const ExpressionPtr *rawBlock() const;
     ExpressionPtr *rawBlock();
+
     // Returns null if no kwsplat present.
     const ExpressionPtr *kwSplat() const;
     ExpressionPtr *kwSplat();
+
     void setBlock(ExpressionPtr block);
     void setKwSplat(ExpressionPtr splat);
+
+    // Add the given keyword argument to the end of the list of keyword arguments.
     void addKwArg(ExpressionPtr key, ExpressionPtr value);
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
+    // Add the given positional argument as the last positional argument.
     void addPosArg(ExpressionPtr ptr);
+
+    // Insert the given positional argument at the given position, shifting existing arguments over.
     void insertPosArg(u2 index, ExpressionPtr arg);
 
-    // Reserve the given number of arguments. Each positional argument takes 1 slot, kw args take 2, splat takes 1, and
-    // block takes 1.
-    void reserveArguments(size_t hint) {
-        this->args.reserve(hint);
+    // Reserve space for the given number of arguments.
+    void reserveArguments(size_t posArgs, size_t kwArgs, bool hasSplat, bool hasBlock) {
+        this->args.reserve(posArgs + (kwArgs * 2) + (hasSplat ? 1 : 0) + (hasBlock ? 1 : 0));
     }
 
     // Returns the raw arguments vector. Please avoid using unless absolutely necessary; it is easier to manipulate the
@@ -797,12 +805,14 @@ public:
         return numPosArgs_;
     }
 
+    // The number of keyword arguments in the Send.
     u2 numKwArgs() const {
         u2 range = args.size() - numPosArgs_ - (hasKwSplat() ? 1 : 0) - (hasBlock() ? 1 : 0);
         ENFORCE(range % 2 == 0);
         return range / 2;
     }
 
+    // Get the ith positional argument.
     ExpressionPtr &getPosArg(u2 idx) {
         ENFORCE(idx < numPosArgs_);
         return args[idx];
@@ -816,6 +826,7 @@ public:
     // Remove all arguments to the function, including the block argument.
     void clearArgs();
 
+    // Get the ith keyword argument key. Indices begin at 0, regardless of the number of positional arguments.
     ExpressionPtr &getKwKey(u2 argnum) {
         ENFORCE(argnum < numKwArgs());
         auto rawIdx = numPosArgs_ + (argnum * 2);
@@ -828,6 +839,7 @@ public:
         return args[rawIdx];
     }
 
+    // Get the ith keyword argument value. Indices begin at 0, regardless of the number of positional arguments.
     ExpressionPtr &getKwValue(u2 argnum) {
         ENFORCE(argnum < numKwArgs());
         auto rawIdx = numPosArgs_ + (argnum * 2) + 1;
@@ -840,13 +852,14 @@ public:
         return args[rawIdx];
     }
 
-    std::pair<int, int> posArgsRange() const {
-        return std::make_pair<int, int>(0, numPosArgs_);
-    }
-
     // True when this send contains a block argument.
     bool hasBlock() const {
         return flags.hasBlock;
+    }
+
+    // True when this send contains at least 1 position argument.
+    bool hasPosArgs() const {
+        return numPosArgs_ > 0;
     }
 
     // True when there are either keyword args, or a keyword splat.
@@ -857,6 +870,14 @@ public:
     // True when there is a keyword args splat present. hasKwSplat -> hasKwArgs, but not the other way around.
     bool hasKwSplat() const {
         return (args.size() - numPosArgs_ - (hasBlock() ? 1 : 0)) & 0x1;
+    }
+
+    // True when this send contains at least one of the following:
+    // - a positional argument
+    // - a keyword argument
+    // - a keyword splat
+    bool hasNonBlockArgs() const {
+        return hasPosArgs() || hasKwArgs();
     }
 
     void _sanityCheck();

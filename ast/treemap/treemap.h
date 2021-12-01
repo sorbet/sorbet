@@ -335,14 +335,9 @@ private:
     }
 
     ExpressionPtr mapSend(ExpressionPtr v, CTX ctx) {
-        ENFORCE(cast_tree_nonnull<Send>(v).hasBlock() ? cast_tree_nonnull<Send>(v).block() != nullptr : true,
-                "block was mapped into not-a block {}", cast_tree_nonnull<Send>(v).fun.toString(ctx));
-
         if constexpr (HAS_MEMBER_preTransformSend<FUNC>()) {
             v = CALL_MEMBER_preTransformSend<FUNC>::call(func, ctx, std::move(v));
         }
-        ENFORCE(cast_tree_nonnull<Send>(v).hasBlock() ? cast_tree_nonnull<Send>(v).block() != nullptr : true,
-                "block was mapped into not-a block");
 
         cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
         for (auto &arg : cast_tree_nonnull<Send>(v).rawArgs()) {
@@ -354,12 +349,7 @@ private:
                 "block was mapped into not-a block");
 
         if constexpr (HAS_MEMBER_postTransformSend<FUNC>()) {
-            v = CALL_MEMBER_postTransformSend<FUNC>::call(func, ctx, std::move(v));
-        }
-
-        if (isa_tree<Send>(v)) {
-            ENFORCE(cast_tree_nonnull<Send>(v).hasBlock() ? cast_tree_nonnull<Send>(v).block() != nullptr : true,
-                    "block was mapped into not-a block");
+            return CALL_MEMBER_postTransformSend<FUNC>::call(func, ctx, std::move(v));
         }
 
         return v;
@@ -800,15 +790,9 @@ private:
     }
 
     ExpressionPtr mapSend(ExpressionPtr v, CTX ctx) {
-        ENFORCE(cast_tree_nonnull<Send>(v).hasBlock() ? cast_tree_nonnull<Send>(v).block() != nullptr : true,
-                "block was mapped into not-a block");
-
         if constexpr (HAS_MEMBER_preTransformSend<FUNC>()) {
             v = CALL_MEMBER_preTransformSend<FUNC>::call(func, ctx, std::move(v));
         }
-
-        ENFORCE(cast_tree_nonnull<Send>(v).hasBlock() ? cast_tree_nonnull<Send>(v).block() != nullptr : true,
-                "block was mapped into not-a block");
 
         cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
         for (auto &arg : cast_tree_nonnull<Send>(v).rawArgs()) {
@@ -820,12 +804,7 @@ private:
                 "block was mapped into not-a block");
 
         if constexpr (HAS_MEMBER_postTransformSend<FUNC>()) {
-            v = CALL_MEMBER_postTransformSend<FUNC>::call(func, ctx, std::move(v));
-        }
-
-        if (isa_tree<Send>(v)) {
-            ENFORCE(cast_tree_nonnull<Send>(v).hasBlock() ? cast_tree_nonnull<Send>(v).block() != nullptr : true,
-                    "block was mapped into not-a block");
+            return CALL_MEMBER_postTransformSend<FUNC>::call(func, ctx, std::move(v));
         }
 
         return v;

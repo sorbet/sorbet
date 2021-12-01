@@ -952,8 +952,7 @@ const ast::Block *Send::block() const {
 ast::Block *Send::block() {
     if (hasBlock()) {
         auto block = ast::cast_tree<ast::Block>(this->args.back());
-        // ENFORCE(block, "{} tag {} size {} posArgs {} fun", this->args.back().tag(), this->args.size(), numPosArgs,
-        //        this->fun.rawId());
+        ENFORCE(block);
         return block;
     } else {
         return nullptr;

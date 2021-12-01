@@ -254,6 +254,24 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     }
                     sig.seen.params = true;
 
+                    if (!send->hasKwArgs() && !send->hasPosArgs()) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            auto paramsStr = send->fun.show(ctx);
+                            e.setHeader("`{}` must be given arguments", paramsStr);
+
+                            core::Loc loc{ctx.file, send->loc};
+                            if (auto orig = loc.source(ctx)) {
+                                auto dot = orig->rfind(".");
+                                if (orig->rfind(".") == string::npos) {
+                                    e.replaceWith("Remove this use of `params`", loc, "");
+                                } else {
+                                    e.replaceWith("Remove this use of `params`", loc, "{}", orig->substr(0, dot));
+                                }
+                            }
+                        }
+                        break;
+                    }
+
                     // `params` only accepts keyword args
                     if (send->numPosArgs() != 0) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -271,24 +289,6 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                                         e.replaceWith("Remove braces from keyword args", loc, "{}",
                                                       locSource->substr(1, locSource->size() - 2));
                                     }
-                                }
-                            }
-                        }
-                        break;
-                    }
-
-                    if (!send->hasKwArgs()) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            auto paramsStr = send->fun.show(ctx);
-                            e.setHeader("`{}` must be given arguments", paramsStr);
-
-                            core::Loc loc{ctx.file, send->loc};
-                            if (auto orig = loc.source(ctx)) {
-                                auto dot = orig->rfind(".");
-                                if (orig->rfind(".") == string::npos) {
-                                    e.replaceWith("Remove this use of `params`", loc, "");
-                                } else {
-                                    e.replaceWith("Remove this use of `params`", loc, "{}", orig->substr(0, dot));
                                 }
                             }
                         }
@@ -338,7 +338,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     }
                     sig.seen.override_ = true;
 
-                    if (send->numPosArgs() > 0) {
+                    if (send->hasPosArgs()) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("`{}` expects keyword arguments", send->fun.show(ctx));
                         }
