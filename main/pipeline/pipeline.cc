@@ -558,6 +558,19 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
     if (f.data(ctx).isRBI()) {
         return result;
     }
+    if (f.data(ctx).isPackage()) {
+        auto &root = ast::cast_tree_nonnull<ast::InsSeq>(resolved.tree);
+        vector<ast::ExpressionPtr> removed;
+        auto it = remove_if(root.stats.begin(), root.stats.end(), [](auto &exp) -> bool {
+            auto def = ast::cast_tree<ast::ClassDef>(exp);
+            if (def != nullptr &&
+                (def->symbol == core::Symbols::PackageRegistry() || def->symbol == core::Symbols::PackageTests())) {
+                return true;
+            }
+            return false;
+        });
+        root.stats.erase(it, root.stats.end());
+    }
 
     Timer timeit(ctx.state.tracer(), "typecheckOne", {{"file", string(f.data(ctx).path())}});
     try {
