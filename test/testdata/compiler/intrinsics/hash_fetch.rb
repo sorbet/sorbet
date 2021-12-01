@@ -31,6 +31,7 @@ def block_arg(hash, key, &blk)
 end
 
 # INITIAL-LABEL: define internal i64 @"func_Object#9block_arg"
+# INITIAL: call i64 @sorbet_callIntrinsicInlineBlock_noBreak({{.*sorbet_rb_hash_fetch_m_withBlock}}
 # INITIAL-NOT: call i64 @sorbet_rb_hash_fetch_m
 # INITIAL{LITERAL}: }
 
