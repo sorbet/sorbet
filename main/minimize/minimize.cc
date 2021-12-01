@@ -89,7 +89,7 @@ core::NameRef rbiNameToSourceName(const core::GlobalState &sourceGS, const core:
     }
 }
 
-void writeClassDef(const core::GlobalState &rbiGS, options::PrinterConfig &outfile, core::SymbolRef rbiEntry,
+void writeClassDef(const core::GlobalState &rbiGS, options::PrinterConfig &outfile, core::ClassOrModuleRef rbiEntry,
                    bool &wroteClassDef) {
     while (rbiEntry.data(rbiGS)->isSingletonClass(rbiGS)) {
         rbiEntry = rbiEntry.data(rbiGS)->attachedClass(rbiGS);
@@ -104,8 +104,8 @@ void writeClassDef(const core::GlobalState &rbiGS, options::PrinterConfig &outfi
 }
 
 void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState &rbiGS,
-                      options::PrinterConfig &outfile, core::SymbolRef sourceClass, core::SymbolRef rbiClass,
-                      bool &wroteClassDef) {
+                      options::PrinterConfig &outfile, core::ClassOrModuleRef sourceClass,
+                      core::ClassOrModuleRef rbiClass, bool &wroteClassDef) {
     auto sourceMembersByName = UnorderedMap<string, core::SymbolRef>{};
     if (sourceClass.exists()) {
         for (auto [sourceEntryName, sourceEntry] : sourceClass.data(sourceGS)->members()) {
@@ -120,10 +120,11 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
 
     for (auto rbiMembersIt : rbiClass.data(rbiGS)->membersStableOrderSlow(rbiGS)) {
         auto rbiEntryName = rbiMembersIt.first;
-        auto rbiEntry = rbiMembersIt.second;
-        if (!rbiEntry.data(rbiGS)->isMethod()) {
+        auto maybeRbiEntry = rbiMembersIt.second;
+        if (!maybeRbiEntry.isMethod()) {
             continue;
         }
+        auto rbiEntry = maybeRbiEntry.asMethodRef();
 
         if (sourceClass.exists()) {
             auto sourceEntryIt = sourceMembersByName.find(rbiEntryName.show(rbiGS));
@@ -181,7 +182,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
             ENFORCE(sourceMembersByName.find(rbiEntryName.show(rbiGS)) == sourceMembersByName.end());
 
             // Have to find the superMethod in sourceGS, because otherwise the `isAbstract` bit won't be set
-            auto sourceSuperMethod = sourceClass.data(sourceGS)->findMemberTransitive(
+            auto sourceSuperMethod = sourceClass.data(sourceGS)->findMethodTransitive(
                 sourceGS, rbiNameToSourceName(sourceGS, rbiGS, rbiEntryName));
             if (sourceSuperMethod.exists() && !sourceSuperMethod.data(sourceGS)->isAbstract()) {
                 // Sorbet will fall back to dispatching to the parent method, which might have a sig.
@@ -265,8 +266,8 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
 }
 
 void serializeIncludes(const core::GlobalState &sourceGS, const core::GlobalState &rbiGS,
-                       options::PrinterConfig &outfile, core::SymbolRef sourceClass, core::SymbolRef rbiClass,
-                       bool &wroteClassDef) {
+                       options::PrinterConfig &outfile, core::ClassOrModuleRef sourceClass,
+                       core::ClassOrModuleRef rbiClass, bool &wroteClassDef) {
     ENFORCE(rbiClass.exists());
     auto sourceClassMixinsFullNames = vector<string>{};
     if (sourceClass.exists()) {
@@ -312,7 +313,8 @@ void serializeIncludes(const core::GlobalState &sourceGS, const core::GlobalStat
 }
 
 void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState &rbiGS,
-                      options::PrinterConfig &outfile, core::SymbolRef sourceClass, core::SymbolRef rbiClass) {
+                      options::PrinterConfig &outfile, core::ClassOrModuleRef sourceClass,
+                      core::ClassOrModuleRef rbiClass) {
     ENFORCE(rbiClass.exists());
 
     auto sourceMembersByName = UnorderedMap<string, core::SymbolRef>{};
@@ -328,16 +330,17 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
 
     for (auto rbiMembersIt : rbiClass.data(rbiGS)->membersStableOrderSlow(rbiGS)) {
         auto rbiEntryName = rbiMembersIt.first;
-        auto rbiEntry = rbiMembersIt.second;
-        if (!rbiEntry.exists()) {
+        auto maybeRbiClass = rbiMembersIt.second;
+        if (!maybeRbiClass.exists()) {
             ENFORCE(rbiClass == core::Symbols::root());
             continue;
         }
 
-        if (!rbiEntry.data(rbiGS)->isClassOrModule()) {
+        if (!maybeRbiClass.isClassOrModule()) {
             continue;
         }
 
+        auto rbiEntry = maybeRbiClass.asClassOrModuleRef();
         if (rbiEntry.data(rbiGS)->isSingletonClass(rbiGS)) {
             // We're going to have serializeIncludes and serializeMethods serialize both the
             // instance and singleton methods at the same time.
@@ -357,27 +360,29 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
             }
         }
 
-        if (sourceEntry.exists() && !sourceEntry.data(sourceGS)->isClassOrModule()) {
+        if (sourceEntry.exists() && !sourceEntry.isClassOrModule()) {
             // The Ruby-powered version would have printed a warning here, but we're going to
             // skip that because there's not an obvious place to emit the log, and we're going
             // to swallow these errors downstream anyways.
             continue;
         }
 
+        auto sourceEntryClass = sourceEntry.asClassOrModuleRef();
         auto wroteClassDef = false;
         if (!sourceEntry.exists()) {
             writeClassDef(rbiGS, outfile, rbiEntry, wroteClassDef);
         }
 
-        auto sourceEntrySingleton = sourceEntry.exists() ? sourceEntry.data(sourceGS)->lookupSingletonClass(sourceGS)
-                                                         : core::Symbols::noSymbol();
+        auto sourceEntrySingleton = sourceEntry.exists()
+                                        ? sourceEntryClass.data(sourceGS)->lookupSingletonClass(sourceGS)
+                                        : core::Symbols::noClassOrModule();
         auto rbiEntrySingleton = rbiEntry.data(rbiGS)->lookupSingletonClass(rbiGS);
 
-        serializeIncludes(sourceGS, rbiGS, outfile, sourceEntry, rbiEntry, wroteClassDef);
+        serializeIncludes(sourceGS, rbiGS, outfile, sourceEntryClass, rbiEntry, wroteClassDef);
         if (rbiEntrySingleton.exists()) {
             serializeIncludes(sourceGS, rbiGS, outfile, sourceEntrySingleton, rbiEntrySingleton, wroteClassDef);
         }
-        serializeMethods(sourceGS, rbiGS, outfile, sourceEntry, rbiEntry, wroteClassDef);
+        serializeMethods(sourceGS, rbiGS, outfile, sourceEntryClass, rbiEntry, wroteClassDef);
         if (rbiEntrySingleton.exists()) {
             serializeMethods(sourceGS, rbiGS, outfile, sourceEntrySingleton, rbiEntrySingleton, wroteClassDef);
         }
@@ -390,7 +395,7 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
             outfile.fmt("end\n\n");
         }
 
-        serializeClasses(sourceGS, rbiGS, outfile, sourceEntry, rbiEntry);
+        serializeClasses(sourceGS, rbiGS, outfile, sourceEntryClass, rbiEntry);
     }
 }
 
