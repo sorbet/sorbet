@@ -581,7 +581,17 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         }
         CFGCollectorAndTyper collector(opts);
         {
-            ast::ShallowMap::apply(ctx, collector, move(resolved.tree));
+            if (f.data(ctx).isPackage()) {
+#ifndef SORBET_REALMAIN_MIN
+                auto removedMods = packager::Packager::removePackageModules(ctx, resolved);
+                result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
+                result = packager::Packager::replacePackageModules(ctx, move(result), move(removedMods));
+#else
+                ENFORCE(false, "Should never happen");
+#endif
+            } else {
+                result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
+            }
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, f);
             }
