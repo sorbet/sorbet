@@ -1,10 +1,10 @@
 #ifndef SORBET_CORE_PACKAGES_PACKAGEINFO_H
 #define SORBET_CORE_PACKAGES_PACKAGEINFO_H
 
-#include <optional>
-#include <vector>
 #include "core/NameRef.h"
 #include "core/SymbolRef.h"
+#include <optional>
+#include <vector>
 
 namespace sorbet::core {
 struct AutocorrectSuggestion;
