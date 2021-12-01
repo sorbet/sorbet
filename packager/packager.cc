@@ -1266,20 +1266,11 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
         }
     }
 
+    // Step 2:
+    // * Find package files and rewrite them into virtual AST mappings.
+    // * Find files within each package and rewrite each to be wrapped by their virtual package namespace.
     {
-        Timer timeit(gs.tracer(), "packager.rewritePackages");
-        // Step 2: Rewrite packages. Can be done in parallel (and w/ step 3) if this becomes a bottleneck.
-        for (auto &file : files) {
-            if (file.file.data(gs).sourceType == core::File::Type::Package) {
-                core::Context ctx(gs, core::Symbols::root(), file.file);
-                file = rewritePackage(ctx, move(file));
-            }
-        }
-    }
-
-    // Step 3: Find files within each package and rewrite each.
-    {
-        Timer timeit(gs.tracer(), "packager.rewritePackagedFiles");
+        Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
 
         auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(files.size());
         auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(files.size());
@@ -1287,8 +1278,8 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
             fileq->push(move(file), 1);
         }
 
-        workers.multiplexJob("rewritePackagedFiles", [&gs, fileq, resultq]() {
-            Timer timeit(gs.tracer(), "packager.rewritePackagedFilesWorker");
+        workers.multiplexJob("rewritePackagesAndFiles", [&gs, fileq, resultq]() {
+            Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
             vector<ast::ParsedFile> results;
             u4 filesProcessed = 0;
             ast::ParsedFile job;
@@ -1298,6 +1289,9 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                     auto &file = job.file.data(gs);
                     if (file.sourceType == core::File::Type::Normal) {
                         job = rewritePackagedFile(gs, move(job));
+                    } else if (file.sourceType == core::File::Type::Package) {
+                        core::Context ctx(gs, core::Symbols::root(), job.file);
+                        job = rewritePackage(ctx, move(job));
                     }
                     results.emplace_back(move(job));
                 }
