@@ -321,11 +321,8 @@ void flattenOrType(vector<core::TypePtr> &results, const core::OrType &type) {
         [&results](const core::TypePtr &def) { results.emplace_back(def); });
 }
 
-static bool isProc(core::SymbolRef sym) {
-    if (sym.kind() != core::SymbolRef::Kind::ClassOrModule) {
-        return false;
-    }
-    auto id = sym.classOrModuleIndex();
+static bool isProc(core::ClassOrModuleRef sym) {
+    auto id = sym.id();
     return id >= core::Symbols::Proc0().id() && id <= core::Symbols::last_proc().id();
 }
 
