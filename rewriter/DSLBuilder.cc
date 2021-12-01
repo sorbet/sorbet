@@ -83,8 +83,7 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
     flags.discardDef = true;
 
     // We need to keep around the original send for the compiler.
-    stats.emplace_back(ast::MK::Send(loc, ast::MK::Unsafe(loc, move(send->recv)), sendFun, send->numPosArgs(),
-                                     std::move(send->rawArgs()), send->flags));
+    stats.emplace_back(send->withNewBody(loc, ast::MK::Unsafe(loc, move(send->recv)), sendFun));
 
     // def self.<prop>
     if (!skipSetter) {
