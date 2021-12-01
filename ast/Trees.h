@@ -861,7 +861,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Send, 56, 8);
+CheckSize(Send, 48, 8);
 
 EXPRESSION(Cast) {
 public:
