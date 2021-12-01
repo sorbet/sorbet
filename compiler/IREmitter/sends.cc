@@ -45,7 +45,7 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
     // TODO(trevor) we could probably handle methods wih block args as well, by passing the block handler through the
     // current ruby execution context.
     if (mcctx.blk.has_value()) {
-        return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        return tryNameBasedIntrinsic(mcctx);
     }
 
     // NOTE: if we don't see a final call to another compiled method, we skip this optimization as it would just degrade
@@ -54,7 +54,7 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
     auto recvType = mcctx.send->recv.type;
     auto finalInfo = IREmitterHelpers::isFinalMethod(cs, recvType, mcctx.send->fun);
     if (!finalInfo.has_value()) {
-        return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        return tryNameBasedIntrinsic(mcctx);
     }
 
     // If the wrapper is defined in another file, this will be resolved by the runtime linker.
@@ -200,7 +200,7 @@ llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
             builder.SetInsertPoint(alternative);
         }
     }
-    auto slowPathRes = tryNameBasedIntrinsic(mcctx);
+    auto slowPathRes = tryFinalMethodCall(mcctx);
     auto slowPathEnd = builder.GetInsertBlock();
     builder.CreateBr(afterSend);
     builder.SetInsertPoint(afterSend);
