@@ -793,8 +793,8 @@ public:
     }
 
     // Returns the raw arguments vector. Please avoid using unless absolutely necessary; it is easier to query
-    // arguments via methods on Send.
-    const ARGS_store &rawArgs() const {
+    // arguments via methods on Send. It is a footgun.
+    const ARGS_store &rawArgsDoNotUse() const {
         return args;
     }
 
