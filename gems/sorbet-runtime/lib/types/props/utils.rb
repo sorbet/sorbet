@@ -44,16 +44,25 @@ module T::Props::Utils
   end
 
   def self.required_prop?(prop_rules)
+    prop_rules = initialize_if_needed(prop_rules)
     # Clients should never reference :_tnilable as the implementation can change.
     !prop_rules[:_tnilable]
   end
 
   def self.optional_prop?(prop_rules)
+    prop_rules = initialize_if_needed(prop_rules)
     # Clients should never reference :_tnilable as the implementation can change.
     !!prop_rules[:_tnilable]
   end
 
   def self.merge_serialized_optional_rule(prop_rules)
     {'_tnilable' => true}.merge(prop_rules.merge('_tnilable' => true))
+  end
+
+  private_class_method def self.initialize_if_needed(prop_rules)
+    if prop_rules.key?(:initialize_proc)
+      prop_rules = prop_rules.replace(prop_rules.fetch(:initialize_proc).call)
+    end
+    prop_rules
   end
 end

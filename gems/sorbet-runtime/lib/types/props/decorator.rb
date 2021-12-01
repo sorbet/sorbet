@@ -14,6 +14,7 @@ class T::Props::Decorator
   DecoratedInstance = T.type_alias {Object} # Would be T::Props, but that produces circular reference errors in some circumstances
   PropType = T.type_alias {T::Types::Base}
   PropTypeOrClass = T.type_alias {T.any(PropType, Module)}
+  LazyPropType = T.type_alias {T.proc.returns(PropTypeOrClass)}
 
   class NoRulesError < StandardError; end
 
@@ -44,6 +45,11 @@ class T::Props::Decorator
     props[prop.to_sym] || raise("No such prop: #{prop.inspect}")
   end
 
+  sig {params(prop: T.any(Symbol, String), rules: Rules).void.checked(:never)}
+  def update_rules_for_prop(prop, rules)
+    @props = @props.merge(prop => rules).freeze
+  end
+
   # checked(:never) - Rules hash is expensive to check
   sig {params(prop: Symbol, rules: Rules).void.checked(:never)}
   def add_prop_definition(prop, rules)
@@ -55,8 +61,19 @@ class T::Props::Decorator
       raise ArgumentError.new("Attempted to override a prop #{prop.inspect} that doesn't already exist")
     end
 
-    @props = @props.merge(prop => rules.freeze).freeze
+    update_rules_for_prop(prop, rules)
   end
+
+  INTERNAL_ONLY_RULE_KEYS = T.let(%i[
+    accessor_key
+    extra
+    need_nil_read_check
+    pii
+    sensitivity
+    serialized_form
+    setter_proc
+  ].map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean])
+  private_constant :INTERNAL_ONLY_RULE_KEYS
 
   VALID_RULE_KEYS = T.let(%i[
     enum
@@ -77,6 +94,11 @@ class T::Props::Decorator
   sig {params(key: Symbol).returns(T::Boolean).checked(:never)}
   def valid_rule_key?(key)
     !!VALID_RULE_KEYS[key]
+  end
+
+  sig {params(rules: Rules).returns(T::Boolean).checked(:never)}
+  private def all_valid_keys?(rules)
+    rules.keys.reject {|k| INTERNAL_ONLY_RULE_KEYS.include?(k)}.all? {|k| valid_rule_key?(k)}
   end
 
   # checked(:never) - O(prop accesses)
@@ -213,12 +235,12 @@ class T::Props::Decorator
   def prop_validate_definition!(name, cls, rules, type)
     validate_prop_name(name)
 
-    if rules.key?(:pii)
+    if rules.key?(:pii) && rules.fetch(:pii)
       raise ArgumentError.new("The 'pii:' option for props has been renamed " \
         "to 'sensitivity:' (in prop #{@class.name}.#{name})")
     end
 
-    if rules.keys.any? {|k| !valid_rule_key?(k)}
+    unless all_valid_keys?(rules)
       raise ArgumentError.new("At least one invalid prop arg supplied in #{self}: #{rules.keys.inspect}")
     end
 
@@ -280,14 +302,18 @@ class T::Props::Decorator
   # checked(:never) - Rules hash is expensive to check
   sig do
     params(
-      name: T.any(Symbol, String),
-      cls: PropTypeOrClass,
+      name: Symbol,
+      cls: T.any(PropTypeOrClass, LazyPropType),
       rules: Rules,
     )
     .void
     .checked(:never)
   end
-  def prop_defined(name, cls, rules={})
+  def process_type(name, cls, rules)
+    if cls.is_a?(Proc)
+      cls = cls.call
+    end
+
     cls = T::Utils.resolve_alias(cls)
 
     if T::Utils::Nilable.is_union_with_nilclass(cls)
@@ -298,7 +324,6 @@ class T::Props::Decorator
       rules[:_tnilable] = true
     end
 
-    name = name.to_sym
     type = cls
     if !cls.is_a?(Module)
       cls = convert_type_to_class(cls)
@@ -309,6 +334,44 @@ class T::Props::Decorator
 
     # Retrive the possible underlying object with T.nilable.
     type = T::Utils::Nilable.get_underlying_type(type)
+
+    # for backcompat (the `:array` key is deprecated but because the name is
+    # so generic it's really hard to be sure it's not being relied on anymore)
+    if type.is_a?(T::Types::TypedArray)
+      inner = T::Utils::Nilable.get_underlying_type(type.type)
+      if inner.is_a?(Module)
+        rules[:array] = inner
+      end
+    end
+
+    rules.merge!(
+      # TODO: The type of this element is confusing. We should refactor so that
+      # it can be always `type_object` (a PropType) or always `cls` (a Module)
+      type: type,
+      type_object: type_object,
+    )
+  end
+
+  # checked(:never) - Rules hash is expensive to check
+  sig do
+    params(
+      name: T.any(Symbol, String),
+      cls: T.any(PropTypeOrClass, LazyPropType),
+      rules: Rules,
+    )
+    .void
+    .checked(:never)
+  end
+  def prop_defined(name, cls, rules={})
+    name = name.to_sym
+
+    unless cls.is_a?(Proc)
+      process_type(name, cls, rules)
+    end
+
+    unless cls.is_a?(Module) || cls.is_a?(Proc)
+      cls = convert_type_to_class(cls)
+    end
 
     sensitivity_and_pii = {sensitivity: rules[:sensitivity]}
     normalize = T::Configuration.normalize_sensitivity_and_pii_handler
@@ -328,10 +391,6 @@ class T::Props::Decorator
     end
 
     rules = rules.merge(
-      # TODO: The type of this element is confusing. We should refactor so that
-      # it can be always `type_object` (a PropType) or always `cls` (a Module)
-      type: type,
-      type_object: type_object,
       accessor_key: "@#{name}".to_sym,
       sensitivity: sensitivity_and_pii[:sensitivity],
       pii: sensitivity_and_pii[:pii],
@@ -341,16 +400,30 @@ class T::Props::Decorator
 
     validate_not_missing_sensitivity(name, rules)
 
-    # for backcompat (the `:array` key is deprecated but because the name is
-    # so generic it's really hard to be sure it's not being relied on anymore)
-    if type.is_a?(T::Types::TypedArray)
-      inner = T::Utils::Nilable.get_underlying_type(type.type)
-      if inner.is_a?(Module)
-        rules[:array] = inner
+    rules[:setter_proc] = if cls.is_a?(Proc)
+      # The `initialize_proc` and `setter_proc` are split so that consumers can either
+      # call the `setter_proc` directly (without having to worry about whether or not
+      # the type has been initialized) _or_ eagerly initialize without calling the setter
+      rules[:initialize_proc] = proc do
+        rules.delete(:initialize_proc)
+        process_type(name, cls, rules)
+        rules[:setter_proc] = T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules).freeze
+        update_rules_for_prop(name, rules)
+        rules
       end
-    end
 
-    rules[:setter_proc] = T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules).freeze
+      proc do |arg|
+        # In cases where `initialize_proc` is called directly, it will no longer exist in the `rules` hash.
+        if rules.key?(:initialize_proc)
+          rules = T.cast(rules.fetch(:initialize_proc).call, Rules)
+        end
+        # `rules[:setter_proc]` has been updated in `rules[:initialize_proc]`,
+        # so this isn't a recursive call.
+        rules[:setter_proc].call(arg)
+      end
+    else
+      T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules).freeze
+    end
 
     add_prop_definition(name, rules)
 
@@ -535,7 +608,7 @@ class T::Props::Decorator
   sig do
     params(
       prop_name: Symbol,
-      prop_cls: Module,
+      prop_cls: T.any(PropTypeOrClass, LazyPropType),
       rules: Rules,
       foreign: T.untyped,
     )
@@ -543,6 +616,7 @@ class T::Props::Decorator
     .checked(:never)
   end
   private def handle_foreign_option(prop_name, prop_cls, rules, foreign)
+    prop_cls = prop_cls.call if prop_cls.is_a?(Proc)
     validate_foreign_option(
       :foreign, foreign, valid_type_msg: "a model class or a Proc that returns one"
     )

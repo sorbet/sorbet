@@ -173,4 +173,59 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
       end
     end
   end
+
+  describe 'lazily initialized types' do
+    class UninitializedLazyFields < T::Struct
+      prop :proc_init, -> {String}
+      prop :proc_init_with_array, -> {T::Array[Symbol]}
+    end
+
+    it 'does not process types on load' do
+      UninitializedLazyFields.props.each_value do |rules|
+        assert_nil(rules[:type_object])
+        assert_nil(rules[:type])
+        refute(rules[:initialize_proc].nil?)
+      end
+    end
+
+    class InitializedLazyFields < T::Struct
+      prop :proc_init, -> {String}
+      prop :proc_init_with_array, -> {T::Array[Symbol]}
+    end
+
+    it 'processes types when setting them' do
+      InitializedLazyFields.props.each_value do |rules|
+        assert_nil(rules[:type_object])
+        assert_nil(rules[:type])
+        refute(rules[:initialize_proc].nil?)
+      end
+
+      InitializedLazyFields.new(
+        proc_init: "Very Lazy",
+        proc_init_with_array: %i[very very lazy],
+      )
+
+      InitializedLazyFields.props.each_value do |rules|
+        refute_nil(rules[:type_object])
+        refute_nil(rules[:type])
+        assert_nil(rules[:initialize_proc])
+      end
+    end
+
+    class NilableLazyFields < T::Struct
+      prop :nilable_field, -> {T.nilable(Numeric)}
+      prop :nonnilable_field, -> {Numeric}
+    end
+
+    it 'works with required_prop? and optional_prop?' do
+      assert(T::Props::Utils.required_prop?(NilableLazyFields.props[:nonnilable_field]))
+      assert(T::Props::Utils.optional_prop?(NilableLazyFields.props[:nilable_field]))
+    end
+
+    it "fails when nonnilable fields aren't initialized" do
+      assert_raises(ArgumentError) do
+        NilableLazyFields.new(nilable_field: 100)
+      end
+    end
+  end
 end
