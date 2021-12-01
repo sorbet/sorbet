@@ -244,9 +244,8 @@ public:
         return {suggestion};
     }
 
-    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const PackageInfo &pkg) const {
-        auto &info = PackageInfoImpl::from(pkg);
-        for (auto import : importedPackageNames) {
+    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const vector<core::NameRef> newExport, bool isPrivateTestExport) const {
+        for (auto expt : exports) {
             // check if we already import this, and if so, don't
             // return an autocorrect
             if (import.name == info.name) {
