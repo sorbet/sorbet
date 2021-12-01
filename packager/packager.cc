@@ -209,7 +209,7 @@ public:
         // first let's try adding it to the end of the imports.
         if (!importedPackageNames.empty()) {
             auto lastOffset = importedPackageNames.back().name.loc;
-            insertionLoc = {info.loc.file(), lastOffset.endPos(), lastOffset.endPos()};
+            insertionLoc = {loc.file(), lastOffset.endPos(), lastOffset.endPos()};
         } else {
             // if we don't have any imports, then we can try adding it
             // either before the first export, or if we have no
@@ -218,11 +218,11 @@ public:
             if (!exports.empty()) {
                 exportLoc = exports.front().fqn.loc.beginPos() - "export "sv.size() - 1;
             } else {
-                exportLoc = info.loc.endPos() - "end"sv.size() - 1;
+                exportLoc = loc.endPos() - "end"sv.size() - 1;
             }
             // we want to find the end of the last non-empty line, so
             // let's do something gross: walk backward until we find non-whitespace
-            const auto &file_source = info.loc.file().data(gs).source();
+            const auto &file_source = loc.file().data(gs).source();
             while (isspace(file_source[exportLoc])) {
                 exportLoc--;
                 // this shouldn't happen in a well-formatted
@@ -231,7 +231,7 @@ public:
                     return nullopt;
                 }
             }
-            insertionLoc = {info.loc.file(), exportLoc + 1, exportLoc + 1};
+            insertionLoc = {loc.file(), exportLoc + 1, exportLoc + 1};
         }
         ENFORCE(insertionLoc.exists());
 
