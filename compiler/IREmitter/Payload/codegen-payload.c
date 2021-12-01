@@ -704,6 +704,8 @@ VALUE sorbet_int_hash_to_h(VALUE recv, ID fun, int argc, const VALUE *const rest
     return sorbet_rb_hash_to_h(recv);
 }
 
+// This is the block variant of rb_hash_fetch_m:
+// https://github.com/sorbet/ruby/blob/12d8c43330278a744d6e45135d1a8735f23f5afe/hash.c#L2113-L2147
 SORBET_INLINE
 VALUE sorbet_rb_hash_fetch_m_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                        const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
@@ -712,6 +714,9 @@ VALUE sorbet_rb_hash_fetch_m_withBlock(VALUE recv, ID fun, int argc, const VALUE
     rb_check_arity(argc, 1, 2);
     VALUE key = argv[0];
     VALUE val;
+
+    // NOTE: the vm will issue a warning when two arguments and a block are
+    // given, but we don't issue that warning here.
 
     if (sorbet_hash_stlike_lookup(recv, key, &val)) {
         return (VALUE)val;
