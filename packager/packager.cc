@@ -209,7 +209,7 @@ public:
         // first let's try adding it to the end of the imports.
         if (!importedPackageNames.empty()) {
             auto lastOffset = importedPackageNames.back().name.loc;
-            insertionLoc = {info.loc.file(), lastOffset.endPos(), lastOffset.endPos()};
+            insertionLoc = {loc.file(), lastOffset.endPos(), lastOffset.endPos()};
         } else {
             // if we don't have any imports, then we can try adding it
             // either before the first export, or if we have no
@@ -218,11 +218,11 @@ public:
             if (!exports.empty()) {
                 exportLoc = exports.front().fqn.loc.beginPos() - "export "sv.size() - 1;
             } else {
-                exportLoc = info.loc.endPos() - "end"sv.size() - 1;
+                exportLoc = loc.endPos() - "end"sv.size() - 1;
             }
             // we want to find the end of the last non-empty line, so
             // let's do something gross: walk backward until we find non-whitespace
-            const auto &file_source = info.loc.file().data(gs).source();
+            const auto &file_source = loc.file().data(gs).source();
             while (isspace(file_source[exportLoc])) {
                 exportLoc--;
                 // this shouldn't happen in a well-formatted
@@ -231,7 +231,7 @@ public:
                     return nullopt;
                 }
             }
-            insertionLoc = {info.loc.file(), exportLoc + 1, exportLoc + 1};
+            insertionLoc = {loc.file(), exportLoc + 1, exportLoc + 1};
         }
         ENFORCE(insertionLoc.exists());
 
@@ -241,6 +241,50 @@ public:
             fmt::format("Import `{}` in package `{}`", info.name.toString(gs), name.toString(gs)),
             {{insertionLoc,
               fmt::format("\n  {} {}", isTestImport ? "test_import" : "import", info.name.toString(gs))}});
+        return {suggestion};
+    }
+
+    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const vector<core::NameRef> newExport,
+                                                    bool isPrivateTestExport) const {
+        for (auto expt : exports) {
+            // check if we already import this, and if so, don't
+            // return an autocorrect
+            if (expt.fqn.parts == newExport) {
+                return nullopt;
+            }
+        }
+
+        auto insertionLoc = core::Loc::none(loc.file());
+        // first let's try adding it to the end of the imports.
+        if (!exports.empty()) {
+            auto lastOffset = exports.back().fqn.loc;
+            insertionLoc = {loc.file(), lastOffset.endPos(), lastOffset.endPos()};
+        } else {
+            // if we don't have any imports, then we can try adding it
+            // either before the first export, or if we have no
+            // exports, then right before the final `end`
+            u4 exportLoc = loc.endPos() - "end"sv.size() - 1;
+            // we want to find the end of the last non-empty line, so
+            // let's do something gross: walk backward until we find non-whitespace
+            const auto &file_source = loc.file().data(gs).source();
+            while (isspace(file_source[exportLoc])) {
+                exportLoc--;
+                // this shouldn't happen in a well-formatted
+                // `__package.rb` file, but just to be safe
+                if (exportLoc == 0) {
+                    return nullopt;
+                }
+            }
+            insertionLoc = {loc.file(), exportLoc + 1, exportLoc + 1};
+        }
+        ENFORCE(insertionLoc.exists());
+
+        // now find the appropriate place for it, specifically by
+        // finding the import that directly preceeds it, if any
+        auto strName = absl::StrJoin(newExport, "::", NameFormatter(gs));
+        core::AutocorrectSuggestion suggestion(
+            fmt::format("Export `{}` in package `{}`", strName, name.toString(gs)),
+            {{insertionLoc, fmt::format("\n  {} {}", isPrivateTestExport ? "export_for_test" : "export", strName)}});
         return {suggestion};
     }
 };

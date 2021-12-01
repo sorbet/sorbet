@@ -20,50 +20,71 @@ namespace spd = spdlog;
 auto logger = spd::stderr_color_mt("pkg-autocorrects-test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
+string examplePackage = "class Opus::ExamplePackage < PackageSpec\nend\n";
+string examplePackagePath = "example/__package.rb";
+
 namespace sorbet {
 struct TestPackageFile {
-    core::FileRef fileRef;
-    ast::ParsedFile parsedFile;
+    // the `ParsedFile` corresponding to the package in which we want
+    // to make the edit
+    ast::ParsedFile targetParsedFile;
+    // the `ParsedFile` corresponding to the package that we want to
+    // add.
+    ast::ParsedFile newParsedFile;
 
-    TestPackageFile(core::FileRef fileRef, ast::ParsedFile parsedFile)
-        : fileRef(fileRef), parsedFile(move(parsedFile)) {}
+    TestPackageFile(ast::ParsedFile targetParsedFile, ast::ParsedFile newParsedFile)
+        : targetParsedFile(move(targetParsedFile)), newParsedFile(move(newParsedFile)) {}
 
     static TestPackageFile create(core::GlobalState &gs, string filename, string source) {
         // add the package file
-        core::FileRef pkg_file;
+        vector<core::FileRef> files;
         {
             core::UnfreezeFileTable fileTableAccess(gs);
-            pkg_file = gs.enterFile(filename, source);
+            files.emplace_back(gs.enterFile(filename, source));
+            files.emplace_back(gs.enterFile(examplePackagePath, examplePackage));
         }
 
         // run through the pipeline up through the packager
         // start by parsing and desugaring
-        ast::ParsedFile parsed_file;
+        vector<ast::ParsedFile> parsedFiles;
         {
             core::UnfreezeNameTable nameTableAccess(gs);
             // run parser
-            auto nodes = parser::Parser::run(gs, pkg_file);
-            // run desugarer
-            core::MutableContext ctx(gs, core::Symbols::root(), pkg_file);
-            parsed_file = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), pkg_file};
+            for (auto file : files) {
+                auto nodes = parser::Parser::run(gs, file);
 
-            // we can skip the rewriter because packages don't need it and
-            // go straight on to indexing
-            parsed_file = local_vars::LocalVars::run(ctx, move(parsed_file));
+                core::MutableContext ctx(gs, core::Symbols::root(), file);
+                auto parsedFile = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file};
+                parsedFiles.emplace_back(local_vars::LocalVars::run(ctx, move(parsedFile)));
+            }
         }
 
         {
             // and then finally the packager!
             auto workers = WorkerPool::create(0, gs.tracer());
-            vector<ast::ParsedFile> trees;
-            trees.emplace_back(move(parsed_file));
-            trees = packager::Packager::run(gs, *workers, move(trees));
-            parsed_file = move(trees.front());
+            parsedFiles = packager::Packager::run(gs, *workers, move(parsedFiles));
         }
 
-        TestPackageFile pkgFile(pkg_file, move(parsed_file));
+        TestPackageFile pkgFile(move(parsedFiles.front()), move(parsedFiles[1]));
 
         return pkgFile;
+    }
+
+    const core::packages::PackageInfo &targetPackage(core::GlobalState &gs) const {
+        return gs.packageDB().getPackageForFile(gs, targetParsedFile.file);
+    }
+
+    const core::packages::PackageInfo &newPackage(core::GlobalState &gs) const {
+        return gs.packageDB().getPackageForFile(gs, newParsedFile.file);
+    }
+
+    const vector<core::NameRef> getName(core::GlobalState &gs, vector<string> rawName) const {
+        vector<core::NameRef> name;
+        core::UnfreezeNameTable nameTableAccess(gs);
+        for (auto &n : rawName) {
+            name.emplace_back(gs.enterNameUTF8(n));
+        }
+        return name;
     }
 };
 
@@ -77,14 +98,14 @@ TEST_CASE("Simple add import") {
 
     string expected = "class Opus::MyPackage < PackageSpec\n"
                       "  import Opus::SomethingElse\n"
-                      "  import Opus::MyPackage\n"
+                      "  import Opus::ExamplePackage\n"
                       "end\n";
 
     auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
 
-    auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
+    auto &package = test.targetPackage(gs);
     ENFORCE(package.exists());
-    auto addImport = package.addImport(gs, package, false);
+    auto addImport = package.addImport(gs, test.newPackage(gs), false);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
     auto replaced = addImport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
@@ -100,14 +121,14 @@ TEST_CASE("Simple test import") {
 
     string expected = "class Opus::MyPackage < PackageSpec\n"
                       "  import Opus::SomethingElse\n"
-                      "  test_import Opus::MyPackage\n"
+                      "  test_import Opus::ExamplePackage\n"
                       "end\n";
 
     auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
 
-    auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
+    auto &package = test.targetPackage(gs);
     ENFORCE(package.exists());
-    auto addImport = package.addImport(gs, package, true);
+    auto addImport = package.addImport(gs, test.newPackage(gs), true);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
     auto replaced = addImport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
@@ -122,15 +143,15 @@ TEST_CASE("Add import with only existing exports") {
                         "end\n";
 
     string expected = "class Opus::MyPackage < PackageSpec\n"
-                      "  import Opus::MyPackage\n"
+                      "  import Opus::ExamplePackage\n"
                       "  export Opus::SomethingElse\n"
                       "end\n";
 
     auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
 
-    auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
+    auto &package = test.targetPackage(gs);
     ENFORCE(package.exists());
-    auto addImport = package.addImport(gs, package, false);
+    auto addImport = package.addImport(gs, test.newPackage(gs), false);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
     auto replaced = addImport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
@@ -145,15 +166,15 @@ TEST_CASE("Add test import with only existing exports") {
                         "end\n";
 
     string expected = "class Opus::MyPackage < PackageSpec\n"
-                      "  test_import Opus::MyPackage\n"
+                      "  test_import Opus::ExamplePackage\n"
                       "  export Opus::SomethingElse\n"
                       "end\n";
 
     auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
 
-    auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
+    auto &package = test.targetPackage(gs);
     ENFORCE(package.exists());
-    auto addImport = package.addImport(gs, package, true);
+    auto addImport = package.addImport(gs, test.newPackage(gs), true);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
     auto replaced = addImport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
@@ -167,14 +188,14 @@ TEST_CASE("Add import to package with neither imports nor exports") {
                         "end\n";
 
     string expected = "class Opus::MyPackage < PackageSpec\n"
-                      "  import Opus::MyPackage\n"
+                      "  import Opus::ExamplePackage\n"
                       "end\n";
 
     auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
 
-    auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
+    auto &package = test.targetPackage(gs);
     ENFORCE(package.exists());
-    auto addImport = package.addImport(gs, package, false);
+    auto addImport = package.addImport(gs, test.newPackage(gs), false);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
     auto replaced = addImport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
@@ -188,16 +209,62 @@ TEST_CASE("Add test import to package with neither imports nor exports") {
                         "end\n";
 
     string expected = "class Opus::MyPackage < PackageSpec\n"
-                      "  test_import Opus::MyPackage\n"
+                      "  test_import Opus::ExamplePackage\n"
                       "end\n";
 
     auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
 
-    auto &package = gs.packageDB().getPackageForFile(gs, test.fileRef);
+    auto &package = test.targetPackage(gs);
     ENFORCE(package.exists());
-    auto addImport = package.addImport(gs, package, true);
+    auto addImport = package.addImport(gs, test.newPackage(gs), true);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
     auto replaced = addImport->applySingleEditForTesting(pkg_source);
+    CHECK_EQ(expected, replaced);
+}
+
+TEST_CASE("Simple add export") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
+
+    string pkg_source = "class Opus::MyPackage < PackageSpec\n"
+                        "  export Opus::MyPackage::This\n"
+                        "end\n";
+
+    string expected = "class Opus::MyPackage < PackageSpec\n"
+                      "  export Opus::MyPackage::This\n"
+                      "  export Opus::MyPackage::NewExport\n"
+                      "end\n";
+
+    auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
+
+    auto &package = test.targetPackage(gs);
+    ENFORCE(package.exists());
+    auto addExport = package.addExport(gs, test.getName(gs, {"Opus", "MyPackage", "NewExport"}), false);
+    ENFORCE(addExport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = addExport->applySingleEditForTesting(pkg_source);
+    CHECK_EQ(expected, replaced);
+}
+
+TEST_CASE("Simple add export_for_test") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
+
+    string pkg_source = "class Opus::MyPackage < PackageSpec\n"
+                        "  export Opus::MyPackage::This\n"
+                        "end\n";
+
+    string expected = "class Opus::MyPackage < PackageSpec\n"
+                      "  export Opus::MyPackage::This\n"
+                      "  export_for_test Opus::MyPackage::NewExport\n"
+                      "end\n";
+
+    auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
+
+    auto &package = test.targetPackage(gs);
+    ENFORCE(package.exists());
+    auto addExport = package.addExport(gs, test.getName(gs, {"Opus", "MyPackage", "NewExport"}), true);
+    ENFORCE(addExport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = addExport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
 }
 
