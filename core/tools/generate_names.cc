@@ -384,6 +384,7 @@ NameDef names[] = {
     {"first"},
     {"min"},
     {"max"},
+    {"sum"},
 
     // Argument forwarding
     {"fwdArgs", "<fwd-args>"},

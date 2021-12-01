@@ -15,6 +15,8 @@ T.assert_type!([1, 2].min, Integer)
 T.assert_type!([1, 2].max, Integer)
 T.assert_type!([1, 2].first, Integer)
 T.assert_type!([1, 2].last, Integer)
+T.assert_type!([].sum, Integer)
+T.assert_type!([1.1, 2.2].sum, Float)
 
 
 # Empty arrays are T::Array[T.untyped]
