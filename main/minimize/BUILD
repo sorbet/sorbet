@@ -15,7 +15,7 @@ cc_library(
         "//common/kvstore",
         "//core",
         "//main/options",
-        "//main/pipeline",
+        "//main/pipeline:pipeline-orig",
         "@spdlog",
     ],
 )
