@@ -321,8 +321,6 @@ void flattenOrType(vector<core::TypePtr> &results, const core::OrType &type) {
         [&results](const core::TypePtr &def) { results.emplace_back(def); });
 }
 
-} // namespace
-
 static bool isProc(core::SymbolRef sym) {
     if (sym.kind() != core::SymbolRef::Kind::ClassOrModule) {
         return false;
@@ -331,41 +329,40 @@ static bool isProc(core::SymbolRef sym) {
     return id >= core::Symbols::Proc0().id() && id <= core::Symbols::last_proc().id();
 }
 
+} // namespace
+
+llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
+                               core::ClassOrModuleRef sym) {
+    for (const auto &[candidate, specializedCall] : optimizedTypeTests) {
+        if (sym == candidate) {
+            return builder.CreateCall(cs.getFunction(specializedCall), {val});
+        }
+    }
+
+    if (sym.data(cs)->name.isTEnumName(cs)) {
+        // T.let(..., MyEnum::X$1) is special. These are singleton values, so we can do a type
+        // test with an object (reference) equality check.
+        return builder.CreateCall(cs.getFunction("sorbet_testObjectEqual_p"),
+                                  {Payload::getRubyConstant(cs, sym, builder), val});
+    }
+
+    auto attachedClass = sym.data(cs)->attachedClass(cs);
+    // todo: handle attached of attached class
+    if (attachedClass.exists()) {
+        return builder.CreateCall(cs.getFunction("sorbet_isa_class_of"),
+                                  {val, Payload::getRubyConstant(cs, attachedClass, builder)});
+    }
+    sym = isProc(sym) ? core::Symbols::Proc() : sym;
+    return builder.CreateCall(cs.getFunction("sorbet_isa"), {val, Payload::getRubyConstant(cs, sym, builder)});
+}
+
 llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                const core::TypePtr &type) {
     llvm::Value *ret = nullptr;
     typecase(
-        type,
-        [&](const core::ClassType &ct) {
-            for (const auto &[candidate, specializedCall] : optimizedTypeTests) {
-                if (ct.symbol == candidate) {
-                    ret = builder.CreateCall(cs.getFunction(specializedCall), {val});
-                    return;
-                }
-            }
-
-            if (ct.symbol.data(cs)->name.isTEnumName(cs)) {
-                // T.let(..., MyEnum::X$1) is special. These are singleton values, so we can do a type
-                // test with an object (reference) equality check.
-                ret = builder.CreateCall(cs.getFunction("sorbet_testObjectEqual_p"),
-                                         {Payload::getRubyConstant(cs, ct.symbol, builder), val});
-                return;
-            }
-
-            auto attachedClass = ct.symbol.data(cs)->attachedClass(cs);
-            // todo: handle attached of attached class
-            if (attachedClass.exists()) {
-                ret = builder.CreateCall(cs.getFunction("sorbet_isa_class_of"),
-                                         {val, Payload::getRubyConstant(cs, attachedClass, builder)});
-                return;
-            }
-            auto sym = isProc(ct.symbol) ? core::Symbols::Proc() : ct.symbol;
-            ret = builder.CreateCall(cs.getFunction("sorbet_isa"), {val, Payload::getRubyConstant(cs, sym, builder)});
-        },
+        type, [&](const core::ClassType &ct) { ret = Payload::typeTest(cs, builder, val, ct.symbol); },
         [&](const core::AppliedType &at) {
-            core::ClassOrModuleRef klass = at.klass;
-            auto base = typeTest(cs, builder, val, core::make_type<core::ClassType>(klass));
-            ret = base;
+            ret = Payload::typeTest(cs, builder, val, at.klass);
             // todo: ranges, hashes, sets, enumerator, and, overall, enumerables
         },
         [&](const core::OrType &ct) {
@@ -453,8 +450,7 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, 
 // adding an assertion.
 void Payload::assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                          core::ClassOrModuleRef sym) {
-    auto type = core::make_type<core::ClassType>(sym);
-    auto *cond = Payload::typeTest(cs, builder, val, type);
+    auto *cond = Payload::typeTest(cs, builder, val, sym);
     builder.CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::assume, {}, {cond});
     return;
 }

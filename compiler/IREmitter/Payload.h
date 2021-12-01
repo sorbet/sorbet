@@ -56,8 +56,12 @@ public:
     static llvm::Value *testIsTruthy(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val);
     static llvm::Value *getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &builder);
     static llvm::Value *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);
+
+    static llvm::Value *typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
+                                 core::ClassOrModuleRef sym);
     static llvm::Value *typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                  const core::TypePtr &type);
+
     static void assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                            core::ClassOrModuleRef sym);
     static llvm::Value *boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *u1);
