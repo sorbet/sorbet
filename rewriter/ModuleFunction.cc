@@ -110,7 +110,9 @@ vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Se
         return stats;
     }
 
-    for (auto &arg : send->rawArgs()) {
+    const auto numPosArgs = send->numPosArgs();
+    for (auto i = 0; i < numPosArgs; ++i) {
+        auto &arg = send->getPosArg(i);
         if (ast::isa_tree<ast::MethodDef>(arg)) {
             return ModuleFunction::rewriteDefn(ctx, arg, prevStat);
         } else if (auto lit = ast::cast_tree<ast::Literal>(arg)) {
@@ -144,6 +146,22 @@ vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Se
                 e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",
                             "module_function");
             }
+        }
+    }
+
+    const auto numKwArgs = send->numKwArgs();
+    for (auto i = 0; i < numKwArgs; ++i) {
+        auto loc = send->getKwKey(i).loc().join(send->getKwValue(i).loc());
+        if (auto e = ctx.beginError(loc, core::errors::Rewriter::BadModuleFunction)) {
+            e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",
+                        "module_function");
+        }
+    }
+
+    if (send->hasKwSplat()) {
+        if (auto e = ctx.beginError(send->kwSplat()->loc(), core::errors::Rewriter::BadModuleFunction)) {
+            e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",
+                        "module_function");
         }
     }
 
