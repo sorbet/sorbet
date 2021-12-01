@@ -436,7 +436,14 @@ private:
         auto rhsData = rhsSym.data(ctx);
         if (rhsData->isTypeAlias()) {
             if (auto e = ctx.beginError(it.rhs->loc, core::errors::Resolver::ReassignsTypeAlias)) {
-                e.setHeader("Reassigning a type alias is not allowed");
+                if (it.file.data(ctx).isPackage()) {
+                    // In --stripe-packages mode, this error surfaces when type aliases
+                    // are exported by a package. TODO (aadi-stripe, 12/30/2021) update docs for
+                    // error 5034 as part of any larger --stripe-packages documentation effort.
+                    e.setHeader("Exporting a type alias is not allowed in package specifications");
+                } else {
+                    e.setHeader("Reassigning a type alias is not allowed");
+                }
                 e.addErrorLine(rhsData->loc(), "Originally defined here");
                 auto rhsLoc = core::Loc{ctx.file, it.rhs->loc};
                 if (rhsLoc.exists()) {
@@ -1517,7 +1524,9 @@ class ResolveTypeMembersAndFieldsWalk {
             // typechecking runs) but we only want to run this on constants that are value-level and not class
             // or type aliases. The check for isa_type<AliasType> makes sure that we skip aliases of the form `X
             // = Integer` and only run this over constant value assignments like `X = 5` or `Y = 5; X = Y`.
-            if (resolveConstantType(ctx, asgn->rhs) == nullptr) {
+            //
+            // NOTE that this error is meaningless in package files, and hence suppressed there.
+            if (resolveConstantType(ctx, asgn->rhs) == nullptr && !ctx.file.data(ctx).isPackage()) {
                 if (auto e = ctx.beginError(asgn->rhs.loc(), core::errors::Resolver::ConstantMissingTypeAnnotation)) {
                     e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
                                 "# typed: strict");
