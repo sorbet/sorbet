@@ -101,7 +101,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
 
             core::lsp::ConstantResponse::Scopes scopes;
             if (symbol == core::Symbols::StubModule()) {
-                scopes = lit->resolutionScopes;
+                scopes = *lit->resolutionScopes;
             } else {
                 scopes = {symbol.data(ctx)->owner};
             }

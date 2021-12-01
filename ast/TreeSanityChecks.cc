@@ -96,7 +96,9 @@ void UnresolvedConstantLit::_sanityCheck() {
     ENFORCE(cnst.exists());
 }
 
-void ConstantLit::_sanityCheck() {}
+void ConstantLit::_sanityCheck() {
+    ENFORCE(resolutionScopes == nullptr || !resolutionScopes->empty());
+}
 
 void EmptyTree::_sanityCheck() {}
 

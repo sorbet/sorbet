@@ -299,25 +299,25 @@ ConstantLit::fullUnresolvedPath(const core::GlobalState &gs) const {
     if (this->symbol != core::Symbols::StubModule()) {
         return nullopt;
     }
-    ENFORCE(!this->resolutionScopes.empty());
+    ENFORCE(this->resolutionScopes != nullptr && !this->resolutionScopes->empty());
     vector<core::NameRef> namesFailedToResolve;
     auto *nested = this;
     {
-        while (!nested->resolutionScopes.front().exists()) {
+        while (!nested->resolutionScopes->front().exists()) {
             auto *orig = cast_tree<UnresolvedConstantLit>(nested->original);
             ENFORCE(orig);
             namesFailedToResolve.emplace_back(orig->cnst);
             nested = ast::cast_tree<ast::ConstantLit>(orig->scope);
             ENFORCE(nested);
             ENFORCE(nested->symbol == core::Symbols::StubModule());
-            ENFORCE(!nested->resolutionScopes.empty());
+            ENFORCE(!nested->resolutionScopes->empty());
         }
         auto *orig = cast_tree<UnresolvedConstantLit>(nested->original);
         ENFORCE(orig);
         namesFailedToResolve.emplace_back(orig->cnst);
         absl::c_reverse(namesFailedToResolve);
     }
-    auto prefix = nested->resolutionScopes.front();
+    auto prefix = nested->resolutionScopes->front();
     return make_pair(prefix, move(namesFailedToResolve));
 }
 
@@ -686,10 +686,12 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "orig = {}\n",
                    this->original ? this->original.showRaw(gs, tabs + 1) : "nullptr");
-    if (!resolutionScopes.empty()) {
+    // If resolutionScopes isn't null, it should not be empty.
+    ENFORCE(resolutionScopes == nullptr || !resolutionScopes->empty());
+    if (resolutionScopes != nullptr && !resolutionScopes->empty()) {
         printTabs(buf, tabs + 1);
         fmt::format_to(std::back_inserter(buf), "resolutionScopes = [{}]\n",
-                       fmt::map_join(this->resolutionScopes.begin(), this->resolutionScopes.end(), ", ",
+                       fmt::map_join(this->resolutionScopes->begin(), this->resolutionScopes->end(), ", ",
                                      [&](auto sym) { return sym.showFullName(gs); }));
     }
     printTabs(buf, tabs);
