@@ -186,6 +186,13 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
                 // complain about the method not being implemented when it was, just not visibly.
                 continue;
             }
+
+            if (sourceClass.data(sourceGS)->isClassOrModuleAbstract() && rbiEntryName == core::Names::initialize()) {
+                // `abstract!` will define `initialize` in the class to raise unconditionally
+                // https://github.com/sorbet/sorbet/blob/026c60bf719d/gems/sorbet-runtime/lib/types/private/abstract/declare.rb#L37-L42
+                // Which is not useful to include in the minimized output.
+                continue;
+            }
         }
 
         // TODO: The old Ruby-powered version used runtime reflection to record a comment like
