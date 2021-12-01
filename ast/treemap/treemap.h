@@ -340,13 +340,34 @@ private:
         }
 
         cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
-        for (auto &arg : cast_tree_nonnull<Send>(v).rawArgs()) {
+
+        const auto numPosArgs = cast_tree_nonnull<Send>(v).numPosArgs();
+        for (auto i = 0; i < numPosArgs; ++i) {
+            auto &arg = cast_tree_nonnull<Send>(v).getPosArg(i);
             arg = mapIt(std::move(arg), ctx);
             ENFORCE(arg != nullptr);
         }
 
-        ENFORCE(cast_tree_nonnull<Send>(v).hasBlock() ? cast_tree_nonnull<Send>(v).block() != nullptr : true,
-                "block was mapped into not-a block");
+        const auto numKwArgs = cast_tree_nonnull<Send>(v).numKwArgs();
+        for (auto i = 0; i < numKwArgs; ++i) {
+            auto &key = cast_tree_nonnull<Send>(v).getKwKey(i);
+            key = mapIt(std::move(key), ctx);
+            ENFORCE(key != nullptr);
+
+            auto &val = cast_tree_nonnull<Send>(v).getKwValue(i);
+            val = mapIt(std::move(val), ctx);
+            ENFORCE(val != nullptr);
+        }
+
+        if (auto kwSplat = cast_tree_nonnull<Send>(v).kwSplat()) {
+            *kwSplat = mapIt(std::move(*kwSplat), ctx);
+            ENFORCE(kwSplat != nullptr);
+        }
+
+        if (auto block = cast_tree_nonnull<Send>(v).rawBlock()) {
+            *block = mapIt(std::move(*block), ctx);
+            ENFORCE(cast_tree_nonnull<Send>(v).block() != nullptr, "block was mapped into not-a block");
+        }
 
         if constexpr (HAS_MEMBER_postTransformSend<FUNC>()) {
             return CALL_MEMBER_postTransformSend<FUNC>::call(func, ctx, std::move(v));
@@ -795,13 +816,34 @@ private:
         }
 
         cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
-        for (auto &arg : cast_tree_nonnull<Send>(v).rawArgs()) {
+
+        const auto numPosArgs = cast_tree_nonnull<Send>(v).numPosArgs();
+        for (auto i = 0; i < numPosArgs; ++i) {
+            auto &arg = cast_tree_nonnull<Send>(v).getPosArg(i);
             arg = mapIt(std::move(arg), ctx);
             ENFORCE(arg != nullptr);
         }
 
-        ENFORCE(cast_tree_nonnull<Send>(v).hasBlock() ? cast_tree_nonnull<Send>(v).block() != nullptr : true,
-                "block was mapped into not-a block");
+        const auto numKwArgs = cast_tree_nonnull<Send>(v).numKwArgs();
+        for (auto i = 0; i < numKwArgs; ++i) {
+            auto &key = cast_tree_nonnull<Send>(v).getKwKey(i);
+            key = mapIt(std::move(key), ctx);
+            ENFORCE(key != nullptr);
+
+            auto &val = cast_tree_nonnull<Send>(v).getKwValue(i);
+            val = mapIt(std::move(val), ctx);
+            ENFORCE(val != nullptr);
+        }
+
+        if (auto kwSplat = cast_tree_nonnull<Send>(v).kwSplat()) {
+            *kwSplat = mapIt(std::move(*kwSplat), ctx);
+            ENFORCE(kwSplat != nullptr);
+        }
+
+        if (auto block = cast_tree_nonnull<Send>(v).rawBlock()) {
+            *block = mapIt(std::move(*block), ctx);
+            ENFORCE(cast_tree_nonnull<Send>(v).block() != nullptr, "block was mapped into not-a block");
+        }
 
         if constexpr (HAS_MEMBER_postTransformSend<FUNC>()) {
             return CALL_MEMBER_postTransformSend<FUNC>::call(func, ctx, std::move(v));
