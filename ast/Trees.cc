@@ -686,6 +686,8 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "orig = {}\n",
                    this->original ? this->original.showRaw(gs, tabs + 1) : "nullptr");
+    // If resolutionScopes isn't null, it should not be empty.
+    ENFORCE(resolutionScopes == nullptr || !resolutionScopes->empty());
     if (resolutionScopes != nullptr && !resolutionScopes->empty()) {
         printTabs(buf, tabs + 1);
         fmt::format_to(std::back_inserter(buf), "resolutionScopes = [{}]\n",
