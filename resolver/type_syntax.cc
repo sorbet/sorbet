@@ -703,6 +703,13 @@ core::TypePtr getResultTypeWithSelfTypeParams(core::Context ctx, const ast::Expr
     return getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()).type;
 }
 
+unique_ptr<core::TypeAndOrigins> makeTypeAndOrigins(core::Context ctx, core::LocOffsets origin, core::TypePtr type) {
+    auto ty = make_unique<core::TypeAndOrigins>();
+    ty->origins.emplace_back(core::Loc(ctx.file, origin));
+    ty->type = move(type);
+    return ty;
+}
+
 TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx, const ast::ExpressionPtr &expr,
                                                               const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     // Ensure that we only check types from a class context
@@ -981,29 +988,49 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             InlinedVector<unique_ptr<core::TypeAndOrigins>, 2> holders;
             InlinedVector<const core::TypeAndOrigins *, 2> targs;
             InlinedVector<core::LocOffsets, 2> argLocs;
-            const auto &rawArgs = s.rawArgs();
-            targs.reserve(rawArgs.size());
-            argLocs.reserve(rawArgs.size());
-            holders.reserve(rawArgs.size());
+            const auto argSize = s.numPosArgs() + (2 * s.numKwArgs()) + (s.hasKwSplat() ? 1 : 0);
+            targs.reserve(argSize);
+            argLocs.reserve(argSize);
+            holders.reserve(argSize);
 
-            auto i = -1;
-            for (auto &arg : rawArgs) {
-                i++;
-                core::TypeAndOrigins ty;
-                ty.origins.emplace_back(core::Loc(ctx.file, arg.loc()));
-                if (i < s.numPosArgs()) {
-                    ty.type = core::make_type<core::MetaType>(
-                        getResultTypeWithSelfTypeParams(ctx, arg, sigBeingParsed, args.withoutSelfType()));
-                } else {
-                    // Fill this in with a dummy type. We don't want to parse this as type syntax
-                    // because we already know it's garbage.
-                    // But we still want to record some sort of arg (for the loc specifically) so
-                    // that the calls.cc intrinsic can craft an autocorrect.
-                    ty.type = core::Types::untypedUntracked();
-                }
-                holders.emplace_back(make_unique<core::TypeAndOrigins>(move(ty)));
+            const auto numPosArgs = s.numPosArgs();
+            for (auto i = 0; i < numPosArgs; ++i) {
+                auto &arg = s.getPosArg(i);
+                auto ty = makeTypeAndOrigins(ctx, arg.loc(),
+                                             core::make_type<core::MetaType>(getResultTypeWithSelfTypeParams(
+                                                 ctx, arg, sigBeingParsed, args.withoutSelfType())));
+                holders.emplace_back(move(ty));
                 targs.emplace_back(holders.back().get());
                 argLocs.emplace_back(arg.loc());
+            }
+
+            const auto numKwArgs = s.numKwArgs();
+            for (auto i = 0; i < numKwArgs; ++i) {
+                auto &kw = s.getKwKey(i);
+                auto &val = s.getKwValue(i);
+
+                // Fill these in with a dummy type. We don't want to parse this as type syntax
+                // because we already know it's garbage.
+                // But we still want to record some sort of arg (for the loc specifically) so
+                // that the calls.cc intrinsic can craft an autocorrect.
+                auto kwty = makeTypeAndOrigins(ctx, kw.loc(), core::Types::untypedUntracked());
+                auto valty = makeTypeAndOrigins(ctx, val.loc(), core::Types::untypedUntracked());
+
+                holders.emplace_back(move(kwty));
+                targs.emplace_back(holders.back().get());
+                argLocs.emplace_back(kw.loc());
+
+                holders.emplace_back(move(valty));
+                targs.emplace_back(holders.back().get());
+                argLocs.emplace_back(val.loc());
+            }
+
+            if (s.hasKwSplat()) {
+                auto &splat = *s.kwSplat();
+                auto ty = makeTypeAndOrigins(ctx, splat.loc(), core::Types::untypedUntracked());
+                holders.emplace_back(move(ty));
+                targs.emplace_back(holders.back().get());
+                argLocs.emplace_back(splat.loc());
             }
 
             core::SymbolRef corrected;
