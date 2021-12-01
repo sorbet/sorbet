@@ -57,17 +57,9 @@ public:
         }
     }
 
-    void sanityCheck(const core::GlobalState &gs, core::ClassOrModuleRef rubyClass, string_view rubyMethod) const {
+    void sanityCheck(const core::GlobalState &gs, core::MethodRef primaryMethod) const {
         if (resultType.exists()) {
             auto intrinsicResultType = resultType.data(gs)->externalType();
-
-            auto methodName = gs.lookupNameUTF8(rubyMethod);
-            ENFORCE(methodName.exists());
-
-            // We can only reasonably add type assertions for methods that have signatures
-            auto primaryMethod = rubyClass.data(gs)->findMemberTransitive(gs, methodName);
-            ENFORCE(primaryMethod.exists());
-            ENFORCE(primaryMethod.data(gs)->hasSig())
 
             // test all overloads to see if we can find a sig that produces this type
             if (core::Types::isSubType(gs, intrinsicResultType, primaryMethod.data(gs)->resultType)) {
@@ -75,13 +67,16 @@ public:
             }
 
             int i = 0;
+            auto methodName = primaryMethod.data(gs)->name;
             auto current = primaryMethod;
             while (current.data(gs)->isOverloaded()) {
                 i++;
                 auto overloadName = gs.lookupNameUnique(core::UniqueNameKind::Overload, methodName, i);
-                auto overload = primaryMethod.data(gs)->owner.data(gs)->findMember(gs, overloadName);
+                auto overloadSym = primaryMethod.data(gs)->owner.data(gs)->findMember(gs, overloadName);
+                ENFORCE(overloadSym.exists());
+
+                auto overload = overloadSym.asMethodRef();
                 ENFORCE(overload.exists());
-                ENFORCE(overload.isMethod());
 
                 if (core::Types::isSubType(gs, intrinsicResultType, overload.data(gs)->resultType)) {
                     return;
@@ -90,7 +85,7 @@ public:
                 current = overload;
             }
 
-            ENFORCE(false, "The method `{}#{}` (or an overload) does not return `{}`", rubyClass.show(gs), rubyMethod,
+            ENFORCE(false, "The method `{}#{}` (or an overload) does not return `{}`", primaryMethod.show(gs),
                     intrinsicResultType.show(gs));
         }
     }
@@ -233,10 +228,49 @@ public:
     }
 
     virtual void sanityCheck(const core::GlobalState &gs) const override {
-        cMethod.sanityCheck(gs, rubyClass, rubyMethod);
-        if (cMethodWithBlock.has_value()) {
-            cMethodWithBlock->sanityCheck(gs, rubyClass, rubyMethod);
+        CallCMethod::sanityCheckInternal(gs, this->rubyClass, *this);
+    }
+
+protected:
+    static void sanityCheckInternal(const core::GlobalState &gs, core::ClassOrModuleRef klass,
+                                    const CallCMethod &call) {
+        auto methodName = gs.lookupNameUTF8(call.rubyMethod);
+        ENFORCE(methodName.exists());
+
+        // We can only reasonably add type assertions for methods that have signatures
+        auto methodSym = klass.data(gs)->findMemberTransitive(gs, methodName);
+        ENFORCE(methodSym.exists());
+
+        auto primaryMethod = methodSym.asMethodRef();
+        ENFORCE(primaryMethod.exists());
+
+        call.cMethod.sanityCheck(gs, primaryMethod);
+        if (call.cMethodWithBlock.has_value()) {
+            call.cMethodWithBlock->sanityCheck(gs, primaryMethod);
         }
+
+        // when the intrinsic is defined without a block variant but the signature
+        int i = 0;
+        bool acceptsBlock = false;
+        auto current = primaryMethod;
+        while (current.data(gs)->isOverloaded()) {
+            const auto &args = current.data(gs)->arguments();
+            if (!args.empty() && !args.back().isSyntheticBlockArgument()) {
+                acceptsBlock = true;
+                break;
+            }
+
+            i++;
+            auto overloadName = gs.lookupNameUnique(core::UniqueNameKind::Overload, methodName, i);
+            auto overloadSym = primaryMethod.data(gs)->owner.data(gs)->findMember(gs, overloadName);
+            ENFORCE(overloadSym.exists());
+
+            current = overloadSym.asMethodRef();
+            ENFORCE(current.exists());
+        }
+
+        ENFORCE(!acceptsBlock || call.cMethodWithBlock.has_value(),
+                "the intrinsic for `{}` needs to have a block variant added", primaryMethod.show(gs));
     }
 };
 
@@ -879,11 +913,8 @@ public:
     };
 
     virtual void sanityCheck(const core::GlobalState &gs) const override {
-        auto singletonClass = rubyClass.data(gs)->lookupSingletonClass(gs);
-        cMethod.sanityCheck(gs, singletonClass, rubyMethod);
-        if (cMethodWithBlock.has_value()) {
-            cMethodWithBlock->sanityCheck(gs, singletonClass, rubyMethod);
-        }
+        auto singletonClass = this->rubyClass.data(gs)->lookupSingletonClass(gs);
+        CallCMethodSingleton::sanityCheckInternal(gs, singletonClass, *this);
     }
 };
 
