@@ -51,13 +51,16 @@ public:
     void addMissingImportSuggestions(core::ErrorBuilder &e, PackageMatch &match) {
         vector<core::ErrorLine> lines;
         auto &otherPkg = db().getPackageInfo(match.mangledName);
-        auto importName = core::packages::PackageDB::isTestFile(ctx, ctx.file.data(ctx)) ? core::Names::test_import()
-                                                                                         : core::Names::import();
+        bool isTestFile = core::packages::PackageDB::isTestFile(ctx, ctx.file.data(ctx));
+        auto importName = isTestFile ? core::Names::test_import() : core::Names::import();
+
         lines.emplace_back(core::ErrorLine::from(
             otherPkg.definitionLoc(), "Do you need to `{}` package `{}`?", importName.show(ctx),
             fmt::map_join(otherPkg.fullName(), "::", [&](auto nr) -> string { return nr.show(ctx); })));
-        // TODO(nroman-stripe) Add automatic fixers
         e.addErrorSection(core::ErrorSection(lines));
+        if (auto autocorrect = currentPkg.addImport(ctx, otherPkg, isTestFile)) {
+            e.addAutocorrect(std::forward<core::AutocorrectSuggestion>(*autocorrect));
+        }
     }
 
 private:
