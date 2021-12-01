@@ -15,6 +15,7 @@
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/lsp.h"
+#include "main/minimize/minimize.h"
 #endif
 
 #include "absl/strings/str_cat.h"
@@ -31,7 +32,6 @@
 #include "core/serialize/serialize.h"
 #include "hashing/hashing.h"
 #include "main/cache/cache.h"
-#include "main/minimize/minimize.h"
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
 #include "payload/payload.h"
@@ -615,6 +615,10 @@ int realmain(int argc, char *argv[]) {
         }
 
         if (!opts.minimizeRBI.empty()) {
+#ifdef SORBET_REALMAIN_MIN
+            logger->warn("--minimize-rbi is disabled in sorbet-orig for faster builds");
+            return 1;
+#else
             // In the future, we might consider making minimizeRBI be a repeatable option, and run
             // this block once for each input file.
             // The trick there is that they would all currently output to the same file, even for
@@ -622,6 +626,7 @@ int realmain(int argc, char *argv[]) {
             // API we want to expose.
             Minimize::indexAndResolveForMinimize(gs, gsForMinimize, opts, *workers, opts.minimizeRBI);
             Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
+#endif
         }
 
         if (opts.suggestTyped) {
