@@ -132,7 +132,6 @@ SORBET_ALIVE(VALUE, sorbet_rb_int_ge_slowpath, (VALUE, VALUE));
 
 SORBET_ALIVE(VALUE, sorbet_i_getRubyClass, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_getRubyConstant, (const char *const className, long classNameLen) __attribute__((const)));
-SORBET_ALIVE(VALUE, sorbet_i_objIsKindOf, (VALUE, VALUE) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_send,
              (struct FunctionInlineCache *, _Bool blkUsesBreak, struct vm_ifunc *, bool searchSuper,
               rb_control_frame_t *, ...));
@@ -152,6 +151,7 @@ SORBET_ALIVE(_Bool, sorbet_i_isa_String, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_Proc, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_Thread, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_RootSingleton, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_objIsKindOf, (VALUE, VALUE) __attribute__((const)));
 
 SORBET_ALIVE(long, sorbet_globalConstRegister, (VALUE val));
 SORBET_ALIVE(VALUE, sorbet_globalConstDupHash, (long index));
