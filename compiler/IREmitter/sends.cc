@@ -96,7 +96,7 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
 
     // slow path: emit a call via the ruby vm
     builder.SetInsertPoint(slowFinalCall);
-    auto *slowPathResult = IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+    auto *slowPathResult = tryNameBasedIntrinsic(mcctx);
     auto *slowPathEnd = builder.GetInsertBlock();
     builder.CreateBr(afterFinalCall);
 
