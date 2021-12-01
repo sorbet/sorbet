@@ -244,7 +244,8 @@ public:
         return {suggestion};
     }
 
-    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const vector<core::NameRef> newExport, bool isPrivateTestExport) const {
+    std::optional<core::AutocorrectSuggestion>
+    addExport(const core::GlobalState &gs, const vector<core::NameRef> newExport, bool isPrivateTestExport) const {
         for (auto expt : exports) {
             // check if we already import this, and if so, don't
             // return an autocorrect
@@ -283,8 +284,7 @@ public:
         auto strName = absl::StrJoin(newExport, "::", NameFormatter(gs));
         core::AutocorrectSuggestion suggestion(
             fmt::format("Export `{}` in package `{}`", strName, name.toString(gs)),
-            {{insertionLoc,
-                 fmt::format("\n  {} {}", isPrivateTestExport ? "export_for_test" : "export", strName)}});
+            {{insertionLoc, fmt::format("\n  {} {}", isPrivateTestExport ? "export_for_test" : "export", strName)}});
         return {suggestion};
     }
 };

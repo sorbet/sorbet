@@ -70,11 +70,11 @@ struct TestPackageFile {
         return pkgFile;
     }
 
-    const core::packages::PackageInfo& targetPackage(core::GlobalState& gs) const {
+    const core::packages::PackageInfo &targetPackage(core::GlobalState &gs) const {
         return gs.packageDB().getPackageForFile(gs, targetParsedFile.file);
     }
 
-    const core::packages::PackageInfo& newPackage(core::GlobalState& gs) const {
+    const core::packages::PackageInfo &newPackage(core::GlobalState &gs) const {
         return gs.packageDB().getPackageForFile(gs, newParsedFile.file);
     }
 
