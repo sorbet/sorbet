@@ -795,13 +795,15 @@ public:
 
 class ImportTreeBuilder final {
     // PackageInfoImpl package; // The package we are building an import tree for.
+    const FullyQualifiedName *fullPkgName;
     core::NameRef pkgMangledName;
     core::NameRef privatePkgMangledName;
     ImportTree root;
 
 public:
     ImportTreeBuilder(const PackageInfoImpl &package)
-        : pkgMangledName(package.name.mangledName), privatePkgMangledName(package.privateMangledName) {}
+        : fullPkgName(&(package.name.fullName)), pkgMangledName(package.name.mangledName),
+          privatePkgMangledName(package.privateMangledName) {}
     ImportTreeBuilder(const ImportTreeBuilder &) = delete;
     ImportTreeBuilder(ImportTreeBuilder &&) = default;
     ImportTreeBuilder &operator=(const ImportTreeBuilder &) = delete;
@@ -932,11 +934,27 @@ private:
             node = child.get();
         }
 
-        // If the node already has an import source, this is a conflicting import.
-        // See test/cli/package-import-conflicts/ for an example.
-        if (node->source.exists() && importType != ImportType::Friend) {
-            addImportConflictError(ctx, loc, node->source.importLoc, exportFqn.parts);
+        if (importType != ImportType::Friend && node->source.exists()) {
+            // If the node already has an import source, this is a conflicting import.
+            // See test/cli/package-import-conflicts/ for an example.
+
+            addConflictingImportSourcesError(ctx, loc, node->source.importLoc, exportFqn.parts);
+
+            // Don't add source; import will not get re-mapped.
+            return;
         }
+
+        if (importType != ImportType::Friend && fullPkgName->isSuffix(exportFqn)) {
+            // If the import is a prefix of the current package, add an error, as this
+            // is by definition a conflicting import.
+            // See test/cli/package-import-parent-package-conflict/ for an example.
+            addPrefixImportError(ctx, loc, importedPackage.name.fullName.parts, exportFqn.parts);
+
+            // Don't add source; import will not get mapped. This prevents an additional
+            // redefinition error in the namer.
+            return;
+        }
+
         node->source = ImportTree::Source{importedPackage.name.mangledName, loc, importType, isEnumeratedImport};
     }
 
@@ -996,7 +1014,7 @@ private:
                 // A conflicting import exists. Only report errors while constructing the test output
                 // to avoid duplicate errors because test imports are a superset of normal imports.
                 if (moduleType == ModuleType::PrivateTest && !isFriendImport) {
-                    addImportConflictError(ctx, source.importLoc, parentSrc.importLoc, parts);
+                    addConflictingImportSourcesError(ctx, source.importLoc, parentSrc.importLoc, parts);
                 }
 
                 return;
@@ -1043,16 +1061,30 @@ private:
         }
     }
 
-    // Create an error that represents an import conflict; namely a package importing two names where one is a
-    // prefix of another. This is disallowed, as it would (rightly) cause a redefinition error in the namer pass.
-    void addImportConflictError(core::Context ctx, const core::LocOffsets &loc, const core::LocOffsets &otherLoc,
-                                const vector<core::NameRef> &nameParts) {
+    // Create an error that occurs if a package imports two names where one is a prefix of another. This is disallowed,
+    // as it would (rightly) cause a redefinition error in the namer pass.
+    void addConflictingImportSourcesError(core::Context ctx, const core::LocOffsets &loc,
+                                          const core::LocOffsets &otherLoc, const vector<core::NameRef> &nameParts) {
         if (auto e = ctx.beginError(loc, core::errors::Packager::ImportConflict)) {
             // TODO Fix flaky ordering of errors. This is strange...not being done in parallel,
             // and the file processing order is consistent.
             e.setHeader("Conflicting import sources for `{}`",
                         fmt::map_join(nameParts, "::", [&](const auto &nr) { return nr.show(ctx); }));
             e.addErrorLine(core::Loc(ctx.file, otherLoc), "Conflict from");
+        }
+    }
+
+    // Create an error that occurs if a package's import exports a prefix of the package's name. This is disallowed,
+    // as it would (rightly) cause a redefinition error in the namer pass.
+    void addPrefixImportError(core::Context ctx, const core::LocOffsets &loc,
+                              const vector<core::NameRef> &importedPackageNameParts,
+                              const vector<core::NameRef> &exportedPrefixNameParts) {
+        if (auto e = ctx.beginError(loc, core::errors::Packager::ImportConflict)) {
+            e.setHeader("Package {} cannot import {}. The latter exports the constant {}, which is a prefix of the "
+                        "importing package",
+                        fmt::map_join(fullPkgName->parts, "::", [&](const auto &nr) { return nr.show(ctx); }),
+                        fmt::map_join(importedPackageNameParts, "::", [&](const auto &nr) { return nr.show(ctx); }),
+                        fmt::map_join(exportedPrefixNameParts, "::", [&](const auto &nr) { return nr.show(ctx); }));
         }
     }
 
