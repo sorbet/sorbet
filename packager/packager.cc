@@ -244,8 +244,8 @@ public:
         return {suggestion};
     }
 
-   optional<core::AutocorrectSuggestion>
-    addExport(const core::GlobalState &gs, const vector<core::NameRef> newExport, bool isPrivateTestExport) const {
+    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const vector<core::NameRef> newExport,
+                                                    bool isPrivateTestExport) const {
         for (auto expt : exports) {
             // check if we already import this, and if so, don't
             // return an autocorrect
