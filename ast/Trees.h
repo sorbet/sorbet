@@ -880,6 +880,11 @@ public:
         return hasPosArgs() || hasKwArgs();
     }
 
+    // Returns a new ast::Send with a different loc, receiver, and function.
+    // _Moves_ the arguments from this Send into the new Send.
+    // The original send turns into a Send with 0 arguments.
+    ExpressionPtr withNewBody(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun);
+
     void _sanityCheck();
 };
 CheckSize(Send, 48, 8);

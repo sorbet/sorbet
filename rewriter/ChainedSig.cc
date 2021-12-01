@@ -139,9 +139,7 @@ struct ChainedSigWalk {
                     // Drop the block argument before moving the arguments.
                     sendCopy->setBlock(nullptr);
                 }
-                auto numPosArgs = sendCopy->numPosArgs();
-                newBlockReceiver = ast::MK::Send(sendCopy->loc, std::move(newBlockReceiver), sendCopy->fun, numPosArgs,
-                                                 std::move(sendCopy->rawArgs()));
+                newBlockReceiver = sendCopy->withNewBody(sendCopy->loc, std::move(newBlockReceiver), sendCopy->fun);
             } else {
                 isFinal = true;
             }
@@ -162,13 +160,9 @@ struct ChainedSigWalk {
             args.emplace_back(ast::MK::Symbol(sendCopy->loc, core::Names::final_()));
         }
 
-        if (blockBody->hasBlock()) {
-            blockBody->setBlock(nullptr);
-        }
-
         // Create the new body, composed of the chained statements that were moved inside and the original block
-        auto newBody = ast::MK::Send(send->loc, std::move(newBlockReceiver), blockBody->fun, blockBody->numPosArgs(),
-                                     std::move(blockBody->rawArgs()));
+        auto newBody = blockBody->withNewBody(send->loc, std::move(newBlockReceiver), blockBody->fun);
+        ast::cast_tree_nonnull<ast::Send>(newBody).setBlock(nullptr);
 
         auto rv = ast::MK::Send(send->loc, std::move(sendCopy->recv), core::Names::sig(), args.size(), std::move(args));
         ast::cast_tree_nonnull<ast::Send>(rv).setBlock(ast::MK::Block0(send->block()->loc, std::move(newBody)));

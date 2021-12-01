@@ -1034,6 +1034,16 @@ void Send::addKwArg(ExpressionPtr key, ExpressionPtr value) {
     this->args.emplace(it + 1, move(value));
 }
 
+ExpressionPtr Send::withNewBody(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun) {
+    auto rv = make_expression<Send>(loc, move(recv), fun, numPosArgs_, std::move(args), flags);
+
+    // Reset important metadata on this function.
+    this->numPosArgs_ = 0;
+    this->flags.hasBlock = false;
+
+    return rv;
+}
+
 string Cast::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "T.{}", this->cast.toString(gs));
