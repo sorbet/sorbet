@@ -999,6 +999,7 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Hash(), "select", CMethod{"sorbet_rb_hash_select", core::Symbols::Enumerator()},
      CMethod{"sorbet_rb_hash_select_withBlock", core::Symbols::Hash()}},
     {core::Symbols::Hash(), "delete", CMethod{"sorbet_rb_hash_delete_m"}, CMethod{"sorbet_rb_hash_delete_m_withBlock"}},
+    {core::Symbols::Hash(), "empty?", CMethod{"sorbet_rb_hash_empty_p"}},
     {core::Symbols::TrueClass(), "|", CMethod{"sorbet_int_bool_true"}},
     {core::Symbols::FalseClass(), "|", CMethod{"sorbet_int_bool_and"}},
     {core::Symbols::TrueClass(), "&", CMethod{"sorbet_int_bool_and"}},
