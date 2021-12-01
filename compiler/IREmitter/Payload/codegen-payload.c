@@ -1612,6 +1612,14 @@ VALUE sorbet_rb_hash_delete_m_withBlock(VALUE recv, ID fun, int argc, const VALU
     }
 }
 
+// From rb_hash_empty_p: https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L2976-L2980
+SORBET_INLINE
+VALUE sorbet_rb_hash_empty_p(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                             VALUE closure) {
+    sorbet_ensure_arity(argc, 0);
+    return RHASH_EMPTY_P(recv) ? Qtrue : Qfalse;
+}
+
 SORBET_INLINE
 VALUE sorbet_rb_int_plus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                          VALUE closure) {
