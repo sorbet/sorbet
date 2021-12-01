@@ -61,6 +61,9 @@ public:
         if (resultType.exists()) {
             auto intrinsicResultType = resultType.data(gs)->externalType();
 
+            // We can only reasonably add type assertions for methods that have signatures
+            ENFORCE(primaryMethod.data(gs)->hasSig());
+
             // test all overloads to see if we can find a sig that produces this type
             if (core::Types::isSubType(gs, intrinsicResultType, primaryMethod.data(gs)->resultType)) {
                 return;
@@ -237,7 +240,6 @@ protected:
         auto methodName = gs.lookupNameUTF8(call.rubyMethod);
         ENFORCE(methodName.exists());
 
-        // We can only reasonably add type assertions for methods that have signatures
         auto methodSym = klass.data(gs)->findMemberTransitive(gs, methodName);
         ENFORCE(methodSym.exists());
 
@@ -249,7 +251,7 @@ protected:
             call.cMethodWithBlock->sanityCheck(gs, primaryMethod);
         }
 
-        // when the intrinsic is defined without a block variant but the signature
+        // Determine if the primary, or any overload, accepts a block argument.
         int i = 0;
         bool acceptsBlock = false;
         auto current = primaryMethod;
