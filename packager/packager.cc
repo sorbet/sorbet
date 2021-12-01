@@ -243,6 +243,40 @@ public:
               fmt::format("\n  {} {}", isTestImport ? "test_import" : "import", info.name.toString(gs))}});
         return {suggestion};
     }
+
+    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const PackageInfo &pkg) const {
+        auto &info = PackageInfoImpl::from(pkg);
+        for (auto import : importedPackageNames) {
+            // check if we already import this, and if so, don't
+            // return an autocorrect
+            if (import.name == info.name) {
+                return nullopt;
+            }
+        }
+
+        u4 exportLoc = info.loc.endPos() - "end"sv.size() - 1;
+        // we want to find the end of the last non-empty line, so
+        // let's do something gross: walk backward until we find non-whitespace
+        const auto &file_source = info.loc.file().data(gs).source();
+        while (isspace(file_source[exportLoc])) {
+            exportLoc--;
+            // this shouldn't happen in a well-formatted
+            // `__package.rb` file, but just to be safe
+            if (exportLoc == 0) {
+                return nullopt;
+            }
+        }
+        core::Loc insertionLoc = {info.loc.file(), exportLoc + 1, exportLoc + 1};
+        ENFORCE(insertionLoc.exists());
+
+        // now find the appropriate place for it, specifically by
+        // finding the import that directly preceeds it, if any
+        core::AutocorrectSuggestion suggestion(
+            fmt::format("Export `{}` in package `{}`", info.name.toString(gs), name.toString(gs)),
+            {{insertionLoc,
+              fmt::format("\n  export {}", info.name.toString(gs))}});
+        return {suggestion};
+    }
 };
 
 void checkPackageName(core::Context ctx, ast::UnresolvedConstantLit *constLit) {

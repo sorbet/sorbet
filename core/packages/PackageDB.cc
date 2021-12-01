@@ -40,6 +40,10 @@ public:
         return {};
     }
 
+    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const PackageInfo &pkg) const {
+        return {};
+    }
+
     ~NonePackage() {}
 
 private:
