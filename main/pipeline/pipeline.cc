@@ -558,6 +558,9 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
     if (f.data(ctx).isRBI()) {
         return result;
     }
+    if (f.data(ctx).isPackage()) {
+        return result;
+    }
 
     Timer timeit(ctx.state.tracer(), "typecheckOne", {{"file", string(f.data(ctx).path())}});
     try {
@@ -572,17 +575,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         }
         CFGCollectorAndTyper collector(opts);
         {
-            if (f.data(ctx).isPackage()) {
-#ifndef SORBET_REALMAIN_MIN
-                auto removedMods = packager::Packager::removePackageModules(ctx, resolved);
-                result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
-                result = packager::Packager::replacePackageModules(ctx, move(result), move(removedMods));
-#else
-                ENFORCE(false, "Should never happen");
-#endif
-            } else {
-                result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
-            }
+            result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, f);
             }

@@ -82,10 +82,6 @@ public:
     // Run packager incrementally. Note: `files` must contain all packages files. Does not support package changes.
     static std::vector<ast::ParsedFile> runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> files);
 
-    static std::vector<ast::ExpressionPtr> removePackageModules(const core::GlobalState &gs, ast::ParsedFile &pf);
-    static ast::ParsedFile replacePackageModules(const core::GlobalState &gs, ast::ParsedFile pf,
-                                                 std::vector<ast::ExpressionPtr> removed);
-
     Packager() = delete;
 };
 } // namespace sorbet::packager

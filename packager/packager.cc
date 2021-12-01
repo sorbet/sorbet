@@ -1427,34 +1427,4 @@ vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<a
     return files;
 }
 
-vector<ast::ExpressionPtr> removePackageModules(const core::GlobalState &gs, ast::ParsedFile &pf) {
-    ENFORCE(pf.file.data(gs).isPackage());
-    vector<ast::ExpressionPtr> removed;
-    removed.reserve(4);
-
-    auto &root = ast::cast_tree_nonnull<ast::InsSeq>(pf.tree);
-    auto it = remove_if(root.stats.begin(), root.stats.end(), [&removed](auto &exp) -> bool {
-        auto def = ast::cast_tree<ast::ClassDef>(exp);
-        if (def != nullptr &&
-            (def->symbol == core::Symbols::PackageRegistry() || def->symbol == core::Symbols::PackageTests())) {
-            ast::ExpressionPtr tmp;
-            swap(tmp, exp);
-            removed.emplace_back(move(tmp));
-            return true;
-        }
-        return false;
-    });
-    root.stats.erase(it, root.stats.end());
-
-    return removed;
-}
-
-ast::ParsedFile replacePackageModules(const core::GlobalState &gs, ast::ParsedFile pf,
-                                      std::vector<ast::ExpressionPtr> removed) {
-    ENFORCE(pf.file.data(gs).isPackage());
-    auto &root = ast::cast_tree_nonnull<ast::InsSeq>(pf.tree);
-    move(removed.begin(), removed.end(), root.stats.end());
-    return pf;
-}
-
 } // namespace sorbet::packager
