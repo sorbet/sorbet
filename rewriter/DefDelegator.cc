@@ -92,7 +92,7 @@ vector<ast::ExpressionPtr> runDefDelegators(core::MutableContext ctx, const ast:
         return methodStubs;
     }
 
-    for (int i = 0, numPosArgs = send->numPosArgs(); i < numPosArgs; ++i) {
+    for (int i = 1, numPosArgs = send->numPosArgs(); i < numPosArgs; ++i) {
         auto *method = ast::cast_tree<ast::Literal>(send->getPosArg(i));
         // Skip method names that we don't understand, but continue to emit
         // desugared calls for the ones we do.
