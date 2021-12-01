@@ -199,7 +199,7 @@ ast::Send *ASTUtil::castSig(ast::Send *send) {
     // 0 args is common case
     // 1 arg  is `sig(:final)`
     // 2 args is `Sorbet::Private::Static.sig(self, :final)`
-    if (send->numPosArgs() + send->numKwArgs() > 2 || send->hasKwSplat()) {
+    if (send->numPosArgs() > 2) {
         return nullptr;
     }
     auto *block = send->block();
@@ -216,7 +216,7 @@ ast::Send *ASTUtil::castSig(ast::Send *send) {
 }
 
 ast::ExpressionPtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
-    if (!send->hasKwArgs()) {
+    if (!send->hasKwArgs() && send->numPosArgs() == 0) {
         return nullptr;
     }
 
