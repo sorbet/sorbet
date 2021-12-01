@@ -1198,24 +1198,23 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
     return file;
 }
 
-ast::ParsedFile rewritePackagedFile(core::GlobalState &gs, ast::ParsedFile parsedFile) {
-    auto &file = parsedFile.file.data(gs);
+ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFile) {
+    auto &file = parsedFile.file.data(ctx);
     ENFORCE(file.sourceType != core::File::Type::Package);
-    core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
-    auto &pkg = gs.packageDB().getPackageForFile(ctx, ctx.file);
+    auto &pkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
     if (pkg.exists()) {
         auto &pkgImpl = PackageInfoImpl::from(pkg);
 
         // Wrap the file in a package module (ending with _Package_Private) to put it by default in the package's
         // private namespace (private-by-default paradigm).
         parsedFile = wrapFileInPackageModule(ctx, move(parsedFile), pkgImpl.privateMangledName, pkgImpl,
-                                             core::packages::PackageDB::isTestFile(gs, file));
+                                             core::packages::PackageDB::isTestFile(ctx, file));
     } else {
         // Don't transform, but raise an error on the first line.
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
             e.setHeader("File `{}` does not belong to a package; add a `{}` file to one "
                         "of its parent directories",
-                        ctx.file.data(gs).path(), "__package.rb");
+                        ctx.file.data(ctx).path(), "__package.rb");
         }
     }
     return parsedFile;
@@ -1226,7 +1225,8 @@ ast::ParsedFile rewritePackagedFile(core::GlobalState &gs, ast::ParsedFile parse
 vector<ast::ParsedFile> rewritePackagedFilesFast(core::GlobalState &gs, vector<ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "packager.rewritePackagedFilesFast");
     for (auto i = 0; i < files.size(); i++) {
-        files[i] = rewritePackagedFile(gs, move(files[i]));
+        core::Context ctx(gs, core::Symbols::root(), files[i].file);
+        files[i] = rewritePackagedFile(ctx, move(files[i]));
     }
     return files;
 }
@@ -1287,10 +1287,11 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                 if (result.gotItem()) {
                     filesProcessed++;
                     auto &file = job.file.data(gs);
+                    core::Context ctx(gs, core::Symbols::root(), job.file);
+
                     if (file.sourceType == core::File::Type::Normal) {
-                        job = rewritePackagedFile(gs, move(job));
+                        job = rewritePackagedFile(ctx, move(job));
                     } else if (file.sourceType == core::File::Type::Package) {
-                        core::Context ctx(gs, core::Symbols::root(), job.file);
                         job = rewritePackage(ctx, move(job));
                     }
                     results.emplace_back(move(job));
