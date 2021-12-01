@@ -162,7 +162,9 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     }
                     break;
                 }
-                for (auto &arg : tsend->rawArgs()) {
+                const auto numPosArgs = tsend->numPosArgs();
+                for (auto i = 0; i < numPosArgs; ++i) {
+                    auto &arg = tsend->getPosArg(i);
                     if (auto c = ast::cast_tree<ast::Literal>(arg)) {
                         if (c->isSymbol(ctx)) {
                             auto name = c->asSymbol(ctx);
@@ -185,6 +187,21 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                         if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Malformed signature; Type parameters are specified with symbols");
                         }
+                    }
+                }
+
+                const auto numKwArgs = tsend->numKwArgs();
+                for (auto i = 0; i < numKwArgs; ++i) {
+                    auto &kwkey = tsend->getKwKey(i);
+                    if (auto e = ctx.beginError(kwkey.loc(), core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Malformed signature; Type parameters are specified with symbols");
+                    }
+                }
+
+                if (tsend->kwSplat()) {
+                    if (auto e =
+                            ctx.beginError(tsend->kwSplat()->loc(), core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Malformed signature; Type parameters are specified with symbols");
                     }
                 }
             }
