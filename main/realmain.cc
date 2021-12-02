@@ -608,7 +608,8 @@ int realmain(int argc, char *argv[]) {
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
-            pipeline::typecheck(gs, move(indexed), opts, *workers);
+            pipeline::typecheck(gs, move(indexed), opts, *workers, /* cancelable */ false, nullopt,
+                                /* presorted */ false, /* intentionallyLeakASTs */ true);
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }

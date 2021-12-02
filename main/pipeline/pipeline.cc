@@ -533,7 +533,8 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
     return ret;
 }
 
-void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts) {
+void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,
+                  bool intentionallyLeakASTs) {
     core::FileRef f = resolved.file;
 
     if (opts.stopAfterPhase == options::Phase::NAMER) {
@@ -587,6 +588,10 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         if (auto e = ctx.state.beginError(sorbet::core::Loc::none(f), core::errors::Internal::InternalError)) {
             e.setHeader("Exception in cfg+infer: {} (backtrace is above)", f.data(ctx).path());
         }
+    }
+
+    if (intentionallyLeakASTs) {
+        intentionallyLeakMemory(resolved.tree.release());
     }
     return;
 }
@@ -926,7 +931,8 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 
 void typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                WorkerPool &workers, bool cancelable,
-               optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted) {
+               optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
+               bool intentionallyLeakASTs) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.
     ENFORCE(gs->hadCriticalError() || gs->errorQueue->filesFlushedCount == 0);
@@ -965,51 +971,51 @@ void typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what, 
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob(
-                "typecheck", [&igs, &opts, epoch, &epochManager, &preemptionManager, fileq, outputq, cancelable]() {
-                    vector<core::FileRef> processedFiles;
-                    ast::ParsedFile job;
-                    int processedByThread = 0;
+            workers.multiplexJob("typecheck", [&igs, &opts, epoch, &epochManager, &preemptionManager, fileq, outputq,
+                                               cancelable, intentionallyLeakASTs]() {
+                vector<core::FileRef> processedFiles;
+                ast::ParsedFile job;
+                int processedByThread = 0;
 
-                    {
-                        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                            if (result.gotItem()) {
-                                unique_ptr<absl::ReaderMutexLock> lock;
-                                if (preemptionManager) {
-                                    // [IDE] While held, no preemption tasks can run. Auto-released after each turn of
-                                    // the loop.
-                                    lock = (*preemptionManager)->lockPreemption();
+                {
+                    for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                        if (result.gotItem()) {
+                            unique_ptr<absl::ReaderMutexLock> lock;
+                            if (preemptionManager) {
+                                // [IDE] While held, no preemption tasks can run. Auto-released after each turn of
+                                // the loop.
+                                lock = (*preemptionManager)->lockPreemption();
+                            }
+                            processedByThread++;
+                            // [IDE] Only do the work if typechecking hasn't been canceled.
+                            const bool isCanceled = cancelable && epochManager.wasTypecheckingCanceled();
+                            // [IDE] Also, don't do work if the file has changed under us since we began
+                            // typechecking!
+                            // TODO(jvilk): epoch is unlikely to overflow, but it is theoretically possible.
+                            const bool fileWasChanged = preemptionManager && job.file.data(igs).epoch > epoch;
+                            if (!isCanceled && !fileWasChanged) {
+                                core::FileRef file = job.file;
+                                try {
+                                    core::Context ctx(igs, core::Symbols::root(), file);
+                                    auto file = job.file;
+                                    typecheckOne(ctx, move(job), opts, intentionallyLeakASTs);
+                                    processedFiles.emplace_back(file);
+                                } catch (SorbetException &) {
+                                    Exception::failInFuzzer();
+                                    igs.tracer().error("Exception typing file: {} (backtrace is above)",
+                                                       file.data(igs).path());
                                 }
-                                processedByThread++;
-                                // [IDE] Only do the work if typechecking hasn't been canceled.
-                                const bool isCanceled = cancelable && epochManager.wasTypecheckingCanceled();
-                                // [IDE] Also, don't do work if the file has changed under us since we began
-                                // typechecking!
-                                // TODO(jvilk): epoch is unlikely to overflow, but it is theoretically possible.
-                                const bool fileWasChanged = preemptionManager && job.file.data(igs).epoch > epoch;
-                                if (!isCanceled && !fileWasChanged) {
-                                    core::FileRef file = job.file;
-                                    try {
-                                        core::Context ctx(igs, core::Symbols::root(), file);
-                                        auto file = job.file;
-                                        typecheckOne(ctx, move(job), opts);
-                                        processedFiles.emplace_back(file);
-                                    } catch (SorbetException &) {
-                                        Exception::failInFuzzer();
-                                        igs.tracer().error("Exception typing file: {} (backtrace is above)",
-                                                           file.data(igs).path());
-                                    }
-                                    // Stream out errors
-                                    outputq->push(move(processedFiles), processedByThread);
-                                    processedByThread = 0;
-                                }
+                                // Stream out errors
+                                outputq->push(move(processedFiles), processedByThread);
+                                processedByThread = 0;
                             }
                         }
                     }
-                    if (processedByThread > 0) {
-                        outputq->push(move(processedFiles), processedByThread);
-                    }
-                });
+                }
+                if (processedByThread > 0) {
+                    outputq->push(move(processedFiles), processedByThread);
+                }
+            });
 
             vector<core::FileRef> files;
             {
