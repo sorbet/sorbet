@@ -3,10 +3,10 @@
 module ::Plaid
 end
 
-module Plaid::Models
+module ::Plaid::Models
 end
 
-class Plaid::Models::BaseModel
+class ::Plaid::Models::BaseModel
   def foo(); end
 end
 
