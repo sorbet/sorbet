@@ -887,16 +887,121 @@ public:
 };
 CheckSize(UnresolvedConstantLit, 24, 8);
 
+// For constants that failed resolution, this class will contain resolutionScopes
+// set to whatever nesting scope we estimate the constant could have been defined in.
+// For constants that resolve properly, this class will contain the resolved symbol.
+class ResolutionScopesOrSymbol final {
+public:
+    // We store tagged pointers as 64-bit values.
+    using tagged_storage = u8;
+
+private:
+    enum class Tag {
+        Symbol = 1,
+        ResolutionScopes = 2,
+    };
+
+    static constexpr tagged_storage TAG_MASK = 0xffff;
+
+    static constexpr tagged_storage PTR_MASK = ~TAG_MASK;
+
+    tagged_storage ptr;
+
+    static tagged_storage tagPtr(Tag tag, tagged_storage ptr) {
+        // Store the tag in the lower 16 bits of the pointer, regardless of size.
+        auto val = static_cast<tagged_storage>(tag);
+        auto maskedPtr = ptr << 16;
+
+        return maskedPtr | val;
+    }
+
+    static tagged_storage tagSymbol(core::SymbolRef symbol) {
+        return tagPtr(Tag::Symbol, static_cast<tagged_storage>(symbol.rawId()));
+    }
+
+    static tagged_storage allocateResolutionScopes() {
+        return tagPtr(Tag::ResolutionScopes, reinterpret_cast<tagged_storage>(new std::vector<core::SymbolRef>()));
+    }
+
+    Tag tag() const {
+        ENFORCE(ptr != 0);
+        auto value = reinterpret_cast<tagged_storage>(ptr) & TAG_MASK;
+        return static_cast<Tag>(value);
+    }
+
+    tagged_storage untaggedPtr() const noexcept {
+        auto val = ptr & PTR_MASK;
+        return val >> 16;
+    }
+
+public:
+    ResolutionScopesOrSymbol() noexcept : ptr(tagSymbol(core::Symbols::noSymbol())) {}
+    ResolutionScopesOrSymbol(core::SymbolRef symbol) noexcept : ptr(tagSymbol(symbol)) {}
+
+    ResolutionScopesOrSymbol(const ResolutionScopesOrSymbol &) = delete;
+    ResolutionScopesOrSymbol &operator=(const ResolutionScopesOrSymbol &) = delete;
+    ResolutionScopesOrSymbol(ResolutionScopesOrSymbol &&other) = delete;
+
+    ResolutionScopesOrSymbol &operator=(ResolutionScopesOrSymbol &&other) noexcept {
+        if (tag() == Tag::ResolutionScopes) {
+            delete resolutionScopes();
+        }
+        this->ptr = other.ptr;
+        other.ptr = tagSymbol(core::Symbols::noSymbol());
+        return *this;
+    }
+
+    ~ResolutionScopesOrSymbol() {
+        if (tag() == Tag::ResolutionScopes) {
+            delete resolutionScopes();
+        }
+    }
+
+    void markUnresolved() {
+        if (tag() != Tag::ResolutionScopes) {
+            ptr = allocateResolutionScopes();
+        }
+    }
+
+    // Returns nullptr if this is a resolved symbol.
+    std::vector<core::SymbolRef> *resolutionScopes() {
+        if (tag() != Tag::ResolutionScopes) {
+            return nullptr;
+        }
+
+        auto ptr = untaggedPtr();
+        return reinterpret_cast<std::vector<core::SymbolRef> *>(ptr);
+    }
+
+    // Returns nullptr if this is a resolved symbol.
+    const std::vector<core::SymbolRef> *resolutionScopes() const {
+        if (tag() != Tag::ResolutionScopes) {
+            return nullptr;
+        }
+
+        auto ptr = untaggedPtr();
+        return reinterpret_cast<std::vector<core::SymbolRef> *>(ptr);
+    }
+
+    // Returns StubModule if this is an unresolved symbol.
+    core::SymbolRef symbol() const {
+        if (tag() != Tag::Symbol) {
+            return core::Symbols::StubModule();
+        }
+        auto symbolId = untaggedPtr();
+        return core::SymbolRef::fromRaw(static_cast<u4>(symbolId));
+    }
+};
+CheckSize(ResolutionScopesOrSymbol, 8, 8);
+
 EXPRESSION(ConstantLit) {
 public:
     const core::LocOffsets loc;
 
-    core::SymbolRef symbol; // If this is a normal constant. This symbol may be already dealiased.
-    // For constants that failed resolution, symbol will be set to StubModule and resolutionScopes
-    // will be set to whatever nesting scope we estimate the constant could have been defined in.
-    // For resolved symbols, `resolutionScopes` is null.
-    using ResolutionScopes = InlinedVector<core::SymbolRef, 1>;
-    std::unique_ptr<ResolutionScopes> resolutionScopes;
+private:
+    ResolutionScopesOrSymbol resolutionScopesOrSymbol;
+
+public:
     ExpressionPtr original;
 
     ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, ExpressionPtr original);
@@ -909,9 +1014,30 @@ public:
     std::optional<std::pair<core::SymbolRef, std::vector<core::NameRef>>> fullUnresolvedPath(
         const core::GlobalState &gs) const;
 
+    core::SymbolRef symbol() const {
+        return resolutionScopesOrSymbol.symbol();
+    }
+
+    void setSymbol(core::SymbolRef symbol) {
+        resolutionScopesOrSymbol = symbol;
+    }
+
+    std::vector<core::SymbolRef> *resolutionScopes() {
+        return resolutionScopesOrSymbol.resolutionScopes();
+    }
+
+    const std::vector<core::SymbolRef> *resolutionScopes() const {
+        return resolutionScopesOrSymbol.resolutionScopes();
+    }
+
+    // Marks this constant as unresolved and allocates a vector for `resolutionScopes`.
+    void markUnresolved() {
+        return resolutionScopesOrSymbol.markUnresolved();
+    }
+
     void _sanityCheck();
 };
-CheckSize(ConstantLit, 32, 8);
+CheckSize(ConstantLit, 24, 8);
 
 EXPRESSION(ZSuperArgs) {
 public:

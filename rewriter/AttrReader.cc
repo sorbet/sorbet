@@ -186,7 +186,7 @@ ast::ExpressionPtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef 
     ast::Send *cur = body;
     while (cur != nullptr) {
         auto recv = ast::cast_tree<ast::ConstantLit>(cur->recv);
-        if ((cur->recv.isSelfReference()) || (recv && recv->symbol == core::Symbols::Sorbet())) {
+        if ((cur->recv.isSelfReference()) || (recv && recv->symbol() == core::Symbols::Sorbet())) {
             auto loc = resultType.loc();
             auto params = ast::MK::Send2(loc, move(cur->recv), core::Names::params(), ast::MK::Symbol(nameLoc, name),
                                          move(resultType));

@@ -32,7 +32,7 @@ public:
         return ctx.state.packageDB();
     }
 
-    vector<PackageMatch> findPossibleMissingImports(const ast::ConstantLit::ResolutionScopes &scopes,
+    vector<PackageMatch> findPossibleMissingImports(const std::vector<core::SymbolRef> &scopes,
                                                     core::NameRef name) const {
         vector<PackageMatch> matches;
         vector<core::NameRef> prefix;
@@ -97,7 +97,7 @@ private:
 } // namespace
 
 bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder &e,
-                                           const ast::ConstantLit::ResolutionScopes &scopes, core::NameRef name) {
+                                           const std::vector<core::SymbolRef> &scopes, core::NameRef name) {
     if (ctx.state.packageDB().empty()) {
         return false;
     }
