@@ -161,7 +161,6 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
     }
 
     if (auto *block = send->block()) {
-
         // Steal the trees, because the run is going to remove the original send node from the tree anyway.
         if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
             for (auto &&stat : insSeq->stats) {
