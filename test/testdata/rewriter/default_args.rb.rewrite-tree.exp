@@ -28,7 +28,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def initialize<<todo method>>(x = "", &<blk>)
       begin
-        @foo = "test"
+        @foo = ::T.let("test", ::String)
         @x = ::T.let(x, <emptyTree>::<C String>)
       end
     end
