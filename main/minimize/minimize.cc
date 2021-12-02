@@ -28,6 +28,11 @@ const vector<string_view> IGNORED_BY_FULL_NAME = {
     "T::InterfaceWrapper::Helpers",
 };
 
+// TODO(jez) This enum and function is a relic of the past. The only OutputCategory in use is
+// `External`, and it's only for an attempt to know when to fully-qualify something in the presence
+// of --stripe-packages mode.
+//
+// This could easily live as a post-process step in Stripe's codebase, and delete the code from here.
 enum class OutputCategory {
     External = 1,
     Util,
