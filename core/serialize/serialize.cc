@@ -1322,7 +1322,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
         case ast::Tag::ConstantLit: {
             auto &a = ast::cast_tree_nonnull<ast::ConstantLit>(what);
             pickle(p, a.loc);
-            p.putU4(a.symbol.rawId());
+            p.putU4(a.symbol().rawId());
             pickle(p, a.original);
             break;
         }

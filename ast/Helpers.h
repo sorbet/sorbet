@@ -449,12 +449,12 @@ public:
             return true;
         }
         auto root = ast::cast_tree<ast::ConstantLit>(scope);
-        return root != nullptr && root->symbol == core::Symbols::root();
+        return root != nullptr && root->symbol() == core::Symbols::root();
     }
 
     static bool isMagicClass(ExpressionPtr &expr) {
         if (auto *recv = cast_tree<ConstantLit>(expr)) {
-            return recv->symbol == core::Symbols::Magic();
+            return recv->symbol() == core::Symbols::Magic();
         } else {
             return false;
         }
