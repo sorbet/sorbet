@@ -34,13 +34,25 @@ bool isPackageModule(const core::GlobalState &gs, core::SymbolRef modName) {
 }
 
 class PrunePackageModules final {
+    const bool intentionallyLeakASTs;
     vector<bool> destroy;
 
+    void emptyRHS(ast::ClassDef &klass) {
+        if (intentionallyLeakASTs) {
+            for (auto &el : klass.rhs) {
+                intentionallyLeakMemory(el.release());
+            }
+        }
+        klass.rhs.clear();
+    }
+
 public:
+    PrunePackageModules(bool intentionallyLeakASTs) : intentionallyLeakASTs(intentionallyLeakASTs) {}
+
     ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (isPackageModule(ctx, klass.symbol)) {
-            klass.rhs.clear();
+            emptyRHS(klass);
             destroy.emplace_back(true);
         } else {
             destroy.emplace_back(false);
@@ -51,6 +63,9 @@ public:
     ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         if (destroy.back()) {
             destroy.pop_back();
+            if (intentionallyLeakASTs) {
+                intentionallyLeakMemory(tree.release());
+            }
             return ast::MK::EmptyTree();
         }
         destroy.pop_back();
@@ -1506,9 +1521,9 @@ vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<a
     return files;
 }
 
-ast::ParsedFile Packager::removePackageModules(core::Context ctx, ast::ParsedFile pf) {
+ast::ParsedFile Packager::removePackageModules(core::Context ctx, ast::ParsedFile pf, bool intentionallyLeakASTs) {
     ENFORCE(pf.file.data(ctx).isPackage());
-    PrunePackageModules prune;
+    PrunePackageModules prune(intentionallyLeakASTs);
     pf.tree = ast::ShallowMap::apply(ctx, prune, move(pf.tree));
     return pf;
 }

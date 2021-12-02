@@ -546,7 +546,7 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
 
 #ifndef SORBET_REALMAIN_MIN
     if (f.data(ctx).isPackage()) {
-        resolved = packager::Packager::removePackageModules(ctx, move(resolved));
+        resolved = packager::Packager::removePackageModules(ctx, move(resolved), intentionallyLeakASTs);
     }
 #endif
 
