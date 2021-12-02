@@ -630,8 +630,12 @@ int realmain(int argc, char *argv[]) {
         }
 
         if (opts.suggestTyped) {
-            for (u4 i = 1; i < gs->filesUsed(); i++) {
-                core::FileRef file(i);
+            for (auto &filename : opts.inputFileNames) {
+                core::FileRef file = gs->findFileByPath(filename);
+                if (!file.exists()) {
+                    continue;
+                }
+
                 if (file.data(*gs).minErrorLevel() <= core::StrictLevel::Ignore) {
                     continue;
                 }
