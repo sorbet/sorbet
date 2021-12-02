@@ -3073,19 +3073,19 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     const auto &epochManager = *gs.epochManager;
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
     if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled();
+        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
     finalizeAncestors(gs);
     if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled();
+        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
     finalizeSymbols(gs);
     if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled();
+        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
     trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
     if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled();
+        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
 
     auto result = resolveSigs(gs, std::move(trees), workers);

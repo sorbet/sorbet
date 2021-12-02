@@ -1885,7 +1885,8 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
     return allFoundDefinitions;
 }
 
-ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions) {
+ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions,
+                                          WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     vector<ast::ParsedFile> output;
     output.reserve(allFoundDefinitions.size());
@@ -1895,7 +1896,10 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
         count++;
         // defineSymbols is really fast. Avoid this mildly expensive check for most turns of the loop.
         if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
-            return ast::ParsedFilesOrCancelled();
+            while (count <= allFoundDefinitions.size()) {
+                output.emplace_back(move(allFoundDefinitions[count - 1].tree));
+            }
+            return ast::ParsedFilesOrCancelled::cancel(move(output), workers);
         }
         core::MutableContext ctx(gs, core::Symbols::root(), fileFoundDefinitions.tree.file);
         SymbolDefiner symbolDefiner(move(fileFoundDefinitions.names));
@@ -1953,9 +1957,13 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
 ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     auto foundDefs = findSymbols(gs, move(trees), workers);
     if (gs.epochManager->wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled();
+        trees.reserve(foundDefs.size());
+        for (auto &def : foundDefs) {
+            trees.emplace_back(move(def.tree));
+        }
+        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
-    auto result = defineSymbols(gs, move(foundDefs));
+    auto result = defineSymbols(gs, move(foundDefs), workers);
     if (!result.hasResult()) {
         return result;
     }

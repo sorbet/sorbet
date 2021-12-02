@@ -26,6 +26,10 @@
 // node type can likely have been created from multiple Ruby constructs.
 //
 
+namespace sorbet {
+class WorkerPool;
+}
+
 namespace sorbet::ast {
 
 enum class Tag {
@@ -235,10 +239,15 @@ struct ParsedFile {
 class ParsedFilesOrCancelled final {
 private:
     std::optional<std::vector<ParsedFile>> trees;
+    ParsedFilesOrCancelled();
 
 public:
-    ParsedFilesOrCancelled();
     ParsedFilesOrCancelled(std::vector<ParsedFile> &&trees);
+
+    // Produces a `ParsedFilesOrCancelled` in the cancelled state.
+    // Trees passed to this function will be destructed in parallel with `workers`, which improves LSP responsiveness on
+    // large projects.
+    static ParsedFilesOrCancelled cancel(std::vector<ParsedFile> &&trees, WorkerPool &workers);
 
     bool hasResult() const;
     std::vector<ParsedFile> &result();
