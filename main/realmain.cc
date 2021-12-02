@@ -609,7 +609,7 @@ int realmain(int argc, char *argv[]) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
             pipeline::typecheck(gs, move(indexed), opts, *workers, /* cancelable */ false, nullopt,
-                                /* presorted */ false, /* intentionallyLeakASTs */ true);
+                                /* presorted */ false, /* intentionallyLeakASTs */ !sorbet::emscripten_build);
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
