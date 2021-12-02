@@ -341,27 +341,11 @@ private:
 
         cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
 
-        const auto numPosArgs = cast_tree_nonnull<Send>(v).numPosArgs();
-        for (auto i = 0; i < numPosArgs; ++i) {
-            auto &arg = cast_tree_nonnull<Send>(v).getPosArg(i);
+        const auto numNonBlockArgs = cast_tree_nonnull<Send>(v).numNonBlockArgs();
+        for (auto i = 0; i < numNonBlockArgs; ++i) {
+            auto &arg = cast_tree_nonnull<Send>(v).getNonBlockArg(i);
             arg = mapIt(std::move(arg), ctx);
             ENFORCE(arg != nullptr);
-        }
-
-        const auto numKwArgs = cast_tree_nonnull<Send>(v).numKwArgs();
-        for (auto i = 0; i < numKwArgs; ++i) {
-            auto &key = cast_tree_nonnull<Send>(v).getKwKey(i);
-            key = mapIt(std::move(key), ctx);
-            ENFORCE(key != nullptr);
-
-            auto &val = cast_tree_nonnull<Send>(v).getKwValue(i);
-            val = mapIt(std::move(val), ctx);
-            ENFORCE(val != nullptr);
-        }
-
-        if (auto kwSplat = cast_tree_nonnull<Send>(v).kwSplat()) {
-            *kwSplat = mapIt(std::move(*kwSplat), ctx);
-            ENFORCE(kwSplat != nullptr);
         }
 
         if (auto block = cast_tree_nonnull<Send>(v).rawBlock()) {
@@ -817,27 +801,11 @@ private:
 
         cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
 
-        const auto numPosArgs = cast_tree_nonnull<Send>(v).numPosArgs();
-        for (auto i = 0; i < numPosArgs; ++i) {
-            auto &arg = cast_tree_nonnull<Send>(v).getPosArg(i);
+        const auto numNonBlockArgs = cast_tree_nonnull<Send>(v).numNonBlockArgs();
+        for (auto i = 0; i < numNonBlockArgs; ++i) {
+            auto &arg = cast_tree_nonnull<Send>(v).getNonBlockArg(i);
             arg = mapIt(std::move(arg), ctx);
             ENFORCE(arg != nullptr);
-        }
-
-        const auto numKwArgs = cast_tree_nonnull<Send>(v).numKwArgs();
-        for (auto i = 0; i < numKwArgs; ++i) {
-            auto &key = cast_tree_nonnull<Send>(v).getKwKey(i);
-            key = mapIt(std::move(key), ctx);
-            ENFORCE(key != nullptr);
-
-            auto &val = cast_tree_nonnull<Send>(v).getKwValue(i);
-            val = mapIt(std::move(val), ctx);
-            ENFORCE(val != nullptr);
-        }
-
-        if (auto kwSplat = cast_tree_nonnull<Send>(v).kwSplat()) {
-            *kwSplat = mapIt(std::move(*kwSplat), ctx);
-            ENFORCE(kwSplat != nullptr);
         }
 
         if (auto block = cast_tree_nonnull<Send>(v).rawBlock()) {

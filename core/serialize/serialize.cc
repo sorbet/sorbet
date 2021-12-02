@@ -928,24 +928,15 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             p.putU1(flags);
             p.putU4(s.numPosArgs());
 
-            const auto numPosArgs = s.numPosArgs();
-            const auto numKwArgs = s.numKwArgs();
-            const auto hasSplat = s.hasKwSplat();
+            const auto numNonBlockArgs = s.numNonBlockArgs();
             const auto hasBlock = s.hasBlock();
 
-            u4 size = numPosArgs + (2 * numKwArgs) + (hasSplat ? 1 : 0) + (hasBlock ? 1 : 0);
+            u4 size = numNonBlockArgs + (hasBlock ? 1 : 0);
             p.putU4(size);
             pickle(p, s.recv);
 
-            for (auto i = 0; i < numPosArgs; ++i) {
-                pickle(p, s.getPosArg(i));
-            }
-            for (auto i = 0; i < numKwArgs; ++i) {
-                pickle(p, s.getKwKey(i));
-                pickle(p, s.getKwValue(i));
-            }
-            if (hasSplat) {
-                pickle(p, *s.kwSplat());
+            for (auto i = 0; i < numNonBlockArgs; ++i) {
+                pickle(p, s.getNonBlockArg(i));
             }
             if (hasBlock) {
                 pickle(p, *s.rawBlock());

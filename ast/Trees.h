@@ -880,6 +880,22 @@ public:
         return hasPosArgs() || hasKwArgs();
     }
 
+    // Returns the number of non-block arguments. Keyword arguments are represented as two separate arguments (key and
+    // value).
+    u2 numNonBlockArgs() const {
+        return numPosArgs_ + (numKwArgs() * 2) + (hasKwSplat() ? 1 : 0);
+    }
+
+    const ExpressionPtr &getNonBlockArg(u2 idx) const {
+        ENFORCE(idx < args.size() - (hasBlock() ? 1 : 0));
+        return args[idx];
+    }
+
+    ExpressionPtr &getNonBlockArg(u2 idx) {
+        ENFORCE(idx < args.size() - (hasBlock() ? 1 : 0));
+        return args[idx];
+    }
+
     // Returns a new ast::Send with a different loc, receiver, and function.
     // _Moves_ the arguments from this Send into the new Send.
     // The original send turns into a Send with 0 arguments.

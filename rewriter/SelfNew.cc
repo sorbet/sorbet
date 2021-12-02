@@ -7,30 +7,20 @@ namespace sorbet::rewriter {
 
 namespace {
 ast::ExpressionPtr convertSelfNew(core::MutableContext ctx, ast::Send *send) {
-    auto numPosArgs = send->numPosArgs();
+    auto numNonBlockArgs = send->numNonBlockArgs();
     ast::Send::ARGS_store args;
 
     args.emplace_back(std::move(send->recv));
 
-    for (auto i = 0; i < numPosArgs; ++i) {
-        args.emplace_back(std::move(send->getPosArg(i)));
+    for (auto i = 0; i < numNonBlockArgs; ++i) {
+        args.emplace_back(std::move(send->getNonBlockArg(i)));
     }
 
-    const auto numKwArgs = send->numKwArgs();
-    for (auto i = 0; i < numKwArgs; ++i) {
-        args.emplace_back(std::move(send->getKwKey(i)));
-        args.emplace_back(std::move(send->getKwValue(i)));
+    if (auto *block = send->rawBlock()) {
+        args.emplace_back(std::move(*block));
     }
 
-    if (send->hasKwSplat()) {
-        args.emplace_back(std::move(*send->kwSplat()));
-    }
-
-    if (send->hasBlock()) {
-        args.emplace_back(std::move(*send->rawBlock()));
-    }
-
-    return ast::MK::SelfNew(send->loc, numPosArgs + 1, std::move(args), send->flags);
+    return ast::MK::SelfNew(send->loc, send->numPosArgs() + 1, std::move(args), send->flags);
 }
 
 bool isSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {

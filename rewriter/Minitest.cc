@@ -161,23 +161,11 @@ bool canMoveIntoMethodDef(const ast::ExpressionPtr &exp) {
         if (!canMoveIntoMethodDef(send->recv)) {
             return false;
         }
-        const auto numPosArgs = send->numPosArgs();
-        for (auto i = 0; i < numPosArgs; ++i) {
-            if (!canMoveIntoMethodDef(send->getPosArg(i))) {
+        const auto numNonBlockArgs = send->numNonBlockArgs();
+        for (auto i = 0; i < numNonBlockArgs; ++i) {
+            if (!canMoveIntoMethodDef(send->getNonBlockArg(i))) {
                 return false;
             }
-        }
-
-        const auto numKwArgs = send->numKwArgs();
-        for (auto i = 0; i < numKwArgs; ++i) {
-            // Keys are always symbol literals.
-            if (!canMoveIntoMethodDef(send->getKwValue(i))) {
-                return false;
-            }
-        }
-
-        if (send->hasKwSplat() && !canMoveIntoMethodDef(*send->kwSplat())) {
-            return false;
         }
 
         return true;

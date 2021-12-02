@@ -42,33 +42,14 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, 0, std::move(args));
         }
 
-        const auto numPosArgs = send->numPosArgs();
-        for (auto i = 0; i < numPosArgs; ++i) {
-            auto dupArg = dupType(send->getPosArg(i));
+        const auto numNonBlockArgs = send->numNonBlockArgs();
+        for (auto i = 0; i < numNonBlockArgs; ++i) {
+            auto dupArg = dupType(send->getNonBlockArg(i));
             if (!dupArg) {
                 // This isn't a Type signature, bail out
                 return nullptr;
             }
             args.emplace_back(std::move(dupArg));
-        }
-
-        const auto numKwArgs = send->numKwArgs();
-        for (auto i = 0; i < numKwArgs; ++i) {
-            auto dupKey = dupType(send->getKwKey(i));
-            auto dupVal = dupType(send->getKwValue(i));
-            if (!dupKey || !dupVal) {
-                return nullptr;
-            }
-            args.emplace_back(std::move(dupKey));
-            args.emplace_back(std::move(dupVal));
-        }
-
-        if (send->hasKwSplat()) {
-            auto dupSplat = dupType(*send->kwSplat());
-            if (!dupSplat) {
-                return nullptr;
-            }
-            args.emplace_back(std::move(dupSplat));
         }
 
         return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, send->numPosArgs(), std::move(args));
