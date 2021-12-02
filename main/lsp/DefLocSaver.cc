@@ -121,7 +121,9 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             if (symbolBeforeDealias == core::Symbols::StubModule()) {
                 // If the symbol is an alias to a stub symbol, it actually resolved, and so it won't
                 // have resolutionScopes.
-                scopes = *lit->resolutionScopes;
+                auto resolutionScopes = lit->resolutionScopes();
+                std::copy(resolutionScopes->begin(), resolutionScopes->end(), scopes.begin());
+
             } else {
                 scopes = {symbol.owner(ctx)};
             }
@@ -133,7 +135,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
         }
         lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope);
         if (lit) {
-            symbolBeforeDealias = lit->symbol;
+            symbolBeforeDealias = lit->symbol();
             symbol = symbolBeforeDealias.dealias(ctx);
         }
     }
@@ -146,7 +148,7 @@ bool shouldLeaveAncestorForIDE(const ast::ExpressionPtr &anc) {
         return false;
     }
     auto rcl = ast::cast_tree<ast::ConstantLit>(anc);
-    if (rcl && rcl->symbol == core::Symbols::todo()) {
+    if (rcl && rcl->symbol() == core::Symbols::todo()) {
         return false;
     }
     return true;
@@ -157,7 +159,7 @@ bool shouldLeaveAncestorForIDE(const ast::ExpressionPtr &anc) {
 void DefLocSaver::postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-    matchesQuery(ctx, &lit, lspQuery, lit.symbol);
+    matchesQuery(ctx, &lit, lspQuery, lit.symbol());
 }
 
 void DefLocSaver::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -170,13 +172,13 @@ void DefLocSaver::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tr
     } else {
         // The `<root>` class we wrap all code with uses EmptyTree for the ClassDef::name field.
         auto lit = ast::cast_tree<ast::ConstantLit>(classDef.name);
-        matchesQuery(ctx, lit, lspQuery, lit->symbol);
+        matchesQuery(ctx, lit, lspQuery, lit->symbol());
     }
 
     if (classDef.kind == ast::ClassDef::Kind::Class && !classDef.ancestors.empty() &&
         shouldLeaveAncestorForIDE(classDef.ancestors.front())) {
         auto lit = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front());
-        matchesQuery(ctx, lit, lspQuery, lit->symbol);
+        matchesQuery(ctx, lit, lspQuery, lit->symbol());
     }
 }
 

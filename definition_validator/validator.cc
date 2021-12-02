@@ -595,13 +595,13 @@ core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef
                                 const core::ClassOrModuleRef ancestor) {
     for (const auto &anc : classDef.ancestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
-        if (ancConst != nullptr && ancConst->symbol.dealias(gs) == ancestor) {
+        if (ancConst != nullptr && ancConst->symbol().dealias(gs) == ancestor) {
             return anc.loc();
         }
     }
     for (const auto &anc : classDef.singletonAncestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
-        if (ancConst != nullptr && ancConst->symbol.dealias(gs) == ancestor) {
+        if (ancConst != nullptr && ancConst->symbol().dealias(gs) == ancestor) {
             return anc.loc();
         }
     }
@@ -789,7 +789,7 @@ void validateSuperClass(core::Context ctx, const core::ClassOrModuleRef sym, con
     }
 
     if (auto cnst = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front())) {
-        if (cnst->symbol == core::Symbols::todo()) {
+        if (cnst->symbol() == core::Symbols::todo()) {
             return;
         }
     }
@@ -1200,11 +1200,11 @@ public:
         }
 
         auto id = ast::cast_tree<ast::ConstantLit>(send.recv);
-        if (id == nullptr || !id->symbol.exists() || !id->symbol.isClassOrModule()) {
+        if (id == nullptr || !id->symbol().exists() || !id->symbol().isClassOrModule()) {
             return;
         }
 
-        auto symbol = id->symbol.asClassOrModuleRef().data(ctx);
+        auto symbol = id->symbol().asClassOrModuleRef().data(ctx);
         if (!symbol->flags.isAbstract) {
             return;
         }
@@ -1219,9 +1219,9 @@ public:
         // there was no user defined .new method, which warrants an error.
         if (method_new.data(ctx)->owner == core::Symbols::Class()) {
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::AbstractClassInstantiated)) {
-                auto symbolName = id->symbol.show(ctx);
+                auto symbolName = id->symbol().show(ctx);
                 e.setHeader("Attempt to instantiate abstract class `{}`", symbolName);
-                e.addErrorLine(id->symbol.loc(ctx), "`{}` defined here", symbolName);
+                e.addErrorLine(id->symbol().loc(ctx), "`{}` defined here", symbolName);
             }
         }
     }

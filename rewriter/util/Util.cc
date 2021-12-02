@@ -23,7 +23,7 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
         if (id == nullptr) {
             return nullptr;
         }
-        ENFORCE(id->symbol == core::Symbols::root());
+        ENFORCE(id->symbol() == core::Symbols::root());
         return make_unique<ast::UnresolvedConstantLit>(cons->loc, ASTUtil::dupType(cons->scope), cons->cnst);
     }
     auto scope = ASTUtil::dupType(cons->scope);
@@ -86,7 +86,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         if (ident->original && !orig) {
             return nullptr;
         }
-        return ast::make_expression<ast::ConstantLit>(ident->loc, ident->symbol, std::move(orig));
+        return ast::make_expression<ast::ConstantLit>(ident->loc, ident->symbol(), std::move(orig));
     }
 
     auto arrayLit = ast::cast_tree<ast::Array>(orig);

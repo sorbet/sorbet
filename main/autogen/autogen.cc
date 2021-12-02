@@ -66,7 +66,7 @@ class AutogenWalk {
             // drive pre-loading for our Ruby services at Stripe, and also have to jump hoops with complicated
             // heuristics in our package generation tooling to determine whether something was resolved via an alias.
             if (cnst != nullptr && cnst->original != nullptr) {
-                auto scopeSym = cnst->symbol;
+                auto scopeSym = cnst->symbol();
                 if (scopeSym.isStaticField(ctx) && scopeSym.asFieldRef().data(ctx)->isClassAlias()) {
                     auto resolvedScopeName = symbolName(ctx, scopeSym);
 
@@ -214,7 +214,7 @@ public:
             auto &original = *cnst->original;
             cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
         }
-        if (cnst && cnst->symbol == core::Symbols::root()) {
+        if (cnst && cnst->symbol() == core::Symbols::root()) {
             return true;
         }
         return false;
@@ -267,13 +267,13 @@ public:
         if (original.original == nullptr) {
             return;
         }
-        if (original.symbol.name(ctx) == core::Names::Constants::AttachedClass()) {
+        if (original.symbol().name(ctx) == core::Names::Constants::AttachedClass()) {
             // This is a reference to a constant like <AttachedClass> that came from the `has_attached_class!` DSL
             // These are not real constant references.
             return;
         }
 
-        auto entry = make_pair(original.loc, original.symbol);
+        auto entry = make_pair(original.loc, original.symbol());
         if (seenRefsByLoc.contains(entry)) {
             return;
         }
@@ -290,7 +290,7 @@ public:
         // class or assignment
         ref.definitionLoc = original.loc;
         ref.name = QualifiedName::fromFullName(constantName(ctx, original));
-        auto sym = original.symbol;
+        auto sym = original.symbol();
         ref.sym = sym;
         if (!sym.isClassOrModule() || sym != core::Symbols::StubModule()) {
             ref.resolved = QualifiedName::fromFullName(symbolName(ctx, sym));
@@ -313,7 +313,7 @@ public:
             return;
         }
 
-        if (lhs->symbol.name(ctx) == core::Names::Constants::AttachedClass()) {
+        if (lhs->symbol().name(ctx) == core::Names::Constants::AttachedClass()) {
             // has_attached_class! create constant assignments that look like `<AttachedClass> = type_member`
             // which do not actually exist at runtime.
             return;
@@ -344,13 +344,13 @@ public:
 
         // if the RHS is _also_ a constant, then this is an alias
         auto rhs = ast::cast_tree<ast::ConstantLit>(original.rhs);
-        if (rhs && rhs->symbol.exists() && !rhs->symbol.isTypeAlias(ctx)) {
+        if (rhs && rhs->symbol().exists() && !rhs->symbol().isTypeAlias(ctx)) {
             def.type = Definition::Type::Alias;
             // since this is a `post`- method, then we've already created a `Reference` for the constant on the
             // RHS. Mark this `Definition` as an alias for it.
             ENFORCE(!refMap.empty());
             def.aliased_ref = refMap[rhs];
-        } else if (lhs->symbol.exists() && lhs->symbol.isTypeAlias(ctx)) {
+        } else if (lhs->symbol().exists() && lhs->symbol().isTypeAlias(ctx)) {
             // if the LHS has already been annotated as a type alias by the namer, the definition is (by definition,
             // hah) a type alias.
             def.type = Definition::Type::TypeAlias;

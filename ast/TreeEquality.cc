@@ -277,7 +277,7 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
         case Tag::ConstantLit: {
             auto *a = reinterpret_cast<const ConstantLit *>(tree);
             auto *b = reinterpret_cast<const ConstantLit *>(other);
-            if (a->symbol != b->symbol) {
+            if (a->symbol() != b->symbol()) {
                 return false;
             }
             if (a->original && b->original) {

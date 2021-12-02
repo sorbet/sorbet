@@ -295,7 +295,7 @@ public:
         }
 
         if (auto constantLit = ast::cast_tree<ast::ConstantLit>(send.recv)) {
-            if (constantLit->symbol == core::Symbols::Regexp() && send.fun == core::Names::new_()) {
+            if (constantLit->symbol() == core::Symbols::Regexp() && send.fun == core::Names::new_()) {
                 ENFORCE(send.numPosArgs() >= 2);
                 skipLocRange(send.getPosArg(0).loc());
                 skipLocRange(send.getPosArg(1).loc());
