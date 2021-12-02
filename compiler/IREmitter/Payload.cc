@@ -350,7 +350,8 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, 
                                   {val, Payload::getRubyConstant(cs, attachedClass, builder)});
     }
     sym = isProc(sym) ? core::Symbols::Proc() : sym;
-    return builder.CreateCall(cs.getFunction("sorbet_isa"), {val, Payload::getRubyConstant(cs, sym, builder)});
+    return builder.CreateCall(cs.getFunction("sorbet_i_objIsKindOf"),
+                              {val, Payload::getRubyConstant(cs, sym, builder)});
 }
 
 llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,

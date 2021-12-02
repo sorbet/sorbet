@@ -193,8 +193,13 @@ public:
 class ObjIsKindOf : public IRIntrinsic {
     llvm::Value *fallbackToVM(llvm::Module &module, llvm::CallInst *instr) const {
         llvm::IRBuilder<> builder(instr);
-        return builder.CreateCall(module.getFunction("rb_obj_is_kind_of"),
-                                  {instr->getArgOperand(0), instr->getArgOperand(1)});
+
+        auto *res = builder.CreateCall(module.getFunction("rb_obj_is_kind_of"),
+                                       {instr->getArgOperand(0), instr->getArgOperand(1)});
+
+        auto *isTrueClass = module.getFunction("sorbet_isa_TrueClass");
+        ENFORCE(isTrueClass != nullptr);
+        return builder.CreateCall(isTrueClass, {res});
     }
 
 public:
@@ -240,10 +245,7 @@ public:
         auto valueName = value->getName();
         for (const auto &[_rubySourceName, rubyCApiName] : knownSymbolMapping) {
             if (valueName == rubyCApiName) {
-                // We could use Payload::rubyTrue, but it takes a CompilerState which we don't have.
-                auto fn = module.getFunction("sorbet_rubyTrue");
-                ENFORCE(fn != nullptr);
-                return builder.CreateCall(fn, {}, "trueValueRaw");
+                return llvm::ConstantInt::getTrue(lctx);
             }
         }
 
