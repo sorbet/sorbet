@@ -383,7 +383,7 @@ class SymbolFinder {
     FoundDefinitionRef squashNames(core::Context ctx, const ast::ExpressionPtr &node) {
         if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
-            auto sym = id->symbol.data(ctx)->dealias(ctx);
+            auto sym = id->symbol().data(ctx)->dealias(ctx);
             ENFORCE(sym.exists());
             return foundDefs->addSymbol(sym);
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
@@ -531,7 +531,7 @@ public:
                 }
 
                 auto recv = ast::cast_tree<ast::ConstantLit>(original.recv);
-                if (recv == nullptr || recv->symbol != core::Symbols::Sorbet_Private_Static()) {
+                if (recv == nullptr || recv->symbol() != core::Symbols::Sorbet_Private_Static()) {
                     break;
                 }
 
@@ -594,7 +594,7 @@ public:
                 return core::NameRef::noName();
             }
 
-            if (recv->symbol != core::Symbols::Sorbet_Private_Static()) {
+            if (recv->symbol() != core::Symbols::Sorbet_Private_Static()) {
                 return core::NameRef::noName();
             }
 
@@ -1437,7 +1437,7 @@ class TreeSymbolizer {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
             if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
-                return id->symbol.data(ctx)->dealias(ctx);
+                return id->symbol().data(ctx)->dealias(ctx);
             }
             if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node)) {
                 if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
@@ -1591,7 +1591,7 @@ public:
             return false;
         }
         auto rcl = ast::cast_tree<ast::ConstantLit>(anc);
-        if (rcl && rcl->symbol == core::Symbols::todo()) {
+        if (rcl && rcl->symbol() == core::Symbols::todo()) {
             return false;
         }
         return true;

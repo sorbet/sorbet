@@ -8,7 +8,7 @@ namespace sorbet::resolver {
 class SuggestPackage final {
 public:
     static bool tryPackageCorrections(core::Context ctx, core::ErrorBuilder &e,
-                                      const ast::ConstantLit::ResolutionScopes &scopes, core::NameRef name);
+                                      const std::vector<core::SymbolRef> &scopes, core::NameRef name);
 
     SuggestPackage() = delete;
 };

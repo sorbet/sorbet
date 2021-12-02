@@ -9,7 +9,7 @@ namespace {
 
 bool isTSigWithoutRuntime(ast::ExpressionPtr &expr) {
     if (auto *cnst = ast::cast_tree<ast::ConstantLit>(expr)) {
-        return cnst->symbol == core::Symbols::T_Sig_WithoutRuntime();
+        return cnst->symbol() == core::Symbols::T_Sig_WithoutRuntime();
     } else {
         auto *withoutRuntime = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
         if (withoutRuntime == nullptr || withoutRuntime->cnst != core::Names::Constants::WithoutRuntime()) {

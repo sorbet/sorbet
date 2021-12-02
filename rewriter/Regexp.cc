@@ -22,7 +22,7 @@ vector<ast::ExpressionPtr> Regexp::run(core::MutableContext ctx, ast::Assign *as
     }
 
     auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
-    if (recv == nullptr || recv->symbol != core::Symbols::Regexp()) {
+    if (recv == nullptr || recv->symbol() != core::Symbols::Regexp()) {
         return {};
     }
 

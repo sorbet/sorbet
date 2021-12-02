@@ -101,7 +101,8 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
 
             core::lsp::ConstantResponse::Scopes scopes;
             if (symbol == core::Symbols::StubModule()) {
-                scopes = *lit->resolutionScopes;
+                auto resolutionScopes = lit->resolutionScopes();
+                std::copy(resolutionScopes->begin(), resolutionScopes->end(), scopes.begin());
             } else {
                 scopes = {symbol.data(ctx)->owner};
             }
@@ -112,7 +113,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
         }
         lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope);
         if (lit) {
-            symbolBeforeDealias = lit->symbol;
+            symbolBeforeDealias = lit->symbol();
             symbol = symbolBeforeDealias.data(ctx)->dealias(ctx);
         }
     }
@@ -123,7 +124,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
 ast::ExpressionPtr DefLocSaver::postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
     auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-    matchesQuery(ctx, &lit, lspQuery, lit.symbol);
+    matchesQuery(ctx, &lit, lspQuery, lit.symbol());
     return tree;
 }
 

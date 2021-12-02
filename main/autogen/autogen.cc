@@ -185,7 +185,7 @@ public:
             auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
             cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
         }
-        if (cnst && cnst->symbol == core::Symbols::root()) {
+        if (cnst && cnst->symbol() == core::Symbols::root()) {
             return true;
         }
         return false;
@@ -225,7 +225,7 @@ public:
         // class or assignment
         ref.definitionLoc = original.loc;
         ref.name = QualifiedName::fromFullName(constantName(ctx, original));
-        auto sym = original.symbol;
+        auto sym = original.symbol();
         if (!sym.isClassOrModule() || sym != core::Symbols::StubModule()) {
             ref.resolved = QualifiedName::fromFullName(symbolName(ctx, sym));
         }
@@ -263,13 +263,13 @@ public:
 
         // if the RHS is _also_ a constant, then this is an alias
         auto *rhs = ast::cast_tree<ast::ConstantLit>(original.rhs);
-        if (rhs && rhs->symbol.exists() && !rhs->symbol.data(ctx)->isTypeAlias()) {
+        if (rhs && rhs->symbol().exists() && !rhs->symbol().data(ctx)->isTypeAlias()) {
             def.type = Definition::Type::Alias;
             // since this is a `post`- method, then we've already created a `Reference` for the constant on the
             // RHS. Mark this `Definition` as an alias for it.
             ENFORCE(refMap.count(original.rhs.get()));
             def.aliased_ref = refMap[original.rhs.get()];
-        } else if (lhs->symbol.exists() && lhs->symbol.data(ctx)->isTypeAlias()) {
+        } else if (lhs->symbol().exists() && lhs->symbol().data(ctx)->isTypeAlias()) {
             // if the LHS has already been annotated as a type alias by the namer, the definition is (by definition,
             // hah) a type alias.
             def.type = Definition::Type::TypeAlias;

@@ -355,13 +355,13 @@ core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef
                                 const core::ClassOrModuleRef ancestor) {
     for (const auto &anc : classDef.ancestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
-        if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
+        if (ancConst != nullptr && ancConst->symbol().data(gs)->dealias(gs) == ancestor) {
             return anc.loc();
         }
     }
     for (const auto &anc : classDef.singletonAncestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
-        if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
+        if (ancConst != nullptr && ancConst->symbol().data(gs)->dealias(gs) == ancestor) {
             return anc.loc();
         }
     }
@@ -508,7 +508,7 @@ void validateSuperClass(core::Context ctx, const core::ClassOrModuleRef sym, con
     }
 
     if (auto *cnst = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front())) {
-        if (cnst->symbol == core::Symbols::todo()) {
+        if (cnst->symbol() == core::Symbols::todo()) {
             return;
         }
     }
