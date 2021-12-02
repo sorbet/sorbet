@@ -85,7 +85,7 @@ public:
     // The structures created for `__package.rb` files from their imports are large and deep. This causes
     // performance problems with typechecking. Use to remove these modules while retaining the PackageSpec
     // class itself during typecheck.
-    static ast::ParsedFile removePackageModules(const core::GlobalState &gs, ast::ParsedFile pf);
+    static ast::ParsedFile removePackageModules(core::Context ctx, ast::ParsedFile pf);
 
     Packager() = delete;
 };

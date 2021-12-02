@@ -544,6 +544,12 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         return;
     }
 
+#ifndef SORBET_REALMAIN_MIN
+    if (f.data(ctx).isPackage()) {
+        resolved = packager::Packager::removePackageModules(ctx, move(resolved));
+    }
+#endif
+
     resolved = definition_validator::runOne(ctx, std::move(resolved));
 
     resolved = class_flatten::runOne(ctx, move(resolved));
@@ -567,12 +573,6 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         }
         return;
     }
-#ifndef SORBET_REALMAIN_MIN
-    if (f.data(ctx).isPackage()) {
-        // Must be after `class_flatten`
-        resolved = packager::Packager::removePackageModules(ctx, move(resolved));
-    }
-#endif
 
     Timer timeit(ctx.state.tracer(), "typecheckOne", {{"file", string(f.data(ctx).path())}});
     try {

@@ -33,6 +33,17 @@ bool isPackageModule(const core::GlobalState &gs, core::SymbolRef modName) {
     return false;
 }
 
+class PrunePackageModules final {
+public:
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        if (isPackageModule(ctx, klass.symbol)) {
+            return ast::MK::EmptyTree();
+        }
+        return tree;
+    }
+};
+
 bool isPrimaryTestNamespace(const core::NameRef ns) {
     return ns == TEST_NAME;
 }
@@ -1481,14 +1492,10 @@ vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<a
     return files;
 }
 
-ast::ParsedFile Packager::removePackageModules(const core::GlobalState &gs, ast::ParsedFile pf) {
-    ENFORCE(pf.file.data(gs).isPackage());
-    auto &root = ast::cast_tree_nonnull<ast::InsSeq>(pf.tree);
-    auto it = remove_if(root.stats.begin(), root.stats.end(), [&gs](auto &exp) -> bool {
-        auto def = ast::cast_tree<ast::ClassDef>(exp);
-        return def != nullptr && isPackageModule(gs, def->symbol);
-    });
-    root.stats.erase(it, root.stats.end());
+ast::ParsedFile Packager::removePackageModules(core::Context ctx, ast::ParsedFile pf) {
+    ENFORCE(pf.file.data(ctx).isPackage());
+    PrunePackageModules prune;
+    pf.tree = ast::ShallowMap::apply(ctx, prune, move(pf.tree));
     return pf;
 }
 
