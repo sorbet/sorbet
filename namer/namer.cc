@@ -1896,7 +1896,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
         count++;
         // defineSymbols is really fast. Avoid this mildly expensive check for most turns of the loop.
         if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
-            while (count <= allFoundDefinitions.size()) {
+            for (; count <= allFoundDefinitions.size(); count++) {
                 output.emplace_back(move(allFoundDefinitions[count - 1].tree));
             }
             return ast::ParsedFilesOrCancelled::cancel(move(output), workers);
