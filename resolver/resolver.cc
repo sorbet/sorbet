@@ -592,13 +592,15 @@ private:
             return;
         }
 
-        if (send->args.size() < 1) {
+        const auto numPosArgs = send->numPosArgs();
+        if (numPosArgs == 0) {
             // The arity mismatch error will be emitted later by infer.
             return;
         }
 
         auto encounteredError = false;
-        for (auto &arg : send->args) {
+        for (auto i = 0; i < numPosArgs; ++i) {
+            auto &arg = send->getPosArg(i);
             if (arg.isSelfReference()) {
                 auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
                 if (recv != nullptr && recv->symbol == core::Symbols::Magic()) {
@@ -678,9 +680,9 @@ private:
             return;
         }
 
-        auto *block = ast::cast_tree<ast::Block>(send->block);
+        auto *block = send->block();
 
-        if (!send->args.empty()) {
+        if (send->numPosArgs() > 0) {
             if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidRequiredAncestor)) {
                 e.setHeader("`{}` only accepts a block", send->fun.show(gs));
                 e.addErrorNote("Use {} to auto-correct using the new syntax",
@@ -693,10 +695,12 @@ private:
                 string replacement = "";
                 int indent = core::Loc::offset2Pos(todo.file.data(gs), send->loc.beginPos()).column - 1;
                 int index = 1;
-                for (auto &arg : send->args) {
+                const auto numPosArgs = send->numPosArgs();
+                for (auto i = 0; i < numPosArgs; ++i) {
+                    auto &arg = send->getPosArg(i);
                     auto argLoc = core::Loc(todo.file, arg.loc());
                     replacement += fmt::format("{:{}}{} {{ {} }}{}", "", index == 1 ? 0 : indent, send->fun.show(gs),
-                                               argLoc.source(gs).value(), index < send->args.size() ? "\n" : "");
+                                               argLoc.source(gs).value(), index < numPosArgs ? "\n" : "");
                     index += 1;
                 }
                 e.addAutocorrect(
@@ -852,13 +856,13 @@ public:
 
         auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send != nullptr && send->fun == core::Names::typeAlias()) {
-            if (!send->block) {
+            if (!send->hasBlock()) {
                 // if we have an invalid (i.e. nullary) call to TypeAlias, then we'll treat it as a type alias for
                 // Untyped and report an error here: otherwise, we end up in a state at the end of constant resolution
                 // that won't match our expected invariants (and in fact will fail our sanity checks)
                 // auto temporaryUntyped = ast::MK::Untyped(asgn->lhs.get()->loc);
                 auto temporaryUntyped = ast::MK::Block0(asgn.lhs.loc(), ast::MK::Untyped(asgn.lhs.loc()));
-                send->block = std::move(temporaryUntyped);
+                send->setBlock(std::move(temporaryUntyped));
 
                 // because we're synthesizing a fake "untyped" here and actually adding it to the AST, we won't report
                 // an arity mismatch for `T.untyped` in the future, so report the arity mismatch now
@@ -867,8 +871,8 @@ public:
                     CorrectTypeAlias::eagerToLazy(ctx, e, send);
                 }
             }
-            auto &block = ast::cast_tree_nonnull<ast::Block>(send->block);
-            auto typeAliasItem = TypeAliasResolutionItem{id->symbol, ctx.file, &block.body};
+            auto *block = send->block();
+            auto typeAliasItem = TypeAliasResolutionItem{id->symbol, ctx.file, &block->body};
             this->todoTypeAliases_.emplace_back(std::move(typeAliasItem));
 
             // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
@@ -1564,14 +1568,14 @@ class ResolveTypeMembersAndFieldsWalk {
 
         // When no args are supplied, this implies that the upper and lower
         // bounds of the type parameter are top and bottom.
-        auto [posEnd, kwEnd] = rhs->kwArgsRange();
-        if (kwEnd - posEnd > 0) {
-            for (auto i = posEnd; i < kwEnd; i += 2) {
-                auto &keyExpr = rhs->args[i];
+        const auto numKwArgs = rhs->numKwArgs();
+        if (numKwArgs > 0) {
+            for (auto i = 0; i < numKwArgs; ++i) {
+                auto &keyExpr = rhs->getKwKey(i);
 
                 auto lit = ast::cast_tree<ast::Literal>(keyExpr);
                 if (lit && lit->isSymbol(ctx)) {
-                    auto &value = rhs->args[i + 1];
+                    auto &value = rhs->getKwValue(i);
 
                     ParsedSig emptySig;
                     auto allowSelfType = true;
@@ -1681,15 +1685,15 @@ class ResolveTypeMembersAndFieldsWalk {
 
     static void resolveTypeAlias(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs) {
         // this is provided by ResolveConstantsWalk
-        ENFORCE(ast::isa_tree<ast::Block>(rhs->block));
-        auto &block = ast::cast_tree_nonnull<ast::Block>(rhs->block);
-        ENFORCE(block.body);
+        ENFORCE(rhs->block() != nullptr);
+        auto block = rhs->block();
+        ENFORCE(block->body);
 
         auto allowSelfType = true;
         auto allowRebind = false;
         auto allowTypeMember = true;
         lhs.data(ctx)->resultType = TypeSyntax::getResultType(
-            ctx, block.body, ParsedSig{}, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
+            ctx, block->body, ParsedSig{}, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
     }
 
     static bool resolveJob(core::MutableContext ctx, ResolveAssignItem &job, vector<bool> &resolvedAttachedClasses) {
@@ -1817,19 +1821,18 @@ class ResolveTypeMembersAndFieldsWalk {
     void validateNonForcingIsA(core::Context ctx, const ast::Send &send) {
         constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
 
-        if (send.numPosArgs != 2) {
+        if (send.numPosArgs() != 2) {
             return;
         }
 
-        auto [posEnd, kwEnd] = send.kwArgsRange();
-        auto numKwArgs = (kwEnd - posEnd) >> 1;
+        auto numKwArgs = send.numKwArgs();
         if (numKwArgs > 1) {
             return;
         }
 
-        auto stringLoc = send.args[1].loc();
+        auto stringLoc = send.getPosArg(1).loc();
 
-        auto *literalNode = ast::cast_tree<ast::Literal>(send.args[1]);
+        auto *literalNode = ast::cast_tree<ast::Literal>(send.getPosArg(1));
         if (literalNode == nullptr) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                 e.setHeader("`{}` only accepts string literals", method);
@@ -1854,15 +1857,15 @@ class ResolveTypeMembersAndFieldsWalk {
         optional<core::LocOffsets> packageLoc;
         if (send.hasKwArgs()) {
             // this means we got the third package arg
-            auto *key = ast::cast_tree<ast::Literal>(send.args[posEnd]);
+            auto *key = ast::cast_tree<ast::Literal>(send.getKwKey(0));
             if (!key || !key->isSymbol(ctx) || key->asSymbol(ctx) != ctx.state.lookupNameUTF8("package")) {
                 return;
             }
 
-            auto *packageNode = ast::cast_tree<ast::Literal>(send.args[posEnd + 1]);
-            packageLoc = std::optional<core::LocOffsets>{send.args[posEnd + 1].loc()};
+            auto *packageNode = ast::cast_tree<ast::Literal>(send.getKwValue(0));
+            packageLoc = std::optional<core::LocOffsets>{send.getKwValue(0).loc()};
             if (packageNode == nullptr) {
-                if (auto e = ctx.beginError(send.args[posEnd + 1].loc(), core::errors::Resolver::LazyResolve)) {
+                if (auto e = ctx.beginError(send.getKwValue(0).loc(), core::errors::Resolver::LazyResolve)) {
                     e.setHeader("`{}` only accepts string literals", method);
                 }
                 return;
@@ -2160,7 +2163,7 @@ public:
                 case core::Names::uncheckedLet().rawId():
                 case core::Names::assertType().rawId():
                 case core::Names::cast().rawId(): {
-                    if (send.args.size() < 2) {
+                    if (send.numPosArgs() < 2) {
                         return tree;
                     }
 
@@ -2172,12 +2175,12 @@ public:
                     // method context.
                     item.owner = ctx.owner.enclosingClass(ctx);
 
-                    auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.args[1]));
-                    auto expr = std::move(send.args[0]);
+                    auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.getPosArg(1)));
+                    auto expr = std::move(send.getPosArg(0));
                     auto cast =
                         ast::make_expression<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), send.fun);
                     item.cast = ast::cast_tree<ast::Cast>(cast);
-                    item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).args[0];
+                    item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).getPosArg(0);
 
                     // We should be able to resolve simple casts immediately.
                     if (!tryResolveSimpleClassCastItem(ctx.withOwner(item.owner), item)) {
@@ -2219,12 +2222,14 @@ public:
                 return tree;
             }
 
-            if (send.args.size() != 2) {
+            const auto numPosArgs = send.numPosArgs();
+            if (numPosArgs != 2) {
                 return tree;
             }
 
             InlinedVector<core::NameRef, 2> args;
-            for (auto &arg : send.args) {
+            for (auto i = 0; i < numPosArgs; ++i) {
+                auto &arg = send.getPosArg(i);
                 auto lit = ast::cast_tree<ast::Literal>(arg);
                 if (lit == nullptr || !lit->isSymbol(ctx)) {
                     continue;
@@ -2245,7 +2250,7 @@ public:
                 ctx.file,
                 owner,
                 send.loc,
-                send.args[1].loc(),
+                send.getPosArg(1).loc(),
                 toName,
                 fromName,
             });
@@ -2771,8 +2776,7 @@ private:
         // code completion in LSP works.  We change the receiver, below, so that
         // sigs that don't pass through here still reflect the user's intent.
         auto *send = sig.origSend;
-        auto &origArgs = send->args;
-        auto *self = ast::cast_tree<ast::Local>(send->args[0]);
+        auto *self = ast::cast_tree<ast::Local>(send->getPosArg(0));
         if (self == nullptr) {
             return;
         }
@@ -2789,9 +2793,8 @@ private:
 
         cnst->symbol = core::Symbols::Sorbet_Private_Static_ResolvedSig();
 
-        origArgs.emplace_back(mdef.flags.isSelfMethod ? ast::MK::True(send->loc) : ast::MK::False(send->loc));
-        origArgs.emplace_back(ast::MK::Symbol(send->loc, method.data(ctx)->name));
-        send->numPosArgs += 2;
+        send->addPosArg(mdef.flags.isSelfMethod ? ast::MK::True(send->loc) : ast::MK::False(send->loc));
+        send->addPosArg(ast::MK::Symbol(send->loc, method.data(ctx)->name));
     }
 
     // Force errors from any signatures that didn't attach to methods.
@@ -2850,7 +2853,8 @@ private:
         seq.stats.erase(toRemove, seq.stats.end());
     }
 
-    ParsedSig parseSig(core::Context ctx, core::ClassOrModuleRef sigOwner, ast::Send &send, ast::MethodDef &mdef) {
+    ParsedSig parseSig(core::Context ctx, core::ClassOrModuleRef sigOwner, const ast::Send &send,
+                       ast::MethodDef &mdef) {
         auto allowSelfType = true;
         auto allowRebind = false;
         auto allowTypeMember = true;
@@ -2878,10 +2882,10 @@ private:
                     return;
                 }
 
-                if (send.args.size() == 1 &&
+                if (send.numPosArgs() == 1 &&
                     (send.fun == core::Names::public_() || send.fun == core::Names::private_() ||
                      send.fun == core::Names::privateClassMethod() || send.fun == core::Names::protected_())) {
-                    processStatement(ctx, send.args[0], lastSigs);
+                    processStatement(ctx, send.getPosArg(0), lastSigs);
                     return;
                 }
             },

@@ -338,16 +338,17 @@ private:
         if constexpr (HAS_MEMBER_preTransformSend<FUNC>()) {
             v = CALL_MEMBER_preTransformSend<FUNC>::call(func, ctx, std::move(v));
         }
+
         cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
-        for (auto &arg : cast_tree_nonnull<Send>(v).args) {
+
+        for (auto &arg : cast_tree_nonnull<Send>(v).nonBlockArgs()) {
             arg = mapIt(std::move(arg), ctx);
             ENFORCE(arg != nullptr);
         }
 
-        if (cast_tree_nonnull<Send>(v).block) {
-            auto nblock = mapBlock(std::move(cast_tree_nonnull<Send>(v).block), ctx);
-            ENFORCE(isa_tree<Block>(nblock), "block was mapped into not-a block");
-            cast_tree_nonnull<Send>(v).block = std::move(nblock);
+        if (auto *block = cast_tree_nonnull<Send>(v).rawBlock()) {
+            *block = mapIt(std::move(*block), ctx);
+            ENFORCE(cast_tree_nonnull<Send>(v).block() != nullptr, "block was mapped into not-a block");
         }
 
         if constexpr (HAS_MEMBER_postTransformSend<FUNC>()) {
@@ -568,8 +569,7 @@ private:
                     return what;
 
                 case Tag::Block:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
-                    break;
+                    return mapBlock(std::move(what), ctx);
 
                 case Tag::InsSeq:
                     return mapInsSeq(std::move(what), ctx);
@@ -796,16 +796,17 @@ private:
         if constexpr (HAS_MEMBER_preTransformSend<FUNC>()) {
             v = CALL_MEMBER_preTransformSend<FUNC>::call(func, ctx, std::move(v));
         }
+
         cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
-        for (auto &arg : cast_tree_nonnull<Send>(v).args) {
+
+        for (auto &arg : cast_tree_nonnull<Send>(v).nonBlockArgs()) {
             arg = mapIt(std::move(arg), ctx);
             ENFORCE(arg != nullptr);
         }
 
-        if (cast_tree_nonnull<Send>(v).block) {
-            auto nblock = mapBlock(std::move(cast_tree_nonnull<Send>(v).block), ctx);
-            ENFORCE(isa_tree<Block>(nblock), "block was mapped into not-a block");
-            cast_tree_nonnull<Send>(v).block = std::move(nblock);
+        if (auto *block = cast_tree_nonnull<Send>(v).rawBlock()) {
+            *block = mapIt(std::move(*block), ctx);
+            ENFORCE(cast_tree_nonnull<Send>(v).block() != nullptr, "block was mapped into not-a block");
         }
 
         if constexpr (HAS_MEMBER_postTransformSend<FUNC>()) {
@@ -1026,8 +1027,7 @@ private:
                     return what;
 
                 case Tag::Block:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
-                    break;
+                    return mapBlock(std::move(what), ctx);
 
                 case Tag::InsSeq:
                     return mapInsSeq(std::move(what), ctx);

@@ -40,10 +40,10 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
         return empty;
     }
 
-    if (send->args.size() < 2) {
+    if (send->numPosArgs() < 2) {
         return empty;
     }
-    auto *sym = ast::cast_tree<ast::Literal>(send->args[0]);
+    auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(0));
     if (sym == nullptr || !sym->isSymbol(ctx)) {
         return empty;
     }
@@ -54,7 +54,7 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
             core::Loc(ctx.file, sym->loc).source(ctx).value()[0] == ':');
     auto nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
 
-    type = ASTUtil::dupType(send->args[1]);
+    type = ASTUtil::dupType(send->getPosArg(1));
     if (!type) {
         return empty;
     }
@@ -83,8 +83,7 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
     flags.discardDef = true;
 
     // We need to keep around the original send for the compiler.
-    stats.emplace_back(ast::MK::Send(loc, ast::MK::Unsafe(loc, move(send->recv)), sendFun, send->numPosArgs,
-                                     std::move(send->args), send->flags, move(send->block)));
+    stats.emplace_back(send->withNewBody(loc, ast::MK::Unsafe(loc, move(send->recv)), sendFun));
 
     // def self.<prop>
     if (!skipSetter) {

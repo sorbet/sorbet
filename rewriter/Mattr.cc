@@ -55,9 +55,9 @@ vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send 
     bool instanceReader = true;
     bool instanceWriter = true;
     bool instancePredicate = true;
-    auto symbolArgsBound = send->numPosArgs;
+    auto symbolArgsBound = send->numPosArgs();
 
-    if (send->args.empty()) {
+    if (!send->hasPosArgs() && !send->hasKwArgs()) {
         return empty;
     }
 
@@ -88,7 +88,7 @@ vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send 
 
     vector<ast::ExpressionPtr> result;
     for (int i = 0; i < symbolArgsBound; i++) {
-        auto *lit = ast::cast_tree<ast::Literal>(send->args[i]);
+        auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(i));
         if (!lit || !lit->isSymbol(ctx)) {
             return empty;
         }

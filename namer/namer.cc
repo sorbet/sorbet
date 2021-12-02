@@ -489,15 +489,16 @@ public:
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
 
         switch (original.fun.rawId()) {
-            case core::Names::privateClassMethod().rawId():
-                for (const auto &arg : original.args) {
+            case core::Names::privateClassMethod().rawId(): {
+                for (auto &arg : original.posArgs()) {
                     addMethodModifier(ctx, original.fun, arg);
                 }
                 break;
+            }
             case core::Names::private_().rawId():
             case core::Names::protected_().rawId():
             case core::Names::public_().rawId():
-                if (original.args.empty()) {
+                if (!original.hasPosArgs()) {
                     ENFORCE(!methodVisiStack.empty());
                     methodVisiStack.back() = optional<Modifier>{Modifier{
                         Modifier::Kind::Method,
@@ -507,21 +508,22 @@ public:
                         core::NameRef::noName(),
                     }};
                 } else {
-                    for (const auto &arg : original.args) {
+                    for (auto &arg : original.posArgs()) {
                         addMethodModifier(ctx, original.fun, arg);
                     }
                 }
                 break;
-            case core::Names::privateConstant().rawId():
-                for (const auto &arg : original.args) {
+            case core::Names::privateConstant().rawId(): {
+                for (auto &arg : original.posArgs()) {
                     addConstantModifier(ctx, original.fun, arg);
                 }
                 break;
+            }
             case core::Names::keepDef().rawId():
                 // ^ visibility toggle doesn't look at `self.*` methods, only instance methods
                 // (need to use `class << self` to use nullary private with singleton class methods)
 
-                if (original.args.size() != 3) {
+                if (original.numPosArgs() != 3) {
                     break;
                 }
 
@@ -535,7 +537,7 @@ public:
                     break;
                 }
 
-                auto methodName = unwrapLiteralToMethodName(ctx, original.args[1]);
+                auto methodName = unwrapLiteralToMethodName(ctx, original.getPosArg(1));
                 foundDefs->addModifier(methodVisiStack.back()->withTarget(methodName));
 
                 break;
@@ -598,11 +600,11 @@ public:
                 return core::NameRef::noName();
             }
 
-            if (send->args.size() != 3) {
+            if (send->numPosArgs() != 3) {
                 return core::NameRef::noName();
             }
 
-            return unwrapLiteralToMethodName(ctx, send->args[1]);
+            return unwrapLiteralToMethodName(ctx, send->getPosArg(1));
         } else {
             ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
             return core::NameRef::noName();
@@ -636,7 +638,7 @@ public:
         found.varianceName = core::NameRef();
         found.isTypeTemplete = send->fun == core::Names::typeTemplate();
 
-        if (send->numPosArgs > 1) {
+        if (send->numPosArgs() > 1) {
             // Too many arguments. Define a static field that we'll use for this type åmember later.
             FoundStaticField staticField;
             staticField.owner = found.owner;
@@ -647,24 +649,20 @@ public:
             return foundDefs->addStaticField(move(staticField));
         }
 
-        if (!send->args.empty()) {
+        if (send->hasPosArgs() || send->hasKwArgs()) {
             // If there are positional arguments, there might be a variance annotation
-            if (send->numPosArgs > 0) {
-                auto *lit = ast::cast_tree<ast::Literal>(send->args[0]);
+            if (send->numPosArgs() > 0) {
+                auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
                 if (lit != nullptr && lit->isSymbol(ctx)) {
                     found.varianceName = lit->asSymbol(ctx);
                     found.litLoc = lit->loc;
                 }
             }
 
-            auto end = send->args.size();
-            if (send->hasKwSplat()) {
-                end -= 1;
-            }
-
+            const auto numKwArgs = send->numKwArgs();
             // Walk over the keyword args to find bounds annotations
-            for (auto i = send->numPosArgs; i < end; i += 2) {
-                auto *key = ast::cast_tree<ast::Literal>(send->args[i]);
+            for (auto i = 0; i < numKwArgs; ++i) {
+                auto *key = ast::cast_tree<ast::Literal>(send->getKwKey(i));
                 if (key != nullptr && key->isSymbol(ctx)) {
                     switch (key->asSymbol(ctx).rawId()) {
                         case core::Names::fixed().rawId():
@@ -1509,23 +1507,24 @@ class TreeSymbolizer {
             return;
         }
 
-        if (send->args.empty()) {
+        const auto numPosArgs = send->numPosArgs();
+        if (numPosArgs == 0) {
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
                 e.setHeader("`{}` requires at least one argument", send->fun.show(ctx));
             }
             return;
         }
 
-        if (send->block != nullptr) {
+        if (send->hasBlock()) {
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludePassedBlock)) {
                 e.setHeader("`{}` can not be passed a block", send->fun.show(ctx));
             }
             return;
         }
 
-        for (auto it = send->args.rbegin(); it != send->args.rend(); it++) {
+        for (auto i = numPosArgs - 1; i >= 0; --i) {
             // Reverse order is intentional: that's how Ruby does it.
-            auto &arg = *it;
+            auto &arg = send->getPosArg(i);
             if (ast::isa_tree<ast::EmptyTree>(arg)) {
                 continue;
             }
@@ -1737,8 +1736,8 @@ public:
                                     ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
         }
 
-        if (!send->args.empty()) {
-            if (send->numPosArgs > 1) {
+        if (send->hasPosArgs() || send->hasKwArgs()) {
+            if (send->numPosArgs() > 1) {
                 if (auto e = ctx.state.beginError(core::Loc(ctx.file, send->loc),
                                                   core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Too many args in type definition");
@@ -1759,9 +1758,9 @@ public:
                 bool fixed = false;
                 bool bounded = false;
 
-                auto [start, end] = send->kwArgsRange();
-                for (auto i = start; i < end; i += 2) {
-                    auto key = ast::cast_tree<ast::Literal>(send->args[i]);
+                const auto numKwArgs = send->numKwArgs();
+                for (auto i = 0; i < numKwArgs; ++i) {
+                    auto key = ast::cast_tree<ast::Literal>(send->getKwKey(i));
                     if (key != nullptr && key->isSymbol(ctx)) {
                         switch (key->asSymbol(ctx).rawId()) {
                             case core::Names::fixed().rawId():
@@ -1794,8 +1793,8 @@ public:
                 }
             }
 
-            if (send->numPosArgs > 0) {
-                auto *lit = ast::cast_tree<ast::Literal>(send->args.front());
+            if (send->numPosArgs() > 0) {
+                auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
                 if (!lit || !lit->isSymbol(ctx)) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                         e.setHeader("Invalid param, must be a :symbol");

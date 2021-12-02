@@ -307,8 +307,8 @@ public:
             ignoring.emplace_back(original);
         }
         // This means it's a `require`; mark it as such
-        if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->args.size() == 1) {
-            auto *lit = ast::cast_tree<ast::Literal>(original->args.front());
+        if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->numPosArgs() == 1) {
+            auto *lit = ast::cast_tree<ast::Literal>(original->getPosArg(0));
             if (lit && lit->isString(ctx)) {
                 requires.emplace_back(lit->asString(ctx));
             }

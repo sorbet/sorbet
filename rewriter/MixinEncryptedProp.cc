@@ -41,12 +41,12 @@ vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast
     if (send->fun != core::Names::encryptedProp()) {
         return empty;
     }
-    if (send->args.empty()) {
+    if (send->numPosArgs() == 0) {
         return empty;
     }
 
     auto loc = send->loc;
-    auto *sym = ast::cast_tree<ast::Literal>(send->args[0]);
+    auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(0));
     if (!sym || !sym->isSymbol(ctx)) {
         return empty;
     }
@@ -58,9 +58,7 @@ vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast
     enc_name = name.prepend(ctx, "encrypted_");
 
     ast::ExpressionPtr rules;
-    if (!send->args.empty()) {
-        rules = ASTUtil::mkKwArgsHash(send);
-    }
+    rules = ASTUtil::mkKwArgsHash(send);
 
     if (auto *hash = ast::cast_tree<ast::Hash>(rules)) {
         if (ASTUtil::hasTruthyHashValue(ctx, *hash, core::Names::immutable())) {

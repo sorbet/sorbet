@@ -25,7 +25,7 @@ namespace sorbet::rewriter {
  *   private def foo(*args, **kwargs); end
  *   def self.foo(*args, **kwargs); end
  *
- * finally, you can use module_function on its on, in which case it will do the above-described rewrite to every
+ * finally, you can use module_function on its own, in which case it will do the above-described rewrite to every
  * subsequent method definition in the class
  */
 class ModuleFunction final {

@@ -344,21 +344,21 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                 return;
                             }
 
-                            if (s.numPosArgs != 1) {
+                            if (s.numPosArgs() != 1) {
                                 if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
                                     e.setHeader("`{}` expects exactly one argument but got `{}`", "T.absurd",
-                                                s.numPosArgs);
+                                                s.numPosArgs());
                                 }
                                 ret = current;
                                 return;
                             }
 
-                            if (!ast::isa_tree<ast::Local>(s.args[0]) &&
-                                !ast::isa_tree<ast::UnresolvedIdent>(s.args[0])) {
+                            if (!ast::isa_tree<ast::Local>(s.getPosArg(0)) &&
+                                !ast::isa_tree<ast::UnresolvedIdent>(s.getPosArg(0))) {
                                 if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
                                     // Providing a send is the most common way T.absurd is misused, so we provide a
                                     // little extra hint in the error message in that case.
-                                    if (ast::isa_tree<ast::Send>(s.args[0])) {
+                                    if (ast::isa_tree<ast::Send>(s.getPosArg(0))) {
                                         e.setHeader("`{}` expects to be called on a variable, not a method call",
                                                     "T.absurd");
                                     } else {
@@ -370,7 +370,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                             }
 
                             auto temp = cctx.newTemporary(core::Names::statTemp());
-                            current = walk(cctx.withTarget(temp), s.args[0], current);
+                            current = walk(cctx.withTarget(temp), s.getPosArg(0), current);
                             current->exprs.emplace_back(cctx.target, s.loc, make_insn<TAbsurd>(temp));
                             ret = current;
                             return;
@@ -383,19 +383,19 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                 InlinedVector<LocalRef, 2> args;
                 InlinedVector<core::LocOffsets, 2> argLocs;
-                auto [posEnd, kwEnd] = s.kwArgsRange();
-                int argIdx = 0;
-                for (; argIdx < posEnd; ++argIdx) {
-                    auto &exp = s.args[argIdx];
+                const auto posEnd = s.numPosArgs();
+                for (auto argIdx = 0; argIdx < posEnd; ++argIdx) {
+                    auto &exp = s.getPosArg(argIdx);
                     LocalRef temp = cctx.newTemporary(core::Names::statTemp());
                     current = walk(cctx.withTarget(temp), exp, current);
                     args.emplace_back(temp);
                     argLocs.emplace_back(exp.loc());
                 }
 
-                for (; argIdx < kwEnd; argIdx += 2) {
-                    auto &key = s.args[argIdx];
-                    auto &val = s.args[argIdx + 1];
+                const auto kwEnd = s.numKwArgs();
+                for (auto argIdx = 0; argIdx < kwEnd; ++argIdx) {
+                    auto &key = s.getKwKey(argIdx);
+                    auto &val = s.getKwValue(argIdx);
                     LocalRef keyTmp = cctx.newTemporary(core::Names::hashTemp());
                     LocalRef valTmp = cctx.newTemporary(core::Names::hashTemp());
                     current = walk(cctx.withTarget(keyTmp), key, current);
@@ -406,24 +406,23 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     argLocs.emplace_back(val.loc());
                 }
 
-                if (s.hasKwSplat()) {
-                    auto &exp = s.args.back();
+                if (auto *exp = s.kwSplat()) {
                     LocalRef temp = cctx.newTemporary(core::Names::statTemp());
-                    current = walk(cctx.withTarget(temp), exp, current);
+                    current = walk(cctx.withTarget(temp), *exp, current);
                     args.emplace_back(temp);
-                    argLocs.emplace_back(exp.loc());
+                    argLocs.emplace_back(exp->loc());
                 }
 
-                if (s.block != nullptr) {
+                if (auto *block = s.block()) {
                     auto newRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
-                    auto &blockArgs = ast::cast_tree_nonnull<ast::Block>(s.block).args;
+                    auto &blockArgs = block->args;
                     vector<ast::ParsedArg> blockArgFlags = ast::ArgParsing::parseArgs(blockArgs);
                     vector<core::ArgInfo::ArgFlags> argFlags;
                     for (auto &e : blockArgFlags) {
                         argFlags.emplace_back(e.flags);
                     }
                     auto link = make_shared<core::SendAndBlockLink>(s.fun, move(argFlags), newRubyBlockId);
-                    auto send = make_insn<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs, args, argLocs,
+                    auto send = make_insn<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs(), args, argLocs,
                                                 !!s.flags.isPrivateOk, link);
                     LocalRef sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
                     auto solveConstraint = make_insn<SolveConstraint>(link, sendTemp);
@@ -443,7 +442,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     LocalRef argTemp = cctx.newTemporary(core::Names::blkArg());
                     bodyBlock->exprs.emplace_back(LocalRef::selfVariable(), s.loc,
                                                   make_insn<LoadSelf>(link, LocalRef::selfVariable()));
-                    bodyBlock->exprs.emplace_back(argTemp, s.block.loc(), make_insn<LoadYieldParams>(link));
+                    bodyBlock->exprs.emplace_back(argTemp, s.block()->loc, make_insn<LoadYieldParams>(link));
 
                     auto *argBlock = bodyBlock;
                     for (int i = 0; i < blockArgFlags.size(); ++i) {
@@ -496,10 +495,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                               .withBlockBreakTarget(cctx.target)
                                               .withLoopScope(headerBlock, postBlock, true)
                                               .withSendAndBlockLink(link),
-                                          ast::cast_tree<ast::Block>(s.block)->body, argBlock);
+                                          s.block()->body, argBlock);
                     if (blockLast != cctx.inWhat.deadBlock()) {
                         LocalRef dead = cctx.newTemporary(core::Names::blockReturnTemp());
-                        synthesizeExpr(blockLast, dead, s.block.loc(), make_insn<BlockReturn>(link, blockrv));
+                        synthesizeExpr(blockLast, dead, s.block()->loc, make_insn<BlockReturn>(link, blockrv));
                     }
 
                     unconditionalJump(blockLast, headerBlock, cctx.inWhat, s.loc);
@@ -529,9 +528,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                      *
                      */
                 } else {
-                    current->exprs.emplace_back(
-                        cctx.target, s.loc,
-                        make_insn<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs, args, argLocs, !!s.flags.isPrivateOk));
+                    current->exprs.emplace_back(cctx.target, s.loc,
+                                                make_insn<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs(), args,
+                                                                argLocs, !!s.flags.isPrivateOk));
                 }
 
                 ret = current;

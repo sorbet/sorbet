@@ -34,7 +34,7 @@ vector<ast::ExpressionPtr> runDefDelegator(core::MutableContext ctx, const ast::
 
     // This method takes 2..3 positional arguments and no keyword args:
     // `def_delegator(accessor, method, ali = method)`
-    if (!(send->numPosArgs == 2 || send->numPosArgs == 3)) {
+    if (!(send->numPosArgs() == 2 || send->numPosArgs() == 3)) {
         return methodStubs;
     }
 
@@ -42,20 +42,20 @@ vector<ast::ExpressionPtr> runDefDelegator(core::MutableContext ctx, const ast::
         return methodStubs;
     }
 
-    auto *accessor = ast::cast_tree<ast::Literal>(send->args[0]);
+    auto *accessor = ast::cast_tree<ast::Literal>(send->getPosArg(0));
     if (!accessor || !(accessor->isSymbol(ctx) || accessor->isString(ctx))) {
         return methodStubs;
     }
 
-    auto *method = ast::cast_tree<ast::Literal>(send->args[1]);
+    auto *method = ast::cast_tree<ast::Literal>(send->getPosArg(1));
     if (!method || !method->isSymbol(ctx)) {
         return methodStubs;
     }
 
     core::NameRef methodName = method->asSymbol(ctx);
 
-    if (send->numPosArgs == 3) {
-        auto *alias = ast::cast_tree<ast::Literal>(send->args[2]);
+    if (send->numPosArgs() == 3) {
+        auto *alias = ast::cast_tree<ast::Literal>(send->getPosArg(2));
         if (!alias || !alias->isSymbol(ctx)) {
             return methodStubs;
         }
@@ -79,7 +79,7 @@ vector<ast::ExpressionPtr> runDefDelegators(core::MutableContext ctx, const ast:
 
     // This method takes 1.. positional arguments and no keyword args:
     // `def_delegators(accessor, methods*)`
-    if (send->numPosArgs == 0) {
+    if (send->numPosArgs() == 0) {
         return methodStubs;
     }
 
@@ -87,13 +87,13 @@ vector<ast::ExpressionPtr> runDefDelegators(core::MutableContext ctx, const ast:
         return methodStubs;
     }
 
-    auto *accessor = ast::cast_tree<ast::Literal>(send->args[0]);
+    auto *accessor = ast::cast_tree<ast::Literal>(send->getPosArg(0));
     if (!accessor || !(accessor->isSymbol(ctx) || accessor->isString(ctx))) {
         return methodStubs;
     }
 
-    for (auto arg = send->args.begin() + 1, end = send->args.end(); arg != end; ++arg) {
-        auto *method = ast::cast_tree<ast::Literal>(*arg);
+    for (int i = 1, numPosArgs = send->numPosArgs(); i < numPosArgs; ++i) {
+        auto *method = ast::cast_tree<ast::Literal>(send->getPosArg(i));
         // Skip method names that we don't understand, but continue to emit
         // desugared calls for the ones we do.
         if (!method || !method->isSymbol(ctx)) {

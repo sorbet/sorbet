@@ -12,8 +12,8 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
     for (auto &stat : klass->rhs) {
         if (auto *send = ast::cast_tree<ast::Send>(stat)) {
             if (send->fun == core::Names::test()) {
-                if (send->args.size() == 1 && send->numPosArgs == 1 && send->block) {
-                    auto *arg0 = ast::cast_tree<ast::Literal>(send->args[0]);
+                if (send->numPosArgs() == 1 && !send->hasKwArgs() && send->hasBlock()) {
+                    auto *arg0 = ast::cast_tree<ast::Literal>(send->getPosArg(0));
 
                     if (arg0 && arg0->isString(ctx)) {
                         testSends.push_back(std::move(stat));
@@ -21,7 +21,8 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
                     }
                 }
             } else if (send->fun == core::Names::setup() || send->fun == core::Names::teardown()) {
-                if (send->args.empty() && send->block) {
+                if (send->hasBlock() && !send->hasPosArgs() && !send->hasKwArgs()) {
+                    // send->args only contains block.
                     setupAndTeardownSends.push_back(std::move(stat));
                     continue;
                 }
@@ -34,8 +35,8 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
     for (auto &stat : testSends) {
         auto *send = ast::cast_tree<ast::Send>(stat);
         auto loc = send->loc;
-        auto *arg0 = ast::cast_tree<ast::Literal>(send->args[0]);
-        auto block = ast::cast_tree<ast::Block>(send->block);
+        auto *arg0 = ast::cast_tree<ast::Literal>(send->getPosArg(0));
+        auto *block = send->block();
 
         auto snake_case_name = absl::StrReplaceAll(arg0->asString(ctx).toString(ctx), {{" ", "_"}});
         auto name = ctx.state.enterNameUTF8("test_" + snake_case_name);
@@ -51,7 +52,7 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
         for (auto &stat : setupAndTeardownSends) {
             auto *send = ast::cast_tree<ast::Send>(stat);
             auto loc = send->loc;
-            auto block = ast::cast_tree<ast::Block>(send->block);
+            auto block = send->block();
             auto method_name = send->fun == core::Names::setup() ? core::Names::initialize() : core::Names::teardown();
 
             auto method = ast::MK::SyntheticMethod0(loc, loc, method_name, std::move(block->body));

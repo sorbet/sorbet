@@ -926,13 +926,21 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             // Can replace this with std::bit_cast in C++20
             memcpy(&flags, &s.flags, sizeof(flags));
             p.putU1(flags);
-            p.putU4(s.numPosArgs);
-            p.putU4(s.args.size());
+            p.putU4(s.numPosArgs());
+
+            const auto hasBlock = s.hasBlock();
+
+            u4 size = s.numNonBlockArgs() + (hasBlock ? 1 : 0);
+            p.putU4(size);
             pickle(p, s.recv);
-            pickle(p, s.block);
-            for (auto &arg : s.args) {
+
+            for (auto &arg : s.nonBlockArgs()) {
                 pickle(p, arg);
             }
+            if (hasBlock) {
+                pickle(p, *s.rawBlock());
+            }
+
             break;
         }
 
@@ -1217,12 +1225,11 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto numPosArgs = static_cast<u2>(p.getU4());
             auto argsSize = p.getU4();
             auto recv = unpickleExpr(p, gs);
-            ast::ExpressionPtr blk = unpickleExpr(p, gs);
             ast::Send::ARGS_store store(argsSize);
             for (auto &expr : store) {
                 expr = unpickleExpr(p, gs);
             }
-            return ast::MK::Send(loc, std::move(recv), fun, numPosArgs, std::move(store), flags, std::move(blk));
+            return ast::MK::Send(loc, std::move(recv), fun, numPosArgs, std::move(store), flags);
         }
         case ast::Tag::Block: {
             auto loc = unpickleLocOffsets(p);

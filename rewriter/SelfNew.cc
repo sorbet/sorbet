@@ -11,12 +11,15 @@ ast::ExpressionPtr convertSelfNew(core::MutableContext ctx, ast::Send *send) {
 
     args.emplace_back(std::move(send->recv));
 
-    for (auto &arg : send->args) {
+    for (auto &arg : send->nonBlockArgs()) {
         args.emplace_back(std::move(arg));
     }
 
-    auto numPosArgs = send->numPosArgs + 1;
-    return ast::MK::SelfNew(send->loc, numPosArgs, std::move(args), send->flags, std::move(send->block));
+    if (auto *block = send->rawBlock()) {
+        args.emplace_back(std::move(*block));
+    }
+
+    return ast::MK::SelfNew(send->loc, send->numPosArgs() + 1, std::move(args), send->flags);
 }
 
 bool isSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {
@@ -24,11 +27,11 @@ bool isSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {
         return false;
     }
 
-    if (!send->args[0].isSelfReference()) {
+    if (!send->getPosArg(0).isSelfReference()) {
         return false;
     }
 
-    auto *lit = ast::cast_tree<ast::Literal>(send->args[1]);
+    auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(1));
     if (lit == nullptr) {
         return false;
     }
@@ -50,18 +53,15 @@ bool isSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {
 }
 
 ast::ExpressionPtr convertSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {
-    ast::Send::ARGS_store args;
-
-    for (auto &arg : send->args) {
-        args.emplace_back(std::move(arg));
-    }
-
     auto magic = ast::MK::Constant(send->loc, core::Symbols::Magic());
-    args[0] = std::move(magic);
-    args[1] = ast::MK::Symbol(send->loc, core::Names::selfNew());
+    auto &arg0 = send->getPosArg(0);
+    arg0 = std::move(magic);
 
-    return ast::MK::Send(send->loc, std::move(send->recv), send->fun, send->numPosArgs, std::move(args), send->flags,
-                         std::move(send->block));
+    auto &arg1 = send->getPosArg(1);
+    arg1 = ast::MK::Symbol(send->loc, core::Names::selfNew());
+
+    // The original expression is now properly mutated, but we need to return an expression not a Send.
+    return send->withNewBody(send->loc, std::move(send->recv), send->fun);
 }
 } // namespace
 
