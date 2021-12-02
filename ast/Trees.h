@@ -823,6 +823,22 @@ public:
         return args[idx];
     }
 
+    absl::Span<const ExpressionPtr> posArgs() const {
+        return absl::MakeSpan(args.begin(), numPosArgs_);
+    }
+
+    absl::Span<ExpressionPtr> posArgs() {
+        return absl::MakeSpan(args.begin(), numPosArgs_);
+    }
+
+    absl::Span<const ExpressionPtr> nonBlockArgs() const {
+        return absl::MakeSpan(args.begin(), numNonBlockArgs());
+    }
+
+    absl::Span<ExpressionPtr> nonBlockArgs() {
+        return absl::MakeSpan(args.begin(), numNonBlockArgs());
+    }
+
     // Remove all arguments to the function, including the block argument.
     void clearArgs();
 

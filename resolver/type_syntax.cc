@@ -162,9 +162,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     }
                     break;
                 }
-                const auto numPosArgs = tsend->numPosArgs();
-                for (auto i = 0; i < numPosArgs; ++i) {
-                    auto &arg = tsend->getPosArg(i);
+                for (auto &arg : tsend->posArgs()) {
                     if (auto c = ast::cast_tree<ast::Literal>(arg)) {
                         if (c->isSymbol(ctx)) {
                             auto name = c->asSymbol(ctx);
@@ -993,9 +991,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             argLocs.reserve(argSize);
             holders.reserve(argSize);
 
-            const auto numPosArgs = s.numPosArgs();
-            for (auto i = 0; i < numPosArgs; ++i) {
-                auto &arg = s.getPosArg(i);
+            for (auto &arg : s.posArgs()) {
                 auto ty = makeTypeAndOrigins(ctx, arg.loc(),
                                              core::make_type<core::MetaType>(getResultTypeWithSelfTypeParams(
                                                  ctx, arg, sigBeingParsed, args.withoutSelfType())));

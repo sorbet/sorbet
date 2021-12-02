@@ -341,14 +341,12 @@ private:
 
         cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
 
-        const auto numNonBlockArgs = cast_tree_nonnull<Send>(v).numNonBlockArgs();
-        for (auto i = 0; i < numNonBlockArgs; ++i) {
-            auto &arg = cast_tree_nonnull<Send>(v).getNonBlockArg(i);
+        for (auto &arg : cast_tree_nonnull<Send>(v).nonBlockArgs()) {
             arg = mapIt(std::move(arg), ctx);
             ENFORCE(arg != nullptr);
         }
 
-        if (auto block = cast_tree_nonnull<Send>(v).rawBlock()) {
+        if (auto *block = cast_tree_nonnull<Send>(v).rawBlock()) {
             *block = mapIt(std::move(*block), ctx);
             ENFORCE(cast_tree_nonnull<Send>(v).block() != nullptr, "block was mapped into not-a block");
         }
@@ -801,14 +799,12 @@ private:
 
         cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
 
-        const auto numNonBlockArgs = cast_tree_nonnull<Send>(v).numNonBlockArgs();
-        for (auto i = 0; i < numNonBlockArgs; ++i) {
-            auto &arg = cast_tree_nonnull<Send>(v).getNonBlockArg(i);
+        for (auto &arg : cast_tree_nonnull<Send>(v).nonBlockArgs()) {
             arg = mapIt(std::move(arg), ctx);
             ENFORCE(arg != nullptr);
         }
 
-        if (auto block = cast_tree_nonnull<Send>(v).rawBlock()) {
+        if (auto *block = cast_tree_nonnull<Send>(v).rawBlock()) {
             *block = mapIt(std::move(*block), ctx);
             ENFORCE(cast_tree_nonnull<Send>(v).block() != nullptr, "block was mapped into not-a block");
         }

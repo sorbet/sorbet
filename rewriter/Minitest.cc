@@ -161,9 +161,8 @@ bool canMoveIntoMethodDef(const ast::ExpressionPtr &exp) {
         if (!canMoveIntoMethodDef(send->recv)) {
             return false;
         }
-        const auto numNonBlockArgs = send->numNonBlockArgs();
-        for (auto i = 0; i < numNonBlockArgs; ++i) {
-            if (!canMoveIntoMethodDef(send->getNonBlockArg(i))) {
+        for (auto &arg : send->nonBlockArgs()) {
+            if (!canMoveIntoMethodDef(arg)) {
                 return false;
             }
         }

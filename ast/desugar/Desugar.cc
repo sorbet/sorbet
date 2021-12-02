@@ -530,8 +530,7 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
     // here: to accomodate the call to field= instead of just field.
     assgnArgs.reserve(numPosArgs + 1);
 
-    for (auto i = 0; i < numPosArgs; ++i) {
-        auto &arg = s->getPosArg(i);
+    for (auto &arg : s->posArgs()) {
         auto argLoc = arg.loc();
         core::NameRef name = dctx.freshNameUnique(s->fun);
         stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));

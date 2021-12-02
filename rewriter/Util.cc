@@ -42,9 +42,8 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, 0, std::move(args));
         }
 
-        const auto numNonBlockArgs = send->numNonBlockArgs();
-        for (auto i = 0; i < numNonBlockArgs; ++i) {
-            auto dupArg = dupType(send->getNonBlockArg(i));
+        for (auto &arg : send->nonBlockArgs()) {
+            auto dupArg = dupType(arg);
             if (!dupArg) {
                 // This isn't a Type signature, bail out
                 return nullptr;

@@ -7,13 +7,12 @@ namespace sorbet::rewriter {
 
 namespace {
 ast::ExpressionPtr convertSelfNew(core::MutableContext ctx, ast::Send *send) {
-    auto numNonBlockArgs = send->numNonBlockArgs();
     ast::Send::ARGS_store args;
 
     args.emplace_back(std::move(send->recv));
 
-    for (auto i = 0; i < numNonBlockArgs; ++i) {
-        args.emplace_back(std::move(send->getNonBlockArg(i)));
+    for (auto &arg : send->nonBlockArgs()) {
+        args.emplace_back(std::move(arg));
     }
 
     if (auto *block = send->rawBlock()) {

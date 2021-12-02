@@ -110,9 +110,7 @@ vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Se
         return stats;
     }
 
-    const auto numPosArgs = send->numPosArgs();
-    for (auto i = 0; i < numPosArgs; ++i) {
-        auto &arg = send->getPosArg(i);
+    for (auto &arg : send->posArgs()) {
         if (ast::isa_tree<ast::MethodDef>(arg)) {
             return ModuleFunction::rewriteDefn(ctx, arg, prevStat);
         } else if (auto lit = ast::cast_tree<ast::Literal>(arg)) {

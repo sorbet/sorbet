@@ -490,9 +490,8 @@ public:
 
         switch (original.fun.rawId()) {
             case core::Names::privateClassMethod().rawId(): {
-                const auto numPosArgs = original.numPosArgs();
-                for (auto i = 0; i < numPosArgs; ++i) {
-                    addMethodModifier(ctx, original.fun, original.getPosArg(i));
+                for (auto &arg : original.posArgs()) {
+                    addMethodModifier(ctx, original.fun, arg);
                 }
                 break;
             }
@@ -509,17 +508,14 @@ public:
                         core::NameRef::noName(),
                     }};
                 } else {
-                    const auto numPosArgs = original.numPosArgs();
-                    for (auto i = 0; i < numPosArgs; ++i) {
-                        auto &arg = original.getPosArg(i);
+                    for (auto &arg : original.posArgs()) {
                         addMethodModifier(ctx, original.fun, arg);
                     }
                 }
                 break;
             case core::Names::privateConstant().rawId(): {
-                const auto numPosArgs = original.numPosArgs();
-                for (auto i = 0; i < numPosArgs; ++i) {
-                    addConstantModifier(ctx, original.fun, original.getPosArg(i));
+                for (auto &arg : original.posArgs()) {
+                    addConstantModifier(ctx, original.fun, arg);
                 }
                 break;
             }
