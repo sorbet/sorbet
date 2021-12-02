@@ -545,7 +545,7 @@
 * [   ] `rb_hash_compare_by_id` (`Hash#compare_by_identity`)
 * [✔  ] `rb_hash_compare_by_id_p` (`Hash#compare_by_identity?`)
 * [   ] `rb_hash_any_p` (`Hash#any?`)
-* [   ] `rb_hash_dig` (`Hash#dig`)
+* [  ✔] `rb_hash_dig` (`Hash#dig`)
 * [   ] `rb_hash_le` (`Hash#<=`)
 * [   ] `rb_hash_lt` (`Hash#<`)
 * [   ] `rb_hash_ge` (`Hash#>=`)
@@ -1564,4 +1564,4 @@
 
 ## Stats
 * Total:   1488
-* Visible: 243
+* Visible: 244
