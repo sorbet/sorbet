@@ -35,40 +35,18 @@ bool isPackageModule(const core::GlobalState &gs, core::SymbolRef modName) {
 
 class PrunePackageModules final {
     const bool intentionallyLeakASTs;
-    vector<bool> destroy;
-
-    void emptyRHS(ast::ClassDef &klass) {
-        if (intentionallyLeakASTs) {
-            for (auto &el : klass.rhs) {
-                intentionallyLeakMemory(el.release());
-            }
-        }
-        klass.rhs.clear();
-    }
 
 public:
     PrunePackageModules(bool intentionallyLeakASTs) : intentionallyLeakASTs(intentionallyLeakASTs) {}
 
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (isPackageModule(ctx, klass.symbol)) {
-            emptyRHS(klass);
-            destroy.emplace_back(true);
-        } else {
-            destroy.emplace_back(false);
-        }
-        return tree;
-    }
-
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
-        if (destroy.back()) {
-            destroy.pop_back();
             if (intentionallyLeakASTs) {
                 intentionallyLeakMemory(tree.release());
             }
             return ast::MK::EmptyTree();
         }
-        destroy.pop_back();
         return tree;
     }
 };
