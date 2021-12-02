@@ -23,6 +23,16 @@ namespace {
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 constexpr core::NameRef TEST_NAME = core::Names::Constants::Test();
 
+bool isPackageModule(const core::GlobalState &gs, core::SymbolRef modName) {
+    while (modName.exists() && modName != core::Symbols::root()) {
+        if (modName == core::Symbols::PackageRegistry() || modName == core::Symbols::PackageTests()) {
+            return true;
+        }
+        modName = modName.data(gs)->owner;
+    }
+    return false;
+}
+
 bool isPrimaryTestNamespace(const core::NameRef ns) {
     return ns == TEST_NAME;
 }
@@ -1471,33 +1481,14 @@ vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<a
     return files;
 }
 
-vector<ast::ExpressionPtr> Packager::removePackageModules(const core::GlobalState &gs, ast::ParsedFile &pf) {
+ast::ParsedFile Packager::removePackageModules(const core::GlobalState &gs, ast::ParsedFile pf) {
     ENFORCE(pf.file.data(gs).isPackage());
-    vector<ast::ExpressionPtr> removed;
-    removed.reserve(4);
-
     auto &root = ast::cast_tree_nonnull<ast::InsSeq>(pf.tree);
-    auto it = remove_if(root.stats.begin(), root.stats.end(), [&removed](auto &exp) -> bool {
+    auto it = remove_if(root.stats.begin(), root.stats.end(), [&gs](auto &exp) -> bool {
         auto def = ast::cast_tree<ast::ClassDef>(exp);
-        if (def != nullptr &&
-            (def->symbol == core::Symbols::PackageRegistry() || def->symbol == core::Symbols::PackageTests())) {
-            ast::ExpressionPtr tmp;
-            swap(tmp, exp);
-            removed.emplace_back(move(tmp));
-            return true;
-        }
-        return false;
+        return def != nullptr && isPackageModule(gs, def->symbol);
     });
     root.stats.erase(it, root.stats.end());
-
-    return removed;
-}
-
-ast::ParsedFile Packager::replacePackageModules(const core::GlobalState &gs, ast::ParsedFile pf,
-                                                std::vector<ast::ExpressionPtr> removed) {
-    ENFORCE(pf.file.data(gs).isPackage());
-    auto &root = ast::cast_tree_nonnull<ast::InsSeq>(pf.tree);
-    move(removed.begin(), removed.end(), root.stats.end());
     return pf;
 }
 
