@@ -34,12 +34,26 @@ bool isPackageModule(const core::GlobalState &gs, core::SymbolRef modName) {
 }
 
 class PrunePackageModules final {
+    vector<bool> destroy;
+
 public:
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (isPackageModule(ctx, klass.symbol)) {
+            klass.rhs.clear();
+            destroy.emplace_back(true);
+        } else {
+            destroy.emplace_back(false);
+        }
+        return tree;
+    }
+
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+        if (destroy.back()) {
+            destroy.pop_back();
             return ast::MK::EmptyTree();
         }
+        destroy.pop_back();
         return tree;
     }
 };
