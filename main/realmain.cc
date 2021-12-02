@@ -608,7 +608,7 @@ int realmain(int argc, char *argv[]) {
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
-            indexed = move(pipeline::typecheck(gs, move(indexed), opts, *workers).result());
+            pipeline::typecheck(gs, move(indexed), opts, *workers);
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
@@ -630,8 +630,8 @@ int realmain(int argc, char *argv[]) {
         }
 
         if (opts.suggestTyped) {
-            for (auto &tree : indexed) {
-                auto file = tree.file;
+            for (u4 i = 1; i < gs->filesUsed(); i++) {
+                core::FileRef file(i);
                 if (file.data(*gs).minErrorLevel() <= core::StrictLevel::Ignore) {
                     continue;
                 }
