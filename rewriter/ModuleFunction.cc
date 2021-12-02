@@ -158,8 +158,8 @@ vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Se
         }
     }
 
-    if (send->hasKwSplat()) {
-        if (auto e = ctx.beginError(send->kwSplat()->loc(), core::errors::Rewriter::BadModuleFunction)) {
+    if (auto *kwSplat = send->kwSplat()) {
+        if (auto e = ctx.beginError(kwSplat->loc(), core::errors::Rewriter::BadModuleFunction)) {
             e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",
                         "module_function");
         }

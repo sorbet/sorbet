@@ -1025,12 +1025,11 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 argLocs.emplace_back(val.loc());
             }
 
-            if (s.hasKwSplat()) {
-                auto &splat = *s.kwSplat();
-                auto ty = makeTypeAndOrigins(ctx, splat.loc(), core::Types::untypedUntracked());
+            if (auto *splat = s.kwSplat()) {
+                auto ty = makeTypeAndOrigins(ctx, splat->loc(), core::Types::untypedUntracked());
                 holders.emplace_back(move(ty));
                 targs.emplace_back(holders.back().get());
-                argLocs.emplace_back(splat.loc());
+                argLocs.emplace_back(splat->loc());
             }
 
             core::SymbolRef corrected;

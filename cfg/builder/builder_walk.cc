@@ -406,17 +406,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     argLocs.emplace_back(val.loc());
                 }
 
-                if (s.hasKwSplat()) {
-                    auto &exp = *s.kwSplat();
+                if (auto *exp = s.kwSplat()) {
                     LocalRef temp = cctx.newTemporary(core::Names::statTemp());
-                    current = walk(cctx.withTarget(temp), exp, current);
+                    current = walk(cctx.withTarget(temp), *exp, current);
                     args.emplace_back(temp);
-                    argLocs.emplace_back(exp.loc());
+                    argLocs.emplace_back(exp->loc());
                 }
 
-                if (s.hasBlock()) {
+                if (auto *block = s.block()) {
                     auto newRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
-                    auto &blockArgs = s.block()->args;
+                    auto &blockArgs = block->args;
                     vector<ast::ParsedArg> blockArgFlags = ast::ArgParsing::parseArgs(blockArgs);
                     vector<core::ArgInfo::ArgFlags> argFlags;
                     for (auto &e : blockArgFlags) {

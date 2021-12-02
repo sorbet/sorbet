@@ -215,8 +215,8 @@ class LocalNameInserter {
         ENFORCE(original.numPosArgs() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.getPosArg(0)));
 
         ast::ExpressionPtr originalBlock;
-        if (original.hasBlock()) {
-            originalBlock = move(*original.rawBlock());
+        if (auto *rawBlock = original.rawBlock()) {
+            originalBlock = move(*rawBlock);
         }
 
         // Clear out the args (which are just [ZSuperArgs]) in the original send. (Note that we want this cleared even
