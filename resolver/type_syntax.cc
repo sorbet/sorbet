@@ -117,7 +117,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
     } else {
         sig.seen.sig = true;
         ENFORCE(sigSend.fun == core::Names::sig());
-        auto block = sigSend.block();
+        auto *block = sigSend.block();
         ENFORCE(block);
         auto send = ast::cast_tree<ast::Send>(block->body);
         if (send) {

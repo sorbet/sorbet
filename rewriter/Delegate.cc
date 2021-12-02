@@ -44,7 +44,7 @@ vector<ast::ExpressionPtr> Delegate::run(core::MutableContext ctx, const ast::Se
         return empty;
     }
 
-    if (send->numPosArgs() == 0) {
+    if (!send->hasPosArgs()) {
         // there has to be at least one positional argument
         return empty;
     }

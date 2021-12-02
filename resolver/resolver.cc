@@ -854,7 +854,7 @@ public:
                     CorrectTypeAlias::eagerToLazy(ctx, e, send);
                 }
             }
-            auto block = send->block();
+            auto *block = send->block();
             auto typeAliasItem = TypeAliasResolutionItem{id->symbol, ctx.file, &block->body};
             this->todoTypeAliases_.emplace_back(std::move(typeAliasItem));
 

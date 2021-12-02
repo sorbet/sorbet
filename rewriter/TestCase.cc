@@ -36,7 +36,7 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
         auto *send = ast::cast_tree<ast::Send>(stat);
         auto loc = send->loc;
         auto *arg0 = ast::cast_tree<ast::Literal>(send->getPosArg(0));
-        auto block = send->block();
+        auto *block = send->block();
 
         auto snake_case_name = absl::StrReplaceAll(arg0->asString(ctx).toString(ctx), {{" ", "_"}});
         auto name = ctx.state.enterNameUTF8("test_" + snake_case_name);

@@ -85,7 +85,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
 
     bool keywordInit = false;
     if (send->hasKwArgs()) {
-        if (send->numPosArgs() == 0) {
+        if (!send->hasPosArgs()) {
             // leave bad usages like `Struct.new(keyword_init: true)` untouched so we error later
             return empty;
         }
@@ -160,8 +160,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
                                                    ast::MK::RaiseUnimplemented(loc)));
     }
 
-    if (send->hasBlock()) {
-        auto block = send->block();
+    if (auto *block = send->block()) {
 
         // Steal the trees, because the run is going to remove the original send node from the tree anyway.
         if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {

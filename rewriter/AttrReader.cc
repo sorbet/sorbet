@@ -70,7 +70,7 @@ bool isTNilableOrUntyped(const ast::ExpressionPtr &expr) {
 ast::Send *findSendReturns(ast::Send *sharedSig) {
     ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
-    auto block = sharedSig->block();
+    auto *block = sharedSig->block();
     auto body = ast::cast_tree<ast::Send>(block->body);
 
     while (body->fun != core::Names::returns() && body->fun != core::Names::void_()) {
@@ -125,7 +125,7 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, ast::S
 ast::Send *findSendChecked(ast::Send *sharedSig) {
     ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
-    auto block = sharedSig->block();
+    auto *block = sharedSig->block();
     auto body = ast::cast_tree<ast::Send>(block->body);
 
     while (body != nullptr && body->fun != core::Names::checked()) {

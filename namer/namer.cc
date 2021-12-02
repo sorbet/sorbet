@@ -499,7 +499,7 @@ public:
             case core::Names::private_().rawId():
             case core::Names::protected_().rawId():
             case core::Names::public_().rawId():
-                if (original.numPosArgs() == 0) {
+                if (!original.hasPosArgs()) {
                     ENFORCE(!methodVisiStack.empty());
                     methodVisiStack.back() = optional<Modifier>{Modifier{
                         Modifier::Kind::Method,

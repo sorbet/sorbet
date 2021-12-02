@@ -195,7 +195,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
 
     // ----- What's the prop's name? -----
     if (!ret.name.exists()) {
-        if (send->numPosArgs() == 0) {
+        if (!send->hasPosArgs()) {
             return nullopt;
         }
         auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(0));
@@ -474,7 +474,7 @@ ast::ExpressionPtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send 
     auto true_ = ast::MK::True(send->loc);
 
     auto *copy = ast::cast_tree<ast::Send>(result);
-    if (copy->hasKwArgs() || copy->numPosArgs() == 0) {
+    if (copy->hasKwArgs() || !copy->hasPosArgs()) {
         // append to the inline keyword arguments of the send
         copy->addKwArg(move(withoutAccessors), move(true_));
     } else {

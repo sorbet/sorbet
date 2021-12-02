@@ -58,7 +58,7 @@ vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *
         body.emplace_back(ast::MK::Assign(blockArg.loc(), move(blockArg), asgn->lhs.deepCopy()));
     }
 
-    if (send->hasBlock()) {
+    if (block != nullptr) {
         // Steal the trees, because the run is going to remove the original send node from the tree anyway.
         if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
             for (auto &&stat : insSeq->stats) {

@@ -66,7 +66,7 @@ void Flatfiles::run(core::MutableContext ctx, ast::ClassDef *klass) {
     vector<ast::ExpressionPtr> methods;
     for (auto &stat : klass->rhs) {
         if (auto flatfileBlock = asFlatfileDo(stat)) {
-            auto block = flatfileBlock->block();
+            auto *block = flatfileBlock->block();
             if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
                 for (auto &stat : insSeq->stats) {
                     handleFieldDefinition(ctx, stat, methods);
