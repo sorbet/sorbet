@@ -538,6 +538,9 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
     core::FileRef f = resolved.file;
 
     if (opts.stopAfterPhase == options::Phase::NAMER) {
+        if (intentionallyLeakASTs) {
+            intentionallyLeakMemory(resolved.tree.release());
+        }
         return;
     }
 
@@ -553,9 +556,15 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
     }
 
     if (opts.stopAfterPhase == options::Phase::RESOLVER) {
+        if (intentionallyLeakASTs) {
+            intentionallyLeakMemory(resolved.tree.release());
+        }
         return;
     }
     if (f.data(ctx).isRBI()) {
+        if (intentionallyLeakASTs) {
+            intentionallyLeakMemory(resolved.tree.release());
+        }
         return;
     }
 
