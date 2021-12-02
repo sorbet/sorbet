@@ -587,7 +587,7 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         }
         CFGCollectorAndTyper collector(opts);
         {
-            result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
+            ast::ShallowMap::apply(ctx, collector, move(resolved.tree));
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, f);
             }
