@@ -758,6 +758,7 @@ int realmain(int argc, char *argv[]) {
 
     if (!sorbet::emscripten_build) {
         // Let it go: leak memory so that we don't need to call destructors
+        // (Although typecheck leaks these, autogen goes thru a different codepath.)
         for (auto &e : indexed) {
             intentionallyLeakMemory(e.tree.release());
         }
