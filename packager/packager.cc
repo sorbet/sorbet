@@ -861,7 +861,7 @@ private:
             lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
             if (scope != nullptr) {
                 ENFORCE(lit == nullptr);
-                ENFORCE(scope->symbol == core::Symbols::root());
+                ENFORCE(scope->symbol() == core::Symbols::root());
                 rootConsts++;
             }
         }
@@ -888,7 +888,7 @@ private:
             lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
             if (scope != nullptr) {
                 ENFORCE(lit == nullptr);
-                ENFORCE(scope->symbol == core::Symbols::root());
+                ENFORCE(scope->symbol() == core::Symbols::root());
                 rootConsts--;
             }
         }
