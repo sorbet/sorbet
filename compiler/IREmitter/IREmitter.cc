@@ -390,8 +390,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true))};
                     auto rawArg1Value =
                         builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "arg1_maybeExpandToFullArgs");
-                    auto isArray = Payload::typeTest(cs, builder, rawArg1Value,
-                                                     core::make_type<core::ClassType>(core::Symbols::Array()));
+                    auto isArray = Payload::typeTest(cs, builder, rawArg1Value, core::Symbols::Array());
                     auto typeTestEnd = builder.GetInsertBlock();
 
                     builder.CreateCondBr(isArray, argExpandBlock, afterArgArrayExpandBlock);

@@ -72,7 +72,7 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
     auto *afterFinalCall = llvm::BasicBlock::Create(cs, llvm::Twine("afterFinalCall_") + methodName,
                                                     builder.GetInsertBlock()->getParent());
 
-    auto *typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(finalInfo->recv));
+    auto *typeTest = Payload::typeTest(cs, builder, recv, finalInfo->recv);
     builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastFinalCall, slowFinalCall);
 
     // fast path: emit a direct call

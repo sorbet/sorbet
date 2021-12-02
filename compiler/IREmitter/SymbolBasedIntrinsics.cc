@@ -1075,7 +1075,7 @@ vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs(const core::Globa
 llvm::Value *SymbolBasedIntrinsicMethod::receiverFastPathTest(MethodCallContext &mcctx,
                                                               core::ClassOrModuleRef potentialClass) const {
     auto *recv = mcctx.varGetRecv();
-    return Payload::typeTest(mcctx.cs, mcctx.builder, recv, core::make_type<core::ClassType>(potentialClass));
+    return Payload::typeTest(mcctx.cs, mcctx.builder, recv, potentialClass);
 }
 
 bool SymbolBasedIntrinsicMethod::skipFastPathTest(MethodCallContext &mcctx,
