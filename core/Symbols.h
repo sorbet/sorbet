@@ -195,14 +195,6 @@ public:
         }
     }
 
-    inline void setReBind(ClassOrModuleRef rebind) {
-        this->rebind_ = rebind;
-    }
-
-    ClassOrModuleRef rebind() const {
-        return rebind_;
-    }
-
     bool hasSig() const {
         return resultType != nullptr;
     }
@@ -232,18 +224,19 @@ public:
 
     ClassOrModuleRef owner;
     NameRef name;
+    ClassOrModuleRef rebind;
     TypePtr resultType;
     // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
     // why raw pointers are safe.
     const IntrinsicMethod *intrinsic = nullptr;
 
 private:
-    uint16_t flags = Flags::NONE;
-    ClassOrModuleRef rebind_;
     InlinedVector<TypeArgumentRef, 4> typeParams;
     InlinedVector<Loc, 2> locs_;
     ArgumentsStore arguments_;
+    uint16_t flags = Flags::NONE;
 };
+CheckSize(Method, 208, 8);
 
 class Symbol final {
 public:

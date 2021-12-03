@@ -537,7 +537,7 @@ ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
 void SerializerImpl::pickle(Pickler &p, const Method &what) {
     p.putU4(what.owner.id());
     p.putU4(what.name.rawId());
-    p.putU4(what.rebind_.id());
+    p.putU4(what.rebind.id());
     p.putU4(what.flags);
     p.putU4(what.typeParams.size());
     for (auto s : what.typeParams) {
@@ -558,7 +558,7 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
     Method result;
     result.owner = ClassOrModuleRef::fromRaw(p.getU4());
     result.name = NameRef::fromRaw(*gs, p.getU4());
-    result.rebind_ = ClassOrModuleRef::fromRaw(p.getU4());
+    result.rebind = ClassOrModuleRef::fromRaw(p.getU4());
     result.flags = static_cast<u2>(p.getU4());
 
     int typeParamsSize = p.getU4();

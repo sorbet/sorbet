@@ -2780,7 +2780,7 @@ private:
             method.data(ctx)->setFinalMethod();
         }
         if (sig.seen.bind) {
-            method.data(ctx)->setReBind(sig.bind);
+            method.data(ctx)->rebind = sig.bind;
         }
 
         auto methodInfo = method.data(ctx);

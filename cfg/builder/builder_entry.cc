@@ -27,7 +27,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         CFG::UnfreezeCFGLocalVariables unfreezeVars(*res);
         retSym = cctx.newTemporary(core::Names::returnMethodTemp());
 
-        auto selfClaz = md.symbol.data(ctx)->rebind();
+        auto selfClaz = md.symbol.data(ctx)->rebind;
         if (!selfClaz.exists()) {
             selfClaz = md.symbol.enclosingClass(ctx);
         }
