@@ -540,8 +540,8 @@ void SerializerImpl::pickle(Pickler &p, const Method &what) {
     p.putU4(what.rebind_.id());
     p.putU4(what.flags);
     p.putU4(what.typeParams.size());
-    for (SymbolRef s : what.typeParams) {
-        p.putU4(s.rawId());
+    for (auto s : what.typeParams) {
+        p.putU4(s.id());
     }
     p.putU4(what.arguments().size());
     for (const auto &a : what.arguments()) {
@@ -559,7 +559,7 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
     result.owner = ClassOrModuleRef::fromRaw(p.getU4());
     result.name = NameRef::fromRaw(*gs, p.getU4());
     result.rebind_ = ClassOrModuleRef::fromRaw(p.getU4());
-    result.flags = p.getU4();
+    result.flags = static_cast<u2>(p.getU4());
 
     int typeParamsSize = p.getU4();
     result.typeParams.reserve(typeParamsSize);
@@ -591,8 +591,8 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     }
 
     p.putU4(what.typeParams.size());
-    for (SymbolRef s : what.typeParams) {
-        p.putU4(s.rawId());
+    for (auto s : what.typeParams) {
+        p.putU4(s.id());
     }
 
     p.putU4(what.members().size());

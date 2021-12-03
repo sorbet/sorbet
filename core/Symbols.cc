@@ -2056,11 +2056,6 @@ Method Method::deepCopy(const GlobalState &to) const {
         store.name = NameRef(to, mem.name);
     }
     result.rebind_ = this->rebind_;
-    result.arguments_.reserve(this->arguments_.size());
-    for (auto &mem : this->arguments_) {
-        auto &store = result.arguments_.emplace_back(mem.deepCopy());
-        store.name = NameRef(to, mem.name);
-    }
     result.intrinsic = this->intrinsic;
     return result;
 }
