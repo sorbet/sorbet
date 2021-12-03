@@ -6,6 +6,11 @@ config_setting(
 )
 
 config_setting(
+    name = "darwin_arm64",
+    values = {"host_cpu": "darwin_arm64"},
+)
+
+config_setting(
     name = "linux",
     values = {"host_cpu": "k8"},
 )
