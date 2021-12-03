@@ -291,6 +291,22 @@ void IREmitterHelpers::emitTypeTestForRestArg(CompilerState &cs, llvm::IRBuilder
     builder.SetInsertPoint(continuationBlock);
 }
 
+bool IREmitterHelpers::isAliasToSingleton(const core::GlobalState &gs, const IREmitterContext &irctx, cfg::LocalRef var,
+                                          core::ClassOrModuleRef klass) {
+    auto aliasit = irctx.aliases.find(var);
+    if (aliasit == irctx.aliases.end()) {
+        return false;
+    }
+
+    if (aliasit->second.kind != Alias::AliasKind::Constant) {
+        return false;
+    }
+
+    ENFORCE(klass.data(gs)->isSingletonClass(gs));
+    auto attachedClass = klass.data(gs)->attachedClass(gs);
+    return aliasit->second.constantSym == attachedClass;
+}
+
 llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilderBase &builder,
                                               const core::TypePtr &lit) {
     if (lit.derivesFrom(cs, core::Symbols::FalseClass())) {

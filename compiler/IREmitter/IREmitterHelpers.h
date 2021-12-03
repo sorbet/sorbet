@@ -182,6 +182,9 @@ public:
                                                       const std::vector<KnownFunction> &expectedRubyCFuncs,
                                                       const std::string &methodNameForDebug);
 
+    static bool isAliasToSingleton(const core::GlobalState &gs, const IREmitterContext &irctx, cfg::LocalRef var,
+                                   core::ClassOrModuleRef klass);
+
     // Given a method call context representing a send, determine whether a variable
     // representing a block can be fetched out of the Ruby VM state.
     static bool canPassThroughBlockViaRubyVM(MethodCallContext &mcctx, cfg::LocalRef var);

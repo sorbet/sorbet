@@ -893,18 +893,7 @@ public:
         auto &irctx = mcctx.irctx;
         auto &recv = mcctx.send->recv;
 
-        auto aliasit = irctx.aliases.find(recv.variable);
-        if (aliasit == irctx.aliases.end()) {
-            return false;
-        }
-
-        if (aliasit->second.kind != Alias::AliasKind::Constant) {
-            return false;
-        }
-
-        ENFORCE(potentialClass.data(cs)->isSingletonClass(cs));
-        auto attachedClass = potentialClass.data(cs)->attachedClass(cs);
-        return aliasit->second.constantSym == attachedClass;
+        return IREmitterHelpers::isAliasToSingleton(cs, irctx, recv.variable, potentialClass);
     }
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
         return {rubyClass.data(gs)->lookupSingletonClass(gs)};
