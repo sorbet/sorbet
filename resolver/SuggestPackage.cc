@@ -55,8 +55,8 @@ public:
             srcPkg.definitionLoc(), "Do you need to `{} {}` in package `{}`?", core::Names::export_().show(ctx),
             match.symbol.show(ctx),
             fmt::map_join(srcPkg.fullName(), "::", [&](auto nr) -> string { return nr.show(ctx); })));
-        lines.emplace_back(core::ErrorLine::from(match.symbol.data(ctx)->loc(),
-                                                 "Constant `{}` is defined here:", match.symbol.show(ctx)));
+        lines.emplace_back(
+            core::ErrorLine::from(match.symbol.loc(ctx), "Constant `{}` is defined here:", match.symbol.show(ctx)));
         // TODO(nroman-stripe) Add automatic fixers
         e.addErrorSection(core::ErrorSection(lines));
     }

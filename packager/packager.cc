@@ -23,12 +23,12 @@ namespace {
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 constexpr core::NameRef TEST_NAME = core::Names::Constants::Test();
 
-bool isPackageModule(const core::GlobalState &gs, core::SymbolRef modName) {
+bool isPackageModule(const core::GlobalState &gs, core::ClassOrModuleRef modName) {
     while (modName.exists() && modName != core::Symbols::root()) {
         if (modName == core::Symbols::PackageRegistry() || modName == core::Symbols::PackageTests()) {
             return true;
         }
-        modName = modName.data(gs)->owner;
+        modName = modName.data(gs)->owner.asClassOrModuleRef();
     }
     return false;
 }
@@ -222,13 +222,15 @@ public:
         return nr == name.mangledName || nr == privateMangledName;
     }
 
-    core::SymbolRef internalModule(const core::GlobalState &gs, bool test) const {
+    core::ClassOrModuleRef internalModule(const core::GlobalState &gs, bool test) const {
         return core::Symbols::root()
             .data(gs)
             ->findMemberNoDealias(gs, test ? core::Names::Constants::PackageTests()
                                            : core::Names::Constants::PackageRegistry())
+            .asClassOrModuleRef()
             .data(gs)
-            ->findMemberNoDealias(gs, privateMangledName);
+            ->findMemberNoDealias(gs, privateMangledName)
+            .asClassOrModuleRef();
     }
 
     vector<MissingExportMatch> findMissingExports(core::Context ctx, core::SymbolRef scope, core::NameRef name) const {
@@ -240,16 +242,16 @@ public:
             }
 
             core::SymbolRef sym = PackageInfoImpl::from(info).findPrivateSymbol(ctx, scope, false);
-            if (sym.exists()) {
-                sym = sym.data(ctx)->findMember(ctx, name);
+            if (sym.exists() && sym.isClassOrModule()) {
+                sym = sym.asClassOrModuleRef().data(ctx)->findMember(ctx, name);
                 if (sym.exists()) {
                     res.emplace_back(MissingExportMatch{sym, imported.name.mangledName});
                 }
             }
             if (core::packages::PackageDB::isTestFile(ctx, ctx.file.data(ctx))) {
                 sym = PackageInfoImpl::from(info).findPrivateSymbol(ctx, scope, true);
-                if (sym.exists()) {
-                    sym = sym.data(ctx)->findMember(ctx, name);
+                if (sym.exists() && sym.isClassOrModule()) {
+                    sym = sym.asClassOrModuleRef().data(ctx)->findMember(ctx, name);
                     if (sym.exists()) {
                         res.emplace_back(MissingExportMatch{sym, imported.name.mangledName});
                     }
@@ -362,12 +364,12 @@ private:
     core::SymbolRef findPrivateSymbol(const core::GlobalState &gs, core::SymbolRef sym, bool test) const {
         if (!sym.exists() || sym == core::Symbols::root()) {
             return core::SymbolRef();
-        } else if (sym.data(gs)->name.isPackagerName(gs)) {
+        } else if (sym.name(gs).isPackagerName(gs)) {
             return internalModule(gs, test);
         }
-        auto owner = findPrivateSymbol(gs, sym.data(gs)->owner, test);
-        if (owner.exists()) {
-            return owner.data(gs)->findMember(gs, sym.data(gs)->name);
+        auto owner = findPrivateSymbol(gs, sym.owner(gs), test);
+        if (owner.exists() && owner.isClassOrModule()) {
+            return owner.asClassOrModuleRef().data(gs)->findMember(gs, sym.name(gs));
         }
         return owner;
     }
