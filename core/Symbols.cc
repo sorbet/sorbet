@@ -580,6 +580,7 @@ SymbolRef Symbol::findConcreteMethodTransitive(const GlobalState &gs, NameRef na
 }
 
 namespace {
+// TODO(jvilk): Remove this when we remove flag filter in `findMemberTransitiveInternal`.
 u4 getFlags(const GlobalState &gs, SymbolRef symbol) {
     switch (symbol.kind()) {
         case SymbolRef::Kind::Method:
@@ -596,6 +597,7 @@ u4 getFlags(const GlobalState &gs, SymbolRef symbol) {
 }
 } // namespace
 
+// TODO(jvilk): Remove flag filter -- it's only used for `findConcreteMethodTransitive`.
 SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
                                                int maxDepth) const {
     ENFORCE(this->isClassOrModule());

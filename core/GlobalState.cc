@@ -814,8 +814,9 @@ MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRe
     return Symbols::noMethod();
 }
 
-// look up a symbol whose flags match the desired flags. This might look through mangled names to discover one whose
-// flags match. If no such symbol exists, then it will return defaultReturnValue.
+// look up a symbol whose flags match the desired kind (or ignores the kind filter if `ignoreKind` is `true`).
+// This might look through mangled names to discover one whose flags match.
+// If no such symbol exists, then it will return defaultReturnValue.
 SymbolRef GlobalState::lookupSymbolWithKind(ClassOrModuleRef owner, NameRef name, SymbolRef::Kind kind,
                                             SymbolRef defaultReturnValue, bool ignoreKind) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
