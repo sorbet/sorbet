@@ -1921,6 +1921,62 @@ VALUE sorbet_rb_hash_each_with_object_withBlock(VALUE recv, ID fun, int argc, co
     return object;
 }
 
+// This is the no-block version of `rb_hash_transform_values`
+// https://github.com/sorbet/ruby/blob/12d8c43330278a744d6e45135d1a8735f23f5afe/hash.c#L3190-L3221
+SORBET_INLINE
+VALUE sorbet_rb_hash_transform_values(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                      VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+    return rb_enumeratorize_with_size(recv, ID2SYM(fun), argc, argv, sorbet_hash_enum_size);
+}
+
+static int sorbet_transform_values_foreach_func(VALUE key, VALUE value, VALUE argp, int error) {
+    return ST_REPLACE;
+}
+
+struct sorbet_rb_transform_values_closure {
+    BlockFFIType fun;
+    VALUE toplevel_closure;
+    VALUE hash;
+};
+
+static int sorbet_transform_values_foreach_replace(VALUE *key, VALUE *value, VALUE argp, int existing) {
+    struct sorbet_rb_transform_values_closure *passthrough = (struct sorbet_rb_transform_values_closure *)argp;
+
+    VALUE new_value = passthrough->fun((VALUE)*value, passthrough->toplevel_closure, 1, value, Qnil);
+    RB_OBJ_WRITE(passthrough->hash, value, new_value);
+    return ST_CONTINUE;
+}
+
+// This is the block version of `rb_hash_transform_values`
+// https://github.com/sorbet/ruby/blob/12d8c43330278a744d6e45135d1a8735f23f5afe/hash.c#L3190-L3221
+SORBET_INLINE
+VALUE sorbet_rb_hash_transform_values_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
+                                                BlockFFIType blk, const struct rb_captured_block *captured,
+                                                VALUE closure, int numPositionalArgs) {
+    // hash_copy isn't exported from the vm. rb_hash_dup does a little more work, so it might be worth re-exporting
+    // hash_copy at some point.
+    VALUE result = rb_hash_dup(recv);
+
+    // This is the inlined version of SET_DEFAULT(result, Qnil);
+    FL_UNSET_RAW(result, RHASH_PROC_DEFAULT);
+    RHASH_SET_IFNONE(result, Qnil);
+
+    if (!RHASH_EMPTY_P(recv)) {
+        struct sorbet_rb_transform_values_closure passthrough;
+        passthrough.fun = blk;
+        passthrough.toplevel_closure = closure;
+        passthrough.hash = result;
+
+        sorbet_pushBlockFrame(captured);
+        rb_hash_stlike_foreach_with_replace(result, sorbet_transform_values_foreach_func,
+                                            sorbet_transform_values_foreach_replace, (VALUE)&passthrough);
+        sorbet_popFrame();
+    }
+
+    return result;
+}
+
 struct sorbet_rb_hash_any_closure {
     BlockFFIType fun;
     VALUE toplevel_closure;
