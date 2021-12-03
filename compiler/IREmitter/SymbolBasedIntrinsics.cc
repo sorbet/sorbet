@@ -1000,6 +1000,8 @@ static const vector<CallCMethod> knownCMethodsInstance{
      CMethod{"sorbet_rb_hash_select_withBlock", core::Symbols::Hash()}},
     {core::Symbols::Hash(), "delete", CMethod{"sorbet_rb_hash_delete_m"}, CMethod{"sorbet_rb_hash_delete_m_withBlock"}},
     {core::Symbols::Hash(), "empty?", CMethod{"sorbet_rb_hash_empty_p"}},
+    {core::Symbols::Hash(), "transform_values", CMethod{"sorbet_rb_hash_transform_values", core::Symbols::Hash()},
+     CMethod{"sorbet_rb_hash_transform_values_withBlock", core::Symbols::Hash()}},
     {core::Symbols::TrueClass(), "|", CMethod{"sorbet_int_bool_true"}},
     {core::Symbols::FalseClass(), "|", CMethod{"sorbet_int_bool_and"}},
     {core::Symbols::TrueClass(), "&", CMethod{"sorbet_int_bool_and"}},
