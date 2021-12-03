@@ -13,6 +13,7 @@ const std::vector<u4> KNOWN_PROP_METHODS = {
     core::Names::tokenProp().rawId(),    core::Names::timestampedTokenProp().rawId(),
     core::Names::createdProp().rawId(),  core::Names::updatedProp().rawId(),
     core::Names::merchantProp().rawId(), core::Names::merchantTokenProp().rawId(),
+    core::Names::const_().rawId(),
 };
 
 struct PropInfoInternal {
@@ -39,6 +40,7 @@ class DSLAnalysisWalk {
 
     std::optional<PropInfoInternal> parseProp(core::Context ctx, ast::Send *send) {
         switch (send->fun.rawId()) {
+            case core::Names::const_().rawId():
             case core::Names::prop().rawId(): {
                 auto *lit = ast::cast_tree<ast::Literal>(send->args.front());
                 if (lit && lit->isSymbol(ctx)) {

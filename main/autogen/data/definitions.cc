@@ -245,7 +245,8 @@ mergeAndFilterGlobalDSLInfo(UnorderedMap<std::vector<core::NameRef>, DSLInfo> gl
             }
 
             result.emplace(klass, std::move(info));
-        } else if (allAncestors.find(CHALK_ODM_MUTATOR) != allAncestors.end() && !info.model.empty()) {
+        } else if (allAncestors.find(CHALK_ODM_MUTATOR) != allAncestors.end() && !info.model.empty() &&
+                   klass[0] != core::Names::Constants::Test()) {
             // Mutators
             result.emplace(klass, std::move(info));
         }
