@@ -97,6 +97,25 @@ public:
             // TODO(gdritter-stripe) handle bad import
             return false;
         }
+
+    bool tryUnresolvedImportCorrections(const ast::ConstantLit::ResolutionScopes &scopes, core::NameRef name) const {
+        // there are two broader cases here: either the name we're
+        // looking for shares the same prefix as the package we're in,
+        // in which case it's probably an export we can't find (and we
+        // should let the normal constant resolution machinery do its
+        // work.) Otherwise, it's probably an import we can't find,
+        // and we can limit our search to only package names.
+
+        // TODO(gdritter): bail when it's clear that we're looking at
+        // an export
+        ctx.state.tracer().error("For: {}", name.toString(ctx));
+        for (auto &s : scopes) {
+            if (s.exists())
+                ctx.state.tracer().error("  - {}", s.show(ctx));
+            else
+                ctx.state.tracer().error("  - {}", s.show(ctx));
+        }
+        return true;
     }
 
 private:
