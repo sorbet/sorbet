@@ -43,7 +43,7 @@ string getFunctionNamePrefix(CompilerState &cs, core::ClassOrModuleRef sym) {
 } // namespace
 
 string IREmitterHelpers::getFunctionName(CompilerState &cs, core::MethodRef sym) {
-    auto owner = sym.data(cs)->owner.asClassOrModuleRef();
+    auto owner = sym.data(cs)->owner;
     auto maybeAttachedOwner = owner.data(cs)->attachedClass(cs);
     string prefix = "func_";
     if (maybeAttachedOwner.exists()) {

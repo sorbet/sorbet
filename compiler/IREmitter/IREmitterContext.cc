@@ -499,9 +499,9 @@ llvm::DISubprogram *getDebugScope(CompilerState &cs, cfg::CFG &cfg, llvm::DIScop
     auto loc = cfg.symbol.data(cs)->loc();
 
     auto owner = cfg.symbol.data(cs)->owner;
-    std::string diName(owner.name(cs).shortName(cs));
+    std::string diName(owner.data(cs)->name.shortName(cs));
 
-    if (owner.isSingletonClass(cs)) {
+    if (owner.data(cs)->isSingletonClass(cs)) {
         diName += ".";
     } else {
         diName += "#";
