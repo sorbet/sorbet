@@ -110,7 +110,7 @@ private:
                         params.size());
 
                 for (int i = 0; i < members.size(); ++i) {
-                    auto memberVariance = members[i].asTypeMemberRef().data(ctx)->variance();
+                    auto memberVariance = members[i].data(ctx)->variance();
                     auto typeArg = params[i];
 
                     // The polarity used to check the parameter is negated

@@ -978,19 +978,17 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     flags = flags | Symbol::Flags::TYPE_ARGUMENT;
 
     auto ownerScope = owner.dataAllowingNone(*this);
-    histogramInc("symbol_enter_by_name", ownerScope->members().size());
+    histogramInc("symbol_enter_by_name", ownerScope->typeArguments().size());
 
-    auto &store = ownerScope->members()[name];
-    if (store.exists()) {
-        ENFORCE(store.isTypeArgument() && (store.asTypeArgumentRef().data(*this)->flags & flags) == flags,
-                "existing symbol has wrong flags");
+    auto existingTypeArgument = ownerScope->findMember(*this, name);
+    if (existingTypeArgument.exists()) {
+        ENFORCE((existingTypeArgument.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
         counterInc("symbols.hit");
-        return store.asTypeArgumentRef();
+        return existingTypeArgument;
     }
 
     ENFORCE(!symbolTableFrozen);
     auto result = TypeArgumentRef(*this, typeArguments.size());
-    store = result; // DO NOT MOVE this assignment down. emplace_back on typeArguments invalidates `store`
     typeArguments.emplace_back();
 
     SymbolData data = result.dataAllowingNone(*this);
@@ -1022,9 +1020,8 @@ MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRe
     store = result; // DO NOT MOVE this assignment down. emplace_back on methods invalidates `store`
     methods.emplace_back();
 
-    SymbolData data = result.dataAllowingNone(*this);
+    MethodData data = result.dataAllowingNone(*this);
     data->name = name;
-    data->flags = Symbol::Flags::METHOD;
     data->owner = owner;
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "method"));
@@ -1038,7 +1035,7 @@ MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, co
     NameRef name = num == 0 ? originalName : freshNameUnique(UniqueNameKind::Overload, originalName, num);
     core::Loc loc = num == 0 ? original.data(*this)->loc()
                              : sigLoc; // use original Loc for main overload so that we get right jump-to-def for it.
-    auto owner = original.data(*this)->owner.asClassOrModuleRef();
+    auto owner = original.data(*this)->owner;
     auto res = enterMethodSymbol(loc, owner, name);
     ENFORCE(res != original);
     if (res.data(*this)->arguments().size() != original.data(*this)->arguments().size()) {
@@ -1131,7 +1128,7 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
 ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name) {
     ENFORCE(owner.exists(), "entering symbol in to non-existing owner");
     ENFORCE(name.exists(), "entering symbol with non-existing name");
-    SymbolData ownerScope = owner.data(*this);
+    MethodData ownerScope = owner.data(*this);
 
     for (auto &arg : ownerScope->arguments()) {
         if (arg.name == name) {
@@ -1781,7 +1778,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     }
     result->methods.reserve(this->methods.capacity());
     for (auto &sym : this->methods) {
-        result->methods.emplace_back(sym.deepCopy(*result, keepId));
+        result->methods.emplace_back(sym.deepCopy(*result));
     }
     result->fields.reserve(this->fields.capacity());
     for (auto &sym : this->fields) {

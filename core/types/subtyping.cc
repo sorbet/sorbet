@@ -298,7 +298,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         const TypePtr &t2s = ltr ? t1 : t2;
         // now a1 <: a2
 
-        InlinedVector<SymbolRef, 4> indexes = Types::alignBaseTypeArgs(gs, a1->klass, a1->targs, a2->klass);
+        InlinedVector<TypeMemberRef, 4> indexes = Types::alignBaseTypeArgs(gs, a1->klass, a1->targs, a2->klass);
         vector<TypePtr> newTargs;
         newTargs.reserve(indexes.size());
         // code below inverts permutation of type params
@@ -914,7 +914,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
         // a1 <:< a2
 
-        InlinedVector<SymbolRef, 4> indexes = Types::alignBaseTypeArgs(gs, a2->klass, a2->targs, a1->klass);
+        InlinedVector<TypeMemberRef, 4> indexes = Types::alignBaseTypeArgs(gs, a2->klass, a2->targs, a1->klass);
 
         // code below inverts permutation of type params
 
@@ -1151,7 +1151,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             result = classSymbolIsAsGoodAs(gs, a1->klass, a2->klass);
         }
         if (result) {
-            InlinedVector<SymbolRef, 4> indexes = Types::alignBaseTypeArgs(gs, a1->klass, a1->targs, a2->klass);
+            InlinedVector<TypeMemberRef, 4> indexes = Types::alignBaseTypeArgs(gs, a1->klass, a1->targs, a2->klass);
             // code below inverts permutation of type params
             int j = 0;
             for (SymbolRef idx : a2->klass.data(gs)->typeMembers()) {

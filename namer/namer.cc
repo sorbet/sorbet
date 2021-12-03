@@ -757,7 +757,7 @@ class SymbolDefiner {
 
     // Allow stub symbols created to hold intrinsics to be filled in
     // with real types from code
-    bool isIntrinsic(const core::SymbolData &data) {
+    bool isIntrinsic(const core::MethodData &data) {
         return data->intrinsic != nullptr && !data->hasSig();
     }
 
@@ -831,7 +831,7 @@ class SymbolDefiner {
         return existing;
     }
 
-    void defineArg(core::MutableContext ctx, core::SymbolData &methodData, int pos, const ast::ParsedArg &parsedArg) {
+    void defineArg(core::MutableContext ctx, core::MethodData &methodData, int pos, const ast::ParsedArg &parsedArg) {
         if (pos < methodData->arguments().size()) {
             // TODO: check that flags match;
             if (parsedArg.loc.exists()) {
@@ -903,7 +903,7 @@ class SymbolDefiner {
     }
 
     bool paramsMatch(core::MutableContext ctx, core::MethodRef method, const vector<ast::ParsedArg> &parsedArgs) {
-        auto sym = method.data(ctx)->dealias(ctx).asMethodRef();
+        auto sym = method.data(ctx)->dealiasMethod(ctx);
         if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
             return false;
         }
@@ -1333,7 +1333,7 @@ class SymbolDefiner {
             }
             // if we have more than one type member with the same name, then we have messed up somewhere
             ENFORCE(absl::c_find_if(onSymbol.data(ctx)->typeMembers(), [&](auto mem) {
-                        return mem.name(ctx) == existingTypeMember.data(ctx)->name;
+                        return mem.data(ctx)->name == existingTypeMember.data(ctx)->name;
                     }) != onSymbol.data(ctx)->typeMembers().end());
             sym = existingTypeMember;
         } else {

@@ -173,8 +173,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
                                ClassOrModuleRef inClass, MethodRef method, const TypeAndOrigins &argTpe,
                                const ArgInfo &argSym, const TypePtr &selfType, const vector<TypePtr> &targs, Loc loc,
                                Loc originForUninitialized, bool mayBeSetter = false) {
-    TypePtr expectedType =
-        Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner.asClassOrModuleRef(), inClass, targs);
+    TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
     if (!expectedType) {
         expectedType = Types::untyped(gs, method);
     }
@@ -237,7 +236,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         while (current.data(gs)->isOverloaded()) {
             i++;
             NameRef overloadName = gs.lookupNameUnique(UniqueNameKind::Overload, primary.data(gs)->name, i);
-            MethodRef overload = primary.data(gs)->owner.asClassOrModuleRef().data(gs)->findMethod(gs, overloadName);
+            MethodRef overload = primary.data(gs)->owner.data(gs)->findMethod(gs, overloadName);
             if (!overload.exists()) {
                 Exception::raise("Corruption of overloads?");
             } else {
@@ -268,9 +267,8 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                     continue;
                 }
 
-                auto argType =
-                    Types::resultTypeAsSeenFrom(gs, candidate.data(gs)->arguments()[i].type,
-                                                candidate.data(gs)->owner.asClassOrModuleRef(), inClass, targs);
+                auto argType = Types::resultTypeAsSeenFrom(gs, candidate.data(gs)->arguments()[i].type,
+                                                           candidate.data(gs)->owner, inClass, targs);
                 if (argType.isFullyDefined() && !Types::isSubType(gs, arg, argType)) {
                     it = leftCandidates.erase(it);
                     continue;
@@ -627,10 +625,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             } else {
                 if (symbol.data(gs)->isClassOrModuleModule()) {
                     auto objMeth = core::Symbols::Object().data(gs)->findMethodTransitive(gs, args.name);
-                    if (objMeth.exists() &&
-                        objMeth.data(gs)->owner.asClassOrModuleRef().data(gs)->isClassOrModuleModule()) {
+                    if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isClassOrModuleModule()) {
                         e.addErrorNote("Did you mean to `{}` in this module?",
-                                       fmt::format("include {}", objMeth.data(gs)->owner.name(gs).show(gs)));
+                                       fmt::format("include {}", objMeth.data(gs)->owner.data(gs)->name.show(gs)));
                     }
                 }
                 auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);
@@ -1147,8 +1144,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         }
 
-        TypePtr blockType =
-            Types::resultTypeAsSeenFrom(gs, bspec.type, data->owner.asClassOrModuleRef(), symbol, targs);
+        TypePtr blockType = Types::resultTypeAsSeenFrom(gs, bspec.type, data->owner, symbol, targs);
         if (!blockType) {
             blockType = Types::untyped(gs, method);
         }
@@ -1180,8 +1176,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         } else if (args.args.size() == 2 && method.data(gs)->name == Names::squareBracketsEq()) {
             resultType = args.args[1]->type;
         } else {
-            resultType = Types::resultTypeAsSeenFrom(gs, method.data(gs)->resultType,
-                                                     method.data(gs)->owner.asClassOrModuleRef(), symbol, targs);
+            resultType =
+                Types::resultTypeAsSeenFrom(gs, method.data(gs)->resultType, method.data(gs)->owner, symbol, targs);
         }
     }
     if (args.block == nullptr) {
@@ -1234,14 +1230,13 @@ TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRe
         if (arg.flags.isRepeated) {
             ENFORCE(args.empty(), "getCallArguments with positional and repeated args is not supported: {}",
                     method.toString(gs));
-            return Types::arrayOf(
-                gs, Types::resultTypeAsSeenFrom(gs, arg.type, data->owner.asClassOrModuleRef(), klass, targs));
+            return Types::arrayOf(gs, Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
         }
         ENFORCE(!arg.flags.isKeyword, "getCallArguments does not support kwargs: {}", method.toString(gs));
         if (arg.flags.isBlock) {
             continue;
         }
-        args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner.asClassOrModuleRef(), klass, targs));
+        args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
     }
     return make_type<TupleType>(move(args));
 }
@@ -1696,7 +1691,7 @@ public:
         for (auto mem : attachedClass.data(gs)->typeMembers()) {
             ++i;
 
-            auto memData = mem.asTypeMemberRef().data(gs);
+            auto memData = mem.data(gs);
 
             auto *memType = cast_type<LambdaParam>(memData->resultType);
             ENFORCE(memType != nullptr);

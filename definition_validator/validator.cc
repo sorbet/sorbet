@@ -264,7 +264,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 }
 
 void validateOverriding(const core::Context ctx, core::MethodRef method) {
-    auto klass = method.data(ctx)->owner.asClassOrModuleRef();
+    auto klass = method.data(ctx)->owner;
     auto name = method.data(ctx)->name;
     auto klassData = klass.data(ctx);
     InlinedVector<core::MethodRef, 4> overridenMethods;
@@ -751,7 +751,7 @@ public:
     ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         auto methodData = methodDef.symbol.data(ctx);
-        auto ownerData = methodData->owner.asClassOrModuleRef().data(ctx);
+        auto ownerData = methodData->owner.data(ctx);
 
         // Only perform this check if this isn't a module from the stdlib, and
         // if there are type members in the owning context.

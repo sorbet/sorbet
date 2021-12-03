@@ -670,7 +670,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
 
     // Intuition for when to use maybeAlias vs what: if it needs to know the original name: maybeAlias.
     // If it needs to know the types / arity: what. Default to `what` if you don't know.
-    auto what = maybeAlias.data(gs)->dealias(gs).asMethodRef();
+    auto what = maybeAlias.data(gs)->dealiasMethod(gs);
 
     if (what == core::Symbols::sig()) {
         if (auto item = trySuggestSig(typechecker, clientConfig, what, receiverType, queryLoc, prefix, sortIdx)) {

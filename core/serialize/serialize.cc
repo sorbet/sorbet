@@ -31,6 +31,7 @@ public:
     static void pickle(Pickler &p, const TypePtr &what);
     static void pickle(Pickler &p, const ArgInfo &a);
     static void pickle(Pickler &p, const Symbol &what);
+    static void pickle(Pickler &p, const Method &what);
     static void pickle(Pickler &p, const ast::ExpressionPtr &what);
     static void pickle(Pickler &p, core::LocOffsets loc);
     static void pickle(Pickler &p, core::Loc loc);
@@ -43,6 +44,7 @@ public:
     static TypePtr unpickleType(UnPickler &p, const GlobalState *gs);
     static ArgInfo unpickleArgInfo(UnPickler &p, const GlobalState *gs);
     static Symbol unpickleSymbol(UnPickler &p, const GlobalState *gs);
+    static Method unpickleMethod(UnPickler &p, const GlobalState *gs);
     static void unpickleGS(UnPickler &p, GlobalState &result);
     static uint32_t unpickleGSUUID(UnPickler &p);
     static LocOffsets unpickleLocOffsets(UnPickler &p);
@@ -532,27 +534,67 @@ ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
     return result;
 }
 
-void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
-    p.putU4(what.owner.rawId());
+void SerializerImpl::pickle(Pickler &p, const Method &what) {
+    p.putU4(what.owner.id());
     p.putU4(what.name.rawId());
-    p.putU4(what.superClassOrRebind.id());
+    p.putU4(what.rebind_.id());
     p.putU4(what.flags);
-    if (!what.isMethod()) {
-        p.putU4(what.mixins_.size());
-        for (ClassOrModuleRef s : what.mixins_) {
-            p.putU4(s.id());
-        }
-    }
     p.putU4(what.typeParams.size());
     for (SymbolRef s : what.typeParams) {
         p.putU4(s.rawId());
     }
-    if (what.isMethod()) {
-        p.putU4(what.arguments().size());
-        for (const auto &a : what.arguments()) {
-            pickle(p, a);
-        }
+    p.putU4(what.arguments().size());
+    for (const auto &a : what.arguments()) {
+        pickle(p, a);
     }
+    pickle(p, what.resultType);
+    p.putU4(what.locs().size());
+    for (auto &loc : what.locs()) {
+        pickle(p, loc);
+    }
+}
+
+Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
+    Method result;
+    result.owner = ClassOrModuleRef::fromRaw(p.getU4());
+    result.name = NameRef::fromRaw(*gs, p.getU4());
+    result.rebind_ = ClassOrModuleRef::fromRaw(p.getU4());
+    result.flags = p.getU4();
+
+    int typeParamsSize = p.getU4();
+    result.typeParams.reserve(typeParamsSize);
+    for (int i = 0; i < typeParamsSize; i++) {
+        result.typeParams.emplace_back(TypeArgumentRef::fromRaw(p.getU4()));
+    }
+
+    int argsSize = p.getU4();
+    for (int i = 0; i < argsSize; i++) {
+        result.arguments().emplace_back(unpickleArgInfo(p, gs));
+    }
+
+    result.resultType = unpickleType(p, gs);
+    auto locCount = p.getU4();
+    for (int i = 0; i < locCount; i++) {
+        result.locs_.emplace_back(unpickleLoc(p));
+    }
+    return result;
+}
+
+void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
+    p.putU4(what.owner.rawId());
+    p.putU4(what.name.rawId());
+    p.putU4(what.superClass_.id());
+    p.putU4(what.flags);
+    p.putU4(what.mixins_.size());
+    for (ClassOrModuleRef s : what.mixins_) {
+        p.putU4(s.id());
+    }
+
+    p.putU4(what.typeParams.size());
+    for (SymbolRef s : what.typeParams) {
+        p.putU4(s.rawId());
+    }
+
     p.putU4(what.members().size());
     vector<pair<uint32_t, uint32_t>> membersSorted;
 
@@ -577,28 +619,21 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
     Symbol result;
     result.owner = SymbolRef::fromRaw(p.getU4());
     result.name = NameRef::fromRaw(*gs, p.getU4());
-    result.superClassOrRebind = ClassOrModuleRef::fromRaw(p.getU4());
+    result.superClass_ = ClassOrModuleRef::fromRaw(p.getU4());
     result.flags = p.getU4();
-    if (!result.isMethod()) {
-        int mixinsSize = p.getU4();
-        result.mixins_.reserve(mixinsSize);
-        for (int i = 0; i < mixinsSize; i++) {
-            result.mixins_.emplace_back(ClassOrModuleRef::fromRaw(p.getU4()));
-        }
+    int mixinsSize = p.getU4();
+    result.mixins_.reserve(mixinsSize);
+    for (int i = 0; i < mixinsSize; i++) {
+        result.mixins_.emplace_back(ClassOrModuleRef::fromRaw(p.getU4()));
     }
+
     int typeParamsSize = p.getU4();
 
     result.typeParams.reserve(typeParamsSize);
     for (int i = 0; i < typeParamsSize; i++) {
-        result.typeParams.emplace_back(SymbolRef::fromRaw(p.getU4()));
+        result.typeParams.emplace_back(TypeMemberRef::fromRaw(p.getU4()));
     }
 
-    if (result.isMethod()) {
-        int argsSize = p.getU4();
-        for (int i = 0; i < argsSize; i++) {
-            result.arguments().emplace_back(unpickleArgInfo(p, gs));
-        }
-    }
     int membersSize = p.getU4();
     result.members().reserve(membersSize);
     for (int i = 0; i < membersSize; i++) {
@@ -664,7 +699,7 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
     }
 
     result.putU4(gs.methods.size());
-    for (const Symbol &s : gs.methods) {
+    for (const Method &s : gs.methods) {
         pickle(result, s);
     }
 
@@ -717,7 +752,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     uniqueNames.clear();
     vector<Symbol> classAndModules(std::move(result.classAndModules));
     classAndModules.clear();
-    vector<Symbol> methods(std::move(result.methods));
+    vector<Method> methods(std::move(result.methods));
     methods.clear();
     vector<Symbol> fields(std::move(result.fields));
     fields.clear();
@@ -778,7 +813,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         ENFORCE(methodSize > 0);
         methods.reserve(nextPowerOfTwo(methodSize));
         for (int i = 0; i < methodSize; i++) {
-            methods.emplace_back(unpickleSymbol(p, &result));
+            methods.emplace_back(unpickleMethod(p, &result));
         }
 
         int fieldSize = p.getU4();

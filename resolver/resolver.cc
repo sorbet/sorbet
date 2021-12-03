@@ -221,7 +221,7 @@ private:
             }
             scope = scope->parent.get();
         }
-        return nesting->scope.findMemberTransitive(ctx, name);
+        return nesting->scope.asClassOrModuleRef().data(ctx)->findMemberTransitive(ctx, name);
     }
 
     static bool isAlreadyResolved(core::Context ctx, const ast::ConstantLit &original) {
@@ -501,7 +501,7 @@ private:
         while (enclosingClass != core::Symbols::root()) {
             auto typeMembers = enclosingClass.data(ctx)->typeMembers();
             if (!typeMembers.empty()) {
-                enclosingTypeMember = typeMembers[0].asTypeMemberRef();
+                enclosingTypeMember = typeMembers[0];
                 break;
             }
             enclosingClass = enclosingClass.data(ctx)->owner.enclosingClass(ctx);

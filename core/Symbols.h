@@ -38,6 +38,213 @@ enum class Visibility : uint8_t {
     Private,
 };
 
+class Method final {
+public:
+    friend class Symbol;
+    friend class serialize::SerializerImpl;
+
+    Method(const Method &) = delete;
+    Method() = default;
+    Method(Method &&) noexcept = default;
+    class Flags {
+    public:
+        static constexpr uint16_t NONE = 0;
+
+        // Synthesized by C++ code in a Rewriter pass
+        static constexpr uint16_t REWRITER_SYNTHESIZED = 00001;
+
+        static constexpr uint16_t METHOD_PROTECTED = 0x0002;
+        static constexpr uint16_t METHOD_PRIVATE = 0x0004;
+        static constexpr uint16_t METHOD_OVERLOADED = 0x0008;
+        static constexpr uint16_t METHOD_ABSTRACT = 0x0010;
+        static constexpr uint16_t METHOD_GENERIC = 0x0020;
+        [[deprecated]] static constexpr uint16_t METHOD_GENERATED_SIG = 0x0040;
+        static constexpr uint16_t METHOD_OVERRIDABLE = 0x0080;
+        static constexpr uint16_t METHOD_FINAL = 0x0100;
+        static constexpr uint16_t METHOD_OVERRIDE = 0x0200;
+        [[deprecated]] static constexpr uint16_t METHOD_IMPLEMENTATION = 0x0400;
+        static constexpr uint16_t METHOD_INCOMPATIBLE_OVERRIDE = 0x0800;
+    };
+
+    Loc loc() const;
+    const InlinedVector<Loc, 2> &locs() const;
+    void addLoc(const core::GlobalState &gs, core::Loc loc);
+    uint32_t hash(const GlobalState &gs) const;
+    uint32_t methodShapeHash(const GlobalState &gs) const;
+    std::vector<uint32_t> methodArgumentHash(const GlobalState &gs) const;
+
+    inline InlinedVector<TypeArgumentRef, 4> &typeArguments() {
+        return typeParams;
+    }
+
+    inline const InlinedVector<TypeArgumentRef, 4> &typeArguments() const {
+        return typeParams;
+    }
+
+    inline bool isOverloaded() const {
+        return (flags & Method::Flags::METHOD_OVERLOADED) != 0;
+    }
+
+    inline bool isAbstract() const {
+        return (flags & Method::Flags::METHOD_ABSTRACT) != 0;
+    }
+
+    inline bool isIncompatibleOverride() const {
+        return (flags & Method::Flags::METHOD_INCOMPATIBLE_OVERRIDE) != 0;
+    }
+
+    inline bool isGenericMethod() const {
+        return (flags & Method::Flags::METHOD_GENERIC) != 0;
+    }
+
+    inline bool isOverridable() const {
+        return (flags & Method::Flags::METHOD_OVERRIDABLE) != 0;
+    }
+
+    inline bool isOverride() const {
+        return (flags & Method::Flags::METHOD_OVERRIDE) != 0;
+    }
+
+    inline void setOverloaded() {
+        flags |= Method::Flags::METHOD_OVERLOADED;
+    }
+
+    inline void setAbstract() {
+        flags |= Method::Flags::METHOD_ABSTRACT;
+    }
+
+    inline void setIncompatibleOverride() {
+        flags |= Method::Flags::METHOD_INCOMPATIBLE_OVERRIDE;
+    }
+
+    inline void setGenericMethod() {
+        flags |= Method::Flags::METHOD_GENERIC;
+    }
+
+    inline void setOverridable() {
+        flags |= Method::Flags::METHOD_OVERRIDABLE;
+    }
+
+    inline void setFinalMethod() {
+        flags |= Method::Flags::METHOD_FINAL;
+    }
+
+    inline void setOverride() {
+        flags |= Method::Flags::METHOD_OVERRIDE;
+    }
+
+    inline bool isFinalMethod() const {
+        return (flags & Method::Flags::METHOD_FINAL) != 0;
+    }
+
+    inline void setMethodPublic() {
+        flags &= ~Method::Flags::METHOD_PRIVATE;
+        flags &= ~Method::Flags::METHOD_PROTECTED;
+    }
+
+    inline void setMethodProtected() {
+        flags |= Method::Flags::METHOD_PROTECTED;
+    }
+
+    inline void setMethodPrivate() {
+        flags |= Method::Flags::METHOD_PRIVATE;
+    }
+
+    void setMethodVisibility(Visibility visibility) {
+        switch (visibility) {
+            case Visibility::Public:
+                this->setMethodPublic();
+                break;
+            case Visibility::Protected:
+                this->setMethodProtected();
+                break;
+            case Visibility::Private:
+                this->setMethodPrivate();
+                break;
+        }
+    }
+
+    inline bool isMethodPublic() const {
+        return !isMethodProtected() && !isMethodPrivate();
+    }
+
+    inline bool isMethodProtected() const {
+        return (flags & Method::Flags::METHOD_PROTECTED) != 0;
+    }
+
+    inline bool isMethodPrivate() const {
+        return (flags & Method::Flags::METHOD_PRIVATE) != 0;
+    }
+
+    inline void setRewriterSynthesized() {
+        flags |= Method::Flags::REWRITER_SYNTHESIZED;
+    }
+    inline bool isRewriterSynthesized() const {
+        return (flags & Method::Flags::REWRITER_SYNTHESIZED) != 0;
+    }
+
+    Visibility methodVisibility() const {
+        if (this->isMethodPublic()) {
+            return Visibility::Public;
+        } else if (this->isMethodProtected()) {
+            return Visibility::Protected;
+        } else if (this->isMethodPrivate()) {
+            return Visibility::Private;
+        } else {
+            Exception::raise("Expected method to have visibility");
+        }
+    }
+
+    inline void setReBind(ClassOrModuleRef rebind) {
+        this->rebind_ = rebind;
+    }
+
+    ClassOrModuleRef rebind() const {
+        return rebind_;
+    }
+
+    bool hasSig() const {
+        return resultType != nullptr;
+    }
+
+    TypeArgumentRef findMember(const GlobalState &gs, NameRef name) const;
+    std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlow(const GlobalState &gs) const;
+
+    using ArgumentsStore = InlinedVector<ArgInfo, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
+    ArgumentsStore &arguments() {
+        return arguments_;
+    }
+
+    const ArgumentsStore &arguments() const {
+        return arguments_;
+    }
+
+    // if dealiasing fails here, then we return a bad alias method stub instead
+    MethodRef dealiasMethod(const GlobalState &gs, int depthLimit = 42) const;
+
+    // TODO(dmitry) perf: most calls to this method could be eliminated as part of perf work.
+    MethodRef ref(const GlobalState &gs) const;
+
+    Method deepCopy(const GlobalState &to) const;
+    void sanityCheck(const GlobalState &gs) const;
+    bool ignoreInHashing(const GlobalState &gs) const;
+    bool isPrintable(const GlobalState &gs) const;
+
+    ClassOrModuleRef owner;
+    NameRef name;
+    TypePtr resultType;
+    // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
+    // why raw pointers are safe.
+    const IntrinsicMethod *intrinsic = nullptr;
+
+private:
+    uint16_t flags = Flags::NONE;
+    ClassOrModuleRef rebind_;
+    InlinedVector<TypeArgumentRef, 4> typeParams;
+    InlinedVector<Loc, 2> locs_;
+    ArgumentsStore arguments_;
+};
+
 class Symbol final {
 public:
     Symbol(const Symbol &) = delete;
@@ -62,7 +269,6 @@ public:
 
         // --- What type of symbol is this? ---
         static constexpr uint32_t CLASS_OR_MODULE = 0x8000'0000;
-        static constexpr uint32_t METHOD = 0x4000'0000;
         static constexpr uint32_t FIELD = 0x2000'0000;
         static constexpr uint32_t STATIC_FIELD = 0x1000'0000;
         static constexpr uint32_t TYPE_ARGUMENT = 0x0800'0000;
@@ -85,19 +291,6 @@ public:
         static constexpr uint32_t CLASS_OR_MODULE_SEALED = 0x0000'0400;
         static constexpr uint32_t CLASS_OR_MODULE_PRIVATE = 0x0000'0800;
 
-        // Method flags
-        static constexpr uint32_t METHOD_PROTECTED = 0x0000'0010;
-        static constexpr uint32_t METHOD_PRIVATE = 0x0000'0020;
-        static constexpr uint32_t METHOD_OVERLOADED = 0x0000'0040;
-        static constexpr uint32_t METHOD_ABSTRACT = 0x0000'0080;
-        static constexpr uint32_t METHOD_GENERIC = 0x0000'0100;
-        [[deprecated]] static constexpr uint32_t METHOD_GENERATED_SIG = 0x0000'0200;
-        static constexpr uint32_t METHOD_OVERRIDABLE = 0x0000'0400;
-        static constexpr uint32_t METHOD_FINAL = 0x0000'0800;
-        static constexpr uint32_t METHOD_OVERRIDE = 0x0000'1000;
-        [[deprecated]] static constexpr uint32_t METHOD_IMPLEMENTATION = 0x0000'2000;
-        static constexpr uint32_t METHOD_INCOMPATIBLE_OVERRIDE = 0x0000'4000;
-
         // Type flags
         static constexpr uint32_t TYPE_COVARIANT = 0x0000'0010;
         static constexpr uint32_t TYPE_INVARIANT = 0x0000'0020;
@@ -114,8 +307,6 @@ public:
     void addLoc(const core::GlobalState &gs, core::Loc loc);
 
     uint32_t hash(const GlobalState &gs) const;
-    uint32_t methodShapeHash(const GlobalState &gs) const;
-    std::vector<uint32_t> methodArgumentHash(const GlobalState &gs) const;
 
     std::vector<TypePtr> selfTypeArgs(const GlobalState &gs) const;
 
@@ -148,12 +339,12 @@ public:
     // Add a placeholder for a mixin and return index in mixins()
     uint16_t addMixinPlaceholder(const GlobalState &gs);
 
-    inline InlinedVector<SymbolRef, 4> &typeMembers() {
+    inline InlinedVector<TypeMemberRef, 4> &typeMembers() {
         ENFORCE(isClassOrModule());
         return typeParams;
     }
 
-    inline const InlinedVector<SymbolRef, 4> &typeMembers() const {
+    inline const InlinedVector<TypeMemberRef, 4> &typeMembers() const {
         ENFORCE(isClassOrModule());
         return typeParams;
     }
@@ -162,16 +353,6 @@ public:
     // this generic type. May differ from typeMembers.size() if some type
     // members have fixed values.
     int typeArity(const GlobalState &gs) const;
-
-    inline InlinedVector<SymbolRef, 4> &typeArguments() {
-        ENFORCE(isMethod());
-        return typeParams;
-    }
-
-    inline const InlinedVector<SymbolRef, 4> &typeArguments() const {
-        ENFORCE(isMethod());
-        return typeParams;
-    }
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const;
 
@@ -192,46 +373,12 @@ public:
         return (flags & Symbol::Flags::FIELD) != 0;
     }
 
-    inline bool isMethod() const {
-        return (flags & Symbol::Flags::METHOD) != 0;
-    }
-
     inline bool isTypeMember() const {
         return (flags & Symbol::Flags::TYPE_MEMBER) != 0;
     }
 
     inline bool isTypeArgument() const {
         return (flags & Symbol::Flags::TYPE_ARGUMENT) != 0;
-    }
-
-    inline bool isOverloaded() const {
-        ENFORCE_NO_TIMER(isMethod());
-        return (flags & Symbol::Flags::METHOD_OVERLOADED) != 0;
-    }
-
-    inline bool isAbstract() const {
-        ENFORCE_NO_TIMER(isMethod());
-        return (flags & Symbol::Flags::METHOD_ABSTRACT) != 0;
-    }
-
-    inline bool isIncompatibleOverride() const {
-        ENFORCE_NO_TIMER(isMethod());
-        return (flags & Symbol::Flags::METHOD_INCOMPATIBLE_OVERRIDE) != 0;
-    }
-
-    inline bool isGenericMethod() const {
-        ENFORCE_NO_TIMER(isMethod());
-        return (flags & Symbol::Flags::METHOD_GENERIC) != 0;
-    }
-
-    inline bool isOverridable() const {
-        ENFORCE_NO_TIMER(isMethod());
-        return (flags & Symbol::Flags::METHOD_OVERRIDABLE) != 0;
-    }
-
-    inline bool isOverride() const {
-        ENFORCE_NO_TIMER(isMethod());
-        return (flags & Symbol::Flags::METHOD_OVERRIDE) != 0;
     }
 
     inline bool isCovariant() const {
@@ -265,33 +412,6 @@ public:
             return Variance::ContraVariant;
         }
         Exception::raise("Should not happen");
-    }
-
-    inline bool isMethodPublic() const {
-        ENFORCE_NO_TIMER(isMethod());
-        return !isMethodProtected() && !isMethodPrivate();
-    }
-
-    inline bool isMethodProtected() const {
-        ENFORCE_NO_TIMER(isMethod());
-        return (flags & Symbol::Flags::METHOD_PROTECTED) != 0;
-    }
-
-    inline bool isMethodPrivate() const {
-        ENFORCE_NO_TIMER(isMethod());
-        return (flags & Symbol::Flags::METHOD_PRIVATE) != 0;
-    }
-
-    Visibility methodVisibility() const {
-        if (this->isMethodPublic()) {
-            return Visibility::Public;
-        } else if (this->isMethodProtected()) {
-            return Visibility::Protected;
-        } else if (this->isMethodPrivate()) {
-            return Visibility::Private;
-        } else {
-            Exception::raise("Expected method to have visibility");
-        }
     }
 
     inline bool isClassOrModuleModule() const {
@@ -350,32 +470,27 @@ public:
     }
 
     inline void setClassOrModule() {
-        ENFORCE(!isStaticField() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
+        ENFORCE(!isStaticField() && !isField() && !isTypeArgument() && !isTypeMember());
         flags |= Symbol::Flags::CLASS_OR_MODULE;
     }
 
     inline void setStaticField() {
-        ENFORCE(!isClassOrModule() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
+        ENFORCE(!isClassOrModule() && !isField() && !isTypeArgument() && !isTypeMember());
         flags |= Symbol::Flags::STATIC_FIELD;
     }
 
     inline void setField() {
-        ENFORCE(!isClassOrModule() && !isStaticField() && !isMethod() && !isTypeArgument() && !isTypeMember());
+        ENFORCE(!isClassOrModule() && !isStaticField() && !isTypeArgument() && !isTypeMember());
         flags |= Symbol::Flags::FIELD;
     }
 
-    inline void setMethod() {
-        ENFORCE(!isClassOrModule() && !isStaticField() && !isField() && !isTypeArgument() && !isTypeMember());
-        flags |= Symbol::Flags::METHOD;
-    }
-
     inline void setTypeArgument() {
-        ENFORCE(!isClassOrModule() && !isStaticField() && !isField() && !isMethod() && !isTypeMember());
+        ENFORCE(!isClassOrModule() && !isStaticField() && !isField() && !isTypeMember());
         flags |= Symbol::Flags::TYPE_ARGUMENT;
     }
 
     inline void setTypeMember() {
-        ENFORCE(!isClassOrModule() && !isStaticField() && !isField() && !isMethod() && !isTypeArgument());
+        ENFORCE(!isClassOrModule() && !isStaticField() && !isField() && !isTypeArgument());
         flags |= Symbol::Flags::TYPE_MEMBER;
     }
 
@@ -411,77 +526,6 @@ public:
     inline void setFixed() {
         ENFORCE(isTypeArgument() || isTypeMember());
         flags |= Symbol::Flags::TYPE_FIXED;
-    }
-
-    inline void setOverloaded() {
-        ENFORCE(isMethod());
-        flags |= Symbol::Flags::METHOD_OVERLOADED;
-    }
-
-    inline void setAbstract() {
-        ENFORCE(isMethod());
-        flags |= Symbol::Flags::METHOD_ABSTRACT;
-    }
-
-    inline void setIncompatibleOverride() {
-        ENFORCE(isMethod());
-        flags |= Symbol::Flags::METHOD_INCOMPATIBLE_OVERRIDE;
-    }
-
-    inline void setGenericMethod() {
-        ENFORCE(isMethod());
-        flags |= Symbol::Flags::METHOD_GENERIC;
-    }
-
-    inline void setOverridable() {
-        ENFORCE(isMethod());
-        flags |= Symbol::Flags::METHOD_OVERRIDABLE;
-    }
-
-    inline void setFinalMethod() {
-        ENFORCE(isMethod());
-        flags |= Symbol::Flags::METHOD_FINAL;
-    }
-
-    inline void setOverride() {
-        ENFORCE(isMethod());
-        flags |= Symbol::Flags::METHOD_OVERRIDE;
-    }
-
-    inline bool isFinalMethod() const {
-        ENFORCE(isMethod());
-        return (flags & Symbol::Flags::METHOD_FINAL) != 0;
-    }
-
-    inline void setMethodPublic() {
-        ENFORCE(isMethod());
-        flags &= ~Symbol::Flags::METHOD_PRIVATE;
-        flags &= ~Symbol::Flags::METHOD_PROTECTED;
-    }
-
-    inline void setMethodProtected() {
-        ENFORCE(isMethod());
-        flags |= Symbol::Flags::METHOD_PROTECTED;
-    }
-
-    inline void setMethodPrivate() {
-        ENFORCE(isMethod());
-        flags |= Symbol::Flags::METHOD_PRIVATE;
-    }
-
-    void setMethodVisibility(Visibility visibility) {
-        ENFORCE(isMethod());
-        switch (visibility) {
-            case Visibility::Public:
-                this->setMethodPublic();
-                break;
-            case Visibility::Protected:
-                this->setMethodProtected();
-                break;
-            case Visibility::Private:
-                this->setMethodPrivate();
-                break;
-        }
     }
 
     inline void setClassOrModuleAbstract() {
@@ -521,7 +565,8 @@ public:
     inline bool isTypeAlias() const {
         // We should only be able to set the type alias bit on static fields.
         // But it's rather unweidly to ask "isStaticField() && isTypeAlias()" just to satisfy the ENFORCE.
-        // To make things nicer, we relax the ENFORCE here to also allow asking whether "some constant" is a type alias.
+        // To make things nicer, we relax the ENFORCE here to also allow asking whether "some constant" is a type
+        // alias.
         ENFORCE(isClassOrModule() || isStaticField() || isTypeMember());
         return isStaticField() && (flags & Symbol::Flags::STATIC_FIELD_TYPE_ALIAS) != 0;
     }
@@ -544,7 +589,7 @@ public:
     MethodRef findMethodNoDealias(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name) const;
     MethodRef findMethodTransitive(const GlobalState &gs, NameRef name) const;
-    SymbolRef findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const;
+    MethodRef findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const;
 
     /* transitively finds a member with the most similar name */
 
@@ -604,47 +649,26 @@ public:
     // if dealiasing fails here, then we return Untyped instead
     SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const;
 
-    // if dealiasing fails here, then we return a bad alias method stub instead
-    MethodRef dealiasMethod(const GlobalState &gs, int depthLimit = 42) const;
-
     bool ignoreInHashing(const GlobalState &gs) const;
 
     SymbolRef owner;
-    ClassOrModuleRef superClassOrRebind; // method arguments store rebind here
+    ClassOrModuleRef superClass_;
 
     inline ClassOrModuleRef superClass() const {
         ENFORCE_NO_TIMER(isClassOrModule());
-        return superClassOrRebind;
+        return superClass_;
     }
 
     inline void setSuperClass(ClassOrModuleRef claz) {
         ENFORCE(isClassOrModule());
-        superClassOrRebind = claz;
-    }
-
-    inline void setReBind(ClassOrModuleRef rebind) {
-        ENFORCE(isMethod());
-        superClassOrRebind = rebind;
-    }
-
-    ClassOrModuleRef rebind() const {
-        ENFORCE_NO_TIMER(isMethod());
-        return superClassOrRebind;
+        superClass_ = claz;
     }
 
     uint32_t flags = Flags::NONE;
     NameRef name; // todo: move out? it should not matter but it's important for name resolution
     TypePtr resultType;
 
-    bool hasSig() const {
-        ENFORCE_NO_TIMER(isMethod());
-        return resultType != nullptr;
-    }
-
     UnorderedMap<NameRef, SymbolRef> members_;
-
-    using ArgumentsStore = InlinedVector<ArgInfo, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
-    ArgumentsStore arguments_;
 
     UnorderedMap<NameRef, SymbolRef> &members() {
         return members_;
@@ -653,24 +677,10 @@ public:
         return members_;
     };
 
-    ArgumentsStore &arguments() {
-        ENFORCE_NO_TIMER(isMethod());
-        return arguments_;
-    }
-
-    const ArgumentsStore &arguments() const {
-        ENFORCE_NO_TIMER(isMethod());
-        return arguments_;
-    }
-
     std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlow(const GlobalState &gs) const;
 
     Symbol deepCopy(const GlobalState &to, bool keepGsId = false) const;
     void sanityCheck(const GlobalState &gs) const;
-
-    // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
-    // why raw pointers are safe.
-    const IntrinsicMethod *intrinsic = nullptr;
 
 private:
     friend class serialize::SerializerImpl;
@@ -692,9 +702,8 @@ private:
     InlinedVector<ClassOrModuleRef, 4> mixins_;
 
     /** For Class or module - ordered type members of the class,
-     * for method - ordered type generic type arguments of the class
      */
-    InlinedVector<SymbolRef, 4> typeParams;
+    InlinedVector<TypeMemberRef, 4> typeParams;
     InlinedVector<Loc, 2> locs_;
 
     // Record a required ancestor for this class of module in a magic property
@@ -706,8 +715,7 @@ private:
     std::vector<RequiredAncestor> requiredAncestorsTransitiveInternal(GlobalState &gs,
                                                                       std::vector<ClassOrModuleRef> &seen);
 
-    SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, uint32_t mask, uint32_t flags,
-                                           int maxDepth = 100) const;
+    SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth = 100) const;
 
     inline void unsetClassOrModuleLinearizationComputed() {
         ENFORCE(isClassOrModule());

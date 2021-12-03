@@ -489,11 +489,11 @@ void ClassType::_sanityCheck(const GlobalState &gs) const {
 /** Returns type parameters of what reordered in the order of type parameters of asIf
  * If some typeArgs are not present, return NoSymbol
  * */
-InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, ClassOrModuleRef what,
-                                                     const vector<TypePtr> &targs, ClassOrModuleRef asIf) {
+InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, ClassOrModuleRef what,
+                                                         const vector<TypePtr> &targs, ClassOrModuleRef asIf) {
     ENFORCE(what == asIf || what.data(gs)->derivesFrom(gs, asIf) || asIf.data(gs)->derivesFrom(gs, what),
             "what={} asIf={}", what.data(gs)->name.showRaw(gs), asIf.data(gs)->name.showRaw(gs));
-    InlinedVector<SymbolRef, 4> currentAlignment;
+    InlinedVector<TypeMemberRef, 4> currentAlignment;
     if (targs.empty()) {
         return currentAlignment;
     }
@@ -504,11 +504,11 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, Clas
     } else {
         currentAlignment.reserve(asIf.data(gs)->typeMembers().size());
         for (auto originalTp : asIf.data(gs)->typeMembers()) {
-            auto name = originalTp.name(gs);
+            auto name = originalTp.data(gs)->name;
             SymbolRef align;
             int i = 0;
             for (auto x : what.data(gs)->typeMembers()) {
-                if (x.name(gs) == name) {
+                if (x.data(gs)->name == name) {
                     align = x;
                     currentAlignment.emplace_back(x);
                     break;
@@ -516,7 +516,7 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, Clas
                 i++;
             }
             if (!align.exists()) {
-                currentAlignment.emplace_back(Symbols::noSymbol());
+                currentAlignment.emplace_back(Symbols::noTypeMember());
             }
         }
     }
