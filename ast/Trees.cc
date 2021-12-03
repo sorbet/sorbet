@@ -1416,6 +1416,8 @@ ParsedFilesOrCancelled::ParsedFilesOrCancelled(std::vector<ParsedFile> &&trees) 
 
 ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(std::vector<ParsedFile> &&trees, WorkerPool &workers) {
     if (!trees.empty()) {
+        // N.B.: `workers.size()` can be `0` when threads are disabled, which would result in undefined behavior for
+        // `BlockingCounter`.
         absl::BlockingCounter threadBarrier(std::max(workers.size(), 1));
         auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
         for (auto &tree : trees) {
