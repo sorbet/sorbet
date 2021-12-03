@@ -72,7 +72,20 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
     auto *afterFinalCall = llvm::BasicBlock::Create(cs, llvm::Twine("afterFinalCall_") + methodName,
                                                     builder.GetInsertBlock()->getParent());
 
-    auto *typeTest = Payload::typeTest(cs, builder, recv, finalInfo->recv);
+    llvm::Value *typeTest;
+
+    // When the receiver is a singleton, we can skip the type test because it would end up looking like the following:
+    //
+    // > %klass = sorbet_i_getRubyConst(...)
+    // > sorbet_isa_class_of(%klass, %klass)
+    //
+    // which we know to be true.
+    if (IREmitterHelpers::isAliasToSingleton(cs, mcctx.irctx, send->recv.variable, finalInfo->recv)) {
+        typeTest = llvm::ConstantInt::getTrue(cs);
+    } else {
+        typeTest = Payload::typeTest(cs, builder, recv, finalInfo->recv);
+    }
+
     builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastFinalCall, slowFinalCall);
 
     // fast path: emit a direct call
@@ -91,6 +104,9 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
     // this is unfortunate: fillSendArgsArray will allocate a hash when keyword arguments are present.
     auto args = IREmitterHelpers::fillSendArgArray(mcctx);
     auto *fastPathResult = builder.CreateCall(wrapper, {cache, args.argc, args.argv, recv});
+
+    Payload::assumeType(cs, builder, fastPathResult, finalInfo->method.data(cs)->resultType);
+
     auto *fastPathEnd = builder.GetInsertBlock();
     builder.CreateBr(afterFinalCall);
 
