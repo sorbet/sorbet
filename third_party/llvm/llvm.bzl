@@ -311,6 +311,14 @@ llvm_all_cmake_vars = select({
             darwin_cmake_vars,
         ),
     ),
+    "@com_stripe_ruby_typer//tools/config:darwin_arm64": cmake_var_string(
+        _dict_add(
+            cmake_vars,
+            llvm_target_cmake_vars("AARCH64", "aarch64-apple-darwin"),
+            posix_cmake_vars,
+            darwin_cmake_vars,
+        ),
+    ),
     "@com_stripe_ruby_typer//tools/config:linux": cmake_var_string(
         _dict_add(
             cmake_vars,
