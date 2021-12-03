@@ -544,6 +544,12 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         return;
     }
 
+#ifndef SORBET_REALMAIN_MIN
+    if (f.data(ctx).isPackage()) {
+        resolved = packager::Packager::removePackageModules(ctx, move(resolved), intentionallyLeakASTs);
+    }
+#endif
+
     resolved = definition_validator::runOne(ctx, std::move(resolved));
 
     resolved = class_flatten::runOne(ctx, move(resolved));

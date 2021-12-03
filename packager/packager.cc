@@ -23,6 +23,34 @@ namespace {
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 constexpr core::NameRef TEST_NAME = core::Names::Constants::Test();
 
+bool isPackageModule(const core::GlobalState &gs, core::SymbolRef modName) {
+    while (modName.exists() && modName != core::Symbols::root()) {
+        if (modName == core::Symbols::PackageRegistry() || modName == core::Symbols::PackageTests()) {
+            return true;
+        }
+        modName = modName.data(gs)->owner;
+    }
+    return false;
+}
+
+class PrunePackageModules final {
+    const bool intentionallyLeakASTs;
+
+public:
+    PrunePackageModules(bool intentionallyLeakASTs) : intentionallyLeakASTs(intentionallyLeakASTs) {}
+
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        if (isPackageModule(ctx, klass.symbol)) {
+            if (intentionallyLeakASTs) {
+                intentionallyLeakMemory(tree.release());
+            }
+            return ast::MK::EmptyTree();
+        }
+        return tree;
+    }
+};
+
 bool isPrimaryTestNamespace(const core::NameRef ns) {
     return ns == TEST_NAME;
 }
@@ -1473,6 +1501,13 @@ vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<a
     }
     ENFORCE(gs.namesUsedTotal() == namesUsed);
     return files;
+}
+
+ast::ParsedFile Packager::removePackageModules(core::Context ctx, ast::ParsedFile pf, bool intentionallyLeakASTs) {
+    ENFORCE(pf.file.data(ctx).isPackage());
+    PrunePackageModules prune(intentionallyLeakASTs);
+    pf.tree = ast::ShallowMap::apply(ctx, prune, move(pf.tree));
+    return pf;
 }
 
 } // namespace sorbet::packager

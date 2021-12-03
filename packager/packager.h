@@ -82,6 +82,12 @@ public:
     // Run packager incrementally. Note: `files` must contain all packages files. Does not support package changes.
     static std::vector<ast::ParsedFile> runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> files);
 
+    // The structures created for `__package.rb` files from their imports are large and deep. This causes
+    // performance problems with typechecking. Use to remove these modules while retaining the PackageSpec
+    // class itself during typecheck.
+    static ast::ParsedFile removePackageModules(core::Context ctx, ast::ParsedFile pf,
+                                                bool intentionallyLeakASTs = false);
+
     Packager() = delete;
 };
 } // namespace sorbet::packager
