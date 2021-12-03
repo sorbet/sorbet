@@ -344,7 +344,10 @@ private:
         ENFORCE(job.scope->scope != core::Symbols::StubModule());
 
         auto customAutogenError = original.cnst == core::Symbols::Subclasses().data(ctx)->name;
-        if (!alreadyReported || customAutogenError) {
+        // If a package exports a name that does not exist only one error should appear at the
+        // export site. Ignore resolution failures in the aliases/modules created by packaging to
+        // avoid this resulting in duplicate errors.
+        if ((!alreadyReported || customAutogenError) && !isPackagerMaterializedConstantRef(ctx, job)) {
             if (auto e = ctx.beginError(job.out->original.loc(), core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
 
@@ -380,6 +383,22 @@ private:
                 }
             }
         }
+    }
+
+    // Is this constant materialized by the packager. This specifically excludes the PackageSpec
+    // class body itself.
+    static bool isPackagerMaterializedConstantRef(core::Context ctx, const ResolutionItem &job) {
+        if (!ctx.file.data(ctx).isPackage()) {
+            return false;
+        }
+        auto nesting = job.scope;
+        while (nesting != nullptr) {
+            if (nesting->scope == core::Symbols::PackageRegistry() || nesting->scope == core::Symbols::PackageTests()) {
+                return true;
+            }
+            nesting = nesting->parent;
+        }
+        return false;
     }
 
     static bool resolveJob(core::Context ctx, ResolutionItem &job) {
