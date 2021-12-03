@@ -191,6 +191,11 @@ class Tempfile
   sig {params(unlink_now: T::Boolean).void}
   def close(unlink_now=false); end
 
+  # Closes and unlinks (deletes) the file. Has the same effect as called
+  # `close(true)`.
+  sig {void}
+  def close!; end
+
   # Alias for:
   # [`unlink`](https://docs.ruby-lang.org/en/2.7.0/Tempfile.html#method-i-unlink)
   sig {returns(T::Boolean)}
