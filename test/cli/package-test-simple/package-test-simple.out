@@ -1,8 +1,11 @@
 main_lib/lib.rb:8: Unable to resolve constant `TestOnly` https://srb.help/5002
      8 |  Project::TestOnly::SomeHelper.new
           ^^^^^^^^^^^^^^^^^
-    test_only/__package.rb:5: Do you need to `import` package `Project::TestOnly`?
+    test_only/__package.rb:5: Do you need to `export Project::TestOnly` in package `Project::TestOnly`?
      5 |class Project::TestOnly < PackageSpec
      6 |  export Project::TestOnly::SomeHelper
      7 |end
+    test_only/some_helper.rb:4: Constant `Project::TestOnly` is defined here:
+     4 |class Project::TestOnly::SomeHelper
+              ^^^^^^^^^^^^^^^^^
 Errors: 1

@@ -48,6 +48,19 @@ public:
         return matches;
     }
 
+    void addMissingExportSuggestions(core::ErrorBuilder &e, core::packages::PackageInfo::MissingExportMatch match) {
+        vector<core::ErrorLine> lines;
+        auto &srcPkg = db().getPackageInfo(match.srcPkg);
+        lines.emplace_back(core::ErrorLine::from(
+            srcPkg.definitionLoc(), "Do you need to `{} {}` in package `{}`?", core::Names::export_().show(ctx),
+            match.symbol.show(ctx),
+            fmt::map_join(srcPkg.fullName(), "::", [&](auto nr) -> string { return nr.show(ctx); })));
+        lines.emplace_back(core::ErrorLine::from(match.symbol.data(ctx)->loc(),
+                                                 "Constant `{}` is defined here:", match.symbol.show(ctx)));
+        // TODO(nroman-stripe) Add automatic fixers
+        e.addErrorSection(core::ErrorSection(lines));
+    }
+
     void addMissingImportSuggestions(core::ErrorBuilder &e, PackageMatch &match) {
         vector<core::ErrorLine> lines;
         auto &otherPkg = db().getPackageInfo(match.mangledName);
@@ -97,7 +110,15 @@ private:
 } // namespace
 
 bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder &e,
-                                           const ast::ConstantLit::ResolutionScopes &scopes, core::NameRef name) {
+                                           const ast::ConstantLit::ResolutionScopes &scopes,
+                                           ast::UnresolvedConstantLit &unresolved) {
+    // Search strategy:
+    // 1. Look for un-exported names in packages *this package already imports* that defined the
+    //    unresolved literal.
+    // 2. Look for packages that we did not import that match the prefix of the unresolved constant
+    //    literal.
+    // Both of above look for EXACT matches only. If neither of these find anything we fall back to
+    // the resolver's default behavior (Symbol::findMemberFuzzyMatch).
     if (ctx.state.packageDB().empty()) {
         return false;
     }
@@ -107,9 +128,21 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
         return false; // This error is not in packaged code. Nothing to do here.
     }
 
-    // TODO(nroman-stripe) First search for missing exports.
+    if (ast::cast_tree<ast::ConstantLit>(unresolved.scope) != nullptr) {
+        auto missingExports = pkgCtx.currentPkg.findMissingExports(
+            ctx, ast::cast_tree_nonnull<ast::ConstantLit>(unresolved.scope).symbol, unresolved.cnst);
+        if (missingExports.size() > 5) {
+            missingExports.resize(5);
+        }
+        if (!missingExports.empty()) {
+            for (auto match : missingExports) {
+                pkgCtx.addMissingExportSuggestions(e, match);
+            }
+            return true;
+        }
+    }
 
-    vector<PackageMatch> missingImports = pkgCtx.findPossibleMissingImports(scopes, name);
+    vector<PackageMatch> missingImports = pkgCtx.findPossibleMissingImports(scopes, unresolved.cnst);
     if (missingImports.empty()) {
         return false;
     }
