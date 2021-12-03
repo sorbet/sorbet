@@ -424,6 +424,7 @@ public:
     // TODO(jvilk): Remove as many of these methods as possible in favor of callsites using .data on the more specific
     // symbol *Ref classes (e.g., ClassOrModuleRef). These were introduced to wean the codebase from calling
     // SymbolRef::data.
+    // Please do not add methods to this list.
     ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     core::NameRef name(const GlobalState &gs) const;
