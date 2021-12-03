@@ -15,7 +15,7 @@ namespace sorbet::realmain::lsp {
 namespace {
 bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalState &gs,
                            unique_ptr<ResponseMessage> &response) {
-    auto locs = symbol.data(gs)->locs();
+    auto locs = symbol.locs(gs);
     string filetype;
     for (auto loc : locs) {
         if (loc.file().data(gs).isRBI()) {
@@ -27,7 +27,7 @@ bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalStat
         if (!filetype.empty()) {
             auto error =
                 fmt::format("Renaming constants defined in {} files is not supported; symbol {} is defined at {}",
-                            filetype, symbol.data(gs)->name.show(gs), loc.filePosToString(gs));
+                            filetype, symbol.name(gs).show(gs), loc.filePosToString(gs));
             response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, error);
             return false;
         }
@@ -99,11 +99,11 @@ void addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symb
     // find the target method definition in each subclass
     for (auto c : subclasses) {
         auto classSymbol = c.data(gs);
-        auto member = classSymbol->findMember(gs, symbolData->name);
+        auto member = classSymbol->findMethod(gs, symbolData->name);
         if (!member.exists()) {
             continue;
         }
-        methods.tryEnqueue(member.asMethodRef());
+        methods.tryEnqueue(member);
     }
 }
 
@@ -311,12 +311,11 @@ public:
 void RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, string newName,
                                 unique_ptr<ResponseMessage> &responseMsg) {
     const core::GlobalState &gs = typechecker.state();
-    auto symbolData = symbol.data(gs);
-    auto originalName = symbolData->name.show(gs);
+    auto originalName = symbol.name(gs).show(gs);
     unique_ptr<Renamer> renamer;
 
     UniqueSymbolQueue symbolQueue;
-    if (symbolData->isMethod()) {
+    if (symbol.isMethod()) {
         renamer = make_unique<MethodRenamer>(gs, config, symbolQueue, originalName, newName);
         addSubclassRelatedMethods(gs, symbol.asMethodRef(), symbolQueue);
     } else {
@@ -404,13 +403,13 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
             return response;
         }
 
-        if (defResp->symbol.data(gs)->isMethod() && isupper(params->newName[0])) {
+        if (defResp->symbol.isMethod() && isupper(params->newName[0])) {
             response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                                          "Method names must begin with an lowercase letter.");
             return response;
         }
 
-        if (defResp->symbol.isClassOrModule() || defResp->symbol.data(gs)->isMethod()) {
+        if (defResp->symbol.isClassOrModule() || defResp->symbol.isMethod()) {
             if (isValidRenameLocation(defResp->symbol, gs, response)) {
                 getRenameEdits(typechecker, defResp->symbol, params->newName, response);
             }

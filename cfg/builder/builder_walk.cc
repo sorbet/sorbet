@@ -47,8 +47,7 @@ LocalRef global2Local(CFGContext cctx, core::SymbolRef what) {
     // Note: this will add an empty local to aliases if 'what' is not there
     LocalRef &alias = cctx.aliases[what];
     if (!alias.exists()) {
-        auto data = what.data(cctx.ctx);
-        alias = cctx.newTemporary(data->name);
+        alias = cctx.newTemporary(what.name(cctx.ctx));
     }
     return alias;
 }
@@ -64,8 +63,8 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) 
             }
             break;
         case ast::UnresolvedIdent::Kind::Instance:
-            ENFORCE(cctx.ctx.owner.data(cctx.ctx)->isMethod());
-            klass = cctx.ctx.owner.data(cctx.ctx)->owner.asClassOrModuleRef();
+            ENFORCE(cctx.ctx.owner.isMethod());
+            klass = cctx.ctx.owner.owner(cctx.ctx).asClassOrModuleRef();
             break;
         case ast::UnresolvedIdent::Kind::Global:
             klass = core::Symbols::root();

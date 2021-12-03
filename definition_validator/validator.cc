@@ -264,9 +264,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 }
 
 void validateOverriding(const core::Context ctx, core::MethodRef method) {
-    auto klass = method.data(ctx)->owner;
+    auto klass = method.data(ctx)->owner.asClassOrModuleRef();
     auto name = method.data(ctx)->name;
-    ENFORCE(klass.isClassOrModule());
     auto klassData = klass.data(ctx);
     InlinedVector<core::MethodRef, 4> overridenMethods;
 
@@ -295,15 +294,15 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
     }
 
     if (klassData->superClass().exists()) {
-        auto superMethod = klassData->superClass().data(ctx)->findMemberTransitive(ctx, name);
+        auto superMethod = klassData->superClass().data(ctx)->findMethodTransitive(ctx, name);
         if (superMethod.exists()) {
-            overridenMethods.emplace_back(superMethod.asMethodRef());
+            overridenMethods.emplace_back(superMethod);
         }
     }
     for (const auto &mixin : klassData->mixins()) {
-        auto superMethod = mixin.data(ctx)->findMember(ctx, name);
+        auto superMethod = mixin.data(ctx)->findMethod(ctx, name);
         if (superMethod.exists()) {
-            overridenMethods.emplace_back(superMethod.asMethodRef());
+            overridenMethods.emplace_back(superMethod);
         }
     }
 
@@ -355,13 +354,13 @@ core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef
                                 const core::ClassOrModuleRef ancestor) {
     for (const auto &anc : classDef.ancestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
-        if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
+        if (ancConst != nullptr && ancConst->symbol.dealias(gs) == ancestor) {
             return anc.loc();
         }
     }
     for (const auto &anc : classDef.singletonAncestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
-        if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
+        if (ancConst != nullptr && ancConst->symbol.dealias(gs) == ancestor) {
             return anc.loc();
         }
     }
@@ -390,19 +389,19 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::ClassOrM
     }
     for (const auto [name, sym] : klass.data(gs)->members()) {
         // We only care about method symbols that exist.
-        if (!sym.exists() || !sym.data(gs)->isMethod() ||
+        if (!sym.exists() || !sym.isMethod() ||
             // Method is 'final', and passes the check.
-            sym.data(gs)->isFinalMethod() ||
+            sym.asMethodRef().data(gs)->isFinalMethod() ||
             // <static-init> is a fake method Sorbet synthesizes for typechecking.
-            sym.data(gs)->name == core::Names::staticInit() ||
+            sym.name(gs) == core::Names::staticInit() ||
             // <unresolved-ancestors> is a fake method Sorbet synthesizes to ensure class hierarchy changes in IDE take
             // slow path.
-            sym.data(gs)->name == core::Names::unresolvedAncestors()) {
+            sym.name(gs) == core::Names::unresolvedAncestors()) {
             continue;
         }
-        if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::FinalModuleNonFinalMethod)) {
+        if (auto e = gs.beginError(sym.loc(gs), core::errors::Resolver::FinalModuleNonFinalMethod)) {
             e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
-                        errMsgClass.show(gs), sym.data(gs)->name.show(gs));
+                        errMsgClass.show(gs), sym.name(gs).show(gs));
         }
     }
 }
@@ -664,7 +663,7 @@ private:
         auto isAbstract = klass.data(gs)->isClassOrModuleAbstract();
         if (isAbstract) {
             for (auto [name, sym] : klass.data(gs)->members()) {
-                if (sym.exists() && sym.data(gs)->isMethod() && sym.data(gs)->isAbstract()) {
+                if (sym.exists() && sym.isMethod() && sym.asMethodRef().data(gs)->isAbstract()) {
                     abstract.emplace_back(sym.asMethodRef());
                 }
             }
@@ -752,7 +751,7 @@ public:
     ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         auto methodData = methodDef.symbol.data(ctx);
-        auto ownerData = methodData->owner.data(ctx);
+        auto ownerData = methodData->owner.asClassOrModuleRef().data(ctx);
 
         // Only perform this check if this isn't a module from the stdlib, and
         // if there are type members in the owning context.

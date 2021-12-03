@@ -28,7 +28,7 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
             // Only support go-to-definition on constants and fields in untyped files.
             if (auto c = resp->isConstant()) {
                 auto sym = c->symbol;
-                for (auto loc : sym.data(gs)->locs()) {
+                for (auto loc : sym.locs(gs)) {
                     addLocIfExists(gs, result, loc);
                 }
             } else if (resp->isField() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
@@ -38,7 +38,7 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
                 }
             } else if (fileIsTyped && resp->isDefinition()) {
                 auto sym = resp->isDefinition()->symbol;
-                for (auto loc : sym.data(gs)->locs()) {
+                for (auto loc : sym.locs(gs)) {
                     addLocIfExists(gs, result, loc);
                 }
             } else if (fileIsTyped && resp->isSend()) {

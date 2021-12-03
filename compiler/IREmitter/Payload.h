@@ -118,7 +118,7 @@ public:
     static void afterIntrinsic(CompilerState &cs, llvm::IRBuilderBase &builder);
 
     static llvm::Value *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                          const IREmitterContext &irctx, core::SymbolRef methodSym);
+                                          const IREmitterContext &irctx, core::MethodRef methodSym);
 
     static llvm::Value *getFileLineNumberInfo(CompilerState &gs, llvm::IRBuilderBase &builder, core::FileRef file);
     static llvm::Value *getIseqEncodedPointer(CompilerState &gs, llvm::IRBuilderBase &builder, core::FileRef file);

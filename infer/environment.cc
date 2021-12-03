@@ -1046,42 +1046,45 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 ENFORCE(ctx.file.data(ctx).hasParseErrors || !tp.origins.empty(), "Inferencer did not assign location");
             },
             [&](cfg::Alias &a) {
-                core::SymbolRef symbol = a.what.data(ctx)->dealias(ctx);
-                const auto &data = symbol.data(ctx);
-                if (data->isClassOrModule()) {
-                    auto singletonClass = data->lookupSingletonClass(ctx);
+                core::SymbolRef symbol = a.what.dealias(ctx);
+                if (symbol.isClassOrModule()) {
+                    auto singletonClass = symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
                     ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
                     tp.type = singletonClass.data(ctx)->externalType();
                     tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
-                } else if (data->isField() || (data->isStaticField() && !data->isTypeAlias()) || data->isTypeMember()) {
-                    if (data->resultType != nullptr) {
-                        if (data->isTypeMember()) {
-                            if (data->isFixed()) {
+                } else if (symbol.isField(ctx) || (symbol.isStaticField(ctx) && !symbol.isTypeAlias(ctx)) ||
+                           symbol.isTypeMember()) {
+                    auto resultType = symbol.resultType(ctx);
+                    if (resultType != nullptr) {
+                        if (symbol.isTypeMember()) {
+                            auto tm = symbol.asTypeMemberRef();
+                            if (tm.data(ctx)->isFixed()) {
                                 // pick the upper bound here, as
                                 // isFixed() => lowerBound == upperBound.
-                                auto lambdaParam = core::cast_type<core::LambdaParam>(data->resultType);
+                                auto lambdaParam = core::cast_type<core::LambdaParam>(resultType);
                                 ENFORCE(lambdaParam != nullptr);
                                 tp.type = core::make_type<core::MetaType>(lambdaParam->upperBound);
                             } else {
                                 tp.type = core::make_type<core::MetaType>(core::make_type<core::SelfTypeParam>(symbol));
                             }
-                        } else if (data->isField()) {
+                        } else if (symbol.isField(ctx)) {
+                            auto field = symbol.asFieldRef();
                             tp.type = core::Types::resultTypeAsSeenFrom(
-                                ctx, symbol.data(ctx)->resultType, symbol.data(ctx)->owner.asClassOrModuleRef(),
+                                ctx, field.data(ctx)->resultType, symbol.owner(ctx).asClassOrModuleRef(),
                                 ctx.owner.enclosingClass(ctx),
                                 ctx.owner.enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx));
                         } else {
-                            tp.type = data->resultType;
+                            tp.type = resultType;
                         }
-                        tp.origins.emplace_back(data->loc());
+                        tp.origins.emplace_back(symbol.loc(ctx));
                     } else {
                         tp.origins.emplace_back(core::Loc::none());
                         tp.type = core::Types::untyped(ctx, symbol);
                     }
-                } else if (data->isTypeAlias()) {
-                    ENFORCE(data->resultType != nullptr);
-                    tp.origins.emplace_back(data->loc());
-                    tp.type = core::make_type<core::MetaType>(data->resultType);
+                } else if (symbol.isTypeAlias(ctx)) {
+                    ENFORCE(symbol.resultType(ctx) != nullptr);
+                    tp.origins.emplace_back(symbol.loc(ctx));
+                    tp.type = core::make_type<core::MetaType>(symbol.resultType(ctx));
                 } else {
                     Exception::notImplemented();
                 }
@@ -1239,12 +1242,12 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
                                                            core::UntypedMode::AlwaysCompatible)) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
-                        auto ownerData = ctx.owner.data(ctx);
+                        auto owner = ctx.owner;
                         e.setHeader("Expected `{}` but found `{}` for method result type", methodReturnType.show(ctx),
                                     typeAndOrigin.type.show(ctx));
-                        auto for_ = core::ErrorColors::format("result type of method `{}`", ownerData->name.show(ctx));
+                        auto for_ = core::ErrorColors::format("result type of method `{}`", owner.name(ctx).show(ctx));
                         e.addErrorSection(
-                            core::TypeAndOrigins::explainExpected(ctx, methodReturnType, ownerData->loc(), for_));
+                            core::TypeAndOrigins::explainExpected(ctx, methodReturnType, owner.loc(ctx), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                         core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, methodReturnType, typeAndOrigin.type);
                         if (i.whatLoc != inWhat.implicitReturnLoc) {

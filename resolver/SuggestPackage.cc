@@ -10,9 +10,9 @@ namespace {
 // Add all name parts for a symbol to a vector, exclude internal names used by packager.
 void symbol2NameParts(core::Context ctx, core::SymbolRef symbol, vector<core::NameRef> &out) {
     ENFORCE(out.empty());
-    while (symbol.exists() && symbol != core::Symbols::root() && !symbol.data(ctx)->name.isPackagerName(ctx)) {
-        out.emplace_back(symbol.data(ctx)->name);
-        symbol = symbol.data(ctx)->owner;
+    while (symbol.exists() && symbol != core::Symbols::root() && !symbol.name(ctx).isPackagerName(ctx)) {
+        out.emplace_back(symbol.name(ctx));
+        symbol = symbol.owner(ctx);
     }
     std::reverse(out.begin(), out.end());
 }
@@ -55,8 +55,8 @@ public:
             srcPkg.definitionLoc(), "Do you need to `{} {}` in package `{}`?", core::Names::export_().show(ctx),
             match.symbol.show(ctx),
             fmt::map_join(srcPkg.fullName(), "::", [&](auto nr) -> string { return nr.show(ctx); })));
-        lines.emplace_back(core::ErrorLine::from(match.symbol.data(ctx)->loc(),
-                                                 "Constant `{}` is defined here:", match.symbol.show(ctx)));
+        lines.emplace_back(
+            core::ErrorLine::from(match.symbol.loc(ctx), "Constant `{}` is defined here:", match.symbol.show(ctx)));
         // TODO(nroman-stripe) Add automatic fixers
         e.addErrorSection(core::ErrorSection(lines));
     }

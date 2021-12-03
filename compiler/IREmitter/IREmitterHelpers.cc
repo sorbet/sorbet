@@ -22,7 +22,7 @@ using namespace std;
 namespace sorbet::compiler {
 
 namespace {
-string getFunctionNamePrefix(CompilerState &cs, core::SymbolRef sym) {
+string getFunctionNamePrefix(CompilerState &cs, core::ClassOrModuleRef sym) {
     auto maybeAttached = sym.data(cs)->attachedClass(cs);
     if (maybeAttached.exists()) {
         return getFunctionNamePrefix(cs, maybeAttached) + ".singleton_class";
@@ -36,19 +36,20 @@ string getFunctionNamePrefix(CompilerState &cs, core::SymbolRef sym) {
     }
     string prefix = IREmitterHelpers::isRootishSymbol(cs, sym.data(cs)->owner)
                         ? ""
-                        : getFunctionNamePrefix(cs, sym.data(cs)->owner) + "::";
+                        : getFunctionNamePrefix(cs, sym.data(cs)->owner.asClassOrModuleRef()) + "::";
 
     return prefix + suffix;
 }
 } // namespace
 
-string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym) {
-    auto maybeAttachedOwner = sym.data(cs)->owner.data(cs)->attachedClass(cs);
+string IREmitterHelpers::getFunctionName(CompilerState &cs, core::MethodRef sym) {
+    auto owner = sym.data(cs)->owner.asClassOrModuleRef();
+    auto maybeAttachedOwner = owner.data(cs)->attachedClass(cs);
     string prefix = "func_";
     if (maybeAttachedOwner.exists()) {
         prefix = prefix + getFunctionNamePrefix(cs, maybeAttachedOwner) + ".";
     } else {
-        prefix = prefix + getFunctionNamePrefix(cs, sym.data(cs)->owner) + "#";
+        prefix = prefix + getFunctionNamePrefix(cs, owner) + "#";
     }
 
     auto name = sym.data(cs)->name;
@@ -77,7 +78,7 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
     return prefix + mangled;
 }
 
-bool IREmitterHelpers::isFileStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
+bool IREmitterHelpers::isFileStaticInit(const core::GlobalState &gs, core::MethodRef sym) {
     auto name = sym.data(gs)->name;
     if (name.kind() != core::NameKind::UNIQUE) {
         return false;
@@ -85,11 +86,11 @@ bool IREmitterHelpers::isFileStaticInit(const core::GlobalState &gs, core::Symbo
     return name.dataUnique(gs)->original == core::Names::staticInit();
 }
 
-bool IREmitterHelpers::isClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
+bool IREmitterHelpers::isClassStaticInit(const core::GlobalState &gs, core::MethodRef sym) {
     return sym.data(gs)->name == core::Names::staticInit();
 }
 
-bool IREmitterHelpers::isFileOrClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
+bool IREmitterHelpers::isFileOrClassStaticInit(const core::GlobalState &gs, core::MethodRef sym) {
     return isFileStaticInit(gs, sym) || isClassStaticInit(gs, sym);
 }
 
@@ -111,30 +112,30 @@ getOrCreateFunctionWithName(CompilerState &cs, std::string name, llvm::FunctionT
 
 }; // namespace
 
-llvm::Function *IREmitterHelpers::lookupFunction(CompilerState &cs, core::SymbolRef sym) {
+llvm::Function *IREmitterHelpers::lookupFunction(CompilerState &cs, core::MethodRef sym) {
     ENFORCE(!isClassStaticInit(cs, sym), "use special helper instead");
     auto *func = cs.module->getFunction(IREmitterHelpers::getFunctionName(cs, sym));
     return func;
 }
 
-llvm::Function *IREmitterHelpers::getOrCreateDirectWrapper(CompilerState &cs, core::SymbolRef sym) {
+llvm::Function *IREmitterHelpers::getOrCreateDirectWrapper(CompilerState &cs, core::MethodRef sym) {
     auto name = "direct_" + IREmitterHelpers::getFunctionName(cs, sym);
     return getOrCreateFunctionWithName(cs, name, cs.getDirectWrapperFunctionType(), llvm::Function::ExternalLinkage,
                                        true);
 }
 
-llvm::Function *IREmitterHelpers::getOrCreateFunction(CompilerState &cs, core::SymbolRef sym) {
+llvm::Function *IREmitterHelpers::getOrCreateFunction(CompilerState &cs, core::MethodRef sym) {
     ENFORCE(!isClassStaticInit(cs, sym), "use special helper instead");
     return getOrCreateFunctionWithName(cs, IREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
                                        llvm::Function::InternalLinkage, true);
 }
 
-llvm::Function *IREmitterHelpers::getOrCreateStaticInit(CompilerState &cs, core::SymbolRef sym, core::LocOffsets loc) {
+llvm::Function *IREmitterHelpers::getOrCreateStaticInit(CompilerState &cs, core::MethodRef sym, core::LocOffsets loc) {
     ENFORCE(isClassStaticInit(cs, sym), "use general helper instead");
     auto name = IREmitterHelpers::getFunctionName(cs, sym) + "L" + to_string(loc.beginPos());
     return getOrCreateFunctionWithName(cs, name, cs.getRubyFFIType(), llvm::Function::InternalLinkage, true);
 }
-llvm::Function *IREmitterHelpers::getInitFunction(CompilerState &cs, core::SymbolRef sym) {
+llvm::Function *IREmitterHelpers::getInitFunction(CompilerState &cs, core::MethodRef sym) {
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
     auto linkageType = llvm::Function::InternalLinkage;
     auto baseName = IREmitterHelpers::getFunctionName(cs, sym);
@@ -330,7 +331,7 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
     }
 }
 
-bool IREmitterHelpers::hasBlockArgument(CompilerState &cs, int blockId, core::SymbolRef method,
+bool IREmitterHelpers::hasBlockArgument(CompilerState &cs, int blockId, core::MethodRef method,
                                         const IREmitterContext &irctx) {
     auto ty = irctx.rubyBlockType[blockId];
     if (!(ty == FunctionType::Block || ty == FunctionType::Method || ty == FunctionType::StaticInitFile ||
@@ -367,7 +368,7 @@ core::SymbolRef IREmitterHelpers::fixupOwningSymbol(const core::GlobalState &gs,
 std::string IREmitterHelpers::showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym) {
     std::string withoutOwnerStr;
 
-    auto name = sym.data(gs)->name;
+    auto name = sym.name(gs);
     if (name.kind() == core::NameKind::UNIQUE) {
         withoutOwnerStr = name.dataUnique(gs)->original.show(gs);
     } else {
@@ -378,7 +379,7 @@ std::string IREmitterHelpers::showClassNameWithoutOwner(const core::GlobalState 
     // the above calls are done inside NameRef, which doesn't have the necessary
     // symbol ownership information to do this sort of munging.  So we have to
     // duplicate the Symbol logic here.
-    if (sym.data(gs)->owner != core::Symbols::PackageRegistry() || !name.isPackagerName(gs)) {
+    if (sym.owner(gs) != core::Symbols::PackageRegistry() || !name.isPackagerName(gs)) {
         return withoutOwnerStr;
     }
 
@@ -405,7 +406,7 @@ bool IREmitterHelpers::isRootishSymbol(const core::GlobalState &gs, core::Symbol
 
     // --stripe-packages interposes its own set of symbols at the toplevel.
     // Absent any runtime support, we need to consider these as rootish.
-    if (sym == core::Symbols::PackageRegistry() || sym.data(gs)->name.isPackagerName(gs)) {
+    if (sym == core::Symbols::PackageRegistry() || sym.name(gs).isPackagerName(gs)) {
         return true;
     }
 
@@ -425,7 +426,7 @@ IREmitterHelpers::isFinalMethod(const core::GlobalState &gs, core::TypePtr recvT
         return std::nullopt;
     }
 
-    auto funSym = recvSym.data(gs)->findMember(gs, fun);
+    auto funSym = recvSym.data(gs)->findMethod(gs, fun);
     if (!funSym.exists()) {
         return std::nullopt;
     }

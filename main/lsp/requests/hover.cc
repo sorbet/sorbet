@@ -56,13 +56,13 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         string typeString;
 
         if (auto c = resp->isConstant()) {
-            for (auto loc : c->symbol.data(gs)->locs()) {
+            for (auto loc : c->symbol.locs(gs)) {
                 if (loc.exists()) {
                     documentationLocations.emplace_back(loc);
                 }
             }
         } else if (auto d = resp->isDefinition()) {
-            for (auto loc : d->symbol.data(gs)->locs()) {
+            for (auto loc : d->symbol.locs(gs)) {
                 if (loc.exists()) {
                     documentationLocations.emplace_back(loc);
                 }

@@ -111,9 +111,9 @@ TypePtr AndType::getCallArguments(const GlobalState &gs, NameRef name) const {
 
 DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "shapetype");
-    auto method = Symbols::Shape().data(gs)->findMember(gs, args.name);
+    auto method = Symbols::Shape().data(gs)->findMethod(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method.asMethodRef(), {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
         DispatchResult res{nullptr, std::move(comp)};
         method.data(gs)->intrinsic->apply(gs, args, res);
         if (res.returnType != nullptr) {
@@ -125,9 +125,9 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
 
 DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "tupletype");
-    auto method = Symbols::Tuple().data(gs)->findMember(gs, args.name);
+    auto method = Symbols::Tuple().data(gs)->findMethod(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method.asMethodRef(), {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
         DispatchResult res{nullptr, std::move(comp)};
         method.data(gs)->intrinsic->apply(gs, args, res);
         if (res.returnType != nullptr) {
@@ -237,12 +237,12 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         while (current.data(gs)->isOverloaded()) {
             i++;
             NameRef overloadName = gs.lookupNameUnique(UniqueNameKind::Overload, primary.data(gs)->name, i);
-            SymbolRef overload = primary.data(gs)->owner.data(gs)->findMember(gs, overloadName);
+            MethodRef overload = primary.data(gs)->owner.asClassOrModuleRef().data(gs)->findMethod(gs, overloadName);
             if (!overload.exists()) {
                 Exception::raise("Corruption of overloads?");
-            } else if (overload.isMethod()) {
-                allCandidates.emplace_back(overload.asMethodRef());
-                current = overload.asMethodRef();
+            } else {
+                allCandidates.emplace_back(overload);
+                current = overload;
             }
         }
 
@@ -537,13 +537,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
     }
 
-    SymbolRef mayBeOverloaded = symbol.data(gs)->findMemberTransitive(gs, args.name);
+    MethodRef mayBeOverloaded = symbol.data(gs)->findMethodTransitive(gs, args.name);
 
     if (!mayBeOverloaded.exists() && gs.requiresAncestorEnabled) {
         // Before raising any error, we look if the method exists in all required ancestors by this symbol
         auto ancestors = symbol.data(gs)->requiredAncestorsTransitive(gs);
         for (auto ancst : ancestors) {
-            mayBeOverloaded = ancst.symbol.data(gs)->findMemberTransitive(gs, args.name);
+            mayBeOverloaded = ancst.symbol.data(gs)->findMethodTransitive(gs, args.name);
             if (mayBeOverloaded.exists()) {
                 break;
             }
@@ -626,10 +626,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             } else {
                 if (symbol.data(gs)->isClassOrModuleModule()) {
-                    auto objMeth = core::Symbols::Object().data(gs)->findMemberTransitive(gs, args.name);
-                    if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isClassOrModuleModule()) {
+                    auto objMeth = core::Symbols::Object().data(gs)->findMethodTransitive(gs, args.name);
+                    if (objMeth.exists() &&
+                        objMeth.data(gs)->owner.asClassOrModuleRef().data(gs)->isClassOrModuleModule()) {
                         e.addErrorNote("Did you mean to `{}` in this module?",
-                                       fmt::format("include {}", objMeth.data(gs)->owner.data(gs)->name.show(gs)));
+                                       fmt::format("include {}", objMeth.data(gs)->owner.name(gs).show(gs)));
                     }
                 }
                 auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);
@@ -640,7 +641,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         auto possibleSymbol = alternative.symbol;
                         if (!possibleSymbol.isClassOrModule() &&
                             (!possibleSymbol.isMethod() ||
-                             (possibleSymbol.data(gs)->isMethodPrivate() && !args.isPrivateOk))) {
+                             (possibleSymbol.asMethodRef().data(gs)->isMethodPrivate() && !args.isPrivateOk))) {
                             continue;
                         }
 
@@ -650,7 +651,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         bool addedAutocorrect = false;
                         if (possibleSymbol.isClassOrModule()) {
                             // TODO(jez) Use Loc::adjust here?
-                            const auto replacement = possibleSymbol.data(gs)->name.show(gs);
+                            const auto replacement = possibleSymbol.name(gs).show(gs);
                             const auto loc = args.callLoc();
                             const auto toReplace = args.name.toString(gs);
                             // This is a bit hacky but the loc corresponding to the send isn't available here and until
@@ -663,7 +664,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                 addedAutocorrect = true;
                             }
                         } else {
-                            const auto replacement = possibleSymbol.data(gs)->name.toString(gs);
+                            const auto replacement = possibleSymbol.name(gs).toString(gs);
                             const auto toReplace = args.name.toString(gs);
                             if (replacement != toReplace) {
                                 const auto recvLoc = args.receiverLoc();
@@ -683,8 +684,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         }
 
                         if (!addedAutocorrect) {
-                            lines.emplace_back(
-                                ErrorLine::from(alternative.symbol.data(gs)->loc(), "`{}`", suggestedName));
+                            lines.emplace_back(ErrorLine::from(alternative.symbol.loc(gs), "`{}`", suggestedName));
                         }
                     }
                     if (!lines.empty()) {
@@ -697,10 +697,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return result;
     }
 
-    auto method = mayBeOverloaded.data(gs)->isOverloaded()
-                      ? guessOverload(gs, symbol, mayBeOverloaded.asMethodRef(), args.numPosArgs, args.args, targs,
-                                      args.block != nullptr)
-                      : mayBeOverloaded.asMethodRef();
+    auto method = mayBeOverloaded.data(gs)->isOverloaded() ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs,
+                                                                           args.args, targs, args.block != nullptr)
+                                                           : mayBeOverloaded;
 
     DispatchResult result;
     auto &component = result.main;
@@ -1222,7 +1221,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 }
 
 TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRef name, const vector<TypePtr> &targs) {
-    SymbolRef method = klass.data(gs)->findMemberTransitive(gs, name);
+    MethodRef method = klass.data(gs)->findMethodTransitive(gs, name);
 
     if (!method.exists()) {
         return nullptr;
@@ -1697,7 +1696,7 @@ public:
         for (auto mem : attachedClass.data(gs)->typeMembers()) {
             ++i;
 
-            auto memData = mem.data(gs);
+            auto memData = mem.asTypeMemberRef().data(gs);
 
             auto *memType = cast_type<LambdaParam>(memData->resultType);
             ENFORCE(memType != nullptr);

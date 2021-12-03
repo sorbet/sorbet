@@ -9,7 +9,7 @@ ast::ExpressionPtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::Exp
     auto &local = ast::cast_tree_nonnull<ast::Local>(tree);
 
     core::MethodRef enclosingMethod;
-    if (ctx.owner.data(ctx)->isMethod()) {
+    if (ctx.owner.isMethod()) {
         enclosingMethod = ctx.owner.asMethodRef();
     } else if (ctx.owner == core::Symbols::root()) {
         enclosingMethod = ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, local.loc));

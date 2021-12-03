@@ -218,7 +218,7 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, 
 
 namespace {
 std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
-    auto owner = sym.data(gs)->owner;
+    auto owner = sym.owner(gs);
     bool includeOwner = !IREmitterHelpers::isRootishSymbol(gs, owner);
     string ownerStr = includeOwner ? showClassName(gs, owner) + "::" : "";
     return ownerStr + IREmitterHelpers::showClassNameWithoutOwner(gs, sym);
@@ -227,11 +227,11 @@ std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
 } // namespace
 
 llvm::Value *Payload::getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &builder) {
-    ENFORCE(sym.data(cs)->isClassOrModule() || sym.data(cs)->isStaticField() || sym.data(cs)->isTypeMember());
+    ENFORCE(sym.isClassOrModule() || sym.isStaticField(cs) || sym.isTypeMember());
     sym = IREmitterHelpers::fixupOwningSymbol(cs, sym);
     auto str = showClassName(cs, sym);
     ENFORCE(str.length() < 2 || (str[0] != ':'), "implementation assumes that strings dont start with ::");
-    auto functionName = sym.data(cs)->isClassOrModule() ? "sorbet_i_getRubyClass" : "sorbet_i_getRubyConstant";
+    auto functionName = sym.isClassOrModule() ? "sorbet_i_getRubyClass" : "sorbet_i_getRubyConstant";
     return builder.CreateCall(
         cs.getFunction(functionName),
         {Payload::toCString(cs, str, builder), llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});
@@ -674,7 +674,7 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
 }
 
 // The common suffix for stack frame related global names.
-string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx, core::SymbolRef methodSym,
+string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx, core::MethodRef methodSym,
                                int rubyBlockId) {
     auto name = IREmitterHelpers::getFunctionName(cs, methodSym);
 
@@ -694,7 +694,7 @@ string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx,
 }
 
 llvm::GlobalVariable *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                        core::SymbolRef methodSym, int rubyBlockId) {
+                                        core::MethodRef methodSym, int rubyBlockId) {
     auto tp = iseqType(cs);
     auto name = getStackFrameGlobalName(cs, irctx, methodSym, rubyBlockId);
     string rawName = "stackFramePrecomputed_" + name;
@@ -742,7 +742,7 @@ llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &bui
 } // namespace
 
 llvm::Value *Payload::rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                        core::SymbolRef methodSym) {
+                                        core::MethodRef methodSym) {
     return ::sorbet::compiler::rubyStackFrameVar(cs, builder, irctx, methodSym, 0);
 }
 
@@ -939,9 +939,7 @@ llvm::Value *Payload::buildInstanceVariableCache(CompilerState &cs, std::string_
 
 llvm::Value *Payload::getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilderBase &builder,
                                                  const IREmitterContext &irctx) {
-    auto sym = irctx.cfg.symbol.data(cs)->owner;
-    ENFORCE(sym.data(cs)->isClassOrModule());
-
+    auto sym = irctx.cfg.symbol.data(cs)->owner.asClassOrModuleRef();
     return Payload::getRubyConstant(cs, sym.data(cs)->topAttachedClass(cs), builder);
 }
 
@@ -1024,8 +1022,8 @@ void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, l
         switch (alias.kind) {
             case Alias::AliasKind::Constant: {
                 auto sym = alias.constantSym;
-                auto name = sym.data(cs.gs)->name.show(cs.gs);
-                auto owner = sym.data(cs.gs)->owner;
+                auto name = sym.name(cs.gs).show(cs.gs);
+                auto owner = sym.owner(cs.gs);
                 builder.CreateCall(cs.getFunction("sorbet_setConstant"),
                                    {Payload::getRubyConstant(cs, owner, builder), Payload::toCString(cs, name, builder),
                                     llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});

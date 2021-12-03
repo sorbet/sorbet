@@ -504,11 +504,11 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, Clas
     } else {
         currentAlignment.reserve(asIf.data(gs)->typeMembers().size());
         for (auto originalTp : asIf.data(gs)->typeMembers()) {
-            auto name = originalTp.data(gs)->name;
+            auto name = originalTp.name(gs);
             SymbolRef align;
             int i = 0;
             for (auto x : what.data(gs)->typeMembers()) {
-                if (x.data(gs)->name == name) {
+                if (x.name(gs) == name) {
                     align = x;
                     currentAlignment.emplace_back(x);
                     break;
@@ -733,9 +733,9 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
         },
         [&](const SelfTypeParam &param) {
             auto sym = param.definition;
-            if (sym.data(ctx)->owner == ctx.owner) {
-                ENFORCE(isa_type<LambdaParam>(sym.data(ctx)->resultType));
-                ret = sym.data(ctx)->resultType;
+            if (sym.owner(ctx) == ctx.owner) {
+                ENFORCE(isa_type<LambdaParam>(sym.resultType(ctx)));
+                ret = sym.resultType(ctx);
             } else {
                 ret = type;
             }

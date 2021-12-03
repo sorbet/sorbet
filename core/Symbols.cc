@@ -26,7 +26,7 @@ constexpr string_view COLON_SEPARATOR = "::"sv;
 constexpr string_view HASH_SEPARATOR = "#"sv;
 
 string showInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name, string_view separator) {
-    if (!owner.exists() || owner == Symbols::root() || owner.data(gs)->name.isPackagerName(gs)) {
+    if (!owner.exists() || owner == Symbols::root() || owner.name(gs).isPackagerName(gs)) {
         return name.show(gs);
     }
     ENFORCE(owner != core::Symbols::PackageRegistry());
@@ -86,7 +86,7 @@ vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClassOrModule()); // should be removed when we have generic methods
     vector<TypePtr> targs;
     for (auto tm : typeMembers()) {
-        auto tmData = tm.data(gs);
+        auto tmData = tm.asTypeMemberRef().data(gs);
         if (tmData->isFixed()) {
             auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
@@ -140,7 +140,7 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
                                ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator();
 
         for (auto &tm : typeMembers()) {
-            auto tmData = tm.data(gs);
+            auto tmData = tm.asTypeMemberRef().data(gs);
             auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
 
@@ -171,20 +171,20 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
 
 bool Symbol::derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const {
     if (isClassOrModuleLinearizationComputed()) {
-        for (SymbolRef a : mixins()) {
+        for (ClassOrModuleRef a : mixins()) {
             if (a == sym) {
                 return true;
             }
         }
     } else {
-        for (SymbolRef a : mixins()) {
+        for (ClassOrModuleRef a : mixins()) {
             if (a == sym || a.data(gs)->derivesFrom(gs, sym)) {
                 return true;
             }
         }
     }
     if (this->superClass().exists()) {
-        return SymbolRef(sym) == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
+        return sym == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
     }
     return false;
 }
@@ -214,11 +214,15 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
     return SymbolRef(gs, type, distance);
 }
 
+bool SymbolRef::isTypeAlias(const GlobalState &gs) const {
+    return isFieldOrStaticField() && asFieldRef().dataAllowingNone(gs)->isTypeAlias();
+}
+
 bool SymbolRef::isField(const GlobalState &gs) const {
-    return isFieldOrStaticField() && data(gs)->isField();
+    return isFieldOrStaticField() && asFieldRef().dataAllowingNone(gs)->isField();
 }
 bool SymbolRef::isStaticField(const GlobalState &gs) const {
-    return isFieldOrStaticField() && data(gs)->isStaticField();
+    return isFieldOrStaticField() && asFieldRef().dataAllowingNone(gs)->isStaticField();
 }
 
 SymbolData SymbolRef::data(GlobalState &gs) const {
@@ -442,7 +446,7 @@ string ClassOrModuleRef::show(const GlobalState &gs) const {
     }
 
     if (sym->name == core::Names::Constants::AttachedClass()) {
-        auto attached = sym->owner.data(gs)->attachedClass(gs);
+        auto attached = sym->owner.asClassOrModuleRef().data(gs)->attachedClass(gs);
         ENFORCE(attached.exists());
         return fmt::format("T.attached_class (of {})", attached.show(gs));
     }
@@ -452,7 +456,7 @@ string ClassOrModuleRef::show(const GlobalState &gs) const {
 
 string MethodRef::show(const GlobalState &gs) const {
     auto sym = data(gs);
-    if (sym->owner.isClassOrModule() && sym->owner.data(gs)->isSingletonClass(gs)) {
+    if (sym->owner.isClassOrModule() && sym->owner.isSingletonClass(gs)) {
         return absl::StrCat(sym->owner.data(gs)->attachedClass(gs).show(gs), ".", sym->name.show(gs));
     }
     return showInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
@@ -471,7 +475,7 @@ string TypeArgumentRef::show(const GlobalState &gs) const {
 string TypeMemberRef::show(const GlobalState &gs) const {
     auto sym = data(gs);
     if (sym->name == core::Names::Constants::AttachedClass()) {
-        auto attached = sym->owner.data(gs)->attachedClass(gs);
+        auto attached = sym->owner.asClassOrModuleRef().data(gs)->attachedClass(gs);
         ENFORCE(attached.exists());
         return fmt::format("T.attached_class (of {})", attached.show(gs));
     }
@@ -479,7 +483,7 @@ string TypeMemberRef::show(const GlobalState &gs) const {
 }
 
 TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
-    auto owner = ctx.owner;
+    auto owner = ctx.owner.asMethodRef();
     auto klass = owner.enclosingClass(ctx);
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
     if (instantiated == nullptr) {
@@ -558,9 +562,17 @@ u2 Symbol::addMixinPlaceholder(const GlobalState &gs) {
 SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
     auto ret = findMemberNoDealias(gs, name);
     if (ret.exists()) {
-        return ret.data(gs)->dealias(gs);
+        return ret.dealias(gs);
     }
     return ret;
+}
+
+MethodRef Symbol::findMethod(const GlobalState &gs, NameRef name) const {
+    auto sym = findMember(gs, name);
+    if (sym.exists() && sym.isMethod()) {
+        return sym.asMethodRef();
+    }
+    return Symbols::noMethod();
 }
 
 SymbolRef Symbol::findMemberNoDealias(const GlobalState &gs, NameRef name) const {
@@ -572,8 +584,24 @@ SymbolRef Symbol::findMemberNoDealias(const GlobalState &gs, NameRef name) const
     return fnd->second;
 }
 
+MethodRef Symbol::findMethodNoDealias(const GlobalState &gs, NameRef name) const {
+    auto sym = findMemberNoDealias(gs, name);
+    if (!sym.isMethod()) {
+        return Symbols::noMethod();
+    }
+    return sym.asMethodRef();
+}
+
 SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name) const {
     return findMemberTransitiveInternal(gs, name, Flags::NONE, Flags::NONE, 100);
+}
+
+MethodRef Symbol::findMethodTransitive(const GlobalState &gs, NameRef name) const {
+    auto sym = findMemberTransitive(gs, name);
+    if (sym.exists() && sym.isMethod()) {
+        return sym.asMethodRef();
+    }
+    return Symbols::noMethod();
 }
 
 SymbolRef Symbol::findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const {
@@ -704,14 +732,14 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
 
     // Find the closest by following outer scopes
     {
-        SymbolRef base = ref(gs);
+        ClassOrModuleRef base = ref(gs).asClassOrModuleRef();
         do {
             // follow outer scopes
 
             // find scopes that would be considered for search
             vector<ClassOrModuleRef> candidateScopes;
             vector<Symbol::FuzzySearchResult> scopeBest;
-            candidateScopes.emplace_back(base.asClassOrModuleRef());
+            candidateScopes.emplace_back(base);
             int i = 0;
             // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
             while (i < candidateScopes.size()) {
@@ -760,7 +788,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                 }
             }
 
-            base = base.data(gs)->owner;
+            base = base.data(gs)->owner.asClassOrModuleRef();
         } while (best.distance > 0 && base.data(gs)->owner.exists() && base != Symbols::root());
     }
 
@@ -1103,7 +1131,7 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
     typeMembers.erase(it, typeMembers.end());
     if (!typeMembers.empty()) {
         fmt::format_to(std::back_inserter(buf), "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
-                           auto name = symb.data(gs)->name;
+                           auto name = symb.name(gs);
                            return showRaw ? name.showRaw(gs) : name.show(gs);
                        }));
     }
@@ -1192,12 +1220,12 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
     }
 
     auto typeMembers = sym->typeArguments();
-    auto it =
-        remove_if(typeMembers.begin(), typeMembers.end(), [&gs](auto &sym) -> bool { return sym.data(gs)->isFixed(); });
+    auto it = remove_if(typeMembers.begin(), typeMembers.end(),
+                        [&gs](auto &sym) -> bool { return sym.asTypeArgumentRef().data(gs)->isFixed(); });
     typeMembers.erase(it, typeMembers.end());
     if (!typeMembers.empty()) {
         fmt::format_to(std::back_inserter(buf), "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
-                           auto name = symb.data(gs)->name;
+                           auto name = symb.name(gs);
                            return showRaw ? name.showRaw(gs) : name.show(gs);
                        }));
     }
@@ -1317,6 +1345,185 @@ string SymbolRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
             return asTypeArgumentRef().toStringWithOptions(gs, tabs, showFull, showRaw);
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().toStringWithOptions(gs, tabs, showFull, showRaw);
+    }
+}
+
+NameRef SymbolRef::name(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->name;
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->name;
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->name;
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->name;
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->name;
+    }
+}
+
+SymbolRef SymbolRef::owner(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->owner;
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->owner;
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->owner;
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->owner;
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->owner;
+    }
+}
+
+Loc SymbolRef::loc(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->loc();
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->loc();
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->loc();
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->loc();
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->loc();
+    }
+}
+
+bool SymbolRef::isSingletonClass(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->isSingletonClass(gs);
+        default:
+            return false;
+    }
+}
+
+std::vector<std::pair<NameRef, SymbolRef>> SymbolRef::membersStableOrderSlow(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->membersStableOrderSlow(gs);
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->membersStableOrderSlow(gs);
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->membersStableOrderSlow(gs);
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->membersStableOrderSlow(gs);
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->membersStableOrderSlow(gs);
+    }
+}
+
+bool SymbolRef::isPrintable(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->isPrintable(gs);
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->isPrintable(gs);
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->isPrintable(gs);
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->isPrintable(gs);
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->isPrintable(gs);
+    }
+}
+
+const InlinedVector<Loc, 2> &SymbolRef::locs(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->locs();
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->locs();
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->locs();
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->locs();
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->locs();
+    }
+}
+
+const TypePtr &SymbolRef::resultType(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->resultType;
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->resultType;
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->resultType;
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->resultType;
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->resultType;
+    }
+}
+
+void SymbolRef::setResultType(GlobalState &gs, const TypePtr &typePtr) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            asClassOrModuleRef().data(gs)->resultType = typePtr;
+            return;
+        case SymbolRef::Kind::Method:
+            asMethodRef().data(gs)->resultType = typePtr;
+            return;
+        case SymbolRef::Kind::FieldOrStaticField:
+            asFieldRef().data(gs)->resultType = typePtr;
+            return;
+        case SymbolRef::Kind::TypeArgument:
+            asTypeArgumentRef().data(gs)->resultType = typePtr;
+            return;
+        case SymbolRef::Kind::TypeMember:
+            asTypeMemberRef().data(gs)->resultType = typePtr;
+            return;
+    }
+}
+
+SymbolRef SymbolRef::dealias(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->dealias(gs);
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->dealias(gs);
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->dealias(gs);
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->dealias(gs);
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->dealias(gs);
+    }
+}
+
+SymbolRef SymbolRef::findMember(const GlobalState &gs, NameRef name) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->findMember(gs, name);
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->findMember(gs, name);
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->findMember(gs, name);
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->findMember(gs, name);
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->findMember(gs, name);
+    }
+}
+
+SymbolRef SymbolRef::findMemberTransitive(const GlobalState &gs, NameRef name) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().data(gs)->findMemberTransitive(gs, name);
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->findMemberTransitive(gs, name);
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().data(gs)->findMemberTransitive(gs, name);
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().data(gs)->findMemberTransitive(gs, name);
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().data(gs)->findMemberTransitive(gs, name);
     }
 }
 
@@ -1474,7 +1681,7 @@ void Symbol::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass)
     // subclassing a sealed class across multiple files, not just one file.
     auto classOfSubclass = subclass.data(ctx)->singletonClass(ctx);
     auto sealedSubclasses =
-        selfRef.data(ctx)->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedSubclasses());
+        selfRef.data(ctx)->lookupSingletonClass(ctx).data(ctx)->findMethod(ctx, core::Names::sealedSubclasses());
 
     auto data = sealedSubclasses.data(ctx);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
@@ -1505,7 +1712,7 @@ void Symbol::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass)
 
 const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
     ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(gs).show(gs));
-    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
+    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
     auto &result = sealedSubclasses.data(gs)->locs();
     ENFORCE(result.size() > 0);
     return result;
@@ -1514,7 +1721,7 @@ const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
 TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
     ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(gs).show(gs));
 
-    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
+    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
 
     auto data = sealedSubclasses.data(gs);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
@@ -1550,7 +1757,7 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 bool Symbol::hasSingleSealedSubclass(const GlobalState &gs) const {
     ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(gs).show(gs));
 
-    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
+    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
 
     // When the sealed type is a class, it must also be abstract for there to be a single subclass.
     if (this->isClassOrModuleClass() && !this->isClassOrModuleAbstract()) {
@@ -1579,7 +1786,7 @@ void Symbol::recordRequiredAncestorInternal(GlobalState &gs, Symbol::RequiredAnc
     ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", ref(gs).show(gs));
 
     // We store the required ancestors into a fake property called `<required-ancestors>`
-    auto ancestors = this->findMember(gs, prop);
+    auto ancestors = this->findMethod(gs, prop);
     if (!ancestors.exists()) {
         ancestors = gs.enterMethodSymbol(ancestor.loc, this->ref(gs).asClassOrModuleRef(), prop);
         ancestors.data(gs)->locs_.clear(); // Remove the original location
@@ -1589,7 +1796,7 @@ void Symbol::recordRequiredAncestorInternal(GlobalState &gs, Symbol::RequiredAnc
         ancestors.data(gs)->resultType = make_type<TupleType>(move(tsymbols));
 
         // Create the first argument typed as a tuple to store RequiredAncestor.origin
-        auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), ancestors.asMethodRef(), core::Names::arg());
+        auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), ancestors, core::Names::arg());
         vector<TypePtr> torigins;
         arg.type = make_type<TupleType>(move(torigins));
     }
@@ -1797,7 +2004,8 @@ int Symbol::typeArity(const GlobalState &gs) const {
     ENFORCE(this->isClassOrModule());
     int arity = 0;
     for (auto &ty : this->typeMembers()) {
-        if (!ty.data(gs)->isFixed()) {
+        auto tm = ty.asTypeMemberRef();
+        if (!tm.data(gs)->isFixed()) {
             ++arity;
         }
     }
@@ -1899,7 +2107,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
         }
         fast_sort(membersToHash, [](const auto &a, const auto &b) -> bool { return a.rawId() < b.rawId(); });
         for (auto member : membersToHash) {
-            result = mix(result, _hash(member.data(gs)->name.shortName(gs)));
+            result = mix(result, _hash(member.name(gs).shortName(gs)));
         }
     }
     for (const auto &e : mixins_) {
@@ -1918,7 +2126,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
     }
     for (const auto &e : typeParams) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
+            result = mix(result, _hash(e.name(gs).shortName(gs)));
         }
     }
 

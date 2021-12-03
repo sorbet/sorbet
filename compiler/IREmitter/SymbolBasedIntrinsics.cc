@@ -25,8 +25,8 @@
 using namespace std;
 namespace sorbet::compiler {
 namespace {
-core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
-    core::SymbolRef sym;
+core::ClassOrModuleRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
+    core::ClassOrModuleRef sym;
     if (core::isa_type<core::ClassType>(typ)) {
         sym = core::cast_type_nonnull<core::ClassType>(typ).symbol;
     } else if (auto appliedType = core::cast_type<core::AppliedType>(typ)) {
@@ -34,8 +34,7 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     } else {
         ENFORCE(false);
     }
-    sym = IREmitterHelpers::fixupOwningSymbol(gs, sym);
-    ENFORCE(sym.data(gs)->isClassOrModule());
+    sym = IREmitterHelpers::fixupOwningSymbol(gs, sym).asClassOrModuleRef();
     return sym;
 }
 
@@ -75,12 +74,9 @@ public:
             while (current.data(gs)->isOverloaded()) {
                 i++;
                 auto overloadName = gs.lookupNameUnique(core::UniqueNameKind::Overload, methodName, i);
-                auto overloadSym = primaryMethod.data(gs)->owner.data(gs)->findMember(gs, overloadName);
-                ENFORCE(overloadSym.exists());
-
-                auto overload = overloadSym.asMethodRef();
+                auto overload =
+                    primaryMethod.data(gs)->owner.asClassOrModuleRef().data(gs)->findMethod(gs, overloadName);
                 ENFORCE(overload.exists());
-
                 if (core::Types::isSubType(gs, intrinsicResultType, overload.data(gs)->resultType)) {
                     return;
                 }
@@ -264,7 +260,8 @@ protected:
 
             i++;
             auto overloadName = gs.lookupNameUnique(core::UniqueNameKind::Overload, methodName, i);
-            auto overloadSym = primaryMethod.data(gs)->owner.data(gs)->findMember(gs, overloadName);
+            auto overloadSym =
+                primaryMethod.data(gs)->owner.asClassOrModuleRef().data(gs)->findMember(gs, overloadName);
             ENFORCE(overloadSym.exists());
 
             current = overloadSym.asMethodRef();
@@ -277,7 +274,7 @@ protected:
 };
 
 void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                             core::SymbolRef funcSym, int rubyBlockId, llvm::Value *param) {
+                             core::MethodRef funcSym, int rubyBlockId, llvm::Value *param) {
     // Following the comment in vm_core.h:
     // https://github.com/ruby/ruby/blob/344a824ef9d4b6152703d02d7ffa042abd4252c1/vm_core.h#L321-L342
     // Comment reproduced here to make things somewhat easier to follow.
@@ -441,7 +438,7 @@ void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, co
 
 // TODO(froydnj): we need to do something like this for blocks as well.
 llvm::Value *buildParamInfo(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                            core::SymbolRef funcSym, int rubyBlockId) {
+                            core::MethodRef funcSym, int rubyBlockId) {
     auto *paramInfo = builder.CreateCall(cs.getFunction("sorbet_allocateParamInfo"), {}, "parameterInfo");
 
     emitParamInitialization(cs, builder, irctx, funcSym, rubyBlockId, paramInfo);
@@ -496,9 +493,8 @@ public:
             // TODO Figure out if this speicial case is right
             lookupSym = core::Symbols::Object();
         }
-        auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
+        auto funcSym = lookupSym.data(cs)->findMethod(cs, funcNameRef);
         ENFORCE(funcSym.exists());
-        ENFORCE(funcSym.data(cs)->isMethod());
 
         // We are going to rely on compiled final methods having their return values checked.
         const bool needsTypechecking = funcSym.data(cs)->isFinalMethod();

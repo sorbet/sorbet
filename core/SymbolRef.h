@@ -7,6 +7,9 @@
 namespace sorbet::core {
 class Symbol;
 class GlobalState;
+class NameRef;
+class Loc;
+class TypePtr;
 struct SymbolDataDebugCheck {
     const GlobalState &gs;
     const unsigned int symbolCountAtCreation;
@@ -115,6 +118,12 @@ public:
         MethodRef ref;
         ref._id = id;
         return ref;
+    }
+
+    std::string toString(const GlobalState &gs) const {
+        bool showFull = false;
+        bool showRaw = false;
+        return toStringWithOptions(gs, 0, showFull, showRaw);
     }
 
     SymbolData data(GlobalState &gs) const;
@@ -314,6 +323,7 @@ public:
         return kind() == Kind::TypeMember;
     }
 
+    bool isTypeAlias(const GlobalState &gs) const;
     bool isField(const GlobalState &gs) const;
     bool isStaticField(const GlobalState &gs) const;
 
@@ -397,17 +407,40 @@ public:
         return TypeArgumentRef::fromRaw(unsafeTableIndex());
     }
 
+private:
+    // TODO(jvilk): Remove these methods so we can have separate classes per symbol type (e.g., Symbol ->
+    // {ClassOrModule, Method, ...}). These are currently used in methods on SymbolRef and friend classes -- but not for
+    // long.
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
     SymbolData dataAllowingNone(GlobalState &gs) const;
     ConstSymbolData dataAllowingNone(const GlobalState &gs) const;
 
+public:
     bool operator==(const SymbolRef &rhs) const;
 
     bool operator!=(const SymbolRef &rhs) const;
 
+    // TODO(jvilk): Remove as many of these methods as possible in favor of callsites using .data on the more specific
+    // symbol *Ref classes (e.g., ClassOrModuleRef). These were introduced to wean the codebase from calling
+    // SymbolRef::data.
+    // Please do not add methods to this list.
     ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
+    core::NameRef name(const GlobalState &gs) const;
+    core::SymbolRef owner(const GlobalState &gs) const;
+    core::Loc loc(const GlobalState &gs) const;
+    bool isSingletonClass(const GlobalState &gs) const;
+    std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlow(const GlobalState &gs) const;
+    bool isPrintable(const GlobalState &gs) const;
+    const InlinedVector<Loc, 2> &locs(const GlobalState &gs) const;
+    const TypePtr &resultType(const GlobalState &gs) const;
+    void setResultType(GlobalState &gs, const TypePtr &typePtr) const;
+    SymbolRef dealias(const GlobalState &gs) const;
+    SymbolRef findMember(const GlobalState &gs, NameRef name) const;
+    SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name) const;
+    // End methods that should be removed.
+
     // Prints the fully qualified name of the symbol in a format that is suitable for showing to the user (e.g.
     // "Owner::SymbolName")
     std::string showFullName(const GlobalState &gs) const;

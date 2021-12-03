@@ -68,7 +68,7 @@ TEST_CASE("namer tests") {
         REQUIRE_EQ(core::Symbols::root(), objectScope->owner.asClassOrModuleRef());
 
         REQUIRE_EQ(4, objectScope->members().size());
-        auto methodSym = objectScope->members().at(gs.enterNameUTF8("hello_world"));
+        auto methodSym = objectScope->members().at(gs.enterNameUTF8("hello_world")).asMethodRef();
         const auto &symbol = methodSym.data(gs);
         REQUIRE_EQ(core::Symbols::Object(), symbol->owner.asClassOrModuleRef());
         REQUIRE_EQ(1, symbol->arguments().size());
@@ -113,11 +113,14 @@ TEST_CASE("namer tests") {
             sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
             runNamer(gs, move(localTree));
         }
-        const auto &rootScope =
-            core::Symbols::root().data(gs)->findMember(gs, gs.enterNameConstant(testClass_str)).data(gs);
+        const auto &rootScope = core::Symbols::root()
+                                    .data(gs)
+                                    ->findMember(gs, gs.enterNameConstant(testClass_str))
+                                    .asClassOrModuleRef()
+                                    .data(gs);
 
         REQUIRE_EQ(3, rootScope->members().size());
-        auto fooSym = rootScope->members().at(gs.enterNameConstant("Foo"));
+        auto fooSym = rootScope->members().at(gs.enterNameConstant("Foo")).asClassOrModuleRef();
         const auto &fooInfo = fooSym.data(gs);
         REQUIRE_EQ(1, fooInfo->members().size());
     }
@@ -130,16 +133,19 @@ TEST_CASE("namer tests") {
             sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
             runNamer(gs, move(localTree));
         }
-        const auto &rootScope =
-            core::Symbols::root().data(gs)->findMember(gs, gs.enterNameConstant(testClass_str)).data(gs);
+        const auto &rootScope = core::Symbols::root()
+                                    .data(gs)
+                                    ->findMember(gs, gs.enterNameConstant(testClass_str))
+                                    .asClassOrModuleRef()
+                                    .data(gs);
 
         REQUIRE_EQ(3, rootScope->members().size());
-        auto fooSym = rootScope->members().at(gs.enterNameConstant("Foo"));
+        auto fooSym = rootScope->members().at(gs.enterNameConstant("Foo")).asClassOrModuleRef();
         const auto &fooInfo = fooSym.data(gs);
         REQUIRE_EQ(2, fooInfo->members().size());
 
         auto barSym = fooInfo->members().at(gs.enterNameUTF8("bar"));
-        REQUIRE_EQ(fooSym, barSym.data(gs)->owner);
+        REQUIRE_EQ(core::SymbolRef(fooSym), barSym.owner(gs));
     }
 }
 

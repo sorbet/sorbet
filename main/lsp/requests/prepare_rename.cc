@@ -10,13 +10,13 @@ namespace sorbet::realmain::lsp {
 namespace {
 variant<JSONNullObject, unique_ptr<PrepareRenameResult>> getPrepareRenameResult(const core::GlobalState &gs,
                                                                                 core::SymbolRef symbol) {
-    auto range = Range::fromLoc(gs, symbol.data(gs)->loc());
+    auto range = Range::fromLoc(gs, symbol.loc(gs));
     if (range == nullptr) {
         return JSONNullObject();
     }
 
     auto result = make_unique<PrepareRenameResult>(move(range));
-    auto name = symbol.data(gs)->name.show(gs);
+    auto name = symbol.name(gs).show(gs);
     result->placeholder = name;
     return result;
 }
@@ -76,7 +76,7 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerDelegate
     } else if (auto defResp = resp->isDefinition()) {
         if (defResp->symbol.isClassOrModule()) {
             response->result = getPrepareRenameResult(gs, defResp->symbol);
-        } else if (defResp->symbol.data(gs)->isMethod()) {
+        } else if (defResp->symbol.isMethod()) {
             response->result = getPrepareRenameResult(gs, defResp->symbol);
         }
     } else if (auto sendResp = resp->isSend()) {

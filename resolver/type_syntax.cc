@@ -623,7 +623,7 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto maybeAliased = obj->symbol;
-            if (maybeAliased.data(ctx)->isTypeAlias()) {
+            if (maybeAliased.isTypeAlias(ctx)) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a T.type_alias");
                 }
@@ -635,7 +635,7 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            auto sym = maybeAliased.data(ctx)->dealias(ctx);
+            auto sym = maybeAliased.dealias(ctx);
             if (sym.isStaticField(ctx)) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a constant field");
@@ -643,7 +643,7 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
 
-            auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
+            auto singleton = sym.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
             if (!singleton.exists()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Unknown class");
@@ -673,7 +673,7 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 }
             }
 
-            if (!ctx.owner.data(ctx)->isSingletonClass(ctx)) {
+            if (!ctx.owner.isSingletonClass(ctx)) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("`{}` may only be used in a singleton class method context",
                                 "T." + core::Names::attachedClass().show(ctx));
@@ -682,7 +682,10 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
             } else {
                 // All singletons have an AttachedClass type member, created by
                 // `singletonClass`
-                auto attachedClass = ctx.owner.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+                auto attachedClass = ctx.owner.asClassOrModuleRef()
+                                         .data(ctx)
+                                         ->findMember(ctx, core::Names::Constants::AttachedClass())
+                                         .asTypeMemberRef();
                 return TypeSyntax::ResultType{attachedClass.data(ctx)->resultType, core::Symbols::noClassOrModule()};
             }
         case core::Names::noreturn().rawId():
@@ -711,8 +714,8 @@ unique_ptr<core::TypeAndOrigins> makeTypeAndOrigins(core::Context ctx, core::Loc
 TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx, const ast::ExpressionPtr &expr,
                                                               const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     // Ensure that we only check types from a class context
-    auto ctxOwnerData = ctx.owner.data(ctx);
-    ENFORCE(ctxOwnerData->isClassOrModule(), "getResultTypeAndBind wasn't called with a class owner");
+    ENFORCE(ctx.owner.isClassOrModule(), "getResultTypeAndBind wasn't called with a class owner");
+    auto ctxOwnerData = ctx.owner.asClassOrModuleRef().data(ctx);
 
     TypeSyntax::ResultType result;
     typecase(
@@ -748,8 +751,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             auto maybeAliased = i.symbol;
             ENFORCE(maybeAliased.exists());
 
-            if (maybeAliased.data(ctx)->isTypeAlias()) {
-                result.type = maybeAliased.data(ctx)->resultType;
+            if (maybeAliased.isTypeAlias(ctx)) {
+                result.type = maybeAliased.resultType(ctx);
                 return;
             }
 
@@ -762,46 +765,49 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             // times as wanted, and assigned into different constants each time. As much as possible, we
             // want there to be one name for every type; making an alias for a type should always be
             // syntactically declared with T.type_alias.
-            if (core::isa_type<core::ClassType>(maybeAliased.data(ctx)->resultType)) {
-                auto resultType = core::cast_type_nonnull<core::ClassType>(maybeAliased.data(ctx)->resultType);
+            if (core::isa_type<core::ClassType>(maybeAliased.resultType(ctx))) {
+                auto resultType = core::cast_type_nonnull<core::ClassType>(maybeAliased.resultType(ctx));
                 if (resultType.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
-                    result.type = maybeAliased.data(ctx)->resultType;
+                    result.type = maybeAliased.resultType(ctx);
                     return;
                 }
             }
 
-            auto sym = maybeAliased.data(ctx)->dealias(ctx);
+            auto sym = maybeAliased.dealias(ctx);
             if (sym.isClassOrModule()) {
+                auto klass = sym.asClassOrModuleRef();
                 // the T::Type generics internally have a typeArity of 0, so this allows us to check against them in the
                 // same way that we check against types like `Array`
-                bool isBuiltinGeneric = sym == core::Symbols::T_Hash() || sym == core::Symbols::T_Array() ||
-                                        sym == core::Symbols::T_Set() || sym == core::Symbols::T_Range() ||
-                                        sym == core::Symbols::T_Enumerable() || sym == core::Symbols::T_Enumerator();
+                bool isBuiltinGeneric = klass == core::Symbols::T_Hash() || klass == core::Symbols::T_Array() ||
+                                        klass == core::Symbols::T_Set() || klass == core::Symbols::T_Range() ||
+                                        klass == core::Symbols::T_Enumerable() ||
+                                        klass == core::Symbols::T_Enumerator();
 
-                if (isBuiltinGeneric || sym.data(ctx)->typeArity(ctx) > 0) {
+                if (isBuiltinGeneric || klass.data(ctx)->typeArity(ctx) > 0) {
                     // This set **should not** grow over time.
-                    bool isStdlibWhitelisted = sym == core::Symbols::Hash() || sym == core::Symbols::Array() ||
-                                               sym == core::Symbols::Set() || sym == core::Symbols::Range() ||
-                                               sym == core::Symbols::Enumerable() || sym == core::Symbols::Enumerator();
+                    bool isStdlibWhitelisted = klass == core::Symbols::Hash() || klass == core::Symbols::Array() ||
+                                               klass == core::Symbols::Set() || klass == core::Symbols::Range() ||
+                                               klass == core::Symbols::Enumerable() ||
+                                               klass == core::Symbols::Enumerator();
                     auto level = isStdlibWhitelisted ? core::errors::Resolver::GenericClassWithoutTypeArgsStdlib
                                                      : core::errors::Resolver::GenericClassWithoutTypeArgs;
                     if (auto e = ctx.beginError(i.loc, level)) {
                         e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
-                                    sym.show(ctx));
+                                    klass.show(ctx));
                         // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to
                         // if we're already looking at `T::Array` instead.
                         auto typePrefix = isBuiltinGeneric ? "" : "T::";
 
                         auto loc = core::Loc{ctx.file, i.loc};
                         if (auto locSource = loc.source(ctx)) {
-                            if (sym == core::Symbols::Hash() || sym == core::Symbols::T_Hash()) {
+                            if (klass == core::Symbols::Hash() || klass == core::Symbols::T_Hash()) {
                                 // Hash is special because it has arity 3 but you're only supposed to write the first 2
                                 e.replaceWith("Add type arguments", loc, "{}{}[T.untyped, T.untyped]", typePrefix,
                                               locSource.value());
                             } else if (isStdlibWhitelisted || isBuiltinGeneric) {
                                 // the default provided here for builtin generic types is 1, and that might need to
                                 // change if we add other builtin generics (but ideally we should never need to do so!)
-                                auto numTypeArgs = isBuiltinGeneric ? 1 : sym.data(ctx)->typeArity(ctx);
+                                auto numTypeArgs = isBuiltinGeneric ? 1 : klass.data(ctx)->typeArity(ctx);
                                 vector<string> untypeds;
                                 for (int i = 0; i < numTypeArgs; i++) {
                                     untypeds.emplace_back("T.untyped");
@@ -812,7 +818,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                         }
                     }
                 }
-                if (sym == core::Symbols::StubModule()) {
+                if (klass == core::Symbols::StubModule()) {
                     // Though for normal types _and_ stub types `infer` should use `externalType`,
                     // using `externalType` for stub types here will lead to incorrect handling of global state hashing,
                     // where we won't see difference between two different unresolved stubs(or a mistyped stub). thus,
@@ -823,11 +829,12 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                     result.type =
                         core::make_type<core::UnresolvedClassType>(unresolvedPath->first, move(unresolvedPath->second));
                 } else {
-                    result.type = sym.data(ctx)->externalType();
+                    result.type = klass.data(ctx)->externalType();
                 }
             } else if (sym.isTypeMember()) {
-                auto symData = sym.data(ctx);
-                auto symOwner = symData->owner.data(ctx);
+                auto tm = sym.asTypeMemberRef();
+                auto symData = tm.data(ctx);
+                auto symOwner = symData->owner.asClassOrModuleRef().data(ctx);
 
                 bool isTypeTemplate = symOwner->isSingletonClass(ctx);
 
@@ -899,8 +906,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             } else if (sym.isStaticField(ctx)) {
                 if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Constant `{}` is not a class or type alias", maybeAliased.show(ctx));
-                    e.addErrorLine(sym.data(ctx)->loc(),
-                                   "If you are trying to define a type alias, you should use `{}` here",
+                    e.addErrorLine(sym.loc(ctx), "If you are trying to define a type alias, you should use `{}` here",
                                    "T.type_alias");
                 }
                 result.type = core::Types::untypedUntracked();
@@ -1057,7 +1063,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             } else {
                 corrected = recvi->symbol;
             }
-            corrected = corrected.data(ctx)->dealias(ctx);
+            corrected = corrected.dealias(ctx);
 
             if (!corrected.isClassOrModule()) {
                 if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
@@ -1067,7 +1073,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 return;
             }
 
-            auto correctedSingleton = corrected.data(ctx)->lookupSingletonClass(ctx);
+            auto correctedSingleton = corrected.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
             ENFORCE_NO_TIMER(correctedSingleton.exists());
             auto ctype = core::make_type<core::ClassType>(correctedSingleton);
             auto ctypeAndOrigins = core::TypeAndOrigins{ctype, {core::Loc(ctx.file, s.loc)}};

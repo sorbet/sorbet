@@ -307,14 +307,15 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         // If klasses are equal, then it's possible that t1s <: t2s.
         bool changedFromT1 = a1->klass != a2->klass;
         for (SymbolRef idx : a2->klass.data(gs)->typeMembers()) {
+            TypeMemberRef idxTypeMember = idx.asTypeMemberRef();
             int i = 0;
             while (indexes[j] != a1->klass.data(gs)->typeMembers()[i]) {
                 i++;
             }
             ENFORCE(i < a1->klass.data(gs)->typeMembers().size());
-            if (idx.data(gs)->isCovariant()) {
+            if (idxTypeMember.data(gs)->isCovariant()) {
                 newTargs.emplace_back(Types::any(gs, a1->targs[i], a2->targs[j]));
-            } else if (idx.data(gs)->isInvariant()) {
+            } else if (idxTypeMember.data(gs)->isInvariant()) {
                 if (!Types::equiv(gs, a1->targs[i], a2->targs[j])) {
                     return OrType::make_shared(t1s, t2s);
                 }
@@ -324,7 +325,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     newTargs.emplace_back(a2->targs[j]);
                 }
 
-            } else if (idx.data(gs)->isContravariant()) {
+            } else if (idxTypeMember.data(gs)->isContravariant()) {
                 newTargs.emplace_back(Types::all(gs, a1->targs[i], a2->targs[j]));
             }
             changedFromT2 = changedFromT2 || newTargs.back() != a2->targs[j];
@@ -921,6 +922,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         newTargs.reserve(a1->klass.data(gs)->typeMembers().size());
         int j = 0;
         for (SymbolRef idx : a1->klass.data(gs)->typeMembers()) {
+            TypeMemberRef idxTypeMember = idx.asTypeMemberRef();
             int i = 0;
             if (j >= indexes.size()) {
                 i = INT_MAX;
@@ -931,9 +933,9 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             if (i >= a2->klass.data(gs)->typeMembers().size()) { // a1 has more tparams, this is fine, it's a child
                 newTargs.emplace_back(a1->targs[j]);
             } else {
-                if (idx.data(gs)->isCovariant()) {
+                if (idxTypeMember.data(gs)->isCovariant()) {
                     newTargs.emplace_back(Types::all(gs, a1->targs[j], a2->targs[i]));
-                } else if (idx.data(gs)->isInvariant()) {
+                } else if (idxTypeMember.data(gs)->isInvariant()) {
                     if (!Types::equiv(gs, a1->targs[j], a2->targs[i])) {
                         return AndType::make_shared(t1, t2);
                     }
@@ -942,7 +944,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     } else {
                         newTargs.emplace_back(a1->targs[j]);
                     }
-                } else if (idx.data(gs)->isContravariant()) {
+                } else if (idxTypeMember.data(gs)->isContravariant()) {
                     newTargs.emplace_back(Types::any(gs, a1->targs[j], a2->targs[i]));
                 }
             }
@@ -1099,14 +1101,14 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             // we can only check bounds when a LambdaParam is present.
             if (!isSelfTypeT1) {
                 auto self2 = cast_type_nonnull<SelfTypeParam>(t2);
-                if (auto *lambdaParam = cast_type<LambdaParam>(self2.definition.data(gs)->resultType)) {
+                if (auto *lambdaParam = cast_type<LambdaParam>(self2.definition.resultType(gs))) {
                     return Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode);
                 } else {
                     return false;
                 }
             } else if (!isSelfTypeT2) {
                 auto self1 = cast_type_nonnull<SelfTypeParam>(t1);
-                if (auto *lambdaParam = cast_type<LambdaParam>(self1.definition.data(gs)->resultType)) {
+                if (auto *lambdaParam = cast_type<LambdaParam>(self1.definition.resultType(gs))) {
                     return Types::isSubTypeUnderConstraint(gs, constr, lambdaParam->upperBound, t2, mode);
                 } else {
                     return false;
@@ -1118,8 +1120,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     return true;
                 }
 
-                auto *lambda1 = cast_type<LambdaParam>(self1.definition.data(gs)->resultType);
-                auto *lambda2 = cast_type<LambdaParam>(self2.definition.data(gs)->resultType);
+                auto *lambda1 = cast_type<LambdaParam>(self1.definition.resultType(gs));
+                auto *lambda2 = cast_type<LambdaParam>(self2.definition.resultType(gs));
                 return lambda1 && lambda2 &&
                        Types::isSubTypeUnderConstraint(gs, constr, lambda1->upperBound, lambda2->lowerBound, mode);
             }
@@ -1153,6 +1155,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             // code below inverts permutation of type params
             int j = 0;
             for (SymbolRef idx : a2->klass.data(gs)->typeMembers()) {
+                TypeMemberRef idxTypeMember = idx.asTypeMemberRef();
                 int i = 0;
                 while (indexes[j] != a1->klass.data(gs)->typeMembers()[i]) {
                     i++;
@@ -1163,9 +1166,9 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 
                 ENFORCE(i < a1->klass.data(gs)->typeMembers().size());
 
-                if (idx.data(gs)->isCovariant()) {
+                if (idxTypeMember.data(gs)->isCovariant()) {
                     result = Types::isSubTypeUnderConstraint(gs, constr, a1->targs[i], a2->targs[j], mode);
-                } else if (idx.data(gs)->isInvariant()) {
+                } else if (idxTypeMember.data(gs)->isInvariant()) {
                     auto &a = a1->targs[i];
                     auto &b = a2->targs[j];
                     if (mode == UntypedMode::AlwaysCompatible) {
@@ -1173,7 +1176,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     } else {
                         result = Types::equivNoUntyped(gs, a, b);
                     }
-                } else if (idx.data(gs)->isContravariant()) {
+                } else if (idxTypeMember.data(gs)->isContravariant()) {
                     result = Types::isSubTypeUnderConstraint(gs, constr, a2->targs[j], a1->targs[i], mode);
                 }
                 if (!result) {
