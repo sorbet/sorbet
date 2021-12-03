@@ -10,14 +10,14 @@ foo/foo.rb:13: Unable to resolve constant `BardClass` https://srb.help/5002
 foo/foo.rb:14: Unable to resolve constant `UnexportedClass` https://srb.help/5002
     14 |    Project::Bar::UnexportedClass
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    bar/bar.rb:14: Do you need to `export` constant `Project::Bar::UnexportedClass`?
-    14 |  class UnexportedClass; end
-          ^^^^^^^^^^^^^^^^^^^^^
-    bar/__package.rb:5: Defined in package `Project::Bar`
+    bar/__package.rb:5: Do you need to `export Project::Bar::UnexportedClass` in package `Project::Bar`?
      5 |class Project::Bar < PackageSpec
      6 |  import Project::Foo
      7 |
      8 |  export Project::Bar::BarClass
      9 |  export Project::Bar::BarMethods
     10 |end
+    bar/bar.rb:14: Constant `Project::Bar::UnexportedClass` is defined here:
+    14 |  class UnexportedClass; end
+          ^^^^^^^^^^^^^^^^^^^^^
 Errors: 2

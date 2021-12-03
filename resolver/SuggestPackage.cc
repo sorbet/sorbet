@@ -51,12 +51,12 @@ public:
     void addMissingExportSuggestions(core::ErrorBuilder &e, core::packages::PackageInfo::MissingExportMatch match) {
         vector<core::ErrorLine> lines;
         auto &srcPkg = db().getPackageInfo(match.srcPkg);
-
-        lines.emplace_back(core::ErrorLine::from(match.symbol.data(ctx)->loc(), "Do you need to `{}` constant `{}`?",
-                                                 core::Names::export_().show(ctx), match.symbol.show(ctx)));
         lines.emplace_back(core::ErrorLine::from(
-            srcPkg.definitionLoc(), "Defined in package `{}`",
+            srcPkg.definitionLoc(), "Do you need to `{} {}` in package `{}`?", core::Names::export_().show(ctx),
+            match.symbol.show(ctx),
             fmt::map_join(srcPkg.fullName(), "::", [&](auto nr) -> string { return nr.show(ctx); })));
+        lines.emplace_back(core::ErrorLine::from(match.symbol.data(ctx)->loc(),
+                                                 "Constant `{}` is defined here:", match.symbol.show(ctx)));
         // TODO(nroman-stripe) Add automatic fixers
         e.addErrorSection(core::ErrorSection(lines));
     }
