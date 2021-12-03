@@ -6,8 +6,8 @@ foo_class.rb:7: Unable to resolve constant `Bar` https://srb.help/5002
      4 |  export Foo::Bar::OtherPackage::OtherClass
      5 |  export Test::Foo::Bar::OtherPackage::TestUtil
      6 |end
-  Autocorrect: Use `-a` to autocorrect
-    __package.rb:6: Insert `
+  Autocorrect: Done
+    __package.rb:6: Inserted `
   import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
@@ -20,8 +20,8 @@ foo_class.rb:8: Unable to resolve constant `Bar` https://srb.help/5002
      4 |  export Foo::Bar::OtherPackage::OtherClass
      5 |  export Test::Foo::Bar::OtherPackage::TestUtil
      6 |end
-  Autocorrect: Use `-a` to autocorrect
-    __package.rb:6: Insert `
+  Autocorrect: Done
+    __package.rb:6: Inserted `
   import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
@@ -34,8 +34,8 @@ foo_class.rb:14: Unable to resolve constant `Bar` https://srb.help/5002
      4 |  export Foo::Bar::OtherPackage::OtherClass
      5 |  export Test::Foo::Bar::OtherPackage::TestUtil
      6 |end
-  Autocorrect: Use `-a` to autocorrect
-    __package.rb:6: Insert `
+  Autocorrect: Done
+    __package.rb:6: Inserted `
   import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
@@ -48,9 +48,20 @@ foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
      4 |  export Foo::Bar::OtherPackage::OtherClass
      5 |  export Test::Foo::Bar::OtherPackage::TestUtil
      6 |end
-  Autocorrect: Use `-a` to autocorrect
-    __package.rb:6: Insert `
+  Autocorrect: Done
+    __package.rb:6: Inserted `
   test_import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
 Errors: 4
+
+--------------------------------------------------------------------------
+
+# frozen_string_literal: true
+# typed: strict
+# enable-packager: true
+
+class Foo::MyPackage < PackageSpec
+  # import Foo::Bar::OtherPackage ## MISSING!
+  import Foo::Bar::OtherPackage
+end
