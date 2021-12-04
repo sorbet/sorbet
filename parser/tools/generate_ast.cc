@@ -824,7 +824,7 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
 void emitNodeClassfile(ostream &out, NodeDef &node) {
     out << "  std::string " << node.name << "::nodeName() {" << '\n';
     out << "    return \"" << node.name << "\";" << '\n';
-    out << "  }" << '\n' << '\n';
+    out << "  };" << '\n' << '\n';
 
     out << "  std::string " << node.name << "::toStringWithTabs(const core::GlobalState &gs, int tabs) const {" << '\n'
         << "    fmt::memory_buffer buf;" << '\n';
@@ -1025,8 +1025,58 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     out << '\n';
 
     // toWhitequark
-    out << "  std::string " << node.name << "::toWhitequark(const core::GlobalState &gs, int tabs) {" << '\n';
-    out << "    return \"\";\n"
+    out << "  std::string " << node.name << "::toWhitequark(const core::GlobalState &gs, int tabs) {" << '\n'
+        << "    fmt::memory_buffer buf;" << '\n';
+    out << "    fmt::format_to(std::back_inserter(buf), \"s(:" << node.whitequarkName << "\");" << '\n';
+    // Generate fields
+    for (auto &arg : node.fields) {
+        switch (arg.type) {
+            case FieldType::Name:
+                if (node.whitequarkName == "str") {
+                    out << "    fmt::format_to(std::back_inserter(buf), \", \\\"{}\\\"\", " << arg.name
+                        << ".toString(gs));\n";
+                } else {
+                    out << "    fmt::format_to(std::back_inserter(buf), \", :{}\", JSON::escape(" << arg.name
+                        << ".show(gs)));\n";
+                }
+                break;
+            case FieldType::Node:
+                out << "    fmt::format_to(std::back_inserter(buf), \",\");\n";
+                out << "    if (" << arg.name << ") {\n";
+                out << "     fmt::format_to(std::back_inserter(buf), \"\\n\");\n";
+                out << "     printTabs(buf, tabs + 1);" << '\n';
+                out << "     printNodeWhitequark(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "    } else {\n";
+                out << "      fmt::format_to(std::back_inserter(buf), \" nil\");\n";
+                out << "    }\n";
+                break;
+            case FieldType::NodeVec:
+                out << "    for (auto &&a: " << arg.name << ") {\n";
+                out << "      fmt::format_to(std::back_inserter(buf), \",\");\n";
+                out << "      if (a) {\n";
+                out << "        fmt::format_to(std::back_inserter(buf), \"\\n\");\n";
+                out << "        printTabs(buf, tabs + 1);" << '\n';
+                out << "        printNodeWhitequark(buf, a, gs, tabs + 1);\n";
+                out << "      } else {\n";
+                out << "        fmt::format_to(std::back_inserter(buf), \" nil\");\n";
+                out << "      }\n";
+                out << "    }\n";
+                break;
+            case FieldType::String:
+                out << "    fmt::format_to(std::back_inserter(buf), \", \\\"{}\\\"\", " << arg.name << ");\n";
+                break;
+            case FieldType::Uint:
+                out << "    fmt::format_to(std::back_inserter(buf), \", {}\", " << arg.name << ");\n";
+                break;
+            case FieldType::Loc:
+                continue;
+            case FieldType::Bool:
+                continue;
+        }
+    }
+
+    out << "    fmt::format_to(std::back_inserter(buf), \")\");";
+    out << "    return to_string(buf);\n"
         << "  }\n";
     out << '\n';
 }
