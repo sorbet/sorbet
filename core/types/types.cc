@@ -492,7 +492,7 @@ void ClassType::_sanityCheck(const GlobalState &gs) const {
 InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, ClassOrModuleRef what,
                                                      const vector<TypePtr> &targs, ClassOrModuleRef asIf) {
     ENFORCE(what == asIf || what.data(gs)->derivesFrom(gs, asIf) || asIf.data(gs)->derivesFrom(gs, what),
-            what.data(gs)->name.showRaw(gs), asIf.data(gs)->name.showRaw(gs));
+            "what={} asIf={}", what.data(gs)->name.showRaw(gs), asIf.data(gs)->name.showRaw(gs));
     InlinedVector<SymbolRef, 4> currentAlignment;
     if (targs.empty()) {
         return currentAlignment;
@@ -586,7 +586,7 @@ void AppliedType::_sanityCheck(const GlobalState &gs) const {
                 (this->klass == Symbols::Array() && (this->targs.size() == 1)) ||
                 (this->klass == Symbols::Hash() && (this->targs.size() == 3)) ||
                 this->klass.id() >= Symbols::Proc0().id() && this->klass.id() <= Symbols::last_proc().id(),
-            this->klass.data(gs)->name.showRaw(gs));
+            "{}", this->klass.data(gs)->name.showRaw(gs));
     for (auto &targ : this->targs) {
         targ.sanityCheck(gs);
     }

@@ -730,7 +730,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     auto pend = data->arguments().end();
 
     ENFORCE(pit != pend, "Should at least have the block arg.");
-    ENFORCE((pend - 1)->flags.isBlock, "Last arg should be the block arg: " + (pend - 1)->show(gs));
+    ENFORCE((pend - 1)->flags.isBlock, "Last arg should be the block arg: {}", (pend - 1)->show(gs));
     // We'll type check the block arg separately from the rest of the args.
     --pend;
 

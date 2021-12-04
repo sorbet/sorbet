@@ -3206,7 +3206,7 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     DEBUG_ONLY(for (auto i = 1; i < gs.classAndModulesUsed(); i++) {
         core::ClassOrModuleRef sym(gs, i);
         // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
-        ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), sym.toString(gs));
+        ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), "{}", sym.toString(gs));
     })
     trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
     auto result = resolveSigs(gs, std::move(trees), *workers);
