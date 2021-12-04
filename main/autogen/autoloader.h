@@ -59,8 +59,7 @@ struct NamedDefinition {
     Definition def;
     QualifiedName qname;
     QualifiedName parentName;
-    std::vector<core::NameRef>
-    requires;
+    std::vector<core::NameRef> requireStatements;
     core::FileRef fileRef;
     u4 pathDepth;
 
@@ -101,7 +100,7 @@ public:
 private:
     core::FileRef file() const;
     void predeclare(const core::GlobalState &gs, std::string_view fullName, fmt::memory_buffer &buf) const;
-    void requires(const core::GlobalState &gs, const AutoloaderConfig &, fmt::memory_buffer &buf) const;
+    void requireStatements(const core::GlobalState &gs, const AutoloaderConfig &, fmt::memory_buffer &buf) const;
     bool hasDifferentFile(core::FileRef) const;
     bool hasDef() const;
     const NamedDefinition &definition(const core::GlobalState &) const;
