@@ -1,6 +1,4 @@
 #include "common/JSON.h"
-#include "spdlog/spdlog.h"
-// spdlog.h must be included before fmt.h https://github.com/sorbet/sorbet/pull/2839
 #include "spdlog/fmt/fmt.h"
 
 using namespace std;
