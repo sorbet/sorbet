@@ -18,8 +18,9 @@ public:
     bool supportsFlush = false;
 
     void print(const std::string_view &contents) const;
-    template <typename... Args> void fmt(const ConstExprStr msg, Args &&...args) const {
-        print(fmt::format(msg.str, std::forward<Args>(args)...));
+    template <typename... Args> void fmt(fmt::format_string<Args...> msg, Args &&...args) const {
+        auto contents = fmt::format(msg, std::forward<Args>(args)...);
+        print(contents);
     }
     void flush();
     std::string flushToString();

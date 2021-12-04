@@ -1,6 +1,5 @@
 #ifndef SORBET_REPORTER_H
 #define SORBET_REPORTER_H
-#include "common/ConstExprStr.h"
 #include "core/AutocorrectSuggestion.h"
 #include "core/Loc.h"
 #include "core/StrictLevel.h"
@@ -34,8 +33,11 @@ class ErrorColors {
 
 public:
     ErrorColors() = delete;
-    template <typename... Args> static std::string format(std::string_view msg, const Args &...args) {
-        return fmt::format(replaceAll(msg, coloredPatternSigil, coloredPatternReplace), args...);
+    template <typename... Args> static std::string format(fmt::format_string<Args...> msg, Args &&...args) {
+        fmt::string_view msgFmtStrView = msg;
+        std::string_view inWhat(msgFmtStrView.data(), msgFmtStrView.size());
+        return fmt::vformat(replaceAll(inWhat, coloredPatternSigil, coloredPatternReplace),
+                            fmt::make_format_args(args...));
     }
     static void enableColors();
     static void disableColors();
@@ -55,15 +57,15 @@ struct ErrorLine {
 
     // Use this (instead of the constructor) if you want `{}` to mean "turn this cyan if should use
     // colors, or just backticks otherwise".
-    template <typename... Args> static ErrorLine from(Loc loc, std::string_view msg, const Args &...args) {
-        std::string formatted = ErrorColors::format(msg, args...);
+    template <typename... Args> static ErrorLine from(Loc loc, fmt::format_string<Args...> msg, Args &&...args) {
+        std::string formatted = ErrorColors::format(msg, std::forward<Args>(args)...);
         return ErrorLine(loc, move(formatted));
     }
 
     // You should ALMOST ALWAYS prefer the variant above that takes a Loc.
     // The best error messages show context associated with locations.
-    template <typename... Args> static ErrorLine fromWithoutLoc(std::string_view msg, const Args &...args) {
-        std::string formatted = ErrorColors::format(msg, args...);
+    template <typename... Args> static ErrorLine fromWithoutLoc(fmt::format_string<Args...> msg, Args &&...args) {
+        std::string formatted = ErrorColors::format(msg, std::forward<Args>(args)...);
         return ErrorLine(core::Loc::none(), move(formatted), LocDisplay::Hidden);
     }
     std::string toString(const GlobalState &gs, bool color = true) const;
@@ -146,23 +148,23 @@ public:
         return state == State::WillBuild;
     }
     void addErrorSection(ErrorSection &&section);
-    template <typename... Args> void addErrorLine(Loc loc, ConstExprStr msg, const Args &...args) {
-        std::string formatted = ErrorColors::format(msg.str, args...);
+    template <typename... Args> void addErrorLine(Loc loc, fmt::format_string<Args...> msg, Args &&...args) {
+        std::string formatted = ErrorColors::format(msg, std::forward<Args>(args)...);
         addErrorSection(ErrorSection({ErrorLine(loc, formatted)}));
     }
-    template <typename... Args> void addErrorNote(ConstExprStr msg, const Args &...args) {
-        addErrorSection(ErrorSection("Note:", {ErrorLine::fromWithoutLoc(msg.str, args...)}));
+    template <typename... Args> void addErrorNote(fmt::format_string<Args...> msg, Args &&...args) {
+        addErrorSection(ErrorSection("Note:", {ErrorLine::fromWithoutLoc(msg, std::forward<Args>(args)...)}));
     }
 
-    template <typename... Args> void setHeader(ConstExprStr msg, const Args &...args) {
-        std::string formatted = ErrorColors::format(msg.str, args...);
+    template <typename... Args> void setHeader(fmt::format_string<Args...> msg, Args &&...args) {
+        std::string formatted = ErrorColors::format(msg, std::forward<Args>(args)...);
         _setHeader(move(formatted));
     }
 
     void addAutocorrect(AutocorrectSuggestion &&autocorrect);
     template <typename... Args>
-    void replaceWith(const std::string &title, Loc loc, ConstExprStr replacement, const Args &...args) {
-        std::string formatted = fmt::format(replacement.str, args...);
+    void replaceWith(const std::string &title, Loc loc, fmt::format_string<Args...> replacement, Args &&...args) {
+        std::string formatted = fmt::format(replacement, std::forward<Args>(args)...);
         addAutocorrect(AutocorrectSuggestion{title, {AutocorrectSuggestion::Edit{loc, move(formatted)}}});
     }
 

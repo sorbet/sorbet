@@ -43,7 +43,8 @@ public:
 
 class Exception final {
 public:
-    template <typename... TArgs> [[noreturn]] static bool raise(const TArgs &...args) __attribute__((noreturn));
+    template <typename... TArgs>
+    [[noreturn]] static bool raise(fmt::string_view formatString, const TArgs &...args) __attribute__((noreturn));
 
     [[noreturn]] static inline void notImplemented() {
         raise("Not Implemented");
@@ -58,15 +59,16 @@ public:
     }
     template <typename... TArgs>
     [[noreturn]] static inline bool enforce_handler(std::string_view check, std::string_view file, int line,
-                                                    std::string_view message, const TArgs &...args)
+                                                    fmt::string_view message, const TArgs &...args)
         __attribute__((noreturn)) {
-        raise("{}:{} enforced condition {} has failed: {}", file, line, check, fmt::format(message, args...));
+        raise("{}:{} enforced condition {} has failed: {}", file, line, check,
+              fmt::vformat(message, fmt::make_format_args(args...)));
     }
 };
 
-template <typename... TArgs> [[noreturn]] bool Exception::raise(const TArgs &...args) {
+template <typename... TArgs> [[noreturn]] bool Exception::raise(fmt::string_view formatString, const TArgs &...args) {
     Exception::failInFuzzer();
-    std::string message = fmt::format(args...);
+    std::string message = fmt::vformat(formatString, fmt::make_format_args(args...));
 
     if (message.size() > 0) {
         fatalLogger->error("Exception::raise(): {}\n", message);
