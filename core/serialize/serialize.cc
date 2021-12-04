@@ -923,7 +923,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             p.putU4(s.fun.rawId());
             u1 flags;
             static_assert(sizeof(flags) == sizeof(s.flags));
-            // Can replace this with std::bit_cast in C++20
+            // Can replace this with std::bit_cast in Clang 14
             memcpy(&flags, &s.flags, sizeof(flags));
             p.putU1(flags);
             p.putU4(s.numPosArgs());
@@ -1106,7 +1106,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             pickle(p, c.declLoc);
             u1 flags;
             static_assert(sizeof(flags) == sizeof(c.flags));
-            // Can replace this with std::bit_cast in C++20
+            // Can replace this with std::bit_cast in Clang 14
             memcpy(&flags, &c.flags, sizeof(flags));
             p.putU1(flags);
             p.putU4(c.name.rawId());
@@ -1220,7 +1220,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto flagsU1 = p.getU1();
             ast::Send::Flags flags;
             static_assert(sizeof(flags) == sizeof(flagsU1));
-            // Can replace this with std::bit_cast in C++20
+            // Can replace this with std::bit_cast in Clang 14
             memcpy(&flags, &flagsU1, sizeof(flags));
             auto numPosArgs = static_cast<u2>(p.getU4());
             auto argsSize = p.getU4();
@@ -1375,7 +1375,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto flagsU1 = p.getU1();
             ast::MethodDef::Flags flags;
             static_assert(sizeof(flags) == sizeof(flagsU1));
-            // Can replace this with std::bit_cast in C++20
+            // Can replace this with std::bit_cast in Clang 14
             memcpy(&flags, &flagsU1, sizeof(flags));
             NameRef name = unpickleNameRef(p, gs);
             auto symbol = MethodRef::fromRaw(p.getU4());
