@@ -15,6 +15,7 @@
 #include "common/typecase.h"
 #include "compiler/Core/AbortCompilation.h"
 #include "compiler/Core/CompilerState.h"
+#include "compiler/Core/FailCompilation.h"
 #include "compiler/Core/OptimizerException.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IREmitter/IREmitter.h"

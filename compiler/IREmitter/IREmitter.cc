@@ -14,6 +14,7 @@
 #include "common/sort.h"
 #include "common/typecase.h"
 #include "compiler/Core/CompilerState.h"
+#include "compiler/Core/FailCompilation.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/IREmitter/IREmitterContext.h"
@@ -1106,7 +1107,7 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::MethodRef &sym, stri
         // Call the LLVM method that was made by run() from this Init_ method
         auto staticInitName = IREmitterHelpers::getFunctionName(cs, staticInit);
         auto staticInitFunc = cs.getFunction(staticInitName);
-        ENFORCE(staticInitFunc, staticInitName + " does not exist");
+        ENFORCE(staticInitFunc, "{} does not exist", staticInitName);
         builder.CreateCall(staticInitFunc,
                            {
                                llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),

@@ -11,6 +11,7 @@
 #include "common/FileOps.h"
 #include "common/sort.h"
 #include "compiler/Core/CompilerState.h"
+#include "compiler/Core/FailCompilation.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/IREmitter/IREmitterContext.h"
@@ -84,7 +85,7 @@ public:
                 current = overload;
             }
 
-            ENFORCE(false, "The method `{}#{}` (or an overload) does not return `{}`", primaryMethod.show(gs),
+            ENFORCE(false, "The method `{}` (or an overload) does not return `{}`", primaryMethod.show(gs),
                     intrinsicResultType.show(gs));
         }
     }
@@ -175,7 +176,7 @@ public:
         if (auto *blk = mcctx.blkAsFunction()) {
             if (!cMethodWithBlock.has_value()) {
                 core::Loc loc{mcctx.irctx.cfg.file, send->argLocs.back()};
-                compiler::failCompilation(cs, loc, "Unable to handle a block with this intrinsic");
+                failCompilation(cs, loc, "Unable to handle a block with this intrinsic");
             }
             auto *forwarder = generateForwarder(mcctx);
 
