@@ -81,7 +81,8 @@ string ParsedFile::toString(const core::GlobalState &gs, int version) const {
                    "# ParsedFile: {}\n"
                    "requires: [{}]\n"
                    "## defs:\n",
-                   core::File::censorFilePathForSnapshotTests(path), fmt::map_join(requires, ", ", nameToString));
+                   core::File::censorFilePathForSnapshotTests(path),
+                   fmt::map_join(requireStatements, ", ", nameToString));
 
     for (auto &def : defs) {
         string_view type;

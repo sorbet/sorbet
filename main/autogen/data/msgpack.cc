@@ -145,8 +145,8 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
     mpack_write_u32(&writer, pf.cksum);
 
     // requires
-    mpack_start_array(&writer, pf.requires.size());
-    for (auto nm : pf.requires) {
+    mpack_start_array(&writer, pf.requireStatements.size());
+    for (auto nm : pf.requireStatements) {
         packString(nm.show(ctx));
     }
     mpack_finish_array(&writer);
