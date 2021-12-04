@@ -52,6 +52,7 @@ build --copt=-Wno-macro-redefined
 # Clang 12.0.0 has warnings when compiling LLVM 12.0.0 on C++20, sadly.
 # TODO(jez) When we upgrade to LLVM 13.0.0+ can we delete this?
 build --host_cxxopt=-Wno-deprecated-anon-enum-enum-conversion
+build --host_cxxopt=-Wno-deprecated-enum-enum-conversion
 build --cxxopt=-Wno-deprecated-anon-enum-enum-conversion
 build --cxxopt=-Wno-deprecated-enum-enum-conversion
 build --cxxopt=-Wno-ambiguous-reversed-operator
