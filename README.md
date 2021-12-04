@@ -372,8 +372,11 @@ follow the pattern `<name>.<phase>.exp`, where `<name>` does not include the
 `__*.rb` suffix. So `foo__1.rb` and `foo__2.rb` would have an exp file like
 `foo.<pass>.exp`.
 
-Another exception: for `package-tree` exp tests, the filename is always
+Exception: 
+- For `package-tree` exp tests, the filename is always
 `pass.package-tree.exp`, no matter the name of the test.
+- For `document-symbols` multifile exp tests, the filename
+would contain the index postfix (i.e. `test/testdata/lsp/a__1.document-symbols.exp`)
 
 ### CLI tests
 
