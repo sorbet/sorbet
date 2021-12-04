@@ -218,7 +218,7 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, 
 
 namespace {
 std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
-    auto owner = sym.data(gs)->owner;
+    auto owner = sym.owner(gs);
     bool includeOwner = !IREmitterHelpers::isRootishSymbol(gs, owner);
     string ownerStr = includeOwner ? showClassName(gs, owner) + "::" : "";
     return ownerStr + IREmitterHelpers::showClassNameWithoutOwner(gs, sym);
@@ -227,11 +227,11 @@ std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
 } // namespace
 
 llvm::Value *Payload::getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &builder) {
-    ENFORCE(sym.data(cs)->isClassOrModule() || sym.data(cs)->isStaticField() || sym.data(cs)->isTypeMember());
+    ENFORCE(sym.isClassOrModule() || sym.isStaticField(cs) || sym.isTypeMember());
     sym = IREmitterHelpers::fixupOwningSymbol(cs, sym);
     auto str = showClassName(cs, sym);
     ENFORCE(str.length() < 2 || (str[0] != ':'), "implementation assumes that strings dont start with ::");
-    auto functionName = sym.data(cs)->isClassOrModule() ? "sorbet_i_getRubyClass" : "sorbet_i_getRubyConstant";
+    auto functionName = sym.isClassOrModule() ? "sorbet_i_getRubyClass" : "sorbet_i_getRubyConstant";
     return builder.CreateCall(
         cs.getFunction(functionName),
         {Payload::toCString(cs, str, builder), llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});
@@ -321,51 +321,46 @@ void flattenOrType(vector<core::TypePtr> &results, const core::OrType &type) {
         [&results](const core::TypePtr &def) { results.emplace_back(def); });
 }
 
+static bool isProc(core::ClassOrModuleRef sym) {
+    auto id = sym.id();
+    return id >= core::Symbols::Proc0().id() && id <= core::Symbols::last_proc().id();
+}
+
 } // namespace
 
-static bool isProc(core::SymbolRef sym) {
-    if (sym.kind() != core::SymbolRef::Kind::ClassOrModule) {
-        return false;
+llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
+                               core::ClassOrModuleRef sym) {
+    for (const auto &[candidate, specializedCall] : optimizedTypeTests) {
+        if (sym == candidate) {
+            return builder.CreateCall(cs.getFunction(specializedCall), {val});
+        }
     }
-    auto id = sym.classOrModuleIndex();
-    return id >= core::Symbols::Proc0().id() && id <= core::Symbols::last_proc().id();
+
+    if (sym.data(cs)->name.isTEnumName(cs)) {
+        // T.let(..., MyEnum::X$1) is special. These are singleton values, so we can do a type
+        // test with an object (reference) equality check.
+        return builder.CreateCall(cs.getFunction("sorbet_testObjectEqual_p"),
+                                  {Payload::getRubyConstant(cs, sym, builder), val});
+    }
+
+    auto attachedClass = sym.data(cs)->attachedClass(cs);
+    // todo: handle attached of attached class
+    if (attachedClass.exists()) {
+        return builder.CreateCall(cs.getFunction("sorbet_isa_class_of"),
+                                  {val, Payload::getRubyConstant(cs, attachedClass, builder)});
+    }
+    sym = isProc(sym) ? core::Symbols::Proc() : sym;
+    return builder.CreateCall(cs.getFunction("sorbet_i_objIsKindOf"),
+                              {val, Payload::getRubyConstant(cs, sym, builder)});
 }
 
 llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                const core::TypePtr &type) {
     llvm::Value *ret = nullptr;
     typecase(
-        type,
-        [&](const core::ClassType &ct) {
-            for (const auto &[candidate, specializedCall] : optimizedTypeTests) {
-                if (ct.symbol == candidate) {
-                    ret = builder.CreateCall(cs.getFunction(specializedCall), {val});
-                    return;
-                }
-            }
-
-            if (ct.symbol.data(cs)->name.isTEnumName(cs)) {
-                // T.let(..., MyEnum::X$1) is special. These are singleton values, so we can do a type
-                // test with an object (reference) equality check.
-                ret = builder.CreateCall(cs.getFunction("sorbet_testObjectEqual_p"),
-                                         {Payload::getRubyConstant(cs, ct.symbol, builder), val});
-                return;
-            }
-
-            auto attachedClass = ct.symbol.data(cs)->attachedClass(cs);
-            // todo: handle attached of attached class
-            if (attachedClass.exists()) {
-                ret = builder.CreateCall(cs.getFunction("sorbet_isa_class_of"),
-                                         {val, Payload::getRubyConstant(cs, attachedClass, builder)});
-                return;
-            }
-            auto sym = isProc(ct.symbol) ? core::Symbols::Proc() : ct.symbol;
-            ret = builder.CreateCall(cs.getFunction("sorbet_isa"), {val, Payload::getRubyConstant(cs, sym, builder)});
-        },
+        type, [&](const core::ClassType &ct) { ret = Payload::typeTest(cs, builder, val, ct.symbol); },
         [&](const core::AppliedType &at) {
-            core::ClassOrModuleRef klass = at.klass;
-            auto base = typeTest(cs, builder, val, core::make_type<core::ClassType>(klass));
-            ret = base;
+            ret = Payload::typeTest(cs, builder, val, at.klass);
             // todo: ranges, hashes, sets, enumerator, and, overall, enumerables
         },
         [&](const core::OrType &ct) {
@@ -453,8 +448,7 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, 
 // adding an assertion.
 void Payload::assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                          core::ClassOrModuleRef sym) {
-    auto type = core::make_type<core::ClassType>(sym);
-    auto *cond = Payload::typeTest(cs, builder, val, type);
+    auto *cond = Payload::typeTest(cs, builder, val, sym);
     builder.CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::assume, {}, {cond});
     return;
 }
@@ -680,7 +674,7 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
 }
 
 // The common suffix for stack frame related global names.
-string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx, core::SymbolRef methodSym,
+string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx, core::MethodRef methodSym,
                                int rubyBlockId) {
     auto name = IREmitterHelpers::getFunctionName(cs, methodSym);
 
@@ -700,7 +694,7 @@ string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx,
 }
 
 llvm::GlobalVariable *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                        core::SymbolRef methodSym, int rubyBlockId) {
+                                        core::MethodRef methodSym, int rubyBlockId) {
     auto tp = iseqType(cs);
     auto name = getStackFrameGlobalName(cs, irctx, methodSym, rubyBlockId);
     string rawName = "stackFramePrecomputed_" + name;
@@ -748,7 +742,7 @@ llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &bui
 } // namespace
 
 llvm::Value *Payload::rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                        core::SymbolRef methodSym) {
+                                        core::MethodRef methodSym) {
     return ::sorbet::compiler::rubyStackFrameVar(cs, builder, irctx, methodSym, 0);
 }
 
@@ -945,9 +939,7 @@ llvm::Value *Payload::buildInstanceVariableCache(CompilerState &cs, std::string_
 
 llvm::Value *Payload::getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilderBase &builder,
                                                  const IREmitterContext &irctx) {
-    auto sym = irctx.cfg.symbol.data(cs)->owner;
-    ENFORCE(sym.data(cs)->isClassOrModule());
-
+    auto sym = irctx.cfg.symbol.data(cs)->owner.asClassOrModuleRef();
     return Payload::getRubyConstant(cs, sym.data(cs)->topAttachedClass(cs), builder);
 }
 
@@ -1030,8 +1022,8 @@ void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, l
         switch (alias.kind) {
             case Alias::AliasKind::Constant: {
                 auto sym = alias.constantSym;
-                auto name = sym.data(cs.gs)->name.show(cs.gs);
-                auto owner = sym.data(cs.gs)->owner;
+                auto name = sym.name(cs.gs).show(cs.gs);
+                auto owner = sym.owner(cs.gs);
                 builder.CreateCall(cs.getFunction("sorbet_setConstant"),
                                    {Payload::getRubyConstant(cs, owner, builder), Payload::toCString(cs, name, builder),
                                     llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
@@ -1115,16 +1107,28 @@ llvm::Value *Payload::callFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &
 }
 
 llvm::Value *Payload::callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
-                                             bool usesBreak, llvm::Value *blockFun, int blkMinArgs, int blkMaxArgs,
-                                             llvm::Value *closure) {
-    auto *minArgs = IREmitterHelpers::buildS4(cs, blkMinArgs);
-    auto *maxArgs = IREmitterHelpers::buildS4(cs, blkMaxArgs);
+                                             bool usesBreak, llvm::Value *ifunc) {
     if (usesBreak) {
-        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache"),
-                                  {cache, blockFun, minArgs, maxArgs, closure}, "sendWithBlock");
+        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache"), {cache, ifunc}, "sendWithBlock");
     } else {
-        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache_noBreak"),
-                                  {cache, blockFun, minArgs, maxArgs, closure}, "sendWithBlock");
+        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache_noBreak"), {cache, ifunc},
+                                  "sendWithBlock");
+    }
+}
+
+llvm::Value *Payload::callSuperFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
+                                             llvm::Value *blockHandler) {
+    return builder.CreateCall(cs.getFunction("sorbet_callSuperFuncWithCache"), {cache, blockHandler}, "send");
+}
+
+llvm::Value *Payload::callSuperFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
+                                                  bool usesBreak, llvm::Value *ifunc) {
+    if (usesBreak) {
+        return builder.CreateCall(cs.getFunction("sorbet_callSuperFuncBlockWithCache"), {cache, ifunc},
+                                  "sendWithBlock");
+    } else {
+        return builder.CreateCall(cs.getFunction("sorbet_callSuperFuncBlockWithCache_noBreak"), {cache, ifunc},
+                                  "sendWithBlock");
     }
 }
 
@@ -1165,4 +1169,39 @@ llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &bui
 llvm::Value *Payload::buildLocalsOffset(CompilerState &cs) {
     return llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true));
 }
+
+llvm::Value *Payload::getOrBuildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                           const IREmitterContext &irctx, int blkId) {
+    auto *blk = irctx.rubyBlocks2Functions[blkId];
+    auto &arity = irctx.rubyBlockArity[blkId];
+    auto rawName = fmt::format("{}_ifunc", (string)blk->getName());
+
+    auto *globalTy = llvm::Type::getInt64Ty(cs);
+
+    auto *global = cs.module->getOrInsertGlobal(rawName, globalTy, [&cs, &blk, &rawName, &globalTy, &arity]() {
+        auto globalInitBuilder = llvm::IRBuilder<>(cs);
+
+        auto isConstant = false;
+        auto *zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
+        auto global = new llvm::GlobalVariable(*cs.module, globalTy, isConstant, llvm::GlobalVariable::InternalLinkage,
+                                               zero, rawName);
+
+        globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
+
+        auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
+        auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
+        auto *offset = buildLocalsOffset(cs);
+        auto *ifunc = globalInitBuilder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
+                                                   {blk, blkMinArgs, blkMaxArgs, offset});
+        auto *asValue = globalInitBuilder.CreateBitOrPointerCast(ifunc, globalTy);
+        auto *globalIndex = globalInitBuilder.CreateCall(cs.getFunction("sorbet_globalConstRegister"), {asValue});
+        globalInitBuilder.CreateStore(globalIndex, global);
+
+        return global;
+    });
+
+    auto *globalIndex = builder.CreateLoad(global);
+    return builder.CreateCall(cs.getFunction("sorbet_globalConstFetchIfunc"), {globalIndex});
+}
+
 } // namespace sorbet::compiler

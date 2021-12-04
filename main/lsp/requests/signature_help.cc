@@ -10,7 +10,7 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::MethodRef method,
                           vector<unique_ptr<SignatureInformation>> &sigs, const core::lsp::SendResponse &resp,
                           int activeParameter) {
     // signature helps only exist for methods.
-    if (!method.exists() || !method.data(gs)->isMethod() || hideSymbol(gs, method)) {
+    if (!method.exists() || hideSymbol(gs, method)) {
         return;
     }
     // Label is mandatory, so method name (i.e B#add) is shown for now. Might want to add markup highlighting

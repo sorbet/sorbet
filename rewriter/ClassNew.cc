@@ -41,24 +41,24 @@ vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *
         return empty;
     }
 
-    auto argc = send->args.size();
-    if (argc > 1) {
+    auto argc = send->numPosArgs();
+    if (argc > 1 || send->hasKwArgs()) {
         return empty;
     }
 
-    if (argc == 1 && !ast::isa_tree<ast::UnresolvedConstantLit>(send->args[0])) {
+    if (argc == 1 && !ast::isa_tree<ast::UnresolvedConstantLit>(send->getPosArg(0))) {
         return empty;
     }
 
     ast::ClassDef::RHS_store body;
 
-    auto *block = ast::cast_tree<ast::Block>(send->block);
+    auto *block = send->block();
     if (block != nullptr && block->args.size() == 1) {
         auto blockArg = move(block->args[0]);
         body.emplace_back(ast::MK::Assign(blockArg.loc(), move(blockArg), asgn->lhs.deepCopy()));
     }
 
-    if (send->block != nullptr) {
+    if (block != nullptr) {
         // Steal the trees, because the run is going to remove the original send node from the tree anyway.
         if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
             for (auto &&stat : insSeq->stats) {
@@ -72,7 +72,7 @@ vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *
 
     ast::ClassDef::ANCESTORS_store ancestors;
     if (argc == 1) {
-        ancestors.emplace_back(move(send->args[0]));
+        ancestors.emplace_back(move(send->getPosArg(0)));
     } else {
         ancestors.emplace_back(ast::MK::Constant(send->loc, core::Symbols::todo()));
     }

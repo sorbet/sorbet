@@ -21,7 +21,7 @@ void ModuleFunction::run(core::MutableContext ctx, ast::ClassDef *cdef) {
         if (auto send = ast::cast_tree<ast::Send>(stat)) {
             // we only care about sends if they're `module_function`
             if (send->fun == core::Names::moduleFunction() && send->recv.isSelfReference()) {
-                if (send->args.size() == 0) {
+                if (!send->hasPosArgs() && !send->hasKwArgs()) {
                     // a `module_function` with no args changes the way that every subsequent method definition works so
                     // we set this flag so we know that the rest of the defns should be rewritten
                     moduleFunctionActive = true;
@@ -110,7 +110,7 @@ vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Se
         return stats;
     }
 
-    for (auto &arg : send->args) {
+    for (auto &arg : send->posArgs()) {
         if (ast::isa_tree<ast::MethodDef>(arg)) {
             return ModuleFunction::rewriteDefn(ctx, arg, prevStat);
         } else if (auto lit = ast::cast_tree<ast::Literal>(arg)) {
@@ -144,6 +144,22 @@ vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Se
                 e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",
                             "module_function");
             }
+        }
+    }
+
+    const auto numKwArgs = send->numKwArgs();
+    for (auto i = 0; i < numKwArgs; ++i) {
+        auto loc = send->getKwKey(i).loc().join(send->getKwValue(i).loc());
+        if (auto e = ctx.beginError(loc, core::errors::Rewriter::BadModuleFunction)) {
+            e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",
+                        "module_function");
+        }
+    }
+
+    if (auto *kwSplat = send->kwSplat()) {
+        if (auto e = ctx.beginError(kwSplat->loc(), core::errors::Rewriter::BadModuleFunction)) {
+            e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",
+                        "module_function");
         }
     }
 

@@ -165,8 +165,7 @@ struct ParsedFile {
     // every static constant usage in this file
     std::vector<Reference> refs;
     // every required gem in this file
-    std::vector<core::NameRef>
-    requires;
+    std::vector<core::NameRef> requireStatements;
 
     std::string toString(const core::GlobalState &gs, int version) const;
     std::string toMsgpack(core::Context ctx, int version);

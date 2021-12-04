@@ -2876,10 +2876,6 @@ class Set
 
   def ===(o); end
 
-  def compare_by_identity(); end
-
-  def compare_by_identity?(); end
-
   def divide(&func); end
 
   def eql?(o); end

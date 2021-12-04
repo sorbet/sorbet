@@ -24,8 +24,8 @@
 using namespace std;
 namespace sorbet::compiler {
 namespace {
-core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
-    core::SymbolRef sym;
+core::ClassOrModuleRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
+    core::ClassOrModuleRef sym;
     if (core::isa_type<core::ClassType>(typ)) {
         sym = core::cast_type_nonnull<core::ClassType>(typ).symbol;
     } else if (auto appliedType = core::cast_type<core::AppliedType>(typ)) {
@@ -33,8 +33,7 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     } else {
         ENFORCE(false);
     }
-    sym = IREmitterHelpers::fixupOwningSymbol(gs, sym);
-    ENFORCE(sym.data(gs)->isClassOrModule());
+    sym = IREmitterHelpers::fixupOwningSymbol(gs, sym).asClassOrModuleRef();
     return sym;
 }
 
@@ -170,24 +169,17 @@ public:
 
         llvm::Value *blockHandler = prepareBlockHandler(mcctx, send->args[2]);
 
+        auto shortName = methodName.shortName(cs);
+
+        auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 3);
+        flags.blockarg = true;
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
+        Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyBlockId), stack);
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, string(shortName), flags, stack.size(), keywords);
         if (methodName == core::Names::super()) {
-            // fill in args
-            auto args = IREmitterHelpers::fillSendArgArray(mcctx, 3);
-
-            return builder.CreateCall(cs.getFunction("sorbet_callSuperBlockHandler"),
-                                      {args.argc, args.argv, args.kw_splat, blockHandler}, "rawSendResult");
-        } else {
-            auto shortName = methodName.shortName(cs);
-
-            auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 3);
-            flags.blockarg = true;
-            auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
-            Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyBlockId),
-                                         stack);
-            auto *cache =
-                IREmitterHelpers::makeInlineCache(cs, builder, string(shortName), flags, stack.size(), keywords);
-            return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
+            return Payload::callSuperFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
         }
+        return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -485,49 +477,34 @@ public:
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         auto methodName = lit.asName(cs);
 
-        if (methodName == core::Names::super()) {
-            auto *argc = builder.CreateCall(cs.getFunction("sorbet_rubyArrayLen"), {splatArray}, "argc");
-            auto *argv = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {splatArray}, "argv");
-            auto *kwSplatFlag = llvm::ConstantInt::get(cs, llvm::APInt(32, flags.kw_splat ? 1 : 0));
+        // setup the inline cache
+        // Note that in the case of calling `super`, the VM's search mechanism will
+        // fetch the method name ID from the method definition itself, not the call
+        // cache, so it's OK that we're saying the cache is for `super`.
+        auto shortName = methodName.shortName(cs);
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(shortName), flags, 1, {});
 
-            if (auto *blk = mcctx.blkAsFunction()) {
-                auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
-                auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
-                auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
+        // Push receiver and the splat array.
+        // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
+        // is actually the first arg of the callWithSplat intrinsic method.
+        Payload::pushRubyStackVector(
+            cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId), {splatArray});
 
-                // blocks require a locals offset parameter
-                llvm::Value *localsOffset = Payload::buildLocalsOffset(cs);
-                ENFORCE(localsOffset != nullptr);
-                return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
-                                          {argc, argv, kwSplatFlag, blk, blkMinArgs, blkMaxArgs, localsOffset},
-                                          "rawSendResult");
-            } else {
-                return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {argc, argv, kwSplatFlag},
-                                          "rawSendResult");
+        // Call the receiver.
+        if (auto *blk = mcctx.blkAsFunction()) {
+            auto blkId = mcctx.blk.value();
+            auto usesBreak = irctx.blockUsesBreak[blkId];
+            auto *ifunc = Payload::getOrBuildBlockIfunc(cs, builder, irctx, blkId);
+            if (methodName == core::Names::super()) {
+                return Payload::callSuperFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, ifunc);
             }
+            return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, ifunc);
         } else {
-            // setup the inline cache
-            auto shortName = methodName.shortName(cs);
-            auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(shortName), flags, 1, {});
-
-            // Push receiver and the splat array.
-            // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
-            // is actually the first arg of the callWithSplat intrinsic method.
-            Payload::pushRubyStackVector(cs, builder, cfp,
-                                         Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId),
-                                         {splatArray});
-
-            // Call the receiver.
-            if (auto *blk = mcctx.blkAsFunction()) {
-                auto *closure = Payload::buildLocalsOffset(cs);
-                auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
-                auto usesBreak = irctx.blockUsesBreak[mcctx.blk.value()];
-                return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, blk, arity.min,
-                                                       arity.max, closure);
-            } else {
-                auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.builder);
-                return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
+            auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.builder);
+            if (methodName == core::Names::super()) {
+                return Payload::callSuperFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
             }
+            return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
         }
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -561,27 +538,24 @@ public:
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         auto methodName = lit.asName(cs);
 
+        // setup the inline cache
+        // Note that in the case of calling `super`, the VM's search mechanism will
+        // fetch the method name ID from the method definition itself, not the call
+        // cache, so it's OK that we're saying the cache is for `super`.
+        auto shortName = methodName.shortName(cs);
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(shortName), flags, 1, {});
+
+        // Push receiver and the splat array.
+        // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
+        // is actually the first arg of the callWithSplat intrinsic method.
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
+        Payload::pushRubyStackVector(
+            cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId), {splatArray});
+
         if (methodName == core::Names::super()) {
-            auto *argc = builder.CreateCall(cs.getFunction("sorbet_rubyArrayLen"), {splatArray}, "argc");
-            auto *argv = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {splatArray}, "argv");
-            auto *kwSplatFlag = llvm::ConstantInt::get(cs, llvm::APInt(32, flags.kw_splat ? 1 : 0));
-            return builder.CreateCall(cs.getFunction("sorbet_callSuperBlockHandler"),
-                                      {argc, argv, kwSplatFlag, blockHandler}, "rawSendResult");
-        } else {
-            // setup the inline cache
-            auto shortName = methodName.shortName(cs);
-            auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(shortName), flags, 1, {});
-
-            // Push receiver and the splat array.
-            // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
-            // is actually the first arg of the callWithSplat intrinsic method.
-            auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
-            Payload::pushRubyStackVector(cs, builder, cfp,
-                                         Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId),
-                                         {splatArray});
-
-            return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
+            return Payload::callSuperFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
         }
+        return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -790,6 +764,50 @@ public:
     }
 } ClassIntrinsic;
 
+class BangIntrinsic : public NameBasedIntrinsicMethod {
+public:
+    BangIntrinsic() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        if (mcctx.send->args.size() != 0) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        }
+
+        auto &cs = mcctx.cs;
+        auto &builder = mcctx.builder;
+        auto *callCache = mcctx.getInlineCache();
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *recv = mcctx.varGetRecv();
+        return builder.CreateCall(cs.getFunction("sorbet_vm_bang"), {callCache, cfp, recv});
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::bang()};
+    }
+} BangIntrinsic;
+
+class FreezeIntrinsic : public NameBasedIntrinsicMethod {
+public:
+    FreezeIntrinsic() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {}
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        if (!mcctx.send->args.empty()) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        }
+
+        auto &cs = mcctx.cs;
+        auto &builder = mcctx.builder;
+        auto *callCache = mcctx.getInlineCache();
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *recv = mcctx.varGetRecv();
+        return builder.CreateCall(cs.getFunction("sorbet_vm_freeze"), {callCache, cfp, recv});
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::freeze()};
+    }
+} FreezeIntrinsic;
+
 class IsAIntrinsic : public NameBasedIntrinsicMethod {
 public:
     IsAIntrinsic() : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled} {};
@@ -875,7 +893,6 @@ static const vector<CallCMethod> knownCMethods{
      core::Symbols::String()},
     {core::Names::selfNew(), "sorbet_selfNew", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {core::Names::blockBreak(), "sorbet_block_break", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {core::Names::bang(), "sorbet_bang", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
     {core::Names::nil_p(), "sorbet_nil_p", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
     {core::Names::checkMatchArray(), "sorbet_check_match_array", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::ClassOrModuleRef()},
@@ -908,7 +925,7 @@ vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
         &DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic,     &CallWithBlock,           &ExceptionRetry,
         &BuildHash,          &CallWithSplat,        &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic, &DefinedClassVar,
         &DefinedInstanceVar, &NewIntrinsic,         &InstanceVariableGet,   &InstanceVariableSet,     &ClassIntrinsic,
-        &IsAIntrinsic};
+        &BangIntrinsic,      &FreezeIntrinsic,      &IsAIntrinsic};
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }

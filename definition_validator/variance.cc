@@ -110,7 +110,7 @@ private:
                                     members.size(), params.size()));
 
                 for (int i = 0; i < members.size(); ++i) {
-                    auto memberVariance = members[i].data(ctx)->variance();
+                    auto memberVariance = members[i].asTypeMemberRef().data(ctx)->variance();
                     auto typeArg = params[i];
 
                     // The polarity used to check the parameter is negated
@@ -148,8 +148,7 @@ private:
                         }
                     } else {
                         if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::InvalidVariance)) {
-                            auto flavor =
-                                paramData->owner.data(ctx)->isSingletonClass(ctx) ? "type_template" : "type_member";
+                            auto flavor = paramData->owner.isSingletonClass(ctx) ? "type_template" : "type_member";
 
                             auto paramName = paramData->name.show(ctx);
 
@@ -164,12 +163,12 @@ private:
             },
 
             [&](const core::AliasType &alias) {
-                auto aliasSym = alias.symbol.data(ctx)->dealias(ctx);
+                auto aliasSym = alias.symbol.dealias(ctx);
 
                 // This can be introduced by `module_function`, which in its
                 // current implementation will alias an instance method as a
                 // class method.
-                if (aliasSym.data(ctx)->isMethod()) {
+                if (aliasSym.isMethod()) {
                     validateMethod(ctx, polarity, aliasSym.asMethodRef());
                 } else {
                     Exception::raise("Unexpected type alias: {}", type.toString(ctx));

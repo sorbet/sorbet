@@ -96,7 +96,9 @@ void UnresolvedConstantLit::_sanityCheck() {
     ENFORCE(cnst.exists());
 }
 
-void ConstantLit::_sanityCheck() {}
+void ConstantLit::_sanityCheck() {
+    ENFORCE(resolutionScopes == nullptr || !resolutionScopes->empty());
+}
 
 void EmptyTree::_sanityCheck() {}
 
@@ -189,8 +191,21 @@ void Retry::_sanityCheck() {}
 void Send::_sanityCheck() {
     ENFORCE(recv);
     ENFORCE(fun.exists());
-    ENFORCE(numPosArgs <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs,
+    ENFORCE(numPosArgs_ <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs_,
             args.size());
+
+    if (hasBlock() || hasKwArgs()) {
+        ENFORCE(args.size() > numPosArgs_);
+    }
+
+    if (hasBlock()) {
+        ENFORCE(block() != nullptr);
+    }
+
+    const int end = args.size() - (hasBlock() ? 1 : 0);
+    for (int i = 0; i < end; i++) {
+        ENFORCE(args[i].tag() != ast::Tag::Block);
+    }
 
     for (auto &node : args) {
         ENFORCE(node);

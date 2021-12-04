@@ -26,11 +26,26 @@ using namespace std;
 namespace sorbet::compiler {
 namespace {
 
+llvm::Value *tryNameBasedIntrinsic(MethodCallContext &mcctx) {
+    for (auto nameBasedIntrinsic : NameBasedIntrinsicMethod::definedIntrinsics()) {
+        if (!absl::c_linear_search(nameBasedIntrinsic->applicableMethods(mcctx.cs), mcctx.send->fun)) {
+            continue;
+        }
+
+        if (mcctx.blk.has_value() && nameBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Unhandled) {
+            continue;
+        }
+
+        return nameBasedIntrinsic->makeCall(mcctx);
+    }
+    return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+}
+
 llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
     // TODO(trevor) we could probably handle methods wih block args as well, by passing the block handler through the
     // current ruby execution context.
     if (mcctx.blk.has_value()) {
-        return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        return tryNameBasedIntrinsic(mcctx);
     }
 
     // NOTE: if we don't see a final call to another compiled method, we skip this optimization as it would just degrade
@@ -39,7 +54,7 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
     auto recvType = mcctx.send->recv.type;
     auto finalInfo = IREmitterHelpers::isFinalMethod(cs, recvType, mcctx.send->fun);
     if (!finalInfo.has_value()) {
-        return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        return tryNameBasedIntrinsic(mcctx);
     }
 
     // If the wrapper is defined in another file, this will be resolved by the runtime linker.
@@ -57,7 +72,7 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
     auto *afterFinalCall = llvm::BasicBlock::Create(cs, llvm::Twine("afterFinalCall_") + methodName,
                                                     builder.GetInsertBlock()->getParent());
 
-    auto *typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(finalInfo->recv));
+    auto *typeTest = Payload::typeTest(cs, builder, recv, finalInfo->recv);
     builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastFinalCall, slowFinalCall);
 
     // fast path: emit a direct call
@@ -92,21 +107,6 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
     phi->addIncoming(slowPathResult, slowPathEnd);
 
     return phi;
-}
-
-llvm::Value *tryNameBasedIntrinsic(MethodCallContext &mcctx) {
-    for (auto nameBasedIntrinsic : NameBasedIntrinsicMethod::definedIntrinsics()) {
-        if (!absl::c_linear_search(nameBasedIntrinsic->applicableMethods(mcctx.cs), mcctx.send->fun)) {
-            continue;
-        }
-
-        if (mcctx.blk.has_value() && nameBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Unhandled) {
-            continue;
-        }
-
-        return nameBasedIntrinsic->makeCall(mcctx);
-    }
-    return tryFinalMethodCall(mcctx);
 }
 
 // We want at least inline storage for one intrinsic so we don't allocate during
@@ -200,7 +200,7 @@ llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
             builder.SetInsertPoint(alternative);
         }
     }
-    auto slowPathRes = tryNameBasedIntrinsic(mcctx);
+    auto slowPathRes = tryFinalMethodCall(mcctx);
     auto slowPathEnd = builder.GetInsertBlock();
     builder.CreateBr(afterSend);
     builder.SetInsertPoint(afterSend);
@@ -397,17 +397,55 @@ RubyStackArgs IREmitterHelpers::buildSendArgs(MethodCallContext &mcctx, cfg::Loc
     return RubyStackArgs(std::move(stack), std::move(keywords), flags);
 }
 
+namespace {
+
+llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx) {
+    auto &cs = mcctx.cs;
+    auto &builder = mcctx.builder;
+    auto &irctx = mcctx.irctx;
+    auto rubyBlockId = mcctx.rubyBlockId;
+    auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
+
+    auto &stack = mcctx.getStackArgs().stack;
+    auto *cache = mcctx.getInlineCache();
+    auto *recv = mcctx.varGetRecv();
+
+    vector<llvm::Value *> args;
+    args.emplace_back(cache);
+
+    if (auto *blk = mcctx.blkAsFunction()) {
+        auto blkId = mcctx.blk.value();
+        args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(irctx.blockUsesBreak[blkId]))));
+        auto *blkIfunc = Payload::getOrBuildBlockIfunc(cs, builder, irctx, blkId);
+        args.emplace_back(blkIfunc);
+    } else {
+        args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(false))));
+        auto *vmIfuncType = llvm::StructType::getTypeByName(cs, "struct.vm_ifunc");
+        args.emplace_back(llvm::ConstantPointerNull::get(llvm::PointerType::getUnqual(vmIfuncType)));
+    }
+    auto *searchSuper =
+        llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(mcctx.send->fun == core::Names::super())));
+    args.emplace_back(searchSuper);
+    args.emplace_back(cfp);
+    args.emplace_back(recv);
+    for (auto *arg : stack) {
+        args.emplace_back(arg);
+    }
+
+    // TODO(neil), RUBYLANG-338: add methodName as a phantom arg to sorbet_i_send
+    return builder.CreateCall(cs.getFunction("sorbet_i_send"), llvm::ArrayRef(args));
+}
+
+} // namespace
+
 llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx) {
     auto &cs = mcctx.cs;
     auto &builder = mcctx.builder;
     auto &irctx = mcctx.irctx;
     auto *send = mcctx.send;
 
-    // If we get here with <Magic>, then something has gone wrong.
-    // TODO(froydnj): We want to do the same thing with Sorbet::Private::Static,
-    // but we'd need to do some surgery on either a) making those methods not
-    // be emitted via symbol-based intrinsics or b) making it possible for
-    // (some) symbol-based intrinsics to bypass typechecks completely.
+    // If we get here with <Magic> or Sorbet::Private::Static, then something has
+    // gone wrong.
     if (auto *at = core::cast_type<core::AppliedType>(send->recv.type)) {
         if (at->klass == core::Symbols::MagicSingleton()) {
             failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
@@ -417,30 +455,6 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
             failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
                             "No runtime implementation for Sorbet::Private::Static method exists");
         }
-    }
-
-    // TODO(perf): call
-    // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
-    // to get inline caching.
-    // before this, perf will not be good
-    if (send->fun == core::Names::super()) {
-        // fill in args
-        auto args = IREmitterHelpers::fillSendArgArray(mcctx);
-
-        if (auto *blk = mcctx.blkAsFunction()) {
-            // blocks require a locals offset parameter
-            llvm::Value *localsOffset = Payload::buildLocalsOffset(cs);
-            ENFORCE(localsOffset != nullptr);
-            auto arity = irctx.rubyBlockArity[mcctx.blk.value()];
-            auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
-            auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
-            return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
-                                      {args.argc, args.argv, args.kw_splat, blk, blkMinArgs, blkMaxArgs, localsOffset},
-                                      "rawSendResult");
-        }
-
-        return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {args.argc, args.argv, args.kw_splat},
-                                  "rawSendResult");
     }
 
     // Try to call blocks directly without reifying the block into a proc.
@@ -510,46 +524,6 @@ llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, llvm::IRBuilde
     }
 
     return cache;
-}
-
-llvm::Value *IREmitterHelpers::callViaRubyVMSimple(MethodCallContext &mcctx) {
-    auto &cs = mcctx.cs;
-    auto &builder = mcctx.builder;
-    auto &irctx = mcctx.irctx;
-    auto rubyBlockId = mcctx.rubyBlockId;
-    auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
-
-    auto &stack = mcctx.getStackArgs().stack;
-    auto *cache = mcctx.getInlineCache();
-    auto *recv = mcctx.varGetRecv();
-
-    auto *closure = Payload::buildLocalsOffset(mcctx.cs);
-    vector<llvm::Value *> args;
-    args.emplace_back(cache);
-
-    if (auto *blk = mcctx.blkAsFunction()) {
-        auto blkId = mcctx.blk.value();
-        args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(irctx.blockUsesBreak[blkId]))));
-        args.emplace_back(blk);
-
-        auto &arity = irctx.rubyBlockArity[mcctx.blk.value()];
-        args.emplace_back(IREmitterHelpers::buildS4(cs, arity.min));
-        args.emplace_back(IREmitterHelpers::buildS4(cs, arity.max));
-    } else {
-        args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(false))));
-        args.emplace_back(llvm::ConstantPointerNull::get(llvm::PointerType::getUnqual(cs.getRubyBlockFFIType())));
-        args.emplace_back(IREmitterHelpers::buildS4(cs, 0));
-        args.emplace_back(IREmitterHelpers::buildS4(cs, 0));
-    }
-    args.emplace_back(closure);
-    args.emplace_back(cfp);
-    args.emplace_back(recv);
-    for (auto *arg : stack) {
-        args.emplace_back(arg);
-    }
-
-    // TODO(neil), RUBYLANG-338: add methodName as a phantom arg to sorbet_i_send
-    return builder.CreateCall(cs.getFunction("sorbet_i_send"), llvm::ArrayRef(args));
 }
 
 } // namespace sorbet::compiler

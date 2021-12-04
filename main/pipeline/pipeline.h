@@ -34,13 +34,15 @@ ast::ParsedFilesOrCancelled name(core::GlobalState &gs, std::vector<ast::ParsedF
                                  WorkerPool &workers);
 
 // Note: `cancelable` and `preemption task manager` are only applicable to LSP.
-ast::ParsedFilesOrCancelled
-typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
-          WorkerPool &workers, bool cancelable = false,
-          std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
-          bool presorted = false);
+// If `intentionallyLeakASTs` is `true`, typecheck will leak the ASTs rather than pay the cost of deleting them
+// properly, which is a significant speedup on large codebases.
+void typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
+               WorkerPool &workers, bool cancelable = false,
+               std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
+               bool presorted = false, bool intentionallyLeakASTs = false);
 
-ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts);
+void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,
+                  bool intentionallyLeakASTs = false);
 
 core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
                                     const options::Options &opts);

@@ -173,7 +173,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
     auto desugaredBody = desugarBody(dctx, loc, blockBody, std::move(destructures));
 
     // TODO the send->block's loc is too big and includes the whole send
-    send->block = MK::Block(loc, std::move(desugaredBody), std::move(args));
+    send->setBlock(MK::Block(loc, std::move(desugaredBody), std::move(args)));
     return res;
 }
 
@@ -515,20 +515,22 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
     //
     // This means we'll always need statements for as many arguments as the send has, plus two more: one for the
     // temporary assignment and the last for the actual update we're desugaring.
+    ENFORCE(!s->hasKwArgs() && !s->hasBlock());
+    const auto numPosArgs = s->numPosArgs();
     InsSeq::STATS_store stats;
-    stats.reserve(s->args.size() + 2);
+    stats.reserve(numPosArgs + 2);
     core::NameRef tempRecv = dctx.freshNameUnique(s->fun);
     stats.emplace_back(MK::Assign(s->loc, tempRecv, std::move(s->recv)));
     Send::ARGS_store readArgs;
     Send::ARGS_store assgnArgs;
     // these are the arguments for the first send, e.g. x.y(). The number of arguments should be identical to whatever
     // we saw on the LHS.
-    readArgs.reserve(s->args.size());
+    readArgs.reserve(numPosArgs);
     // these are the arguments for the second send, e.g. x.y=(val). That's why we need the space for the extra argument
     // here: to accomodate the call to field= instead of just field.
-    assgnArgs.reserve(s->args.size() + 1);
+    assgnArgs.reserve(numPosArgs + 1);
 
-    for (auto &arg : s->args) {
+    for (auto &arg : s->posArgs()) {
         auto argLoc = arg.loc();
         core::NameRef name = dctx.freshNameUnique(s->fun);
         stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));
@@ -536,7 +538,7 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
         assgnArgs.emplace_back(MK::Local(argLoc, name));
     }
 
-    return {tempRecv, std::move(stats), s->numPosArgs, std::move(readArgs), std::move(assgnArgs)};
+    return {tempRecv, std::move(stats), numPosArgs, std::move(readArgs), std::move(assgnArgs)};
 }
 
 // while true
@@ -777,7 +779,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         Literal *lit;
                         if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol(dctx.ctx)) {
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
-                                           4, std::move(sendargs), flags, symbol2Proc(dctx, std::move(convertedBlock)));
+                                           4, std::move(sendargs), flags);
+                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(
+                                symbol2Proc(dctx, std::move(convertedBlock)));
                         } else {
                             sendargs.emplace_back(std::move(convertedBlock));
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()),
@@ -846,8 +850,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         auto convertedBlock = node2TreeImpl(dctx, std::move(block));
                         Literal *lit;
                         if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol(dctx.ctx)) {
-                            res = MK::Send(loc, std::move(rec), send->method, numPosArgs, std::move(args), flags,
-                                           symbol2Proc(dctx, std::move(convertedBlock)));
+                            res = MK::Send(loc, std::move(rec), send->method, numPosArgs, std::move(args), flags);
+                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(
+                                symbol2Proc(dctx, std::move(convertedBlock)));
                         } else {
                             Send::ARGS_store sendargs;
                             sendargs.emplace_back(std::move(rec));

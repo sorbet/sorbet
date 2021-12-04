@@ -18,6 +18,7 @@ ClassDef{
         }]
       rhs = [
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -36,6 +37,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -44,6 +46,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {privateOk}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -52,6 +55,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U T>>
                     scope = EmptyTree
@@ -75,6 +79,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -94,6 +99,7 @@ ClassDef{
         name = <U a>
       }
       rhs = Send{
+        flags = {}
         recv = UnresolvedConstantLit{
           cnst = <C <U A>>
           scope = EmptyTree
@@ -124,6 +130,7 @@ ClassDef{
             name = <D <U value> $3>
           }
           rhs = Send{
+            flags = {}
             recv = UnresolvedIdent{
               kind = Local
               name = <D <U value> $2>
@@ -142,6 +149,7 @@ ClassDef{
           name = <D <U value> $3>
         }
         thenp = Send{
+          flags = {}
           recv = UnresolvedIdent{
             kind = Local
             name = <D <U value> $2>
@@ -178,6 +186,7 @@ ClassDef{
             name = <D <U value> $5>
           }
           rhs = Send{
+            flags = {}
             recv = UnresolvedIdent{
               kind = Local
               name = <D <U value> $4>
@@ -200,6 +209,7 @@ ClassDef{
           name = <D <U value> $5>
         }
         elsep = Send{
+          flags = {}
           recv = UnresolvedIdent{
             kind = Local
             name = <D <U value> $4>

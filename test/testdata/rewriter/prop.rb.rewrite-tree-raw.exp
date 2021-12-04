@@ -16,6 +16,7 @@ ClassDef{
       rhs = InsSeq{
         stats = [
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -25,7 +26,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U SomeODM>>
                     scope = EmptyTree
@@ -45,6 +48,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -54,7 +58,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U SomeODM>>
                     scope = EmptyTree
@@ -75,6 +81,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -84,7 +91,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U SomeODM>>
                     scope = EmptyTree
@@ -104,6 +113,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -113,7 +123,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U SomeODM>>
                     scope = EmptyTree
@@ -134,6 +146,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -143,7 +156,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U AdvancedODM>>
                     scope = EmptyTree
@@ -163,6 +178,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -172,7 +188,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U AdvancedODM>>
                     scope = EmptyTree
@@ -192,6 +210,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -201,7 +220,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U AdvancedODM>>
                     scope = EmptyTree
@@ -221,6 +242,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -230,7 +252,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U AdvancedODM>>
                     scope = EmptyTree
@@ -250,6 +274,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -259,7 +284,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U AdvancedODM>>
                     scope = EmptyTree
@@ -279,7 +306,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U AdvancedODM>>
                 scope = EmptyTree
@@ -298,6 +327,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -307,7 +337,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U AdvancedODM>>
                     scope = EmptyTree
@@ -327,7 +359,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U AdvancedODM>>
                 scope = EmptyTree
@@ -346,6 +380,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -355,7 +390,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U AdvancedODM>>
                     scope = EmptyTree
@@ -375,7 +412,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U AdvancedODM>>
                 scope = EmptyTree
@@ -394,6 +433,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -403,7 +443,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U AdvancedODM>>
                     scope = EmptyTree
@@ -423,6 +465,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -432,7 +475,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U AdvancedODM>>
                     scope = EmptyTree
@@ -452,6 +497,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -461,7 +507,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U AdvancedODM>>
                     scope = EmptyTree
@@ -481,7 +529,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U AdvancedODM>>
                 scope = EmptyTree
@@ -499,6 +549,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -508,7 +559,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U PropHelpers>>
                     scope = EmptyTree
@@ -528,7 +581,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U PropHelpers>>
                 scope = EmptyTree
@@ -547,7 +602,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U PropHelpers>>
                 scope = EmptyTree
@@ -566,6 +623,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -575,7 +633,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U PropHelpers>>
                     scope = EmptyTree
@@ -595,7 +655,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U PropHelpers>>
                 scope = EmptyTree
@@ -614,7 +676,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U PropHelpers>>
                 scope = EmptyTree
@@ -633,6 +697,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -642,7 +707,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U PropHelpers2>>
                     scope = EmptyTree
@@ -662,7 +729,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U PropHelpers2>>
                 scope = EmptyTree
@@ -681,7 +750,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U PropHelpers2>>
                 scope = EmptyTree
@@ -700,6 +771,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -709,7 +781,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U PropHelpers2>>
                     scope = EmptyTree
@@ -729,7 +803,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U PropHelpers2>>
                 scope = EmptyTree
@@ -748,6 +824,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -757,7 +834,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U EncryptedProp>>
                     scope = EmptyTree
@@ -777,6 +856,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -786,7 +866,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U EncryptedProp>>
                     scope = EmptyTree
@@ -806,7 +888,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U EncryptedProp>>
                 scope = EmptyTree
@@ -825,7 +909,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U EncryptedProp>>
                 scope = EmptyTree
@@ -844,7 +930,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U EncryptedProp>>
                 scope = EmptyTree
@@ -863,6 +951,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -872,7 +961,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U AdvancedODM>>
                     scope = EmptyTree
@@ -892,6 +983,7 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -901,7 +993,9 @@ ClassDef{
             pos_args = 1
             args = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U AdvancedODM>>
                     scope = EmptyTree
@@ -921,7 +1015,9 @@ ClassDef{
             ]
           }
           Send{
+            flags = {}
             recv = Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U AdvancedODM>>
                 scope = EmptyTree
@@ -941,7 +1037,9 @@ ClassDef{
           }
         ],
         expr = Send{
+          flags = {}
           recv = Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U AdvancedODM>>
               scope = EmptyTree
@@ -987,6 +1085,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1004,6 +1103,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -1015,6 +1115,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -1028,6 +1129,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -1044,6 +1146,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -1061,6 +1164,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -1082,6 +1186,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -1099,6 +1204,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -1108,6 +1214,7 @@ ClassDef{
           args = [
             Literal{ value = :day }
             Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U IntegerParam>>
                 scope = EmptyTree
@@ -1126,6 +1233,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -1135,6 +1243,7 @@ ClassDef{
           args = [
             Literal{ value = :name }
             Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U StringParam>>
                 scope = EmptyTree
@@ -1149,6 +1258,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -1158,6 +1268,7 @@ ClassDef{
           args = [
             Literal{ value = :how_many }
             Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U CaseParam>>
                 scope = UnresolvedConstantLit{
@@ -1173,6 +1284,7 @@ ClassDef{
               pos_args = 2
               args = [
                 Send{
+                  flags = {privateOk}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -1183,6 +1295,7 @@ ClassDef{
                   ]
                 }
                 Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U ParamSpecsParam>>
                     scope = UnresolvedConstantLit{
@@ -1209,6 +1322,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -1218,6 +1332,7 @@ ClassDef{
           args = [
             Literal{ value = :optional_param }
             Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U IntegerParam>>
                 scope = EmptyTree
@@ -1245,6 +1360,7 @@ ClassDef{
         }]
       rhs = [
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1254,6 +1370,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -1278,7 +1395,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foo><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -1292,6 +1409,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -1305,8 +1423,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -1340,6 +1461,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1349,7 +1471,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -1385,7 +1509,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foo=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -1397,7 +1521,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -1420,6 +1546,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -1438,6 +1565,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1447,6 +1575,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {privateOk}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -1455,6 +1584,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U T>>
                     scope = EmptyTree
@@ -1488,6 +1618,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1497,6 +1628,7 @@ ClassDef{
             pos_args = 2
             args = [
               Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U T>>
                   scope = EmptyTree
@@ -1509,6 +1641,7 @@ ClassDef{
                 ]
               }
               Send{
+                flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U T>>
                   scope = EmptyTree
@@ -1528,6 +1661,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1537,7 +1671,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {privateOk}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -1582,6 +1718,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {}
             recv = UnresolvedConstantLit{
               cnst = <C <U T>>
               scope = EmptyTree
@@ -1600,6 +1737,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -1618,6 +1756,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -1636,6 +1775,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -1654,6 +1794,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1671,6 +1812,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1688,6 +1830,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1705,6 +1848,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1749,6 +1893,7 @@ ClassDef{
         }]
       rhs = [
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1758,6 +1903,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -1782,7 +1928,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U default><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -1796,6 +1942,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -1809,8 +1956,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -1844,6 +1994,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1853,7 +2004,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -1889,7 +2042,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U default=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -1901,7 +2054,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -1924,6 +2079,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -1942,6 +2098,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -1951,6 +2108,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -1959,6 +2117,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U T>>
                     scope = EmptyTree
@@ -1986,7 +2145,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U t_nilable><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -2000,6 +2159,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -2013,8 +2173,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -2048,6 +2211,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2057,7 +2221,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -2067,6 +2233,7 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   Send{
+                    flags = {}
                     recv = UnresolvedConstantLit{
                       cnst = <C <U T>>
                       scope = EmptyTree
@@ -2088,6 +2255,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U T>>
                     scope = EmptyTree
@@ -2115,7 +2283,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U t_nilable=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -2127,7 +2295,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -2150,6 +2320,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -2168,6 +2339,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2177,6 +2349,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -2201,7 +2374,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U array><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -2215,6 +2388,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -2228,8 +2402,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -2263,6 +2440,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2272,7 +2450,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -2308,7 +2488,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U array=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -2320,7 +2500,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -2343,6 +2525,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -2361,6 +2544,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2370,6 +2554,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -2378,6 +2563,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U Array>>
                     scope = UnresolvedConstantLit{
@@ -2408,7 +2594,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U t_array><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -2422,6 +2608,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -2435,8 +2622,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -2470,6 +2660,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2479,7 +2670,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -2489,6 +2682,7 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   Send{
+                    flags = {}
                     recv = UnresolvedConstantLit{
                       cnst = <C <U Array>>
                       scope = UnresolvedConstantLit{
@@ -2513,6 +2707,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U Array>>
                     scope = UnresolvedConstantLit{
@@ -2543,7 +2738,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U t_array=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -2555,7 +2750,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -2578,6 +2775,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -2596,6 +2794,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2605,6 +2804,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -2613,6 +2813,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U Hash>>
                     scope = UnresolvedConstantLit{
@@ -2647,7 +2848,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U hash_of><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -2661,6 +2862,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -2674,8 +2876,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -2709,6 +2914,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2718,7 +2924,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -2728,6 +2936,7 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   Send{
+                    flags = {}
                     recv = UnresolvedConstantLit{
                       cnst = <C <U Hash>>
                       scope = UnresolvedConstantLit{
@@ -2756,6 +2965,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U Hash>>
                     scope = UnresolvedConstantLit{
@@ -2790,7 +3000,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U hash_of=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -2802,7 +3012,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -2825,6 +3037,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -2843,6 +3056,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2852,6 +3066,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -2876,7 +3091,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U const_explicit><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -2890,6 +3105,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -2903,8 +3119,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -2938,6 +3157,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -2947,6 +3167,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -2971,7 +3192,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U const><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -2985,6 +3206,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -2998,8 +3220,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -3033,6 +3258,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3042,6 +3268,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -3066,7 +3293,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U enum_prop><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3080,6 +3307,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -3093,8 +3321,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -3128,6 +3359,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3137,7 +3369,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -3173,7 +3407,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U enum_prop=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -3183,7 +3417,9 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -3208,6 +3444,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3217,6 +3454,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -3241,7 +3479,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3255,6 +3493,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -3268,8 +3507,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -3303,6 +3545,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3312,7 +3555,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -3348,7 +3593,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -3360,7 +3605,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -3383,6 +3630,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -3401,6 +3649,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3410,7 +3659,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -3420,6 +3671,7 @@ ClassDef{
                 args = [
                   Literal{ value = :opts }
                   Send{
+                    flags = {}
                     recv = ConstantLit{
                       symbol = (module ::T)
                       orig = nullptr
@@ -3437,6 +3689,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T)
                     orig = nullptr
@@ -3464,7 +3717,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign_><<U <todo method>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3474,7 +3727,9 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -3499,6 +3754,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3508,7 +3764,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -3518,6 +3776,7 @@ ClassDef{
                 args = [
                   Literal{ value = :opts }
                   Send{
+                    flags = {}
                     recv = ConstantLit{
                       symbol = (module ::T)
                       orig = nullptr
@@ -3551,7 +3810,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign_!><<U <todo method>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3561,7 +3820,9 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -3586,6 +3847,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3595,6 +3857,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -3619,7 +3882,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign_lazy><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3633,6 +3896,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -3646,8 +3910,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -3681,6 +3948,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3690,7 +3958,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -3726,7 +3996,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign_lazy=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -3738,7 +4008,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -3761,6 +4033,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -3779,6 +4052,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3788,7 +4062,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -3798,6 +4074,7 @@ ClassDef{
                 args = [
                   Literal{ value = :opts }
                   Send{
+                    flags = {}
                     recv = ConstantLit{
                       symbol = (module ::T)
                       orig = nullptr
@@ -3815,6 +4092,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T)
                     orig = nullptr
@@ -3842,7 +4120,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign_lazy_><<U <todo method>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3852,7 +4130,9 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -3877,6 +4157,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3886,7 +4167,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -3896,6 +4179,7 @@ ClassDef{
                 args = [
                   Literal{ value = :opts }
                   Send{
+                    flags = {}
                     recv = ConstantLit{
                       symbol = (module ::T)
                       orig = nullptr
@@ -3929,7 +4213,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign_lazy_!><<U <todo method>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3939,7 +4223,9 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -3964,6 +4250,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -3973,6 +4260,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -3997,7 +4285,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign_proc><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4011,6 +4299,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -4024,8 +4313,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -4059,6 +4351,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4068,7 +4361,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -4104,7 +4399,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign_proc=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -4116,7 +4411,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -4139,6 +4436,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -4157,6 +4455,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4166,7 +4465,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -4176,6 +4477,7 @@ ClassDef{
                 args = [
                   Literal{ value = :opts }
                   Send{
+                    flags = {}
                     recv = ConstantLit{
                       symbol = (module ::T)
                       orig = nullptr
@@ -4193,6 +4495,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T)
                     orig = nullptr
@@ -4220,7 +4523,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign_proc_><<U <todo method>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4230,7 +4533,9 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -4255,6 +4560,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4264,7 +4570,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -4274,6 +4582,7 @@ ClassDef{
                 args = [
                   Literal{ value = :opts }
                   Send{
+                    flags = {}
                     recv = ConstantLit{
                       symbol = (module ::T)
                       orig = nullptr
@@ -4307,7 +4616,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign_proc_!><<U <todo method>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4317,7 +4626,9 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -4342,6 +4653,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4351,6 +4663,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -4375,7 +4688,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign_invalid><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4389,6 +4702,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -4402,8 +4716,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -4437,6 +4754,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4446,7 +4764,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -4482,7 +4802,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign_invalid=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -4494,7 +4814,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -4517,6 +4839,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -4535,6 +4858,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4544,7 +4868,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -4554,6 +4880,7 @@ ClassDef{
                 args = [
                   Literal{ value = :opts }
                   Send{
+                    flags = {}
                     recv = ConstantLit{
                       symbol = (module ::T)
                       orig = nullptr
@@ -4571,6 +4898,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T)
                     orig = nullptr
@@ -4594,7 +4922,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign_invalid_><<U <todo method>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4604,7 +4932,9 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -4629,6 +4959,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4638,7 +4969,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -4648,6 +4981,7 @@ ClassDef{
                 args = [
                   Literal{ value = :opts }
                   Send{
+                    flags = {}
                     recv = ConstantLit{
                       symbol = (module ::T)
                       orig = nullptr
@@ -4665,6 +4999,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T)
                     orig = nullptr
@@ -4688,7 +5023,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foreign_invalid_!><<U <todo method>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4698,7 +5033,9 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -4723,6 +5060,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4732,6 +5070,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -4756,14 +5095,16 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U ifunset><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -4788,6 +5129,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4797,7 +5139,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -4833,7 +5177,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U ifunset=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -4845,7 +5189,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -4868,6 +5214,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -4886,6 +5233,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4895,6 +5243,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -4903,6 +5252,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U T>>
                     scope = EmptyTree
@@ -4930,14 +5280,16 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U ifunset_nilable><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -4962,6 +5314,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -4971,7 +5324,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -4981,6 +5336,7 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   Send{
+                    flags = {}
                     recv = UnresolvedConstantLit{
                       cnst = <C <U T>>
                       scope = EmptyTree
@@ -5002,6 +5358,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = UnresolvedConstantLit{
                     cnst = <C <U T>>
                     scope = EmptyTree
@@ -5029,7 +5386,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U ifunset_nilable=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -5041,7 +5398,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -5064,6 +5423,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -5082,6 +5442,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5091,6 +5452,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -5115,7 +5477,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U empty_hash_rules><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -5129,6 +5491,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -5142,8 +5505,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -5177,6 +5543,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5186,7 +5553,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -5222,7 +5591,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U empty_hash_rules=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -5234,7 +5603,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -5257,6 +5628,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -5275,6 +5647,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5284,6 +5657,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -5308,7 +5682,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U hash_rules><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -5322,6 +5696,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -5335,8 +5710,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -5370,6 +5748,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5379,7 +5758,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -5415,7 +5796,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U hash_rules=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -5425,7 +5806,9 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -5450,6 +5833,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -5468,6 +5852,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -5488,6 +5873,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5505,6 +5891,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5522,6 +5909,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -5531,6 +5919,7 @@ ClassDef{
           args = [
             Literal{ value = :t_nilable }
             Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U T>>
                 scope = EmptyTree
@@ -5551,6 +5940,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5568,6 +5958,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5585,6 +5976,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -5603,6 +5995,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5620,6 +6013,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5637,6 +6031,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -5646,6 +6041,7 @@ ClassDef{
           args = [
             Literal{ value = :t_array }
             Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Array>>
                 scope = UnresolvedConstantLit{
@@ -5669,6 +6065,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5686,6 +6083,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5703,6 +6101,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -5712,6 +6111,7 @@ ClassDef{
           args = [
             Literal{ value = :hash_of }
             Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Hash>>
                 scope = UnresolvedConstantLit{
@@ -5739,6 +6139,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5756,6 +6157,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5773,6 +6175,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -5793,6 +6196,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5810,6 +6214,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -5828,6 +6233,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5845,6 +6251,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -5870,6 +6277,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5887,6 +6295,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5904,6 +6313,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -5927,6 +6337,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5944,6 +6355,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -5961,6 +6373,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -5975,6 +6388,7 @@ ClassDef{
             }
             Literal{ value = :foreign }
             Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U Kernel>>
                 scope = EmptyTree
@@ -5998,6 +6412,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6015,6 +6430,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6032,6 +6448,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -6046,6 +6463,7 @@ ClassDef{
             }
             Literal{ value = :foreign }
             Send{
+              flags = {privateOk}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -6068,6 +6486,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6085,6 +6504,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6102,6 +6522,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -6116,6 +6537,7 @@ ClassDef{
             }
             Literal{ value = :foreign }
             Send{
+              flags = {privateOk}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -6135,6 +6557,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6152,6 +6575,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6169,6 +6593,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -6189,6 +6614,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6206,6 +6632,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6223,6 +6650,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -6232,6 +6660,7 @@ ClassDef{
           args = [
             Literal{ value = :ifunset_nilable }
             Send{
+              flags = {}
               recv = UnresolvedConstantLit{
                 cnst = <C <U T>>
                 scope = EmptyTree
@@ -6254,6 +6683,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6271,6 +6701,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6288,6 +6719,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -6312,6 +6744,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6329,6 +6762,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6346,6 +6780,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -6379,6 +6814,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6396,6 +6832,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6464,6 +6901,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6473,6 +6911,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -6497,7 +6936,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U token><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -6511,6 +6950,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -6524,8 +6964,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -6559,6 +7002,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6568,7 +7012,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -6604,7 +7050,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U token=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -6616,7 +7062,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -6639,6 +7087,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -6657,6 +7106,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6666,6 +7116,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -6690,7 +7141,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U created><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -6704,6 +7155,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -6717,8 +7169,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -6752,6 +7207,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6761,7 +7217,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -6797,7 +7255,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U created=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -6809,7 +7267,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -6832,6 +7292,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -6850,6 +7311,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -6868,6 +7330,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6885,6 +7348,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6902,6 +7366,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -6915,6 +7380,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6932,6 +7398,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6949,6 +7416,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -6962,6 +7430,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -6979,6 +7448,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7047,6 +7517,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7056,6 +7527,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -7080,7 +7552,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U token><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -7094,6 +7566,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -7107,8 +7580,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -7142,6 +7618,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7151,7 +7628,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -7187,7 +7666,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U token=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -7199,7 +7678,9 @@ ClassDef{
           rhs = InsSeq{
             stats = [
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T::Configuration)
                     orig = nullptr
@@ -7222,6 +7703,7 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -7240,6 +7722,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7249,6 +7732,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -7273,7 +7757,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U created><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -7287,6 +7771,7 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -7300,8 +7785,11 @@ ClassDef{
               }
             ],
             expr = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Local{
                     localVariable = <U <self>>
                   }
@@ -7335,6 +7823,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -7353,6 +7842,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7370,6 +7860,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7387,6 +7878,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -7400,6 +7892,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7417,6 +7910,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7434,6 +7928,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -7449,6 +7944,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7553,6 +8049,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7562,6 +8059,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -7570,6 +8068,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T)
                     orig = nullptr
@@ -7597,14 +8096,16 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foo><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -7629,6 +8130,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7638,6 +8140,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -7646,6 +8149,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T)
                     orig = nullptr
@@ -7688,14 +8192,16 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U encrypted_foo><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -7720,6 +8226,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7729,7 +8236,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -7739,6 +8248,7 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   Send{
+                    flags = {}
                     recv = ConstantLit{
                       symbol = (module ::T)
                       orig = nullptr
@@ -7760,6 +8270,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T)
                     orig = nullptr
@@ -7787,7 +8298,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U foo=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -7797,7 +8308,9 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -7822,6 +8335,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7831,7 +8345,9 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Send{
+                flags = {}
                 recv = Local{
                   localVariable = <U <self>>
                 }
@@ -7841,6 +8357,7 @@ ClassDef{
                 args = [
                   Literal{ value = :arg0 }
                   Send{
+                    flags = {}
                     recv = ConstantLit{
                       symbol = (module ::T)
                       orig = nullptr
@@ -7877,6 +8394,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T)
                     orig = nullptr
@@ -7919,7 +8437,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U encrypted_foo=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -7929,7 +8447,9 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -7954,6 +8474,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -7963,6 +8484,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -7971,6 +8493,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T)
                     orig = nullptr
@@ -7998,14 +8521,16 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U bar><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -8030,6 +8555,7 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8039,6 +8565,7 @@ ClassDef{
             args = [
             ]
             body = Send{
+              flags = {}
               recv = Local{
                 localVariable = <U <self>>
               }
@@ -8047,6 +8574,7 @@ ClassDef{
               pos_args = 1
               args = [
                 Send{
+                  flags = {}
                   recv = ConstantLit{
                     symbol = (module ::T)
                     orig = nullptr
@@ -8089,14 +8617,16 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {rewriter}
+          flags = {rewriterSynthesized}
           name = <U encrypted_bar><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
           rhs = Send{
+            flags = {rewriterSynthesized}
             recv = Send{
+              flags = {}
               recv = ConstantLit{
                 symbol = (module ::T)
                 orig = nullptr
@@ -8121,6 +8651,7 @@ ClassDef{
         }
 
         Send{
+          flags = {privateOk}
           recv = Local{
             localVariable = <U <self>>
           }
@@ -8139,6 +8670,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8156,6 +8688,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8173,6 +8706,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8190,6 +8724,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8207,6 +8742,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8224,6 +8760,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8241,6 +8778,7 @@ ClassDef{
         }
 
         Send{
+          flags = {}
           recv = ConstantLit{
             symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
@@ -8260,6 +8798,7 @@ ClassDef{
     }
 
     Send{
+      flags = {}
       recv = ConstantLit{
         symbol = (module ::Sorbet::Private::Static)
         orig = nullptr

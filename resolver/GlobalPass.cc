@@ -20,7 +20,7 @@ core::SymbolRef dealiasAt(const core::GlobalState &gs, core::TypeMemberRef tpara
         return tparam;
     } else {
         core::ClassOrModuleRef cursor;
-        if (tparam.data(gs)->owner.data(gs)->derivesFrom(gs, klass)) {
+        if (tparam.data(gs)->owner.asClassOrModuleRef().data(gs)->derivesFrom(gs, klass)) {
             cursor = tparam.data(gs)->owner.asClassOrModuleRef();
         } else if (klass.data(gs)->derivesFrom(gs, tparam.data(gs)->owner.asClassOrModuleRef())) {
             cursor = klass;
@@ -62,7 +62,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
         return false;
     }
     if (!my.isTypeMember()) {
-        if (auto e = gs.beginError(my.data(gs)->loc(), core::errors::Resolver::NotATypeVariable)) {
+        if (auto e = gs.beginError(my.loc(gs), core::errors::Resolver::NotATypeVariable)) {
             e.setHeader("Type variable `{}` needs to be declared as `= type_member(SOMETHING)`", name.show(gs));
         }
         auto synthesizedName = gs.freshNameUnique(core::UniqueNameKind::TypeVarName, name, 1);
@@ -112,14 +112,12 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
                 core::SymbolRef my = dealiasAt(gs, tp.asTypeMemberRef(), sym, typeAliases);
                 ENFORCE(my.exists(), "resolver failed to register type member aliases");
                 if (sym.data(gs)->typeMembers()[i] != my) {
-                    if (auto e = gs.beginError(my.data(gs)->loc(), core::errors::Resolver::TypeMembersInWrongOrder)) {
+                    if (auto e = gs.beginError(my.loc(gs), core::errors::Resolver::TypeMembersInWrongOrder)) {
                         e.setHeader("Type members for `{}` repeated in wrong order", sym.show(gs));
-                        e.addErrorLine(my.data(gs)->loc(), "Found type member with name `{}`",
-                                       my.data(gs)->name.show(gs));
-                        e.addErrorLine(sym.data(gs)->typeMembers()[i].data(gs)->loc(),
-                                       "Expected type member with name `{}`",
-                                       sym.data(gs)->typeMembers()[i].data(gs)->name.show(gs));
-                        e.addErrorLine(tp.data(gs)->loc(), "`{}` defined in parent here:", tp.data(gs)->name.show(gs));
+                        e.addErrorLine(my.loc(gs), "Found type member with name `{}`", my.name(gs).show(gs));
+                        e.addErrorLine(sym.data(gs)->typeMembers()[i].loc(gs), "Expected type member with name `{}`",
+                                       sym.data(gs)->typeMembers()[i].name(gs).show(gs));
+                        e.addErrorLine(tp.loc(gs), "`{}` defined in parent here:", tp.name(gs).show(gs));
                     }
                     int foundIdx = 0;
                     while (foundIdx < sym.data(gs)->typeMembers().size() &&
@@ -145,14 +143,15 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
 
     if (sym.data(gs)->isClassOrModuleClass()) {
         for (core::SymbolRef tp : sym.data(gs)->typeMembers()) {
+            auto tm = tp.asTypeMemberRef();
             // AttachedClass is covariant, but not controlled by the user.
-            if (tp.data(gs)->name == core::Names::Constants::AttachedClass()) {
+            if (tm.data(gs)->name == core::Names::Constants::AttachedClass()) {
                 continue;
             }
 
-            auto myVariance = tp.data(gs)->variance();
+            auto myVariance = tm.data(gs)->variance();
             if (myVariance != core::Variance::Invariant) {
-                auto loc = tp.data(gs)->loc();
+                auto loc = tm.data(gs)->loc();
                 if (!loc.file().data(gs).isPayload()) {
                     if (auto e = gs.beginError(loc, core::errors::Resolver::VariantTypeMemberInClass)) {
                         e.setHeader("Classes can only have invariant type members");
@@ -172,7 +171,8 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
             // with RuntimeProfiled.
             auto attachedClass = singleton.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
             if (attachedClass.exists()) {
-                auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(gs)->resultType);
+                auto *lambdaParam =
+                    core::cast_type<core::LambdaParam>(attachedClass.asTypeMemberRef().data(gs)->resultType);
                 ENFORCE(lambdaParam != nullptr);
 
                 lambdaParam->lowerBound = core::Types::bottom();
@@ -191,7 +191,6 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     int moduleCount = 0;
     for (size_t i = 1; i < gs.methodsUsed(); ++i) {
         auto ref = core::MethodRef(gs, i);
-        ENFORCE(ref.data(gs)->isMethod());
         auto loc = ref.data(gs)->loc();
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
             methodCount++;
@@ -297,6 +296,7 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
         InlinedVector<core::ClassOrModuleRef, 4> currentMixins = data->mixins();
         InlinedVector<core::ClassOrModuleRef, 4> newMixins;
         for (auto mixin : currentMixins) {
+            ENFORCE(mixin != core::Symbols::PlaceholderMixin(), "Resolver failed to replace all placeholders");
             if (mixin == data->superClass()) {
                 continue;
             }
@@ -380,9 +380,8 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
 
         core::ClassOrModuleRef singleton;
         for (auto ancst : sym.data(gs)->mixins()) {
-            ENFORCE(ancst.data(gs)->isClassOrModule());
             // Reading the fake property created in resolver#resolveClassMethodsJob(){}
-            auto mixedInClassMethods = ancst.data(gs)->findMember(gs, core::Names::mixedInClassMethods());
+            auto mixedInClassMethods = ancst.data(gs)->findMethod(gs, core::Names::mixedInClassMethods());
             if (!mixedInClassMethods.exists()) {
                 continue;
             }

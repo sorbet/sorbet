@@ -533,13 +533,22 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
     return ret;
 }
 
-ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts) {
-    ast::ParsedFile result{ast::MK::EmptyTree(), resolved.file};
+void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,
+                  bool intentionallyLeakASTs) {
     core::FileRef f = resolved.file;
 
     if (opts.stopAfterPhase == options::Phase::NAMER) {
-        return result;
+        if (intentionallyLeakASTs) {
+            intentionallyLeakMemory(resolved.tree.release());
+        }
+        return;
     }
+
+#ifndef SORBET_REALMAIN_MIN
+    if (f.data(ctx).isPackage()) {
+        resolved = packager::Packager::removePackageModules(ctx, move(resolved), intentionallyLeakASTs);
+    }
+#endif
 
     resolved = definition_validator::runOne(ctx, std::move(resolved));
 
@@ -553,10 +562,16 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
     }
 
     if (opts.stopAfterPhase == options::Phase::RESOLVER) {
-        return result;
+        if (intentionallyLeakASTs) {
+            intentionallyLeakMemory(resolved.tree.release());
+        }
+        return;
     }
     if (f.data(ctx).isRBI()) {
-        return result;
+        if (intentionallyLeakASTs) {
+            intentionallyLeakMemory(resolved.tree.release());
+        }
+        return;
     }
 
     Timer timeit(ctx.state.tracer(), "typecheckOne", {{"file", string(f.data(ctx).path())}});
@@ -572,7 +587,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         }
         CFGCollectorAndTyper collector(opts);
         {
-            result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
+            ast::ShallowMap::apply(ctx, collector, move(resolved.tree));
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, f);
             }
@@ -589,7 +604,11 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
             e.setHeader("Exception in cfg+infer: {} (backtrace is above)", f.data(ctx).path());
         }
     }
-    return result;
+
+    if (intentionallyLeakASTs) {
+        intentionallyLeakMemory(resolved.tree.release());
+    }
+    return;
 }
 
 vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
@@ -660,9 +679,8 @@ private:
     const int prohibitedLinesEnd;
 
     bool isAllowListed(core::Context ctx, core::SymbolRef sym) {
-        return sym.data(ctx)->name == core::Names::staticInit() ||
-               sym.data(ctx)->name == core::Names::Constants::Root() ||
-               sym.data(ctx)->name == core::Names::unresolvedAncestors();
+        return sym.name(ctx) == core::Names::staticInit() || sym.name(ctx) == core::Names::Constants::Root() ||
+               sym.name(ctx) == core::Names::unresolvedAncestors();
     }
 
     void checkLoc(core::Context ctx, core::Loc loc) {
@@ -675,7 +693,7 @@ private:
         if (isAllowListed(ctx, sym)) {
             return;
         }
-        checkLoc(ctx, sym.data(ctx)->loc());
+        checkLoc(ctx, sym.loc(ctx));
     }
 
 public:
@@ -925,15 +943,14 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
     return ast::ParsedFilesOrCancelled(move(what));
 }
 
-ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                      const options::Options &opts, WorkerPool &workers, bool cancelable,
-                                      optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager,
-                                      bool presorted) {
+void typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what, const options::Options &opts,
+               WorkerPool &workers, bool cancelable,
+               optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
+               bool intentionallyLeakASTs) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.
     ENFORCE(gs->hadCriticalError() || gs->errorQueue->filesFlushedCount == 0);
 
-    vector<ast::ParsedFile> typecheck_result;
     const auto &epochManager = *gs->epochManager;
     // Record epoch at start of typechecking before any preemption occurs.
     const u4 epoch = epochManager.getStatus().epoch;
@@ -946,11 +963,11 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         }
 
         shared_ptr<ConcurrentBoundedQueue<ast::ParsedFile>> fileq;
-        shared_ptr<BlockingBoundedQueue<vector<ast::ParsedFile>>> treesq;
+        shared_ptr<BlockingBoundedQueue<vector<core::FileRef>>> outputq;
 
         {
             fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(what.size());
-            treesq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(what.size());
+            outputq = make_shared<BlockingBoundedQueue<vector<core::FileRef>>>(what.size());
         }
 
         const core::GlobalState &igs = *gs;
@@ -968,62 +985,61 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob(
-                "typecheck", [&igs, &opts, epoch, &epochManager, &preemptionManager, fileq, treesq, cancelable]() {
-                    vector<ast::ParsedFile> trees;
-                    ast::ParsedFile job;
-                    int processedByThread = 0;
+            workers.multiplexJob("typecheck", [&igs, &opts, epoch, &epochManager, &preemptionManager, fileq, outputq,
+                                               cancelable, intentionallyLeakASTs]() {
+                vector<core::FileRef> processedFiles;
+                ast::ParsedFile job;
+                int processedByThread = 0;
 
-                    {
-                        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                            if (result.gotItem()) {
-                                unique_ptr<absl::ReaderMutexLock> lock;
-                                if (preemptionManager) {
-                                    // [IDE] While held, no preemption tasks can run. Auto-released after each turn of
-                                    // the loop.
-                                    lock = (*preemptionManager)->lockPreemption();
+                {
+                    for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                        if (result.gotItem()) {
+                            unique_ptr<absl::ReaderMutexLock> lock;
+                            if (preemptionManager) {
+                                // [IDE] While held, no preemption tasks can run. Auto-released after each turn of
+                                // the loop.
+                                lock = (*preemptionManager)->lockPreemption();
+                            }
+                            processedByThread++;
+                            // [IDE] Only do the work if typechecking hasn't been canceled.
+                            const bool isCanceled = cancelable && epochManager.wasTypecheckingCanceled();
+                            // [IDE] Also, don't do work if the file has changed under us since we began
+                            // typechecking!
+                            // TODO(jvilk): epoch is unlikely to overflow, but it is theoretically possible.
+                            const bool fileWasChanged = preemptionManager && job.file.data(igs).epoch > epoch;
+                            if (!isCanceled && !fileWasChanged) {
+                                core::FileRef file = job.file;
+                                try {
+                                    core::Context ctx(igs, core::Symbols::root(), file);
+                                    auto file = job.file;
+                                    typecheckOne(ctx, move(job), opts, intentionallyLeakASTs);
+                                    processedFiles.emplace_back(file);
+                                } catch (SorbetException &) {
+                                    Exception::failInFuzzer();
+                                    igs.tracer().error("Exception typing file: {} (backtrace is above)",
+                                                       file.data(igs).path());
                                 }
-                                processedByThread++;
-                                // [IDE] Only do the work if typechecking hasn't been canceled.
-                                const bool isCanceled = cancelable && epochManager.wasTypecheckingCanceled();
-                                // [IDE] Also, don't do work if the file has changed under us since we began
-                                // typechecking!
-                                // TODO(jvilk): epoch is unlikely to overflow, but it is theoretically possible.
-                                const bool fileWasChanged = preemptionManager && job.file.data(igs).epoch > epoch;
-                                if (!isCanceled && !fileWasChanged) {
-                                    core::FileRef file = job.file;
-                                    try {
-                                        core::Context ctx(igs, core::Symbols::root(), file);
-                                        auto parsedFile = typecheckOne(ctx, move(job), opts);
-                                        trees.emplace_back(move(parsedFile));
-                                    } catch (SorbetException &) {
-                                        Exception::failInFuzzer();
-                                        igs.tracer().error("Exception typing file: {} (backtrace is above)",
-                                                           file.data(igs).path());
-                                    }
-                                    // Stream out errors
-                                    treesq->push(move(trees), processedByThread);
-                                    processedByThread = 0;
-                                }
+                                // Stream out errors
+                                outputq->push(move(processedFiles), processedByThread);
+                                processedByThread = 0;
                             }
                         }
                     }
-                    if (processedByThread > 0) {
-                        treesq->push(move(trees), processedByThread);
-                    }
-                });
+                }
+                if (processedByThread > 0) {
+                    outputq->push(move(processedFiles), processedByThread);
+                }
+            });
 
-            vector<ast::ParsedFile> trees;
+            vector<core::FileRef> files;
             {
-                for (auto result = treesq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
+                for (auto result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
                      !result.done();
-                     result = treesq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
+                     result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
                     if (result.gotItem()) {
-                        for (auto &tree : trees) {
-                            gs->errorQueue->flushErrorsForFile(*gs, tree.file);
+                        for (auto &file : files) {
+                            gs->errorQueue->flushErrorsForFile(*gs, file);
                         }
-                        typecheck_result.insert(typecheck_result.end(), make_move_iterator(trees.begin()),
-                                                make_move_iterator(trees.end()));
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
 
@@ -1032,7 +1048,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                     }
                 }
                 if (cancelable && epochManager.wasTypecheckingCanceled()) {
-                    return ast::ParsedFilesOrCancelled();
+                    return;
                 }
             }
 
@@ -1058,7 +1074,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         // Error queue is re-used across runs, so reset the flush count to ignore files flushed during typecheck.
         gs->errorQueue->filesFlushedCount = 0;
 
-        return ast::ParsedFilesOrCancelled(move(typecheck_result));
+        return;
     }
 }
 

@@ -193,7 +193,7 @@ public:
         }
 
         if (md.symbol.data(gs)->name == core::Names::staticInit()) {
-            auto attachedClass = md.symbol.data(gs)->owner.data(gs)->attachedClass(gs);
+            auto attachedClass = md.symbol.data(gs)->owner.asClassOrModuleRef().data(gs)->attachedClass(gs);
             if (attachedClass.exists() && attachedClass.data(gs)->name.isTEnumName(gs)) {
                 return;
             }

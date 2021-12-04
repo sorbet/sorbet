@@ -25,8 +25,8 @@
 using namespace std;
 namespace sorbet::compiler {
 namespace {
-core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
-    core::SymbolRef sym;
+core::ClassOrModuleRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
+    core::ClassOrModuleRef sym;
     if (core::isa_type<core::ClassType>(typ)) {
         sym = core::cast_type_nonnull<core::ClassType>(typ).symbol;
     } else if (auto appliedType = core::cast_type<core::AppliedType>(typ)) {
@@ -34,8 +34,7 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     } else {
         ENFORCE(false);
     }
-    sym = IREmitterHelpers::fixupOwningSymbol(gs, sym);
-    ENFORCE(sym.data(gs)->isClassOrModule());
+    sym = IREmitterHelpers::fixupOwningSymbol(gs, sym).asClassOrModuleRef();
     return sym;
 }
 
@@ -57,17 +56,12 @@ public:
         }
     }
 
-    void sanityCheck(const core::GlobalState &gs, core::ClassOrModuleRef rubyClass, string_view rubyMethod) const {
+    void sanityCheck(const core::GlobalState &gs, core::MethodRef primaryMethod) const {
         if (resultType.exists()) {
             auto intrinsicResultType = resultType.data(gs)->externalType();
 
-            auto methodName = gs.lookupNameUTF8(rubyMethod);
-            ENFORCE(methodName.exists());
-
             // We can only reasonably add type assertions for methods that have signatures
-            auto primaryMethod = rubyClass.data(gs)->findMemberTransitive(gs, methodName);
-            ENFORCE(primaryMethod.exists());
-            ENFORCE(primaryMethod.data(gs)->hasSig())
+            ENFORCE(primaryMethod.data(gs)->hasSig());
 
             // test all overloads to see if we can find a sig that produces this type
             if (core::Types::isSubType(gs, intrinsicResultType, primaryMethod.data(gs)->resultType)) {
@@ -75,14 +69,14 @@ public:
             }
 
             int i = 0;
+            auto methodName = primaryMethod.data(gs)->name;
             auto current = primaryMethod;
             while (current.data(gs)->isOverloaded()) {
                 i++;
                 auto overloadName = gs.lookupNameUnique(core::UniqueNameKind::Overload, methodName, i);
-                auto overload = primaryMethod.data(gs)->owner.data(gs)->findMember(gs, overloadName);
+                auto overload =
+                    primaryMethod.data(gs)->owner.asClassOrModuleRef().data(gs)->findMethod(gs, overloadName);
                 ENFORCE(overload.exists());
-                ENFORCE(overload.isMethod());
-
                 if (core::Types::isSubType(gs, intrinsicResultType, overload.data(gs)->resultType)) {
                     return;
                 }
@@ -90,7 +84,7 @@ public:
                 current = overload;
             }
 
-            ENFORCE(false, "The method `{}#{}` (or an overload) does not return `{}`", rubyClass.show(gs), rubyMethod,
+            ENFORCE(false, "The method `{}#{}` (or an overload) does not return `{}`", primaryMethod.show(gs),
                     intrinsicResultType.show(gs));
         }
     }
@@ -185,16 +179,15 @@ public:
             }
             auto *forwarder = generateForwarder(mcctx);
 
-            auto arity = mcctx.irctx.rubyBlockArity[mcctx.blk.value()];
-            auto *minArgs = IREmitterHelpers::buildS4(cs, arity.min);
-            auto *maxArgs = IREmitterHelpers::buildS4(cs, arity.max);
+            auto blkId = mcctx.blk.value();
 
             // NOTE: The ruby stack doesn't need to be managed here because the known c intrinsics don't expect to be
             // called by the vm.
-            bool usesBreak = mcctx.irctx.blockUsesBreak[mcctx.blk.value()];
+            bool usesBreak = mcctx.irctx.blockUsesBreak[blkId];
+            auto *blkIfunc = Payload::getOrBuildBlockIfunc(cs, builder, mcctx.irctx, blkId);
             if (usesBreak) {
                 res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock"),
-                                         {forwarder, recv, id, args.argc, args.argv, blk, minArgs, maxArgs, offset},
+                                         {forwarder, recv, id, args.argc, args.argv, blkIfunc, offset},
                                          "rawSendResultWithBlock");
             } else {
                 // Since the block doesn't use break we can make two optimizations:
@@ -204,7 +197,7 @@ public:
                 // 2. Emit a type assertion on the result of the function, as we know that there won't be non-local
                 //    control flow based on the use of `break` that could change the type of the returned value
                 res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock_noBreak"),
-                                         {forwarder, recv, id, args.argc, args.argv, blk, minArgs, maxArgs, offset},
+                                         {forwarder, recv, id, args.argc, args.argv, blkIfunc, offset},
                                          "rawSendResultWithBlock");
                 cMethodWithBlock->assertResultType(cs, builder, res);
             }
@@ -234,15 +227,54 @@ public:
     }
 
     virtual void sanityCheck(const core::GlobalState &gs) const override {
-        cMethod.sanityCheck(gs, rubyClass, rubyMethod);
-        if (cMethodWithBlock.has_value()) {
-            cMethodWithBlock->sanityCheck(gs, rubyClass, rubyMethod);
+        CallCMethod::sanityCheckInternal(gs, this->rubyClass, *this);
+    }
+
+protected:
+    static void sanityCheckInternal(const core::GlobalState &gs, core::ClassOrModuleRef klass,
+                                    const CallCMethod &call) {
+        auto methodName = gs.lookupNameUTF8(call.rubyMethod);
+        ENFORCE(methodName.exists());
+
+        auto methodSym = klass.data(gs)->findMemberTransitive(gs, methodName);
+        ENFORCE(methodSym.exists());
+
+        auto primaryMethod = methodSym.asMethodRef();
+        ENFORCE(primaryMethod.exists());
+
+        call.cMethod.sanityCheck(gs, primaryMethod);
+        if (call.cMethodWithBlock.has_value()) {
+            call.cMethodWithBlock->sanityCheck(gs, primaryMethod);
         }
+
+        // Determine if the primary, or any overload, accepts a block argument.
+        int i = 0;
+        bool acceptsBlock = false;
+        auto current = primaryMethod;
+        while (current.data(gs)->isOverloaded()) {
+            const auto &args = current.data(gs)->arguments();
+            if (!args.empty() && !args.back().isSyntheticBlockArgument()) {
+                acceptsBlock = true;
+                break;
+            }
+
+            i++;
+            auto overloadName = gs.lookupNameUnique(core::UniqueNameKind::Overload, methodName, i);
+            auto overloadSym =
+                primaryMethod.data(gs)->owner.asClassOrModuleRef().data(gs)->findMember(gs, overloadName);
+            ENFORCE(overloadSym.exists());
+
+            current = overloadSym.asMethodRef();
+            ENFORCE(current.exists());
+        }
+
+        ENFORCE(!acceptsBlock || call.cMethodWithBlock.has_value(),
+                "the intrinsic for `{}` needs to have a block variant added", primaryMethod.show(gs));
     }
 };
 
 void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                             core::SymbolRef funcSym, int rubyBlockId, llvm::Value *param) {
+                             core::MethodRef funcSym, int rubyBlockId, llvm::Value *param) {
     // Following the comment in vm_core.h:
     // https://github.com/ruby/ruby/blob/344a824ef9d4b6152703d02d7ffa042abd4252c1/vm_core.h#L321-L342
     // Comment reproduced here to make things somewhat easier to follow.
@@ -406,7 +438,7 @@ void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, co
 
 // TODO(froydnj): we need to do something like this for blocks as well.
 llvm::Value *buildParamInfo(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                            core::SymbolRef funcSym, int rubyBlockId) {
+                            core::MethodRef funcSym, int rubyBlockId) {
     auto *paramInfo = builder.CreateCall(cs.getFunction("sorbet_allocateParamInfo"), {}, "parameterInfo");
 
     emitParamInitialization(cs, builder, irctx, funcSym, rubyBlockId, paramInfo);
@@ -461,9 +493,8 @@ public:
             // TODO Figure out if this speicial case is right
             lookupSym = core::Symbols::Object();
         }
-        auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
+        auto funcSym = lookupSym.data(cs)->findMethod(cs, funcNameRef);
         ENFORCE(funcSym.exists());
-        ENFORCE(funcSym.data(cs)->isMethod());
 
         // We are going to rely on compiled final methods having their return values checked.
         const bool needsTypechecking = funcSym.data(cs)->isFinalMethod();
@@ -880,11 +911,8 @@ public:
     };
 
     virtual void sanityCheck(const core::GlobalState &gs) const override {
-        auto singletonClass = rubyClass.data(gs)->lookupSingletonClass(gs);
-        cMethod.sanityCheck(gs, singletonClass, rubyMethod);
-        if (cMethodWithBlock.has_value()) {
-            cMethodWithBlock->sanityCheck(gs, singletonClass, rubyMethod);
-        }
+        auto singletonClass = this->rubyClass.data(gs)->lookupSingletonClass(gs);
+        CallCMethodSingleton::sanityCheckInternal(gs, singletonClass, *this);
     }
 };
 
@@ -957,13 +985,19 @@ static const vector<CallCMethod> knownCMethodsInstance{
      CMethod{"sorbet_int_hash_to_h_withBlock", core::Symbols::Hash()},
      {KnownFunction::cached("sorbet_rb_hash_to_h_func")}},
     {core::Symbols::Hash(), "to_hash", CMethod{"sorbet_returnRecv", core::Symbols::Hash()}},
-    {core::Symbols::Hash(), "fetch", CMethod{"sorbet_rb_hash_fetch_m"}},
+    {core::Symbols::Hash(), "fetch", CMethod{"sorbet_rb_hash_fetch_m"}, CMethod{"sorbet_rb_hash_fetch_m_withBlock"}},
     {core::Symbols::Hash(), "merge", CMethod{"sorbet_rb_hash_merge", core::Symbols::Hash()},
      CMethod{"sorbet_rb_hash_merge_withBlock", core::Symbols::Hash()}},
     {core::Symbols::Hash(), "merge!", CMethod{"sorbet_rb_hash_update", core::Symbols::Hash()},
      CMethod{"sorbet_rb_hash_update_withBlock", core::Symbols::Hash()}},
     {core::Symbols::Hash(), "update", CMethod{"sorbet_rb_hash_update", core::Symbols::Hash()},
      CMethod{"sorbet_rb_hash_update_withBlock", core::Symbols::Hash()}},
+    {core::Symbols::Hash(), "select", CMethod{"sorbet_rb_hash_select", core::Symbols::Enumerator()},
+     CMethod{"sorbet_rb_hash_select_withBlock", core::Symbols::Hash()}},
+    {core::Symbols::Hash(), "delete", CMethod{"sorbet_rb_hash_delete_m"}, CMethod{"sorbet_rb_hash_delete_m_withBlock"}},
+    {core::Symbols::Hash(), "empty?", CMethod{"sorbet_rb_hash_empty_p"}},
+    {core::Symbols::Hash(), "transform_values", CMethod{"sorbet_rb_hash_transform_values", core::Symbols::Hash()},
+     CMethod{"sorbet_rb_hash_transform_values_withBlock", core::Symbols::Hash()}},
     {core::Symbols::TrueClass(), "|", CMethod{"sorbet_int_bool_true"}},
     {core::Symbols::FalseClass(), "|", CMethod{"sorbet_int_bool_and"}},
     {core::Symbols::TrueClass(), "&", CMethod{"sorbet_int_bool_and"}},
@@ -1039,7 +1073,7 @@ vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs(const core::Globa
 llvm::Value *SymbolBasedIntrinsicMethod::receiverFastPathTest(MethodCallContext &mcctx,
                                                               core::ClassOrModuleRef potentialClass) const {
     auto *recv = mcctx.varGetRecv();
-    return Payload::typeTest(mcctx.cs, mcctx.builder, recv, core::make_type<core::ClassType>(potentialClass));
+    return Payload::typeTest(mcctx.cs, mcctx.builder, recv, potentialClass);
 }
 
 bool SymbolBasedIntrinsicMethod::skipFastPathTest(MethodCallContext &mcctx,

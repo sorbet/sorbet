@@ -42,7 +42,7 @@ bool isTEnum(core::MutableContext ctx, ast::ClassDef *klass) {
 ast::Send *asEnumsDo(ast::ExpressionPtr &stat) {
     auto *send = ast::cast_tree<ast::Send>(stat);
 
-    if (send != nullptr && send->block != nullptr && send->fun == core::Names::enums()) {
+    if (send != nullptr && send->hasBlock() && send->fun == core::Names::enums()) {
         return send;
     } else {
         return nullptr;
@@ -88,11 +88,11 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
             return badConst(ctx, stat.loc(), klass->loc);
         }
 
-        if (rhs->args.size() != 2) {
+        if (rhs->numPosArgs() != 2) {
             return badConst(ctx, stat.loc(), klass->loc);
         }
 
-        auto arg0 = ast::cast_tree<ast::Send>(rhs->args[0]);
+        auto arg0 = ast::cast_tree<ast::Send>(rhs->getPosArg(0));
         if (arg0 == nullptr) {
             return badConst(ctx, stat.loc(), klass->loc);
         }
@@ -124,29 +124,15 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
     auto classDef =
         ast::MK::Class(stat.loc(), stat.loc(), classCnst.deepCopy(), std::move(parent), std::move(classRhs));
 
-    ast::Send::ARGS_store args;
-    auto first = true;
-    for (auto &&arg : rhs->args) {
-        if (first) {
-            // This is a call to <Magic>.<self-new>, so we need to skip the first arg.
-            first = false;
-            continue;
-        }
-
-        args.emplace_back(std::move(arg));
-    }
-
     // Remove one from the number of positional arguments to account for the self param to <Magic>.<self-new>
-    auto numPosArgs = rhs->numPosArgs - 1;
+    rhs->removePosArg(0);
 
     ast::Send::Flags flags = {};
     flags.isPrivateOk = true;
     auto singletonAsgn = ast::MK::Assign(
         stat.loc(), std::move(asgn->lhs),
-        ast::MK::Send2(
-            stat.loc(), ast::MK::Constant(stat.loc(), core::Symbols::T()), core::Names::uncheckedLet(),
-            ast::MK::Send(stat.loc(), classCnst.deepCopy(), core::Names::new_(), numPosArgs, std::move(args), flags),
-            std::move(classCnst)));
+        ast::MK::Send2(stat.loc(), ast::MK::Constant(stat.loc(), core::Symbols::T()), core::Names::uncheckedLet(),
+                       rhs->withNewBody(stat.loc(), classCnst.deepCopy(), core::Names::new_()), std::move(classCnst)));
     vector<ast::ExpressionPtr> result;
     result.emplace_back(std::move(classDef));
     result.emplace_back(std::move(singletonAsgn));
@@ -186,15 +172,15 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareSealed()));
     for (auto &stat : oldRHS) {
         if (auto enumsDo = asEnumsDo(stat)) {
-            auto &block = ast::cast_tree_nonnull<ast::Block>(enumsDo->block);
+            auto *block = enumsDo->block();
             vector<ast::ExpressionPtr> newStats;
-            if (auto insSeq = ast::cast_tree<ast::InsSeq>(block.body)) {
+            if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
                 for (auto &stat : insSeq->stats) {
                     collectNewStats(ctx, klass, std::move(stat), FromWhere::Inside, newStats);
                 }
                 collectNewStats(ctx, klass, std::move(insSeq->expr), FromWhere::Inside, newStats);
             } else {
-                collectNewStats(ctx, klass, std::move(block.body), FromWhere::Inside, newStats);
+                collectNewStats(ctx, klass, std::move(block->body), FromWhere::Inside, newStats);
             }
 
             ast::InsSeq::STATS_store insSeqStats;
@@ -202,7 +188,7 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
                 insSeqStats.emplace_back(std::move(newStat));
             }
 
-            block.body = ast::MK::InsSeq(block.loc, std::move(insSeqStats), ast::MK::Nil(block.loc));
+            block->body = ast::MK::InsSeq(block->loc, std::move(insSeqStats), ast::MK::Nil(block->loc));
             klass->rhs.emplace_back(std::move(stat));
         } else {
             vector<ast::ExpressionPtr> newStats;

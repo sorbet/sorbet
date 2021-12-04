@@ -29,6 +29,7 @@
 #include "main/autogen/autogen.h"
 #include "main/autogen/crc_builder.h"
 #include "main/autogen/data/version.h"
+#include "main/minimize/minimize.h"
 #include "namer/namer.h"
 #include "packager/packager.h"
 #include "parser/parser.h"
@@ -85,7 +86,7 @@ UnorderedSet<string> knownExpectations = {"parse-tree",       "parse-tree-json",
                                           "flatten-tree",     "flatten-tree-raw", "cfg",
                                           "cfg-raw",          "cfg-text",         "autogen",
                                           "document-symbols", "package-tree",     "document-formatting-rubyfmt",
-                                          "autocorrects"};
+                                          "autocorrects",     "minimized-rbi"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
@@ -194,6 +195,13 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
         gs->suggestUnsafe = "T.unsafe";
+    }
+
+    unique_ptr<core::GlobalState> gsForMinimize;
+    if (!test.minimizeRBI.empty()) {
+        // Copy GlobalState after initializing it, but before rest of pipeline, so that it
+        // represents an "empty" GlobalState.
+        gsForMinimize = gs->deepCopy();
     }
 
     // Parser
@@ -361,6 +369,21 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     for (auto &resolvedTree : trees) {
         handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree.toString(*gs); });
         handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
+    }
+
+    if (!test.minimizeRBI.empty()) {
+        auto opts = realmain::options::Options{};
+        auto minimizeRBI = test.folder + test.minimizeRBI;
+        realmain::Minimize::indexAndResolveForMinimize(gs, gsForMinimize, opts, *workers, minimizeRBI);
+        auto printerConfig = realmain::options::PrinterConfig{};
+        printerConfig.enabled = true;
+        printerConfig.outputPath = "/dev/null"; // tricks PrinterConfig::print into buffering
+        printerConfig.supportsFlush = true;
+        realmain::Minimize::writeDiff(*gs, *gsForMinimize, printerConfig);
+
+        auto addNewline = false;
+        handler.addObserved(
+            *gs, "minimized-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
     }
 
     // Simulate what pipeline.cc does: We want to start typeckecking big files first because it helps with better work

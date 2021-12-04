@@ -85,49 +85,51 @@ com::stripe::rubytyper::Symbol::ArgumentInfo Proto::toProto(const GlobalState &g
 }
 com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef sym, bool showFull) {
     com::stripe::rubytyper::Symbol symbolProto;
-    const auto data = sym.data(gs);
 
     symbolProto.set_id(sym.rawId());
-    *symbolProto.mutable_name() = toProto(gs, data->name);
+    *symbolProto.mutable_name() = toProto(gs, sym.name(gs));
 
-    if (data->isClassOrModule()) {
+    if (sym.isClassOrModule()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::CLASS_OR_MODULE);
-    } else if (data->isStaticField()) {
+    } else if (sym.isStaticField(gs)) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::STATIC_FIELD);
-    } else if (data->isField()) {
+    } else if (sym.isField(gs)) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::FIELD);
-    } else if (data->isMethod()) {
+    } else if (sym.isMethod()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::METHOD);
-    } else if (data->isTypeMember()) {
+    } else if (sym.isTypeMember()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::TYPE_MEMBER);
-    } else if (data->isTypeArgument()) {
+    } else if (sym.isTypeArgument()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::TYPE_ARGUMENT);
     }
 
-    if (data->isClassOrModule() || data->isMethod()) {
-        if (data->isClassOrModule()) {
-            for (auto thing : data->mixins()) {
+    if (sym.isClassOrModule() || sym.isMethod()) {
+        if (sym.isClassOrModule()) {
+            auto klass = sym.asClassOrModuleRef();
+            for (auto thing : klass.data(gs)->mixins()) {
                 symbolProto.add_mixins(SymbolRef(thing).rawId());
             }
+
+            if (klass.data(gs)->superClass().exists()) {
+                symbolProto.set_superclass(SymbolRef(klass.data(gs)->superClass()).rawId());
+            }
         } else {
-            for (auto &thing : data->arguments()) {
+            auto method = sym.asMethodRef();
+            for (auto &thing : method.data(gs)->arguments()) {
                 *symbolProto.add_arguments() = toProto(gs, thing);
             }
         }
-
-        if (data->isClassOrModule() && data->superClass().exists()) {
-            symbolProto.set_superclass(SymbolRef(data->superClass()).rawId());
-        }
     }
 
-    if (data->isStaticField()) {
-        if (core::isa_type<core::AliasType>(data->resultType)) {
-            auto type = core::cast_type_nonnull<AliasType>(data->resultType);
+    if (sym.isStaticField(gs)) {
+        auto field = sym.asFieldRef();
+        if (core::isa_type<core::AliasType>(field.data(gs)->resultType)) {
+            auto type = core::cast_type_nonnull<AliasType>(field.data(gs)->resultType);
             symbolProto.set_aliasto(type.symbol.rawId());
         }
     }
 
-    for (auto pair : data->membersStableOrderSlow(gs)) {
+    for (auto pair : sym.membersStableOrderSlow(gs)) {
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
             pair.first == Names::mixedInClassMethods() || pair.first == Names::Constants::AttachedClass()) {
             continue;
@@ -137,7 +139,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
             continue;
         }
 
-        if (!showFull && !pair.second.data(gs)->isPrintable(gs)) {
+        if (!showFull && !pair.second.isPrintable(gs)) {
             continue;
         }
 

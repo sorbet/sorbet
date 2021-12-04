@@ -28,7 +28,7 @@ namespace sorbet::compiler {
 
 namespace {
 
-vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::SymbolRef method,
+vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::MethodRef method,
                                                       const IREmitterContext &irctx) {
     auto ty = irctx.rubyBlockType[blockId];
     ENFORCE(ty == FunctionType::Block || ty == FunctionType::Method || ty == FunctionType::StaticInitFile ||
@@ -390,8 +390,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true))};
                     auto rawArg1Value =
                         builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "arg1_maybeExpandToFullArgs");
-                    auto isArray = Payload::typeTest(cs, builder, rawArg1Value,
-                                                     core::make_type<core::ClassType>(core::Symbols::Array()));
+                    auto isArray = Payload::typeTest(cs, builder, rawArg1Value, core::Symbols::Array());
                     auto typeTestEnd = builder.GetInsertBlock();
 
                     builder.CreateCondBr(isArray, argExpandBlock, afterArgArrayExpandBlock);
@@ -1055,7 +1054,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     cs.runCheapOptimizations(func);
 }
 
-void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, string_view objectName) {
+void IREmitter::buildInitFor(CompilerState &cs, const core::MethodRef &sym, string_view objectName) {
     llvm::IRBuilder<> builder(cs);
 
     auto owner = sym.data(cs)->owner;
@@ -1102,7 +1101,7 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
 
         builder.CreateCall(cs.getFunction("sorbet_globalConstructors"), {realpath});
 
-        core::SymbolRef staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc());
+        core::MethodRef staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc());
 
         // Call the LLVM method that was made by run() from this Init_ method
         auto staticInitName = IREmitterHelpers::getFunctionName(cs, staticInit);

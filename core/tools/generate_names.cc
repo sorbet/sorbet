@@ -384,6 +384,7 @@ NameDef names[] = {
     {"first"},
     {"min"},
     {"max"},
+    {"sum"},
 
     // Argument forwarding
     {"fwdArgs", "<fwd-args>"},
@@ -482,6 +483,7 @@ NameDef names[] = {
     {"StubModule", "StubModule", true},
     {"StubSuperClass", "StubSuperClass", true},
     {"StubMixin", "StubMixin", true},
+    {"PlaceholderMixin", "PlaceholderMixin", true},
     {"Base", "Base", true},
     {"Void", "Void", true},
     {"TypeAlias", "<TypeAlias>", true},

@@ -56,8 +56,12 @@ public:
     static llvm::Value *testIsTruthy(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val);
     static llvm::Value *getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &builder);
     static llvm::Value *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);
+
+    static llvm::Value *typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
+                                 core::ClassOrModuleRef sym);
     static llvm::Value *typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                  const core::TypePtr &type);
+
     static void assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                            core::ClassOrModuleRef sym);
     static llvm::Value *boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *u1);
@@ -103,15 +107,18 @@ public:
     static llvm::Value *callFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                           llvm::Value *blockHandler);
     static llvm::Value *callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
-                                               bool usesBreak, llvm::Value *blockFun, int blkMinArgs, int blkMaxArgs,
-                                               llvm::Value *closure);
+                                               bool usesBreak, llvm::Value *ifunc);
+    static llvm::Value *callSuperFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
+                                               llvm::Value *blockHandler);
+    static llvm::Value *callSuperFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
+                                                    bool usesBreak, llvm::Value *ifunc);
     static llvm::Value *callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                        llvm::Value *fn, llvm::Value *argc, llvm::Value *argv, llvm::Value *recv,
                                        llvm::Value *iseq);
     static void afterIntrinsic(CompilerState &cs, llvm::IRBuilderBase &builder);
 
     static llvm::Value *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                          const IREmitterContext &irctx, core::SymbolRef methodSym);
+                                          const IREmitterContext &irctx, core::MethodRef methodSym);
 
     static llvm::Value *getFileLineNumberInfo(CompilerState &gs, llvm::IRBuilderBase &builder, core::FileRef file);
     static llvm::Value *getIseqEncodedPointer(CompilerState &gs, llvm::IRBuilderBase &builder, core::FileRef file);
@@ -120,6 +127,9 @@ public:
                                        int rubyBlockId);
 
     static llvm::Value *buildLocalsOffset(CompilerState &cs);
+
+    static llvm::Value *getOrBuildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                             const IREmitterContext &irctx, int blkId);
 };
 } // namespace sorbet::compiler
 #endif

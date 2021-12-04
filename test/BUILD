@@ -21,6 +21,7 @@ cc_binary(
         "//local_vars",
         "//main/autogen",
         "//main/lsp",
+        "//main/minimize",
         "//main/pipeline/semantic_extension:none",
         "//namer",
         "//packager",
@@ -125,6 +126,29 @@ cc_test(
         "//parser",
         "//payload",
         "@cxxopts",
+        "@doctest",
+        "@doctest//:doctest_main",
+    ],
+)
+
+cc_test(
+    name = "pkg-autocorrects-test",
+    size = "small",
+    srcs = ["pkg_autocorrects_test.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//ast",
+        "//ast/desugar",
+        "//common",
+        "//common/concurrency",
+        "//core",
+        "//local_vars",
+        "//packager",
+        "//parser",
         "@doctest",
         "@doctest//:doctest_main",
     ],

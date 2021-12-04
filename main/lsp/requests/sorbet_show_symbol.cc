@@ -53,9 +53,9 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
         }
 
         auto result = make_unique<SymbolInformation>(sym.show(gs), symbolRef2SymbolKind(gs, sym),
-                                                     config.loc2Location(gs, sym.data(gs)->loc()));
+                                                     config.loc2Location(gs, sym.loc(gs)));
 
-        auto container = sym.data(gs)->owner;
+        auto container = sym.owner(gs);
         if (container != core::Symbols::root()) {
             result->containerName = container.show(gs);
         }

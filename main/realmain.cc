@@ -15,6 +15,7 @@
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/lsp.h"
+#include "main/minimize/minimize.h"
 #endif
 
 #include "absl/strings/str_cat.h"
@@ -511,6 +512,13 @@ int realmain(int argc, char *argv[]) {
 
     logger->trace("done building initial global state");
 
+    unique_ptr<core::GlobalState> gsForMinimize;
+    if (!opts.minimizeRBI.empty()) {
+        // Copy GlobalState after createInitialGlobalState and option handling, but before rest of
+        // pipeline, so that it represents an "empty" GlobalState.
+        gsForMinimize = gs->deepCopy();
+    }
+
     if (opts.runLSP) {
 #ifdef SORBET_REALMAIN_MIN
         logger->warn("LSP is disabled in sorbet-orig for faster builds");
@@ -600,15 +608,35 @@ int realmain(int argc, char *argv[]) {
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
-            indexed = move(pipeline::typecheck(gs, move(indexed), opts, *workers).result());
+            pipeline::typecheck(gs, move(indexed), opts, *workers, /* cancelable */ false, nullopt,
+                                /* presorted */ false, /* intentionallyLeakASTs */ !sorbet::emscripten_build);
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
         }
 
+        if (!opts.minimizeRBI.empty()) {
+#ifdef SORBET_REALMAIN_MIN
+            logger->warn("--minimize-rbi is disabled in sorbet-orig for faster builds");
+            return 1;
+#else
+            // In the future, we might consider making minimizeRBI be a repeatable option, and run
+            // this block once for each input file.
+            // The trick there is that they would all currently output to the same file, even for
+            // multiple input files if we assume the naive implementation, which might not be the
+            // API we want to expose.
+            Minimize::indexAndResolveForMinimize(gs, gsForMinimize, opts, *workers, opts.minimizeRBI);
+            Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
+#endif
+        }
+
         if (opts.suggestTyped) {
-            for (auto &tree : indexed) {
-                auto file = tree.file;
+            for (auto &filename : opts.inputFileNames) {
+                core::FileRef file = gs->findFileByPath(filename);
+                if (!file.exists()) {
+                    continue;
+                }
+
                 if (file.data(*gs).minErrorLevel() <= core::StrictLevel::Ignore) {
                     continue;
                 }
@@ -720,7 +748,7 @@ int realmain(int argc, char *argv[]) {
         }
     }
 #endif
-    if (!gs || gs->hadCriticalError()) {
+    if (!gs || gs->hadCriticalError() || (gsForMinimize && gsForMinimize->hadCriticalError())) {
         returnCode = 10;
     } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.supressNonCriticalErrors) {
         returnCode = 1;
@@ -730,10 +758,12 @@ int realmain(int argc, char *argv[]) {
 
     if (!sorbet::emscripten_build) {
         // Let it go: leak memory so that we don't need to call destructors
+        // (Although typecheck leaks these, autogen goes thru a different codepath.)
         for (auto &e : indexed) {
             intentionallyLeakMemory(e.tree.release());
         }
         intentionallyLeakMemory(gs.release());
+        intentionallyLeakMemory(gsForMinimize.release());
     }
 
     // je_malloc_stats_print(nullptr, nullptr, nullptr); // uncomment this to print jemalloc statistics

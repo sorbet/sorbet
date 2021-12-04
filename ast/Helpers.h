@@ -35,9 +35,8 @@ public:
     }
 
     static ExpressionPtr Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs,
-                              Send::ARGS_store args, Send::Flags flags = {}, ExpressionPtr blk = nullptr) {
-        auto send =
-            make_expression<ast::Send>(loc, std::move(recv), fun, numPosArgs, std::move(args), std::move(blk), flags);
+                              Send::ARGS_store args, Send::Flags flags = {}) {
+        auto send = make_expression<ast::Send>(loc, std::move(recv), fun, numPosArgs, std::move(args), flags);
         return send;
     }
 
@@ -48,7 +47,12 @@ public:
 
     static ExpressionPtr Send0Block(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, ExpressionPtr blk) {
         Send::ARGS_store nargs;
-        return Send(loc, std::move(recv), fun, 0, std::move(nargs), {}, std::move(blk));
+        Send::Flags flags;
+        if (blk != nullptr) {
+            flags.hasBlock = true;
+            nargs.emplace_back(std::move(blk));
+        }
+        return Send(loc, std::move(recv), fun, 0, std::move(nargs), flags);
     }
 
     static ExpressionPtr Send1(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, ExpressionPtr arg1) {
@@ -131,8 +135,7 @@ public:
         if (auto *s = cast_tree<ast::Send>(lhs)) {
             // the LHS might be a send of the form x.y=(), in which case we add the RHS to the arguments list and get
             // x.y=(rhs)
-            s->args.emplace_back(std::move(rhs));
-            s->numPosArgs++;
+            s->addPosArg(std::move(rhs));
             return lhs;
         } else if (auto *seq = cast_tree<ast::InsSeq>(lhs)) {
             // the LHS might be a sequence, which means that it's the result of a safe navigation operator, like
@@ -141,7 +144,7 @@ public:
             //   { $t = x; if $t == nil then nil else $t.y=(rhs)
             if (auto *cond = cast_tree<ast::If>(seq->expr)) {
                 if (auto *s = cast_tree<ast::Send>(cond->elsep)) {
-                    s->args.emplace_back(std::move(rhs));
+                    s->addPosArg(std::move(rhs));
                     return lhs;
                 }
             }
@@ -318,7 +321,7 @@ public:
         auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
                          Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
         auto sigSend = ast::cast_tree<ast::Send>(sig);
-        sigSend->block = Block0(loc, std::move(returns));
+        sigSend->setBlock(Block0(loc, std::move(returns)));
         sigSend->flags.isRewriterSynthesized = true;
         return sig;
     }
@@ -329,7 +332,7 @@ public:
         auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
                          Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
         auto sigSend = ast::cast_tree<ast::Send>(sig);
-        sigSend->block = Block0(loc, std::move(void_));
+        sigSend->setBlock(Block0(loc, std::move(void_)));
         sigSend->flags.isRewriterSynthesized = true;
         return sig;
     }
@@ -339,7 +342,7 @@ public:
         auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
                          Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
         auto sigSend = ast::cast_tree<ast::Send>(sig);
-        sigSend->block = Block0(loc, std::move(returns));
+        sigSend->setBlock(Block0(loc, std::move(returns)));
         sigSend->flags.isRewriterSynthesized = true;
         return sig;
     }
@@ -388,14 +391,15 @@ public:
     }
 
     static ExpressionPtr ZSuper(core::LocOffsets loc) {
-        return Send1(loc, Self(loc), core::Names::super(), make_expression<ast::ZSuperArgs>(loc));
+        Send::Flags flags;
+        flags.isPrivateOk = true;
+        return Send(loc, Self(loc), core::Names::super(), 1, SendArgs(make_expression<ast::ZSuperArgs>(loc)), flags);
     }
 
     static ExpressionPtr SelfNew(core::LocOffsets loc, int numPosArgs, ast::Send::ARGS_store args,
-                                 Send::Flags flags = {}, ExpressionPtr block = nullptr) {
+                                 Send::Flags flags = {}) {
         auto magic = Constant(loc, core::Symbols::Magic());
-        return Send(loc, std::move(magic), core::Names::selfNew(), numPosArgs, std::move(args), flags,
-                    std::move(block));
+        return Send(loc, std::move(magic), core::Names::selfNew(), numPosArgs, std::move(args), flags);
     }
 
     static ExpressionPtr DefineTopClassOrModule(core::LocOffsets loc, core::ClassOrModuleRef klass) {

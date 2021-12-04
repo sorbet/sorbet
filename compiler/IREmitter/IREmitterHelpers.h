@@ -86,18 +86,18 @@ private:
 
 class IREmitterHelpers {
 public:
-    static bool isClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym);
-    static bool isFileStaticInit(const core::GlobalState &gs, core::SymbolRef sym);
-    static bool isFileOrClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym);
+    static bool isClassStaticInit(const core::GlobalState &gs, core::MethodRef sym);
+    static bool isFileStaticInit(const core::GlobalState &gs, core::MethodRef sym);
+    static bool isFileOrClassStaticInit(const core::GlobalState &gs, core::MethodRef sym);
 
-    static std::string getFunctionName(CompilerState &cs, core::SymbolRef sym);
-    static llvm::Function *lookupFunction(CompilerState &cs, core::SymbolRef sym);
+    static std::string getFunctionName(CompilerState &cs, core::MethodRef sym);
+    static llvm::Function *lookupFunction(CompilerState &cs, core::MethodRef sym);
     static llvm::Function *cleanFunctionBody(CompilerState &cs, llvm::Function *func);
-    static llvm::Function *getOrCreateStaticInit(CompilerState &cs, core::SymbolRef sym, core::LocOffsets loc);
-    static llvm::Function *getOrCreateFunction(CompilerState &cs, core::SymbolRef sym);
-    static llvm::Function *getOrCreateDirectWrapper(CompilerState &cs, core::SymbolRef sym);
+    static llvm::Function *getOrCreateStaticInit(CompilerState &cs, core::MethodRef sym, core::LocOffsets loc);
+    static llvm::Function *getOrCreateFunction(CompilerState &cs, core::MethodRef sym);
+    static llvm::Function *getOrCreateDirectWrapper(CompilerState &cs, core::MethodRef sym);
 
-    static llvm::Function *getInitFunction(CompilerState &cs, core::SymbolRef sym);
+    static llvm::Function *getInitFunction(CompilerState &cs, core::MethodRef sym);
 
     static std::size_t sendArgCount(cfg::Send *send);
 
@@ -123,8 +123,6 @@ public:
 
     static llvm::Value *makeInlineCache(CompilerState &cs, llvm::IRBuilderBase &build, std::string methodName,
                                         CallCacheFlags flags, int argc, const std::vector<std::string_view> &keywords);
-
-    static llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx);
 
     static llvm::Value *emitMethodCallViaRubyVM(MethodCallContext &mcctx);
 
@@ -159,7 +157,7 @@ public:
                                        const core::TypePtr &literalish);
 
     // Return true if the given blockId has a block argument.
-    static bool hasBlockArgument(CompilerState &gs, int blockId, core::SymbolRef method, const IREmitterContext &irctx);
+    static bool hasBlockArgument(CompilerState &gs, int blockId, core::MethodRef method, const IREmitterContext &irctx);
 
     // Given an owner as the Sorbet-visible symbol, return the parent symbol
     // as seen by the Ruby VM.
@@ -172,7 +170,7 @@ public:
 
     struct FinalMethodInfo {
         core::ClassOrModuleRef recv;
-        core::SymbolRef method;
+        core::MethodRef method;
         core::FileRef file;
     };
 

@@ -92,6 +92,7 @@ SORBET_ALIVE(void, sorbet_vm_env_write_slowpath, (const VALUE *, int, VALUE));
 SORBET_ALIVE(void, sorbet_setupFunctionInlineCache,
              (struct FunctionInlineCache * cache, ID mid, unsigned int flags, int argc, int num_kwargs, VALUE *keys));
 SORBET_ALIVE(VALUE, sorbet_callFuncWithCache, (struct FunctionInlineCache * cache, VALUE bh));
+SORBET_ALIVE(VALUE, sorbet_callSuperFuncWithCache, (struct FunctionInlineCache * cache, VALUE bh));
 SORBET_ALIVE(void, sorbet_vmMethodSearch, (struct FunctionInlineCache * cache, VALUE recv));
 SORBET_ALIVE(VALUE, sorbet_getPassedBlockHandler, ());
 
@@ -131,9 +132,8 @@ SORBET_ALIVE(VALUE, sorbet_rb_int_ge_slowpath, (VALUE, VALUE));
 
 SORBET_ALIVE(VALUE, sorbet_i_getRubyClass, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_getRubyConstant, (const char *const className, long classNameLen) __attribute__((const)));
-SORBET_ALIVE(VALUE, sorbet_i_objIsKindOf, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_i_send,
-             (struct FunctionInlineCache *, _Bool blkUsesBreak, BlockFFIType blk, int blkMinArgs, int blkMaxArgs, VALUE,
+             (struct FunctionInlineCache *, _Bool blkUsesBreak, struct vm_ifunc *, bool searchSuper,
               rb_control_frame_t *, ...));
 
 SORBET_ALIVE(_Bool, sorbet_i_isa_Integer, (VALUE) __attribute__((const)));
@@ -151,9 +151,11 @@ SORBET_ALIVE(_Bool, sorbet_i_isa_String, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_Proc, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_Thread, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_RootSingleton, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_objIsKindOf, (VALUE, VALUE) __attribute__((const)));
 
 SORBET_ALIVE(long, sorbet_globalConstRegister, (VALUE val));
 SORBET_ALIVE(VALUE, sorbet_globalConstDupHash, (long index));
+SORBET_ALIVE(struct vm_ifunc *, sorbet_globalConstFetchIfunc, (long index));
 SORBET_ALIVE(VALUE, sorbet_magic_mergeHashHelper, (VALUE, VALUE));
 
 SORBET_ALIVE(VALUE, sorbet_vm_getivar, (VALUE obj, ID id, struct iseq_inline_iv_cache_entry *cache));
@@ -174,8 +176,10 @@ SORBET_ALIVE(VALUE, sorbet_vm_instance_variable_set,
              (struct FunctionInlineCache * getCache, struct iseq_inline_iv_cache_entry *varCache,
               rb_control_frame_t *cfp, VALUE recv, ID var, VALUE value));
 SORBET_ALIVE(VALUE, sorbet_vm_class, (struct FunctionInlineCache * classCache, rb_control_frame_t *cfp, VALUE recv));
+SORBET_ALIVE(VALUE, sorbet_vm_bang, (struct FunctionInlineCache * bangCache, rb_control_frame_t *cfp, VALUE recv));
 SORBET_ALIVE(VALUE, sorbet_vm_isa_p,
              (struct FunctionInlineCache * classCache, rb_control_frame_t *cfp, VALUE recv, VALUE klass));
+SORBET_ALIVE(VALUE, sorbet_vm_freeze, (struct FunctionInlineCache * classCache, rb_control_frame_t *cfp, VALUE recv));
 
 SORBET_ALIVE(VALUE, rb_hash_keys, (VALUE recv));
 SORBET_ALIVE(VALUE, rb_hash_values, (VALUE recv));
@@ -219,8 +223,7 @@ SORBET_ALIVE(VALUE, sorbet_run_exception_handling,
               // The special value indicating that we need to retry.
               VALUE retrySingleton, long exceptionValueIndex, long exceptionValueLevel));
 
-SORBET_ALIVE(VALUE, sorbet_rb_iterate,
-             (VALUE(*body)(VALUE), VALUE data1, rb_block_call_func_t bl_proc, int minArgs, int maxArgs, VALUE data2));
+SORBET_ALIVE(VALUE, sorbet_rb_iterate, (VALUE(*body)(VALUE), VALUE data1, const struct vm_ifunc *ifunc));
 SORBET_ALIVE(VALUE, sorbet_vm_aref,
              (rb_control_frame_t * cfp, struct FunctionInlineCache *cache, VALUE recv, VALUE arg));
 SORBET_ALIVE(VALUE, sorbet_vm_plus,
@@ -392,11 +395,6 @@ _Bool sorbet_isa_RootSingleton(VALUE obj) {
 KEEP_ALIVE(sorbet_isa_RootSingleton);
 
 SORBET_ATTRIBUTE(const) VALUE rb_class_inherited_p(VALUE, VALUE);
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa(VALUE obj, VALUE class) {
-    return sorbet_i_objIsKindOf(obj, class) == Qtrue;
-}
 
 SORBET_ATTRIBUTE(const)
 _Bool sorbet_isa_class_of(VALUE obj, VALUE class) {
@@ -699,6 +697,30 @@ VALUE sorbet_int_hash_to_h(VALUE recv, ID fun, int argc, const VALUE *const rest
                            VALUE closure) {
     extern VALUE sorbet_rb_hash_to_h(VALUE);
     return sorbet_rb_hash_to_h(recv);
+}
+
+// This is the block variant of rb_hash_fetch_m:
+// https://github.com/sorbet/ruby/blob/12d8c43330278a744d6e45135d1a8735f23f5afe/hash.c#L2113-L2147
+SORBET_INLINE
+VALUE sorbet_rb_hash_fetch_m_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                       const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
+    extern VALUE sorbet_hash_stlike_lookup(VALUE hash, VALUE key, VALUE * val);
+
+    rb_check_arity(argc, 1, 2);
+    VALUE key = argv[0];
+    VALUE val;
+
+    // NOTE: the vm will issue a warning when two arguments and a block are
+    // given, but we don't issue that warning here.
+
+    if (sorbet_hash_stlike_lookup(recv, key, &val)) {
+        return (VALUE)val;
+    } else {
+        sorbet_pushBlockFrame(captured);
+        val = blk(key, closure, 1, &key, Qnil);
+        sorbet_popFrame();
+        return val;
+    }
 }
 
 struct sorbet_int_hash_to_h_closure {
@@ -1537,6 +1559,62 @@ VALUE sorbet_rb_hash_square_br_eq(VALUE recv, ID fun, int argc, const VALUE *con
     return rb_hash_aset(recv, argv[0], argv[1]);
 }
 
+// This is the no-block version of rb_hash_delete_m https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L2390-L2409
+SORBET_INLINE
+VALUE sorbet_rb_hash_delete_m(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                              VALUE closure) {
+    sorbet_ensure_arity(argc, 1);
+
+    VALUE val;
+    VALUE key = argv[0];
+
+    // begin inline of rb_hash_modify_check
+    rb_check_frozen(recv);
+    // end inline of rb_hash_modify_check
+
+    val = rb_hash_delete_entry(recv, key);
+
+    if (val != Qundef) {
+        return val;
+    } else {
+        return Qnil;
+    }
+}
+
+// This is the block version of rb_hash_delete_m https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L2390-L2409
+SORBET_INLINE
+VALUE sorbet_rb_hash_delete_m_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
+                                        BlockFFIType blk, const struct rb_captured_block *captured, VALUE closure,
+                                        int numPositionalArgs) {
+    sorbet_ensure_arity(argc, 1);
+
+    VALUE val;
+    VALUE key = argv[0];
+
+    // begin inline of rb_hash_modify_check
+    rb_check_frozen(recv);
+    // end inline of rb_hash_modify_check
+
+    val = rb_hash_delete_entry(recv, key);
+
+    if (val != Qundef) {
+        return val;
+    } else {
+        sorbet_pushBlockFrame(captured);
+        VALUE ret = blk(key, closure, 1, &key, Qnil);
+        sorbet_popFrame();
+        return ret;
+    }
+}
+
+// From rb_hash_empty_p: https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L2976-L2980
+SORBET_INLINE
+VALUE sorbet_rb_hash_empty_p(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                             VALUE closure) {
+    sorbet_ensure_arity(argc, 0);
+    return RHASH_EMPTY_P(recv) ? Qtrue : Qfalse;
+}
+
 SORBET_INLINE
 VALUE sorbet_rb_int_plus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                          VALUE closure) {
@@ -1843,6 +1921,62 @@ VALUE sorbet_rb_hash_each_with_object_withBlock(VALUE recv, ID fun, int argc, co
     return object;
 }
 
+// This is the no-block version of `rb_hash_transform_values`
+// https://github.com/sorbet/ruby/blob/12d8c43330278a744d6e45135d1a8735f23f5afe/hash.c#L3190-L3221
+SORBET_INLINE
+VALUE sorbet_rb_hash_transform_values(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                      VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+    return rb_enumeratorize_with_size(recv, ID2SYM(fun), argc, argv, sorbet_hash_enum_size);
+}
+
+static int sorbet_transform_values_foreach_func(VALUE key, VALUE value, VALUE argp, int error) {
+    return ST_REPLACE;
+}
+
+struct sorbet_rb_transform_values_closure {
+    BlockFFIType fun;
+    VALUE toplevel_closure;
+    VALUE hash;
+};
+
+static int sorbet_transform_values_foreach_replace(VALUE *key, VALUE *value, VALUE argp, int existing) {
+    struct sorbet_rb_transform_values_closure *passthrough = (struct sorbet_rb_transform_values_closure *)argp;
+
+    VALUE new_value = passthrough->fun((VALUE)*value, passthrough->toplevel_closure, 1, value, Qnil);
+    RB_OBJ_WRITE(passthrough->hash, value, new_value);
+    return ST_CONTINUE;
+}
+
+// This is the block version of `rb_hash_transform_values`
+// https://github.com/sorbet/ruby/blob/12d8c43330278a744d6e45135d1a8735f23f5afe/hash.c#L3190-L3221
+SORBET_INLINE
+VALUE sorbet_rb_hash_transform_values_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
+                                                BlockFFIType blk, const struct rb_captured_block *captured,
+                                                VALUE closure, int numPositionalArgs) {
+    // hash_copy isn't exported from the vm. rb_hash_dup does a little more work, so it might be worth re-exporting
+    // hash_copy at some point.
+    VALUE result = rb_hash_dup(recv);
+
+    // This is the inlined version of SET_DEFAULT(result, Qnil);
+    FL_UNSET_RAW(result, RHASH_PROC_DEFAULT);
+    RHASH_SET_IFNONE(result, Qnil);
+
+    if (!RHASH_EMPTY_P(recv)) {
+        struct sorbet_rb_transform_values_closure passthrough;
+        passthrough.fun = blk;
+        passthrough.toplevel_closure = closure;
+        passthrough.hash = result;
+
+        sorbet_pushBlockFrame(captured);
+        rb_hash_stlike_foreach_with_replace(result, sorbet_transform_values_foreach_func,
+                                            sorbet_transform_values_foreach_replace, (VALUE)&passthrough);
+        sorbet_popFrame();
+    }
+
+    return result;
+}
+
 struct sorbet_rb_hash_any_closure {
     BlockFFIType fun;
     VALUE toplevel_closure;
@@ -1975,6 +2109,50 @@ VALUE sorbet_rb_hash_merge_withBlock(VALUE recv, ID fun, int argc, const VALUE *
                                            numPositionalArgs);
 }
 
+// This is the no-block version of rb_hash_select: https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L2694-L2705
+// In that version, the `RETURN_SIZED_ENUMERATOR` macro is what causes the early return when a block is not passed. In
+// this case, we know that the block wasn't passed, so we always return an enumerator
+SORBET_INLINE
+VALUE sorbet_rb_hash_select(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                            VALUE closure) {
+    sorbet_ensure_arity(argc, 0);
+    return rb_enumeratorize_with_size(recv, ID2SYM(fun), argc, argv, sorbet_hash_enum_size);
+}
+
+struct sorbet_select_i_args {
+    VALUE result;
+    BlockFFIType blk;
+    VALUE closure;
+};
+
+static int sorbet_select_i(VALUE key, VALUE value, VALUE argsv) {
+    struct sorbet_select_i_args *args = (struct sorbet_select_i_args *)argsv;
+    VALUE block_argv[2] = {key, value};
+    if (RTEST(args->blk(key, args->closure, 2, &block_argv[0], Qnil))) {
+        rb_hash_aset(args->result, key, value);
+    }
+    return ST_CONTINUE;
+}
+
+// This is the block version of rb_hash_select: https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L2694-L2705
+SORBET_INLINE
+VALUE sorbet_rb_hash_select_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                      const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
+    sorbet_ensure_arity(argc, 0);
+
+    // must push a frame for the captured block
+    sorbet_pushBlockFrame(captured);
+
+    struct sorbet_select_i_args args = {rb_hash_new(), blk, closure};
+    if (!RHASH_EMPTY_P(recv)) {
+        rb_hash_foreach(recv, sorbet_select_i, (VALUE)&args);
+    }
+
+    sorbet_popFrame();
+
+    return args.result;
+}
+
 // ****
 // ****                       Name Based Intrinsics
 // ****
@@ -2096,21 +2274,6 @@ VALUE sorbet_int_bool_nand(VALUE recv, ID fun, int argc, const VALUE *const rest
         return Qfalse;
     }
     return Qtrue;
-}
-
-SORBET_INLINE
-VALUE sorbet_bang(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
-    // RTEST is false when the value is Qfalse or Qnil
-    if (RTEST(recv)) {
-        if (recv == Qtrue) {
-            return Qfalse;
-        } else {
-            // slow path - dispatch via the VM
-            return rb_funcallv(recv, fun, argc, argv);
-        }
-    } else {
-        return Qtrue;
-    }
 }
 
 SORBET_INLINE
@@ -2397,16 +2560,41 @@ static VALUE sorbet_iterMethod(VALUE obj) {
     return sorbet_callFuncWithCache(cache, bh);
 }
 
+static VALUE sorbet_iterSuperMethod(VALUE obj) {
+    struct FunctionInlineCache *cache = (struct FunctionInlineCache *)obj;
+
+    // In this case we know that a block handler was set, as we only emit calls to this payload function from sends that
+    // pass a block argument.
+    rb_execution_context_t *ec = GET_EC();
+    VALUE bh = ec->passed_block_handler;
+
+    // It's important that we clear out the passed block handler state in the execution context:
+    // https://github.com/ruby/ruby/blob/ruby_2_7/vm.c#L203-L210
+    ec->passed_block_handler = VM_BLOCK_HANDLER_NONE;
+
+    return sorbet_callSuperFuncWithCache(cache, bh);
+}
+
 SORBET_INLINE
-VALUE sorbet_callFuncBlockWithCache(struct FunctionInlineCache *cache, BlockFFIType blockImpl, int blkMinArgs,
-                                    int blkMaxArgs, VALUE closure) {
-    return sorbet_rb_iterate(sorbet_iterMethod, (VALUE)cache, blockImpl, blkMinArgs, blkMaxArgs, closure);
+const struct vm_ifunc *sorbet_buildBlockIfunc(BlockFFIType blockImpl, int blkMinArgs, int blkMaxArgs, VALUE closure) {
+    return rb_vm_ifunc_new(blockImpl, (void *)closure, blkMinArgs, blkMaxArgs);
+}
+KEEP_ALIVE(sorbet_buildBlockIfunc);
+
+SORBET_INLINE
+VALUE sorbet_callFuncBlockWithCache(struct FunctionInlineCache *cache, const struct vm_ifunc *ifunc) {
+    return sorbet_rb_iterate(sorbet_iterMethod, (VALUE)cache, ifunc);
 }
 KEEP_ALIVE(sorbet_callFuncBlockWithCache);
 
 SORBET_INLINE
-VALUE sorbet_callFuncBlockWithCache_noBreak(struct FunctionInlineCache *cache, BlockFFIType blockImpl, int blkMinArgs,
-                                            int blkMaxArgs, VALUE closure) {
+VALUE sorbet_callSuperFuncBlockWithCache(struct FunctionInlineCache *cache, const struct vm_ifunc *ifunc) {
+    return sorbet_rb_iterate(sorbet_iterSuperMethod, (VALUE)cache, ifunc);
+}
+KEEP_ALIVE(sorbet_callSuperFuncBlockWithCache);
+
+SORBET_INLINE
+VALUE sorbet_callFuncBlockWithCache_noBreak(struct FunctionInlineCache *cache, const struct vm_ifunc *ifunc) {
     rb_execution_context_t *ec = GET_EC();
     rb_control_frame_t *cfp = ec->cfp;
 
@@ -2414,7 +2602,6 @@ VALUE sorbet_callFuncBlockWithCache_noBreak(struct FunctionInlineCache *cache, B
     // the use of `rb_vm_ifunc_proc_new` and the setup of the captured block handler.
     // * https://github.com/ruby/ruby/blob/ruby_2_7/vm_eval.c#L1448
     // * https://github.com/ruby/ruby/blob/ruby_2_7/vm_eval.c#L1406-L1408
-    const struct vm_ifunc *const ifunc = rb_vm_ifunc_new(blockImpl, (void *)closure, blkMinArgs, blkMaxArgs);
     struct rb_captured_block *captured = (struct rb_captured_block *)&cfp->self;
     captured->code.ifunc = ifunc;
 
@@ -2426,6 +2613,27 @@ VALUE sorbet_callFuncBlockWithCache_noBreak(struct FunctionInlineCache *cache, B
     return sorbet_callFuncWithCache(cache, VM_BH_FROM_IFUNC_BLOCK(captured));
 }
 KEEP_ALIVE(sorbet_callFuncBlockWithCache_noBreak);
+
+SORBET_INLINE
+VALUE sorbet_callSuperFuncBlockWithCache_noBreak(struct FunctionInlineCache *cache, const struct vm_ifunc *ifunc) {
+    rb_execution_context_t *ec = GET_EC();
+    rb_control_frame_t *cfp = ec->cfp;
+
+    // This is an inlined version of the block handler setup that `rb_iterate` performs. See the following two links for
+    // the use of `rb_vm_ifunc_proc_new` and the setup of the captured block handler.
+    // * https://github.com/ruby/ruby/blob/ruby_2_7/vm_eval.c#L1448
+    // * https://github.com/ruby/ruby/blob/ruby_2_7/vm_eval.c#L1406-L1408
+    struct rb_captured_block *captured = (struct rb_captured_block *)&cfp->self;
+    captured->code.ifunc = ifunc;
+
+    // It's important that we clear out the passed block handler state in the execution context:
+    // https://github.com/ruby/ruby/blob/ruby_2_7/vm.c#L203-L210
+    ec->passed_block_handler = VM_BLOCK_HANDLER_NONE;
+
+    // We don't need to pass the block handler through ec->passed_block_handler in this case.
+    return sorbet_callSuperFuncWithCache(cache, VM_BH_FROM_IFUNC_BLOCK(captured));
+}
+KEEP_ALIVE(sorbet_callSuperFuncBlockWithCache_noBreak);
 
 SORBET_INLINE
 VALUE sorbet_makeBlockHandlerProc(VALUE block) {
@@ -2506,8 +2714,8 @@ VALUE sorbet_inlineIntrinsicEnv_apply(VALUE value, BlockConsumerFFIType intrinsi
 }
 
 SORBET_INLINE
-VALUE sorbet_callIntrinsicInlineBlock(VALUE (*body)(VALUE), VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk,
-                                      int blkMinArgs, int blkMaxArgs, VALUE closure) {
+VALUE sorbet_callIntrinsicInlineBlock(VALUE (*body)(VALUE), VALUE recv, ID fun, int argc, VALUE *argv,
+                                      const struct vm_ifunc *ifunc, VALUE closure) {
     struct sorbet_inlineIntrinsicEnv env;
     env.recv = recv;
     env.fun = fun;
@@ -2518,12 +2726,12 @@ VALUE sorbet_callIntrinsicInlineBlock(VALUE (*body)(VALUE), VALUE recv, ID fun, 
     // NOTE: we pass the block function to rb_iterate so that we ensure that the block handler is setup correctly.
     // However it won't be called through the vm, as that would hide the direct call to the block function from the
     // inliner.
-    return sorbet_rb_iterate(body, (VALUE)&env, blk, blkMinArgs, blkMaxArgs, closure);
+    return sorbet_rb_iterate(body, (VALUE)&env, ifunc);
 }
 
 SORBET_INLINE
 VALUE sorbet_callIntrinsicInlineBlock_noBreak(VALUE (*body)(VALUE), VALUE recv, ID fun, int argc, VALUE *argv,
-                                              BlockFFIType blk, int blkMinArgs, int blkMaxArgs, VALUE closure) {
+                                              const struct vm_ifunc *ifunc, VALUE closure) {
     struct sorbet_inlineIntrinsicEnv env;
     env.recv = recv;
     env.fun = fun;
@@ -2539,7 +2747,6 @@ VALUE sorbet_callIntrinsicInlineBlock_noBreak(VALUE (*body)(VALUE), VALUE recv, 
     rb_execution_context_t *ec = GET_EC();
     rb_control_frame_t *cfp = ec->cfp;
 
-    const struct vm_ifunc *const ifunc = rb_vm_ifunc_new(blk, (void *)closure, blkMinArgs, blkMaxArgs);
     struct rb_captured_block *captured = (struct rb_captured_block *)&cfp->self;
     captured->code.ifunc = ifunc;
     VALUE blockHandler = VM_BH_FROM_IFUNC_BLOCK(captured);
@@ -2609,107 +2816,6 @@ const rb_control_frame_t *sorbet_setRubyStackFrame(_Bool isStaticInit, int iseq_
     }
 
     return cfp;
-}
-
-SORBET_INLINE
-VALUE sorbet_callSuper(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat) {
-    // Mostly an implementation of return rb_call_super(argc, argv);
-    rb_execution_context_t *ec = GET_EC();
-    VALUE recv = ec->cfp->self;
-    VALUE klass;
-    ID id;
-    rb_control_frame_t *cfp = ec->cfp;
-    const rb_callable_method_entry_t *me = rb_vm_frame_method_entry(cfp);
-
-    klass = RCLASS_ORIGIN(me->defined_class);
-    klass = RCLASS_SUPER(klass);
-    id = me->def->original_id;
-    me = rb_callable_method_entry(klass, id);
-
-    if (!me) {
-        // TODO do something here
-        // return rb_method_missing(recv, id, argc, argv, MISSING_SUPER);
-        rb_raise(rb_eRuntimeError, "unimplemented super with a missing method");
-        return Qnil;
-    } else {
-        return rb_vm_call_kw(ec, recv, id, argc, argv, me, kw_splat);
-    }
-}
-
-SORBET_INLINE
-VALUE sorbet_callSuperBlockHandler(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
-                                   VALUE block_handler) {
-    // Mostly an implementation of return rb_call_super(argc, argv);
-    rb_execution_context_t *ec = GET_EC();
-    VALUE recv = ec->cfp->self;
-    VALUE klass;
-    ID id;
-    rb_control_frame_t *cfp = ec->cfp;
-    const rb_callable_method_entry_t *me = rb_vm_frame_method_entry(cfp);
-
-    klass = RCLASS_ORIGIN(me->defined_class);
-    klass = RCLASS_SUPER(klass);
-    id = me->def->original_id;
-    me = rb_callable_method_entry(klass, id);
-
-    if (!me) {
-        // TODO do something here
-        // return rb_method_missing(recv, id, argc, argv, MISSING_SUPER);
-        rb_raise(rb_eRuntimeError, "unimplemented super with a missing method");
-        return Qnil;
-    } else {
-        ec->passed_block_handler = block_handler;
-        // TODO: consider vm_block_handler_verify?
-        return rb_vm_call_kw(ec, recv, id, argc, argv, me, kw_splat);
-    }
-}
-
-struct sorbet_iterSuperArg {
-    VALUE recv;
-    ID func;
-    int argc;
-    const VALUE *argv;
-    const rb_callable_method_entry_t *me;
-    int kw_splat;
-};
-
-static VALUE sorbet_iterSuper(VALUE obj) {
-    struct sorbet_iterSuperArg *arg = (struct sorbet_iterSuperArg *)obj;
-    return rb_vm_call_kw(GET_EC(), arg->recv, arg->func, arg->argc, arg->argv, arg->me, arg->kw_splat);
-}
-
-SORBET_INLINE
-VALUE sorbet_callSuperBlock(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
-                            BlockFFIType blockImpl, int blkMinArgs, int blkMaxArgs, VALUE closure) {
-    // Mostly an implementation of return rb_call_super(argc, argv);
-    rb_execution_context_t *ec = GET_EC();
-    VALUE recv = ec->cfp->self;
-    VALUE klass;
-    ID id;
-    rb_control_frame_t *cfp = ec->cfp;
-    const rb_callable_method_entry_t *me = rb_vm_frame_method_entry(cfp);
-
-    klass = RCLASS_ORIGIN(me->defined_class);
-    klass = RCLASS_SUPER(klass);
-    id = me->def->original_id;
-    me = rb_callable_method_entry(klass, id);
-
-    if (!me) {
-        // TODO do something here
-        // return rb_method_missing(recv, id, argc, argv, MISSING_SUPER);
-        rb_raise(rb_eRuntimeError, "unimplemented super with a missing method");
-        return Qnil;
-    }
-
-    struct sorbet_iterSuperArg arg;
-    arg.recv = recv;
-    arg.func = id;
-    arg.argc = argc;
-    arg.argv = argv;
-    arg.me = me;
-    arg.kw_splat = kw_splat;
-
-    return sorbet_rb_iterate(sorbet_iterSuper, (VALUE)&arg, blockImpl, blkMinArgs, blkMaxArgs, closure);
 }
 
 SORBET_INLINE

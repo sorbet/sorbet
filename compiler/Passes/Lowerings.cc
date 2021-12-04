@@ -193,8 +193,13 @@ public:
 class ObjIsKindOf : public IRIntrinsic {
     llvm::Value *fallbackToVM(llvm::Module &module, llvm::CallInst *instr) const {
         llvm::IRBuilder<> builder(instr);
-        return builder.CreateCall(module.getFunction("rb_obj_is_kind_of"),
-                                  {instr->getArgOperand(0), instr->getArgOperand(1)});
+
+        auto *res = builder.CreateCall(module.getFunction("rb_obj_is_kind_of"),
+                                       {instr->getArgOperand(0), instr->getArgOperand(1)});
+
+        auto *isTrueClass = module.getFunction("sorbet_isa_TrueClass");
+        ENFORCE(isTrueClass != nullptr);
+        return builder.CreateCall(isTrueClass, {res});
     }
 
 public:
@@ -240,10 +245,7 @@ public:
         auto valueName = value->getName();
         for (const auto &[_rubySourceName, rubyCApiName] : knownSymbolMapping) {
             if (valueName == rubyCApiName) {
-                // We could use Payload::rubyTrue, but it takes a CompilerState which we don't have.
-                auto fn = module.getFunction("sorbet_rubyTrue");
-                ENFORCE(fn != nullptr);
-                return builder.CreateCall(fn, {}, "trueValueRaw");
+                return llvm::ConstantInt::getTrue(lctx);
             }
         }
 
@@ -301,8 +303,7 @@ public:
     //
     //   %3 = call ... @sorbet_i_send(%struct.FunctionInlineCache* @ic_puts,
     //                                i1 false,
-    //                                i64 (i64, i64, i32, i64*, i64)* null,
-    //                                i32 0, i32 0,
+    //                                %struct.vm_ifunc* null,
     //                                %struct.rb_control_frame_struct* %cfp,
     //                                i64 %selfRaw,
     //                                i64 %rubyStr_a
@@ -329,37 +330,49 @@ public:
     // Line 8 corresponds to the sorbet_callFuncWithCache call.
     virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module,
                                      llvm::CallInst *instr) const override {
-        // Make sure cache, blk, closure, cfp and self are passed in.
-        ENFORCE(instr->arg_size() >= 5);
+        // Make sure cache, blkUsesBreak, blk, searchSuper, cfp and self are passed in.
+        const int recvArgOffset = 5;
+        ENFORCE(instr->arg_size() >= (recvArgOffset + 1));
 
         llvm::IRBuilder<> builder(instr);
         auto *cache = instr->getArgOperand(0);
-        auto *blk = instr->getArgOperand(2);
-        auto *blkMinArgs = instr->getArgOperand(3);
-        auto *blkMaxArgs = instr->getArgOperand(4);
-        auto *closure = instr->getArgOperand(5);
-        auto *cfp = instr->getArgOperand(6);
+        auto *blkIfunc = instr->getArgOperand(2);
+        auto *cfp = instr->getArgOperand(4);
 
         auto *spPtr = builder.CreateCall(module.getFunction("sorbet_get_sp"), {cfp});
         auto spPtrType = llvm::dyn_cast<llvm::PointerType>(spPtr->getType());
         llvm::Value *sp = builder.CreateLoad(spPtrType->getElementType(), spPtr);
-        for (auto iter = std::next(instr->arg_begin(), 7); iter < instr->arg_end(); ++iter) {
+        for (auto iter = std::next(instr->arg_begin(), recvArgOffset); iter < instr->arg_end(); ++iter) {
             sp = builder.CreateCall(module.getFunction("sorbet_pushValueStack"), {sp, iter->get()});
         }
         builder.CreateStore(sp, spPtr);
 
-        if (llvm::isa<llvm::ConstantPointerNull>(blk)) {
+        auto *searchSuper = llvm::dyn_cast<llvm::ConstantInt>(instr->getArgOperand(3));
+        ENFORCE(searchSuper);
+        bool usesSuper = searchSuper->equalsInt(1);
+
+        if (llvm::isa<llvm::ConstantPointerNull>(blkIfunc)) {
+            llvm::StringRef func = usesSuper ? llvm::StringRef("sorbet_callSuperFuncWithCache")
+                                             : llvm::StringRef("sorbet_callFuncWithCache");
             auto *blockHandler =
                 builder.CreateCall(module.getFunction("sorbet_vmBlockHandlerNone"), {}, "VM_BLOCK_HANDLER_NONE");
-            return builder.CreateCall(module.getFunction("sorbet_callFuncWithCache"), {cache, blockHandler}, "send");
+            return builder.CreateCall(module.getFunction(func), {cache, blockHandler}, "send");
         } else {
             auto *blkUsesBreak = llvm::dyn_cast<llvm::ConstantInt>(instr->getArgOperand(1));
             ENFORCE(blkUsesBreak);
+            bool usesBreak = blkUsesBreak->equalsInt(1);
 
-            auto *callImpl = blkUsesBreak->equalsInt(1) ? module.getFunction("sorbet_callFuncBlockWithCache")
-                                                        : module.getFunction("sorbet_callFuncBlockWithCache_noBreak");
+            llvm::StringRef func;
+            if (usesSuper) {
+                func = usesBreak ? llvm::StringRef("sorbet_callSuperFuncBlockWithCache")
+                                 : llvm::StringRef("sorbet_callSuperFuncBlockWithCache_noBreak");
+            } else {
+                func = usesBreak ? llvm::StringRef("sorbet_callFuncBlockWithCache")
+                                 : llvm::StringRef("sorbet_callFuncBlockWithCache_noBreak");
+            }
 
-            return builder.CreateCall(callImpl, {cache, blk, blkMinArgs, blkMaxArgs, closure}, "sendWithBlock");
+            auto *callImpl = module.getFunction(func);
+            return builder.CreateCall(callImpl, {cache, blkIfunc}, "sendWithBlock");
         }
     }
 } SorbetSend;

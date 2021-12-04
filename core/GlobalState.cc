@@ -296,6 +296,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::StubModule());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
     ENFORCE(id == Symbols::StubMixin());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::PlaceholderMixin());
+    ENFORCE(id == Symbols::PlaceholderMixin());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubSuperClass());
     ENFORCE(id == Symbols::StubSuperClass());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerable());
@@ -839,7 +841,7 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
     // the previous name was: for `x$n` where `n` is larger than 2, it'll be `x$(n-1)`, for bare `x`,
     // it'll be whatever the largest `x$n` that exists is, if any; otherwise, there will be none.
     ENFORCE(sym.exists(), "lookup up previous name of non-existing symbol");
-    NameRef name = sym.data(*this)->name;
+    NameRef name = sym.name(*this);
     auto ownerScope = owner.dataAllowingNone(*this);
 
     if (name.kind() == NameKind::UNIQUE) {
@@ -2009,9 +2011,9 @@ MethodRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
 
 MethodRef GlobalState::lookupStaticInitForClass(ClassOrModuleRef klass) const {
     auto classData = klass.data(*this);
-    auto ref = classData->lookupSingletonClass(*this).data(*this)->findMember(*this, core::Names::staticInit());
+    auto ref = classData->lookupSingletonClass(*this).data(*this)->findMethod(*this, core::Names::staticInit());
     ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.toString(*this));
-    return ref.asMethodRef();
+    return ref;
 }
 
 MethodRef GlobalState::staticInitForFile(Loc loc) {

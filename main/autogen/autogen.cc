@@ -14,8 +14,7 @@ namespace sorbet::autogen {
 class AutogenWalk {
     vector<Definition> defs;
     vector<Reference> refs;
-    vector<core::NameRef>
-    requires;
+    vector<core::NameRef> requireStatements;
     vector<DefinitionRef> nesting;
 
     enum class ScopeType { Class, Block };
@@ -28,8 +27,8 @@ class AutogenWalk {
     vector<core::NameRef> symbolName(core::Context ctx, core::SymbolRef sym) {
         vector<core::NameRef> out;
         while (sym.exists() && sym != core::Symbols::root()) {
-            out.emplace_back(sym.data(ctx)->name);
-            sym = sym.data(ctx)->owner;
+            out.emplace_back(sym.name(ctx));
+            sym = sym.owner(ctx);
         }
         reverse(out.begin(), out.end());
         return out;
@@ -263,13 +262,13 @@ public:
 
         // if the RHS is _also_ a constant, then this is an alias
         auto *rhs = ast::cast_tree<ast::ConstantLit>(original.rhs);
-        if (rhs && rhs->symbol.exists() && !rhs->symbol.data(ctx)->isTypeAlias()) {
+        if (rhs && rhs->symbol.exists() && !rhs->symbol.isTypeAlias(ctx)) {
             def.type = Definition::Type::Alias;
             // since this is a `post`- method, then we've already created a `Reference` for the constant on the
             // RHS. Mark this `Definition` as an alias for it.
             ENFORCE(refMap.count(original.rhs.get()));
             def.aliased_ref = refMap[original.rhs.get()];
-        } else if (lhs->symbol.exists() && lhs->symbol.data(ctx)->isTypeAlias()) {
+        } else if (lhs->symbol.exists() && lhs->symbol.isTypeAlias(ctx)) {
             // if the LHS has already been annotated as a type alias by the namer, the definition is (by definition,
             // hah) a type alias.
             def.type = Definition::Type::TypeAlias;
@@ -307,10 +306,10 @@ public:
             ignoring.emplace_back(original);
         }
         // This means it's a `require`; mark it as such
-        if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->args.size() == 1) {
-            auto *lit = ast::cast_tree<ast::Literal>(original->args.front());
+        if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->numPosArgs() == 1) {
+            auto *lit = ast::cast_tree<ast::Literal>(original->getPosArg(0));
             if (lit && lit->isString(ctx)) {
-                requires.emplace_back(lit->asString(ctx));
+                requireStatements.emplace_back(lit->asString(ctx));
             }
         }
         return tree;
@@ -331,7 +330,7 @@ public:
         ParsedFile out;
         out.refs = move(refs);
         out.defs = move(defs);
-        out.requires = move(requires);
+        out.requireStatements = move(requireStatements);
         return out;
     }
 };

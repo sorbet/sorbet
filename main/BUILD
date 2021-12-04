@@ -73,6 +73,7 @@ cc_library(
         "//main/autogen",
         "//main/cache",
         "//main/lsp",
+        "//main/minimize",
         "//main/options",
         "//main/pipeline",
         "//payload:interface",

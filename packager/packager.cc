@@ -9,6 +9,7 @@
 #include "common/concurrency/WorkerPool.h"
 #include "common/formatting.h"
 #include "common/sort.h"
+#include "core/AutocorrectSuggestion.h"
 #include "core/Unfreeze.h"
 #include "core/errors/packager.h"
 #include "core/packages/PackageInfo.h"
@@ -22,11 +23,33 @@ namespace {
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 constexpr core::NameRef TEST_NAME = core::Names::Constants::Test();
 
-bool isTestFile(const core::GlobalState &gs, core::File &file) {
-    // TODO: (aadi-stripe, 11/26/2021) see if these can all be changed to use getPrintablePath
-    return absl::EndsWith(file.path(), ".test.rb") || absl::StartsWith(file.path(), "./test/") ||
-           absl::StrContains(gs.getPrintablePath(file.path()), "/test/");
+bool isPackageModule(const core::GlobalState &gs, core::ClassOrModuleRef modName) {
+    while (modName.exists() && modName != core::Symbols::root()) {
+        if (modName == core::Symbols::PackageRegistry() || modName == core::Symbols::PackageTests()) {
+            return true;
+        }
+        modName = modName.data(gs)->owner.asClassOrModuleRef();
+    }
+    return false;
 }
+
+class PrunePackageModules final {
+    const bool intentionallyLeakASTs;
+
+public:
+    PrunePackageModules(bool intentionallyLeakASTs) : intentionallyLeakASTs(intentionallyLeakASTs) {}
+
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        if (isPackageModule(ctx, klass.symbol)) {
+            if (intentionallyLeakASTs) {
+                intentionallyLeakMemory(tree.release());
+            }
+            return ast::MK::EmptyTree();
+        }
+        return tree;
+    }
+};
 
 bool isPrimaryTestNamespace(const core::NameRef ns) {
     return ns == TEST_NAME;
@@ -91,6 +114,10 @@ struct PackageName {
     string toString(const core::GlobalState &gs) const {
         return absl::StrJoin(fullName.parts, "::", NameFormatter(gs));
     }
+
+    bool operator==(const PackageName &rhs) const {
+        return mangledName == rhs.mangledName;
+    }
 };
 
 enum class ImportType {
@@ -145,6 +172,10 @@ public:
         return name.mangledName;
     }
 
+    const vector<core::NameRef> &fullName() const {
+        return name.fullName.parts;
+    }
+
     const std::vector<std::string> &pathPrefixes() const {
         return packagePathPrefixes;
     }
@@ -187,9 +218,161 @@ public:
         return make_unique<PackageInfoImpl>(*this);
     }
 
+    bool matchesInternalName(core::NameRef nr) const {
+        return nr == name.mangledName || nr == privateMangledName;
+    }
+
+    core::ClassOrModuleRef internalModule(const core::GlobalState &gs, bool test) const {
+        return core::Symbols::root()
+            .data(gs)
+            ->findMemberNoDealias(gs, test ? core::Names::Constants::PackageTests()
+                                           : core::Names::Constants::PackageRegistry())
+            .asClassOrModuleRef()
+            .data(gs)
+            ->findMemberNoDealias(gs, privateMangledName)
+            .asClassOrModuleRef();
+    }
+
+    vector<MissingExportMatch> findMissingExports(core::Context ctx, core::SymbolRef scope, core::NameRef name) const {
+        vector<MissingExportMatch> res;
+        for (auto &imported : importedPackageNames) {
+            auto &info = ctx.state.packageDB().getPackageInfo(imported.name.mangledName);
+            if (!info.exists()) {
+                continue;
+            }
+
+            core::SymbolRef sym = PackageInfoImpl::from(info).findPrivateSymbol(ctx, scope, false);
+            if (sym.exists() && sym.isClassOrModule()) {
+                sym = sym.asClassOrModuleRef().data(ctx)->findMember(ctx, name);
+                if (sym.exists()) {
+                    res.emplace_back(MissingExportMatch{sym, imported.name.mangledName});
+                }
+            }
+            if (core::packages::PackageDB::isTestFile(ctx, ctx.file.data(ctx))) {
+                sym = PackageInfoImpl::from(info).findPrivateSymbol(ctx, scope, true);
+                if (sym.exists() && sym.isClassOrModule()) {
+                    sym = sym.asClassOrModuleRef().data(ctx)->findMember(ctx, name);
+                    if (sym.exists()) {
+                        res.emplace_back(MissingExportMatch{sym, imported.name.mangledName});
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
     PackageInfoImpl() = default;
     explicit PackageInfoImpl(const PackageInfoImpl &) = default;
     PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;
+
+    optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
+                                                    bool isTestImport) const {
+        auto &info = PackageInfoImpl::from(pkg);
+        for (auto import : importedPackageNames) {
+            // check if we already import this, and if so, don't
+            // return an autocorrect
+            if (import.name == info.name) {
+                return nullopt;
+            }
+        }
+
+        core::Loc insertionLoc = loc.adjust(gs, core::INVALID_POS_LOC, core::INVALID_POS_LOC);
+        // first let's try adding it to the end of the imports.
+        if (!importedPackageNames.empty()) {
+            auto lastOffset = importedPackageNames.back().name.loc;
+            insertionLoc = {loc.file(), lastOffset.endPos(), lastOffset.endPos()};
+        } else {
+            // if we don't have any imports, then we can try adding it
+            // either before the first export, or if we have no
+            // exports, then right before the final `end`
+            u4 exportLoc;
+            if (!exports.empty()) {
+                exportLoc = exports.front().fqn.loc.beginPos() - "export "sv.size() - 1;
+            } else {
+                exportLoc = loc.endPos() - "end"sv.size() - 1;
+            }
+            // we want to find the end of the last non-empty line, so
+            // let's do something gross: walk backward until we find non-whitespace
+            const auto &file_source = loc.file().data(gs).source();
+            while (isspace(file_source[exportLoc])) {
+                exportLoc--;
+                // this shouldn't happen in a well-formatted
+                // `__package.rb` file, but just to be safe
+                if (exportLoc == 0) {
+                    return nullopt;
+                }
+            }
+            insertionLoc = {loc.file(), exportLoc + 1, exportLoc + 1};
+        }
+        ENFORCE(insertionLoc.exists());
+
+        // now find the appropriate place for it, specifically by
+        // finding the import that directly preceeds it, if any
+        core::AutocorrectSuggestion suggestion(
+            fmt::format("Import `{}` in package `{}`", info.name.toString(gs), name.toString(gs)),
+            {{insertionLoc,
+              fmt::format("\n  {} {}", isTestImport ? "test_import" : "import", info.name.toString(gs))}});
+        return {suggestion};
+    }
+
+    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const vector<core::NameRef> newExport,
+                                                    bool isPrivateTestExport) const {
+        for (auto expt : exports) {
+            // check if we already import this, and if so, don't
+            // return an autocorrect
+            if (expt.fqn.parts == newExport) {
+                return nullopt;
+            }
+        }
+
+        auto insertionLoc = core::Loc::none(loc.file());
+        // first let's try adding it to the end of the imports.
+        if (!exports.empty()) {
+            auto lastOffset = exports.back().fqn.loc;
+            insertionLoc = {loc.file(), lastOffset.endPos(), lastOffset.endPos()};
+        } else {
+            // if we don't have any imports, then we can try adding it
+            // either before the first export, or if we have no
+            // exports, then right before the final `end`
+            u4 exportLoc = loc.endPos() - "end"sv.size() - 1;
+            // we want to find the end of the last non-empty line, so
+            // let's do something gross: walk backward until we find non-whitespace
+            const auto &file_source = loc.file().data(gs).source();
+            while (isspace(file_source[exportLoc])) {
+                exportLoc--;
+                // this shouldn't happen in a well-formatted
+                // `__package.rb` file, but just to be safe
+                if (exportLoc == 0) {
+                    return nullopt;
+                }
+            }
+            insertionLoc = {loc.file(), exportLoc + 1, exportLoc + 1};
+        }
+        ENFORCE(insertionLoc.exists());
+
+        // now find the appropriate place for it, specifically by
+        // finding the import that directly preceeds it, if any
+        auto strName = absl::StrJoin(newExport, "::", NameFormatter(gs));
+        core::AutocorrectSuggestion suggestion(
+            fmt::format("Export `{}` in package `{}`", strName, name.toString(gs)),
+            {{insertionLoc, fmt::format("\n  {} {}", isPrivateTestExport ? "export_for_test" : "export", strName)}});
+        return {suggestion};
+    }
+
+private:
+    // Recursively walk up a symbol's scope from the package's internal module.
+    core::SymbolRef findPrivateSymbol(const core::GlobalState &gs, core::SymbolRef sym, bool test) const {
+        if (!sym.exists() || sym == core::Symbols::root()) {
+            return core::SymbolRef();
+        } else if (sym.name(gs).isPackagerName(gs)) {
+            return internalModule(gs, test);
+        }
+        auto owner = findPrivateSymbol(gs, sym.owner(gs), test);
+        if (owner.exists() && owner.isClassOrModule()) {
+            return owner.asClassOrModuleRef().data(gs)->findMember(gs, sym.name(gs));
+        }
+        return owner;
+    }
 };
 
 void checkPackageName(core::Context ctx, ast::UnresolvedConstantLit *constLit) {
@@ -463,7 +646,9 @@ struct PackageInfoFinder {
 
         // Sanity check arguments for unrecognized methods
         if (!isSpecMethod(send)) {
-            for (const auto &arg : send.args) {
+            const auto numPosArgs = send.numPosArgs();
+            for (auto i = 0; i < numPosArgs; ++i) {
+                auto &arg = send.getPosArg(i);
                 if (!ast::isa_tree<ast::Literal>(arg)) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Packager::InvalidPackageExpression)) {
                         e.setHeader("Invalid expression in package: Arguments to functions must be literals");
@@ -477,17 +662,19 @@ struct PackageInfoFinder {
             return tree;
         }
 
-        if (send.fun == core::Names::export_() && send.args.size() == 1) {
+        if (send.fun == core::Names::export_() && send.numPosArgs() == 1) {
             // null indicates an invalid export.
-            if (auto target = verifyConstant(ctx, core::Names::export_(), send.args[0])) {
+            if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
+                auto &arg = send.getPosArg(0);
                 exported.emplace_back(getFullyQualifiedName(ctx, target), ExportType::Public);
                 // Transform the constant lit to refer to the target within the mangled package namespace.
-                send.args[0] = prependInternalPackageName(ctx, move(send.args[0]));
+                arg = prependInternalPackageName(ctx, move(send.getPosArg(0)));
             }
         }
-        if (send.fun == core::Names::export_for_test() && send.args.size() == 1) {
+        if (send.fun == core::Names::export_for_test() && send.numPosArgs() == 1) {
             // null indicates an invalid export.
-            if (auto target = verifyConstant(ctx, core::Names::export_for_test(), send.args[0])) {
+            if (auto target = verifyConstant(ctx, core::Names::export_for_test(), send.getPosArg(0))) {
+                auto &arg = send.getPosArg(0);
                 auto fqn = getFullyQualifiedName(ctx, target);
                 ENFORCE(fqn.parts.size() > 0);
                 if (isTestNamespace(ctx.state, fqn.parts[0])) {
@@ -499,13 +686,13 @@ struct PackageInfoFinder {
                     exported.emplace_back(move(fqn), ExportType::PrivateTest);
                 }
                 // Transform the constant lit to refer to the target within the mangled package namespace.
-                send.args[0] = prependInternalPackageName(ctx, move(send.args[0]));
+                arg = prependInternalPackageName(ctx, move(arg));
             }
         }
 
-        if ((send.fun == core::Names::import() || send.fun == core::Names::test_import()) && send.args.size() == 1) {
+        if ((send.fun == core::Names::import() || send.fun == core::Names::test_import()) && send.numPosArgs() == 1) {
             // null indicates an invalid import.
-            if (auto target = verifyConstant(ctx, send.fun, send.args[0])) {
+            if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto name = getPackageName(ctx, target);
                 if (name.mangledName == info->name.mangledName) {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
@@ -797,13 +984,15 @@ public:
 
 class ImportTreeBuilder final {
     // PackageInfoImpl package; // The package we are building an import tree for.
+    const FullyQualifiedName *fullPkgName;
     core::NameRef pkgMangledName;
     core::NameRef privatePkgMangledName;
     ImportTree root;
 
 public:
     ImportTreeBuilder(const PackageInfoImpl &package)
-        : pkgMangledName(package.name.mangledName), privatePkgMangledName(package.privateMangledName) {}
+        : fullPkgName(&(package.name.fullName)), pkgMangledName(package.name.mangledName),
+          privatePkgMangledName(package.privateMangledName) {}
     ImportTreeBuilder(const ImportTreeBuilder &) = delete;
     ImportTreeBuilder(ImportTreeBuilder &&) = default;
     ImportTreeBuilder &operator=(const ImportTreeBuilder &) = delete;
@@ -934,11 +1123,27 @@ private:
             node = child.get();
         }
 
-        // If the node already has an import source, this is a conflicting import.
-        // See test/cli/package-import-conflicts/ for an example.
-        if (node->source.exists() && importType != ImportType::Friend) {
-            addImportConflictError(ctx, loc, node->source.importLoc, exportFqn.parts);
+        if (importType != ImportType::Friend && node->source.exists()) {
+            // If the node already has an import source, this is a conflicting import.
+            // See test/cli/package-import-conflicts/ for an example.
+
+            addConflictingImportSourcesError(ctx, loc, node->source.importLoc, exportFqn.parts);
+
+            // Don't add source; import will not get re-mapped.
+            return;
         }
+
+        if (importType != ImportType::Friend && fullPkgName->isSuffix(exportFqn)) {
+            // If the import is a prefix of the current package, add an error, as this
+            // is by definition a conflicting import.
+            // See test/cli/package-import-parent-package-conflict/ for an example.
+            addPrefixImportError(ctx, loc, importedPackage.name.fullName.parts, exportFqn.parts);
+
+            // Don't add source; import will not get mapped. This prevents an additional
+            // redefinition error in the namer.
+            return;
+        }
+
         node->source = ImportTree::Source{importedPackage.name.mangledName, loc, importType, isEnumeratedImport};
     }
 
@@ -998,7 +1203,7 @@ private:
                 // A conflicting import exists. Only report errors while constructing the test output
                 // to avoid duplicate errors because test imports are a superset of normal imports.
                 if (moduleType == ModuleType::PrivateTest && !isFriendImport) {
-                    addImportConflictError(ctx, source.importLoc, parentSrc.importLoc, parts);
+                    addConflictingImportSourcesError(ctx, source.importLoc, parentSrc.importLoc, parts);
                 }
 
                 return;
@@ -1045,16 +1250,30 @@ private:
         }
     }
 
-    // Create an error that represents an import conflict; namely a package importing two names where one is a
-    // prefix of another. This is disallowed, as it would (rightly) cause a redefinition error in the namer pass.
-    void addImportConflictError(core::Context ctx, const core::LocOffsets &loc, const core::LocOffsets &otherLoc,
-                                const vector<core::NameRef> &nameParts) {
+    // Create an error that occurs if a package imports two names where one is a prefix of another. This is disallowed,
+    // as it would (rightly) cause a redefinition error in the namer pass.
+    void addConflictingImportSourcesError(core::Context ctx, const core::LocOffsets &loc,
+                                          const core::LocOffsets &otherLoc, const vector<core::NameRef> &nameParts) {
         if (auto e = ctx.beginError(loc, core::errors::Packager::ImportConflict)) {
             // TODO Fix flaky ordering of errors. This is strange...not being done in parallel,
             // and the file processing order is consistent.
             e.setHeader("Conflicting import sources for `{}`",
                         fmt::map_join(nameParts, "::", [&](const auto &nr) { return nr.show(ctx); }));
             e.addErrorLine(core::Loc(ctx.file, otherLoc), "Conflict from");
+        }
+    }
+
+    // Create an error that occurs if a package's import exports a prefix of the package's name. This is disallowed,
+    // as it would (rightly) cause a redefinition error in the namer pass.
+    void addPrefixImportError(core::Context ctx, const core::LocOffsets &loc,
+                              const vector<core::NameRef> &importedPackageNameParts,
+                              const vector<core::NameRef> &exportedPrefixNameParts) {
+        if (auto e = ctx.beginError(loc, core::errors::Packager::ImportConflict)) {
+            e.setHeader("Package {} cannot import {}. The latter exports the constant {}, which is a prefix of the "
+                        "importing package",
+                        fmt::map_join(fullPkgName->parts, "::", [&](const auto &nr) { return nr.show(ctx); }),
+                        fmt::map_join(importedPackageNameParts, "::", [&](const auto &nr) { return nr.show(ctx); }),
+                        fmt::map_join(exportedPrefixNameParts, "::", [&](const auto &nr) { return nr.show(ctx); }));
         }
     }
 
@@ -1200,24 +1419,23 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
     return file;
 }
 
-ast::ParsedFile rewritePackagedFile(core::GlobalState &gs, ast::ParsedFile parsedFile) {
-    auto &file = parsedFile.file.data(gs);
+ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFile) {
+    auto &file = parsedFile.file.data(ctx);
     ENFORCE(file.sourceType != core::File::Type::Package);
-    core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
-    auto &pkg = gs.packageDB().getPackageForFile(ctx, ctx.file);
+    auto &pkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
     if (pkg.exists()) {
         auto &pkgImpl = PackageInfoImpl::from(pkg);
 
         // Wrap the file in a package module (ending with _Package_Private) to put it by default in the package's
         // private namespace (private-by-default paradigm).
-        parsedFile =
-            wrapFileInPackageModule(ctx, move(parsedFile), pkgImpl.privateMangledName, pkgImpl, isTestFile(gs, file));
+        parsedFile = wrapFileInPackageModule(ctx, move(parsedFile), pkgImpl.privateMangledName, pkgImpl,
+                                             core::packages::PackageDB::isTestFile(ctx, file));
     } else {
         // Don't transform, but raise an error on the first line.
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
             e.setHeader("File `{}` does not belong to a package; add a `{}` file to one "
                         "of its parent directories",
-                        ctx.file.data(gs).path(), "__package.rb");
+                        ctx.file.data(ctx).path(), "__package.rb");
         }
     }
     return parsedFile;
@@ -1228,7 +1446,8 @@ ast::ParsedFile rewritePackagedFile(core::GlobalState &gs, ast::ParsedFile parse
 vector<ast::ParsedFile> rewritePackagedFilesFast(core::GlobalState &gs, vector<ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "packager.rewritePackagedFilesFast");
     for (auto i = 0; i < files.size(); i++) {
-        files[i] = rewritePackagedFile(gs, move(files[i]));
+        core::Context ctx(gs, core::Symbols::root(), files[i].file);
+        files[i] = rewritePackagedFile(ctx, move(files[i]));
     }
     return files;
 }
@@ -1268,20 +1487,11 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
         }
     }
 
+    // Step 2:
+    // * Find package files and rewrite them into virtual AST mappings.
+    // * Find files within each package and rewrite each to be wrapped by their virtual package namespace.
     {
-        Timer timeit(gs.tracer(), "packager.rewritePackages");
-        // Step 2: Rewrite packages. Can be done in parallel (and w/ step 3) if this becomes a bottleneck.
-        for (auto &file : files) {
-            if (file.file.data(gs).sourceType == core::File::Type::Package) {
-                core::Context ctx(gs, core::Symbols::root(), file.file);
-                file = rewritePackage(ctx, move(file));
-            }
-        }
-    }
-
-    // Step 3: Find files within each package and rewrite each.
-    {
-        Timer timeit(gs.tracer(), "packager.rewritePackagedFiles");
+        Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
 
         auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(files.size());
         auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(files.size());
@@ -1289,8 +1499,8 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
             fileq->push(move(file), 1);
         }
 
-        workers.multiplexJob("rewritePackagedFiles", [&gs, fileq, resultq]() {
-            Timer timeit(gs.tracer(), "packager.rewritePackagedFilesWorker");
+        workers.multiplexJob("rewritePackagesAndFiles", [&gs, fileq, resultq]() {
+            Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
             vector<ast::ParsedFile> results;
             u4 filesProcessed = 0;
             ast::ParsedFile job;
@@ -1298,8 +1508,12 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                 if (result.gotItem()) {
                     filesProcessed++;
                     auto &file = job.file.data(gs);
+                    core::Context ctx(gs, core::Symbols::root(), job.file);
+
                     if (file.sourceType == core::File::Type::Normal) {
-                        job = rewritePackagedFile(gs, move(job));
+                        job = rewritePackagedFile(ctx, move(job));
+                    } else if (file.sourceType == core::File::Type::Package) {
+                        job = rewritePackage(ctx, move(job));
                     }
                     results.emplace_back(move(job));
                 }
@@ -1345,6 +1559,13 @@ vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<a
     }
     ENFORCE(gs.namesUsedTotal() == namesUsed);
     return files;
+}
+
+ast::ParsedFile Packager::removePackageModules(core::Context ctx, ast::ParsedFile pf, bool intentionallyLeakASTs) {
+    ENFORCE(pf.file.data(ctx).isPackage());
+    PrunePackageModules prune(intentionallyLeakASTs);
+    pf.tree = ast::ShallowMap::apply(ctx, prune, move(pf.tree));
+    return pf;
 }
 
 } // namespace sorbet::packager

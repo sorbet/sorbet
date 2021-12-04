@@ -130,7 +130,8 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
     if (sig == nullptr) {
         return;
     }
-    auto *block = ast::cast_tree<ast::Block>(sig->block);
+
+    auto *block = sig->block();
     if (block == nullptr) {
         return;
     }
@@ -145,11 +146,11 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
     }
 
     // build a lookup table that maps from names to the types they have
-    auto [kwStart, kwEnd] = params->kwArgsRange();
+    auto numKwArgs = params->numKwArgs();
     UnorderedMap<core::NameRef, const ast::ExpressionPtr *> argTypeMap;
-    for (int i = kwStart; i < kwEnd; i += 2) {
-        auto *argName = ast::cast_tree<ast::Literal>(params->args[i]);
-        auto *argVal = &params->args[i + 1];
+    for (int i = 0; i < numKwArgs; ++i) {
+        auto *argName = ast::cast_tree<ast::Literal>(params->getKwKey(i));
+        auto *argVal = &params->getKwValue(i);
         if (argName->isSymbol(ctx)) {
             argTypeMap[argName->asSymbol(ctx)] = argVal;
         }

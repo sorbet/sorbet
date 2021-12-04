@@ -1,4 +1,7 @@
 #include "ast/Trees.h"
+#include "absl/synchronization/blocking_counter.h"
+#include "common/concurrency/ConcurrentQueue.h"
+#include "common/concurrency/WorkerPool.h"
 #include "common/formatting.h"
 #include "common/typecase.h"
 #include "core/Symbols.h"
@@ -229,11 +232,10 @@ Assign::Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs)
 }
 
 Send::Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, Send::ARGS_store args,
-           ExpressionPtr block, Flags flags)
-    : loc(loc), fun(fun), flags(flags), numPosArgs(numPosArgs), recv(std::move(recv)), args(std::move(args)),
-      block(std::move(block)) {
+           Flags flags)
+    : loc(loc), fun(fun), flags(flags), numPosArgs_(numPosArgs), recv(std::move(recv)), args(std::move(args)) {
     categoryCounterInc("trees", "send");
-    if (block) {
+    if (hasBlock()) {
         counterInc("trees.send.with_block");
     }
     histogramInc("trees.send.args", this->args.size());
@@ -299,25 +301,25 @@ ConstantLit::fullUnresolvedPath(const core::GlobalState &gs) const {
     if (this->symbol != core::Symbols::StubModule()) {
         return nullopt;
     }
-    ENFORCE(!this->resolutionScopes.empty());
+    ENFORCE(this->resolutionScopes != nullptr && !this->resolutionScopes->empty());
     vector<core::NameRef> namesFailedToResolve;
     auto *nested = this;
     {
-        while (!nested->resolutionScopes.front().exists()) {
+        while (!nested->resolutionScopes->front().exists()) {
             auto *orig = cast_tree<UnresolvedConstantLit>(nested->original);
             ENFORCE(orig);
             namesFailedToResolve.emplace_back(orig->cnst);
             nested = ast::cast_tree<ast::ConstantLit>(orig->scope);
             ENFORCE(nested);
             ENFORCE(nested->symbol == core::Symbols::StubModule());
-            ENFORCE(!nested->resolutionScopes.empty());
+            ENFORCE(!nested->resolutionScopes->empty());
         }
         auto *orig = cast_tree<UnresolvedConstantLit>(nested->original);
         ENFORCE(orig);
         namesFailedToResolve.emplace_back(orig->cnst);
         absl::c_reverse(namesFailedToResolve);
     }
-    auto prefix = nested->resolutionScopes.front();
+    auto prefix = nested->resolutionScopes->front();
     return make_pair(prefix, move(namesFailedToResolve));
 }
 
@@ -378,6 +380,9 @@ template <class T> void printElems(const core::GlobalState &gs, fmt::memory_buff
     bool first = true;
     bool didshadow = false;
     for (auto &a : args) {
+        if (isa_tree<Block>(a)) {
+            continue;
+        }
         if (!first) {
             if (isa_tree<ShadowArg>(a) && !didshadow) {
                 fmt::format_to(std::back_inserter(buf), "; ");
@@ -546,7 +551,7 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
         stringifiedFlags.emplace_back("self");
     }
     if (this->flags.isRewriterSynthesized) {
-        stringifiedFlags.emplace_back("rewriter");
+        stringifiedFlags.emplace_back("rewriterSynthesized");
     }
     fmt::format_to(std::back_inserter(buf), "flags = {{{}}}\n", fmt::join(stringifiedFlags, ", "));
 
@@ -686,10 +691,12 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "orig = {}\n",
                    this->original ? this->original.showRaw(gs, tabs + 1) : "nullptr");
-    if (!resolutionScopes.empty()) {
+    // If resolutionScopes isn't null, it should not be empty.
+    ENFORCE(resolutionScopes == nullptr || !resolutionScopes->empty());
+    if (resolutionScopes != nullptr && !resolutionScopes->empty()) {
         printTabs(buf, tabs + 1);
         fmt::format_to(std::back_inserter(buf), "resolutionScopes = [{}]\n",
-                       fmt::map_join(this->resolutionScopes.begin(), this->resolutionScopes.end(), ", ",
+                       fmt::map_join(this->resolutionScopes->begin(), this->resolutionScopes->end(), ", ",
                                      [&](auto sym) { return sym.showFullName(gs); }));
     }
     printTabs(buf, tabs);
@@ -897,8 +904,8 @@ string Send::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}.{}", this->recv.toStringWithTabs(gs, tabs), this->fun.toString(gs));
     printArgs(gs, buf, this->args, tabs);
-    if (this->block != nullptr) {
-        fmt::format_to(std::back_inserter(buf), "{}", this->block.toStringWithTabs(gs, tabs));
+    if (this->hasBlock()) {
+        fmt::format_to(std::back_inserter(buf), "{}", this->block()->toStringWithTabs(gs, tabs));
     }
 
     return fmt::to_string(buf);
@@ -907,22 +914,36 @@ string Send::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
 string Send::showRaw(const core::GlobalState &gs, int tabs) {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
+
+    vector<string> stringifiedFlags;
+    if (this->flags.isPrivateOk) {
+        stringifiedFlags.emplace_back("privateOk");
+    }
+    if (this->flags.isRewriterSynthesized) {
+        stringifiedFlags.emplace_back("rewriterSynthesized");
+    }
+
+    printTabs(buf, tabs + 1);
+    fmt::format_to(std::back_inserter(buf), "flags = {{{}}}\n", fmt::join(stringifiedFlags, ", "));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "recv = {}\n", this->recv.showRaw(gs, tabs + 1));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "fun = {}\n", this->fun.showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "block = ");
-    if (this->block) {
-        fmt::format_to(std::back_inserter(buf), "{}\n", this->block.showRaw(gs, tabs + 1));
+    if (this->hasBlock()) {
+        fmt::format_to(std::back_inserter(buf), "{}\n", this->block()->showRaw(gs, tabs + 1));
     } else {
         fmt::format_to(std::back_inserter(buf), "nullptr\n");
     }
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "pos_args = {}\n", this->numPosArgs);
+    fmt::format_to(std::back_inserter(buf), "pos_args = {}\n", this->numPosArgs_);
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "args = [\n");
     for (auto &a : args) {
+        if (this->hasBlock() && a == args.back()) {
+            continue;
+        }
         printTabs(buf, tabs + 2);
         fmt::format_to(std::back_inserter(buf), "{}\n", a.showRaw(gs, tabs + 2));
     }
@@ -932,6 +953,129 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
     fmt::format_to(std::back_inserter(buf), "}}");
 
     return fmt::to_string(buf);
+}
+
+const ast::Block *Send::block() const {
+    if (hasBlock()) {
+        auto block = ast::cast_tree<ast::Block>(this->args.back());
+        ENFORCE(block);
+        return block;
+    } else {
+        return nullptr;
+    }
+}
+
+ast::Block *Send::block() {
+    if (hasBlock()) {
+        auto block = ast::cast_tree<ast::Block>(this->args.back());
+        ENFORCE(block);
+        return block;
+    } else {
+        return nullptr;
+    }
+}
+
+const ExpressionPtr *Send::rawBlock() const {
+    if (hasBlock()) {
+        return &this->args.back();
+    }
+    return nullptr;
+}
+
+ExpressionPtr *Send::rawBlock() {
+    if (hasBlock()) {
+        return &this->args.back();
+    }
+    return nullptr;
+}
+
+const ExpressionPtr *Send::kwSplat() const {
+    if (hasKwSplat()) {
+        auto index = this->args.size() - 1;
+        if (hasBlock()) {
+            index = index - 1;
+        }
+        return &this->args[index];
+    }
+    return nullptr;
+}
+
+core::LocOffsets Send::argsLoc() const {
+    if (!this->hasPosArgs() && !this->hasKwArgs()) {
+        return core::LocOffsets();
+    }
+    auto begin = this->args.begin();
+    auto end = this->args.end() - 1;
+    if (this->hasBlock()) {
+        end = end - 1;
+    }
+    return begin->loc().join(end->loc());
+}
+
+ExpressionPtr *Send::kwSplat() {
+    if (hasKwSplat()) {
+        auto index = this->args.size() - 1;
+        if (hasBlock()) {
+            index = index - 1;
+        }
+        return &this->args[index];
+    }
+    return nullptr;
+}
+
+void Send::clearArgs() {
+    this->args.clear();
+    this->flags.hasBlock = false;
+    this->numPosArgs_ = 0;
+}
+
+void Send::addPosArg(ExpressionPtr ptr) {
+    this->args.emplace(this->args.begin() + numPosArgs_, move(ptr));
+    this->numPosArgs_++;
+}
+
+void Send::insertPosArg(u2 index, ExpressionPtr arg) {
+    ENFORCE(index <= numPosArgs_);
+    this->args.emplace(this->args.begin() + index, std::move(arg));
+    this->numPosArgs_++;
+}
+
+void Send::removePosArg(u2 index) {
+    ENFORCE(index < numPosArgs_);
+    this->args.erase(this->args.begin() + index);
+    this->numPosArgs_--;
+}
+
+void Send::setBlock(ExpressionPtr block) {
+    if (hasBlock()) {
+        this->args.pop_back();
+        flags.hasBlock = false;
+    }
+
+    if (block != nullptr) {
+        this->args.emplace_back(move(block));
+        flags.hasBlock = true;
+        ENFORCE(this->block() != nullptr);
+    }
+}
+
+void Send::setKwSplat(ExpressionPtr splat) {
+    this->args.emplace(this->args.begin() + numPosArgs_, move(splat));
+}
+
+void Send::addKwArg(ExpressionPtr key, ExpressionPtr value) {
+    auto it = this->args.emplace(this->args.end() - (hasBlock() ? 1 : 0) - (hasKwSplat() ? 1 : 0), move(key));
+    this->args.emplace(it + 1, move(value));
+}
+
+ExpressionPtr Send::withNewBody(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun) {
+    auto rv = make_expression<Send>(loc, move(recv), fun, numPosArgs_, std::move(args), flags);
+
+    // Reset important metadata on this function.
+    this->numPosArgs_ = 0;
+    this->flags.hasBlock = false;
+
+    return rv;
 }
 
 string Cast::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
@@ -1269,6 +1413,33 @@ string BlockArg::nodeName() {
 
 ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};
 ParsedFilesOrCancelled::ParsedFilesOrCancelled(std::vector<ParsedFile> &&trees) : trees(move(trees)) {}
+
+ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(std::vector<ParsedFile> &&trees, WorkerPool &workers) {
+    if (!trees.empty()) {
+        // N.B.: `workers.size()` can be `0` when threads are disabled, which would result in undefined behavior for
+        // `BlockingCounter`.
+        absl::BlockingCounter threadBarrier(std::max(workers.size(), 1));
+        auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
+        for (auto &tree : trees) {
+            fileq->push(move(tree), 1);
+        }
+
+        workers.multiplexJob("deleteTrees", [fileq, &threadBarrier]() {
+            {
+                ast::ParsedFile job;
+                for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                    // Do nothing; allow the destructor of `ast::ParsedFile` to run for `job`.
+                }
+            }
+            threadBarrier.DecrementCount();
+        });
+
+        // Wait for threads to complete destructing the trees.
+        threadBarrier.Wait();
+    }
+
+    return ParsedFilesOrCancelled();
+}
 
 bool ParsedFilesOrCancelled::hasResult() const {
     return trees.has_value();

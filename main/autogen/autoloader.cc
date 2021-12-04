@@ -89,7 +89,7 @@ NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile
 
     auto fullName = parsedFile.showQualifiedName(gs, def);
 
-    return {def.data(parsedFile), fullName, parentName, parsedFile.requires, parsedFile.tree.file, pathDepth};
+    return {def.data(parsedFile), fullName, parentName, parsedFile.requireStatements, parsedFile.tree.file, pathDepth};
 }
 
 bool NamedDefinition::preferredTo(const core::GlobalState &gs, const NamedDefinition &lhs, const NamedDefinition &rhs) {
@@ -195,7 +195,7 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
         definingFile = file();
     }
     if (definingFile.exists()) {
-        requires(gs, alCfg, buf);
+        requireStatements(gs, alCfg, buf);
     }
 
     string fullName = "nil";
@@ -238,13 +238,14 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
     return to_string(buf);
 }
 
-void DefTree::requires(const core::GlobalState &gs, const AutoloaderConfig &alCfg, fmt::memory_buffer &buf) const {
+void DefTree::requireStatements(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
+                                fmt::memory_buffer &buf) const {
     if (root() || !hasDef()) {
         return;
     }
     auto &ndef = definition(gs);
     vector<string> reqs;
-    for (auto reqRef : ndef.requires) {
+    for (auto reqRef : ndef.requireStatements) {
         if (alCfg.includeRequire(reqRef)) {
             string req = reqRef.show(gs);
             reqs.emplace_back(req);

@@ -55,8 +55,8 @@ ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, 
         core::ClassOrModuleRef klass;
         // Logic cargo culted from `global2Local` in `walker_build.cc`.
         if (id.kind == ast::UnresolvedIdent::Kind::Instance) {
-            ENFORCE(ctx.owner.data(ctx)->isMethod());
-            klass = ctx.owner.data(ctx)->owner.asClassOrModuleRef();
+            ENFORCE(ctx.owner.isMethod());
+            klass = ctx.owner.owner(ctx).asClassOrModuleRef();
         } else {
             // Class var.
             klass = ctx.owner.enclosingClass(ctx);
@@ -69,11 +69,12 @@ ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, 
         const core::lsp::Query &lspQuery = ctx.state.lspQuery;
         if (sym.exists() && sym.isFieldOrStaticField() &&
             (lspQuery.matchesSymbol(sym) || lspQuery.matchesLoc(core::Loc(ctx.file, id.loc)))) {
+            auto field = sym.asFieldRef();
             core::TypeAndOrigins tp;
-            tp.type = sym.data(ctx)->resultType;
-            tp.origins.emplace_back(sym.data(ctx)->loc());
+            tp.type = field.data(ctx)->resultType;
+            tp.origins.emplace_back(field.data(ctx)->loc());
             core::lsp::QueryResponse::pushQueryResponse(
-                ctx, core::lsp::FieldResponse(sym.asFieldRef(), core::Loc(ctx.file, id.loc), id.name, tp));
+                ctx, core::lsp::FieldResponse(field, core::Loc(ctx.file, id.loc), id.name, tp));
         }
     }
     return tree;
@@ -84,26 +85,26 @@ namespace {
 void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery,
                   core::SymbolRef symbolBeforeDealias) {
     // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
-    auto symbol = symbolBeforeDealias.data(ctx)->dealias(ctx);
+    auto symbol = symbolBeforeDealias.dealias(ctx);
     while (lit && symbol.exists() && lit->original) {
         auto &unresolved = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(lit->original);
         if (lspQuery.matchesLoc(core::Loc(ctx.file, lit->loc)) || lspQuery.matchesSymbol(symbol)) {
             // This basically approximates the cfg::Alias case from Environment::processBinding.
             core::TypeAndOrigins tp;
-            tp.origins.emplace_back(symbol.data(ctx)->loc());
+            tp.origins.emplace_back(symbol.loc(ctx));
 
             if (symbol.isClassOrModule()) {
-                tp.type = symbol.data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();
+                tp.type = symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();
             } else {
-                auto resultType = symbol.data(ctx)->resultType;
+                auto resultType = symbol.resultType(ctx);
                 tp.type = resultType == nullptr ? core::Types::untyped(ctx, symbol) : resultType;
             }
 
             core::lsp::ConstantResponse::Scopes scopes;
             if (symbol == core::Symbols::StubModule()) {
-                scopes = lit->resolutionScopes;
+                scopes = *lit->resolutionScopes;
             } else {
-                scopes = {symbol.data(ctx)->owner};
+                scopes = {symbol.owner(ctx)};
             }
 
             auto resp = core::lsp::ConstantResponse(symbol, symbolBeforeDealias, core::Loc(ctx.file, lit->loc), scopes,
@@ -113,7 +114,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
         lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope);
         if (lit) {
             symbolBeforeDealias = lit->symbol;
-            symbol = symbolBeforeDealias.data(ctx)->dealias(ctx);
+            symbol = symbolBeforeDealias.dealias(ctx);
         }
     }
 }

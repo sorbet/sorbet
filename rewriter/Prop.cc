@@ -188,17 +188,17 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         expectedPosArgs = 2;
     }
 
-    if (send->numPosArgs > expectedPosArgs) {
+    if (send->numPosArgs() > expectedPosArgs) {
         // Too many args, even if all optional args were provided.
         return nullopt;
     }
 
     // ----- What's the prop's name? -----
     if (!ret.name.exists()) {
-        if (send->args.empty()) {
+        if (!send->hasPosArgs()) {
             return nullopt;
         }
-        auto *sym = ast::cast_tree<ast::Literal>(send->args[0]);
+        auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(0));
         if (!sym || !sym->isSymbol(ctx)) {
             return nullopt;
         }
@@ -211,13 +211,13 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
 
     // ----- What's the prop's type? -----
     if (ret.type == nullptr) {
-        if (send->numPosArgs == 1) {
+        if (send->numPosArgs() == 1) {
             // Type must have been inferred from prop method (like created_prop) or
             // been given in second argument.
             return nullopt;
         }
 
-        ret.type = ASTUtil::dupType(send->args[1]);
+        ret.type = ASTUtil::dupType(send->getPosArg(1));
         if (ret.type == nullptr) {
             return nullopt;
         }
@@ -230,7 +230,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     // Deep copy the rules hash so that we can destruct it at will to parse things,
     // without having to worry about whether we stole things from the tree.
     ast::ExpressionPtr rulesTree = ASTUtil::mkKwArgsHash(send);
-    if (rulesTree == nullptr && send->numPosArgs >= expectedPosArgs) {
+    if (rulesTree == nullptr && send->numPosArgs() >= expectedPosArgs) {
         // No rules, but 3 args including name and type. Also not a T::Props
         return std::nullopt;
     }
@@ -474,25 +474,15 @@ ast::ExpressionPtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send 
     auto true_ = ast::MK::True(send->loc);
 
     auto *copy = ast::cast_tree<ast::Send>(result);
-    if (copy->hasKwArgs() || copy->args.empty()) {
+    if (copy->hasKwArgs() || !copy->hasPosArgs()) {
         // append to the inline keyword arguments of the send
-        auto pos = copy->args.end();
-        if (copy->hasKwSplat()) {
-            pos--;
-        }
-
-        pos = copy->args.insert(pos, move(withoutAccessors));
-        pos++;
-        copy->args.insert(pos, move(true_));
+        copy->addKwArg(move(withoutAccessors), move(true_));
     } else {
-        if (auto *hash = ast::cast_tree<ast::Hash>(copy->args.back())) {
+        if (auto *hash = ast::cast_tree<ast::Hash>(copy->getPosArg(copy->numPosArgs() - 1))) {
             hash->keys.emplace_back(move(withoutAccessors));
             hash->values.emplace_back(move(true_));
         } else {
-            auto pos = copy->args.end();
-            pos = copy->args.insert(pos, move(withoutAccessors));
-            pos++;
-            copy->args.insert(pos, move(true_));
+            copy->addKwArg(move(withoutAccessors), move(true_));
         }
     }
 
@@ -535,7 +525,19 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
         stats.emplace_back(ast::MK::Assign(prop.loc, ast::MK::Instance(prop.nameLoc, ivarName),
                                            ast::MK::Local(prop.nameLoc, prop.name)));
     }
-    auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::ZSuper(klassDeclLoc));
+    // Normally we wouldn't need to call super here: the compiler will use the types
+    // in the sig to typecheck everything, just like sorbet-runtime, and we've
+    // generated a body to set all the appropriate instance variables, just like
+    // sorbet-runtime.  (deprecated) enum props, however, are not typechecked
+    // properly by the compiler, so we need to use super to call into sorbet-runtime
+    // to get the correct handling.
+    ast::ExpressionPtr maybeSuper;
+    if (absl::c_any_of(props, [](const auto &prop) { return prop.enum_ != nullptr; })) {
+        maybeSuper = ast::MK::ZSuper(klassDeclLoc);
+    } else {
+        maybeSuper = ast::MK::Nil(klassDeclLoc);
+    }
+    auto body = ast::MK::InsSeq(klassLoc, std::move(stats), std::move(maybeSuper));
 
     vector<ast::ExpressionPtr> result;
     result.emplace_back(ast::MK::SigVoid(klassDeclLoc, std::move(sigArgs)));

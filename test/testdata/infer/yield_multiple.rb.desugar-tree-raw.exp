@@ -7,6 +7,7 @@ ClassDef{
     }]
   rhs = [
     Send{
+      flags = {privateOk}
       recv = Local{
         localVariable = <U <self>>
       }
@@ -25,6 +26,7 @@ ClassDef{
     }
 
     Send{
+      flags = {privateOk}
       recv = Local{
         localVariable = <U <self>>
       }
@@ -33,7 +35,9 @@ ClassDef{
         args = [
         ]
         body = Send{
+          flags = {}
           recv = Send{
+            flags = {privateOk}
             recv = Local{
               localVariable = <U <self>>
             }
@@ -43,8 +47,11 @@ ClassDef{
             args = [
               Literal{ value = :blk }
               Send{
+                flags = {}
                 recv = Send{
+                  flags = {}
                   recv = Send{
+                    flags = {}
                     recv = UnresolvedConstantLit{
                       cnst = <C <U T>>
                       scope = EmptyTree
@@ -105,6 +112,7 @@ ClassDef{
       rhs = InsSeq{
         stats = [
           Send{
+            flags = {}
             recv = UnresolvedIdent{
               kind = Local
               name = <U blk>
@@ -119,6 +127,7 @@ ClassDef{
           }
         ],
         expr = Send{
+          flags = {}
           recv = UnresolvedIdent{
             kind = Local
             name = <U blk>

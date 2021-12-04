@@ -69,8 +69,8 @@ TEST_CASE("Errors") {
 TEST_CASE("SymbolRef") {
     GlobalState gs(errorQueue);
     gs.initEmpty();
-    SymbolRef ref = Symbols::Object();
-    CHECK_EQ(ref, ref.data(gs)->ref(gs));
+    auto ref = Symbols::Object();
+    CHECK_EQ(SymbolRef(ref), ref.data(gs)->ref(gs));
 }
 
 struct FileIsTypedCase {

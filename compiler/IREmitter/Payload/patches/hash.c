@@ -132,3 +132,7 @@ int sorbet_rb_hash_update_withBlock_i(VALUE key, VALUE value, VALUE argsv) {
     RHASH_UPDATE(hash, key, sorbet_rb_hash_update_withBlock_callback, (VALUE)&callback_args);
     return ST_CONTINUE;
 }
+
+int sorbet_hash_stlike_lookup(VALUE hash, VALUE key, VALUE *val) {
+    return hash_stlike_lookup(hash, key, val);
+}

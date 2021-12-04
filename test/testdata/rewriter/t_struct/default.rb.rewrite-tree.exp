@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def initialize<<todo method>>(foo: = 3, &<blk>)
       begin
         @foo = ::T.let(foo, <emptyTree>::<C Integer>)
-        <self>.<super>(ZSuperArgs)
+        nil
       end
     end
 
@@ -50,7 +50,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def initialize<<todo method>>(&<blk>)
-      <self>.<super>(ZSuperArgs)
+      nil
     end
 
     ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)

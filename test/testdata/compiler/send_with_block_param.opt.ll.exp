@@ -77,7 +77,7 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 
 @ruby_current_vm_ptr = external local_unnamed_addr global %struct.rb_vm_struct*, align 8
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
-@.str.6 = private unnamed_addr constant [8 x i8] c"to_proc\00", align 1
+@.str.7 = private unnamed_addr constant [8 x i8] c"to_proc\00", align 1
 @sorbet_makeBlockHandlerProc.rb_funcallv_data = internal global %struct.rb_call_data zeroinitializer, align 8
 @rb_eRuntimeError = external local_unnamed_addr global i64, align 8
 @.str.9 = private unnamed_addr constant [95 x i8] c"sorbet_getBuildSCMRevision: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
@@ -133,24 +133,27 @@ declare void @rb_raise(i64, i8*, ...) local_unnamed_addr #1
 
 declare i64 @rb_funcallv_with_cc(%struct.rb_call_data*, i64, i64, i32, i64*) local_unnamed_addr #0
 
+; Function Attrs: inaccessiblememonly nofree nosync nounwind willreturn
+declare void @llvm.experimental.noalias.scope.decl(metadata) #2
+
 declare i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct*, i32) local_unnamed_addr #0
 
 ; Function Attrs: nounwind ssp uwtable
-define weak i32 @sorbet_getIsReleaseBuild() local_unnamed_addr #2 {
+define weak i32 @sorbet_getIsReleaseBuild() local_unnamed_addr #3 {
   %1 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !6
   tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* noundef getelementptr inbounds ([93 x i8], [93 x i8]* @.str.10, i64 0, i64 0)) #6
   unreachable
 }
 
 ; Function Attrs: nounwind ssp uwtable
-define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #2 {
+define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #3 {
   %1 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !6
   tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* noundef getelementptr inbounds ([95 x i8], [95 x i8]* @.str.9, i64 0, i64 0)) #6
   unreachable
 }
 
 ; Function Attrs: sspreq
-define void @Init_send_with_block_param() local_unnamed_addr #3 {
+define void @Init_send_with_block_param() local_unnamed_addr #4 {
 entry:
   %callArgs.i = alloca [4 x i64], align 8
   %argArray.i.i = alloca [2 x i64], align 8
@@ -243,7 +246,7 @@ rb_vm_check_ints.exit.i:                          ; preds = %37, %entry
   br i1 %42, label %"func_<root>.17<static-init>$152.exit", label %43, !dbg !10
 
 43:                                               ; preds = %rb_vm_check_ints.exit.i
-  %44 = call i64 @rb_intern2(i8* noundef getelementptr inbounds ([8 x i8], [8 x i8]* @.str.6, i64 0, i64 0), i64 noundef 7) #7, !dbg !10
+  %44 = call i64 @rb_intern2(i8* noundef getelementptr inbounds ([8 x i8], [8 x i8]* @.str.7, i64 0, i64 0), i64 noundef 7) #7, !dbg !10
   %45 = call i64 @rb_funcallv_with_cc(%struct.rb_call_data* noundef nonnull @sorbet_makeBlockHandlerProc.rb_funcallv_data, i64 %28, i64 %44, i32 noundef 0, i64* noundef null) #7, !dbg !10
   br label %"func_<root>.17<static-init>$152.exit", !dbg !10
 
@@ -267,9 +270,6 @@ rb_vm_check_ints.exit.i:                          ; preds = %37, %entry
   ret void
 }
 
-; Function Attrs: inaccessiblememonly nofree nosync nounwind willreturn
-declare void @llvm.experimental.noalias.scope.decl(metadata) #4
-
 ; Function Attrs: argmemonly nofree nosync nounwind willreturn
 declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #5
 
@@ -278,9 +278,9 @@ declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #5
 
 attributes #0 = { "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #1 = { noreturn "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #2 = { nounwind ssp uwtable "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #3 = { sspreq }
-attributes #4 = { inaccessiblememonly nofree nosync nounwind willreturn }
+attributes #2 = { inaccessiblememonly nofree nosync nounwind willreturn }
+attributes #3 = { nounwind ssp uwtable "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #4 = { sspreq }
 attributes #5 = { argmemonly nofree nosync nounwind willreturn }
 attributes #6 = { noreturn nounwind }
 attributes #7 = { nounwind }

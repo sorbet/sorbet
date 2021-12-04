@@ -8,7 +8,7 @@ namespace {
 
 [[nodiscard]] bool checkForAttachedClassHint(const GlobalState &gs, ErrorBuilder &e, const SelfTypeParam expected,
                                              const ClassType got) {
-    if (expected.definition.data(gs)->name != Names::Constants::AttachedClass()) {
+    if (expected.definition.name(gs) != Names::Constants::AttachedClass()) {
         return false;
     }
 
@@ -17,7 +17,7 @@ namespace {
         return false;
     }
 
-    if (attachedClass != expected.definition.data(gs)->owner.asClassOrModuleRef()) {
+    if (attachedClass != expected.definition.owner(gs).asClassOrModuleRef()) {
         return false;
     }
 
