@@ -369,16 +369,11 @@ public:
     core::NameRef name;
 
     struct Flags {
-        bool isSelfMethod : 1;
-        bool isRewriterSynthesized : 1;
-        bool isAttrReader : 1;
-        bool discardDef : 1;
-        bool genericPropGetter : 1;
-
-        // In C++20 we can replace this with bit field initialzers
-        Flags()
-            : isSelfMethod(false), isRewriterSynthesized(false), isAttrReader(false), discardDef(false),
-              genericPropGetter(false) {}
+        bool isSelfMethod : 1 = false;
+        bool isRewriterSynthesized : 1 = false;
+        bool isAttrReader : 1 = false;
+        bool discardDef : 1 = false;
+        bool genericPropGetter : 1 = false;
     };
     CheckSize(Flags, 1, 1);
 
@@ -718,12 +713,9 @@ public:
     core::NameRef fun;
 
     struct Flags {
-        bool isPrivateOk : 1;
-        bool isRewriterSynthesized : 1;
-        bool hasBlock : 1;
-
-        // In C++20 we can replace this with bit field initialzers
-        Flags() : isPrivateOk(false), isRewriterSynthesized(false), hasBlock(false) {}
+        bool isPrivateOk : 1 = false;
+        bool isRewriterSynthesized : 1 = false;
+        bool hasBlock : 1 = false;
     };
     CheckSize(Flags, 1, 1);
 
@@ -761,7 +753,8 @@ private:
     ARGS_store args;
 
 public:
-    Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, ARGS_store args, Flags flags = {});
+    Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, ARGS_store args,
+         Flags flags = {.isPrivateOk = false, .isRewriterSynthesized = false, .hasBlock = false});
 
     ExpressionPtr deepCopy() const;
 

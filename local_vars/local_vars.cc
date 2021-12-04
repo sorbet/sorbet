@@ -14,13 +14,10 @@ class LocalNameInserter {
     friend class LocalVars;
 
     struct ArgFlags {
-        bool keyword : 1;
-        bool block : 1;
-        bool repeated : 1;
-        bool shadow : 1;
-
-        // In C++20 we can replace this with bit field initialzers
-        ArgFlags() : keyword(false), block(false), repeated(false), shadow(false) {}
+        bool keyword : 1 = false;
+        bool block : 1 = false;
+        bool repeated : 1 = false;
+        bool shadow : 1 = false;
 
         bool isPositional() const {
             return !this->keyword && !this->block && !this->repeated && !this->shadow;
