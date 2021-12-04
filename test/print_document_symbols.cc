@@ -54,9 +54,9 @@ int printDocumentSymbols(char *paths[], int fileAmount) {
     int nextId = 0;
     int fileId = 1;
     UnorderedMap<string, vector<string>> edits;
-    for (int i = 1;  i < fileAmount; i++) {
-      auto [fileUri, fileEdits] = findEditsToApply(paths[i]);
-      edits[fileUri] = fileEdits;
+    for (int i = 1; i < fileAmount; i++) {
+        auto [fileUri, fileEdits] = findEditsToApply(paths[i]);
+        edits[fileUri] = fileEdits;
     }
 
     // Send 'initialize' message.
@@ -108,16 +108,16 @@ int printDocumentSymbols(char *paths[], int fileAmount) {
 
     {
         // Initialize empty file.
-        for (auto const& [fileUri, _] : edits) {
-          auto params =
-              make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(fileUri, "ruby", fileId++, ""));
-          auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params));
-          // Discard responses.
-          lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
+        for (auto const &[fileUri, _] : edits) {
+            auto params =
+                make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(fileUri, "ruby", fileId++, ""));
+            auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params));
+            // Discard responses.
+            lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
         }
     }
 
-      for (auto const& [fileUri, fileEdits] : edits) {
+    for (auto const &[fileUri, fileEdits] : edits) {
         for (auto &fileEdit : fileEdits) {
             vector<unique_ptr<TextDocumentContentChangeEvent>> edits;
             edits.push_back(make_unique<TextDocumentContentChangeEvent>(fileEdit));
@@ -126,9 +126,10 @@ int printDocumentSymbols(char *paths[], int fileAmount) {
             auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(params));
             lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
         }
-      }
+    }
 
-    auto docSymbolParams = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(absl::StrCat(uriPrefix, paths[1])));
+    auto docSymbolParams =
+        make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(absl::StrCat(uriPrefix, paths[1])));
     auto req =
         make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(docSymbolParams));
     // Make documentSymbol request.
