@@ -14,8 +14,7 @@ namespace sorbet::autogen {
 class AutogenWalk {
     vector<Definition> defs;
     vector<Reference> refs;
-    vector<core::NameRef>
-    requires;
+    vector<core::NameRef> requireStatements;
     vector<DefinitionRef> nesting;
 
     enum class ScopeType { Class, Block };
@@ -310,7 +309,7 @@ public:
         if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->numPosArgs() == 1) {
             auto *lit = ast::cast_tree<ast::Literal>(original->getPosArg(0));
             if (lit && lit->isString(ctx)) {
-                requires.emplace_back(lit->asString(ctx));
+                requireStatements.emplace_back(lit->asString(ctx));
             }
         }
         return tree;
@@ -331,7 +330,7 @@ public:
         ParsedFile out;
         out.refs = move(refs);
         out.defs = move(defs);
-        out.requires = move(requires);
+        out.requireStatements = move(requireStatements);
         return out;
     }
 };
