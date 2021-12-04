@@ -114,12 +114,4 @@ void CompilerState::runCheapOptimizations(llvm::Function *func) {
     pm.run(*func);
 }
 
-void failCompilation(const core::GlobalState &gs, const core::Loc &loc, ConstExprStr msg) {
-    if (auto e = gs.beginError(loc, core::errors::Compiler::Unanalyzable)) {
-        e.setHeader(msg);
-    }
-
-    throw AbortCompilation(msg.str);
-}
-
 } // namespace sorbet::compiler

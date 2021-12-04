@@ -1,8 +1,6 @@
 #ifndef SORBET_COMPILER_CORE_COMPILER_STATE_H
 #define SORBET_COMPILER_CORE_COMPILER_STATE_H
 
-#include "common/ConstExprStr.h"
-#include "common/Exception.h"
 #include "compiler/Core/ForwardDeclarations.h"
 #include "core/Files.h"
 #include <memory>
@@ -67,11 +65,6 @@ public:
 
     CompilerState withFunctionEntry(llvm::BasicBlock *functionEntry);
 };
-
-// Add an error to GlobalState, and then throw to abort compilation.
-// Use only when compilation CANNOT continue.
-// (Emitting any old GlobalState error will still cause Sorbet to exit non-zero.)
-[[noreturn]] void failCompilation(const core::GlobalState &gs, const core::Loc &loc, ConstExprStr msg);
 
 } // namespace sorbet::compiler
 
