@@ -28,15 +28,19 @@ class TypeAndOrigins;
 class ArgInfo {
 public:
     struct ArgFlags {
-        bool isKeyword = false;
-        bool isRepeated = false;
-        bool isDefault = false;
-        bool isShadow = false;
-        bool isBlock = false;
+        bool isKeyword : 1;
+        bool isRepeated : 1;
+        bool isDefault : 1;
+        bool isShadow : 1;
+        bool isBlock : 1;
+
+        // In C++20 we can replace this with bit field initialzers
+        ArgFlags() : isKeyword(false), isRepeated(false), isDefault(false), isShadow(false), isBlock(false) {}
 
     private:
         friend class Symbol;
         friend class serialize::SerializerImpl;
+
         void setFromU1(u1 flags);
         u1 toU1() const;
     };
@@ -62,7 +66,7 @@ public:
     ArgInfo &operator=(ArgInfo &&) noexcept = default;
     ArgInfo deepCopy() const;
 };
-CheckSize(ArgInfo, 48, 8);
+CheckSize(ArgInfo, 40, 8);
 
 template <class T, class... Args> TypePtr make_type(Args &&...args) {
     static_assert(!TypePtr::TypeToIsInlined<T>::value, "Inlined types must specialize `make_type` for each combination "
