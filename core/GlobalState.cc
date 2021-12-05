@@ -980,11 +980,12 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     auto ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->typeArguments().size());
 
-    auto existingTypeArgument = ownerScope->findMember(*this, name);
-    if (existingTypeArgument.exists()) {
-        ENFORCE((existingTypeArgument.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
-        counterInc("symbols.hit");
-        return existingTypeArgument;
+    for (auto typeArg : ownerScope->typeArguments()) {
+        if (typeArg.dataAllowingNone(*this)->name == name) {
+            ENFORCE((typeArg.dataAllowingNone(*this)->flags & flags) == flags, "existing symbol has wrong flags");
+            counterInc("symbols.hit");
+            return typeArg;
+        }
     }
 
     ENFORCE(!symbolTableFrozen);

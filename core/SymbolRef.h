@@ -453,7 +453,6 @@ public:
     const TypePtr &resultType(const GlobalState &gs) const;
     void setResultType(GlobalState &gs, const TypePtr &typePtr) const;
     SymbolRef dealias(const GlobalState &gs) const;
-    SymbolRef findMember(const GlobalState &gs, NameRef name) const;
     // End methods that should be removed.
 
     // Prints the fully qualified name of the symbol in a format that is suitable for showing to the user (e.g.

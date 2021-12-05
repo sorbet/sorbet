@@ -540,15 +540,6 @@ SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
     return ret;
 }
 
-TypeArgumentRef Method::findMember(const GlobalState &gs, NameRef name) const {
-    for (auto &typeParam : typeParams) {
-        if (typeParam.exists() && typeParam.data(gs)->name == name) {
-            return typeParam;
-        }
-    }
-    return Symbols::noTypeArgument();
-}
-
 MethodRef Symbol::findMethod(const GlobalState &gs, NameRef name) const {
     auto sym = findMember(gs, name);
     if (sym.exists() && sym.isMethod()) {
@@ -558,6 +549,7 @@ MethodRef Symbol::findMethod(const GlobalState &gs, NameRef name) const {
 }
 
 SymbolRef Symbol::findMemberNoDealias(const GlobalState &gs, NameRef name) const {
+    ENFORCE(this->isClassOrModule(), "Only classes and modules have members");
     histogramInc("find_member_scope_size", members().size());
     auto fnd = members().find(name);
     if (fnd == members().end()) {
@@ -1543,21 +1535,6 @@ SymbolRef SymbolRef::dealias(const GlobalState &gs) const {
             return asTypeArgumentRef().data(gs)->dealias(gs);
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->dealias(gs);
-    }
-}
-
-SymbolRef SymbolRef::findMember(const GlobalState &gs, NameRef name) const {
-    switch (kind()) {
-        case SymbolRef::Kind::ClassOrModule:
-            return asClassOrModuleRef().data(gs)->findMember(gs, name);
-        case SymbolRef::Kind::Method:
-            return asMethodRef().data(gs)->findMember(gs, name);
-        case SymbolRef::Kind::FieldOrStaticField:
-            return asFieldRef().data(gs)->findMember(gs, name);
-        case SymbolRef::Kind::TypeArgument:
-            return asTypeArgumentRef().data(gs)->findMember(gs, name);
-        case SymbolRef::Kind::TypeMember:
-            return asTypeMemberRef().data(gs)->findMember(gs, name);
     }
 }
 

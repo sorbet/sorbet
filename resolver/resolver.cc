@@ -215,9 +215,11 @@ private:
     static core::SymbolRef resolveLhs(core::Context ctx, const shared_ptr<Nesting> &nesting, core::NameRef name) {
         Nesting *scope = nesting.get();
         while (scope != nullptr) {
-            auto lookup = scope->scope.findMember(ctx, name);
-            if (lookup.exists()) {
-                return lookup;
+            if (scope->scope.isClassOrModule()) {
+                auto lookup = scope->scope.asClassOrModuleRef().data(ctx)->findMember(ctx, name);
+                if (lookup.exists()) {
+                    return lookup;
+                }
             }
             scope = scope->parent.get();
         }
@@ -275,7 +277,10 @@ private:
                 return core::Symbols::noSymbol();
             }
             core::SymbolRef resolved = id->symbol.dealias(ctx);
-            core::SymbolRef result = resolved.findMember(ctx, c.cnst);
+            core::SymbolRef result;
+            if (resolved.isClassOrModule()) {
+                result = resolved.asClassOrModuleRef().data(ctx)->findMember(ctx, c.cnst);
+            }
 
             // Private constants are allowed to be resolved, when there is no scope set (the scope is checked above),
             // otherwise we should error out. Private constant references _are not_ enforced inside RBI files.
@@ -2106,7 +2111,10 @@ class ResolveTypeMembersAndFieldsWalk {
                 return;
             }
 
-            auto newCurrent = current.findMember(ctx, member);
+            core::SymbolRef newCurrent;
+            if (current.isClassOrModule()) {
+                newCurrent = current.asClassOrModuleRef().data(ctx)->findMember(ctx, member);
+            }
             if (!newCurrent.exists()) {
                 if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                     auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.show(ctx);
