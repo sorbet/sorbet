@@ -56,9 +56,9 @@ ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, 
         if (id.kind == ast::UnresolvedIdent::Kind::Instance) {
             ENFORCE(ctx.owner.isMethod() || ctx.owner.isClassOrModule());
             if (ctx.owner.isMethod()) {
-              klass = ctx.owner.owner(ctx).asClassOrModuleRef();
+                klass = ctx.owner.owner(ctx).asClassOrModuleRef();
             } else if (ctx.owner.isClassOrModule()) {
-              klass = ctx.owner.asClassOrModuleRef();
+                klass = ctx.owner.asClassOrModuleRef();
             }
         } else {
             // Class var.
