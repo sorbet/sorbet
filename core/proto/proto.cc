@@ -129,21 +129,34 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         }
     }
 
-    for (auto pair : sym.membersStableOrderSlow(gs)) {
-        if (pair.first == Names::singleton() || pair.first == Names::attached() ||
-            pair.first == Names::mixedInClassMethods() || pair.first == Names::Constants::AttachedClass()) {
-            continue;
-        }
+    if (sym.isClassOrModule()) {
+        for (auto pair : sym.asClassOrModuleRef().data(gs)->membersStableOrderSlow(gs)) {
+            if (pair.first == Names::singleton() || pair.first == Names::attached() ||
+                pair.first == Names::mixedInClassMethods() || pair.first == Names::Constants::AttachedClass()) {
+                continue;
+            }
 
-        if (!pair.second.exists()) {
-            continue;
-        }
+            if (!pair.second.exists()) {
+                continue;
+            }
 
-        if (!showFull && !pair.second.isPrintable(gs)) {
-            continue;
-        }
+            if (!showFull && !pair.second.isPrintable(gs)) {
+                continue;
+            }
 
-        *symbolProto.add_children() = toProto(gs, pair.second, showFull);
+            *symbolProto.add_children() = toProto(gs, pair.second, showFull);
+        }
+    } else if (sym.isMethod()) {
+        for (auto typeArg : sym.asMethodRef().data(gs)->typeArguments()) {
+            if (!typeArg.exists()) {
+                continue;
+            }
+
+            if (!showFull && !typeArg.data(gs)->isPrintable(gs)) {
+                continue;
+            }
+            *symbolProto.add_children() = toProto(gs, typeArg, showFull);
+        }
     }
 
     return symbolProto;

@@ -731,9 +731,13 @@ void CompletionTask::findSimilarConstants(const core::GlobalState &gs, const cor
     }
 
     for (auto scope : resp.scopes) {
+        if (!scope.isClassOrModule()) {
+            continue;
+        }
+
         // TODO(jez) This membersStableOrderSlow is the only ordering we have on constant items right now.
         // We should probably at least sort by whether the prefix of the suggested constant matches.
-        for (auto [_name, sym] : scope.membersStableOrderSlow(gs)) {
+        for (auto [_name, sym] : scope.asClassOrModuleRef().data(gs)->membersStableOrderSlow(gs)) {
             if (isSimilarConstant(gs, prefix, sym)) {
                 items.push_back(getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, items.size()));
             }

@@ -1437,21 +1437,6 @@ bool SymbolRef::isSingletonClass(const GlobalState &gs) const {
     }
 }
 
-std::vector<std::pair<NameRef, SymbolRef>> SymbolRef::membersStableOrderSlow(const GlobalState &gs) const {
-    switch (kind()) {
-        case SymbolRef::Kind::ClassOrModule:
-            return asClassOrModuleRef().data(gs)->membersStableOrderSlow(gs);
-        case SymbolRef::Kind::Method:
-            return asMethodRef().data(gs)->membersStableOrderSlow(gs);
-        case SymbolRef::Kind::FieldOrStaticField:
-            return asFieldRef().data(gs)->membersStableOrderSlow(gs);
-        case SymbolRef::Kind::TypeArgument:
-            return asTypeArgumentRef().data(gs)->membersStableOrderSlow(gs);
-        case SymbolRef::Kind::TypeMember:
-            return asTypeMemberRef().data(gs)->membersStableOrderSlow(gs);
-    }
-}
-
 bool SymbolRef::isPrintable(const GlobalState &gs) const {
     switch (kind()) {
         case SymbolRef::Kind::ClassOrModule:
@@ -2321,61 +2306,47 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
     addLocInternal(gs, loc, this->loc(), locs_);
 }
 
-namespace {
-bool stableOrder(const GlobalState &gs, const pair<NameRef, SymbolRef> &lhs, const pair<NameRef, SymbolRef> &rhs) {
-    auto lhsShort = lhs.first.shortName(gs);
-    auto rhsShort = rhs.first.shortName(gs);
-    auto compareShort = lhsShort.compare(rhsShort);
-    if (compareShort != 0) {
-        return compareShort < 0;
-    }
-    auto lhsRaw = lhs.first.showRaw(gs);
-    auto rhsRaw = rhs.first.showRaw(gs);
-    auto compareRaw = lhsRaw.compare(rhsRaw);
-    if (compareRaw != 0) {
-        return compareRaw < 0;
-    }
-    int i = -1;
-    const auto &rhsLocs = rhs.second.locs(gs);
-    for (const auto lhsLoc : lhs.second.locs(gs)) {
-        i++;
-        if (i > rhsLocs.size()) {
-            // more locs in lhs, so `lhs < rhs` is `false`
-            return false;
-        }
-        auto rhsLoc = rhsLocs[i];
-        auto compareLoc = lhsLoc.filePosToString(gs).compare(rhsLoc.filePosToString(gs));
-        if (compareLoc != 0) {
-            return compareLoc < 0;
-        }
-    }
-    if (i < rhsLocs.size()) {
-        // more locs in rhs, so `lhs < rhs` is true
-        return true;
-    }
-    ENFORCE(false, "no stable sort");
-    return false;
-}
-} // namespace
-
-vector<pair<NameRef, SymbolRef>> Method::membersStableOrderSlow(const GlobalState &gs) const {
-    vector<pair<NameRef, SymbolRef>> result;
-    if (!typeParams.empty()) {
-        for (auto typeParam : typeParams) {
-            result.emplace_back(typeParam.data(gs)->name, typeParam);
-        }
-        fast_sort(result, [&](auto const &lhs, auto const &rhs) -> bool { return stableOrder(gs, lhs, rhs); });
-    }
-    return result;
-}
-
 vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const GlobalState &gs) const {
+    ENFORCE(this->isClassOrModule());
     vector<pair<NameRef, SymbolRef>> result;
     result.reserve(members().size());
     for (const auto &e : members()) {
         result.emplace_back(e);
     }
-    fast_sort(result, [&](auto const &lhs, auto const &rhs) -> bool { return stableOrder(gs, lhs, rhs); });
+    fast_sort(result, [&](auto const &lhs, auto const &rhs) -> bool {
+        auto lhsShort = lhs.first.shortName(gs);
+        auto rhsShort = rhs.first.shortName(gs);
+        auto compareShort = lhsShort.compare(rhsShort);
+        if (compareShort != 0) {
+            return compareShort < 0;
+        }
+        auto lhsRaw = lhs.first.showRaw(gs);
+        auto rhsRaw = rhs.first.showRaw(gs);
+        auto compareRaw = lhsRaw.compare(rhsRaw);
+        if (compareRaw != 0) {
+            return compareRaw < 0;
+        }
+        int i = -1;
+        const auto &rhsLocs = rhs.second.locs(gs);
+        for (const auto lhsLoc : lhs.second.locs(gs)) {
+            i++;
+            if (i > rhsLocs.size()) {
+                // more locs in lhs, so `lhs < rhs` is `false`
+                return false;
+            }
+            auto rhsLoc = rhsLocs[i];
+            auto compareLoc = lhsLoc.filePosToString(gs).compare(rhsLoc.filePosToString(gs));
+            if (compareLoc != 0) {
+                return compareLoc < 0;
+            }
+        }
+        if (i < rhsLocs.size()) {
+            // more locs in rhs, so `lhs < rhs` is true
+            return true;
+        }
+        ENFORCE(false, "no stable sort");
+        return false;
+    });
     return result;
 }
 

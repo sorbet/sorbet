@@ -199,8 +199,6 @@ public:
         return resultType != nullptr;
     }
 
-    std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlow(const GlobalState &gs) const;
-
     using ArgumentsStore = InlinedVector<ArgInfo, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
     ArgumentsStore &arguments() {
         return arguments_;
