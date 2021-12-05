@@ -180,6 +180,11 @@ struct PropInfo {
     std::optional<std::string> typeStr;
 };
 
+struct LocInfo {
+    core::FileRef file;
+    core::LocOffsets loc;
+};
+
 struct DSLInfo {
     // mutator or model
     std::vector<PropInfo> props;
@@ -189,7 +194,7 @@ struct DSLInfo {
     core::FileRef file;
 
     // problem locs
-    std::vector<core::LocOffsets> problemLocs;
+    std::vector<LocInfo> problemLocs;
 
     // in case of mutators
     std::vector<core::NameRef> model;
@@ -199,7 +204,7 @@ struct DSLInfo {
 
 void printName(fmt::memory_buffer &out, const std::vector<core::NameRef> &parts, const core::GlobalState &gs);
 UnorderedMap<std::vector<core::NameRef>, DSLInfo>
-mergeAndFilterGlobalDSLInfo(UnorderedMap<std::vector<core::NameRef>, DSLInfo> globalDSLInfo);
+mergeAndFilterGlobalDSLInfo(const core::GlobalState &gs, UnorderedMap<std::vector<core::NameRef>, DSLInfo> globalDSLInfo);
 
 struct DSLAnalysisFile {
     // the checksum of this file

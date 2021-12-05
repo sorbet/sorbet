@@ -193,7 +193,7 @@ public:
         bool isProp = absl::c_any_of(KNOWN_PROP_METHODS, [&](const auto &nrid) -> bool { return nrid == funId; });
         if (isProp) {
             if (!validScope) {
-                dslInfo[curScope].problemLocs.emplace_back(std::move(original->loc));
+                dslInfo[curScope].problemLocs.emplace_back(LocInfo{file, std::move(original->loc)});
                 return tree;
             }
 
@@ -203,9 +203,10 @@ public:
                 if ((*propInfo).typeExp.has_value()) {
                     typeStr = std::move(*((*propInfo).typeExp)).toString(ctx);
                 }
+
                 dslInfo[curScope].props.emplace_back(PropInfo{std::move((*propInfo).name), std::move(typeStr)});
             } else {
-                dslInfo[curScope].problemLocs.emplace_back(std::move(original->loc));
+                dslInfo[curScope].problemLocs.emplace_back(LocInfo{file, std::move(original->loc)});
             }
 
             return tree;
