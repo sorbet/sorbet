@@ -2,23 +2,9 @@
 # typed: true
 
 module T::Private::Methods
-  Declaration = Struct.new(
-    :mod,
-    :params,
-    :returns,
-    :bind,
-    :mode,
-    :checked,
-    :finalized,
-    :on_failure,
-    :override_allow_incompatible,
-    :type_parameters,
-    :raw,
-    :final
-  )
+  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :raw)
 
   class DeclBuilder
-    # The signature declaration the builder is composing (class `Declaration`)
     attr_reader :decl
 
     class BuilderError < StandardError; end
@@ -26,24 +12,6 @@ module T::Private::Methods
     private def check_live!
       if decl.finalized
         raise BuilderError.new("You can't modify a signature declaration after it has been used.")
-      end
-    end
-
-    private def check_sig_block_is_unset!
-      if T::Private::DeclState.current.active_declaration&.blk
-        raise BuilderError.new(
-          "Cannot add more signature statements after the declaration block."
-        )
-      end
-    end
-
-    # Verify if we're trying to invoke the method outside of a signature block. Notice that we need to check if it's a
-    # proc, because this is valid and would lead to a false positive: `T.type_alias { T.proc.params(a: Integer).void }`
-    private def check_running_inside_block!(method_name)
-      unless @inside_sig_block || decl.mod == T::Private::Methods::PROC_TYPE
-        raise BuilderError.new(
-          "Can't invoke #{method_name} outside of a signature declaration block"
-        )
       end
     end
 
@@ -60,23 +28,12 @@ module T::Private::Methods
         ARG_NOT_PROVIDED, # on_failure
         nil, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
-        raw,
-        ARG_NOT_PROVIDED, # final
+        raw
       )
-      @inside_sig_block = false
-    end
-
-    def run!(&block)
-      @inside_sig_block = true
-      instance_exec(&block)
-      finalize!
-      self
     end
 
     def params(**params)
       check_live!
-      check_running_inside_block!(__method__)
-
       if !decl.params.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .params twice")
       end
@@ -91,8 +48,6 @@ module T::Private::Methods
 
     def returns(type)
       check_live!
-      check_running_inside_block!(__method__)
-
       if decl.returns.is_a?(T::Private::Types::Void)
         raise BuilderError.new("You can't call .returns after calling .void.")
       end
@@ -107,8 +62,6 @@ module T::Private::Methods
 
     def void
       check_live!
-      check_running_inside_block!(__method__)
-
       if !decl.returns.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .void after calling .returns.")
       end
@@ -120,8 +73,6 @@ module T::Private::Methods
 
     def bind(type)
       check_live!
-      check_running_inside_block!(__method__)
-
       if !decl.bind.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .bind multiple times in a signature.")
       end
@@ -133,7 +84,6 @@ module T::Private::Methods
 
     def checked(level)
       check_live!
-      check_running_inside_block!(__method__)
 
       if !decl.checked.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .checked multiple times in a signature.")
@@ -152,7 +102,6 @@ module T::Private::Methods
 
     def on_failure(*args)
       check_live!
-      check_running_inside_block!(__method__)
 
       if !decl.on_failure.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .on_failure multiple times in a signature.")
@@ -166,7 +115,7 @@ module T::Private::Methods
       self
     end
 
-    def abstract(&blk)
+    def abstract
       check_live!
 
       case decl.mode
@@ -178,47 +127,15 @@ module T::Private::Methods
         raise BuilderError.new("`.abstract` cannot be combined with `.override` or `.overridable`.")
       end
 
-      check_sig_block_is_unset!
-
-      if blk
-        T::Private::DeclState.current.active_declaration.blk = blk
-      end
-
       self
     end
 
-    def final(&blk)
+    def final
       check_live!
-
-      if !decl.final.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't call .final multiple times in a signature.")
-      end
-
-      if @inside_sig_block
-        raise BuilderError.new(
-          "Unlike other sig annotations, the `final` annotation must remain outside the sig block, " \
-          "using either `sig(:final) {...}` or `sig.final {...}`, not `sig {final. ...}"
-        )
-      end
-
-      raise BuilderError.new(".final cannot be repeated in a single signature") if final?
-
-      decl.final = true
-
-      check_sig_block_is_unset!
-
-      if blk
-        T::Private::DeclState.current.active_declaration.blk = blk
-      end
-
-      self
+      raise BuilderError.new("The syntax for declaring a method final is `sig(:final) {...}`, not `sig {final. ...}`")
     end
 
-    def final?
-      !decl.final.equal?(ARG_NOT_PROVIDED) && decl.final
-    end
-
-    def override(allow_incompatible: false, &blk)
+    def override(allow_incompatible: false)
       check_live!
 
       case decl.mode
@@ -233,16 +150,10 @@ module T::Private::Methods
         raise BuilderError.new("`.override` cannot be combined with `.abstract`.")
       end
 
-      check_sig_block_is_unset!
-
-      if blk
-        T::Private::DeclState.current.active_declaration.blk = blk
-      end
-
       self
     end
 
-    def overridable(&blk)
+    def overridable
       check_live!
 
       case decl.mode
@@ -254,12 +165,6 @@ module T::Private::Methods
         decl.mode = Modes.overridable
       when Modes.overridable, Modes.overridable_override
         raise BuilderError.new(".overridable cannot be repeated in a single signature")
-      end
-
-      check_sig_block_is_unset!
-
-      if blk
-        T::Private::DeclState.current.active_declaration.blk = blk
       end
 
       self
@@ -278,7 +183,6 @@ module T::Private::Methods
     #  def map(&blk); end
     def type_parameters(*names)
       check_live!
-      check_running_inside_block!(__method__)
 
       names.each do |name|
         raise BuilderError.new("not a symbol: #{name}") unless name.is_a?(Symbol)

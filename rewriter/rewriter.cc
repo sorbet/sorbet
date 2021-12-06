@@ -4,7 +4,6 @@
 #include "common/typecase.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "rewriter/AttrReader.h"
-#include "rewriter/ChainedSig.h"
 #include "rewriter/ClassNew.h"
 #include "rewriter/Cleanup.h"
 #include "rewriter/Command.h"
@@ -196,11 +195,6 @@ private:
 
 ast::ExpressionPtr Rewriter::run(core::MutableContext ctx, ast::ExpressionPtr tree) {
     auto ast = std::move(tree);
-
-    // We should not default to whole-tree travel rewriters. However, the chained sig rewriter is temporary for the
-    // transition period between the two different syntax styles. Once we fully adopt the new syntax, this rewriter pass
-    // should go away and the chained sig rewriter should be deleted
-    ast = ChainedSig::run(ctx, std::move(ast));
 
     Rewriterer rewriter;
     ast = ast::TreeMap::apply(ctx, rewriter, std::move(ast));

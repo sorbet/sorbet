@@ -2,5 +2,5 @@
 
 extend T::Sig
 
-sig # error: Signature declarations expect a block
+sig # error: no block
 #  ^ apply-completion: [A] item: 0

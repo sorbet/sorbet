@@ -3,23 +3,13 @@ module T::Sig
   # We could provide a more-complete signature, but these are already
   # parsed in C++, so there's no need to emit errors twice.
 
-  sig do
-    params(
-      arg0: T.nilable(Symbol),
-      blk: T.nilable(T.proc.bind(T::Private::Methods::DeclBuilder).void)
-    ).returns(T::Private::Methods::DeclBuilder)
-  end
+  sig {params(arg0: T.nilable(Symbol), blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
   def sig(arg0=nil, &blk); end
 end
 module T::Sig::WithoutRuntime
   # At runtime, does nothing, but statically it is treated exactly the same
   # as T::Sig#sig. Only use it in cases where you can't use T::Sig#sig.
-  sig do
-    params(
-      arg0: T.nilable(Symbol),
-      blk: T.nilable(T.proc.bind(T::Private::Methods::DeclBuilder).void)
-    ).returns(T::Private::Methods::DeclBuilder)
-  end
+  sig {params(arg0: T.nilable(Symbol), blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
   def self.sig(arg0=nil, &blk); end
 end
 

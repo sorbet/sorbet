@@ -695,7 +695,7 @@ bb2[rubyBlockId=1, firstDead=-1](<self>: T.class_of(B), <block-pre-call-temp>$9:
 # backedges
 # - bb2(rubyBlockId=1)
 bb3[rubyBlockId=0, firstDead=14](<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(B)):
-    <statTemp>$3: T::Private::Methods::DeclBuilder = Solve<<block-pre-call-temp>$9, sig>
+    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$9, sig>
     <self>: T.class_of(B) = <selfRestore>$10
     <cfgAlias>$24: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$26: T.class_of(T) = alias <C T>
