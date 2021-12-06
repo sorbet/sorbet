@@ -7,7 +7,7 @@ extend T::Sig
 # the sig unconditionally, so that it at least gives users something to start
 # filling in the holes.
 
-sig # error: Signature declarations expect a block
+sig # error: no block
 #  ^ apply-completion: [A] item: 0
 def all_untyped(x)
   T.unsafe(nil)

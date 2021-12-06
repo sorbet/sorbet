@@ -6,12 +6,12 @@
 # nesting scope.
 
 class A
-  T::Sig::WithoutRuntime.sig # error: Signature declarations expect a block
+  T::Sig::WithoutRuntime.sig # error: no block
   #                         ^ apply-completion: [A] item: 0
   def without_runtime; ''; end
 
   Sorbet::Private::Static.sig # error: Not enough arguments
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Signature declarations expect a block
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: no block
   #                          ^ apply-completion: [B] item: 0
   def private_static; :''; end
 end
@@ -23,11 +23,11 @@ class Outer
     # Even though there are method defs after this, none are in the right
     # scope, so no suggested sig.
 
-    T::Sig::WithoutRuntime.sig # error: Signature declarations expect a block
+    T::Sig::WithoutRuntime.sig # error: no block
     #                         ^ apply-completion: [C] item: 0
 
     Sorbet::Private::Static.sig # error: Not enough arguments
-  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Signature declarations expect a block
+  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: no block
     #                          ^ apply-completion: [D] item: 0
   end
 

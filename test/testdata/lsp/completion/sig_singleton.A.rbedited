@@ -5,14 +5,14 @@ class Module
 end
 
 class A
-  sig {returns(Integer)}${0} # error: Signature declarations expect a block
+  sig {returns(Integer)}${0} # error: no block
   #  ^ apply-completion: [A] item: 0
   def self.foo
     1
   end
 end
 
-sig # error: Signature declarations expect a block
+sig # error: no block
 #  ^ apply-completion: [B] item: 0
 def self.main
   ''

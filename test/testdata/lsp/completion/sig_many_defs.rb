@@ -13,7 +13,7 @@ class A
     ''
   end
 
-  sig # error: Signature declarations expect a block
+  sig # error: no block
   #  ^ apply-completion: [A] item: 0
 
   def returns_symbol
