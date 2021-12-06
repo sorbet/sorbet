@@ -67,15 +67,17 @@ class T::Props::Decorator
   INTERNAL_ONLY_RULE_KEYS = T.let(%i[
     accessor_key
     extra
+    initialize_proc
     need_nil_read_check
     pii
-    sensitivity
     serialized_form
     setter_proc
+    _tnilable
   ].map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean])
   private_constant :INTERNAL_ONLY_RULE_KEYS
 
   VALID_RULE_KEYS = T.let(%i[
+    default
     enum
     foreign
     ifunset
@@ -87,7 +89,6 @@ class T::Props::Decorator
     clobber_existing_method!
     extra
     setter_validate
-    _tnilable
   ].map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean])
   private_constant :VALID_RULE_KEYS
 
@@ -234,11 +235,6 @@ class T::Props::Decorator
   end
   def prop_validate_definition!(name, cls, rules, type)
     validate_prop_name(name)
-
-    if rules.key?(:pii) && rules.fetch(:pii)
-      raise ArgumentError.new("The 'pii:' option for props has been renamed " \
-        "to 'sensitivity:' (in prop #{@class.name}.#{name})")
-    end
 
     unless all_valid_keys?(rules)
       raise ArgumentError.new("At least one invalid prop arg supplied in #{self}: #{rules.keys.inspect}")
@@ -410,17 +406,16 @@ class T::Props::Decorator
         process_type(name, cls, rules)
         rules[:setter_proc] = T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules).freeze
         update_rules_for_prop(name, rules)
+        T::Configuration.without_ruby_warnings {define_setter(name, rules)}
         rules
       end
 
       proc do |arg|
         # In cases where `initialize_proc` is called directly, it will no longer exist in the `rules` hash.
-        if rules.key?(:initialize_proc)
-          rules = p T.cast(rules.fetch(:initialize_proc).call, Rules)
-        end
-        # `rules[:setter_proc]` has been updated in `rules[:initialize_proc]`,
-        # so this isn't a recursive call.
+        rules = rules[:initialize_proc]&.call || rules
+        # initialize_proc defines the setter, so we can just call it here
         rules[:setter_proc].call(arg)
+        # @class.send("#{name}=", arg)
       end
     else
       T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules).freeze
@@ -440,18 +435,7 @@ class T::Props::Decorator
   sig {params(name: Symbol, rules: Rules).void.checked(:never)}
   private def define_getter_and_setter(name, rules)
     T::Configuration.without_ruby_warnings do
-      if !rules[:immutable]
-        if method(:prop_set).owner != T::Props::Decorator
-          @class.send(:define_method, "#{name}=") do |val|
-            T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
-          end
-        else
-          # Fast path (~4x faster as of Ruby 2.6)
-          require 'pry'
-          binding.pry
-          @class.send(:define_method, "#{name}=", &rules.fetch(:setter_proc))
-        end
-      end
+      define_setter(name, rules)
 
       if method(:prop_get).owner != T::Props::Decorator || rules.key?(:ifunset)
         @class.send(:define_method, name) do
@@ -460,6 +444,23 @@ class T::Props::Decorator
       else
         # Fast path (~30x faster as of Ruby 2.6)
         @class.send(:attr_reader, name) # send is used because `attr_reader` is private in 2.4
+      end
+    end
+  end
+
+  sig {params(name: Symbol, rules: Rules).void.checked(:never)}
+  private def define_setter(name, rules)
+    if !rules[:immutable]
+      if method(:prop_set).owner != T::Props::Decorator
+        @class.send(:define_method, "#{name}=") do |val|
+          T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
+        end
+      else
+        # Fast path (~4x faster as of Ruby 2.6)
+        # If it's not lazily initialized, the setter_proc
+        # won't change once it's called, so this saves
+        # us from having to fetch it every time
+        @class.send(:define_method, "#{name}=", &rules.fetch(:setter_proc))
       end
     end
   end

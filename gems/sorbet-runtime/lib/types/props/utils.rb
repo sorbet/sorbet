@@ -59,7 +59,7 @@ module T::Props::Utils
     {'_tnilable' => true}.merge(prop_rules.merge('_tnilable' => true))
   end
 
-  private_class_method def self.initialize_if_needed(prop_rules)
+  def self.initialize_if_needed(prop_rules)
     if prop_rules.key?(:initialize_proc)
       prop_rules = prop_rules.replace(prop_rules.fetch(:initialize_proc).call)
     end

@@ -26,7 +26,8 @@ module T::Props::Optional::DecoratorMethods
   end
 
   def prop_optional?(prop)
-    !T::Props::Utils.need_nil_write_check?(rules)
+    rules = T::Props::Utils.initialize_if_needed(prop_rules(prop))
+    rules[:fully_optional]
   end
 
   def compute_derived_rules(rules)
