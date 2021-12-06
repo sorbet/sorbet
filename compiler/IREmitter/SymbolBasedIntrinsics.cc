@@ -252,7 +252,7 @@ protected:
         bool acceptsBlock = false;
         auto current = primaryMethod;
         while (current.data(gs)->isOverloaded()) {
-            const auto &args = current.data(gs)->arguments();
+            const auto &args = current.data(gs)->arguments;
             if (!args.empty() && !args.back().isSyntheticBlockArgument()) {
                 acceptsBlock = true;
                 break;
@@ -319,7 +319,7 @@ void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, co
     InlinedVector<const core::ArgInfo *, 4> keywordArgInfo;
 
     int i = -1;
-    for (auto &argInfo : funcSym.data(cs)->arguments()) {
+    for (auto &argInfo : funcSym.data(cs)->arguments) {
         ++i;
         auto &flags = argInfo.flags;
         if (flags.isBlock) {

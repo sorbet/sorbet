@@ -222,7 +222,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
         auto isSingleton = rbiClass.data(rbiGS)->isSingletonClass(rbiGS);
         outfile.fmt("  def {}{}(", isSingleton ? "self." : "", rbiEntryShortName);
 
-        auto &rbiParameters = rbiEntry.data(rbiGS)->arguments();
+        auto &rbiParameters = rbiEntry.data(rbiGS)->arguments;
         if (rbiParameters.size() == 3 && rbiParameters[1].name == core::Names::fwdKwargs()) {
             // The positional and block parameters get their names normalized to make overload
             // checking easier. The only reliable way to detect `...` syntax is by looking at the

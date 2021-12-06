@@ -38,7 +38,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         BasicBlock *presentCont = entry;
         BasicBlock *defaultCont = nullptr;
 
-        auto &argInfos = md.symbol.data(ctx)->arguments();
+        auto &argInfos = md.symbol.data(ctx)->arguments;
         bool isAbstract = md.symbol.data(ctx)->isAbstract();
         bool seenKeyword = false;
         int i = -1;

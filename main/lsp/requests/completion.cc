@@ -258,7 +258,7 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
     }
 
     vector<string> typeAndArgNames;
-    for (auto &argSym : method.data(gs)->arguments()) {
+    for (auto &argSym : method.data(gs)->arguments) {
         fmt::memory_buffer argBuf;
         if (argSym.flags.isBlock) {
             // Blocks are handled below
@@ -286,8 +286,8 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
         fmt::format_to(std::back_inserter(result), "({})", fmt::join(typeAndArgNames, ", "));
     }
 
-    ENFORCE(!method.data(gs)->arguments().empty());
-    auto &blkArg = method.data(gs)->arguments().back();
+    ENFORCE(!method.data(gs)->arguments.empty());
+    auto &blkArg = method.data(gs)->arguments.back();
     ENFORCE(blkArg.flags.isBlock);
 
     auto hasBlockType = blkArg.type != nullptr && !blkArg.type.isUntyped();

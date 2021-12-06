@@ -2679,10 +2679,10 @@ private:
             // we cannot rely on method and symbol arguments being aligned, as method could have more arguments.
             // we roundtrip through original symbol that is stored in mdef.
             auto internalNameToLookFor = argSym.name;
-            auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->arguments(),
+            auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->arguments,
                                                  [&](const auto &arg) { return arg.name == internalNameToLookFor; });
-            ENFORCE(originalArgIt != mdef.symbol.data(ctx)->arguments().end());
-            auto realPos = originalArgIt - mdef.symbol.data(ctx)->arguments().begin();
+            ENFORCE(originalArgIt != mdef.symbol.data(ctx)->arguments.end());
+            auto realPos = originalArgIt - mdef.symbol.data(ctx)->arguments.begin();
             return ast::MK::arg2Local(mdef.args[realPos]);
         }
     }
@@ -2720,7 +2720,7 @@ private:
                     local = ast::cast_tree<ast::Local>(arg);
                 }
 
-                auto &info = mdef.symbol.data(ctx)->arguments()[argIdx];
+                auto &info = mdef.symbol.data(ctx)->arguments[argIdx];
                 if (info.flags.isKeyword) {
                     args.emplace_back(ast::MK::Symbol(local->loc, info.name));
                     args.emplace_back(local->deepCopy());
@@ -2746,7 +2746,7 @@ private:
     static void fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
                                   ParsedSig &sig, bool isOverloaded, const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
-        ENFORCE(isOverloaded || method.data(ctx)->arguments().size() == mdef.args.size());
+        ENFORCE(isOverloaded || method.data(ctx)->arguments.size() == mdef.args.size());
 
         if (!sig.seen.returns && !sig.seen.void_) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -2794,13 +2794,13 @@ private:
         auto methodInfo = method.data(ctx);
 
         // Is this a signature for a method defined with argument forwarding syntax?
-        if (methodInfo->arguments().size() >= 3) {
+        if (methodInfo->arguments.size() >= 3) {
             // To match, the definition must have been desugared with at least 3 parameters named
             // `<fwd-args>`, `<fwd-kwargs>` and `<fwd-block>`
-            auto len = methodInfo->arguments().size();
-            auto l1 = getArgLocal(ctx, methodInfo->arguments()[len - 3], mdef, len - 3, isOverloaded)->localVariable;
-            auto l2 = getArgLocal(ctx, methodInfo->arguments()[len - 2], mdef, len - 2, isOverloaded)->localVariable;
-            auto l3 = getArgLocal(ctx, methodInfo->arguments()[len - 1], mdef, len - 1, isOverloaded)->localVariable;
+            auto len = methodInfo->arguments.size();
+            auto l1 = getArgLocal(ctx, methodInfo->arguments[len - 3], mdef, len - 3, isOverloaded)->localVariable;
+            auto l2 = getArgLocal(ctx, methodInfo->arguments[len - 2], mdef, len - 2, isOverloaded)->localVariable;
+            auto l3 = getArgLocal(ctx, methodInfo->arguments[len - 1], mdef, len - 1, isOverloaded)->localVariable;
             if (l1._name == core::Names::fwdArgs() && l2._name == core::Names::fwdKwargs() &&
                 l3._name == core::Names::fwdBlock()) {
                 if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -2821,7 +2821,7 @@ private:
 
         methodInfo->resultType = sig.returns;
         int i = -1;
-        for (auto &arg : methodInfo->arguments()) {
+        for (auto &arg : methodInfo->arguments) {
             ++i;
             auto local = getArgLocal(ctx, arg, mdef, i, isOverloaded);
             auto treeArgName = local->localVariable._name;

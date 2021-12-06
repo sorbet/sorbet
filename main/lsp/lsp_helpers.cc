@@ -100,7 +100,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     if (sym->isOverride()) {
         flags.emplace_back("override");
     }
-    for (auto &argSym : method.data(gs)->arguments()) {
+    for (auto &argSym : method.data(gs)->arguments) {
         // Don't display synthetic arguments (like blk).
         if (!argSym.isSyntheticBlockArgument()) {
             typeAndArgNames.emplace_back(absl::StrCat(
@@ -157,7 +157,7 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method) {
         methodNamePrefix = "self.";
     }
     vector<string> prettyArgs;
-    const auto &arguments = methodData->dealiasMethod(gs).data(gs)->arguments();
+    const auto &arguments = methodData->dealiasMethod(gs).data(gs)->arguments;
     ENFORCE(!arguments.empty(), "Should have at least a block arg");
     for (const auto &argSym : arguments) {
         // Don't display synthetic arguments (like blk).

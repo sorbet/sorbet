@@ -212,11 +212,11 @@ unique_ptr<Error> missingArg(const GlobalState &gs, Loc callLoc, Loc receiverLoc
 }
 
 int getArity(const GlobalState &gs, MethodRef method) {
-    ENFORCE(!method.data(gs)->arguments().empty(), "Every method should have at least a block arg.");
-    ENFORCE(method.data(gs)->arguments().back().flags.isBlock, "Last arg should be the block arg.");
+    ENFORCE(!method.data(gs)->arguments.empty(), "Every method should have at least a block arg.");
+    ENFORCE(method.data(gs)->arguments.back().flags.isBlock, "Last arg should be the block arg.");
 
     // Don't count the block arg in the arity
-    return method.data(gs)->arguments().size() - 1;
+    return method.data(gs)->arguments.size() - 1;
 }
 
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
@@ -267,7 +267,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                     continue;
                 }
 
-                auto argType = Types::resultTypeAsSeenFrom(gs, candidate.data(gs)->arguments()[i].type,
+                auto argType = Types::resultTypeAsSeenFrom(gs, candidate.data(gs)->arguments[i].type,
                                                            candidate.data(gs)->owner, inClass, targs);
                 if (argType.isFullyDefined() && !Types::isSubType(gs, arg, argType)) {
                     it = leftCandidates.erase(it);
@@ -296,7 +296,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     { // keep only candidates that have a block iff we are passing one
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
             MethodRef candidate = *it;
-            const auto &args = candidate.data(gs)->arguments();
+            const auto &args = candidate.data(gs)->arguments;
             ENFORCE(!args.empty(), "Should at least have a block argument.");
             auto mentionsBlockArg = !args.back().isSyntheticBlockArgument();
             if (mentionsBlockArg != hasBlock) {
@@ -412,7 +412,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
 string prettyArity(const GlobalState &gs, MethodRef method) {
     int required = 0, optional = 0;
     bool repeated = false;
-    for (const auto &arg : method.data(gs)->arguments()) {
+    for (const auto &arg : method.data(gs)->arguments) {
         if (arg.flags.isKeyword || arg.flags.isBlock) {
             // ignore
         } else if (arg.flags.isDefault) {
@@ -717,14 +717,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         constr->defineDomain(gs, data->typeArguments());
     }
     auto posArgs = args.numPosArgs;
-    bool hasKwargs = absl::c_any_of(data->arguments(), [](const auto &arg) { return arg.flags.isKeyword; });
+    bool hasKwargs = absl::c_any_of(data->arguments, [](const auto &arg) { return arg.flags.isKeyword; });
     auto nonPosArgs = (args.args.size() - args.numPosArgs);
     bool hasKwsplat = nonPosArgs & 0x1;
     auto numKwargs = hasKwsplat ? nonPosArgs - 1 : nonPosArgs;
 
     // p -> params, i.e., what was mentioned in the defintiion
-    auto pit = data->arguments().begin();
-    auto pend = data->arguments().end();
+    auto pit = data->arguments.begin();
+    auto pend = data->arguments.end();
 
     ENFORCE(pit != pend, "Should at least have the block arg.");
     ENFORCE((pend - 1)->flags.isBlock, "Last arg should be the block arg: {}", (pend - 1)->show(gs));
@@ -899,7 +899,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             bool hasKwSplatParam = false;
             bool hasKwParam = false;
             const ArgInfo *kwSplatParam;
-            for (auto &param : data->arguments()) {
+            for (auto &param : data->arguments) {
                 if (param.flags.isKeyword && param.flags.isRepeated) {
                     kwSplatParam = &param;
                     hasKwSplatParam = true;
@@ -971,7 +971,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             pend = kwit;
 
             bool sawKwSplat = false;
-            while (kwit != data->arguments().end()) {
+            while (kwit != data->arguments.end()) {
                 const ArgInfo &spec = *kwit;
                 if (spec.flags.isBlock) {
                     break;
@@ -1077,7 +1077,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         } else if (kwargs == nullptr) {
             // The method has keyword arguments, but none were provided. Report an error for each missing argument.
-            for (auto &spec : data->arguments()) {
+            for (auto &spec : data->arguments) {
                 if (!spec.flags.isKeyword || spec.flags.isDefault || spec.flags.isRepeated) {
                     continue;
                 }
@@ -1107,10 +1107,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                 // if there's an obvious first keyword argument that the user hasn't supplied, we can mention it
                 // explicitly
-                auto firstKeyword = absl::c_find_if(data->arguments(), [&consumed](const ArgInfo &arg) {
+                auto firstKeyword = absl::c_find_if(data->arguments, [&consumed](const ArgInfo &arg) {
                     return arg.flags.isKeyword && arg.flags.isDefault && consumed.count(arg.name) == 0;
                 });
-                if (firstKeyword != data->arguments().end()) {
+                if (firstKeyword != data->arguments.end()) {
                     e.addErrorLine(args.callLoc(),
                                    "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
                                    method.show(gs), firstKeyword->argumentName(gs));
@@ -1121,8 +1121,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (args.block != nullptr) {
-        ENFORCE(!data->arguments().empty(), "Every symbol must at least have a block arg: {}", method.show(gs));
-        const auto &bspec = data->arguments().back();
+        ENFORCE(!data->arguments.empty(), "Every symbol must at least have a block arg: {}", method.show(gs));
+        const auto &bspec = data->arguments.back();
         ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg: {}", method.show(gs));
 
         // Only report "does not expect a block" error if the method is defined in a `typed: strict`
@@ -1191,9 +1191,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 result.main.errors.emplace_back(e.build());
             }
         }
-        ENFORCE(!data->arguments().empty(), "Every method should at least have a block arg.");
-        ENFORCE(data->arguments().back().flags.isBlock, "The last arg should be the block arg.");
-        auto blockType = data->arguments().back().type;
+        ENFORCE(!data->arguments.empty(), "Every method should at least have a block arg.");
+        ENFORCE(data->arguments.back().flags.isBlock, "The last arg should be the block arg.");
+        auto blockType = data->arguments.back().type;
         if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
             if (auto e = gs.beginError(args.callLoc(), errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", args.name.show(gs));
@@ -1225,8 +1225,8 @@ TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRe
     auto data = method.data(gs);
 
     vector<TypePtr> args;
-    args.reserve(data->arguments().size());
-    for (const auto &arg : data->arguments()) {
+    args.reserve(data->arguments.size());
+    for (const auto &arg : data->arguments) {
         if (arg.flags.isRepeated) {
             ENFORCE(args.empty(), "getCallArguments with positional and repeated args is not supported: {}",
                     method.toString(gs));
@@ -2108,7 +2108,7 @@ private:
             return;
         }
 
-        const auto &methodArgs = dispatchComp.method.data(gs)->arguments();
+        const auto &methodArgs = dispatchComp.method.data(gs)->arguments;
         ENFORCE(!methodArgs.empty());
         const auto &bspec = methodArgs.back();
         ENFORCE(bspec.flags.isBlock);
@@ -2166,7 +2166,7 @@ private:
             auto it = &dispatched;
             while (it != nullptr) {
                 if (it->main.method.exists()) {
-                    const auto &methodArgs = it->main.method.data(gs)->arguments();
+                    const auto &methodArgs = it->main.method.data(gs)->arguments;
                     ENFORCE(!methodArgs.empty());
                     const auto &bspec = methodArgs.back();
                     ENFORCE(bspec.flags.isBlock);

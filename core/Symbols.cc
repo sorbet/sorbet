@@ -1268,7 +1268,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
                        }));
     }
     fmt::format_to(std::back_inserter(buf), " ({})",
-                   fmt::map_join(sym->arguments(), ", ", [&](const auto &symb) { return symb.argumentName(gs); }));
+                   fmt::map_join(sym->arguments, ", ", [&](const auto &symb) { return symb.argumentName(gs); }));
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);
@@ -1292,7 +1292,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
         fmt::format_to(std::back_inserter(buf), "{}", move(str));
     }
 
-    for (auto &arg : sym->arguments()) {
+    for (auto &arg : sym->arguments) {
         auto str = arg.toString(gs);
         ENFORCE(!str.empty());
         printTabs(buf, tabs + 1);
@@ -1813,7 +1813,7 @@ void Symbol::recordRequiredAncestorInternal(GlobalState &gs, Symbol::RequiredAnc
 
     // Store the RequiredAncestor.origin
     auto tOrigin = core::make_type<ClassType>(ancestor.origin);
-    (cast_type<TupleType>(ancestors.data(gs)->arguments()[0].type))->elems.emplace_back(tOrigin);
+    (cast_type<TupleType>(ancestors.data(gs)->arguments[0].type))->elems.emplace_back(tOrigin);
 
     // Store the RequiredAncestor.loc
     ancestors.data(gs)->locs_.emplace_back(ancestor.loc);
@@ -1833,7 +1833,7 @@ vector<Symbol::RequiredAncestor> Symbol::readRequiredAncestorsInternal(const Glo
 
     auto data = ancestors.data(gs);
     auto tSymbols = cast_type<TupleType>(data->resultType);
-    auto tOrigins = cast_type<TupleType>(data->arguments()[0].type);
+    auto tOrigins = cast_type<TupleType>(data->arguments[0].type);
     auto index = 0;
     for (auto elem : tSymbols->elems) {
         ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
@@ -2012,9 +2012,9 @@ Method Method::deepCopy(const GlobalState &to) const {
     result.name = NameRef(to, this->name);
     result.locs_ = this->locs_;
     result.typeParams = this->typeParams;
-    result.arguments_.reserve(this->arguments_.size());
-    for (auto &mem : this->arguments_) {
-        auto &store = result.arguments_.emplace_back(mem.deepCopy());
+    result.arguments.reserve(this->arguments.size());
+    for (auto &mem : this->arguments) {
+        auto &store = result.arguments.emplace_back(mem.deepCopy());
         store.name = NameRef(to, mem.name);
     }
     result.rebind = this->rebind;
@@ -2092,9 +2092,9 @@ void Method::sanityCheck(const GlobalState &gs) const {
     if (isa_type<AliasType>(this->resultType)) {
         // If we have an alias method, we should never look at it's arguments;
         // we should instead look at the arguments of whatever we're aliasing.
-        ENFORCE_NO_TIMER(this->arguments().empty(), ref(gs).show(gs));
+        ENFORCE_NO_TIMER(this->arguments.empty(), ref(gs).show(gs));
     } else {
-        ENFORCE_NO_TIMER(!this->arguments().empty(), ref(gs).show(gs));
+        ENFORCE_NO_TIMER(!this->arguments.empty(), ref(gs).show(gs));
     }
 }
 
@@ -2173,7 +2173,7 @@ uint32_t Method::hash(const GlobalState &gs) const {
     result = mix(result, this->flags);
     result = mix(result, this->owner.id());
     result = mix(result, this->rebind.id());
-    for (const auto &arg : arguments_) {
+    for (const auto &arg : arguments) {
         // If an argument's resultType changes, then the sig has changed.
         auto type = arg.type;
         if (!type) {
@@ -2213,8 +2213,8 @@ uint32_t Method::methodShapeHash(const GlobalState &gs) const {
 
 vector<uint32_t> Method::methodArgumentHash(const GlobalState &gs) const {
     vector<uint32_t> result;
-    result.reserve(arguments().size());
-    for (const auto &e : arguments()) {
+    result.reserve(arguments.size());
+    for (const auto &e : arguments) {
         uint32_t arg = 0;
         // Changing name of keyword arg is a shape change.
         if (e.flags.isKeyword) {

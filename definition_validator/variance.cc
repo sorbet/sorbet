@@ -196,7 +196,7 @@ public:
         // context.
         const Polarity negated = negatePolarity(polarity);
 
-        for (auto &arg : methodData->arguments()) {
+        for (auto &arg : methodData->arguments) {
             if (arg.type != nullptr) {
                 validatePolarity(arg.loc, ctx, negated, arg.type);
             }

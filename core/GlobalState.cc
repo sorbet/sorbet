@@ -1039,10 +1039,10 @@ MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, co
     auto owner = original.data(*this)->owner;
     auto res = enterMethodSymbol(loc, owner, name);
     ENFORCE(res != original);
-    if (res.data(*this)->arguments().size() != original.data(*this)->arguments().size()) {
-        ENFORCE(res.data(*this)->arguments().empty());
-        res.data(*this)->arguments().reserve(original.data(*this)->arguments().size());
-        const auto &originalArguments = original.data(*this)->arguments();
+    if (res.data(*this)->arguments.size() != original.data(*this)->arguments.size()) {
+        ENFORCE(res.data(*this)->arguments.empty());
+        res.data(*this)->arguments.reserve(original.data(*this)->arguments.size());
+        const auto &originalArguments = original.data(*this)->arguments;
         int i = -1;
         for (auto &arg : originalArguments) {
             i += 1;
@@ -1131,12 +1131,12 @@ ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRe
     ENFORCE(name.exists(), "entering symbol with non-existing name");
     MethodData ownerScope = owner.data(*this);
 
-    for (auto &arg : ownerScope->arguments()) {
+    for (auto &arg : ownerScope->arguments) {
         if (arg.name == name) {
             return arg;
         }
     }
-    auto &store = ownerScope->arguments().emplace_back();
+    auto &store = ownerScope->arguments.emplace_back();
 
     ENFORCE(!symbolTableFrozen);
 

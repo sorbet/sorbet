@@ -200,13 +200,6 @@ public:
     }
 
     using ArgumentsStore = InlinedVector<ArgInfo, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
-    ArgumentsStore &arguments() {
-        return arguments_;
-    }
-
-    const ArgumentsStore &arguments() const {
-        return arguments_;
-    }
 
     // if dealiasing fails here, then we return a bad alias method stub instead
     MethodRef dealiasMethod(const GlobalState &gs, int depthLimit = 42) const;
@@ -226,11 +219,11 @@ public:
     // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
     // why raw pointers are safe.
     const IntrinsicMethod *intrinsic = nullptr;
+    ArgumentsStore arguments;
 
 private:
     InlinedVector<TypeArgumentRef, 4> typeParams;
     InlinedVector<Loc, 2> locs_;
-    ArgumentsStore arguments_;
     uint16_t flags = Flags::NONE;
 };
 CheckSize(Method, 208, 8);

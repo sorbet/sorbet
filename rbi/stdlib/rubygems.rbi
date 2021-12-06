@@ -3512,7 +3512,7 @@ class Gem::Command
   #   "FILE          name of file to find"
   # end
   # ```
-  def arguments(); end
+  def arguments; end
 
   # True if `long` begins with the characters from `short`.
   def begins?(long, short); end

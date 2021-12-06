@@ -364,7 +364,7 @@ bool IREmitterHelpers::hasBlockArgument(CompilerState &cs, int blockId, core::Me
         return blockLink->argFlags.back().isBlock;
     }
 
-    auto &args = method.data(cs)->arguments();
+    auto &args = method.data(cs)->arguments;
     if (args.empty()) {
         return false;
     }

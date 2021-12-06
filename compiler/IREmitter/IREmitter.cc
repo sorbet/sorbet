@@ -41,7 +41,7 @@ vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blo
     }
 
     vector<core::ArgInfo::ArgFlags> res;
-    for (auto &argInfo : method.data(cs)->arguments()) {
+    for (auto &argInfo : method.data(cs)->arguments) {
         res.emplace_back(argInfo.flags);
     }
 
@@ -637,7 +637,7 @@ llvm::BasicBlock *resolveJumpTarget(cfg::CFG &cfg, const IREmitterContext &irctx
 void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(base);
     auto startLoc = cfg.symbol.data(base)->loc();
-    auto &arguments = cfg.symbol.data(base)->arguments();
+    auto &arguments = cfg.symbol.data(base)->arguments;
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[bb->rubyRegionId]);
