@@ -204,7 +204,8 @@ struct DSLInfo {
 
 void printName(fmt::memory_buffer &out, const std::vector<core::NameRef> &parts, const core::GlobalState &gs);
 UnorderedMap<std::vector<core::NameRef>, DSLInfo>
-mergeAndFilterGlobalDSLInfo(const core::GlobalState &gs, UnorderedMap<std::vector<core::NameRef>, DSLInfo> globalDSLInfo);
+mergeAndFilterGlobalDSLInfo(const core::GlobalState &gs,
+                            UnorderedMap<std::vector<core::NameRef>, DSLInfo> globalDSLInfo);
 
 struct DSLAnalysisFile {
     // the checksum of this file

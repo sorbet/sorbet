@@ -206,7 +206,8 @@ void printName(fmt::memory_buffer &out, const std::vector<core::NameRef> &parts,
 }
 
 UnorderedMap<std::vector<core::NameRef>, DSLInfo>
-mergeAndFilterGlobalDSLInfo(UnorderedMap<std::vector<core::NameRef>, DSLInfo> globalDSLInfo) {
+mergeAndFilterGlobalDSLInfo(const core::GlobalState &gs,
+                            UnorderedMap<std::vector<core::NameRef>, DSLInfo> globalDSLInfo) {
     const std::vector<core::NameRef> CHALK_ODM_MODEL = {core::Names::Constants::Chalk(), core::Names::Constants::ODM(),
                                                         core::Names::Constants::Model()};
     const std::vector<core::NameRef> CHALK_ODM_MUTATOR = {
@@ -242,7 +243,8 @@ mergeAndFilterGlobalDSLInfo(UnorderedMap<std::vector<core::NameRef>, DSLInfo> gl
                 }
                 DSLInfo &ancstInfo = ancstInfoIt->second;
                 info.props.insert(info.props.end(), ancstInfo.props.begin(), ancstInfo.props.end());
-                info.problemLocs.insert(info.problemLocs.end(), ancstInfo.problemLocs.begin(), ancstInfo.problemLocs.end());
+                info.problemLocs.insert(info.problemLocs.end(), ancstInfo.problemLocs.begin(),
+                                        ancstInfo.problemLocs.end());
             }
 
             result.emplace(klass, std::move(info));

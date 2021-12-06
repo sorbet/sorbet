@@ -266,6 +266,7 @@ NameDef names[] = {
     {"Model", "Model", true},
     {"Mixins", "Mixins", true},
     {"Mutator", "Mutator", true},
+    {"ImmutableModel", "ImmutableModel", true},
     {"Encryptable", "Encryptable", true},
     {"EncryptedValue", "EncryptedValue", true},
     {"Command", "Command", true},

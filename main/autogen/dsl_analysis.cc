@@ -16,6 +16,9 @@ const std::vector<u4> KNOWN_PROP_METHODS = {
     core::Names::const_().rawId(),
 };
 
+const std::vector<core::NameRef> CHALK_ODM_IMMUTABLE_MODEL = {
+    core::Names::Constants::Chalk(), core::Names::Constants::ODM(), core::Names::Constants::ImmutableModel()};
+
 struct PropInfoInternal {
     core::NameRef name;
     std::optional<ast::ExpressionPtr> typeExp;
@@ -227,6 +230,11 @@ public:
     ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         if (nestingScopes.size() == 0 || !validScope) {
             // Not already in a valid scope
+            return tree;
+        }
+
+        auto &curScope = nestingScopes.back();
+        if (curScope == CHALK_ODM_IMMUTABLE_MODEL) {
             return tree;
         }
 
