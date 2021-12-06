@@ -73,14 +73,6 @@ public:
     uint32_t methodShapeHash(const GlobalState &gs) const;
     std::vector<uint32_t> methodArgumentHash(const GlobalState &gs) const;
 
-    inline InlinedVector<TypeArgumentRef, 4> &typeArguments() {
-        return typeParams;
-    }
-
-    inline const InlinedVector<TypeArgumentRef, 4> &typeArguments() const {
-        return typeParams;
-    }
-
     inline bool isOverloaded() const {
         return (flags & Method::Flags::METHOD_OVERLOADED) != 0;
     }
@@ -220,9 +212,9 @@ public:
     // why raw pointers are safe.
     const IntrinsicMethod *intrinsic = nullptr;
     ArgumentsStore arguments;
+    InlinedVector<TypeArgumentRef, 4> typeArguments;
 
 private:
-    InlinedVector<TypeArgumentRef, 4> typeParams;
     InlinedVector<Loc, 2> locs_;
     uint16_t flags = Flags::NONE;
 };

@@ -978,9 +978,9 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     flags = flags | Symbol::Flags::TYPE_ARGUMENT;
 
     auto ownerScope = owner.dataAllowingNone(*this);
-    histogramInc("symbol_enter_by_name", ownerScope->typeArguments().size());
+    histogramInc("symbol_enter_by_name", ownerScope->typeArguments.size());
 
-    for (auto typeArg : ownerScope->typeArguments()) {
+    for (auto typeArg : ownerScope->typeArguments) {
         if (typeArg.dataAllowingNone(*this)->name == name) {
             ENFORCE((typeArg.dataAllowingNone(*this)->flags & flags) == flags, "existing symbol has wrong flags");
             counterInc("symbols.hit");
@@ -1000,7 +1000,7 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     DEBUG_ONLY(categoryCounterInc("symbols", "type_argument"));
     wasModified_ = true;
 
-    owner.dataAllowingNone(*this)->typeArguments().emplace_back(result);
+    owner.dataAllowingNone(*this)->typeArguments.emplace_back(result);
     return result;
 }
 
