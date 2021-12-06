@@ -33,11 +33,16 @@ namespace {
 // Hash functions used to determine position in namesByHash.
 
 inline unsigned int hashMixUnique(UniqueNameKind unk, unsigned int num, unsigned int rawId) {
-    return mix(mix(num, static_cast<u4>(unk)), rawId) * HASH_MULT2 + static_cast<u4>(NameKind::UNIQUE);
+    u4 unkAndKind = static_cast<u4>(unk) << 8;
+    unkAndKind |= static_cast<u4>(NameKind::UNIQUE);
+    return _hash(unkAndKind, num, rawId);
 }
 
 inline unsigned int hashMixConstant(unsigned int id) {
-    return id * HASH_MULT2 + static_cast<u4>(NameKind::CONSTANT);
+    u8 data = id;
+    data <<= 32;
+    data |= static_cast<u8>(NameKind::CONSTANT);
+    return _hash(data);
 }
 
 inline unsigned int hashNameRef(const GlobalState &gs, NameRef nref) {

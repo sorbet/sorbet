@@ -13,5 +13,9 @@ inline unsigned int mix(unsigned int acc, unsigned int nw) {
 
 unsigned int _hash(std::string_view utf8);
 
+unsigned int _hash(uint64_t num1);
+
+unsigned int _hash(uint32_t num1, uint32_t num2, uint32_t num3);
+
 } // namespace sorbet::core
 #endif // SORBET_HASHING_H
