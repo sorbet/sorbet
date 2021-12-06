@@ -60,10 +60,10 @@ bool checkSubtype(const core::Context ctx, const core::TypePtr &sub, const core:
 
 string supermethodKind(const core::Context ctx, core::MethodRef method) {
     auto methodData = method.data(ctx);
-    ENFORCE(methodData->isAbstract() || methodData->isOverridable() || methodData->hasSig());
-    if (methodData->isAbstract()) {
+    ENFORCE(methodData->flags.isAbstract || methodData->flags.isOverridable || methodData->hasSig());
+    if (methodData->flags.isAbstract) {
         return "abstract";
-    } else if (methodData->isOverridable()) {
+    } else if (methodData->flags.isOverridable) {
         return "overridable";
     } else {
         return "overridden";
@@ -72,10 +72,10 @@ string supermethodKind(const core::Context ctx, core::MethodRef method) {
 
 string implementationOf(const core::Context ctx, core::MethodRef method) {
     auto methodData = method.data(ctx);
-    ENFORCE(methodData->isAbstract() || methodData->isOverridable() || methodData->hasSig());
-    if (methodData->isAbstract()) {
+    ENFORCE(methodData->flags.isAbstract || methodData->flags.isOverridable || methodData->hasSig());
+    if (methodData->flags.isAbstract) {
         return "Implementation of abstract";
-    } else if (methodData->isOverridable()) {
+    } else if (methodData->flags.isOverridable) {
         return "Implementation of overridable";
     } else {
         return "Override of";
@@ -111,7 +111,7 @@ void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrap
 
 // Ensure that two argument lists are compatible in shape and type
 void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMethod, core::MethodRef method) {
-    if (method.data(ctx)->isOverloaded()) {
+    if (method.data(ctx)->flags.isOverloaded) {
         // Don't try to check overloaded methods; It's not immediately clear how
         // to match overloads against their superclass definitions. Since we
         // Only permit overloading in the stdlib for now, this is no great loss.
@@ -271,19 +271,19 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
 
     // both of these match the behavior of the runtime checks, which will only allow public methods to be defined in
     // interfaces
-    if (klassData->isClassOrModuleInterface() && method.data(ctx)->isMethodPrivate()) {
+    if (klassData->isClassOrModuleInterface() && method.data(ctx)->flags.isPrivate) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
             e.setHeader("Interface method `{}` cannot be private", method.show(ctx));
         }
     }
 
-    if (klassData->isClassOrModuleInterface() && method.data(ctx)->isMethodProtected()) {
+    if (klassData->isClassOrModuleInterface() && method.data(ctx)->flags.isProtected) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
             e.setHeader("Interface method `{}` cannot be protected", method.show(ctx));
         }
     }
 
-    if (method.data(ctx)->isAbstract() && klassData->isClassOrModule() && klassData->isSingletonClass(ctx)) {
+    if (method.data(ctx)->flags.isAbstract && klassData->isClassOrModule() && klassData->isSingletonClass(ctx)) {
         auto attached = klassData->attachedClass(ctx);
         if (attached.exists() && attached.data(ctx)->isClassOrModuleModule()) {
             if (auto e =
@@ -306,7 +306,8 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
         }
     }
 
-    if (overridenMethods.size() == 0 && method.data(ctx)->isOverride() && !method.data(ctx)->isIncompatibleOverride()) {
+    if (overridenMethods.size() == 0 && method.data(ctx)->flags.isOverride &&
+        !method.data(ctx)->flags.isIncompatibleOverride) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Method `{}` is marked `{}` but does not override anything", method.show(ctx), "override");
         }
@@ -314,9 +315,9 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
 
     // we don't raise override errors if the method implements an abstract method, which means we need to know ahead of
     // time whether any parent methods are abstract
-    auto anyIsInterface = absl::c_any_of(overridenMethods, [&](auto &m) { return m.data(ctx)->isAbstract(); });
+    auto anyIsInterface = absl::c_any_of(overridenMethods, [&](auto &m) { return m.data(ctx)->flags.isAbstract; });
     for (const auto &overridenMethod : overridenMethods) {
-        if (overridenMethod.data(ctx)->isFinalMethod()) {
+        if (overridenMethod.data(ctx)->flags.isFinal) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
                 e.setHeader("`{}` was declared as final and cannot be overridden by `{}`", overridenMethod.show(ctx),
                             method.show(ctx));
@@ -324,9 +325,9 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
             }
         }
         auto isRBI = absl::c_any_of(method.data(ctx)->locs(), [&](auto &loc) { return loc.file().data(ctx).isRBI(); });
-        if (!method.data(ctx)->isOverride() && method.data(ctx)->hasSig() &&
-            (overridenMethod.data(ctx)->isOverridable() || overridenMethod.data(ctx)->isOverride()) &&
-            !anyIsInterface && overridenMethod.data(ctx)->hasSig() && !method.data(ctx)->isRewriterSynthesized() &&
+        if (!method.data(ctx)->flags.isOverride && method.data(ctx)->hasSig() &&
+            (overridenMethod.data(ctx)->flags.isOverridable || overridenMethod.data(ctx)->flags.isOverride) &&
+            !anyIsInterface && overridenMethod.data(ctx)->hasSig() && !method.data(ctx)->flags.isRewriterSynthesized &&
             !isRBI) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` overrides an overridable method `{}` but is not declared with `{}`",
@@ -334,17 +335,19 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
                 e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
             }
         }
-        if (!method.data(ctx)->isOverride() && method.data(ctx)->hasSig() && overridenMethod.data(ctx)->isAbstract() &&
-            overridenMethod.data(ctx)->hasSig() && !method.data(ctx)->isRewriterSynthesized() && !isRBI) {
+        if (!method.data(ctx)->flags.isOverride && method.data(ctx)->hasSig() &&
+            overridenMethod.data(ctx)->flags.isAbstract && overridenMethod.data(ctx)->hasSig() &&
+            !method.data(ctx)->flags.isRewriterSynthesized && !isRBI) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`",
                             method.show(ctx), overridenMethod.show(ctx), "override.");
                 e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
             }
         }
-        if ((overridenMethod.data(ctx)->isAbstract() || overridenMethod.data(ctx)->isOverridable() ||
-             (overridenMethod.data(ctx)->hasSig() && method.data(ctx)->isOverride())) &&
-            !method.data(ctx)->isIncompatibleOverride() && !isRBI && !method.data(ctx)->isRewriterSynthesized()) {
+        if ((overridenMethod.data(ctx)->flags.isAbstract || overridenMethod.data(ctx)->flags.isOverridable ||
+             (overridenMethod.data(ctx)->hasSig() && method.data(ctx)->flags.isOverride)) &&
+            !method.data(ctx)->flags.isIncompatibleOverride && !isRBI &&
+            !method.data(ctx)->flags.isRewriterSynthesized) {
             validateCompatibleOverride(ctx, overridenMethod, method);
         }
     }
@@ -391,7 +394,7 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::ClassOrM
         // We only care about method symbols that exist.
         if (!sym.exists() || !sym.isMethod() ||
             // Method is 'final', and passes the check.
-            sym.asMethodRef().data(gs)->isFinalMethod() ||
+            sym.asMethodRef().data(gs)->flags.isFinal ||
             // <static-init> is a fake method Sorbet synthesizes for typechecking.
             sym.name(gs) == core::Names::staticInit() ||
             // <unresolved-ancestors> is a fake method Sorbet synthesizes to ensure class hierarchy changes in IDE take
@@ -663,7 +666,7 @@ private:
         auto isAbstract = klass.data(gs)->isClassOrModuleAbstract();
         if (isAbstract) {
             for (auto [name, sym] : klass.data(gs)->members()) {
-                if (sym.exists() && sym.isMethod() && sym.asMethodRef().data(gs)->isAbstract()) {
+                if (sym.exists() && sym.isMethod() && sym.asMethodRef().data(gs)->flags.isAbstract) {
                     abstract.emplace_back(sym.asMethodRef());
                 }
             }

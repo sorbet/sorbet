@@ -22,7 +22,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     auto guessTypes = true;
     unique_ptr<core::TypeConstraint> _constr;
     core::TypeConstraint *constr = &core::TypeConstraint::EmptyFrozenConstraint;
-    if (cfg->symbol.data(ctx)->isGenericMethod()) {
+    if (cfg->symbol.data(ctx)->flags.isGenericMethod) {
         _constr = make_unique<core::TypeConstraint>();
         constr = _constr.get();
         for (core::SymbolRef typeArgument : cfg->symbol.data(ctx)->typeArguments) {

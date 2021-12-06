@@ -233,7 +233,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     { // create candidates and sort them by number of arguments(stable by symbol id)
         int i = 0;
         MethodRef current = primary;
-        while (current.data(gs)->isOverloaded()) {
+        while (current.data(gs)->flags.isOverloaded) {
             i++;
             NameRef overloadName = gs.lookupNameUnique(UniqueNameKind::Overload, primary.data(gs)->name, i);
             MethodRef overload = primary.data(gs)->owner.data(gs)->findMethod(gs, overloadName);
@@ -638,7 +638,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         auto possibleSymbol = alternative.symbol;
                         if (!possibleSymbol.isClassOrModule() &&
                             (!possibleSymbol.isMethod() ||
-                             (possibleSymbol.asMethodRef().data(gs)->isMethodPrivate() && !args.isPrivateOk))) {
+                             (possibleSymbol.asMethodRef().data(gs)->flags.isPrivate && !args.isPrivateOk))) {
                             continue;
                         }
 
@@ -694,9 +694,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return result;
     }
 
-    auto method = mayBeOverloaded.data(gs)->isOverloaded() ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs,
-                                                                           args.args, targs, args.block != nullptr)
-                                                           : mayBeOverloaded;
+    auto method =
+        mayBeOverloaded.data(gs)->flags.isOverloaded
+            ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, targs, args.block != nullptr)
+            : mayBeOverloaded;
 
     DispatchResult result;
     auto &component = result.main;
@@ -706,14 +707,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     auto data = method.data(gs);
     unique_ptr<TypeConstraint> &maybeConstraint = result.main.constr;
     TypeConstraint *constr;
-    if (args.block || data->isGenericMethod()) {
+    if (args.block || data->flags.isGenericMethod) {
         maybeConstraint = make_unique<TypeConstraint>();
         constr = maybeConstraint.get();
     } else {
         constr = &TypeConstraint::EmptyFrozenConstraint;
     }
 
-    if (data->isGenericMethod()) {
+    if (data->flags.isGenericMethod) {
         constr->defineDomain(gs, data->typeArguments);
     }
     auto posArgs = args.numPosArgs;

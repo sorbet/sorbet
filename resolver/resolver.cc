@@ -2688,7 +2688,7 @@ private:
     }
 
     static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef) {
-        if (mdef.symbol.data(ctx)->isAbstract()) {
+        if (mdef.symbol.data(ctx)->flags.isAbstract) {
             if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
                 if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
                     e.setHeader("Abstract methods must not contain any code in their body");
@@ -2760,13 +2760,13 @@ private:
         }
 
         if (sig.seen.abstract) {
-            method.data(ctx)->setAbstract();
+            method.data(ctx)->flags.isAbstract = true;
         }
         if (sig.seen.incompatibleOverride) {
-            method.data(ctx)->setIncompatibleOverride();
+            method.data(ctx)->flags.isIncompatibleOverride = true;
         }
         if (!sig.typeArgs.empty()) {
-            method.data(ctx)->setGenericMethod();
+            method.data(ctx)->flags.isGenericMethod = true;
             for (auto &typeSpec : sig.typeArgs) {
                 if (typeSpec.type) {
                     auto name = ctx.state.freshNameUnique(core::UniqueNameKind::TypeVarName, typeSpec.name, 1);
@@ -2779,13 +2779,13 @@ private:
             }
         }
         if (sig.seen.overridable) {
-            method.data(ctx)->setOverridable();
+            method.data(ctx)->flags.isOverridable = true;
         }
         if (sig.seen.override_) {
-            method.data(ctx)->setOverride();
+            method.data(ctx)->flags.isOverride = true;
         }
         if (sig.seen.final) {
-            method.data(ctx)->setFinalMethod();
+            method.data(ctx)->flags.isFinal = true;
         }
         if (sig.seen.bind) {
             method.data(ctx)->rebind = sig.bind;
@@ -3135,7 +3135,7 @@ public:
                                                                i, sig.argsToKeep);
                 overloadSym.data(ctx)->setMethodVisibility(mdef.symbol.data(ctx)->methodVisibility());
                 if (i != sigs.size() - 1) {
-                    overloadSym.data(ctx)->setOverloaded();
+                    overloadSym.data(ctx)->flags.isOverloaded = true;
                 }
             } else {
                 overloadSym = mdef.symbol;

@@ -340,13 +340,13 @@ bool childNeedsOverride(core::Context ctx, core::MethodRef childSymbol, core::Me
         // that isn't the constructor...
         childSymbol.data(ctx)->name != core::Names::initialize() &&
         // and wasn't Rewriter synthesized (beause we can't change DSL'd sigs).
-        !parentSymbol.data(ctx)->isRewriterSynthesized() &&
+        !parentSymbol.data(ctx)->flags.isRewriterSynthesized &&
         // It has a sig...
         parentSymbol.data(ctx)->resultType != nullptr &&
         //  that is either overridable...
-        (parentSymbol.data(ctx)->isOverridable() ||
+        (parentSymbol.data(ctx)->flags.isOverridable ||
          // or override...
-         parentSymbol.data(ctx)->isOverride());
+         parentSymbol.data(ctx)->flags.isOverride);
 }
 
 } // namespace
@@ -433,7 +433,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     if (methodSymbol.data(ctx)->name != core::Names::initialize()) {
         // Only need override / implementation if the parent has a sig
         if (closestMethod.exists() && closestMethod.data(ctx)->resultType != nullptr) {
-            if (closestMethod.data(ctx)->isAbstract() || childNeedsOverride(ctx, methodSymbol, closestMethod)) {
+            if (closestMethod.data(ctx)->flags.isAbstract || childNeedsOverride(ctx, methodSymbol, closestMethod)) {
                 fmt::format_to(std::back_inserter(ss), "override.");
             }
         }

@@ -1051,7 +1051,7 @@ class SymbolDefiner {
         defineArgs(ctx.withOwner(sym), parsedArgs);
         sym.data(ctx)->addLoc(ctx, declLoc);
         if (method.flags.isRewriterSynthesized) {
-            sym.data(ctx)->setRewriterSynthesized();
+            sym.data(ctx)->flags.isRewriterSynthesized = true;
         }
         ENFORCE(ctx.state.lookupMethodSymbolWithHash(owner, method.name, method.argsHash).exists());
         return sym;
@@ -1062,7 +1062,7 @@ class SymbolDefiner {
         auto implicitlyPrivate = ctx.owner.enclosingClass(ctx) == core::Symbols::root();
         if (implicitlyPrivate) {
             // Methods defined at the top level default to private (on Object)
-            symbol.data(ctx)->setMethodPrivate();
+            symbol.data(ctx)->flags.isPrivate = true;
         } else {
             // All other methods default to public (their visibility might be changed later)
             symbol.data(ctx)->setMethodPublic();
@@ -1082,10 +1082,10 @@ class SymbolDefiner {
             switch (mod.name.rawId()) {
                 case core::Names::private_().rawId():
                 case core::Names::privateClassMethod().rawId():
-                    method.data(ctx)->setMethodPrivate();
+                    method.data(ctx)->flags.isPrivate = true;
                     break;
                 case core::Names::protected_().rawId():
-                    method.data(ctx)->setMethodProtected();
+                    method.data(ctx)->flags.isProtected = true;
                     break;
                 case core::Names::public_().rawId():
                     method.data(ctx)->setMethodPublic();

@@ -78,73 +78,9 @@ public:
     uint32_t methodShapeHash(const GlobalState &gs) const;
     std::vector<uint32_t> methodArgumentHash(const GlobalState &gs) const;
 
-    inline bool isOverloaded() const {
-        return flags.isOverloaded;
-    }
-
-    inline bool isAbstract() const {
-        return flags.isAbstract;
-    }
-
-    inline bool isIncompatibleOverride() const {
-        return flags.isIncompatibleOverride;
-    }
-
-    inline bool isGenericMethod() const {
-        return flags.isGenericMethod;
-    }
-
-    inline bool isOverridable() const {
-        return flags.isOverridable;
-    }
-
-    inline bool isOverride() const {
-        return flags.isOverride;
-    }
-
-    inline void setOverloaded() {
-        flags.isOverloaded = true;
-    }
-
-    inline void setAbstract() {
-        flags.isAbstract = true;
-    }
-
-    inline void setIncompatibleOverride() {
-        flags.isIncompatibleOverride = true;
-    }
-
-    inline void setGenericMethod() {
-        flags.isGenericMethod = true;
-    }
-
-    inline void setOverridable() {
-        flags.isOverridable = true;
-    }
-
-    inline void setFinalMethod() {
-        flags.isFinal = true;
-    }
-
-    inline void setOverride() {
-        flags.isOverride = true;
-    }
-
-    inline bool isFinalMethod() const {
-        return flags.isFinal;
-    }
-
     inline void setMethodPublic() {
         flags.isPrivate = false;
         flags.isProtected = false;
-    }
-
-    inline void setMethodProtected() {
-        flags.isProtected = true;
-    }
-
-    inline void setMethodPrivate() {
-        flags.isPrivate = true;
     }
 
     void setMethodVisibility(Visibility visibility) {
@@ -153,39 +89,24 @@ public:
                 this->setMethodPublic();
                 break;
             case Visibility::Protected:
-                this->setMethodProtected();
+                this->flags.isProtected = true;
                 break;
             case Visibility::Private:
-                this->setMethodPrivate();
+                this->flags.isPrivate = true;
                 break;
         }
     }
 
     inline bool isMethodPublic() const {
-        return !isMethodProtected() && !isMethodPrivate();
-    }
-
-    inline bool isMethodProtected() const {
-        return flags.isProtected;
-    }
-
-    inline bool isMethodPrivate() const {
-        return flags.isPrivate;
-    }
-
-    inline void setRewriterSynthesized() {
-        flags.isRewriterSynthesized = true;
-    }
-    inline bool isRewriterSynthesized() const {
-        return flags.isRewriterSynthesized;
+        return !flags.isProtected && !flags.isPrivate;
     }
 
     Visibility methodVisibility() const {
         if (this->isMethodPublic()) {
             return Visibility::Public;
-        } else if (this->isMethodProtected()) {
+        } else if (this->flags.isProtected) {
             return Visibility::Protected;
-        } else if (this->isMethodPrivate()) {
+        } else if (this->flags.isPrivate) {
             return Visibility::Private;
         } else {
             Exception::raise("Expected method to have visibility");
@@ -221,6 +142,8 @@ public:
 
 private:
     InlinedVector<Loc, 2> locs_;
+
+public:
     Flags flags;
 };
 CheckSize(Method, 192, 8);
@@ -559,7 +482,7 @@ public:
     inline void setRewriterSynthesized() {
         flags |= Symbol::Flags::REWRITER_SYNTHESIZED;
     }
-    inline bool isRewriterSynthesized() const {
+    inline bool isRewriterSynthesized() {
         return (flags & Symbol::Flags::REWRITER_SYNTHESIZED) != 0;
     }
 

@@ -462,7 +462,7 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     if (instantiated == nullptr) {
         instantiated = core::Types::untyped(ctx, owner);
     }
-    if (owner.data(ctx)->isGenericMethod()) {
+    if (owner.data(ctx)->flags.isGenericMethod) {
         instantiated = core::Types::instantiate(ctx, instantiated, constr);
     } else {
         // You might expect us to instantiate with the constr to be null for a non-generic method,
@@ -608,14 +608,14 @@ MethodRef findConcreteMethodTransitiveInternal(const GlobalState &gs, ClassOrMod
     }
 
     MethodRef result = owner.data(gs)->findMethod(gs, name);
-    if (result.exists() && !result.data(gs)->isAbstract()) {
+    if (result.exists() && !result.data(gs)->flags.isAbstract) {
         return result;
     }
 
     for (auto it = owner.data(gs)->mixins().begin(); it != owner.data(gs)->mixins().end(); ++it) {
         ENFORCE(it->exists());
         result = it->data(gs)->findMethod(gs, name);
-        if (result.exists() && !result.data(gs)->isAbstract()) {
+        if (result.exists() && !result.data(gs)->flags.isAbstract) {
             return result;
         }
     }
@@ -1230,25 +1230,25 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
 
     auto methodFlags = InlinedVector<string, 3>{};
 
-    if (sym->isMethodPrivate()) {
+    if (sym->flags.isPrivate) {
         methodFlags.emplace_back("private");
-    } else if (sym->isMethodProtected()) {
+    } else if (sym->flags.isProtected) {
         methodFlags.emplace_back("protected");
     }
 
-    if (sym->isAbstract()) {
+    if (sym->flags.isAbstract) {
         methodFlags.emplace_back("abstract");
     }
-    if (sym->isOverridable()) {
+    if (sym->flags.isOverridable) {
         methodFlags.emplace_back("overridable");
     }
-    if (sym->isOverride()) {
+    if (sym->flags.isOverride) {
         methodFlags.emplace_back("override");
     }
-    if (sym->isIncompatibleOverride()) {
+    if (sym->flags.isIncompatibleOverride) {
         methodFlags.emplace_back("allow_incompatible");
     }
-    if (sym->isFinalMethod()) {
+    if (sym->flags.isFinal) {
         methodFlags.emplace_back("final");
     }
 

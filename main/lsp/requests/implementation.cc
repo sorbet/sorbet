@@ -26,7 +26,7 @@ unique_ptr<ResponseError> makeInvalidRequestError(core::SymbolRef symbol, const 
 
 const MethodImplementationResults findMethodImplementations(const core::GlobalState &gs, core::MethodRef method) {
     MethodImplementationResults res;
-    if (!method.data(gs)->isAbstract()) {
+    if (!method.data(gs)->flags.isAbstract) {
         res.error = makeInvalidRequestError(method, gs);
         return res;
     }
@@ -89,7 +89,7 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
 
         auto method = maybeMethod.asMethodRef();
         core::MethodRef overridedMethod = method;
-        if (method.data(gs)->isOverride()) {
+        if (method.data(gs)->flags.isOverride) {
             overridedMethod = findOverridedMethod(gs, method);
         }
         auto locationsOrError = findMethodImplementations(gs, overridedMethod);
@@ -130,7 +130,7 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
 
         auto calledMethod = mainResponse.method;
         auto overridedMethod = calledMethod;
-        if (calledMethod.data(gs)->isOverride()) {
+        if (calledMethod.data(gs)->flags.isOverride) {
             overridedMethod = findOverridedMethod(gs, overridedMethod);
         }
 

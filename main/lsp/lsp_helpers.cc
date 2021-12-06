@@ -88,16 +88,16 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     vector<string> flags;
     auto sym = method.data(gs);
     string sigCall = "sig";
-    if (sym->isFinalMethod()) {
+    if (sym->flags.isFinal) {
         sigCall = "sig(:final)";
     }
-    if (sym->isAbstract()) {
+    if (sym->flags.isAbstract) {
         flags.emplace_back("abstract");
     }
-    if (sym->isOverridable()) {
+    if (sym->flags.isOverridable) {
         flags.emplace_back("overridable");
     }
-    if (sym->isOverride()) {
+    if (sym->flags.isOverride) {
         flags.emplace_back("override");
     }
     for (auto &argSym : method.data(gs)->arguments) {
@@ -140,9 +140,9 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method) {
     auto methodData = method.data(gs);
 
     string visibility = "";
-    if (methodData->isMethodPrivate()) {
+    if (methodData->flags.isPrivate) {
         visibility = "private ";
-    } else if (methodData->isMethodProtected()) {
+    } else if (methodData->flags.isProtected) {
         visibility = "protected ";
     }
 
