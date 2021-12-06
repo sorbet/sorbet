@@ -1532,7 +1532,8 @@ class ResolveTypeMembersAndFieldsWalk {
         auto data = job.sym.data(ctx);
         if (data->resultType == nullptr) {
             auto resultType = resolveConstantType(ctx, asgn->rhs);
-            if (resultType == nullptr) {
+            // Do not attempt to suggest types for aliases that fail to resolve in package files.
+            if (resultType == nullptr && !ctx.file.data(ctx).isPackage()) {
                 // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
                 auto rhs = move(job.asgn->rhs);
                 auto loc = rhs.loc();
