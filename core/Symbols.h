@@ -49,20 +49,20 @@ public:
     class Flags {
     public:
         // Synthesized by C++ code in a Rewriter pass
-        bool rewriterSynthesized : 1;
-        bool methodProtected : 1;
-        bool methodPrivate : 1;
-        bool methodOverloaded : 1;
-        bool methodAbstract : 1;
-        bool methodGeneric : 1;
-        bool methodOverridable : 1;
-        bool methodFinal : 1;
-        bool methodOverride : 1;
-        bool methodIncompatibleOverride : 1;
+        bool isRewriterSynthesized : 1;
+        bool isProtected : 1;
+        bool isPrivate : 1;
+        bool isOverloaded : 1;
+        bool isAbstract : 1;
+        bool isGenericMethod : 1;
+        bool isOverridable : 1;
+        bool isFinal : 1;
+        bool isOverride : 1;
+        bool isIncompatibleOverride : 1;
         Flags() noexcept
-            : rewriterSynthesized(false), methodProtected(false), methodPrivate(false), methodOverloaded(false),
-              methodAbstract(false), methodGeneric(false), methodOverridable(false), methodFinal(false),
-              methodOverride(false), methodIncompatibleOverride(false) {}
+            : isRewriterSynthesized(false), isProtected(false), isPrivate(false), isOverloaded(false),
+              isAbstract(false), isGenericMethod(false), isOverridable(false), isFinal(false), isOverride(false),
+              isIncompatibleOverride(false) {}
 
         uint16_t serialize() const {
             // Can replace this with std::bit_cast in C++20
@@ -79,72 +79,72 @@ public:
     std::vector<uint32_t> methodArgumentHash(const GlobalState &gs) const;
 
     inline bool isOverloaded() const {
-        return flags.methodOverloaded;
+        return flags.isOverloaded;
     }
 
     inline bool isAbstract() const {
-        return flags.methodAbstract;
+        return flags.isAbstract;
     }
 
     inline bool isIncompatibleOverride() const {
-        return flags.methodIncompatibleOverride;
+        return flags.isIncompatibleOverride;
     }
 
     inline bool isGenericMethod() const {
-        return flags.methodGeneric;
+        return flags.isGenericMethod;
     }
 
     inline bool isOverridable() const {
-        return flags.methodOverridable;
+        return flags.isOverridable;
     }
 
     inline bool isOverride() const {
-        return flags.methodOverride;
+        return flags.isOverride;
     }
 
     inline void setOverloaded() {
-        flags.methodOverloaded = true;
+        flags.isOverloaded = true;
     }
 
     inline void setAbstract() {
-        flags.methodAbstract = true;
+        flags.isAbstract = true;
     }
 
     inline void setIncompatibleOverride() {
-        flags.methodIncompatibleOverride = true;
+        flags.isIncompatibleOverride = true;
     }
 
     inline void setGenericMethod() {
-        flags.methodGeneric = true;
+        flags.isGenericMethod = true;
     }
 
     inline void setOverridable() {
-        flags.methodOverridable = true;
+        flags.isOverridable = true;
     }
 
     inline void setFinalMethod() {
-        flags.methodFinal = true;
+        flags.isFinal = true;
     }
 
     inline void setOverride() {
-        flags.methodOverride = true;
+        flags.isOverride = true;
     }
 
     inline bool isFinalMethod() const {
-        return flags.methodFinal;
+        return flags.isFinal;
     }
 
     inline void setMethodPublic() {
-        flags.methodPrivate = false;
-        flags.methodProtected = false;
+        flags.isPrivate = false;
+        flags.isProtected = false;
     }
 
     inline void setMethodProtected() {
-        flags.methodProtected = true;
+        flags.isProtected = true;
     }
 
     inline void setMethodPrivate() {
-        flags.methodPrivate = true;
+        flags.isPrivate = true;
     }
 
     void setMethodVisibility(Visibility visibility) {
@@ -166,18 +166,18 @@ public:
     }
 
     inline bool isMethodProtected() const {
-        return flags.methodProtected;
+        return flags.isProtected;
     }
 
     inline bool isMethodPrivate() const {
-        return flags.methodPrivate;
+        return flags.isPrivate;
     }
 
     inline void setRewriterSynthesized() {
-        flags.rewriterSynthesized = true;
+        flags.isRewriterSynthesized = true;
     }
     inline bool isRewriterSynthesized() const {
-        return flags.rewriterSynthesized;
+        return flags.isRewriterSynthesized;
     }
 
     Visibility methodVisibility() const {
