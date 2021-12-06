@@ -11,9 +11,10 @@ unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, uniqu
     return nullptr;
 }
 
-void maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore> kvstore, const options::Options &opts,
-                                   core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
-    return;
+unique_ptr<Joinable> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore> kvstore, shared_ptr<spdlog::logger> tracer,
+                                                   const options::Options &opts, core::GlobalState &gs,
+                                                   WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
+    return nullptr;
 }
 
 } // namespace sorbet::realmain::cache

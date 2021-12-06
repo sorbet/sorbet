@@ -575,7 +575,8 @@ int realmain(int argc, char *argv[]) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
         }
-        cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed);
+        auto cacheThread = cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), logger, opts,
+                                                                *gs, *workers, indexed);
 
         if (gs->runningUnderAutogen) {
 #ifdef SORBET_REALMAIN_MIN

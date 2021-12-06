@@ -202,8 +202,8 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
         }
     }
 
-    cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(ownedKvstore)), config->opts, *initialGS,
-                                         workers, indexed);
+    this->cacheThread = cache::maybeCacheGlobalStateAndFiles(
+        OwnedKeyValueStore::abort(move(ownedKvstore)), config->logger, config->opts, *initialGS, workers, indexed);
 
     ENFORCE_NO_TIMER(indexed.size() == initialGS->filesUsed());
 
