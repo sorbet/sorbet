@@ -79,6 +79,15 @@ public:
         }
     }
 
+    bool tryPackageSpecCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
+        if (isUnresolvedExport(unresolved)) {
+            // TODO(nroman-stripe) handle bad export
+        } else {
+            // TODO(gdritter-stripe) handle bad import
+        }
+        return false;
+    }
+
 private:
     // Search all packages finding those that match a specific prefix. These are candidates for
     // includes. See following example for why prefixes and not exact matches are used:
@@ -112,6 +121,14 @@ private:
     bool canImport(const core::packages::PackageInfo &other) const {
         return currentPkg.mangledName() != other.mangledName(); // Don't import yourself
     }
+
+    bool isUnresolvedExport(ast::UnresolvedConstantLit &unresolved) {
+        if (ast::isa_tree<ast::EmptyTree>(unresolved.scope)) {
+            return false;
+        }
+        return core::packages::PackageInfo::isPackageModule(
+            ctx, ast::cast_tree_nonnull<ast::ConstantLit>(unresolved.scope).symbol.asClassOrModuleRef());
+    }
 };
 } // namespace
 
@@ -132,6 +149,8 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
     PackageContext pkgCtx(ctx);
     if (!pkgCtx.currentPkg.exists()) {
         return false; // This error is not in packaged code. Nothing to do here.
+    } else if (ctx.file.data(ctx).isPackage()) {
+        return pkgCtx.tryPackageSpecCorrections(e, unresolved);
     }
 
     if (ast::cast_tree<ast::ConstantLit>(unresolved.scope) != nullptr) {

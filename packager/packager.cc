@@ -23,16 +23,6 @@ namespace {
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 constexpr core::NameRef TEST_NAME = core::Names::Constants::Test();
 
-bool isPackageModule(const core::GlobalState &gs, core::ClassOrModuleRef modName) {
-    while (modName.exists() && modName != core::Symbols::root()) {
-        if (modName == core::Symbols::PackageRegistry() || modName == core::Symbols::PackageTests()) {
-            return true;
-        }
-        modName = modName.data(gs)->owner.asClassOrModuleRef();
-    }
-    return false;
-}
-
 class PrunePackageModules final {
     const bool intentionallyLeakASTs;
 
@@ -41,7 +31,7 @@ public:
 
     ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
-        if (isPackageModule(ctx, klass.symbol)) {
+        if (core::packages::PackageInfo::isPackageModule(ctx, klass.symbol)) {
             if (intentionallyLeakASTs) {
                 intentionallyLeakMemory(tree.release());
             }
