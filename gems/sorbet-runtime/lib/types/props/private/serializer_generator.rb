@@ -45,10 +45,10 @@ module T::Props
           ) || ivar_name
 
           nil_asserter =
-            if T::Props::Utils.need_nil_write_check?(rules)
-              "required_prop_missing_from_serialize(#{prop.inspect}) if strict"
-            else
+            if rules[:fully_optional]
               ''
+            else
+              "required_prop_missing_from_serialize(#{prop.inspect}) if strict"
             end
 
           # Don't serialize values that are nil to save space (both the

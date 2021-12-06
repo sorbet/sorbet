@@ -345,6 +345,7 @@ class T::Props::Decorator
     end
 
     rules.merge!(
+      fully_optional: !T::Props::Utils.need_nil_write_check?(rules),
       # TODO: The type of this element is confusing. We should refactor so that
       # it can be always `type_object` (a PropType) or always `cls` (a Module)
       type: type,
@@ -415,7 +416,7 @@ class T::Props::Decorator
       proc do |arg|
         # In cases where `initialize_proc` is called directly, it will no longer exist in the `rules` hash.
         if rules.key?(:initialize_proc)
-          rules = T.cast(rules.fetch(:initialize_proc).call, Rules)
+          rules = p T.cast(rules.fetch(:initialize_proc).call, Rules)
         end
         # `rules[:setter_proc]` has been updated in `rules[:initialize_proc]`,
         # so this isn't a recursive call.
@@ -446,6 +447,8 @@ class T::Props::Decorator
           end
         else
           # Fast path (~4x faster as of Ruby 2.6)
+          require 'pry'
+          binding.pry
           @class.send(:define_method, "#{name}=", &rules.fetch(:setter_proc))
         end
       end
