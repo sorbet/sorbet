@@ -673,7 +673,7 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 }
             }
 
-            if (!ctx.owner.isSingletonClass(ctx)) {
+            if (!ctx.owner.isClassOrModule() || !ctx.owner.asClassOrModuleRef().data(ctx)->isSingletonClass(ctx)) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("`{}` may only be used in a singleton class method context",
                                 "T." + core::Names::attachedClass().show(ctx));

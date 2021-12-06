@@ -148,7 +148,10 @@ private:
                         }
                     } else {
                         if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::InvalidVariance)) {
-                            auto flavor = paramData->owner.isSingletonClass(ctx) ? "type_template" : "type_member";
+                            auto flavor = paramData->owner.isClassOrModule() &&
+                                                  paramData->owner.asClassOrModuleRef().data(ctx)->isSingletonClass(ctx)
+                                              ? "type_template"
+                                              : "type_member";
 
                             auto paramName = paramData->name.show(ctx);
 

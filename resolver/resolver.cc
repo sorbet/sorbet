@@ -1526,7 +1526,8 @@ class ResolveTypeMembersAndFieldsWalk {
                 // Declaring a class instance variable
             } else if (job.atTopLevel && ctx.owner.name(ctx) == core::Names::initialize()) {
                 // Declaring a instance variable
-            } else if (ctx.owner.isMethod() && ctx.owner.owner(ctx).isSingletonClass(ctx) &&
+            } else if (ctx.owner.isMethod() &&
+                       ctx.owner.asMethodRef().data(ctx)->owner.data(ctx)->isSingletonClass(ctx) &&
                        !core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
                 // Declaring a class instance variable in a static method
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {

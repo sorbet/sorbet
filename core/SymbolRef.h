@@ -446,7 +446,6 @@ public:
     core::NameRef name(const GlobalState &gs) const;
     core::SymbolRef owner(const GlobalState &gs) const;
     core::Loc loc(const GlobalState &gs) const;
-    bool isSingletonClass(const GlobalState &gs) const;
     bool isPrintable(const GlobalState &gs) const;
     const InlinedVector<Loc, 2> &locs(const GlobalState &gs) const;
     const TypePtr &resultType(const GlobalState &gs) const;

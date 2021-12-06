@@ -1428,15 +1428,6 @@ Loc SymbolRef::loc(const GlobalState &gs) const {
     }
 }
 
-bool SymbolRef::isSingletonClass(const GlobalState &gs) const {
-    switch (kind()) {
-        case SymbolRef::Kind::ClassOrModule:
-            return asClassOrModuleRef().data(gs)->isSingletonClass(gs);
-        default:
-            return false;
-    }
-}
-
 bool SymbolRef::isPrintable(const GlobalState &gs) const {
     switch (kind()) {
         case SymbolRef::Kind::ClassOrModule:
