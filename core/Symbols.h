@@ -48,23 +48,28 @@ public:
     Method(Method &&) noexcept = default;
     class Flags {
     public:
-        static constexpr uint16_t NONE = 0;
-
         // Synthesized by C++ code in a Rewriter pass
-        static constexpr uint16_t REWRITER_SYNTHESIZED = 00001;
+        bool rewriterSynthesized : 1;
+        bool methodProtected : 1;
+        bool methodPrivate : 1;
+        bool methodOverloaded : 1;
+        bool methodAbstract : 1;
+        bool methodGeneric : 1;
+        bool methodOverridable : 1;
+        bool methodFinal : 1;
+        bool methodOverride : 1;
+        bool methodIncompatibleOverride : 1;
+        Flags() noexcept
+            : rewriterSynthesized(false), methodProtected(false), methodPrivate(false), methodOverloaded(false),
+              methodAbstract(false), methodGeneric(false), methodOverridable(false), methodFinal(false),
+              methodOverride(false), methodIncompatibleOverride(false) {}
 
-        static constexpr uint16_t METHOD_PROTECTED = 0x0002;
-        static constexpr uint16_t METHOD_PRIVATE = 0x0004;
-        static constexpr uint16_t METHOD_OVERLOADED = 0x0008;
-        static constexpr uint16_t METHOD_ABSTRACT = 0x0010;
-        static constexpr uint16_t METHOD_GENERIC = 0x0020;
-        [[deprecated]] static constexpr uint16_t METHOD_GENERATED_SIG = 0x0040;
-        static constexpr uint16_t METHOD_OVERRIDABLE = 0x0080;
-        static constexpr uint16_t METHOD_FINAL = 0x0100;
-        static constexpr uint16_t METHOD_OVERRIDE = 0x0200;
-        [[deprecated]] static constexpr uint16_t METHOD_IMPLEMENTATION = 0x0400;
-        static constexpr uint16_t METHOD_INCOMPATIBLE_OVERRIDE = 0x0800;
+        uint16_t serialize() const {
+            // Can replace this with std::bit_cast in C++20
+            return *reinterpret_cast<const uint16_t *>(this);
+        }
     };
+    CheckSize(Flags, 2, 1);
 
     Loc loc() const;
     const InlinedVector<Loc, 2> &locs() const;
@@ -74,72 +79,72 @@ public:
     std::vector<uint32_t> methodArgumentHash(const GlobalState &gs) const;
 
     inline bool isOverloaded() const {
-        return (flags & Method::Flags::METHOD_OVERLOADED) != 0;
+        return flags.methodOverloaded;
     }
 
     inline bool isAbstract() const {
-        return (flags & Method::Flags::METHOD_ABSTRACT) != 0;
+        return flags.methodAbstract;
     }
 
     inline bool isIncompatibleOverride() const {
-        return (flags & Method::Flags::METHOD_INCOMPATIBLE_OVERRIDE) != 0;
+        return flags.methodIncompatibleOverride;
     }
 
     inline bool isGenericMethod() const {
-        return (flags & Method::Flags::METHOD_GENERIC) != 0;
+        return flags.methodGeneric;
     }
 
     inline bool isOverridable() const {
-        return (flags & Method::Flags::METHOD_OVERRIDABLE) != 0;
+        return flags.methodOverridable;
     }
 
     inline bool isOverride() const {
-        return (flags & Method::Flags::METHOD_OVERRIDE) != 0;
+        return flags.methodOverride;
     }
 
     inline void setOverloaded() {
-        flags |= Method::Flags::METHOD_OVERLOADED;
+        flags.methodOverloaded = true;
     }
 
     inline void setAbstract() {
-        flags |= Method::Flags::METHOD_ABSTRACT;
+        flags.methodAbstract = true;
     }
 
     inline void setIncompatibleOverride() {
-        flags |= Method::Flags::METHOD_INCOMPATIBLE_OVERRIDE;
+        flags.methodIncompatibleOverride = true;
     }
 
     inline void setGenericMethod() {
-        flags |= Method::Flags::METHOD_GENERIC;
+        flags.methodGeneric = true;
     }
 
     inline void setOverridable() {
-        flags |= Method::Flags::METHOD_OVERRIDABLE;
+        flags.methodOverridable = true;
     }
 
     inline void setFinalMethod() {
-        flags |= Method::Flags::METHOD_FINAL;
+        flags.methodFinal = true;
     }
 
     inline void setOverride() {
-        flags |= Method::Flags::METHOD_OVERRIDE;
+        flags.methodOverride = true;
     }
 
     inline bool isFinalMethod() const {
-        return (flags & Method::Flags::METHOD_FINAL) != 0;
+        return flags.methodFinal;
     }
 
     inline void setMethodPublic() {
-        flags &= ~Method::Flags::METHOD_PRIVATE;
-        flags &= ~Method::Flags::METHOD_PROTECTED;
+        flags.methodPrivate = false;
+        flags.methodProtected = false;
     }
 
     inline void setMethodProtected() {
-        flags |= Method::Flags::METHOD_PROTECTED;
+        flags.methodProtected = true;
     }
 
     inline void setMethodPrivate() {
-        flags |= Method::Flags::METHOD_PRIVATE;
+        flags.methodPrivate = true;
     }
 
     void setMethodVisibility(Visibility visibility) {
@@ -161,18 +166,18 @@ public:
     }
 
     inline bool isMethodProtected() const {
-        return (flags & Method::Flags::METHOD_PROTECTED) != 0;
+        return flags.methodProtected;
     }
 
     inline bool isMethodPrivate() const {
-        return (flags & Method::Flags::METHOD_PRIVATE) != 0;
+        return flags.methodPrivate;
     }
 
     inline void setRewriterSynthesized() {
-        flags |= Method::Flags::REWRITER_SYNTHESIZED;
+        flags.rewriterSynthesized = true;
     }
     inline bool isRewriterSynthesized() const {
-        return (flags & Method::Flags::REWRITER_SYNTHESIZED) != 0;
+        return flags.rewriterSynthesized;
     }
 
     Visibility methodVisibility() const {
@@ -216,9 +221,9 @@ public:
 
 private:
     InlinedVector<Loc, 2> locs_;
-    uint16_t flags = Flags::NONE;
+    Flags flags;
 };
-CheckSize(Method, 208, 8);
+CheckSize(Method, 192, 8);
 
 class Symbol final {
 public:

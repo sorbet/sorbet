@@ -2170,7 +2170,7 @@ uint32_t Symbol::hash(const GlobalState &gs) const {
 uint32_t Method::hash(const GlobalState &gs) const {
     uint32_t result = _hash(name.shortName(gs));
     result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
-    result = mix(result, this->flags);
+    result = mix(result, this->flags.serialize());
     result = mix(result, this->owner.id());
     result = mix(result, this->rebind.id());
     for (const auto &arg : arguments) {
@@ -2193,7 +2193,7 @@ uint32_t Method::hash(const GlobalState &gs) const {
 
 uint32_t Method::methodShapeHash(const GlobalState &gs) const {
     uint32_t result = _hash(name.shortName(gs));
-    result = mix(result, this->flags);
+    result = mix(result, this->flags.serialize());
     result = mix(result, this->owner.id());
     result = mix(result, this->rebind.id());
     result = mix(result, this->hasSig());

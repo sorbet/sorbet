@@ -538,7 +538,7 @@ void SerializerImpl::pickle(Pickler &p, const Method &what) {
     p.putU4(what.owner.id());
     p.putU4(what.name.rawId());
     p.putU4(what.rebind.id());
-    p.putU4(what.flags);
+    p.putU4(what.flags.serialize());
     p.putU4(what.typeArguments.size());
     for (auto s : what.typeArguments) {
         p.putU4(s.id());
@@ -559,7 +559,12 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
     result.owner = ClassOrModuleRef::fromRaw(p.getU4());
     result.name = NameRef::fromRaw(*gs, p.getU4());
     result.rebind = ClassOrModuleRef::fromRaw(p.getU4());
-    result.flags = static_cast<u2>(p.getU4());
+    auto flagsU2 = static_cast<u2>(p.getU4());
+    Method::Flags flags;
+    static_assert(sizeof(flags) == sizeof(flagsU2));
+    // Can replace this with std::bit_cast in C++20
+    memcpy(&flags, &flagsU2, sizeof(flags));
+    result.flags = flags;
 
     int typeParamsSize = p.getU4();
     result.typeArguments.reserve(typeParamsSize);
