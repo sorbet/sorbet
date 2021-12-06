@@ -103,28 +103,31 @@ public:
     FieldRef enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     ArgInfo &enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name);
 
-    SymbolRef lookupSymbol(SymbolRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, 0, Symbols::noSymbol());
+    SymbolRef lookupSymbol(ClassOrModuleRef owner, NameRef name) const {
+        return lookupSymbolWithKind(owner, name, SymbolRef::Kind::ClassOrModule, Symbols::noSymbol(),
+                                    /* ignoreKind */ true);
     }
     TypeMemberRef lookupTypeMemberSymbol(ClassOrModuleRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::TYPE_MEMBER, Symbols::noTypeMember())
+        return lookupSymbolWithKind(owner, name, SymbolRef::Kind::TypeMember, Symbols::noTypeMember())
             .asTypeMemberRef();
     }
     ClassOrModuleRef lookupClassSymbol(ClassOrModuleRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE, Symbols::noClassOrModule())
+        return lookupSymbolWithKind(owner, name, SymbolRef::Kind::ClassOrModule, Symbols::noClassOrModule())
             .asClassOrModuleRef();
     }
     MethodRef lookupMethodSymbol(ClassOrModuleRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD, Symbols::noMethod()).asMethodRef();
+        return lookupSymbolWithKind(owner, name, SymbolRef::Kind::Method, Symbols::noMethod()).asMethodRef();
     }
     MethodRef lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, const std::vector<u4> &methodHash) const;
     FieldRef lookupStaticFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD, Symbols::noField()).asFieldRef();
+        // N.B.: Fields and static fields have entirely different types of names, so this should be unambiguous.
+        return lookupSymbolWithKind(owner, name, SymbolRef::Kind::FieldOrStaticField, Symbols::noField()).asFieldRef();
     }
     FieldRef lookupFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::FIELD, Symbols::noField()).asFieldRef();
+        // N.B.: Fields and static fields have entirely different types of names, so this should be unambiguous.
+        return lookupSymbolWithKind(owner, name, SymbolRef::Kind::FieldOrStaticField, Symbols::noField()).asFieldRef();
     }
-    SymbolRef findRenamedSymbol(SymbolRef owner, SymbolRef name) const;
+    SymbolRef findRenamedSymbol(ClassOrModuleRef owner, SymbolRef name) const;
 
     MethodRef staticInitForFile(Loc loc);
     MethodRef staticInitForClass(ClassOrModuleRef klass, Loc loc);
@@ -320,7 +323,8 @@ private:
 
     ClassOrModuleRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().id(), bool isModule = false);
 
-    SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags, SymbolRef defaultReturnValue) const;
+    SymbolRef lookupSymbolWithKind(ClassOrModuleRef owner, NameRef name, SymbolRef::Kind kind,
+                                   SymbolRef defaultReturnValue, bool ignoreKind = false) const;
 
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
 };

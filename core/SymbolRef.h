@@ -128,6 +128,7 @@ public:
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
+    SymbolData dataAllowingNone(GlobalState &gs) const;
 
     ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
@@ -171,6 +172,7 @@ public:
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
     ConstSymbolData dataAllowingNone(const GlobalState &gs) const;
+    SymbolData dataAllowingNone(GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
     std::string toStringFullName(const GlobalState &gs) const;
@@ -211,6 +213,7 @@ public:
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
+    SymbolData dataAllowingNone(GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
     std::string toStringFullName(const GlobalState &gs) const;
@@ -251,6 +254,7 @@ public:
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
+    SymbolData dataAllowingNone(GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
     std::string toStringFullName(const GlobalState &gs) const;
@@ -406,15 +410,6 @@ public:
         ENFORCE_NO_TIMER(kind() == Kind::TypeArgument);
         return TypeArgumentRef::fromRaw(unsafeTableIndex());
     }
-
-private:
-    // TODO(jvilk): Remove these methods so we can have separate classes per symbol type (e.g., Symbol ->
-    // {ClassOrModule, Method, ...}). These are currently used in methods on SymbolRef and friend classes -- but not for
-    // long.
-    SymbolData data(GlobalState &gs) const;
-    ConstSymbolData data(const GlobalState &gs) const;
-    SymbolData dataAllowingNone(GlobalState &gs) const;
-    ConstSymbolData dataAllowingNone(const GlobalState &gs) const;
 
 public:
     bool operator==(const SymbolRef &rhs) const;

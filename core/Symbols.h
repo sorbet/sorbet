@@ -601,17 +601,10 @@ public:
     std::vector<RequiredAncestor> requiredAncestorsTransitive(const GlobalState &gs) const;
 
     // if dealiasing fails here, then we return Untyped instead
-    SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const {
-        return dealiasWithDefault(gs, depthLimit, Symbols::untyped());
-    }
-    // if dealiasing fails here, then we return a bad alias method stub instead
-    MethodRef dealiasMethod(const GlobalState &gs, int depthLimit = 42) const {
-        ENFORCE_NO_TIMER(isMethod());
-        return dealiasWithDefault(gs, depthLimit, core::Symbols::Sorbet_Private_Static_badAliasMethodStub())
-            .asMethodRef();
-    }
+    SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const;
 
-    SymbolRef dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const;
+    // if dealiasing fails here, then we return a bad alias method stub instead
+    MethodRef dealiasMethod(const GlobalState &gs, int depthLimit = 42) const;
 
     bool ignoreInHashing(const GlobalState &gs) const;
 
