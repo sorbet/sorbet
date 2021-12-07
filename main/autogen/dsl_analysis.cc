@@ -13,11 +13,26 @@ const std::vector<u4> KNOWN_PROP_METHODS = {
     core::Names::tokenProp().rawId(),    core::Names::timestampedTokenProp().rawId(),
     core::Names::createdProp().rawId(),  core::Names::updatedProp().rawId(),
     core::Names::merchantProp().rawId(), core::Names::merchantTokenProp().rawId(),
-    core::Names::const_().rawId(),
-};
+    core::Names::const_().rawId()};
 
 const std::vector<core::NameRef> CHALK_ODM_IMMUTABLE_MODEL = {
     core::Names::Constants::Chalk(), core::Names::Constants::ODM(), core::Names::Constants::ImmutableModel()};
+
+const std::vector<core::NameRef> OPUS_DB_SHARD_BY_MERCHANT = {
+    core::Names::Constants::Opus(), core::Names::Constants::DB(), core::Names::Constants::Sharding(),
+    core::Names::Constants::ShardByMerchant()};
+
+const std::vector<core::NameRef> OPUS_DB_SHARD_BY_MERCHANT_BASE = {
+    core::Names::Constants::Opus(), core::Names::Constants::DB(), core::Names::Constants::Sharding(),
+    core::Names::Constants::ShardByMerchantBase()};
+
+const std::vector<core::NameRef> OPUS_STORAGE_WAL_WALABLE = {
+    core::Names::Constants::Opus(), core::Names::Constants::Storage(), core::Names::Constants::WAL(),
+    core::Names::Constants::WALable()};
+
+const std::vector<core::NameRef> OPUS_STORAGE_WAL_WALABLE_CLASSMETHODS = {
+    core::Names::Constants::Opus(), core::Names::Constants::Storage(), core::Names::Constants::WAL(),
+    core::Names::Constants::WALable(), core::Names::Constants::ClassMethods()};
 
 struct PropInfoInternal {
     core::NameRef name;
@@ -162,7 +177,13 @@ public:
                 continue;
             }
 
-            ancestors.emplace_back(symbolName(ctx, cnst->symbol));
+            const auto ancstName = symbolName(ctx, cnst->symbol);
+            if (ancstName == OPUS_DB_SHARD_BY_MERCHANT) {
+                ancestors.emplace_back(OPUS_DB_SHARD_BY_MERCHANT_BASE);
+            } else if (ancstName == OPUS_STORAGE_WAL_WALABLE) {
+                ancestors.emplace_back(OPUS_STORAGE_WAL_WALABLE_CLASSMETHODS);
+            }
+            ancestors.emplace_back(std::move(ancstName));
         }
 
         const vector<core::NameRef> className = symbolName(ctx, original.symbol);
@@ -224,6 +245,19 @@ public:
             dslInfo[curScope].model = symbolName(ctx, cnst->symbol);
         }
 
+        if (original->fun == core::Names::configureArchival()) {
+            auto [kwStart, kwEnd] = original->kwArgsRange();
+            for (auto i = kwStart; i < kwEnd; i += 2) {
+                auto *key = ast::cast_tree<ast::Literal>(original->args[i]);
+                if (key && key->isSymbol(ctx) && key->asSymbol(ctx) == core::Names::originalClass()) {
+                    auto *value = ast::cast_tree<ast::ConstantLit>(original->args[i + 1]);
+                    if (value && value->original) {
+                        dslInfo[curScope].ancestors.emplace_back(symbolName(ctx, value->symbol));
+                    }
+                }
+            }
+        }
+
         return tree;
     }
 
@@ -234,7 +268,8 @@ public:
         }
 
         auto &curScope = nestingScopes.back();
-        if (curScope == CHALK_ODM_IMMUTABLE_MODEL) {
+        if (curScope == CHALK_ODM_IMMUTABLE_MODEL || curScope == OPUS_DB_SHARD_BY_MERCHANT_BASE ||
+            curScope == OPUS_STORAGE_WAL_WALABLE_CLASSMETHODS) {
             return tree;
         }
 
