@@ -57,8 +57,11 @@ public:
             fmt::map_join(srcPkg.fullName(), "::", [&](auto nr) -> string { return nr.show(ctx); })));
         lines.emplace_back(
             core::ErrorLine::from(match.symbol.loc(ctx), "Constant `{}` is defined here:", match.symbol.show(ctx)));
-        // TODO(nroman-stripe) Add automatic fixers
         e.addErrorSection(core::ErrorSection(lines));
+
+        if (auto autocorrect = srcPkg.addExport(ctx, match.symbol, false)) {
+            e.addAutocorrect(std::move(*autocorrect));
+        }
     }
 
     void addMissingImportSuggestions(core::ErrorBuilder &e, PackageMatch &match) {
@@ -72,7 +75,7 @@ public:
             fmt::map_join(otherPkg.fullName(), "::", [&](auto nr) -> string { return nr.show(ctx); })));
         e.addErrorSection(core::ErrorSection(lines));
         if (auto autocorrect = currentPkg.addImport(ctx, otherPkg, isTestFile)) {
-            e.addAutocorrect(std::forward<core::AutocorrectSuggestion>(*autocorrect));
+            e.addAutocorrect(std::move(*autocorrect));
         }
     }
 

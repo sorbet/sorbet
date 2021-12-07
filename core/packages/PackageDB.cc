@@ -46,7 +46,7 @@ public:
         return {};
     }
 
-    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const vector<core::NameRef> name,
+    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const core::SymbolRef name,
                                                          bool isPrivateTestExport) const {
         return {};
     }

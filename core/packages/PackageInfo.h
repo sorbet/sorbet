@@ -28,7 +28,7 @@ public:
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                                  bool isTestImport) const = 0;
     virtual std::optional<core::AutocorrectSuggestion>
-    addExport(const core::GlobalState &gs, const std::vector<core::NameRef> name, bool isPrivateTestExport) const = 0;
+    addExport(const core::GlobalState &gs, const core::SymbolRef name, bool isPrivateTestExport) const = 0;
 
     bool operator==(const PackageInfo &rhs) const;
 

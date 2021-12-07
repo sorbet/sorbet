@@ -78,13 +78,15 @@ struct TestPackageFile {
         return gs.packageDB().getPackageForFile(gs, newParsedFile.file);
     }
 
-    const vector<core::NameRef> getName(core::GlobalState &gs, vector<string> rawName) const {
-        vector<core::NameRef> name;
+    const core::SymbolRef getConstantRef(core::GlobalState &gs, vector<string> rawName) const {
         core::UnfreezeNameTable nameTableAccess(gs);
+        core::UnfreezeSymbolTable symbolTableAccess(gs);
+        core::ClassOrModuleRef sym = core::Symbols::root();
+
         for (auto &n : rawName) {
-            name.emplace_back(gs.enterNameUTF8(n));
+            sym = gs.enterClassSymbol(core::Loc(), sym, gs.enterNameConstant(gs.enterNameUTF8(n)));
         }
-        return name;
+        return sym;
     }
 };
 
@@ -239,7 +241,7 @@ TEST_CASE("Simple add export") {
 
     auto &package = test.targetPackage(gs);
     ENFORCE(package.exists());
-    auto addExport = package.addExport(gs, test.getName(gs, {"Opus", "MyPackage", "NewExport"}), false);
+    auto addExport = package.addExport(gs, test.getConstantRef(gs, {"Opus", "MyPackage", "NewExport"}), false);
     ENFORCE(addExport, "Expected to get an autocorrect from `addImport`");
     auto replaced = addExport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
@@ -262,7 +264,7 @@ TEST_CASE("Simple add export_for_test") {
 
     auto &package = test.targetPackage(gs);
     ENFORCE(package.exists());
-    auto addExport = package.addExport(gs, test.getName(gs, {"Opus", "MyPackage", "NewExport"}), true);
+    auto addExport = package.addExport(gs, test.getConstantRef(gs, {"Opus", "MyPackage", "NewExport"}), true);
     ENFORCE(addExport, "Expected to get an autocorrect from `addImport`");
     auto replaced = addExport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
