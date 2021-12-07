@@ -41,4 +41,4 @@ T.reveal_type(y) # error: `T.untyped`
 y = T.nilable(Integer).validate!(x)
 T.reveal_type(y) # error: `T.untyped`
 
-[T::Array[Integer]].first.to_s # error: Call to method `first` on `[T::Array[Integer]]` mistakes a type for a value
+[T::Array[Integer]].first.to_s # error: Call to method `to_s` on `T::Array[Integer]` mistakes a type for a value
