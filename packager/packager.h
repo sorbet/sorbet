@@ -76,6 +76,9 @@ namespace sorbet::packager {
  */
 class Packager final {
 public:
+    static std::vector<ast::ParsedFile> findPackages(core::GlobalState &gs, WorkerPool &workers,
+                                                     std::vector<ast::ParsedFile> files);
+
     static std::vector<ast::ParsedFile> run(core::GlobalState &gs, WorkerPool &workers,
                                             std::vector<ast::ParsedFile> files);
 
