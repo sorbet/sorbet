@@ -413,10 +413,9 @@ class T::Props::Decorator
 
       proc do |arg|
         # In cases where `initialize_proc` is called directly, it will no longer exist in the `rules` hash.
-        rules = rules[:initialize_proc]&.call || rules
+        rules = T.cast(rules[:initialize_proc]&.call, T.nilable(Rules)) || rules
         # initialize_proc defines the setter, so we can just call it here
         rules[:setter_proc].call(arg)
-        # @class.send("#{name}=", arg)
       end
     else
       T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules).freeze
@@ -622,6 +621,7 @@ class T::Props::Decorator
   end
   private def handle_foreign_option(prop_name, prop_cls, rules, foreign)
     prop_cls = prop_cls.call if prop_cls.is_a?(Proc)
+    prop_cls = convert_type_to_class(prop_cls) if prop_cls.is_a?(T::Types::Base)
     validate_foreign_option(
       :foreign, foreign, valid_type_msg: "a model class or a Proc that returns one"
     )
