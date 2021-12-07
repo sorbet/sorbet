@@ -251,6 +251,16 @@ public:
         return res;
     }
 
+    bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {
+        while (symbol.exists() && symbol != core::Symbols::root()) {
+            if (symbol.isClassOrModule() && symbol.name(gs) == privateMangledName) {
+                return true;
+            }
+            symbol = symbol.owner(gs);
+        }
+        return false;
+    }
+
     PackageInfoImpl() = default;
     explicit PackageInfoImpl(const PackageInfoImpl &) = default;
     PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;

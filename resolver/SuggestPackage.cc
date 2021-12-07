@@ -1,5 +1,6 @@
 #include "resolver/SuggestPackage.h"
 
+#include "absl/strings/str_join.h"
 #include "common/formatting.h"
 #include "core/core.h"
 
@@ -7,6 +8,17 @@ using namespace std;
 
 namespace sorbet::resolver {
 namespace {
+class NameFormatter final {
+    const core::GlobalState &gs;
+
+public:
+    NameFormatter(const core::GlobalState &gs) : gs(gs) {}
+
+    void operator()(std::string *out, core::NameRef name) const {
+        out->append(name.shortName(gs));
+    }
+};
+
 // Add all name parts for a symbol to a vector, exclude internal names used by packager.
 void symbol2NameParts(core::Context ctx, core::SymbolRef symbol, vector<core::NameRef> &out) {
     ENFORCE(out.empty());
@@ -51,10 +63,9 @@ public:
     void addMissingExportSuggestions(core::ErrorBuilder &e, core::packages::PackageInfo::MissingExportMatch match) {
         vector<core::ErrorLine> lines;
         auto &srcPkg = db().getPackageInfo(match.srcPkg);
-        lines.emplace_back(core::ErrorLine::from(
-            srcPkg.definitionLoc(), "Do you need to `{} {}` in package `{}`?", core::Names::export_().show(ctx),
-            match.symbol.show(ctx),
-            fmt::map_join(srcPkg.fullName(), "::", [&](auto nr) -> string { return nr.show(ctx); })));
+        lines.emplace_back(core::ErrorLine::from(srcPkg.definitionLoc(), "Do you need to `{} {}` in package `{}`?",
+                                                 core::Names::export_().show(ctx), match.symbol.show(ctx),
+                                                 formatPackageName(srcPkg)));
         lines.emplace_back(
             core::ErrorLine::from(match.symbol.loc(ctx), "Constant `{}` is defined here:", match.symbol.show(ctx)));
         e.addErrorSection(core::ErrorSection(lines));
@@ -70,9 +81,8 @@ public:
         bool isTestFile = core::packages::PackageDB::isTestFile(ctx, ctx.file.data(ctx));
         auto importName = isTestFile ? core::Names::test_import() : core::Names::import();
 
-        lines.emplace_back(core::ErrorLine::from(
-            otherPkg.definitionLoc(), "Do you need to `{}` package `{}`?", importName.show(ctx),
-            fmt::map_join(otherPkg.fullName(), "::", [&](auto nr) -> string { return nr.show(ctx); })));
+        lines.emplace_back(core::ErrorLine::from(otherPkg.definitionLoc(), "Do you need to `{}` package `{}`?",
+                                                 importName.show(ctx), formatPackageName(otherPkg)));
         e.addErrorSection(core::ErrorSection(lines));
         if (auto autocorrect = currentPkg.addImport(ctx, otherPkg, isTestFile)) {
             e.addAutocorrect(std::move(*autocorrect));
@@ -81,11 +91,12 @@ public:
 
     bool tryPackageSpecCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
         if (isUnresolvedExport(unresolved)) {
-            // TODO(nroman-stripe) handle bad export
+            tryUnresolvedExportCorrections(e, unresolved);
+            return true;
         } else {
             // TODO(gdritter-stripe) handle bad import
+            return false;
         }
-        return false;
     }
 
 private:
@@ -126,8 +137,44 @@ private:
         if (ast::isa_tree<ast::EmptyTree>(unresolved.scope)) {
             return false;
         }
+        // Look for the prefix added by the packager to exports. (Imports are left as-is.)
         return core::packages::PackageInfo::isPackageModule(
             ctx, ast::cast_tree_nonnull<ast::ConstantLit>(unresolved.scope).symbol.asClassOrModuleRef());
+    }
+
+    void tryUnresolvedExportCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
+        auto scope = ast::cast_tree_nonnull<ast::ConstantLit>(unresolved.scope).symbol.asClassOrModuleRef();
+        auto matches = scope.data(ctx)->findMemberFuzzyMatch(ctx, unresolved.cnst);
+        {
+            // Remove results defined outside of this package:
+            auto it = remove_if(matches.begin(), matches.end(),
+                                [&](auto &m) -> bool { return !currentPkg.ownsSymbol(ctx, m.symbol); });
+            matches.erase(it, matches.end());
+            if (matches.size() > 4) {
+                matches.resize(4);
+            }
+        }
+        if (matches.size() > 0) {
+            addReplacementSuggestions(e, unresolved, matches);
+        } else {
+            e.addErrorNote("To be exported it must be defined in package `{}`", formatPackageName(currentPkg));
+        }
+    }
+
+    void addReplacementSuggestions(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved,
+                                   const vector<sorbet::core::Symbol::FuzzySearchResult> &matches) {
+        vector<core::ErrorLine> lines;
+        for (auto suggestion : matches) {
+            const auto replacement = suggestion.symbol.show(ctx);
+            lines.emplace_back(core::ErrorLine::from(suggestion.symbol.loc(ctx), "Did you mean: `{}`?", replacement));
+            e.replaceWith(fmt::format("Replace with `{}`", replacement), core::Loc(ctx.file, unresolved.loc), "{}",
+                          replacement);
+        }
+        e.addErrorSection(core::ErrorSection(lines));
+    }
+
+    string formatPackageName(const core::packages::PackageInfo &pkg) const {
+        return absl::StrJoin(pkg.fullName(), "::", NameFormatter(ctx));
     }
 };
 } // namespace

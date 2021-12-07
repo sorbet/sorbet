@@ -51,6 +51,11 @@ public:
         return {};
     }
 
+    bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {
+        ENFORCE(false);
+        return false;
+    }
+
     ~NonePackage() {}
 
 private:

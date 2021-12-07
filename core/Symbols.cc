@@ -798,6 +798,12 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                         member.second.asClassOrModuleRef().data(gs)->derivesFrom(gs, core::Symbols::StubModule())) {
                         continue;
                     }
+                    // A static-field inside a package file is an alias created by that packager.
+                    // Ignore these so that the search finds only actual definitions.
+                    if (member.second.isFieldOrStaticField() && member.second.loc(gs).file().exists() &&
+                        member.second.loc(gs).file().data(gs).isPackage()) {
+                        continue;
+                    }
                     // Mangled packager names are not matched, but we do descend into them to search
                     // deeper.
                     if (member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {

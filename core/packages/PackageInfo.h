@@ -45,6 +45,7 @@ public:
     };
     virtual std::vector<MissingExportMatch> findMissingExports(core::Context ctx, core::SymbolRef scope,
                                                                core::NameRef name) const = 0;
+    virtual bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const = 0;
 
     // Utilities:
 
