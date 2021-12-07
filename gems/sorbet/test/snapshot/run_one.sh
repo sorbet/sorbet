@@ -182,6 +182,7 @@ fi
   #
   # note: redirects stderr before the pipe
   info "├─ Running srb"
+  # shellcheck disable=SC2048
   if ! SRB_YES=1 ${test_cmd[*]} < /dev/null 2> "err.log" > "out.log"; then
     error "├─ srb failed."
     error "├─ stdout (out.log):"
