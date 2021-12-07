@@ -315,16 +315,8 @@ public:
         return {suggestion};
     }
 
-    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const vector<core::NameRef> newExport,
+    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const core::SymbolRef newExport,
                                                     bool isPrivateTestExport) const {
-        for (auto expt : exports) {
-            // check if we already import this, and if so, don't
-            // return an autocorrect
-            if (expt.fqn.parts == newExport) {
-                return nullopt;
-            }
-        }
-
         auto insertionLoc = core::Loc::none(loc.file());
         // first let's try adding it to the end of the imports.
         if (!exports.empty()) {
@@ -352,7 +344,7 @@ public:
 
         // now find the appropriate place for it, specifically by
         // finding the import that directly preceeds it, if any
-        auto strName = absl::StrJoin(newExport, "::", NameFormatter(gs));
+        auto strName = newExport.show(gs);
         core::AutocorrectSuggestion suggestion(
             fmt::format("Export `{}` in package `{}`", strName, name.toString(gs)),
             {{insertionLoc, fmt::format("\n  {} {}", isPrivateTestExport ? "export_for_test" : "export", strName)}});

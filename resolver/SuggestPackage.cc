@@ -57,18 +57,11 @@ public:
             fmt::map_join(srcPkg.fullName(), "::", [&](auto nr) -> string { return nr.show(ctx); })));
         lines.emplace_back(
             core::ErrorLine::from(match.symbol.loc(ctx), "Constant `{}` is defined here:", match.symbol.show(ctx)));
+        e.addErrorSection(core::ErrorSection(lines));
 
-        core::SymbolRef sym = match.symbol;
-        vector<core::NameRef> name;
-        do {
-            name.emplace_back(sym.name(ctx));
-            sym = sym.owner(ctx);
-        } while(sym.exists() && sym != core::Symbols::root());
-        if (auto autocorrect = srcPkg.addExport(ctx, name, false)) {
+        if (auto autocorrect = srcPkg.addExport(ctx, match.symbol, false)) {
             e.addAutocorrect(std::forward<core::AutocorrectSuggestion>(*autocorrect));
         }
-
-        e.addErrorSection(core::ErrorSection(lines));
     }
 
     void addMissingImportSuggestions(core::ErrorBuilder &e, PackageMatch &match) {
