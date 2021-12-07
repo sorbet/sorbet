@@ -60,7 +60,7 @@ public:
         e.addErrorSection(core::ErrorSection(lines));
 
         if (auto autocorrect = srcPkg.addExport(ctx, match.symbol, false)) {
-            e.addAutocorrect(std::forward<core::AutocorrectSuggestion>(*autocorrect));
+            e.addAutocorrect(std::move(*autocorrect));
         }
     }
 
@@ -75,7 +75,7 @@ public:
             fmt::map_join(otherPkg.fullName(), "::", [&](auto nr) -> string { return nr.show(ctx); })));
         e.addErrorSection(core::ErrorSection(lines));
         if (auto autocorrect = currentPkg.addImport(ctx, otherPkg, isTestFile)) {
-            e.addAutocorrect(std::forward<core::AutocorrectSuggestion>(*autocorrect));
+            e.addAutocorrect(std::move(*autocorrect));
         }
     }
 
