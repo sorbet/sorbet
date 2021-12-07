@@ -54,7 +54,7 @@ int printDocumentSymbols(vector<string_view> paths) {
     int nextId = 0;
     int fileId = 1;
     UnorderedMap<string, vector<string>> edits;
-    for (auto path: paths) {
+    for (auto path : paths) {
         auto [fileUri, fileEdits] = findEditsToApply(path);
         edits[fileUri] = fileEdits;
     }
@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::string_view> args;
     for (auto i = 1; i < argc; ++i) {
-      args.emplace_back(argv[i]);
+        args.emplace_back(argv[i]);
     }
     return sorbet::realmain::lsp::printDocumentSymbols(args);
 }

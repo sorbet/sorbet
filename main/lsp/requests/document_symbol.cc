@@ -89,7 +89,6 @@ bool isOwnerInTheSameFile(const core::GlobalState &gs, core::SymbolRef ref, core
     return isRefInFile(gs, ref.owner(gs), fref);
 }
 
-
 unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentSymbol);
     if (!config.opts.lspDocumentSymbolEnabled) {
