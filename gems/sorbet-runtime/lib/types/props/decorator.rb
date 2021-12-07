@@ -73,6 +73,7 @@ class T::Props::Decorator
     serialized_form
     setter_proc
     _tnilable
+    _t_props_private_apply_default
   ].map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean])
   private_constant :INTERNAL_ONLY_RULE_KEYS
 
