@@ -40,3 +40,5 @@ y = T.nilable(Integer).error_message_for_obj_recursive(x)
 T.reveal_type(y) # error: `T.untyped`
 y = T.nilable(Integer).validate!(x)
 T.reveal_type(y) # error: `T.untyped`
+
+[T::Array[Integer]].first.to_s # error: Call to method `first` on `[T::Array[Integer]]` mistakes a type for a value
