@@ -4,8 +4,6 @@
 #include "core/AutocorrectSuggestion.h"
 #include "core/Loc.h"
 #include "core/StrictLevel.h"
-#include "spdlog/spdlog.h"
-// spdlog.h must be included before fmt.h https://github.com/sorbet/sorbet/pull/2839
 #include "spdlog/fmt/fmt.h"
 #include <initializer_list>
 #include <memory>

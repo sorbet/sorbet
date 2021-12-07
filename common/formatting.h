@@ -2,8 +2,6 @@
 #define SORBET_COMMON_FORMATTING_HPP
 
 #include "common/common.h"
-#include "spdlog/spdlog.h"
-// spdlog.h must be included before fmt.h https://github.com/sorbet/sorbet/pull/2839
 #include "spdlog/fmt/fmt.h"
 
 namespace fmt {
