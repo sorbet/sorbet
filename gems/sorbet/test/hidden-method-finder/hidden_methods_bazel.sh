@@ -42,7 +42,7 @@ test_name=$3
 test_dir="${repo_root}/gems/sorbet/test/hidden-method-finder/${test_name}"
 
 # NOTE: using rlocation here because this script gets run from a genrule
-# shellcheck disable=SC1090
+# shellcheck source=SCRIPTDIR/logging.sh
 source "$(rlocation com_stripe_ruby_typer/gems/sorbet/test/hidden-method-finder/logging.sh)"
 
 # ----- Environment setup and validation -----

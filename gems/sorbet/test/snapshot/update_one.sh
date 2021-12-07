@@ -3,8 +3,9 @@
 set -euo pipefail
 shopt -s dotglob
 
-# shellcheck disable=SC1090
+# shellcheck source-path=SCRIPTDIR/../../../..
 source "gems/sorbet/test/snapshot/logging.sh"
+# shellcheck source-path=SCRIPTDIR/../../../..
 source "gems/sorbet/test/snapshot/validate_utils.sh"
 
 setup_validate_env "$@"

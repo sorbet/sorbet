@@ -1,9 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# This script is always run from the repo root, so `logging.sh` doesn't exist
-# where shellcheck thinks it does.
-# shellcheck disable=SC1091
+# shellcheck source-path=SCRIPTDIR/..
 source "test/logging.sh"
 
 # Argument Parsing #############################################################

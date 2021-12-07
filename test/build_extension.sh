@@ -28,10 +28,10 @@ fi
 
 # Find logging and hermetic_tar with rlocation, as this script is run from a genrule
 
-# shellcheck disable=SC1090
+# shellcheck source=SCRIPTDIR/logging.sh
 source "$(rlocation com_stripe_ruby_typer/test/logging.sh)"
 
-# shellcheck disable=SC1090
+# shellcheck source=SCRIPTDIR/hermetic_tar.sh
 source "$(rlocation com_stripe_ruby_typer/test/hermetic_tar.sh)"
 
 # Argument Parsing #############################################################

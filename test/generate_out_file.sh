@@ -26,7 +26,7 @@ fi
 # --- end runfiles.bash initialization --- }}}
 
 # Find logging with rlocation, as this script is run from a genrule
-# shellcheck disable=SC1090
+# shellcheck source=SCRIPTDIR/logging.sh
 source "$(rlocation com_stripe_ruby_typer/test/logging.sh)"
 
 # Argument Parsing #############################################################
