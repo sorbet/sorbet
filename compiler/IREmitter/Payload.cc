@@ -453,6 +453,12 @@ void Payload::assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::
     return;
 }
 
+void Payload::assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val, const core::TypePtr &type) {
+    auto *cond = Payload::typeTest(cs, builder, val, type);
+    builder.CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::assume, {}, {cond});
+    return;
+}
+
 llvm::Value *Payload::boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *u1) {
     return builder.CreateCall(cs.getFunction("sorbet_boolToRuby"), {u1}, "rubyBool");
 }
