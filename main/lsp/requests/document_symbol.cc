@@ -81,15 +81,14 @@ bool DocumentSymbolTask::isDelayable() const {
     return true;
 }
 
-bool isOwnerInTheSameFile(const core::GlobalState &gs, core::SymbolRef ref, core::FileRef fref) {
-    auto &locs = ref.owner(gs).locs(gs);
-
-    return absl::c_any_of(locs, [fref](auto &loc) { return loc.file() == fref; });
-}
-
 bool isRefInFile(const core::GlobalState &gs, core::SymbolRef ref, core::FileRef fref) {
     return absl::c_any_of(ref.locs(gs), [fref](auto &loc) { return loc.file() == fref; });
 }
+
+bool isOwnerInTheSameFile(const core::GlobalState &gs, core::SymbolRef ref, core::FileRef fref) {
+    return isRefInFile(gs, ref.owner(gs), fref);
+}
+
 
 unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentSymbol);

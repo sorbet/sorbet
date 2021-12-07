@@ -48,14 +48,14 @@ pair<string, vector<string>> findEditsToApply(string_view filePath) {
     return make_pair(uri, move(fileContents));
 }
 
-int printDocumentSymbols(char *paths[], int fileAmount) {
+int printDocumentSymbols(vector<string_view> paths) {
     auto lspWrapper = SingleThreadedLSPWrapper::create();
     lspWrapper->enableAllExperimentalFeatures();
     int nextId = 0;
     int fileId = 1;
     UnorderedMap<string, vector<string>> edits;
-    for (int i = 1; i < fileAmount; i++) {
-        auto [fileUri, fileEdits] = findEditsToApply(paths[i]);
+    for (auto path: paths) {
+        auto [fileUri, fileEdits] = findEditsToApply(path);
         edits[fileUri] = fileEdits;
     }
 
@@ -156,9 +156,13 @@ int printDocumentSymbols(char *paths[], int fileAmount) {
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         std::cout << "Usage: print_document_symbols path/to/file.rb\n";
-        std::cout << "If you pass multiple files, symbols would be generate for the first file only";
+        std::cout << "If you pass multiple files, symbols will be generated for the first file only";
         return 1;
     }
 
-    return sorbet::realmain::lsp::printDocumentSymbols(argv, argc);
+    std::vector<std::string_view> args;
+    for (auto i = 1; i < argc; ++i) {
+      args.emplace_back(argv[i]);
+    }
+    return sorbet::realmain::lsp::printDocumentSymbols(args);
 }
