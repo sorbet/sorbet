@@ -335,6 +335,22 @@ package(default_visibility = ["//visibility:public"])
         strip_prefix = "llvm-project-0cbbf06b625605fff83d89b17c2187c7ccfcecd5/llvm",
     )
 
+    shellcheck_version = "0.8.0"
+    http_archive(
+        name = "shellcheck_linux",
+        urls = _github_public_urls("koalaman/shellcheck/releases/download/v{0}/shellcheck-v{0}.linux.x86_64.tar.xz".format(shellcheck_version)),
+        build_file = "@com_stripe_ruby_typer//third_party:shellcheck.BUILD",
+        sha256 = "ab6ee1b178f014d1b86d1e24da20d1139656c8b0ed34d2867fbb834dad02bf0a",
+        strip_prefix = "shellcheck-v{}".format(shellcheck_version),
+    )
+    http_archive(
+        name = "shellcheck_darwin",
+        urls = _github_public_urls("koalaman/shellcheck/releases/download/v{0}/shellcheck-v{0}.darwin.x86_64.tar.xz".format(shellcheck_version)),
+        build_file = "@com_stripe_ruby_typer//third_party:shellcheck.BUILD",
+        sha256 = "e065d4afb2620cc8c1d420a9b3e6243c84ff1a693c1ff0e38f279c8f31e86634",
+        strip_prefix = "shellcheck-v{}".format(shellcheck_version),
+    )
+
     http_file(
         name = "bundler_stripe",
         urls = _rubygems_urls("bundler-1.17.3.gem"),
