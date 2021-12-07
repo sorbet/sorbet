@@ -428,55 +428,107 @@ struct IndexThreadResultPack {
     IndexResult res;
 };
 
-IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const options::Options &opts,
-                              shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
-                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
-    Timer timeit(cgs->tracer(), "mergeIndexResults");
-    IndexThreadResultPack threadResult;
-    IndexResult ret;
-    for (auto result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer()); !result.done();
-         result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer())) {
-        if (result.gotItem()) {
-            counterConsume(move(threadResult.counters));
-            if (ret.gs == nullptr) {
-                ret.gs = move(threadResult.res.gs);
-                ENFORCE(ret.trees.empty());
-                ret.trees = move(threadResult.res.trees);
-            } else {
-                core::GlobalSubstitution substitution(*threadResult.res.gs, *ret.gs, cgs.get());
-                {
-                    Timer timeit(cgs->tracer(), "substituteTrees");
-                    for (auto &tree : threadResult.res.trees) {
-                        auto file = tree.file;
-                        if (!file.data(*ret.gs).cached) {
-                            core::MutableContext ctx(*ret.gs, core::Symbols::root(), file);
-                            tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
-                        }
-                    }
-                }
-                ret.trees.insert(ret.trees.end(), make_move_iterator(threadResult.res.trees.begin()),
-                                 make_move_iterator(threadResult.res.trees.end()));
-            }
-            progress.reportProgress(input->doneEstimate());
+struct IndexSubstitutionJob {
+    // Not necessary for substitution, but passing this through to the worker means it's freed in that thread, instead
+    // of serially in the main thread.
+    unique_ptr<core::GlobalState> threadGs;
+
+    std::optional<core::GlobalSubstitution> subst;
+    vector<ast::ParsedFile> trees;
+
+    IndexSubstitutionJob() {}
+
+    IndexSubstitutionJob(core::GlobalState &to, IndexResult res)
+        : threadGs{std::move(res.gs)}, subst{}, trees{std::move(res.trees)} {
+        if (absl::c_any_of(this->trees, [this](auto &parsed) { return !parsed.file.data(*this->threadGs).cached; })) {
+            this->subst.emplace(*this->threadGs, to);
+        } else {
+            core::GlobalSubstitution::mergeFileTables(*this->threadGs, to);
         }
     }
+
+    IndexSubstitutionJob(IndexSubstitutionJob &&other) = default;
+    IndexSubstitutionJob &operator=(IndexSubstitutionJob &&other) = default;
+};
+
+vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options::Options &opts,
+                                          shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
+                                          WorkerPool &workers, const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+    ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
+    Timer timeit(cgs.tracer(), "mergeIndexResults");
+
+    auto batchq = make_shared<ConcurrentBoundedQueue<IndexSubstitutionJob>>(input->bound);
+    vector<ast::ParsedFile> ret;
+
+    {
+        Timer timeit(cgs.tracer(), "mergeGlobalStates");
+        IndexThreadResultPack threadResult;
+        for (auto result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer());
+             !result.done(); result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
+            if (result.gotItem()) {
+                counterConsume(move(threadResult.counters));
+                auto numTrees = threadResult.res.trees.size();
+                batchq->push(IndexSubstitutionJob{cgs, std::move(threadResult.res)}, numTrees);
+            }
+        }
+    }
+
+    {
+        Timer timeit(cgs.tracer(), "substituteTrees");
+        auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(batchq->bound);
+
+        workers.multiplexJob("substituteTrees", [&cgs, batchq, resultq]() {
+            Timer timeit(cgs.tracer(), "substituteTreesWorker");
+            IndexSubstitutionJob job;
+            for (auto result = batchq->try_pop(job); !result.done(); result = batchq->try_pop(job)) {
+                if (result.gotItem()) {
+                    if (job.subst.has_value()) {
+                        for (auto &tree : job.trees) {
+                            auto file = tree.file;
+                            if (!file.data(cgs).cached) {
+                                core::MutableContext ctx(cgs, core::Symbols::root(), file);
+                                tree.tree = ast::Substitute::run(ctx, *job.subst, move(tree.tree));
+                            }
+                        }
+                    }
+                    auto numSubstitutedTrees = job.trees.size();
+                    resultq->push(std::move(job.trees), numSubstitutedTrees);
+                }
+            }
+        });
+
+        vector<ast::ParsedFile> trees;
+        for (auto result = resultq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), cgs.tracer()); !result.done();
+             result = resultq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
+            if (result.gotItem()) {
+                ret.insert(ret.end(), std::make_move_iterator(trees.begin()), std::make_move_iterator(trees.end()));
+                progress.reportProgress(resultq->doneEstimate());
+            }
+        }
+    }
+
     return ret;
 }
 
-IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::FileRef> &files,
-                               const options::Options &opts, WorkerPool &workers,
-                               const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    Timer timeit(baseGs->tracer(), "indexSuppliedFiles");
+vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<core::FileRef> &files,
+                                           const options::Options &opts, WorkerPool &workers,
+                                           const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+    Timer timeit(baseGs.tracer(), "indexSuppliedFiles");
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
     for (auto &file : files) {
         fileq->push(move(file), 1);
     }
 
-    workers.multiplexJob("indexSuppliedFiles", [baseGs, &opts, fileq, resultq, &kvstore]() {
-        Timer timeit(baseGs->tracer(), "indexSuppliedFilesWorker");
-        unique_ptr<core::GlobalState> localGs = baseGs->deepCopy();
+    std::shared_ptr<core::GlobalState> emptyGs = baseGs.copyForIndex();
+
+    workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore]() {
+        Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
+
+        // clone the empty global state to avoid manually re-entering everything, and copy the base filetable so that
+        // file sources are available.
+        unique_ptr<core::GlobalState> localGs = emptyGs->deepCopy();
+
         IndexThreadResultPack threadResult;
 
         {
@@ -499,13 +551,12 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
         }
     });
 
-    return mergeIndexResults(baseGs, opts, resultq, kvstore);
+    return mergeIndexResults(baseGs, opts, resultq, workers, kvstore);
 }
 
-vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::FileRef> files,
-                              const options::Options &opts, WorkerPool &workers,
-                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    Timer timeit(gs->tracer(), "index");
+vector<ast::ParsedFile> index(core::GlobalState &gs, vector<core::FileRef> files, const options::Options &opts,
+                              WorkerPool &workers, const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+    Timer timeit(gs.tracer(), "index");
     vector<ast::ParsedFile> ret;
     vector<ast::ParsedFile> empty;
 
@@ -513,20 +564,18 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         return empty;
     }
 
-    gs->sanityCheck();
+    gs.sanityCheck();
 
     if (files.size() < 3) {
         // Run singlethreaded if only using 2 files
         for (auto file : files) {
-            auto tree = readFileWithStrictnessOverrides(*gs, file, opts, kvstore);
-            auto parsedFile = indexOne(opts, *gs, file, move(tree));
+            auto tree = readFileWithStrictnessOverrides(gs, file, opts, kvstore);
+            auto parsedFile = indexOne(opts, gs, file, move(tree));
             ret.emplace_back(move(parsedFile));
         }
         ENFORCE(files.size() == ret.size());
     } else {
-        auto pass = indexSuppliedFiles(move(gs), files, opts, workers, kvstore);
-        gs = move(pass.gs);
-        ret = move(pass.trees);
+        ret = indexSuppliedFiles(gs, files, opts, workers, kvstore);
     }
 
     fast_sort(ret, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });

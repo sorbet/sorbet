@@ -17,9 +17,11 @@ class GlobalState;
  * The constructor builds up a lookup table from every NameRef in `from` to an equivalent NameRef in `to`, inserting new
  * names into `to` where needed. Then, that table can be used to rewrite multiple ASTs from `from`.
  */
-class GlobalSubstitution {
+class GlobalSubstitution final {
 public:
     GlobalSubstitution(const GlobalState &from, GlobalState &to, const GlobalState *optionalCommonParent = nullptr);
+
+    static void mergeFileTables(const GlobalState &from, GlobalState &to);
 
     NameRef substitute(NameRef from, bool allowSameFromTo = false) const {
         if (!allowSameFromTo) {
@@ -61,9 +63,9 @@ private:
     std::vector<NameRef> constantNameSubstitution;
     std::vector<NameRef> uniqueNameSubstitution;
     // set if no substitution is actually necessary
-    bool fastPath;
+    bool fastPath = false;
 
-    const int toGlobalStateId;
+    int toGlobalStateId;
 };
 
 /**

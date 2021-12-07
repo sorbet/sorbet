@@ -17,21 +17,8 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
     ENFORCE(from.typeMembers.size() == to.typeMembers.size(), "Can't substitute symbols yet");
 
     from.sanityCheck();
-    {
-        UnfreezeFileTable unfreezeFiles(to);
-        int fileIdx = 0; // Skip file 0
-        while (fileIdx + 1 < from.filesUsed()) {
-            fileIdx++;
-            if (from.files[fileIdx]->sourceType == File::Type::NotYetRead) {
-                continue;
-            }
-            if (fileIdx < to.filesUsed() && from.files[fileIdx].get() == to.files[fileIdx].get()) {
-                continue;
-            }
-            ENFORCE(fileIdx >= to.filesUsed() || to.files[fileIdx]->sourceType == File::Type::NotYetRead);
-            to.enterNewFileAt(from.files[fileIdx], fileIdx);
-        }
-    }
+
+    GlobalSubstitution::mergeFileTables(from, to);
 
     fastPath = false;
     if (optionalCommonParent != nullptr) {
@@ -116,6 +103,22 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
     }
 
     to.sanityCheck();
+}
+
+void GlobalSubstitution::mergeFileTables(const GlobalState &from, GlobalState &to) {
+    UnfreezeFileTable unfreezeFiles(to);
+    int fileIdx = 0; // Skip file 0
+    while (fileIdx + 1 < from.filesUsed()) {
+        fileIdx++;
+        if (from.files[fileIdx]->sourceType == File::Type::NotYetRead) {
+            continue;
+        }
+        if (fileIdx < to.filesUsed() && from.files[fileIdx].get() == to.files[fileIdx].get()) {
+            continue;
+        }
+        ENFORCE(fileIdx >= to.filesUsed() || to.files[fileIdx]->sourceType == File::Type::NotYetRead);
+        to.enterNewFileAt(from.files[fileIdx], fileIdx);
+    }
 }
 
 bool GlobalSubstitution::useFastPath() const {

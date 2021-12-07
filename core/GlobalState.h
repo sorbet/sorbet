@@ -235,6 +235,8 @@ public:
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;
 
+    std::unique_ptr<GlobalState> copyForIndex() const;
+
     // Contains a path prefix that should be stripped from all printed paths.
     std::string pathPrefix;
     // Returns a string_view of the given path with the path prefix removed.

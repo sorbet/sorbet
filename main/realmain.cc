@@ -569,7 +569,7 @@ int realmain(int argc, char *argv[]) {
                 // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
                 indexed = hashing::Hashing::indexAndComputeFileHashes(gs, opts, *logger, inputFiles, *workers, kvstore);
             } else {
-                indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore);
+                indexed = pipeline::index(*gs, inputFiles, opts, *workers, kvstore);
             }
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);

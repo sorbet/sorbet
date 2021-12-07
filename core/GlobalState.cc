@@ -1806,6 +1806,27 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     return result;
 }
 
+unique_ptr<GlobalState> GlobalState::copyForIndex() const {
+    auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
+
+    result->initEmpty();
+
+    result->files = this->files;
+    result->fileRefByPath = this->fileRefByPath;
+
+    result->silenceErrors = this->silenceErrors;
+    result->autocorrect = this->autocorrect;
+    result->ensureCleanStrings = this->ensureCleanStrings;
+    result->runningUnderAutogen = this->runningUnderAutogen;
+    result->censorForSnapshotTests = this->censorForSnapshotTests;
+    result->sleepInSlowPath = this->sleepInSlowPath;
+    result->requiresAncestorEnabled = this->requiresAncestorEnabled;
+    result->kvstoreUuid = this->kvstoreUuid;
+    result->pathPrefix = this->pathPrefix;
+
+    return result;
+}
+
 string_view GlobalState::getPrintablePath(string_view path) const {
     // Only strip the path prefix if the path has it.
     if (path.substr(0, pathPrefix.length()) == pathPrefix) {

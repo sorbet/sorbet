@@ -122,7 +122,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
                                                            spdlog::logger &logger, vector<core::FileRef> &files,
                                                            WorkerPool &workers,
                                                            const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    auto asts = realmain::pipeline::index(gs, files, opts, workers, kvstore);
+    auto asts = realmain::pipeline::index(*gs, files, opts, workers, kvstore);
     ENFORCE_NO_TIMER(asts.size() == files.size());
 
     // Below, we rewrite ASTs to an empty GlobalState and use them for hashing.
