@@ -51,11 +51,13 @@ build --copt=-Wno-macro-redefined
 
 # Clang 12.0.0 has warnings when compiling LLVM 12.0.0 on C++20, sadly.
 # TODO(jez) When we upgrade to LLVM 13.0.0+ can we delete this?
-build --host_cxxopt=-Wno-deprecated-anon-enum-enum-conversion
-build --host_cxxopt=-Wno-deprecated-enum-enum-conversion
-build --cxxopt=-Wno-deprecated-anon-enum-enum-conversion
-build --cxxopt=-Wno-deprecated-enum-enum-conversion
-build --cxxopt=-Wno-ambiguous-reversed-operator
+# TODO(jez) We will need these to build C++20, but emscripten doesn't even know about these options yet.
+# Leaving them commented out so we can uncomment them after upgrading emscripten.
+# build --host_cxxopt=-Wno-deprecated-anon-enum-enum-conversion
+# build --host_cxxopt=-Wno-deprecated-enum-enum-conversion
+# build --cxxopt=-Wno-deprecated-anon-enum-enum-conversion
+# build --cxxopt=-Wno-deprecated-enum-enum-conversion
+# build --cxxopt=-Wno-ambiguous-reversed-operator
 
 ##
 ## debug configuration
