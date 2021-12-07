@@ -96,23 +96,23 @@ class mempool {
 public:
     mempool() = default;
 
-    template <typename... Args> ruby_parser::node_list *node_list(Args &&... args) {
+    template <typename... Args> ruby_parser::node_list *node_list(Args &&...args) {
         return _node_list.alloc(std::forward<Args>(args)...);
     }
 
-    template <typename... Args> ruby_parser::delimited_node_list *delimited_node_list(Args &&... args) {
+    template <typename... Args> ruby_parser::delimited_node_list *delimited_node_list(Args &&...args) {
         return _delimited_node_list.alloc(std::forward<Args>(args)...);
     }
 
-    template <typename... Args> ruby_parser::delimited_block *delimited_block(Args &&... args) {
+    template <typename... Args> ruby_parser::delimited_block *delimited_block(Args &&...args) {
         return _delimited_block.alloc(std::forward<Args>(args)...);
     }
 
-    template <typename... Args> ruby_parser::node_with_token *node_with_token(Args &&... args) {
+    template <typename... Args> ruby_parser::node_with_token *node_with_token(Args &&...args) {
         return _node_with_token.alloc(std::forward<Args>(args)...);
     }
 
-    template <typename... Args> ruby_parser::case_body *case_body(Args &&... args) {
+    template <typename... Args> ruby_parser::case_body *case_body(Args &&...args) {
         return _case_body.alloc(std::forward<Args>(args)...);
     }
 };
@@ -165,7 +165,7 @@ public:
 class max_numparam_stack {
     struct NumparamScope {
         int max;
-        ruby_parser::node_list* decls;
+        ruby_parser::node_list *decls;
     };
 
     std::vector<NumparamScope> stack;
@@ -193,7 +193,7 @@ public:
     }
 
     // Register a numparam in the current scope
-    void regis(int numparam, ruby_parser::node_list* decls) {
+    void regis(int numparam, ruby_parser::node_list *decls) {
         if (stack.empty()) {
             push(decls);
         } else {
@@ -205,13 +205,13 @@ public:
     }
 
     // Current scope
-    NumparamScope* top() {
+    NumparamScope *top() {
         return &stack.back();
     }
 
     // Push a new scope on the stack (top = 0)
-    void push(ruby_parser::node_list* decls) {
-        stack.push_back(NumparamScope {0, decls});
+    void push(ruby_parser::node_list *decls) {
+        stack.push_back(NumparamScope{0, decls});
     }
 
     // Pop the current scope
@@ -249,7 +249,7 @@ public:
     }
 
     bool declared(std::string name) {
-        if(stack.empty()) {
+        if (stack.empty()) {
             return false;
         }
         return stack.back().find(name) != stack.back().end();
