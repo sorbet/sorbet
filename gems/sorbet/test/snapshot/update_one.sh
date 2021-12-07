@@ -3,8 +3,9 @@
 set -euo pipefail
 shopt -s dotglob
 
-# shellcheck disable=SC1090
+# shellcheck source-path=SCRIPTDIR/../../../..
 source "gems/sorbet/test/snapshot/logging.sh"
+# shellcheck source-path=SCRIPTDIR/../../../..
 source "gems/sorbet/test/snapshot/validate_utils.sh"
 
 setup_validate_env "$@"
@@ -32,7 +33,7 @@ diff_partial() {
     attn "├─ updating expected/sorbet (partial):"
 
     find "$test_dir/expected/sorbet" -print0 | while IFS= read -r -d '' expected_path; do
-      path_suffix="${expected_path#$test_dir/expected/sorbet}"
+      path_suffix="${expected_path#"$test_dir"/expected/sorbet}"
       actual_path="$actual/sorbet$path_suffix"
 
       # Only ever update existing files, never grow this partial snapshot.

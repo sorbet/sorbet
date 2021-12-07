@@ -5,7 +5,7 @@ set -euo pipefail
 test_dir="$(dirname "${BASH_SOURCE[0]}")"
 root_dir="${test_dir}/../.."
 
-# shellcheck disable=SC1090
+# shellcheck source=SCRIPTDIR/../../logging.sh
 source "${root_dir}/test/logging.sh"
 
 usage() {

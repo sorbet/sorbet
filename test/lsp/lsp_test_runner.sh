@@ -52,7 +52,7 @@ while read -r line
 do
     if [[ "$line" == ${READ_PREFIX}* ]] ;
     then
-       payload=${line#$READ_PREFIX}
+       payload=${line#"$READ_PREFIX"}
        bytelen=${#payload}
         echo -e -n "Content-Length: ${bytelen}\r\n\r\n">&"$IN_FD"
         # Don't interpret escape characters in payload.
@@ -63,7 +63,7 @@ do
 
     elif [[ "$line" == ${WRITE_PREFIX}* ]] ;
     then
-        expected_payload=${line#$WRITE_PREFIX}
+        expected_payload=${line#"$WRITE_PREFIX"}
         read -r -u "$OUT_FD" header
         if [[ "$header" == "Content-Length: "* ]] ;
         then

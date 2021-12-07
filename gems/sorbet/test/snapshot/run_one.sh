@@ -42,10 +42,10 @@ test_name=$3
 test_dir="${repo_root}/gems/sorbet/test/snapshot/${test_name}"
 
 # NOTE: using rlocation here because this script gets run from a genrule
-# shellcheck disable=SC1090
+# shellcheck source=SCRIPTDIR/logging.sh
 source "$(rlocation com_stripe_ruby_typer/gems/sorbet/test/snapshot/logging.sh)"
 
-# shellcheck disable=SC1090
+# shellcheck source=SCRIPTDIR/hermetic_tar.sh
 source "$(rlocation com_stripe_ruby_typer/gems/sorbet/test/snapshot/hermetic_tar.sh)"
 
 
@@ -182,6 +182,7 @@ fi
   #
   # note: redirects stderr before the pipe
   info "├─ Running srb"
+  # shellcheck disable=SC2048
   if ! SRB_YES=1 ${test_cmd[*]} < /dev/null 2> "err.log" > "out.log"; then
     error "├─ srb failed."
     error "├─ stdout (out.log):"
