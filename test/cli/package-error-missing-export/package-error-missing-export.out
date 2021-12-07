@@ -8,6 +8,11 @@ foo_class.rb:10: Unable to resolve constant `NotExported` https://srb.help/5002
     other/other_class.rb:7: Constant `Foo::Bar::OtherPackage::NotExported` is defined here:
      7 |  class NotExported
           ^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    other/__package.rb:4: Insert `
+  export Foo::Bar::OtherPackage::NotExported`
+     4 |  export Foo::Bar::OtherPackage::OtherClass
+                                                   ^
 
 foo_class.rb:11: Unable to resolve constant `NotExported` https://srb.help/5002
     11 |      Bar::OtherPackage::NotExported
@@ -19,6 +24,11 @@ foo_class.rb:11: Unable to resolve constant `NotExported` https://srb.help/5002
     other/other_class.rb:7: Constant `Foo::Bar::OtherPackage::NotExported` is defined here:
      7 |  class NotExported
           ^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    other/__package.rb:4: Insert `
+  export Foo::Bar::OtherPackage::NotExported`
+     4 |  export Foo::Bar::OtherPackage::OtherClass
+                                                   ^
 
 foo_class.rb:12: Unable to resolve constant `Inner` https://srb.help/5002
     12 |      Foo::Bar::OtherPackage::Inner::AlsoNotExported
@@ -30,6 +40,11 @@ foo_class.rb:12: Unable to resolve constant `Inner` https://srb.help/5002
     other/other_class.rb:10: Constant `Foo::Bar::OtherPackage::Inner` is defined here:
     10 |  class Inner::AlsoNotExported
                 ^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    other/__package.rb:4: Insert `
+  export Foo::Bar::OtherPackage::Inner`
+     4 |  export Foo::Bar::OtherPackage::OtherClass
+                                                   ^
 
 foo_class.rb:13: Unable to resolve constant `Inner` https://srb.help/5002
     13 |      Bar::OtherPackage::Inner::AlsoNotExported
@@ -41,4 +56,9 @@ foo_class.rb:13: Unable to resolve constant `Inner` https://srb.help/5002
     other/other_class.rb:10: Constant `Foo::Bar::OtherPackage::Inner` is defined here:
     10 |  class Inner::AlsoNotExported
                 ^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    other/__package.rb:4: Insert `
+  export Foo::Bar::OtherPackage::Inner`
+     4 |  export Foo::Bar::OtherPackage::OtherClass
+                                                   ^
 Errors: 4
