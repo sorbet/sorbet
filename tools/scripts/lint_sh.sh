@@ -21,7 +21,7 @@ if ! bazel build "@shellcheck_$platform//:shellcheck_exe"; then
   echo "warning: Could not fetch shellcheck with Bazel. Falling back to system"
   shellcheck="shellcheck"
 else
-  shellcheck="bazel-sorbet/external/shellcheck/shellcheck"
+  shellcheck="bazel-sorbet/external/shellcheck_$platform/shellcheck"
 fi
 
 if [ "$1" = "-t" ]; then
