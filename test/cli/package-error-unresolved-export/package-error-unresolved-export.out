@@ -1,0 +1,17 @@
+__package.rb:7: Unable to resolve constant `WildlyMisspelled` https://srb.help/5002
+     7 |  export Foo::BasePkg::WildlyMisspelled
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    To be exported it must be defined in package `Foo::BasePkg`
+
+__package.rb:8: Unable to resolve constant `NameWithTipo` https://srb.help/5002
+     8 |  export Foo::BasePkg::NameWithTipo
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    __package.rb:8: Replace with `Foo::BasePkg::NameWithTypo`
+     8 |  export Foo::BasePkg::NameWithTipo
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    base.rb:7: Did you mean: `Foo::BasePkg::NameWithTypo`?
+     7 |  class NameWithTypo; end
+          ^^^^^^^^^^^^^^^^^^
+Errors: 2
