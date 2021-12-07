@@ -21,7 +21,7 @@ ruby_parser::typedruby27 *rbdriver_typedruby27_new(const char *source, size_t so
 
 void rbdriver_typedruby27_free(ruby_parser::typedruby27 *parser);
 
-const void *rbdriver_parse(ruby_parser::base_driver *parser, ruby_parser::SelfPtr self);
+const void *rbdriver_parse(ruby_parser::base_driver *parser, ruby_parser::SelfPtr self, bool trace);
 
 bool rbdriver_in_definition(const ruby_parser::base_driver *driver);
 

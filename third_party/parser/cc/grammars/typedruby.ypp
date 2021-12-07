@@ -29,6 +29,7 @@ using namespace std::string_literals;
 %define api.token.constructor false
 %define parse.assert
 %define parse.error verbose
+%define parse.trace
 
 // mirrored in inc/ruby_parser/token.hh
 // if any of these token values are changed here, the header must be updated

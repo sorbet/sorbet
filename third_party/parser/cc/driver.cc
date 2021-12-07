@@ -12,8 +12,9 @@ base_driver::base_driver(ruby_version version, const std::string &source, const 
 typedruby27::typedruby27(const std::string &source, const struct builder &builder)
     : base_driver(ruby_version::RUBY_27, source, builder) {}
 
-ForeignPtr typedruby27::parse(SelfPtr self) {
+ForeignPtr typedruby27::parse(SelfPtr self, bool trace) {
     bison::typedruby27::parser p(*this, self);
+    p.set_debug_level(trace ? 1 : 0);
     p.parse();
     return ast;
 }

@@ -274,7 +274,7 @@ public:
 
     base_driver(ruby_version version, const std::string &source, const struct builder &builder);
     virtual ~base_driver() {}
-    virtual ForeignPtr parse(SelfPtr self) = 0;
+    virtual ForeignPtr parse(SelfPtr self, bool trace) = 0;
 
     bool valid_kwarg_name(const token *name) {
         char c = name->string().at(0);
@@ -300,7 +300,7 @@ public:
 class typedruby27 : public base_driver {
 public:
     typedruby27(const std::string &source, const struct builder &builder);
-    virtual ForeignPtr parse(SelfPtr self);
+    virtual ForeignPtr parse(SelfPtr self, bool trace);
     ~typedruby27() {}
 };
 

@@ -49,7 +49,7 @@ public:
     }
 };
 
-unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file,
+unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file, bool trace,
                              std::vector<std::string> initialLocals) {
     Builder builder(gs, file);
     auto source = file.data(gs).source();
@@ -59,7 +59,7 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file,
         driver.lex.declare(local);
     }
 
-    auto ast = unique_ptr<Node>(builder.build(&driver));
+    auto ast = unique_ptr<Node>(builder.build(&driver, trace));
     ErrorToError::run(gs, file, driver.diagnostics);
 
     if (!ast) {

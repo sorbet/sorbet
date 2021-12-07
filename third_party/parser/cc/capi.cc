@@ -11,8 +11,8 @@ void rbdriver_typedruby27_free(ruby_parser::typedruby27 *driver) {
     delete driver;
 }
 
-const void *rbdriver_parse(ruby_parser::base_driver *driver, ruby_parser::SelfPtr self) {
-    return driver->parse(self);
+const void *rbdriver_parse(ruby_parser::base_driver *driver, ruby_parser::SelfPtr self, bool trace) {
+    return driver->parse(self, trace);
 }
 
 bool rbdriver_in_definition(const ruby_parser::base_driver *driver) {
