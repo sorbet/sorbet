@@ -30,7 +30,7 @@ empty << 4
 # Arrays of literals decay
 ["foo"] + ["bar"]
 
-[T::Array[Integer], 0] # error: Unsupported usage of literal type
+T.let(T.unsafe(nil), [T::Array[Integer], 0]) # error: Unsupported usage of literal type)
 
 T.assert_type!([1].concat([:foo]), [Integer, Symbol])
 T.assert_type!([1].concat([:foo]).concat([3, 4]), [Integer, Symbol, Integer, Integer])
