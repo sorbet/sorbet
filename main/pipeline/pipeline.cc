@@ -93,8 +93,8 @@ string fileKey(const core::File &file) {
 }
 
 ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, core::File &file,
-                                      const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    if (kvstore && fref.id() < gs.filesUsed()) {
+                                      const OwnedKeyValueStore *kvstore) {
+    if (kvstore != nullptr && fref.id() < gs.filesUsed()) {
         string fileHashKey = fileKey(file);
         auto maybeCached = kvstore->read(fileHashKey);
         if (maybeCached.data != nullptr) {
@@ -365,15 +365,14 @@ void incrementStrictLevelCounter(core::StrictLevel level) {
 }
 
 // Returns a non-null ast::Expression if kvstore contains the AST.
-ast::ExpressionPtr readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
-                                                   const options::Options &opts,
-                                                   const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::FileRef file,
+                                                   const options::Options &opts, const OwnedKeyValueStore *kvstore) {
     ast::ExpressionPtr ast;
-    if (file.dataAllowingUnsafe(*gs).sourceType != core::File::Type::NotYetRead) {
+    if (file.dataAllowingUnsafe(gs).sourceType != core::File::Type::NotYetRead) {
         return ast;
     }
-    auto fileName = file.dataAllowingUnsafe(*gs).path();
-    Timer timeit(gs->tracer(), "readFileWithStrictnessOverrides", {{"file", string(fileName)}});
+    auto fileName = file.dataAllowingUnsafe(gs).path();
+    Timer timeit(gs.tracer(), "readFileWithStrictnessOverrides", {{"file", string(fileName)}});
     string src;
     bool fileFound = true;
     try {
@@ -388,22 +387,22 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(unique_ptr<core::GlobalState>
     prodCounterInc("types.input.files");
 
     {
-        core::UnfreezeFileTable unfreezeFiles(*gs);
+        core::UnfreezeFileTable unfreezeFiles(gs);
         auto fileObj =
             make_shared<core::File>(string(fileName.begin(), fileName.end()), move(src), core::File::Type::Normal);
         // Returns nullptr if tree is not in cache.
-        ast = fetchTreeFromCache(*gs, file, *fileObj, kvstore);
+        ast = fetchTreeFromCache(gs, file, *fileObj, kvstore);
 
-        auto entered = gs->enterNewFileAt(move(fileObj), file);
+        auto entered = gs.enterNewFileAt(move(fileObj), file);
         ENFORCE(entered == file);
     }
     if (enable_counters) {
-        counterAdd("types.input.lines", file.data(*gs).lineCount());
+        counterAdd("types.input.lines", file.data(gs).lineCount());
     }
 
-    auto &fileData = file.data(*gs);
+    auto &fileData = file.data(gs);
     if (!fileFound) {
-        if (auto e = gs->beginError(sorbet::core::Loc::none(file), core::errors::Internal::FileNotFound)) {
+        if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::FileNotFound)) {
             e.setHeader("File Not Found");
         }
     }
@@ -412,7 +411,7 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(unique_ptr<core::GlobalState>
         fileData.sourceType = core::File::Type::PayloadGeneration;
     }
 
-    auto level = decideStrictLevel(*gs, file, opts);
+    auto level = decideStrictLevel(gs, file, opts);
     fileData.strictLevel = level;
     incrementStrictLevelCounter(level);
     return ast;
@@ -430,7 +429,7 @@ struct IndexThreadResultPack {
 
 IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const options::Options &opts,
                               shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
-                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+                              const OwnedKeyValueStore *kvstore) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
     Timer timeit(cgs->tracer(), "mergeIndexResults");
     IndexThreadResultPack threadResult;
@@ -465,8 +464,7 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
 }
 
 IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::FileRef> &files,
-                               const options::Options &opts, WorkerPool &workers,
-                               const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+                               const options::Options &opts, WorkerPool &workers, const OwnedKeyValueStore *kvstore) {
     Timer timeit(baseGs->tracer(), "indexSuppliedFiles");
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
@@ -484,7 +482,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     core::FileRef file = job;
-                    auto cachedTree = readFileWithStrictnessOverrides(localGs, file, opts, kvstore);
+                    auto cachedTree = readFileWithStrictnessOverrides(*localGs, file, opts, kvstore);
                     auto parsedFile = indexOne(opts, *localGs, file, move(cachedTree));
                     threadResult.res.trees.emplace_back(move(parsedFile));
                 }
@@ -503,8 +501,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
 }
 
 vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::FileRef> files,
-                              const options::Options &opts, WorkerPool &workers,
-                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+                              const options::Options &opts, WorkerPool &workers, const OwnedKeyValueStore *kvstore) {
     Timer timeit(gs->tracer(), "index");
     vector<ast::ParsedFile> ret;
     vector<ast::ParsedFile> empty;
@@ -518,7 +515,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
     if (files.size() < 3) {
         // Run singlethreaded if only using 2 files
         for (auto file : files) {
-            auto tree = readFileWithStrictnessOverrides(gs, file, opts, kvstore);
+            auto tree = readFileWithStrictnessOverrides(*gs, file, opts, kvstore);
             auto parsedFile = indexOne(opts, *gs, file, move(tree));
             ret.emplace_back(move(parsedFile));
         }

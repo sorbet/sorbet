@@ -192,7 +192,7 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
         indexed.resize(initialGS->filesUsed());
 
         auto asts = hashing::Hashing::indexAndComputeFileHashes(initialGS, config->opts, *config->logger, inputFiles,
-                                                                workers, ownedKvstore);
+                                                                workers, ownedKvstore.get());
         // asts are in fref order, but we (currently) don't index and compute file hashes for payload files, so vector
         // index != FileRef ID. Fix that by slotting them into `indexed`.
         for (auto &ast : asts) {
@@ -263,7 +263,7 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
 
     {
         // Explicitly null. It does not make sense to use kvstore for short-lived editor edits.
-        unique_ptr<const OwnedKeyValueStore> kvstore;
+        const OwnedKeyValueStore *kvstore = nullptr;
         // Create a throwaway error queue. commitEdit may be called on two different threads, and we can't anticipate
         // which one it will be.
         initialGS->errorQueue = make_shared<core::ErrorQueue>(

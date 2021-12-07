@@ -22,7 +22,7 @@ void populateRBIsInto(unique_ptr<core::GlobalState> &gs) {
     realmain::options::Options emptyOpts;
     unique_ptr<const OwnedKeyValueStore> kvstore;
     auto workers = WorkerPool::create(emptyOpts.threads, gs->tracer());
-    auto indexed = realmain::pipeline::index(gs, payloadFiles, emptyOpts, *workers, kvstore);
+    auto indexed = realmain::pipeline::index(gs, payloadFiles, emptyOpts, *workers, kvstore.get());
     realmain::pipeline::resolve(gs, move(indexed), emptyOpts, *workers); // result is thrown away
     gs->ensureCleanStrings = false;
 }
