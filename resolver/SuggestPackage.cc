@@ -98,7 +98,7 @@ public:
             return false;
         }
 
-    bool tryUnresolvedImportCorrections(const ast::ConstantLit::ResolutionScopes &scopes, core::NameRef name) const {
+    bool tryUnresolvedImportCorrections(const ast::ConstantLit::ResolutionScopes &scopes, core::NameRef name) {
         // there are two broader cases here: either the name we're
         // looking for shares the same prefix as the package we're in,
         // in which case it's probably an export we can't find (and we
@@ -108,7 +108,16 @@ public:
 
         // TODO(gdritter): bail when it's clear that we're looking at
         // an export
-        ctx.state.tracer().error("For: {}", name.toString(ctx));
+        vector<PackageMatch> matches;
+        vector<core::NameRef> prefix;
+
+        ast::UnresolvedConstantLit& cnst;
+        do {
+            prefix.emplace_back(unresolved.cnst);
+        } while (
+
+        findPackagesWithPrefix(prefix, matches);
+        ctx.state.tracer().error("For: {}", unresolved.toStringWithTabs(ctx));
         for (auto &s : scopes) {
             if (s.exists())
                 ctx.state.tracer().error("  - {}", s.show(ctx));
