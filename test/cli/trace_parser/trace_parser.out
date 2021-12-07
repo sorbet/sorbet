@@ -1,0 +1,30 @@
+Starting parse
+Entering state 0
+Reading a token: Next token is token "end of file" ()
+Reducing stack by rule 3 (line 492):
+-> $$ = nterm top_stmts ()
+Stack now 0
+Entering state 73
+Next token is token "end of file" ()
+Reducing stack by rule 713 (line 3622):
+-> $$ = nterm opt_terms ()
+Stack now 73 0
+Entering state 340
+Reducing stack by rule 2 (line 486):
+   $1 = nterm top_stmts ()
+   $2 = nterm opt_terms ()
+-> $$ = nterm top_compstmt ()
+Stack now 0
+Entering state 72
+Reducing stack by rule 1 (line 481):
+   $1 = nterm top_compstmt ()
+-> $$ = nterm program ()
+Stack now 0
+Entering state 71
+Next token is token "end of file" ()
+Shifting token "end of file" ()
+Entering state 339
+Cleanup: popping token "end of file" ()
+Cleanup: popping nterm program ()
+test/cli/trace_parser.rb: File Not Found https://srb.help/1004
+Errors: 1
