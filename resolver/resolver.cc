@@ -142,6 +142,9 @@ private:
         core::FileRef file;
         ast::ConstantLit *rhs;
 
+        ClassAliasResolutionItem(core::SymbolRef lhs, core::FileRef file, ast::ConstantLit *rhs)
+            : lhs(lhs), file(file), rhs(rhs) {}
+
         ClassAliasResolutionItem() = default;
         ClassAliasResolutionItem(ClassAliasResolutionItem &&) noexcept = default;
         ClassAliasResolutionItem &operator=(ClassAliasResolutionItem &&rhs) noexcept = default;
@@ -155,6 +158,9 @@ private:
         core::FileRef file;
         ast::ExpressionPtr *rhs;
 
+        TypeAliasResolutionItem(core::SymbolRef lhs, core::FileRef file, ast::ExpressionPtr *rhs)
+            : lhs(lhs), file(file), rhs(rhs) {}
+
         TypeAliasResolutionItem(TypeAliasResolutionItem &&) noexcept = default;
         TypeAliasResolutionItem &operator=(TypeAliasResolutionItem &&rhs) noexcept = default;
 
@@ -167,6 +173,9 @@ private:
         core::SymbolRef owner;
         ast::Send *send;
 
+        ClassMethodsResolutionItem(core::FileRef file, core::SymbolRef owner, ast::Send *send)
+            : file(file), owner(owner), send(send) {}
+
         ClassMethodsResolutionItem(ClassMethodsResolutionItem &&) noexcept = default;
         ClassMethodsResolutionItem &operator=(ClassMethodsResolutionItem &&rhs) noexcept = default;
 
@@ -178,6 +187,9 @@ private:
         core::FileRef file;
         core::ClassOrModuleRef owner;
         ast::Send *send;
+
+        RequireAncestorResolutionItem(core::FileRef file, core::ClassOrModuleRef owner, ast::Send *send)
+            : file(file), owner(owner), send(send) {}
 
         RequireAncestorResolutionItem(RequireAncestorResolutionItem &&) noexcept = default;
         RequireAncestorResolutionItem &operator=(RequireAncestorResolutionItem &&rhs) noexcept = default;
@@ -3216,7 +3228,7 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     DEBUG_ONLY(for (auto i = 1; i < gs.classAndModulesUsed(); i++) {
         core::ClassOrModuleRef sym(gs, i);
         // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
-        ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), sym.toString(gs));
+        ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), "{}", sym.toString(gs));
     })
     trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
     auto result = resolveSigs(gs, std::move(trees), *workers);

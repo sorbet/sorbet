@@ -1036,7 +1036,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                     out << "    fmt::format_to(std::back_inserter(buf), \", \\\"{}\\\"\", " << arg.name
                         << ".toString(gs));\n";
                 } else {
-                    out << "    fmt::format_to(std::back_inserter(buf), \", :\" + JSON::escape(" << arg.name
+                    out << "    fmt::format_to(std::back_inserter(buf), \", :{}\", JSON::escape(" << arg.name
                         << ".show(gs)));\n";
                 }
                 break;

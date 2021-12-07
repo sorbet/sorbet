@@ -42,7 +42,8 @@ public:
             core::Loc loc(file, translatePos(diag.location().beginPos, maxOff - 1),
                           translatePos(diag.location().endPos, maxOff));
             if (auto e = gs.beginError(loc, core::errors::Parser::ParserError)) {
-                e.setHeader("{}", fmt::format(dclassStrings[(int)diag.error_class()], diag.data()));
+                e.setHeader("{}",
+                            fmt::vformat(dclassStrings[(int)diag.error_class()], fmt::make_format_args(diag.data())));
             }
         }
     }

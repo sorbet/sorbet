@@ -66,7 +66,7 @@ AliasesAndKeywords setupAliasesAndKeywords(CompilerState &cs, const cfg::CFG &cf
                     } else if (name.size() > 1 && name[0] == '$') {
                         res.aliases[bind.bind.variable] = Alias::forGlobalField(i->name);
                     } else {
-                        ENFORCE(stoi(string(name)) > 0, "'" + string(name) + "' is not a valid global name");
+                        ENFORCE(stoi(string(name)) > 0, "'{}' is not a valid global name", name);
                         res.aliases[bind.bind.variable] = Alias::forGlobalField(i->name);
                     }
                 } else {

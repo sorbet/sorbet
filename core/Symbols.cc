@@ -2051,18 +2051,18 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
 
         ENFORCE_NO_TIMER(current == current2);
         for (auto &e : members()) {
-            ENFORCE_NO_TIMER(e.first.exists(), name.toString(gs) + " has a member symbol without a name");
-            ENFORCE_NO_TIMER(e.second.exists(), name.toString(gs) + "." + e.first.toString(gs) +
-                                                    " corresponds to a core::Symbols::noSymbol()");
+            ENFORCE_NO_TIMER(e.first.exists(), "{} has a member symbol without a name", name.toString(gs));
+            ENFORCE_NO_TIMER(e.second.exists(), "{}.{} corresponds to a core::Symbols::noSymbol()", name.toString(gs),
+                             e.first.toString(gs));
         }
     }
     if (this->isMethod()) {
         if (isa_type<AliasType>(this->resultType)) {
             // If we have an alias method, we should never look at it's arguments;
             // we should instead look at the arguments of whatever we're aliasing.
-            ENFORCE_NO_TIMER(this->arguments().empty(), ref(gs).show(gs));
+            ENFORCE_NO_TIMER(this->arguments().empty(), "{}", ref(gs).show(gs));
         } else {
-            ENFORCE_NO_TIMER(!this->arguments().empty(), ref(gs).show(gs));
+            ENFORCE_NO_TIMER(!this->arguments().empty(), "{}", ref(gs).show(gs));
         }
     }
 }

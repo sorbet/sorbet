@@ -106,8 +106,8 @@ private:
                 auto params = app.targs;
 
                 ENFORCE(members.size() == params.size(),
-                        fmt::format("types should be fully saturated, but there are {} members and {} params",
-                                    members.size(), params.size()));
+                        "types should be fully saturated, but there are {} members and {} params", members.size(),
+                        params.size());
 
                 for (int i = 0; i < members.size(); ++i) {
                     auto memberVariance = members[i].asTypeMemberRef().data(ctx)->variance();

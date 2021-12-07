@@ -64,6 +64,10 @@ struct NamedDefinition {
     u4 pathDepth;
 
     NamedDefinition() = default;
+    NamedDefinition(Definition def, QualifiedName qname, QualifiedName parentName,
+                    std::vector<core::NameRef> requireStatements, core::FileRef fileRef, u4 pathDepth)
+        : def(def), qname(qname), parentName(parentName), requireStatements(std::move(requireStatements)),
+          fileRef(fileRef), pathDepth(pathDepth) {}
     NamedDefinition(const NamedDefinition &) = delete;
     NamedDefinition(NamedDefinition &&) = default;
     NamedDefinition &operator=(const NamedDefinition &) = delete;

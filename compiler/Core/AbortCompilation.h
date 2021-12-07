@@ -1,3 +1,6 @@
+#ifndef SORBET_COMPILER_CORE_ABORT_COMPILATION_H
+#define SORBET_COMPILER_CORE_ABORT_COMPILATION_H
+
 #include "common/Exception.h"
 
 namespace sorbet::compiler {
@@ -7,3 +10,5 @@ public:
     AbortCompilation(const char *message) : SorbetException(message){};
 };
 } // namespace sorbet::compiler
+
+#endif
