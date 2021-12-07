@@ -94,11 +94,11 @@ public:
             tryUnresolvedExportCorrections(e, unresolved);
             return true;
         } else {
-            // TODO(gdritter-stripe) handle bad import
-            return false;
+            tryUnresolvedImportCorrections(e, unresolved);
+            return true;
         }
 
-    bool tryUnresolvedImportCorrections(const ast::ConstantLit::ResolutionScopes &scopes, core::NameRef name) {
+    void tryUnresolvedImportCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
         // there are two broader cases here: either the name we're
         // looking for shares the same prefix as the package we're in,
         // in which case it's probably an export we can't find (and we
@@ -111,20 +111,22 @@ public:
         vector<PackageMatch> matches;
         vector<core::NameRef> prefix;
 
-        ast::UnresolvedConstantLit& cnst;
-        do {
-            prefix.emplace_back(unresolved.cnst);
-        } while (
+        ast::UnresolvedConstantLit* cnst = &unresolved;
+        while (cnst) {
+            prefix.emplace_back(cnst->cnst);
+            if (auto cnst_lit = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope)) {
+                cnst = cnst_lit;
+            } else if (auto cnst_lit = ast::cast_tree<ast::ConstantLit>(cnst->scope)) {
+                cnst = ast::cast_tree<ast::UnresolvedConstantLit>(cnst_lit->original);
+            } else {
+                break;
+            }
+        }
 
         findPackagesWithPrefix(prefix, matches);
-        ctx.state.tracer().error("For: {}", unresolved.toStringWithTabs(ctx));
-        for (auto &s : scopes) {
-            if (s.exists())
-                ctx.state.tracer().error("  - {}", s.show(ctx));
-            else
-                ctx.state.tracer().error("  - {}", s.show(ctx));
+        for (auto match : matches) {
+            addMissingImportSuggestions(e, match);
         }
-        return true;
     }
 
 private:
