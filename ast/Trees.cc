@@ -303,6 +303,9 @@ ConstantLit::fullUnresolvedPath(const core::GlobalState &gs) const {
         return nullopt;
     }
     ENFORCE(this->resolutionScopes != nullptr && !this->resolutionScopes->empty());
+    if (this->resolutionScopes == nullptr) {
+        return nullopt;
+    }
     vector<core::NameRef> namesFailedToResolve;
     auto *nested = this;
     {

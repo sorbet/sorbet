@@ -53,7 +53,13 @@ string LiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string LiteralType::show(const GlobalState &gs, ShowOptions options) const {
-    return fmt::format("{}({})", this->underlying(gs).show(gs, options), showValue(gs));
+    // RBI generator: Users type the value, not `String("value")`.
+    // if (literalKind == LiteralTypeKind::Symbol) {
+    // HACK: Restore T.deprecated_enum :|
+    return fmt::format("T.deprecated_enum([{}])", showValue(gs));
+    //}
+    // return showValue(gs);
+    // return fmt::format("{}({})", this->underlying(gs).show(gs, options), showValue(gs));
 }
 
 string LiteralType::showValue(const GlobalState &gs) const {
@@ -124,13 +130,15 @@ string ShapeType::show(const GlobalState &gs, ShowOptions options) const {
         } else {
             fmt::format_to(std::back_inserter(buf), ", ");
         }
-        auto underlying = cast_type_nonnull<LiteralType>(key).underlying(gs);
+        auto keyLiteral = cast_type_nonnull<LiteralType>(key);
+        auto underlying = keyLiteral.underlying(gs);
         ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
-        if (undSymbol == Symbols::Symbol()) {
+        // properties beginning with $ need to be printed as :$prop => type.
+        if (undSymbol == Symbols::Symbol() && !absl::StartsWith(keyLiteral.asName(gs).shortName(gs), "$")) {
             fmt::format_to(std::back_inserter(buf), "{}: {}", cast_type_nonnull<LiteralType>(key).asName(gs).show(gs),
                            (*valueIterator).show(gs, options));
         } else {
-            fmt::format_to(std::back_inserter(buf), "{} => {}", key.show(gs, options),
+            fmt::format_to(std::back_inserter(buf), "{} => {}", keyLiteral.showValue(gs),
                            (*valueIterator).show(gs, options));
         }
         ++valueIterator;
@@ -148,7 +156,10 @@ string AliasType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string AliasType::show(const GlobalState &gs, ShowOptions options) const {
-    return fmt::format("<Alias: {} >", this->symbol.showFullName(gs));
+    // RBI generation: show() is supposed to print what the user typed, and the user doesn't
+    // type <Alias: SymbolName>!
+    return this->symbol.show(gs);
+    // return fmt::format("<Alias: {} >", this->symbol.showFullName(gs));
 }
 
 string AndType::toStringWithTabs(const GlobalState &gs, int tabs) const {
@@ -401,6 +412,10 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
             }
             return to_string(buf);
         } else {
+            if (this->klass.data(gs)->isSingletonClass(gs)) {
+                // T.class_of(klass)[arg1, arg2] is never valid syntax.
+                return this->klass.show(gs, options);
+            }
             fmt::format_to(std::back_inserter(buf), "{}", this->klass.show(gs, options));
         }
     }

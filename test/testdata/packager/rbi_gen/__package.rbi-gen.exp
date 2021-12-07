@@ -1,0 +1,263 @@
+# test/testdata/packager/rbi_gen/RBIGen_Package.rbi
+# typed: true
+
+RBIGen::DirectlyExported::MyString = String
+module RBIGen::Public
+end
+class RBIGen::Public::XMLNode < Opus::Flatfiles::MarkupLanguageNodeStruct
+  flatfile do
+    field :boo
+  end
+end
+module RBIGen::Public::VariousMethods
+  sig {void}
+  def initialize
+    @if = T.let(T.unsafe(nil), Integer)
+    @unless = T.let(T.unsafe(nil), String)
+  end
+  sig {returns(T.deprecated_enum(["hello"]))}
+  def dep_enum; end
+  def dotdotdot(...); end
+  sig {returns(Integer)}
+  def if; end
+  sig {params(ifArg: Integer).returns(Integer)}
+  def if=(ifArg); end
+  sig {params(a: RBIGen::Private::PrivateClassPulledInByPrivateMethod).void}
+  private def my_method(a); end
+  sig {returns(T.any(String, [T.deprecated_enum([:D]), Integer], Integer))}
+  def returns_any_with_literals; end
+  sig {returns(T::Array[String])}
+  def returns_generic_type; end
+  sig {returns({"str" => Integer, symb: Integer})}
+  def returns_shape_type; end
+  sig {returns(String)}
+  def returns_type_alias; end
+  sig {void}
+  private def sample_mod_fcn; end
+  sig {void}
+  private def some_mod_fcn; end
+  sig {returns(String)}
+  def unless; end
+  sig {params(unlessArg: String).returns(String)}
+  def unless=(unlessArg); end
+  extend T::Sig
+  sig {void}
+  private_class_method def self.kls_method; end
+  sig {void}
+  def self.sample_mod_fcn; end
+  module_function :some_mod_fcn
+end
+class RBIGen::Private::PrivateClassPulledInByPrivateMethod < Object
+end
+RBIGen::Public::VariousMethods::MyString = T.type_alias {String}
+class RBIGen::Public::StructWithInitializer < T::Struct
+  prop :foo, T.nilable(String), default: T.let(T.unsafe(nil), T.nilable(String))
+  sig {params(foo: T.nilable(String)).void}
+  def initialize(foo: T.let(T.unsafe(nil), T.untyped))
+    @extra_prop = T.let(T.unsafe(nil), String)
+  end
+  extend T::Sig
+end
+RBIGen::Public::ShapeType = T.type_alias {{:$str => String}}
+class RBIGen::Public::SealedClass < Object
+  sealed!
+  extend T::Helpers
+end
+class RBIGen::Public::RefersToPrivateTypes < Object
+  sig {params(a: RBIGen::Private::PrivateClass).void}
+  def method(a); end
+  extend T::Sig
+end
+class RBIGen::Private::PrivateClass < Object
+end
+RBIGen::Public::RefersToPrivateTypes::ClassAlias = RBIGen::Private::PrivateClassPulledInByClassAlias
+class RBIGen::Private::PrivateClassPulledInByClassAlias < Object
+end
+class RBIGen::Public::MyStruct < T::Struct
+  prop :foo, Integer
+  const :singleton_type, T.class_of(RBIGen::Public::MyStruct)
+  const :singleton_type_with_type_params, T.class_of(RBIGen::Public::ClassWithTypeParams)
+  const :bar, T.nilable(String), default: T.let(T.unsafe(nil), T.nilable(String))
+  const :quz, Float, default: T.let(T.unsafe(nil), Float)
+  sig {returns(Integer)}
+  def extra_method
+    @internal_field = T.let(T.unsafe(nil), T.nilable(Integer))
+  end
+  sig {void}
+  def later_method; end
+  extend T::Sig
+  @field = T.let(T.unsafe(nil), Integer)
+end
+class RBIGen::Private::PrivateClassPulledInByTypeTemplate < Object
+end
+class RBIGen::Public::MyEnum < T::Enum
+  abstract!
+  sealed!
+  sig {returns(String)}
+  def to_string; end
+  extend T::Sig
+  extend T::Helpers
+  enums do
+    Clubs = new
+    Diamonds = new
+    Hearts = new
+    Spades = new
+  end
+end
+module RBIGen::Public::ModuleWithTypeParams
+  A = type_member(:in)
+  B = type_member(:out)
+  extend T::Generic
+  extend T::Helpers
+end
+module RBIGen::Public::MixesInClassMethods
+  mixes_in_class_methods(RBIGen::Public::MixesInClassMethods::ClassMethods)
+  extend T::Generic
+  extend T::Helpers
+end
+module RBIGen::Public::MixesInClassMethods::ClassMethods
+  sig {void}
+  def method; end
+  extend T::Sig
+end
+RBIGen::Public::MaybeString = T.type_alias {T.nilable(String)}
+module RBIGen::Public::InterfaceModule
+  abstract!
+  interface!
+  sig {abstract.returns(String)}
+  def interface_method; end
+  extend T::Sig
+  extend T::Helpers
+end
+class RBIGen::Public::InheritsInitializer < RBIGen::Public::HasInitializer
+  abstract!
+  sig {abstract.void}
+  def abstract_method; end
+  sig {void}
+  def declares_field
+    @field = T.let(T.unsafe(nil), T.nilable(Integer))
+  end
+  extend T::Helpers
+end
+class RBIGen::Public::HasInitializer < Object
+  sig {params(a: Integer).void}
+  def initialize(a); end
+  extend T::Sig
+end
+class RBIGen::Public::Flatfile < Opus::Flatfiles::Record
+  flatfile do
+    field :bar
+    field :baz
+    field :foo
+  end
+  sig {returns(String)}
+  def deprecated?; end
+  sig {params(deprecated: String).returns(NilClass)}
+  def self.deprecated?(deprecated); end
+  sig {returns(String)}
+  def self.get_deprecated?; end
+end
+class RBIGen::Public::FinalClass < Object
+  final!
+  sig(:final) {void}
+  def final_method; end
+  extend T::Sig
+  extend T::Helpers
+end
+class RBIGen::Public::FieldCheck < Object
+  @@static_field = T.let(T.unsafe(nil), Integer)
+  sig {void}
+  def initialize
+    @field = T.let(T.unsafe(nil), Integer)
+  end
+  sig {void}
+  def empty_method; end
+  extend T::Sig
+  @statically_declared_field = T.let(T.unsafe(nil), Integer)
+end
+RBIGen::Public::FieldCheck::Constant = T.let(T.unsafe(nil), Integer)
+RBIGen::Public::FieldCheck::AliasConstant = T.let(T.unsafe(nil), T.class_of(RBIGen::Public::FieldCheck))
+RBIGen::Public::FieldCheck::Alias = RBIGen::Public::FieldCheck
+module RBIGen::Public::DefDelegator
+  sig {void}
+  def initialize
+    @field = T.let(T.unsafe(nil), String)
+  end
+  def_delegator :@field, :concat, :aliased_concat
+  def_delegator :@field, :empty
+  def_delegator :@field, :length
+  def_delegator :@field, :size
+  extend Forwardable
+  extend T::Helpers
+  extend T::Sig
+  @static_field = T.let(T.unsafe(nil), Integer)
+  class << self
+    def_delegator :@static_field, :method1
+  end
+  class << self
+    def_delegator :@static_field, :method2
+  end
+  class << self
+    def_delegator :@static_field, :method3
+  end
+end
+class RBIGen::Public::CustomStruct < Object
+  include T::Props
+  const :bar, T.nilable(String)
+  prop :foo, Integer
+  sig {void}
+  def my_method; end
+  extend T::Props::ClassMethods
+  extend T::Sig
+end
+class RBIGen::Public::ClassWithTypeParams < Object
+  C = type_member()
+  extend T::Generic
+  extend T::Helpers
+  A = type_template(fixed: RBIGen::Private::PrivateClassPulledInByTypeTemplate)
+  B = type_template()
+end
+class RBIGen::Public::AttachedClassType < Object
+  extend T::Sig
+  sig {params(a: T.proc.params(arg0: T.attached_class).void).void}
+  def self.method(a); end
+end
+class RBIGen::Public::AliasMethod < Object
+  sig {params(other: BasicObject).returns(T::Boolean)}
+  def ==(other); end
+  def bad_alias(*arg0); end
+  alias_method :eql?, :==
+  extend T::Sig
+  sig {void}
+  def self.some_method; end
+  class << self
+    alias_method :some_method_alias, :some_method
+  end
+end
+class RBIGen::Public::AbstractClass < Object
+  abstract!
+  sig {abstract.returns(String)}
+  def abstract_method; end
+  extend T::Sig
+  extend T::Helpers
+end
+class RBIGen::Public::AbstractAndInterfaceImplementor < RBIGen::Public::AbstractClass
+  include RBIGen::Public::InterfaceModule
+  sig {override.returns(String)}
+  def abstract_method; end
+  sig {override.returns(String)}
+  def interface_method; end
+end
+
+# test/testdata/packager/rbi_gen/RBIGen_Package.test.rbi
+# typed: true
+
+class RBIGen::Private::PrivateClassForTests < Object
+end
+module Test::RBIGen
+end
+class Test::RBIGen::MyTestHelper < Object
+end
+class Test::RBIGen::MyTest < Object
+end
+

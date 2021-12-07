@@ -361,6 +361,12 @@ NameRef NameRef::addEq(GlobalState &gs) const {
     return gs.enterNameUTF8(nameEq);
 }
 
+NameRef NameRef::lookupWithEq(const GlobalState &gs) const {
+    auto name = this->dataUtf8(gs);
+    string nameEq = absl::StrCat(name->utf8, "=");
+    return gs.lookupNameUTF8(nameEq);
+}
+
 NameRef NameRef::addQuestion(GlobalState &gs) const {
     auto name = this->dataUtf8(gs);
     string nameEq = absl::StrCat(name->utf8, "?");

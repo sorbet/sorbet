@@ -4,6 +4,7 @@
 #define FULL_BUILD_ONLY(X) X;
 #include "core/proto/proto.h" // has to be included first as it violates our poisons
 // intentional comment to stop from reformatting
+#include "absl/strings/str_split.h"
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
@@ -16,6 +17,8 @@
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/lsp.h"
 #include "main/minimize/minimize.h"
+#include "packager/packager.h"
+#include "packager/rbi_gen.h"
 #endif
 
 #include "absl/strings/str_cat.h"
@@ -596,8 +599,12 @@ int realmain(int argc, char *argv[]) {
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
-            pipeline::typecheck(gs, move(indexed), opts, *workers, /* cancelable */ false, nullopt,
-                                /* presorted */ false, /* intentionallyLeakASTs */ !sorbet::emscripten_build);
+
+            if (opts.packageRBIOutput.empty()) {
+                // we don't need to typecheck under packageRBIOutput
+                pipeline::typecheck(gs, move(indexed), opts, *workers, /* cancelable */ false, nullopt,
+                                    /* presorted */ false, /* intentionallyLeakASTs */ !sorbet::emscripten_build);
+            }
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
@@ -739,6 +746,49 @@ int realmain(int argc, char *argv[]) {
             logger->error("Cannot write metrics file at `{}`", opts.metricsFile);
         }
     }
+
+    if (!opts.dumpPackageInfo.empty()) {
+        if (!opts.stripePackages) {
+            logger->error("stripe packages mode needs to be enabled");
+            return 1;
+        }
+        packager::Packager::dumpPackageInfo(*gs, opts.dumpPackageInfo);
+    }
+
+    if (!opts.packageRBIOutput.empty()) {
+        if (opts.stripePackages) {
+            logger->error("Cannot serialize package RBIs in legacy stripe packages mode.");
+            return 1;
+        }
+
+        if (opts.rawInputDirNames.size() != 1) {
+            logger->error("Serializing package RBIs requires one input folder.");
+            return 1;
+        }
+
+        auto relativeIgnorePatterns = opts.relativeIgnorePatterns;
+        auto it = find(relativeIgnorePatterns.begin(), relativeIgnorePatterns.end(), "/__package.rb");
+        if (it != relativeIgnorePatterns.end()) {
+            relativeIgnorePatterns.erase(it);
+        } else {
+            Exception::raise("Couldn't find ignore pattern.");
+        }
+        auto packageFiles = opts.fs->listFilesInDir(opts.rawInputDirNames[0], opts.allowedExtensions, true,
+                                                    opts.absoluteIgnorePatterns, relativeIgnorePatterns);
+        packageFiles.erase(remove_if(packageFiles.begin(), packageFiles.end(), [](const auto &packageFile) {
+            return !absl::EndsWith(packageFile, "__package.rb");
+        }));
+
+        if (!packageFiles.empty()) {
+            auto packageFileRefs = pipeline::reserveFiles(gs, packageFiles);
+            auto packages = pipeline::index(*gs, packageFileRefs, opts, *workers, nullptr);
+            packager::RBIGenerator::run(*gs, move(packages), opts.packageRBIOutput, *workers);
+        } else {
+            logger->error("No package files found!");
+            return 1;
+        }
+    }
+
 #endif
     if (!gs || gs->hadCriticalError() || (gsForMinimize && gsForMinimize->hadCriticalError())) {
         returnCode = 10;
