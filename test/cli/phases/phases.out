@@ -198,14 +198,14 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<returnMethodTemp>$2: Integer(1) = 1\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
+        label = "block[id=0, rubyRegionId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<returnMethodTemp>$2: Integer(1) = 1\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyRegionId=0]()\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -245,15 +245,15 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 --- cfg-text start ---
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=3]():
+bb0[rubyRegionId=0, firstDead=3]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <returnMethodTemp>$2: Integer(1) = 1
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
@@ -315,11 +315,11 @@ class <C <U <root>>> < <C <U Object>> ()
 <   end
 <   expr = EmptyTree
 <   stats = [
-< # - bb0(rubyBlockId=0)
+< # - bb0(rubyRegionId=0)
 < # backedges
 < InsSeq{
-< bb0[rubyBlockId=0, firstDead=3]():
-< bb1[rubyBlockId=0, firstDead=-1]():
+< bb0[rubyRegionId=0, firstDead=3]():
+< bb1[rubyRegionId=0, firstDead=-1]():
 < begin
 < end
 < method ::<Class:<root>>#<static-init> {
