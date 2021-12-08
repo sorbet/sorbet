@@ -58,6 +58,7 @@ done < <(find "${paths[@]}" -name '*.rb*' | sort)
 
 basename=
 srcs=()
+prev_src=
 
 for this_src in "${rb_src[@]}" DUMMY; do
   # Packager tests are folder based.
@@ -76,6 +77,13 @@ for this_src in "${rb_src[@]}" DUMMY; do
   if [ -n "$basename" ]; then
     for pass in "${passes[@]}"; do
       candidate="$basename.$pass.exp"
+
+      if [ "$pass" = "document-symbols" ]; then
+        # for document-symbols we want keep multifile endings in .exp files
+        # for example a__1.rb.document-symbols.exp
+        candidate="$prev_src.$pass.exp"
+      fi
+
       args=()
       if [ "$pass" = "autogen" ]; then
         args=("--stop-after=namer --skip-rewriter-passes")
@@ -126,6 +134,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
 
   basename="$this_base"
   srcs=("$this_src")
+  prev_src="$this_src"
 done
 
 if ! parallel --joblog - < "$COMMAND_FILE"; then

@@ -6,21 +6,23 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
+
 std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
                                                          core::FileRef filter);
 
 void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::SymbolRef sym, core::FileRef filter,
                                          vector<unique_ptr<DocumentSymbol>> &out) {
     for (auto mem : sym.membersStableOrderSlow(gs)) {
+        auto ref = mem.second;
         if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
             bool foundThisFile = false;
-            for (auto loc : mem.second.locs(gs)) {
+            for (auto loc : ref.locs(gs)) {
                 foundThisFile = foundThisFile || loc.file() == filter;
             }
             if (!foundThisFile) {
                 continue;
             }
-            auto inner = symbolRef2DocumentSymbol(gs, mem.second, filter);
+            auto inner = symbolRef2DocumentSymbol(gs, ref, filter);
             if (inner) {
                 out.push_back(move(inner));
             }
@@ -79,6 +81,14 @@ bool DocumentSymbolTask::isDelayable() const {
     return true;
 }
 
+bool isRefInFile(const core::GlobalState &gs, core::SymbolRef ref, core::FileRef fref) {
+    return absl::c_any_of(ref.locs(gs), [fref](auto &loc) { return loc.file() == fref; });
+}
+
+bool isOwnerInTheSameFile(const core::GlobalState &gs, core::SymbolRef ref, core::FileRef fref) {
+    return isRefInFile(gs, ref.owner(gs), fref);
+}
+
 unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentSymbol);
     if (!config.opts.lspDocumentSymbolEnabled) {
@@ -102,17 +112,14 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
     for (auto [kind, used] : symbolTypes) {
         for (u4 idx = 1; idx < used; idx++) {
             core::SymbolRef ref(gs, kind, idx);
+
             if (!hideSymbol(gs, ref) &&
-                // a bit counter-intuitive, but this actually should be `!= fref`, as it prevents duplicates.
-                (ref.owner(gs).loc(gs).file() != fref || ref.owner(gs) == core::Symbols::root())) {
-                for (auto definitionLocation : ref.locs(gs)) {
-                    if (definitionLocation.file() == fref) {
-                        auto data = symbolRef2DocumentSymbol(gs, ref, fref);
-                        if (data) {
-                            result.push_back(move(data));
-                            break;
-                        }
-                    }
+                // If owner of the ref is in the same file then
+                // the ref will be added to the results during a processing of the owner.
+                // That happens because the `symbolRef2DocumentSymbol` is recursively called for every child of the ref
+                (isRefInFile(gs, ref, fref) && !isOwnerInTheSameFile(gs, ref, fref))) {
+                if (auto data = symbolRef2DocumentSymbol(gs, ref, fref)) {
+                    result.push_back(move(data));
                 }
             }
         }

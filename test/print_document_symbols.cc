@@ -48,12 +48,16 @@ pair<string, vector<string>> findEditsToApply(string_view filePath) {
     return make_pair(uri, move(fileContents));
 }
 
-int printDocumentSymbols(string_view filePath) {
+int printDocumentSymbols(vector<string_view> paths) {
     auto lspWrapper = SingleThreadedLSPWrapper::create();
     lspWrapper->enableAllExperimentalFeatures();
     int nextId = 0;
     int fileId = 1;
-    auto [fileUri, fileEdits] = findEditsToApply(filePath);
+    UnorderedMap<string, vector<string>> edits;
+    for (auto path : paths) {
+        auto [fileUri, fileEdits] = findEditsToApply(path);
+        edits[fileUri] = fileEdits;
+    }
 
     // Send 'initialize' message.
     {
@@ -104,23 +108,28 @@ int printDocumentSymbols(string_view filePath) {
 
     {
         // Initialize empty file.
-        auto params =
-            make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(fileUri, "ruby", fileId++, ""));
-        auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params));
-        // Discard responses.
-        lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
+        for (auto const &[fileUri, _] : edits) {
+            auto params =
+                make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(fileUri, "ruby", fileId++, ""));
+            auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params));
+            // Discard responses.
+            lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
+        }
     }
 
-    for (auto &fileEdit : fileEdits) {
-        vector<unique_ptr<TextDocumentContentChangeEvent>> edits;
-        edits.push_back(make_unique<TextDocumentContentChangeEvent>(fileEdit));
-        auto params = make_unique<DidChangeTextDocumentParams>(
-            make_unique<VersionedTextDocumentIdentifier>(fileUri, static_cast<double>(fileId++)), move(edits));
-        auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(params));
-        lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
+    for (auto const &[fileUri, fileEdits] : edits) {
+        for (auto &fileEdit : fileEdits) {
+            vector<unique_ptr<TextDocumentContentChangeEvent>> edits;
+            edits.push_back(make_unique<TextDocumentContentChangeEvent>(fileEdit));
+            auto params = make_unique<DidChangeTextDocumentParams>(
+                make_unique<VersionedTextDocumentIdentifier>(fileUri, static_cast<double>(fileId++)), move(edits));
+            auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(params));
+            lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
+        }
     }
 
-    auto docSymbolParams = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(fileUri));
+    auto docSymbolParams =
+        make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(absl::StrCat(uriPrefix, paths[1])));
     auto req =
         make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(docSymbolParams));
     // Make documentSymbol request.
@@ -145,10 +154,15 @@ int printDocumentSymbols(string_view filePath) {
 } // namespace sorbet::realmain::lsp
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
+    if (argc < 2) {
         std::cout << "Usage: print_document_symbols path/to/file.rb\n";
+        std::cout << "If you pass multiple files, symbols will be generated for the first file only";
         return 1;
     }
 
-    return sorbet::realmain::lsp::printDocumentSymbols(argv[1]);
+    std::vector<std::string_view> args;
+    for (auto i = 1; i < argc; ++i) {
+        args.emplace_back(argv[i]);
+    }
+    return sorbet::realmain::lsp::printDocumentSymbols(args);
 }
