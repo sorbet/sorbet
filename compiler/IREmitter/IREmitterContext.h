@@ -285,8 +285,8 @@ struct IREmitterContext {
     std::vector<llvm::BasicBlock *> deadBlockMapping;
 
     // Mapping from ruby region id to llvm block exit blocks. These blocks are used for the case where a transition
-    // between a basic block in a ruby region exists, and transitions to a node in a different ruby region (that isn't the
-    // dead block).
+    // between a basic block in a ruby region exists, and transitions to a node in a different ruby region (that isn't
+    // the dead block).
     std::vector<llvm::BasicBlock *> blockExitMapping;
 
     // Mappinf from ruby region id to debug info scope.
