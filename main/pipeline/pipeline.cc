@@ -93,8 +93,8 @@ string fileKey(const core::File &file) {
 }
 
 ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, core::File &file,
-                                      const OwnedKeyValueStore *kvstore) {
-    if (kvstore != nullptr && fref.id() < gs.filesUsed()) {
+                                      const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+    if (kvstore && fref.id() < gs.filesUsed()) {
         string fileHashKey = fileKey(file);
         auto maybeCached = kvstore->read(fileHashKey);
         if (maybeCached.data != nullptr) {
@@ -366,7 +366,8 @@ void incrementStrictLevelCounter(core::StrictLevel level) {
 
 // Returns a non-null ast::Expression if kvstore contains the AST.
 ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::FileRef file,
-                                                   const options::Options &opts, const OwnedKeyValueStore *kvstore) {
+                                                   const options::Options &opts,
+                                                   const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     ast::ExpressionPtr ast;
     if (file.dataAllowingUnsafe(gs).sourceType != core::File::Type::NotYetRead) {
         return ast;
@@ -429,7 +430,7 @@ struct IndexThreadResultPack {
 
 IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const options::Options &opts,
                               shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
-                              const OwnedKeyValueStore *kvstore) {
+                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
     Timer timeit(cgs->tracer(), "mergeIndexResults");
     IndexThreadResultPack threadResult;
@@ -464,7 +465,8 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
 }
 
 IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::FileRef> &files,
-                               const options::Options &opts, WorkerPool &workers, const OwnedKeyValueStore *kvstore) {
+                               const options::Options &opts, WorkerPool &workers,
+                               const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     Timer timeit(baseGs->tracer(), "indexSuppliedFiles");
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
@@ -501,7 +503,8 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
 }
 
 vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::FileRef> files,
-                              const options::Options &opts, WorkerPool &workers, const OwnedKeyValueStore *kvstore) {
+                              const options::Options &opts, WorkerPool &workers,
+                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     Timer timeit(gs->tracer(), "index");
     vector<ast::ParsedFile> ret;
     vector<ast::ParsedFile> empty;

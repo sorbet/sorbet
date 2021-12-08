@@ -19,7 +19,7 @@ std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, 
 
 std::vector<ast::ParsedFile> index(std::unique_ptr<core::GlobalState> &gs, std::vector<core::FileRef> files,
                                    const options::Options &opts, WorkerPool &workers,
-                                   const OwnedKeyValueStore *kvstore);
+                                   const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 
 std::vector<ast::ParsedFile> package(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                      const options::Options &opts, WorkerPool &workers);
