@@ -70,11 +70,11 @@ vector<ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::ARGS_store &args) 
     return parsedArgs;
 }
 
-std::vector<u4> ArgParsing::hashArgs(core::Context ctx, const std::vector<ParsedArg> &args) {
-    std::vector<u4> result;
+std::vector<uint32_t> ArgParsing::hashArgs(core::Context ctx, const std::vector<ParsedArg> &args) {
+    std::vector<uint32_t> result;
     result.reserve(args.size());
     for (const auto &e : args) {
-        u4 arg = 0;
+        uint32_t arg = 0;
         u1 flags = 0;
         if (e.flags.isKeyword) {
             arg = core::mix(arg, core::_hash(e.local._name.shortName(ctx)));

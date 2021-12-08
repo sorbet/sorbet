@@ -46,7 +46,7 @@ CheckSize(ConstSymbolData, 8, 8);
 class Symbol;
 
 class ClassOrModuleRef final {
-    u4 _id;
+    uint32_t _id;
 
     friend class SymbolRef;
     friend class GlobalState;
@@ -57,9 +57,9 @@ private:
 
 public:
     ClassOrModuleRef() : _id(0){};
-    ClassOrModuleRef(const GlobalState &from, u4 id);
+    ClassOrModuleRef(const GlobalState &from, uint32_t id);
 
-    u4 id() const {
+    uint32_t id() const {
         return _id;
     }
 
@@ -67,7 +67,7 @@ public:
         return _id != 0;
     }
 
-    static ClassOrModuleRef fromRaw(u4 id) {
+    static ClassOrModuleRef fromRaw(uint32_t id) {
         ClassOrModuleRef ref;
         ref._id = id;
         return ref;
@@ -95,7 +95,7 @@ public:
 CheckSize(ClassOrModuleRef, 4, 4);
 
 class MethodRef final {
-    u4 _id;
+    uint32_t _id;
     friend class SymbolRef;
 
 private:
@@ -104,9 +104,9 @@ private:
 
 public:
     MethodRef() : _id(0){};
-    MethodRef(const GlobalState &from, u4 id);
+    MethodRef(const GlobalState &from, uint32_t id);
 
-    u4 id() const {
+    uint32_t id() const {
         return _id;
     }
 
@@ -114,7 +114,7 @@ public:
         return _id != 0;
     }
 
-    static MethodRef fromRaw(u4 id) {
+    static MethodRef fromRaw(uint32_t id) {
         MethodRef ref;
         ref._id = id;
         return ref;
@@ -143,7 +143,7 @@ public:
 CheckSize(MethodRef, 4, 4);
 
 class FieldRef final {
-    u4 _id;
+    uint32_t _id;
 
     friend class SymbolRef;
 
@@ -153,9 +153,9 @@ private:
 
 public:
     FieldRef() : _id(0){};
-    FieldRef(const GlobalState &from, u4 id);
+    FieldRef(const GlobalState &from, uint32_t id);
 
-    u4 id() const {
+    uint32_t id() const {
         return _id;
     }
 
@@ -163,7 +163,7 @@ public:
         return _id != 0;
     }
 
-    static FieldRef fromRaw(u4 id) {
+    static FieldRef fromRaw(uint32_t id) {
         FieldRef ref;
         ref._id = id;
         return ref;
@@ -185,7 +185,7 @@ public:
 CheckSize(FieldRef, 4, 4);
 
 class TypeMemberRef final {
-    u4 _id;
+    uint32_t _id;
 
     friend class SymbolRef;
 
@@ -195,9 +195,9 @@ private:
 
 public:
     TypeMemberRef() : _id(0){};
-    TypeMemberRef(const GlobalState &from, u4 id);
+    TypeMemberRef(const GlobalState &from, uint32_t id);
 
-    u4 id() const {
+    uint32_t id() const {
         return _id;
     }
 
@@ -205,7 +205,7 @@ public:
         return _id != 0;
     }
 
-    static TypeMemberRef fromRaw(u4 id) {
+    static TypeMemberRef fromRaw(uint32_t id) {
         TypeMemberRef ref;
         ref._id = id;
         return ref;
@@ -226,7 +226,7 @@ public:
 CheckSize(TypeMemberRef, 4, 4);
 
 class TypeArgumentRef final {
-    u4 _id;
+    uint32_t _id;
 
     friend class SymbolRef;
 
@@ -236,9 +236,9 @@ private:
 
 public:
     TypeArgumentRef() : _id(0){};
-    TypeArgumentRef(const GlobalState &from, u4 id);
+    TypeArgumentRef(const GlobalState &from, uint32_t id);
 
-    u4 id() const {
+    uint32_t id() const {
         return _id;
     }
 
@@ -246,7 +246,7 @@ public:
         return _id != 0;
     }
 
-    static TypeArgumentRef fromRaw(u4 id) {
+    static TypeArgumentRef fromRaw(uint32_t id) {
         TypeArgumentRef ref;
         ref._id = id;
         return ref;
@@ -274,8 +274,8 @@ class SymbolRef final {
     friend class MethodRef;
 
     // Stores the symbol's Kind and Index. Kind occupies the lower bits.
-    u4 _id;
-    u4 unsafeTableIndex() const {
+    uint32_t _id;
+    uint32_t unsafeTableIndex() const {
         return _id >> KIND_BITS;
     }
 
@@ -294,16 +294,16 @@ public:
     };
 
     // Kind takes up this many bits in _id.
-    static constexpr u4 KIND_BITS = 3;
-    static constexpr u4 ID_BITS = 32 - KIND_BITS;
-    static constexpr u4 KIND_MASK = (1 << KIND_BITS) - 1;
-    static constexpr u4 MAX_ID = (1 << ID_BITS) - 1;
+    static constexpr uint32_t KIND_BITS = 3;
+    static constexpr uint32_t ID_BITS = 32 - KIND_BITS;
+    static constexpr uint32_t KIND_MASK = (1 << KIND_BITS) - 1;
+    static constexpr uint32_t MAX_ID = (1 << ID_BITS) - 1;
 
     Kind kind() const {
         return static_cast<Kind>(_id & KIND_MASK);
     }
 
-    u4 rawId() const {
+    uint32_t rawId() const {
         return _id;
     }
 
@@ -331,33 +331,33 @@ public:
     bool isField(const GlobalState &gs) const;
     bool isStaticField(const GlobalState &gs) const;
 
-    u4 classOrModuleIndex() const {
+    uint32_t classOrModuleIndex() const {
         ENFORCE_NO_TIMER(kind() == Kind::ClassOrModule);
         return unsafeTableIndex();
     }
 
-    u4 methodIndex() const {
+    uint32_t methodIndex() const {
         ENFORCE_NO_TIMER(kind() == Kind::Method);
         return unsafeTableIndex();
     }
 
-    u4 fieldIndex() const {
+    uint32_t fieldIndex() const {
         ENFORCE_NO_TIMER(kind() == Kind::FieldOrStaticField);
         return unsafeTableIndex();
     }
 
-    u4 typeArgumentIndex() const {
+    uint32_t typeArgumentIndex() const {
         ENFORCE_NO_TIMER(kind() == Kind::TypeArgument);
         return unsafeTableIndex();
     }
 
-    u4 typeMemberIndex() const {
+    uint32_t typeMemberIndex() const {
         ENFORCE_NO_TIMER(kind() == Kind::TypeMember);
         return unsafeTableIndex();
     }
 
-    SymbolRef(GlobalState const *from, Kind type, u4 id);
-    SymbolRef(const GlobalState &from, Kind type, u4 id);
+    SymbolRef(GlobalState const *from, Kind type, uint32_t id);
+    SymbolRef(const GlobalState &from, Kind type, uint32_t id);
     // This constructor is not marked explicit so that we can implicitly convert ClassOrModuleRef to SymbolRefs as
     // method arguments. This conversion is always safe and never throws.
     SymbolRef(ClassOrModuleRef kls);
@@ -371,7 +371,7 @@ public:
     // Placed here so it can be used across packages for common case optimizations.
     static constexpr int EXPECTED_METHOD_ARGS_COUNT = 2;
 
-    static SymbolRef fromRaw(u4 raw) {
+    static SymbolRef fromRaw(uint32_t raw) {
         auto ref = SymbolRef();
         ref._id = raw;
         return ref;

@@ -34,7 +34,7 @@ core::File::Type getFileType(string_view path, const options::Options &opts) {
 } // namespace
 
 LSPPreprocessor::LSPPreprocessor(shared_ptr<LSPConfiguration> config, shared_ptr<absl::Mutex> taskQueueMutex,
-                                 shared_ptr<TaskQueueState> taskQueue, u4 initialVersion)
+                                 shared_ptr<TaskQueueState> taskQueue, uint32_t initialVersion)
     : config(move(config)), taskQueueMutex(std::move(taskQueueMutex)), taskQueue(move(taskQueue)),
       owner(this_thread::get_id()), nextVersion(initialVersion + 1) {}
 
@@ -307,7 +307,7 @@ void LSPPreprocessor::preprocessAndEnqueue(unique_ptr<LSPMessage> msg) {
 }
 
 unique_ptr<SorbetWorkspaceEditParams>
-LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentParams> changeParams) {
+LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidChangeTextDocumentParams> changeParams) {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
     edit->sorbetCancellationExpected = changeParams->sorbetCancellationExpected.value_or(false);
@@ -328,7 +328,7 @@ LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentParams>
 }
 
 unique_ptr<SorbetWorkspaceEditParams>
-LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidOpenTextDocumentParams> openParams) {
+LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidOpenTextDocumentParams> openParams) {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
     string_view uri = openParams->textDocument->uri;
@@ -346,7 +346,7 @@ LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidOpenTextDocumentParams> o
 }
 
 unique_ptr<SorbetWorkspaceEditParams>
-LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidCloseTextDocumentParams> closeParams) {
+LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidCloseTextDocumentParams> closeParams) {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
     string_view uri = closeParams->textDocument->uri;
@@ -364,7 +364,7 @@ LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidCloseTextDocumentParams> 
 }
 
 unique_ptr<SorbetWorkspaceEditParams>
-LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<WatchmanQueryResponse> queryResponse) const {
+LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse> queryResponse) const {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
     for (auto &file : queryResponse->files) {

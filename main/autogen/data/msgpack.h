@@ -16,7 +16,7 @@ private:
     mpack_writer_t writer;
 
     std::vector<core::NameRef> symbols;
-    UnorderedMap<core::NameRef, u4> symbolIds;
+    UnorderedMap<core::NameRef, uint32_t> symbolIds;
 
     static const std::map<int, std::vector<std::string>> refAttrMap;
     static const std::map<int, std::vector<std::string>> defAttrMap;
@@ -29,7 +29,7 @@ private:
     void packBool(bool b);
     void packReferenceRef(ReferenceRef ref);
     void packDefinitionRef(DefinitionRef ref);
-    void packRange(u4 begin, u4 end);
+    void packRange(uint32_t begin, uint32_t end);
     void packDefinition(core::Context ctx, ParsedFile &pf, Definition &def);
     void packReference(core::Context ctx, ParsedFile &pf, Reference &ref);
     static int assertValidVersion(int version) {

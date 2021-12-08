@@ -57,7 +57,7 @@ public:
     File &dataAllowingUnsafe(GlobalState &gs) const;
 
 private:
-    u4 _id;
+    uint32_t _id;
 };
 CheckSize(FileRef, 4, 4);
 
@@ -76,7 +76,7 @@ public:
     bool hasParseErrors = false; // some reasonable invariants don't hold for invalid files
     // Epoch is _only_ used in LSP mode. Do not depend on it elsewhere.
     // TODO(jvilk): Delurk epoch usage and use something like pointer equality to check if a file has changed.
-    const u4 epoch;
+    const uint32_t epoch;
 
     friend class GlobalState;
     friend class ::sorbet::core::serialize::SerializerImpl;
@@ -93,7 +93,7 @@ public:
     bool isStdlib() const;
     bool isPackage() const;
 
-    File(std::string &&path_, std::string &&source_, Type sourceType, u4 epoch = 0);
+    File(std::string &&path_, std::string &&source_, Type sourceType, uint32_t epoch = 0);
     File(File &&other) = delete;
     File(const File &other) = delete;
     File() = delete;

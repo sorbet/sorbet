@@ -277,30 +277,30 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(empty.debugLogFile), "file");
     options.add_options("advanced")(
         "reserve-class-table-capacity", "Preallocate the specified number of entries in the class and modules table",
-        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveClassTableCapacity)));
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveClassTableCapacity)));
     options.add_options("advanced")(
         "reserve-method-table-capacity", "Preallocate the specified number of entries in the method table",
-        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveMethodTableCapacity)));
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveMethodTableCapacity)));
     options.add_options("advanced")(
         "reserve-field-table-capacity", "Preallocate the specified number of entries in the field table",
-        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveFieldTableCapacity)));
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveFieldTableCapacity)));
     options.add_options("advanced")(
         "reserve-type-argument-table-capacity",
         "Preallocate the specified number of entries in the type argument table",
-        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveTypeArgumentTableCapacity)));
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveTypeArgumentTableCapacity)));
     options.add_options("advanced")(
         "reserve-type-member-table-capacity", "Preallocate the specified number of entries in the type member table",
-        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveTypeMemberTableCapacity)));
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveTypeMemberTableCapacity)));
     options.add_options("advanced")(
         "reserve-utf8-name-table-capacity", "Preallocate the specified number of entries in the UTF8 name table",
-        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveUtf8NameTableCapacity)));
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveUtf8NameTableCapacity)));
     options.add_options("advanced")(
         "reserve-constant-name-table-capacity",
         "Preallocate the specified number of entries in the constant name table",
-        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveConstantNameTableCapacity)));
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveConstantNameTableCapacity)));
     options.add_options("advanced")(
         "reserve-unique-name-table-capacity", "Preallocate the specified number of entries in the unique name table",
-        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveUniqueNameTableCapacity)));
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveUniqueNameTableCapacity)));
     options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
     options.add_options("advanced")("remove-path-prefix",
                                     "Remove the provided path prefix from all printed paths. Defaults to the input "
@@ -857,14 +857,14 @@ void readOptions(Options &opts,
                 }
             }
         }
-        opts.reserveUtf8NameTableCapacity = raw["reserve-utf8-name-table-capacity"].as<u4>();
-        opts.reserveConstantNameTableCapacity = raw["reserve-constant-name-table-capacity"].as<u4>();
-        opts.reserveUniqueNameTableCapacity = raw["reserve-unique-name-table-capacity"].as<u4>();
-        opts.reserveClassTableCapacity = raw["reserve-class-table-capacity"].as<u4>();
-        opts.reserveMethodTableCapacity = raw["reserve-method-table-capacity"].as<u4>();
-        opts.reserveFieldTableCapacity = raw["reserve-field-table-capacity"].as<u4>();
-        opts.reserveTypeArgumentTableCapacity = raw["reserve-type-argument-table-capacity"].as<u4>();
-        opts.reserveTypeMemberTableCapacity = raw["reserve-type-member-table-capacity"].as<u4>();
+        opts.reserveUtf8NameTableCapacity = raw["reserve-utf8-name-table-capacity"].as<uint32_t>();
+        opts.reserveConstantNameTableCapacity = raw["reserve-constant-name-table-capacity"].as<uint32_t>();
+        opts.reserveUniqueNameTableCapacity = raw["reserve-unique-name-table-capacity"].as<uint32_t>();
+        opts.reserveClassTableCapacity = raw["reserve-class-table-capacity"].as<uint32_t>();
+        opts.reserveMethodTableCapacity = raw["reserve-method-table-capacity"].as<uint32_t>();
+        opts.reserveFieldTableCapacity = raw["reserve-field-table-capacity"].as<uint32_t>();
+        opts.reserveTypeArgumentTableCapacity = raw["reserve-type-argument-table-capacity"].as<uint32_t>();
+        opts.reserveTypeMemberTableCapacity = raw["reserve-type-member-table-capacity"].as<uint32_t>();
         if (raw.count("autogen-version") > 0) {
             if (!opts.print.AutogenMsgPack.enabled) {
                 logger->error("`{}` must also include `{}`", "--autogen-version", "-p autogen-msgpack");

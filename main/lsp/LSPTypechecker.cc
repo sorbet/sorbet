@@ -36,13 +36,13 @@ void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &
 
 // In debug builds, asserts that we have not accidentally taken the fast path after a change to the set of
 // methods in a file.
-bool validateMethodHashesHaveSameMethods(const std::vector<std::pair<core::NameHash, u4>> &a,
-                                         const std::vector<std::pair<core::NameHash, u4>> &b) {
+bool validateMethodHashesHaveSameMethods(const std::vector<std::pair<core::NameHash, uint32_t>> &a,
+                                         const std::vector<std::pair<core::NameHash, uint32_t>> &b) {
     if (a.size() != b.size()) {
         return false;
     }
 
-    pair<core::NameHash, u4> previousHash; // Initializes to <0, 0>.
+    pair<core::NameHash, uint32_t> previousHash; // Initializes to <0, 0>.
     auto bIt = b.begin();
     for (const auto &methodA : a) {
         const auto &methodB = *bIt;
@@ -115,7 +115,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
 
             // Prune the new files from list of files to be re-typechecked
             vector<core::FileRef> oldFilesWithErrors;
-            u4 maxFileId = gs->getFiles().size();
+            uint32_t maxFileId = gs->getFiles().size();
             for (auto &file : errorReporter->filesWithErrorsSince(cancellationUndoState->epoch)) {
                 if (file.id() < maxFileId) {
                     oldFilesWithErrors.push_back(file);
@@ -176,7 +176,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     {
-        vector<pair<core::NameHash, u4>> changedMethodHashes;
+        vector<pair<core::NameHash, uint32_t>> changedMethodHashes;
         for (auto &f : updates.updatedFiles) {
             auto fref = gs->findFileByPath(f->path());
             // We don't support new files on the fast path. This enforce failing indicates a bug in our fast/slow
@@ -347,7 +347,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
     logger->debug("Taking slow path");
 
     auto finalGS = move(updates.updatedGS.value());
-    const u4 epoch = updates.epoch;
+    const uint32_t epoch = updates.epoch;
     // Replace error queue with one that is owned by this thread.
     finalGS->errorQueue = make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer,
                                                         make_shared<ErrorFlusherLSP>(epoch, errorReporter));
@@ -605,7 +605,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
     if (addAllPackages) {
         ENFORCE(config->opts.stripePackages);
         // We must include every package file to rebuild the full PackageDB.
-        for (u4 i = 1; i < gs->filesUsed(); i++) {
+        for (uint32_t i = 1; i < gs->filesUsed(); i++) {
             core::FileRef fref(i);
             if (fref.data(*gs).sourceType == core::File::Type::Package) {
                 auto &indexed = getIndexed(fref);

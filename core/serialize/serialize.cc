@@ -11,12 +11,12 @@
 #include "core/serialize/pickler.h"
 #include "lib/lz4.h"
 
-template class std::vector<sorbet::u4>;
+template class std::vector<sorbet::uint32_t>;
 
 using namespace std;
 
 namespace sorbet::core::serialize {
-const u4 Serializer::VERSION;
+const uint32_t Serializer::VERSION;
 
 // These helper methods are declared in a class inside of an anonymous namespace
 // or inline so that `GlobalState` can forward-declare and `friend` the entire
@@ -44,7 +44,7 @@ public:
     static ArgInfo unpickleArgInfo(UnPickler &p, const GlobalState *gs);
     static Symbol unpickleSymbol(UnPickler &p, const GlobalState *gs);
     static void unpickleGS(UnPickler &p, GlobalState &result);
-    static u4 unpickleGSUUID(UnPickler &p);
+    static uint32_t unpickleGSUUID(UnPickler &p);
     static LocOffsets unpickleLocOffsets(UnPickler &p);
     static Loc unpickleLoc(UnPickler &p);
     static ast::ExpressionPtr unpickleExpr(UnPickler &p, const GlobalState &);
@@ -132,7 +132,7 @@ u1 UnPickler::getU1() {
     return res;
 }
 
-void Pickler::putU4(u4 u) {
+void Pickler::putU4(uint32_t u) {
     if (u == 0) {
         if (zeroCounter != 0) {
             if (zeroCounter == UCHAR_MAX) {
@@ -160,7 +160,7 @@ void Pickler::putU4(u4 u) {
     }
 }
 
-u4 UnPickler::getU4() {
+uint32_t UnPickler::getU4() {
     if (zeroCounter != 0) {
         zeroCounter--;
         return 0;
@@ -171,8 +171,8 @@ u4 UnPickler::getU4() {
         zeroCounter--;
         return r;
     } else {
-        u4 res = r & 127;
-        u4 vle = r;
+        uint32_t res = r & 127;
+        uint32_t vle = r;
         if ((vle & 128) == 0) {
             goto done;
         }
@@ -333,7 +333,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         p.putU4(0);
         return;
     }
-    p.putU4(static_cast<u4>(what.tag()));
+    p.putU4(static_cast<uint32_t>(what.tag()));
     switch (what.tag()) {
         case TypePtr::Tag::UnresolvedAppliedType:
         case TypePtr::Tag::UnresolvedClassType:
@@ -430,7 +430,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
 
 TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
     auto tag = p.getU4(); // though we formally need only u1 here, benchmarks suggest that
-                          // size difference after compression is small and u4 is 10% faster
+                          // size difference after compression is small and uint32_t is 10% faster
     if (tag == 0) {
         return TypePtr();
     }
@@ -554,7 +554,7 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
         }
     }
     p.putU4(what.members().size());
-    vector<pair<u4, u4>> membersSorted;
+    vector<pair<uint32_t, uint32_t>> membersSorted;
 
     for (const auto &member : what.members()) {
         membersSorted.emplace_back(member.first.rawId(), member.second.rawId());
@@ -691,7 +691,7 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
     return result;
 }
 
-u4 SerializerImpl::unpickleGSUUID(UnPickler &p) {
+uint32_t SerializerImpl::unpickleGSUUID(UnPickler &p) {
     if (p.getU4() != Serializer::VERSION) {
         Exception::raise("Payload version mismatch");
     }
@@ -879,7 +879,7 @@ void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
     gs.installIntrinsics();
 }
 
-u4 Serializer::loadGlobalStateUUID(const GlobalState &gs, const u1 *const data) {
+uint32_t Serializer::loadGlobalStateUUID(const GlobalState &gs, const u1 *const data) {
     UnPickler p(data, gs.tracer());
     return SerializerImpl::unpickleGSUUID(p);
 }
@@ -895,7 +895,7 @@ vector<u1> Serializer::storeTree(const core::File &file, const ast::ParsedFile &
 
 ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File &file, const u1 *const data) {
     UnPickler p(data, gs.tracer());
-    u4 fileSrcLen = p.getU4();
+    uint32_t fileSrcLen = p.getU4();
     if (file.source().size() != fileSrcLen) {
         // See comment in `serialize.h` above `loadTree`.
         // File does not have expected size; bail.
@@ -914,7 +914,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
     }
 
     auto tag = what.tag();
-    p.putU4(static_cast<u4>(tag));
+    p.putU4(static_cast<uint32_t>(tag));
 
     switch (tag) {
         case ast::Tag::Send: {
@@ -930,7 +930,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
             const auto hasBlock = s.hasBlock();
 
-            u4 size = s.numNonBlockArgs() + (hasBlock ? 1 : 0);
+            uint32_t size = s.numNonBlockArgs() + (hasBlock ? 1 : 0);
             p.putU4(size);
             pickle(p, s.recv);
 

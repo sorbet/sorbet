@@ -9,7 +9,7 @@ namespace sorbet::realmain::lsp {
 using namespace std;
 ErrorReporter::ErrorReporter(shared_ptr<const LSPConfiguration> config) : config(move(config)) {}
 
-vector<core::FileRef> ErrorReporter::filesWithErrorsSince(u4 epoch) {
+vector<core::FileRef> ErrorReporter::filesWithErrorsSince(uint32_t epoch) {
     vector<core::FileRef> filesUpdatedSince;
     for (size_t i = 1; i < fileErrorStatuses.size(); ++i) {
         ErrorStatus fileErrorStatus = fileErrorStatuses[i];
@@ -20,7 +20,7 @@ vector<core::FileRef> ErrorReporter::filesWithErrorsSince(u4 epoch) {
     return filesUpdatedSince;
 }
 
-void ErrorReporter::beginEpoch(u4 epoch, bool isIncremental, vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
+void ErrorReporter::beginEpoch(uint32_t epoch, bool isIncremental, vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     ENFORCE(epochTimers.find(epoch) == epochTimers.end());
     vector<Timer> firstDiagnosticLatencyTimers;
     if (config->getClientConfig().enableTypecheckInfo) {
@@ -39,7 +39,7 @@ void ErrorReporter::beginEpoch(u4 epoch, bool isIncremental, vector<unique_ptr<T
     epochTimers[epoch] = EpochTimers{move(firstDiagnosticLatencyTimers), move(diagnosticLatencyTimers)};
 }
 
-void ErrorReporter::endEpoch(u4 epoch, bool committed) {
+void ErrorReporter::endEpoch(uint32_t epoch, bool committed) {
     auto it = epochTimers.find(epoch);
     ENFORCE(it != epochTimers.end());
     if (!committed) {
@@ -55,7 +55,7 @@ void ErrorReporter::endEpoch(u4 epoch, bool committed) {
     epochTimers.erase(it);
 }
 
-void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<unique_ptr<core::Error>> &errors,
+void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const vector<unique_ptr<core::Error>> &errors,
                                     const core::GlobalState &gs) {
     ENFORCE(file.exists());
 
@@ -71,13 +71,13 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
         this->clientErrorCount = this->clientErrorCount - fileErrorStatus.errorCount;
     }
 
-    u4 errorsToReport = errors.size();
+    uint32_t errorsToReport = errors.size();
     {
         const auto maxErrors = config->opts.lspErrorCap;
         // N.B.: A value of 0 means no maximum is imposed.
         if (maxErrors > 0) {
             if (maxErrors > this->clientErrorCount) {
-                errorsToReport = min(static_cast<u4>(errors.size()), maxErrors - this->clientErrorCount);
+                errorsToReport = min(static_cast<uint32_t>(errors.size()), maxErrors - this->clientErrorCount);
             } else {
                 errorsToReport = 0;
             }
@@ -174,7 +174,7 @@ ErrorStatus &ErrorReporter::getFileErrorStatus(core::FileRef file) {
     return fileErrorStatuses[file.id()];
 };
 
-u4 ErrorReporter::lastDiagnosticEpochForFile(core::FileRef file) {
+uint32_t ErrorReporter::lastDiagnosticEpochForFile(core::FileRef file) {
     return getFileErrorStatus(file).lastReportedEpoch;
 }
 
@@ -183,7 +183,7 @@ void ErrorReporter::sanityCheck() const {
         return;
     }
 
-    u4 errorCount = 0;
+    uint32_t errorCount = 0;
     for (auto &status : this->fileErrorStatuses) {
         if (status.lastReportedEpoch >= this->lastFullTypecheckEpoch) {
             errorCount += status.errorCount;
@@ -192,7 +192,7 @@ void ErrorReporter::sanityCheck() const {
     ENFORCE(errorCount == this->clientErrorCount);
 }
 
-ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, u4 epoch, bool isIncremental,
+ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, uint32_t epoch, bool isIncremental,
                        std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers)
     : errorReporter(errorReporter), epoch(epoch) {
     errorReporter.beginEpoch(epoch, isIncremental, move(diagnosticLatencyTimers));

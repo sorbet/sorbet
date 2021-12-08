@@ -14,7 +14,7 @@ namespace sorbet::rewriter {
 
 namespace {
 class ConstantMover {
-    u4 classDepth = 0;
+    uint32_t classDepth = 0;
     vector<ast::ExpressionPtr> movedConstants = {};
 
 public:

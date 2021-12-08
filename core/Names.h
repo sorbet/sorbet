@@ -37,7 +37,7 @@ enum class UniqueNameKind : u1 {
 
 struct UniqueName final {
     NameRef original;
-    u4 num;
+    uint32_t num;
     UniqueNameKind uniqueNameKind;
 
     UniqueName deepCopy(const core::GlobalState &gs) const;

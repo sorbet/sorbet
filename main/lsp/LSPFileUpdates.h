@@ -11,12 +11,12 @@ namespace sorbet::realmain::lsp {
 class LSPFileUpdates final {
 public:
     // This specific update contains edits with the given epoch
-    u4 epoch = 0;
+    uint32_t epoch = 0;
     // The total number of edits that this update represents. Used for stats and assertions.
-    u4 editCount = 0;
+    uint32_t editCount = 0;
     // The total number of edits in this update that are already committed & had diagnostics sent out (via preemption).
     // Used for stats and assertions.
-    u4 committedEditCount = 0;
+    uint32_t committedEditCount = 0;
 
     std::vector<std::shared_ptr<core::File>> updatedFiles;
     std::vector<ast::ParsedFile> updatedFileIndexes;

@@ -173,21 +173,21 @@ struct Options {
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
 
-    u4 reserveClassTableCapacity = 0;
-    u4 reserveMethodTableCapacity = 0;
-    u4 reserveFieldTableCapacity = 0;
-    u4 reserveTypeArgumentTableCapacity = 0;
-    u4 reserveTypeMemberTableCapacity = 0;
-    u4 reserveUtf8NameTableCapacity = 0;
-    u4 reserveConstantNameTableCapacity = 0;
-    u4 reserveUniqueNameTableCapacity = 0;
+    uint32_t reserveClassTableCapacity = 0;
+    uint32_t reserveMethodTableCapacity = 0;
+    uint32_t reserveFieldTableCapacity = 0;
+    uint32_t reserveTypeArgumentTableCapacity = 0;
+    uint32_t reserveTypeMemberTableCapacity = 0;
+    uint32_t reserveUtf8NameTableCapacity = 0;
+    uint32_t reserveConstantNameTableCapacity = 0;
+    uint32_t reserveUniqueNameTableCapacity = 0;
 
     /* The maximum number of files that are permitted to typecheck on the fast path concurrently. Not exposed on CLI.
      * Placed on Options for convenience so tests can override. */
-    u4 lspMaxFilesOnFastPath = 50;
+    uint32_t lspMaxFilesOnFastPath = 50;
     /* The maximum number of errors to report to the client when in LSP mode. Prevents editor UI slowdown
      * related to large error lists. 0 means no limit. */
-    u4 lspErrorCap = 1000;
+    uint32_t lspErrorCap = 1000;
 
     std::string statsdHost;
     std::string statsdPrefix = "ruby_typer.unknown";

@@ -59,9 +59,9 @@ void generateErrors(core::FileRef fref, vector<unique_ptr<core::Error>> &errors,
                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
     }
 }
-u4 errorsReported(LSPOutputToVector &outputVector) {
+uint32_t errorsReported(LSPOutputToVector &outputVector) {
     auto output = outputVector.getOutput();
-    u4 count = 0;
+    uint32_t count = 0;
     for (auto &message : output) {
         auto &notificationMessage = message->asNotification();
         auto &publishDiagnosticParams = get<unique_ptr<PublishDiagnosticsParams>>(notificationMessage.params);

@@ -16,11 +16,11 @@ extern const char *dclassStrings[];
 using namespace std;
 
 class ErrorToError {
-    static u4 translatePos(size_t pos, u4 maxOff) {
+    static uint32_t translatePos(size_t pos, uint32_t maxOff) {
         if (pos == 0) {
             return pos;
         }
-        return min((u4)(pos), maxOff);
+        return min((uint32_t)(pos), maxOff);
     }
 
 public:
@@ -28,7 +28,7 @@ public:
         if (diagnostics.empty()) {
             return;
         }
-        u4 maxOff = file.data(gs).source().size();
+        uint32_t maxOff = file.data(gs).source().size();
         file.data(gs).hasParseErrors = true;
         for (auto &diag : diagnostics) {
             switch (diag.level()) {

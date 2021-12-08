@@ -1466,7 +1466,7 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
 
         // First, sort the edits by increasing starting location and verify that none overlap.
         fast_sort(c->edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
-        for (u4 i = 1; i < c->edits.size(); i++) {
+        for (uint32_t i = 1; i < c->edits.size(); i++) {
             INFO(fmt::format("Received quick fix edit\n{}\nthat overlaps edit\n{}\nThe test runner does not support "
                              "overlapping autocomplete edits, and it's likely that this is a bug.",
                              c->edits[i - 1]->toJSON(), c->edits[i]->toJSON()));

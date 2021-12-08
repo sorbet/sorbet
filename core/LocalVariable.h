@@ -14,9 +14,9 @@ public:
     // local name, and identifies the block scope it was defined in.
     // Additionally, this value can only be non-zero if the variable is defined
     // in the scope of a block with a non-zero scope id.
-    u4 unique;
+    uint32_t unique;
 
-    LocalVariable(NameRef name, u4 unique) : _name(name), unique(unique) {}
+    LocalVariable(NameRef name, uint32_t unique) : _name(name), unique(unique) {}
 
     LocalVariable() = default;
 

@@ -319,7 +319,7 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
 // This is somewhat brittle, but has worked well so far.
 unique_ptr<Range> replacementRangeForQuery(const core::GlobalState &gs, core::Loc queryLoc, string_view prefix) {
     auto queryStart = queryLoc.beginPos();
-    u4 prefixSize = prefix.size();
+    uint32_t prefixSize = prefix.size();
     auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
     // Sometimes Range::fromLoc returns nullptr (commonly when running under a fuzzer which disables certain loc info).
     return Range::fromLoc(gs, replacementLoc);
@@ -593,8 +593,8 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
     item->sortText = fmt::format("{:06d}", sortIdx);
     item->detail = fmt::format("Suggested sig for {}", targetMethod.data(gs)->name.shortName(gs));
 
-    u4 queryStart = queryLoc.beginPos();
-    u4 prefixSize = prefix.size();
+    uint32_t queryStart = queryLoc.beginPos();
+    uint32_t prefixSize = prefix.size();
     auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
     auto replacementRange = Range::fromLoc(gs, replacementLoc);
 

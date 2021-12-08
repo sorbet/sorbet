@@ -2,7 +2,7 @@
 
 using namespace std;
 namespace sorbet::realmain::lsp {
-ErrorFlusherLSP::ErrorFlusherLSP(const u4 epoch, shared_ptr<ErrorReporter> errorReporter)
+ErrorFlusherLSP::ErrorFlusherLSP(const uint32_t epoch, shared_ptr<ErrorReporter> errorReporter)
     : epoch(epoch), errorReporter(errorReporter){};
 
 void ErrorFlusherLSP::flushErrors(spdlog::logger &logger, const core::GlobalState &gs, core::FileRef file,

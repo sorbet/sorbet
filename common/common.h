@@ -142,7 +142,7 @@ template <class From, class To> To *fast_cast(From *what) {
 };
 
 // Rounds the provided number up to the nearest power of two. If v is already a power of two, it returns v.
-u4 nextPowerOfTwo(u4 v);
+uint32_t nextPowerOfTwo(uint32_t v);
 
 } // namespace sorbet
 

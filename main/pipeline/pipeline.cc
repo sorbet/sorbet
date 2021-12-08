@@ -953,7 +953,7 @@ void typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what, 
 
     const auto &epochManager = *gs->epochManager;
     // Record epoch at start of typechecking before any preemption occurs.
-    const u4 epoch = epochManager.getStatus().epoch;
+    const uint32_t epoch = epochManager.getStatus().epoch;
 
     {
         Timer timeit(gs->tracer(), "typecheck");

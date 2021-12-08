@@ -20,12 +20,12 @@ namespace {
 
 struct DesugarContext final {
     core::MutableContext ctx;
-    u4 &uniqueCounter;
+    uint32_t &uniqueCounter;
     core::NameRef enclosingBlockArg;
     core::LocOffsets enclosingMethodLoc;
     core::NameRef enclosingMethodName;
 
-    DesugarContext(core::MutableContext ctx, u4 &uniqueCounter, core::NameRef enclosingBlockArg,
+    DesugarContext(core::MutableContext ctx, uint32_t &uniqueCounter, core::NameRef enclosingBlockArg,
                    core::LocOffsets enclosingMethodLoc, core::NameRef enclosingMethodName)
         : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockArg(enclosingBlockArg),
           enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName){};
@@ -305,7 +305,7 @@ ExpressionPtr validateRBIBody(DesugarContext dctx, ExpressionPtr body) {
 ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
                           unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body, bool isSelf) {
     // Reset uniqueCounter within this scope (to keep numbers small)
-    u4 uniqueCounter = 1;
+    uint32_t uniqueCounter = 1;
     DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, declLoc, name);
     auto [args, destructures] = desugarArgs(dctx1, loc, argnode);
 
@@ -474,7 +474,7 @@ bool locReported = false;
 ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node> node) {
     ClassDef::RHS_store body;
     // Reset uniqueCounter within this scope (to keep numbers small)
-    u4 uniqueCounter = 1;
+    uint32_t uniqueCounter = 1;
     DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
                          dctx.enclosingMethodName);
     if (auto *begin = parser::cast_node<parser::Begin>(node.get())) {
@@ -2183,7 +2183,7 @@ ExpressionPtr liftTopLevel(DesugarContext dctx, core::LocOffsets loc, Expression
 
 ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what) {
     try {
-        u4 uniqueCounter = 1;
+        uint32_t uniqueCounter = 1;
         // We don't have an enclosing block arg to start off.
         DesugarContext dctx(ctx, uniqueCounter, core::NameRef::noName(), core::LocOffsets::none(),
                             core::NameRef::noName());

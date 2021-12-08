@@ -8,11 +8,11 @@ namespace sorbet::realmain::lsp {
 
 class ErrorFlusherLSP : public core::ErrorFlusher {
 private:
-    u4 epoch;
+    uint32_t epoch;
     std::shared_ptr<ErrorReporter> errorReporter;
 
 public:
-    ErrorFlusherLSP(const u4 epoch, std::shared_ptr<ErrorReporter> errorReporter);
+    ErrorFlusherLSP(const uint32_t epoch, std::shared_ptr<ErrorReporter> errorReporter);
     ~ErrorFlusherLSP() = default;
 
     void flushErrors(spdlog::logger &logger, const core::GlobalState &gs, core::FileRef file,

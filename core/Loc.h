@@ -13,13 +13,13 @@ class MutableContext;
 
 constexpr int INVALID_POS_LOC = 0xffffff;
 struct LocOffsets {
-    u4 beginLoc = INVALID_POS_LOC;
-    u4 endLoc = INVALID_POS_LOC;
-    u4 beginPos() const {
+    uint32_t beginLoc = INVALID_POS_LOC;
+    uint32_t endLoc = INVALID_POS_LOC;
+    uint32_t beginPos() const {
         return beginLoc;
     };
 
-    u4 endPos() const {
+    uint32_t endPos() const {
         return endLoc;
     }
     bool exists() const {
@@ -68,11 +68,11 @@ public:
 
     Loc join(Loc other) const;
 
-    u4 beginPos() const {
+    uint32_t beginPos() const {
         return storage.offsets.beginLoc;
     };
 
-    u4 endPos() const {
+    uint32_t endPos() const {
         return storage.offsets.endLoc;
     }
     const LocOffsets &offsets() const {
@@ -92,7 +92,7 @@ public:
         }
     }
 
-    inline Loc(FileRef file, u4 begin, u4 end) : storage{{begin, end}, file} {
+    inline Loc(FileRef file, uint32_t begin, uint32_t end) : storage{{begin, end}, file} {
         ENFORCE(begin <= INVALID_POS_LOC);
         ENFORCE(end <= INVALID_POS_LOC);
         ENFORCE(begin <= end);
@@ -108,7 +108,7 @@ public:
     Loc(Loc &&rhs) = default;
 
     struct Detail {
-        u4 line, column;
+        uint32_t line, column;
     };
 
     bool contains(const Loc &other) const;
@@ -124,8 +124,8 @@ public:
     bool operator==(const Loc &rhs) const;
 
     bool operator!=(const Loc &rhs) const;
-    static std::optional<u4> pos2Offset(const File &file, Detail pos);
-    static Detail offset2Pos(const File &file, u4 off);
+    static std::optional<uint32_t> pos2Offset(const File &file, Detail pos);
+    static Detail offset2Pos(const File &file, uint32_t off);
     static std::optional<Loc> fromDetails(const GlobalState &gs, FileRef fileRef, Detail begin, Detail end);
 
     // Create a new Loc by adjusting the beginPos and endPos of this Loc, like this:
@@ -152,7 +152,7 @@ public:
     // - the Loc corresponding to the first non-whitespace character on this line, and
     // - how many characters of the start of this line are whitespace.
     //
-    std::pair<Loc, u4> findStartOfLine(const GlobalState &gs) const;
+    std::pair<Loc, uint32_t> findStartOfLine(const GlobalState &gs) const;
 };
 CheckSize(Loc, 12, 4);
 

@@ -46,9 +46,9 @@ public:
 
     class Flags {
     public:
-        static constexpr u4 NONE = 0;
+        static constexpr uint32_t NONE = 0;
 
-        // We're packing three different kinds of flags into separate ranges with the u4's below:
+        // We're packing three different kinds of flags into separate ranges with the uint32_t's below:
         //
         // 0x0000'0000
         //   ├▶    ◀┤└─ Applies to all types of symbol
@@ -61,61 +61,61 @@ public:
         //
 
         // --- What type of symbol is this? ---
-        static constexpr u4 CLASS_OR_MODULE = 0x8000'0000;
-        static constexpr u4 METHOD = 0x4000'0000;
-        static constexpr u4 FIELD = 0x2000'0000;
-        static constexpr u4 STATIC_FIELD = 0x1000'0000;
-        static constexpr u4 TYPE_ARGUMENT = 0x0800'0000;
-        static constexpr u4 TYPE_MEMBER = 0x0400'0000;
+        static constexpr uint32_t CLASS_OR_MODULE = 0x8000'0000;
+        static constexpr uint32_t METHOD = 0x4000'0000;
+        static constexpr uint32_t FIELD = 0x2000'0000;
+        static constexpr uint32_t STATIC_FIELD = 0x1000'0000;
+        static constexpr uint32_t TYPE_ARGUMENT = 0x0800'0000;
+        static constexpr uint32_t TYPE_MEMBER = 0x0400'0000;
 
         // --- Applies to all types of Symbols ---
 
         // Synthesized by C++ code in a Rewriter pass
-        static constexpr u4 REWRITER_SYNTHESIZED = 0x0000'0001;
+        static constexpr uint32_t REWRITER_SYNTHESIZED = 0x0000'0001;
 
         // --- For our current symbol type, what flags does it have?
 
         // Class flags
-        static constexpr u4 CLASS_OR_MODULE_CLASS = 0x0000'0010;
-        static constexpr u4 CLASS_OR_MODULE_MODULE = 0x0000'0020;
-        static constexpr u4 CLASS_OR_MODULE_ABSTRACT = 0x0000'0040;
-        static constexpr u4 CLASS_OR_MODULE_INTERFACE = 0x0000'0080;
-        static constexpr u4 CLASS_OR_MODULE_LINEARIZATION_COMPUTED = 0x0000'0100;
-        static constexpr u4 CLASS_OR_MODULE_FINAL = 0x0000'0200;
-        static constexpr u4 CLASS_OR_MODULE_SEALED = 0x0000'0400;
-        static constexpr u4 CLASS_OR_MODULE_PRIVATE = 0x0000'0800;
+        static constexpr uint32_t CLASS_OR_MODULE_CLASS = 0x0000'0010;
+        static constexpr uint32_t CLASS_OR_MODULE_MODULE = 0x0000'0020;
+        static constexpr uint32_t CLASS_OR_MODULE_ABSTRACT = 0x0000'0040;
+        static constexpr uint32_t CLASS_OR_MODULE_INTERFACE = 0x0000'0080;
+        static constexpr uint32_t CLASS_OR_MODULE_LINEARIZATION_COMPUTED = 0x0000'0100;
+        static constexpr uint32_t CLASS_OR_MODULE_FINAL = 0x0000'0200;
+        static constexpr uint32_t CLASS_OR_MODULE_SEALED = 0x0000'0400;
+        static constexpr uint32_t CLASS_OR_MODULE_PRIVATE = 0x0000'0800;
 
         // Method flags
-        static constexpr u4 METHOD_PROTECTED = 0x0000'0010;
-        static constexpr u4 METHOD_PRIVATE = 0x0000'0020;
-        static constexpr u4 METHOD_OVERLOADED = 0x0000'0040;
-        static constexpr u4 METHOD_ABSTRACT = 0x0000'0080;
-        static constexpr u4 METHOD_GENERIC = 0x0000'0100;
-        [[deprecated]] static constexpr u4 METHOD_GENERATED_SIG = 0x0000'0200;
-        static constexpr u4 METHOD_OVERRIDABLE = 0x0000'0400;
-        static constexpr u4 METHOD_FINAL = 0x0000'0800;
-        static constexpr u4 METHOD_OVERRIDE = 0x0000'1000;
-        [[deprecated]] static constexpr u4 METHOD_IMPLEMENTATION = 0x0000'2000;
-        static constexpr u4 METHOD_INCOMPATIBLE_OVERRIDE = 0x0000'4000;
+        static constexpr uint32_t METHOD_PROTECTED = 0x0000'0010;
+        static constexpr uint32_t METHOD_PRIVATE = 0x0000'0020;
+        static constexpr uint32_t METHOD_OVERLOADED = 0x0000'0040;
+        static constexpr uint32_t METHOD_ABSTRACT = 0x0000'0080;
+        static constexpr uint32_t METHOD_GENERIC = 0x0000'0100;
+        [[deprecated]] static constexpr uint32_t METHOD_GENERATED_SIG = 0x0000'0200;
+        static constexpr uint32_t METHOD_OVERRIDABLE = 0x0000'0400;
+        static constexpr uint32_t METHOD_FINAL = 0x0000'0800;
+        static constexpr uint32_t METHOD_OVERRIDE = 0x0000'1000;
+        [[deprecated]] static constexpr uint32_t METHOD_IMPLEMENTATION = 0x0000'2000;
+        static constexpr uint32_t METHOD_INCOMPATIBLE_OVERRIDE = 0x0000'4000;
 
         // Type flags
-        static constexpr u4 TYPE_COVARIANT = 0x0000'0010;
-        static constexpr u4 TYPE_INVARIANT = 0x0000'0020;
-        static constexpr u4 TYPE_CONTRAVARIANT = 0x0000'0040;
-        static constexpr u4 TYPE_FIXED = 0x0000'0080;
+        static constexpr uint32_t TYPE_COVARIANT = 0x0000'0010;
+        static constexpr uint32_t TYPE_INVARIANT = 0x0000'0020;
+        static constexpr uint32_t TYPE_CONTRAVARIANT = 0x0000'0040;
+        static constexpr uint32_t TYPE_FIXED = 0x0000'0080;
 
         // Static Field flags
-        static constexpr u4 STATIC_FIELD_TYPE_ALIAS = 0x0000'0010;
-        static constexpr u4 STATIC_FIELD_PRIVATE = 0x0000'0020;
+        static constexpr uint32_t STATIC_FIELD_TYPE_ALIAS = 0x0000'0010;
+        static constexpr uint32_t STATIC_FIELD_PRIVATE = 0x0000'0020;
     };
 
     Loc loc() const;
     const InlinedVector<Loc, 2> &locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
 
-    u4 hash(const GlobalState &gs) const;
-    u4 methodShapeHash(const GlobalState &gs) const;
-    std::vector<u4> methodArgumentHash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
+    uint32_t methodShapeHash(const GlobalState &gs) const;
+    std::vector<uint32_t> methodArgumentHash(const GlobalState &gs) const;
 
     std::vector<TypePtr> selfTypeArgs(const GlobalState &gs) const;
 
@@ -631,7 +631,7 @@ public:
         return superClassOrRebind;
     }
 
-    u4 flags = Flags::NONE;
+    uint32_t flags = Flags::NONE;
     NameRef name; // todo: move out? it should not matter but it's important for name resolution
     TypePtr resultType;
 
@@ -705,7 +705,7 @@ private:
     std::vector<RequiredAncestor> requiredAncestorsTransitiveInternal(GlobalState &gs,
                                                                       std::vector<ClassOrModuleRef> &seen);
 
-    SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
+    SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, uint32_t mask, uint32_t flags,
                                            int maxDepth = 100) const;
 
     inline void unsetClassOrModuleLinearizationComputed() {

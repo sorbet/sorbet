@@ -9,7 +9,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 UndoState::UndoState(unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
-                     u4 epoch)
+                     uint32_t epoch)
     : evictedGs(move(evictedGs)), evictedIndexedFinalGS(std::move(evictedIndexedFinalGS)), epoch(epoch) {}
 
 void UndoState::recordEvictedState(ast::ParsedFile evictedIndexTree) {

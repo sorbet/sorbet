@@ -41,10 +41,10 @@ enum class DefinitionKind : u1 {
 
 class FoundDefinitionRef final {
     DefinitionKind _kind;
-    u4 _id;
+    uint32_t _id;
 
 public:
-    FoundDefinitionRef(DefinitionKind kind, u4 idx) : _kind(kind), _id(idx) {}
+    FoundDefinitionRef(DefinitionKind kind, uint32_t idx) : _kind(kind), _id(idx) {}
     FoundDefinitionRef() : FoundDefinitionRef(DefinitionKind::Empty, 0) {}
     FoundDefinitionRef(const FoundDefinitionRef &nm) = default;
     FoundDefinitionRef(FoundDefinitionRef &&nm) = default;
@@ -62,7 +62,7 @@ public:
         return _id > 0;
     }
 
-    u4 idx() const {
+    uint32_t idx() const {
         return _id;
     }
 
@@ -126,7 +126,7 @@ struct FoundMethod final {
     core::LocOffsets declLoc;
     ast::MethodDef::Flags flags;
     vector<ast::ParsedArg> parsedArgs;
-    vector<u4> argsHash;
+    vector<uint32_t> argsHash;
 };
 
 struct Modifier {
@@ -179,31 +179,31 @@ public:
     ~FoundDefinitions() = default;
 
     FoundDefinitionRef addClass(FoundClass &&klass) {
-        const u4 idx = _klasses.size();
+        const uint32_t idx = _klasses.size();
         _klasses.emplace_back(move(klass));
         return addDefinition(FoundDefinitionRef(DefinitionKind::Class, idx));
     }
 
     FoundDefinitionRef addClassRef(FoundClassRef &&klassRef) {
-        const u4 idx = _klassRefs.size();
+        const uint32_t idx = _klassRefs.size();
         _klassRefs.emplace_back(move(klassRef));
         return FoundDefinitionRef(DefinitionKind::ClassRef, idx);
     }
 
     FoundDefinitionRef addMethod(FoundMethod &&method) {
-        const u4 idx = _methods.size();
+        const uint32_t idx = _methods.size();
         _methods.emplace_back(move(method));
         return addDefinition(FoundDefinitionRef(DefinitionKind::Method, idx));
     }
 
     FoundDefinitionRef addStaticField(FoundStaticField &&staticField) {
-        const u4 idx = _staticFields.size();
+        const uint32_t idx = _staticFields.size();
         _staticFields.emplace_back(move(staticField));
         return addDefinition(FoundDefinitionRef(DefinitionKind::StaticField, idx));
     }
 
     FoundDefinitionRef addTypeMember(FoundTypeMember &&typeMember) {
-        const u4 idx = _typeMembers.size();
+        const uint32_t idx = _typeMembers.size();
         _typeMembers.emplace_back(move(typeMember));
         return addDefinition(FoundDefinitionRef(DefinitionKind::TypeMember, idx));
     }
@@ -1895,7 +1895,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     vector<ast::ParsedFile> output;
     output.reserve(allFoundDefinitions.size());
     const auto &epochManager = *gs.epochManager;
-    u4 count = 0;
+    uint32_t count = 0;
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
         count++;
         // defineSymbols is really fast. Avoid this mildly expensive check for most turns of the loop.

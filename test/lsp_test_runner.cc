@@ -166,7 +166,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
                 }
             }
 
-            u4 receivedCodeActionsCount = receivedCodeActionsByTitle.size();
+            uint32_t receivedCodeActionsCount = receivedCodeActionsByTitle.size();
             vector<shared_ptr<ApplyCodeActionAssertion>> matchedCodeActionAssertions;
 
             // Test code action assertions matching the range of this error.

@@ -6,7 +6,7 @@
 namespace sorbet::core::serialize {
 class Serializer {
 public:
-    static const u4 VERSION = 6;
+    static const uint32_t VERSION = 6;
 
     // Serialize a global state.
     static std::vector<u1> store(GlobalState &gs);
@@ -22,7 +22,7 @@ public:
 
     static void loadGlobalState(GlobalState &gs, const u1 *const data);
 
-    static u4 loadGlobalStateUUID(const GlobalState &gs, const u1 *const data);
+    static uint32_t loadGlobalStateUUID(const GlobalState &gs, const u1 *const data);
 
     // Loads the AST and file hash for the given file. Mutates file to indicate that it is cached and to store the
     // cached file hash.

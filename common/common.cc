@@ -300,7 +300,7 @@ vector<string> sorbet::FileOps::listFilesInDir(string_view path, const Unordered
 }
 
 // https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-sorbet::u4 sorbet::nextPowerOfTwo(sorbet::u4 v) {
+sorbet::uint32_t sorbet::nextPowerOfTwo(sorbet::uint32_t v) {
     // Avoid underflow in subtraction on next line.
     if (v == 0) {
         // 1 is the nearest power of 2 to 0 (2^0)

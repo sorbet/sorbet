@@ -328,7 +328,7 @@ vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, co
     visited[sym.id()] = true;
 
     vector<core::ClassOrModuleRef> subclasses;
-    for (u4 i = 1; i < gs.classAndModulesUsed(); ++i) {
+    for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
         auto s = core::ClassOrModuleRef(gs, i);
         if (!includeSelf && s == sym) {
             continue;

@@ -68,7 +68,7 @@ unique_ptr<core::GlobalState> makeGS(shared_ptr<core::ErrorFlusher> errorFlusher
 auto nullConfig = makeConfig();
 
 LSPPreprocessor makePreprocessor(shared_ptr<absl::Mutex> taskQueueMutex, shared_ptr<TaskQueueState> queueState,
-                                 const shared_ptr<LSPConfiguration> &config = nullConfig, u4 initialVersion = 0) {
+                                 const shared_ptr<LSPConfiguration> &config = nullConfig, uint32_t initialVersion = 0) {
     return LSPPreprocessor(config, std::move(taskQueueMutex), move(queueState), initialVersion);
 }
 

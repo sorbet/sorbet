@@ -49,7 +49,7 @@ public:
     UnorderedMap<core::SymbolRef, LocalRef> &aliases;
     UnorderedMap<core::NameRef, LocalRef> &discoveredUndeclaredFields;
 
-    u4 &temporaryCounter;
+    uint32_t &temporaryCounter;
 
     CFGContext withTarget(LocalRef target);
     CFGContext withBlockBreakTarget(LocalRef blockBreakTarget);
@@ -63,7 +63,7 @@ private:
     friend std::unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md);
     CFGContext(core::Context ctx, CFG &inWhat, LocalRef target, int loops, BasicBlock *nextScope,
                BasicBlock *breakScope, BasicBlock *rescueScope, UnorderedMap<core::SymbolRef, LocalRef> &aliases,
-               UnorderedMap<core::NameRef, LocalRef> &discoveredUndeclaredFields, u4 &temporaryCounter)
+               UnorderedMap<core::NameRef, LocalRef> &discoveredUndeclaredFields, uint32_t &temporaryCounter)
         : ctx(ctx), inWhat(inWhat), target(target), loops(loops), isInsideRubyBlock(false), breakIsJump(false),
           nextScope(nextScope), breakScope(breakScope), rescueScope(rescueScope), aliases(aliases),
           discoveredUndeclaredFields(discoveredUndeclaredFields), temporaryCounter(temporaryCounter){};

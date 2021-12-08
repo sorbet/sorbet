@@ -190,7 +190,7 @@ bool Symbol::derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const {
 }
 
 SymbolRef Symbol::ref(const GlobalState &gs) const {
-    u4 distance = 0;
+    uint32_t distance = 0;
     auto type = SymbolRef::Kind::ClassOrModule;
     if (isClassOrModule()) {
         type = SymbolRef::Kind::ClassOrModule;
@@ -337,13 +337,13 @@ void printTabs(fmt::memory_buffer &to, int count) {
     fmt::format_to(std::back_inserter(to), "{}", ident);
 }
 
-SymbolRef::SymbolRef(const GlobalState &from, SymbolRef::Kind kind, u4 id)
-    : _id((id << KIND_BITS) | static_cast<u4>(kind)) {
+SymbolRef::SymbolRef(const GlobalState &from, SymbolRef::Kind kind, uint32_t id)
+    : _id((id << KIND_BITS) | static_cast<uint32_t>(kind)) {
     // If this fails, the symbol table is too big :(
     ENFORCE_NO_TIMER(id <= MAX_ID);
 }
-SymbolRef::SymbolRef(GlobalState const *from, SymbolRef::Kind kind, u4 id)
-    : _id((id << KIND_BITS) | static_cast<u4>(kind)) {
+SymbolRef::SymbolRef(GlobalState const *from, SymbolRef::Kind kind, uint32_t id)
+    : _id((id << KIND_BITS) | static_cast<uint32_t>(kind)) {
     // If this fails, the symbol table is too big :(
     ENFORCE_NO_TIMER(id <= MAX_ID);
 }
@@ -358,15 +358,15 @@ SymbolRef::SymbolRef(TypeMemberRef typeMember) : SymbolRef(nullptr, SymbolRef::K
 
 SymbolRef::SymbolRef(TypeArgumentRef typeArg) : SymbolRef(nullptr, SymbolRef::Kind::TypeArgument, typeArg.id()) {}
 
-ClassOrModuleRef::ClassOrModuleRef(const GlobalState &from, u4 id) : _id(id) {}
+ClassOrModuleRef::ClassOrModuleRef(const GlobalState &from, uint32_t id) : _id(id) {}
 
-MethodRef::MethodRef(const GlobalState &from, u4 id) : _id(id) {}
+MethodRef::MethodRef(const GlobalState &from, uint32_t id) : _id(id) {}
 
-FieldRef::FieldRef(const GlobalState &from, u4 id) : _id(id) {}
+FieldRef::FieldRef(const GlobalState &from, uint32_t id) : _id(id) {}
 
-TypeMemberRef::TypeMemberRef(const GlobalState &from, u4 id) : _id(id) {}
+TypeMemberRef::TypeMemberRef(const GlobalState &from, uint32_t id) : _id(id) {}
 
-TypeArgumentRef::TypeArgumentRef(const GlobalState &from, u4 id) : _id(id) {}
+TypeArgumentRef::TypeArgumentRef(const GlobalState &from, uint32_t id) : _id(id) {}
 
 string SymbolRef::show(const GlobalState &gs) const {
     switch (kind()) {
@@ -581,7 +581,7 @@ SymbolRef Symbol::findConcreteMethodTransitive(const GlobalState &gs, NameRef na
 
 namespace {
 // TODO(jvilk): Remove this when we remove flag filter in `findMemberTransitiveInternal`.
-u4 getFlags(const GlobalState &gs, SymbolRef symbol) {
+uint32_t getFlags(const GlobalState &gs, SymbolRef symbol) {
     switch (symbol.kind()) {
         case SymbolRef::Kind::Method:
             return symbol.asMethodRef().data(gs)->flags;
@@ -598,7 +598,7 @@ u4 getFlags(const GlobalState &gs, SymbolRef symbol) {
 } // namespace
 
 // TODO(jvilk): Remove flag filter -- it's only used for `findConcreteMethodTransitive`.
-SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
+SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, uint32_t mask, uint32_t flags,
                                                int maxDepth) const {
     ENFORCE(this->isClassOrModule());
     if (maxDepth == 0) {
@@ -2096,8 +2096,8 @@ ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
     }
 }
 
-u4 Symbol::hash(const GlobalState &gs) const {
-    u4 result = _hash(name.shortName(gs));
+uint32_t Symbol::hash(const GlobalState &gs) const {
+    uint32_t result = _hash(name.shortName(gs));
     result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
@@ -2151,10 +2151,10 @@ u4 Symbol::hash(const GlobalState &gs) const {
     return result;
 }
 
-u4 Symbol::methodShapeHash(const GlobalState &gs) const {
+uint32_t Symbol::methodShapeHash(const GlobalState &gs) const {
     ENFORCE(isMethod());
 
-    u4 result = _hash(name.shortName(gs));
+    uint32_t result = _hash(name.shortName(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
     result = mix(result, this->superClassOrRebind.id());
@@ -2173,11 +2173,11 @@ u4 Symbol::methodShapeHash(const GlobalState &gs) const {
     return result;
 }
 
-vector<u4> Symbol::methodArgumentHash(const GlobalState &gs) const {
-    vector<u4> result;
+vector<uint32_t> Symbol::methodArgumentHash(const GlobalState &gs) const {
+    vector<uint32_t> result;
     result.reserve(arguments().size());
     for (const auto &e : arguments()) {
-        u4 arg = 0;
+        uint32_t arg = 0;
         // Changing name of keyword arg is a shape change.
         if (e.flags.isKeyword) {
             arg = mix(arg, _hash(e.name.shortName(gs)));

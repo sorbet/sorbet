@@ -3,26 +3,26 @@
 namespace sorbet {
 
 // Integer divide by 32 and round up to determine how many u4s we need.
-UIntSet::UIntSet(u4 size) : _members((size + 31) / 32, 0) {}
+UIntSet::UIntSet(uint32_t size) : _members((size + 31) / 32, 0) {}
 
-void UIntSet::add(u4 item) {
-    u4 memberIndex = item >> 5;
+void UIntSet::add(uint32_t item) {
+    uint32_t memberIndex = item >> 5;
     ENFORCE_NO_TIMER(memberIndex < _members.size());
-    u4 mask = 1 << (item & 0x1F);
+    uint32_t mask = 1 << (item & 0x1F);
     _members[memberIndex] |= mask;
 }
 
-void UIntSet::remove(u4 item) {
-    u4 memberIndex = item >> 5;
+void UIntSet::remove(uint32_t item) {
+    uint32_t memberIndex = item >> 5;
     ENFORCE_NO_TIMER(memberIndex < _members.size());
-    u4 mask = 1 << (item & 0x1F);
+    uint32_t mask = 1 << (item & 0x1F);
     _members[memberIndex] &= ~mask;
 }
 
-bool UIntSet::contains(u4 item) const {
-    u4 memberIndex = item >> 5;
+bool UIntSet::contains(uint32_t item) const {
+    uint32_t memberIndex = item >> 5;
     ENFORCE_NO_TIMER(memberIndex < _members.size());
-    u4 mask = 1 << (item & 0x1F);
+    uint32_t mask = 1 << (item & 0x1F);
     return (_members[memberIndex] & mask) > 0;
 }
 

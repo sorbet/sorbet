@@ -9,7 +9,7 @@ class Pickler {
     u1 zeroCounter = 0;
 
 public:
-    void putU4(u4 u);
+    void putU4(uint32_t u);
     void putU1(const u1 u);
     void putS8(const int64_t i);
     void putStr(std::string_view s);
@@ -23,7 +23,7 @@ class UnPickler {
     std::vector<u1> data;
 
 public:
-    u4 getU4();
+    uint32_t getU4();
     u1 getU1();
     int64_t getS8();
     std::string_view getStr();

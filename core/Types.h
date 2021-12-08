@@ -334,7 +334,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
@@ -377,7 +377,7 @@ public:
     LambdaParam(TypeMemberRef definition, TypePtr lower, TypePtr upper);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
@@ -395,7 +395,7 @@ public:
     SelfTypeParam(const SymbolRef definition);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
@@ -418,7 +418,7 @@ public:
     AliasType(SymbolRef other);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
     const SymbolRef symbol;
@@ -449,7 +449,7 @@ public:
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     std::string showValue(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
 
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 
@@ -460,7 +460,7 @@ CheckSize(SelfType, 8, 8);
 
 template <> inline TypePtr make_type<SelfType>() {
     // static_cast required to disambiguate TypePtr constructor.
-    return TypePtr(TypePtr::Tag::SelfType, static_cast<u4>(0), 0);
+    return TypePtr(TypePtr::Tag::SelfType, static_cast<uint32_t>(0), 0);
 }
 
 template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
@@ -472,7 +472,7 @@ TYPE_INLINED(LiteralType) final {
     union {
         const int64_t value;
         const double floatval;
-        const u4 nameId;
+        const uint32_t nameId;
     };
 
 public:
@@ -492,7 +492,7 @@ public:
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     std::string showValue(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
 
     bool equals(const LiteralType &rhs) const;
     void _sanityCheck(const GlobalState &gs) const;
@@ -500,17 +500,17 @@ public:
 CheckSize(LiteralType, 16, 8);
 
 template <> inline TypePtr make_type<LiteralType, double &>(double &val) {
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(LiteralType::LiteralTypeKind::Float),
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<uint32_t>(LiteralType::LiteralTypeKind::Float),
                    absl::bit_cast<uint64_t>(val));
 }
 
 template <> inline TypePtr make_type<LiteralType, double>(double &&val) {
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(LiteralType::LiteralTypeKind::Float),
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<uint32_t>(LiteralType::LiteralTypeKind::Float),
                    absl::bit_cast<uint64_t>(val));
 }
 
 template <> inline TypePtr make_type<LiteralType, int64_t>(int64_t &&val) {
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(LiteralType::LiteralTypeKind::Integer),
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<uint32_t>(LiteralType::LiteralTypeKind::Integer),
                    absl::bit_cast<uint64_t>(val));
 }
 
@@ -528,12 +528,12 @@ template <> inline TypePtr make_type<LiteralType, float>(float &&val) {
 
 template <> inline TypePtr make_type<LiteralType, ClassOrModuleRef, NameRef &>(ClassOrModuleRef &&klass, NameRef &val) {
     LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val.rawId());
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<uint32_t>(type.literalKind), val.rawId());
 }
 
 template <> inline TypePtr make_type<LiteralType, ClassOrModuleRef, NameRef>(ClassOrModuleRef &&klass, NameRef &&val) {
     LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val.rawId());
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<uint32_t>(type.literalKind), val.rawId());
 }
 
 template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &what) {
@@ -545,9 +545,9 @@ template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &wha
         case LiteralType::LiteralTypeKind::Integer:
             return LiteralType(absl::bit_cast<int64_t>(what.value));
         case LiteralType::LiteralTypeKind::String:
-            return LiteralType(Symbols::String(), NameRef::fromRawUnchecked(static_cast<u4>(what.value)));
+            return LiteralType(Symbols::String(), NameRef::fromRawUnchecked(static_cast<uint32_t>(what.value)));
         case LiteralType::LiteralTypeKind::Symbol:
-            return LiteralType(Symbols::Symbol(), NameRef::fromRawUnchecked(static_cast<u4>(what.value)));
+            return LiteralType(Symbols::Symbol(), NameRef::fromRawUnchecked(static_cast<uint32_t>(what.value)));
     }
 }
 
@@ -561,7 +561,7 @@ public:
     TypeVar(TypeArgumentRef sym);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
     void _sanityCheck(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
@@ -578,7 +578,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
@@ -629,7 +629,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
@@ -672,7 +672,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
     std::string showWithMoreInfo(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
@@ -697,7 +697,7 @@ public:
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     std::string showWithMoreInfo(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
@@ -720,7 +720,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
@@ -750,7 +750,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
@@ -912,7 +912,7 @@ public:
         : ClassType(core::Symbols::untyped()), scope(scope), names(std::move(names)){};
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
 };
 
 TYPE(UnresolvedAppliedType) final : public ClassType {
@@ -923,7 +923,7 @@ public:
         : ClassType(core::Symbols::untyped()), klass(klass), targs(std::move(targs)){};
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
 };
 
 } // namespace sorbet::core

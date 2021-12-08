@@ -153,7 +153,7 @@ bool isSetter(const GlobalState &gs, NameRef fun) {
     return false;
 }
 
-u4 locSize(core::Loc loc) {
+uint32_t locSize(core::Loc loc) {
     return loc.endPos() - loc.beginPos();
 }
 
@@ -658,7 +658,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             // it is, this verifies that the methodLoc below exists.
                             if (loc.exists() && absl::StartsWith(loc.source(gs).value(), toReplace)) {
                                 const auto methodLoc =
-                                    Loc{loc.file(), loc.beginPos(), (u4)(loc.beginPos() + toReplace.length())};
+                                    Loc{loc.file(), loc.beginPos(), (uint32_t)(loc.beginPos() + toReplace.length())};
                                 e.replaceWith(fmt::format("Replace with `{}.new`", replacement), methodLoc, "{}.new",
                                               replacement);
                                 addedAutocorrect = true;
@@ -675,7 +675,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                     absl::StartsWith(callLoc.source(gs).value(),
                                                      fmt::format("{}.{}", recvLoc.source(gs).value(), toReplace))) {
                                     const auto methodLoc = Loc{recvLoc.file(), recvLoc.endPos() + 1,
-                                                               (u4)(recvLoc.endPos() + 1 + toReplace.length())};
+                                                               (uint32_t)(recvLoc.endPos() + 1 + toReplace.length())};
                                     e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}",
                                                   replacement);
                                     addedAutocorrect = true;
@@ -2693,8 +2693,8 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
     }
 
     // TODO(jez) Use Loc::adjust here
-    u4 valueBegin = origin.beginPos() + keyStart + keySymbol.size() + char_traits<char>::length(" ");
-    u4 valueEnd = valueBegin + char_traits<char>::length(valueStr);
+    uint32_t valueBegin = origin.beginPos() + keyStart + keySymbol.size() + char_traits<char>::length(" ");
+    uint32_t valueEnd = valueBegin + char_traits<char>::length(valueStr);
     if (valueEnd <= origin.file().data(gs).source().size()) {
         auto loc = Loc{origin.file(), valueBegin, valueEnd};
         if (loc.exists() && loc.source(gs).value() == valueStr) {

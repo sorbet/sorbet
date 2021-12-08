@@ -42,7 +42,7 @@ TEST_SUITE("UIntSet") {
     }
 
     TEST_CASE("single element, but on a secondary integer") {
-        // Try setting an element backed by a different u4
+        // Try setting an element backed by a different uint32_t
         UIntSet set(128);
         set.add(32);
         CHECK_FALSE(set.empty());
@@ -185,12 +185,12 @@ TEST_SUITE("UIntSet") {
         UIntSet a(128);
 
         // Empty case
-        a.forEach([](u4 local) -> void { FAIL("Expected forEach on an empty set to not call the lambda."); });
+        a.forEach([](uint32_t local) -> void { FAIL("Expected forEach on an empty set to not call the lambda."); });
 
         // Single case
         a.add(0);
         int callCount = 0;
-        a.forEach([&callCount](u4 local) -> void {
+        a.forEach([&callCount](uint32_t local) -> void {
             CHECK_EQ(0, local);
             callCount++;
         });
@@ -199,7 +199,7 @@ TEST_SUITE("UIntSet") {
         // Multiple case
         callCount = 0;
         a.add(64);
-        a.forEach([&callCount](u4 local) -> void {
+        a.forEach([&callCount](uint32_t local) -> void {
             if (callCount == 0) {
                 CHECK_EQ(0, local);
             } else if (callCount == 1) {
@@ -218,7 +218,7 @@ TEST_SUITE("UIntSet") {
 
         callCount = 0;
         a.add(64);
-        a.forEach([&callCount](u4 local) -> void {
+        a.forEach([&callCount](uint32_t local) -> void {
             CHECK_EQ(callCount, local);
             callCount++;
         });

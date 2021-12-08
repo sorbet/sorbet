@@ -14,7 +14,7 @@ public:
         // see https://eli.thegreenplace.net/2010/11/13/pure-virtual-destructors-in-c
     };
 
-    u4 crc32(string_view data) const override {
+    uint32_t crc32(string_view data) const override {
         return CRC::Calculate(data.data(), data.size(), this->lookupTable);
     }
 };

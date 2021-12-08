@@ -5,7 +5,7 @@ using namespace std;
 namespace sorbet::ast {
 
 class VerifierWalker {
-    u4 methodDepth = 0;
+    uint32_t methodDepth = 0;
 
 public:
     ExpressionPtr preTransformExpression(core::Context ctx, ExpressionPtr original) {

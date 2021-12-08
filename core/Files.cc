@@ -166,7 +166,7 @@ CompiledLevel File::fileCompiledSigil(string_view source) {
     }
 }
 
-File::File(string &&path_, string &&source_, Type sourceType, u4 epoch)
+File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), path_(move(path_)), source_(move(source_)),
       originalSigil(fileStrictSigil(this->source_)), strictLevel(originalSigil),
       compiledLevel(fileCompiledSigil(this->source_)) {}

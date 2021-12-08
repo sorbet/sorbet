@@ -6,7 +6,7 @@
 
 using namespace std;
 namespace sorbet::core {
-u4 incZero(u4 a) {
+uint32_t incZero(uint32_t a) {
     return a == 0 ? 1 : a;
 };
 NameHash::NameHash(const GlobalState &gs, NameRef nm) : _hashValue(incZero(_hash(nm.shortName(gs)))){};

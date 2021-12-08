@@ -85,8 +85,8 @@ public:
     void installIntrinsics();
 
     // Expand symbol and name tables to the given lengths. Does nothing if the value is <= current capacity.
-    void preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 fieldsSize, u4 typeArgumentsSize,
-                           u4 typeMembersSize, u4 utf8NameSize, u4 constantNameSize, u4 uniqueNameSize);
+    void preallocateTables(uint32_t classAndModulesSize, uint32_t methodsSize, uint32_t fieldsSize, uint32_t typeArgumentsSize,
+                           uint32_t typeMembersSize, uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize);
 
     GlobalState(const GlobalState &) = delete;
     GlobalState(GlobalState &&) = delete;
@@ -97,7 +97,7 @@ public:
     TypeMemberRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
     TypeArgumentRef enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance);
     MethodRef enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
-    MethodRef enterNewMethodOverload(Loc loc, MethodRef original, core::NameRef originalName, u4 num,
+    MethodRef enterNewMethodOverload(Loc loc, MethodRef original, core::NameRef originalName, uint32_t num,
                                      const std::vector<bool> &argsToKeep);
     FieldRef enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     FieldRef enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
@@ -118,7 +118,7 @@ public:
     MethodRef lookupMethodSymbol(ClassOrModuleRef owner, NameRef name) const {
         return lookupSymbolWithKind(owner, name, SymbolRef::Kind::Method, Symbols::noMethod()).asMethodRef();
     }
-    MethodRef lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, const std::vector<u4> &methodHash) const;
+    MethodRef lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, const std::vector<uint32_t> &methodHash) const;
     FieldRef lookupStaticFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
         // N.B.: Fields and static fields have entirely different types of names, so this should be unambiguous.
         return lookupSymbolWithKind(owner, name, SymbolRef::Kind::FieldOrStaticField, Symbols::noField()).asFieldRef();
@@ -138,8 +138,8 @@ public:
     NameRef enterNameUTF8(std::string_view nm);
     NameRef lookupNameUTF8(std::string_view nm) const;
 
-    NameRef lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) const;
-    NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num);
+    NameRef lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, uint32_t num) const;
+    NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, uint32_t num);
 
     NameRef enterNameConstant(NameRef original);
     NameRef enterNameConstant(std::string_view original);
@@ -242,7 +242,7 @@ public:
     lsp::Query lspQuery;
 
     // Stores a UUID that uniquely identifies this GlobalState in kvstore.
-    u4 kvstoreUuid = 0;
+    uint32_t kvstoreUuid = 0;
 
     FlowId creation; // used to track flow of global states
 
@@ -300,7 +300,7 @@ private:
     std::vector<Symbol> fields;
     std::vector<Symbol> typeMembers;
     std::vector<Symbol> typeArguments;
-    std::vector<std::pair<unsigned int, u4>> namesByHash;
+    std::vector<std::pair<unsigned int, uint32_t>> namesByHash;
     std::vector<std::shared_ptr<File>> files;
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
@@ -319,9 +319,9 @@ private:
     bool symbolTableFrozen = true;
     bool fileTableFrozen = true;
 
-    void expandNames(u4 utf8NameSize, u4 constantNameSize, u4 uniqueNameSize);
+    void expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize);
 
-    ClassOrModuleRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().id(), bool isModule = false);
+    ClassOrModuleRef synthesizeClass(NameRef nameID, uint32_t superclass = Symbols::todo().id(), bool isModule = false);
 
     SymbolRef lookupSymbolWithKind(ClassOrModuleRef owner, NameRef name, SymbolRef::Kind kind,
                                    SymbolRef defaultReturnValue, bool ignoreKind = false) const;
