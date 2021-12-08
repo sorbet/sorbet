@@ -19,7 +19,7 @@ public:
     static bool isFile(std::string_view path, std::string_view ignorePattern, const int pos);
     static bool isFolder(std::string_view path, std::string_view ignorePattern, const int pos);
     static std::string read(std::string_view filename);
-    static void write(std::string_view filename, const std::vector<sorbet::u1> &data);
+    static void write(std::string_view filename, const std::vector<uint8_t> &data);
     static void append(std::string_view filename, std::string_view text);
     static void write(std::string_view filename, std::string_view text);
     static bool writeIfDifferent(std::string_view filename, std::string_view text);

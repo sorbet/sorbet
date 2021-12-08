@@ -1294,9 +1294,9 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto SorbetWorkspaceEditParams =
         makeObject("SorbetWorkspaceEditParams", {}, classTypes,
                    {
-                       "u4 epoch = 0;",
+                       "uint32_t epoch = 0;",
                        "// Contains the number of individual edit messages merged into this edit.",
-                       "u4 mergeCount = 0;",
+                       "uint32_t mergeCount = 0;",
                        "// Used in multithreaded tests to wait for a cancellation to occur when processing this edit.",
                        "bool sorbetCancellationExpected = false;",
                        "// Used in multithreaded tests to wait for a preemption to occur when processing this edit.",

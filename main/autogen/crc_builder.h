@@ -20,7 +20,7 @@ public:
     CRCBuilder &operator=(CRCBuilder &&) = delete;
     CRCBuilder &operator=(const CRCBuilder &) = delete;
 
-    virtual sorbet::u4 crc32(std::string_view data) const = 0;
+    virtual uint32_t crc32(std::string_view data) const = 0;
 };
 
 } // namespace sorbet::autogen

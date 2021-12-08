@@ -18,7 +18,7 @@ class CompletionTask final : public LSPRequestTask {
                                                                core::MethodRef what, const core::TypePtr &receiverType,
                                                                const core::TypeConstraint *constraint,
                                                                core::Loc queryLoc, std::string_view prefix,
-                                                               size_t sortIdx, u2 totalArgs) const;
+                                                               size_t sortIdx, uint16_t totalArgs) const;
 
 public:
     CompletionTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<CompletionParams> params);

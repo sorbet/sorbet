@@ -13,7 +13,7 @@ using namespace std;
 using namespace sorbet::realmain::lsp;
 
 namespace {
-u4 nextHash = 0;
+uint32_t nextHash = 0;
 unique_ptr<core::FileHash> getFileHash() {
     auto hash = make_unique<core::FileHash>();
     hash->definitions.hierarchyHash = nextHash++;

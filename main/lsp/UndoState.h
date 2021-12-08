@@ -23,10 +23,10 @@ class UndoState final {
 
 public:
     // Epoch of the running slow path
-    const u4 epoch;
+    const uint32_t epoch;
 
     UndoState(std::unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
-              u4 epoch);
+              uint32_t epoch);
 
     /**
      * Records that the given items were evicted from LSPTypechecker following a typecheck run.

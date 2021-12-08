@@ -52,16 +52,16 @@ unique_ptr<core::GlobalState> makeGS() {
 }
 
 // Generate `count` errors for `fref` in `errors`.
-void generateErrors(core::FileRef fref, vector<unique_ptr<core::Error>> &errors, u2 count) {
-    for (u2 i = 0; i < count; i++) {
+void generateErrors(core::FileRef fref, vector<unique_ptr<core::Error>> &errors, uint16_t count) {
+    for (uint16_t i = 0; i < count; i++) {
         errors.emplace_back(
             make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
     }
 }
-u4 errorsReported(LSPOutputToVector &outputVector) {
+uint32_t errorsReported(LSPOutputToVector &outputVector) {
     auto output = outputVector.getOutput();
-    u4 count = 0;
+    uint32_t count = 0;
     for (auto &message : output) {
         auto &notificationMessage = message->asNotification();
         auto &publishDiagnosticParams = get<unique_ptr<PublishDiagnosticsParams>>(notificationMessage.params);

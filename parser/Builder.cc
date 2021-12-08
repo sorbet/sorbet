@@ -93,18 +93,18 @@ public:
 
     GlobalState &gs_;
     core::FileRef file_;
-    u2 uniqueCounter_ = 1;
-    u4 maxOff_;
+    uint16_t uniqueCounter_ = 1;
+    uint32_t maxOff_;
     ruby_parser::base_driver *driver_;
 
     vector<unique_ptr<Node>> foreignNodes_;
 
-    u4 clamp(u4 off) {
+    uint32_t clamp(uint32_t off) {
         return std::min(off, maxOff_);
     }
 
     core::LocOffsets tokLoc(const token *tok) {
-        return core::LocOffsets{clamp((u4)tok->start()), clamp((u4)tok->end())};
+        return core::LocOffsets{clamp((uint32_t)tok->start()), clamp((uint32_t)tok->end())};
     }
 
     core::LocOffsets maybe_loc(unique_ptr<Node> &node) {
@@ -115,7 +115,7 @@ public:
     }
 
     core::LocOffsets tokLoc(const token *begin, const token *end) {
-        return core::LocOffsets{clamp((u4)begin->start()), clamp((u4)end->end())};
+        return core::LocOffsets{clamp((uint32_t)begin->start()), clamp((uint32_t)end->end())};
     }
 
     core::LocOffsets collectionLoc(const token *begin, sorbet::parser::NodeVec &elts, const token *end) {
@@ -1218,7 +1218,8 @@ public:
     }
 
     unique_ptr<Node> pair_keyword(const token *key, unique_ptr<Node> value) {
-        auto keyLoc = core::LocOffsets{clamp((u4)key->start()), clamp((u4)key->end() - 1)}; // drop the trailing :
+        auto keyLoc =
+            core::LocOffsets{clamp((uint32_t)key->start()), clamp((uint32_t)key->end() - 1)}; // drop the trailing :
 
         return make_unique<Pair>(tokLoc(key).join(maybe_loc(value)),
                                  make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->string())), std::move(value));

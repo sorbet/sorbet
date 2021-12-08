@@ -243,7 +243,7 @@ vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const 
 }
 
 string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatchResult, core::MethodRef method,
-                     const core::TypePtr &receiverType, const core::TypeConstraint *constraint, u2 totalArgs) {
+                     const core::TypePtr &receiverType, const core::TypeConstraint *constraint, uint16_t totalArgs) {
     fmt::memory_buffer result;
     fmt::format_to(std::back_inserter(result), "{}", method.data(gs)->name.shortName(gs));
     auto nextTabstop = 1;
@@ -319,7 +319,7 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
 // This is somewhat brittle, but has worked well so far.
 unique_ptr<Range> replacementRangeForQuery(const core::GlobalState &gs, core::Loc queryLoc, string_view prefix) {
     auto queryStart = queryLoc.beginPos();
-    u4 prefixSize = prefix.size();
+    uint32_t prefixSize = prefix.size();
     auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
     // Sometimes Range::fromLoc returns nullptr (commonly when running under a fuzzer which disables certain loc info).
     return Range::fromLoc(gs, replacementLoc);
@@ -593,8 +593,8 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
     item->sortText = fmt::format("{:06d}", sortIdx);
     item->detail = fmt::format("Suggested sig for {}", targetMethod.data(gs)->name.shortName(gs));
 
-    u4 queryStart = queryLoc.beginPos();
-    u4 prefixSize = prefix.size();
+    uint32_t queryStart = queryLoc.beginPos();
+    uint32_t prefixSize = prefix.size();
     auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
     auto replacementRange = Range::fromLoc(gs, replacementLoc);
 
@@ -659,7 +659,7 @@ unique_ptr<CompletionItem>
 CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::DispatchResult &dispatchResult,
                                            core::MethodRef maybeAlias, const core::TypePtr &receiverType,
                                            const core::TypeConstraint *constraint, core::Loc queryLoc,
-                                           string_view prefix, size_t sortIdx, u2 totalArgs) const {
+                                           string_view prefix, size_t sortIdx, uint16_t totalArgs) const {
     const auto &gs = typechecker.state();
     ENFORCE(maybeAlias.exists());
     auto clientConfig = config.getClientConfig();

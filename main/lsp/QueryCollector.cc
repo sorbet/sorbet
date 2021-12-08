@@ -5,7 +5,7 @@ namespace sorbet::realmain::lsp {
 namespace {
 // In the case of location ties, determines which query response takes priority in the vector constructed by
 // flushErrors. Larger values means greater specificity.
-u2 getQueryResponseTypeSpecificity(const core::lsp::QueryResponse &q) {
+uint16_t getQueryResponseTypeSpecificity(const core::lsp::QueryResponse &q) {
     if (q.isEdit()) {
         // Only reported for autocomplete, and should take precedence over anything else reported
         return 8;

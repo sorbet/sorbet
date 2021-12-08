@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
     if (!fin.good()) {
         throw sorbet::FileNotFoundException();
     }
-    vector<sorbet::u1> data;
+    vector<uint8_t> data;
 
     fin.seekg(0, ios::end);
     size_t filesize = fin.tellg();
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 
     ofstream classfile(argv[2], ios::trunc);
 
-    classfile << "#include \"common/common.h\"\n" << '\n' << "const sorbet::u1 nameTablePayload[] = {\n";
+    classfile << "#include \"common/common.h\"\n" << '\n' << "const uint8_t nameTablePayload[] = {\n";
     int i = -1;
     bool first = true;
     for (auto c : data) {
@@ -40,8 +40,7 @@ int main(int argc, char **argv) {
         classfile << (int)c;
     }
     classfile << "};\n";
-    classfile << "extern const sorbet::u1 * const getNameTablePayload = (const sorbet::u1 * const)&nameTablePayload;"
-              << '\n';
+    classfile << "extern const uint8_t * const getNameTablePayload = (const uint8_t * const)&nameTablePayload;" << '\n';
 
     classfile.close();
 

@@ -29,7 +29,7 @@ public:
 // implicitly numbered: result of every instruction can be uniquely referenced
 // by its position in a linear array.
 
-enum class Tag : u1 {
+enum class Tag : uint8_t {
     Ident = 1,
     Alias,
     SolveConstraint,
@@ -107,7 +107,7 @@ CheckSize(SolveConstraint, 24, 8);
 INSN(Send) : public Instruction {
 public:
     bool isPrivateOk;
-    u2 numPosArgs;
+    uint16_t numPosArgs;
     core::NameRef fun;
     VariableUseSite recv;
     core::LocOffsets receiverLoc;
@@ -115,7 +115,7 @@ public:
     InlinedVector<core::LocOffsets, 2> argLocs;
     std::shared_ptr<core::SendAndBlockLink> link;
 
-    Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, u2 numPosArgs,
+    Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, uint16_t numPosArgs,
          const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> argLocs, bool isPrivateOk = false,
          const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
 
@@ -178,10 +178,10 @@ CheckSize(GetCurrentException, 8, 8);
 
 INSN(LoadArg) : public Instruction {
 public:
-    u2 argId;
+    uint16_t argId;
     core::MethodRef method;
 
-    LoadArg(core::MethodRef method, u2 argId) : argId(argId), method(method) {
+    LoadArg(core::MethodRef method, uint16_t argId) : argId(argId), method(method) {
         categoryCounterInc("cfg", "loadarg");
     };
 
@@ -193,10 +193,10 @@ CheckSize(LoadArg, 8, 8);
 
 INSN(ArgPresent) : public Instruction {
 public:
-    u2 argId;
+    uint16_t argId;
     core::MethodRef method;
 
-    ArgPresent(core::MethodRef method, u2 argId) : argId(argId), method(method) {
+    ArgPresent(core::MethodRef method, uint16_t argId) : argId(argId), method(method) {
         categoryCounterInc("cfg", "argpresent");
     }
 
@@ -220,9 +220,9 @@ CheckSize(LoadYieldParams, 24, 8);
 
 INSN(YieldParamPresent) : public Instruction {
 public:
-    u2 argId;
+    uint16_t argId;
 
-    YieldParamPresent(u2 argId) : argId{argId} {
+    YieldParamPresent(uint16_t argId) : argId{argId} {
         categoryCounterInc("cfg", "argpresent");
     };
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
@@ -233,10 +233,10 @@ CheckSize(YieldParamPresent, 8, 8);
 INSN(YieldLoadArg) : public Instruction {
 public:
     core::ArgInfo::ArgFlags flags;
-    u2 argId;
+    uint16_t argId;
     VariableUseSite yieldParam;
 
-    YieldLoadArg(u2 argId, core::ArgInfo::ArgFlags flags, LocalRef yieldParam)
+    YieldLoadArg(uint16_t argId, core::ArgInfo::ArgFlags flags, LocalRef yieldParam)
         : flags(flags), argId(argId), yieldParam(yieldParam) {
         categoryCounterInc("cfg", "yieldloadarg");
     }
@@ -272,7 +272,7 @@ public:
 CheckSize(TAbsurd, 32, 8);
 
 class InstructionPtr final {
-    using tagged_storage = u8;
+    using tagged_storage = uint64_t;
 
     static constexpr tagged_storage TAG_MASK = 0xffff;
 

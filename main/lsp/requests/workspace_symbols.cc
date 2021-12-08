@@ -241,7 +241,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     {
         Timer timeit(gs.tracer(), "SymbolMatcher::doQuery::pass1");
         for (auto [kind, size] : symbolKinds) {
-            for (u4 i = 0; i < size; ++i) {
+            for (uint32_t i = 0; i < size; ++i) {
                 auto sym = core::SymbolRef(gs, kind, i);
                 if (sym.exists()) {
                     updatePartialMatch(core::SymbolRef(gs, kind, i), queryBegin, queryEnd, ceilingScore);
@@ -258,7 +258,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     {
         Timer timeit(gs.tracer(), "SymbolMatcher::doQuery::pass2");
         for (auto [kind, size] : symbolKinds) {
-            for (u4 i = 0; i < size; ++i) {
+            for (uint32_t i = 0; i < size; ++i) {
                 auto symbolRef = core::SymbolRef(gs, kind, i);
                 if (!symbolRef.exists()) {
                     continue;

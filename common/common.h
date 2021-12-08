@@ -107,21 +107,6 @@ template <typename ToCheck, std::size_t ExpectedAlign, std::size_t RealAlign = a
         sorbet::check_align<T, ExpAlign> UNUSED(_##T##is##ExpAlign##_bytes_aligned); \
     }
 
-/**
- * Shorter aliases for unsigned ints of specified byte widths.
- */
-using u1 = uint8_t;
-CheckSize(u1, 1, 1);
-
-using u2 = uint16_t;
-CheckSize(u2, 2, 2);
-
-using u4 = uint32_t;
-CheckSize(u4, 4, 4);
-
-using u8 = uint64_t;
-CheckSize(u8, 8, 8);
-
 template <class From, class To> To *fast_cast(From *what) {
     constexpr bool isFinal = std::is_final<To>::value;
     if (std::is_same<From, To>::value) {
@@ -142,7 +127,7 @@ template <class From, class To> To *fast_cast(From *what) {
 };
 
 // Rounds the provided number up to the nearest power of two. If v is already a power of two, it returns v.
-u4 nextPowerOfTwo(u4 v);
+uint32_t nextPowerOfTwo(uint32_t v);
 
 } // namespace sorbet
 

@@ -1368,8 +1368,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             // TODO(jez) Add location to cfg::Cast instruction
                             auto prefix = "T.cast(";
                             auto suffix = ", T.untyped)";
-                            u4 beginPos = bind.loc.beginPos() + char_traits<char>::length(prefix);
-                            u4 endPos = bind.loc.endPos() - char_traits<char>::length(suffix);
+                            uint32_t beginPos = bind.loc.beginPos() + char_traits<char>::length(prefix);
+                            uint32_t endPos = bind.loc.endPos() - char_traits<char>::length(suffix);
                             // Naive attempt at detecting when this heuristic will have failed.
                             if ((beginPos <= endPos) &&
                                 (core::Loc{ctx.file, bind.loc.beginPos(), beginPos}.source(ctx) == prefix) &&

@@ -1,3 +1,3 @@
 #include "common/common.h"
 
-extern const sorbet::u1 *const getNameTablePayload = nullptr;
+extern const uint8_t *const getNameTablePayload = nullptr;

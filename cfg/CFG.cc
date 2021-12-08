@@ -15,7 +15,7 @@ using namespace std;
 
 namespace sorbet::cfg {
 
-CFG::ReadsAndWrites::ReadsAndWrites(u4 maxBasicBlockId, u4 numLocalVariables)
+CFG::ReadsAndWrites::ReadsAndWrites(uint32_t maxBasicBlockId, uint32_t numLocalVariables)
     : reads(maxBasicBlockId, UIntSet(numLocalVariables)), writes(maxBasicBlockId, UIntSet(numLocalVariables)),
       dead(maxBasicBlockId, UIntSet(numLocalVariables)) {}
 
@@ -150,7 +150,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
         for (auto blockId = 0; blockId < maxBasicBlockId; blockId++) {
             UIntSet blockReadsAndWrites = target.reads[blockId];
             blockReadsAndWrites.add(target.writes[blockId]);
-            blockReadsAndWrites.forEach([&usageCounts, blockId](u4 local) -> void {
+            blockReadsAndWrites.forEach([&usageCounts, blockId](uint32_t local) -> void {
                 if (usageCounts[local].first == 0) {
                     usageCounts[local].second = blockId;
                 }

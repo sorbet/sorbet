@@ -85,7 +85,7 @@ NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile
         }
     }
     const auto &pathStr = parsedFile.tree.file.data(gs).path();
-    u4 pathDepth = count(pathStr.begin(), pathStr.end(), '/'); // Pre-compute for comparison
+    uint32_t pathDepth = count(pathStr.begin(), pathStr.end(), '/'); // Pre-compute for comparison
 
     auto fullName = parsedFile.showQualifiedName(gs, def);
 

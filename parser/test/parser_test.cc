@@ -14,7 +14,6 @@
 #include <vector>
 
 namespace spd = spdlog;
-using sorbet::u4;
 using namespace std;
 
 auto logger = spd::stderr_color_mt("parser_test");

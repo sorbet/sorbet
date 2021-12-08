@@ -33,11 +33,11 @@ namespace {
 // Hash functions used to determine position in namesByHash.
 
 inline unsigned int hashMixUnique(UniqueNameKind unk, unsigned int num, unsigned int rawId) {
-    return mix(mix(num, static_cast<u4>(unk)), rawId) * HASH_MULT2 + static_cast<u4>(NameKind::UNIQUE);
+    return mix(mix(num, static_cast<uint32_t>(unk)), rawId) * HASH_MULT2 + static_cast<uint32_t>(NameKind::UNIQUE);
 }
 
 inline unsigned int hashMixConstant(unsigned int id) {
-    return id * HASH_MULT2 + static_cast<u4>(NameKind::CONSTANT);
+    return id * HASH_MULT2 + static_cast<uint32_t>(NameKind::CONSTANT);
 }
 
 inline unsigned int hashNameRef(const GlobalState &gs, NameRef nref) {
@@ -132,7 +132,7 @@ MethodBuilder enterMethod(GlobalState &gs, ClassOrModuleRef klass, NameRef name)
 
 } // namespace
 
-ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule) {
+ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, uint32_t superclass, bool isModule) {
     // This can't use enterClass since there is a chicken and egg problem.
     // These will be added to Symbols::root().members later.
     ClassOrModuleRef symRef = ClassOrModuleRef(*this, classAndModules.size());
@@ -669,7 +669,7 @@ void GlobalState::initEmpty() {
     // Set the correct resultTypes for all synthesized classes
     // Collect size prior to loop since singletons will cause vector to grow.
     size_t classAndModulesSize = classAndModules.size();
-    for (u4 i = 1; i < classAndModulesSize; i++) {
+    for (uint32_t i = 1; i < classAndModulesSize; i++) {
         classAndModules[i].singletonClass(*this);
     }
 
@@ -750,16 +750,17 @@ void GlobalState::installIntrinsics() {
     }
 }
 
-void GlobalState::preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 fieldsSize, u4 typeArgumentsSize,
-                                    u4 typeMembersSize, u4 utf8NameSize, u4 constantNameSize, u4 uniqueNameSize) {
-    u4 classAndModulesSizeScaled = nextPowerOfTwo(classAndModulesSize);
-    u4 methodsSizeScaled = nextPowerOfTwo(methodsSize);
-    u4 fieldsSizeScaled = nextPowerOfTwo(fieldsSize);
-    u4 typeArgumentsSizeScaled = nextPowerOfTwo(typeArgumentsSize);
-    u4 typeMembersSizeScaled = nextPowerOfTwo(typeMembersSize);
-    u4 utf8NameSizeScaled = nextPowerOfTwo(utf8NameSize);
-    u4 constantNameSizeScaled = nextPowerOfTwo(constantNameSize);
-    u4 uniqueNameSizeScaled = nextPowerOfTwo(uniqueNameSize);
+void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t methodsSize, uint32_t fieldsSize,
+                                    uint32_t typeArgumentsSize, uint32_t typeMembersSize, uint32_t utf8NameSize,
+                                    uint32_t constantNameSize, uint32_t uniqueNameSize) {
+    uint32_t classAndModulesSizeScaled = nextPowerOfTwo(classAndModulesSize);
+    uint32_t methodsSizeScaled = nextPowerOfTwo(methodsSize);
+    uint32_t fieldsSizeScaled = nextPowerOfTwo(fieldsSize);
+    uint32_t typeArgumentsSizeScaled = nextPowerOfTwo(typeArgumentsSize);
+    uint32_t typeMembersSizeScaled = nextPowerOfTwo(typeMembersSize);
+    uint32_t utf8NameSizeScaled = nextPowerOfTwo(utf8NameSize);
+    uint32_t constantNameSizeScaled = nextPowerOfTwo(constantNameSize);
+    uint32_t uniqueNameSizeScaled = nextPowerOfTwo(uniqueNameSize);
 
     // When preallocating in release builds, large initial reservations aren't necessarily a problem on hosts with lots
     // of cores available as we use jemalloc as the allocator. An effect of this is that larger allocations will be
@@ -785,14 +786,14 @@ void GlobalState::preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 f
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
 MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name,
-                                                  const vector<u4> &methodHash) const {
+                                                  const vector<uint32_t> &methodHash) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_lookup_by_name", ownerScope->members().size());
 
     NameRef lookupName = name;
-    u4 unique = 1;
+    uint32_t unique = 1;
     auto res = ownerScope->members().find(lookupName);
     while (res != ownerScope->members().end()) {
         ENFORCE(res->second.exists());
@@ -825,7 +826,7 @@ SymbolRef GlobalState::lookupSymbolWithKind(ClassOrModuleRef owner, NameRef name
     histogramInc("symbol_lookup_by_name", ownerScope->members().size());
 
     NameRef lookupName = name;
-    u4 unique = 1;
+    uint32_t unique = 1;
     auto res = ownerScope->members().find(lookupName);
     while (res != ownerScope->members().end()) {
         ENFORCE(res->second.exists());
@@ -868,7 +869,7 @@ SymbolRef GlobalState::findRenamedSymbol(ClassOrModuleRef owner, SymbolRef sym) 
             return res->second;
         }
     } else {
-        u4 unique = 1;
+        uint32_t unique = 1;
         NameRef lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
         auto res = ownerScope->members().find(lookupName);
         while (res != ownerScope->members().end()) {
@@ -913,7 +914,7 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
 }
 
 TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
-    u4 flags;
+    uint32_t flags;
     ENFORCE(owner.exists() || name == Names::Constants::NoTypeMember());
     ENFORCE(name.exists());
     if (variance == Variance::Invariant) {
@@ -963,7 +964,7 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     ENFORCE(owner.exists() || name == Names::Constants::NoTypeArgument() ||
             name == Names::Constants::TodoTypeArgument());
     ENFORCE(name.exists());
-    u4 flags;
+    uint32_t flags;
     if (variance == Variance::Invariant) {
         flags = Symbol::Flags::TYPE_INVARIANT;
     } else if (variance == Variance::CoVariant) {
@@ -1032,7 +1033,7 @@ MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRe
     return result;
 }
 
-MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, core::NameRef originalName, u4 num,
+MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, core::NameRef originalName, uint32_t num,
                                               const vector<bool> &argsToKeep) {
     NameRef name = num == 0 ? originalName : freshNameUnique(UniqueNameKind::Overload, originalName, num);
     core::Loc loc = num == 0 ? original.data(*this)->loc()
@@ -1358,7 +1359,8 @@ NameRef GlobalState::lookupNameConstant(string_view original) const {
     return lookupNameConstant(utf8);
 }
 
-void moveNames(pair<unsigned int, u4> *from, pair<unsigned int, u4> *to, unsigned int szFrom, unsigned int szTo) {
+void moveNames(pair<unsigned int, uint32_t> *from, pair<unsigned int, uint32_t> *to, unsigned int szFrom,
+               unsigned int szTo) {
     // printf("\nResizing name hash table from %u to %u\n", szFrom, szTo);
     ENFORCE((szTo & (szTo - 1)) == 0, "name hash table size corruption");
     ENFORCE((szFrom & (szFrom - 1)) == 0, "name hash table size corruption");
@@ -1377,13 +1379,13 @@ void moveNames(pair<unsigned int, u4> *from, pair<unsigned int, u4> *to, unsigne
     }
 }
 
-void GlobalState::expandNames(u4 utf8NameSize, u4 constantNameSize, u4 uniqueNameSize) {
+void GlobalState::expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize) {
     sanityCheck();
     utf8Names.reserve(utf8NameSize);
     constantNames.reserve(constantNameSize);
     uniqueNames.reserve(uniqueNameSize);
 
-    u4 hashTableSize = 2 * nextPowerOfTwo(utf8NameSize + constantNameSize + uniqueNameSize);
+    uint32_t hashTableSize = 2 * nextPowerOfTwo(utf8NameSize + constantNameSize + uniqueNameSize);
 
     if (hashTableSize > namesByHash.size()) {
         vector<pair<unsigned int, unsigned int>> new_namesByHash(hashTableSize);
@@ -1392,7 +1394,7 @@ void GlobalState::expandNames(u4 utf8NameSize, u4 constantNameSize, u4 uniqueNam
     }
 }
 
-NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) const {
+NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, uint32_t num) const {
     ENFORCE(num > 0, "num == 0, name overflow");
     const auto hs = hashMixUnique(uniqueNameKind, num, original.rawId());
     unsigned int hashTableSize = namesByHash.size();
@@ -1418,7 +1420,7 @@ NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef ori
     return core::NameRef::noName();
 }
 
-NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) {
+NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, uint32_t num) {
     ENFORCE(num > 0, "num == 0, name overflow");
     const auto hs = hashMixUnique(uniqueNameKind, num, original.rawId());
     unsigned int hashTableSize = namesByHash.size();
@@ -1518,7 +1520,7 @@ void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName) {
     ENFORCE(fnd != ownerMembers.end());
     ENFORCE(fnd->second == what);
     ENFORCE(what.name(*this) == origName);
-    u4 collisionCount = 1;
+    uint32_t collisionCount = 1;
     NameRef name;
     do {
         name = freshNameUnique(UniqueNameKind::MangleRename, origName, collisionCount++);
@@ -1618,15 +1620,15 @@ void GlobalState::sanityCheck() const {
             namesUsedTotal(), namesByHash.capacity());
     ENFORCE(namesByHash.size() == namesByHash.capacity(), "hash name table not at full capacity");
 
-    for (u4 i = 0; i < utf8Names.size(); i++) {
+    for (uint32_t i = 0; i < utf8Names.size(); i++) {
         NameRef(*this, NameKind::UTF8, i).sanityCheck(*this);
     }
 
-    for (u4 i = 0; i < constantNames.size(); i++) {
+    for (uint32_t i = 0; i < constantNames.size(); i++) {
         NameRef(*this, NameKind::CONSTANT, i).sanityCheck(*this);
     }
 
-    for (u4 i = 0; i < uniqueNames.size(); i++) {
+    for (uint32_t i = 0; i < uniqueNames.size(); i++) {
         NameRef(*this, NameKind::UNIQUE, i).sanityCheck(*this);
     }
 
@@ -1960,7 +1962,7 @@ unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState>
     return what;
 }
 
-u4 patchHash(u4 hash) {
+uint32_t patchHash(uint32_t hash) {
     if (hash == GlobalStateHash::HASH_STATE_NOT_COMPUTED) {
         hash = GlobalStateHash::HASH_STATE_NOT_COMPUTED_COLLISION_AVOID;
     } else if (hash == GlobalStateHash::HASH_STATE_INVALID) {
@@ -1971,8 +1973,8 @@ u4 patchHash(u4 hash) {
 
 unique_ptr<GlobalStateHash> GlobalState::hash() const {
     constexpr bool DEBUG_HASHING_TAIL = false;
-    u4 hierarchyHash = 0;
-    UnorderedMap<NameHash, u4> methodHashes;
+    uint32_t hierarchyHash = 0;
+    UnorderedMap<NameHash, uint32_t> methodHashes;
     int counter = 0;
 
     for (const auto *symbolType : {&this->classAndModules, &this->fields, &this->typeArguments, &this->typeMembers}) {

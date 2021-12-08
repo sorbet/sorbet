@@ -29,7 +29,7 @@ public:
         return this->_hashValue < rhs._hashValue;
     }
 
-    u4 _hashValue;
+    uint32_t _hashValue;
 };
 
 template <typename H> H AbslHashValue(H h, const NameHash &m) {
@@ -41,8 +41,8 @@ struct GlobalStateHash {
     static constexpr int HASH_STATE_NOT_COMPUTED_COLLISION_AVOID = 1;
     static constexpr int HASH_STATE_INVALID = 2;
     static constexpr int HASH_STATE_INVALID_COLLISION_AVOID = 3;
-    u4 hierarchyHash = HASH_STATE_NOT_COMPUTED;
-    std::vector<std::pair<NameHash, u4>> methodHashes;
+    uint32_t hierarchyHash = HASH_STATE_NOT_COMPUTED;
+    std::vector<std::pair<NameHash, uint32_t>> methodHashes;
 };
 
 struct UsageHash {

@@ -285,7 +285,7 @@ public:
             // if we don't have any imports, then we can try adding it
             // either before the first export, or if we have no
             // exports, then right before the final `end`
-            u4 exportLoc;
+            uint32_t exportLoc;
             if (!exports.empty()) {
                 exportLoc = exports.front().fqn.loc.beginPos() - "export "sv.size() - 1;
             } else {
@@ -326,7 +326,7 @@ public:
             // if we don't have any imports, then we can try adding it
             // either before the first export, or if we have no
             // exports, then right before the final `end`
-            u4 exportLoc = loc.endPos() - "end"sv.size() - 1;
+            uint32_t exportLoc = loc.endPos() - "end"sv.size() - 1;
             // we want to find the end of the last non-empty line, so
             // let's do something gross: walk backward until we find non-whitespace
             const auto &file_source = loc.file().data(gs).source();
@@ -1315,7 +1315,7 @@ bool checkContainsAllPackages(const core::GlobalState &gs, const vector<ast::Par
         }
     }
 
-    for (u4 i = 1; i < gs.filesUsed(); i++) {
+    for (uint32_t i = 1; i < gs.filesUsed(); i++) {
         core::FileRef fref(i);
         if (fref.data(gs).sourceType == core::File::Type::Package && !filePackages.contains(fref)) {
             return false;
@@ -1494,7 +1494,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
         workers.multiplexJob("rewritePackagesAndFiles", [&gs, fileq, resultq]() {
             Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
             vector<ast::ParsedFile> results;
-            u4 filesProcessed = 0;
+            uint32_t filesProcessed = 0;
             ast::ParsedFile job;
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {

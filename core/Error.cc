@@ -139,7 +139,7 @@ void ErrorBuilder::addErrorSection(ErrorSection &&section) {
 void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     ENFORCE(state == State::WillBuild);
     for (auto &edit : autocorrect.edits) {
-        u4 n = edit.loc.endPos() - edit.loc.beginPos();
+        uint32_t n = edit.loc.endPos() - edit.loc.beginPos();
         if (gs.autocorrect) {
             auto line =
                 edit.replacement == ""

@@ -70,7 +70,7 @@ template <typename T> struct ExpressionToTag;
 class ExpressionPtr {
 public:
     // We store tagged pointers as 64-bit values.
-    using tagged_storage = u8;
+    using tagged_storage = uint64_t;
 
     // Required for typecase
     template <class To> static bool isa(const ExpressionPtr &tree);
@@ -324,7 +324,7 @@ public:
     core::LocOffsets declLoc;
     core::ClassOrModuleRef symbol;
 
-    enum class Kind : u1 {
+    enum class Kind : uint8_t {
         Module,
         Class,
     };
@@ -579,7 +579,7 @@ EXPRESSION(UnresolvedIdent) {
 public:
     const core::LocOffsets loc;
 
-    enum class Kind : u1 {
+    enum class Kind : uint8_t {
         Local,
         Instance,
         Class,
@@ -730,7 +730,7 @@ public:
     Flags flags;
 
 private:
-    u2 numPosArgs_;
+    uint16_t numPosArgs_;
 
 public:
     ExpressionPtr recv;
@@ -761,7 +761,8 @@ private:
     ARGS_store args;
 
 public:
-    Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, ARGS_store args, Flags flags = {});
+    Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, uint16_t numPosArgs, ARGS_store args,
+         Flags flags = {});
 
     ExpressionPtr deepCopy() const;
 
@@ -791,10 +792,10 @@ public:
     void addPosArg(ExpressionPtr ptr);
 
     // Insert the given positional argument at the given position, shifting existing arguments over.
-    void insertPosArg(u2 index, ExpressionPtr arg);
+    void insertPosArg(uint16_t index, ExpressionPtr arg);
 
     // Removes the position argument at the given index.
-    void removePosArg(u2 index);
+    void removePosArg(uint16_t index);
 
     // Reserve space for the given number of arguments.
     void reserveArguments(size_t posArgs, size_t kwArgs, bool hasSplat, bool hasBlock) {
@@ -810,24 +811,24 @@ public:
     // Returns a loc covering the arguments in the send. Does not cover the block argument.
     core::LocOffsets argsLoc() const;
 
-    u2 numPosArgs() const {
+    uint16_t numPosArgs() const {
         return numPosArgs_;
     }
 
     // The number of keyword arguments in the Send.
-    u2 numKwArgs() const {
-        u2 range = args.size() - numPosArgs_ - (hasKwSplat() ? 1 : 0) - (hasBlock() ? 1 : 0);
+    uint16_t numKwArgs() const {
+        uint16_t range = args.size() - numPosArgs_ - (hasKwSplat() ? 1 : 0) - (hasBlock() ? 1 : 0);
         ENFORCE(range % 2 == 0);
         return range / 2;
     }
 
     // Get the ith positional argument.
-    ExpressionPtr &getPosArg(u2 idx) {
+    ExpressionPtr &getPosArg(uint16_t idx) {
         ENFORCE(idx < numPosArgs_);
         return args[idx];
     }
 
-    const ExpressionPtr &getPosArg(u2 idx) const {
+    const ExpressionPtr &getPosArg(uint16_t idx) const {
         ENFORCE(idx < numPosArgs_);
         return args[idx];
     }
@@ -852,26 +853,26 @@ public:
     void clearArgs();
 
     // Get the ith keyword argument key. Indices begin at 0, regardless of the number of positional arguments.
-    ExpressionPtr &getKwKey(u2 argnum) {
+    ExpressionPtr &getKwKey(uint16_t argnum) {
         ENFORCE(argnum < numKwArgs());
         auto rawIdx = numPosArgs_ + (argnum * 2);
         return args[rawIdx];
     }
 
-    const ExpressionPtr &getKwKey(u2 argnum) const {
+    const ExpressionPtr &getKwKey(uint16_t argnum) const {
         ENFORCE(argnum < numKwArgs());
         auto rawIdx = numPosArgs_ + (argnum * 2);
         return args[rawIdx];
     }
 
     // Get the ith keyword argument value. Indices begin at 0, regardless of the number of positional arguments.
-    ExpressionPtr &getKwValue(u2 argnum) {
+    ExpressionPtr &getKwValue(uint16_t argnum) {
         ENFORCE(argnum < numKwArgs());
         auto rawIdx = numPosArgs_ + (argnum * 2) + 1;
         return args[rawIdx];
     }
 
-    const ExpressionPtr &getKwValue(u2 argnum) const {
+    const ExpressionPtr &getKwValue(uint16_t argnum) const {
         ENFORCE(argnum < numKwArgs());
         auto rawIdx = numPosArgs_ + (argnum * 2) + 1;
         return args[rawIdx];
@@ -907,16 +908,16 @@ public:
 
     // Returns the number of non-block arguments. Keyword arguments are represented as two separate arguments (key and
     // value).
-    u2 numNonBlockArgs() const {
+    uint16_t numNonBlockArgs() const {
         return numPosArgs_ + (numKwArgs() * 2) + (hasKwSplat() ? 1 : 0);
     }
 
-    const ExpressionPtr &getNonBlockArg(u2 idx) const {
+    const ExpressionPtr &getNonBlockArg(uint16_t idx) const {
         ENFORCE(idx < args.size() - (hasBlock() ? 1 : 0));
         return args[idx];
     }
 
-    ExpressionPtr &getNonBlockArg(u2 idx) {
+    ExpressionPtr &getNonBlockArg(uint16_t idx) {
         ENFORCE(idx < args.size() - (hasBlock() ? 1 : 0));
         return args[idx];
     }

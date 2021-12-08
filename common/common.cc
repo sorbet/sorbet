@@ -52,10 +52,10 @@ string sorbet::FileOps::read(string_view filename) {
     throw sorbet::FileNotFoundException();
 }
 
-void sorbet::FileOps::write(string_view filename, const vector<sorbet::u1> &data) {
+void sorbet::FileOps::write(string_view filename, const vector<uint8_t> &data) {
     FILE *fp = std::fopen(string(filename).c_str(), "wb");
     if (fp) {
-        fwrite(data.data(), sizeof(sorbet::u1), data.size(), fp);
+        fwrite(data.data(), sizeof(uint8_t), data.size(), fp);
         fclose(fp);
         return;
     }
@@ -300,7 +300,7 @@ vector<string> sorbet::FileOps::listFilesInDir(string_view path, const Unordered
 }
 
 // https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-sorbet::u4 sorbet::nextPowerOfTwo(sorbet::u4 v) {
+uint32_t sorbet::nextPowerOfTwo(uint32_t v) {
     // Avoid underflow in subtraction on next line.
     if (v == 0) {
         // 1 is the nearest power of 2 to 0 (2^0)

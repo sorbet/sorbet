@@ -14,7 +14,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     unique_ptr<CFG> res(new CFG); // private constructor
     res->file = ctx.file;
     res->symbol = md.symbol.data(ctx)->dealiasMethod(ctx);
-    u4 temporaryCounter = 1;
+    uint32_t temporaryCounter = 1;
     UnorderedMap<core::SymbolRef, LocalRef> aliases;
     UnorderedMap<core::NameRef, LocalRef> discoveredUndeclaredFields;
     CFGContext cctx(ctx, *res.get(), LocalRef::noVariable(), 0, nullptr, nullptr, nullptr, aliases,

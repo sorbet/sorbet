@@ -45,11 +45,11 @@ class FlattenWalk {
 
     struct ScopeInfo {
         // This tells us how many `class << self` levels we're nested inside
-        u4 staticLevel;
+        uint32_t staticLevel;
         // this corresponds to the thing we're moving
         ScopeType scopeType;
 
-        ScopeInfo(u4 staticLevel, ScopeType scopeType) : staticLevel(staticLevel), scopeType(scopeType) {}
+        ScopeInfo(uint32_t staticLevel, ScopeType scopeType) : staticLevel(staticLevel), scopeType(scopeType) {}
     };
 
     // This is what we keep on the stack: we need to know whether an item should be moved or not (i.e. whether it's
@@ -94,8 +94,8 @@ class FlattenWalk {
     // whether it should be in a `class << self` block.
     struct MovedItem {
         ast::ExpressionPtr expr;
-        u4 staticLevel;
-        MovedItem(ast::ExpressionPtr expr, u4 staticLevel) : expr(move(expr)), staticLevel(staticLevel){};
+        uint32_t staticLevel;
+        MovedItem(ast::ExpressionPtr expr, uint32_t staticLevel) : expr(move(expr)), staticLevel(staticLevel){};
         MovedItem() = default;
     };
 

@@ -33,7 +33,7 @@ Loc Loc::join(Loc other) const {
     return Loc(this->file(), min(this->beginPos(), other.beginPos()), max(this->endPos(), other.endPos()));
 }
 
-Loc::Detail Loc::offset2Pos(const File &file, u4 off) {
+Loc::Detail Loc::offset2Pos(const File &file, uint32_t off) {
     Loc::Detail pos;
 
     ENFORCE(off <= file.source().size(), "file offset out of bounds in file: {} @ {} <= {}", string(file.path()),
@@ -50,7 +50,7 @@ Loc::Detail Loc::offset2Pos(const File &file, u4 off) {
     return pos;
 }
 
-optional<u4> Loc::pos2Offset(const File &file, Loc::Detail pos) {
+optional<uint32_t> Loc::pos2Offset(const File &file, Loc::Detail pos) {
     auto l = pos.line - 1;
     auto &lineBreaks = file.lineBreaks();
     if (!(0 <= l && l < lineBreaks.size())) {
@@ -296,8 +296,8 @@ Loc Loc::adjust(const GlobalState &gs, int32_t beginAdjust, int32_t endAdjust) c
         return Loc::none(this->file());
     }
 
-    u4 newBegin = begin + beginAdjust;
-    u4 newEnd = end + endAdjust;
+    uint32_t newBegin = begin + beginAdjust;
+    uint32_t newEnd = end + endAdjust;
 
     return Loc{this->file(), newBegin, newEnd};
 }
@@ -320,13 +320,13 @@ Loc Loc::adjustLen(const GlobalState &gs, int32_t beginAdjust, int32_t len) cons
         return Loc::none(this->file());
     }
 
-    u4 newBegin = begin + beginAdjust;
-    u4 newEnd = newBegin + len;
+    uint32_t newBegin = begin + beginAdjust;
+    uint32_t newEnd = newBegin + len;
 
     return Loc{this->file(), newBegin, newEnd};
 }
 
-pair<Loc, u4> Loc::findStartOfLine(const GlobalState &gs) const {
+pair<Loc, uint32_t> Loc::findStartOfLine(const GlobalState &gs) const {
     auto startDetail = this->position(gs).first;
     auto maybeLineStart = Loc::pos2Offset(this->file().data(gs), {startDetail.line, 1});
     ENFORCE(maybeLineStart.has_value());
@@ -338,7 +338,7 @@ pair<Loc, u4> Loc::findStartOfLine(const GlobalState &gs) const {
         // if this line didn't have a whitespace prefix, then don't add any padding to it, so startOffset = lineStart.
         padding = 0;
     }
-    u4 startOffset = lineStart + padding;
+    uint32_t startOffset = lineStart + padding;
     return make_pair(Loc(this->file(), startOffset, startOffset), padding);
 }
 

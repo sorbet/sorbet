@@ -375,7 +375,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
     // that resolves types and we don't want to introduce additional passes if
     // we don't have to. It would be a tractable refactor to merge it
     // `ResolveConstantsWalk` if it becomes necessary to process earlier.
-    for (u4 i = 1; i < gs.classAndModulesUsed(); ++i) {
+    for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
         auto sym = core::ClassOrModuleRef(gs, i);
 
         core::ClassOrModuleRef singleton;

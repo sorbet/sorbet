@@ -34,7 +34,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
         return;
     }
 
-    const u1 *const nameTablePayload = getNameTablePayload;
+    const uint8_t *const nameTablePayload = getNameTablePayload;
     if (nameTablePayload == nullptr) {
         Timer timeit(gs->tracer(), "read_global_state.source");
         sorbet::rbi::populateRBIsInto(gs);
@@ -79,7 +79,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
 }
 
 namespace {
-bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const u1 *maybeGsBytes) {
+bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const uint8_t *maybeGsBytes) {
     const bool storedUidMatches =
         maybeGsBytes && gs.kvstoreUuid == core::serialize::Serializer::loadGlobalStateUUID(gs, maybeGsBytes);
     const bool noPreviouslyStoredUuid = !maybeGsBytes && gs.kvstoreUuid == 0;

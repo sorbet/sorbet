@@ -153,7 +153,7 @@ bool isSetter(const GlobalState &gs, NameRef fun) {
     return false;
 }
 
-u4 locSize(core::Loc loc) {
+uint32_t locSize(core::Loc loc) {
     return loc.endPos() - loc.beginPos();
 }
 
@@ -222,7 +222,7 @@ int getArity(const GlobalState &gs, MethodRef method) {
 
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
-MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, u2 numPosArgs,
+MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     ENFORCE(Context::permitOverloadDefinitions(gs, primary.data(gs)->loc().file(), primary),
@@ -658,7 +658,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             // it is, this verifies that the methodLoc below exists.
                             if (loc.exists() && absl::StartsWith(loc.source(gs).value(), toReplace)) {
                                 const auto methodLoc =
-                                    Loc{loc.file(), loc.beginPos(), (u4)(loc.beginPos() + toReplace.length())};
+                                    Loc{loc.file(), loc.beginPos(), (uint32_t)(loc.beginPos() + toReplace.length())};
                                 e.replaceWith(fmt::format("Replace with `{}.new`", replacement), methodLoc, "{}.new",
                                               replacement);
                                 addedAutocorrect = true;
@@ -675,7 +675,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                     absl::StartsWith(callLoc.source(gs).value(),
                                                      fmt::format("{}.{}", recvLoc.source(gs).value(), toReplace))) {
                                     const auto methodLoc = Loc{recvLoc.file(), recvLoc.endPos() + 1,
-                                                               (u4)(recvLoc.endPos() + 1 + toReplace.length())};
+                                                               (uint32_t)(recvLoc.endPos() + 1 + toReplace.length())};
                                     e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}",
                                                   replacement);
                                     addedAutocorrect = true;
@@ -1770,7 +1770,7 @@ void applySig(const GlobalState &gs, const DispatchArgs &args, DispatchResult &r
     }
     CallLocs callLocs{args.locs.file, args.locs.call, callLocsReceiver, callLocsArgs};
 
-    u2 numPosArgs = args.numPosArgs - (1 + argsToDropOffEnd);
+    uint16_t numPosArgs = args.numPosArgs - (1 + argsToDropOffEnd);
     auto dispatchArgsArgs = InlinedVector<const TypeAndOrigins *, 2>{};
     for (auto arg = args.args.begin() + argsOffset, end = args.args.end() - argsToDropOffEnd; arg != end; ++arg) {
         dispatchArgsArgs.emplace_back(*arg);
@@ -2007,7 +2007,7 @@ public:
             return;
         }
 
-        u2 numPosArgs = posTuple->elems.size();
+        uint16_t numPosArgs = posTuple->elems.size();
 
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
         InlinedVector<const TypeAndOrigins *, 2> sendArgs =
@@ -2239,7 +2239,7 @@ public:
 
         NameRef fn = lit.asName(gs);
 
-        u2 numPosArgs = args.numPosArgs - 3;
+        uint16_t numPosArgs = args.numPosArgs - 3;
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
         InlinedVector<LocOffsets, 2> sendArgLocs;
         for (int i = 3; i < args.args.size(); i++) {
@@ -2321,7 +2321,7 @@ public:
             return;
         }
 
-        u2 numPosArgs = posTuple->elems.size();
+        uint16_t numPosArgs = posTuple->elems.size();
 
         auto kwType = args.args[3]->type;
         auto *kwTuple = cast_type<TupleType>(kwType);
@@ -2416,7 +2416,7 @@ public:
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, selfTy.type, mustExist);
 
-        u2 numPosArgs = args.numPosArgs - 1;
+        uint16_t numPosArgs = args.numPosArgs - 1;
 
         InlinedVector<const TypeAndOrigins *, 2> sendArgStore;
         InlinedVector<LocOffsets, 2> sendArgLocs;
@@ -2693,8 +2693,8 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
     }
 
     // TODO(jez) Use Loc::adjust here
-    u4 valueBegin = origin.beginPos() + keyStart + keySymbol.size() + char_traits<char>::length(" ");
-    u4 valueEnd = valueBegin + char_traits<char>::length(valueStr);
+    uint32_t valueBegin = origin.beginPos() + keyStart + keySymbol.size() + char_traits<char>::length(" ");
+    uint32_t valueEnd = valueBegin + char_traits<char>::length(valueStr);
     if (valueEnd <= origin.file().data(gs).source().size()) {
         auto loc = Loc{origin.file(), valueBegin, valueEnd};
         if (loc.exists() && loc.source(gs).value() == valueStr) {

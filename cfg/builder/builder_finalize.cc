@@ -288,7 +288,7 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
             continue;
         }
 
-        RnW.reads[bb->id].forEach([&cfg, &bb](u4 local) {
+        RnW.reads[bb->id].forEach([&cfg, &bb](uint32_t local) {
             auto curMin = cfg.minLoops[local];
             if (curMin > bb->outerLoops) {
                 curMin = bb->outerLoops;
@@ -359,7 +359,7 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
                 const auto &deadForBlock = deadByBlock[bb->id];
                 if (!deadForBlock.empty()) {
                     UIntSet toRemove(cfg.numLocalVariables());
-                    deadForBlock.forEach([&bb, &cfg, &toRemove](u4 local) -> void {
+                    deadForBlock.forEach([&bb, &cfg, &toRemove](uint32_t local) -> void {
                         // TODO(nelhage) We can't erase for variables inside loops, due
                         // to how our "pinning" type inference works. We can remove this
                         // inner condition when we get a better type inference
@@ -405,7 +405,7 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
             intersection.intersect(upperBounds2[it->id]);
             // Note: forEach enqueues arguments in sorted order. We assume that args is empty so we don't need to sort.
             ENFORCE_NO_TIMER(it->args.empty());
-            intersection.forEach([&it](u4 local) -> void { it->args.emplace_back(local); });
+            intersection.forEach([&it](uint32_t local) -> void { it->args.emplace_back(local); });
             // it->args is now sorted in LocalRef ID order.
             ENFORCE(absl::c_is_sorted(it->args,
                                       [](auto &a, auto &b) -> bool { return a.variable.id() < b.variable.id(); }));

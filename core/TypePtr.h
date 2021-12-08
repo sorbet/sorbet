@@ -21,7 +21,7 @@ class TypePtr final {
 
 public:
     // We store tagged pointers as 64-bit values.
-    using tagged_storage = u8;
+    using tagged_storage = uint64_t;
 
     enum class Tag {
         ClassType = 1,
@@ -72,9 +72,9 @@ public:
 private:
     union {
         // If containsPtr()
-        std::atomic<u4> *counter;
+        std::atomic<uint32_t> *counter;
         // If !containsPtr()
-        u8 value;
+        uint64_t value;
     };
     tagged_storage store;
 
@@ -92,7 +92,7 @@ private:
         return static_cast<tagged_storage>(tag);
     }
 
-    static tagged_storage tagValue(Tag tag, u4 inlinedValue) {
+    static tagged_storage tagValue(Tag tag, uint32_t inlinedValue) {
         auto val = tagToMask(tag);
 
         // Store value into val.  It doesn't much matter where we put it in
@@ -114,13 +114,13 @@ private:
         return maskedPtr | val | NOT_INLINED_MASK;
     }
 
-    TypePtr(Tag tag, std::atomic<u4> *counter, void *expr) : counter(counter), store(tagPtr(tag, expr)) {
+    TypePtr(Tag tag, std::atomic<uint32_t> *counter, void *expr) : counter(counter), store(tagPtr(tag, expr)) {
         ENFORCE_NO_TIMER(counter != nullptr);
         counter->fetch_add(1);
     }
 
     // Inlined TypePtr constructor
-    TypePtr(Tag tag, u4 value1, u8 value2) : value(value2), store(tagValue(tag, value1)) {}
+    TypePtr(Tag tag, uint32_t value1, uint64_t value2) : value(value2), store(tagValue(tag, value1)) {}
 
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
@@ -135,14 +135,14 @@ private:
         return saved;
     }
 
-    std::atomic<u4> *releaseCounter() noexcept {
+    std::atomic<uint32_t> *releaseCounter() noexcept {
         ENFORCE_NO_TIMER(containsPtr());
         auto saved = counter;
         counter = nullptr;
         return saved;
     }
 
-    u8 releaseValue() noexcept {
+    uint64_t releaseValue() noexcept {
         ENFORCE_NO_TIMER(!containsPtr());
         auto saved = value;
         value = 0;
@@ -152,7 +152,7 @@ private:
     void handleDelete() noexcept {
         if (containsPtr()) {
             // fetch_sub returns value prior to subtract
-            const u4 counterVal = counter->fetch_sub(1) - 1;
+            const uint32_t counterVal = counter->fetch_sub(1) - 1;
             if (counterVal == 0) {
                 deleteTagged(tag(), get());
                 delete counter;
@@ -162,10 +162,10 @@ private:
 
     void _sanityCheck(const GlobalState &gs) const;
 
-    u4 inlinedValue() const {
+    uint32_t inlinedValue() const {
         ENFORCE_NO_TIMER(!containsPtr());
         auto val = store >> 32;
-        return static_cast<u4>(val);
+        return static_cast<uint32_t>(val);
     }
 
     void *get() const {
@@ -237,7 +237,7 @@ public:
         return *this;
     };
 
-    explicit TypePtr(Tag tag, void *expr) : TypePtr(tag, new std::atomic<u4>(), expr) {}
+    explicit TypePtr(Tag tag, void *expr) : TypePtr(tag, new std::atomic<uint32_t>(), expr) {}
 
     operator bool() const {
         return (bool)store;
@@ -318,7 +318,7 @@ public:
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
-    u4 hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
 
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
 

@@ -146,7 +146,7 @@ llvm::Function *IREmitterHelpers::getInitFunction(CompilerState &cs, core::Metho
 
 // TODO(froydnj): LLVM datatypes don't really have the concept of signedness, only
 // LLVM operations.  Does that mean we should just be using IRBuilder::getInt32 etc.?
-llvm::Value *IREmitterHelpers::buildU4(CompilerState &cs, u4 i) {
+llvm::Value *IREmitterHelpers::buildU4(CompilerState &cs, uint32_t i) {
     return llvm::ConstantInt::get(cs, llvm::APInt(32, i));
 }
 

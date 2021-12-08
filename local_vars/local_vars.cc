@@ -114,8 +114,8 @@ class LocalNameInserter {
         };
         UnorderedMap<core::NameRef, core::LocalVariable> locals;
         vector<Arg> args;
-        std::optional<u4> oldBlockCounter = nullopt;
-        u4 localId = 0;
+        std::optional<uint32_t> oldBlockCounter = nullopt;
+        uint32_t localId = 0;
         bool insideBlock = false;
         bool insideMethod = false;
     };
@@ -173,7 +173,7 @@ class LocalNameInserter {
     //   [].map { # $1 }
     // end
     // [].each { # $2 }
-    u4 blockCounter{0};
+    uint32_t blockCounter{0};
 
     core::LocalVariable enterLocal(core::NameRef name) {
         auto &frame = scopeStack.back();

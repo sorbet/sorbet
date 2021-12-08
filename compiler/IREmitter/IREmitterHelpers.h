@@ -52,7 +52,7 @@ struct Alias {
 
 class Intrinsics {
 public:
-    enum class HandleBlock : u1 {
+    enum class HandleBlock : uint8_t {
         Handled = 1,
         Unhandled = 2,
     };
@@ -114,7 +114,7 @@ public:
     static SendArgInfo fillSendArgArray(MethodCallContext &mcctx, const std::size_t offset);
     static SendArgInfo fillSendArgArray(MethodCallContext &mcctx);
 
-    static llvm::Value *buildU4(CompilerState &cs, u4 i);
+    static llvm::Value *buildU4(CompilerState &cs, uint32_t i);
     static llvm::Value *buildS4(CompilerState &cs, int i);
 
     static llvm::Value *emitMethodCall(MethodCallContext &mcctx);

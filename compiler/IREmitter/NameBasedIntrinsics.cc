@@ -834,11 +834,11 @@ public:
 
 class UntypedSpecialization : public NameBasedIntrinsicMethod {
     const core::NameRef rubyMethod;
-    const u4 arity;
+    const uint32_t arity;
     const string_view cMethod;
 
 public:
-    UntypedSpecialization(core::NameRef rubyMethod, u4 arity, string_view cMethod)
+    UntypedSpecialization(core::NameRef rubyMethod, uint32_t arity, string_view cMethod)
         : NameBasedIntrinsicMethod{Intrinsics::HandleBlock::Unhandled}, rubyMethod(rubyMethod), arity(arity),
           cMethod(cMethod) {}
 

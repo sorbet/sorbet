@@ -14,9 +14,9 @@ struct EpochTimers {
 
 struct ErrorStatus {
     // The epoch at which we last sent diagnostics for this file.
-    u4 lastReportedEpoch = 0;
+    uint32_t lastReportedEpoch = 0;
     // The number of errors reported for this file during the last reported epoch.
-    u4 errorCount = 0;
+    uint32_t errorCount = 0;
 };
 
 class ErrorReporter {
@@ -24,27 +24,27 @@ class ErrorReporter {
     // Maps from file ref ID to its error status.
     std::vector<ErrorStatus> fileErrorStatuses;
     ErrorStatus &getFileErrorStatus(core::FileRef file);
-    UnorderedMap<u4, EpochTimers> epochTimers;
+    UnorderedMap<uint32_t, EpochTimers> epochTimers;
     // The number of errors currently displayed in the editor. Reset whenever Sorbet begins a non-incremental epoch,
     // which promises to retypecheck every file. Used to implement a global error limit.
-    u4 clientErrorCount = 0;
+    uint32_t clientErrorCount = 0;
     // Tracks the last epoch that was a full typecheck. Used to sanity check clientErrorCount.
-    u4 lastFullTypecheckEpoch = 0;
+    uint32_t lastFullTypecheckEpoch = 0;
 
 public:
     ErrorReporter(std::shared_ptr<const LSPConfiguration> config);
-    std::vector<core::FileRef> filesWithErrorsSince(u4 epoch);
+    std::vector<core::FileRef> filesWithErrorsSince(uint32_t epoch);
     /**
      * Sends diagnostics from a typecheck run of a single file to the client.
      * `epoch` specifies the epoch of the file updates that produced these diagnostics. Used to prevent emitting
      * outdated diagnostics from a slow path run if they had already been re-typechecked on the fast path.
      */
-    void pushDiagnostics(u4 epoch, core::FileRef file, const std::vector<std::unique_ptr<core::Error>> &errors,
+    void pushDiagnostics(uint32_t epoch, core::FileRef file, const std::vector<std::unique_ptr<core::Error>> &errors,
                          const core::GlobalState &gs);
 
-    void beginEpoch(u4 epoch, bool isIncremental, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
-    void endEpoch(u4 epoch, bool committed = true);
-    u4 lastDiagnosticEpochForFile(core::FileRef file);
+    void beginEpoch(uint32_t epoch, bool isIncremental, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
+    void endEpoch(uint32_t epoch, bool committed = true);
+    uint32_t lastDiagnosticEpochForFile(core::FileRef file);
 
     // Sanity checks error count data.
     void sanityCheck() const;
@@ -52,10 +52,10 @@ public:
 
 class ErrorEpoch final {
     ErrorReporter &errorReporter;
-    u4 epoch;
+    uint32_t epoch;
 
 public:
-    ErrorEpoch(ErrorReporter &errorReporter, u4 epoch, bool isIncremental,
+    ErrorEpoch(ErrorReporter &errorReporter, uint32_t epoch, bool isIncremental,
                std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
 
     ~ErrorEpoch();

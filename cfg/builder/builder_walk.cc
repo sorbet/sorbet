@@ -464,7 +464,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                             // add a test for YieldParamPresent
                             auto present = cctx.newTemporary(core::Names::argPresent());
                             synthesizeExpr(argBlock, present, arg.loc,
-                                           make_insn<YieldParamPresent>(static_cast<u2>(i)));
+                                           make_insn<YieldParamPresent>(static_cast<uint16_t>(i)));
                             conditionalJump(argBlock, present, presentBlock, missingBlock, cctx.inWhat, arg.loc);
 
                             // make a new block for the present and missing blocks to join

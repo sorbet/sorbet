@@ -14,8 +14,8 @@ using namespace std;
 
 namespace sorbet::core {
 
-NameRef::NameRef(const GlobalState &gs, NameKind kind, u4 id)
-    : DebugOnlyCheck(gs, kind, id), _id{(id << KIND_BITS) | static_cast<u4>(kind)} {
+NameRef::NameRef(const GlobalState &gs, NameKind kind, uint32_t id)
+    : DebugOnlyCheck(gs, kind, id), _id{(id << KIND_BITS) | static_cast<uint32_t>(kind)} {
     // If this fails, the symbol table is too big :(
     ENFORCE_NO_TIMER(id <= MAX_ID);
 }
@@ -257,7 +257,7 @@ bool NameRef::isValidConstantName(const GlobalState &gs) const {
     }
 }
 
-NameRefDebugCheck::NameRefDebugCheck(const GlobalState &gs, NameKind kind, u4 index) {
+NameRefDebugCheck::NameRefDebugCheck(const GlobalState &gs, NameKind kind, uint32_t index) {
     // store the globalStateId of the creating global state to allow sharing refs between siblings
     // when the ref refers to a name in the common ancestor
     globalStateId = gs.globalStateId;
@@ -285,7 +285,7 @@ NameRefDebugCheck::NameRefDebugCheck(const GlobalState &gs, NameKind kind, u4 in
     }
 }
 
-void NameRefDebugCheck::check(const GlobalState &gs, NameKind kind, u4 index) const {
+void NameRefDebugCheck::check(const GlobalState &gs, NameKind kind, uint32_t index) const {
     if (globalStateId == -1) {
         return;
     }

@@ -20,7 +20,7 @@ struct QualifiedName {
         return nameParts.empty();
     }
 
-    u4 size() const {
+    uint32_t size() const {
         return nameParts.size();
     }
 
@@ -36,7 +36,7 @@ struct QualifiedName {
     std::string join(const core::GlobalState &gs, std::string_view sep) const;
 };
 
-const u4 NONE_ID = (u4)-1;
+const uint32_t NONE_ID = (uint32_t)-1;
 
 struct ParsedFile;
 struct Reference;
@@ -53,12 +53,12 @@ enum class ClassKind { Class, Module };
 
 // A reference to a specific `Definition` inside of a `ParsedFile`.
 struct DefinitionRef {
-    u4 _id;
+    uint32_t _id;
 
     DefinitionRef() : _id(NONE_ID){};
-    DefinitionRef(u4 id) : _id(id) {}
+    DefinitionRef(uint32_t id) : _id(id) {}
 
-    u4 id() const {
+    uint32_t id() const {
         return _id;
     }
 
@@ -71,11 +71,11 @@ struct DefinitionRef {
 
 // A reference to a specific `Reference` inside of a `ParsedFile`.
 struct ReferenceRef {
-    u4 _id;
+    uint32_t _id;
     ReferenceRef() : _id(NONE_ID){};
-    ReferenceRef(u4 id) : _id(id) {}
+    ReferenceRef(uint32_t id) : _id(id) {}
 
-    u4 id() const {
+    uint32_t id() const {
         return _id;
     }
 
@@ -88,7 +88,7 @@ struct ReferenceRef {
 
 // A constant definition---a class, module, constant definition, or constant alias---along with relevant metadata
 struct Definition {
-    enum class Type : u8 { Module, Class, Casgn, Alias, TypeAlias };
+    enum class Type : uint64_t { Module, Class, Casgn, Alias, TypeAlias };
 
     // the reference to this definition. Once `AutogenWalk` is completed and a full `ParsedFile` has been created, it
     // should always be the case that
@@ -157,7 +157,7 @@ struct ParsedFile {
     // the original file AST from Sorbet
     ast::ParsedFile tree;
     // the checksum of this file
-    u4 cksum;
+    uint32_t cksum;
     // the path on disk to this file
     std::string path;
     // every statically-known constant defined by this file

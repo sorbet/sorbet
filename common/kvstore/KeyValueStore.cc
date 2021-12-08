@@ -201,7 +201,7 @@ void OwnedKeyValueStore::writeInternal(std::string_view key, void *value, size_t
     }
 }
 
-void OwnedKeyValueStore::write(string_view key, const vector<u1> &value) {
+void OwnedKeyValueStore::write(string_view key, const vector<uint8_t> &value) {
     writeInternal(key, (void *)value.data(), value.size());
 }
 
@@ -238,7 +238,7 @@ KeyValueStoreValue OwnedKeyValueStore::read(string_view key) const {
         }
         throw_mdb_error("failed read from the database"sv, rc);
     }
-    return {static_cast<u1 *>(data.mv_data), data.mv_size};
+    return {static_cast<uint8_t *>(data.mv_data), data.mv_size};
 }
 
 void OwnedKeyValueStore::clear() {

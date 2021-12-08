@@ -113,8 +113,10 @@ core::Loc Range::toLoc(const core::GlobalState &gs, core::FileRef file) const {
     ENFORCE(end->line >= 0);
     ENFORCE(end->character >= 0);
 
-    auto sPos = core::Loc::pos2Offset(file.data(gs), core::Loc::Detail{(u4)start->line + 1, (u4)start->character + 1});
-    auto ePos = core::Loc::pos2Offset(file.data(gs), core::Loc::Detail{(u4)end->line + 1, (u4)end->character + 1});
+    auto sPos = core::Loc::pos2Offset(file.data(gs),
+                                      core::Loc::Detail{(uint32_t)start->line + 1, (uint32_t)start->character + 1});
+    auto ePos =
+        core::Loc::pos2Offset(file.data(gs), core::Loc::Detail{(uint32_t)end->line + 1, (uint32_t)end->character + 1});
 
     // These offsets are non-nullopt assuming the input Range is valid
     return core::Loc(file, sPos.value(), ePos.value());

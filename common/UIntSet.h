@@ -6,20 +6,20 @@
 namespace sorbet {
 class UIntSet final {
     // Most uses require < 128 members.
-    InlinedVector<u4, 4> _members;
+    InlinedVector<uint32_t, 4> _members;
 
 public:
     // Creates a new set with the given capacity as the maximum acceptable item ID.
-    UIntSet(u4 capacity);
+    UIntSet(uint32_t capacity);
 
     // Add number to set.
-    void add(u4 item);
+    void add(uint32_t item);
 
     // Remove number from set.
-    void remove(u4 item);
+    void remove(uint32_t item);
 
     // Returns true if the set contains the given item.
-    bool contains(u4 item) const;
+    bool contains(uint32_t item) const;
 
     // Defined in UIntSetForEach.h so that it's only included where it is called.
     template <typename F> void forEach(F each) const;

@@ -769,7 +769,7 @@ string fieldType(FieldType arg) {
         case FieldType::String:
             return "const std::string";
         case FieldType::Uint:
-            return "u4";
+            return "uint32_t";
         case FieldType::Loc:
             return "core::LocOffsets";
         case FieldType::Bool:

@@ -459,8 +459,8 @@ void Payload::assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::
     return;
 }
 
-llvm::Value *Payload::boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *u1) {
-    return builder.CreateCall(cs.getFunction("sorbet_boolToRuby"), {u1}, "rubyBool");
+llvm::Value *Payload::boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *uint8_t) {
+    return builder.CreateCall(cs.getFunction("sorbet_boolToRuby"), {uint8_t}, "rubyBool");
 }
 
 namespace {

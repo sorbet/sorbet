@@ -11,10 +11,10 @@ namespace sorbet::core {
 
 class ErrorClass {
 public:
-    const u2 code;
+    const uint16_t code;
     const StrictLevel minLevel;
 
-    constexpr ErrorClass(u2 code, StrictLevel minLevel) : code(code), minLevel(minLevel){};
+    constexpr ErrorClass(uint16_t code, StrictLevel minLevel) : code(code), minLevel(minLevel){};
     ErrorClass(const ErrorClass &rhs) = default;
 
     bool operator==(const ErrorClass &rhs) const {

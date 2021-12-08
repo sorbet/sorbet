@@ -21,9 +21,9 @@ auto errorQueue = make_shared<ErrorQueue>(*logger, *logger, errorCollector);
 
 struct Offset2PosTest {
     string src;
-    u4 off;
-    u4 line;
-    u4 col;
+    uint32_t off;
+    uint32_t line;
+    uint32_t col;
 };
 
 TEST_CASE("TestOffset2Pos") {
@@ -166,17 +166,17 @@ TEST_CASE("Substitute") { // NOLINT
 // Privileged class that is friends with TypePtr
 class TypePtrTestHelper {
 public:
-    static std::atomic<u4> *counter(const TypePtr &ptr) {
+    static std::atomic<uint32_t> *counter(const TypePtr &ptr) {
         CHECK(ptr.containsPtr());
         return ptr.counter;
     }
 
-    static u8 value(const TypePtr &ptr) {
+    static uint64_t value(const TypePtr &ptr) {
         CHECK(!ptr.containsPtr());
         return ptr.value;
     }
 
-    static u4 inlinedValue(const TypePtr &ptr) {
+    static uint32_t inlinedValue(const TypePtr &ptr) {
         CHECK(!ptr.containsPtr());
         return ptr.inlinedValue();
     }
@@ -194,7 +194,7 @@ public:
         return TypePtr(tag, type);
     }
 
-    static TypePtr createInlined(TypePtr::Tag tag, u4 inlinedValue, u8 value) {
+    static TypePtr createInlined(TypePtr::Tag tag, uint32_t inlinedValue, uint64_t value) {
         return TypePtr(tag, inlinedValue, value);
     }
 };
@@ -264,7 +264,7 @@ TEST_SUITE("TypePtr") {
 
     TEST_CASE("Supports inlined values") {
         // Let's try edge cases.
-        std::list<pair<u4, u8>> valuesArray = {
+        std::list<pair<uint32_t, uint64_t>> valuesArray = {
             {0, 0},
             {1, 1},
             {0xFFFFFFFF, 0xFFFFFFFFFFFFFFFF},

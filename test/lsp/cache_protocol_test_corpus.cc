@@ -226,9 +226,9 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
 
             // File was updated, so no cache hits.
             auto counters = getCounters();
-            const u4 kvstoreMissCount = counters.getCounter("types.input.files.kvstore.miss");
-            const u4 kvstoreHitCount = counters.getCounter("types.input.files.kvstore.hit");
-            const u4 cacheCommitted = counters.getCounter("cache.committed");
+            const uint32_t kvstoreMissCount = counters.getCounter("types.input.files.kvstore.miss");
+            const uint32_t kvstoreHitCount = counters.getCounter("types.input.files.kvstore.hit");
+            const uint32_t cacheCommitted = counters.getCounter("cache.committed");
             CHECK_GT(kvstoreMissCount, 0);
             CHECK_EQ(kvstoreHitCount, 0);
             CHECK_EQ(cacheCommitted, 1);

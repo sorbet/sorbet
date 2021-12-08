@@ -8,7 +8,7 @@ namespace sorbet {
 class OwnedKeyValueStore;
 
 struct KeyValueStoreValue {
-    u1 *data;
+    uint8_t *data;
     size_t len;
 };
 
@@ -82,7 +82,7 @@ public:
     std::string_view readString(std::string_view key) const;
     void writeString(std::string_view key, std::string_view value);
     /** can only be called from owning thread */
-    void write(std::string_view key, const std::vector<u1> &value);
+    void write(std::string_view key, const std::vector<uint8_t> &value);
 
     /** Aborts all changes without writing them to disk. Returns an unowned kvstore that can be re-owned if more writes
      * are desired. If not explicitly called, OwnedKeyValueStore will implicitly abort everything in the destructor.

@@ -149,7 +149,7 @@ public:
 
     class ReadsAndWrites {
     public:
-        ReadsAndWrites(u4 maxBasicBlockId, u4 numLocalVariables);
+        ReadsAndWrites(uint32_t maxBasicBlockId, uint32_t numLocalVariables);
         std::vector<UIntSet> reads;
         std::vector<UIntSet> writes;
 

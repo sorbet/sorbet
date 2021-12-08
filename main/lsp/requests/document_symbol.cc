@@ -92,7 +92,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
     vector<unique_ptr<DocumentSymbol>> result;
     string_view uri = params->textDocument->uri;
     auto fref = config.uri2FileRef(gs, uri);
-    vector<pair<core::SymbolRef::Kind, u4>> symbolTypes = {
+    vector<pair<core::SymbolRef::Kind, uint32_t>> symbolTypes = {
         {core::SymbolRef::Kind::ClassOrModule, gs.classAndModulesUsed()},
         {core::SymbolRef::Kind::Method, gs.methodsUsed()},
         {core::SymbolRef::Kind::FieldOrStaticField, gs.fieldsUsed()},
@@ -100,7 +100,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
         {core::SymbolRef::Kind::TypeMember, gs.typeMembersUsed()},
     };
     for (auto [kind, used] : symbolTypes) {
-        for (u4 idx = 1; idx < used; idx++) {
+        for (uint32_t idx = 1; idx < used; idx++) {
             core::SymbolRef ref(gs, kind, idx);
             if (!hideSymbol(gs, ref) &&
                 // a bit counter-intuitive, but this actually should be `!= fref`, as it prevents duplicates.

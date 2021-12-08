@@ -53,7 +53,7 @@ class LSPPreprocessor final {
     UnorderedMap<std::string, std::shared_ptr<core::File>> openFiles;
 
     // Indicates the next version to use on an incoming edit. Used to refer to edits by ID.
-    u4 nextVersion = 1;
+    uint32_t nextVersion = 1;
 
     /**
      * Merges all consecutive file updates into a single update. File updates are also merged if they are only separated
@@ -68,13 +68,13 @@ class LSPPreprocessor final {
     /* The following methods convert edits into SorbetWorkspaceEditParams. */
 
     std::unique_ptr<SorbetWorkspaceEditParams>
-    canonicalizeEdits(u4 v, std::unique_ptr<DidChangeTextDocumentParams> changeParams);
-    std::unique_ptr<SorbetWorkspaceEditParams> canonicalizeEdits(u4 v,
+    canonicalizeEdits(uint32_t v, std::unique_ptr<DidChangeTextDocumentParams> changeParams);
+    std::unique_ptr<SorbetWorkspaceEditParams> canonicalizeEdits(uint32_t v,
                                                                  std::unique_ptr<DidOpenTextDocumentParams> openParams);
     std::unique_ptr<SorbetWorkspaceEditParams>
-    canonicalizeEdits(u4 v, std::unique_ptr<DidCloseTextDocumentParams> closeParams);
+    canonicalizeEdits(uint32_t v, std::unique_ptr<DidCloseTextDocumentParams> closeParams);
     std::unique_ptr<SorbetWorkspaceEditParams>
-    canonicalizeEdits(u4 v, std::unique_ptr<WatchmanQueryResponse> queryResponse) const;
+    canonicalizeEdits(uint32_t v, std::unique_ptr<WatchmanQueryResponse> queryResponse) const;
 
     /**
      * Get the current contents of the file at the given path. Returns "" (empty string view) if file does not yet
@@ -88,7 +88,7 @@ class LSPPreprocessor final {
 
 public:
     LSPPreprocessor(std::shared_ptr<LSPConfiguration> config, std::shared_ptr<absl::Mutex> taskQueueMutex,
-                    std::shared_ptr<TaskQueueState> taskQueue, u4 initialVersion = 0);
+                    std::shared_ptr<TaskQueueState> taskQueue, uint32_t initialVersion = 0);
 
     /**
      * Performs pre-processing on the incoming LSP request and appends it to the queue.

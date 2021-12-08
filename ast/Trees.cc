@@ -231,7 +231,7 @@ Assign::Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs)
     _sanityCheck();
 }
 
-Send::Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, Send::ARGS_store args,
+Send::Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, uint16_t numPosArgs, Send::ARGS_store args,
            Flags flags)
     : loc(loc), fun(fun), flags(flags), numPosArgs_(numPosArgs), recv(std::move(recv)), args(std::move(args)) {
     categoryCounterInc("trees", "send");
@@ -1034,13 +1034,13 @@ void Send::addPosArg(ExpressionPtr ptr) {
     this->numPosArgs_++;
 }
 
-void Send::insertPosArg(u2 index, ExpressionPtr arg) {
+void Send::insertPosArg(uint16_t index, ExpressionPtr arg) {
     ENFORCE(index <= numPosArgs_);
     this->args.emplace(this->args.begin() + index, std::move(arg));
     this->numPosArgs_++;
 }
 
-void Send::removePosArg(u2 index) {
+void Send::removePosArg(uint16_t index) {
     ENFORCE(index < numPosArgs_);
     this->args.erase(this->args.begin() + index);
     this->numPosArgs_--;

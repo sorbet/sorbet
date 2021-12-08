@@ -127,7 +127,7 @@ private:
 
         bool isSuperclass; // true if superclass, false for mixin
         bool isInclude;    // true if include, false if extend
-        std::optional<u2> mixinIndex;
+        std::optional<uint16_t> mixinIndex;
 
         AncestorResolutionItem() = default;
         AncestorResolutionItem(AncestorResolutionItem &&rhs) noexcept = default;
@@ -1857,7 +1857,7 @@ class ResolveTypeMembersAndFieldsWalk {
     static void computeExternalTypes(core::GlobalState &gs) {
         Timer timeit(gs.tracer(), "resolver.computeExternalType");
         // Ensure all symbols have `externalType` computed.
-        for (u4 i = 1; i < gs.classAndModulesUsed(); i++) {
+        for (uint32_t i = 1; i < gs.classAndModulesUsed(); i++) {
             core::ClassOrModuleRef(gs, i).data(gs)->unsafeComputeExternalType(gs);
         }
     }

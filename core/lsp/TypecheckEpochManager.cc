@@ -13,7 +13,7 @@ void TypecheckEpochManager::assertConsistentThread(optional<thread::id> &expecte
     }
 }
 
-void TypecheckEpochManager::startCommitEpoch(u4 epoch) {
+void TypecheckEpochManager::startCommitEpoch(uint32_t epoch) {
     assertConsistentThread(typecheckingThreadId, "TypecheckEpochManager::startCommitEpoch", "typechecking");
     absl::MutexLock lock(&epochMutex);
     ENFORCE(epoch != currentlyProcessingLSPEpoch.load());
@@ -32,9 +32,9 @@ bool TypecheckEpochManager::wasTypecheckingCanceled() const {
 }
 
 TypecheckEpochManager::TypecheckingStatus TypecheckEpochManager::getStatusInternal() const {
-    const u4 processing = currentlyProcessingLSPEpoch.load();
-    const u4 committed = lastCommittedLSPEpoch.load();
-    const u4 invalidator = lspEpochInvalidator.load();
+    const uint32_t processing = currentlyProcessingLSPEpoch.load();
+    const uint32_t committed = lastCommittedLSPEpoch.load();
+    const uint32_t invalidator = lspEpochInvalidator.load();
     const bool slowPathRunning = processing != committed;
     const bool slowPathIsCanceled = processing != invalidator;
     return TypecheckingStatus{slowPathRunning, slowPathIsCanceled, processing};
@@ -45,13 +45,13 @@ TypecheckEpochManager::TypecheckingStatus TypecheckEpochManager::getStatus() con
     return getStatusInternal();
 }
 
-bool TypecheckEpochManager::tryCancelSlowPath(u4 newEpoch) {
+bool TypecheckEpochManager::tryCancelSlowPath(uint32_t newEpoch) {
     assertConsistentThread(messageProcessingThreadId, "TypecheckEpochManager::tryCancelSlowPath",
                            "messageProcessingThread");
     absl::MutexLock lock(&epochMutex);
-    const u4 processing = currentlyProcessingLSPEpoch.load();
+    const uint32_t processing = currentlyProcessingLSPEpoch.load();
     ENFORCE(newEpoch != processing); // This would prevent a cancelation from happening.
-    const u4 committed = lastCommittedLSPEpoch.load();
+    const uint32_t committed = lastCommittedLSPEpoch.load();
     // The second condition should never happen, but guard against it in production.
     if (processing == committed || newEpoch == processing) {
         return false;
@@ -61,7 +61,7 @@ bool TypecheckEpochManager::tryCancelSlowPath(u4 newEpoch) {
     return true;
 }
 
-bool TypecheckEpochManager::tryCommitEpoch(core::GlobalState &gs, u4 epoch, bool isCancelable,
+bool TypecheckEpochManager::tryCommitEpoch(core::GlobalState &gs, uint32_t epoch, bool isCancelable,
                                            optional<shared_ptr<PreemptionTaskManager>> preemptionManager,
                                            function<void()> typecheck) {
     assertConsistentThread(typecheckingThreadId, "TypecheckEpochManager::tryCommitEpoch", "typechecking");
@@ -80,8 +80,8 @@ bool TypecheckEpochManager::tryCommitEpoch(core::GlobalState &gs, u4 epoch, bool
     {
         absl::MutexLock lock(&epochMutex);
         // Try to commit.
-        const u4 processing = currentlyProcessingLSPEpoch.load();
-        const u4 invalidator = lspEpochInvalidator.load();
+        const uint32_t processing = currentlyProcessingLSPEpoch.load();
+        const uint32_t invalidator = lspEpochInvalidator.load();
         if (processing == invalidator) {
             ENFORCE(lastCommittedLSPEpoch.load() != processing, "Trying to commit an already-committed epoch.");
             // OK to commit!
@@ -89,7 +89,7 @@ bool TypecheckEpochManager::tryCommitEpoch(core::GlobalState &gs, u4 epoch, bool
             committed = true;
         } else {
             // Typechecking was canceled.
-            const u4 lastCommitted = lastCommittedLSPEpoch.load();
+            const uint32_t lastCommitted = lastCommittedLSPEpoch.load();
             currentlyProcessingLSPEpoch.store(lastCommitted);
             lspEpochInvalidator.store(lastCommitted);
         }
