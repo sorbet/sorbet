@@ -1,6 +1,6 @@
 method ::Object#main {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
     <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <cfgAlias>$9: T.class_of(T) = alias <C T>
@@ -13,21 +13,21 @@ bb0[rubyBlockId=0, firstDead=-1]():
     <ifTemp>$14 -> (T::Boolean ? bb2 : bb3)
 
 # backedges
-# - bb2(rubyBlockId=0)
-# - bb3(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb2(rubyRegionId=0)
+# - bb3(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=2]():
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=2]():
     <returnTemp>$16: String("missing name") = "missing name"
     <statTemp>$13: T.noreturn = return <returnTemp>$16: String("missing name")
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=3](name: String):
+# - bb0(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=3](name: String):
     <statTemp>$18: String("foo") = "foo"
     <returnMethodTemp>$2: T::Boolean = name: String.include?(<statTemp>$18: String("foo"))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Boolean
@@ -37,7 +37,7 @@ bb3[rubyBlockId=0, firstDead=3](name: String):
 
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=6]():
+bb0[rubyRegionId=0, firstDead=6]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <statTemp>$6: Symbol(:main) = :main
@@ -47,8 +47,8 @@ bb0[rubyBlockId=0, firstDead=6]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }

@@ -1,34 +1,34 @@
 method ::Object#foo {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
     <unconditional> -> bb2
 
 # backedges
-# - bb3(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1](<self>):
+# - bb3(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1](<self>):
     <statTemp>$10 = <self>
     <statTemp>$4 = <statTemp>$10.bad()
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-# - bb5(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1](<self>: Object):
+# - bb0(rubyRegionId=0)
+# - bb5(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1](<self>: Object):
     # outerLoops: 1
     <whileTemp>$3: TrueClass = true
     <whileTemp>$3 -> (TrueClass ? bb5 : bb3)
 
 # backedges
-# - bb2(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=0]():
+# - bb2(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=0]():
     <returnMethodTemp>$2 = nil
     <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
-# - bb2(rubyBlockId=0)
-bb5[rubyBlockId=0, firstDead=-1](<self>: Object):
+# - bb2(rubyRegionId=0)
+bb5[rubyRegionId=0, firstDead=-1](<self>: Object):
     # outerLoops: 1
     <statTemp>$5: T.untyped = <self>: Object.good()
     <nextTemp>$8: T.untyped = <self>: Object.value()
@@ -38,7 +38,7 @@ bb5[rubyBlockId=0, firstDead=-1](<self>: Object):
 
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=6]():
+bb0[rubyRegionId=0, firstDead=6]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <statTemp>$6: Symbol(:foo) = :foo
@@ -48,8 +48,8 @@ bb0[rubyBlockId=0, firstDead=6]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }

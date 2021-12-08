@@ -1,6 +1,6 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=8]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <cfgAlias>$7: T.class_of(Examples) = alias <C Examples>
@@ -12,36 +12,36 @@ bb0[rubyBlockId=0, firstDead=8]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::Examples#i_like_ifs {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Examples = cast(<self>: NilClass, Examples);
     <ifTemp>$3: TrueClass = true
     <ifTemp>$3 -> (TrueClass ? bb2 : bb3)
 
 # backedges
-# - bb2(rubyBlockId=0)
-# - bb3(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1](<returnMethodTemp>$2):
+# - bb2(rubyRegionId=0)
+# - bb3(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1](<returnMethodTemp>$2):
     <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=2]():
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=2]():
     <returnTemp>$4: Integer(1) = 1
     <returnMethodTemp>$2: T.noreturn = return <returnTemp>$4: Integer(1)
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=0]():
+# - bb0(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=0]():
     <returnTemp>$5 = 2
     <returnMethodTemp>$2 = return <returnTemp>$5
     <unconditional> -> bb1
@@ -50,32 +50,32 @@ bb3[rubyBlockId=0, firstDead=0]():
 
 method ::Examples#i_like_exps {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Examples = cast(<self>: NilClass, Examples);
     <ifTemp>$3: TrueClass = true
     <ifTemp>$3 -> (TrueClass ? bb2 : bb3)
 
 # backedges
-# - bb4(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb4(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1]():
     <returnMethodTemp>$2: Integer(1) = 1
     <unconditional> -> bb4
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=0]():
+# - bb0(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=0]():
     <returnMethodTemp>$2 = 2
     <unconditional> -> bb4
 
 # backedges
-# - bb2(rubyBlockId=0)
-# - bb3(rubyBlockId=0)
-bb4[rubyBlockId=0, firstDead=1](<returnMethodTemp>$2: Integer(1)):
+# - bb2(rubyRegionId=0)
+# - bb3(rubyRegionId=0)
+bb4[rubyRegionId=0, firstDead=1](<returnMethodTemp>$2: Integer(1)):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
     <unconditional> -> bb1
 
@@ -83,27 +83,27 @@ bb4[rubyBlockId=0, firstDead=1](<returnMethodTemp>$2: Integer(1)):
 
 method ::Examples#return_in_one_branch1 {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Examples = cast(<self>: NilClass, Examples);
     <ifTemp>$3: TrueClass = true
     <ifTemp>$3 -> (TrueClass ? bb2 : bb3)
 
 # backedges
-# - bb2(rubyBlockId=0)
-# - bb3(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb2(rubyRegionId=0)
+# - bb3(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=2]():
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=2]():
     <returnTemp>$4: Integer(1) = 1
     <returnMethodTemp>$2: T.noreturn = return <returnTemp>$4: Integer(1)
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=0]():
+# - bb0(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=0]():
     <returnMethodTemp>$2 = 2
     <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
@@ -112,27 +112,27 @@ bb3[rubyBlockId=0, firstDead=0]():
 
 method ::Examples#return_in_one_branch2 {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Examples = cast(<self>: NilClass, Examples);
     <ifTemp>$3: TrueClass = true
     <ifTemp>$3 -> (TrueClass ? bb2 : bb3)
 
 # backedges
-# - bb2(rubyBlockId=0)
-# - bb3(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb2(rubyRegionId=0)
+# - bb3(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=2]():
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=2]():
     <returnMethodTemp>$2: Integer(1) = 1
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=0]():
+# - bb0(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=0]():
     <returnTemp>$4 = 2
     <returnMethodTemp>$2 = return <returnTemp>$4
     <unconditional> -> bb1
@@ -141,51 +141,51 @@ bb3[rubyBlockId=0, firstDead=0]():
 
 method ::Examples#variables {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Examples = cast(<self>: NilClass, Examples);
     <ifTemp>$4: TrueClass = true
     <ifTemp>$4 -> (TrueClass ? bb2 : bb3)
 
 # backedges
-# - bb7(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb7(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1]():
     a: Integer(1) = 1
     <unconditional> -> bb4
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=0]():
+# - bb0(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=0]():
     a = 2
     <unconditional> -> bb4
 
 # backedges
-# - bb2(rubyBlockId=0)
-# - bb3(rubyBlockId=0)
-bb4[rubyBlockId=0, firstDead=-1](a: Integer(1)):
+# - bb2(rubyRegionId=0)
+# - bb3(rubyRegionId=0)
+bb4[rubyRegionId=0, firstDead=-1](a: Integer(1)):
     <ifTemp>$6: FalseClass = false
     <ifTemp>$6 -> (FalseClass ? bb5 : bb6)
 
 # backedges
-# - bb4(rubyBlockId=0)
-bb5[rubyBlockId=0, firstDead=0](a: Integer(1)):
+# - bb4(rubyRegionId=0)
+bb5[rubyRegionId=0, firstDead=0](a: Integer(1)):
     b = 1
     <unconditional> -> bb7
 
 # backedges
-# - bb4(rubyBlockId=0)
-bb6[rubyBlockId=0, firstDead=-1](a: Integer(1)):
+# - bb4(rubyRegionId=0)
+bb6[rubyRegionId=0, firstDead=-1](a: Integer(1)):
     b: Integer(2) = 2
     <unconditional> -> bb7
 
 # backedges
-# - bb5(rubyBlockId=0)
-# - bb6(rubyBlockId=0)
-bb7[rubyBlockId=0, firstDead=2](a: Integer(1), b: Integer(2)):
+# - bb5(rubyRegionId=0)
+# - bb6(rubyRegionId=0)
+bb7[rubyRegionId=0, firstDead=2](a: Integer(1), b: Integer(2)):
     <returnMethodTemp>$2: Integer = a: Integer(1).+(b: Integer(2))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
     <unconditional> -> bb1
@@ -194,62 +194,62 @@ bb7[rubyBlockId=0, firstDead=2](a: Integer(1), b: Integer(2)):
 
 method ::Examples#variables_and_loop {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Examples = cast(<self>: NilClass, Examples);
     cond: T.untyped = load_arg(cond)
     <ifTemp>$4: TrueClass = true
     <ifTemp>$4 -> (TrueClass ? bb2 : bb3)
 
 # backedges
-# - bb7(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb7(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1](cond: T.untyped):
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1](cond: T.untyped):
     a: Integer(1) = 1
     <unconditional> -> bb5
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=0](cond: T.untyped):
+# - bb0(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=0](cond: T.untyped):
     a = 2
     <unconditional> -> bb5
 
 # backedges
-# - bb2(rubyBlockId=0)
-# - bb3(rubyBlockId=0)
-# - bb9(rubyBlockId=0)
-# - bb10(rubyBlockId=0)
-bb5[rubyBlockId=0, firstDead=-1](cond: T.untyped, b: NilClass):
+# - bb2(rubyRegionId=0)
+# - bb3(rubyRegionId=0)
+# - bb9(rubyRegionId=0)
+# - bb10(rubyRegionId=0)
+bb5[rubyRegionId=0, firstDead=-1](cond: T.untyped, b: NilClass):
     # outerLoops: 1
     <whileTemp>$6: TrueClass = true
     <whileTemp>$6 -> (TrueClass ? bb8 : bb7)
 
 # backedges
-# - bb5(rubyBlockId=0)
-bb7[rubyBlockId=0, firstDead=0](b: NilClass):
+# - bb5(rubyRegionId=0)
+bb7[rubyRegionId=0, firstDead=0](b: NilClass):
     <returnMethodTemp>$2 = b
     <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
-# - bb5(rubyBlockId=0)
-bb8[rubyBlockId=0, firstDead=-1](cond: T.untyped, b: NilClass):
+# - bb5(rubyRegionId=0)
+bb8[rubyRegionId=0, firstDead=-1](cond: T.untyped, b: NilClass):
     # outerLoops: 1
     cond -> (T.untyped ? bb9 : bb10)
 
 # backedges
-# - bb8(rubyBlockId=0)
-bb9[rubyBlockId=0, firstDead=-1](cond: T.untyped, b: NilClass):
+# - bb8(rubyRegionId=0)
+bb9[rubyRegionId=0, firstDead=-1](cond: T.untyped, b: NilClass):
     # outerLoops: 1
     b: T.untyped = 1
     <unconditional> -> bb5
 
 # backedges
-# - bb8(rubyBlockId=0)
-bb10[rubyBlockId=0, firstDead=-1](cond: T.nilable(FalseClass), b: NilClass):
+# - bb8(rubyRegionId=0)
+bb10[rubyRegionId=0, firstDead=-1](cond: T.nilable(FalseClass), b: NilClass):
     # outerLoops: 1
     b: T.untyped = 2
     <unconditional> -> bb5
@@ -258,48 +258,48 @@ bb10[rubyBlockId=0, firstDead=-1](cond: T.nilable(FalseClass), b: NilClass):
 
 method ::Examples#variables_loop_if {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Examples = cast(<self>: NilClass, Examples);
     cond: T.untyped = load_arg(cond)
     <unconditional> -> bb2
 
 # backedges
-# - bb4(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb4(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-# - bb6(rubyBlockId=0)
-# - bb7(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1](cond: T.untyped, b: NilClass):
+# - bb0(rubyRegionId=0)
+# - bb6(rubyRegionId=0)
+# - bb7(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1](cond: T.untyped, b: NilClass):
     # outerLoops: 1
     <whileTemp>$4: TrueClass = true
     <whileTemp>$4 -> (TrueClass ? bb5 : bb4)
 
 # backedges
-# - bb2(rubyBlockId=0)
-bb4[rubyBlockId=0, firstDead=0](b: NilClass):
+# - bb2(rubyRegionId=0)
+bb4[rubyRegionId=0, firstDead=0](b: NilClass):
     <returnMethodTemp>$2 = b
     <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
-# - bb2(rubyBlockId=0)
-bb5[rubyBlockId=0, firstDead=-1](cond: T.untyped, b: NilClass):
+# - bb2(rubyRegionId=0)
+bb5[rubyRegionId=0, firstDead=-1](cond: T.untyped, b: NilClass):
     # outerLoops: 1
     cond -> (T.untyped ? bb6 : bb7)
 
 # backedges
-# - bb5(rubyBlockId=0)
-bb6[rubyBlockId=0, firstDead=-1](cond: T.untyped, b: NilClass):
+# - bb5(rubyRegionId=0)
+bb6[rubyRegionId=0, firstDead=-1](cond: T.untyped, b: NilClass):
     # outerLoops: 1
     b: T.untyped = 1
     <unconditional> -> bb2
 
 # backedges
-# - bb5(rubyBlockId=0)
-bb7[rubyBlockId=0, firstDead=-1](cond: T.nilable(FalseClass), b: NilClass):
+# - bb5(rubyRegionId=0)
+bb7[rubyRegionId=0, firstDead=-1](cond: T.nilable(FalseClass), b: NilClass):
     # outerLoops: 1
     b: T.untyped = 2
     <unconditional> -> bb2
@@ -308,33 +308,33 @@ bb7[rubyBlockId=0, firstDead=-1](cond: T.nilable(FalseClass), b: NilClass):
 
 method ::Examples#take_arguments {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Examples = cast(<self>: NilClass, Examples);
     i: T.untyped = load_arg(i)
     <ifTemp>$3: FalseClass = false
     <ifTemp>$3 -> (FalseClass ? bb2 : bb3)
 
 # backedges
-# - bb4(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb4(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=0]():
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=0]():
     <returnMethodTemp>$2 = 2
     <unconditional> -> bb4
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=-1](i: T.untyped):
+# - bb0(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=-1](i: T.untyped):
     <returnMethodTemp>$2: T.untyped = i
     <unconditional> -> bb4
 
 # backedges
-# - bb2(rubyBlockId=0)
-# - bb3(rubyBlockId=0)
-bb4[rubyBlockId=0, firstDead=1](<returnMethodTemp>$2: T.untyped):
+# - bb2(rubyRegionId=0)
+# - bb3(rubyRegionId=0)
+bb4[rubyRegionId=0, firstDead=1](<returnMethodTemp>$2: T.untyped):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
@@ -342,7 +342,7 @@ bb4[rubyBlockId=0, firstDead=1](<returnMethodTemp>$2: T.untyped):
 
 method ::<Class:Examples>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=34]():
+bb0[rubyRegionId=0, firstDead=34]():
     <self>: T.class_of(Examples) = cast(<self>: NilClass, T.class_of(Examples));
     <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <statTemp>$7: Symbol(:i_like_ifs) = :i_like_ifs
@@ -380,8 +380,8 @@ bb0[rubyBlockId=0, firstDead=34]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }

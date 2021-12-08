@@ -1,39 +1,39 @@
 method ::Object#foo {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
     <unconditional> -> bb2
 
 # backedges
-# - bb4(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1](<self>):
+# - bb4(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1](<self>):
     <statTemp>$9 = <self>
     <statTemp>$4 = <statTemp>$9.dead()
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1]():
     # outerLoops: 1
     <whileTemp>$3: TrueClass = true
     <whileTemp>$3 -> (TrueClass ? bb5 : bb3)
 
 # backedges
-# - bb2(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=0]():
+# - bb2(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=0]():
     <returnMethodTemp>$2 = nil
     <unconditional> -> bb4
 
 # backedges
-# - bb3(rubyBlockId=0)
-# - bb5(rubyBlockId=0)
-bb4[rubyBlockId=0, firstDead=1](<returnMethodTemp>$2: Integer(2)):
+# - bb3(rubyRegionId=0)
+# - bb5(rubyRegionId=0)
+bb4[rubyRegionId=0, firstDead=1](<returnMethodTemp>$2: Integer(2)):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(2)
     <unconditional> -> bb1
 
 # backedges
-# - bb2(rubyBlockId=0)
-bb5[rubyBlockId=0, firstDead=-1]():
+# - bb2(rubyRegionId=0)
+bb5[rubyRegionId=0, firstDead=-1]():
     # outerLoops: 1
     <returnTemp>$7: Integer(2) = 2
     <block-break-assign>$8: Integer(2) = <returnTemp>$7
@@ -44,7 +44,7 @@ bb5[rubyBlockId=0, firstDead=-1]():
 
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=8]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <statTemp>$7: Symbol(:foo) = :foo
@@ -56,8 +56,8 @@ bb0[rubyBlockId=0, firstDead=8]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
