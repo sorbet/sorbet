@@ -52,10 +52,10 @@ string sorbet::FileOps::read(string_view filename) {
     throw sorbet::FileNotFoundException();
 }
 
-void sorbet::FileOps::write(string_view filename, const vector<sorbet::u1> &data) {
+void sorbet::FileOps::write(string_view filename, const vector<sorbet::uint8_t> &data) {
     FILE *fp = std::fopen(string(filename).c_str(), "wb");
     if (fp) {
-        fwrite(data.data(), sizeof(sorbet::u1), data.size(), fp);
+        fwrite(data.data(), sizeof(sorbet::uint8_t), data.size(), fp);
         fclose(fp);
         return;
     }

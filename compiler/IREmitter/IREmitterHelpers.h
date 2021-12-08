@@ -52,7 +52,7 @@ struct Alias {
 
 class Intrinsics {
 public:
-    enum class HandleBlock : u1 {
+    enum class HandleBlock : uint8_t {
         Handled = 1,
         Unhandled = 2,
     };

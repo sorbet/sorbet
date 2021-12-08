@@ -59,20 +59,20 @@ void Pickler::putStr(string_view s) {
     putU4(s.size());
 
     for (char c : s) {
-        putU1(absl::bit_cast<u1>(c));
+        putU1(absl::bit_cast<uint8_t>(c));
     }
 }
 
-constexpr size_t SIZE_BYTES = sizeof(int) / sizeof(u1);
+constexpr size_t SIZE_BYTES = sizeof(int) / sizeof(uint8_t);
 constexpr int LZ4_COMPRESSION_SETTING = 1;
 
-vector<u1> Pickler::result() {
+vector<uint8_t> Pickler::result() {
     if (zeroCounter != 0) {
         data.emplace_back(zeroCounter);
         zeroCounter = 0;
     }
     const size_t maxDstSize = LZ4_compressBound(data.size());
-    vector<u1> compressedData;
+    vector<uint8_t> compressedData;
     compressedData.resize(2048 + maxDstSize); // give extra room for compression
                                               // Lizard_compressBound returns size of data if compression
                                               // succeeds. It seems to be written for big inputs
@@ -94,7 +94,7 @@ vector<u1> Pickler::result() {
     return compressedData;
 }
 
-UnPickler::UnPickler(const u1 *const compressed, spdlog::logger &tracer) : pos(0) {
+UnPickler::UnPickler(const uint8_t *const compressed, spdlog::logger &tracer) : pos(0) {
     Timer timeit(tracer, "Unpickler::UnPickler");
     int compressedSize;
     memcpy(&compressedSize, compressed, SIZE_BYTES);
@@ -118,7 +118,7 @@ string_view UnPickler::getStr() {
     return result;
 }
 
-void Pickler::putU1(u1 u) {
+void Pickler::putU1(uint8_t u) {
     if (zeroCounter != 0) {
         data.emplace_back(zeroCounter);
         zeroCounter = 0;
@@ -126,7 +126,7 @@ void Pickler::putU1(u1 u) {
     data.emplace_back(u);
 }
 
-u1 UnPickler::getU1() {
+uint8_t UnPickler::getU1() {
     ENFORCE(zeroCounter == 0);
     auto res = data[pos++];
     return res;
@@ -165,7 +165,7 @@ uint32_t UnPickler::getU4() {
         zeroCounter--;
         return 0;
     }
-    u1 r = data[pos++];
+    uint8_t r = data[pos++];
     if (r == 0) {
         zeroCounter = data[pos++];
         zeroCounter--;
@@ -282,7 +282,7 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
 }
 
 void SerializerImpl::pickle(Pickler &p, const File &what) {
-    p.putU1((u1)what.sourceType);
+    p.putU1((uint8_t)what.sourceType);
     p.putStr(what.path());
     p.putStr(what.source());
     pickle(p, what.getFileHash());
@@ -309,7 +309,7 @@ void SerializerImpl::pickle(Pickler &p, const ConstantName &what) {
 void SerializerImpl::pickle(Pickler &p, const UniqueName &what) {
     p.putU4(what.original.rawId());
     p.putU4(what.num);
-    p.putU1(static_cast<u1>(what.uniqueNameKind));
+    p.putU1(static_cast<uint8_t>(what.uniqueNameKind));
 }
 
 UTF8Name SerializerImpl::unpickleUTF8Name(UnPickler &p, GlobalState &gs) {
@@ -351,7 +351,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         }
         case TypePtr::Tag::LiteralType: {
             auto c = cast_type_nonnull<LiteralType>(what);
-            p.putU1((u1)c.literalKind);
+            p.putU1((uint8_t)c.literalKind);
             switch (c.literalKind) {
                 case LiteralType::LiteralTypeKind::Float:
                     p.putS8(absl::bit_cast<int64_t>(c.asFloat()));
@@ -429,7 +429,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
 }
 
 TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
-    auto tag = p.getU4(); // though we formally need only u1 here, benchmarks suggest that
+    auto tag = p.getU4(); // though we formally need only uint8_t here, benchmarks suggest that
                           // size difference after compression is small and uint32_t is 10% faster
     if (tag == 0) {
         return TypePtr();
@@ -525,7 +525,7 @@ ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
     result.rebind = core::ClassOrModuleRef::fromRaw(p.getU4());
     result.loc = unpickleLoc(p);
     {
-        u1 flags = p.getU1();
+        uint8_t flags = p.getU1();
         result.flags.setFromU1(flags);
     }
     result.type = unpickleType(p, gs);
@@ -860,18 +860,18 @@ LocOffsets SerializerImpl::unpickleLocOffsets(UnPickler &p) {
     return LocOffsets{p.getU4(), p.getU4()};
 }
 
-vector<u1> Serializer::store(GlobalState &gs) {
+vector<uint8_t> Serializer::store(GlobalState &gs) {
     Pickler p = SerializerImpl::pickle(gs);
     return p.result();
 }
 
-std::vector<u1> Serializer::storePayloadAndNameTable(GlobalState &gs) {
+std::vector<uint8_t> Serializer::storePayloadAndNameTable(GlobalState &gs) {
     Timer timeit(gs.tracer(), "Serializer::storePayloadAndNameTable");
     Pickler p = SerializerImpl::pickle(gs, true);
     return p.result();
 }
 
-void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
+void Serializer::loadGlobalState(GlobalState &gs, const uint8_t *const data) {
     ENFORCE(gs.files.empty() && gs.namesUsedTotal() == 0 && gs.symbolsUsedTotal() == 0,
             "Can't load into a non-empty state");
     UnPickler p(data, gs.tracer());
@@ -879,12 +879,12 @@ void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
     gs.installIntrinsics();
 }
 
-uint32_t Serializer::loadGlobalStateUUID(const GlobalState &gs, const u1 *const data) {
+uint32_t Serializer::loadGlobalStateUUID(const GlobalState &gs, const uint8_t *const data) {
     UnPickler p(data, gs.tracer());
     return SerializerImpl::unpickleGSUUID(p);
 }
 
-vector<u1> Serializer::storeTree(const core::File &file, const ast::ParsedFile &tree) {
+vector<uint8_t> Serializer::storeTree(const core::File &file, const ast::ParsedFile &tree) {
     Pickler p;
     // See comment in `serialize.h` above `loadTree`.
     p.putU4(file.source().size());
@@ -893,7 +893,7 @@ vector<u1> Serializer::storeTree(const core::File &file, const ast::ParsedFile &
     return p.result();
 }
 
-ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File &file, const u1 *const data) {
+ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File &file, const uint8_t *const data) {
     UnPickler p(data, gs.tracer());
     uint32_t fileSrcLen = p.getU4();
     if (file.source().size() != fileSrcLen) {
@@ -921,7 +921,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             auto &s = ast::cast_tree_nonnull<ast::Send>(what);
             pickle(p, s.loc);
             p.putU4(s.fun.rawId());
-            u1 flags;
+            uint8_t flags;
             static_assert(sizeof(flags) == sizeof(s.flags));
             // Can replace this with std::bit_cast in C++20
             memcpy(&flags, &s.flags, sizeof(flags));
@@ -1104,7 +1104,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             auto &c = ast::cast_tree_nonnull<ast::MethodDef>(what);
             pickle(p, c.loc);
             pickle(p, c.declLoc);
-            u1 flags;
+            uint8_t flags;
             static_assert(sizeof(flags) == sizeof(c.flags));
             // Can replace this with std::bit_cast in C++20
             memcpy(&flags, &c.flags, sizeof(flags));
@@ -1188,7 +1188,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
         case ast::Tag::UnresolvedIdent: {
             auto &a = ast::cast_tree_nonnull<ast::UnresolvedIdent>(what);
             pickle(p, a.loc);
-            p.putU1(static_cast<u1>(a.kind));
+            p.putU1(static_cast<uint8_t>(a.kind));
             p.putU4(a.name.rawId());
             break;
         }

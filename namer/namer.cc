@@ -29,7 +29,7 @@ struct FoundStaticField;
 struct FoundTypeMember;
 struct FoundMethod;
 
-enum class DefinitionKind : u1 {
+enum class DefinitionKind : uint8_t {
     Empty = 0,
     Class = 1,
     ClassRef = 2,
@@ -130,7 +130,7 @@ struct FoundMethod final {
 };
 
 struct Modifier {
-    enum class Kind : u1 {
+    enum class Kind : uint8_t {
         Class = 0,
         Method = 1,
         ClassOrStaticField = 2,

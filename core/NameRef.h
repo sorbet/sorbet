@@ -10,7 +10,7 @@ struct ConstantName;
 struct UTF8Name;
 
 // If you add NameKinds, make sure NameRef::KIND_BITS is kept in sync!
-enum class NameKind : u1 {
+enum class NameKind : uint8_t {
     UTF8 = 1,
     UNIQUE = 2,
     CONSTANT = 3,
@@ -148,7 +148,7 @@ public:
 
     constexpr NameKind kind() const {
         auto nameKind = static_cast<NameKind>(_id & KIND_MASK);
-        ENFORCE_NO_TIMER(static_cast<u1>(nameKind) > 0);
+        ENFORCE_NO_TIMER(static_cast<uint8_t>(nameKind) > 0);
         return nameKind;
     }
 

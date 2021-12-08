@@ -1092,9 +1092,9 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
         fileq->push(&parsedFile, 1);
     }
 
-    auto resultq = make_shared<BlockingBoundedQueue<vector<pair<string, vector<u1>>>>>(parsedFiles.size());
+    auto resultq = make_shared<BlockingBoundedQueue<vector<pair<string, vector<uint8_t>>>>>(parsedFiles.size());
     workers.multiplexJob("compressTreesAndFiles", [fileq, resultq, &gs]() {
-        vector<pair<string, vector<u1>>> threadResult;
+        vector<pair<string, vector<uint8_t>>> threadResult;
         int processedByThread = 0;
         ast::ParsedFile *job = nullptr;
         unique_ptr<Timer> timeit;
@@ -1130,7 +1130,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
 
     bool written = false;
     {
-        vector<pair<string, vector<u1>>> threadResult;
+        vector<pair<string, vector<uint8_t>>> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {

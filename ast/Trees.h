@@ -324,7 +324,7 @@ public:
     core::LocOffsets declLoc;
     core::ClassOrModuleRef symbol;
 
-    enum class Kind : u1 {
+    enum class Kind : uint8_t {
         Module,
         Class,
     };
@@ -579,7 +579,7 @@ EXPRESSION(UnresolvedIdent) {
 public:
     const core::LocOffsets loc;
 
-    enum class Kind : u1 {
+    enum class Kind : uint8_t {
         Local,
         Instance,
         Class,

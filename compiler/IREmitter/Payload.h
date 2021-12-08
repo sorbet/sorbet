@@ -67,7 +67,7 @@ public:
     static void assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                            const core::TypePtr &type);
 
-    static llvm::Value *boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *u1);
+    static llvm::Value *boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *uint8_t);
     static llvm::Value *setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &builder,
                                           const IREmitterContext &irctx, const ast::MethodDef &md, int rubyBlockId);
 

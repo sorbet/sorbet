@@ -1953,8 +1953,8 @@ ArgInfo ArgInfo::deepCopy() const {
     return result;
 }
 
-u1 ArgInfo::ArgFlags::toU1() const {
-    u1 flags = 0;
+uint8_t ArgInfo::ArgFlags::toU1() const {
+    uint8_t flags = 0;
     if (isKeyword) {
         flags += 1;
     }
@@ -1973,7 +1973,7 @@ u1 ArgInfo::ArgFlags::toU1() const {
     return flags;
 }
 
-void ArgInfo::ArgFlags::setFromU1(u1 flags) {
+void ArgInfo::ArgFlags::setFromU1(uint8_t flags) {
     isKeyword = flags & 1;
     isRepeated = flags & 2;
     isDefault = flags & 4;

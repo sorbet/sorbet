@@ -11,9 +11,9 @@ extern "C" {
 };
 
 namespace sorbet::crypto_hashing {
-inline std::array<u1, 64> hash64(std::string_view data) {
+inline std::array<uint8_t, 64> hash64(std::string_view data) {
     static_assert(BLAKE2B_OUTBYTES == 64);
-    std::array<u1, 64> res;
+    std::array<uint8_t, 64> res;
 
 #ifndef EMSCRIPTEN
     int err = blake2b(&res[0], data.begin(), nullptr, std::size(res), data.size(), 0);

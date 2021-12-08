@@ -285,7 +285,7 @@ private:
 
 public:
     // If you add Symbol Kinds, make sure KIND_BITS is kept in sync!
-    enum class Kind : u1 {
+    enum class Kind : uint8_t {
         ClassOrModule = 0,
         Method = 1,
         FieldOrStaticField = 2,

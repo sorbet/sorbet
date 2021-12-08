@@ -18,7 +18,7 @@ struct UTF8Name final {
 };
 CheckSize(UTF8Name, 16, 8);
 
-enum class UniqueNameKind : u1 {
+enum class UniqueNameKind : uint8_t {
     Parser,
     Desugar,
     Namer,

@@ -9,20 +9,20 @@ public:
     static const uint32_t VERSION = 6;
 
     // Serialize a global state.
-    static std::vector<u1> store(GlobalState &gs);
+    static std::vector<uint8_t> store(GlobalState &gs);
 
     // Stores a GlobalState, but only includes `File`s with Type == Payload.
     // This can be used in conjunction with `storeFile` to store
     // a global state containing a name table along side a large number of
     // individual cached files, which can be loaded independently.
-    static std::vector<u1> storePayloadAndNameTable(GlobalState &gs);
+    static std::vector<uint8_t> storePayloadAndNameTable(GlobalState &gs);
 
     // Serializes an AST and file hash.
-    static std::vector<u1> storeTree(const core::File &file, const ast::ParsedFile &tree);
+    static std::vector<uint8_t> storeTree(const core::File &file, const ast::ParsedFile &tree);
 
-    static void loadGlobalState(GlobalState &gs, const u1 *const data);
+    static void loadGlobalState(GlobalState &gs, const uint8_t *const data);
 
-    static uint32_t loadGlobalStateUUID(const GlobalState &gs, const u1 *const data);
+    static uint32_t loadGlobalStateUUID(const GlobalState &gs, const uint8_t *const data);
 
     // Loads the AST and file hash for the given file. Mutates file to indicate that it is cached and to store the
     // cached file hash.
@@ -33,7 +33,7 @@ public:
     // messages as they will point to invalid offsets in the file's text.
     // To prevent that memory error entirely, we stash the file source's text into the `data` blob. If `loadTree`
     // encounters a file with a different sized source text, it returns `nullptr`.
-    static ast::ExpressionPtr loadTree(const GlobalState &gs, core::File &file, const u1 *const data);
+    static ast::ExpressionPtr loadTree(const GlobalState &gs, core::File &file, const uint8_t *const data);
 };
 }; // namespace sorbet::core::serialize
 

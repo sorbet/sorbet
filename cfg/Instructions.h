@@ -29,7 +29,7 @@ public:
 // implicitly numbered: result of every instruction can be uniquely referenced
 // by its position in a linear array.
 
-enum class Tag : u1 {
+enum class Tag : uint8_t {
     Ident = 1,
     Alias,
     SolveConstraint,

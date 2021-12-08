@@ -41,8 +41,8 @@ public:
         friend class Symbol;
         friend class serialize::SerializerImpl;
 
-        void setFromU1(u1 flags);
-        u1 toU1() const;
+        void setFromU1(uint8_t flags);
+        uint8_t toU1() const;
     };
     ArgFlags flags;
     NameRef name;
@@ -181,7 +181,7 @@ public:
 };
 
 struct Intrinsic {
-    enum class Kind : u1 {
+    enum class Kind : uint8_t {
         Instance = 1,
         Singleton = 2,
     };
@@ -476,7 +476,7 @@ TYPE_INLINED(LiteralType) final {
     };
 
 public:
-    enum class LiteralTypeKind : u1 { Integer, String, Symbol, Float };
+    enum class LiteralTypeKind : uint8_t { Integer, String, Symbol, Float };
     const LiteralTypeKind literalKind;
     LiteralType(int64_t val);
     LiteralType(double val);

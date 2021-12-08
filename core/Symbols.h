@@ -32,7 +32,7 @@ public:
 
 enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
 
-enum class Visibility : u1 {
+enum class Visibility : uint8_t {
     Public = 1,
     Protected,
     Private,
