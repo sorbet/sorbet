@@ -245,19 +245,6 @@ public:
             dslInfo[curScope].model = symbolName(ctx, cnst->symbol);
         }
 
-        if (original->fun == core::Names::configureArchival()) {
-            auto [kwStart, kwEnd] = original->kwArgsRange();
-            for (auto i = kwStart; i < kwEnd; i += 2) {
-                auto *key = ast::cast_tree<ast::Literal>(original->args[i]);
-                if (key && key->isSymbol(ctx) && key->asSymbol(ctx) == core::Names::originalClass()) {
-                    auto *value = ast::cast_tree<ast::ConstantLit>(original->args[i + 1]);
-                    if (value && value->original) {
-                        dslInfo[curScope].ancestors.emplace_back(symbolName(ctx, value->symbol));
-                    }
-                }
-            }
-        }
-
         return tree;
     }
 
