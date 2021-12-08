@@ -14,7 +14,6 @@
 #include <vector>
 
 namespace spd = spdlog;
-using uint32_t;
 using namespace std;
 
 auto logger = spd::stderr_color_mt("parser_test");
