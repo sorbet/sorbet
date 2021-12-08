@@ -1497,14 +1497,8 @@ SymbolRef SymbolRef::dealias(const GlobalState &gs) const {
     switch (kind()) {
         case SymbolRef::Kind::ClassOrModule:
             return asClassOrModuleRef().data(gs)->dealias(gs);
-        case SymbolRef::Kind::Method: {
-            auto rv = asMethodRef().data(gs)->dealiasMethod(gs);
-            // dealiasMethod returns badAliasMethodStub but callers of dealias expect Symbols::untyped.
-            if (rv == Symbols::Sorbet_Private_Static_badAliasMethodStub()) {
-                return Symbols::untyped();
-            }
-            return rv;
-        }
+        case SymbolRef::Kind::Method:
+            return asMethodRef().data(gs)->dealiasMethod(gs);
         case SymbolRef::Kind::FieldOrStaticField:
             return asFieldRef().data(gs)->dealias(gs);
         case SymbolRef::Kind::TypeArgument:
