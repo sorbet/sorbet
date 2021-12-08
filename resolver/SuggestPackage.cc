@@ -154,7 +154,7 @@ private:
                 matches.resize(4);
             }
         }
-        if (matches.size() > 0) {
+        if (!matches.empty()) {
             addReplacementSuggestions(e, unresolved, matches);
         } else {
             e.addErrorNote("To be exported it must be defined in package `{}`", formatPackageName(currentPkg));

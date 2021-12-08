@@ -16,33 +16,33 @@ public:
     }
 
     const vector<core::NameRef> &fullName() const {
-        ENFORCE(false);
+        notImplemented();
         return emptyName;
     }
 
     const vector<string> &pathPrefixes() const {
-        ENFORCE(false);
+        notImplemented();
         return prefixes;
     }
 
     unique_ptr<PackageInfo> deepCopy() const {
-        ENFORCE(false);
+        notImplemented();
         return make_unique<NonePackage>();
     }
 
     Loc definitionLoc() const {
-        ENFORCE(false);
+        notImplemented();
         return Loc::none();
     }
 
     std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                          bool isTestImport) const {
-        ENFORCE(false);
+        notImplemented();
         return nullopt;
     }
 
     vector<MissingExportMatch> findMissingExports(core::Context ctx, core::SymbolRef scope, core::NameRef name) const {
-        ENFORCE(false);
+        notImplemented();
         return {};
     }
 
@@ -52,7 +52,7 @@ public:
     }
 
     bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {
-        ENFORCE(false);
+        notImplemented();
         return false;
     }
 
@@ -61,6 +61,10 @@ public:
 private:
     const vector<string> prefixes;
     const vector<core::NameRef> emptyName;
+
+    void notImplemented() const {
+        ENFORCE(false, "Not implemented for NonePackage");
+    }
 };
 static const NonePackage NONE_PKG;
 } // namespace
