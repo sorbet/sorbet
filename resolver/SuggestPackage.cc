@@ -97,42 +97,6 @@ public:
             tryUnresolvedImportCorrections(e, unresolved);
             return true;
         }
-
-    void tryUnresolvedImportCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
-        // there are two broader cases here: either the name we're
-        // looking for shares the same prefix as the package we're in,
-        // in which case it's probably an export we can't find (and we
-        // should let the normal constant resolution machinery do its
-        // work.) Otherwise, it's probably an import we can't find,
-        // and we can limit our search to only package names.
-
-        // TODO(gdritter): bail when it's clear that we're looking at
-        // an export
-        vector<PackageMatch> matches;
-        vector<core::NameRef> prefix;
-
-        ast::UnresolvedConstantLit* cnst = &unresolved;
-        while (cnst) {
-            prefix.emplace_back(cnst->cnst);
-            if (auto cnst_lit = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope)) {
-                cnst = cnst_lit;
-            } else if (auto cnst_lit = ast::cast_tree<ast::ConstantLit>(cnst->scope)) {
-                cnst = ast::cast_tree<ast::UnresolvedConstantLit>(cnst_lit->original);
-            } else {
-                break;
-            }
-        }
-        reverse(prefix.begin(), prefix.end());
-        ctx.state.tracer().error("-----");
-        for (auto n : prefix) {
-            ctx.state.tracer().error("  - {}", n.show(ctx));
-        }
-
-        findPackagesWithPrefix(prefix, matches);
-        ctx.state.tracer().error("found {} matches", matches.size());
-        for (auto match : matches) {
-            addMissingImportSuggestions(e, match);
-        }
     }
 
 private:
@@ -195,6 +159,34 @@ private:
             addReplacementSuggestions(e, unresolved, matches);
         } else {
             e.addErrorNote("To be exported it must be defined in package `{}`", formatPackageName(currentPkg));
+        }
+    }
+
+    void tryUnresolvedImportCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
+        vector<PackageMatch> matches;
+        vector<core::NameRef> prefix;
+
+        ast::UnresolvedConstantLit* cnst = &unresolved;
+        while (cnst) {
+            prefix.emplace_back(cnst->cnst);
+            if (auto cnst_lit = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope)) {
+                cnst = cnst_lit;
+            } else if (auto cnst_lit = ast::cast_tree<ast::ConstantLit>(cnst->scope)) {
+                cnst = ast::cast_tree<ast::UnresolvedConstantLit>(cnst_lit->original);
+            } else {
+                break;
+            }
+        }
+        reverse(prefix.begin(), prefix.end());
+        ctx.state.tracer().error("-----");
+        for (auto n : prefix) {
+            ctx.state.tracer().error("  - {}", n.show(ctx));
+        }
+
+        findPackagesWithPrefix(prefix, matches);
+        ctx.state.tracer().error("found {} matches", matches.size());
+        for (auto match : matches) {
+            addMissingImportSuggestions(e, match);
         }
     }
 
