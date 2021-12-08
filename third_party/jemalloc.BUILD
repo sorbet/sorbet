@@ -97,7 +97,7 @@ cc_library(
     srcs = [":jemalloc_genrule"],
     hdrs = ["include/jemalloc/jemalloc.h"],
     linkopts = select({
-        "@com_stripe_ruby_typer//tools/config:linux": ["-ldl"],  # side step https://github.com/jemalloc/jemalloc/issues/948
+        "@platforms//os:linux": ["-ldl"],  # side step https://github.com/jemalloc/jemalloc/issues/948
         "//conditions:default": [],
     }),
     linkstatic = 1,

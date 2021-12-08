@@ -14,7 +14,7 @@ cc_library(
         "WorkerPool.h",
     ],
     linkopts = select({
-        "//tools/config:linux": ["-lm"],
+        "@platforms//os:linux": ["-lm"],
         "//conditions:default": [],
     }),
     linkstatic = select({

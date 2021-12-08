@@ -13,7 +13,7 @@ cc_library(
         "json2msgpack.h",
     ],
     linkopts = select({
-        "//tools/config:linux": ["-lm"],
+        "@platforms//os:linux": ["-lm"],
         "//conditions:default": [],
     }),
     linkstatic = select({
