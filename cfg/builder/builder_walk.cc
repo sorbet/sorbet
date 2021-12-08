@@ -413,14 +413,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 }
 
                 if (auto *block = s.block()) {
-                    auto newRubyBlockId = ++cctx.inWhat.maxRubyRegionId;
+                    auto newRubyRegionId = ++cctx.inWhat.maxRubyRegionId;
                     auto &blockArgs = block->args;
                     vector<ast::ParsedArg> blockArgFlags = ast::ArgParsing::parseArgs(blockArgs);
                     vector<core::ArgInfo::ArgFlags> argFlags;
                     for (auto &e : blockArgFlags) {
                         argFlags.emplace_back(e.flags);
                     }
-                    auto link = make_shared<core::SendAndBlockLink>(s.fun, move(argFlags), newRubyBlockId);
+                    auto link = make_shared<core::SendAndBlockLink>(s.fun, move(argFlags), newRubyRegionId);
                     auto send = make_insn<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs(), args, argLocs,
                                                 !!s.flags.isPrivateOk, link);
                     LocalRef sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
@@ -430,13 +430,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     synthesizeExpr(current, restoreSelf, core::LocOffsets::none(),
                                    make_insn<Ident>(LocalRef::selfVariable()));
 
-                    auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1, newRubyBlockId);
+                    auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1, newRubyRegionId);
                     // solveConstraintBlock is only entered if break is not called
                     // in the block body.
                     auto solveConstraintBlock = cctx.inWhat.freshBlock(cctx.loops, current->rubyRegionId);
                     auto postBlock = cctx.inWhat.freshBlock(cctx.loops, current->rubyRegionId);
                     auto bodyLoops = cctx.loops + 1;
-                    auto bodyBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyBlockId);
+                    auto bodyBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyRegionId);
 
                     LocalRef argTemp = cctx.newTemporary(core::Names::blkArg());
                     bodyBlock->exprs.emplace_back(LocalRef::selfVariable(), s.loc,
@@ -458,8 +458,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         }
 
                         if (auto *opt = ast::cast_tree<ast::OptionalArg>(blockArgs[i])) {
-                            auto *presentBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyBlockId);
-                            auto *missingBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyBlockId);
+                            auto *presentBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyRegionId);
+                            auto *missingBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyRegionId);
 
                             // add a test for YieldParamPresent
                             auto present = cctx.newTemporary(core::Names::argPresent());
@@ -468,7 +468,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                             conditionalJump(argBlock, present, presentBlock, missingBlock, cctx.inWhat, arg.loc);
 
                             // make a new block for the present and missing blocks to join
-                            argBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyBlockId);
+                            argBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyRegionId);
 
                             // compile the argument fetch in the present block
                             presentBlock->exprs.emplace_back(argLoc, arg.loc,
