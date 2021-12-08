@@ -107,23 +107,28 @@ private:
 
     struct ResolutionItem {
         shared_ptr<Nesting> scope;
-        core::FileRef file;
-        bool resolutionFailed = false;
         ast::ConstantLit *out;
+        bool resolutionFailed = false;
 
         ResolutionItem() = default;
-        ResolutionItem(const shared_ptr<Nesting> &scope, core::FileRef file, ast::ConstantLit *lit)
-            : scope(scope), file(file), out(lit) {}
+        ResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
         ResolutionItem(ResolutionItem &&rhs) noexcept = default;
         ResolutionItem &operator=(ResolutionItem &&rhs) noexcept = default;
 
         ResolutionItem(const ResolutionItem &rhs) = delete;
         const ResolutionItem &operator=(const ResolutionItem &rhs) = delete;
     };
+
+    template <class T> struct ResolveItems {
+        core::FileRef file;
+        vector<T> items;
+
+        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)){};
+    };
+
     struct AncestorResolutionItem {
         ast::ConstantLit *ancestor;
         core::ClassOrModuleRef klass;
-        core::FileRef file;
 
         bool isSuperclass; // true if superclass, false for mixin
         bool isInclude;    // true if include, false if extend
@@ -137,13 +142,15 @@ private:
         const AncestorResolutionItem &operator=(const AncestorResolutionItem &rhs) = delete;
     };
 
+    struct AncestorResolutionItems {
+        vector<AncestorResolutionItem> items;
+    };
+
     struct ClassAliasResolutionItem {
         core::SymbolRef lhs;
-        core::FileRef file;
         ast::ConstantLit *rhs;
 
-        ClassAliasResolutionItem(core::SymbolRef lhs, core::FileRef file, ast::ConstantLit *rhs)
-            : lhs(lhs), file(file), rhs(rhs) {}
+        ClassAliasResolutionItem(core::SymbolRef lhs, ast::ConstantLit *rhs) : lhs(lhs), rhs(rhs) {}
 
         ClassAliasResolutionItem() = default;
         ClassAliasResolutionItem(ClassAliasResolutionItem &&) noexcept = default;
@@ -472,7 +479,7 @@ private:
 
         if (rhsSym.isTypeAlias(ctx)) {
             if (auto e = ctx.beginError(it.rhs->loc, core::errors::Resolver::ReassignsTypeAlias)) {
-                if (it.file.data(ctx).isPackage()) {
+                if (ctx.file.data(ctx).isPackage()) {
                     // In --stripe-packages mode, this error surfaces when type aliases
                     // are exported by a package. TODO (aadi-stripe, 12/30/2021) update docs for
                     // error 5034 as part of any larger --stripe-packages documentation effort.
@@ -804,7 +811,6 @@ private:
         AncestorResolutionItem job;
         job.klass = klass;
         job.isSuperclass = isSuperclass;
-        job.file = ctx.file;
         job.isInclude = isInclude;
 
         if (auto *cnst = ast::cast_tree<ast::ConstantLit>(ancestor)) {
@@ -856,7 +862,7 @@ public:
         }
         auto loc = c.loc;
         auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
-        ResolutionItem job{nesting_, ctx.file, ast::cast_tree<ast::ConstantLit>(out)};
+        ResolutionItem job{nesting_, ast::cast_tree<ast::ConstantLit>(out)};
         if (resolveJob(ctx, job)) {
             categoryCounterInc("resolve.constants.nonancestor", "firstpass");
         } else {
@@ -919,7 +925,7 @@ public:
 
             // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
             // we'll still emit a warning when the rhs of a type alias doesn't resolve.
-            auto item = ResolutionItem{nesting_, ctx.file, id};
+            auto item = ResolutionItem{nesting_, id};
             this->todo_.emplace_back(std::move(item));
             return tree;
         }
@@ -929,7 +935,7 @@ public:
             return tree;
         }
 
-        auto item = ClassAliasResolutionItem{id->symbol, ctx.file, rhs};
+        auto item = ClassAliasResolutionItem{id->symbol, rhs};
 
         // TODO(perf) currently, by construction the last item in resolve todo list is the one this alias depends on
         // We may be able to get some perf by using this
@@ -960,23 +966,23 @@ public:
         return tree;
     }
 
-    static bool compareLocs(const core::GlobalState &gs, core::Loc lhs, core::Loc rhs) {
+    static bool compareFiles(const core::GlobalState &gs, core::FileRef lhs, core::FileRef rhs) {
         core::StrictLevel left = core::StrictLevel::Strong;
         core::StrictLevel right = core::StrictLevel::Strong;
 
-        if (lhs.file().exists()) {
-            left = lhs.file().data(gs).strictLevel;
+        if (lhs.exists()) {
+            left = lhs.data(gs).strictLevel;
         }
-        if (rhs.file().exists()) {
-            right = rhs.file().data(gs).strictLevel;
+        if (rhs.exists()) {
+            right = rhs.data(gs).strictLevel;
         }
-
         if (left != right) {
             return right < left;
         }
-        if (lhs.file() != rhs.file()) {
-            return lhs.file() < rhs.file();
-        }
+        return lhs < rhs;
+    }
+
+    static bool compareLocOffsets(core::LocOffsets lhs, core::LocOffsets rhs) {
         if (lhs.beginPos() != rhs.beginPos()) {
             return lhs.beginPos() < rhs.beginPos();
         }
@@ -994,30 +1000,14 @@ public:
     }
 
     struct ResolveWalkResult {
-        vector<ResolutionItem> todo_;
-        vector<AncestorResolutionItem> todoAncestors_;
-        vector<ClassAliasResolutionItem> todoClassAliases_;
-        vector<TypeAliasResolutionItem> todoTypeAliases_;
-        vector<ClassMethodsResolutionItem> todoClassMethods_;
-        vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
+        vector<ResolveItems<ResolutionItem>> todo_;
+        vector<ResolveItems<AncestorResolutionItem>> todoAncestors_;
+        vector<ResolveItems<ClassAliasResolutionItem>> todoClassAliases_;
+        vector<ResolveItems<TypeAliasResolutionItem>> todoTypeAliases_;
+        vector<ResolveItems<ClassMethodsResolutionItem>> todoClassMethods_;
+        vector<ResolveItems<RequireAncestorResolutionItem>> todoRequiredAncestors_;
         vector<ast::ParsedFile> trees;
     };
-
-    static bool locCompare(core::Loc lhs, core::Loc rhs) {
-        if (lhs.file() < rhs.file()) {
-            return true;
-        }
-        if (lhs.file() > rhs.file()) {
-            return false;
-        }
-        if (lhs.beginPos() < rhs.beginPos()) {
-            return true;
-        }
-        if (lhs.beginPos() > rhs.beginPos()) {
-            return false;
-        }
-        return lhs.endPos() < rhs.endPos();
-    }
 
     static vector<ast::ParsedFile> resolveConstants(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                     WorkerPool &workers) {
@@ -1032,6 +1022,7 @@ public:
         workers.multiplexJob("resolveConstantsWalk", [&igs, fileq, resultq]() {
             Timer timeit(igs.tracer(), "ResolveConstantsWorker");
             ResolveConstantsWalk constants;
+            ResolveWalkResult walkResult;
             vector<ast::ParsedFile> partiallyResolvedTrees;
             ast::ParsedFile job;
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
@@ -1039,27 +1030,40 @@ public:
                     core::Context ictx(igs, core::Symbols::root(), job.file);
                     job.tree = ast::TreeMap::apply(ictx, constants, std::move(job.tree));
                     partiallyResolvedTrees.emplace_back(move(job));
+                    if (!constants.todo_.empty()) {
+                        walkResult.todo_.emplace_back(job.file, move(constants.todo_));
+                    }
+                    if (!constants.todoAncestors_.empty()) {
+                        walkResult.todoAncestors_.emplace_back(job.file, move(constants.todoAncestors_));
+                    }
+                    if (!constants.todoClassAliases_.empty()) {
+                        walkResult.todoClassAliases_.emplace_back(job.file, move(constants.todoClassAliases_));
+                    }
+                    if (!constants.todoTypeAliases_.empty()) {
+                        walkResult.todoTypeAliases_.emplace_back(job.file, move(constants.todoTypeAliases_));
+                    }
+                    if (!constants.todoClassMethods_.empty()) {
+                        walkResult.todoClassMethods_.emplace_back(job.file, move(constants.todoClassMethods_));
+                    }
+                    if (!constants.todoRequiredAncestors_.empty()) {
+                        walkResult.todoRequiredAncestors_.emplace_back(job.file,
+                                                                       move(constants.todoRequiredAncestors_));
+                    }
                 }
             }
             if (!partiallyResolvedTrees.empty()) {
-                ResolveWalkResult result{move(constants.todo_),
-                                         move(constants.todoAncestors_),
-                                         move(constants.todoClassAliases_),
-                                         move(constants.todoTypeAliases_),
-                                         move(constants.todoClassMethods_),
-                                         move(constants.todoRequiredAncestors_),
-                                         move(partiallyResolvedTrees)};
-                auto computedTreesCount = result.trees.size();
-                resultq->push(move(result), computedTreesCount);
+                walkResult.trees = move(partiallyResolvedTrees);
+                auto computedTreesCount = walkResult.trees.size();
+                resultq->push(move(walkResult), computedTreesCount);
             }
         });
         trees.clear();
-        vector<ResolutionItem> todo;
-        vector<AncestorResolutionItem> todoAncestors;
-        vector<ClassAliasResolutionItem> todoClassAliases;
-        vector<TypeAliasResolutionItem> todoTypeAliases;
-        vector<ClassMethodsResolutionItem> todoClassMethods;
-        vector<RequireAncestorResolutionItem> todoRequiredAncestors;
+        vector<ResolveItems<ResolutionItem>> todo;
+        vector<ResolveItems<AncestorResolutionItem>> todoAncestors;
+        vector<ResolveItems<ClassAliasResolutionItem>> todoClassAliases;
+        vector<ResolveItems<TypeAliasResolutionItem>> todoTypeAliases;
+        vector<ResolveItems<ClassMethodsResolutionItem>> todoClassMethods;
+        vector<ResolveItems<RequireAncestorResolutionItem>> todoRequiredAncestors;
 
         {
             ResolveWalkResult threadResult;
@@ -1089,29 +1093,20 @@ public:
             }
         }
 
-        fast_sort(todo, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.out->loc), core::Loc(rhs.file, rhs.out->loc));
-        });
-        fast_sort(todoAncestors, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.ancestor->loc), core::Loc(rhs.file, rhs.ancestor->loc));
-        });
-        fast_sort(todoClassAliases, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.rhs->loc), core::Loc(rhs.file, rhs.rhs->loc));
-        });
-        fast_sort(todoTypeAliases, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, (*lhs.rhs).loc()), core::Loc(rhs.file, (*rhs.rhs).loc()));
-        });
-        fast_sort(todoClassMethods, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.send->loc), core::Loc(rhs.file, rhs.send->loc));
-        });
-        fast_sort(todoRequiredAncestors, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.send->loc), core::Loc(rhs.file, rhs.send->loc));
-        });
+        fast_sort(todo, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
+        fast_sort(todoAncestors,
+                  [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
+        fast_sort(todoClassAliases,
+                  [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
+        fast_sort(todoTypeAliases,
+                  [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
+        fast_sort(todoClassMethods,
+                  [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
+        fast_sort(todoRequiredAncestors,
+                  [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
 
         ENFORCE(todoRequiredAncestors.empty() || gs.requiresAncestorEnabled);
-        fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.tree.loc()), core::Loc(rhs.file, rhs.tree.loc()));
-        });
+        fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
 
         Timer timeit1(gs.tracer(), "resolver.resolve_constants.fixed_point");
 
@@ -1124,32 +1119,46 @@ public:
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.ancestors");
                 // This is an optimization. The order should not matter semantically
-                // We try to resolve most ancestors second because this makes us much more likely to resolve everything
-                // else.
-                int origSize = todoAncestors.size();
-                auto it =
-                    remove_if(todoAncestors.begin(), todoAncestors.end(), [&gs](AncestorResolutionItem &job) -> bool {
-                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                        auto resolved = resolveAncestorJob(ctx, job, false);
-                        if (resolved) {
-                            tryRegisterSealedSubclass(ctx, job);
-                        }
-                        return resolved;
-                    });
+                // We try to resolve most ancestors second because this makes us much more likely to resolve
+                // everything else.
+                long retries = 0;
+                auto it = remove_if(todoAncestors.begin(), todoAncestors.end(),
+                                    [&gs, &retries](ResolveItems<AncestorResolutionItem> &job) -> bool {
+                                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                                        const auto origSize = job.items.size();
+                                        auto fileIt = remove_if(job.items.begin(), job.items.end(),
+                                                                [&](AncestorResolutionItem &item) -> bool {
+                                                                    auto resolved =
+                                                                        resolveAncestorJob(ctx, item, false);
+                                                                    if (resolved) {
+                                                                        tryRegisterSealedSubclass(ctx, item);
+                                                                    }
+                                                                    return resolved;
+                                                                });
+                                        job.items.erase(fileIt, job.items.end());
+                                        retries += origSize - job.items.size();
+                                        return job.items.empty();
+                                    });
                 todoAncestors.erase(it, todoAncestors.end());
-                progress = (origSize != todoAncestors.size());
-                categoryCounterAdd("resolve.constants.ancestor", "retry", origSize - todoAncestors.size());
+                categoryCounterAdd("resolve.constants.ancestor", "retry", retries);
+                progress = retries > 0;
             }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
-                int origSize = todo.size();
-                auto it = remove_if(todo.begin(), todo.end(), [&gs](ResolutionItem &job) -> bool {
-                    core::Context ictx(gs, core::Symbols::root(), job.file);
-                    return resolveJob(ictx, job);
-                });
+                long retries = 0;
+                auto it =
+                    remove_if(todo.begin(), todo.end(), [&gs, &retries](ResolveItems<ResolutionItem> &job) -> bool {
+                        core::Context ictx(gs, core::Symbols::root(), job.file);
+                        auto origSize = job.items.size();
+                        auto fileIt = remove_if(job.items.begin(), job.items.end(),
+                                                [&](ResolutionItem &item) -> bool { return resolveJob(ictx, item); });
+                        job.items.erase(fileIt, job.items.end());
+                        retries += origSize - job.items.size();
+                        return job.items.empty();
+                    });
                 todo.erase(it, todo.end());
-                progress = progress || (origSize != todo.size());
-                categoryCounterAdd("resolve.constants.nonancestor", "retry", origSize - todo.size());
+                categoryCounterAdd("resolve.constants.nonancestor", "retry", retries);
+                progress = progress || retries > 0;
             }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.class_aliases");
@@ -1158,42 +1167,60 @@ public:
                 // every item in todoClassAliases implicitly depends on an item in item in todo
                 // there would be no point in running the todoClassAliases step before todo
 
-                int origSize = todoClassAliases.size();
+                long retries = 0;
                 auto it = remove_if(todoClassAliases.begin(), todoClassAliases.end(),
-                                    [&gs](ClassAliasResolutionItem &it) -> bool {
-                                        core::MutableContext ctx(gs, core::Symbols::root(), it.file);
-                                        return resolveClassAliasJob(ctx, it);
+                                    [&gs, &retries](ResolveItems<ClassAliasResolutionItem> &job) -> bool {
+                                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                                        auto origSize = job.items.size();
+                                        auto fileIt = remove_if(job.items.begin(), job.items.end(),
+                                                                [&](ClassAliasResolutionItem &item) -> bool {
+                                                                    return resolveClassAliasJob(ctx, item);
+                                                                });
+                                        job.items.erase(fileIt, job.items.end());
+                                        retries += origSize - job.items.size();
+                                        return job.items.empty();
                                     });
                 todoClassAliases.erase(it, todoClassAliases.end());
-                progress = progress || (origSize != todoClassAliases.size());
-                categoryCounterAdd("resolve.constants.aliases", "retry", origSize - todoClassAliases.size());
+                categoryCounterAdd("resolve.constants.aliases", "retry", retries);
+                progress = progress || retries > 0;
             }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.type_aliases");
-                int origSize = todoTypeAliases.size();
+                long retries = 0;
                 auto it = remove_if(todoTypeAliases.begin(), todoTypeAliases.end(),
-                                    [&gs](TypeAliasResolutionItem &it) -> bool {
-                                        core::MutableContext ctx(gs, core::Symbols::root(), it.file);
-                                        return resolveTypeAliasJob(ctx, it);
+                                    [&gs, &retries](ResolveItems<TypeAliasResolutionItem> &job) -> bool {
+                                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                                        auto origSize = job.items.size();
+                                        auto fileIt = remove_if(job.items.begin(), job.items.end(),
+                                                                [&](TypeAliasResolutionItem &item) -> bool {
+                                                                    return resolveTypeAliasJob(ctx, item);
+                                                                });
+                                        job.items.erase(fileIt, job.items.end());
+                                        retries += origSize - job.items.size();
+                                        return job.items.empty();
                                     });
                 todoTypeAliases.erase(it, todoTypeAliases.end());
-                progress = progress || (origSize != todoTypeAliases.size());
-                categoryCounterAdd("resolve.constants.typealiases", "retry", origSize - todoTypeAliases.size());
+                categoryCounterAdd("resolve.constants.typealiases", "retry", retries);
+                progress = progress || retries > 0;
             }
         }
 
         {
             Timer timeit(gs.tracer(), "resolver.mixes_in_class_methods");
-            for (auto &todo : todoClassMethods) {
-                resolveClassMethodsJob(gs, todo);
+            for (auto &job : todoClassMethods) {
+                for (auto &todo : job.items) {
+                    resolveClassMethodsJob(gs, todo);
+                }
             }
             todoClassMethods.clear();
         }
 
         {
             Timer timeit(gs.tracer(), "resolver.requires_ancestor");
-            for (auto &todo : todoRequiredAncestors) {
-                resolveRequiredAncestorsJob(gs, todo);
+            for (auto &job : todoRequiredAncestors) {
+                for (auto &todo : job.items) {
+                    resolveRequiredAncestorsJob(gs, todo);
+                }
             }
             todoRequiredAncestors.clear();
         }
@@ -1217,19 +1244,29 @@ public:
          *
          * - Within a file, report the first occurrence.
          */
-        fast_sort(todo, [&gs](const auto &lhs, const auto &rhs) -> bool {
-            if (core::Loc(lhs.file, lhs.out->loc) == core::Loc(rhs.file, rhs.out->loc)) {
-                return constantDepth(lhs.out) < constantDepth(rhs.out);
-            }
-            return compareLocs(gs, core::Loc(lhs.file, lhs.out->loc), core::Loc(rhs.file, rhs.out->loc));
-        });
+        fast_sort(todo,
+                  [&gs](const auto &lhs, const auto &rhs) -> bool { return compareFiles(gs, lhs.file, rhs.file); });
 
-        fast_sort(todoAncestors, [&gs](const auto &lhs, const auto &rhs) -> bool {
-            if (core::Loc(lhs.file, lhs.ancestor->loc) == core::Loc(rhs.file, rhs.ancestor->loc)) {
-                return constantDepth(lhs.ancestor) < constantDepth(rhs.ancestor);
-            }
-            return compareLocs(gs, core::Loc(lhs.file, lhs.ancestor->loc), core::Loc(rhs.file, rhs.ancestor->loc));
-        });
+        for (auto &todos : todo) {
+            fast_sort(todos.items, [](const ResolutionItem &lhs, const ResolutionItem &rhs) -> bool {
+                if (lhs.out->loc == rhs.out->loc) {
+                    return constantDepth(lhs.out) < constantDepth(rhs.out);
+                }
+                return compareLocOffsets(lhs.out->loc, rhs.out->loc);
+            });
+        }
+
+        fast_sort(todoAncestors,
+                  [&gs](const auto &lhs, const auto &rhs) -> bool { return compareFiles(gs, lhs.file, rhs.file); });
+
+        for (auto &todos : todoAncestors) {
+            fast_sort(todos.items, [](const AncestorResolutionItem &lhs, const AncestorResolutionItem &rhs) -> bool {
+                if (lhs.ancestor->loc == rhs.ancestor->loc) {
+                    return constantDepth(lhs.ancestor) < constantDepth(rhs.ancestor);
+                }
+                return compareLocOffsets(lhs.ancestor->loc, rhs.ancestor->loc);
+            });
+        }
 
         // Note that this is missing alias stubbing, thus resolveJob needs to be able to handle missing aliases.
 
@@ -1239,15 +1276,19 @@ public:
             int suggestionCount = 0;
             for (auto &job : todo) {
                 core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                constantResolutionFailed(ctx, job, suggestionCount);
+                for (auto &item : job.items) {
+                    constantResolutionFailed(ctx, item, suggestionCount);
+                }
             }
 
             for (auto &job : todoAncestors) {
                 core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                auto resolved = resolveAncestorJob(ctx, job, true);
-                if (!resolved) {
-                    resolved = resolveAncestorJob(ctx, job, true);
-                    ENFORCE(resolved);
+                for (auto &item : job.items) {
+                    auto resolved = resolveAncestorJob(ctx, item, true);
+                    if (!resolved) {
+                        resolved = resolveAncestorJob(ctx, item, true);
+                        ENFORCE(resolved);
+                    }
                 }
             }
         }
@@ -1936,9 +1977,9 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        // If this string _begins_ with `::`, then the first fragment will be an empty string; in multiple places below,
-        // we'll check to find out whether the first part is `""` or not, which means we're testing whether the string
-        // did or did not begin with `::`.
+        // If this string _begins_ with `::`, then the first fragment will be an empty string; in multiple places
+        // below, we'll check to find out whether the first part is `""` or not, which means we're testing whether
+        // the string did or did not begin with `::`.
         vector<string> parts = absl::StrSplit(shortName, "::");
         if (packageType) {
             // there's a little bit of a complexity here: we want
@@ -1984,9 +2025,9 @@ class ResolveTypeMembersAndFieldsWalk {
                 if (!packageType) {
                     if (part != "") {
                         if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                            e.setHeader(
-                                "The string given to `{}` must be an absolute constant reference that starts with `{}`",
-                                method, "::");
+                            e.setHeader("The string given to `{}` must be an absolute constant reference that "
+                                        "starts with `{}`",
+                                        method, "::");
                         }
                         return;
                     }

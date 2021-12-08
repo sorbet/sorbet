@@ -54,7 +54,7 @@ module Test3
   end
 
   module M3
-  #      ^^ error: `T.class_of(Test3::M3)` requires unrelated classes `R3` and `R1` making it impossible to inherit
+  #      ^^ error: `T.class_of(Test3::M3)` requires unrelated classes `R1` and `R3` making it impossible to inherit
   #      ^^ error: `T.class_of(Test3::M3)` must inherit `R1` (required by `Test3::M1`)
   #      ^^ error: `T.class_of(Test3::M3)` must inherit `R3` (required by `Test3::M2`)
     extend M1, M2
