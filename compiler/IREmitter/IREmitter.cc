@@ -728,12 +728,12 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                 },
                 [&](cfg::GetCurrentException &i) {
                     // if this block isn't an exception block header, there's nothing to do here.
-                    auto bodyRubyBlockId = irctx.exceptionBlockHeader[bb->id];
-                    if (bodyRubyBlockId == 0) {
+                    auto bodyRubyRegionId = irctx.exceptionBlockHeader[bb->id];
+                    if (bodyRubyRegionId == 0) {
                         return;
                     }
 
-                    IREmitterHelpers::emitExceptionHandlers(cs, builder, irctx, bb->rubyRegionId, bodyRubyBlockId,
+                    IREmitterHelpers::emitExceptionHandlers(cs, builder, irctx, bb->rubyRegionId, bodyRubyRegionId,
                                                             bind.bind.variable);
                 },
                 [&](cfg::ArgPresent &i) {

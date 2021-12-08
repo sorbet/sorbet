@@ -23,22 +23,22 @@ llvm::Function *getExceptionFunc(CompilerState &cs, const IREmitterContext &irct
 } // namespace
 
 void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                             const IREmitterContext &irctx, int rubyRegionId, int bodyRubyBlockId,
+                                             const IREmitterContext &irctx, int rubyRegionId, int bodyRubyRegionId,
                                              cfg::LocalRef exceptionValue) {
-    const int handlersRubyBlockId = bodyRubyBlockId + cfg::CFG::HANDLERS_REGION_OFFSET;
-    const int ensureRubyBlockId = bodyRubyBlockId + cfg::CFG::ENSURE_REGION_OFFSET;
-    const int elseRubyBlockId = bodyRubyBlockId + cfg::CFG::ELSE_REGION_OFFSET;
+    const int handlersRubyRegionId = bodyRubyRegionId + cfg::CFG::HANDLERS_REGION_OFFSET;
+    const int ensureRubyRegionId = bodyRubyRegionId + cfg::CFG::ENSURE_REGION_OFFSET;
+    const int elseRubyRegionId = bodyRubyRegionId + cfg::CFG::ELSE_REGION_OFFSET;
 
     auto *currentFunc = irctx.rubyBlocks2Functions[rubyRegionId];
     // TODO: it would be nice if we could detect some of these functions
     // were empty and/or not useful so that we could eliminate dealing with
     // them from the exception handling logic.
-    ENFORCE(irctx.rubyBlockType[handlersRubyBlockId] != FunctionType::Unused);
-    // ENFORCE(irctx.rubyBlockType[ensureRubyBlockId] != FunctionType::Unused);
-    // ENFORCE(irctx.rubyBlockType[elseRubyBlockId] != FunctionType::Unused);
-    auto *handlersFunc = getExceptionFunc(cs, irctx, handlersRubyBlockId);
-    auto *ensureFunc = getExceptionFunc(cs, irctx, ensureRubyBlockId);
-    auto *elseFunc = getExceptionFunc(cs, irctx, elseRubyBlockId);
+    ENFORCE(irctx.rubyBlockType[handlersRubyRegionId] != FunctionType::Unused);
+    // ENFORCE(irctx.rubyBlockType[ensureRubyRegionId] != FunctionType::Unused);
+    // ENFORCE(irctx.rubyBlockType[elseRubyRegionId] != FunctionType::Unused);
+    auto *handlersFunc = getExceptionFunc(cs, irctx, handlersRubyRegionId);
+    auto *ensureFunc = getExceptionFunc(cs, irctx, ensureRubyRegionId);
+    auto *elseFunc = getExceptionFunc(cs, irctx, elseRubyRegionId);
 
     auto *ec = builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
 
@@ -46,10 +46,10 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
     auto *closure = Payload::buildLocalsOffset(cs);
     auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyRegionId);
 
-    auto info = Payload::escapedVariableInfo(cs, exceptionValue, irctx, bodyRubyBlockId);
+    auto info = Payload::escapedVariableInfo(cs, exceptionValue, irctx, bodyRubyRegionId);
     auto *v =
         builder.CreateCall(cs.getFunction("sorbet_run_exception_handling"),
-                           {ec, irctx.rubyBlocks2Functions[bodyRubyBlockId], pc, closure, cfp, handlersFunc, elseFunc,
+                           {ec, irctx.rubyBlocks2Functions[bodyRubyRegionId], pc, closure, cfp, handlersFunc, elseFunc,
                             ensureFunc, Payload::retrySingleton(cs, builder, irctx), info.index, info.level});
 
     auto *exceptionContinue = llvm::BasicBlock::Create(cs, "exception-continue", currentFunc);

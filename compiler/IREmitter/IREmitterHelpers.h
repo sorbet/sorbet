@@ -127,7 +127,7 @@ public:
     static llvm::Value *emitMethodCallViaRubyVM(MethodCallContext &mcctx);
 
     static void emitExceptionHandlers(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                      int rubyRegionId, int bodyRubyBlockId, cfg::LocalRef exceptionValue);
+                                      int rubyRegionId, int bodyRubyRegionId, cfg::LocalRef exceptionValue);
 
     static void emitDebugLoc(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                              int rubyRegionId, core::Loc loc);
