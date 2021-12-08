@@ -1082,7 +1082,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             auto &c = ast::cast_tree_nonnull<ast::ClassDef>(what);
             pickle(p, c.loc);
             pickle(p, c.declLoc);
-            p.putU1(static_cast<u2>(c.kind));
+            p.putU1(static_cast<uint16_t>(c.kind));
             p.putU4(c.symbol.id());
             p.putU4(c.ancestors.size());
             p.putU4(c.singletonAncestors.size());
@@ -1222,7 +1222,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             static_assert(sizeof(flags) == sizeof(flagsU1));
             // Can replace this with std::bit_cast in C++20
             memcpy(&flags, &flagsU1, sizeof(flags));
-            auto numPosArgs = static_cast<u2>(p.getU4());
+            auto numPosArgs = static_cast<uint16_t>(p.getU4());
             auto argsSize = p.getU4();
             auto recv = unpickleExpr(p, gs);
             ast::Send::ARGS_store store(argsSize);

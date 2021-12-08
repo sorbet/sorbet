@@ -222,7 +222,7 @@ int getArity(const GlobalState &gs, MethodRef method) {
 
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
-MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, u2 numPosArgs,
+MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     ENFORCE(Context::permitOverloadDefinitions(gs, primary.data(gs)->loc().file(), primary),
@@ -1770,7 +1770,7 @@ void applySig(const GlobalState &gs, const DispatchArgs &args, DispatchResult &r
     }
     CallLocs callLocs{args.locs.file, args.locs.call, callLocsReceiver, callLocsArgs};
 
-    u2 numPosArgs = args.numPosArgs - (1 + argsToDropOffEnd);
+    uint16_t numPosArgs = args.numPosArgs - (1 + argsToDropOffEnd);
     auto dispatchArgsArgs = InlinedVector<const TypeAndOrigins *, 2>{};
     for (auto arg = args.args.begin() + argsOffset, end = args.args.end() - argsToDropOffEnd; arg != end; ++arg) {
         dispatchArgsArgs.emplace_back(*arg);
@@ -2007,7 +2007,7 @@ public:
             return;
         }
 
-        u2 numPosArgs = posTuple->elems.size();
+        uint16_t numPosArgs = posTuple->elems.size();
 
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
         InlinedVector<const TypeAndOrigins *, 2> sendArgs =
@@ -2239,7 +2239,7 @@ public:
 
         NameRef fn = lit.asName(gs);
 
-        u2 numPosArgs = args.numPosArgs - 3;
+        uint16_t numPosArgs = args.numPosArgs - 3;
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
         InlinedVector<LocOffsets, 2> sendArgLocs;
         for (int i = 3; i < args.args.size(); i++) {
@@ -2321,7 +2321,7 @@ public:
             return;
         }
 
-        u2 numPosArgs = posTuple->elems.size();
+        uint16_t numPosArgs = posTuple->elems.size();
 
         auto kwType = args.args[3]->type;
         auto *kwTuple = cast_type<TupleType>(kwType);
@@ -2416,7 +2416,7 @@ public:
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, selfTy.type, mustExist);
 
-        u2 numPosArgs = args.numPosArgs - 1;
+        uint16_t numPosArgs = args.numPosArgs - 1;
 
         InlinedVector<const TypeAndOrigins *, 2> sendArgStore;
         InlinedVector<LocOffsets, 2> sendArgLocs;

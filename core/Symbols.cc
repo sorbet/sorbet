@@ -477,7 +477,7 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     return Types::arrayOf(ctx, instantiated);
 }
 
-void Symbol::addMixinAt(ClassOrModuleRef sym, std::optional<u2> index) {
+void Symbol::addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index) {
     if (index.has_value()) {
         auto i = index.value();
         ENFORCE(mixins_.size() > i);
@@ -488,7 +488,7 @@ void Symbol::addMixinAt(ClassOrModuleRef sym, std::optional<u2> index) {
     }
 }
 
-bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional<u2> index) {
+bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional<uint16_t> index) {
     ENFORCE(isClassOrModule());
     // Note: Symbols without an explicit declaration may not have class or module set. They default to modules in
     // GlobalPass.cc. We also do not complain if the mixin is BasicObject.
@@ -522,11 +522,11 @@ bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional
     return isValidMixin;
 }
 
-u2 Symbol::addMixinPlaceholder(const GlobalState &gs) {
+uint16_t Symbol::addMixinPlaceholder(const GlobalState &gs) {
     ENFORCE(isClassOrModule());
     ENFORCE(ref(gs) != core::Symbols::PlaceholderMixin(), "Created a cycle through PlaceholderMixin");
     mixins_.emplace_back(core::Symbols::PlaceholderMixin());
-    ENFORCE(mixins_.size() < numeric_limits<u2>::max());
+    ENFORCE(mixins_.size() < numeric_limits<uint16_t>::max());
     return mixins_.size() - 1;
 }
 

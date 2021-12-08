@@ -34,7 +34,7 @@ public:
         return store;
     }
 
-    static ExpressionPtr Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs,
+    static ExpressionPtr Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, uint16_t numPosArgs,
                               Send::ARGS_store args, Send::Flags flags = {}) {
         auto send = make_expression<ast::Send>(loc, std::move(recv), fun, numPosArgs, std::move(args), flags);
         return send;

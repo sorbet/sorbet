@@ -93,7 +93,7 @@ public:
 
     GlobalState &gs_;
     core::FileRef file_;
-    u2 uniqueCounter_ = 1;
+    uint16_t uniqueCounter_ = 1;
     uint32_t maxOff_;
     ruby_parser::base_driver *driver_;
 

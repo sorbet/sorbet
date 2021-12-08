@@ -243,7 +243,7 @@ vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const 
 }
 
 string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatchResult, core::MethodRef method,
-                     const core::TypePtr &receiverType, const core::TypeConstraint *constraint, u2 totalArgs) {
+                     const core::TypePtr &receiverType, const core::TypeConstraint *constraint, uint16_t totalArgs) {
     fmt::memory_buffer result;
     fmt::format_to(std::back_inserter(result), "{}", method.data(gs)->name.shortName(gs));
     auto nextTabstop = 1;
@@ -659,7 +659,7 @@ unique_ptr<CompletionItem>
 CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::DispatchResult &dispatchResult,
                                            core::MethodRef maybeAlias, const core::TypePtr &receiverType,
                                            const core::TypeConstraint *constraint, core::Loc queryLoc,
-                                           string_view prefix, size_t sortIdx, u2 totalArgs) const {
+                                           string_view prefix, size_t sortIdx, uint16_t totalArgs) const {
     const auto &gs = typechecker.state();
     ENFORCE(maybeAlias.exists());
     auto clientConfig = config.getClientConfig();
