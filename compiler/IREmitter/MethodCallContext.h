@@ -31,9 +31,9 @@ class MethodCallContext {
 
     void initArgsAndCache();
 
-    MethodCallContext(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx, int rubyBlockId,
+    MethodCallContext(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx, int rubyRegionId,
                       cfg::Send *send, std::optional<int> blk)
-        : cs(cs), builder(builder), irctx(irctx), rubyBlockId(rubyBlockId), send(send), blk(blk){};
+        : cs(cs), builder(builder), irctx(irctx), rubyRegionId(rubyRegionId), send(send), blk(blk){};
 
 public:
     CompilerState &cs;
@@ -42,9 +42,9 @@ public:
 
     const IREmitterContext &irctx;
 
-    // See IREmitterContext for a description of rubyBlockId. Primarily used to index into the
+    // See IREmitterContext for a description of rubyRegionId. Primarily used to index into the
     // various vectors in `irctx`.
-    int rubyBlockId;
+    int rubyRegionId;
 
     // The method call being emitted right now.
     cfg::Send *send;
@@ -78,7 +78,7 @@ public:
     llvm::Function *blkAsFunction() const;
 
     static MethodCallContext create(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
-                                    int rubyBlockId, cfg::Send *send, std::optional<int> blk);
+                                    int rubyRegionId, cfg::Send *send, std::optional<int> blk);
 
     // connect the send entry and the continuation
     void finalize();

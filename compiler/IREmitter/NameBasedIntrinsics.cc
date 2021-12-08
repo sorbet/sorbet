@@ -122,7 +122,7 @@ class IdentityIntrinsic : public NameBasedIntrinsicMethod {
 public:
     IdentityIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
-        return Payload::varGet(mcctx.cs, mcctx.send->args[0].variable, mcctx.builder, mcctx.irctx, mcctx.rubyBlockId);
+        return Payload::varGet(mcctx.cs, mcctx.send->args[0].variable, mcctx.builder, mcctx.irctx, mcctx.rubyRegionId);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::suggestType()};
@@ -132,14 +132,14 @@ public:
 llvm::Value *prepareBlockHandler(MethodCallContext &mcctx, cfg::VariableUseSite &blkVar) {
     auto &cs = mcctx.cs;
     auto &irctx = mcctx.irctx;
-    auto rubyBlockId = mcctx.rubyBlockId;
+    auto rubyRegionId = mcctx.rubyRegionId;
 
     if (IREmitterHelpers::canPassThroughBlockViaRubyVM(mcctx, blkVar.variable)) {
         return Payload::getPassedBlockHandler(cs, mcctx.builder);
     } else {
         // TODO(perf) `makeBlockHandlerProc` uses `to_proc` under the hood, and could be rewritten here to make an
         // inline cache.
-        auto *block = Payload::varGet(cs, blkVar.variable, mcctx.builder, irctx, rubyBlockId);
+        auto *block = Payload::varGet(cs, blkVar.variable, mcctx.builder, irctx, rubyRegionId);
         return Payload::makeBlockHandlerProc(cs, mcctx.builder, block);
     }
 }
@@ -157,7 +157,7 @@ public:
 
         auto &cs = mcctx.cs;
         auto &irctx = mcctx.irctx;
-        auto rubyBlockId = mcctx.rubyBlockId;
+        auto rubyRegionId = mcctx.rubyRegionId;
         auto *send = mcctx.send;
         auto &builder = mcctx.builder;
 
@@ -174,8 +174,8 @@ public:
 
         auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 3);
         flags.blockarg = true;
-        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
-        Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyBlockId), stack);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyRegionId);
+        Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyRegionId), stack);
         auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, string(shortName), flags, stack.size(), keywords);
         if (methodName == core::Names::super()) {
             return Payload::callSuperFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
@@ -196,12 +196,12 @@ public:
         auto &cs = mcctx.cs;
         auto &builder = mcctx.builder;
         auto &irctx = mcctx.irctx;
-        auto rubyBlockId = mcctx.rubyBlockId;
+        auto rubyRegionId = mcctx.rubyRegionId;
 
         auto *retrySingleton = Payload::retrySingleton(cs, builder, irctx);
-        IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, retrySingleton);
+        IREmitterHelpers::emitReturn(cs, builder, irctx, rubyRegionId, retrySingleton);
 
-        auto *dead = llvm::BasicBlock::Create(cs, "dead-retry", irctx.rubyBlocks2Functions[rubyBlockId]);
+        auto *dead = llvm::BasicBlock::Create(cs, "dead-retry", irctx.rubyBlocks2Functions[rubyRegionId]);
         builder.SetInsertPoint(dead);
 
         return retrySingleton;
@@ -402,7 +402,7 @@ std::tuple<CallCacheFlags, llvm::Value *> prepareSplatArgs(MethodCallContext &mc
     //
     // TODO(perf): We can probably save quite a bit of intermediate dupping, popping, etc., by cleverer addressing
     // of the array contents.
-    auto *splatArgs = Payload::varGet(mcctx.cs, splatArgsVar.variable, builder, irctx, mcctx.rubyBlockId);
+    auto *splatArgs = Payload::varGet(mcctx.cs, splatArgsVar.variable, builder, irctx, mcctx.rubyRegionId);
 
     // TODO(perf) we can avoid duplicating the array here if we know that it was created specifically for this
     // splat.
@@ -416,7 +416,7 @@ std::tuple<CallCacheFlags, llvm::Value *> prepareSplatArgs(MethodCallContext &mc
         flags.args_splat = true;
         flags.kw_splat = true;
 
-        auto *kwArgArray = Payload::varGet(mcctx.cs, kwArgsVar.variable, mcctx.builder, irctx, mcctx.rubyBlockId);
+        auto *kwArgArray = Payload::varGet(mcctx.cs, kwArgsVar.variable, mcctx.builder, irctx, mcctx.rubyRegionId);
 
         llvm::Value *kwHash;
 
@@ -470,7 +470,7 @@ public:
         auto &builder = mcctx.builder;
         auto *send = mcctx.send;
         auto recv = send->args[0].variable;
-        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyRegionId);
 
         auto [flags, splatArray] = prepareSplatArgs(mcctx, send->args[2], send->args[3]);
 
@@ -489,7 +489,7 @@ public:
         // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
         // is actually the first arg of the callWithSplat intrinsic method.
         Payload::pushRubyStackVector(
-            cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId), {splatArray});
+            cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyRegionId), {splatArray});
 
         // Call the receiver.
         if (auto *blk = mcctx.blkAsFunction()) {
@@ -549,9 +549,9 @@ public:
         // Push receiver and the splat array.
         // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
         // is actually the first arg of the callWithSplat intrinsic method.
-        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyRegionId);
         Payload::pushRubyStackVector(
-            cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyBlockId), {splatArray});
+            cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyRegionId), {splatArray});
 
         if (methodName == core::Names::super()) {
             return Payload::callSuperFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
@@ -572,7 +572,7 @@ public:
         auto &cs = mcctx.cs;
         auto &builder = mcctx.builder;
         auto &irctx = mcctx.irctx;
-        int rubyBlockId = mcctx.rubyBlockId;
+        int rubyRegionId = mcctx.rubyRegionId;
 
         auto *klass = mcctx.varGetRecv();
         auto *newCache = mcctx.getInlineCache();
@@ -581,7 +581,7 @@ public:
         auto fastCall = llvm::BasicBlock::Create(cs, "fastNew", builder.GetInsertBlock()->getParent());
         auto afterNew = llvm::BasicBlock::Create(cs, "afterNew", builder.GetInsertBlock()->getParent());
 
-        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyRegionId);
         auto *allocatedObject =
             builder.CreateCall(cs.getFunction("sorbet_maybeAllocateObjectFastPath"), {klass, newCache});
         auto *isUndef = Payload::testIsUndef(cs, builder, allocatedObject);
@@ -632,11 +632,11 @@ public:
         auto &cs = mcctx.cs;
         auto &builder = mcctx.builder;
         auto &irctx = mcctx.irctx;
-        int rubyBlockId = mcctx.rubyBlockId;
+        int rubyRegionId = mcctx.rubyRegionId;
 
         auto *klass = Payload::getClassVariableStoreClass(cs, builder, irctx);
         // TODO(froydnj): figure out how to access the ID of the argument directly.
-        auto *var = Payload::varGet(cs, mcctx.send->args[0].variable, builder, irctx, rubyBlockId);
+        auto *var = Payload::varGet(cs, mcctx.send->args[0].variable, builder, irctx, rubyRegionId);
         return builder.CreateCall(cs.getFunction("sorbet_classVariableDefined"), {klass, var}, "is_cvar_defined");
     }
 
@@ -653,11 +653,11 @@ public:
         auto &cs = mcctx.cs;
         auto &builder = mcctx.builder;
         auto &irctx = mcctx.irctx;
-        int rubyBlockId = mcctx.rubyBlockId;
+        int rubyRegionId = mcctx.rubyRegionId;
 
-        auto *self = Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyBlockId);
+        auto *self = Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyRegionId);
         // TODO(froydnj): figure out how to access the ID of the argument directly.
-        auto *var = Payload::varGet(cs, mcctx.send->args[0].variable, builder, irctx, rubyBlockId);
+        auto *var = Payload::varGet(cs, mcctx.send->args[0].variable, builder, irctx, rubyRegionId);
         return builder.CreateCall(cs.getFunction("sorbet_instanceVariableDefined"), {self, var}, "is_cvar_defined");
     }
 
@@ -691,7 +691,7 @@ public:
 
         auto *callCache = mcctx.getInlineCache();
         auto *ivarCache = Payload::buildInstanceVariableCache(cs, varNameStr);
-        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyRegionId);
         auto *recv = mcctx.varGetRecv();
         auto *ivarID = Payload::idIntern(cs, builder, varNameStr);
 
@@ -729,10 +729,10 @@ public:
 
         auto *callCache = mcctx.getInlineCache();
         auto *ivarCache = Payload::buildInstanceVariableCache(cs, varNameStr);
-        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyRegionId);
         auto *recv = mcctx.varGetRecv();
         auto *ivarID = Payload::idIntern(cs, builder, varNameStr);
-        auto *value = Payload::varGet(cs, mcctx.send->args[1].variable, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *value = Payload::varGet(cs, mcctx.send->args[1].variable, builder, mcctx.irctx, mcctx.rubyRegionId);
 
         return builder.CreateCall(cs.getFunction("sorbet_vm_instance_variable_set"),
                                   {callCache, ivarCache, cfp, recv, ivarID, value});
@@ -755,7 +755,7 @@ public:
         auto &cs = mcctx.cs;
         auto &builder = mcctx.builder;
         auto *callCache = mcctx.getInlineCache();
-        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyRegionId);
         auto *recv = mcctx.varGetRecv();
         return builder.CreateCall(cs.getFunction("sorbet_vm_class"), {callCache, cfp, recv});
     }
@@ -777,7 +777,7 @@ public:
         auto &cs = mcctx.cs;
         auto &builder = mcctx.builder;
         auto *callCache = mcctx.getInlineCache();
-        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyRegionId);
         auto *recv = mcctx.varGetRecv();
         return builder.CreateCall(cs.getFunction("sorbet_vm_bang"), {callCache, cfp, recv});
     }
@@ -799,7 +799,7 @@ public:
         auto &cs = mcctx.cs;
         auto &builder = mcctx.builder;
         auto *callCache = mcctx.getInlineCache();
-        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyRegionId);
         auto *recv = mcctx.varGetRecv();
         return builder.CreateCall(cs.getFunction("sorbet_vm_freeze"), {callCache, cfp, recv});
     }
@@ -821,9 +821,9 @@ public:
         auto &cs = mcctx.cs;
         auto &builder = mcctx.builder;
         auto *callCache = mcctx.getInlineCache();
-        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyRegionId);
         auto *recv = mcctx.varGetRecv();
-        auto *var = Payload::varGet(cs, mcctx.send->args[0].variable, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *var = Payload::varGet(cs, mcctx.send->args[0].variable, builder, mcctx.irctx, mcctx.rubyRegionId);
         return builder.CreateCall(cs.getFunction("sorbet_vm_isa_p"), {callCache, cfp, recv, var});
     }
 
@@ -865,7 +865,7 @@ public:
         ENFORCE(this->arity == 1 || this->arity == 2);
 
         auto *cFunction = cs.getFunction(llvm::StringRef{this->cMethod.data(), this->cMethod.size()});
-        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyRegionId);
 
         InlinedVector<llvm::Value *, 5> funcArgs{cfp, cache, recv, args.stack[0]};
         if (this->arity == 2) {

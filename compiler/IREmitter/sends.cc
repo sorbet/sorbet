@@ -270,7 +270,7 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
     auto &builder = mcctx.builder;
     auto &args = mcctx.send->args;
     auto irctx = mcctx.irctx;
-    auto rubyBlockId = mcctx.rubyBlockId;
+    auto rubyRegionId = mcctx.rubyRegionId;
 
     auto posEnd = mcctx.send->numPosArgs;
     auto kwEnd = mcctx.send->args.size();
@@ -303,19 +303,19 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
                            std::move(argValues)};
     }
 
-    auto *sendArgs = irctx.sendArgArrayByBlock[rubyBlockId];
+    auto *sendArgs = irctx.sendArgArrayByBlock[rubyRegionId];
 
     // fill in keyword args first, so that we can re-use the args vector to build the initial hash
     if (hasKwArgs) {
         llvm::Value *kwHash = nullptr;
         if (numKwArgs == 0) {
             // no inlined keyword args, lookup the hash to be splatted
-            kwHash = Payload::varGet(cs, args.back().variable, builder, irctx, rubyBlockId);
+            kwHash = Payload::varGet(cs, args.back().variable, builder, irctx, rubyRegionId);
         } else {
             // fill in inlined args (posEnd .. kwEnd)
             auto it = args.begin() + posEnd;
             for (auto argId = 0; argId < numKwArgs; ++argId, ++it) {
-                auto var = Payload::varGet(cs, it->variable, builder, irctx, rubyBlockId);
+                auto var = Payload::varGet(cs, it->variable, builder, irctx, rubyRegionId);
                 argValues.emplace_back(var);
                 setSendArgsEntry(cs, builder, sendArgs, argId, var);
             }
@@ -327,7 +327,7 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
 
             // merge in the splat if it's present (mcctx.send->args.back())
             if (hasKwSplat) {
-                auto *splat = Payload::varGet(cs, args.back().variable, builder, irctx, rubyBlockId);
+                auto *splat = Payload::varGet(cs, args.back().variable, builder, irctx, rubyRegionId);
                 argValues.emplace_back(splat);
                 builder.CreateCall(cs.getFunction("sorbet_hashUpdate"), {kwHash, splat});
             }
@@ -341,7 +341,7 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
         int argId = 0;
         auto it = args.begin() + offset;
         for (; argId < numPosArgs; argId += 1, ++it) {
-            auto var = Payload::varGet(cs, it->variable, builder, irctx, rubyBlockId);
+            auto var = Payload::varGet(cs, it->variable, builder, irctx, rubyRegionId);
             argValues.emplace_back(var);
             setSendArgsEntry(cs, builder, sendArgs, argId, var);
         }
@@ -359,7 +359,7 @@ RubyStackArgs IREmitterHelpers::buildSendArgs(MethodCallContext &mcctx, cfg::Loc
     auto &irctx = mcctx.irctx;
     auto &builder = mcctx.builder;
     auto &send = mcctx.send;
-    auto rubyBlockId = mcctx.rubyBlockId;
+    auto rubyRegionId = mcctx.rubyRegionId;
 
     CallCacheFlags flags;
 
@@ -371,7 +371,7 @@ RubyStackArgs IREmitterHelpers::buildSendArgs(MethodCallContext &mcctx, cfg::Loc
     auto posEnd = send->numPosArgs;
     auto argIdx = offset;
     for (; argIdx < posEnd; ++argIdx) {
-        stack.emplace_back(Payload::varGet(cs, send->args[argIdx].variable, builder, irctx, rubyBlockId));
+        stack.emplace_back(Payload::varGet(cs, send->args[argIdx].variable, builder, irctx, rubyRegionId));
     }
 
     // push keyword argument values, and populate the keywords vector
@@ -389,7 +389,7 @@ RubyStackArgs IREmitterHelpers::buildSendArgs(MethodCallContext &mcctx, cfg::Loc
             ENFORCE(numKwArgs == 1);
             flags.kw_splat = true;
 
-            auto var = Payload::varGet(cs, send->args[argIdx].variable, builder, irctx, rubyBlockId);
+            auto var = Payload::varGet(cs, send->args[argIdx].variable, builder, irctx, rubyRegionId);
             stack.emplace_back(var);
         } else {
             flags.kwarg = true;
@@ -400,7 +400,7 @@ RubyStackArgs IREmitterHelpers::buildSendArgs(MethodCallContext &mcctx, cfg::Loc
                 ENFORCE(it != irctx.symbols.end(), "Keyword arg present with non-symbol keyword");
                 keywords.emplace_back(it->second);
 
-                stack.emplace_back(Payload::varGet(cs, send->args[argIdx++].variable, builder, irctx, rubyBlockId));
+                stack.emplace_back(Payload::varGet(cs, send->args[argIdx++].variable, builder, irctx, rubyRegionId));
             }
         }
     } else {
@@ -420,8 +420,8 @@ llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx) {
     auto &cs = mcctx.cs;
     auto &builder = mcctx.builder;
     auto &irctx = mcctx.irctx;
-    auto rubyBlockId = mcctx.rubyBlockId;
-    auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
+    auto rubyRegionId = mcctx.rubyRegionId;
+    auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyRegionId);
 
     auto &stack = mcctx.getStackArgs().stack;
     auto *cache = mcctx.getInlineCache();
@@ -483,7 +483,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
 
         // fill in args
         auto args = IREmitterHelpers::fillSendArgArray(mcctx);
-        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyRegionId);
 
         return builder.CreateCall(cs.getFunction("sorbet_vm_callBlock"), {cfp, args.argc, args.argv, args.kw_splat},
                                   "rawBlockSendResult");

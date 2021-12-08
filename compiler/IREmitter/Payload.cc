@@ -466,11 +466,11 @@ llvm::Value *Payload::boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder
 namespace {
 
 llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                     const ast::MethodDef &md, int rubyBlockId);
+                                     const ast::MethodDef &md, int rubyRegionId);
 
 llvm::Value *getIseqType(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                         int rubyBlockId) {
-    switch (irctx.rubyBlockType[rubyBlockId]) {
+                         int rubyRegionId) {
+    switch (irctx.rubyBlockType[rubyRegionId]) {
         case FunctionType::Method:
             return builder.CreateCall(cs.getFunction("sorbet_rubyIseqTypeMethod"), {}, "ISEQ_TYPE_METHOD");
 
@@ -507,20 +507,20 @@ llvm::PointerType *iseqType(CompilerState &cs) {
 }
 
 // Given a Ruby block, finds the block id of the nearest _proper_ ancestor of that block that allocates an iseq.
-int getNearestIseqAllocatorBlock(const IREmitterContext &irctx, int rubyBlockId) {
+int getNearestIseqAllocatorBlock(const IREmitterContext &irctx, int rubyRegionId) {
     do {
-        rubyBlockId = irctx.rubyBlockParent[rubyBlockId];
-    } while (rubyBlockId > 0 && irctx.rubyBlockType[rubyBlockId] == FunctionType::ExceptionBegin);
+        rubyRegionId = irctx.rubyBlockParent[rubyRegionId];
+    } while (rubyRegionId > 0 && irctx.rubyBlockType[rubyRegionId] == FunctionType::ExceptionBegin);
 
-    return rubyBlockId;
+    return rubyRegionId;
 }
 
 std::tuple<const string &, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &builder,
                                                       const IREmitterContext &irctx, const ast::MethodDef &md,
-                                                      int rubyBlockId) {
-    auto &locationName = irctx.rubyBlockLocationNames[rubyBlockId];
+                                                      int rubyRegionId) {
+    auto &locationName = irctx.rubyBlockLocationNames[rubyRegionId];
     llvm::Value *parent = nullptr;
-    switch (irctx.rubyBlockType[rubyBlockId]) {
+    switch (irctx.rubyBlockType[rubyRegionId]) {
         case FunctionType::Method:
         case FunctionType::StaticInitFile:
         case FunctionType::StaticInitModule:
@@ -530,7 +530,7 @@ std::tuple<const string &, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::I
         case FunctionType::Block:
         case FunctionType::Rescue:
         case FunctionType::Ensure:
-            parent = allocateRubyStackFrames(cs, builder, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
+            parent = allocateRubyStackFrames(cs, builder, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyRegionId));
             break;
 
         case FunctionType::ExceptionBegin:
@@ -551,7 +551,7 @@ std::tuple<const string &, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::I
 }
 
 // Fill the locals array with interned ruby IDs.
-void fillLocals(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx, int rubyBlockId,
+void fillLocals(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx, int rubyRegionId,
                 int baseOffset, llvm::Value *locals) {
     // The map used to store escaped variables isn't stable, so we first sort it into a vector. This isn't great, but
     // without this step the locals are processed in random order, making the llvm output unstable.
@@ -586,8 +586,8 @@ enum class LocalsIDStorage {
 };
 
 LocalsIDStorage classifyStorageFor(CompilerState &cs, const IREmitterContext &irctx, const ast::MethodDef &md,
-                                   int rubyBlockId) {
-    switch (irctx.rubyBlockType[rubyBlockId]) {
+                                   int rubyRegionId) {
+    switch (irctx.rubyBlockType[rubyRegionId]) {
         case FunctionType::Method:
         case FunctionType::StaticInitFile:
         case FunctionType::StaticInitModule:
@@ -605,13 +605,13 @@ LocalsIDStorage classifyStorageFor(CompilerState &cs, const IREmitterContext &ir
 // Allocate an array to hold local variable ids before calling `sorbet_allocateRubyStackFrame`.
 tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilderBase &builder,
                                               const IREmitterContext &irctx, const ast::MethodDef &md,
-                                              int rubyBlockId) {
+                                              int rubyRegionId) {
     llvm::Value *locals = nullptr;
     llvm::Value *numLocals = nullptr;
     auto *idType = llvm::Type::getInt64Ty(cs);
     auto *idPtrType = llvm::PointerType::getUnqual(idType);
 
-    auto storageKind = classifyStorageFor(cs, irctx, md, rubyBlockId);
+    auto storageKind = classifyStorageFor(cs, irctx, md, rubyRegionId);
     switch (storageKind) {
         case LocalsIDStorage::Inherited:
             numLocals = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true));
@@ -621,7 +621,7 @@ tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilder
         case LocalsIDStorage::Stack:
             numLocals = llvm::ConstantInt::get(cs, llvm::APInt(32, irctx.escapedVariableIndices.size(), true));
             locals = builder.CreateAlloca(idType, numLocals, "locals");
-            fillLocals(cs, builder, irctx, rubyBlockId, 0, locals);
+            fillLocals(cs, builder, irctx, rubyRegionId, 0, locals);
             break;
     }
 
@@ -629,7 +629,7 @@ tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilder
 }
 
 llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterContext &irctx, const ast::MethodDef &md,
-                                            int rubyBlockId, llvm::GlobalVariable *store) {
+                                            int rubyRegionId, llvm::GlobalVariable *store) {
     std::vector<llvm::Type *> argTys{llvm::Type::getInt64Ty(cs)};
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), argTys, false);
     auto constr =
@@ -649,8 +649,8 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
 
     auto loc = md.symbol.data(cs)->loc();
     auto file = cs.file;
-    auto *iseqType = getIseqType(cs1, builder, irctx, rubyBlockId);
-    auto [funcName, parent] = getIseqInfo(cs1, builder, irctx, md, rubyBlockId);
+    auto *iseqType = getIseqType(cs1, builder, irctx, rubyRegionId);
+    auto [funcName, parent] = getIseqInfo(cs1, builder, irctx, md, rubyRegionId);
     auto funcNameId = Payload::idIntern(cs1, builder, funcName);
     auto funcNameValue = Payload::cPtrToRubyString(cs1, builder, funcName, true);
     auto filename = file.data(cs).path();
@@ -663,7 +663,7 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
     } else {
         startLine = 0;
     }
-    auto [locals, numLocals] = getLocals(cs1, builder, irctx, md, rubyBlockId);
+    auto [locals, numLocals] = getLocals(cs1, builder, irctx, md, rubyRegionId);
     auto sendMax = llvm::ConstantInt::get(cs, llvm::APInt(32, irctx.maxSendArgCount, true));
     auto *fileLineNumberInfo = Payload::getFileLineNumberInfo(cs, builder, file);
     auto *fn = cs.getFunction("sorbet_allocateRubyStackFrame");
@@ -681,10 +681,10 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
 
 // The common suffix for stack frame related global names.
 string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx, core::MethodRef methodSym,
-                               int rubyBlockId) {
+                               int rubyRegionId) {
     auto name = IREmitterHelpers::getFunctionName(cs, methodSym);
 
-    switch (irctx.rubyBlockType[rubyBlockId]) {
+    switch (irctx.rubyBlockType[rubyRegionId]) {
         case FunctionType::Method:
         case FunctionType::StaticInitFile:
         case FunctionType::StaticInitModule:
@@ -695,14 +695,14 @@ string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx,
         case FunctionType::Ensure:
         case FunctionType::ExceptionBegin:
         case FunctionType::Unused:
-            return name + "$block_" + std::to_string(rubyBlockId);
+            return name + "$block_" + std::to_string(rubyRegionId);
     }
 }
 
 llvm::GlobalVariable *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                        core::MethodRef methodSym, int rubyBlockId) {
+                                        core::MethodRef methodSym, int rubyRegionId) {
     auto tp = iseqType(cs);
-    auto name = getStackFrameGlobalName(cs, irctx, methodSym, rubyBlockId);
+    auto name = getStackFrameGlobalName(cs, irctx, methodSym, rubyRegionId);
     string rawName = "stackFramePrecomputed_" + name;
     auto *var = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
         auto ret =
@@ -717,9 +717,9 @@ llvm::GlobalVariable *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &
 }
 
 llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                     const ast::MethodDef &md, int rubyBlockId) {
+                                     const ast::MethodDef &md, int rubyRegionId) {
     llvm::IRBuilder<> globalInitBuilder(cs);
-    auto globalDeclaration = rubyStackFrameVar(cs, builder, irctx, md.symbol, rubyBlockId);
+    auto globalDeclaration = rubyStackFrameVar(cs, builder, irctx, md.symbol, rubyRegionId);
     if (!globalDeclaration->hasInitializer()) {
         auto nullv = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(globalDeclaration->getValueType()));
         globalDeclaration->setInitializer(nullv);
@@ -729,7 +729,7 @@ llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &bui
         realpath->setName("realpath");
 
         // create constructor
-        auto constr = allocateRubyStackFramesImpl(cs, irctx, md, rubyBlockId, globalDeclaration);
+        auto constr = allocateRubyStackFramesImpl(cs, irctx, md, rubyRegionId, globalDeclaration);
         globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
         globalInitBuilder.CreateCall(constr, {realpath});
     }
@@ -753,14 +753,14 @@ llvm::Value *Payload::rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &
 }
 
 llvm::Value *Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                        const ast::MethodDef &md, int rubyBlockId) {
-    auto stackFrame = allocateRubyStackFrames(cs, builder, irctx, md, rubyBlockId);
-    auto *iseqType = getIseqType(cs, builder, irctx, rubyBlockId);
+                                        const ast::MethodDef &md, int rubyRegionId) {
+    auto stackFrame = allocateRubyStackFrames(cs, builder, irctx, md, rubyRegionId);
+    auto *iseqType = getIseqType(cs, builder, irctx, rubyRegionId);
     auto *isStaticInit = llvm::ConstantInt::get(
-        cs, llvm::APInt(1, static_cast<int>(irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInitFile ||
-                                            irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInitModule)));
+        cs, llvm::APInt(1, static_cast<int>(irctx.rubyBlockType[rubyRegionId] == FunctionType::StaticInitFile ||
+                                            irctx.rubyBlockType[rubyRegionId] == FunctionType::StaticInitModule)));
     builder.CreateCall(cs.getFunction("sorbet_setRubyStackFrame"), {isStaticInit, iseqType, stackFrame});
-    auto *cfp = getCFPForBlock(cs, builder, irctx, rubyBlockId);
+    auto *cfp = getCFPForBlock(cs, builder, irctx, rubyRegionId);
     auto pc = builder.CreateCall(cs.getFunction("sorbet_getPc"), {cfp});
     return pc;
 }
@@ -928,7 +928,7 @@ llvm::Value *Payload::readRestArgs(CompilerState &cs, llvm::IRBuilderBase &build
 namespace {
 // For a variable that's escaped, compute its index into the locals from its unique id in the
 // closure.
-llvm::Value *indexForLocalVariable(CompilerState &cs, const IREmitterContext &irctx, int rubyBlockId, int escapeId) {
+llvm::Value *indexForLocalVariable(CompilerState &cs, const IREmitterContext &irctx, int rubyRegionId, int escapeId) {
     return llvm::ConstantInt::get(cs, llvm::APInt(64, escapeId, true));
 }
 
@@ -950,17 +950,17 @@ llvm::Value *Payload::getClassVariableStoreClass(CompilerState &cs, llvm::IRBuil
 }
 
 EscapedVariableInfo Payload::escapedVariableInfo(CompilerState &cs, cfg::LocalRef local, const IREmitterContext &irctx,
-                                                 int rubyBlockId) {
+                                                 int rubyRegionId) {
     auto &escapedUse = irctx.escapedVariableIndices.at(local);
-    auto *index = indexForLocalVariable(cs, irctx, rubyBlockId, escapedUse.localIndex);
-    auto level = irctx.rubyBlockLevel[rubyBlockId];
+    auto *index = indexForLocalVariable(cs, irctx, rubyRegionId, escapedUse.localIndex);
+    auto level = irctx.rubyBlockLevel[rubyRegionId];
     return EscapedVariableInfo{escapedUse, index, llvm::ConstantInt::get(cs, llvm::APInt(64, level, true))};
 }
 
 llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBuilderBase &builder,
-                             const IREmitterContext &irctx, int rubyBlockId) {
+                             const IREmitterContext &irctx, int rubyRegionId) {
     if (local == cfg::LocalRef::selfVariable()) {
-        return Payload::unboxRawValue(cs, builder, irctx.selfVariables.at(rubyBlockId));
+        return Payload::unboxRawValue(cs, builder, irctx.selfVariables.at(rubyRegionId));
     }
     if (irctx.aliases.contains(local)) {
         // alias to a field or constant
@@ -988,14 +988,14 @@ llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBui
                 auto name = alias.instanceField.shortName(cs);
                 auto *cache = buildInstanceVariableCache(cs, name);
                 return builder.CreateCall(cs.getFunction("sorbet_instanceVariableGet"),
-                                          {varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyBlockId),
+                                          {varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyRegionId),
                                            Payload::idIntern(cs, builder, name), cache});
             }
         }
     }
     if (irctx.escapedVariableIndices.contains(local)) {
-        auto *cfp = getCFPForBlock(cs, builder, irctx, rubyBlockId);
-        auto info = escapedVariableInfo(cs, local, irctx, rubyBlockId);
+        auto *cfp = getCFPForBlock(cs, builder, irctx, rubyRegionId);
+        auto info = escapedVariableInfo(cs, local, irctx, rubyRegionId);
         auto *value = builder.CreateCall(cs.getFunction("sorbet_readLocal"), {cfp, info.index, info.level});
         // If we ever wrote to this local, we cannot guarantee that the type has
         // been checked prior to the access from the locals array.
@@ -1018,9 +1018,9 @@ llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBui
 }
 
 void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, llvm::IRBuilderBase &builder,
-                     const IREmitterContext &irctx, int rubyBlockId) {
+                     const IREmitterContext &irctx, int rubyRegionId) {
     if (local == cfg::LocalRef::selfVariable()) {
-        return Payload::boxRawValue(cs, builder, irctx.selfVariables.at(rubyBlockId), var);
+        return Payload::boxRawValue(cs, builder, irctx.selfVariables.at(rubyRegionId), var);
     }
     if (irctx.aliases.contains(local)) {
         // alias to a field or constant
@@ -1055,7 +1055,7 @@ void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, l
                 auto name = alias.instanceField.shortName(cs);
                 auto *cache = buildInstanceVariableCache(cs, name);
                 builder.CreateCall(cs.getFunction("sorbet_instanceVariableSet"),
-                                   {Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyBlockId),
+                                   {Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyRegionId),
                                     Payload::idIntern(cs, builder, name), var, cache});
                 break;
             }
@@ -1063,8 +1063,8 @@ void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, l
         return;
     }
     if (irctx.escapedVariableIndices.contains(local)) {
-        auto *cfp = getCFPForBlock(cs, builder, irctx, rubyBlockId);
-        auto info = escapedVariableInfo(cs, local, irctx, rubyBlockId);
+        auto *cfp = getCFPForBlock(cs, builder, irctx, rubyRegionId);
+        auto info = escapedVariableInfo(cs, local, irctx, rubyRegionId);
         builder.CreateCall(cs.getFunction("sorbet_writeLocal"), {cfp, info.index, info.level, var});
         return;
     }
@@ -1150,16 +1150,16 @@ void Payload::afterIntrinsic(CompilerState &cs, llvm::IRBuilderBase &builder) {
 }
 
 llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                     int rubyBlockId) {
-    switch (irctx.rubyBlockType[rubyBlockId]) {
+                                     int rubyRegionId) {
+    switch (irctx.rubyBlockType[rubyRegionId]) {
         case FunctionType::Method:
         case FunctionType::StaticInitModule:
         case FunctionType::StaticInitFile:
-            return irctx.rubyBlocks2Functions[rubyBlockId]->arg_begin() + 3;
+            return irctx.rubyBlocks2Functions[rubyRegionId]->arg_begin() + 3;
         case FunctionType::Block:
-            return builder.CreateLoad(irctx.blockControlFramePtrs.at(rubyBlockId), "cached_cfp");
+            return builder.CreateLoad(irctx.blockControlFramePtrs.at(rubyRegionId), "cached_cfp");
         case FunctionType::ExceptionBegin:
-            return irctx.rubyBlocks2Functions[rubyBlockId]->arg_begin() + 2;
+            return irctx.rubyBlocks2Functions[rubyRegionId]->arg_begin() + 2;
         case FunctionType::Rescue:
         case FunctionType::Ensure:
         case FunctionType::Unused:

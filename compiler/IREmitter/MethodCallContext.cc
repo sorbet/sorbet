@@ -12,9 +12,9 @@
 namespace sorbet::compiler {
 
 MethodCallContext MethodCallContext::create(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                            const IREmitterContext &irctx, int rubyBlockId, cfg::Send *send,
+                                            const IREmitterContext &irctx, int rubyRegionId, cfg::Send *send,
                                             std::optional<int> blk) {
-    MethodCallContext ret{cs, builder, irctx, rubyBlockId, send, blk};
+    MethodCallContext ret{cs, builder, irctx, rubyRegionId, send, blk};
 
     auto *func = builder.GetInsertBlock()->getParent();
     ret.sendEntry = llvm::BasicBlock::Create(cs, "sendEntry", func);
@@ -63,7 +63,7 @@ llvm::Value *MethodCallContext::varGetRecv() {
         auto saved = builder.saveIP();
         this->builder.SetInsertPoint(this->sendEntry);
         this->recv =
-            Payload::varGet(this->cs, this->send->recv.variable, this->builder, this->irctx, this->rubyBlockId);
+            Payload::varGet(this->cs, this->send->recv.variable, this->builder, this->irctx, this->rubyRegionId);
         this->builder.restoreIP(saved);
     }
 

@@ -275,7 +275,7 @@ protected:
 };
 
 void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                             core::MethodRef funcSym, int rubyBlockId, llvm::Value *param) {
+                             core::MethodRef funcSym, int rubyRegionId, llvm::Value *param) {
     // Following the comment in vm_core.h:
     // https://github.com/ruby/ruby/blob/344a824ef9d4b6152703d02d7ffa042abd4252c1/vm_core.h#L321-L342
     // Comment reproduced here to make things somewhat easier to follow.
@@ -439,10 +439,10 @@ void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, co
 
 // TODO(froydnj): we need to do something like this for blocks as well.
 llvm::Value *buildParamInfo(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                            core::MethodRef funcSym, int rubyBlockId) {
+                            core::MethodRef funcSym, int rubyRegionId) {
     auto *paramInfo = builder.CreateCall(cs.getFunction("sorbet_allocateParamInfo"), {}, "parameterInfo");
 
-    emitParamInitialization(cs, builder, irctx, funcSym, rubyBlockId, paramInfo);
+    emitParamInitialization(cs, builder, irctx, funcSym, rubyRegionId, paramInfo);
 
     return paramInfo;
 }
@@ -526,7 +526,7 @@ public:
                                           : (isPropGetter && !needsTypechecking) ? "sorbet_definePropGetter"
                                                                                  : "sorbet_defineMethod";
             auto rubyFunc = cs.getFunction(payloadFuncName);
-            auto *paramInfo = buildParamInfo(cs, builder, mcctx.irctx, funcSym, mcctx.rubyBlockId);
+            auto *paramInfo = buildParamInfo(cs, builder, mcctx.irctx, funcSym, mcctx.rubyRegionId);
             builder.CreateCall(rubyFunc, {klass, name, funcHandle, paramInfo, stackFrame});
 
             builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
@@ -535,7 +535,7 @@ public:
         // Return the symbol of the method name even if we don't emit a definition. This will be a problem if there are
         // meta-progrmaming methods applied to an abstract method definition, see
         // https://github.com/stripe/sorbet_llvm/issues/115 for more information.
-        return Payload::varGet(cs, send->args[1].variable, builder, mcctx.irctx, mcctx.rubyBlockId);
+        return Payload::varGet(cs, send->args[1].variable, builder, mcctx.irctx, mcctx.rubyRegionId);
     }
 
     virtual bool skipFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass) const override {
@@ -560,7 +560,7 @@ public:
         auto &irctx = mcctx.irctx;
         auto &builder = mcctx.builder;
         auto *send = mcctx.send;
-        auto rubyBlockId = mcctx.rubyBlockId;
+        auto rubyRegionId = mcctx.rubyRegionId;
         // args[0] = originalRecv
         // args[1] = arg to sig, if present
         // args[2] = isSelf
@@ -573,18 +573,18 @@ public:
         }
 
         ENFORCE(mcctx.blkAsFunction() != nullptr);
-        llvm::Value *originalRecv = Payload::varGet(cs, send->args[0].variable, builder, irctx, rubyBlockId);
+        llvm::Value *originalRecv = Payload::varGet(cs, send->args[0].variable, builder, irctx, rubyRegionId);
         llvm::Value *sigArg;
         cfg::VariableUseSite *remainingArgs;
         if (send->args.size() > 3) {
-            sigArg = Payload::varGet(cs, send->args[1].variable, builder, irctx, rubyBlockId);
+            sigArg = Payload::varGet(cs, send->args[1].variable, builder, irctx, rubyRegionId);
             remainingArgs = &send->args[2];
         } else {
             sigArg = Payload::rubyNil(cs, builder);
             remainingArgs = &send->args[1];
         }
-        llvm::Value *isSelf = Payload::varGet(cs, remainingArgs[0].variable, builder, irctx, rubyBlockId);
-        llvm::Value *methodName = Payload::varGet(cs, remainingArgs[1].variable, builder, irctx, rubyBlockId);
+        llvm::Value *isSelf = Payload::varGet(cs, remainingArgs[0].variable, builder, irctx, rubyRegionId);
+        llvm::Value *methodName = Payload::varGet(cs, remainingArgs[1].variable, builder, irctx, rubyRegionId);
         builder.CreateCall(cs.getFunction("sorbet_vm_register_sig"),
                            {isSelf, methodName, originalRecv, sigArg, mcctx.blkAsFunction()});
         return Payload::rubyNil(mcctx.cs, builder);
@@ -654,7 +654,7 @@ public:
         builder.CreateCondBr(expected, fastStart, slowStart);
 
         builder.SetInsertPoint(fastStart);
-        auto arg0Value = Payload::varGet(cs, arg0.variable, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto arg0Value = Payload::varGet(cs, arg0.variable, builder, mcctx.irctx, mcctx.rubyRegionId);
         auto typeTest = Payload::typeTest(cs, builder, arg0Value, recvType);
         auto fastPath = Payload::boolToRuby(cs, builder, typeTest);
         auto fastEnd = builder.GetInsertBlock();
@@ -752,9 +752,9 @@ public:
         auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 0);
         auto &irctx = mcctx.irctx;
         auto &builder = mcctx.builder;
-        auto rubyBlockId = mcctx.rubyBlockId;
-        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
-        Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyBlockId), stack);
+        auto rubyRegionId = mcctx.rubyRegionId;
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyRegionId);
+        Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyRegionId), stack);
         auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, "new", flags, stack.size(), keywords);
         return Payload::callFuncWithCache(cs, builder, cache, blockHandler);
     };
@@ -875,7 +875,7 @@ public:
         auto *id = Payload::idIntern(cs, builder, symit->second);
         return builder.CreateCall(
             cs.getFunction("sorbet_Thread_square_br_eq_symarg"),
-            {recv, id, Payload::varGet(cs, send->args[1].variable, builder, irctx, mcctx.rubyBlockId)});
+            {recv, id, Payload::varGet(cs, send->args[1].variable, builder, irctx, mcctx.rubyRegionId)});
     }
 } Thread_squareBracketsEq;
 

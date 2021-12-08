@@ -16,20 +16,20 @@ llvm::Function *getDoNothing(CompilerState &cs) {
     return cs.getFunction("sorbet_blockReturnUndef");
 }
 
-llvm::Function *getExceptionFunc(CompilerState &cs, const IREmitterContext &irctx, int rubyBlockId) {
-    auto present = irctx.rubyBlockType[rubyBlockId] != FunctionType::Unused;
-    return present ? irctx.rubyBlocks2Functions[rubyBlockId] : getDoNothing(cs);
+llvm::Function *getExceptionFunc(CompilerState &cs, const IREmitterContext &irctx, int rubyRegionId) {
+    auto present = irctx.rubyBlockType[rubyRegionId] != FunctionType::Unused;
+    return present ? irctx.rubyBlocks2Functions[rubyRegionId] : getDoNothing(cs);
 }
 } // namespace
 
 void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                             const IREmitterContext &irctx, int rubyBlockId, int bodyRubyBlockId,
+                                             const IREmitterContext &irctx, int rubyRegionId, int bodyRubyBlockId,
                                              cfg::LocalRef exceptionValue) {
     const int handlersRubyBlockId = bodyRubyBlockId + cfg::CFG::HANDLERS_BLOCK_OFFSET;
     const int ensureRubyBlockId = bodyRubyBlockId + cfg::CFG::ENSURE_BLOCK_OFFSET;
     const int elseRubyBlockId = bodyRubyBlockId + cfg::CFG::ELSE_BLOCK_OFFSET;
 
-    auto *currentFunc = irctx.rubyBlocks2Functions[rubyBlockId];
+    auto *currentFunc = irctx.rubyBlocks2Functions[rubyRegionId];
     // TODO: it would be nice if we could detect some of these functions
     // were empty and/or not useful so that we could eliminate dealing with
     // them from the exception handling logic.
@@ -42,9 +42,9 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
 
     auto *ec = builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
 
-    auto *pc = builder.CreateLoad(irctx.lineNumberPtrsByFunction[rubyBlockId]);
+    auto *pc = builder.CreateLoad(irctx.lineNumberPtrsByFunction[rubyRegionId]);
     auto *closure = Payload::buildLocalsOffset(cs);
-    auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
+    auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyRegionId);
 
     auto info = Payload::escapedVariableInfo(cs, exceptionValue, irctx, bodyRubyBlockId);
     auto *v =
@@ -59,7 +59,7 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
     builder.CreateCondBr(notUndef, exceptionReturn, exceptionContinue);
 
     builder.SetInsertPoint(exceptionReturn);
-    IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, v);
+    IREmitterHelpers::emitReturn(cs, builder, irctx, rubyRegionId, v);
 
     builder.SetInsertPoint(exceptionContinue);
     return;
