@@ -1093,7 +1093,8 @@ public:
             }
         }
 
-        fast_sort(todo, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
+        // Note: `todo` does not need to be sorted. There are no ordering effects on error production.
+
         fast_sort(todoAncestors,
                   [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
         fast_sort(todoClassAliases,
