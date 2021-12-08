@@ -847,7 +847,7 @@ void emitDeadBlocks(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &ir
 
     // Emit the dead block body for each ruby block. It should be an error to transition to the dead block, so
     // we mark its body as unreachable.
-    for (auto rubyRegionId = 0; rubyRegionId <= cfg.maxRubyBlockId; ++rubyRegionId) {
+    for (auto rubyRegionId = 0; rubyRegionId <= cfg.maxRubyRegionId; ++rubyRegionId) {
         auto *dead = irctx.deadBlockMapping[rubyRegionId];
         builder.SetInsertPoint(dead);
         builder.CreateUnreachable();
@@ -857,7 +857,7 @@ void emitDeadBlocks(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &ir
 void emitBlockExits(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(base);
 
-    for (auto rubyRegionId = 0; rubyRegionId <= cfg.maxRubyBlockId; ++rubyRegionId) {
+    for (auto rubyRegionId = 0; rubyRegionId <= cfg.maxRubyRegionId; ++rubyRegionId) {
         auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[rubyRegionId]);
 
         builder.SetInsertPoint(irctx.blockExitMapping[rubyRegionId]);

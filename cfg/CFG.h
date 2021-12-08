@@ -100,7 +100,7 @@ public:
      */
     core::MethodRef symbol;
     int maxBasicBlockId = 0;
-    int maxRubyBlockId = 0;
+    int maxRubyRegionId = 0;
 
     /**
      * Get the number of unique local variables in the CFG. Used to size vectors that contain an entry per LocalRef.

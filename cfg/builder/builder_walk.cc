@@ -413,7 +413,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 }
 
                 if (auto *block = s.block()) {
-                    auto newRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
+                    auto newRubyBlockId = ++cctx.inWhat.maxRubyRegionId;
                     auto &blockArgs = block->args;
                     vector<ast::ParsedArg> blockArgFlags = ast::ArgParsing::parseArgs(blockArgs);
                     vector<core::ArgInfo::ArgFlags> argFlags;
@@ -635,11 +635,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
 
             [&](ast::Rescue &a) {
-                auto bodyRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
+                auto bodyRubyBlockId = ++cctx.inWhat.maxRubyRegionId;
                 auto handlersRubyBlockId = bodyRubyBlockId + CFG::HANDLERS_REGION_OFFSET;
                 auto ensureRubyBlockId = bodyRubyBlockId + CFG::ENSURE_REGION_OFFSET;
                 auto elseRubyBlockId = bodyRubyBlockId + CFG::ELSE_REGION_OFFSET;
-                cctx.inWhat.maxRubyBlockId = elseRubyBlockId;
+                cctx.inWhat.maxRubyRegionId = elseRubyBlockId;
 
                 auto rescueHeaderBlock = cctx.inWhat.freshBlock(cctx.loops, current->rubyRegionId);
                 unconditionalJump(current, rescueHeaderBlock, cctx.inWhat, a.loc);

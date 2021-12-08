@@ -99,7 +99,7 @@ AliasesAndKeywords setupAliasesAndKeywords(CompilerState &cs, const cfg::CFG &cf
 
 // Iterate over all instructions in the CFG, determining which ruby blocks use `break`
 vector<bool> blocksThatUseBreak(CompilerState &cs, const cfg::CFG &cfg) {
-    vector<bool> res(cfg.maxRubyBlockId + 1, false);
+    vector<bool> res(cfg.maxRubyRegionId + 1, false);
 
     for (auto &bb : cfg.basicBlocks) {
         for (auto &bind : bb->exprs) {
@@ -142,7 +142,7 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, const UnorderedMap<cfg::Lo
     // reserve self in all basic blocks.  We rely on LLVM to delete any allocas
     // we wind up not actually needing.
     UnorderedMap<int, llvm::AllocaInst *> selfVariables;
-    for (int i = 0; i <= cfg.maxRubyBlockId; ++i) {
+    for (int i = 0; i <= cfg.maxRubyRegionId; ++i) {
         builder.SetInsertPoint(irctx.functionInitializersByFunction[i]);
         auto var = cfg::LocalRef::selfVariable();
         auto nameStr = var.toString(cs, cfg);
@@ -523,7 +523,7 @@ void getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Func
                                     vector<llvm::DISubprogram *> &scopes) {
     auto *bt = cs.getRubyBlockFFIType();
     auto *et = cs.getRubyExceptionFFIType();
-    for (int i = 0; i <= cfg.maxRubyBlockId; i++) {
+    for (int i = 0; i <= cfg.maxRubyRegionId; i++) {
         switch (blockTypes[i]) {
             case FunctionType::Method:
             case FunctionType::StaticInitFile:
@@ -781,7 +781,7 @@ vector<optional<string>> getBlockLocationNames(CompilerState &cs, cfg::CFG &cfg,
     // Sort blocks by their depth so that we can process things in a breadth-first order.
     vector<BlockInfo> blocksByDepth;
     blocksByDepth.reserve(blockLevels.size());
-    for (int i = 0; i <= cfg.maxRubyBlockId; ++i) {
+    for (int i = 0; i <= cfg.maxRubyRegionId; ++i) {
         blocksByDepth.emplace_back(BlockInfo{i, blockLevels[i]});
     }
 
@@ -930,13 +930,13 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         }
     }
 
-    vector<FunctionType> blockTypes(cfg.maxRubyBlockId + 1, FunctionType::Unused);
-    vector<int> blockParents(cfg.maxRubyBlockId + 1, 0);
+    vector<FunctionType> blockTypes(cfg.maxRubyRegionId + 1, FunctionType::Unused);
+    vector<int> blockParents(cfg.maxRubyRegionId + 1, 0);
     vector<int> exceptionHandlingBlockHeaders(cfg.maxBasicBlockId + 1, 0);
     determineBlockTypes(cs, cfg, blockTypes, blockParents, exceptionHandlingBlockHeaders, basicBlockJumpOverrides);
 
-    vector<llvm::Function *> rubyBlock2Function(cfg.maxRubyBlockId + 1, nullptr);
-    vector<llvm::DISubprogram *> blockScopes(cfg.maxRubyBlockId + 1, nullptr);
+    vector<llvm::Function *> rubyBlock2Function(cfg.maxRubyRegionId + 1, nullptr);
+    vector<llvm::DISubprogram *> blockScopes(cfg.maxRubyRegionId + 1, nullptr);
     getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc, blockTypes, rubyBlock2Function, blockScopes);
 
     auto [blockLevels, blockNestingLevels] = getBlockLevels(blockParents, blockTypes);
@@ -992,20 +992,20 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         i++;
     }
 
-    vector<llvm::BasicBlock *> blockExits(cfg.maxRubyBlockId + 1);
-    for (auto rubyRegionId = 0; rubyRegionId <= cfg.maxRubyBlockId; ++rubyRegionId) {
+    vector<llvm::BasicBlock *> blockExits(cfg.maxRubyRegionId + 1);
+    for (auto rubyRegionId = 0; rubyRegionId <= cfg.maxRubyRegionId; ++rubyRegionId) {
         blockExits[rubyRegionId] =
             llvm::BasicBlock::Create(cs, llvm::Twine("blockExit"), rubyBlock2Function[rubyRegionId]);
     }
 
-    vector<llvm::BasicBlock *> deadBlocks(cfg.maxRubyBlockId + 1);
+    vector<llvm::BasicBlock *> deadBlocks(cfg.maxRubyRegionId + 1);
     vector<llvm::BasicBlock *> llvmBlocks(cfg.maxBasicBlockId + 1);
     for (auto &b : cfg.basicBlocks) {
         if (b.get() == cfg.entry()) {
             llvmBlocks[b->id] = userEntryBlockByFunction[0] =
                 llvm::BasicBlock::Create(cs, "userEntry", rubyBlock2Function[0]);
         } else if (b.get() == cfg.deadBlock()) {
-            for (auto rubyRegionId = 0; rubyRegionId <= cfg.maxRubyBlockId; ++rubyRegionId) {
+            for (auto rubyRegionId = 0; rubyRegionId <= cfg.maxRubyRegionId; ++rubyRegionId) {
                 deadBlocks[rubyRegionId] =
                     llvm::BasicBlock::Create(cs, llvm::Twine("dead"), rubyBlock2Function[rubyRegionId]);
             }
@@ -1027,8 +1027,8 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         }
     }
 
-    vector<vector<cfg::LocalRef>> argPresentVariables(cfg.maxRubyBlockId + 1);
-    vector<BlockArity> rubyBlockArity(cfg.maxRubyBlockId + 1);
+    vector<vector<cfg::LocalRef>> argPresentVariables(cfg.maxRubyRegionId + 1);
+    vector<BlockArity> rubyBlockArity(cfg.maxRubyRegionId + 1);
 
     // The method arguments are initialized here, while the block arguments are initialized when the blockCall header is
     // encountered in the loop below.
