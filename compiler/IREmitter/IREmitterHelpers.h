@@ -127,17 +127,17 @@ public:
     static llvm::Value *emitMethodCallViaRubyVM(MethodCallContext &mcctx);
 
     static void emitExceptionHandlers(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                      int rubyBlockId, int bodyRubyBlockId, cfg::LocalRef exceptionValue);
+                                      int rubyRegionId, int bodyRubyRegionId, cfg::LocalRef exceptionValue);
 
     static void emitDebugLoc(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                             int rubyBlockId, core::Loc loc);
+                             int rubyRegionId, core::Loc loc);
 
     static void emitUncheckedReturn(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                    int rubyBlockId, llvm::Value *retVal);
+                                    int rubyRegionId, llvm::Value *retVal);
     static void emitReturn(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                           int rubyBlockId, llvm::Value *retVal);
+                           int rubyRegionId, llvm::Value *retVal);
     static void emitReturnAcrossBlock(CompilerState &gs, cfg::CFG &cfg, llvm::IRBuilderBase &builder,
-                                      const IREmitterContext &irctx, int rubyBlockId, llvm::Value *retVal);
+                                      const IREmitterContext &irctx, int rubyRegionId, llvm::Value *retVal);
     // Typecheck returnValue as the return value of cfg, if necessary.  Returns the actual
     // value to be returned, which may be different than returnValue e.g. in the case of a
     // void-returning method.

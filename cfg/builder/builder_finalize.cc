@@ -50,7 +50,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 bb->bexit.cond = LocalRef::unconditional();
             }
             if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb &&
-                bb->rubyBlockId == thenb->rubyBlockId) { // can be squashed togather
+                bb->rubyRegionId == thenb->rubyRegionId) { // can be squashed togather
                 if (thenb->backEdges.size() == 1 && thenb->outerLoops == bb->outerLoops) {
                     bb->exprs.insert(bb->exprs.end(), make_move_iterator(thenb->exprs.begin()),
                                      make_move_iterator(thenb->exprs.end()));
@@ -83,7 +83,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     continue;
                 }
             }
-            if (thenb != cfg.deadBlock() && bb->rubyBlockId == thenb->rubyBlockId && thenb->exprs.empty() &&
+            if (thenb != cfg.deadBlock() && bb->rubyRegionId == thenb->rubyRegionId && thenb->exprs.empty() &&
                 thenb->bexit.thenb == thenb->bexit.elseb && bb->bexit.thenb != thenb->bexit.thenb) {
                 // shortcut then
                 bb->bexit.thenb = thenb->bexit.thenb;
@@ -94,7 +94,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 sanityCheck(ctx, cfg);
                 continue;
             }
-            if (elseb != cfg.deadBlock() && bb->rubyBlockId == thenb->rubyBlockId && elseb->exprs.empty() &&
+            if (elseb != cfg.deadBlock() && bb->rubyRegionId == thenb->rubyRegionId && elseb->exprs.empty() &&
                 elseb->bexit.thenb == elseb->bexit.elseb && bb->bexit.elseb != elseb->bexit.elseb) {
                 // shortcut else
                 sanityCheck(ctx, cfg);

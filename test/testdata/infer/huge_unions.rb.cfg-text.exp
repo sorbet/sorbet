@@ -1,6 +1,6 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=164]():
+bb0[rubyRegionId=0, firstDead=164]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <cfgAlias>$6: T.class_of(<Magic>) = alias <C <Magic>>
     <cfgAlias>$8: T.class_of(C1) = alias <C C1>
@@ -168,379 +168,379 @@ bb0[rubyBlockId=0, firstDead=164]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C1>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C1) = cast(<self>: NilClass, T.class_of(C1));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C2>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C2) = cast(<self>: NilClass, T.class_of(C2));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C3>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C3) = cast(<self>: NilClass, T.class_of(C3));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C4>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C4) = cast(<self>: NilClass, T.class_of(C4));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C5>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C5) = cast(<self>: NilClass, T.class_of(C5));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C6>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C6) = cast(<self>: NilClass, T.class_of(C6));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C7>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C7) = cast(<self>: NilClass, T.class_of(C7));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C8>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C8) = cast(<self>: NilClass, T.class_of(C8));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C9>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C9) = cast(<self>: NilClass, T.class_of(C9));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C10>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C10) = cast(<self>: NilClass, T.class_of(C10));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C11>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C11) = cast(<self>: NilClass, T.class_of(C11));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C12>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C12) = cast(<self>: NilClass, T.class_of(C12));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C13>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C13>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C13>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C13>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C13>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C13>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C13>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C14>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C14) = cast(<self>: NilClass, T.class_of(C14));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C15>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C15) = cast(<self>: NilClass, T.class_of(C15));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C16>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C16) = cast(<self>: NilClass, T.class_of(C16));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C17>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C17) = cast(<self>: NilClass, T.class_of(C17));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C18>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C18) = cast(<self>: NilClass, T.class_of(C18));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C19>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C19) = cast(<self>: NilClass, T.class_of(C19));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:C20>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(C20) = cast(<self>: NilClass, T.class_of(C20));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:A>#send_beta_invitation {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
     invite: T.untyped = load_arg(invite)
     <statTemp>$6: Integer(1) = 1
@@ -548,314 +548,314 @@ bb0[rubyBlockId=0, firstDead=-1]():
     <ifTemp>$5 -> (T::Boolean ? bb2 : bb3)
 
 # backedges
-# - bb61(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1](<returnMethodTemp>$2):
+# - bb61(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1](<returnMethodTemp>$2):
     <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$8: T.class_of(C1) = alias <C C1>
     r: T.class_of(C1) = <cfgAlias>$8
     <unconditional> -> bb61
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb0(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$10: Integer(2) = 2
     <ifTemp>$9: T::Boolean = <statTemp>$10: Integer(2).===(invite: T.untyped)
     <ifTemp>$9 -> (T::Boolean ? bb4 : bb5)
 
 # backedges
-# - bb3(rubyBlockId=0)
-bb4[rubyBlockId=0, firstDead=-1]():
+# - bb3(rubyRegionId=0)
+bb4[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$12: T.class_of(C2) = alias <C C2>
     r: T.class_of(C2) = <cfgAlias>$12
     <unconditional> -> bb61
 
 # backedges
-# - bb3(rubyBlockId=0)
-bb5[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb3(rubyRegionId=0)
+bb5[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$14: Integer(3) = 3
     <ifTemp>$13: T::Boolean = <statTemp>$14: Integer(3).===(invite: T.untyped)
     <ifTemp>$13 -> (T::Boolean ? bb6 : bb7)
 
 # backedges
-# - bb5(rubyBlockId=0)
-bb6[rubyBlockId=0, firstDead=-1]():
+# - bb5(rubyRegionId=0)
+bb6[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$16: T.class_of(C3) = alias <C C3>
     r: T.class_of(C3) = <cfgAlias>$16
     <unconditional> -> bb61
 
 # backedges
-# - bb5(rubyBlockId=0)
-bb7[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb5(rubyRegionId=0)
+bb7[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$18: Integer(4) = 4
     <ifTemp>$17: T::Boolean = <statTemp>$18: Integer(4).===(invite: T.untyped)
     <ifTemp>$17 -> (T::Boolean ? bb8 : bb9)
 
 # backedges
-# - bb7(rubyBlockId=0)
-bb8[rubyBlockId=0, firstDead=-1]():
+# - bb7(rubyRegionId=0)
+bb8[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$20: T.class_of(C4) = alias <C C4>
     r: T.class_of(C4) = <cfgAlias>$20
     <unconditional> -> bb61
 
 # backedges
-# - bb7(rubyBlockId=0)
-bb9[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb7(rubyRegionId=0)
+bb9[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$22: Integer(5) = 5
     <ifTemp>$21: T::Boolean = <statTemp>$22: Integer(5).===(invite: T.untyped)
     <ifTemp>$21 -> (T::Boolean ? bb10 : bb11)
 
 # backedges
-# - bb9(rubyBlockId=0)
-bb10[rubyBlockId=0, firstDead=-1]():
+# - bb9(rubyRegionId=0)
+bb10[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$24: T.class_of(C5) = alias <C C5>
     r: T.class_of(C5) = <cfgAlias>$24
     <unconditional> -> bb61
 
 # backedges
-# - bb9(rubyBlockId=0)
-bb11[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb9(rubyRegionId=0)
+bb11[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$26: Integer(6) = 6
     <ifTemp>$25: T::Boolean = <statTemp>$26: Integer(6).===(invite: T.untyped)
     <ifTemp>$25 -> (T::Boolean ? bb12 : bb13)
 
 # backedges
-# - bb11(rubyBlockId=0)
-bb12[rubyBlockId=0, firstDead=-1]():
+# - bb11(rubyRegionId=0)
+bb12[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$28: T.class_of(C6) = alias <C C6>
     r: T.class_of(C6) = <cfgAlias>$28
     <unconditional> -> bb61
 
 # backedges
-# - bb11(rubyBlockId=0)
-bb13[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb11(rubyRegionId=0)
+bb13[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$30: Integer(7) = 7
     <ifTemp>$29: T::Boolean = <statTemp>$30: Integer(7).===(invite: T.untyped)
     <ifTemp>$29 -> (T::Boolean ? bb14 : bb15)
 
 # backedges
-# - bb13(rubyBlockId=0)
-bb14[rubyBlockId=0, firstDead=-1]():
+# - bb13(rubyRegionId=0)
+bb14[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$32: T.class_of(C7) = alias <C C7>
     r: T.class_of(C7) = <cfgAlias>$32
     <unconditional> -> bb61
 
 # backedges
-# - bb13(rubyBlockId=0)
-bb15[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb13(rubyRegionId=0)
+bb15[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$34: Integer(8) = 8
     <ifTemp>$33: T::Boolean = <statTemp>$34: Integer(8).===(invite: T.untyped)
     <ifTemp>$33 -> (T::Boolean ? bb16 : bb17)
 
 # backedges
-# - bb15(rubyBlockId=0)
-bb16[rubyBlockId=0, firstDead=-1]():
+# - bb15(rubyRegionId=0)
+bb16[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$36: T.class_of(C8) = alias <C C8>
     r: T.class_of(C8) = <cfgAlias>$36
     <unconditional> -> bb61
 
 # backedges
-# - bb15(rubyBlockId=0)
-bb17[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb15(rubyRegionId=0)
+bb17[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$38: Integer(9) = 9
     <ifTemp>$37: T::Boolean = <statTemp>$38: Integer(9).===(invite: T.untyped)
     <ifTemp>$37 -> (T::Boolean ? bb18 : bb19)
 
 # backedges
-# - bb17(rubyBlockId=0)
-bb18[rubyBlockId=0, firstDead=-1]():
+# - bb17(rubyRegionId=0)
+bb18[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$40: T.class_of(C9) = alias <C C9>
     r: T.class_of(C9) = <cfgAlias>$40
     <unconditional> -> bb61
 
 # backedges
-# - bb17(rubyBlockId=0)
-bb19[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb17(rubyRegionId=0)
+bb19[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$42: Integer(10) = 10
     <ifTemp>$41: T::Boolean = <statTemp>$42: Integer(10).===(invite: T.untyped)
     <ifTemp>$41 -> (T::Boolean ? bb20 : bb21)
 
 # backedges
-# - bb19(rubyBlockId=0)
-bb20[rubyBlockId=0, firstDead=-1]():
+# - bb19(rubyRegionId=0)
+bb20[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$44: T.class_of(C10) = alias <C C10>
     r: T.class_of(C10) = <cfgAlias>$44
     <unconditional> -> bb61
 
 # backedges
-# - bb19(rubyBlockId=0)
-bb21[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb19(rubyRegionId=0)
+bb21[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$46: Integer(11) = 11
     <ifTemp>$45: T::Boolean = <statTemp>$46: Integer(11).===(invite: T.untyped)
     <ifTemp>$45 -> (T::Boolean ? bb22 : bb23)
 
 # backedges
-# - bb21(rubyBlockId=0)
-bb22[rubyBlockId=0, firstDead=-1]():
+# - bb21(rubyRegionId=0)
+bb22[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$48: T.class_of(C11) = alias <C C11>
     r: T.class_of(C11) = <cfgAlias>$48
     <unconditional> -> bb61
 
 # backedges
-# - bb21(rubyBlockId=0)
-bb23[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb21(rubyRegionId=0)
+bb23[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$50: Integer(12) = 12
     <ifTemp>$49: T::Boolean = <statTemp>$50: Integer(12).===(invite: T.untyped)
     <ifTemp>$49 -> (T::Boolean ? bb24 : bb25)
 
 # backedges
-# - bb23(rubyBlockId=0)
-bb24[rubyBlockId=0, firstDead=-1]():
+# - bb23(rubyRegionId=0)
+bb24[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$52: T.class_of(C12) = alias <C C12>
     r: T.class_of(C12) = <cfgAlias>$52
     <unconditional> -> bb61
 
 # backedges
-# - bb23(rubyBlockId=0)
-bb25[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb23(rubyRegionId=0)
+bb25[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$54: Integer(13) = 13
     <ifTemp>$53: T::Boolean = <statTemp>$54: Integer(13).===(invite: T.untyped)
     <ifTemp>$53 -> (T::Boolean ? bb26 : bb27)
 
 # backedges
-# - bb25(rubyBlockId=0)
-bb26[rubyBlockId=0, firstDead=-1]():
+# - bb25(rubyRegionId=0)
+bb26[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$56: T.class_of(C13) = alias <C C13>
     r: T.class_of(C13) = <cfgAlias>$56
     <unconditional> -> bb61
 
 # backedges
-# - bb25(rubyBlockId=0)
-bb27[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb25(rubyRegionId=0)
+bb27[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$58: Integer(14) = 14
     <ifTemp>$57: T::Boolean = <statTemp>$58: Integer(14).===(invite: T.untyped)
     <ifTemp>$57 -> (T::Boolean ? bb28 : bb29)
 
 # backedges
-# - bb27(rubyBlockId=0)
-bb28[rubyBlockId=0, firstDead=-1]():
+# - bb27(rubyRegionId=0)
+bb28[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$60: T.class_of(C14) = alias <C C14>
     r: T.class_of(C14) = <cfgAlias>$60
     <unconditional> -> bb61
 
 # backedges
-# - bb27(rubyBlockId=0)
-bb29[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb27(rubyRegionId=0)
+bb29[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$62: Integer(15) = 15
     <ifTemp>$61: T::Boolean = <statTemp>$62: Integer(15).===(invite: T.untyped)
     <ifTemp>$61 -> (T::Boolean ? bb30 : bb31)
 
 # backedges
-# - bb29(rubyBlockId=0)
-bb30[rubyBlockId=0, firstDead=-1]():
+# - bb29(rubyRegionId=0)
+bb30[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$64: T.class_of(C15) = alias <C C15>
     r: T.class_of(C15) = <cfgAlias>$64
     <unconditional> -> bb61
 
 # backedges
-# - bb29(rubyBlockId=0)
-bb31[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb29(rubyRegionId=0)
+bb31[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$66: Integer(16) = 16
     <ifTemp>$65: T::Boolean = <statTemp>$66: Integer(16).===(invite: T.untyped)
     <ifTemp>$65 -> (T::Boolean ? bb32 : bb33)
 
 # backedges
-# - bb31(rubyBlockId=0)
-bb32[rubyBlockId=0, firstDead=-1]():
+# - bb31(rubyRegionId=0)
+bb32[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$68: T.class_of(C16) = alias <C C16>
     r: T.class_of(C16) = <cfgAlias>$68
     <unconditional> -> bb61
 
 # backedges
-# - bb31(rubyBlockId=0)
-bb33[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb31(rubyRegionId=0)
+bb33[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$70: Integer(17) = 17
     <ifTemp>$69: T::Boolean = <statTemp>$70: Integer(17).===(invite: T.untyped)
     <ifTemp>$69 -> (T::Boolean ? bb34 : bb35)
 
 # backedges
-# - bb33(rubyBlockId=0)
-bb34[rubyBlockId=0, firstDead=-1]():
+# - bb33(rubyRegionId=0)
+bb34[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$72: T.class_of(C17) = alias <C C17>
     r: T.class_of(C17) = <cfgAlias>$72
     <unconditional> -> bb61
 
 # backedges
-# - bb33(rubyBlockId=0)
-bb35[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb33(rubyRegionId=0)
+bb35[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$74: Integer(18) = 18
     <ifTemp>$73: T::Boolean = <statTemp>$74: Integer(18).===(invite: T.untyped)
     <ifTemp>$73 -> (T::Boolean ? bb36 : bb37)
 
 # backedges
-# - bb35(rubyBlockId=0)
-bb36[rubyBlockId=0, firstDead=-1]():
+# - bb35(rubyRegionId=0)
+bb36[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$76: T.class_of(C18) = alias <C C18>
     r: T.class_of(C18) = <cfgAlias>$76
     <unconditional> -> bb61
 
 # backedges
-# - bb35(rubyBlockId=0)
-bb37[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb35(rubyRegionId=0)
+bb37[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$78: Integer(19) = 19
     <ifTemp>$77: T::Boolean = <statTemp>$78: Integer(19).===(invite: T.untyped)
     <ifTemp>$77 -> (T::Boolean ? bb38 : bb39)
 
 # backedges
-# - bb37(rubyBlockId=0)
-bb38[rubyBlockId=0, firstDead=-1]():
+# - bb37(rubyRegionId=0)
+bb38[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$80: T.class_of(C19) = alias <C C19>
     r: T.class_of(C19) = <cfgAlias>$80
     <unconditional> -> bb61
 
 # backedges
-# - bb37(rubyBlockId=0)
-bb39[rubyBlockId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+# - bb37(rubyRegionId=0)
+bb39[rubyRegionId=0, firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
     <statTemp>$82: Integer(20) = 20
     <ifTemp>$81: T::Boolean = <statTemp>$82: Integer(20).===(invite: T.untyped)
     <ifTemp>$81 -> (T::Boolean ? bb40 : bb41)
 
 # backedges
-# - bb39(rubyBlockId=0)
-bb40[rubyBlockId=0, firstDead=-1]():
+# - bb39(rubyRegionId=0)
+bb40[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$84: T.class_of(C20) = alias <C C20>
     r: T.class_of(C20) = <cfgAlias>$84
     <unconditional> -> bb61
 
 # backedges
-# - bb39(rubyBlockId=0)
-bb41[rubyBlockId=0, firstDead=2](<self>: T.class_of(A)):
+# - bb39(rubyRegionId=0)
+bb41[rubyRegionId=0, firstDead=2](<self>: T.class_of(A)):
     <statTemp>$86: String("Bla bla bla") = "Bla bla bla"
     <statTemp>$3: T.noreturn = <self>: T.class_of(A).raise(<statTemp>$86: String("Bla bla bla"))
     <unconditional> -> bb61
 
 # backedges
-# - bb2(rubyBlockId=0)
-# - bb4(rubyBlockId=0)
-# - bb6(rubyBlockId=0)
-# - bb8(rubyBlockId=0)
-# - bb10(rubyBlockId=0)
-# - bb12(rubyBlockId=0)
-# - bb14(rubyBlockId=0)
-# - bb16(rubyBlockId=0)
-# - bb18(rubyBlockId=0)
-# - bb20(rubyBlockId=0)
-# - bb22(rubyBlockId=0)
-# - bb24(rubyBlockId=0)
-# - bb26(rubyBlockId=0)
-# - bb28(rubyBlockId=0)
-# - bb30(rubyBlockId=0)
-# - bb32(rubyBlockId=0)
-# - bb34(rubyBlockId=0)
-# - bb36(rubyBlockId=0)
-# - bb38(rubyBlockId=0)
-# - bb40(rubyBlockId=0)
-# - bb41(rubyBlockId=0)
-bb61[rubyBlockId=0, firstDead=2](r: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20))):
+# - bb2(rubyRegionId=0)
+# - bb4(rubyRegionId=0)
+# - bb6(rubyRegionId=0)
+# - bb8(rubyRegionId=0)
+# - bb10(rubyRegionId=0)
+# - bb12(rubyRegionId=0)
+# - bb14(rubyRegionId=0)
+# - bb16(rubyRegionId=0)
+# - bb18(rubyRegionId=0)
+# - bb20(rubyRegionId=0)
+# - bb22(rubyRegionId=0)
+# - bb24(rubyRegionId=0)
+# - bb26(rubyRegionId=0)
+# - bb28(rubyRegionId=0)
+# - bb30(rubyRegionId=0)
+# - bb32(rubyRegionId=0)
+# - bb34(rubyRegionId=0)
+# - bb36(rubyRegionId=0)
+# - bb38(rubyRegionId=0)
+# - bb40(rubyRegionId=0)
+# - bb41(rubyRegionId=0)
+bb61[rubyRegionId=0, firstDead=2](r: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20))):
     s: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20)) = r
     <returnMethodTemp>$2: T.noreturn = return s: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20))
     <unconditional> -> bb1
@@ -864,7 +864,7 @@ bb61[rubyBlockId=0, firstDead=2](r: T.any(T.class_of(C1), T.class_of(C2), T.clas
 
 method ::<Class:A>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=6]():
+bb0[rubyRegionId=0, firstDead=6]():
     <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
     <cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <statTemp>$6: Symbol(:send_beta_invitation) = :send_beta_invitation
@@ -874,8 +874,8 @@ bb0[rubyBlockId=0, firstDead=6]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }

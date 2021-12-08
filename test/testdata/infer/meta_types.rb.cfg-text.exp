@@ -1,6 +1,6 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=8]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <cfgAlias>$7: T.class_of(TestMetaType) = alias <C TestMetaType>
@@ -12,29 +12,29 @@ bb0[rubyBlockId=0, firstDead=8]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::TestMetaType#_ {
 
-bb0[rubyBlockId=0, firstDead=2]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: TestMetaType = cast(<self>: NilClass, TestMetaType);
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::TestMetaType#testit {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: TestMetaType = cast(<self>: NilClass, TestMetaType);
     <cfgAlias>$7: T.class_of(T::Array) = alias <C Array>
     <cfgAlias>$9: T.class_of(T) = alias <C T>
@@ -45,13 +45,13 @@ bb0[rubyBlockId=0, firstDead=-1]():
     <ifTemp>$15 -> (T.untyped ? bb2 : bb3)
 
 # backedges
-# - bb7(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb7(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1](<self>: TestMetaType):
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1](<self>: TestMetaType):
     <cfgAlias>$18: T.class_of(T::Array) = alias <C Array>
     <cfgAlias>$20: T.class_of(T) = alias <C T>
     <cfgAlias>$22: T.class_of(String) = alias <C String>
@@ -59,22 +59,22 @@ bb2[rubyBlockId=0, firstDead=-1](<self>: TestMetaType):
     <unconditional> -> bb4
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=-1](<self>: TestMetaType):
+# - bb0(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=-1](<self>: TestMetaType):
     <statTemp>$14: FalseClass = false
     <unconditional> -> bb4
 
 # backedges
-# - bb2(rubyBlockId=0)
-# - bb3(rubyBlockId=0)
-bb4[rubyBlockId=0, firstDead=-1](<self>: TestMetaType, <statTemp>$14: Object):
+# - bb2(rubyRegionId=0)
+# - bb3(rubyRegionId=0)
+bb4[rubyRegionId=0, firstDead=-1](<self>: TestMetaType, <statTemp>$14: Object):
     <statTemp>$12: NilClass = <self>: TestMetaType.puts(<statTemp>$14: Object)
     <ifTemp>$25: T.untyped = <self>: TestMetaType._()
     <ifTemp>$25 -> (T.untyped ? bb5 : bb6)
 
 # backedges
-# - bb4(rubyBlockId=0)
-bb5[rubyBlockId=0, firstDead=-1](<self>: TestMetaType):
+# - bb4(rubyRegionId=0)
+bb5[rubyRegionId=0, firstDead=-1](<self>: TestMetaType):
     <cfgAlias>$28: T.class_of(T::Array) = alias <C Array>
     <cfgAlias>$30: T.class_of(T) = alias <C T>
     <cfgAlias>$32: T.class_of(String) = alias <C String>
@@ -82,8 +82,8 @@ bb5[rubyBlockId=0, firstDead=-1](<self>: TestMetaType):
     <unconditional> -> bb7
 
 # backedges
-# - bb4(rubyBlockId=0)
-bb6[rubyBlockId=0, firstDead=-1](<self>: TestMetaType):
+# - bb4(rubyRegionId=0)
+bb6[rubyRegionId=0, firstDead=-1](<self>: TestMetaType):
     <cfgAlias>$34: T.class_of(T::Array) = alias <C Array>
     <cfgAlias>$36: T.class_of(T) = alias <C T>
     <cfgAlias>$38: T.class_of(Float) = alias <C Float>
@@ -91,9 +91,9 @@ bb6[rubyBlockId=0, firstDead=-1](<self>: TestMetaType):
     <unconditional> -> bb7
 
 # backedges
-# - bb5(rubyBlockId=0)
-# - bb6(rubyBlockId=0)
-bb7[rubyBlockId=0, firstDead=2](<self>: TestMetaType, <statTemp>$24: Object):
+# - bb5(rubyRegionId=0)
+# - bb6(rubyRegionId=0)
+bb7[rubyRegionId=0, firstDead=2](<self>: TestMetaType, <statTemp>$24: Object):
     <returnMethodTemp>$2: NilClass = <self>: TestMetaType.puts(<statTemp>$24: Object)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
@@ -102,7 +102,7 @@ bb7[rubyBlockId=0, firstDead=2](<self>: TestMetaType, <statTemp>$24: Object):
 
 method ::<Class:TestMetaType>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=10]():
+bb0[rubyRegionId=0, firstDead=10]():
     <self>: T.class_of(TestMetaType) = cast(<self>: NilClass, T.class_of(TestMetaType));
     <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <statTemp>$7: Symbol(:_) = :_
@@ -116,8 +116,8 @@ bb0[rubyBlockId=0, firstDead=10]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }

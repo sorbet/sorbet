@@ -49,8 +49,8 @@ vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blo
 }
 
 void setupStackFrame(CompilerState &cs, const ast::MethodDef &md, const IREmitterContext &irctx,
-                     llvm::IRBuilderBase &builder, int rubyBlockId) {
-    switch (irctx.rubyBlockType[rubyBlockId]) {
+                     llvm::IRBuilderBase &builder, int rubyRegionId) {
+    switch (irctx.rubyBlockType[rubyRegionId]) {
         case FunctionType::Method:
         case FunctionType::StaticInitFile:
         case FunctionType::StaticInitModule:
@@ -58,16 +58,16 @@ void setupStackFrame(CompilerState &cs, const ast::MethodDef &md, const IREmitte
         case FunctionType::Rescue:
         case FunctionType::Ensure: {
             // Switch the current control frame from a C frame to a Ruby-esque one
-            auto pc = Payload::setRubyStackFrame(cs, builder, irctx, md, rubyBlockId);
-            builder.CreateStore(pc, irctx.lineNumberPtrsByFunction[rubyBlockId]);
+            auto pc = Payload::setRubyStackFrame(cs, builder, irctx, md, rubyRegionId);
+            builder.CreateStore(pc, irctx.lineNumberPtrsByFunction[rubyRegionId]);
             break;
         }
 
         case FunctionType::ExceptionBegin: {
             // Exception functions get their pc and iseq_encoded values as arguments
-            auto func = irctx.rubyBlocks2Functions[rubyBlockId];
+            auto func = irctx.rubyBlocks2Functions[rubyRegionId];
             auto *pc = func->arg_begin();
-            builder.CreateStore(pc, irctx.lineNumberPtrsByFunction[rubyBlockId]);
+            builder.CreateStore(pc, irctx.lineNumberPtrsByFunction[rubyRegionId]);
             break;
         }
 
@@ -80,19 +80,19 @@ void setupStackFrame(CompilerState &cs, const ast::MethodDef &md, const IREmitte
 
 void setupStackFrames(CompilerState &base, const ast::MethodDef &md, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(base);
-    for (auto rubyBlockId = 0; rubyBlockId < irctx.rubyBlocks2Functions.size(); rubyBlockId++) {
-        auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[rubyBlockId]);
+    for (auto rubyRegionId = 0; rubyRegionId < irctx.rubyBlocks2Functions.size(); rubyRegionId++) {
+        auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[rubyRegionId]);
 
-        builder.SetInsertPoint(irctx.functionInitializersByFunction[rubyBlockId]);
+        builder.SetInsertPoint(irctx.functionInitializersByFunction[rubyRegionId]);
 
-        switch (irctx.rubyBlockType[rubyBlockId]) {
+        switch (irctx.rubyBlockType[rubyRegionId]) {
             case FunctionType::Method:
             case FunctionType::StaticInitFile:
             case FunctionType::StaticInitModule: {
                 // We could get this from the frame, as below, but it is slightly more
                 // efficient to get it from the function arguments.
-                auto selfArgRaw = irctx.rubyBlocks2Functions[rubyBlockId]->arg_begin() + 2;
-                Payload::varSet(cs, cfg::LocalRef::selfVariable(), selfArgRaw, builder, irctx, rubyBlockId);
+                auto selfArgRaw = irctx.rubyBlocks2Functions[rubyRegionId]->arg_begin() + 2;
+                Payload::varSet(cs, cfg::LocalRef::selfVariable(), selfArgRaw, builder, irctx, rubyRegionId);
                 break;
             }
             case FunctionType::Block:
@@ -100,33 +100,33 @@ void setupStackFrames(CompilerState &base, const ast::MethodDef &md, const IREmi
             case FunctionType::Ensure:
             case FunctionType::ExceptionBegin: {
                 auto selfArgRaw = builder.CreateCall(cs.getFunction("sorbet_getSelfFromFrame"), {}, "self");
-                Payload::varSet(cs, cfg::LocalRef::selfVariable(), selfArgRaw, builder, irctx, rubyBlockId);
+                Payload::varSet(cs, cfg::LocalRef::selfVariable(), selfArgRaw, builder, irctx, rubyRegionId);
                 break;
             }
             default:
                 break;
         }
 
-        if (irctx.rubyBlockType[rubyBlockId] == FunctionType::Block) {
+        if (irctx.rubyBlockType[rubyRegionId] == FunctionType::Block) {
             auto *cfp = builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfp");
-            builder.CreateStore(cfp, irctx.blockControlFramePtrs.at(rubyBlockId));
+            builder.CreateStore(cfp, irctx.blockControlFramePtrs.at(rubyRegionId));
         }
 
-        setupStackFrame(cs, md, irctx, builder, rubyBlockId);
+        setupStackFrame(cs, md, irctx, builder, rubyRegionId);
         auto lastLoc = core::Loc::none();
         auto startLoc = md.symbol.data(base)->loc();
         Payload::setLineNumber(cs, builder, core::Loc(cs.file, md.loc), startLoc, lastLoc,
-                               irctx.lineNumberPtrsByFunction[rubyBlockId]);
+                               irctx.lineNumberPtrsByFunction[rubyRegionId]);
     }
 }
 
 void parseKeywordArgsFromCallData(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                   cfg::LocalRef kwRestArgName, llvm::Value *argCountRaw, llvm::Value *argArrayRaw,
                                   llvm::Value *hashArgs, int maxPositionalArgCount,
-                                  const vector<core::ArgInfo::ArgFlags> &argsFlags, int rubyBlockId) {
-    ENFORCE(rubyBlockId == 0);
-    auto *func = irctx.rubyBlocks2Functions[rubyBlockId];
-    auto &argPresentVariables = irctx.argPresentVariables[rubyBlockId];
+                                  const vector<core::ArgInfo::ArgFlags> &argsFlags, int rubyRegionId) {
+    ENFORCE(rubyRegionId == 0);
+    auto *func = irctx.rubyBlocks2Functions[rubyRegionId];
+    auto &argPresentVariables = irctx.argPresentVariables[rubyRegionId];
     // required arguments remaining to be parsed
     auto numRequiredKwArgs = absl::c_count_if(
         argsFlags, [](auto &argFlag) { return argFlag.isKeyword && !argFlag.isDefault && !argFlag.isRepeated; });
@@ -149,7 +149,7 @@ void parseKeywordArgsFromCallData(CompilerState &cs, llvm::IRBuilderBase &builde
         if (!argsFlags[argId].isKeyword || argsFlags[argId].isRepeated) {
             continue;
         }
-        auto name = irctx.rubyBlockArgs[rubyBlockId][argId];
+        auto name = irctx.rubyBlockArgs[rubyRegionId][argId];
         auto strviewName = name.data(irctx.cfg)._name.shortName(cs);
         auto rawId = Payload::idIntern(cs, builder, strviewName);
 
@@ -174,7 +174,7 @@ void parseKeywordArgsFromCallData(CompilerState &cs, llvm::IRBuilderBase &builde
         // Write a default value out, and mark the variable as missing
         builder.SetInsertPoint(kwArgDefault);
         if (argPresent.exists()) {
-            Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx, rubyBlockId);
+            Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx, rubyRegionId);
         }
 
         auto *updatedMissingKwargs = missingKwargs;
@@ -196,9 +196,9 @@ void parseKeywordArgsFromCallData(CompilerState &cs, llvm::IRBuilderBase &builde
                                         fmt::format("updatedOptional_{}", strviewName));
             }
 
-            Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx, rubyBlockId);
+            Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx, rubyRegionId);
         }
-        Payload::varSet(cs, name, passedValue, builder, irctx, rubyBlockId);
+        Payload::varSet(cs, name, passedValue, builder, irctx, rubyRegionId);
 
         optionalPhi->addIncoming(updatedOptionalKwargs, builder.GetInsertBlock());
         missingPhi->addIncoming(missingKwargs, builder.GetInsertBlock());
@@ -218,9 +218,9 @@ void parseKeywordArgsFromCallData(CompilerState &cs, llvm::IRBuilderBase &builde
 
 void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                  cfg::LocalRef kwRestArgName, llvm::Value *hashArgs, int maxPositionalArgCount,
-                                 const vector<core::ArgInfo::ArgFlags> &argsFlags, int rubyBlockId) {
-    auto *func = irctx.rubyBlocks2Functions[rubyBlockId];
-    auto &argPresentVariables = irctx.argPresentVariables[rubyBlockId];
+                                 const vector<core::ArgInfo::ArgFlags> &argsFlags, int rubyRegionId) {
+    auto *func = irctx.rubyBlocks2Functions[rubyRegionId];
+    auto &argPresentVariables = irctx.argPresentVariables[rubyRegionId];
     // required arguments remaining to be parsed
     auto numRequiredKwArgs = absl::c_count_if(
         argsFlags, [](auto &argFlag) { return argFlag.isKeyword && !argFlag.isDefault && !argFlag.isRepeated; });
@@ -233,7 +233,7 @@ void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder
         if (!argsFlags[argId].isKeyword || argsFlags[argId].isRepeated) {
             continue;
         }
-        auto name = irctx.rubyBlockArgs[rubyBlockId][argId];
+        auto name = irctx.rubyBlockArgs[rubyRegionId][argId];
         auto rawId = Payload::idIntern(cs, builder, name.data(irctx.cfg)._name.shortName(cs));
         auto rawRubySym = builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
 
@@ -260,7 +260,7 @@ void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder
         // Write a default value out, and mark the variable as missing
         builder.SetInsertPoint(kwArgDefault);
         if (argPresent.exists()) {
-            Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx, rubyBlockId);
+            Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx, rubyRegionId);
         }
 
         auto *updatedMissingKwargs = missingKwargs;
@@ -280,9 +280,9 @@ void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder
                     builder.CreateBinOp(llvm::Instruction::Add, optionalKwargs, IREmitterHelpers::buildS4(cs, 1));
             }
 
-            Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx, rubyBlockId);
+            Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx, rubyRegionId);
         }
-        Payload::varSet(cs, name, passedValue, builder, irctx, rubyBlockId);
+        Payload::varSet(cs, name, passedValue, builder, irctx, rubyRegionId);
         optionalPhi->addIncoming(updatedOptionalKwargs, builder.GetInsertBlock());
         missingPhi->addIncoming(missingKwargs, builder.GetInsertBlock());
         builder.CreateBr(kwArgContinue);
@@ -293,7 +293,7 @@ void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder
     }
     Payload::assertAllRequiredKWArgs(cs, builder, missingKwargs);
     if (kwRestArgName.exists()) {
-        Payload::varSet(cs, kwRestArgName, Payload::readKWRestArg(cs, builder, hashArgs), builder, irctx, rubyBlockId);
+        Payload::varSet(cs, kwRestArgName, Payload::readKWRestArg(cs, builder, hashArgs), builder, irctx, rubyRegionId);
     } else {
         Payload::assertNoExtraKWArg(cs, builder, hashArgs, IREmitterHelpers::buildS4(cs, numRequiredKwArgs),
                                     optionalKwargs);
@@ -304,20 +304,20 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
     // this function effectively generate an optimized build of
     // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
     llvm::IRBuilder<> builder(base);
-    for (auto rubyBlockId = 0; rubyBlockId < irctx.rubyBlocks2Functions.size(); rubyBlockId++) {
-        auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[rubyBlockId]);
+    for (auto rubyRegionId = 0; rubyRegionId < irctx.rubyBlocks2Functions.size(); rubyRegionId++) {
+        auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[rubyRegionId]);
 
-        builder.SetInsertPoint(irctx.argumentSetupBlocksByFunction[rubyBlockId]);
+        builder.SetInsertPoint(irctx.argumentSetupBlocksByFunction[rubyRegionId]);
 
         // emit a location that corresponds to the function entry
         auto loc = md.symbol.data(cs)->loc();
-        IREmitterHelpers::emitDebugLoc(cs, builder, irctx, rubyBlockId, loc);
+        IREmitterHelpers::emitDebugLoc(cs, builder, irctx, rubyRegionId, loc);
 
-        auto blockType = irctx.rubyBlockType[rubyBlockId];
+        auto blockType = irctx.rubyBlockType[rubyRegionId];
         if (blockType == FunctionType::Method || blockType == FunctionType::StaticInitFile ||
             blockType == FunctionType::StaticInitModule || blockType == FunctionType::Block) {
-            auto func = irctx.rubyBlocks2Functions[rubyBlockId];
-            auto &argPresentVariables = irctx.argPresentVariables[rubyBlockId];
+            auto func = irctx.rubyBlocks2Functions[rubyRegionId];
+            auto &argPresentVariables = irctx.argPresentVariables[rubyRegionId];
             auto maxPositionalArgCount = 0;
             auto minPositionalArgCount = 0;
             auto isBlock = blockType == FunctionType::Block;
@@ -332,22 +332,22 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
             cfg::LocalRef restArgName;
             cfg::LocalRef kwRestArgName;
 
-            auto argsFlags = getArgFlagsForBlockId(cs, rubyBlockId, cfg.symbol, irctx);
+            auto argsFlags = getArgFlagsForBlockId(cs, rubyRegionId, cfg.symbol, irctx);
             {
                 auto argId = -1;
-                ENFORCE(argsFlags.size() == irctx.rubyBlockArgs[rubyBlockId].size());
+                ENFORCE(argsFlags.size() == irctx.rubyBlockArgs[rubyRegionId].size());
                 for (auto &argFlags : argsFlags) {
                     argId += 1;
                     if (argFlags.isKeyword) {
                         hasKWArgs = true;
                         if (argFlags.isRepeated) {
-                            kwRestArgName = irctx.rubyBlockArgs[rubyBlockId][argId];
+                            kwRestArgName = irctx.rubyBlockArgs[rubyRegionId][argId];
                             hasKWRestArgs = true;
                         }
                         continue;
                     }
                     if (argFlags.isRepeated) {
-                        restArgName = irctx.rubyBlockArgs[rubyBlockId][argId];
+                        restArgName = irctx.rubyBlockArgs[rubyRegionId][argId];
                         hasRestArgs = true;
                         continue;
                     }
@@ -356,7 +356,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                         continue;
                     }
                     if (argFlags.isBlock) {
-                        blkArgName = irctx.rubyBlockArgs[rubyBlockId][argId];
+                        blkArgName = irctx.rubyBlockArgs[rubyRegionId][argId];
                         continue;
                     }
                     maxPositionalArgCount += 1;
@@ -480,7 +480,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                         auto &block = fillFromArgBlocks[i - minPositionalArgCount];
                         builder.SetInsertPoint(block);
                     }
-                    const auto a = irctx.rubyBlockArgs[rubyBlockId][i];
+                    const auto a = irctx.rubyBlockArgs[rubyRegionId][i];
                     if (!a.data(cfg)._name.exists()) {
                         failCompilation(cs, core::Loc(cfg.file, md.declLoc),
                                         "this method has a block argument construct that's not supported");
@@ -489,14 +489,14 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     // mark the arg as present
                     auto &argPresent = argPresentVariables[i];
                     if (argPresent.exists()) {
-                        Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx, rubyBlockId);
+                        Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx, rubyRegionId);
                     }
 
                     llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, i, true))};
                     auto name = a.data(cfg)._name.shortName(cs);
                     llvm::StringRef nameRef(name.data(), name.length());
                     auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
-                    Payload::varSet(cs, a, rawValue, builder, irctx, rubyBlockId);
+                    Payload::varSet(cs, a, rawValue, builder, irctx, rubyRegionId);
                     if (i >= minPositionalArgCount) {
                         // check if we need to fill in the next variable from the arg
                         builder.CreateBr(checkBlocks[i - minPositionalArgCount + 1]);
@@ -534,12 +534,12 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     auto argIndex = i + minPositionalArgCount;
                     auto argPresent = argPresentVariables[argIndex];
                     if (argPresent.exists()) {
-                        Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx, rubyBlockId);
+                        Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx, rubyRegionId);
                     }
 
                     if (isBlock) {
-                        auto a = irctx.rubyBlockArgs[rubyBlockId][argIndex];
-                        Payload::varSet(cs, a, Payload::rubyNil(cs, builder), builder, irctx, rubyBlockId);
+                        auto a = irctx.rubyBlockArgs[rubyRegionId][argIndex];
+                        Payload::varSet(cs, a, Payload::rubyNil(cs, builder), builder, irctx, rubyRegionId);
                     }
 
                     // fall through to the next default arg init block
@@ -555,7 +555,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                 if (hasRestArgs) {
                     Payload::varSet(cs, restArgName,
                                     Payload::readRestArgs(cs, builder, maxPositionalArgCount, argCountRaw, argArrayRaw),
-                                    builder, irctx, rubyBlockId);
+                                    builder, irctx, rubyRegionId);
                 }
                 if (hasKWArgs) {
                     // If we have a kwsplat arg, the caller/VM will always make sure that
@@ -563,9 +563,9 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     // in attempting to take the efficient parsing route.
                     //
                     // Blocks also take the splat route always.
-                    if (hasKWRestArgs || rubyBlockId != 0) {
+                    if (hasKWRestArgs || rubyRegionId != 0) {
                         parseKeywordArgsFromKwSplat(cs, builder, irctx, kwRestArgName, hashArgs, maxPositionalArgCount,
-                                                    argsFlags, rubyBlockId);
+                                                    argsFlags, rubyRegionId);
                     } else {
                         // Due to the wonders of Ruby, we can't always be assured that
                         // our kwargs are passed directly on the stack.  They might
@@ -582,12 +582,12 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
 
                         builder.SetInsertPoint(efficientBlock);
                         parseKeywordArgsFromCallData(cs, builder, irctx, kwRestArgName, argCountRaw, argArrayRaw,
-                                                     hashArgs, maxPositionalArgCount, argsFlags, rubyBlockId);
+                                                     hashArgs, maxPositionalArgCount, argsFlags, rubyRegionId);
                         builder.CreateBr(continuationBlock);
 
                         builder.SetInsertPoint(hashBlock);
                         parseKeywordArgsFromKwSplat(cs, builder, irctx, kwRestArgName, hashArgs, maxPositionalArgCount,
-                                                    argsFlags, rubyBlockId);
+                                                    argsFlags, rubyRegionId);
                         builder.CreateBr(continuationBlock);
 
                         builder.SetInsertPoint(continuationBlock);
@@ -605,7 +605,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
             case FunctionType::Rescue:
             case FunctionType::Ensure:
                 // jump dirrectly to user body
-                builder.CreateBr(irctx.userEntryBlockByFunction[rubyBlockId]);
+                builder.CreateBr(irctx.userEntryBlockByFunction[rubyRegionId]);
                 break;
 
             case FunctionType::Unused:
@@ -623,12 +623,12 @@ cfg::LocalRef returnValue(cfg::CFG &cfg, CompilerState &cs) {
 llvm::BasicBlock *resolveJumpTarget(cfg::CFG &cfg, const IREmitterContext &irctx, const cfg::BasicBlock *from,
                                     const cfg::BasicBlock *to) {
     if (to == cfg.deadBlock()) {
-        return irctx.deadBlockMapping[from->rubyBlockId];
+        return irctx.deadBlockMapping[from->rubyRegionId];
     }
 
     auto remapped = irctx.basicBlockJumpOverrides[to->id];
-    if (from->rubyBlockId != irctx.basicBlockRubyBlockId[remapped]) {
-        return irctx.blockExitMapping[from->rubyBlockId];
+    if (from->rubyRegionId != irctx.basicBlockRubyBlockId[remapped]) {
+        return irctx.blockExitMapping[from->rubyRegionId];
     } else {
         return irctx.llvmBlocksBySorbetBlocks[remapped];
     }
@@ -640,7 +640,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
     auto &arguments = cfg.symbol.data(base)->arguments();
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
-        auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[bb->rubyBlockId]);
+        auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[bb->rubyRegionId]);
 
         auto block = irctx.llvmBlocksBySorbetBlocks[bb->id];
         bool isTerminated = false;
@@ -660,15 +660,15 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
             auto loc = core::Loc(cs.file, bind.loc);
 
             lastLoc = Payload::setLineNumber(cs, builder, loc, startLoc, lastLoc,
-                                             irctx.lineNumberPtrsByFunction[bb->rubyBlockId]);
+                                             irctx.lineNumberPtrsByFunction[bb->rubyRegionId]);
 
-            IREmitterHelpers::emitDebugLoc(cs, builder, irctx, bb->rubyBlockId, loc);
+            IREmitterHelpers::emitDebugLoc(cs, builder, irctx, bb->rubyRegionId, loc);
 
             typecase(
                 bind.value,
                 [&](cfg::Ident &i) {
-                    auto var = Payload::varGet(cs, i.what, builder, irctx, bb->rubyBlockId);
-                    Payload::varSet(cs, bind.bind.variable, var, builder, irctx, bb->rubyBlockId);
+                    auto var = Payload::varGet(cs, i.what, builder, irctx, bb->rubyRegionId);
+                    Payload::varSet(cs, bind.bind.variable, var, builder, irctx, bb->rubyRegionId);
                 },
                 [&](cfg::Alias &i) {
                     // We compute the alias map when IREmitterContext is first created, so if an entry is missing,
@@ -677,71 +677,71 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                             "Alias is missing from the alias map");
                 },
                 [&](cfg::SolveConstraint &i) {
-                    auto var = Payload::varGet(cs, i.send, builder, irctx, bb->rubyBlockId);
-                    Payload::varSet(cs, bind.bind.variable, var, builder, irctx, bb->rubyBlockId);
+                    auto var = Payload::varGet(cs, i.send, builder, irctx, bb->rubyRegionId);
+                    Payload::varSet(cs, bind.bind.variable, var, builder, irctx, bb->rubyRegionId);
                 },
                 [&](cfg::Send &i) {
                     std::optional<int> blk;
                     if (i.link != nullptr) {
-                        blk.emplace(i.link->rubyBlockId);
+                        blk.emplace(i.link->rubyRegionId);
                     }
-                    auto mcctx = MethodCallContext::create(cs, builder, irctx, bb->rubyBlockId, &i, blk);
+                    auto mcctx = MethodCallContext::create(cs, builder, irctx, bb->rubyRegionId, &i, blk);
                     auto rawCall = IREmitterHelpers::emitMethodCall(mcctx);
                     mcctx.finalize();
-                    Payload::varSet(cs, bind.bind.variable, rawCall, builder, irctx, bb->rubyBlockId);
+                    Payload::varSet(cs, bind.bind.variable, rawCall, builder, irctx, bb->rubyRegionId);
                 },
                 [&](cfg::Return &i) {
                     isTerminated = true;
 
-                    auto *var = Payload::varGet(cs, i.what.variable, builder, irctx, bb->rubyBlockId);
+                    auto *var = Payload::varGet(cs, i.what.variable, builder, irctx, bb->rubyRegionId);
                     bool hasBlockAncestor = false;
-                    int rubyBlockId = bb->rubyBlockId;
+                    int rubyRegionId = bb->rubyRegionId;
 
-                    while (rubyBlockId != 0) {
+                    while (rubyRegionId != 0) {
                         // We iterate over the entire ancestor chain instead of breaking out early
                         // when we hit a Ruby block.  We do this so we can check this ENFORCE and
                         // ensure that we're not throwing over something that would require postprocessing.
-                        ENFORCE(!functionTypeNeedsPostprocessing(irctx.rubyBlockType[rubyBlockId]));
-                        hasBlockAncestor = hasBlockAncestor || irctx.rubyBlockType[rubyBlockId] == FunctionType::Block;
-                        rubyBlockId = irctx.rubyBlockParent[rubyBlockId];
+                        ENFORCE(!functionTypeNeedsPostprocessing(irctx.rubyBlockType[rubyRegionId]));
+                        hasBlockAncestor = hasBlockAncestor || irctx.rubyBlockType[rubyRegionId] == FunctionType::Block;
+                        rubyRegionId = irctx.rubyBlockParent[rubyRegionId];
                     }
 
                     if (hasBlockAncestor) {
                         ENFORCE(irctx.hasReturnAcrossBlock);
-                        IREmitterHelpers::emitReturnAcrossBlock(cs, cfg, builder, irctx, bb->rubyBlockId, var);
+                        IREmitterHelpers::emitReturnAcrossBlock(cs, cfg, builder, irctx, bb->rubyRegionId, var);
                     } else {
-                        IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
+                        IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyRegionId, var);
                     }
                 },
                 [&](cfg::BlockReturn &i) {
-                    ENFORCE(bb->rubyBlockId != 0, "should never happen");
+                    ENFORCE(bb->rubyRegionId != 0, "should never happen");
                     isTerminated = true;
-                    auto var = Payload::varGet(cs, i.what.variable, builder, irctx, bb->rubyBlockId);
-                    IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
+                    auto var = Payload::varGet(cs, i.what.variable, builder, irctx, bb->rubyRegionId);
+                    IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyRegionId, var);
                 },
                 [&](cfg::LoadSelf &i) {
                     // it's done in function setup, no need to do anything here
                 },
                 [&](cfg::Literal &i) {
                     auto rawValue = IREmitterHelpers::emitLiteralish(cs, builder, i.value);
-                    Payload::varSet(cs, bind.bind.variable, rawValue, builder, irctx, bb->rubyBlockId);
+                    Payload::varSet(cs, bind.bind.variable, rawValue, builder, irctx, bb->rubyRegionId);
                 },
                 [&](cfg::GetCurrentException &i) {
                     // if this block isn't an exception block header, there's nothing to do here.
-                    auto bodyRubyBlockId = irctx.exceptionBlockHeader[bb->id];
-                    if (bodyRubyBlockId == 0) {
+                    auto bodyRubyRegionId = irctx.exceptionBlockHeader[bb->id];
+                    if (bodyRubyRegionId == 0) {
                         return;
                     }
 
-                    IREmitterHelpers::emitExceptionHandlers(cs, builder, irctx, bb->rubyBlockId, bodyRubyBlockId,
+                    IREmitterHelpers::emitExceptionHandlers(cs, builder, irctx, bb->rubyRegionId, bodyRubyRegionId,
                                                             bind.bind.variable);
                 },
                 [&](cfg::ArgPresent &i) {
-                    ENFORCE(bb->rubyBlockId == 0, "ArgPresent found outside of entry-method");
+                    ENFORCE(bb->rubyRegionId == 0, "ArgPresent found outside of entry-method");
                     // Intentionally omitted: the result of the ArgPresent call is filled out in `setupArguments`
                 },
                 [&](cfg::LoadArg &i) {
-                    ENFORCE(bb->rubyBlockId == 0, "LoadArg found outside of entry-method");
+                    ENFORCE(bb->rubyRegionId == 0, "LoadArg found outside of entry-method");
 
                     // Argument values are loaded by `setupArguments`, we just need to check their type here
                     auto &argInfo = arguments[i.argId];
@@ -764,19 +764,19 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     }
                 },
                 [&](cfg::LoadYieldParams &i) {
-                    ENFORCE(bb->rubyBlockId != 0, "LoadYieldParams found outside of ruby block");
+                    ENFORCE(bb->rubyRegionId != 0, "LoadYieldParams found outside of ruby block");
                     /* intentionally omitted, it's part of method preambula */
                 },
                 [&](cfg::YieldParamPresent &i) {
-                    ENFORCE(bb->rubyBlockId != 0, "YieldParamPresent found outside of ruby block");
+                    ENFORCE(bb->rubyRegionId != 0, "YieldParamPresent found outside of ruby block");
                     // Intentionally omitted: the result of the YieldParamPresent call is filled out in `setupArguments`
                 },
                 [&](cfg::YieldLoadArg &i) {
-                    ENFORCE(bb->rubyBlockId != 0, "YieldLoadArg found outside of ruby block");
+                    ENFORCE(bb->rubyRegionId != 0, "YieldLoadArg found outside of ruby block");
                     // Filled out as part of the method preamble.
                 },
                 [&](cfg::Cast &i) {
-                    auto val = Payload::varGet(cs, i.value.variable, builder, irctx, bb->rubyBlockId);
+                    auto val = Payload::varGet(cs, i.value.variable, builder, irctx, bb->rubyRegionId);
 
                     // We skip the type test for Cast instructions that assign into <self>.
                     // These instructions only exist in the CFG for the purpose of type checking.
@@ -790,14 +790,14 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     }
 
                     if (i.cast == core::Names::let() || i.cast == core::Names::cast()) {
-                        Payload::varSet(cs, bind.bind.variable, val, builder, irctx, bb->rubyBlockId);
+                        Payload::varSet(cs, bind.bind.variable, val, builder, irctx, bb->rubyRegionId);
                     } else if (i.cast == core::Names::assertType()) {
                         Payload::varSet(cs, bind.bind.variable, Payload::rubyFalse(cs, builder), builder, irctx,
-                                        bb->rubyBlockId);
+                                        bb->rubyRegionId);
                     }
                 },
                 [&](cfg::TAbsurd &i) {
-                    auto val = Payload::varGet(cs, i.what.variable, builder, irctx, bb->rubyBlockId);
+                    auto val = Payload::varGet(cs, i.what.variable, builder, irctx, bb->rubyRegionId);
                     builder.CreateCall(cs.getFunction("sorbet_t_absurd"), {val});
                 });
             if (isTerminated) {
@@ -830,7 +830,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     auto id = Payload::idIntern(cs, builder, aliasEntry->second.classField.shortName(cs));
                     condValue = builder.CreateCall(cs.getFunction("sorbet_classVariableDefinedAndTruthy"), {klass, id});
                 } else {
-                    auto var = Payload::varGet(cs, testref, builder, irctx, bb->rubyBlockId);
+                    auto var = Payload::varGet(cs, testref, builder, irctx, bb->rubyRegionId);
                     condValue = Payload::testIsTruthy(cs, builder, var);
                 }
 
@@ -847,8 +847,8 @@ void emitDeadBlocks(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &ir
 
     // Emit the dead block body for each ruby block. It should be an error to transition to the dead block, so
     // we mark its body as unreachable.
-    for (auto rubyBlockId = 0; rubyBlockId <= cfg.maxRubyBlockId; ++rubyBlockId) {
-        auto *dead = irctx.deadBlockMapping[rubyBlockId];
+    for (auto rubyRegionId = 0; rubyRegionId <= cfg.maxRubyRegionId; ++rubyRegionId) {
+        auto *dead = irctx.deadBlockMapping[rubyRegionId];
         builder.SetInsertPoint(dead);
         builder.CreateUnreachable();
     }
@@ -857,12 +857,12 @@ void emitDeadBlocks(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &ir
 void emitBlockExits(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(base);
 
-    for (auto rubyBlockId = 0; rubyBlockId <= cfg.maxRubyBlockId; ++rubyBlockId) {
-        auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[rubyBlockId]);
+    for (auto rubyRegionId = 0; rubyRegionId <= cfg.maxRubyRegionId; ++rubyRegionId) {
+        auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[rubyRegionId]);
 
-        builder.SetInsertPoint(irctx.blockExitMapping[rubyBlockId]);
+        builder.SetInsertPoint(irctx.blockExitMapping[rubyRegionId]);
 
-        switch (irctx.rubyBlockType[rubyBlockId]) {
+        switch (irctx.rubyBlockType[rubyRegionId]) {
             case FunctionType::Method:
             case FunctionType::StaticInitFile:
             case FunctionType::StaticInitModule:
@@ -875,7 +875,7 @@ void emitBlockExits(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &
             case FunctionType::Ensure:
             case FunctionType::Unused:
                 // for non-top-level functions, we return `Qundef` to indicate that this value isn't used for anything.
-                IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, Payload::rubyUndef(cs, builder));
+                IREmitterHelpers::emitReturn(cs, builder, irctx, rubyRegionId, Payload::rubyUndef(cs, builder));
                 break;
         }
     }
@@ -886,12 +886,12 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
     builder.SetInsertPoint(irctx.postProcessBlock);
 
     // we're only using the top-level ruby block at this point
-    auto rubyBlockId = 0;
+    auto rubyRegionId = 0;
 
-    auto var = Payload::varGet(cs, returnValue(cfg, cs), builder, irctx, rubyBlockId);
+    auto var = Payload::varGet(cs, returnValue(cfg, cs), builder, irctx, rubyRegionId);
     auto *maybeChecked = IREmitterHelpers::maybeCheckReturnValue(cs, cfg, builder, irctx, var);
 
-    IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyBlockId, maybeChecked);
+    IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyRegionId, maybeChecked);
 }
 
 // Direct wrappers call the wrapped function without checking the receiver's type; the caller is responsible for

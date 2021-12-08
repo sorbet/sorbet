@@ -1,6 +1,6 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=8]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <cfgAlias>$7: T.class_of(TestIVar) = alias <C TestIVar>
@@ -12,15 +12,15 @@ bb0[rubyBlockId=0, firstDead=8]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::TestIVar#initialize {
 
-bb0[rubyBlockId=0, firstDead=9]():
+bb0[rubyRegionId=0, firstDead=9]():
     @foo$3: Integer = alias @foo
     <self>: TestIVar = cast(<self>: NilClass, TestIVar);
     <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
@@ -33,15 +33,15 @@ bb0[rubyBlockId=0, firstDead=9]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::TestIVar#test {
 
-bb0[rubyBlockId=0, firstDead=5]():
+bb0[rubyRegionId=0, firstDead=5]():
     @foo$3: Integer = alias @foo
     <self>: TestIVar = cast(<self>: NilClass, TestIVar);
     @foo$3: Integer = nil
@@ -50,15 +50,15 @@ bb0[rubyBlockId=0, firstDead=5]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:TestIVar>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=10]():
+bb0[rubyRegionId=0, firstDead=10]():
     <self>: T.class_of(TestIVar) = cast(<self>: NilClass, T.class_of(TestIVar));
     <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <statTemp>$7: Symbol(:initialize) = :initialize
@@ -72,8 +72,8 @@ bb0[rubyBlockId=0, firstDead=10]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }

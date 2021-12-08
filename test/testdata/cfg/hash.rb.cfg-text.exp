@@ -1,6 +1,6 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=8]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <cfgAlias>$7: T.class_of(TestHash) = alias <C TestHash>
@@ -12,30 +12,30 @@ bb0[rubyBlockId=0, firstDead=8]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::TestHash#something {
 
-bb0[rubyBlockId=0, firstDead=3]():
+bb0[rubyRegionId=0, firstDead=3]():
     <self>: TestHash = cast(<self>: NilClass, TestHash);
     <returnMethodTemp>$2: Integer(17) = 17
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(17)
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::TestHash#test {
 
-bb0[rubyBlockId=0, firstDead=10]():
+bb0[rubyRegionId=0, firstDead=10]():
     <self>: TestHash = cast(<self>: NilClass, TestHash);
     <hashTemp>$3: T.untyped = <self>: TestHash.something()
     <hashTemp>$4: Symbol(:bar) = :bar
@@ -49,15 +49,15 @@ bb0[rubyBlockId=0, firstDead=10]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::TestHash#test_shaped {
 
-bb0[rubyBlockId=0, firstDead=12]():
+bb0[rubyRegionId=0, firstDead=12]():
     <self>: TestHash = cast(<self>: NilClass, TestHash);
     <hashTemp>$3: Integer(1) = 1
     <hashTemp>$4: Integer(2) = 2
@@ -73,15 +73,15 @@ bb0[rubyBlockId=0, firstDead=12]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:TestHash>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=14]():
+bb0[rubyRegionId=0, firstDead=14]():
     <self>: T.class_of(TestHash) = cast(<self>: NilClass, T.class_of(TestHash));
     <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <statTemp>$7: Symbol(:something) = :something
@@ -99,8 +99,8 @@ bb0[rubyBlockId=0, firstDead=14]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }

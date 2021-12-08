@@ -769,10 +769,10 @@ public:
     SendAndBlockLink(SendAndBlockLink &&) = default;
     std::vector<ArgInfo::ArgFlags> argFlags;
     core::NameRef fun;
-    int rubyBlockId;
+    int rubyRegionId;
     std::shared_ptr<DispatchResult> result;
 
-    SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argFlags, int rubyBlockId);
+    SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argFlags, int rubyRegionId);
     std::optional<int> fixedArity() const;
     std::shared_ptr<SendAndBlockLink> duplicate();
 };

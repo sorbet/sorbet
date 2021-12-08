@@ -1,6 +1,6 @@
 method ::Object#foo {
 
-bb0[rubyBlockId=0, firstDead=5]():
+bb0[rubyRegionId=0, firstDead=5]():
     <self>: Object = cast(<self>: NilClass, Object);
     <statTemp>$3: String("3") = "3"
     <statTemp>$4: Integer(3) = 3
@@ -9,15 +9,15 @@ bb0[rubyBlockId=0, firstDead=5]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=6]():
+bb0[rubyRegionId=0, firstDead=6]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <statTemp>$6: Symbol(:foo) = :foo
@@ -27,8 +27,8 @@ bb0[rubyBlockId=0, firstDead=6]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }

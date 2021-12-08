@@ -1,6 +1,6 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=8]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <cfgAlias>$7: T.class_of(HasLoops) = alias <C HasLoops>
@@ -12,41 +12,41 @@ bb0[rubyBlockId=0, firstDead=8]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::HasLoops#variable_only_inside_loop {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: HasLoops = cast(<self>: NilClass, HasLoops);
     <unconditional> -> bb2
 
 # backedges
-# - bb3(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb3(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-# - bb5(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+# - bb5(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1]():
     # outerLoops: 1
     <whileTemp>$3: TrueClass = true
     <whileTemp>$3 -> (TrueClass ? bb5 : bb3)
 
 # backedges
-# - bb2(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=0]():
+# - bb2(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=0]():
     <returnMethodTemp>$2 = nil
     <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
-# - bb2(rubyBlockId=0)
-bb5[rubyBlockId=0, firstDead=-1]():
+# - bb2(rubyRegionId=0)
+bb5[rubyRegionId=0, firstDead=-1]():
     # outerLoops: 1
     a: Integer(1) = 1
     <unconditional> -> bb2
@@ -55,34 +55,34 @@ bb5[rubyBlockId=0, firstDead=-1]():
 
 method ::HasLoops#incorrect_assignment {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: HasLoops = cast(<self>: NilClass, HasLoops);
     a: String("s") = "s"
     <unconditional> -> bb2
 
 # backedges
-# - bb3(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb3(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-# - bb5(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1](a: String("s")):
+# - bb0(rubyRegionId=0)
+# - bb5(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1](a: String("s")):
     # outerLoops: 1
     <whileTemp>$4: TrueClass = true
     <whileTemp>$4 -> (TrueClass ? bb5 : bb3)
 
 # backedges
-# - bb2(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=0]():
+# - bb2(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=0]():
     <returnMethodTemp>$2 = nil
     <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
-# - bb2(rubyBlockId=0)
-bb5[rubyBlockId=0, firstDead=-1](a: String("s")):
+# - bb2(rubyRegionId=0)
+bb5[rubyRegionId=0, firstDead=-1](a: String("s")):
     # outerLoops: 1
     a: T.untyped = 1
     <unconditional> -> bb2
@@ -91,34 +91,34 @@ bb5[rubyBlockId=0, firstDead=-1](a: String("s")):
 
 method ::HasLoops#correct_assignment {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: HasLoops = cast(<self>: NilClass, HasLoops);
     a: String("s") = "s"
     <unconditional> -> bb2
 
 # backedges
-# - bb3(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb3(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-# - bb5(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1](a: String("s")):
+# - bb0(rubyRegionId=0)
+# - bb5(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1](a: String("s")):
     # outerLoops: 1
     <whileTemp>$4: TrueClass = true
     <whileTemp>$4 -> (TrueClass ? bb5 : bb3)
 
 # backedges
-# - bb2(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=0]():
+# - bb2(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=0]():
     <returnMethodTemp>$2 = nil
     <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
-# - bb2(rubyBlockId=0)
-bb5[rubyBlockId=0, firstDead=-1](a: String("s")):
+# - bb2(rubyRegionId=0)
+bb5[rubyRegionId=0, firstDead=-1](a: String("s")):
     # outerLoops: 1
     a: String("a") = "a"
     <unconditional> -> bb2
@@ -127,7 +127,7 @@ bb5[rubyBlockId=0, firstDead=-1](a: String("s")):
 
 method ::<Class:HasLoops>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=14]():
+bb0[rubyRegionId=0, firstDead=14]():
     <self>: T.class_of(HasLoops) = cast(<self>: NilClass, T.class_of(HasLoops));
     <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <statTemp>$7: Symbol(:variable_only_inside_loop) = :variable_only_inside_loop
@@ -145,8 +145,8 @@ bb0[rubyBlockId=0, firstDead=14]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }

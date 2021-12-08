@@ -69,7 +69,7 @@ public:
 
     static llvm::Value *boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *uint8_t);
     static llvm::Value *setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                          const IREmitterContext &irctx, const ast::MethodDef &md, int rubyBlockId);
+                                          const IREmitterContext &irctx, const ast::MethodDef &md, int rubyRegionId);
 
     static llvm::Value *readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);
     static llvm::Value *assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash,
@@ -90,12 +90,12 @@ public:
     static llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilderBase &builder,
                                                    const IREmitterContext &irctx);
     static llvm::Value *varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBuilderBase &builder,
-                               const IREmitterContext &irctx, int rubyBlockId);
+                               const IREmitterContext &irctx, int rubyRegionId);
     static void varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, llvm::IRBuilderBase &builder,
-                       const IREmitterContext &irctx, int rubyBlockId);
+                       const IREmitterContext &irctx, int rubyRegionId);
 
     static EscapedVariableInfo escapedVariableInfo(CompilerState &cs, cfg::LocalRef local,
-                                                   const IREmitterContext &irctx, int rubyBlockId);
+                                                   const IREmitterContext &irctx, int rubyRegionId);
 
     static llvm::Value *retrySingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
     static llvm::Value *voidSingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
@@ -127,7 +127,7 @@ public:
     static llvm::Value *getIseqEncodedPointer(CompilerState &gs, llvm::IRBuilderBase &builder, core::FileRef file);
 
     static llvm::Value *getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                       int rubyBlockId);
+                                       int rubyRegionId);
 
     static llvm::Value *buildLocalsOffset(CompilerState &cs);
 

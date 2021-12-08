@@ -1,6 +1,6 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=8]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <cfgAlias>$7: T.class_of(Side) = alias <C Side>
@@ -12,15 +12,15 @@ bb0[rubyBlockId=0, firstDead=8]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::Side#foo {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Side = cast(<self>: NilClass, Side);
     cond: T.untyped = load_arg(cond)
     a: Integer(1) = 1
@@ -29,26 +29,26 @@ bb0[rubyBlockId=0, firstDead=-1]():
     cond -> (T.untyped ? bb2 : bb3)
 
 # backedges
-# - bb4(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb4(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
     a: TrueClass = true
     <unconditional> -> bb4
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=-1](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
+# - bb0(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=-1](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
     a: Integer(2) = 2
     <unconditional> -> bb4
 
 # backedges
-# - bb2(rubyBlockId=0)
-# - bb3(rubyBlockId=0)
-bb4[rubyBlockId=0, firstDead=2](a: T.any(TrueClass, Integer), <statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
+# - bb2(rubyRegionId=0)
+# - bb3(rubyRegionId=0)
+bb4[rubyRegionId=0, firstDead=2](a: T.any(TrueClass, Integer), <statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
     <returnMethodTemp>$2: T.untyped = <statTemp>$4: Integer(1).foo(<statTemp>$5: Integer(1), a: T.any(TrueClass, Integer))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -57,7 +57,7 @@ bb4[rubyBlockId=0, firstDead=2](a: T.any(TrueClass, Integer), <statTemp>$4: Inte
 
 method ::<Class:Side>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=6]():
+bb0[rubyRegionId=0, firstDead=6]():
     <self>: T.class_of(Side) = cast(<self>: NilClass, T.class_of(Side));
     <cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <statTemp>$6: Symbol(:foo) = :foo
@@ -67,8 +67,8 @@ bb0[rubyBlockId=0, firstDead=6]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }

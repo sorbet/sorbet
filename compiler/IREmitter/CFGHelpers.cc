@@ -9,9 +9,9 @@ namespace sorbet::compiler {
 
 namespace {
 
-bool validExit(cfg::CFG &cfg, int targetRegionId, int rubyBlockId, vector<cfg::BasicBlock *> &exits,
+bool validExit(cfg::CFG &cfg, int targetRegionId, int rubyRegionId, vector<cfg::BasicBlock *> &exits,
                cfg::BasicBlock *candidate) {
-    if (candidate->rubyBlockId == rubyBlockId) {
+    if (candidate->rubyRegionId == rubyRegionId) {
         return false;
     }
 
@@ -23,7 +23,7 @@ bool validExit(cfg::CFG &cfg, int targetRegionId, int rubyBlockId, vector<cfg::B
         return false;
     }
 
-    return candidate->rubyBlockId == targetRegionId;
+    return candidate->rubyRegionId == targetRegionId;
 }
 
 } // namespace
@@ -32,7 +32,7 @@ vector<cfg::BasicBlock *> CFGHelpers::findRegionExits(cfg::CFG &cfg, int targetR
     vector<cfg::BasicBlock *> exits;
 
     for (auto &node : cfg.basicBlocks) {
-        if (node->rubyBlockId != sourceRegionId) {
+        if (node->rubyRegionId != sourceRegionId) {
             continue;
         }
 
@@ -51,9 +51,9 @@ vector<cfg::BasicBlock *> CFGHelpers::findRegionExits(cfg::CFG &cfg, int targetR
     return exits;
 }
 
-cfg::BasicBlock *CFGHelpers::findRegionEntry(cfg::CFG &cfg, int rubyBlockId) {
+cfg::BasicBlock *CFGHelpers::findRegionEntry(cfg::CFG &cfg, int rubyRegionId) {
     for (auto &bb : cfg.basicBlocks) {
-        if (bb->rubyBlockId == rubyBlockId) {
+        if (bb->rubyRegionId == rubyRegionId) {
             return bb.get();
         }
     }

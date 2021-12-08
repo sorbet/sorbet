@@ -168,8 +168,8 @@ llvm::Function *IREmitterHelpers::cleanFunctionBody(CompilerState &cs, llvm::Fun
 }
 
 void IREmitterHelpers::emitDebugLoc(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                    int rubyBlockId, core::Loc loc) {
-    auto *scope = irctx.blockScopes[rubyBlockId];
+                                    int rubyRegionId, core::Loc loc) {
+    auto *scope = irctx.blockScopes[rubyRegionId];
     unsigned line, column;
 
     if (!loc.exists()) {
@@ -189,28 +189,28 @@ void IREmitterHelpers::emitDebugLoc(CompilerState &cs, llvm::IRBuilderBase &buil
 }
 
 void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                           const IREmitterContext &irctx, int rubyBlockId, llvm::Value *retVal) {
-    if (functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId])) {
+                                           const IREmitterContext &irctx, int rubyRegionId, llvm::Value *retVal) {
+    if (functionTypePushesFrame(irctx.rubyBlockType[rubyRegionId])) {
         builder.CreateCall(cs.getFunction("sorbet_popFrame"), {});
     }
     builder.CreateRet(retVal);
 }
 
 void IREmitterHelpers::emitReturnAcrossBlock(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &builder,
-                                             const IREmitterContext &irctx, int rubyBlockId, llvm::Value *retVal) {
+                                             const IREmitterContext &irctx, int rubyRegionId, llvm::Value *retVal) {
     auto *ec = builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
     builder.CreateCall(cs.getFunction("sorbet_throwReturn"), {ec, retVal});
     builder.CreateUnreachable();
 }
 
 void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                  int rubyBlockId, llvm::Value *retVal) {
-    if (functionTypeNeedsPostprocessing(irctx.rubyBlockType[rubyBlockId])) {
+                                  int rubyRegionId, llvm::Value *retVal) {
+    if (functionTypeNeedsPostprocessing(irctx.rubyBlockType[rubyRegionId])) {
         auto returnValue = irctx.cfg.enterLocal({Names::returnValue(cs), 1});
-        Payload::varSet(cs, returnValue, retVal, builder, irctx, rubyBlockId);
+        Payload::varSet(cs, returnValue, retVal, builder, irctx, rubyRegionId);
         builder.CreateBr(irctx.postProcessBlock);
     } else {
-        emitUncheckedReturn(cs, builder, irctx, rubyBlockId, retVal);
+        emitUncheckedReturn(cs, builder, irctx, rubyRegionId, retVal);
     }
 }
 
@@ -542,7 +542,7 @@ llvm::Value *CallCacheFlags::build(CompilerState &cs, llvm::IRBuilderBase &build
 
 bool IREmitterHelpers::canPassThroughBlockViaRubyVM(MethodCallContext &mcctx, cfg::LocalRef blkVar) {
     auto &irctx = mcctx.irctx;
-    auto rubyBlockId = mcctx.rubyBlockId;
+    auto rubyRegionId = mcctx.rubyRegionId;
 
     // TODO: all of this logic needs to be modified for blocks that take blocks.
     if (irctx.blockArgUsage != BlockArgUsage::SameFrameAsTopLevel) {
@@ -552,7 +552,7 @@ bool IREmitterHelpers::canPassThroughBlockViaRubyVM(MethodCallContext &mcctx, cf
     ENFORCE(IREmitterHelpers::hasBlockArgument(mcctx.cs, 0, irctx.cfg.symbol, irctx));
 
     // The block for the send is not at the same level as the toplevel.
-    if (irctx.rubyBlockLevel[rubyBlockId] != 0) {
+    if (irctx.rubyBlockLevel[rubyRegionId] != 0) {
         return false;
     }
 

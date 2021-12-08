@@ -43,8 +43,8 @@ enum class BlockArgUsage {
     None,
 
     // The block argument to the function is only used directly within the
-    // top-level ruby block (rubyBlockId == 0) or in ruby blocks that have the
-    // same frame as the top-level ruby block (e.g. ExceptionBegin blocks).
+    // top-level ruby region (rubyRegionId == 0) or in ruby regions that have the
+    // same frame as the top-level ruby region (e.g. ExceptionBegin regions).
     //
     // "used" here means that either it is only ever the receiver of .call
     // (i.e. it is yield'd to) or it is passed along as a block argument itself.
@@ -123,7 +123,7 @@ struct BlockArity {
 
 // Contains a bunch of state that gets populated and accessed while emitting IR for a single Ruby method.
 //
-// Nearly every vector here behaves as a lookup map keyed on cfg::BasicBlock::rubyBlockId (i.e., an ID
+// Nearly every vector here behaves as a lookup map keyed on cfg::BasicBlock::rubyRegionId (i.e., an ID
 // for each Ruby block like `do ...  end` inside a Ruby method, with 0 meaning "outside a Ruby block").
 // It might make sense to newtype this someday.
 struct IREmitterContext {
@@ -145,7 +145,7 @@ struct IREmitterContext {
     // Contains llvm::BasicBlocks (insertion points) to hold code for a Ruby method or block that runs first,
     // before starting to execute the user-written body.
     //
-    // idx: cfg::BasicBlock::rubyBlockId
+    // idx: cfg::BasicBlock::rubyRegionId
     std::vector<llvm::BasicBlock *> functionInitializersByFunction;
 
     // The insertion points for code that loads and validates arguments, one for each Ruby method or Ruby block.
@@ -157,12 +157,12 @@ struct IREmitterContext {
     // the original Ruby method had a fixed arity, so there ends up being a fair deal of argument checking logic.
     // In particular, there are many llvm::BasicBlocks involved in arguments--this map holds just the starting point.
     //
-    // idx: cfg::BasicBlock::rubyBlockId
+    // idx: cfg::BasicBlock::rubyRegionId
     std::vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
 
     // The insertion points for the body code a user wrote inside a Ruby method or Ruby block.
     //
-    // idx: cfg::BasicBlock::rubyBlockId
+    // idx: cfg::BasicBlock::rubyRegionId
     std::vector<llvm::BasicBlock *> userEntryBlockByFunction;
 
     // A mapping from cfg::BasicBlock -> llvm::BasicBlock
@@ -183,7 +183,7 @@ struct IREmitterContext {
     // that a jump override corresponds to, so this data can just exist along-side the jump overrides.
     //
     // idx: cfg::BasicBlock::id
-    // val: cfg::BasicBlock::rubyBlockId
+    // val: cfg::BasicBlock::rubyRegionId
     std::vector<int> basicBlockRubyBlockId;
 
     // This is the maximum number of argument seen in a given ruby method.
@@ -196,9 +196,9 @@ struct IREmitterContext {
     // hold the argv of the Ruby method call taking the most arguments within this Ruby method or
     // Ruby block, and reuse that stack space when making each Ruby method call.
     //
-    // This is a mapping from each Ruby method or block to that AllocaInst.
+    // This is a mapping from each Ruby method or region to that AllocaInst.
     //
-    // idx: cfg::BasicBlock::rubyBlockId;
+    // idx: cfg::BasicBlock::rubyRegionId;
     std::vector<llvm::AllocaInst *> sendArgArrayByBlock;
 
     // Local variables that escape, i.e. are referenced from multiple Ruby blocks, are
@@ -210,7 +210,7 @@ struct IREmitterContext {
     // When arguments have defaults, the use of the default is guarded by a call to ArgPresent. The ArgPresent variables
     // are initialized during setupArguments, but need to be available by argument index.
     //
-    // outer idx: the ruby block id that defines these arguments
+    // outer idx: the ruby region id that defines these arguments
     // idx: Argument index into the method arguments
     // val: The local ref that holds the result of the ArgPresent instruction, or cfg::LocalRef::noVariable if the
     //      argument does not have a default value.
@@ -224,7 +224,7 @@ struct IREmitterContext {
 
     // `self` is retrieved at the entry point of each Ruby block and stashed here.
     //
-    // idx: cfg::BasicBlock::rubyBlockId
+    // idx: cfg::BasicBlock::rubyRegionId
     // val: alloca for `self`
     UnorderedMap<int, llvm::AllocaInst *> selfVariables;
 
@@ -232,36 +232,36 @@ struct IREmitterContext {
     // This handles return type checking, among other things.
     llvm::BasicBlock *postProcessBlock;
 
-    // idx: cfg::BasicBlock::rubyBlockId
-    // val: The SendAndBlockLink for that block (each Ruby block correspondes to one cfg::Send)
+    // idx: cfg::BasicBlock::rubyRegionId
+    // val: The SendAndBlockLink for that region (each Ruby block correspondes to one cfg::Send)
     std::vector<std::shared_ptr<core::SendAndBlockLink>> blockLinks;
 
-    // idx: cfg::BasicBlock::rubyBlockId
-    // val: The arguments for that Ruby method or block.
+    // idx: cfg::BasicBlock::rubyRegionId
+    // val: The arguments for that Ruby method or region.
     std::vector<std::vector<cfg::LocalRef>> rubyBlockArgs;
 
-    // Each Ruby method and Ruby block gets compiled to an llvm::Function so that it can be called
+    // Each Ruby method and Ruby region gets compiled to an llvm::Function so that it can be called
     // directly like any other C function.
     //
-    // idx: cfg::BasicBlock::rubyBlockId
+    // idx: cfg::BasicBlock::rubyRegionId
     std::vector<llvm::Function *> rubyBlocks2Functions;
 
     // The type of each function that we're going to generate.
     //
-    // idx: cfg::BasicBlock::rubyBlockId
+    // idx: cfg::BasicBlock::rubyRegionId
     std::vector<FunctionType> rubyBlockType;
 
-    // The parent block id of each function being generated. Used for constructing the parent relationship when
+    // The parent region id of each function being generated. Used for constructing the parent relationship when
     // allocating iseq values for block/exception functions.
     //
-    // idx: cfg::BasicBlock::rubyBlockId
-    // val: cfg::BasicBlock::rubyBlockId
+    // idx: cfg::BasicBlock::rubyRegionId
+    // val: cfg::BasicBlock::rubyRegionId
     std::vector<int> rubyBlockParent;
 
-    // The level of a ruby block corresponds to the nesting depth of non-method stack frames when it's called. So for a
-    // block at the top-level of the method, the value would be 1.
+    // The level of a ruby region corresponds to the nesting depth of non-method stack frames when it's called. So for a
+    // region at the top-level of the method, the value would be 1.
     //
-    // idx: cfg::BasicBlock::rubyBlockId
+    // idx: cfg::BasicBlock::rubyRegionId
     // val: the number of scopes traversed to get back to the top-level method frame at runtime
     std::vector<int> rubyBlockLevel;
 
@@ -270,44 +270,44 @@ struct IREmitterContext {
 
     // Stores the control frame (GET_EC()->cfp) for ordinary ruby blocks.
     //
-    // idx: cfg::BasicBlock::rubyBlockId
+    // idx: cfg::BasicBlock::rubyRegionId
     UnorderedMap<int, llvm::AllocaInst *> blockControlFramePtrs;
 
     // How this function uses its block arg, if any.
     BlockArgUsage blockArgUsage;
 
-    // Non-zero for basic-blocks that originally jumped to exception-handling code.
+    // Non-zero for regions that originally jumped to exception-handling code.
     // idx: block id
-    // val: the rubyBlockId for the body of the exception block
+    // val: the rubyRegionId for the body of the exception block
     std::vector<int> exceptionBlockHeader;
 
-    // Mapping from ruby block id to llvm dead block.
+    // Mapping from ruby region id to llvm dead block.
     std::vector<llvm::BasicBlock *> deadBlockMapping;
 
-    // Mapping from ruby block id to llvm block exit blocks. These blocks are used for the case where a transition
-    // between a basic block in a ruby block exists, and transitions to a node in a different ruby block (that isn't the
-    // dead block).
+    // Mapping from ruby region id to llvm block exit blocks. These blocks are used for the case where a transition
+    // between a basic block in a ruby region exists, and transitions to a node in a different ruby region (that isn't
+    // the dead block).
     std::vector<llvm::BasicBlock *> blockExitMapping;
 
-    // Mappinf from ruby block id to debug info scope.
+    // Mappinf from ruby region id to debug info scope.
     std::vector<llvm::DISubprogram *> blockScopes;
 
-    // Records which ruby blocks use `break`, as that will forbid us from emitting type assertions on intrinsics that
+    // Records which ruby regions use `break`, as that will forbid us from emitting type assertions on intrinsics that
     // they are used with.
     //
-    // idx: cfg::BasicBlock::rubyBlockId
-    // val: true when the block uses `break`
+    // idx: cfg::BasicBlock::rubyRegionId
+    // val: true when the region uses `break`
     std::vector<bool> blockUsesBreak;
 
     // Whether an explicit return statement ever appears in a context that has a
     // Ruby block as an ancestor.
     bool hasReturnAcrossBlock;
 
-    // Mapping from ruby block id to the name for the block's iseq.
+    // Mapping from ruby region id to the name for the block's iseq.
     std::vector<std::optional<std::string>> rubyBlockLocationNames;
 
-    // Mapping from ruby block id to min/max arguments that block takes. As this is only used for block allocations,
-    // it's {0, 0} for every ruby block id that is not a FunctionType::Block.
+    // Mapping from ruby region id to min/max arguments that region takes. As this is only used for block allocations,
+    // it's {0, 0} for every ruby region id that is not a FunctionType::Block.
     std::vector<BlockArity> rubyBlockArity;
 
     static IREmitterContext getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md,

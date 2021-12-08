@@ -1,6 +1,6 @@
 method ::Object#baz1 {
 
-bb0[rubyBlockId=0, firstDead=5]():
+bb0[rubyRegionId=0, firstDead=5]():
     <self>: Object = cast(<self>: NilClass, Object);
     a: String("foo") = "foo"
     b: T.nilable(Integer) = a: String("foo").getbyte(a: String("foo"))
@@ -9,15 +9,15 @@ bb0[rubyBlockId=0, firstDead=5]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::Object#baz2 {
 
-bb0[rubyBlockId=0, firstDead=6]():
+bb0[rubyRegionId=0, firstDead=6]():
     <self>: Object = cast(<self>: NilClass, Object);
     a: String("foo") = "foo"
     <statTemp>$5: String("foo") = "foo"
@@ -27,15 +27,15 @@ bb0[rubyBlockId=0, firstDead=6]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::Object#baz3 {
 
-bb0[rubyBlockId=0, firstDead=6]():
+bb0[rubyRegionId=0, firstDead=6]():
     <self>: Object = cast(<self>: NilClass, Object);
     <statTemp>$3: String("foo") = "foo"
     <statTemp>$4: String("foo") = "foo"
@@ -45,15 +45,15 @@ bb0[rubyBlockId=0, firstDead=6]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::Object#baz4 {
 
-bb0[rubyBlockId=0, firstDead=6]():
+bb0[rubyRegionId=0, firstDead=6]():
     <self>: Object = cast(<self>: NilClass, Object);
     <statTemp>$3: T.untyped = <self>: Object.a()
     <statTemp>$5: String("foo") = "foo"
@@ -63,40 +63,40 @@ bb0[rubyBlockId=0, firstDead=6]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::Object#baz5 {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
     cond: T.untyped = load_arg(cond)
     cond -> (T.untyped ? bb2 : bb3)
 
 # backedges
-# - bb4(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb4(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1]():
     b: Integer(1) = 1
     <unconditional> -> bb4
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=-1]():
     b: String("foo") = "foo"
     <unconditional> -> bb4
 
 # backedges
-# - bb2(rubyBlockId=0)
-# - bb3(rubyBlockId=0)
-bb4[rubyBlockId=0, firstDead=5](b: T.any(Integer, String)):
+# - bb2(rubyRegionId=0)
+# - bb3(rubyRegionId=0)
+bb4[rubyRegionId=0, firstDead=5](b: T.any(Integer, String)):
     <statTemp>$5: T.any(Integer, String) = b
     <statTemp>$6: Integer(1) = 1
     b: T.untyped = <statTemp>$5: T.any(Integer, String).getbyte(<statTemp>$6: Integer(1))
@@ -108,32 +108,32 @@ bb4[rubyBlockId=0, firstDead=5](b: T.any(Integer, String)):
 
 method ::Object#baz6 {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
     cond: T.untyped = load_arg(cond)
     cond -> (T.untyped ? bb2 : bb3)
 
 # backedges
-# - bb4(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb4(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1]():
     b: Integer(1) = 1
     <unconditional> -> bb4
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=-1]():
     b: String("foo") = "foo"
     <unconditional> -> bb4
 
 # backedges
-# - bb2(rubyBlockId=0)
-# - bb3(rubyBlockId=0)
-bb4[rubyBlockId=0, firstDead=5](b: T.any(Integer, String)):
+# - bb2(rubyRegionId=0)
+# - bb3(rubyRegionId=0)
+bb4[rubyRegionId=0, firstDead=5](b: T.any(Integer, String)):
     <statTemp>$5: String("foo") = "foo"
     <statTemp>$6: T.any(Integer, String) = b
     b: T.nilable(Integer) = <statTemp>$5: String("foo").getbyte(<statTemp>$6: T.any(Integer, String))
@@ -145,26 +145,26 @@ bb4[rubyBlockId=0, firstDead=5](b: T.any(Integer, String)):
 
 method ::Object#baz7 {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
     cond: T.untyped = load_arg(cond)
     cond -> (T.untyped ? bb2 : bb4)
 
 # backedges
-# - bb4(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb4(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1]():
     b: Integer(1) = 1
     <unconditional> -> bb4
 
 # backedges
-# - bb0(rubyBlockId=0)
-# - bb2(rubyBlockId=0)
-bb4[rubyBlockId=0, firstDead=5](b: T.nilable(Integer)):
+# - bb0(rubyRegionId=0)
+# - bb2(rubyRegionId=0)
+bb4[rubyRegionId=0, firstDead=5](b: T.nilable(Integer)):
     <statTemp>$5: String("foo") = "foo"
     <statTemp>$6: T.nilable(Integer) = b
     b: T.nilable(Integer) = <statTemp>$5: String("foo").getbyte(<statTemp>$6: T.nilable(Integer))
@@ -176,33 +176,33 @@ bb4[rubyBlockId=0, firstDead=5](b: T.nilable(Integer)):
 
 method ::Object#baz8 {
 
-bb0[rubyBlockId=0, firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
     <unconditional> -> bb2
 
 # backedges
-# - bb3(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb3(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-# - bb5(rubyBlockId=0)
-bb2[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+# - bb5(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1]():
     # outerLoops: 1
     <whileTemp>$3: TrueClass = true
     <whileTemp>$3 -> (TrueClass ? bb5 : bb3)
 
 # backedges
-# - bb2(rubyBlockId=0)
-bb3[rubyBlockId=0, firstDead=0]():
+# - bb2(rubyRegionId=0)
+bb3[rubyRegionId=0, firstDead=0]():
     <returnMethodTemp>$2 = nil
     <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
-# - bb2(rubyBlockId=0)
-bb5[rubyBlockId=0, firstDead=-1]():
+# - bb2(rubyRegionId=0)
+bb5[rubyRegionId=0, firstDead=-1]():
     # outerLoops: 1
     b: Integer(1) = 1
     <unconditional> -> bb2
@@ -211,7 +211,7 @@ bb5[rubyBlockId=0, firstDead=-1]():
 
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyBlockId=0, firstDead=34]():
+bb0[rubyRegionId=0, firstDead=34]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <statTemp>$7: Symbol(:baz1) = :baz1
@@ -249,8 +249,8 @@ bb0[rubyBlockId=0, firstDead=34]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyBlockId=0)
-bb1[rubyBlockId=0, firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }

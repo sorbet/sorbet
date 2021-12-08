@@ -31,12 +31,12 @@ int CFG::numLocalVariables() const {
     return this->localVariables.size();
 }
 
-BasicBlock *CFG::freshBlock(int outerLoops, int rubyBlockId) {
+BasicBlock *CFG::freshBlock(int outerLoops, int rubyRegionId) {
     int id = this->maxBasicBlockId++;
     auto &r = this->basicBlocks.emplace_back(make_unique<BasicBlock>());
     r->id = id;
     r->outerLoops = outerLoops;
-    r->rubyBlockId = rubyBlockId;
+    r->rubyRegionId = rubyRegionId;
     return r.get();
 }
 
@@ -247,8 +247,8 @@ string CFG::toTextualString(const core::GlobalState &gs) const {
         if (!basicBlock->backEdges.empty()) {
             fmt::format_to(std::back_inserter(buf), "# backedges\n");
             for (auto *backEdge : basicBlock->backEdges) {
-                fmt::format_to(std::back_inserter(buf), "# - bb{}(rubyBlockId={})\n", backEdge->id,
-                               backEdge->rubyBlockId);
+                fmt::format_to(std::back_inserter(buf), "# - bb{}(rubyRegionId={})\n", backEdge->id,
+                               backEdge->rubyRegionId);
             }
         }
 
@@ -296,7 +296,7 @@ string CFG::showRaw(core::Context ctx) const {
 
 string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "block[id={}, rubyBlockId={}]({})\n", this->id, this->rubyBlockId,
+    fmt::format_to(std::back_inserter(buf), "block[id={}, rubyRegionId={}]({})\n", this->id, this->rubyRegionId,
                    fmt::map_join(
                        this->args.begin(), this->args.end(),
                        ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
@@ -313,7 +313,7 @@ string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
 
 string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "bb{}[rubyBlockId={}, firstDead={}]({}):\n", this->id, this->rubyBlockId,
+    fmt::format_to(std::back_inserter(buf), "bb{}[rubyRegionId={}, firstDead={}]({}):\n", this->id, this->rubyRegionId,
                    this->firstDeadInstructionIdx,
                    fmt::map_join(
                        this->args.begin(), this->args.end(),

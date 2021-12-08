@@ -57,10 +57,14 @@ public:
     int bwdId = -1;
     int flags = 0;
     int outerLoops = 0;
-    // Tracks which Ruby block (do ... end) this BasicBlock was generated from.
+    // Tracks which Ruby block (do ... end) or Ruby exception-handling region
+    // (in begin ... rescue ... else ... ensure ... end, each `...` is its own
+    // region) this BasicBlock was generated from.  We call it a "region" to
+    // avoid confusion between BasicBlocks and Ruby blocks.
+    //
     // Incremented every time builder_walk sees a new Ruby block while traversing a Ruby method.
-    // rubyBlockId == 0 means code at the top-level of this method (outside any Ruby block).
-    int rubyBlockId = 0;
+    // rubyRegionId == 0 means code at the top-level of this method (outside any Ruby block).
+    int rubyRegionId = 0;
     int firstDeadInstructionIdx = -1;
     std::vector<Binding> exprs;
     BlockExit bexit;
@@ -96,7 +100,7 @@ public:
      */
     core::MethodRef symbol;
     int maxBasicBlockId = 0;
-    int maxRubyBlockId = 0;
+    int maxRubyRegionId = 0;
 
     /**
      * Get the number of unique local variables in the CFG. Used to size vectors that contain an entry per LocalRef.
@@ -140,10 +144,10 @@ public:
     static constexpr int MIN_LOOP_GLOBAL = -2;
     static constexpr int MIN_LOOP_LET = -3;
 
-    // special ruby block id offsets for exception handling
-    static constexpr int HANDLERS_BLOCK_OFFSET = 1;
-    static constexpr int ENSURE_BLOCK_OFFSET = 2;
-    static constexpr int ELSE_BLOCK_OFFSET = 3;
+    // special ruby region id offsets for exception handling
+    static constexpr int HANDLERS_REGION_OFFSET = 1;
+    static constexpr int ENSURE_REGION_OFFSET = 2;
+    static constexpr int ELSE_REGION_OFFSET = 3;
 
     void sanityCheck(core::Context ctx);
 
