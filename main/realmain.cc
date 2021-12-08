@@ -311,10 +311,10 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         }
     }
     if (opts.print.AutogenAutoloader.enabled) {
-        {
-            Timer timeit(logger, "autogenAutoloaderPrune");
-            autogen::DefTreeBuilder::collapseSameFileDefs(gs, autoloaderCfg, root);
-        }
+        /* { */
+        /*     /1* Timer timeit(logger, "autogenAutoloaderPrune"); *1/ */
+        /*     /1* autogen::DefTreeBuilder::collapseSameFileDefs(gs, autoloaderCfg, root); *1/ */
+        /* } */
         {
             Timer timeit(logger, "autogenAutoloaderWrite");
             autogen::AutoloadWriter::writeAutoloads(gs, workers, autoloaderCfg, opts.print.AutogenAutoloader.outputPath,

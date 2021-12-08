@@ -3,6 +3,7 @@
 /compile_commands.json
 /.gdb_history
 /tags
+.ccls-cache/
 
 # CI puts a checkout here for testing.
 /pay-server
