@@ -40,8 +40,7 @@ int main(int argc, char **argv) {
         classfile << (int)c;
     }
     classfile << "};\n";
-    classfile << "extern const uint8_t * const getNameTablePayload = (const uint8_t * const)&nameTablePayload;"
-              << '\n';
+    classfile << "extern const uint8_t * const getNameTablePayload = (const uint8_t * const)&nameTablePayload;" << '\n';
 
     classfile.close();
 

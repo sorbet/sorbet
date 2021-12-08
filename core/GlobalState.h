@@ -85,8 +85,9 @@ public:
     void installIntrinsics();
 
     // Expand symbol and name tables to the given lengths. Does nothing if the value is <= current capacity.
-    void preallocateTables(uint32_t classAndModulesSize, uint32_t methodsSize, uint32_t fieldsSize, uint32_t typeArgumentsSize,
-                           uint32_t typeMembersSize, uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize);
+    void preallocateTables(uint32_t classAndModulesSize, uint32_t methodsSize, uint32_t fieldsSize,
+                           uint32_t typeArgumentsSize, uint32_t typeMembersSize, uint32_t utf8NameSize,
+                           uint32_t constantNameSize, uint32_t uniqueNameSize);
 
     GlobalState(const GlobalState &) = delete;
     GlobalState(GlobalState &&) = delete;
@@ -118,7 +119,8 @@ public:
     MethodRef lookupMethodSymbol(ClassOrModuleRef owner, NameRef name) const {
         return lookupSymbolWithKind(owner, name, SymbolRef::Kind::Method, Symbols::noMethod()).asMethodRef();
     }
-    MethodRef lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, const std::vector<uint32_t> &methodHash) const;
+    MethodRef lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name,
+                                         const std::vector<uint32_t> &methodHash) const;
     FieldRef lookupStaticFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
         // N.B.: Fields and static fields have entirely different types of names, so this should be unambiguous.
         return lookupSymbolWithKind(owner, name, SymbolRef::Kind::FieldOrStaticField, Symbols::noField()).asFieldRef();

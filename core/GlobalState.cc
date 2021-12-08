@@ -750,8 +750,9 @@ void GlobalState::installIntrinsics() {
     }
 }
 
-void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t methodsSize, uint32_t fieldsSize, uint32_t typeArgumentsSize,
-                                    uint32_t typeMembersSize, uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize) {
+void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t methodsSize, uint32_t fieldsSize,
+                                    uint32_t typeArgumentsSize, uint32_t typeMembersSize, uint32_t utf8NameSize,
+                                    uint32_t constantNameSize, uint32_t uniqueNameSize) {
     uint32_t classAndModulesSizeScaled = nextPowerOfTwo(classAndModulesSize);
     uint32_t methodsSizeScaled = nextPowerOfTwo(methodsSize);
     uint32_t fieldsSizeScaled = nextPowerOfTwo(fieldsSize);
@@ -1358,7 +1359,8 @@ NameRef GlobalState::lookupNameConstant(string_view original) const {
     return lookupNameConstant(utf8);
 }
 
-void moveNames(pair<unsigned int, uint32_t> *from, pair<unsigned int, uint32_t> *to, unsigned int szFrom, unsigned int szTo) {
+void moveNames(pair<unsigned int, uint32_t> *from, pair<unsigned int, uint32_t> *to, unsigned int szFrom,
+               unsigned int szTo) {
     // printf("\nResizing name hash table from %u to %u\n", szFrom, szTo);
     ENFORCE((szTo & (szTo - 1)) == 0, "name hash table size corruption");
     ENFORCE((szFrom & (szFrom - 1)) == 0, "name hash table size corruption");

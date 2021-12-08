@@ -1218,7 +1218,8 @@ public:
     }
 
     unique_ptr<Node> pair_keyword(const token *key, unique_ptr<Node> value) {
-        auto keyLoc = core::LocOffsets{clamp((uint32_t)key->start()), clamp((uint32_t)key->end() - 1)}; // drop the trailing :
+        auto keyLoc =
+            core::LocOffsets{clamp((uint32_t)key->start()), clamp((uint32_t)key->end() - 1)}; // drop the trailing :
 
         return make_unique<Pair>(tokLoc(key).join(maybe_loc(value)),
                                  make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->string())), std::move(value));

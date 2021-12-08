@@ -761,7 +761,8 @@ private:
     ARGS_store args;
 
 public:
-    Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, uint16_t numPosArgs, ARGS_store args, Flags flags = {});
+    Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, uint16_t numPosArgs, ARGS_store args,
+         Flags flags = {});
 
     ExpressionPtr deepCopy() const;
 
