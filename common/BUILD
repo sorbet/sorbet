@@ -11,7 +11,7 @@ cc_library(
         # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
         exclude = ["flycheck_*"],
     ) + select({
-        "//tools/config:darwin": ["os/mac.cc"],
+        "@platforms//os:macos": ["os/mac.cc"],
         "//tools/config:webasm": ["os/emscripten.cc"],
         "//conditions:default": ["os/linux.cc"],
     }),
