@@ -442,6 +442,59 @@ private:
         return true;
     }
 
+    static bool resolveConstants(const core::GlobalState &gs, vector<ResolveItems<ResolutionItem>> &jobs,
+                                 WorkerPool &workers) {
+        if (jobs.empty()) {
+            return false;
+        }
+        auto outputq =
+            make_shared<BlockingBoundedQueue<pair<uint32_t, vector<ResolveItems<ResolutionItem>>>>>(jobs.size());
+        auto inputq = make_shared<ConcurrentBoundedQueue<ResolveItems<ResolutionItem>>>(jobs.size());
+        for (auto &job : jobs) {
+            inputq->push(move(job), 1);
+        }
+        jobs.clear();
+
+        workers.multiplexJob("resolveConstantsWorker", [inputq, outputq, &gs]() {
+            vector<ResolveItems<ResolutionItem>> leftover;
+            ResolveItems<ResolutionItem> job(core::FileRef(), {});
+            uint32_t processed = 0;
+            uint32_t retries = 0;
+            for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
+                if (result.gotItem()) {
+                    processed++;
+                    core::Context ictx(gs, core::Symbols::root(), job.file);
+                    auto origSize = job.items.size();
+                    auto fileIt = remove_if(job.items.begin(), job.items.end(),
+                                            [&](ResolutionItem &item) -> bool { return resolveJob(ictx, item); });
+                    job.items.erase(fileIt, job.items.end());
+                    retries += origSize - job.items.size();
+                    if (!job.items.empty()) {
+                        leftover.emplace_back(move(job));
+                    }
+                }
+            }
+            if (processed > 0) {
+                auto pair = make_pair(retries, move(leftover));
+                outputq->push(move(pair), processed);
+            }
+        });
+
+        uint32_t retries = 0;
+        pair<uint32_t, vector<ResolveItems<ResolutionItem>>> threadResult;
+        for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done();
+             result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (result.gotItem()) {
+                retries += threadResult.first;
+                jobs.insert(jobs.end(), make_move_iterator(threadResult.second.begin()),
+                            make_move_iterator(threadResult.second.end()));
+            }
+        }
+        categoryCounterAdd("resolve.constants.nonancestor", "retry", retries);
+        return retries > 0;
+    }
+
     static bool resolveTypeAliasJob(core::MutableContext ctx, TypeAliasResolutionItem &job) {
         core::TypeMemberRef enclosingTypeMember;
         core::ClassOrModuleRef enclosingClass = job.lhs.enclosingClass(ctx);
@@ -1146,20 +1199,8 @@ public:
             }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
-                long retries = 0;
-                auto it =
-                    remove_if(todo.begin(), todo.end(), [&gs, &retries](ResolveItems<ResolutionItem> &job) -> bool {
-                        core::Context ictx(gs, core::Symbols::root(), job.file);
-                        auto origSize = job.items.size();
-                        auto fileIt = remove_if(job.items.begin(), job.items.end(),
-                                                [&](ResolutionItem &item) -> bool { return resolveJob(ictx, item); });
-                        job.items.erase(fileIt, job.items.end());
-                        retries += origSize - job.items.size();
-                        return job.items.empty();
-                    });
-                todo.erase(it, todo.end());
-                categoryCounterAdd("resolve.constants.nonancestor", "retry", retries);
-                progress = progress || retries > 0;
+                bool resolvedSomeConstants = resolveConstants(gs, todo, workers);
+                progress = progress || resolvedSomeConstants;
             }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.class_aliases");
