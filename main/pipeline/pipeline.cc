@@ -365,15 +365,15 @@ void incrementStrictLevelCounter(core::StrictLevel level) {
 }
 
 // Returns a non-null ast::Expression if kvstore contains the AST.
-ast::ExpressionPtr readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
+ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::FileRef file,
                                                    const options::Options &opts,
                                                    const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     ast::ExpressionPtr ast;
-    if (file.dataAllowingUnsafe(*gs).sourceType != core::File::Type::NotYetRead) {
+    if (file.dataAllowingUnsafe(gs).sourceType != core::File::Type::NotYetRead) {
         return ast;
     }
-    auto fileName = file.dataAllowingUnsafe(*gs).path();
-    Timer timeit(gs->tracer(), "readFileWithStrictnessOverrides", {{"file", string(fileName)}});
+    auto fileName = file.dataAllowingUnsafe(gs).path();
+    Timer timeit(gs.tracer(), "readFileWithStrictnessOverrides", {{"file", string(fileName)}});
     string src;
     bool fileFound = true;
     try {
@@ -388,22 +388,22 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(unique_ptr<core::GlobalState>
     prodCounterInc("types.input.files");
 
     {
-        core::UnfreezeFileTable unfreezeFiles(*gs);
+        core::UnfreezeFileTable unfreezeFiles(gs);
         auto fileObj =
             make_shared<core::File>(string(fileName.begin(), fileName.end()), move(src), core::File::Type::Normal);
         // Returns nullptr if tree is not in cache.
-        ast = fetchTreeFromCache(*gs, file, *fileObj, kvstore);
+        ast = fetchTreeFromCache(gs, file, *fileObj, kvstore);
 
-        auto entered = gs->enterNewFileAt(move(fileObj), file);
+        auto entered = gs.enterNewFileAt(move(fileObj), file);
         ENFORCE(entered == file);
     }
     if (enable_counters) {
-        counterAdd("types.input.lines", file.data(*gs).lineCount());
+        counterAdd("types.input.lines", file.data(gs).lineCount());
     }
 
-    auto &fileData = file.data(*gs);
+    auto &fileData = file.data(gs);
     if (!fileFound) {
-        if (auto e = gs->beginError(sorbet::core::Loc::none(file), core::errors::Internal::FileNotFound)) {
+        if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::FileNotFound)) {
             e.setHeader("File Not Found");
         }
     }
@@ -412,7 +412,7 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(unique_ptr<core::GlobalState>
         fileData.sourceType = core::File::Type::PayloadGeneration;
     }
 
-    auto level = decideStrictLevel(*gs, file, opts);
+    auto level = decideStrictLevel(gs, file, opts);
     fileData.strictLevel = level;
     incrementStrictLevelCounter(level);
     return ast;
@@ -484,7 +484,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     core::FileRef file = job;
-                    auto cachedTree = readFileWithStrictnessOverrides(localGs, file, opts, kvstore);
+                    auto cachedTree = readFileWithStrictnessOverrides(*localGs, file, opts, kvstore);
                     auto parsedFile = indexOne(opts, *localGs, file, move(cachedTree));
                     threadResult.res.trees.emplace_back(move(parsedFile));
                 }
@@ -518,7 +518,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
     if (files.size() < 3) {
         // Run singlethreaded if only using 2 files
         for (auto file : files) {
-            auto tree = readFileWithStrictnessOverrides(gs, file, opts, kvstore);
+            auto tree = readFileWithStrictnessOverrides(*gs, file, opts, kvstore);
             auto parsedFile = indexOne(opts, *gs, file, move(tree));
             ret.emplace_back(move(parsedFile));
         }
