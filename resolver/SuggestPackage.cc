@@ -122,8 +122,14 @@ public:
                 break;
             }
         }
+        reverse(prefix.begin(), prefix.end());
+        ctx.state.tracer().error("-----");
+        for (auto n : prefix) {
+            ctx.state.tracer().error("  - {}", n.show(ctx));
+        }
 
         findPackagesWithPrefix(prefix, matches);
+        ctx.state.tracer().error("found {} matches", matches.size());
         for (auto match : matches) {
             addMissingImportSuggestions(e, match);
         }
@@ -150,6 +156,7 @@ private:
         auto prefixSize = prefix.end() - prefixBegin;
 
         for (auto name : db().packages()) {
+            ctx.state.tracer().error("comparing against {}", name.toString(ctx));
             auto &other = db().getPackageInfo(name);
             auto &fullName = other.fullName();
             if (fullName.size() >= prefixSize && canImport(other) &&
