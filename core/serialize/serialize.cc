@@ -11,7 +11,7 @@
 #include "core/serialize/pickler.h"
 #include "lib/lz4.h"
 
-template class std::vector<sorbet::uint32_t>;
+template class std::vector<uint32_t>;
 
 using namespace std;
 
