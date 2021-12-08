@@ -88,7 +88,7 @@ struct ReferenceRef {
 
 // A constant definition---a class, module, constant definition, or constant alias---along with relevant metadata
 struct Definition {
-    enum class Type : u8 { Module, Class, Casgn, Alias, TypeAlias };
+    enum class Type : uint64_t { Module, Class, Casgn, Alias, TypeAlias };
 
     // the reference to this definition. Once `AutogenWalk` is completed and a full `ParsedFile` has been created, it
     // should always be the case that

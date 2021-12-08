@@ -70,7 +70,7 @@ template <typename T> struct ExpressionToTag;
 class ExpressionPtr {
 public:
     // We store tagged pointers as 64-bit values.
-    using tagged_storage = u8;
+    using tagged_storage = uint64_t;
 
     // Required for typecase
     template <class To> static bool isa(const ExpressionPtr &tree);

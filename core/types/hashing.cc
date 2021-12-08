@@ -33,16 +33,16 @@ u4 LiteralType::hash(const GlobalState &gs) const {
     ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
     result = mix(result, undSymbol.id());
 
-    u8 rawValue;
+    uint64_t rawValue;
     switch (literalKind) {
         case LiteralType::LiteralTypeKind::String:
         case LiteralType::LiteralTypeKind::Symbol:
             return mix(result, _hash(asName(gs).shortName(gs)));
         case LiteralType::LiteralTypeKind::Float:
-            rawValue = absl::bit_cast<u8>(asFloat());
+            rawValue = absl::bit_cast<uint64_t>(asFloat());
             break;
         case LiteralType::LiteralTypeKind::Integer:
-            rawValue = absl::bit_cast<u8>(asInteger());
+            rawValue = absl::bit_cast<uint64_t>(asInteger());
             break;
     }
 

@@ -21,7 +21,7 @@ class TypePtr final {
 
 public:
     // We store tagged pointers as 64-bit values.
-    using tagged_storage = u8;
+    using tagged_storage = uint64_t;
 
     enum class Tag {
         ClassType = 1,
@@ -74,7 +74,7 @@ private:
         // If containsPtr()
         std::atomic<u4> *counter;
         // If !containsPtr()
-        u8 value;
+        uint64_t value;
     };
     tagged_storage store;
 
@@ -120,7 +120,7 @@ private:
     }
 
     // Inlined TypePtr constructor
-    TypePtr(Tag tag, u4 value1, u8 value2) : value(value2), store(tagValue(tag, value1)) {}
+    TypePtr(Tag tag, u4 value1, uint64_t value2) : value(value2), store(tagValue(tag, value1)) {}
 
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
@@ -142,7 +142,7 @@ private:
         return saved;
     }
 
-    u8 releaseValue() noexcept {
+    uint64_t releaseValue() noexcept {
         ENFORCE_NO_TIMER(!containsPtr());
         auto saved = value;
         value = 0;

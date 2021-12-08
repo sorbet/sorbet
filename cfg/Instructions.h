@@ -272,7 +272,7 @@ public:
 CheckSize(TAbsurd, 32, 8);
 
 class InstructionPtr final {
-    using tagged_storage = u8;
+    using tagged_storage = uint64_t;
 
     static constexpr tagged_storage TAG_MASK = 0xffff;
 

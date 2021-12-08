@@ -57,7 +57,7 @@ void MsgpackWriter::packDefinitionRef(DefinitionRef ref) {
 }
 
 void MsgpackWriter::packRange(u4 begin, u4 end) {
-    mpack_write_u64(&writer, ((u8)begin << 32) | end);
+    mpack_write_u64(&writer, ((uint64_t)begin << 32) | end);
 }
 
 void MsgpackWriter::packDefinition(core::Context ctx, ParsedFile &pf, Definition &def) {
@@ -72,7 +72,7 @@ void MsgpackWriter::packDefinition(core::Context ctx, ParsedFile &pf, Definition
     if (version <= 2 && defType == Definition::Type::TypeAlias) {
         defType = Definition::Type::Casgn;
     }
-    mpack_write_u8(&writer, static_cast<u8>(defType));
+    mpack_write_u8(&writer, static_cast<uint64_t>(defType));
 
     // defines_behavior
     packBool(def.defines_behavior);

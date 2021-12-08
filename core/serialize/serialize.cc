@@ -207,7 +207,7 @@ u4 UnPickler::getU4() {
 }
 
 void Pickler::putS8(const int64_t i) {
-    auto u = absl::bit_cast<u8>(i);
+    auto u = absl::bit_cast<uint64_t>(i);
     while (u > 127) {
         putU1((u & 127) | 128);
         u = u >> 7;
@@ -216,8 +216,8 @@ void Pickler::putS8(const int64_t i) {
 }
 
 int64_t UnPickler::getS8() {
-    u8 res = 0;
-    u8 vle = 128;
+    uint64_t res = 0;
+    uint64_t vle = 128;
     int i = 0;
     while (vle & 128) {
         vle = getU1();

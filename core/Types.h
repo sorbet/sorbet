@@ -501,17 +501,17 @@ CheckSize(LiteralType, 16, 8);
 
 template <> inline TypePtr make_type<LiteralType, double &>(double &val) {
     return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(LiteralType::LiteralTypeKind::Float),
-                   absl::bit_cast<u8>(val));
+                   absl::bit_cast<uint64_t>(val));
 }
 
 template <> inline TypePtr make_type<LiteralType, double>(double &&val) {
     return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(LiteralType::LiteralTypeKind::Float),
-                   absl::bit_cast<u8>(val));
+                   absl::bit_cast<uint64_t>(val));
 }
 
 template <> inline TypePtr make_type<LiteralType, int64_t>(int64_t &&val) {
     return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(LiteralType::LiteralTypeKind::Integer),
-                   absl::bit_cast<u8>(val));
+                   absl::bit_cast<uint64_t>(val));
 }
 
 template <> inline TypePtr make_type<LiteralType, long &>(long &val) {

@@ -171,7 +171,7 @@ public:
         return ptr.counter;
     }
 
-    static u8 value(const TypePtr &ptr) {
+    static uint64_t value(const TypePtr &ptr) {
         CHECK(!ptr.containsPtr());
         return ptr.value;
     }
@@ -194,7 +194,7 @@ public:
         return TypePtr(tag, type);
     }
 
-    static TypePtr createInlined(TypePtr::Tag tag, u4 inlinedValue, u8 value) {
+    static TypePtr createInlined(TypePtr::Tag tag, u4 inlinedValue, uint64_t value) {
         return TypePtr(tag, inlinedValue, value);
     }
 };
@@ -264,7 +264,7 @@ TEST_SUITE("TypePtr") {
 
     TEST_CASE("Supports inlined values") {
         // Let's try edge cases.
-        std::list<pair<u4, u8>> valuesArray = {
+        std::list<pair<u4, uint64_t>> valuesArray = {
             {0, 0},
             {1, 1},
             {0xFFFFFFFF, 0xFFFFFFFFFFFFFFFF},
