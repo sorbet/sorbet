@@ -634,7 +634,7 @@ def ruby(rubygems, gems, extra_srcs = None, append_srcs = None, configure_flags 
         gems = gems,
         # This is a hack because macOS Catalina changed the way that system headers and libraries work.
         sysroot_flag = select({
-            "@com_stripe_ruby_typer//tools/config:darwin": "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+            "@platforms//os:macos": "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
             "//conditions:default": "",
         }),
         post_build_patches = post_build_patches,
