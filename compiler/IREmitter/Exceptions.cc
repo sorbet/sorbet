@@ -25,9 +25,9 @@ llvm::Function *getExceptionFunc(CompilerState &cs, const IREmitterContext &irct
 void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderBase &builder,
                                              const IREmitterContext &irctx, int rubyRegionId, int bodyRubyBlockId,
                                              cfg::LocalRef exceptionValue) {
-    const int handlersRubyBlockId = bodyRubyBlockId + cfg::CFG::HANDLERS_BLOCK_OFFSET;
-    const int ensureRubyBlockId = bodyRubyBlockId + cfg::CFG::ENSURE_BLOCK_OFFSET;
-    const int elseRubyBlockId = bodyRubyBlockId + cfg::CFG::ELSE_BLOCK_OFFSET;
+    const int handlersRubyBlockId = bodyRubyBlockId + cfg::CFG::HANDLERS_REGION_OFFSET;
+    const int ensureRubyBlockId = bodyRubyBlockId + cfg::CFG::ENSURE_REGION_OFFSET;
+    const int elseRubyBlockId = bodyRubyBlockId + cfg::CFG::ELSE_REGION_OFFSET;
 
     auto *currentFunc = irctx.rubyBlocks2Functions[rubyRegionId];
     // TODO: it would be nice if we could detect some of these functions

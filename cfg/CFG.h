@@ -144,10 +144,10 @@ public:
     static constexpr int MIN_LOOP_GLOBAL = -2;
     static constexpr int MIN_LOOP_LET = -3;
 
-    // special ruby block id offsets for exception handling
-    static constexpr int HANDLERS_BLOCK_OFFSET = 1;
-    static constexpr int ENSURE_BLOCK_OFFSET = 2;
-    static constexpr int ELSE_BLOCK_OFFSET = 3;
+    // special ruby region id offsets for exception handling
+    static constexpr int HANDLERS_REGION_OFFSET = 1;
+    static constexpr int ENSURE_REGION_OFFSET = 2;
+    static constexpr int ELSE_REGION_OFFSET = 3;
 
     void sanityCheck(core::Context ctx);
 

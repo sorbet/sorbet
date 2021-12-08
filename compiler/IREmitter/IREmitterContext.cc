@@ -607,9 +607,9 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
 
             // the relative block ids of blocks that are involved in the translation of an exception handling block.
             auto bodyBlockId = bodyBlock->rubyRegionId;
-            auto handlersBlockId = bodyBlockId + cfg::CFG::HANDLERS_BLOCK_OFFSET;
-            auto ensureBlockId = bodyBlockId + cfg::CFG::ENSURE_BLOCK_OFFSET;
-            auto elseBlockId = bodyBlockId + cfg::CFG::ELSE_BLOCK_OFFSET;
+            auto handlersBlockId = bodyBlockId + cfg::CFG::HANDLERS_REGION_OFFSET;
+            auto ensureBlockId = bodyBlockId + cfg::CFG::ENSURE_REGION_OFFSET;
+            auto elseBlockId = bodyBlockId + cfg::CFG::ELSE_REGION_OFFSET;
 
             // `b` is the exception handling header block if the two branches from it have the sequential ids we would
             // expect for the handler and body blocks. The reason we bail out here if this isn't the case is because
@@ -1083,9 +1083,9 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
 
             // the relative block ids of blocks that are involved in the translation of an exception handling block.
             auto bodyBlockId = bodyBlock->rubyRegionId;
-            auto handlersBlockId = bodyBlockId + cfg::CFG::HANDLERS_BLOCK_OFFSET;
-            auto ensureBlockId = bodyBlockId + cfg::CFG::ENSURE_BLOCK_OFFSET;
-            auto elseBlockId = bodyBlockId + cfg::CFG::ELSE_BLOCK_OFFSET;
+            auto handlersBlockId = bodyBlockId + cfg::CFG::HANDLERS_REGION_OFFSET;
+            auto ensureBlockId = bodyBlockId + cfg::CFG::ENSURE_REGION_OFFSET;
+            auto elseBlockId = bodyBlockId + cfg::CFG::ELSE_REGION_OFFSET;
 
             userEntryBlockByFunction[bodyBlockId] = llvmBlocks[bodyBlock->id];
             userEntryBlockByFunction[handlersBlockId] = llvmBlocks[handlersBlock->id];

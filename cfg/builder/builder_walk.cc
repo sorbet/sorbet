@@ -636,9 +636,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
             [&](ast::Rescue &a) {
                 auto bodyRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
-                auto handlersRubyBlockId = bodyRubyBlockId + CFG::HANDLERS_BLOCK_OFFSET;
-                auto ensureRubyBlockId = bodyRubyBlockId + CFG::ENSURE_BLOCK_OFFSET;
-                auto elseRubyBlockId = bodyRubyBlockId + CFG::ELSE_BLOCK_OFFSET;
+                auto handlersRubyBlockId = bodyRubyBlockId + CFG::HANDLERS_REGION_OFFSET;
+                auto ensureRubyBlockId = bodyRubyBlockId + CFG::ENSURE_REGION_OFFSET;
+                auto elseRubyBlockId = bodyRubyBlockId + CFG::ELSE_REGION_OFFSET;
                 cctx.inWhat.maxRubyBlockId = elseRubyBlockId;
 
                 auto rescueHeaderBlock = cctx.inWhat.freshBlock(cctx.loops, current->rubyRegionId);
