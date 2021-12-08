@@ -57,7 +57,11 @@ public:
     int bwdId = -1;
     int flags = 0;
     int outerLoops = 0;
-    // Tracks which Ruby block (do ... end) this BasicBlock was generated from.
+    // Tracks which Ruby block (do ... end) or Ruby exception-handling region
+    // (in begin ... rescue ... else ... ensure ... end, each `...` is its own
+    // region) this BasicBlock was generated from.  We call it a "region" to
+    // avoid confusion between BasicBlocks and Ruby blocks.
+    //
     // Incremented every time builder_walk sees a new Ruby block while traversing a Ruby method.
     // rubyRegionId == 0 means code at the top-level of this method (outside any Ruby block).
     int rubyRegionId = 0;
