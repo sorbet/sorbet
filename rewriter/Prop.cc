@@ -120,9 +120,14 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     // ----- Is this a send we care about? -----
     switch (send->fun.rawId()) {
         case core::Names::prop().rawId():
-            // Nothing special
+            if (auto body = ASTUtil::thunkBody(ctx, ret.type)) {
+                ret.type = std::move(body);
+            };
             break;
         case core::Names::const_().rawId():
+            if (auto body = ASTUtil::thunkBody(ctx, ret.type)) {
+                ret.type = std::move(body);
+            };
             ret.isImmutable = true;
             break;
         case core::Names::tokenProp().rawId():
