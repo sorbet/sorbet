@@ -19,7 +19,7 @@ class GlobalState;
  */
 class GlobalSubstitution final {
 public:
-    GlobalSubstitution(const GlobalState &from, GlobalState &to, const GlobalState *optionalCommonParent = nullptr);
+    GlobalSubstitution(const GlobalState &from, GlobalState &to);
 
     static void mergeFileTables(const GlobalState &from, GlobalState &to);
 

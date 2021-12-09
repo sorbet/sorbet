@@ -5,9 +5,7 @@
 using namespace std;
 namespace sorbet::core {
 
-GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
-                                       const GlobalState *optionalCommonParent)
-    : toGlobalStateId(to.globalStateId) {
+GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to) : toGlobalStateId(to.globalStateId) {
     Timer timeit(to.tracer(), "GlobalSubstitution.new", from.creation);
     ENFORCE(toGlobalStateId != 0, "toGlobalStateId is only used for sanity checks, but should always be set.");
     ENFORCE(from.classAndModules.size() == to.classAndModules.size(), "Can't substitute symbols yet");
@@ -21,14 +19,6 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
     GlobalSubstitution::mergeFileTables(from, to);
 
     fastPath = false;
-    if (optionalCommonParent != nullptr) {
-        if (from.namesUsedTotal() == optionalCommonParent->namesUsedTotal() &&
-            from.symbolsUsedTotal() == optionalCommonParent->symbolsUsedTotal()) {
-            ENFORCE(to.namesUsedTotal() >= from.namesUsedTotal());
-            ENFORCE(to.symbolsUsedTotal() >= from.symbolsUsedTotal());
-            fastPath = true;
-        }
-    }
 
     if (!fastPath || debug_mode) {
         {
