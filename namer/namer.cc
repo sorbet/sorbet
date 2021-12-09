@@ -1374,7 +1374,7 @@ class SymbolDefiner {
         }
 
         if (typeMember.isFixed) {
-            sym.data(ctx)->setFixed();
+            sym.data(ctx)->flags.isFixed = true;
         }
 
         return sym;

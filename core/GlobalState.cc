@@ -166,7 +166,7 @@ int maybeAddMixin(core::GlobalState &gs, core::ClassOrModuleRef forSym,
 ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, core::ClassOrModuleRef ofClass) {
     ENFORCE_NO_TIMER(ofClass.exists());
     auto data = ofClass.data(gs);
-    if (!data->isClassOrModuleLinearizationComputed()) {
+    if (!data->flags.isLinearizationComputed) {
         if (data->superClass().exists()) {
             computeClassLinearization(gs, data->superClass());
         }
@@ -184,7 +184,7 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
             }
             ParentLinearizationInformation mixinLinearization = computeClassLinearization(gs, mixin);
 
-            if (!mixin.data(gs)->isClassOrModuleModule()) {
+            if (!mixin.data(gs)->flags.isModule) {
                 // insert all transitive parents of class to bring methods back.
                 auto allMixins = mixinLinearization.fullLinearizationSlow(gs);
                 newMixins.insert(newMixins.begin(), allMixins.begin(), allMixins.end());
@@ -197,7 +197,7 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
             }
         }
         data->mixins() = std::move(newMixins);
-        data->setClassOrModuleLinearizationComputed();
+        data->flags.isLinearizationComputed = true;
         if (debug_mode) {
             for (auto oldMixin : currentMixins) {
                 ENFORCE(ofClass.data(gs)->derivesFrom(gs, oldMixin), "{} no longer derives from {}",
@@ -205,7 +205,7 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
             }
         }
     }
-    ENFORCE_NO_TIMER(data->isClassOrModuleLinearizationComputed());
+    ENFORCE_NO_TIMER(data->flags.isLinearizationComputed);
     return ParentLinearizationInformation{data->mixins(), data->superClass(), ofClass};
 }
 
@@ -216,7 +216,7 @@ void fullLinearizationSlowImpl(core::GlobalState &gs, const ParentLinearizationI
 
     for (auto m : info.mixins) {
         if (!absl::c_linear_search(acc, m)) {
-            if (m.data(gs)->isClassOrModuleModule()) {
+            if (m.data(gs)->flags.isModule) {
                 acc.emplace_back(m);
             } else {
                 fullLinearizationSlowImpl(gs, computeClassLinearization(gs, m), acc);
@@ -1056,27 +1056,26 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
 }
 
 TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
-    uint32_t flags;
+    TypeParameter::Flags flags;
     ENFORCE(owner.exists() || name == Names::Constants::NoTypeMember());
     ENFORCE(name.exists());
     if (variance == Variance::Invariant) {
-        flags = Symbol::Flags::TYPE_INVARIANT;
+        flags.isInvariant = true;
     } else if (variance == Variance::CoVariant) {
-        flags = Symbol::Flags::TYPE_COVARIANT;
+        flags.isCovariant = true;
     } else if (variance == Variance::ContraVariant) {
-        flags = Symbol::Flags::TYPE_CONTRAVARIANT;
+        flags.isContravariant = true;
     } else {
         Exception::notImplemented();
     }
-
-    flags = flags | Symbol::Flags::TYPE_MEMBER;
+    flags.isTypeMember = true;
 
     SymbolData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
     if (store.exists()) {
-        ENFORCE(store.isTypeMember() && (store.asTypeMemberRef().data(*this)->flags & flags) == flags,
+        ENFORCE(store.isTypeMember() && store.asTypeMemberRef().data(*this)->flags.hasFlags(flags),
                 "existing symbol has wrong flags");
         counterInc("symbols.hit");
         return store.asTypeMemberRef();
@@ -1087,7 +1086,7 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     store = result; // DO NOT MOVE this assignment down. emplace_back on typeMembers invalidates `store`
     typeMembers.emplace_back();
 
-    SymbolData data = result.dataAllowingNone(*this);
+    TypeParameterData data = result.dataAllowingNone(*this);
     data->name = name;
     data->flags = flags;
     data->owner = owner;
@@ -1106,25 +1105,24 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     ENFORCE(owner.exists() || name == Names::Constants::NoTypeArgument() ||
             name == Names::Constants::TodoTypeArgument());
     ENFORCE(name.exists());
-    uint32_t flags;
+    TypeParameter::Flags flags;
     if (variance == Variance::Invariant) {
-        flags = Symbol::Flags::TYPE_INVARIANT;
+        flags.isInvariant = true;
     } else if (variance == Variance::CoVariant) {
-        flags = Symbol::Flags::TYPE_COVARIANT;
+        flags.isCovariant = true;
     } else if (variance == Variance::ContraVariant) {
-        flags = Symbol::Flags::TYPE_CONTRAVARIANT;
+        flags.isContravariant = true;
     } else {
         Exception::notImplemented();
     }
-
-    flags = flags | Symbol::Flags::TYPE_ARGUMENT;
+    flags.isTypeArgument = true;
 
     auto ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->typeArguments.size());
 
     for (auto typeArg : ownerScope->typeArguments) {
         if (typeArg.dataAllowingNone(*this)->name == name) {
-            ENFORCE((typeArg.dataAllowingNone(*this)->flags & flags) == flags, "existing symbol has wrong flags");
+            ENFORCE(typeArg.dataAllowingNone(*this)->flags.hasFlags(flags), "existing symbol has wrong flags");
             counterInc("symbols.hit");
             return typeArg;
         }
@@ -1134,7 +1132,7 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     auto result = TypeArgumentRef(*this, typeArguments.size());
     typeArguments.emplace_back();
 
-    SymbolData data = result.dataAllowingNone(*this);
+    TypeParameterData data = result.dataAllowingNone(*this);
     data->name = name;
     data->flags = flags;
     data->owner = owner;
@@ -1901,11 +1899,11 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     }
     result->typeArguments.reserve(this->typeArguments.capacity());
     for (auto &sym : this->typeArguments) {
-        result->typeArguments.emplace_back(sym.deepCopy(*result, keepId));
+        result->typeArguments.emplace_back(sym.deepCopy(*result));
     }
     result->typeMembers.reserve(this->typeMembers.capacity());
     for (auto &sym : this->typeMembers) {
-        result->typeMembers.emplace_back(sym.deepCopy(*result, keepId));
+        result->typeMembers.emplace_back(sym.deepCopy(*result));
     }
     result->pathPrefix = this->pathPrefix;
     for (auto &semanticExtension : this->semanticExtensions) {
@@ -2129,16 +2127,33 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     UnorderedMap<NameHash, uint32_t> methodHashes;
     int counter = 0;
 
-    for (const auto *symbolType : {&this->classAndModules, &this->typeArguments, &this->typeMembers}) {
-        counter = 0;
-        for (const auto &sym : *symbolType) {
-            if (!sym.ignoreInHashing(*this)) {
-                hierarchyHash = mix(hierarchyHash, sym.hash(*this));
-                counter++;
-                if (DEBUG_HASHING_TAIL && counter > symbolType->size() - 15) {
-                    errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
-                }
+    for (const auto &sym : this->classAndModules) {
+        if (!sym.ignoreInHashing(*this)) {
+            hierarchyHash = mix(hierarchyHash, sym.hash(*this));
+            counter++;
+            if (DEBUG_HASHING_TAIL && counter > this->classAndModules.size() - 15) {
+                errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
             }
+        }
+    }
+
+    counter = 0;
+    for (const auto &typeArg : this->typeArguments) {
+        counter++;
+        // No type arguments are ignored in hashing.
+        hierarchyHash = mix(hierarchyHash, typeArg.hash(*this));
+        if (DEBUG_HASHING_TAIL && counter > this->typeArguments.size() - 15) {
+            errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, typeArg.name.show(*this));
+        }
+    }
+
+    counter = 0;
+    for (const auto &typeMember : this->typeMembers) {
+        counter++;
+        // No type members are ignored in hashing.
+        hierarchyHash = mix(hierarchyHash, typeMember.hash(*this));
+        if (DEBUG_HASHING_TAIL && counter > this->typeMembers.size() - 15) {
+            errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, typeMember.name.show(*this));
         }
     }
 

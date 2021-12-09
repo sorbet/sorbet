@@ -33,6 +33,7 @@ public:
     static void pickle(Pickler &p, const Symbol &what);
     static void pickle(Pickler &p, const Method &what);
     static void pickle(Pickler &p, const Field &what);
+    static void pickle(Pickler &p, const TypeParameter &what);
     static void pickle(Pickler &p, const ast::ExpressionPtr &what);
     static void pickle(Pickler &p, core::LocOffsets loc);
     static void pickle(Pickler &p, core::Loc loc);
@@ -47,6 +48,7 @@ public:
     static Symbol unpickleSymbol(UnPickler &p, const GlobalState *gs);
     static Method unpickleMethod(UnPickler &p, const GlobalState *gs);
     static Field unpickleField(UnPickler &p, const GlobalState *gs);
+    static TypeParameter unpickleTypeParameter(UnPickler &p, const GlobalState *gs);
     static void unpickleGS(UnPickler &p, GlobalState &result);
     static uint32_t unpickleGSUUID(UnPickler &p);
     static LocOffsets unpickleLocOffsets(UnPickler &p);
@@ -690,6 +692,36 @@ Field SerializerImpl::unpickleField(UnPickler &p, const GlobalState *gs) {
     return result;
 }
 
+void SerializerImpl::pickle(Pickler &p, const TypeParameter &what) {
+    p.putU4(what.owner.rawId());
+    p.putU4(what.name.rawId());
+    p.putU1(what.flags.serialize());
+    pickle(p, what.resultType);
+    p.putU4(what.locs().size());
+    for (auto &loc : what.locs()) {
+        pickle(p, loc);
+    }
+}
+
+TypeParameter SerializerImpl::unpickleTypeParameter(UnPickler &p, const GlobalState *gs) {
+    TypeParameter result;
+    result.owner = SymbolRef::fromRaw(p.getU4());
+    result.name = NameRef::fromRaw(*gs, p.getU4());
+
+    auto flagsU1 = p.getU1();
+    TypeParameter::Flags flags;
+    static_assert(sizeof(flags) == sizeof(flagsU1));
+    // Can replace this with std::bit_cast in C++20
+    memcpy(&flags, &flagsU1, sizeof(flags));
+    result.flags = flags;
+    result.resultType = unpickleType(p, gs);
+    auto locCount = p.getU4();
+    for (int i = 0; i < locCount; i++) {
+        result.locs_.emplace_back(unpickleLoc(p));
+    }
+    return result;
+}
+
 Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
     Timer timeit(gs.tracer(), "pickleGlobalState");
     Pickler result;
@@ -745,12 +777,12 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
     }
 
     result.putU4(gs.typeArguments.size());
-    for (const Symbol &s : gs.typeArguments) {
+    for (const TypeParameter &s : gs.typeArguments) {
         pickle(result, s);
     }
 
     result.putU4(gs.typeMembers.size());
-    for (const Symbol &s : gs.typeMembers) {
+    for (const TypeParameter &s : gs.typeMembers) {
         pickle(result, s);
     }
 
@@ -792,9 +824,9 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     methods.clear();
     vector<Field> fields(std::move(result.fields));
     fields.clear();
-    vector<Symbol> typeArguments(std::move(result.typeArguments));
+    vector<TypeParameter> typeArguments(std::move(result.typeArguments));
     typeArguments.clear();
-    vector<Symbol> typeMembers(std::move(result.typeMembers));
+    vector<TypeParameter> typeMembers(std::move(result.typeMembers));
     typeMembers.clear();
     vector<pair<unsigned int, unsigned int>> namesByHash(std::move(result.namesByHash));
     namesByHash.clear();
@@ -863,14 +895,14 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         ENFORCE(typeArgumentSize > 0);
         typeArguments.reserve(nextPowerOfTwo(typeArgumentSize));
         for (int i = 0; i < typeArgumentSize; i++) {
-            typeArguments.emplace_back(unpickleSymbol(p, &result));
+            typeArguments.emplace_back(unpickleTypeParameter(p, &result));
         }
 
         int typeMemberSize = p.getU4();
         ENFORCE(typeMemberSize > 0);
         typeMembers.reserve(nextPowerOfTwo(typeMemberSize));
         for (int i = 0; i < typeMemberSize; i++) {
-            typeMembers.emplace_back(unpickleSymbol(p, &result));
+            typeMembers.emplace_back(unpickleTypeParameter(p, &result));
         }
     }
 

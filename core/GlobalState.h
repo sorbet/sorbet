@@ -43,6 +43,7 @@ class GlobalState final {
     friend Symbol;
     friend Method;
     friend Field;
+    friend TypeParameter;
     friend SymbolRef;
     friend ClassOrModuleRef;
     friend MethodRef;
@@ -315,8 +316,8 @@ private:
     std::vector<Symbol> classAndModules;
     std::vector<Method> methods;
     std::vector<Field> fields;
-    std::vector<Symbol> typeMembers;
-    std::vector<Symbol> typeArguments;
+    std::vector<TypeParameter> typeMembers;
+    std::vector<TypeParameter> typeArguments;
     std::vector<std::pair<unsigned int, uint32_t>> namesByHash;
     std::vector<std::shared_ptr<File>> files;
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;

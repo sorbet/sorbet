@@ -88,6 +88,28 @@ public:
 };
 CheckSize(ConstFieldData, 8, 8);
 
+class TypeParameter;
+class TypeParameterData : private DebugOnlyCheck<SymbolDataDebugCheck> {
+    TypeParameter &typeParam;
+
+public:
+    TypeParameterData(TypeParameter &ref, GlobalState &gs);
+
+    TypeParameter *operator->();
+    const TypeParameter *operator->() const;
+};
+CheckSize(TypeParameterData, 8, 8);
+
+class ConstTypeParameterData : private DebugOnlyCheck<SymbolDataDebugCheck> {
+    const TypeParameter &typeParam;
+
+public:
+    ConstTypeParameterData(const TypeParameter &ref, const GlobalState &gs);
+
+    const TypeParameter *operator->() const;
+};
+CheckSize(ConstTypeParameterData, 8, 8);
+
 class ClassOrModuleRef final {
     uint32_t _id;
 
@@ -263,9 +285,9 @@ public:
         return ref;
     }
 
-    SymbolData data(GlobalState &gs) const;
-    ConstSymbolData data(const GlobalState &gs) const;
-    SymbolData dataAllowingNone(GlobalState &gs) const;
+    TypeParameterData data(GlobalState &gs) const;
+    ConstTypeParameterData data(const GlobalState &gs) const;
+    TypeParameterData dataAllowingNone(GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
     std::string toStringFullName(const GlobalState &gs) const;
@@ -308,9 +330,9 @@ public:
         return ref;
     }
 
-    SymbolData data(GlobalState &gs) const;
-    ConstSymbolData data(const GlobalState &gs) const;
-    SymbolData dataAllowingNone(GlobalState &gs) const;
+    TypeParameterData data(GlobalState &gs) const;
+    ConstTypeParameterData data(const GlobalState &gs) const;
+    TypeParameterData dataAllowingNone(GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
     std::string toStringFullName(const GlobalState &gs) const;

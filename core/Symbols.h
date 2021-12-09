@@ -218,6 +218,103 @@ public:
 };
 CheckSize(Field, 64, 8);
 
+class TypeParameter final {
+    friend class serialize::SerializerImpl;
+
+public:
+    TypeParameter(const TypeParameter &) = delete;
+    TypeParameter() = default;
+    TypeParameter(TypeParameter &&) noexcept = default;
+
+    class Flags {
+    public:
+        bool isTypeArgument : 1;
+        bool isTypeMember : 1;
+
+        // Type flags
+        bool isCovariant : 1;
+        bool isInvariant : 1;
+        bool isContravariant : 1;
+        bool isFixed : 1;
+
+        Flags() noexcept
+            : isTypeArgument(false), isTypeMember(false), isCovariant(false), isInvariant(false),
+              isContravariant(false), isFixed(false) {}
+
+        uint8_t serialize() const {
+            // Can replace this with std::bit_cast in C++20
+            return *reinterpret_cast<const uint8_t *>(this);
+        }
+
+        bool hasFlags(const Flags other) {
+            if (other.isTypeArgument && !this->isTypeArgument) {
+                return false;
+            }
+
+            if (other.isTypeMember && !this->isTypeMember) {
+                return false;
+            }
+
+            if (other.isCovariant && !this->isCovariant) {
+                return false;
+            }
+
+            if (other.isInvariant && !this->isInvariant) {
+                return false;
+            }
+
+            if (other.isContravariant && !this->isContravariant) {
+                return false;
+            }
+
+            if (other.isFixed && !this->isFixed) {
+                return false;
+            }
+
+            return true;
+        }
+    };
+    CheckSize(Flags, 1, 1);
+
+    Loc loc() const;
+    const InlinedVector<Loc, 2> &locs() const;
+    void addLoc(const core::GlobalState &gs, core::Loc loc);
+
+    uint32_t hash(const GlobalState &gs) const;
+
+    bool isPrintable(const GlobalState &gs) const;
+
+    SymbolRef ref(const GlobalState &gs) const;
+
+    Variance variance() const {
+        if (flags.isInvariant) {
+            return Variance::Invariant;
+        }
+        if (flags.isCovariant) {
+            return Variance::CoVariant;
+        }
+        if (flags.isContravariant) {
+            return Variance::ContraVariant;
+        }
+        Exception::raise("Should not happen");
+    }
+
+    SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const;
+
+    void sanityCheck(const GlobalState &gs) const;
+
+    TypeParameter deepCopy(const GlobalState &gs) const;
+
+    Flags flags;
+    // Method for TypeArgument, ClassOrModule for TypeMember.
+    SymbolRef owner;
+    NameRef name;
+    TypePtr resultType;
+
+private:
+    InlinedVector<Loc, 2> locs_;
+};
+
 class Symbol final {
 public:
     Symbol(const Symbol &) = delete;
@@ -242,8 +339,6 @@ public:
 
         // --- What type of symbol is this? ---
         static constexpr uint32_t CLASS_OR_MODULE = 0x8000'0000;
-        static constexpr uint32_t TYPE_ARGUMENT = 0x0800'0000;
-        static constexpr uint32_t TYPE_MEMBER = 0x0400'0000;
 
         // --- Applies to all types of Symbols ---
 
@@ -262,12 +357,6 @@ public:
         static constexpr uint32_t CLASS_OR_MODULE_SEALED = 0x0000'0400;
         static constexpr uint32_t CLASS_OR_MODULE_PRIVATE = 0x0000'0800;
         static constexpr uint32_t CLASS_OR_MODULE_UNDECLARED = 0x0000'1000;
-
-        // Type flags
-        static constexpr uint32_t TYPE_COVARIANT = 0x0000'0010;
-        static constexpr uint32_t TYPE_INVARIANT = 0x0000'0020;
-        static constexpr uint32_t TYPE_CONTRAVARIANT = 0x0000'0040;
-        static constexpr uint32_t TYPE_FIXED = 0x0000'0080;
     };
 
     Loc loc() const;
@@ -333,47 +422,6 @@ public:
 
     bool isSingletonClass(const GlobalState &gs) const;
 
-    inline bool isTypeMember() const {
-        return (flags & Symbol::Flags::TYPE_MEMBER) != 0;
-    }
-
-    inline bool isTypeArgument() const {
-        return (flags & Symbol::Flags::TYPE_ARGUMENT) != 0;
-    }
-
-    inline bool isCovariant() const {
-        ENFORCE_NO_TIMER(isTypeArgument() || isTypeMember());
-        return (flags & Symbol::Flags::TYPE_COVARIANT) != 0;
-    }
-
-    inline bool isInvariant() const {
-        ENFORCE_NO_TIMER(isTypeArgument() || isTypeMember());
-        return (flags & Symbol::Flags::TYPE_INVARIANT) != 0;
-    }
-
-    inline bool isContravariant() const {
-        ENFORCE_NO_TIMER(isTypeArgument() || isTypeMember());
-        return (flags & Symbol::Flags::TYPE_CONTRAVARIANT) != 0;
-    }
-
-    inline bool isFixed() const {
-        ENFORCE_NO_TIMER(isTypeArgument() || isTypeMember());
-        return (flags & Symbol::Flags::TYPE_FIXED) != 0;
-    }
-
-    Variance variance() const {
-        if (isInvariant()) {
-            return Variance::Invariant;
-        }
-        if (isCovariant()) {
-            return Variance::CoVariant;
-        }
-        if (isContravariant()) {
-            return Variance::ContraVariant;
-        }
-        Exception::raise("Should not happen");
-    }
-
     inline bool isClassOrModuleModule() const {
         ENFORCE_NO_TIMER(isClassOrModule());
         if (flags & Symbol::Flags::CLASS_OR_MODULE_MODULE) {
@@ -436,18 +484,7 @@ public:
     }
 
     inline void setClassOrModule() {
-        ENFORCE(!isTypeArgument() && !isTypeMember());
         flags |= Symbol::Flags::CLASS_OR_MODULE;
-    }
-
-    inline void setTypeArgument() {
-        ENFORCE(!isClassOrModule() && !isTypeMember());
-        flags |= Symbol::Flags::TYPE_ARGUMENT;
-    }
-
-    inline void setTypeMember() {
-        ENFORCE(!isClassOrModule() && !isTypeArgument());
-        flags |= Symbol::Flags::TYPE_MEMBER;
     }
 
     inline void setIsModule(bool isModule) {
@@ -464,29 +501,6 @@ public:
     inline void setClassModuleUndeclared() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_UNDECLARED;
-    }
-
-    inline void setCovariant() {
-        ENFORCE(isTypeArgument() || isTypeMember());
-        ENFORCE(!isContravariant() && !isInvariant());
-        flags |= Symbol::Flags::TYPE_COVARIANT;
-    }
-
-    inline void setContravariant() {
-        ENFORCE(isTypeArgument() || isTypeMember());
-        ENFORCE(!isCovariant() && !isInvariant());
-        flags |= Symbol::Flags::TYPE_CONTRAVARIANT;
-    }
-
-    inline void setInvariant() {
-        ENFORCE(isTypeArgument() || isTypeMember());
-        ENFORCE(!isCovariant() && !isContravariant());
-        flags |= Symbol::Flags::TYPE_INVARIANT;
-    }
-
-    inline void setFixed() {
-        ENFORCE(isTypeArgument() || isTypeMember());
-        flags |= Symbol::Flags::TYPE_FIXED;
     }
 
     inline void setClassOrModuleAbstract() {

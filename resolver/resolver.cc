@@ -3631,7 +3631,7 @@ public:
 
                 mdef.rhs = ast::MK::EmptyTree();
             }
-            if (!mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleAbstract()) {
+            if (!mdef.symbol.enclosingClass(ctx).data(ctx)->flags.isAbstract) {
                 if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
                     e.setHeader("Before declaring an abstract method, you must mark your class/module "
                                 "as abstract using `abstract!` or `interface!`");
@@ -3671,7 +3671,7 @@ public:
             auto self = ast::MK::Self(mdef.loc);
             mdef.rhs = ast::MK::Send(mdef.loc, std::move(self), core::Names::super(), mdef.loc.copyWithZeroLength(),
                                      numPosArgs, std::move(args));
-        } else if (mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
+        } else if (mdef.symbol.enclosingClass(ctx).data(ctx)->flags.isInterface) {
             if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                 e.setHeader("All methods in an interface must be declared abstract");
             }

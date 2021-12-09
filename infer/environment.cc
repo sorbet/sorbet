@@ -1119,7 +1119,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     if (resultType != nullptr) {
                         if (symbol.isTypeMember()) {
                             auto tm = symbol.asTypeMemberRef();
-                            if (tm.data(ctx)->isFixed()) {
+                            if (tm.data(ctx)->flags.isFixed) {
                                 // pick the upper bound here, as
                                 // isFixed() => lowerBound == upperBound.
                                 auto lambdaParam = core::cast_type<core::LambdaParam>(resultType);

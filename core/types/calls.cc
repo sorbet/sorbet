@@ -1929,7 +1929,7 @@ public:
             auto *memType = cast_type<LambdaParam>(memData->resultType);
             ENFORCE(memType != nullptr);
 
-            if (memData->isFixed()) {
+            if (memData->flags.isFixed) {
                 // Fixed args are implicitly applied, and won't consume type
                 // arguments from the list that's supplied.
                 targs.emplace_back(memType->upperBound);
