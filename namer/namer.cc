@@ -811,7 +811,6 @@ class SymbolDefiner {
         ctx.state.mangleRenameSymbol(scope, scopeName);
         auto scopeKlass =
             ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope.owner(ctx).asClassOrModuleRef(), scopeName);
-        scopeKlass.data(ctx)->singletonClass(ctx); // force singleton class into existance
         return scopeKlass;
     }
 
@@ -825,7 +824,6 @@ class SymbolDefiner {
         core::SymbolRef existing = scope.data(ctx)->findMember(ctx, name);
         if (!existing.exists()) {
             existing = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope, name);
-            existing.asClassOrModuleRef().data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
 
         return existing;
@@ -1134,11 +1132,6 @@ class SymbolDefiner {
             ctx.state.mangleRenameSymbol(symbol, symbol.name(ctx));
             klassSymbol = ctx.state.enterClassSymbol(declLoc, symbol.owner(ctx).asClassOrModuleRef(), origName);
             klassSymbol.data(ctx)->setIsModule(isModule);
-
-            auto oldSymCount = ctx.state.classAndModulesUsed();
-            auto newSingleton = klassSymbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-            ENFORCE(newSingleton.id() >= oldSymCount,
-                    "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
             return klassSymbol;
         }
 

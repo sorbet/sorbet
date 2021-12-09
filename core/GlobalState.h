@@ -94,7 +94,8 @@ public:
 
     ~GlobalState() = default;
 
-    ClassOrModuleRef enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    ClassOrModuleRef enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name, bool defineSingleton = true);
+
     TypeMemberRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
     TypeArgumentRef enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance);
     MethodRef enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
@@ -329,6 +330,12 @@ private:
                                    SymbolRef defaultReturnValue, bool ignoreKind = false) const;
 
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
+
+    ClassOrModuleRef defineSingleton(Loc loc, ClassOrModuleRef owner, ClassOrModuleRef parent, NameRef name);
+
+    // Extracted so that `enterClassSymbol` and `defineSingleton` can re-use logic. Not safe to use on its own.
+    void defineSingletonInternal(core::Loc loc, NameRef singletonName, ClassOrModuleRef singleton,
+                                 ClassOrModuleRef parent, SymbolData parentData, ClassOrModuleRef owner);
 };
 // CheckSize(GlobalState, 152, 8);
 // Historically commented out because size of unordered_map was different between different versions of stdlib

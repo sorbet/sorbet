@@ -1599,30 +1599,9 @@ ClassOrModuleRef Symbol::singletonClass(GlobalState &gs) {
     if (singleton.exists()) {
         return singleton;
     }
-    ClassOrModuleRef selfRef = this->ref(gs).asClassOrModuleRef();
 
-    // avoid using `this` after the call to gs.enterTypeMember
-    auto selfLoc = this->loc();
-
-    NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
-    singleton = gs.enterClassSymbol(this->loc(), this->owner.asClassOrModuleRef(), singletonName);
-    SymbolData singletonInfo = singleton.data(gs);
-
-    prodCounterInc("types.input.singleton_classes.total");
-    singletonInfo->members()[Names::attached()] = selfRef;
-    singletonInfo->setSuperClass(Symbols::todo());
-    singletonInfo->setIsModule(false);
-
-    auto tp = gs.enterTypeMember(selfLoc, singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
-
-    // Initialize the bounds of AttachedClass as todo, as they will be updated
-    // to the externalType of the attached class for the upper bound, and bottom
-    // for the lower bound in the ResolveSignaturesWalk pass of the resolver.
-    auto todo = make_type<ClassType>(Symbols::todo());
-    tp.data(gs)->resultType = make_type<LambdaParam>(tp, todo, todo);
-
-    selfRef.data(gs)->members()[Names::singleton()] = singleton;
-    return singleton;
+    return gs.defineSingleton(this->loc(), this->owner.asClassOrModuleRef(), this->ref(gs).asClassOrModuleRef(),
+                              this->name);
 }
 
 ClassOrModuleRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
@@ -2030,7 +2009,7 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
         switch (current.kind()) {
             case SymbolRef::Kind::ClassOrModule:
                 current2 = const_cast<GlobalState &>(gs).enterClassSymbol(this->loc(), this->owner.asClassOrModuleRef(),
-                                                                          this->name);
+                                                                          this->name, false);
                 break;
             case SymbolRef::Kind::Method:
                 current2 = const_cast<GlobalState &>(gs).enterMethodSymbol(

@@ -269,11 +269,11 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::Complex());
     klass = synthesizeClass(core::Names::Constants::Rational());
     ENFORCE(klass == Symbols::Rational());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Array());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Array(), false);
     ENFORCE(klass == Symbols::T_Array());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Hash());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Hash(), false);
     ENFORCE(klass == Symbols::T_Hash());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Proc());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Proc(), false);
     ENFORCE(klass == Symbols::T_Proc());
     klass = synthesizeClass(core::Names::Constants::Proc());
     ENFORCE(klass == Symbols::Proc());
@@ -287,46 +287,50 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::File());
     klass = synthesizeClass(core::Names::Constants::Sorbet());
     ENFORCE(klass == Symbols::Sorbet());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet(), core::Names::Constants::Private());
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet(), core::Names::Constants::Private(), false);
     ENFORCE(klass == Symbols::Sorbet_Private());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static());
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static(), false);
     ENFORCE(klass == Symbols::Sorbet_Private_Static());
     klass = Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this);
     ENFORCE(klass == Symbols::Sorbet_Private_StaticSingleton());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
+    klass =
+        enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule(), false);
     ENFORCE(klass == Symbols::StubModule());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin(), false);
     ENFORCE(klass == Symbols::StubMixin());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::PlaceholderMixin());
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::PlaceholderMixin(),
+                             false);
     ENFORCE(klass == Symbols::PlaceholderMixin());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubSuperClass());
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubSuperClass(),
+                             false);
     ENFORCE(klass == Symbols::StubSuperClass());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerable());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerable(), false);
     ENFORCE(klass == Symbols::T_Enumerable());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Range());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Range(), false);
     ENFORCE(klass == Symbols::T_Range());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Set());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Set(), false);
     ENFORCE(klass == Symbols::T_Set());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Void());
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Void(), false);
     klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::void_());
     klass = synthesizeClass(core::Names::Constants::TypeAlias(), 0);
     ENFORCE(klass == Symbols::typeAliasTemp());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::Configuration());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::Configuration(), false);
     ENFORCE(klass == Symbols::T_Configuration());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Generic());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Generic(), false);
     ENFORCE(klass == Symbols::T_Generic());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Tuple());
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Tuple(), false);
     ENFORCE(klass == Symbols::Tuple());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Shape());
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Shape(), false);
     ENFORCE(klass == Symbols::Shape());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Subclasses());
+    klass =
+        enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Subclasses(), false);
     ENFORCE(klass == Symbols::Subclasses());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
-                             core::Names::Constants::ImplicitModuleSuperclass());
+                             core::Names::Constants::ImplicitModuleSuperclass(), false);
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
-    klass =
-        enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ReturnTypeInference());
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
+                             core::Names::Constants::ReturnTypeInference(), false);
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ReturnTypeInference());
     method =
         enterMethod(*this, Symbols::Sorbet_Private_Static(), core::Names::guessedTypeTypeParameterHolder()).build();
@@ -346,7 +350,7 @@ void GlobalState::initEmpty() {
     typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
     ENFORCE(typeArgument ==
             Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Sig());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Sig(), false);
     ENFORCE(klass == Symbols::T_Sig());
 
     // A magic non user-creatable class with methods to keep state between passes
@@ -360,7 +364,7 @@ void GlobalState::initEmpty() {
     ENFORCE(method == Symbols::Sorbet_Private_Static_badAliasMethodStub());
 
     // T::Helpers
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Helpers());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Helpers(), false);
     ENFORCE(klass == Symbols::T_Helpers());
 
     // SigBuilder magic class
@@ -372,28 +376,28 @@ void GlobalState::initEmpty() {
     // Ruby 2.5 Hack
     klass = synthesizeClass(core::Names::Constants::Net(), 0, true);
     ENFORCE(klass == Symbols::Net());
-    klass = enterClassSymbol(Loc::none(), Symbols::Net(), core::Names::Constants::IMAP());
+    klass = enterClassSymbol(Loc::none(), Symbols::Net(), core::Names::Constants::IMAP(), false);
     Symbols::Net_IMAP().data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::Net_IMAP());
-    klass = enterClassSymbol(Loc::none(), Symbols::Net(), core::Names::Constants::Protocol());
+    klass = enterClassSymbol(Loc::none(), Symbols::Net(), core::Names::Constants::Protocol(), false);
     ENFORCE(klass == Symbols::Net_Protocol());
     Symbols::Net_Protocol().data(*this)->setIsModule(false);
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime());
+    klass = enterClassSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime(), false);
     ENFORCE(klass == Symbols::T_Sig_WithoutRuntime());
 
     klass = synthesizeClass(core::Names::Constants::Enumerator());
     ENFORCE(klass == Symbols::Enumerator());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerator());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerator(), false);
     ENFORCE(klass == Symbols::T_Enumerator());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Struct());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Struct(), false);
     ENFORCE(klass == Symbols::T_Struct());
 
     klass = synthesizeClass(core::Names::Constants::Singleton(), 0, true);
     ENFORCE(klass == Symbols::Singleton());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enum());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enum(), false);
     klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::T_Enum());
 
@@ -402,17 +406,17 @@ void GlobalState::initEmpty() {
     ENFORCE(method == Symbols::sig());
 
     // Enumerable::Lazy
-    klass = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Lazy());
+    klass = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Lazy(), false);
     ENFORCE(klass == Symbols::Enumerator_Lazy());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::Private());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::Private(), false);
     ENFORCE(klass == Symbols::T_Private());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private(), Names::Constants::Types());
+    klass = enterClassSymbol(Loc::none(), Symbols::T_Private(), Names::Constants::Types(), false);
     ENFORCE(klass == Symbols::T_Private_Types());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private_Types(), Names::Constants::Void());
+    klass = enterClassSymbol(Loc::none(), Symbols::T_Private_Types(), Names::Constants::Void(), false);
     klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::T_Private_Types_Void());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private_Types_Void(), Names::Constants::VOID());
+    klass = enterClassSymbol(Loc::none(), Symbols::T_Private_Types_Void(), Names::Constants::VOID(), false);
     ENFORCE(klass == Symbols::T_Private_Types_Void_VOID());
     klass = klass.data(*this)->singletonClass(*this);
     ENFORCE(klass == Symbols::T_Private_Types_Void_VOIDSingleton());
@@ -426,7 +430,7 @@ void GlobalState::initEmpty() {
         enterMethod(*this, Symbols::T_Sig_WithoutRuntimeSingleton(), Names::sig()).defaultArg(Names::arg0()).build();
     ENFORCE(method == Symbols::sigWithoutRuntime());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::NonForcingConstants());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::NonForcingConstants(), false);
     ENFORCE(klass == Symbols::T_NonForcingConstants());
 
     method = enterMethod(*this, Symbols::Sorbet_Private_StaticSingleton(), Names::sig())
@@ -435,13 +439,13 @@ void GlobalState::initEmpty() {
                  .build();
     ENFORCE(method == Symbols::SorbetPrivateStaticSingleton_sig());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageRegistry());
+    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageRegistry(), false);
     ENFORCE(klass == Symbols::PackageRegistry());
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageTests());
+    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageTests(), false);
     ENFORCE(klass == Symbols::PackageTests());
 
     // PackageSpec is a class that can be subclassed.
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpec());
+    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpec(), false);
     klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::PackageSpec());
 
@@ -480,12 +484,13 @@ void GlobalState::initEmpty() {
     enterMethodArgumentSymbol(Loc::none(), method, Names::args());
     ENFORCE(method == Symbols::todoMethod());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig());
+    klass =
+        enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig(), false);
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ResolvedSig());
     klass = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ResolvedSigSingleton());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private(), core::Names::Constants::Compiler());
+    klass = enterClassSymbol(Loc::none(), Symbols::T_Private(), core::Names::Constants::Compiler(), false);
     ENFORCE(klass == Symbols::T_Private_Compiler());
     klass = Symbols::T_Private_Compiler().data(*this)->singletonClass(*this);
     ENFORCE(klass == Symbols::T_Private_CompilerSingleton());
@@ -661,7 +666,7 @@ void GlobalState::initEmpty() {
     Symbols::StubSuperClass().data(*this)->setSuperClass(Symbols::Object());
 
     // Synthesize T::Utils
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Utils());
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Utils(), false);
     klass.data(*this)->setIsModule(true);
 
     int reservedCount = 0;
@@ -885,7 +890,41 @@ SymbolRef GlobalState::findRenamedSymbol(ClassOrModuleRef owner, SymbolRef sym) 
     }
 }
 
-ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
+void GlobalState::defineSingletonInternal(core::Loc loc, NameRef singletonName, ClassOrModuleRef singleton,
+                                          ClassOrModuleRef parent, SymbolData parentData, ClassOrModuleRef owner) {
+    ENFORCE(owner.data(*this)->members()[singletonName] == singleton);
+
+    parentData->members()[Names::singleton()] = singleton;
+
+    SymbolData singletonData = singleton.data(*this);
+    singletonData->name = singletonName;
+    singletonData->flags = Symbol::Flags::CLASS_OR_MODULE;
+    singletonData->owner = owner;
+    singletonData->addLoc(*this, loc);
+    singletonData->members()[Names::attached()] = parent;
+    singletonData->setSuperClass(Symbols::todo());
+    singletonData->setIsModule(false);
+
+    auto tp = enterTypeMember(loc, singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
+    // Initialize the bounds of AttachedClass as todo, as they will be updated
+    // to the externalType of the attached class for the upper bound, and bottom
+    // for the lower bound in the ResolveSignaturesWalk pass of the resolver.
+    auto todo = make_type<ClassType>(Symbols::todo());
+    tp.data(*this)->resultType = make_type<LambdaParam>(tp, todo, todo);
+    DEBUG_ONLY(counterInc("types.input.singleton_classes.total"));
+    DEBUG_ONLY(categoryCounterInc("symbols", "class"));
+}
+
+ClassOrModuleRef GlobalState::defineSingleton(Loc loc, ClassOrModuleRef owner, ClassOrModuleRef parent, NameRef name) {
+    NameRef singletonName = freshNameUnique(UniqueNameKind::Singleton, name, 1);
+    auto singletonRef = ClassOrModuleRef(*this, this->classAndModules.size());
+    this->classAndModules.emplace_back();
+    owner.data(*this)->members()[singletonName] = singletonRef;
+    defineSingletonInternal(loc, singletonName, singletonRef, parent, parent.data(*this), owner);
+    return singletonRef;
+}
+
+ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name, bool enterSingleton) {
     // ENFORCE_NO_TIMER(!owner.exists()); // Owner may not exist on purely synthetic symbols.
     ENFORCE_NO_TIMER(name.isClassName(*this));
     SymbolData ownerScope = owner.dataAllowingNone(*this);
@@ -899,16 +938,42 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
-    auto ret = ClassOrModuleRef(*this, classAndModules.size());
+    const uint32_t retId = classAndModules.size();
+    auto ret = ClassOrModuleRef(*this, retId);
+    auto retSingleton = ClassOrModuleRef(*this, retId + 1);
     store = ret; // DO NOT MOVE this assignment down. emplace_back on classAndModules invalidates `store`
+
+    NameRef singletonName;
+    if (enterSingleton) {
+        // Allocate name before emplacing back symbols. If name table expands, GlobalState will kick off a sanity check
+        // in debug builds which will fail since we have allocated a symbol w/o configuring it.
+        singletonName = freshNameUnique(UniqueNameKind::Singleton, name, 1);
+        ownerScope->members()[singletonName] =
+            retSingleton; // DO NOT MOVE this assignment down. emplace_back on classAndModules invalidates `ownerScope`
+    }
+
     classAndModules.emplace_back();
+
+    if (enterSingleton) {
+        // Move this up here before the other `enterSingleton` conditional so that we don't invalidate the main symbol's
+        // `SymbolData`.
+        classAndModules.emplace_back();
+    }
+
+    // Putting this into a new scope since the second `emplace_back` invalidates `data`.
     SymbolData data = ret.data(*this);
     data->name = name;
     data->flags = Symbol::Flags::CLASS_OR_MODULE;
     data->owner = owner;
     data->addLoc(*this, loc);
-    DEBUG_ONLY(categoryCounterInc("symbols", "class"));
     wasModified_ = true;
+
+    if (enterSingleton) {
+        ENFORCE(singletonName.exists());
+        defineSingletonInternal(loc, singletonName, retSingleton, ret, data, owner);
+    }
+
+    DEBUG_ONLY(categoryCounterInc("symbols", "class"));
 
     return ret;
 }
@@ -954,9 +1019,9 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     wasModified_ = true;
 
     auto &members = owner.dataAllowingNone(*this)->typeMembers();
-    if (!absl::c_linear_search(members, result)) {
-        members.emplace_back(result);
-    }
+    // This is a new type member; it shouldn't be in members yet.
+    ENFORCE(!absl::c_linear_search(members, result));
+    members.emplace_back(result);
     return result;
 }
 
