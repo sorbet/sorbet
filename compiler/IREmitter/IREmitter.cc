@@ -21,7 +21,6 @@
 #include "compiler/IREmitter/IREmitterHelpers.h"
 #include "compiler/IREmitter/MethodCallContext.h"
 #include "compiler/IREmitter/Payload.h"
-#include "compiler/Names/Names.h"
 #include <string_view>
 
 using namespace std;
@@ -617,7 +616,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
 }
 
 cfg::LocalRef returnValue(cfg::CFG &cfg, CompilerState &cs) {
-    return cfg.enterLocal({Names::returnValue(cs), 1});
+    return cfg.enterLocal({core::Names::returnValue(), 1});
 }
 
 llvm::BasicBlock *resolveJumpTarget(cfg::CFG &cfg, const IREmitterContext &irctx, const cfg::BasicBlock *from,

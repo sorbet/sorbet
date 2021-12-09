@@ -16,7 +16,6 @@
 #include "compiler/IREmitter/IREmitterContext.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
 #include "compiler/IREmitter/MethodCallContext.h"
-#include "compiler/Names/Names.h"
 
 using namespace std;
 namespace sorbet::compiler {
@@ -153,7 +152,7 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, const UnorderedMap<cfg::Lo
     {
         // reserve the magical return value
         builder.SetInsertPoint(irctx.functionInitializersByFunction[0]);
-        auto name = Names::returnValue(cs);
+        auto name = core::Names::returnValue();
         auto var = cfg.enterLocal(core::LocalVariable{name, 1});
         auto nameStr = name.toString(cs);
         llvmVariables[var] =

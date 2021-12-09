@@ -11,7 +11,6 @@ cc_library(
     deps = [
         "//compiler/Errors",
         "//compiler/IREmitter",
-        "//compiler/Names",
         "//compiler/ObjectFileEmitter",
         "@com_google_absl//absl/cleanup",
         "@com_stripe_ruby_typer//ast",

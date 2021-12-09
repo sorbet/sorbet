@@ -19,7 +19,6 @@
 #include "compiler/IREmitter/MethodCallContext.h"
 #include "compiler/IREmitter/Payload.h"
 #include "compiler/IREmitter/SymbolBasedIntrinsicMethod.h"
-#include "compiler/Names/Names.h"
 #include <optional>
 #include <string_view>
 

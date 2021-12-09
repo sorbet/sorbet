@@ -519,6 +519,9 @@ NameDef names[] = {
     {"Autogen", "Autogen", true},
     {"Tokens", "Tokens", true},
     {"AccountModelMerchantToken", "AccountModelMerchantToken", true},
+
+    // used by the compiler
+    {"returnValue", "<returnValue>"},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {
