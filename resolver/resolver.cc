@@ -286,7 +286,7 @@ private:
             // otherwise we should error out. Private constant references _are not_ enforced inside RBI files.
             if (result.exists() &&
                 ((result.isClassOrModule() && result.asClassOrModuleRef().data(ctx)->isClassOrModulePrivate()) ||
-                 (result.isStaticField(ctx) && result.asFieldRef().data(ctx)->isStaticFieldPrivate())) &&
+                 (result.isStaticField(ctx) && result.asFieldRef().data(ctx)->flags.isStaticFieldPrivate)) &&
                 !ctx.file.data(ctx).isRBI()) {
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::PrivateConstantReferenced)) {
                     e.setHeader("Non-private reference to private constant `{}` referenced", result.show(ctx));
@@ -1614,7 +1614,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
     // Tries to resolve the given static field. Returns Types::todo() if it is unable to resolve the field.
     [[nodiscard]] static core::TypePtr tryResolveStaticField(core::Context ctx, ResolveStaticFieldItem &job) {
-        ENFORCE(job.sym.data(ctx)->isStaticField());
+        ENFORCE(job.sym.data(ctx)->flags.isStaticField);
         auto &asgn = job.asgn;
         auto data = job.sym.data(ctx);
         if (data->resultType == nullptr) {
@@ -1628,7 +1628,7 @@ class ResolveTypeMembersAndFieldsWalk {
     }
 
     [[nodiscard]] static core::TypePtr resolveStaticField(core::Context ctx, ResolveStaticFieldItem &job) {
-        ENFORCE(job.sym.data(ctx)->isStaticField());
+        ENFORCE(job.sym.data(ctx)->flags.isStaticField);
         auto &asgn = job.asgn;
         auto data = job.sym.data(ctx);
         if (data->resultType == nullptr) {

@@ -41,6 +41,7 @@ class GlobalState final {
     friend NameRef;
     friend Symbol;
     friend Method;
+    friend Field;
     friend SymbolRef;
     friend ClassOrModuleRef;
     friend MethodRef;
@@ -309,7 +310,7 @@ private:
     UnorderedMap<std::string, FileRef> fileRefByPath;
     std::vector<Symbol> classAndModules;
     std::vector<Method> methods;
-    std::vector<Symbol> fields;
+    std::vector<Field> fields;
     std::vector<Symbol> typeMembers;
     std::vector<Symbol> typeArguments;
     std::vector<std::pair<unsigned int, uint32_t>> namesByHash;

@@ -148,6 +148,64 @@ public:
 };
 CheckSize(Method, 192, 8);
 
+// Contains a field or a static field
+class Field final {
+    friend class serialize::SerializerImpl;
+
+public:
+    Field(const Field &) = delete;
+    Field() = default;
+    Field(Field &&) noexcept = default;
+
+    class Flags {
+    public:
+        // Synthesized by C++ code in a Rewriter pass
+        bool isRewriterSynthesized : 1;
+        bool isField : 1;
+        bool isStaticField : 1;
+
+        // Static Field flags
+        bool isStaticFieldTypeAlias : 1;
+        bool isStaticFieldPrivate : 1;
+
+        Flags() noexcept
+            : isRewriterSynthesized(false), isField(false), isStaticField(false), isStaticFieldTypeAlias(false),
+              isStaticFieldPrivate(false) {}
+
+        uint8_t serialize() const {
+            // Can replace this with std::bit_cast in C++20
+            return *reinterpret_cast<const uint8_t *>(this);
+        }
+    };
+    CheckSize(Flags, 1, 1);
+
+    Loc loc() const;
+    const InlinedVector<Loc, 2> &locs() const;
+    void addLoc(const core::GlobalState &gs, core::Loc loc);
+
+    uint32_t hash(const GlobalState &gs) const;
+
+    void sanityCheck(const GlobalState &gs) const;
+
+    Field deepCopy(const GlobalState &to) const;
+
+    bool isPrintable(const GlobalState &gs) const;
+
+    FieldRef ref(const GlobalState &gs) const;
+
+    SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const;
+
+    // dealias?
+
+    Flags flags;
+    NameRef name;
+    ClassOrModuleRef owner;
+    TypePtr resultType;
+
+private:
+    InlinedVector<Loc, 2> locs_;
+};
+
 class Symbol final {
 public:
     Symbol(const Symbol &) = delete;
@@ -172,8 +230,6 @@ public:
 
         // --- What type of symbol is this? ---
         static constexpr uint32_t CLASS_OR_MODULE = 0x8000'0000;
-        static constexpr uint32_t FIELD = 0x2000'0000;
-        static constexpr uint32_t STATIC_FIELD = 0x1000'0000;
         static constexpr uint32_t TYPE_ARGUMENT = 0x0800'0000;
         static constexpr uint32_t TYPE_MEMBER = 0x0400'0000;
 
@@ -199,10 +255,6 @@ public:
         static constexpr uint32_t TYPE_INVARIANT = 0x0000'0020;
         static constexpr uint32_t TYPE_CONTRAVARIANT = 0x0000'0040;
         static constexpr uint32_t TYPE_FIXED = 0x0000'0080;
-
-        // Static Field flags
-        static constexpr uint32_t STATIC_FIELD_TYPE_ALIAS = 0x0000'0010;
-        static constexpr uint32_t STATIC_FIELD_PRIVATE = 0x0000'0020;
     };
 
     Loc loc() const;
@@ -267,14 +319,6 @@ public:
     }
 
     bool isSingletonClass(const GlobalState &gs) const;
-
-    inline bool isStaticField() const {
-        return (flags & Symbol::Flags::STATIC_FIELD) != 0;
-    }
-
-    inline bool isField() const {
-        return (flags & Symbol::Flags::FIELD) != 0;
-    }
 
     inline bool isTypeMember() const {
         return (flags & Symbol::Flags::TYPE_MEMBER) != 0;
@@ -367,33 +411,18 @@ public:
         return (flags & Symbol::Flags::CLASS_OR_MODULE_PRIVATE) != 0;
     }
 
-    inline bool isStaticFieldPrivate() const {
-        ENFORCE_NO_TIMER(isStaticField());
-        return (flags & Symbol::Flags::STATIC_FIELD_PRIVATE) != 0;
-    }
-
     inline void setClassOrModule() {
-        ENFORCE(!isStaticField() && !isField() && !isTypeArgument() && !isTypeMember());
+        ENFORCE(!isTypeArgument() && !isTypeMember());
         flags |= Symbol::Flags::CLASS_OR_MODULE;
     }
 
-    inline void setStaticField() {
-        ENFORCE(!isClassOrModule() && !isField() && !isTypeArgument() && !isTypeMember());
-        flags |= Symbol::Flags::STATIC_FIELD;
-    }
-
-    inline void setField() {
-        ENFORCE(!isClassOrModule() && !isStaticField() && !isTypeArgument() && !isTypeMember());
-        flags |= Symbol::Flags::FIELD;
-    }
-
     inline void setTypeArgument() {
-        ENFORCE(!isClassOrModule() && !isStaticField() && !isField() && !isTypeMember());
+        ENFORCE(!isClassOrModule() && !isTypeMember());
         flags |= Symbol::Flags::TYPE_ARGUMENT;
     }
 
     inline void setTypeMember() {
-        ENFORCE(!isClassOrModule() && !isStaticField() && !isField() && !isTypeArgument());
+        ENFORCE(!isClassOrModule() && !isTypeArgument());
         flags |= Symbol::Flags::TYPE_MEMBER;
     }
 
@@ -459,24 +488,6 @@ public:
     inline void setClassOrModulePrivate() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_PRIVATE;
-    }
-
-    inline void setTypeAlias() {
-        ENFORCE(isStaticField());
-        flags |= Symbol::Flags::STATIC_FIELD_TYPE_ALIAS;
-    }
-    inline bool isTypeAlias() const {
-        // We should only be able to set the type alias bit on static fields.
-        // But it's rather unweidly to ask "isStaticField() && isTypeAlias()" just to satisfy the ENFORCE.
-        // To make things nicer, we relax the ENFORCE here to also allow asking whether "some constant" is a type
-        // alias.
-        ENFORCE(isClassOrModule() || isStaticField() || isTypeMember());
-        return isStaticField() && (flags & Symbol::Flags::STATIC_FIELD_TYPE_ALIAS) != 0;
-    }
-
-    inline void setStaticFieldPrivate() {
-        ENFORCE(isStaticField());
-        flags |= Symbol::Flags::STATIC_FIELD_PRIVATE;
     }
 
     inline void setRewriterSynthesized() {

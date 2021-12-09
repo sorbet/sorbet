@@ -1082,9 +1082,9 @@ FieldRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef 
     store = result; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
     fields.emplace_back();
 
-    SymbolData data = result.dataAllowingNone(*this);
+    FieldData data = result.dataAllowingNone(*this);
     data->name = name;
-    data->flags = Symbol::Flags::FIELD;
+    data->flags.isField = true;
     data->owner = owner;
     data->addLoc(*this, loc);
 
@@ -1113,10 +1113,9 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
     store = ret; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
     fields.emplace_back();
 
-    SymbolData data = ret.dataAllowingNone(*this);
+    FieldData data = ret.dataAllowingNone(*this);
     data->name = name;
-    data->flags = Symbol::Flags::STATIC_FIELD;
-    ;
+    data->flags.isStaticField = true;
     data->owner = owner;
     data->addLoc(*this, loc);
 
@@ -1783,7 +1782,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     }
     result->fields.reserve(this->fields.capacity());
     for (auto &sym : this->fields) {
-        result->fields.emplace_back(sym.deepCopy(*result, keepId));
+        result->fields.emplace_back(sym.deepCopy(*result));
     }
     result->typeArguments.reserve(this->typeArguments.capacity());
     for (auto &sym : this->typeArguments) {
@@ -2015,7 +2014,7 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     UnorderedMap<NameHash, uint32_t> methodHashes;
     int counter = 0;
 
-    for (const auto *symbolType : {&this->classAndModules, &this->fields, &this->typeArguments, &this->typeMembers}) {
+    for (const auto *symbolType : {&this->classAndModules, &this->typeArguments, &this->typeMembers}) {
         counter = 0;
         for (const auto &sym : *symbolType) {
             if (!sym.ignoreInHashing(*this)) {
@@ -2025,6 +2024,17 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
                     errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
                 }
             }
+        }
+    }
+
+    counter = 0;
+    for (const auto &field : this->fields) {
+        counter++;
+        // No fields are ignored in hashing.
+        hierarchyHash = mix(hierarchyHash, field.hash(*this));
+
+        if (DEBUG_HASHING_TAIL && counter > this->fields.size() - 15) {
+            errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, field.name.show(*this));
         }
     }
 

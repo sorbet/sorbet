@@ -1106,7 +1106,7 @@ class SymbolDefiner {
             if (constant.isClassOrModule()) {
                 constant.asClassOrModuleRef().data(ctx)->setClassOrModulePrivate();
             } else if (constant.isStaticField(ctx)) {
-                constant.asFieldRef().data(ctx)->setStaticFieldPrivate();
+                constant.asFieldRef().data(ctx)->flags.isStaticFieldPrivate = true;
             } else if (constant.isTypeMember()) {
                 // Visibility on type members is special (even more restrictive than private),
                 // so we ignore requests to mark type members private.
@@ -1266,7 +1266,7 @@ class SymbolDefiner {
         sym = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, staticField.lhsLoc), scope, name);
 
         if (staticField.isTypeAlias) {
-            sym.data(ctx)->setTypeAlias();
+            sym.data(ctx)->flags.isStaticFieldTypeAlias = true;
         }
 
         return sym;

@@ -1052,7 +1052,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
                     tp.type = singletonClass.data(ctx)->externalType();
                     tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
-                } else if (symbol.isField(ctx) || (symbol.isStaticField(ctx) && !symbol.isTypeAlias(ctx)) ||
+                } else if (symbol.isField(ctx) ||
+                           (symbol.isStaticField(ctx) &&
+                            !symbol.asFieldRef().data(ctx)->flags.isStaticFieldTypeAlias) ||
                            symbol.isTypeMember()) {
                     auto resultType = symbol.resultType(ctx);
                     if (resultType != nullptr) {

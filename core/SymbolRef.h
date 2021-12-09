@@ -65,6 +65,28 @@ public:
 };
 CheckSize(ConstMethodData, 8, 8);
 
+class Field;
+class FieldData : private DebugOnlyCheck<SymbolDataDebugCheck> {
+    Field &field;
+
+public:
+    FieldData(Field &ref, GlobalState &gs);
+
+    Field *operator->();
+    const Field *operator->() const;
+};
+CheckSize(FieldData, 8, 8);
+
+class ConstFieldData : private DebugOnlyCheck<SymbolDataDebugCheck> {
+    const Field &field;
+
+public:
+    ConstFieldData(const Field &ref, const GlobalState &gs);
+
+    const Field *operator->() const;
+};
+CheckSize(ConstFieldData, 8, 8);
+
 class ClassOrModuleRef final {
     uint32_t _id;
 
@@ -189,10 +211,10 @@ public:
         return ref;
     }
 
-    SymbolData data(GlobalState &gs) const;
-    ConstSymbolData data(const GlobalState &gs) const;
-    ConstSymbolData dataAllowingNone(const GlobalState &gs) const;
-    SymbolData dataAllowingNone(GlobalState &gs) const;
+    FieldData data(GlobalState &gs) const;
+    ConstFieldData data(const GlobalState &gs) const;
+    ConstFieldData dataAllowingNone(const GlobalState &gs) const;
+    FieldData dataAllowingNone(GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
     std::string toStringFullName(const GlobalState &gs) const;

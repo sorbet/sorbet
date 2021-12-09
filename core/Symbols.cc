@@ -196,9 +196,6 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
     if (isClassOrModule()) {
         type = SymbolRef::Kind::ClassOrModule;
         distance = this - gs.classAndModules.data();
-    } else if (isField() || isStaticField()) {
-        type = SymbolRef::Kind::FieldOrStaticField;
-        distance = this - gs.fields.data();
     } else if (isTypeMember()) {
         type = SymbolRef::Kind::TypeMember;
         distance = this - gs.typeMembers.data();
@@ -212,20 +209,26 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
     return SymbolRef(gs, type, distance);
 }
 
+FieldRef Field::ref(const GlobalState &gs) const {
+    uint32_t distance = this - gs.fields.data();
+    return FieldRef(gs, distance);
+}
+
 MethodRef Method::ref(const GlobalState &gs) const {
     uint32_t distance = this - gs.methods.data();
     return MethodRef(gs, distance);
 }
 
 bool SymbolRef::isTypeAlias(const GlobalState &gs) const {
-    return isFieldOrStaticField() && asFieldRef().dataAllowingNone(gs)->isTypeAlias();
+    return isFieldOrStaticField() && asFieldRef().dataAllowingNone(gs)->flags.isStaticFieldTypeAlias;
 }
 
 bool SymbolRef::isField(const GlobalState &gs) const {
-    return isFieldOrStaticField() && asFieldRef().dataAllowingNone(gs)->isField();
+    return isFieldOrStaticField() && asFieldRef().dataAllowingNone(gs)->flags.isField;
 }
+
 bool SymbolRef::isStaticField(const GlobalState &gs) const {
-    return isFieldOrStaticField() && asFieldRef().dataAllowingNone(gs)->isStaticField();
+    return isFieldOrStaticField() && asFieldRef().dataAllowingNone(gs)->flags.isStaticField;
 }
 
 SymbolData ClassOrModuleRef::dataAllowingNone(GlobalState &gs) const {
@@ -265,25 +268,25 @@ MethodData MethodRef::dataAllowingNone(GlobalState &gs) const {
     return MethodData(gs.methods[_id], gs);
 }
 
-SymbolData FieldRef::data(GlobalState &gs) const {
+FieldData FieldRef::data(GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.fieldsUsed());
-    return SymbolData(gs.fields[_id], gs);
+    return FieldData(gs.fields[_id], gs);
 }
 
-ConstSymbolData FieldRef::dataAllowingNone(const GlobalState &gs) const {
+ConstFieldData FieldRef::dataAllowingNone(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.fieldsUsed());
-    return ConstSymbolData(gs.fields[_id], gs);
+    return ConstFieldData(gs.fields[_id], gs);
 }
 
-ConstSymbolData FieldRef::data(const GlobalState &gs) const {
+ConstFieldData FieldRef::data(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     return dataAllowingNone(gs);
 }
 
-SymbolData FieldRef::dataAllowingNone(GlobalState &gs) const {
+FieldData FieldRef::dataAllowingNone(GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.fieldsUsed());
-    return SymbolData(gs.fields[_id], gs);
+    return FieldData(gs.fields[_id], gs);
 }
 
 SymbolData TypeMemberRef::data(GlobalState &gs) const {
@@ -437,7 +440,7 @@ string MethodRef::show(const GlobalState &gs) const {
 
 string FieldRef::show(const GlobalState &gs) const {
     auto sym = dataAllowingNone(gs);
-    return showInternal(gs, sym->owner, sym->name, sym->isStaticField() ? COLON_SEPARATOR : HASH_SEPARATOR);
+    return showInternal(gs, sym->owner, sym->name, sym->flags.isStaticField ? COLON_SEPARATOR : HASH_SEPARATOR);
 }
 
 string TypeArgumentRef::show(const GlobalState &gs) const {
@@ -1018,7 +1021,7 @@ string MethodRef::showFullName(const GlobalState &gs) const {
 
 string FieldRef::showFullName(const GlobalState &gs) const {
     auto sym = data(gs);
-    return showFullNameInternal(gs, sym->owner, sym->name, sym->isStaticField() ? COLON_SEPARATOR : HASH_SEPARATOR);
+    return showFullNameInternal(gs, sym->owner, sym->name, sym->flags.isStaticField ? COLON_SEPARATOR : HASH_SEPARATOR);
 }
 
 string TypeArgumentRef::showFullName(const GlobalState &gs) const {
@@ -1058,7 +1061,8 @@ string MethodRef::toStringFullName(const GlobalState &gs) const {
 
 string FieldRef::toStringFullName(const GlobalState &gs) const {
     auto sym = data(gs);
-    return toStringFullNameInternal(gs, sym->owner, sym->name, sym->isStaticField() ? COLON_SEPARATOR : HASH_SEPARATOR);
+    return toStringFullNameInternal(gs, sym->owner, sym->name,
+                                    sym->flags.isStaticField ? COLON_SEPARATOR : HASH_SEPARATOR);
 }
 
 string TypeArgumentRef::toStringFullName(const GlobalState &gs) const {
@@ -1090,6 +1094,7 @@ bool Symbol::isPrintable(const GlobalState &gs) const {
     return false;
 }
 
+// TODO(jvilk): Hoist this to *Ref classes to remove use of ref().
 bool Method::isPrintable(const GlobalState &gs) const {
     if (!isHiddenFromPrinting(gs, this->ref(gs))) {
         return true;
@@ -1102,6 +1107,10 @@ bool Method::isPrintable(const GlobalState &gs) const {
     }
 
     return false;
+}
+
+bool Field::isPrintable(const GlobalState &gs) const {
+    return !isHiddenFromPrinting(gs, this->ref(gs));
 }
 
 string_view SymbolRef::showKind(const GlobalState &gs) const {
@@ -1132,8 +1141,8 @@ string_view ClassOrModuleRef::showKind(const GlobalState &gs) const {
 
 string_view FieldRef::showKind(const GlobalState &gs) const {
     auto sym = dataAllowingNone(gs);
-    if (sym->isStaticField()) {
-        if (sym->isTypeAlias()) {
+    if (sym->flags.isStaticField) {
+        if (sym->flags.isStaticFieldTypeAlias) {
             return "static-field-type-alias"sv;
         } else {
             return "static-field"sv;
@@ -1312,7 +1321,7 @@ string FieldRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showF
     string_view type = showKind(gs);
 
     string_view access;
-    if (sym->isStaticField() && sym->isStaticFieldPrivate()) {
+    if (sym->flags.isStaticField && sym->flags.isStaticFieldPrivate) {
         access = " : private"sv;
     }
 
@@ -1924,6 +1933,10 @@ MethodRef Method::dealiasMethod(const GlobalState &gs, int depthLimit) const {
         .asMethodRef();
 }
 
+SymbolRef Field::dealias(const GlobalState &gs, int depthLimit) const {
+    return dealiasWithDefault(gs, this->ref(gs), depthLimit, Symbols::untyped());
+}
+
 bool ArgInfo::isSyntheticBlockArgument() const {
     // Every block argument that we synthesize in desugar or enter manually into global state uses Loc::none().
     return flags.isBlock && !loc.exists();
@@ -2007,6 +2020,16 @@ Method Method::deepCopy(const GlobalState &to) const {
     return result;
 }
 
+Field Field::deepCopy(const GlobalState &to) const {
+    Field result;
+    result.owner = this->owner;
+    result.flags = this->flags;
+    result.resultType = this->resultType;
+    result.name = NameRef(to, this->name);
+    result.locs_ = this->locs_;
+    return result;
+}
+
 int Symbol::typeArity(const GlobalState &gs) const {
     ENFORCE(this->isClassOrModule());
     int arity = 0;
@@ -2031,16 +2054,8 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
                                                                           this->name);
                 break;
             case SymbolRef::Kind::Method:
-                ENFORCE(false, "Methods cannot be stored in the Symbol class");
-                break;
             case SymbolRef::Kind::FieldOrStaticField:
-                if (isField()) {
-                    current2 = const_cast<GlobalState &>(gs).enterFieldSymbol(
-                        this->loc(), this->owner.asClassOrModuleRef(), this->name);
-                } else {
-                    current2 = const_cast<GlobalState &>(gs).enterStaticFieldSymbol(
-                        this->loc(), this->owner.asClassOrModuleRef(), this->name);
-                }
+                ENFORCE(false, "Methods, fields, and static fields cannot be stored in the Symbol class");
                 break;
             case SymbolRef::Kind::TypeArgument:
                 current2 = const_cast<GlobalState &>(gs).enterTypeArgument(this->loc(), this->owner.asMethodRef(),
@@ -2083,6 +2098,23 @@ void Method::sanityCheck(const GlobalState &gs) const {
     }
 }
 
+void Field::sanityCheck(const GlobalState &gs) const {
+    if (!debug_mode) {
+        return;
+    }
+    FieldRef current = this->ref(gs);
+    FieldRef current2;
+    if (flags.isField) {
+        current2 = const_cast<GlobalState &>(gs).enterFieldSymbol(this->loc(), this->owner, this->name);
+        ENFORCE_NO_TIMER(!flags.isStaticFieldTypeAlias);
+        ENFORCE_NO_TIMER(!flags.isStaticField);
+        ENFORCE_NO_TIMER(!flags.isStaticFieldPrivate);
+    } else {
+        current2 = const_cast<GlobalState &>(gs).enterStaticFieldSymbol(this->loc(), this->owner, this->name);
+    }
+    ENFORCE_NO_TIMER(current == current2);
+}
+
 ClassOrModuleRef MethodRef::enclosingClass(const GlobalState &gs) const {
     // Methods can only be owned by classes or modules.
     return data(gs)->owner;
@@ -2096,7 +2128,7 @@ ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
             return asMethodRef().enclosingClass(gs);
         case SymbolRef::Kind::FieldOrStaticField:
             // Fields can only be owned by classes or modules.
-            return asFieldRef().data(gs)->owner.asClassOrModuleRef();
+            return asFieldRef().data(gs)->owner;
         case SymbolRef::Kind::TypeArgument:
             // Typeargs are owned by methods.
             return asTypeArgumentRef().data(gs)->owner.asMethodRef().enclosingClass(gs);
@@ -2176,6 +2208,14 @@ uint32_t Method::hash(const GlobalState &gs) const {
     return result;
 }
 
+uint32_t Field::hash(const GlobalState &gs) const {
+    uint32_t result = _hash(name.shortName(gs));
+    result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
+    result = mix(result, this->flags.serialize());
+    result = mix(result, this->owner.id());
+    return result;
+}
+
 uint32_t Method::methodShapeHash(const GlobalState &gs) const {
     uint32_t result = _hash(name.shortName(gs));
     result = mix(result, this->flags.serialize());
@@ -2236,11 +2276,22 @@ Loc Symbol::loc() const {
     return Loc::none();
 }
 
+Loc Field::loc() const {
+    if (!locs_.empty()) {
+        return locs_.back();
+    }
+    return Loc::none();
+}
+
 const InlinedVector<Loc, 2> &Method::locs() const {
     return locs_;
 }
 
 const InlinedVector<Loc, 2> &Symbol::locs() const {
+    return locs_;
+}
+
+const InlinedVector<Loc, 2> &Field::locs() const {
     return locs_;
 }
 
@@ -2269,6 +2320,14 @@ void addLocInternal(const core::GlobalState &gs, core::Loc loc, core::Loc mainLo
 } // namespace
 
 void Method::addLoc(const core::GlobalState &gs, core::Loc loc) {
+    if (!loc.file().exists()) {
+        return;
+    }
+
+    addLocInternal(gs, loc, this->loc(), locs_);
+}
+
+void Field::addLoc(const core::GlobalState &gs, core::Loc loc) {
     if (!loc.file().exists()) {
         return;
     }
@@ -2378,6 +2437,25 @@ const Method *MethodData::operator->() const {
 const Method *ConstMethodData::operator->() const {
     runDebugOnlyCheck();
     return &method;
+};
+
+FieldData::FieldData(Field &ref, GlobalState &gs) : DebugOnlyCheck(gs), field(ref) {}
+
+ConstFieldData::ConstFieldData(const Field &ref, const GlobalState &gs) : DebugOnlyCheck(gs), field(ref) {}
+
+Field *FieldData::operator->() {
+    runDebugOnlyCheck();
+    return &field;
+};
+
+const Field *FieldData::operator->() const {
+    runDebugOnlyCheck();
+    return &field;
+};
+
+const Field *ConstFieldData::operator->() const {
+    runDebugOnlyCheck();
+    return &field;
 };
 
 } // namespace sorbet::core
