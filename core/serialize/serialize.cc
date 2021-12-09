@@ -559,7 +559,7 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
     result.owner = ClassOrModuleRef::fromRaw(p.getU4());
     result.name = NameRef::fromRaw(*gs, p.getU4());
     result.rebind = ClassOrModuleRef::fromRaw(p.getU4());
-    auto flagsU2 = static_cast<u2>(p.getU4());
+    auto flagsU2 = static_cast<uint16_t>(p.getU4());
     Method::Flags flags;
     static_assert(sizeof(flags) == sizeof(flagsU2));
     // Can replace this with std::bit_cast in C++20
