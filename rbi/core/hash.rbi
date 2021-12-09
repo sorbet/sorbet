@@ -302,7 +302,7 @@ class Hash < Object
     params(
         arg0: K,
     )
-    .returns(T::Array[T.any(K, V)])
+    .returns(T.nilable(T::Array[T.any(K, V)]))
   end
   def assoc(arg0); end
 
