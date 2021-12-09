@@ -716,7 +716,7 @@ public:
  * Defines symbols for all of the definitions found via SymbolFinder. Single threaded.
  */
 class SymbolDefiner {
-    unique_ptr<const FoundDefinitions> foundDefs;
+    unique_ptr<FoundDefinitions> foundDefs;
     vector<core::ClassOrModuleRef> definedClasses;
     vector<core::MethodRef> definedMethods;
 
@@ -732,6 +732,8 @@ class SymbolDefiner {
             case DefinitionKind::ClassRef: {
                 auto &klassRef = ref.klassRef(*foundDefs);
                 auto newOwner = squashNames(ctx, klassRef.owner, owner);
+                // Prevent subsequent calls to squashNames from recursing here.
+                klassRef.owner = FoundDefinitionRef{DefinitionKind::Symbol, newOwner.rawId()};
                 return getOrDefineSymbol(ctx.withOwner(newOwner), klassRef.name, klassRef.loc);
             }
             default:
@@ -1373,7 +1375,7 @@ class SymbolDefiner {
     }
 
 public:
-    SymbolDefiner(unique_ptr<const FoundDefinitions> foundDefs) : foundDefs(move(foundDefs)) {}
+    SymbolDefiner(unique_ptr<FoundDefinitions> foundDefs) : foundDefs(move(foundDefs)) {}
 
     void run(core::MutableContext ctx) {
         definedClasses.reserve(foundDefs->klasses().size());
