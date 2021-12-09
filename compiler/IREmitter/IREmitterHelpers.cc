@@ -205,7 +205,7 @@ void IREmitterHelpers::emitReturnAcrossBlock(CompilerState &cs, cfg::CFG &cfg, l
 void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                   int rubyRegionId, llvm::Value *retVal) {
     if (functionTypeNeedsPostprocessing(irctx.rubyBlockType[rubyRegionId])) {
-        auto returnValue = irctx.cfg.enterLocal({Names::returnValue(), 1});
+        auto returnValue = irctx.cfg.enterLocal({core::Names::returnValue(), 1});
         Payload::varSet(cs, returnValue, retVal, builder, irctx, rubyRegionId);
         builder.CreateBr(irctx.postProcessBlock);
     } else {
