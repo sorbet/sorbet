@@ -1178,7 +1178,6 @@ class SymbolDefiner {
             symbol.data(ctx)->owner != core::Symbols::PackageRegistry()) {
             symbol.data(ctx)->addLoc(ctx, core::Loc(ctx.file, klass.declLoc));
         }
-        symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
         // make sure we've added a static init symbol so we have it ready for the flatten pass later
         if (symbol == core::Symbols::root()) {
