@@ -12,51 +12,42 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to)
 
     GlobalSubstitution::mergeFileTables(from, to);
 
-    fastPath = false;
-
-    if (!fastPath || debug_mode) {
-        {
-            UnfreezeNameTable unfreezeNames(to);
-            utf8NameSubstitution.reserve(from.utf8Names.size());
-            constantNameSubstitution.reserve(from.constantNames.size());
-            uniqueNameSubstitution.reserve(from.uniqueNames.size());
-            int i = -1;
-            for (const UTF8Name &nm : from.utf8Names) {
-                i++;
-                ENFORCE_NO_TIMER(utf8NameSubstitution.size() == i, "UTF8 name substitution has wrong size");
-                utf8NameSubstitution.emplace_back(to.enterNameUTF8(nm.utf8));
-                ENFORCE(!fastPath || utf8NameSubstitution.back().utf8Index() == i);
-            }
-            // UniqueNames and ConstantNames may reference each other, necessitating some special logic here to avoid
-            // crashing. We process UniqueNames first because there are fewer of them, so fewer loop iterations require
-            // this special check. Tested in `core_test.cc`.
-            i = -1;
-            for (const UniqueName &nm : from.uniqueNames) {
-                i++;
-                ENFORCE(uniqueNameSubstitution.size() == i, "Unique name substitution has wrong size");
-                if (nm.original.kind() == NameKind::CONSTANT &&
-                    nm.original.constantIndex() >= constantNameSubstitution.size()) {
-                    // Note: Duplicate of loop body below. If you change one, change the other!
-                    for (uint32_t i = constantNameSubstitution.size(); i <= nm.original.constantIndex(); i++) {
-                        auto &cnst = from.constantNames[i];
-                        ENFORCE_NO_TIMER(constantNameSubstitution.size() == i,
-                                         "Constant name substitution has wrong size");
-                        // N.B.: cnst may reference a UniqueName, but since names are linearizeable we should have
-                        // already substituted it by now.
-                        constantNameSubstitution.emplace_back(to.enterNameConstant(substitute(cnst.original)));
-                    }
+    {
+        UnfreezeNameTable unfreezeNames(to);
+        utf8NameSubstitution.reserve(from.utf8Names.size());
+        constantNameSubstitution.reserve(from.constantNames.size());
+        uniqueNameSubstitution.reserve(from.uniqueNames.size());
+        int i = -1;
+        for (const UTF8Name &nm : from.utf8Names) {
+            i++;
+            ENFORCE_NO_TIMER(utf8NameSubstitution.size() == i, "UTF8 name substitution has wrong size");
+            utf8NameSubstitution.emplace_back(to.enterNameUTF8(nm.utf8));
+        }
+        // UniqueNames and ConstantNames may reference each other, necessitating some special logic here to avoid
+        // crashing. We process UniqueNames first because there are fewer of them, so fewer loop iterations require
+        // this special check. Tested in `core_test.cc`.
+        i = -1;
+        for (const UniqueName &nm : from.uniqueNames) {
+            i++;
+            ENFORCE(uniqueNameSubstitution.size() == i, "Unique name substitution has wrong size");
+            if (nm.original.kind() == NameKind::CONSTANT &&
+                nm.original.constantIndex() >= constantNameSubstitution.size()) {
+                // Note: Duplicate of loop body below. If you change one, change the other!
+                for (uint32_t i = constantNameSubstitution.size(); i <= nm.original.constantIndex(); i++) {
+                    auto &cnst = from.constantNames[i];
+                    ENFORCE_NO_TIMER(constantNameSubstitution.size() == i, "Constant name substitution has wrong size");
+                    // N.B.: cnst may reference a UniqueName, but since names are linearizeable we should have
+                    // already substituted it by now.
+                    constantNameSubstitution.emplace_back(to.enterNameConstant(substitute(cnst.original)));
                 }
+            }
 
-                uniqueNameSubstitution.emplace_back(
-                    to.freshNameUnique(nm.uniqueNameKind, substitute(nm.original), nm.num));
-                ENFORCE(!fastPath || uniqueNameSubstitution.back().uniqueIndex() == i);
-            }
-            for (i = constantNameSubstitution.size(); i < from.constantNames.size(); i++) {
-                ENFORCE_NO_TIMER(constantNameSubstitution.size() == i, "Constant name substitution has wrong size");
-                auto &nm = from.constantNames[i];
-                constantNameSubstitution.emplace_back(to.enterNameConstant(substitute(nm.original)));
-                ENFORCE(!fastPath || constantNameSubstitution.back().constantIndex() == i);
-            }
+            uniqueNameSubstitution.emplace_back(to.freshNameUnique(nm.uniqueNameKind, substitute(nm.original), nm.num));
+        }
+        for (i = constantNameSubstitution.size(); i < from.constantNames.size(); i++) {
+            ENFORCE_NO_TIMER(constantNameSubstitution.size() == i, "Constant name substitution has wrong size");
+            auto &nm = from.constantNames[i];
+            constantNameSubstitution.emplace_back(to.enterNameConstant(substitute(nm.original)));
         }
     }
 
@@ -81,10 +72,6 @@ void GlobalSubstitution::mergeFileTables(const GlobalState &from, GlobalState &t
         ENFORCE(fileIdx >= to.filesUsed() || to.files[fileIdx]->sourceType == File::Type::NotYetRead);
         to.enterNewFileAt(from.files[fileIdx], fileIdx);
     }
-}
-
-bool GlobalSubstitution::useFastPath() const {
-    return fastPath;
 }
 
 LazyGlobalSubstitution::LazyGlobalSubstitution(const GlobalState &fromGS, GlobalState &toGS)

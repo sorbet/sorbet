@@ -129,9 +129,6 @@ public:
 } // namespace
 
 ExpressionPtr Substitute::run(core::MutableContext ctx, const core::GlobalSubstitution &subst, ExpressionPtr what) {
-    if (subst.useFastPath()) {
-        return what;
-    }
     SubstWalk walk(subst);
     what = TreeMap::apply(ctx, walk, std::move(what));
     return what;

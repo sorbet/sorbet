@@ -54,16 +54,12 @@ public:
         return substitute(from, allowSameFromTo);
     }
 
-    bool useFastPath() const;
-
 private:
     friend NameRefDebugCheck;
 
     std::vector<NameRef> utf8NameSubstitution;
     std::vector<NameRef> constantNameSubstitution;
     std::vector<NameRef> uniqueNameSubstitution;
-    // set if no substitution is actually necessary
-    bool fastPath = false;
 
     int toGlobalStateId;
 };
