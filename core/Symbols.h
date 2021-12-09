@@ -59,14 +59,21 @@ public:
         bool isFinal : 1;
         bool isOverride : 1;
         bool isIncompatibleOverride : 1;
+
+        constexpr static uint16_t NUMBER_OF_FLAGS = 10;
+        constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
         Flags() noexcept
             : isRewriterSynthesized(false), isProtected(false), isPrivate(false), isOverloaded(false),
               isAbstract(false), isGenericMethod(false), isOverridable(false), isFinal(false), isOverride(false),
               isIncompatibleOverride(false) {}
 
         uint16_t serialize() const {
+            ENFORCE(sizeof(Flags) == sizeof(uint16_t));
             // Can replace this with std::bit_cast in C++20
-            return *reinterpret_cast<const uint16_t *>(this);
+            auto rawBits = *reinterpret_cast<const uint16_t *>(this);
+
+            // We need to mask the valid bits since uninitialized memory isn't zeroed in C++.
+            return rawBits & VALID_BITS_MASK;
         }
     };
     CheckSize(Flags, 2, 1);
@@ -168,13 +175,19 @@ public:
         bool isStaticFieldTypeAlias : 1;
         bool isStaticFieldPrivate : 1;
 
+        constexpr static uint8_t NUMBER_OF_FLAGS = 5;
+        constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
+
         Flags() noexcept
             : isRewriterSynthesized(false), isField(false), isStaticField(false), isStaticFieldTypeAlias(false),
               isStaticFieldPrivate(false) {}
 
         uint8_t serialize() const {
+            ENFORCE(sizeof(Flags) == sizeof(uint8_t));
             // Can replace this with std::bit_cast in C++20
-            return *reinterpret_cast<const uint8_t *>(this);
+            auto rawBits = *reinterpret_cast<const uint8_t *>(this);
+            // We need to mask the valid bits since uninitialized memory isn't zeroed in C++.
+            return rawBits & VALID_BITS_MASK;
         }
     };
     CheckSize(Flags, 1, 1);
