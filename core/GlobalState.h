@@ -40,6 +40,7 @@ class SerializerImpl;
 class GlobalState final {
     friend NameRef;
     friend Symbol;
+    friend Method;
     friend SymbolRef;
     friend ClassOrModuleRef;
     friend MethodRef;
@@ -298,7 +299,7 @@ private:
     std::vector<UniqueName> uniqueNames;
     UnorderedMap<std::string, FileRef> fileRefByPath;
     std::vector<Symbol> classAndModules;
-    std::vector<Symbol> methods;
+    std::vector<Method> methods;
     std::vector<Symbol> fields;
     std::vector<Symbol> typeMembers;
     std::vector<Symbol> typeArguments;

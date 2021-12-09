@@ -20,7 +20,7 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::MethodRef method,
     vector<unique_ptr<ParameterInformation>> parameters;
     // Documentation is set to be a markdown element that highlights which parameter you are currently typing in.
     string methodDocumentation = "(";
-    auto &args = method.data(gs)->arguments();
+    auto &args = method.data(gs)->arguments;
     int i = 0;
     for (const auto &arg : args) {
         // label field is populated with the name of the variable.

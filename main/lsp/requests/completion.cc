@@ -258,7 +258,7 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
     }
 
     vector<string> typeAndArgNames;
-    for (auto &argSym : method.data(gs)->arguments()) {
+    for (auto &argSym : method.data(gs)->arguments) {
         fmt::memory_buffer argBuf;
         if (argSym.flags.isBlock) {
             // Blocks are handled below
@@ -286,8 +286,8 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
         fmt::format_to(std::back_inserter(result), "({})", fmt::join(typeAndArgNames, ", "));
     }
 
-    ENFORCE(!method.data(gs)->arguments().empty());
-    auto &blkArg = method.data(gs)->arguments().back();
+    ENFORCE(!method.data(gs)->arguments.empty());
+    auto &blkArg = method.data(gs)->arguments.back();
     ENFORCE(blkArg.flags.isBlock);
 
     auto hasBlockType = blkArg.type != nullptr && !blkArg.type.isUntyped();
@@ -670,7 +670,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
 
     // Intuition for when to use maybeAlias vs what: if it needs to know the original name: maybeAlias.
     // If it needs to know the types / arity: what. Default to `what` if you don't know.
-    auto what = maybeAlias.data(gs)->dealias(gs).asMethodRef();
+    auto what = maybeAlias.data(gs)->dealiasMethod(gs);
 
     if (what == core::Symbols::sig()) {
         if (auto item = trySuggestSig(typechecker, clientConfig, what, receiverType, queryLoc, prefix, sortIdx)) {
@@ -731,9 +731,13 @@ void CompletionTask::findSimilarConstants(const core::GlobalState &gs, const cor
     }
 
     for (auto scope : resp.scopes) {
+        if (!scope.isClassOrModule()) {
+            continue;
+        }
+
         // TODO(jez) This membersStableOrderSlow is the only ordering we have on constant items right now.
         // We should probably at least sort by whether the prefix of the suggested constant matches.
-        for (auto [_name, sym] : scope.membersStableOrderSlow(gs)) {
+        for (auto [_name, sym] : scope.asClassOrModuleRef().data(gs)->membersStableOrderSlow(gs)) {
             if (isSimilarConstant(gs, prefix, sym)) {
                 items.push_back(getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, items.size()));
             }
@@ -833,7 +837,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
             auto similarMethod = similarMethods[0];
 
-            if (similarMethod.method.data(gs)->isMethodPrivate() && !sendResp->isPrivateOk) {
+            if (similarMethod.method.data(gs)->flags.isPrivate && !sendResp->isPrivateOk) {
                 continue;
             }
 

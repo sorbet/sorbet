@@ -23,7 +23,7 @@ public:
     TypeConstraint() = default;
     TypeConstraint(const TypeConstraint &) = delete;
     TypeConstraint(TypeConstraint &&) = default;
-    void defineDomain(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &typeParams);
+    void defineDomain(const GlobalState &gs, const InlinedVector<TypeArgumentRef, 4> &typeParams);
     bool hasUpperBound(TypeArgumentRef forWhat) const;
     bool hasLowerBound(TypeArgumentRef forWhat) const;
     TypePtr findSolution(TypeArgumentRef forWhat) const;

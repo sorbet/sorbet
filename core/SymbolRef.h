@@ -18,7 +18,7 @@ struct SymbolDataDebugCheck {
     void check() const;
 };
 
-/** This class is intended to be a safe way to pass `Symbol &` around.
+/** These classes are intended to be a safe way to pass symbol references around.
  *  Entering new symbols can invalidate `Symbol &`s and thus they are generally unsafe.
  *  This class ensures that all accesses are safe in debug builds and effectively is a `Symbol &` in optimized builds.
  */
@@ -43,7 +43,27 @@ public:
 };
 CheckSize(ConstSymbolData, 8, 8);
 
-class Symbol;
+class Method;
+class MethodData : private DebugOnlyCheck<SymbolDataDebugCheck> {
+    Method &method;
+
+public:
+    MethodData(Method &ref, GlobalState &gs);
+
+    Method *operator->();
+    const Method *operator->() const;
+};
+CheckSize(MethodData, 8, 8);
+
+class ConstMethodData : private DebugOnlyCheck<SymbolDataDebugCheck> {
+    const Method &method;
+
+public:
+    ConstMethodData(const Method &ref, const GlobalState &gs);
+
+    const Method *operator->() const;
+};
+CheckSize(ConstMethodData, 8, 8);
 
 class ClassOrModuleRef final {
     uint32_t _id;
@@ -126,9 +146,9 @@ public:
         return toStringWithOptions(gs, 0, showFull, showRaw);
     }
 
-    SymbolData data(GlobalState &gs) const;
-    ConstSymbolData data(const GlobalState &gs) const;
-    SymbolData dataAllowingNone(GlobalState &gs) const;
+    MethodData data(GlobalState &gs) const;
+    ConstMethodData data(const GlobalState &gs) const;
+    MethodData dataAllowingNone(GlobalState &gs) const;
 
     ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
@@ -229,6 +249,7 @@ class TypeArgumentRef final {
     uint32_t _id;
 
     friend class SymbolRef;
+    friend class MethodRef;
 
 private:
     std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
@@ -425,15 +446,11 @@ public:
     core::NameRef name(const GlobalState &gs) const;
     core::SymbolRef owner(const GlobalState &gs) const;
     core::Loc loc(const GlobalState &gs) const;
-    bool isSingletonClass(const GlobalState &gs) const;
-    std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlow(const GlobalState &gs) const;
     bool isPrintable(const GlobalState &gs) const;
     const InlinedVector<Loc, 2> &locs(const GlobalState &gs) const;
     const TypePtr &resultType(const GlobalState &gs) const;
     void setResultType(GlobalState &gs, const TypePtr &typePtr) const;
     SymbolRef dealias(const GlobalState &gs) const;
-    SymbolRef findMember(const GlobalState &gs, NameRef name) const;
-    SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name) const;
     // End methods that should be removed.
 
     // Prints the fully qualified name of the symbol in a format that is suitable for showing to the user (e.g.

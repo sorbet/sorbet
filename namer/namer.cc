@@ -757,7 +757,7 @@ class SymbolDefiner {
 
     // Allow stub symbols created to hold intrinsics to be filled in
     // with real types from code
-    bool isIntrinsic(const core::SymbolData &data) {
+    bool isIntrinsic(const core::MethodData &data) {
         return data->intrinsic != nullptr && !data->hasSig();
     }
 
@@ -831,11 +831,11 @@ class SymbolDefiner {
         return existing;
     }
 
-    void defineArg(core::MutableContext ctx, core::SymbolData &methodData, int pos, const ast::ParsedArg &parsedArg) {
-        if (pos < methodData->arguments().size()) {
+    void defineArg(core::MutableContext ctx, core::MethodData &methodData, int pos, const ast::ParsedArg &parsedArg) {
+        if (pos < methodData->arguments.size()) {
             // TODO: check that flags match;
             if (parsedArg.loc.exists()) {
-                methodData->arguments()[pos].loc = core::Loc(ctx.file, parsedArg.loc);
+                methodData->arguments[pos].loc = core::Loc(ctx.file, parsedArg.loc);
             }
             return;
         }
@@ -848,7 +848,7 @@ class SymbolDefiner {
         } else {
             name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
         }
-        // we know right now that pos >= arguments().size() because otherwise we would have hit the early return at the
+        // we know right now that pos >= arguments.size() because otherwise we would have hit the early return at the
         // beginning of this method
         auto &argInfo =
             ctx.state.enterMethodArgumentSymbol(core::Loc(ctx.file, parsedArg.loc), ctx.owner.asMethodRef(), name);
@@ -856,15 +856,15 @@ class SymbolDefiner {
         // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
         // identical). We know that we need to match the arity of the function as written, so if we don't have as many
         // arguments as we expect, clone the one we got back from enterMethodArgumentSymbol in the position we expect
-        if (methodData->arguments().size() == pos) {
+        if (methodData->arguments.size() == pos) {
             auto argCopy = argInfo.deepCopy();
             argCopy.name = ctx.state.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, argInfo.name, pos + 1);
-            methodData->arguments().emplace_back(move(argCopy));
+            methodData->arguments.emplace_back(move(argCopy));
             return;
         }
         // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
         // from enterMethodArgumentSymbol
-        ENFORCE(methodData->arguments().size() >= pos + 1);
+        ENFORCE(methodData->arguments.size() >= pos + 1);
 
         argInfo.flags = parsedArg.flags;
     }
@@ -873,14 +873,14 @@ class SymbolDefiner {
         auto methodData = ctx.owner.asMethodRef().data(ctx);
         bool inShadows = false;
         bool intrinsic = isIntrinsic(methodData);
-        bool swapArgs = intrinsic && (methodData->arguments().size() == 1);
+        bool swapArgs = intrinsic && (methodData->arguments.size() == 1);
         core::ArgInfo swappedArg;
         if (swapArgs) {
             // When we're filling in an intrinsic method, we want to overwrite the block arg that used
             // to exist with the block arg that we got from desugaring the method def in the RBI files.
-            ENFORCE(methodData->arguments()[0].flags.isBlock);
-            swappedArg = move(methodData->arguments()[0]);
-            methodData->arguments().clear();
+            ENFORCE(methodData->arguments[0].flags.isBlock);
+            swappedArg = move(methodData->arguments[0]);
+            methodData->arguments.clear();
         }
 
         int i = -1;
@@ -893,23 +893,23 @@ class SymbolDefiner {
 
                 if (swapArgs && arg.flags.isBlock) {
                     // see commnent on if (swapArgs) above
-                    methodData->arguments().emplace_back(move(swappedArg));
+                    methodData->arguments.emplace_back(move(swappedArg));
                 }
 
                 defineArg(ctx, methodData, i, arg);
-                ENFORCE(i < methodData->arguments().size());
+                ENFORCE(i < methodData->arguments.size());
             }
         }
     }
 
     bool paramsMatch(core::MutableContext ctx, core::MethodRef method, const vector<ast::ParsedArg> &parsedArgs) {
-        auto sym = method.data(ctx)->dealias(ctx).asMethodRef();
-        if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
+        auto sym = method.data(ctx)->dealiasMethod(ctx);
+        if (sym.data(ctx)->arguments.size() != parsedArgs.size()) {
             return false;
         }
         for (int i = 0; i < parsedArgs.size(); i++) {
             auto &methodArg = parsedArgs[i];
-            auto &symArg = sym.data(ctx)->arguments()[i];
+            auto &symArg = sym.data(ctx)->arguments[i];
 
             if (symArg.flags.isKeyword != methodArg.flags.isKeyword ||
                 symArg.flags.isBlock != methodArg.flags.isBlock ||
@@ -928,22 +928,21 @@ class SymbolDefiner {
             return;
         }
         auto symMethod = sym.asMethodRef();
-        if (symMethod.data(ctx)->arguments().size() != parsedArgs.size()) {
+        if (symMethod.data(ctx)->arguments.size() != parsedArgs.size()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                 if (sym != ctx.owner) {
                     // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader(
                         "Method alias `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                        ctx.owner.show(ctx), symMethod.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
+                        ctx.owner.show(ctx), symMethod.data(ctx)->arguments.size() - 1, parsedArgs.size() - 1);
                     e.addErrorLine(ctx.owner.loc(ctx), "Previous alias definition");
                     e.addErrorLine(symMethod.data(ctx)->loc(), "Dealiased definition");
                 } else {
                     // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                                symMethod.show(ctx), symMethod.data(ctx)->arguments().size() - 1,
-                                parsedArgs.size() - 1);
+                                symMethod.show(ctx), symMethod.data(ctx)->arguments.size() - 1, parsedArgs.size() - 1);
                     e.addErrorLine(symMethod.data(ctx)->loc(), "Previous definition");
                 }
             }
@@ -951,7 +950,7 @@ class SymbolDefiner {
         }
         for (int i = 0; i < parsedArgs.size(); i++) {
             auto &methodArg = parsedArgs[i];
-            auto &symArg = symMethod.data(ctx)->arguments()[i];
+            auto &symArg = symMethod.data(ctx)->arguments[i];
 
             if (symArg.flags.isKeyword != methodArg.flags.isKeyword) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
@@ -1052,7 +1051,7 @@ class SymbolDefiner {
         defineArgs(ctx.withOwner(sym), parsedArgs);
         sym.data(ctx)->addLoc(ctx, declLoc);
         if (method.flags.isRewriterSynthesized) {
-            sym.data(ctx)->setRewriterSynthesized();
+            sym.data(ctx)->flags.isRewriterSynthesized = true;
         }
         ENFORCE(ctx.state.lookupMethodSymbolWithHash(owner, method.name, method.argsHash).exists());
         return sym;
@@ -1063,7 +1062,7 @@ class SymbolDefiner {
         auto implicitlyPrivate = ctx.owner.enclosingClass(ctx) == core::Symbols::root();
         if (implicitlyPrivate) {
             // Methods defined at the top level default to private (on Object)
-            symbol.data(ctx)->setMethodPrivate();
+            symbol.data(ctx)->flags.isPrivate = true;
         } else {
             // All other methods default to public (their visibility might be changed later)
             symbol.data(ctx)->setMethodPublic();
@@ -1083,10 +1082,10 @@ class SymbolDefiner {
             switch (mod.name.rawId()) {
                 case core::Names::private_().rawId():
                 case core::Names::privateClassMethod().rawId():
-                    method.data(ctx)->setMethodPrivate();
+                    method.data(ctx)->flags.isPrivate = true;
                     break;
                 case core::Names::protected_().rawId():
-                    method.data(ctx)->setMethodProtected();
+                    method.data(ctx)->flags.isProtected = true;
                     break;
                 case core::Names::public_().rawId():
                     method.data(ctx)->setMethodPublic();
@@ -1333,7 +1332,7 @@ class SymbolDefiner {
             }
             // if we have more than one type member with the same name, then we have messed up somewhere
             ENFORCE(absl::c_find_if(onSymbol.data(ctx)->typeMembers(), [&](auto mem) {
-                        return mem.name(ctx) == existingTypeMember.data(ctx)->name;
+                        return mem.data(ctx)->name == existingTypeMember.data(ctx)->name;
                     }) != onSymbol.data(ctx)->typeMembers().end());
             sym = existingTypeMember;
         } else {
@@ -1692,8 +1691,8 @@ public:
 
     ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        ENFORCE(method.args.size() == method.symbol.data(ctx)->arguments().size(), "{}: {} != {}",
-                method.name.showRaw(ctx), method.args.size(), method.symbol.data(ctx)->arguments().size());
+        ENFORCE(method.args.size() == method.symbol.data(ctx)->arguments.size(), "{}: {} != {}",
+                method.name.showRaw(ctx), method.args.size(), method.symbol.data(ctx)->arguments.size());
         return tree;
     }
 

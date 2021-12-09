@@ -59,7 +59,7 @@ optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context
 core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component,
                              optional<core::NameRef> keyword, int argId) {
     ENFORCE(component.method.exists());
-    const auto &args = component.method.data(ctx)->arguments();
+    const auto &args = component.method.data(ctx)->arguments;
     if (argId >= args.size()) {
         return nullptr;
     }
@@ -340,13 +340,13 @@ bool childNeedsOverride(core::Context ctx, core::MethodRef childSymbol, core::Me
         // that isn't the constructor...
         childSymbol.data(ctx)->name != core::Names::initialize() &&
         // and wasn't Rewriter synthesized (beause we can't change DSL'd sigs).
-        !parentSymbol.data(ctx)->isRewriterSynthesized() &&
+        !parentSymbol.data(ctx)->flags.isRewriterSynthesized &&
         // It has a sig...
         parentSymbol.data(ctx)->resultType != nullptr &&
         //  that is either overridable...
-        (parentSymbol.data(ctx)->isOverridable() ||
+        (parentSymbol.data(ctx)->flags.isOverridable ||
          // or override...
-         parentSymbol.data(ctx)->isOverride());
+         parentSymbol.data(ctx)->flags.isOverride);
 }
 
 } // namespace
@@ -389,7 +389,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             // sometimes variable does not have a name e.g. `def initialize (*)`
             arg.name.shortName(ctx).empty();
     };
-    bool hasBadArg = absl::c_any_of(methodSymbol.data(ctx)->arguments(), isBadArg);
+    bool hasBadArg = absl::c_any_of(methodSymbol.data(ctx)->arguments, isBadArg);
     if (hasBadArg) {
         return nullopt;
     }
@@ -406,7 +406,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             guessedReturnType = closestReturnType;
         }
 
-        for (const auto &arg : closestMethod.data(ctx)->arguments()) {
+        for (const auto &arg : closestMethod.data(ctx)->arguments) {
             if (arg.type && !arg.type.isUntyped()) {
                 guessedArgumentTypes[arg.name] = arg.type;
             }
@@ -426,14 +426,14 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     }
     fmt::format_to(std::back_inserter(ss), " {{");
 
-    ENFORCE(!methodSymbol.data(ctx)->arguments().empty(), "There should always be at least one arg (the block arg).");
-    bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->arguments().size() == 1 &&
-                                methodSymbol.data(ctx)->arguments()[0].isSyntheticBlockArgument();
+    ENFORCE(!methodSymbol.data(ctx)->arguments.empty(), "There should always be at least one arg (the block arg).");
+    bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->arguments.size() == 1 &&
+                                methodSymbol.data(ctx)->arguments[0].isSyntheticBlockArgument();
 
     if (methodSymbol.data(ctx)->name != core::Names::initialize()) {
         // Only need override / implementation if the parent has a sig
         if (closestMethod.exists() && closestMethod.data(ctx)->resultType != nullptr) {
-            if (closestMethod.data(ctx)->isAbstract() || childNeedsOverride(ctx, methodSymbol, closestMethod)) {
+            if (closestMethod.data(ctx)->flags.isAbstract || childNeedsOverride(ctx, methodSymbol, closestMethod)) {
                 fmt::format_to(std::back_inserter(ss), "override.");
             }
         }
@@ -443,7 +443,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         fmt::format_to(std::back_inserter(ss), "params(");
 
         bool first = true;
-        for (auto &argSym : methodSymbol.data(ctx)->arguments()) {
+        for (auto &argSym : methodSymbol.data(ctx)->arguments) {
             // WARNING: This is doing raw string equality--don't cargo cult this!
             // You almost certainly want to compare NameRef's for equality instead.
             // We need to compare strings here because we're running with a frozen global state

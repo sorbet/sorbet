@@ -300,7 +300,7 @@ public:
 
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
 
-    TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
+    TypePtr _instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
 
     // If this TypePtr `is_proxy_type`, returns its underlying type.

@@ -10,7 +10,7 @@ namespace sorbet::cfg {
 unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     Timer timeit(ctx.state.tracer(), "cfg");
     ENFORCE(md.symbol.exists());
-    ENFORCE(!md.symbol.data(ctx)->isOverloaded());
+    ENFORCE(!md.symbol.data(ctx)->flags.isOverloaded);
     unique_ptr<CFG> res(new CFG); // private constructor
     res->file = ctx.file;
     res->symbol = md.symbol.data(ctx)->dealiasMethod(ctx);
@@ -27,7 +27,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         CFG::UnfreezeCFGLocalVariables unfreezeVars(*res);
         retSym = cctx.newTemporary(core::Names::returnMethodTemp());
 
-        auto selfClaz = md.symbol.data(ctx)->rebind();
+        auto selfClaz = md.symbol.data(ctx)->rebind;
         if (!selfClaz.exists()) {
             selfClaz = md.symbol.enclosingClass(ctx);
         }
@@ -38,8 +38,8 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         BasicBlock *presentCont = entry;
         BasicBlock *defaultCont = nullptr;
 
-        auto &argInfos = md.symbol.data(ctx)->arguments();
-        bool isAbstract = md.symbol.data(ctx)->isAbstract();
+        auto &argInfos = md.symbol.data(ctx)->arguments;
+        bool isAbstract = md.symbol.data(ctx)->flags.isAbstract;
         bool seenKeyword = false;
         int i = -1;
         for (auto &argExpr : md.args) {

@@ -11,7 +11,11 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
 
 void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::SymbolRef sym, core::FileRef filter,
                                          vector<unique_ptr<DocumentSymbol>> &out) {
-    for (auto mem : sym.membersStableOrderSlow(gs)) {
+    if (!sym.isClassOrModule()) {
+        return;
+    }
+
+    for (auto mem : sym.asClassOrModuleRef().data(gs)->membersStableOrderSlow(gs)) {
         if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
             bool foundThisFile = false;
             for (auto loc : mem.second.locs(gs)) {

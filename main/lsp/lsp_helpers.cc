@@ -72,7 +72,7 @@ constexpr int MAX_PRETTY_WIDTH = 80;
 string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
                           core::TypePtr retType, const core::TypeConstraint *constraint) {
     ENFORCE(method.exists());
-    ENFORCE(method.data(gs)->dealias(gs) == method);
+    ENFORCE(method.data(gs)->dealiasMethod(gs) == method);
     // handle this case anyways so that we don't crash in prod when this method is mis-used
     if (!method.exists()) {
         return "";
@@ -88,26 +88,23 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     vector<string> flags;
     auto sym = method.data(gs);
     string sigCall = "sig";
-    if (sym->isMethod()) {
-        if (sym->isFinalMethod()) {
-            sigCall = "sig(:final)";
-        }
-        if (sym->isAbstract()) {
-            flags.emplace_back("abstract");
-        }
-        if (sym->isOverridable()) {
-            flags.emplace_back("overridable");
-        }
-        if (sym->isOverride()) {
-            flags.emplace_back("override");
-        }
-        for (auto &argSym : method.data(gs)->arguments()) {
-            // Don't display synthetic arguments (like blk).
-            if (!argSym.isSyntheticBlockArgument()) {
-                typeAndArgNames.emplace_back(
-                    absl::StrCat(argSym.argumentName(gs), ": ",
-                                 getResultType(gs, argSym.type, method, receiver, constraint).show(gs)));
-            }
+    if (sym->flags.isFinal) {
+        sigCall = "sig(:final)";
+    }
+    if (sym->flags.isAbstract) {
+        flags.emplace_back("abstract");
+    }
+    if (sym->flags.isOverridable) {
+        flags.emplace_back("overridable");
+    }
+    if (sym->flags.isOverride) {
+        flags.emplace_back("override");
+    }
+    for (auto &argSym : method.data(gs)->arguments) {
+        // Don't display synthetic arguments (like blk).
+        if (!argSym.isSyntheticBlockArgument()) {
+            typeAndArgNames.emplace_back(absl::StrCat(
+                argSym.argumentName(gs), ": ", getResultType(gs, argSym.type, method, receiver, constraint).show(gs)));
         }
     }
 
@@ -143,9 +140,9 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method) {
     auto methodData = method.data(gs);
 
     string visibility = "";
-    if (methodData->isMethodPrivate()) {
+    if (methodData->flags.isPrivate) {
         visibility = "private ";
-    } else if (methodData->isMethodProtected()) {
+    } else if (methodData->flags.isProtected) {
         visibility = "protected ";
     }
 
@@ -156,12 +153,11 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method) {
         methodName = methodNameRef.toString(gs);
     }
     string methodNamePrefix = "";
-    if (methodData->owner.exists() && methodData->owner.isClassOrModule() &&
-        methodData->owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()) {
+    if (methodData->owner.exists() && methodData->owner.data(gs)->attachedClass(gs).exists()) {
         methodNamePrefix = "self.";
     }
     vector<string> prettyArgs;
-    const auto &arguments = methodData->dealias(gs).asMethodRef().data(gs)->arguments();
+    const auto &arguments = methodData->dealiasMethod(gs).data(gs)->arguments;
     ENFORCE(!arguments.empty(), "Should have at least a block arg");
     for (const auto &argSym : arguments) {
         // Don't display synthetic arguments (like blk).
@@ -213,9 +209,9 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method) {
 
 string prettyTypeForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
                            const core::TypePtr &retType, const core::TypeConstraint *constraint) {
-    return fmt::format(
-        "{}\n{}", prettySigForMethod(gs, method.data(gs)->dealias(gs).asMethodRef(), receiver, retType, constraint),
-        prettyDefForMethod(gs, method));
+    return fmt::format("{}\n{}",
+                       prettySigForMethod(gs, method.data(gs)->dealiasMethod(gs), receiver, retType, constraint),
+                       prettyDefForMethod(gs, method));
 }
 
 string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant) {

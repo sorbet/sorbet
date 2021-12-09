@@ -380,7 +380,7 @@ CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cf
     TrackCaptures usage(aliases, blockLevels);
 
     int argId = -1;
-    auto &methodArguments = cfg.symbol.data(cs)->arguments();
+    auto &methodArguments = cfg.symbol.data(cs)->arguments;
     for (auto &arg : mdef.args) {
         argId += 1;
         ast::Local const *local = nullptr;
@@ -392,7 +392,7 @@ CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cf
         ENFORCE(local);
         auto localRef = cfg.enterLocal(local->localVariable);
         auto &argInfo = methodArguments[argId];
-        if (cfg.symbol.data(cs)->arguments()[argId].flags.isBlock) {
+        if (cfg.symbol.data(cs)->arguments[argId].flags.isBlock) {
             usage.blkArg = localRef;
         }
         usage.trackBlockArgument(cfg.entry(), localRef, argInfo.type);
@@ -499,9 +499,9 @@ llvm::DISubprogram *getDebugScope(CompilerState &cs, cfg::CFG &cfg, llvm::DIScop
     auto loc = cfg.symbol.data(cs)->loc();
 
     auto owner = cfg.symbol.data(cs)->owner;
-    std::string diName(owner.name(cs).shortName(cs));
+    std::string diName(owner.data(cs)->name.shortName(cs));
 
-    if (owner.isSingletonClass(cs)) {
+    if (owner.data(cs)->isSingletonClass(cs)) {
         diName += ".";
     } else {
         diName += "#";
@@ -1032,7 +1032,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
 
     // The method arguments are initialized here, while the block arguments are initialized when the blockCall header is
     // encountered in the loop below.
-    int numArgs = md.symbol.data(cs)->arguments().size();
+    int numArgs = md.symbol.data(cs)->arguments.size();
     argPresentVariables[0].resize(numArgs, cfg::LocalRef::noVariable());
 
     for (auto &b : cfg.basicBlocks) {

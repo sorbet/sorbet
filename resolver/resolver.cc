@@ -215,13 +215,15 @@ private:
     static core::SymbolRef resolveLhs(core::Context ctx, const shared_ptr<Nesting> &nesting, core::NameRef name) {
         Nesting *scope = nesting.get();
         while (scope != nullptr) {
-            auto lookup = scope->scope.findMember(ctx, name);
-            if (lookup.exists()) {
-                return lookup;
+            if (scope->scope.isClassOrModule()) {
+                auto lookup = scope->scope.asClassOrModuleRef().data(ctx)->findMember(ctx, name);
+                if (lookup.exists()) {
+                    return lookup;
+                }
             }
             scope = scope->parent.get();
         }
-        return nesting->scope.findMemberTransitive(ctx, name);
+        return nesting->scope.asClassOrModuleRef().data(ctx)->findMemberTransitive(ctx, name);
     }
 
     static bool isAlreadyResolved(core::Context ctx, const ast::ConstantLit &original) {
@@ -275,7 +277,10 @@ private:
                 return core::Symbols::noSymbol();
             }
             core::SymbolRef resolved = id->symbol.dealias(ctx);
-            core::SymbolRef result = resolved.findMember(ctx, c.cnst);
+            core::SymbolRef result;
+            if (resolved.isClassOrModule()) {
+                result = resolved.asClassOrModuleRef().data(ctx)->findMember(ctx, c.cnst);
+            }
 
             // Private constants are allowed to be resolved, when there is no scope set (the scope is checked above),
             // otherwise we should error out. Private constant references _are not_ enforced inside RBI files.
@@ -501,7 +506,7 @@ private:
         while (enclosingClass != core::Symbols::root()) {
             auto typeMembers = enclosingClass.data(ctx)->typeMembers();
             if (!typeMembers.empty()) {
-                enclosingTypeMember = typeMembers[0].asTypeMemberRef();
+                enclosingTypeMember = typeMembers[0];
                 break;
             }
             enclosingClass = enclosingClass.data(ctx)->owner.enclosingClass(ctx);
@@ -1521,7 +1526,8 @@ class ResolveTypeMembersAndFieldsWalk {
                 // Declaring a class instance variable
             } else if (job.atTopLevel && ctx.owner.name(ctx) == core::Names::initialize()) {
                 // Declaring a instance variable
-            } else if (ctx.owner.isMethod() && ctx.owner.owner(ctx).isSingletonClass(ctx) &&
+            } else if (ctx.owner.isMethod() &&
+                       ctx.owner.asMethodRef().data(ctx)->owner.data(ctx)->isSingletonClass(ctx) &&
                        !core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
                 // Declaring a class instance variable in a static method
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
@@ -2106,7 +2112,10 @@ class ResolveTypeMembersAndFieldsWalk {
                 return;
             }
 
-            auto newCurrent = current.findMember(ctx, member);
+            core::SymbolRef newCurrent;
+            if (current.isClassOrModule()) {
+                newCurrent = current.asClassOrModuleRef().data(ctx)->findMember(ctx, member);
+            }
             if (!newCurrent.exists()) {
                 if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                     auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.show(ctx);
@@ -2671,16 +2680,16 @@ private:
             // we cannot rely on method and symbol arguments being aligned, as method could have more arguments.
             // we roundtrip through original symbol that is stored in mdef.
             auto internalNameToLookFor = argSym.name;
-            auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->arguments(),
+            auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->arguments,
                                                  [&](const auto &arg) { return arg.name == internalNameToLookFor; });
-            ENFORCE(originalArgIt != mdef.symbol.data(ctx)->arguments().end());
-            auto realPos = originalArgIt - mdef.symbol.data(ctx)->arguments().begin();
+            ENFORCE(originalArgIt != mdef.symbol.data(ctx)->arguments.end());
+            auto realPos = originalArgIt - mdef.symbol.data(ctx)->arguments.begin();
             return ast::MK::arg2Local(mdef.args[realPos]);
         }
     }
 
     static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef) {
-        if (mdef.symbol.data(ctx)->isAbstract()) {
+        if (mdef.symbol.data(ctx)->flags.isAbstract) {
             if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
                 if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
                     e.setHeader("Abstract methods must not contain any code in their body");
@@ -2712,7 +2721,7 @@ private:
                     local = ast::cast_tree<ast::Local>(arg);
                 }
 
-                auto &info = mdef.symbol.data(ctx)->arguments()[argIdx];
+                auto &info = mdef.symbol.data(ctx)->arguments[argIdx];
                 if (info.flags.isKeyword) {
                     args.emplace_back(ast::MK::Symbol(local->loc, info.name));
                     args.emplace_back(local->deepCopy());
@@ -2738,7 +2747,7 @@ private:
     static void fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
                                   ParsedSig &sig, bool isOverloaded, const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
-        ENFORCE(isOverloaded || method.data(ctx)->arguments().size() == mdef.args.size());
+        ENFORCE(isOverloaded || method.data(ctx)->arguments.size() == mdef.args.size());
 
         if (!sig.seen.returns && !sig.seen.void_) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -2752,13 +2761,13 @@ private:
         }
 
         if (sig.seen.abstract) {
-            method.data(ctx)->setAbstract();
+            method.data(ctx)->flags.isAbstract = true;
         }
         if (sig.seen.incompatibleOverride) {
-            method.data(ctx)->setIncompatibleOverride();
+            method.data(ctx)->flags.isIncompatibleOverride = true;
         }
         if (!sig.typeArgs.empty()) {
-            method.data(ctx)->setGenericMethod();
+            method.data(ctx)->flags.isGenericMethod = true;
             for (auto &typeSpec : sig.typeArgs) {
                 if (typeSpec.type) {
                     auto name = ctx.state.freshNameUnique(core::UniqueNameKind::TypeVarName, typeSpec.name, 1);
@@ -2771,28 +2780,28 @@ private:
             }
         }
         if (sig.seen.overridable) {
-            method.data(ctx)->setOverridable();
+            method.data(ctx)->flags.isOverridable = true;
         }
         if (sig.seen.override_) {
-            method.data(ctx)->setOverride();
+            method.data(ctx)->flags.isOverride = true;
         }
         if (sig.seen.final) {
-            method.data(ctx)->setFinalMethod();
+            method.data(ctx)->flags.isFinal = true;
         }
         if (sig.seen.bind) {
-            method.data(ctx)->setReBind(sig.bind);
+            method.data(ctx)->rebind = sig.bind;
         }
 
         auto methodInfo = method.data(ctx);
 
         // Is this a signature for a method defined with argument forwarding syntax?
-        if (methodInfo->arguments().size() >= 3) {
+        if (methodInfo->arguments.size() >= 3) {
             // To match, the definition must have been desugared with at least 3 parameters named
             // `<fwd-args>`, `<fwd-kwargs>` and `<fwd-block>`
-            auto len = methodInfo->arguments().size();
-            auto l1 = getArgLocal(ctx, methodInfo->arguments()[len - 3], mdef, len - 3, isOverloaded)->localVariable;
-            auto l2 = getArgLocal(ctx, methodInfo->arguments()[len - 2], mdef, len - 2, isOverloaded)->localVariable;
-            auto l3 = getArgLocal(ctx, methodInfo->arguments()[len - 1], mdef, len - 1, isOverloaded)->localVariable;
+            auto len = methodInfo->arguments.size();
+            auto l1 = getArgLocal(ctx, methodInfo->arguments[len - 3], mdef, len - 3, isOverloaded)->localVariable;
+            auto l2 = getArgLocal(ctx, methodInfo->arguments[len - 2], mdef, len - 2, isOverloaded)->localVariable;
+            auto l3 = getArgLocal(ctx, methodInfo->arguments[len - 1], mdef, len - 1, isOverloaded)->localVariable;
             if (l1._name == core::Names::fwdArgs() && l2._name == core::Names::fwdKwargs() &&
                 l3._name == core::Names::fwdBlock()) {
                 if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -2813,7 +2822,7 @@ private:
 
         methodInfo->resultType = sig.returns;
         int i = -1;
-        for (auto &arg : methodInfo->arguments()) {
+        for (auto &arg : methodInfo->arguments) {
             ++i;
             auto local = getArgLocal(ctx, arg, mdef, i, isOverloaded);
             auto treeArgName = local->localVariable._name;
@@ -3127,7 +3136,7 @@ public:
                                                                i, sig.argsToKeep);
                 overloadSym.data(ctx)->setMethodVisibility(mdef.symbol.data(ctx)->methodVisibility());
                 if (i != sigs.size() - 1) {
-                    overloadSym.data(ctx)->setOverloaded();
+                    overloadSym.data(ctx)->flags.isOverloaded = true;
                 }
             } else {
                 overloadSym = mdef.symbol;

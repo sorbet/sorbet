@@ -984,7 +984,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     //  - When a method doesn't exist.
                     //
                     // In all of these cases, we bail out and skip the non-private checking.
-                    if (it->main.method.exists() && it->main.method.data(ctx)->isMethodPrivate() && !send.isPrivateOk) {
+                    if (it->main.method.exists() && it->main.method.data(ctx)->flags.isPrivate && !send.isPrivateOk) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PrivateMethod)) {
                             if (multipleComponents) {
                                 e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`",
@@ -1280,7 +1280,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         e.setHeader("Expected `{}` but found `{}` for block result type", expectedType.show(ctx),
                                     typeAndOrigin.type.show(ctx));
 
-                        const auto &bspec = i.link->result->main.method.data(ctx)->arguments().back();
+                        const auto &bspec = i.link->result->main.method.data(ctx)->arguments.back();
                         ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg");
                         e.addErrorSection(
                             core::TypeAndOrigins::explainExpected(ctx, expectedType, bspec.loc, "block result type"));

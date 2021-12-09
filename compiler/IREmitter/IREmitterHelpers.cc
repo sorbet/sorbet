@@ -43,7 +43,7 @@ string getFunctionNamePrefix(CompilerState &cs, core::ClassOrModuleRef sym) {
 } // namespace
 
 string IREmitterHelpers::getFunctionName(CompilerState &cs, core::MethodRef sym) {
-    auto owner = sym.data(cs)->owner.asClassOrModuleRef();
+    auto owner = sym.data(cs)->owner;
     auto maybeAttachedOwner = owner.data(cs)->attachedClass(cs);
     string prefix = "func_";
     if (maybeAttachedOwner.exists()) {
@@ -228,7 +228,7 @@ llvm::Value *IREmitterHelpers::maybeCheckReturnValue(CompilerState &cs, cfg::CFG
 
     // sorbet-runtime doesn't check this type for abstract methods, so we won't either.
     // TODO(froydnj): we should check this type.
-    if (!cfg.symbol.data(cs)->isAbstract()) {
+    if (!cfg.symbol.data(cs)->flags.isAbstract) {
         IREmitterHelpers::emitTypeTest(cs, builder, returnValue, expectedType, "Return value");
     }
 
@@ -364,7 +364,7 @@ bool IREmitterHelpers::hasBlockArgument(CompilerState &cs, int blockId, core::Me
         return blockLink->argFlags.back().isBlock;
     }
 
-    auto &args = method.data(cs)->arguments();
+    auto &args = method.data(cs)->arguments;
     if (args.empty()) {
         return false;
     }
@@ -447,7 +447,7 @@ IREmitterHelpers::isFinalMethod(const core::GlobalState &gs, core::TypePtr recvT
         return std::nullopt;
     }
 
-    if (!funSym.data(gs)->isFinalMethod()) {
+    if (!funSym.data(gs)->flags.isFinal) {
         return std::nullopt;
     }
 

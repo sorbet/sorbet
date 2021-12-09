@@ -62,7 +62,7 @@ public:
     ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
-        if (m.symbol.data(ctx)->isOverloaded()) {
+        if (m.symbol.data(ctx)->flags.isOverloaded) {
             return tree;
         }
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m);

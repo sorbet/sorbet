@@ -110,7 +110,7 @@ private:
                         params.size());
 
                 for (int i = 0; i < members.size(); ++i) {
-                    auto memberVariance = members[i].asTypeMemberRef().data(ctx)->variance();
+                    auto memberVariance = members[i].data(ctx)->variance();
                     auto typeArg = params[i];
 
                     // The polarity used to check the parameter is negated
@@ -148,7 +148,10 @@ private:
                         }
                     } else {
                         if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::InvalidVariance)) {
-                            auto flavor = paramData->owner.isSingletonClass(ctx) ? "type_template" : "type_member";
+                            auto flavor = paramData->owner.isClassOrModule() &&
+                                                  paramData->owner.asClassOrModuleRef().data(ctx)->isSingletonClass(ctx)
+                                              ? "type_template"
+                                              : "type_member";
 
                             auto paramName = paramData->name.show(ctx);
 
@@ -196,7 +199,7 @@ public:
         // context.
         const Polarity negated = negatePolarity(polarity);
 
-        for (auto &arg : methodData->arguments()) {
+        for (auto &arg : methodData->arguments) {
             if (arg.type != nullptr) {
                 validatePolarity(arg.loc, ctx, negated, arg.type);
             }

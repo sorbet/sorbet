@@ -184,7 +184,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
             // Have to find the superMethod in sourceGS, because otherwise the `isAbstract` bit won't be set
             auto sourceSuperMethod = sourceClass.data(sourceGS)->findMethodTransitive(
                 sourceGS, rbiNameToSourceName(sourceGS, rbiGS, rbiEntryName));
-            if (sourceSuperMethod.exists() && !sourceSuperMethod.data(sourceGS)->isAbstract()) {
+            if (sourceSuperMethod.exists() && !sourceSuperMethod.data(sourceGS)->flags.isAbstract) {
                 // Sorbet will fall back to dispatching to the parent method, which might have a sig.
                 // But if the parent is abstract, and we don't serialize a method, Sorbet will
                 // complain about the method not being implemented when it was, just not visibly.
@@ -222,7 +222,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
         auto isSingleton = rbiClass.data(rbiGS)->isSingletonClass(rbiGS);
         outfile.fmt("  def {}{}(", isSingleton ? "self." : "", rbiEntryShortName);
 
-        auto &rbiParameters = rbiEntry.data(rbiGS)->arguments();
+        auto &rbiParameters = rbiEntry.data(rbiGS)->arguments;
         if (rbiParameters.size() == 3 && rbiParameters[1].name == core::Names::fwdKwargs()) {
             // The positional and block parameters get their names normalized to make overload
             // checking easier. The only reliable way to detect `...` syntax is by looking at the

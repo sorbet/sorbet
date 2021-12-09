@@ -339,7 +339,7 @@ string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
         ++i;
         if (i < this->klass.data(gs)->typeMembers().size()) {
             auto tyMem = this->klass.data(gs)->typeMembers()[i];
-            fmt::format_to(std::back_inserter(buf), "{}{} = {}\n", twiceNestedTabs, tyMem.name(gs).showRaw(gs),
+            fmt::format_to(std::back_inserter(buf), "{}{} = {}\n", twiceNestedTabs, tyMem.data(gs)->name.showRaw(gs),
                            targ.toStringWithTabs(gs, tabs + 3));
         } else {
             // this happens if we try to print type before resolver has processed stdlib
@@ -408,10 +408,10 @@ string AppliedType::show(const GlobalState &gs) const {
     }
     auto it = targs.begin();
     for (auto typeMember : typeMembers) {
-        auto tm = typeMember.asTypeMemberRef();
+        auto tm = typeMember;
         if (tm.data(gs)->isFixed()) {
             it = targs.erase(it);
-        } else if (typeMember.name(gs) == core::Names::Constants::AttachedClass()) {
+        } else if (typeMember.data(gs)->name == core::Names::Constants::AttachedClass()) {
             it = targs.erase(it);
         } else if (this->klass == Symbols::Hash() && typeMember == typeMembers.back()) {
             it = targs.erase(it);

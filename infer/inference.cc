@@ -22,10 +22,10 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     auto guessTypes = true;
     unique_ptr<core::TypeConstraint> _constr;
     core::TypeConstraint *constr = &core::TypeConstraint::EmptyFrozenConstraint;
-    if (cfg->symbol.data(ctx)->isGenericMethod()) {
+    if (cfg->symbol.data(ctx)->flags.isGenericMethod) {
         _constr = make_unique<core::TypeConstraint>();
         constr = _constr.get();
-        for (core::SymbolRef typeArgument : cfg->symbol.data(ctx)->typeArguments()) {
+        for (core::SymbolRef typeArgument : cfg->symbol.data(ctx)->typeArguments) {
             constr->rememberIsSubtype(ctx, typeArgument.asTypeArgumentRef().data(ctx)->resultType,
                                       core::make_type<core::SelfTypeParam>(typeArgument));
         }
@@ -50,7 +50,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             constr = _constr.get();
             auto returnTypeVar = core::Symbols::
                 Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant();
-            InlinedVector<core::SymbolRef, 4> domainTemp;
+            InlinedVector<core::TypeArgumentRef, 4> domainTemp;
             domainTemp.emplace_back(returnTypeVar);
             methodReturnType = returnTypeVar.data(ctx)->resultType;
 
@@ -62,9 +62,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         auto enclosingClass = cfg->symbol.enclosingClass(ctx);
         methodReturnType = core::Types::instantiate(
             ctx,
-            core::Types::resultTypeAsSeenFrom(ctx, cfg->symbol.data(ctx)->resultType,
-                                              cfg->symbol.data(ctx)->owner.asClassOrModuleRef(), enclosingClass,
-                                              enclosingClass.data(ctx)->selfTypeArgs(ctx)),
+            core::Types::resultTypeAsSeenFrom(ctx, cfg->symbol.data(ctx)->resultType, cfg->symbol.data(ctx)->owner,
+                                              enclosingClass, enclosingClass.data(ctx)->selfTypeArgs(ctx)),
             *constr);
         methodReturnType = core::Types::replaceSelfType(ctx, methodReturnType, enclosingClass.data(ctx)->selfType(ctx));
     }

@@ -26,22 +26,16 @@ unique_ptr<ResponseError> makeInvalidRequestError(core::SymbolRef symbol, const 
 
 const MethodImplementationResults findMethodImplementations(const core::GlobalState &gs, core::MethodRef method) {
     MethodImplementationResults res;
-    if (!method.data(gs)->isMethod() || !method.data(gs)->isAbstract()) {
+    if (!method.data(gs)->flags.isAbstract) {
         res.error = makeInvalidRequestError(method, gs);
         return res;
     }
 
     vector<core::Loc> locations;
     auto owner = method.data(gs)->owner;
-    if (!owner.isClassOrModule()) {
-        res.error = makeInvalidParamsError("Abstract method can only be inside a class or module");
-        return res;
-    }
-
-    auto owningClassSymbolRef = owner.asClassOrModuleRef();
     auto includeOwner = false;
     // Scans whole symbol table. This is slow, and we might need to make this faster eventually.
-    auto childClasses = getSubclassesSlow(gs, owningClassSymbolRef, includeOwner);
+    auto childClasses = getSubclassesSlow(gs, owner, includeOwner);
     auto methodName = method.data(gs)->name;
     for (const auto &childClass : childClasses) {
         auto methodImplementation = childClass.data(gs)->findMethod(gs, methodName);
@@ -53,12 +47,9 @@ const MethodImplementationResults findMethodImplementations(const core::GlobalSt
 }
 
 core::MethodRef findOverridedMethod(const core::GlobalState &gs, const core::MethodRef method) {
-    auto ownerClass = method.data(gs)->owner.asClassOrModuleRef();
+    auto ownerClass = method.data(gs)->owner;
 
     for (auto mixin : ownerClass.data(gs)->mixins()) {
-        if (!mixin.data(gs)->isClassOrModule() && !mixin.data(gs)->isAbstract()) {
-            continue;
-        }
         return mixin.data(gs)->findMethod(gs, method.data(gs)->name);
     }
     return core::Symbols::noMethod();
@@ -98,7 +89,7 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
 
         auto method = maybeMethod.asMethodRef();
         core::MethodRef overridedMethod = method;
-        if (method.data(gs)->isOverride()) {
+        if (method.data(gs)->flags.isOverride) {
             overridedMethod = findOverridedMethod(gs, method);
         }
         auto locationsOrError = findMethodImplementations(gs, overridedMethod);
@@ -139,7 +130,7 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
 
         auto calledMethod = mainResponse.method;
         auto overridedMethod = calledMethod;
-        if (calledMethod.data(gs)->isOverride()) {
+        if (calledMethod.data(gs)->flags.isOverride) {
             overridedMethod = findOverridedMethod(gs, overridedMethod);
         }
 
