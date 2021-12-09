@@ -195,16 +195,17 @@ public:
 
     SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const;
 
-    // dealias?
-
-    Flags flags;
     NameRef name;
     ClassOrModuleRef owner;
     TypePtr resultType;
 
 private:
     InlinedVector<Loc, 2> locs_;
+
+public:
+    Flags flags;
 };
+CheckSize(Field, 64, 8);
 
 class Symbol final {
 public:
