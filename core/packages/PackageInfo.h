@@ -47,6 +47,8 @@ public:
                                                                core::NameRef name) const = 0;
     virtual bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const = 0;
 
+    virtual core::ClassOrModuleRef getPrivateModule(const core::GlobalState &gs) const = 0;
+
     // Utilities:
 
     static bool isPackageModule(const core::GlobalState &gs, core::ClassOrModuleRef klass);

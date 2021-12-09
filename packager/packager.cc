@@ -261,6 +261,10 @@ public:
         return false;
     }
 
+    core::ClassOrModuleRef getPrivateModule(const core::GlobalState &gs) const {
+        return internalModule(gs, false);
+    }
+
     PackageInfoImpl() = default;
     explicit PackageInfoImpl(const PackageInfoImpl &) = default;
     PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;
@@ -1346,10 +1350,10 @@ bool checkContainsAllPackages(const core::GlobalState &gs, const vector<ast::Par
 //
 // ...for self-mapping, to __package.rb files to set up the package namespace.
 ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
-    ast::ClassDef::RHS_store importedPackages;
-    ast::ClassDef::RHS_store testImportedPackages;
-    ast::ClassDef::RHS_store publicMapping;
-    ast::ClassDef::RHS_store publicTestMapping;
+    // ast::ClassDef::RHS_store importedPackages;
+    // ast::ClassDef::RHS_store testImportedPackages;
+    // ast::ClassDef::RHS_store publicMapping;
+    // ast::ClassDef::RHS_store publicTestMapping;
 
     const auto &packageDB = ctx.state.packageDB();
     auto &absPkg = packageDB.getPackageForFile(ctx, file.file);
@@ -1358,7 +1362,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
         // The correct course of action is to abort the transform.
         return file;
     }
-    auto &package = PackageInfoImpl::from(absPkg);
+    // auto &package = PackageInfoImpl::from(absPkg);
 
     // Sanity check: __package.rb files _must_ be typed: strict
     if (file.file.data(ctx).originalSigil < core::StrictLevel::Strict) {
@@ -1367,6 +1371,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
         }
     }
 
+    /*
     {
         ImportTreeBuilder treeBuilder(package);
 
@@ -1407,6 +1412,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
     rootKlass.rhs.emplace_back(move(testPackageNamespace));
     rootKlass.rhs.emplace_back(move(publicMappingNamespace));
     rootKlass.rhs.emplace_back(move(publicTestMappingNamespace));
+    */
 
     return file;
 }

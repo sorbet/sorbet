@@ -56,6 +56,11 @@ public:
         return false;
     }
 
+    core::ClassOrModuleRef getPrivateModule(const core::GlobalState &gs) const {
+        notImplemented();
+        return core::Symbols::noClassOrModule();
+    }
+
     ~NonePackage() {}
 
 private:
@@ -77,6 +82,7 @@ UnfreezePackages::UnfreezePackages(PackageDB &db) : db(db) {
 
 UnfreezePackages::~UnfreezePackages() {
     ENFORCE(!db.frozen);
+    db.buildRevNames();
     db.writerThread = std::thread::id();
     db.frozen = true;
     // Note in the future we may want to change the data structures involved in a way that requires
@@ -178,11 +184,36 @@ PackageDB PackageDB::deepCopy() const {
     result.extraPackageFilesDirectoryPrefixes_ = this->extraPackageFilesDirectoryPrefixes_;
     result.packagesByPathPrefix = this->packagesByPathPrefix;
     result.mangledNames = this->mangledNames;
+
+    result.buildRevNames(); // TODO
     return result;
 }
 
 UnfreezePackages PackageDB::unfreeze() {
     return UnfreezePackages(*this);
+}
+
+PkgTrie PkgTrie::deepCopy() const {
+    ENFORCE(false, "TODO");
+    return PkgTrie{};
+}
+
+void PackageDB::buildRevNames() {
+    revNames_ = PkgTrie{}; // clear it
+
+    for (auto pkgName : packages()) {
+        auto &nameParts = getPackageInfo(pkgName).fullName();
+        auto *node = &revNames_;
+        for (auto it = nameParts.rbegin(); it != nameParts.rend(); ++it) {
+            auto &child = node->children[*it];
+            if (child == nullptr) {
+                child = make_unique<PkgTrie>();
+            }
+            node = child.get();
+        }
+        ENFORCE(!node->pkgName.exists(), "Conflict!");
+        node->pkgName = pkgName;
+    }
 }
 
 } // namespace sorbet::core::packages

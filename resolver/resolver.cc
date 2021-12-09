@@ -213,11 +213,19 @@ private:
     vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
 
     static core::SymbolRef resolveLhs(core::Context ctx, const shared_ptr<Nesting> &nesting, core::NameRef name) {
+        // TODO LHS needs to handle pkg search too
         Nesting *scope = nesting.get();
         while (scope != nullptr) {
             auto lookup = scope->scope.findMember(ctx, name);
             if (lookup.exists()) {
                 return lookup;
+            }
+            auto pkgScope = resolveViaPackage(ctx, scope->scope.asClassOrModuleRef());
+            if (pkgScope.exists()) {
+                lookup = pkgScope.findMember(ctx, name);
+                if (lookup.exists()) {
+                    return lookup;
+                }
             }
             scope = scope->parent.get();
         }
@@ -256,8 +264,41 @@ private:
         return !checker.seenUnresolved;
     }
 
+    static core::SymbolRef resolveViaPackage(core::Context ctx, core::ClassOrModuleRef scope) {
+        if (ctx.state.packageDB().empty()) {
+            return core::Symbols::noClassOrModule();
+        }
+        auto *trie = &ctx.state.packageDB().revNames();
+        while (trie != nullptr && scope.exists() && scope != core::Symbols::root() &&
+               !scope.data(ctx)->name.isPackagerName(ctx)) {
+            auto childIt = trie->children.find(scope.data(ctx)->name);
+            if (childIt == trie->children.end()) {
+                trie = nullptr;
+                break;
+            } else {
+                trie = childIt->second.get();
+            }
+
+            scope = scope.data(ctx)->owner.asClassOrModuleRef();
+        }
+        // TODO: test NS handling
+        // TODO: Enforce pkg import visibility
+        // TODO: Enforce export visibility
+
+        if (trie == nullptr || !trie->pkgName.exists()) {
+            return core::Symbols::noClassOrModule();
+        }
+        auto &pkg = ctx.state.packageDB().getPackageInfo(trie->pkgName);
+        core::SymbolRef sym = pkg.getPrivateModule(ctx);
+        for (auto name : pkg.fullName()) { // TODO this search could be done once per-package
+            sym = core::SymbolRef(sym).findMember(ctx, name);
+        }
+        ENFORCE(sym.exists());
+        return sym;
+    }
+
     static core::SymbolRef resolveConstant(core::Context ctx, const shared_ptr<Nesting> &nesting,
-                                           const ast::UnresolvedConstantLit &c, bool &resolutionFailed) {
+                                           ast::UnresolvedConstantLit &c, bool &resolutionFailed) {
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             core::SymbolRef result = resolveLhs(ctx, nesting, c.cnst);
             return result;
@@ -276,6 +317,15 @@ private:
             }
             core::SymbolRef resolved = id->symbol.dealias(ctx);
             core::SymbolRef result = resolved.findMember(ctx, c.cnst);
+
+            if (!result.exists()) {
+                auto pkgScope = resolveViaPackage(ctx, sym.asClassOrModuleRef());
+                if (pkgScope.exists()) {
+                    resolved = pkgScope;
+                    id->symbol = resolved;
+                    result = resolved.findMember(ctx, c.cnst);
+                }
+            }
 
             // Private constants are allowed to be resolved, when there is no scope set (the scope is checked above),
             // otherwise we should error out. Private constant references _are not_ enforced inside RBI files.

@@ -18,6 +18,15 @@ public:
     ~UnfreezePackages();
 };
 
+class PkgTrie final {
+public:
+    UnorderedMap<core::NameRef, std::unique_ptr<PkgTrie>> children;
+
+    core::NameRef pkgName;
+
+    PkgTrie deepCopy() const;
+};
+
 class PackageDB final {
     friend class core::GlobalState;
 
@@ -35,6 +44,10 @@ public:
     PackageDB deepCopy() const;
 
     UnfreezePackages unfreeze();
+
+    const PkgTrie &revNames() const {
+        return revNames_;
+    }
 
     PackageDB() = default;
     PackageDB(const PackageDB &) = delete;
@@ -55,6 +68,9 @@ private:
     UnorderedMap<core::NameRef, std::unique_ptr<packages::PackageInfo>> packages_;
     UnorderedMap<std::string, core::NameRef> packagesByPathPrefix;
     std::vector<NameRef> mangledNames;
+
+    PkgTrie revNames_;
+    void buildRevNames();
 
     bool frozen = true;
     std::thread::id writerThread;
