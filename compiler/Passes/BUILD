@@ -13,7 +13,6 @@ cc_library(
     deps = [
         "//compiler/Core",
         "//compiler/IREmitter/Payload",
-        "//compiler/Names",
         "@spdlog",
     ],
 )

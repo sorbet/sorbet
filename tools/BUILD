@@ -100,7 +100,6 @@ compilation_database(
         "//proto:proto",
         "//compiler/ObjectFileEmitter:ObjectFileEmitter",
         "//compiler/Passes:Passes",
-        "//compiler/Names:Names",
         "//compiler/Linker:Linker",
         "//compiler/IREmitter/Payload:Payload",
         "//compiler/Core:Core",

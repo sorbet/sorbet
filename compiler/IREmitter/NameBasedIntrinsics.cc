@@ -19,7 +19,6 @@
 #include "compiler/IREmitter/MethodCallContext.h"
 #include "compiler/IREmitter/NameBasedIntrinsics.h"
 #include "compiler/IREmitter/Payload.h"
-#include "compiler/Names/Names.h"
 #include "core/Names.h"
 #include <string_view>
 using namespace std;

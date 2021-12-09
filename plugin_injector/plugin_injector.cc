@@ -21,7 +21,6 @@
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
 #include "compiler/IREmitter/Payload/PayloadLoader.h"
-#include "compiler/Names/Names.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 #include "core/ErrorQueue.h"
 #include "main/options/options.h"
@@ -178,9 +177,7 @@ public:
         this->forceCompiled = forceCompiled;
     }
 
-    virtual void run(core::MutableContext &ctx, ast::ClassDef *klass) const override {
-        compiler::Names::init(ctx);
-    };
+    virtual void run(core::MutableContext &ctx, ast::ClassDef *klass) const override{};
 
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg, ast::MethodDef &md) const override {
         if (!shouldCompile(gs, cfg.file)) {
