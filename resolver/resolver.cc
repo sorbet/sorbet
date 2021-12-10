@@ -291,9 +291,11 @@ private:
         auto &pkg = ctx.state.packageDB().getPackageInfo(trie->pkgName);
         core::SymbolRef sym = pkg.getPrivateModule(ctx);
         for (auto name : pkg.fullName()) { // TODO this search could be done once per-package
+            if (!sym.exists()) {
+                break;
+            }
             sym = core::SymbolRef(sym).findMember(ctx, name);
         }
-        ENFORCE(sym.exists());
         return sym;
     }
 
