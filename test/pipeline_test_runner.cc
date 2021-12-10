@@ -608,8 +608,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         newTrees.emplace_back(move(file));
     }
-
     trees = move(newTrees);
+    fast_sort(trees, [](auto &lhs, auto &rhs) { return lhs.file < rhs.file; });
+
     if (enablePackager) {
         trees = packager::Packager::runIncremental(*gs, move(trees));
         for (auto &tree : trees) {
