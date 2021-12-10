@@ -32,7 +32,8 @@ void processSource(core::GlobalState &cb, string str) {
     sorbet::core::UnfreezeSymbolTable st(cb);
     sorbet::core::UnfreezeFileTable ft(cb);
     core::FileRef fileId = cb.enterFile("<test>", str);
-    auto ast = parser::Parser::run(cb, fileId);
+    auto trace = false;
+    auto ast = parser::Parser::run(cb, fileId, trace);
     sorbet::core::MutableContext ctx(cb, core::Symbols::root(), fileId);
     auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(ast)), fileId};
     tree.tree = rewriter::Rewriter::run(ctx, move(tree.tree));
