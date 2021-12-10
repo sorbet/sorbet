@@ -9,11 +9,16 @@ using namespace std;
 namespace sorbet::autogen {
 
 const std::vector<u4> KNOWN_PROP_METHODS = {
-    core::Names::prop().rawId(),         core::Names::tokenProp().rawId(),
-    core::Names::tokenProp().rawId(),    core::Names::timestampedTokenProp().rawId(),
-    core::Names::createdProp().rawId(),  core::Names::updatedProp().rawId(),
-    core::Names::merchantProp().rawId(), core::Names::merchantTokenProp().rawId(),
-    core::Names::const_().rawId(), core::Names::encryptedProp().rawId(),
+    core::Names::prop().rawId(),
+    core::Names::tokenProp().rawId(),
+    core::Names::tokenProp().rawId(),
+    core::Names::timestampedTokenProp().rawId(),
+    core::Names::createdProp().rawId(),
+    core::Names::updatedProp().rawId(),
+    core::Names::merchantProp().rawId(),
+    core::Names::merchantTokenProp().rawId(),
+    core::Names::const_().rawId(),
+    core::Names::encryptedProp().rawId(),
     core::Names::bearerTokenProp().rawId(),
 };
 
@@ -90,7 +95,7 @@ class DSLAnalysisWalk {
                             result.emplace_back(PropInfoInternal{lit->asSymbol(ctx), std::move(send->args[1])});
                         }
                     } else {
-                      result.emplace_back(PropInfoInternal{lit->asSymbol(ctx), std::nullopt});
+                        result.emplace_back(PropInfoInternal{lit->asSymbol(ctx), std::nullopt});
                     }
                 }
 
@@ -114,17 +119,17 @@ class DSLAnalysisWalk {
                     auto *labelLit = ast::cast_tree<ast::Literal>(send->args[i]);
                     if (labelLit && labelLit->isSymbol(ctx)) {
                         if (labelLit->asSymbol(ctx) == core::Names::propPrefixOpt()) {
-                            auto propLit = ast::cast_tree_nonnull<ast::Literal>(send->args[i+1]);
+                            auto propLit = ast::cast_tree_nonnull<ast::Literal>(send->args[i + 1]);
                             if (propLit.isString(ctx)) {
                                 propPrefix = propLit.asString(ctx);
                             }
                         } else if (labelLit->asSymbol(ctx) == core::Names::optional()) {
-                            auto propLit = ast::cast_tree_nonnull<ast::Literal>(send->args[i+1]);
+                            auto propLit = ast::cast_tree_nonnull<ast::Literal>(send->args[i + 1]);
                             if (propLit.isTrue(ctx)) {
                                 optionalProp = true;
                             }
                         } else if (labelLit->asSymbol(ctx) == core::Names::timeForConsumedAt()) {
-                            auto propLit = ast::cast_tree_nonnull<ast::Literal>(send->args[i+1]);
+                            auto propLit = ast::cast_tree_nonnull<ast::Literal>(send->args[i + 1]);
                             if (propLit.isTrue(ctx)) {
                                 timeForConsumedAt = true;
                             }
@@ -136,9 +141,12 @@ class DSLAnalysisWalk {
                 core::NameRef versionPropName;
                 core::NameRef consumedAtPropName;
                 if (propPrefix.has_value()) {
-                    propName = ctx.state.enterNameConstant(absl::StrCat((*propPrefix).show(ctx), "_", propSuffix.show(ctx)));
-                    versionPropName = ctx.state.enterNameConstant(absl::StrCat((*propPrefix).show(ctx), "_", core::Names::bearerTokenVersion().show(ctx)));
-                    consumedAtPropName = ctx.state.enterNameConstant(absl::StrCat((*propPrefix).show(ctx), "_", core::Names::bearerTokenConsumedAt().show(ctx)));
+                    propName =
+                        ctx.state.enterNameConstant(absl::StrCat((*propPrefix).show(ctx), "_", propSuffix.show(ctx)));
+                    versionPropName = ctx.state.enterNameConstant(
+                        absl::StrCat((*propPrefix).show(ctx), "_", core::Names::bearerTokenVersion().show(ctx)));
+                    consumedAtPropName = ctx.state.enterNameConstant(
+                        absl::StrCat((*propPrefix).show(ctx), "_", core::Names::bearerTokenConsumedAt().show(ctx)));
                 } else {
                     propName = propSuffix;
                     versionPropName = core::Names::bearerTokenVersion();
@@ -150,13 +158,13 @@ class DSLAnalysisWalk {
                 if (optionalProp) {
                     ast::Send::ARGS_store args;
                     args.emplace_back(ast::MK::Constant(send->loc, core::Symbols::String()));
-                    typeExp = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()), core::Names::nilable(), 1,
-                                         std::move(args));
+                    typeExp = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()),
+                                            core::Names::nilable(), 1, std::move(args));
 
                     ast::Send::ARGS_store argsVer;
                     argsVer.emplace_back(ast::MK::Constant(send->loc, core::Symbols::Integer()));
-                    versionPropTypeExp = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()), core::Names::nilable(), 1,
-                                         std::move(argsVer));
+                    versionPropTypeExp = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()),
+                                                       core::Names::nilable(), 1, std::move(argsVer));
                 } else {
                     typeExp = ast::MK::Constant(send->loc, core::Symbols::String());
                     versionPropTypeExp = ast::MK::Constant(send->loc, core::Symbols::Integer());
@@ -180,12 +188,13 @@ class DSLAnalysisWalk {
                 if (lit && lit->isSymbol(ctx)) {
                     ast::Send::ARGS_store args;
                     args.emplace_back(ast::MK::Constant(send->loc, core::Symbols::String()));
-                    auto typeExp = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()), core::Names::nilable(), 1,
-                                         std::move(args));
+                    auto typeExp = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()),
+                                                 core::Names::nilable(), 1, std::move(args));
                     core::NameRef name = lit->asSymbol(ctx);
 
                     core::NameRef encryptedName = ctx.state.enterNameConstant(absl::StrCat(ENCRYPTED_, name.show(ctx)));
-                    auto typeExpEnc = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()), core::Names::untyped(), 0, {});
+                    auto typeExpEnc = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()),
+                                                    core::Names::untyped(), 0, {});
 
                     result.emplace_back(PropInfoInternal{name, std::move(typeExp)});
                     result.emplace_back(PropInfoInternal{encryptedName, std::move(typeExpEnc)});
@@ -203,12 +212,14 @@ class DSLAnalysisWalk {
                 break;
             }
             case core::Names::createdProp().rawId(): {
-                result.emplace_back(PropInfoInternal{core::Names::created(), ast::MK::Constant(send->loc, core::Symbols::Float())});
+                result.emplace_back(
+                    PropInfoInternal{core::Names::created(), ast::MK::Constant(send->loc, core::Symbols::Float())});
 
                 break;
             }
             case core::Names::updatedProp().rawId(): {
-                result.emplace_back(PropInfoInternal{core::Names::updated(), ast::MK::Constant(send->loc, core::Symbols::Float())});
+                result.emplace_back(
+                    PropInfoInternal{core::Names::updated(), ast::MK::Constant(send->loc, core::Symbols::Float())});
 
                 break;
             }
@@ -378,7 +389,8 @@ public:
             }
 
             auto &sym = cnst->symbol;
-            auto name = (!sym.isClassOrModule() || sym != core::Symbols::StubModule()) ? symbolName(ctx, sym) : constantName(ctx, *cnst);
+            auto name = (!sym.isClassOrModule() || sym != core::Symbols::StubModule()) ? symbolName(ctx, sym)
+                                                                                       : constantName(ctx, *cnst);
             dslInfo[curScope].model = std::move(name);
         }
 

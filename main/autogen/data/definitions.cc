@@ -238,7 +238,8 @@ mergeAndFilterGlobalDSLInfo(const core::GlobalState &gs,
             queue.insert(queue.end(), curAncstInfo->second.ancestors.begin(), curAncstInfo->second.ancestors.end());
         }
 
-        if (allAncestors.find(CHALK_ODM_MODEL) != allAncestors.end() && info.model.empty() && allAncestors.find(IMMUTABLE_ARCHIVE_RECORD) == allAncestors.end()) {
+        if (allAncestors.find(CHALK_ODM_MODEL) != allAncestors.end() && info.model.empty() &&
+            allAncestors.find(IMMUTABLE_ARCHIVE_RECORD) == allAncestors.end()) {
             // Models
             for (const std::vector<core::NameRef> &ancst : allAncestors) {
                 auto ancstInfoIt = globalDSLInfo.find(ancst);
@@ -266,7 +267,7 @@ mergeAndFilterGlobalDSLInfo(const core::GlobalState &gs,
         const auto &model = info.model;
         if (model.empty() || result.find(model) == result.end()) {
             if (!model.empty() && result.find(model) == result.end()) {
-              notFoundModels++;
+                notFoundModels++;
             }
             // Not a mutator, or not one with a corresponding model
             continue;
