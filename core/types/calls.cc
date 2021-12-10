@@ -1824,22 +1824,13 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         vector<TypePtr> elems;
         elems.reserve(args.args.size());
-        bool isType = absl::c_any_of(args.args, [](auto ty) { return isa_type<MetaType>(ty->type); });
         int i = -1;
         for (auto &elem : args.args) {
             ++i;
-            if (isType) {
-                elems.emplace_back(unwrapType(gs, args.argLoc(i), elem->type));
-            } else {
-                elems.emplace_back(elem->type);
-            }
+            elems.emplace_back(elem->type);
         }
 
-        auto tuple = make_type<TupleType>(move(elems));
-        if (isType) {
-            tuple = make_type<MetaType>(move(tuple));
-        }
-        res.returnType = move(tuple);
+        res.returnType = make_type<TupleType>(move(elems));
     }
 } Magic_buildArray;
 
