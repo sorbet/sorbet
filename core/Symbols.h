@@ -305,10 +305,6 @@ public:
 
     class Flags {
     public:
-        // Synthesized by C++ code in a Rewriter pass
-        bool isRewriterSynthesized : 1;
-
-        // Class flags
         bool isClass : 1;
         bool isModule : 1;
         bool isAbstract : 1;
@@ -319,21 +315,21 @@ public:
         bool isPrivate : 1;
         bool isUndeclared : 1;
 
-        constexpr static uint16_t NUMBER_OF_FLAGS = 10;
+        constexpr static uint16_t NUMBER_OF_FLAGS = 9;
         constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
-            : isRewriterSynthesized(false), isClass(false), isModule(false), isAbstract(false), isInterface(false),
+            : isClass(false), isModule(false), isAbstract(false), isInterface(false),
             isLinearizationComputed(false), isFinal(false), isSealed(false), isPrivate(false), isUndeclared(false) {}
 
-        uint16_t serialize() const {
+        uint8_t serialize() const {
             // Can replace this with std::bit_cast in C++20
             auto rawBits = *reinterpret_cast<const uint8_t *>(this);
             // Mask the valid bits since uninitialized bits can be any value.
             return rawBits & VALID_BITS_MASK;
         }
     };
-    CheckSize(Flags, 2, 1);
+    CheckSize(Flags, 1, 1);
 
     Loc loc() const;
     const InlinedVector<Loc, 2> &locs() const;
@@ -344,8 +340,8 @@ public:
     std::vector<TypePtr> selfTypeArgs(const GlobalState &gs) const;
 
     // selfType and externalType return the type of an instance of this Symbol
-    // (which must be isClassOrModule()), if instantiated without specific type
-    // parameters, as seen from inside or outside of the class, respectively.
+    // if instantiated without specific type parameters, as seen from inside or
+    // outside of the class, respectively.
     TypePtr selfType(const GlobalState &gs) const;
     TypePtr externalType() const;
 
@@ -390,7 +386,7 @@ public:
 
     bool isSingletonClass(const GlobalState &gs) const;
 
-    inline bool isClassOrModuleModule() const {
+    inline bool isModule() const {
         if (flags.isModule) {
             return true;
         }
@@ -406,36 +402,8 @@ public:
         return flags.isModule || flags.isClass;
     }
 
-    inline bool isClassOrModuleClass() const {
-        return !isClassOrModuleModule();
-    }
-
-    inline bool isClassOrModuleAbstract() const {
-        return flags.isAbstract;
-    }
-
-    inline bool isClassOrModuleInterface() const {
-        return flags.isInterface;
-    }
-
-    inline bool isClassOrModuleLinearizationComputed() const {
-        return flags.isLinearizationComputed;
-    }
-
-    inline bool isClassOrModuleFinal() const {
-        return flags.isFinal;
-    }
-
-    inline bool isClassOrModuleSealed() const {
-        return flags.isSealed;
-    }
-
-    inline bool isClassOrModulePrivate() const {
-        return flags.isPrivate;
-    }
-
-    inline bool isClassOrModuleUndeclared() const {
-        return flags.isUndeclared;
+    inline bool isClass() const {
+        return !isModule();
     }
 
     inline void setIsModule(bool isModule) {
@@ -446,41 +414,6 @@ public:
             ENFORCE(!flags.isModule);
             flags.isClass = true;
         }
-    }
-
-    inline void setClassModuleUndeclared() {
-        flags.isUndeclared = true;
-    }
-
-    inline void setClassOrModuleAbstract() {
-        flags.isAbstract = true;
-    }
-
-    inline void setClassOrModuleInterface() {
-        flags.isInterface = true;
-    }
-
-    inline void setClassOrModuleLinearizationComputed() {
-        flags.isLinearizationComputed = true;
-    }
-
-    inline void setClassOrModuleFinal() {
-        flags.isFinal = true;
-    }
-
-    inline void setClassOrModuleSealed() {
-        flags.isSealed = true;
-    }
-
-    inline void setClassOrModulePrivate() {
-        flags.isPrivate = true;
-    }
-
-    inline void setRewriterSynthesized() {
-        flags.isRewriterSynthesized = true;
-    }
-    inline bool isRewriterSynthesized() {
-        return flags.isRewriterSynthesized;
     }
 
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;

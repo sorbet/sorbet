@@ -731,9 +731,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                   receiverLoc.source(gs).value());
                 }
             } else {
-                if (symbol.data(gs)->isClassOrModuleModule()) {
+                if (symbol.data(gs)->isModule()) {
                     auto objMeth = core::Symbols::Object().data(gs)->findMethodTransitive(gs, args.name);
-                    if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isClassOrModuleModule()) {
+                    if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isModule()) {
                         e.addErrorNote("Did you mean to `{}` in this module?",
                                        fmt::format("include {}", objMeth.data(gs)->owner.data(gs)->name.show(gs)));
                     }
@@ -3675,8 +3675,7 @@ public:
         // If at any point we ever change isSubType to transparently convert between sealed classes and a
         // union of subclasses, this code can go away. It's written like this now to limit the blast
         // radius of allocating large union types.
-        if (rhsSym.exists() && rhsSym.data(gs)->isClassOrModuleSealed() &&
-            rhsSym.data(gs)->hasSingleSealedSubclass(gs)) {
+        if (rhsSym.exists() && rhsSym.data(gs)->flags.isSealed && rhsSym.data(gs)->hasSingleSealedSubclass(gs)) {
             rhs = rhsSym.data(gs)->sealedSubclassesToUnion(gs);
         }
 
@@ -3746,8 +3745,7 @@ public:
         // If at any point we ever change isSubType to transparently convert between sealed classes and a
         // union of subclasses, this code can go away. It's written like this now to limit the blast
         // radius of allocating large union types.
-        if (rhsSym.exists() && rhsSym.data(gs)->isClassOrModuleSealed() &&
-            rhsSym.data(gs)->hasSingleSealedSubclass(gs)) {
+        if (rhsSym.exists() && rhsSym.data(gs)->flags.isSealed && rhsSym.data(gs)->hasSingleSealedSubclass(gs)) {
             rhs = rhsSym.data(gs)->sealedSubclassesToUnion(gs);
         }
 

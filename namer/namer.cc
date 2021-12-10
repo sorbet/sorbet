@@ -1118,7 +1118,7 @@ class SymbolDefiner {
         auto constant = ctx.state.lookupSymbol(owner, constantNameRef);
         if (constant.exists() && mod.name == core::Names::privateConstant()) {
             if (constant.isClassOrModule()) {
-                constant.asClassOrModuleRef().data(ctx)->setClassOrModulePrivate();
+                constant.asClassOrModuleRef().data(ctx)->flags.isPrivate = true;
             } else if (constant.isStaticField(ctx)) {
                 constant.asFieldRef().data(ctx)->flags.isStaticFieldPrivate = true;
             } else if (constant.isTypeMember()) {
@@ -1156,10 +1156,10 @@ class SymbolDefiner {
         }
 
         auto klassSymbol = symbol.asClassOrModuleRef();
-        if (klassSymbol.data(ctx)->isClassModuleSet() && isModule != klassSymbol.data(ctx)->isClassOrModuleModule()) {
+        if (klassSymbol.data(ctx)->isClassModuleSet() && isModule != klassSymbol.data(ctx)->isModule()) {
             if (auto e = ctx.state.beginError(declLoc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("`{}` was previously defined as a `{}`", symbol.show(ctx),
-                            klassSymbol.data(ctx)->isClassOrModuleModule() ? "module" : "class");
+                            klassSymbol.data(ctx)->isModule() ? "module" : "class");
 
                 for (auto loc : klassSymbol.data(ctx)->locs()) {
                     if (loc != declLoc) {
@@ -1215,11 +1215,11 @@ class SymbolDefiner {
         const auto fun = mod.name;
         auto symbolData = ctx.owner.asClassOrModuleRef().data(ctx);
         if (fun == core::Names::declareFinal()) {
-            symbolData->setClassOrModuleFinal();
-            symbolData->singletonClass(ctx).data(ctx)->setClassOrModuleFinal();
+            symbolData->flags.isFinal = true;
+            symbolData->singletonClass(ctx).data(ctx)->flags.isFinal = true;
         }
         if (fun == core::Names::declareSealed()) {
-            symbolData->setClassOrModuleSealed();
+            symbolData->flags.isSealed = true;
 
             auto classOfKlass = symbolData->singletonClass(ctx);
             auto sealedSubclasses =
@@ -1235,12 +1235,12 @@ class SymbolDefiner {
                 core::make_type<core::AppliedType>(core::Symbols::Set(), move(targs));
         }
         if (fun == core::Names::declareInterface() || fun == core::Names::declareAbstract()) {
-            symbolData->setClassOrModuleAbstract();
-            symbolData->singletonClass(ctx).data(ctx)->setClassOrModuleAbstract();
+            symbolData->flags.isAbstract = true;
+            symbolData->singletonClass(ctx).data(ctx)->flags.isAbstract = true;
         }
         if (fun == core::Names::declareInterface()) {
-            symbolData->setClassOrModuleInterface();
-            if (!symbolData->isClassOrModuleModule()) {
+            symbolData->flags.isInterface = true;
+            if (!symbolData->isModule()) {
                 if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InterfaceClass)) {
                     e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
                     e.replaceWith("Change `interface!` to `abstract!`", ctx.locAt(mod.loc), "abstract!");
@@ -1251,8 +1251,9 @@ class SymbolDefiner {
 
     core::FieldRef insertStaticField(core::MutableContext ctx, const FoundStaticField &staticField) {
         // forbid dynamic constant definition
-        if (!ctx.owner.isClassOrModule() && !ctx.owner.asClassOrModuleRef().data(ctx)->isRewriterSynthesized()) {
-            if (auto e = ctx.beginError(staticField.asgnLoc, core::errors::Namer::DynamicConstantAssignment)) {
+        if (!ctx.owner.isClassOrModule()) {
+            if (auto e = ctx.state.beginError(core::Loc(ctx.file, staticField.asgnLoc),
+                                              core::errors::Namer::DynamicConstantAssignment)) {
                 e.setHeader("Dynamic constant assignment");
             }
         }

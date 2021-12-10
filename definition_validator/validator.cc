@@ -274,13 +274,13 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
 
     // both of these match the behavior of the runtime checks, which will only allow public methods to be defined in
     // interfaces
-    if (klassData->isClassOrModuleInterface() && method.data(ctx)->flags.isPrivate) {
+    if (klassData->flags.isInterface && method.data(ctx)->flags.isPrivate) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
             e.setHeader("Interface method `{}` cannot be private", method.show(ctx));
         }
     }
 
-    if (klassData->isClassOrModuleInterface() && method.data(ctx)->flags.isProtected) {
+    if (klassData->flags.isInterface && method.data(ctx)->flags.isProtected) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
             e.setHeader("Interface method `{}` cannot be protected", method.show(ctx));
         }
@@ -288,7 +288,7 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
 
     if (method.data(ctx)->flags.isAbstract && klassData->isSingletonClass(ctx)) {
         auto attached = klassData->attachedClass(ctx);
-        if (attached.exists() && attached.data(ctx)->isClassOrModuleModule()) {
+        if (attached.exists() && attached.data(ctx)->isModule()) {
             if (auto e =
                     ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::StaticAbstractModuleMethod)) {
                 e.setHeader("Static methods in a module cannot be abstract");
@@ -377,7 +377,7 @@ core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef
 void validateFinalAncestorHelper(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ClassDef &classDef,
                                  const core::ClassOrModuleRef errMsgClass, const string_view verb) {
     for (const auto &mixin : klass.data(ctx)->mixins()) {
-        if (!mixin.data(ctx)->isClassOrModuleFinal()) {
+        if (!mixin.data(ctx)->flags.isFinal) {
             continue;
         }
         if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, mixin), core::errors::Resolver::FinalAncestor)) {
@@ -390,7 +390,7 @@ void validateFinalAncestorHelper(core::Context ctx, const core::ClassOrModuleRef
 
 void validateFinalMethodHelper(const core::GlobalState &gs, const core::ClassOrModuleRef klass,
                                const core::ClassOrModuleRef errMsgClass) {
-    if (!klass.data(gs)->isClassOrModuleFinal()) {
+    if (!klass.data(gs)->flags.isFinal) {
         return;
     }
     for (const auto [name, sym] : klass.data(gs)->members()) {
@@ -422,7 +422,7 @@ void validateFinal(core::Context ctx, const core::ClassOrModuleRef klass, const 
     const auto superClass = klass.data(ctx)->superClass();
     if (superClass.exists()) {
         auto superClassData = superClass.data(ctx);
-        if (superClassData->isClassOrModuleFinal()) {
+        if (superClassData->flags.isFinal) {
             if (auto e =
                     ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
                 e.setHeader("`{}` was declared as final and cannot be inherited by `{}`", superClass.show(ctx),
@@ -483,7 +483,7 @@ core::FileRef bestNonRBIFile(core::Context ctx, const core::ClassOrModuleRef kla
 void validateSealedAncestorHelper(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ClassDef &classDef,
                                   const core::ClassOrModuleRef errMsgClass, const string_view verb) {
     for (const auto &mixin : klass.data(ctx)->mixins()) {
-        if (!mixin.data(ctx)->isClassOrModuleSealed()) {
+        if (!mixin.data(ctx)->flags.isSealed) {
             continue;
         }
 
@@ -510,8 +510,7 @@ void validateSealedAncestorHelper(core::Context ctx, const core::ClassOrModuleRe
 
 void validateSealed(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ClassDef &classDef) {
     const auto superClass = klass.data(ctx)->superClass();
-
-    if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed()) {
+    if (superClass.exists() && superClass.data(ctx)->flags.isSealed) {
         auto file = bestNonRBIFile(ctx, klass);
 
         // Normally we would skip RBIs for the purpose of checking `sealed!`, but when running in stripe-packages mode
@@ -540,7 +539,7 @@ void validateSealed(core::Context ctx, const core::ClassOrModuleRef klass, const
 }
 
 void validateSuperClass(core::Context ctx, const core::ClassOrModuleRef sym, const ast::ClassDef &classDef) {
-    if (!sym.data(ctx)->isClassOrModuleClass()) {
+    if (!sym.data(ctx)->isClass()) {
         // In this case, a class with the same name as a module has been defined, and we'll already have raised an error
         // in the namer.
         return;
@@ -595,7 +594,7 @@ void validateUselessRequiredAncestors(core::Context ctx, const core::ClassOrModu
         if (data->derivesFrom(ctx, req.symbol)) {
             if (auto e = ctx.state.beginError(req.loc, core::errors::Resolver::UselessRequiredAncestor)) {
                 e.setHeader("`{}` is already {} by `{}`", req.symbol.show(ctx),
-                            req.symbol.data(ctx)->isClassOrModuleModule() ? "included" : "inherited", sym.show(ctx));
+                            req.symbol.data(ctx)->isModule() ? "included" : "inherited", sym.show(ctx));
             }
         }
     }
@@ -603,14 +602,14 @@ void validateUselessRequiredAncestors(core::Context ctx, const core::ClassOrModu
 
 void validateUnsatisfiedRequiredAncestors(core::Context ctx, const core::ClassOrModuleRef sym) {
     auto data = sym.data(ctx);
-    if (data->isClassOrModuleModule() || data->isClassOrModuleAbstract()) {
+    if (data->isModule() || data->flags.isAbstract) {
         return;
     }
     for (auto req : data->requiredAncestorsTransitive(ctx)) {
         if (sym != req.symbol && !data->derivesFrom(ctx, req.symbol)) {
             if (auto e = ctx.state.beginError(data->loc(), core::errors::Resolver::UnsatisfiedRequiredAncestor)) {
                 e.setHeader("`{}` must {} `{}` (required by `{}`)", sym.show(ctx),
-                            req.symbol.data(ctx)->isClassOrModuleModule() ? "include" : "inherit", req.symbol.show(ctx),
+                            req.symbol.data(ctx)->isModule() ? "include" : "inherit", req.symbol.show(ctx),
                             req.origin.show(ctx));
                 e.addErrorLine(req.loc, "required by `{}` here", req.origin.show(ctx));
             }
@@ -623,7 +622,7 @@ void validateUnsatisfiableRequiredAncestors(core::Context ctx, const core::Class
 
     vector<core::Symbol::RequiredAncestor> requiredClasses;
     for (auto ancst : data->requiredAncestorsTransitive(ctx)) {
-        if (ancst.symbol.data(ctx)->isClassOrModuleClass()) {
+        if (ancst.symbol.data(ctx)->isClass()) {
             requiredClasses.emplace_back(ancst);
         }
 
@@ -637,7 +636,7 @@ void validateUnsatisfiableRequiredAncestors(core::Context ctx, const core::Class
         }
     }
 
-    if (data->isClassOrModuleClass() && data->isClassOrModuleAbstract()) {
+    if (data->isClass() && data->flags.isAbstract) {
         for (auto ancst : requiredClasses) {
             if (!sym.data(ctx)->derivesFrom(ctx, ancst.symbol) && !ancst.symbol.data(ctx)->derivesFrom(ctx, sym)) {
                 if (auto e = ctx.state.beginError(data->loc(), core::errors::Resolver::UnsatisfiableRequiredAncestor)) {
@@ -663,7 +662,7 @@ void validateUnsatisfiableRequiredAncestors(core::Context ctx, const core::Class
                 if (auto e = ctx.state.beginError(data->loc(), core::errors::Resolver::UnsatisfiableRequiredAncestor)) {
                     e.setHeader("`{}` requires unrelated classes `{}` and `{}` making it impossible to {}",
                                 sym.show(ctx), ra1.symbol.show(ctx), ra2.symbol.show(ctx),
-                                data->isClassOrModuleModule() ? "include" : "inherit");
+                                data->isModule() ? "include" : "inherit");
                     e.addErrorLine(ra1.loc, "`{}` is required by `{}` here", ra1.symbol.show(ctx),
                                    ra1.origin.show(ctx));
                     e.addErrorLine(ra2.loc, "`{}` is required by `{}` here", ra2.symbol.show(ctx),
@@ -705,7 +704,7 @@ private:
             abstract.insert(abstract.end(), fromMixin.begin(), fromMixin.end());
         }
 
-        auto isAbstract = klass.data(gs)->isClassOrModuleAbstract();
+        auto isAbstract = klass.data(gs)->flags.isAbstract;
         if (isAbstract) {
             for (auto [name, sym] : klass.data(gs)->members()) {
                 if (sym.exists() && sym.isMethod() && sym.asMethodRef().data(gs)->flags.isAbstract) {
@@ -738,7 +737,7 @@ private:
     }
 
     void validateAbstract(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
-        if (sym.data(gs)->isClassOrModuleAbstract()) {
+        if (sym.data(gs)->flags.isAbstract) {
             return;
         }
         auto loc = sym.data(gs)->loc();

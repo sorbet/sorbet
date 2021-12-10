@@ -107,7 +107,7 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerInterfa
         // User called "Go to Implementation" from the abstract class reference
         auto classSymbol = constant->symbol.asClassOrModuleRef();
 
-        if (!classSymbol.data(gs)->isClassOrModuleAbstract()) {
+        if (!classSymbol.data(gs)->flags.isAbstract) {
             response->error = makeInvalidRequestError(classSymbol, gs);
             return response;
         }

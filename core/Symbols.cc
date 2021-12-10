@@ -170,7 +170,7 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
 }
 
 bool Symbol::derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const {
-    if (isClassOrModuleLinearizationComputed()) {
+    if (flags.isLinearizationComputed) {
         for (ClassOrModuleRef a : mixins()) {
             if (a == sym) {
                 return true;
@@ -499,10 +499,10 @@ void Symbol::addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index) {
 bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional<uint16_t> index) {
     // Note: Symbols without an explicit declaration may not have class or module set. They default to modules in
     // GlobalPass.cc. We also do not complain if the mixin is BasicObject.
-    bool isValidMixin = !sym.data(gs)->isClassModuleSet() || sym.data(gs)->isClassOrModuleModule() ||
-                        sym == core::Symbols::BasicObject();
+    bool isValidMixin =
+        !sym.data(gs)->isClassModuleSet() || sym.data(gs)->isModule() || sym == core::Symbols::BasicObject();
 
-    if (!isClassOrModuleLinearizationComputed()) {
+    if (!flags.isLinearizationComputed) {
         // Symbol hasn't been linearized yet, so add symbol unconditionally (order matters, so dupes are OK and
         // semantically important!)
         // This is the 99% common case.
@@ -585,7 +585,7 @@ namespace {
 MethodRef findConcreteMethodTransitiveInternal(const GlobalState &gs, ClassOrModuleRef owner, NameRef name,
                                                int maxDepth) {
     // We can support it before linearization but it's more code to do so.
-    ENFORCE(owner.data(gs)->isClassOrModuleLinearizationComputed());
+    ENFORCE(owner.data(gs)->flags.isLinearizationComputed);
 
     if (maxDepth == 0) {
         if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
@@ -663,7 +663,7 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
     if (result.exists()) {
         return result;
     }
-    if (isClassOrModuleLinearizationComputed()) {
+    if (flags.isLinearizationComputed) {
         for (auto it = this->mixins().begin(); it != this->mixins().end(); ++it) {
             ENFORCE(it->exists());
             result = it->data(gs)->findMember(gs, name);
@@ -1147,7 +1147,7 @@ string_view ClassOrModuleRef::showKind(const GlobalState &gs) const {
     auto sym = dataAllowingNone(gs);
     if (!sym->isClassModuleSet()) {
         return "class-or-module"sv;
-    } else if (sym->isClassOrModuleClass()) {
+    } else if (sym->isClass()) {
         return "class"sv;
     } else {
         return "module"sv;
@@ -1209,7 +1209,7 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
                        return showRaw ? name.showRaw(gs) : name.show(gs);
                    }));
 
-    if (sym->isClassOrModulePrivate()) {
+    if (sym->flags.isPrivate) {
         fmt::format_to(std::back_inserter(buf), " : private");
     }
     // root should have no locs. We used to have special handling here to hide locs on root
@@ -1670,7 +1670,7 @@ ClassOrModuleRef Symbol::topAttachedClass(const GlobalState &gs) const {
 }
 
 void Symbol::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass) {
-    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(ctx).show(ctx));
+    ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(ctx).show(ctx));
     ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", ref(ctx).show(ctx));
 
     // Avoid using a clobbered `this` pointer, as `singletonClass` can cause the symbol table to move.
@@ -1713,7 +1713,7 @@ void Symbol::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass)
 }
 
 const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
-    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(gs).show(gs));
+    ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(gs).show(gs));
     auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
     auto &result = sealedSubclasses.data(gs)->locs();
     ENFORCE(result.size() > 0);
@@ -1721,7 +1721,7 @@ const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
 }
 
 TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
-    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(gs).show(gs));
+    ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(gs).show(gs));
 
     auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
 
@@ -1757,12 +1757,12 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 }
 
 bool Symbol::hasSingleSealedSubclass(const GlobalState &gs) const {
-    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(gs).show(gs));
+    ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(gs).show(gs));
 
     auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
 
     // When the sealed type is a class, it must also be abstract for there to be a single subclass.
-    if (this->isClassOrModuleClass() && !this->isClassOrModuleAbstract()) {
+    if (this->isClass() && !this->flags.isAbstract) {
         return false;
     }
 

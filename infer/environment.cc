@@ -501,7 +501,7 @@ bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
     }
 
     // The Ruby stdlib has a Singleton module which lets people invent their own singletons.
-    return (sym.data(ctx)->derivesFrom(ctx, core::Symbols::Singleton()) && sym.data(ctx)->isClassOrModuleFinal());
+    return (sym.data(ctx)->derivesFrom(ctx, core::Symbols::Singleton()) && sym.data(ctx)->flags.isFinal);
 }
 
 } // namespace

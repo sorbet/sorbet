@@ -593,7 +593,7 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     p.putU4(what.owner.rawId());
     p.putU4(what.name.rawId());
     p.putU4(what.superClass_.id());
-    p.putU4(what.flags.serialize());
+    p.putU1(what.flags.serialize());
     p.putU4(what.mixins_.size());
     for (ClassOrModuleRef s : what.mixins_) {
         p.putU4(s.id());
@@ -630,7 +630,7 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
     result.name = NameRef::fromRaw(*gs, p.getU4());
     result.superClass_ = ClassOrModuleRef::fromRaw(p.getU4());
     Symbol::Flags flags;
-    uint16_t flagsRaw = static_cast<uint16_t>(p.getU4());
+    uint8_t flagsRaw = p.getU1();
     ENFORCE(sizeof(flagsRaw) == sizeof(flags));
     // Can replace this with std::bit_cast in C++20
     memcpy(&flags, &flagsRaw, sizeof(flags));

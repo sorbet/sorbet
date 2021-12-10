@@ -281,7 +281,7 @@ private:
             // Private constants are allowed to be resolved, when there is no scope set (the scope is checked above),
             // otherwise we should error out. Private constant references _are not_ enforced inside RBI files.
             if (result.exists() &&
-                ((result.isClassOrModule() && result.asClassOrModuleRef().data(ctx)->isClassOrModulePrivate()) ||
+                ((result.isClassOrModule() && result.asClassOrModuleRef().data(ctx)->flags.isPrivate) ||
                  (result.isStaticField(ctx) && result.asFieldRef().data(ctx)->flags.isStaticFieldPrivate)) &&
                 !ctx.file.data(ctx).isRBI()) {
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::PrivateConstantReferenced)) {
@@ -1011,7 +1011,7 @@ private:
 
         auto owner = todo.owner;
         auto send = todo.send;
-        if (!owner.isClassOrModule() || !owner.asClassOrModuleRef().data(gs)->isClassOrModuleModule()) {
+        if (!owner.isClassOrModule() || !owner.asClassOrModuleRef().data(gs)->isModule()) {
             if (auto e =
                     gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
                 e.setHeader("`{}` can only be declared inside a module, not a class", send->fun.show(gs));
@@ -1053,7 +1053,7 @@ private:
                 }
                 continue;
             }
-            if (id->symbol.asClassOrModuleRef().data(gs)->isClassOrModuleClass()) {
+            if (id->symbol.asClassOrModuleRef().data(gs)->isClass()) {
                 if (auto e =
                         gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
                     e.setHeader("`{}` is a class, not a module; Only modules may be mixins", id->symbol.show(gs));
@@ -1105,7 +1105,7 @@ private:
         auto send = todo.send;
         auto loc = core::Loc(todo.file, send->loc);
 
-        if (!owner.data(gs)->isClassOrModuleModule() && !owner.data(gs)->isClassOrModuleAbstract()) {
+        if (!owner.data(gs)->isModule() && !owner.data(gs)->flags.isAbstract) {
             if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidRequiredAncestor)) {
                 e.setHeader("`{}` can only be declared inside a module or an abstract class", send->fun.show(gs));
             }
@@ -1175,7 +1175,7 @@ private:
         ENFORCE(job.ancestor->symbol.exists(), "Ancestor must exist, or we can't check whether it's sealed.");
         auto ancestorSym = job.ancestor->symbol.dealias(ctx).asClassOrModuleRef();
 
-        if (!ancestorSym.data(ctx)->isClassOrModuleSealed()) {
+        if (!ancestorSym.data(ctx)->flags.isSealed) {
             return;
         }
         Timer timeit(ctx.state.tracer(), "resolver.registerSealedSubclass");
@@ -3827,7 +3827,7 @@ void verifyLinearizationComputed(const core::GlobalState &gs) {
     DEBUG_ONLY(for (auto i = 1; i < gs.classAndModulesUsed(); i++) {
         core::ClassOrModuleRef sym(gs, i);
         // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
-        ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), "{}", sym.toString(gs));
+        ENFORCE_NO_TIMER(sym.data(gs)->flags.isLinearizationComputed, "{}", sym.toString(gs));
     })
 }
 

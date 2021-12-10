@@ -601,7 +601,7 @@ TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
         categoryCounterInc("glb.<class>.collapsed", "yes");
         return t2;
     } else {
-        if (sym1.data(gs)->isClassOrModuleClass() && sym2.data(gs)->isClassOrModuleClass()) {
+        if (sym1.data(gs)->isClass() && sym2.data(gs)->isClass()) {
             categoryCounterInc("glb.<class>.collapsed", "bottom");
             return Types::bottom();
         }
@@ -885,14 +885,14 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     if (auto *a1 = cast_type<AppliedType>(t1)) {
         auto *a2 = cast_type<AppliedType>(t2);
         if (a2 == nullptr) {
-            if (a1->klass.data(gs)->isClassOrModuleModule() || !isa_type<ClassType>(t2)) {
+            if (a1->klass.data(gs)->isModule() || !isa_type<ClassType>(t2)) {
                 return AndType::make_shared(t1, t2);
             }
             auto c2 = cast_type_nonnull<ClassType>(t2);
             if (a1->klass.data(gs)->derivesFrom(gs, c2.symbol)) {
                 return t1;
             }
-            if (c2.symbol.data(gs)->isClassOrModuleModule()) {
+            if (c2.symbol.data(gs)->isModule()) {
                 return AndType::make_shared(t1, t2);
             }
             return Types::bottom();
@@ -900,7 +900,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         bool rtl = a1->klass == a2->klass || a1->klass.data(gs)->derivesFrom(gs, a2->klass);
         bool ltr = !rtl && a2->klass.data(gs)->derivesFrom(gs, a1->klass);
         if (!rtl && !ltr) {
-            if (a1->klass.data(gs)->isClassOrModuleClass() && a2->klass.data(gs)->isClassOrModuleClass()) {
+            if (a1->klass.data(gs)->isClass() && a2->klass.data(gs)->isClass()) {
                 // At this point, the two types are both classes, and unrelated
                 // to each other. Because ruby does not support multiple
                 // inheritance, this type is empty.

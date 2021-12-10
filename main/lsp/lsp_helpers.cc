@@ -262,10 +262,10 @@ core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &ty
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef symbol) {
     if (symbol.isClassOrModule()) {
         auto klass = symbol.asClassOrModuleRef();
-        if (klass.data(gs)->isClassOrModuleModule()) {
+        if (klass.data(gs)->isModule()) {
             return SymbolKind::Module;
         }
-        if (klass.data(gs)->isClassOrModuleClass()) {
+        if (klass.data(gs)->isClass()) {
             return SymbolKind::Class;
         }
     } else if (symbol.isMethod()) {
