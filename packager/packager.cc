@@ -1306,25 +1306,6 @@ ast::ParsedFile wrapFileInPackageModule(core::Context ctx, ast::ParsedFile file,
     return file;
 }
 
-// We can't run packages without having all package ASTs. Assert that they are all present.
-bool checkContainsAllPackages(const core::GlobalState &gs, const vector<ast::ParsedFile> &files) {
-    UnorderedSet<core::FileRef> filePackages;
-    for (const auto &f : files) {
-        if (f.file.data(gs).sourceType == core::File::Type::Package) {
-            filePackages.insert(f.file);
-        }
-    }
-
-    for (uint32_t i = 1; i < gs.filesUsed(); i++) {
-        core::FileRef fref(i);
-        if (fref.data(gs).sourceType == core::File::Type::Package && !filePackages.contains(fref)) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 } // namespace
 
 // Add:
@@ -1435,11 +1416,20 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
 
 // Re-write source files to be in packages. This is only called if no package definitions were
 // changed.
-vector<ast::ParsedFile> rewritePackagedFilesFast(core::GlobalState &gs, vector<ast::ParsedFile> files) {
-    Timer timeit(gs.tracer(), "packager.rewritePackagedFilesFast");
+vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::ParsedFile> files) {
+    Timer timeit(gs.tracer(), "packager.rewriteFilesFast");
     for (auto i = 0; i < files.size(); i++) {
         core::Context ctx(gs, core::Symbols::root(), files[i].file);
-        files[i] = rewritePackagedFile(ctx, move(files[i]));
+        if (files[i].file.data(gs).isPackage()) {
+            {
+                core::MutableContext ctx(gs, core::Symbols::root(), files[i].file);
+                auto pkg = getPackageInfo(ctx, files[i], gs.packageDB().extraPackageFilesDirectoryPrefixes());
+                ENFORCE(pkg != nullptr);
+            }
+            files[i] = rewritePackage(ctx, move(files[i]));
+        } else {
+            files[i] = rewritePackagedFile(ctx, move(files[i]));
+        }
     }
     return files;
 }
@@ -1535,20 +1525,11 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
 }
 
 vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
-    // However, if only source files have changed the existing PackageDB can be used to re-process
-    // the changed files only.
+    // Note: This will only run if packages have not been changed (byte-for-byte equality).
     // TODO(nroman-stripe) This could be further incrementalized to avoid processing all packages by
     // building in an understanding of the dependencies between packages.
     auto namesUsed = gs.namesUsedTotal();
-    bool packageDefChanged = absl::c_any_of(
-        files, [&gs](const auto &pf) -> bool { return pf.file.data(gs).sourceType == core::File::Type::Package; });
-    if (packageDefChanged) {
-        ENFORCE(checkContainsAllPackages(gs, files));
-        auto emptyWorkers = WorkerPool::create(0, gs.tracer());
-        files = Packager::run(gs, *emptyWorkers, move(files));
-    } else {
-        files = rewritePackagedFilesFast(gs, move(files));
-    }
+    files = rewriteFilesFast(gs, move(files));
     ENFORCE(gs.namesUsedTotal() == namesUsed);
     return files;
 }
