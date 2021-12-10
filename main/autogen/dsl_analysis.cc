@@ -21,6 +21,7 @@ const std::vector<u4> KNOWN_PROP_METHODS = {
     core::Names::encryptedProp().rawId(),
     core::Names::bearerTokenProp().rawId(),
     core::Names::feeRuleProp().rawId(),
+    core::Names::modelProp().rawId(),
 };
 
 const std::vector<core::NameRef> CHALK_ODM_IMMUTABLE_MODEL = {
@@ -184,6 +185,55 @@ class DSLAnalysisWalk {
 
                 break;
             }
+            case core::Names::modelProp().rawId(): {
+                if (send->numPosArgs > 0) {
+                    bool optionalProp = false;
+                    auto *lit = ast::cast_tree<ast::Literal>(send->args.front());
+                    if (lit && lit->isSymbol(ctx)) {
+                        core::NameRef propName = lit->asSymbol(ctx);
+
+                        auto [kwStart, kwEnd] = send->kwArgsRange();
+                        for (auto i = kwStart; i < kwEnd; i += 2) {
+                            auto *labelLit = ast::cast_tree<ast::Literal>(send->args[i]);
+                            if (labelLit && labelLit->isSymbol(ctx) &&
+                                labelLit->asSymbol(ctx) == core::Names::optional()) {
+                                auto propLit = ast::cast_tree_nonnull<ast::Literal>(send->args[i + 1]);
+                                if (propLit.isTrue(ctx)) {
+                                    optionalProp = true;
+                                }
+                            }
+                        }
+
+                        core::NameRef idPropName = ctx.state.enterNameConstant(absl::StrCat(propName.show(ctx), "_id"));
+                        core::NameRef collectionPropName =
+                            ctx.state.enterNameConstant(absl::StrCat(propName.show(ctx), "_collection"));
+
+                        ast::ExpressionPtr typeExp;
+                        ast::ExpressionPtr collectionTypeExp;
+                        if (optionalProp) {
+                            ast::Send::ARGS_store args;
+                            args.emplace_back(ast::MK::Constant(send->loc, core::Symbols::String()));
+                            typeExp = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()),
+                                                    core::Names::nilable(), 1, std::move(args));
+
+                            ast::Send::ARGS_store argsC;
+                            argsC.emplace_back(ast::MK::Constant(send->loc, core::Symbols::String()));
+                            collectionTypeExp =
+                                ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()),
+                                              core::Names::nilable(), 1, std::move(argsC));
+                        } else {
+                            typeExp = ast::MK::Constant(send->loc, core::Symbols::String());
+                            collectionTypeExp = ast::MK::Constant(send->loc, core::Symbols::String());
+                        }
+
+                        result.emplace_back(PropInfoInternal{std::move(idPropName), std::move(typeExp)});
+                        result.emplace_back(
+                            PropInfoInternal{std::move(collectionPropName), std::move(collectionTypeExp)});
+                    }
+                }
+
+                break;
+            }
             case core::Names::encryptedProp().rawId(): {
                 auto *lit = ast::cast_tree<ast::Literal>(send->args.front());
                 if (lit && lit->isSymbol(ctx)) {
@@ -207,12 +257,10 @@ class DSLAnalysisWalk {
                 if (send->numPosArgs > 0) {
                     auto *lit = ast::cast_tree<ast::Literal>(send->args.front());
                     if (lit && lit->isSymbol(ctx)) {
-                        core::NameRef propName = ctx.state.enterNameConstant(absl::StrCat(
-                              lit->asSymbol(ctx).show(ctx),
-                              "_rules"
-                        ));
+                        core::NameRef propName =
+                            ctx.state.enterNameConstant(absl::StrCat(lit->asSymbol(ctx).show(ctx), "_rules"));
                         auto typeExp = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()),
-                                                        core::Names::untyped(), 0, {});
+                                                     core::Names::untyped(), 0, {});
                         result.emplace_back(PropInfoInternal{std::move(propName), std::move(typeExp)});
                     }
                 }
