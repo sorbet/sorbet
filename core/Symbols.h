@@ -484,7 +484,7 @@ public:
 
     bool ignoreInHashing(const GlobalState &gs) const;
 
-    SymbolRef owner;
+    ClassOrModuleRef owner;
     ClassOrModuleRef superClass_;
 
     inline ClassOrModuleRef superClass() const {

@@ -783,8 +783,7 @@ class SymbolDefiner {
         // Common case: Everything is fine, user is trying to define a symbol on a class or module.
         if (scope.isClassOrModule()) {
             // Check if original symbol was mangled away. If so, complain.
-            auto renamedSymbol =
-                ctx.state.findRenamedSymbol(scope.asClassOrModuleRef().data(ctx)->owner.asClassOrModuleRef(), scope);
+            auto renamedSymbol = ctx.state.findRenamedSymbol(scope.asClassOrModuleRef().data(ctx)->owner, scope);
             if (renamedSymbol.exists()) {
                 if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidClassOwner)) {
                     auto constLitName = name.show(ctx);
@@ -1169,7 +1168,7 @@ class SymbolDefiner {
             }
         } else {
             klassSymbol.data(ctx)->setIsModule(isModule);
-            auto renamed = ctx.state.findRenamedSymbol(klassSymbol.data(ctx)->owner.asClassOrModuleRef(), symbol);
+            auto renamed = ctx.state.findRenamedSymbol(klassSymbol.data(ctx)->owner, symbol);
             if (renamed.exists()) {
                 emitRedefinedConstantError(ctx, ctx.locAt(klass.loc), symbol, renamed);
             }

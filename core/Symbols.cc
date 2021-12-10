@@ -807,7 +807,7 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                 }
             }
 
-            base = base.data(gs)->owner.asClassOrModuleRef();
+            base = base.data(gs)->owner;
         } while (best.distance > 0 && base.data(gs)->owner.exists() && base != Symbols::root());
     }
 
@@ -1616,7 +1616,7 @@ ClassOrModuleRef ClassOrModule::singletonClass(GlobalState &gs) {
     auto selfLoc = this->loc();
 
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
-    singleton = gs.enterClassSymbol(this->loc(), this->owner.asClassOrModuleRef(), singletonName);
+    singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
     ClassOrModuleData singletonInfo = singleton.data(gs);
 
     prodCounterInc("types.input.singleton_classes.total");
@@ -2068,23 +2068,10 @@ void ClassOrModule::sanityCheck(const GlobalState &gs) const {
     if (!debug_mode) {
         return;
     }
-    SymbolRef current = this->ref(gs);
+    ClassOrModuleRef current = this->ref(gs);
     if (current != Symbols::root()) {
-        SymbolRef current2;
-        switch (current.kind()) {
-            case SymbolRef::Kind::ClassOrModule:
-                current2 = const_cast<GlobalState &>(gs).enterClassSymbol(this->loc(), this->owner.asClassOrModuleRef(),
-                                                                          this->name);
-                break;
-            case SymbolRef::Kind::Method:
-            case SymbolRef::Kind::FieldOrStaticField:
-            case SymbolRef::Kind::TypeArgument:
-            case SymbolRef::Kind::TypeMember:
-                ENFORCE(false,
-                        "Methods, fields, static fields, and type parameters cannot be stored in the Symbol class");
-                break;
-        }
-
+        ClassOrModuleRef current2 =
+            const_cast<GlobalState &>(gs).enterClassSymbol(this->loc(), this->owner, this->name);
         ENFORCE_NO_TIMER(current == current2);
         for (auto &e : members()) {
             ENFORCE_NO_TIMER(e.first.exists(), "{} has a member symbol without a name", name.toString(gs));
@@ -2200,7 +2187,7 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
     uint32_t result = _hash(name.shortName(gs));
     result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
     result = mix(result, this->flags.serialize());
-    result = mix(result, this->owner._id);
+    result = mix(result, this->owner.id());
     result = mix(result, this->superClass_.id());
     // argumentsOrMixins, typeParams, typeAliases
     if (!members().empty()) {

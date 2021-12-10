@@ -35,7 +35,7 @@ string getFunctionNamePrefix(CompilerState &cs, core::ClassOrModuleRef sym) {
     }
     string prefix = IREmitterHelpers::isRootishSymbol(cs, sym.data(cs)->owner)
                         ? ""
-                        : getFunctionNamePrefix(cs, sym.data(cs)->owner.asClassOrModuleRef()) + "::";
+                        : getFunctionNamePrefix(cs, sym.data(cs)->owner) + "::";
 
     return prefix + suffix;
 }

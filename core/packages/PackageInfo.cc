@@ -24,7 +24,7 @@ bool PackageInfo::isPackageModule(const core::GlobalState &gs, core::ClassOrModu
         if (klass == core::Symbols::PackageRegistry() || klass == core::Symbols::PackageTests()) {
             return true;
         }
-        klass = klass.data(gs)->owner.asClassOrModuleRef();
+        klass = klass.data(gs)->owner;
     }
     return false;
 }
