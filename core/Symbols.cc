@@ -103,7 +103,7 @@ TypePtr Symbol::selfType(const GlobalState &gs) const {
     if (typeMembers().empty()) {
         return externalType();
     } else {
-        return make_type<AppliedType>(ref(gs).asClassOrModuleRef(), selfTypeArgs(gs));
+        return make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
     }
 }
 
@@ -125,7 +125,7 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
 
     // note that sometimes resultType is set externally to not be a result of this computation
     // this happens e.g. in case this is a stub class
-    auto ref = this->ref(gs).asClassOrModuleRef();
+    auto ref = this->ref(gs);
     if (typeMembers().empty()) {
         resultType = make_type<ClassType>(ref);
     } else {
@@ -189,10 +189,9 @@ bool Symbol::derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const {
     return false;
 }
 
-SymbolRef Symbol::ref(const GlobalState &gs) const {
-    auto type = SymbolRef::Kind::ClassOrModule;
+ClassOrModuleRef Symbol::ref(const GlobalState &gs) const {
     uint32_t distance = this - gs.classAndModules.data();
-    return SymbolRef(gs, type, distance);
+    return ClassOrModuleRef(gs, distance);
 }
 
 FieldRef Field::ref(const GlobalState &gs) const {
@@ -632,7 +631,7 @@ MethodRef findConcreteMethodTransitiveInternal(const GlobalState &gs, ClassOrMod
 } // namespace
 
 MethodRef Symbol::findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const {
-    return findConcreteMethodTransitiveInternal(gs, this->ref(gs).asClassOrModuleRef(), name, 100);
+    return findConcreteMethodTransitiveInternal(gs, this->ref(gs), name, 100);
 }
 
 SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth) const {
@@ -751,7 +750,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
 
     // Find the closest by following outer scopes
     {
-        ClassOrModuleRef base = ref(gs).asClassOrModuleRef();
+        ClassOrModuleRef base = ref(gs);
         do {
             // follow outer scopes
 
@@ -1609,7 +1608,7 @@ ClassOrModuleRef Symbol::singletonClass(GlobalState &gs) {
     if (singleton.exists()) {
         return singleton;
     }
-    ClassOrModuleRef selfRef = this->ref(gs).asClassOrModuleRef();
+    ClassOrModuleRef selfRef = this->ref(gs);
 
     // avoid using `this` after the call to gs.enterTypeMember
     auto selfLoc = this->loc();
@@ -1656,7 +1655,7 @@ ClassOrModuleRef Symbol::attachedClass(const GlobalState &gs) const {
 }
 
 ClassOrModuleRef Symbol::topAttachedClass(const GlobalState &gs) const {
-    ClassOrModuleRef classSymbol = this->ref(gs).asClassOrModuleRef();
+    ClassOrModuleRef classSymbol = this->ref(gs);
 
     while (true) {
         auto attachedClass = classSymbol.data(gs)->attachedClass(gs);
@@ -1674,7 +1673,7 @@ void Symbol::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass)
     ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", ref(ctx).show(ctx));
 
     // Avoid using a clobbered `this` pointer, as `singletonClass` can cause the symbol table to move.
-    ClassOrModuleRef selfRef = this->ref(ctx).asClassOrModuleRef();
+    ClassOrModuleRef selfRef = this->ref(ctx);
 
     // We record sealed subclasses on a magical method called core::Names::sealedSubclasses(). This is so we don't
     // bloat the `sizeof class Symbol` with an extra field that most class sybmols will never use.
@@ -1788,7 +1787,7 @@ void Symbol::recordRequiredAncestorInternal(GlobalState &gs, Symbol::RequiredAnc
     // We store the required ancestors into a fake property called `<required-ancestors>`
     auto ancestors = this->findMethod(gs, prop);
     if (!ancestors.exists()) {
-        ancestors = gs.enterMethodSymbol(ancestor.loc, this->ref(gs).asClassOrModuleRef(), prop);
+        ancestors = gs.enterMethodSymbol(ancestor.loc, this->ref(gs), prop);
         ancestors.data(gs)->locs_.clear(); // Remove the original location
 
         // Create the return type tuple to store RequiredAncestor.symbol
@@ -1853,7 +1852,7 @@ vector<Symbol::RequiredAncestor> Symbol::readRequiredAncestorsInternal(const Glo
 
 // Record a required ancestor for this class of module
 void Symbol::recordRequiredAncestor(GlobalState &gs, ClassOrModuleRef ancestor, Loc loc) {
-    RequiredAncestor req = {this->ref(gs).asClassOrModuleRef(), ancestor, loc};
+    RequiredAncestor req = {this->ref(gs), ancestor, loc};
     recordRequiredAncestorInternal(gs, req, Names::requiredAncestors());
 }
 
@@ -1865,15 +1864,15 @@ vector<Symbol::RequiredAncestor> Symbol::requiredAncestors(const GlobalState &gs
 // All required ancestors by this class or module
 std::vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitiveInternal(GlobalState &gs,
                                                                                   std::vector<ClassOrModuleRef> &seen) {
-    if (absl::c_find(seen, this->ref(gs).asClassOrModuleRef()) != seen.end()) {
+    if (absl::c_find(seen, this->ref(gs)) != seen.end()) {
         return requiredAncestors(gs); // Break recursive loops if we already visited this ancestor
     }
-    seen.emplace_back(this->ref(gs).asClassOrModuleRef());
+    seen.emplace_back(this->ref(gs));
 
     for (auto ancst : requiredAncestors(gs)) {
         recordRequiredAncestorInternal(gs, ancst, Names::requiredAncestorsLin());
         for (auto sancst : ancst.symbol.data(gs)->requiredAncestorsTransitiveInternal(gs, seen)) {
-            if (sancst.symbol != this->ref(gs).asClassOrModuleRef()) {
+            if (sancst.symbol != this->ref(gs)) {
                 recordRequiredAncestorInternal(gs, sancst, Names::requiredAncestorsLin());
             }
         }
@@ -1882,7 +1881,7 @@ std::vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitiveInterna
     auto parent = superClass();
     if (parent.exists()) {
         for (auto ancst : parent.data(gs)->requiredAncestorsTransitiveInternal(gs, seen)) {
-            if (ancst.symbol != this->ref(gs).asClassOrModuleRef()) {
+            if (ancst.symbol != this->ref(gs)) {
                 recordRequiredAncestorInternal(gs, ancst, Names::requiredAncestorsLin());
             }
         }
@@ -1890,7 +1889,7 @@ std::vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitiveInterna
 
     for (auto mixin : mixins()) {
         for (auto ancst : mixin.data(gs)->requiredAncestors(gs)) {
-            if (ancst.symbol != this->ref(gs).asClassOrModuleRef()) {
+            if (ancst.symbol != this->ref(gs)) {
                 recordRequiredAncestorInternal(gs, ancst, Names::requiredAncestorsLin());
             }
         }
