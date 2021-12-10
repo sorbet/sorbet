@@ -269,6 +269,7 @@ NameDef names[] = {
     {"Mixins", "Mixins", true},
     {"Mutator", "Mutator", true},
     {"ImmutableModel", "ImmutableModel", true},
+    {"ImmutableArchiveRecord", "ImmutableArchiveRecord", true},
     {"Sharding", "Sharding", true},
     {"ShardByMerchant", "ShardByMerchant", true},
     {"ShardByMerchantBase", "ShardByMerchantBase", true},

@@ -212,6 +212,10 @@ mergeAndFilterGlobalDSLInfo(const core::GlobalState &gs,
                                                         core::Names::Constants::Model()};
     const std::vector<core::NameRef> CHALK_ODM_MUTATOR = {
         core::Names::Constants::Chalk(), core::Names::Constants::ODM(), core::Names::Constants::Mutator()};
+    const std::vector<core::NameRef> IMMUTABLE_ARCHIVE_RECORD = {
+        core::Names::Constants::Opus(), core::Names::Constants::DB(), core::Names::Constants::Helpers(),
+        core::Names::Constants::ImmutableArchiveRecord()};
+
     UnorderedMap<std::vector<core::NameRef>, DSLInfo> result;
 
     for (auto &it : globalDSLInfo) {
@@ -234,7 +238,7 @@ mergeAndFilterGlobalDSLInfo(const core::GlobalState &gs,
             queue.insert(queue.end(), curAncstInfo->second.ancestors.begin(), curAncstInfo->second.ancestors.end());
         }
 
-        if (allAncestors.find(CHALK_ODM_MODEL) != allAncestors.end() && info.model.empty()) {
+        if (allAncestors.find(CHALK_ODM_MODEL) != allAncestors.end() && info.model.empty() && allAncestors.find(IMMUTABLE_ARCHIVE_RECORD) == allAncestors.end()) {
             // Models
             for (const std::vector<core::NameRef> &ancst : allAncestors) {
                 auto ancstInfoIt = globalDSLInfo.find(ancst);
@@ -255,11 +259,15 @@ mergeAndFilterGlobalDSLInfo(const core::GlobalState &gs,
         }
     }
 
+    int notFoundModels = 0;
     for (auto &it : result) {
         const std::vector<core::NameRef> &klass = it.first;
         DSLInfo info = it.second;
         const auto &model = info.model;
         if (model.empty() || result.find(model) == result.end()) {
+            if (!model.empty() && result.find(model) == result.end()) {
+              notFoundModels++;
+            }
             // Not a mutator, or not one with a corresponding model
             continue;
         }
@@ -269,6 +277,8 @@ mergeAndFilterGlobalDSLInfo(const core::GlobalState &gs,
 
         result[klass] = std::move(info);
     }
+
+    cout << "Not found models - " << notFoundModels << std::endl;
 
     return result;
 }

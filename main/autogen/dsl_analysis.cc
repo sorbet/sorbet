@@ -56,7 +56,20 @@ class DSLAnalysisWalk {
         return out;
     }
 
-    std::optional<PropInfoInternal> parseProp(core::Context ctx, ast::Send *send) {
+    // Convert a constant literal into a fully qualified name
+    vector<core::NameRef> constantName(core::Context ctx, ast::ConstantLit &cnstRef) {
+        vector<core::NameRef> out;
+        auto *cnst = &cnstRef;
+        while (cnst != nullptr && cnst->original != nullptr) {
+            auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
+            out.emplace_back(original.cnst);
+            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
+        }
+        reverse(out.begin(), out.end());
+        return out;
+    }
+
+    const std::optional<PropInfoInternal> parseProp(core::Context ctx, ast::Send *send) {
         switch (send->fun.rawId()) {
             case core::Names::const_().rawId():
             case core::Names::prop().rawId(): {
@@ -242,7 +255,9 @@ public:
                 return tree;
             }
 
-            dslInfo[curScope].model = symbolName(ctx, cnst->symbol);
+            auto &sym = cnst->symbol;
+            auto name = (!sym.isClassOrModule() || sym != core::Symbols::StubModule()) ? symbolName(ctx, sym) : constantName(ctx, *cnst);
+            dslInfo[curScope].model = std::move(name);
         }
 
         return tree;
