@@ -200,7 +200,7 @@ struct AutogenResult {
     unique_ptr<autogen::DefTree> defTree = make_unique<autogen::DefTree>();
 };
 
-void runAutogen(const core::GlobalState &gs, options::Options &opts, const autogen::AutoloaderConfig &autoloaderCfg,
+void runAutogen(core::GlobalState &gs, options::Options &opts, const autogen::AutoloaderConfig &autoloaderCfg,
                 WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
     Timer timeit(logger, "autogen");
 
@@ -254,7 +254,8 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 if (opts.print.DSLAnalysis.enabled) {
                     auto &tree2 = indexed[idx];
                     Timer timeit(logger, "dslAnalysisToString");
-                    auto daf = autogen::DSLAnalysis::generate(ctx, move(tree2), *crcBuilder);
+                    core::MutableContext ctxM(gs, core::Symbols::root(), tree2.file);
+                    auto daf = autogen::DSLAnalysis::generate(ctxM, move(tree2), *crcBuilder);
                     serialized.dslInfo = std::move(daf.dslInfo);
                 }
                 if (opts.print.AutogenMsgPack.enabled) {

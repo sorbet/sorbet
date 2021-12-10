@@ -9,7 +9,7 @@ namespace sorbet::autogen {
 
 class DSLAnalysis final {
 public:
-    static DSLAnalysisFile generate(core::Context ctx, ast::ParsedFile tree, const CRCBuilder &crcBuilder);
+    static DSLAnalysisFile generate(core::MutableContext ctx, ast::ParsedFile tree, const CRCBuilder &crcBuilder);
     DSLAnalysis() = delete;
 };
 

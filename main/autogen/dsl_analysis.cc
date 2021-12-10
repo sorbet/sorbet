@@ -13,7 +13,7 @@ const std::vector<u4> KNOWN_PROP_METHODS = {
     core::Names::tokenProp().rawId(),    core::Names::timestampedTokenProp().rawId(),
     core::Names::createdProp().rawId(),  core::Names::updatedProp().rawId(),
     core::Names::merchantProp().rawId(), core::Names::merchantTokenProp().rawId(),
-    core::Names::const_().rawId()};
+    core::Names::const_().rawId(), core::Names::encryptedProp().rawId()};
 
 const std::vector<core::NameRef> CHALK_ODM_IMMUTABLE_MODEL = {
     core::Names::Constants::Chalk(), core::Names::Constants::ODM(), core::Names::Constants::ImmutableModel()};
@@ -34,9 +34,13 @@ const std::vector<core::NameRef> OPUS_STORAGE_WAL_WALABLE_CLASSMETHODS = {
     core::Names::Constants::Opus(), core::Names::Constants::Storage(), core::Names::Constants::WAL(),
     core::Names::Constants::WALable(), core::Names::Constants::ClassMethods()};
 
+const std::string ENCRYPTED_ = "encrypted_";
+const std::string UNTYPED_STR = "T.untyped";
+
 struct PropInfoInternal {
     core::NameRef name;
     std::optional<ast::ExpressionPtr> typeExp;
+    bool encrypted = false;
 };
 
 class DSLAnalysisWalk {
@@ -46,7 +50,7 @@ class DSLAnalysisWalk {
     bool validScope;
 
     // Convert a symbol name into a fully qualified name
-    vector<core::NameRef> symbolName(core::Context ctx, core::SymbolRef sym) {
+    vector<core::NameRef> symbolName(core::MutableContext ctx, core::SymbolRef sym) {
         vector<core::NameRef> out;
         while (sym.exists() && sym != core::Symbols::root()) {
             out.emplace_back(sym.data(ctx)->name);
@@ -57,7 +61,7 @@ class DSLAnalysisWalk {
     }
 
     // Convert a constant literal into a fully qualified name
-    vector<core::NameRef> constantName(core::Context ctx, ast::ConstantLit &cnstRef) {
+    vector<core::NameRef> constantName(core::MutableContext ctx, ast::ConstantLit &cnstRef) {
         vector<core::NameRef> out;
         auto *cnst = &cnstRef;
         while (cnst != nullptr && cnst->original != nullptr) {
@@ -69,7 +73,7 @@ class DSLAnalysisWalk {
         return out;
     }
 
-    const std::optional<PropInfoInternal> parseProp(core::Context ctx, ast::Send *send) {
+    const std::optional<PropInfoInternal> parseProp(core::MutableContext ctx, ast::Send *send) {
         switch (send->fun.rawId()) {
             case core::Names::const_().rawId():
             case core::Names::prop().rawId(): {
@@ -85,6 +89,20 @@ class DSLAnalysisWalk {
                     }
 
                     return PropInfoInternal{lit->asSymbol(ctx), std::nullopt};
+                }
+
+                break;
+            }
+            case core::Names::encryptedProp().rawId(): {
+                auto *lit = ast::cast_tree<ast::Literal>(send->args.front());
+                if (lit && lit->isSymbol(ctx)) {
+                    ast::Send::ARGS_store args;
+                    args.emplace_back(ast::MK::Constant(send->loc, core::Symbols::String()));
+                    auto recv = ast::MK::Constant(send->loc, core::Symbols::T());
+
+                    auto typeExp = ast::MK::Send(send->loc, std::move(recv), core::Names::nilable(), 1,
+                                         std::move(args));
+                    return PropInfoInternal{lit->asSymbol(ctx), std::move(typeExp), true};
                 }
 
                 break;
@@ -125,7 +143,7 @@ class DSLAnalysisWalk {
         return std::nullopt;
     }
 
-    std::optional<ast::ExpressionPtr> transformTypeForMutator(core::Context ctx, ast::ExpressionPtr &propType) {
+    std::optional<ast::ExpressionPtr> transformTypeForMutator(core::MutableContext ctx, ast::ExpressionPtr &propType) {
         auto *send = ast::cast_tree<ast::Send>(propType);
         if (send) {
             if (send->fun == core::Names::nilable()) {
@@ -175,7 +193,7 @@ public:
         file = a_file;
     }
 
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (original.symbol.data(ctx)->owner == core::Symbols::PackageRegistry()) {
             // this is a package, so do not enter a definition for it
@@ -206,7 +224,7 @@ public:
         return tree;
     }
 
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         if (nestingScopes.size() == 0 || !validScope) {
             // Not in any scope
             return tree;
@@ -217,7 +235,7 @@ public:
         return tree;
     }
 
-    ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr preTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         if (nestingScopes.size() == 0) {
             // Not in any scope
             return tree;
@@ -241,7 +259,13 @@ public:
                     typeStr = std::move(*((*propInfo).typeExp)).toString(ctx);
                 }
 
-                dslInfo[curScope].props.emplace_back(PropInfo{std::move((*propInfo).name), std::move(typeStr)});
+                core::NameRef name = std::move((*propInfo).name);
+                dslInfo[curScope].props.emplace_back(PropInfo{name, std::move(typeStr)});
+
+                if ((*propInfo).encrypted) {
+                    core::NameRef encryptedName = ctx.state.enterNameConstant(absl::StrCat(ENCRYPTED_, name.show(ctx)));
+                    dslInfo[curScope].props.emplace_back(PropInfo{std::move(encryptedName), UNTYPED_STR});
+                }
             } else {
                 dslInfo[curScope].problemLocs.emplace_back(LocInfo{file, std::move(original->loc)});
             }
@@ -263,7 +287,7 @@ public:
         return tree;
     }
 
-    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr preTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         if (nestingScopes.size() == 0 || !validScope) {
             // Not already in a valid scope
             return tree;
@@ -279,7 +303,7 @@ public:
         return tree;
     }
 
-    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         if (nestingScopes.size() == 0 || validScope) {
             // Already in a valid scope, or never in a scope
             return tree;
@@ -297,7 +321,7 @@ public:
     }
 };
 
-DSLAnalysisFile DSLAnalysis::generate(core::Context ctx, ast::ParsedFile tree, const CRCBuilder &crcBuilder) {
+DSLAnalysisFile DSLAnalysis::generate(core::MutableContext ctx, ast::ParsedFile tree, const CRCBuilder &crcBuilder) {
     DSLAnalysisWalk walk(tree.file);
     ast::TreeMap::apply(ctx, walk, move(tree.tree));
     auto daf = walk.dslAnalysisFile();
