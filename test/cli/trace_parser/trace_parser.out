@@ -1,0 +1,581 @@
+Starting parse
+Entering state 0
+Reading a token: Next token is token "class" ()
+Shifting token "class" ()
+Entering state 2
+Reading a token: Next token is token tCONSTANT ()
+Shifting token tCONSTANT ()
+Entering state 126
+Reading a token: Next token is token tNL ()
+Reducing stack by rule 121 (line 1069):
+   $1 = token tCONSTANT ()
+-> $$ = nterm cname ()
+Stack now 2 0
+Entering state 134
+Reducing stack by rule 123 (line 1075):
+   $1 = nterm cname ()
+-> $$ = nterm cpath ()
+Stack now 2 0
+Entering state 135
+Next token is token tNL ()
+Reducing stack by rule 617 (line 3165):
+-> $$ = nterm superclass ()
+Stack now 135 2 0
+Entering state 421
+Reducing stack by rule 337 (line 1719):
+-> $$ = nterm $@13 ()
+Stack now 421 135 2 0
+Entering state 657
+Next token is token tNL ()
+Reducing stack by rule 12 (line 552):
+-> $$ = nterm stmts ()
+Stack now 657 421 135 2 0
+Entering state 304
+Next token is token tNL ()
+Shifting token tNL ()
+Entering state 248
+Reducing stack by rule 724 (line 3644):
+   $1 = token tNL ()
+-> $$ = nterm term ()
+Stack now 304 657 421 135 2 0
+Entering state 252
+Reducing stack by rule 725 (line 3646):
+   $1 = nterm term ()
+-> $$ = nterm terms ()
+Stack now 304 657 421 135 2 0
+Entering state 493
+Reading a token: Next token is token "def" ()
+Shifting token "def" ()
+Entering state 4
+Reading a token: Next token is token tIDENTIFIER ()
+Shifting token tIDENTIFIER ()
+Entering state 184
+Reading a token: Next token is token tNL ()
+Reducing stack by rule 125 (line 1084):
+   $1 = token tIDENTIFIER ()
+-> $$ = nterm fname ()
+Stack now 4 493 304 657 421 135 2 0
+Entering state 219
+Reducing stack by rule 60 (line 763):
+   $1 = nterm fname ()
+-> $$ = nterm def_name ()
+Stack now 4 493 304 657 421 135 2 0
+Entering state 218
+Reducing stack by rule 61 (line 773):
+   $1 = token "def" ()
+   $2 = nterm def_name ()
+-> $$ = nterm defn_head ()
+Stack now 493 304 657 421 135 2 0
+Entering state 78
+Next token is token tNL ()
+Reducing stack by rule 624 (line 3195):
+-> $$ = nterm @33 ()
+Stack now 78 493 304 657 421 135 2 0
+Entering state 353
+Next token is token tNL ()
+Reducing stack by rule 647 (line 3345):
+-> $$ = nterm f_args ()
+Stack now 353 78 493 304 657 421 135 2 0
+Entering state 577
+Next token is token tNL ()
+Shifting token tNL ()
+Entering state 248
+Reducing stack by rule 724 (line 3644):
+   $1 = token tNL ()
+-> $$ = nterm term ()
+Stack now 577 353 78 493 304 657 421 135 2 0
+Entering state 770
+Reducing stack by rule 625 (line 3195):
+   $1 = nterm @33 ()
+   $2 = nterm f_args ()
+   $3 = nterm term ()
+-> $$ = nterm f_arglist ()
+Stack now 78 493 304 657 421 135 2 0
+Entering state 352
+Reading a token: Next token is token tIDENTIFIER ()
+Shifting token tIDENTIFIER ()
+Entering state 32
+Reading a token: Next token is token tSTRING ()
+Reducing stack by rule 699 (line 3603):
+   $1 = token tIDENTIFIER ()
+-> $$ = nterm operation ()
+Stack now 352 78 493 304 657 421 135 2 0
+Entering state 117
+Reducing stack by rule 70 (line 811):
+   $1 = nterm operation ()
+-> $$ = nterm fcall ()
+Stack now 352 78 493 304 657 421 135 2 0
+Entering state 82
+Next token is token tSTRING ()
+Reducing stack by rule 281 (line 1449):
+-> $$ = nterm $@8 ()
+Stack now 82 352 78 493 304 657 421 135 2 0
+Entering state 282
+Next token is token tSTRING ()
+Shifting token tSTRING ()
+Entering state 61
+Reducing stack by rule 553 (line 2856):
+   $1 = token tSTRING ()
+-> $$ = nterm string1 ()
+Stack now 282 82 352 78 493 304 657 421 135 2 0
+Entering state 100
+Reducing stack by rule 550 (line 2840):
+   $1 = nterm string1 ()
+-> $$ = nterm string ()
+Stack now 282 82 352 78 493 304 657 421 135 2 0
+Entering state 99
+Reading a token: Next token is token tNL ()
+Reducing stack by rule 549 (line 2835):
+   $1 = nterm string ()
+-> $$ = nterm strings ()
+Stack now 282 82 352 78 493 304 657 421 135 2 0
+Entering state 98
+Reducing stack by rule 296 (line 1536):
+   $1 = nterm strings ()
+-> $$ = nterm primary ()
+Stack now 282 82 352 78 493 304 657 421 135 2 0
+Entering state 92
+Next token is token tNL ()
+Reducing stack by rule 252 (line 1347):
+   $1 = nterm primary ()
+-> $$ = nterm arg ()
+Stack now 282 82 352 78 493 304 657 421 135 2 0
+Entering state 272
+Next token is token tNL ()
+Reducing stack by rule 259 (line 1360):
+   $1 = nterm arg ()
+-> $$ = nterm arg_value ()
+Stack now 282 82 352 78 493 304 657 421 135 2 0
+Entering state 273
+Next token is token tNL ()
+Reducing stack by rule 286 (line 1491):
+   $1 = nterm arg_value ()
+-> $$ = nterm args ()
+Stack now 282 82 352 78 493 304 657 421 135 2 0
+Entering state 276
+Next token is token tNL ()
+Reducing stack by rule 285 (line 1487):
+-> $$ = nterm opt_block_arg ()
+Stack now 276 282 82 352 78 493 304 657 421 135 2 0
+Entering state 461
+Reducing stack by rule 277 (line 1425):
+   $1 = nterm args ()
+   $2 = nterm opt_block_arg ()
+-> $$ = nterm call_args ()
+Stack now 282 82 352 78 493 304 657 421 135 2 0
+Entering state 467
+Reducing stack by rule 282 (line 1449):
+   $1 = nterm $@8 ()
+   $2 = nterm call_args ()
+-> $$ = nterm command_args ()
+Stack now 82 352 78 493 304 657 421 135 2 0
+Entering state 360
+Next token is token tNL ()
+Reducing stack by rule 71 (line 813):
+   $1 = nterm fcall ()
+   $2 = nterm command_args ()
+-> $$ = nterm command ()
+Stack now 352 78 493 304 657 421 135 2 0
+Entering state 83
+Next token is token tNL ()
+Reducing stack by rule 64 (line 789):
+   $1 = nterm command ()
+-> $$ = nterm command_call ()
+Stack now 352 78 493 304 657 421 135 2 0
+Entering state 80
+Reducing stack by rule 47 (line 704):
+   $1 = nterm command_call ()
+-> $$ = nterm expr ()
+Stack now 352 78 493 304 657 421 135 2 0
+Entering state 77
+Next token is token tNL ()
+Reducing stack by rule 35 (line 651):
+   $1 = nterm expr ()
+-> $$ = nterm stmt ()
+Stack now 352 78 493 304 657 421 135 2 0
+Entering state 306
+Next token is token tNL ()
+Reducing stack by rule 16 (line 569):
+   $1 = nterm stmt ()
+-> $$ = nterm stmt_or_begin ()
+Stack now 352 78 493 304 657 421 135 2 0
+Entering state 305
+Reducing stack by rule 13 (line 555):
+   $1 = nterm stmt_or_begin ()
+-> $$ = nterm stmts ()
+Stack now 352 78 493 304 657 421 135 2 0
+Entering state 304
+Next token is token tNL ()
+Shifting token tNL ()
+Entering state 248
+Reducing stack by rule 724 (line 3644):
+   $1 = token tNL ()
+-> $$ = nterm term ()
+Stack now 304 352 78 493 304 657 421 135 2 0
+Entering state 252
+Reducing stack by rule 725 (line 3646):
+   $1 = nterm term ()
+-> $$ = nterm terms ()
+Stack now 304 352 78 493 304 657 421 135 2 0
+Entering state 493
+Reading a token: Next token is token "end" ()
+Reducing stack by rule 714 (line 3622):
+   $1 = nterm terms ()
+-> $$ = nterm opt_terms ()
+Stack now 304 352 78 493 304 657 421 135 2 0
+Entering state 492
+Reducing stack by rule 11 (line 546):
+   $1 = nterm stmts ()
+   $2 = nterm opt_terms ()
+-> $$ = nterm compstmt ()
+Stack now 352 78 493 304 657 421 135 2 0
+Entering state 430
+Next token is token "end" ()
+Reducing stack by rule 539 (line 2803):
+-> $$ = nterm opt_rescue ()
+Stack now 430 352 78 493 304 657 421 135 2 0
+Entering state 670
+Next token is token "end" ()
+Reducing stack by rule 727 (line 3650):
+-> $$ = nterm none ()
+Stack now 670 430 352 78 493 304 657 421 135 2 0
+Entering state 849
+Reducing stack by rule 358 (line 1855):
+   $1 = nterm none ()
+-> $$ = nterm opt_else ()
+Stack now 670 430 352 78 493 304 657 421 135 2 0
+Entering state 848
+Next token is token "end" ()
+Reducing stack by rule 546 (line 2828):
+-> $$ = nterm opt_ensure ()
+Stack now 848 670 430 352 78 493 304 657 421 135 2 0
+Entering state 969
+Reducing stack by rule 10 (line 521):
+   $1 = nterm compstmt ()
+   $2 = nterm opt_rescue ()
+   $3 = nterm opt_else ()
+   $4 = nterm opt_ensure ()
+-> $$ = nterm bodystmt ()
+Stack now 352 78 493 304 657 421 135 2 0
+Entering state 576
+Next token is token "end" ()
+Shifting token "end" ()
+Entering state 769
+Reducing stack by rule 343 (line 1784):
+   $1 = nterm defn_head ()
+   $2 = nterm f_arglist ()
+   $3 = nterm bodystmt ()
+   $4 = token "end" ()
+-> $$ = nterm primary ()
+Stack now 493 304 657 421 135 2 0
+Entering state 92
+Reading a token: Next token is token tNL ()
+Reducing stack by rule 252 (line 1347):
+   $1 = nterm primary ()
+-> $$ = nterm arg ()
+Stack now 493 304 657 421 135 2 0
+Entering state 90
+Next token is token tNL ()
+Reducing stack by rule 56 (line 749):
+   $1 = nterm arg ()
+-> $$ = nterm expr ()
+Stack now 493 304 657 421 135 2 0
+Entering state 77
+Next token is token tNL ()
+Reducing stack by rule 35 (line 651):
+   $1 = nterm expr ()
+-> $$ = nterm stmt ()
+Stack now 493 304 657 421 135 2 0
+Entering state 306
+Next token is token tNL ()
+Reducing stack by rule 16 (line 569):
+   $1 = nterm stmt ()
+-> $$ = nterm stmt_or_begin ()
+Stack now 493 304 657 421 135 2 0
+Entering state 716
+Reducing stack by rule 14 (line 559):
+   $1 = nterm stmts ()
+   $2 = nterm terms ()
+   $3 = nterm stmt_or_begin ()
+-> $$ = nterm stmts ()
+Stack now 657 421 135 2 0
+Entering state 304
+Next token is token tNL ()
+Shifting token tNL ()
+Entering state 248
+Reducing stack by rule 724 (line 3644):
+   $1 = token tNL ()
+-> $$ = nterm term ()
+Stack now 304 657 421 135 2 0
+Entering state 252
+Reducing stack by rule 725 (line 3646):
+   $1 = nterm term ()
+-> $$ = nterm terms ()
+Stack now 304 657 421 135 2 0
+Entering state 493
+Reading a token: Next token is token "end" ()
+Reducing stack by rule 714 (line 3622):
+   $1 = nterm terms ()
+-> $$ = nterm opt_terms ()
+Stack now 304 657 421 135 2 0
+Entering state 492
+Reducing stack by rule 11 (line 546):
+   $1 = nterm stmts ()
+   $2 = nterm opt_terms ()
+-> $$ = nterm compstmt ()
+Stack now 657 421 135 2 0
+Entering state 430
+Next token is token "end" ()
+Reducing stack by rule 539 (line 2803):
+-> $$ = nterm opt_rescue ()
+Stack now 430 657 421 135 2 0
+Entering state 670
+Next token is token "end" ()
+Reducing stack by rule 727 (line 3650):
+-> $$ = nterm none ()
+Stack now 670 430 657 421 135 2 0
+Entering state 849
+Reducing stack by rule 358 (line 1855):
+   $1 = nterm none ()
+-> $$ = nterm opt_else ()
+Stack now 670 430 657 421 135 2 0
+Entering state 848
+Next token is token "end" ()
+Reducing stack by rule 546 (line 2828):
+-> $$ = nterm opt_ensure ()
+Stack now 848 670 430 657 421 135 2 0
+Entering state 969
+Reducing stack by rule 10 (line 521):
+   $1 = nterm compstmt ()
+   $2 = nterm opt_rescue ()
+   $3 = nterm opt_else ()
+   $4 = nterm opt_ensure ()
+-> $$ = nterm bodystmt ()
+Stack now 657 421 135 2 0
+Entering state 838
+Next token is token "end" ()
+Shifting token "end" ()
+Entering state 964
+Reducing stack by rule 338 (line 1718):
+   $1 = token "class" ()
+   $2 = nterm cpath ()
+   $3 = nterm superclass ()
+   $4 = nterm $@13 ()
+   $5 = nterm bodystmt ()
+   $6 = token "end" ()
+-> $$ = nterm primary ()
+Stack now 0
+Entering state 92
+Reading a token: Next token is token tNL ()
+Reducing stack by rule 252 (line 1347):
+   $1 = nterm primary ()
+-> $$ = nterm arg ()
+Stack now 0
+Entering state 90
+Next token is token tNL ()
+Reducing stack by rule 56 (line 749):
+   $1 = nterm arg ()
+-> $$ = nterm expr ()
+Stack now 0
+Entering state 77
+Next token is token tNL ()
+Reducing stack by rule 35 (line 651):
+   $1 = nterm expr ()
+-> $$ = nterm stmt ()
+Stack now 0
+Entering state 75
+Next token is token tNL ()
+Reducing stack by rule 7 (line 509):
+   $1 = nterm stmt ()
+-> $$ = nterm top_stmt ()
+Stack now 0
+Entering state 74
+Reducing stack by rule 4 (line 495):
+   $1 = nterm top_stmt ()
+-> $$ = nterm top_stmts ()
+Stack now 0
+Entering state 73
+Next token is token tNL ()
+Shifting token tNL ()
+Entering state 248
+Reducing stack by rule 724 (line 3644):
+   $1 = token tNL ()
+-> $$ = nterm term ()
+Stack now 73 0
+Entering state 252
+Reducing stack by rule 725 (line 3646):
+   $1 = nterm term ()
+-> $$ = nterm terms ()
+Stack now 73 0
+Entering state 341
+Reading a token: Next token is token tCONSTANT ()
+Shifting token tCONSTANT ()
+Entering state 36
+Reading a token: Next token is token "." ()
+Reducing stack by rule 600 (line 3089):
+   $1 = token tCONSTANT ()
+-> $$ = nterm user_variable ()
+Stack now 341 73 0
+Entering state 112
+Next token is token "." ()
+Reducing stack by rule 609 (line 3127):
+   $1 = nterm user_variable ()
+-> $$ = nterm var_ref ()
+Stack now 341 73 0
+Entering state 114
+Reducing stack by rule 303 (line 1543):
+   $1 = nterm var_ref ()
+-> $$ = nterm primary ()
+Stack now 341 73 0
+Entering state 92
+Next token is token "." ()
+Reducing stack by rule 349 (line 1822):
+   $1 = nterm primary ()
+-> $$ = nterm primary_value ()
+Stack now 341 73 0
+Entering state 93
+Next token is token "." ()
+Shifting token "." ()
+Entering state 400
+Reducing stack by rule 711 (line 3607):
+   $1 = token "." ()
+-> $$ = nterm call_op ()
+Stack now 93 341 73 0
+Entering state 404
+Reading a token: Next token is token tIDENTIFIER ()
+Shifting token tIDENTIFIER ()
+Entering state 641
+Reading a token: Next token is token "." ()
+Reducing stack by rule 702 (line 3604):
+   $1 = token tIDENTIFIER ()
+-> $$ = nterm operation2 ()
+Stack now 404 93 341 73 0
+Entering state 646
+Next token is token "." ()
+Reducing stack by rule 269 (line 1399):
+-> $$ = nterm opt_paren_args ()
+Stack now 646 404 93 341 73 0
+Entering state 832
+Reducing stack by rule 421 (line 2245):
+   $1 = nterm primary_value ()
+   $2 = nterm call_op ()
+   $3 = nterm operation2 ()
+   $4 = nterm opt_paren_args ()
+-> $$ = nterm method_call ()
+Stack now 341 73 0
+Entering state 96
+Next token is token "." ()
+Reducing stack by rule 325 (line 1639):
+   $1 = nterm method_call ()
+-> $$ = nterm primary ()
+Stack now 341 73 0
+Entering state 92
+Next token is token "." ()
+Reducing stack by rule 349 (line 1822):
+   $1 = nterm primary ()
+-> $$ = nterm primary_value ()
+Stack now 341 73 0
+Entering state 93
+Next token is token "." ()
+Shifting token "." ()
+Entering state 400
+Reducing stack by rule 711 (line 3607):
+   $1 = token "." ()
+-> $$ = nterm call_op ()
+Stack now 93 341 73 0
+Entering state 404
+Reading a token: Next token is token tIDENTIFIER ()
+Shifting token tIDENTIFIER ()
+Entering state 641
+Reading a token: Next token is token tNL ()
+Reducing stack by rule 702 (line 3604):
+   $1 = token tIDENTIFIER ()
+-> $$ = nterm operation2 ()
+Stack now 404 93 341 73 0
+Entering state 646
+Next token is token tNL ()
+Reducing stack by rule 269 (line 1399):
+-> $$ = nterm opt_paren_args ()
+Stack now 646 404 93 341 73 0
+Entering state 832
+Reducing stack by rule 421 (line 2245):
+   $1 = nterm primary_value ()
+   $2 = nterm call_op ()
+   $3 = nterm operation2 ()
+   $4 = nterm opt_paren_args ()
+-> $$ = nterm method_call ()
+Stack now 341 73 0
+Entering state 96
+Next token is token tNL ()
+Reducing stack by rule 325 (line 1639):
+   $1 = nterm method_call ()
+-> $$ = nterm primary ()
+Stack now 341 73 0
+Entering state 92
+Next token is token tNL ()
+Reducing stack by rule 252 (line 1347):
+   $1 = nterm primary ()
+-> $$ = nterm arg ()
+Stack now 341 73 0
+Entering state 90
+Next token is token tNL ()
+Reducing stack by rule 56 (line 749):
+   $1 = nterm arg ()
+-> $$ = nterm expr ()
+Stack now 341 73 0
+Entering state 77
+Next token is token tNL ()
+Reducing stack by rule 35 (line 651):
+   $1 = nterm expr ()
+-> $$ = nterm stmt ()
+Stack now 341 73 0
+Entering state 75
+Next token is token tNL ()
+Reducing stack by rule 7 (line 509):
+   $1 = nterm stmt ()
+-> $$ = nterm top_stmt ()
+Stack now 341 73 0
+Entering state 533
+Reducing stack by rule 5 (line 499):
+   $1 = nterm top_stmts ()
+   $2 = nterm terms ()
+   $3 = nterm top_stmt ()
+-> $$ = nterm top_stmts ()
+Stack now 0
+Entering state 73
+Next token is token tNL ()
+Shifting token tNL ()
+Entering state 248
+Reducing stack by rule 724 (line 3644):
+   $1 = token tNL ()
+-> $$ = nterm term ()
+Stack now 73 0
+Entering state 252
+Reducing stack by rule 725 (line 3646):
+   $1 = nterm term ()
+-> $$ = nterm terms ()
+Stack now 73 0
+Entering state 341
+Reading a token: Next token is token "end of file" ()
+Reducing stack by rule 714 (line 3622):
+   $1 = nterm terms ()
+-> $$ = nterm opt_terms ()
+Stack now 73 0
+Entering state 340
+Reducing stack by rule 2 (line 486):
+   $1 = nterm top_stmts ()
+   $2 = nterm opt_terms ()
+-> $$ = nterm top_compstmt ()
+Stack now 0
+Entering state 72
+Reducing stack by rule 1 (line 481):
+   $1 = nterm top_compstmt ()
+-> $$ = nterm program ()
+Stack now 0
+Entering state 71
+Next token is token "end of file" ()
+Shifting token "end of file" ()
+Entering state 339
+Cleanup: popping token "end of file" ()
+Cleanup: popping nterm program ()
+No errors! Great job.

@@ -2413,9 +2413,9 @@ ForeignPtr xstring_compose(SelfPtr builder, const token *begin, const node_list 
 
 namespace sorbet::parser {
 
-unique_ptr<Node> Builder::build(ruby_parser::base_driver *driver) {
+unique_ptr<Node> Builder::build(ruby_parser::base_driver *driver, bool trace) {
     impl_->driver_ = driver;
-    return impl_->cast_node(driver->parse(impl_.get()));
+    return impl_->cast_node(driver->parse(impl_.get(), trace));
 }
 
 struct ruby_parser::builder Builder::interface = {

@@ -51,7 +51,8 @@ struct TestPackageFile {
             core::UnfreezeNameTable nameTableAccess(gs);
             // run parser
             for (auto file : files) {
-                auto nodes = parser::Parser::run(gs, file);
+                auto trace = false;
+                auto nodes = parser::Parser::run(gs, file, trace);
 
                 core::MutableContext ctx(gs, core::Symbols::root(), file);
                 auto parsedFile = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file};

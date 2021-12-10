@@ -30,7 +30,8 @@ ast::ParsedFile getTree(core::GlobalState &gs, string str) {
     sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
     sorbet::core::UnfreezeFileTable ft(gs);              // enters original strings
     auto file = gs.enterFile("<test>", str);
-    auto tree = parser::Parser::run(gs, file);
+    auto trace = false;
+    auto tree = parser::Parser::run(gs, file, trace);
     file.data(gs).strictLevel = core::StrictLevel::Strict;
     sorbet::core::MutableContext ctx(gs, core::Symbols::root(), file);
     auto ast = ast::desugar::node2Tree(ctx, move(tree));

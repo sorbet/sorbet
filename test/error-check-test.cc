@@ -38,7 +38,8 @@ TEST_CASE("ParserCheck") {
     sorbet::core::UnfreezeFileTable ft(gs);
 
     core::FileRef fileId = gs.enterFile("<test input>", "a");
-    auto ast = sorbet::parser::Parser::run(gs, fileId);
+    auto trace = false;
+    auto ast = sorbet::parser::Parser::run(gs, fileId, trace);
 
     try {
         sorbet::core::MutableContext ctx(gs, core::Symbols::root(), fileId);

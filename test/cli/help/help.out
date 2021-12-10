@@ -204,6 +204,7 @@ Usage:
                                 autogen-msgpack, autogen-classlist,
                                 autogen-autoloader, autogen-subclasses, package-tree,
                                 minimized-rbi]
+      --trace-parser            Enable bison's parser trace functionality
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of
                                 subclasses. This option must be used in

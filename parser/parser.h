@@ -7,7 +7,7 @@ namespace sorbet::parser {
 
 class Parser final {
 public:
-    static std::unique_ptr<Node> run(core::GlobalState &gs, core::FileRef file,
+    static std::unique_ptr<Node> run(core::GlobalState &gs, core::FileRef file, bool trace,
                                      std::vector<std::string> initialLocals = {});
 };
 
