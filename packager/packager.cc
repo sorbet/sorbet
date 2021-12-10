@@ -1423,8 +1423,8 @@ vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::Pars
         if (files[i].file.data(gs).isPackage()) {
             {
                 core::MutableContext ctx(gs, core::Symbols::root(), files[i].file);
-                auto pkg = getPackageInfo(ctx, files[i], gs.packageDB().extraPackageFilesDirectoryPrefixes());
-                ENFORCE(pkg != nullptr);
+                // Re-write imports and exports:
+                getPackageInfo(ctx, files[i], gs.packageDB().extraPackageFilesDirectoryPrefixes());
             }
             files[i] = rewritePackage(ctx, move(files[i]));
         } else {
