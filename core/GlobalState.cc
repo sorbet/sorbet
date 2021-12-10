@@ -242,7 +242,8 @@ ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, uint32_t superclas
     // These will be added to Symbols::root().members later.
     ClassOrModuleRef symRef = ClassOrModuleRef(*this, classAndModules.size());
     classAndModules.emplace_back();
-    SymbolData data = symRef.dataAllowingNone(*this); // allowing noSymbol is needed because this enters noSymbol.
+    ClassOrModuleData data =
+        symRef.dataAllowingNone(*this); // allowing noSymbol is needed because this enters noSymbol.
     data->name = nameId;
     data->owner = Symbols::root();
     data->setIsModule(isModule);
@@ -1028,7 +1029,7 @@ SymbolRef GlobalState::findRenamedSymbol(ClassOrModuleRef owner, SymbolRef sym) 
 ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     // ENFORCE_NO_TIMER(!owner.exists()); // Owner may not exist on purely synthetic symbols.
     ENFORCE_NO_TIMER(name.isClassName(*this));
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
@@ -1042,7 +1043,7 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     auto ret = ClassOrModuleRef(*this, classAndModules.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on classAndModules invalidates `store`
     classAndModules.emplace_back();
-    SymbolData data = ret.data(*this);
+    ClassOrModuleData data = ret.data(*this);
     data->name = name;
     data->owner = owner;
     data->addLoc(*this, loc);
@@ -1067,7 +1068,7 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     }
     flags.isTypeMember = true;
 
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
@@ -1142,7 +1143,7 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
 }
 
 MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
@@ -1203,7 +1204,7 @@ MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, co
 FieldRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     ENFORCE(name.exists());
 
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
@@ -1234,7 +1235,7 @@ FieldRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef 
 FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     ENFORCE(name.exists());
 
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];

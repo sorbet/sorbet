@@ -620,7 +620,7 @@ void validateUnsatisfiedRequiredAncestors(core::Context ctx, const core::ClassOr
 void validateUnsatisfiableRequiredAncestors(core::Context ctx, const core::ClassOrModuleRef sym) {
     auto data = sym.data(ctx);
 
-    vector<core::Symbol::RequiredAncestor> requiredClasses;
+    vector<core::ClassOrModule::RequiredAncestor> requiredClasses;
     for (auto ancst : data->requiredAncestorsTransitive(ctx)) {
         if (ancst.symbol.data(ctx)->isClass()) {
             requiredClasses.emplace_back(ancst);

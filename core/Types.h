@@ -22,7 +22,7 @@ struct DispatchArgs;
 struct DispatchComponent;
 struct DispatchResult;
 struct CallLocs;
-class Symbol;
+class ClassOrModule;
 class TypeVar;
 class SendAndBlockLink;
 class TypeAndOrigins;
@@ -642,8 +642,8 @@ private:
     friend TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<TypePtr, 4> &typeFilter);
     friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassOrModuleRef klass);
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
-    friend class Symbol; // the actual method is `recordSealedSubclass(Mutableconst GlobalState &gs, SymbolRef
-                         // subclass)`, but refering to it introduces a cycle
+    friend class ClassOrModule; // the actual method is `recordSealedSubclass(Mutableconst GlobalState &gs, SymbolRef
+                                // subclass)`, but refering to it introduces a cycle
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };

@@ -30,7 +30,7 @@ public:
     static void pickle(Pickler &p, const UniqueName &what);
     static void pickle(Pickler &p, const TypePtr &what);
     static void pickle(Pickler &p, const ArgInfo &a);
-    static void pickle(Pickler &p, const Symbol &what);
+    static void pickle(Pickler &p, const ClassOrModule &what);
     static void pickle(Pickler &p, const Method &what);
     static void pickle(Pickler &p, const Field &what);
     static void pickle(Pickler &p, const TypeParameter &what);
@@ -45,7 +45,7 @@ public:
     static UniqueName unpickleUniqueName(UnPickler &p, GlobalState &gs);
     static TypePtr unpickleType(UnPickler &p, const GlobalState *gs);
     static ArgInfo unpickleArgInfo(UnPickler &p, const GlobalState *gs);
-    static Symbol unpickleSymbol(UnPickler &p, const GlobalState *gs);
+    static ClassOrModule unpickleClassOrModule(UnPickler &p, const GlobalState *gs);
     static Method unpickleMethod(UnPickler &p, const GlobalState *gs);
     static Field unpickleField(UnPickler &p, const GlobalState *gs);
     static TypeParameter unpickleTypeParameter(UnPickler &p, const GlobalState *gs);
@@ -589,7 +589,7 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
     return result;
 }
 
-void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
+void SerializerImpl::pickle(Pickler &p, const ClassOrModule &what) {
     p.putU4(what.owner.rawId());
     p.putU4(what.name.rawId());
     p.putU4(what.superClass_.id());
@@ -624,12 +624,12 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     }
 }
 
-Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
-    Symbol result;
+ClassOrModule SerializerImpl::unpickleClassOrModule(UnPickler &p, const GlobalState *gs) {
+    ClassOrModule result;
     result.owner = SymbolRef::fromRaw(p.getU4());
     result.name = NameRef::fromRaw(*gs, p.getU4());
     result.superClass_ = ClassOrModuleRef::fromRaw(p.getU4());
-    Symbol::Flags flags;
+    ClassOrModule::Flags flags;
     uint8_t flagsRaw = p.getU1();
     ENFORCE(sizeof(flagsRaw) == sizeof(flags));
     // Can replace this with std::bit_cast in C++20
@@ -767,7 +767,7 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
     }
 
     result.putU4(gs.classAndModules.size());
-    for (const Symbol &s : gs.classAndModules) {
+    for (const ClassOrModule &s : gs.classAndModules) {
         pickle(result, s);
     }
 
@@ -823,7 +823,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     constantNames.clear();
     vector<UniqueName> uniqueNames(std::move(result.uniqueNames));
     uniqueNames.clear();
-    vector<Symbol> classAndModules(std::move(result.classAndModules));
+    vector<ClassOrModule> classAndModules(std::move(result.classAndModules));
     classAndModules.clear();
     vector<Method> methods(std::move(result.methods));
     methods.clear();
@@ -879,7 +879,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         ENFORCE(classAndModuleSize > 0);
         classAndModules.reserve(nextPowerOfTwo(classAndModuleSize));
         for (int i = 0; i < classAndModuleSize; i++) {
-            classAndModules.emplace_back(unpickleSymbol(p, &result));
+            classAndModules.emplace_back(unpickleClassOrModule(p, &result));
         }
 
         int methodSize = p.getU4();

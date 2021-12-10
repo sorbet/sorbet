@@ -11,7 +11,7 @@
 #include <vector>
 
 namespace sorbet::core {
-class Symbol;
+class ClassOrModule;
 class GlobalState;
 struct GlobalStateHash;
 class Type;
@@ -40,7 +40,7 @@ enum class Visibility : uint8_t {
 
 class Method final {
 public:
-    friend class Symbol;
+    friend class ClassOrModule;
     friend class serialize::SerializerImpl;
 
     Method(const Method &) = delete;
@@ -297,11 +297,11 @@ private:
     InlinedVector<Loc, 2> locs_;
 };
 
-class Symbol final {
+class ClassOrModule final {
 public:
-    Symbol(const Symbol &) = delete;
-    Symbol() = default;
-    Symbol(Symbol &&) noexcept = default;
+    ClassOrModule(const ClassOrModule &) = delete;
+    ClassOrModule() = default;
+    ClassOrModule(ClassOrModule &&) noexcept = default;
 
     class Flags {
     public:
@@ -510,7 +510,7 @@ public:
 
     std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlow(const GlobalState &gs) const;
 
-    Symbol deepCopy(const GlobalState &to, bool keepGsId = false) const;
+    ClassOrModule deepCopy(const GlobalState &to, bool keepGsId = false) const;
     void sanityCheck(const GlobalState &gs) const;
 
 private:

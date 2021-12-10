@@ -234,7 +234,7 @@ private:
     }
 
     void addReplacementSuggestions(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved,
-                                   const vector<sorbet::core::Symbol::FuzzySearchResult> &matches) {
+                                   const vector<sorbet::core::ClassOrModule::FuzzySearchResult> &matches) {
         vector<core::ErrorLine> lines;
         for (auto suggestion : matches) {
             const auto replacement = suggestion.symbol.show(ctx);

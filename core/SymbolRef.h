@@ -6,7 +6,7 @@
 #include "core/ShowOptions.h"
 
 namespace sorbet::core {
-class Symbol;
+class ClassOrModule;
 class GlobalState;
 class NameRef;
 class Loc;
@@ -23,26 +23,26 @@ struct SymbolDataDebugCheck {
  *  Entering new symbols can invalidate `Symbol &`s and thus they are generally unsafe.
  *  This class ensures that all accesses are safe in debug builds and effectively is a `Symbol &` in optimized builds.
  */
-class SymbolData : private DebugOnlyCheck<SymbolDataDebugCheck> {
-    Symbol &symbol;
+class ClassOrModuleData : private DebugOnlyCheck<SymbolDataDebugCheck> {
+    ClassOrModule &symbol;
 
 public:
-    SymbolData(Symbol &ref, GlobalState &gs);
+    ClassOrModuleData(ClassOrModule &ref, GlobalState &gs);
 
-    Symbol *operator->();
-    const Symbol *operator->() const;
+    ClassOrModule *operator->();
+    const ClassOrModule *operator->() const;
 };
-CheckSize(SymbolData, 8, 8);
+CheckSize(ClassOrModuleData, 8, 8);
 
-class ConstSymbolData : private DebugOnlyCheck<SymbolDataDebugCheck> {
-    const Symbol &symbol;
+class ConstClassOrModuleData : private DebugOnlyCheck<SymbolDataDebugCheck> {
+    const ClassOrModule &symbol;
 
 public:
-    ConstSymbolData(const Symbol &ref, const GlobalState &gs);
+    ConstClassOrModuleData(const ClassOrModule &ref, const GlobalState &gs);
 
-    const Symbol *operator->() const;
+    const ClassOrModule *operator->() const;
 };
-CheckSize(ConstSymbolData, 8, 8);
+CheckSize(ConstClassOrModuleData, 8, 8);
 
 class Method;
 class MethodData : private DebugOnlyCheck<SymbolDataDebugCheck> {
@@ -138,10 +138,10 @@ public:
         return ref;
     }
 
-    SymbolData data(GlobalState &gs) const;
-    SymbolData dataAllowingNone(GlobalState &gs) const;
-    ConstSymbolData data(const GlobalState &gs) const;
-    ConstSymbolData dataAllowingNone(const GlobalState &gs) const;
+    ClassOrModuleData data(GlobalState &gs) const;
+    ClassOrModuleData dataAllowingNone(GlobalState &gs) const;
+    ConstClassOrModuleData data(const GlobalState &gs) const;
+    ConstClassOrModuleData dataAllowingNone(const GlobalState &gs) const;
 
     bool operator==(const ClassOrModuleRef &rhs) const;
     bool operator!=(const ClassOrModuleRef &rhs) const;
@@ -349,7 +349,7 @@ CheckSize(TypeArgumentRef, 4, 4);
 
 class SymbolRef final {
     friend class GlobalState;
-    friend class Symbol;
+    friend class ClassOrModule;
     // For toStringWithOptions.
     friend class ClassOrModuleRef;
     friend class MethodRef;
