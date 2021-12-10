@@ -20,6 +20,7 @@ const std::vector<u4> KNOWN_PROP_METHODS = {
     core::Names::const_().rawId(),
     core::Names::encryptedProp().rawId(),
     core::Names::bearerTokenProp().rawId(),
+    core::Names::feeRuleProp().rawId(),
 };
 
 const std::vector<core::NameRef> CHALK_ODM_IMMUTABLE_MODEL = {
@@ -198,6 +199,22 @@ class DSLAnalysisWalk {
 
                     result.emplace_back(PropInfoInternal{name, std::move(typeExp)});
                     result.emplace_back(PropInfoInternal{encryptedName, std::move(typeExpEnc)});
+                }
+
+                break;
+            }
+            case core::Names::feeRuleProp().rawId(): {
+                if (send->numPosArgs > 0) {
+                    auto *lit = ast::cast_tree<ast::Literal>(send->args.front());
+                    if (lit && lit->isSymbol(ctx)) {
+                        core::NameRef propName = ctx.state.enterNameConstant(absl::StrCat(
+                              lit->asSymbol(ctx).show(ctx),
+                              "_rules"
+                        ));
+                        auto typeExp = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()),
+                                                        core::Names::untyped(), 0, {});
+                        result.emplace_back(PropInfoInternal{std::move(propName), std::move(typeExp)});
+                    }
                 }
 
                 break;

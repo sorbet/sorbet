@@ -196,6 +196,7 @@ NameDef names[] = {
     {"merchantProp", "merchant_prop"},
     {"merchantTokenProp", "merchant_token_prop"},
     {"encryptedProp", "encrypted_prop"},
+    {"feeRuleProp", "fee_rule_prop"},
     {"array"},
     {"defDelegator", "def_delegator"},
     {"defDelegators", "def_delegators"},
