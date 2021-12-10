@@ -286,7 +286,7 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
         }
     }
 
-    if (method.data(ctx)->flags.isAbstract && klassData->isClassOrModule() && klassData->isSingletonClass(ctx)) {
+    if (method.data(ctx)->flags.isAbstract && klassData->isSingletonClass(ctx)) {
         auto attached = klassData->attachedClass(ctx);
         if (attached.exists() && attached.data(ctx)->isClassOrModuleModule()) {
             if (auto e =
