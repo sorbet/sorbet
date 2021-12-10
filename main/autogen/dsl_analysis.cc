@@ -13,7 +13,9 @@ const std::vector<u4> KNOWN_PROP_METHODS = {
     core::Names::tokenProp().rawId(),    core::Names::timestampedTokenProp().rawId(),
     core::Names::createdProp().rawId(),  core::Names::updatedProp().rawId(),
     core::Names::merchantProp().rawId(), core::Names::merchantTokenProp().rawId(),
-    core::Names::const_().rawId(), core::Names::encryptedProp().rawId()};
+    core::Names::const_().rawId(), core::Names::encryptedProp().rawId(),
+    core::Names::bearerTokenProp().rawId(),
+};
 
 const std::vector<core::NameRef> CHALK_ODM_IMMUTABLE_MODEL = {
     core::Names::Constants::Chalk(), core::Names::Constants::ODM(), core::Names::Constants::ImmutableModel()};
@@ -40,7 +42,6 @@ const std::string UNTYPED_STR = "T.untyped";
 struct PropInfoInternal {
     core::NameRef name;
     std::optional<ast::ExpressionPtr> typeExp;
-    bool encrypted = false;
 };
 
 class DSLAnalysisWalk {
@@ -73,7 +74,9 @@ class DSLAnalysisWalk {
         return out;
     }
 
-    const std::optional<PropInfoInternal> parseProp(core::MutableContext ctx, ast::Send *send) {
+    const std::vector<PropInfoInternal> parseProp(core::MutableContext ctx, ast::Send *send) {
+        std::vector<PropInfoInternal> result;
+
         switch (send->fun.rawId()) {
             case core::Names::const_().rawId():
             case core::Names::prop().rawId(): {
@@ -82,14 +85,93 @@ class DSLAnalysisWalk {
                     if (send->args.size() > 1) {
                         auto maybeTransformedType = transformTypeForMutator(ctx, send->args[1]);
                         if (maybeTransformedType.has_value()) {
-                            return PropInfoInternal{lit->asSymbol(ctx), std::move(*maybeTransformedType)};
+                            result.emplace_back(PropInfoInternal{lit->asSymbol(ctx), std::move(*maybeTransformedType)});
                         } else {
-                            return PropInfoInternal{lit->asSymbol(ctx), std::move(send->args[1])};
+                            result.emplace_back(PropInfoInternal{lit->asSymbol(ctx), std::move(send->args[1])});
+                        }
+                    } else {
+                      result.emplace_back(PropInfoInternal{lit->asSymbol(ctx), std::nullopt});
+                    }
+                }
+
+                break;
+            }
+            case core::Names::bearerTokenProp().rawId(): {
+                core::NameRef propSuffix = core::Names::bearerToken();
+                std::optional<core::NameRef> propPrefix;
+                bool optionalProp = false;
+                bool timeForConsumedAt = false;
+
+                if (send->numPosArgs > 0) {
+                    auto *lit = ast::cast_tree<ast::Literal>(send->args.front());
+                    if (lit && lit->isSymbol(ctx)) {
+                        propSuffix = lit->asSymbol(ctx);
+                    }
+                }
+
+                auto [kwStart, kwEnd] = send->kwArgsRange();
+                for (auto i = kwStart; i < kwEnd; i += 2) {
+                    auto *labelLit = ast::cast_tree<ast::Literal>(send->args[i]);
+                    if (labelLit && labelLit->isSymbol(ctx)) {
+                        if (labelLit->asSymbol(ctx) == core::Names::propPrefixOpt()) {
+                            auto propLit = ast::cast_tree_nonnull<ast::Literal>(send->args[i+1]);
+                            if (propLit.isString(ctx)) {
+                                propPrefix = propLit.asString(ctx);
+                            }
+                        } else if (labelLit->asSymbol(ctx) == core::Names::optional()) {
+                            auto propLit = ast::cast_tree_nonnull<ast::Literal>(send->args[i+1]);
+                            if (propLit.isTrue(ctx)) {
+                                optionalProp = true;
+                            }
+                        } else if (labelLit->asSymbol(ctx) == core::Names::timeForConsumedAt()) {
+                            auto propLit = ast::cast_tree_nonnull<ast::Literal>(send->args[i+1]);
+                            if (propLit.isTrue(ctx)) {
+                                timeForConsumedAt = true;
+                            }
                         }
                     }
-
-                    return PropInfoInternal{lit->asSymbol(ctx), std::nullopt};
                 }
+
+                core::NameRef propName;
+                core::NameRef versionPropName;
+                core::NameRef consumedAtPropName;
+                if (propPrefix.has_value()) {
+                    propName = ctx.state.enterNameConstant(absl::StrCat((*propPrefix).show(ctx), "_", propSuffix.show(ctx)));
+                    versionPropName = ctx.state.enterNameConstant(absl::StrCat((*propPrefix).show(ctx), "_", core::Names::bearerTokenVersion().show(ctx)));
+                    consumedAtPropName = ctx.state.enterNameConstant(absl::StrCat((*propPrefix).show(ctx), "_", core::Names::bearerTokenConsumedAt().show(ctx)));
+                } else {
+                    propName = propSuffix;
+                    versionPropName = core::Names::bearerTokenVersion();
+                    consumedAtPropName = core::Names::bearerTokenConsumedAt();
+                }
+
+                ast::ExpressionPtr typeExp;
+                ast::ExpressionPtr versionPropTypeExp;
+                if (optionalProp) {
+                    ast::Send::ARGS_store args;
+                    args.emplace_back(ast::MK::Constant(send->loc, core::Symbols::String()));
+                    typeExp = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()), core::Names::nilable(), 1,
+                                         std::move(args));
+
+                    ast::Send::ARGS_store argsVer;
+                    argsVer.emplace_back(ast::MK::Constant(send->loc, core::Symbols::Integer()));
+                    versionPropTypeExp = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()), core::Names::nilable(), 1,
+                                         std::move(argsVer));
+                } else {
+                    typeExp = ast::MK::Constant(send->loc, core::Symbols::String());
+                    versionPropTypeExp = ast::MK::Constant(send->loc, core::Symbols::Integer());
+                }
+
+                ast::ExpressionPtr consumedAtPropTypeExp;
+                if (timeForConsumedAt) {
+                    consumedAtPropTypeExp = ast::MK::Constant(send->loc, core::Symbols::Time());
+                } else {
+                    consumedAtPropTypeExp = ast::MK::Constant(send->loc, core::Symbols::Float());
+                }
+
+                result.emplace_back(PropInfoInternal{std::move(propName), std::move(typeExp)});
+                result.emplace_back(PropInfoInternal{std::move(versionPropName), std::move(versionPropTypeExp)});
+                result.emplace_back(PropInfoInternal{std::move(consumedAtPropName), std::move(consumedAtPropTypeExp)});
 
                 break;
             }
@@ -98,32 +180,48 @@ class DSLAnalysisWalk {
                 if (lit && lit->isSymbol(ctx)) {
                     ast::Send::ARGS_store args;
                     args.emplace_back(ast::MK::Constant(send->loc, core::Symbols::String()));
-                    auto recv = ast::MK::Constant(send->loc, core::Symbols::T());
-
-                    auto typeExp = ast::MK::Send(send->loc, std::move(recv), core::Names::nilable(), 1,
+                    auto typeExp = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()), core::Names::nilable(), 1,
                                          std::move(args));
-                    return PropInfoInternal{lit->asSymbol(ctx), std::move(typeExp), true};
+                    core::NameRef name = lit->asSymbol(ctx);
+
+                    core::NameRef encryptedName = ctx.state.enterNameConstant(absl::StrCat(ENCRYPTED_, name.show(ctx)));
+                    auto typeExpEnc = ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T()), core::Names::untyped(), 0, {});
+
+                    result.emplace_back(PropInfoInternal{name, std::move(typeExp)});
+                    result.emplace_back(PropInfoInternal{encryptedName, std::move(typeExpEnc)});
                 }
 
                 break;
             }
             case core::Names::tokenProp().rawId():
-            case core::Names::timestampedTokenProp().rawId():
-                return PropInfoInternal{
+            case core::Names::timestampedTokenProp().rawId(): {
+                result.emplace_back(PropInfoInternal{
                     core::Names::token(),
                     ast::MK::Constant(send->loc, core::Symbols::String()),
-                };
-            case core::Names::createdProp().rawId():
-                return PropInfoInternal{core::Names::created(), ast::MK::Constant(send->loc, core::Symbols::Float())};
-            case core::Names::updatedProp().rawId():
-                return PropInfoInternal{core::Names::updated(), ast::MK::Constant(send->loc, core::Symbols::Float())};
-            case core::Names::merchantProp().rawId():
-                return PropInfoInternal{
+                });
+
+                break;
+            }
+            case core::Names::createdProp().rawId(): {
+                result.emplace_back(PropInfoInternal{core::Names::created(), ast::MK::Constant(send->loc, core::Symbols::Float())});
+
+                break;
+            }
+            case core::Names::updatedProp().rawId(): {
+                result.emplace_back(PropInfoInternal{core::Names::updated(), ast::MK::Constant(send->loc, core::Symbols::Float())});
+
+                break;
+            }
+            case core::Names::merchantProp().rawId(): {
+                result.emplace_back(PropInfoInternal{
                     core::Names::merchant(),
                     ast::MK::Constant(send->loc, core::Symbols::String()),
-                };
-            case core::Names::merchantTokenProp().rawId():
-                return PropInfoInternal{
+                });
+
+                break;
+            }
+            case core::Names::merchantTokenProp().rawId(): {
+                result.emplace_back(PropInfoInternal{
                     core::Names::merchant(),
                     ast::MK::UnresolvedConstant(
                         send->loc,
@@ -135,12 +233,15 @@ class DSLAnalysisWalk {
                                                         core::Names::Constants::Autogen()),
                             core::Names::Constants::Tokens()),
                         core::Names::Constants::AccountModelMerchantToken()),
-                };
+                });
+
+                break;
+            }
             default:
-                return std::nullopt;
+                break;
         }
 
-        return std::nullopt;
+        return result;
     }
 
     std::optional<ast::ExpressionPtr> transformTypeForMutator(core::MutableContext ctx, ast::ExpressionPtr &propType) {
@@ -252,19 +353,16 @@ public:
                 return tree;
             }
 
-            const auto propInfo = parseProp(ctx, original);
-            if (propInfo.has_value()) {
-                std::optional<std::string> typeStr;
-                if ((*propInfo).typeExp.has_value()) {
-                    typeStr = std::move(*((*propInfo).typeExp)).toString(ctx);
-                }
+            const auto propInfos = parseProp(ctx, original);
+            if (!propInfos.empty()) {
+                for (const auto &propInfo : propInfos) {
+                    std::optional<std::string> typeStr;
+                    if (propInfo.typeExp.has_value()) {
+                        typeStr = std::move(*(propInfo.typeExp)).toString(ctx);
+                    }
 
-                core::NameRef name = std::move((*propInfo).name);
-                dslInfo[curScope].props.emplace_back(PropInfo{name, std::move(typeStr)});
-
-                if ((*propInfo).encrypted) {
-                    core::NameRef encryptedName = ctx.state.enterNameConstant(absl::StrCat(ENCRYPTED_, name.show(ctx)));
-                    dslInfo[curScope].props.emplace_back(PropInfo{std::move(encryptedName), UNTYPED_STR});
+                    core::NameRef name = std::move(propInfo.name);
+                    dslInfo[curScope].props.emplace_back(PropInfo{name, std::move(typeStr)});
                 }
             } else {
                 dslInfo[curScope].problemLocs.emplace_back(LocInfo{file, std::move(original->loc)});

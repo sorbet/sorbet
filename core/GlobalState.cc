@@ -485,6 +485,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::T_Private_Compiler());
     id = Symbols::T_Private_Compiler().data(*this)->singletonClass(*this);
     ENFORCE(id == Symbols::T_Private_CompilerSingleton());
+    id = synthesizeClass(core::Names::Constants::Time());
+    ENFORCE(id == Symbols::Time());
 
     typeArgument =
         enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
