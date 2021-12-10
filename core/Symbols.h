@@ -237,41 +237,23 @@ public:
         bool isContravariant : 1;
         bool isFixed : 1;
 
+        constexpr static uint8_t NUMBER_OF_FLAGS = 6;
+        constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
+
         Flags() noexcept
             : isTypeArgument(false), isTypeMember(false), isCovariant(false), isInvariant(false),
               isContravariant(false), isFixed(false) {}
 
         uint8_t serialize() const {
             // Can replace this with std::bit_cast in C++20
-            return *reinterpret_cast<const uint8_t *>(this);
+            auto rawBits = *reinterpret_cast<const uint8_t *>(this);
+            // Mask the valid bits since uninitialized bits can be any value.
+            return rawBits & VALID_BITS_MASK;
         }
 
         bool hasFlags(const Flags other) {
-            if (other.isTypeArgument && !this->isTypeArgument) {
-                return false;
-            }
-
-            if (other.isTypeMember && !this->isTypeMember) {
-                return false;
-            }
-
-            if (other.isCovariant && !this->isCovariant) {
-                return false;
-            }
-
-            if (other.isInvariant && !this->isInvariant) {
-                return false;
-            }
-
-            if (other.isContravariant && !this->isContravariant) {
-                return false;
-            }
-
-            if (other.isFixed && !this->isFixed) {
-                return false;
-            }
-
-            return true;
+            const auto otherSerialized = other.serialize();
+            return (this->serialize() & otherSerialized) == otherSerialized;
         }
     };
     CheckSize(Flags, 1, 1);
