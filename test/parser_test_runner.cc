@@ -127,7 +127,8 @@ TEST_CASE("WhitequarkParserTest") {
             // whitequark/parser declares these 3 meta variables to
             // simplify testing cases around local variables
             vector<string> initialLocals = {"foo", "bar", "baz"};
-            nodes = parser::Parser::run(gs, file, initialLocals);
+            auto trace = false;
+            nodes = parser::Parser::run(gs, file, trace, initialLocals);
         }
         {
             errorQueue->flushAllErrors(gs);
