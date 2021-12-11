@@ -6,7 +6,7 @@
 #include "common/concurrency/WorkerPool.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
-#include "core/GlobalSubstitution.h"
+#include "core/NameSubstitution.h"
 #include "core/Unfreeze.h"
 #include "local_vars/local_vars.h"
 #include "packager/packager.h"

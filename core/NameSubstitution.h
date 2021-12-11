@@ -1,5 +1,5 @@
-#ifndef SORBET_CORE_GLOBAL_SUBSTITUTION_H
-#define SORBET_CORE_GLOBAL_SUBSTITUTION_H
+#ifndef SORBET_CORE_NAME_SUBSTITUTION_H
+#define SORBET_CORE_NAME_SUBSTITUTION_H
 
 #include "common/common.h"
 #include "core/NameHash.h"

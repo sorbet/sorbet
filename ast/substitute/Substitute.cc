@@ -2,7 +2,7 @@
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 #include "common/typecase.h"
-#include "core/GlobalSubstitution.h"
+#include "core/NameSubstitution.h"
 namespace sorbet::ast {
 
 namespace {

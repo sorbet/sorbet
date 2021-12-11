@@ -3,7 +3,7 @@
 #include "core/Error.h"
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
-#include "core/GlobalSubstitution.h"
+#include "core/NameSubstitution.h"
 #include "core/TypePtr.h"
 #include "core/Unfreeze.h"
 #include "core/core.h"

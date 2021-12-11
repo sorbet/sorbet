@@ -17,7 +17,7 @@ cc_library(
         "Names_gen.cc",
     ],
     hdrs = [
-        "GlobalSubstitution.h",
+        "NameSubstitution.h",
         "core.h",
     ] + glob([
         "errors/*.h",

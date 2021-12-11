@@ -1,4 +1,4 @@
-#include "core/GlobalSubstitution.h"
+#include "core/NameSubstitution.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"
 #include "core/Unfreeze.h"
