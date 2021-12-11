@@ -235,6 +235,9 @@ public:
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;
 
+    // Copy the file table and other parts of GlobalState that are required for the indexing pass.
+    // NOTE: this very intentionally will not copy the symbol or name tables. The symbol tables aren't used or populated
+    // during indexing, and the name tables will only be written to.
     std::unique_ptr<GlobalState> copyForIndex() const;
 
     // Contains a path prefix that should be stripped from all printed paths.

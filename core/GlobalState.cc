@@ -1811,9 +1811,9 @@ unique_ptr<GlobalState> GlobalState::copyForIndex() const {
 
     result->initEmpty();
 
+    // Options that might be used during indexing are manually copied over here
     result->files = this->files;
     result->fileRefByPath = this->fileRefByPath;
-
     result->silenceErrors = this->silenceErrors;
     result->autocorrect = this->autocorrect;
     result->ensureCleanStrings = this->ensureCleanStrings;
@@ -1822,6 +1822,10 @@ unique_ptr<GlobalState> GlobalState::copyForIndex() const {
     result->sleepInSlowPath = this->sleepInSlowPath;
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
     result->kvstoreUuid = this->kvstoreUuid;
+    result->errorUrlBase = this->errorUrlBase;
+    result->suppressedErrorClasses = this->suppressedErrorClasses;
+    result->onlyErrorClasses = this->onlyErrorClasses;
+    result->suggestUnsafe = this->suggestUnsafe;
     result->pathPrefix = this->pathPrefix;
 
     return result;

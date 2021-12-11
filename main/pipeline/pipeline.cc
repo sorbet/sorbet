@@ -440,10 +440,9 @@ struct IndexSubstitutionJob {
 
     IndexSubstitutionJob(core::GlobalState &to, IndexResult res)
         : threadGs{std::move(res.gs)}, subst{}, trees{std::move(res.trees)} {
+        core::GlobalSubstitution::mergeFileTables(*this->threadGs, to);
         if (absl::c_any_of(this->trees, [this](auto &parsed) { return !parsed.file.data(*this->threadGs).cached; })) {
             this->subst.emplace(*this->threadGs, to);
-        } else {
-            core::GlobalSubstitution::mergeFileTables(*this->threadGs, to);
         }
     }
 
@@ -520,7 +519,7 @@ vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<cor
         fileq->push(move(file), 1);
     }
 
-    std::shared_ptr<core::GlobalState> emptyGs = baseGs.copyForIndex();
+    std::shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex();
 
     workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");

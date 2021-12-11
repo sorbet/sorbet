@@ -10,8 +10,6 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to)
 
     from.sanityCheck();
 
-    GlobalSubstitution::mergeFileTables(from, to);
-
     {
         UnfreezeNameTable unfreezeNames(to);
         utf8NameSubstitution.reserve(from.utf8Names.size());
