@@ -60,9 +60,8 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to)
 
 void GlobalSubstitution::mergeFileTables(const GlobalState &from, GlobalState &to) {
     UnfreezeFileTable unfreezeFiles(to);
-    int fileIdx = 0; // Skip file 0
-    while (fileIdx + 1 < from.filesUsed()) {
-        fileIdx++;
+    // id 0 is for non-existing FileRef
+    for (int fileIdx = 1; fileIdx < from.filesUsed(); fileIdx++) {
         if (from.files[fileIdx]->sourceType == File::Type::NotYetRead) {
             continue;
         }
