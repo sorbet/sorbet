@@ -120,7 +120,6 @@ private:
         auto prefixSize = prefix.end() - prefixBegin;
 
         for (auto name : db().packages()) {
-            ctx.state.tracer().error("comparing against {}", name.toString(ctx));
             auto &other = db().getPackageInfo(name);
             auto &fullName = other.fullName();
             if (fullName.size() >= prefixSize && canImport(other) &&
@@ -163,30 +162,43 @@ private:
     }
 
     void tryUnresolvedImportCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
-        vector<PackageMatch> matches;
-        vector<core::NameRef> prefix;
+        auto &scope = unresolved.scope;
+        // by default, we'll try to search for a matching package in the root scope
+        core::SymbolRef searchScope = core::Symbols::root();
+        // but if our parent is something that _was_ resolved, we can
+        // search in that scope instead
+        if (auto *cnst = ast::cast_tree<ast::ConstantLit>(scope)) {
+            searchScope = cnst->symbol;
+        }
 
-        ast::UnresolvedConstantLit* cnst = &unresolved;
-        while (cnst) {
-            prefix.emplace_back(cnst->cnst);
-            if (auto cnst_lit = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope)) {
-                cnst = cnst_lit;
-            } else if (auto cnst_lit = ast::cast_tree<ast::ConstantLit>(cnst->scope)) {
-                cnst = ast::cast_tree<ast::UnresolvedConstantLit>(cnst_lit->original);
-            } else {
-                break;
+        // try to find a matching constant in the resolved parent
+        // scope (or root scope if that didn't exist)
+        auto matches = searchScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, unresolved.cnst);
+        {
+            // remove anything that's not a package. Since we're
+            // searching from the root, that means we'll be finding
+            // the things which inherit from `PackageSpec`
+            // (i.e. something like `::MyPackage`, and not
+            // `::<PackageRegistry>::MyPackage`), and we can retain
+            // _only_ those constants which inherit from `PackageSpec`
+            // and throw out other suggestions
+            auto it = remove_if(matches.begin(), matches.end(), [&](auto &m) -> bool {
+                if (m.symbol.isClassOrModule()) {
+                    return m.symbol.asClassOrModuleRef().data(ctx)->superClass() != core::Symbols::PackageSpec();
+                } else {
+                    return true;
+                }
+            });
+            matches.erase(it, matches.end());
+
+            // only keep a tractable number of them
+            if (matches.size() > 4) {
+                matches.resize(4);
             }
         }
-        reverse(prefix.begin(), prefix.end());
-        ctx.state.tracer().error("-----");
-        for (auto n : prefix) {
-            ctx.state.tracer().error("  - {}", n.show(ctx));
-        }
-
-        findPackagesWithPrefix(prefix, matches);
-        ctx.state.tracer().error("found {} matches", matches.size());
-        for (auto match : matches) {
-            addMissingImportSuggestions(e, match);
+        // do the replacements
+        if (!matches.empty()) {
+            addReplacementSuggestions(e, unresolved, matches);
         }
     }
 
