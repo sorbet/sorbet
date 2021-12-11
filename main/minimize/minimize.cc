@@ -414,7 +414,7 @@ void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &sourceG
     // I'm ignoring everything relating to caching here, because missing methods is likely
     // to run on a new _unknown.rbi file every time and I didn't want to think about it.
     // If this phase gets slow, we can consider whether caching would speed things up.
-    auto rbiIndexed = pipeline::index(rbiGS, rbiInputFiles, opts, workers, nullptr);
+    auto rbiIndexed = pipeline::index(*rbiGS, rbiInputFiles, opts, workers, nullptr);
     if (rbiGS->hadCriticalError()) {
         rbiGS->errorQueue->flushAllErrors(*rbiGS);
     }
