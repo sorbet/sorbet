@@ -3,8 +3,8 @@
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/ErrorQueue.h"
-#include "core/NameSubstitution.h"
 #include "core/NameHash.h"
+#include "core/NameSubstitution.h"
 #include "core/Unfreeze.h"
 #include "main/pipeline/pipeline.h"
 

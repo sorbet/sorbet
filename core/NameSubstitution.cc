@@ -71,8 +71,7 @@ void NameSubstitution::mergeFileTables(const GlobalState &from, GlobalState &to)
     }
 }
 
-LazyNameSubstitution::LazyNameSubstitution(const GlobalState &fromGS, GlobalState &toGS)
-    : fromGS(fromGS), toGS(toGS) {
+LazyNameSubstitution::LazyNameSubstitution(const GlobalState &fromGS, GlobalState &toGS) : fromGS(fromGS), toGS(toGS) {
     // Pre-define an entry for the empty name.
     nameSubstitution[core::NameRef()] = core::NameRef();
 };
