@@ -94,8 +94,8 @@ public:
             tryUnresolvedExportCorrections(e, unresolved);
             return true;
         } else {
-            // TODO(gdritter-stripe) handle bad import
-            return false;
+            tryUnresolvedImportCorrections(e, unresolved);
+            return true;
         }
     }
 
@@ -158,6 +158,47 @@ private:
             addReplacementSuggestions(e, unresolved, matches);
         } else {
             e.addErrorNote("To be exported it must be defined in package `{}`", formatPackageName(currentPkg));
+        }
+    }
+
+    void tryUnresolvedImportCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
+        auto &scope = unresolved.scope;
+        // by default, we'll try to search for a matching package in the root scope
+        core::SymbolRef searchScope = core::Symbols::root();
+        // but if our parent is something that _was_ resolved, we can
+        // search in that scope instead
+        if (auto *cnst = ast::cast_tree<ast::ConstantLit>(scope)) {
+            searchScope = cnst->symbol;
+        }
+
+        // try to find a matching constant in the resolved parent
+        // scope (or root scope if that didn't exist)
+        auto matches = searchScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, unresolved.cnst);
+        {
+            // remove anything that's not a package. Since we're
+            // searching from the root, that means we'll be finding
+            // the things which inherit from `PackageSpec`
+            // (i.e. something like `::MyPackage`, and not
+            // `::<PackageRegistry>::MyPackage`), and we can retain
+            // _only_ those constants which inherit from `PackageSpec`
+            // and throw out other suggestions
+            auto it = remove_if(matches.begin(), matches.end(), [&](auto &m) -> bool {
+                if (m.symbol.isClassOrModule()) {
+                    return m.symbol.asClassOrModuleRef().data(ctx)->superClass() != core::Symbols::PackageSpec();
+                } else {
+                    return true;
+                }
+            });
+            matches.erase(it, matches.end());
+
+            // only keep a tractable number of them
+            if (matches.size() > 4) {
+                matches.resize(4);
+            }
+        }
+        // do the replacements
+        if (!matches.empty()) {
+            addReplacementSuggestions(e, unresolved, matches);
         }
     }
 
