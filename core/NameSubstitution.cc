@@ -56,21 +56,6 @@ NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : t
     to.sanityCheck();
 }
 
-void NameSubstitution::mergeFileTables(const GlobalState &from, GlobalState &to) {
-    UnfreezeFileTable unfreezeFiles(to);
-    // id 0 is for non-existing FileRef
-    for (int fileIdx = 1; fileIdx < from.filesUsed(); fileIdx++) {
-        if (from.files[fileIdx]->sourceType == File::Type::NotYetRead) {
-            continue;
-        }
-        if (fileIdx < to.filesUsed() && from.files[fileIdx].get() == to.files[fileIdx].get()) {
-            continue;
-        }
-        ENFORCE(fileIdx >= to.filesUsed() || to.files[fileIdx]->sourceType == File::Type::NotYetRead);
-        to.enterNewFileAt(from.files[fileIdx], fileIdx);
-    }
-}
-
 LazyNameSubstitution::LazyNameSubstitution(const GlobalState &fromGS, GlobalState &toGS) : fromGS(fromGS), toGS(toGS) {
     // Pre-define an entry for the empty name.
     nameSubstitution[core::NameRef()] = core::NameRef();

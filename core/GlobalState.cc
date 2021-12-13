@@ -1831,6 +1831,21 @@ unique_ptr<GlobalState> GlobalState::copyForIndex() const {
     return result;
 }
 
+void GlobalState::mergeFileTable(const core::GlobalState &from) {
+    UnfreezeFileTable unfreezeFiles(*this);
+    // id 0 is for non-existing FileRef
+    for (int fileIdx = 1; fileIdx < from.filesUsed(); fileIdx++) {
+        if (from.files[fileIdx]->sourceType == File::Type::NotYetRead) {
+            continue;
+        }
+        if (fileIdx < this->filesUsed() && from.files[fileIdx].get() == this->files[fileIdx].get()) {
+            continue;
+        }
+        ENFORCE(fileIdx >= this->filesUsed() || this->files[fileIdx]->sourceType == File::Type::NotYetRead);
+        this->enterNewFileAt(from.files[fileIdx], fileIdx);
+    }
+}
+
 string_view GlobalState::getPrintablePath(string_view path) const {
     // Only strip the path prefix if the path has it.
     if (path.substr(0, pathPrefix.length()) == pathPrefix) {

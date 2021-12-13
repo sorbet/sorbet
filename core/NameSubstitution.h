@@ -21,8 +21,6 @@ class NameSubstitution final {
 public:
     NameSubstitution(const GlobalState &from, GlobalState &to);
 
-    static void mergeFileTables(const GlobalState &from, GlobalState &to);
-
     NameRef substitute(NameRef from, bool allowSameFromTo = false) const {
         if (!allowSameFromTo) {
             from.sanityCheckSubstitution(*this);
