@@ -6,7 +6,7 @@
 namespace sorbet::ast {
 
 namespace {
-// Is used with GlobalSubstitution and LazyGlobalSubstitution, which implement the same interface.
+// Is used with NameSubstitution and LazyNameSubstitution, which implement the same interface.
 template <typename T> class SubstWalk {
 private:
     T &subst;
@@ -128,13 +128,13 @@ public:
 };
 } // namespace
 
-ExpressionPtr Substitute::run(core::MutableContext ctx, const core::GlobalSubstitution &subst, ExpressionPtr what) {
+ExpressionPtr Substitute::run(core::MutableContext ctx, const core::NameSubstitution &subst, ExpressionPtr what) {
     SubstWalk walk(subst);
     what = TreeMap::apply(ctx, walk, std::move(what));
     return what;
 }
 
-ExpressionPtr Substitute::run(core::MutableContext ctx, core::LazyGlobalSubstitution &subst, ExpressionPtr what) {
+ExpressionPtr Substitute::run(core::MutableContext ctx, core::LazyNameSubstitution &subst, ExpressionPtr what) {
     SubstWalk walk(subst);
     what = TreeMap::apply(ctx, walk, std::move(what));
     return what;

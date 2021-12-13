@@ -604,7 +604,7 @@ private:
      */
     friend TypePtr Types::falsyTypes();
     friend TypePtr Types::Boolean();
-    friend class GlobalSubstitution;
+    friend class NameSubstitution;
     friend class serialize::SerializerImpl;
     friend bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                                 const TypePtr &t2, UntypedMode mode);
@@ -647,7 +647,7 @@ private:
      */
     AndType(const TypePtr &left, const TypePtr &right);
 
-    friend class GlobalSubstitution;
+    friend class NameSubstitution;
     friend class serialize::SerializerImpl;
     friend class TypeConstraint;
 

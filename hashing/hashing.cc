@@ -20,7 +20,7 @@ pair<ast::ParsedFile, core::UsageHash> rewriteAST(const core::GlobalState &origi
                                                   core::FileRef newFref, const ast::ParsedFile &ast) {
     // TODO(jvilk): Switch to passing around compressed ASTs which are cheaper to copy + inflate.
     ast::ParsedFile rewritten{ast.tree.deepCopy(), newFref};
-    core::LazyGlobalSubstitution subst(originalGS, newGS);
+    core::LazyNameSubstitution subst(originalGS, newGS);
     core::MutableContext ctx(newGS, core::Symbols::root(), newFref);
     core::UnfreezeNameTable nameTableAccess(newGS);
     rewritten.tree = ast::Substitute::run(ctx, subst, move(rewritten.tree));
@@ -60,9 +60,9 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
     core::FileRef fref = makeEmptyGlobalStateForFile(logger, move(forWhat), /* out param */ lgs, hashingOpts);
     auto ast = realmain::pipeline::indexOne(opts(), *lgs, fref);
 
-    // Calculate UsageHash. We use LazyGlobalSubstitution for this purpose, but it will not do any actual substitution
+    // Calculate UsageHash. We use LazyNameSubstitution for this purpose, but it will not do any actual substitution
     // when fromGS == toGS (hence we intentionally do not unfreeze name table).
-    core::LazyGlobalSubstitution subst(*lgs, *lgs);
+    core::LazyNameSubstitution subst(*lgs, *lgs);
     core::MutableContext ctx(*lgs, core::Symbols::root(), fref);
     ast.tree = ast::Substitute::run(ctx, subst, move(ast.tree));
     return computeFileHashForAST(lgs, subst.getAllNames(), move(ast));

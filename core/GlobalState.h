@@ -23,7 +23,7 @@ class MethodRef;
 class FieldRef;
 class TypeArgumentRef;
 class TypeMemberRef;
-class GlobalSubstitution;
+class NameSubstitution;
 class ErrorQueue;
 struct GlobalStateHash;
 
@@ -49,7 +49,7 @@ class GlobalState final {
     friend FieldRef;
     friend File;
     friend FileRef;
-    friend GlobalSubstitution;
+    friend NameSubstitution;
     friend ErrorBuilder;
     friend serialize::Serializer;
     friend serialize::SerializerImpl;

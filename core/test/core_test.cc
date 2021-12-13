@@ -150,7 +150,7 @@ TEST_CASE("Substitute") { // NOLINT
         gs1.enterNameUTF8("name");
     }
 
-    GlobalSubstitution subst(gs1, gs2);
+    NameSubstitution subst(gs1, gs2);
 
     CHECK_EQ(subst.substitute(foo1), foo2);
     CHECK_EQ(subst.substitute(bar1), bar2);

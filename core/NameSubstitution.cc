@@ -5,8 +5,8 @@
 using namespace std;
 namespace sorbet::core {
 
-GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to) : toGlobalStateId(to.globalStateId) {
-    Timer timeit(to.tracer(), "GlobalSubstitution.new", from.creation);
+NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : toGlobalStateId(to.globalStateId) {
+    Timer timeit(to.tracer(), "NameSubstitution.new", from.creation);
 
     from.sanityCheck();
 
@@ -56,7 +56,7 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to)
     to.sanityCheck();
 }
 
-void GlobalSubstitution::mergeFileTables(const GlobalState &from, GlobalState &to) {
+void NameSubstitution::mergeFileTables(const GlobalState &from, GlobalState &to) {
     UnfreezeFileTable unfreezeFiles(to);
     // id 0 is for non-existing FileRef
     for (int fileIdx = 1; fileIdx < from.filesUsed(); fileIdx++) {
@@ -71,13 +71,13 @@ void GlobalSubstitution::mergeFileTables(const GlobalState &from, GlobalState &t
     }
 }
 
-LazyGlobalSubstitution::LazyGlobalSubstitution(const GlobalState &fromGS, GlobalState &toGS)
+LazyNameSubstitution::LazyNameSubstitution(const GlobalState &fromGS, GlobalState &toGS)
     : fromGS(fromGS), toGS(toGS) {
     // Pre-define an entry for the empty name.
     nameSubstitution[core::NameRef()] = core::NameRef();
 };
 
-NameRef LazyGlobalSubstitution::defineName(NameRef from, bool allowSameFromTo) {
+NameRef LazyNameSubstitution::defineName(NameRef from, bool allowSameFromTo) {
     ENFORCE_NO_TIMER(&fromGS != &toGS);
 
     // Avoid failures in debug builds.
@@ -104,7 +104,7 @@ NameRef LazyGlobalSubstitution::defineName(NameRef from, bool allowSameFromTo) {
     return to;
 }
 
-core::UsageHash LazyGlobalSubstitution::getAllNames() {
+core::UsageHash LazyNameSubstitution::getAllNames() {
     core::NameHash::sortAndDedupe(acc.sends);
     core::NameHash::sortAndDedupe(acc.symbols);
     return move(acc);
