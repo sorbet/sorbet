@@ -8,7 +8,7 @@
 #include "common/common.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
-#include "core/GlobalSubstitution.h"
+#include "core/NameSubstitution.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "parser/parser.h"
@@ -186,7 +186,7 @@ TEST_CASE("CloneSubstitutePayload") {
         n1 = c1->enterNameUTF8("test new name");
     }
 
-    sorbet::core::GlobalSubstitution subst(*c1, *c2);
+    sorbet::core::NameSubstitution subst(*c1, *c2);
     REQUIRE_EQ("<U test new name>", subst.substitute(n1).showRaw(*c2));
     REQUIRE_EQ(c1->symbolsUsedTotal(), c2->symbolsUsedTotal());
     REQUIRE_EQ(c1->symbolsUsedTotal(), gs.symbolsUsedTotal());

@@ -1,7 +1,7 @@
 #include "core/Names.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
-#include "core/GlobalSubstitution.h"
+#include "core/NameSubstitution.h"
 #include "core/Names.h"
 #include "core/hashing/hashing.h"
 #include <numeric> // accumulate
@@ -322,7 +322,7 @@ void NameRefDebugCheck::check(const GlobalState &gs, NameKind kind, uint32_t ind
     ENFORCE(false, "NameRef not owned by correct GlobalState");
 }
 
-void NameRefDebugCheck::check(const GlobalSubstitution &subst) const {
+void NameRefDebugCheck::check(const NameSubstitution &subst) const {
     ENFORCE(globalStateId != subst.toGlobalStateId, "substituting a name twice!");
 }
 
@@ -330,7 +330,7 @@ void NameRef::enforceCorrectGlobalState(const GlobalState &gs) const {
     runDebugOnlyCheck(gs, kind(), unsafeTableIndex());
 }
 
-void NameRef::sanityCheckSubstitution(const GlobalSubstitution &subst) const {
+void NameRef::sanityCheckSubstitution(const NameSubstitution &subst) const {
     runDebugOnlyCheck(subst);
 }
 

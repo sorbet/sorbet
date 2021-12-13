@@ -353,8 +353,7 @@ public:
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) override {
         return make_unique<LLVMSemanticExtension>(this->compiledOutputDir, this->irOutputDir, this->forceCompiled);
     };
-    virtual void merge(const core::GlobalState &from, core::GlobalState &to, core::GlobalSubstitution &subst) override {
-    }
+    virtual void merge(const core::GlobalState &from, core::GlobalState &to, core::NameSubstitution &subst) override {}
 };
 
 class LLVMSemanticExtensionProvider : public SemanticExtensionProvider {

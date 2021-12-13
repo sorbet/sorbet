@@ -10,7 +10,7 @@ class Options;
 namespace sorbet {
 namespace core {
 class GlobalState;
-class GlobalSubstitution;
+class NameSubstitution;
 class MutableContext;
 class FileRef;
 } // namespace core
@@ -33,7 +33,7 @@ public:
     virtual void run(core::MutableContext &, ast::ClassDef *) const = 0;
     virtual ~SemanticExtension() = default;
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) = 0;
-    virtual void merge(const core::GlobalState &from, core::GlobalState &to, core::GlobalSubstitution &subst) = 0;
+    virtual void merge(const core::GlobalState &from, core::GlobalState &to, core::NameSubstitution &subst) = 0;
 };
 
 class SemanticExtensionProvider {

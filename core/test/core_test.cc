@@ -3,7 +3,7 @@
 #include "core/Error.h"
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
-#include "core/GlobalSubstitution.h"
+#include "core/NameSubstitution.h"
 #include "core/TypePtr.h"
 #include "core/Unfreeze.h"
 #include "core/core.h"
@@ -150,7 +150,7 @@ TEST_CASE("Substitute") { // NOLINT
         gs1.enterNameUTF8("name");
     }
 
-    GlobalSubstitution subst(gs1, gs2);
+    NameSubstitution subst(gs1, gs2);
 
     CHECK_EQ(subst.substitute(foo1), foo2);
     CHECK_EQ(subst.substitute(bar1), bar2);

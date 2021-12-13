@@ -4,7 +4,7 @@
 #include "core/DebugOnlyCheck.h"
 namespace sorbet::core {
 class GlobalState;
-class GlobalSubstitution;
+class NameSubstitution;
 struct UniqueName;
 struct ConstantName;
 struct UTF8Name;
@@ -63,7 +63,7 @@ struct NameRefDebugCheck {
     NameRefDebugCheck(const GlobalState &gs, NameKind kind, uint32_t id);
 
     void check(const GlobalState &gs, NameKind kind, uint32_t id) const;
-    void check(const GlobalSubstitution &subst) const;
+    void check(const NameSubstitution &subst) const;
 };
 
 constexpr std::string_view PACKAGE_SUFFIX = "_Package";
@@ -197,7 +197,7 @@ public:
     std::string show(const GlobalState &gs) const;
 
     void enforceCorrectGlobalState(const GlobalState &gs) const;
-    void sanityCheckSubstitution(const GlobalSubstitution &subst) const;
+    void sanityCheckSubstitution(const NameSubstitution &subst) const;
     void sanityCheck(const GlobalState &gs) const;
 };
 CheckSize(NameRef, 4, 4);

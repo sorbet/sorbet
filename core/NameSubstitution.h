@@ -1,5 +1,5 @@
-#ifndef SORBET_CORE_GLOBAL_SUBSTITUTION_H
-#define SORBET_CORE_GLOBAL_SUBSTITUTION_H
+#ifndef SORBET_CORE_NAME_SUBSTITUTION_H
+#define SORBET_CORE_NAME_SUBSTITUTION_H
 
 #include "common/common.h"
 #include "core/NameHash.h"
@@ -11,15 +11,15 @@ namespace sorbet::core {
 class GlobalState;
 
 /**
- * With the ast::substitute pass, GlobalSubstitution makes it possible to rewrite ASTs from one GlobalState into ASTs
+ * With the ast::substitute pass, NameSubstitution makes it possible to rewrite ASTs from one GlobalState into ASTs
  * from a second GlobalState.
  *
  * The constructor builds up a lookup table from every NameRef in `from` to an equivalent NameRef in `to`, inserting new
  * names into `to` where needed. Then, that table can be used to rewrite multiple ASTs from `from`.
  */
-class GlobalSubstitution final {
+class NameSubstitution final {
 public:
-    GlobalSubstitution(const GlobalState &from, GlobalState &to);
+    NameSubstitution(const GlobalState &from, GlobalState &to);
 
     static void mergeFileTables(const GlobalState &from, GlobalState &to);
 
@@ -65,15 +65,15 @@ private:
 };
 
 /**
- * GlobalSubstitution, but lazily populates `nameSubstitution` _and_ builds up a UsageHash for the file.
+ * NameSubstitution, but lazily populates `nameSubstitution` _and_ builds up a UsageHash for the file.
  * Used in the hashing package as a part of the AST hashing process, which rewrites ASTs from the main GlobalState into
  * ASTs for new and empty GlobalStates.
  *
- * Unlike the GlobalSubstitution case, LazyGlobalSubstitution is intended to be used for rewriting a single AST. Hence,
+ * Unlike the NameSubstitution case, LazyNameSubstitution is intended to be used for rewriting a single AST. Hence,
  * the `nameSubstitution` map is sparse and built up lazily, since a single AST will only reference a small subset of
  * names in GlobalState.
  */
-class LazyGlobalSubstitution final {
+class LazyNameSubstitution final {
     const core::GlobalState &fromGS;
     core::GlobalState &toGS;
 
@@ -83,8 +83,8 @@ class LazyGlobalSubstitution final {
     NameRef defineName(NameRef from, bool allowSameFromTo);
 
 public:
-    LazyGlobalSubstitution(const GlobalState &fromGS, GlobalState &toGS);
-    ~LazyGlobalSubstitution() = default;
+    LazyNameSubstitution(const GlobalState &fromGS, GlobalState &toGS);
+    ~LazyNameSubstitution() = default;
 
     NameRef substitute(NameRef from, bool allowSameFromTo = false) {
         if (&fromGS == &toGS) {

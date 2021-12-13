@@ -27,7 +27,7 @@
 #include "common/formatting.h"
 #include "common/sort.h"
 #include "core/ErrorQueue.h"
-#include "core/GlobalSubstitution.h"
+#include "core/NameSubstitution.h"
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
 #include "core/lsp/PreemptionTaskManager.h"
@@ -434,14 +434,14 @@ struct IndexSubstitutionJob {
     // of serially in the main thread.
     unique_ptr<core::GlobalState> threadGs;
 
-    std::optional<core::GlobalSubstitution> subst;
+    std::optional<core::NameSubstitution> subst;
     vector<ast::ParsedFile> trees;
 
     IndexSubstitutionJob() {}
 
     IndexSubstitutionJob(core::GlobalState &to, IndexResult res)
         : threadGs{std::move(res.gs)}, subst{}, trees{std::move(res.trees)} {
-        core::GlobalSubstitution::mergeFileTables(*this->threadGs, to);
+        core::NameSubstitution::mergeFileTables(*this->threadGs, to);
         if (absl::c_any_of(this->trees, [this](auto &parsed) { return !parsed.file.data(*this->threadGs).cached; })) {
             this->subst.emplace(*this->threadGs, to);
         }
