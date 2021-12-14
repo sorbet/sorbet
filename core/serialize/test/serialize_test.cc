@@ -77,4 +77,22 @@ TEST_CASE("Strings") { // NOLINT
     CHECK_EQ(u.getStr(), "НЯ");
     CHECK_EQ(u.getStr(), "\0\0\0\t\n\f\rНЯЯЯЯЯ");
 }
+
+TEST_CASE("Symbol flags") {
+    Field::Flags fieldFlags;
+    Method::Flags mflags;
+    // All unused bits should be zero, and all flags should default to false.
+    CHECK_EQ(fieldFlags.serialize(), 0);
+    CHECK_EQ(mflags.serialize(), 0);
+
+    mflags.isAbstract = true;
+    CHECK_NE(mflags.serialize(), 0);
+
+    fieldFlags.isField = true;
+    CHECK_NE(fieldFlags.serialize(), 0);
+
+    // I wish I could check that the mask is correct.
+    // https://stackoverflow.com/a/45837449 indicates it is possible to count the number of fields in a class, but it
+    // requires a lot of shenanigans.
+}
 } // namespace sorbet::core::serialize
