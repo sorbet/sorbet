@@ -166,8 +166,6 @@ public:
 
     class Flags {
     public:
-        // Synthesized by C++ code in a Rewriter pass
-        bool isRewriterSynthesized : 1;
         bool isField : 1;
         bool isStaticField : 1;
 
@@ -175,12 +173,11 @@ public:
         bool isStaticFieldTypeAlias : 1;
         bool isStaticFieldPrivate : 1;
 
-        constexpr static uint8_t NUMBER_OF_FLAGS = 5;
+        constexpr static uint8_t NUMBER_OF_FLAGS = 4;
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
-            : isRewriterSynthesized(false), isField(false), isStaticField(false), isStaticFieldTypeAlias(false),
-              isStaticFieldPrivate(false) {}
+            : isField(false), isStaticField(false), isStaticFieldTypeAlias(false), isStaticFieldPrivate(false) {}
 
         uint8_t serialize() const {
             ENFORCE(sizeof(Flags) == sizeof(uint8_t));
