@@ -1,5 +1,6 @@
 #include "core/Symbols.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/str_replace.h"
 #include "common/JSON.h"
 #include "common/Levenstein.h"
@@ -1007,6 +1008,19 @@ string SymbolRef::showFullName(const GlobalState &gs) const {
         case Kind::TypeMember:
             return asTypeMemberRef().showFullName(gs);
     }
+}
+
+string SymbolRef::showFullNameWithoutPackagePrefix(const GlobalState &gs) const {
+    vector<std::string> parts;
+    auto curSym = *this;
+    while (curSym.exists() && curSym.owner(gs) != core::Symbols::PackageRegistry() &&
+           curSym.owner(gs) != core::Symbols::PackageTests() && curSym != core::Symbols::root()) {
+        parts.emplace_back(curSym.name(gs).show(gs));
+        curSym = curSym.owner(gs);
+    }
+
+    reverse(parts.begin(), parts.end());
+    return absl::StrJoin(parts, "::");
 }
 
 string ClassOrModuleRef::showFullName(const GlobalState &gs) const {

@@ -260,6 +260,7 @@ public:
         static constexpr uint32_t CLASS_OR_MODULE_FINAL = 0x0000'0200;
         static constexpr uint32_t CLASS_OR_MODULE_SEALED = 0x0000'0400;
         static constexpr uint32_t CLASS_OR_MODULE_PRIVATE = 0x0000'0800;
+        static constexpr uint32_t CLASS_OR_MODULE_UNDECLARED = 0x0000'1000;
 
         // Type flags
         static constexpr uint32_t TYPE_COVARIANT = 0x0000'0010;
@@ -422,6 +423,17 @@ public:
         return (flags & Symbol::Flags::CLASS_OR_MODULE_PRIVATE) != 0;
     }
 
+    inline bool isClassOrModuleUndeclared() const {
+        ENFORCE_NO_TIMER(isClassOrModule());
+
+        // Represents "filler definitions", which are not explicitly declared. Pre-resolver, these have a class/module
+        // type, but neither class or module flag should be set. Post-resolver, we will use the "undeclared" bit to
+        // identify them (this is useful for LSP fast-path checks).
+
+        return ((flags & (Symbol::Flags::CLASS_OR_MODULE_MODULE | Symbol::Flags::CLASS_OR_MODULE_CLASS)) == 0) ||
+               ((flags & Symbol::Flags::CLASS_OR_MODULE_UNDECLARED) != 0);
+    }
+
     inline void setClassOrModule() {
         ENFORCE(!isTypeArgument() && !isTypeMember());
         flags |= Symbol::Flags::CLASS_OR_MODULE;
@@ -446,6 +458,11 @@ public:
             ENFORCE((flags & Symbol::Flags::CLASS_OR_MODULE_MODULE) == 0);
             flags |= Symbol::Flags::CLASS_OR_MODULE_CLASS;
         }
+    }
+
+    inline void setClassModuleUndeclared() {
+        ENFORCE(isClassOrModule());
+        flags |= Symbol::Flags::CLASS_OR_MODULE_UNDECLARED;
     }
 
     inline void setCovariant() {

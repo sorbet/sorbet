@@ -872,6 +872,56 @@ class MyClass < MySuperClass
 end
 ```
 
+## 5068
+
+Sorbet requires that class or module definitions be namespaced unambiguously.
+For example, in this code:
+
+```
+# typed: true
+
+module B
+end
+
+module A
+  class B::C
+   # ...
+  end
+end
+```
+
+The definition B::C is ambiguous. In Ruby's runtime, it resolves to B::C (and
+not A::B::C). However, things are different in the presence of a pre-declared
+filler namespace like below:
+
+```
+# typed: true
+
+module B
+end
+
+module A
+  module B; end
+
+  class B::C
+   # ...
+  end
+end
+```
+
+In this case, the definition resolves to A::B::C in Ruby's runtime.
+
+By default, Sorbet assumes the presence of filler namespaces while typechecking,
+regardless of whether they are explicitly predeclared like in the second
+example. This means that in Sorbet's view, the definition resolves to A::B::C in
+either case.
+
+In Stripe's codebase, this is generally not a problem at runtime, as we use
+Sorbet's own autoloader generation to pre-declare filler namespaces, keeping the
+Ruby runtime's behavior equivalent to Sorbet. However, the autoloader has some
+edge cases, which can often cause deviations between Ruby's runtime and Sorbet.
+This error helps guard against these issues.
+
 ## 6002
 
 In `# typed: strict` files, Sorbet requires that all instance and class
