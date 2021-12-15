@@ -952,12 +952,12 @@ public:
         // not in --stripe-mode.
         //
         // TODO: Do rigorous perf analysis.
-        if (!ctx.file.data(ctx).isPackage()) {
+        if (!ctx.file.data(ctx).isPackage() && !ctx.state.runningUnderAutogen) {
             const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx);
-            if (ambigDef.has_value()) {
+            if (ambigDef.exists()) {
                 if (auto e = ctx.beginError(original.loc, core::errors::Resolver::AmbiguousDefinitionError)) {
-                    e.setHeader("Class definition is ambiguous", klass.show(ctx));
-                    e.addErrorLine((*ambigDef).loc(ctx), "Previously defined here.");
+                    e.setHeader("Class definition is ambiguous");
+                    e.addErrorLine(ambigDef.loc(ctx), "Alternate definition here.");
                 }
             }
         }

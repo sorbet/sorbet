@@ -1,7 +1,7 @@
 test/cli/ambiguous-definitions/foo.rb:5: Class definition is ambiguous https://srb.help/5068
-     5 |    module Foo::Bar
+     5 |    module Foo::Bar # ambiguous
      6 |    end
-    test/cli/ambiguous-definitions/foo.rb:4: Previously defined here.
+    test/cli/ambiguous-definitions/foo.rb:4: Alternate definition here.
      4 |  module Foo
           ^^^^^^^^^^
 Errors: 1

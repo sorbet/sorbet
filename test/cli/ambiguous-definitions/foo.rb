@@ -2,7 +2,7 @@
 
 module Opus
   module Foo
-    module Foo::Bar
+    module Foo::Bar # ambiguous
     end
   end
 end
