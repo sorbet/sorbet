@@ -1,0 +1,7 @@
+foo/a.rb:5: Class definition is ambiguous https://srb.help/5068
+     5 |    module Foo::D # ambiguous
+     6 |    end
+    foo/a.rb:4: Alternate definition here.
+     4 |  module Foo
+          ^^^^^^^^^^
+Errors: 1
