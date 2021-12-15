@@ -966,17 +966,18 @@ public:
         return tree;
     }
 
-    const std::optional<core::SymbolRef> findAnyDefinitionAmbiguousWithCurrent(core::Context ctx) {
+    const core::SymbolRef findAnyDefinitionAmbiguousWithCurrent(core::Context ctx) {
+        const core::SymbolRef defaultSymbol;
         if (nesting_ == nullptr) {
             // can't be ambiguous if nesting is null
-            return std::nullopt;
+            return defaultSymbol;
         }
 
         auto curSym = nesting_->scope;
         auto curNesting = nesting_->parent;
         if (curNesting == nullptr || curNesting->scope == core::Symbols::root()) {
             // can't be ambiguous if nested directly under root scope
-            return std::nullopt;
+            return defaultSymbol;
         }
 
         // find preceding symbol for current def
@@ -988,33 +989,40 @@ public:
 
         if (!curSym.exists() || (curSym.exists() && curSym == core::Symbols::root())) {
             // preceding symbol cannot be ambiguous in these cases
-            return std::nullopt;
+            return defaultSymbol;
         }
         auto precedingSymForCurDef = lastSym;
 
-        if (precedingSymForCurDef.isClassOrModule() &&
-            !precedingSymForCurDef.asClassOrModuleRef().data(ctx)->isClassModuleSet()) {
-            // preceding symbol for current def is a filler
-            core::NameRef filler = precedingSymForCurDef.name(ctx);
-
-            // Look for filler name in all nestings above parent nesting. Note that for various reasons pertinent to
-            // the Stripe codebase, we don't look under the root nesting.
-            curNesting = curNesting->parent;
-            while (curNesting != nullptr && curNesting->scope != core::Symbols::root()) {
-                if (curNesting->scope.isClassOrModule()) {
-                    auto scopeSym = curNesting->scope.asClassOrModuleRef().data(ctx);
-                    const auto ambigDef = scopeSym->findMember(ctx, filler);
-                    if (ambigDef.exists() && !ambigDef.loc(ctx).file().data(ctx).isPackage()) {
-                        // Filler name found! Definition is ambiguous.
-                        return ambigDef;
-                    }
-                }
-
-                curNesting = curNesting->parent;
-            }
+        if (!precedingSymForCurDef.isClassOrModule()) {
+           // only proceed if preceding symbol is a class or module
+           return defaultSymbol;
         }
 
-        return std::nullopt;
+        if (precedingSymForCurDef.asClassOrModuleRef().data(ctx)->isClassModuleSet()) {
+            // Not a filler def, but a real def
+            return defaultSymbol;
+        }
+
+        // preceding symbol for current def is a filler
+        core::NameRef filler = precedingSymForCurDef.name(ctx);
+
+        // Look for filler name in all nestings above parent nesting. Note that for various reasons pertinent to
+        // the Stripe codebase, we don't look under the root nesting.
+        curNesting = curNesting->parent;
+        while (curNesting != nullptr && curNesting->scope != core::Symbols::root()) {
+            if (curNesting->scope.isClassOrModule()) {
+                auto scopeSym = curNesting->scope.asClassOrModuleRef().data(ctx);
+                const auto ambigDef = scopeSym->findMember(ctx, filler);
+                if (ambigDef.exists() && !ambigDef.loc(ctx).file().data(ctx).isPackage()) {
+                    // Filler name found! Definition is ambiguous.
+                    return ambigDef;
+                }
+            }
+
+            curNesting = curNesting->parent;
+        }
+
+        return defaultSymbol;
     }
 
     ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
