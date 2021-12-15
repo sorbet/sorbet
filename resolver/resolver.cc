@@ -948,11 +948,8 @@ public:
             transformAncestor(ctx.withOwner(klass), singleton, ancst, isInclude);
         }
 
-        // TODO: Only do this check in --stripe-mode. Currently it does the check but skips reporting the error if
-        // not in --stripe-mode.
-        //
-        // TODO: Do rigorous perf analysis.
-        if (!ctx.file.data(ctx).isPackage() && !ctx.state.runningUnderAutogen) {
+        // Check for ambiguous definitions.
+        if (checkAmbiguousDefinition(ctx)) {
             const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx);
             if (ambigDef.exists()) {
                 if (auto e = ctx.beginError(original.loc, core::errors::Resolver::AmbiguousDefinitionError)) {
@@ -966,13 +963,48 @@ public:
         return tree;
     }
 
-    const core::SymbolRef findAnyDefinitionAmbiguousWithCurrent(core::Context ctx) {
-        const core::SymbolRef defaultSymbol;
-        if (nesting_ == nullptr) {
-            // can't be ambiguous if nesting is null
-            return defaultSymbol;
+    const bool checkAmbiguousDefinition(core::Context ctx) {
+        if (ctx.state.runningUnderAutogen) {
+            // no need to check in autogen
+            return false;
         }
 
+        if (ctx.file.data(ctx).isPackage()) {
+            // no need to check package files
+            return false;
+        }
+
+        if (nesting_->scope == core::Symbols::root()) {
+            // no need to check <root> def itself
+            return false;
+        }
+
+        // If current definition is owned by package registry/test, this means it is a package-mangled module.
+        const core::SymbolRef curOwner = nesting_->scope.owner(ctx);
+        if (curOwner == core::Symbols::PackageTests() || curOwner == core::Symbols::PackageRegistry()) {
+            return false;
+        }
+
+        // If current parent is owned by package registry/test, this means we are at package-top-level (and we skip).
+        // If we didn't skip here, we'd end up checking symbols like "Test", "Opus", etc.
+        //
+        // We have a small set of these leading package namespace symbols at Stripe, and we don't expect these to run
+        // into ambiguous definition issues. Skipping checking these saves on significant overhead.
+        const core::SymbolRef curParentOwner = nesting_->parent->scope.owner(ctx);
+        if (curParentOwner == core::Symbols::PackageTests() || curParentOwner == core::Symbols::PackageRegistry()) {
+            return false;
+        }
+
+        // Can't be ambiguous if current definition is single-part, don't check in this case.
+        if (curOwner == nesting_->parent->scope) {
+            return false;
+        }
+
+        return true;
+    }
+
+    const core::SymbolRef findAnyDefinitionAmbiguousWithCurrent(core::Context ctx) {
+        const core::SymbolRef defaultSymbol;
         auto curSym = nesting_->scope;
         auto curNesting = nesting_->parent;
         if (curNesting == nullptr || curNesting->scope == core::Symbols::root()) {
@@ -1006,10 +1038,9 @@ public:
         // preceding symbol for current def is a filler
         core::NameRef filler = precedingSymForCurDef.name(ctx);
 
-        // Look for filler name in all nestings above parent nesting. Note that for various reasons pertinent to
-        // the Stripe codebase, we don't look under the root nesting.
+        // Look for filler name in all nestings above current nesting.
         curNesting = curNesting->parent;
-        while (curNesting != nullptr && curNesting->scope != core::Symbols::root()) {
+        while (curNesting != nullptr) {
             if (curNesting->scope.isClassOrModule()) {
                 auto scopeSym = curNesting->scope.asClassOrModuleRef().data(ctx);
                 const auto ambigDef = scopeSym->findMember(ctx, filler);
