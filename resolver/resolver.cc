@@ -994,8 +994,8 @@ public:
         auto precedingSymForCurDef = lastSym;
 
         if (!precedingSymForCurDef.isClassOrModule()) {
-           // only proceed if preceding symbol is a class or module
-           return defaultSymbol;
+            // only proceed if preceding symbol is a class or module
+            return defaultSymbol;
         }
 
         if (precedingSymForCurDef.asClassOrModuleRef().data(ctx)->isClassModuleSet()) {
