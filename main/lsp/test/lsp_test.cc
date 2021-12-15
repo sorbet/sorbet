@@ -58,6 +58,16 @@ const string file_string = "# typed: true\n"
                            "    end\n"
                            "\n"
                            "    # This is a method with documentation above its\n"
+                           "    # multi-line sig(:final) block.\n"
+                           "    sig(:final) do\n"
+                           "      params(x: Integer)\n"
+                           "      .returns(Integer)\n"
+                           "    end\n"
+                           "    def multi_line_sig_final_block\n"
+                           "      1\n"
+                           "    end\n"
+                           "\n"
+                           "    # This is a method with documentation above its\n"
                            "    # broken multi-line sig block. You shouldn't see this. \n"
                            "    not_a_sig do \n"
                            "      params(x: Integer)\n"
@@ -147,6 +157,11 @@ TEST_CASE("MultiLineSig") {
     int position = file.find("multi_line_sig_block");
     optional<string> b = findDocumentation(file, position);
     REQUIRE_EQ(*b, "This is a method with documentation above its\nmulti-line sig block.");
+}
+TEST_CASE("MultiLineSigFinal") {
+    int position = file.find("multi_line_sig_final_block");
+    optional<string> b = findDocumentation(file, position);
+    REQUIRE_EQ(*b, "This is a method with documentation above its\nmulti-line sig(:final) block.");
 }
 TEST_CASE("BrokenMultiLineSig") {
     int position = file.find("broken_multi_line_sig_block");
