@@ -375,13 +375,14 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
 
         // Handle multi-line sig block
         else if (absl::StartsWith(line, "end")) {
-            // ASSUMPTION: We either hit the start of file, a `sig do` or an `end`
+            // ASSUMPTION: We either hit the start of file, a `sig do`/`sig(:final) do` or an `end`
             it++;
             while (
                 // SOF
                 it != all_lines.rend()
                 // Start of sig block
-                && !absl::StartsWith(absl::StripAsciiWhitespace(*it), "sig do")
+                && !(absl::StartsWith(absl::StripAsciiWhitespace(*it), "sig do") ||
+                     absl::StartsWith(absl::StripAsciiWhitespace(*it), "sig(:final) do"))
                 // Invalid end keyword
                 && !absl::StartsWith(absl::StripAsciiWhitespace(*it), "end")) {
                 it++;
@@ -397,10 +398,11 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
 
             // Reached a sig block.
             line = absl::StripAsciiWhitespace(*it);
-            ENFORCE(absl::StartsWith(line, "sig do"));
+            ENFORCE(absl::StartsWith(line, "sig do") || absl::StartsWith(line, "sig(:final) do"));
 
             // Stop looking if this is a single-line block e.g `sig do; <block>; end`
-            if (absl::StartsWith(line, "sig do;") && absl::EndsWith(line, "end")) {
+            if ((absl::StartsWith(line, "sig do;") || absl::StartsWith(line, "sig(:final) do;")) &&
+                absl::EndsWith(line, "end")) {
                 break;
             }
 
