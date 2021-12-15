@@ -16,7 +16,6 @@ class DocumentHighlight;
 enum class FieldAccessorType { None, Reader, Writer, Accessor };
 
 struct AccessorInfo {
-    core::NameRef type;
     FieldAccessorType accessorType = FieldAccessorType::None;
     core::FieldRef fieldSymbol;
     core::MethodRef readerSymbol;
