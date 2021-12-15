@@ -165,7 +165,8 @@ const siteConfig = {
   // enableUpdateTime: true,
 
   algolia: {
-    apiKey: 'fa1ec885ab70787d636759b88e509b92',
+    appId: 'ZYWC6Z01G8',
+    apiKey: 'b05a65e9f8d9f50dc4ec3241db8836c4',
     // This name must match the index name here:
     // https://github.com/algolia/docsearch-configs/blob/master/configs/stripe_sorbet.json
     indexName: 'stripe_sorbet',
