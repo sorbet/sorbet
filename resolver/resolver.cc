@@ -948,8 +948,73 @@ public:
             transformAncestor(ctx.withOwner(klass), singleton, ancst, isInclude);
         }
 
+        // TODO: Only do this check in --stripe-mode. Currently it does the check but skips reporting the error if
+        // not in --stripe-mode.
+        //
+        // TODO: Do rigorous perf analysis.
+        if (!ctx.file.data(ctx).isPackage()) {
+            const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx);
+            if (ambigDef.has_value()) {
+                if (auto e = ctx.beginError(original.loc, core::errors::Resolver::AmbiguousDefinitionError)) {
+                    e.setHeader("Class definition is ambiguous", klass.show(ctx));
+                    e.addErrorLine((*ambigDef).loc(ctx), "Previously defined here.");
+                }
+            }
+        }
+
         nesting_ = nesting_->parent;
         return tree;
+    }
+
+    const std::optional<core::SymbolRef> findAnyDefinitionAmbiguousWithCurrent(core::Context ctx) {
+        if (nesting_ == nullptr) {
+            // can't be ambiguous if nesting is null
+            return std::nullopt;
+        }
+
+        auto curSym = nesting_->scope;
+        auto curNesting = nesting_->parent;
+        if (curNesting == nullptr || curNesting->scope == core::Symbols::root()) {
+            // can't be ambiguous if nested directly under root scope
+            return std::nullopt;
+        }
+
+        // find preceding symbol for current def
+        core::SymbolRef lastSym;
+        while (curSym != curNesting->scope && curSym.exists() && curSym != core::Symbols::root()) {
+            lastSym = curSym;
+            curSym = curSym.owner(ctx);
+        }
+
+        if (!curSym.exists() || (curSym.exists() && curSym == core::Symbols::root())) {
+            // preceding symbol cannot be ambiguous in these cases
+            return std::nullopt;
+        }
+        auto precedingSymForCurDef = lastSym;
+
+        if (precedingSymForCurDef.isClassOrModule() &&
+            !precedingSymForCurDef.asClassOrModuleRef().data(ctx)->isClassModuleSet()) {
+            // preceding symbol for current def is a filler
+            core::NameRef filler = precedingSymForCurDef.name(ctx);
+
+            // Look for filler name in all nestings above parent nesting. Note that for various reasons pertinent to
+            // the Stripe codebase, we don't look under the root nesting.
+            curNesting = curNesting->parent;
+            while (curNesting != nullptr && curNesting->scope != core::Symbols::root()) {
+                if (curNesting->scope.isClassOrModule()) {
+                    auto scopeSym = curNesting->scope.asClassOrModuleRef().data(ctx);
+                    const auto ambigDef = scopeSym->findMember(ctx, filler);
+                    if (ambigDef.exists() && !ambigDef.loc(ctx).file().data(ctx).isPackage()) {
+                        // Filler name found! Definition is ambiguous.
+                        return ambigDef;
+                    }
+                }
+
+                curNesting = curNesting->parent;
+            }
+        }
+
+        return std::nullopt;
     }
 
     ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {

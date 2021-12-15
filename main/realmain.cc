@@ -499,6 +499,7 @@ int realmain(int argc, char *argv[]) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
         if (opts.isolateErrorCode.empty()) {
             gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
+            gs->suppressErrorClass(core::errors::Resolver::AmbiguousDefinitionError.code);
         }
     }
     if (opts.suggestTyped) {
