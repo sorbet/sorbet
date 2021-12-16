@@ -155,12 +155,12 @@ SimilarMethodsByName similarMethodsForClass(const core::GlobalState &gs, core::C
 SimilarMethodsByName mergeSimilarMethods(SimilarMethodsByName left, SimilarMethodsByName right) {
     auto result = SimilarMethodsByName{};
 
-    for (auto [methodName, leftSimilarMethods] : left) {
+    for (auto &[methodName, leftSimilarMethods] : left) {
         if (right.contains(methodName)) {
-            for (auto similarMethod : leftSimilarMethods) {
+            for (auto &similarMethod : leftSimilarMethods) {
                 result[methodName].emplace_back(similarMethod);
             }
-            for (auto similarMethod : right[methodName]) {
+            for (auto &similarMethod : right[methodName]) {
                 result[methodName].emplace_back(similarMethod);
             }
         }
