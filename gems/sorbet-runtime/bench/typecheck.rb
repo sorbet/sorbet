@@ -28,6 +28,7 @@ module SorbetBenchmarks
       puts "#{name}: #{duration_str}"
     end
 
+    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     def self.run
       example = Example.new
 
@@ -165,6 +166,7 @@ module SorbetBenchmarks
         puts 'skipping UnboundMethod#bind_call tests (re-run on Ruby 2.7+)'
       end
     end
+    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
     sig {params(x: Integer).void.checked(:never)}
     def self.unchecked_param(x); end
