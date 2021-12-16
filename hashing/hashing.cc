@@ -106,8 +106,7 @@ void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spd
 
     {
         vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
+        for (auto result : resultq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
                 for (auto &a : threadResult) {
                     files[a.first]->setFileHash(move(a.second));
@@ -173,8 +172,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
 
     {
         vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
+        for (auto result : resultq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
                 for (auto &a : threadResult) {
                     a.first.data(*gs).setFileHash(move(a.second));

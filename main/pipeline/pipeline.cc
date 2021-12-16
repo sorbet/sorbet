@@ -463,8 +463,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
     {
         Timer timeit(cgs.tracer(), "mergeGlobalStates");
         IndexThreadResultPack threadResult;
-        for (auto result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer());
-             !result.done(); result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
+        for (auto result : input->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
             if (result.gotItem()) {
                 counterConsume(move(threadResult.counters));
                 auto numTrees = threadResult.res.trees.size();
@@ -498,8 +497,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
         });
 
         vector<ast::ParsedFile> trees;
-        for (auto result = resultq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), cgs.tracer()); !result.done();
-             result = resultq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
+        for (auto result : resultq->popUntilEmptyWithTimeout(trees, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
             if (result.gotItem()) {
                 ret.insert(ret.end(), std::make_move_iterator(trees.begin()), std::make_move_iterator(trees.end()));
                 progress.reportProgress(resultq->doneEstimate());
@@ -1082,9 +1080,7 @@ void typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what, 
 
             vector<core::FileRef> files;
             {
-                for (auto result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
-                     !result.done();
-                     result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
+                for (auto result : outputq->popUntilEmptyWithTimeout(files, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
                     if (result.gotItem()) {
                         for (auto &file : files) {
                             gs->errorQueue->flushErrorsForFile(*gs, file);
@@ -1179,9 +1175,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
     bool written = false;
     {
         vector<pair<string, vector<uint8_t>>> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+        for (auto result : resultq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
                 for (auto &a : threadResult) {
                     kvstore->write(move(a.first), move(a.second));

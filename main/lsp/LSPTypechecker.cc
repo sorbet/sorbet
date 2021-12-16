@@ -320,8 +320,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
     {
         vector<ast::ParsedFile> threadResult;
         out.reserve(indexed.size());
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
+        for (auto result : resultq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
                 for (auto &copy : threadResult) {
                     out.push_back(move(copy));

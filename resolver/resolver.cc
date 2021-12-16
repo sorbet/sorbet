@@ -487,9 +487,7 @@ private:
 
         uint32_t retries = 0;
         pair<uint32_t, vector<ResolveItems<ResolutionItem>>> threadResult;
-        for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+        for (auto result : outputq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
                 retries += threadResult.first;
                 jobs.insert(jobs.end(), make_move_iterator(threadResult.second.begin()),
@@ -1125,9 +1123,7 @@ public:
 
         {
             ResolveWalkResult threadResult;
-            for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-                 !result.done();
-                 result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            for (auto result : resultq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem()) {
                     todo.insert(todo.end(), make_move_iterator(threadResult.todo_.begin()),
                                 make_move_iterator(threadResult.todo_.end()));
@@ -2509,9 +2505,7 @@ public:
 
         {
             ResolveTypeMembersAndFieldsResult threadResult;
-            for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-                 !result.done();
-                 result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            for (auto result : outputq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem()) {
                     combinedFiles.insert(combinedFiles.end(), make_move_iterator(threadResult.files.begin()),
                                          make_move_iterator(threadResult.files.end()));
@@ -3266,9 +3260,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
     vector<ResolveSignaturesWalk::ResolveFileSignatures> combinedFileJobs;
     {
         ResolveSignaturesWalk::ResolveSignaturesWalkResult threadResult;
-        for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+        for (auto result : outputq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
                 trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
                              make_move_iterator(threadResult.trees.end()));

@@ -481,8 +481,7 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
     });
 
     CounterState out;
-    for (auto res = outputq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), gs.tracer()); !res.done();
-         res = outputq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+    for (auto res : outputq->popUntilEmptyWithTimeout(out, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
         if (!res.gotItem()) {
             continue;
         }
