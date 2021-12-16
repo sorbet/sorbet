@@ -2,6 +2,7 @@
 #include "core/ErrorQueue.h"
 #include "core/NullFlusher.h"
 #include "core/errors/namer.h"
+#include "core/errors/resolver.h"
 #include "main/cache/cache.h"
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPOutput.h"
@@ -21,6 +22,7 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced
         // in Stripe code.
         gs.suppressErrorClass(sorbet::core::errors::Namer::MultipleBehaviorDefs.code);
+        gs.suppressErrorClass(sorbet::core::errors::Resolver::AmbiguousDefinitionError.code);
     }
 
     gs.requiresAncestorEnabled = options.requiresAncestorEnabled;
