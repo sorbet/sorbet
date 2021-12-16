@@ -954,7 +954,8 @@ public:
             if (ambigDef.exists()) {
                 if (auto e = ctx.beginError(original.loc, core::errors::Resolver::AmbiguousDefinitionError)) {
                     e.setHeader("Class definition is ambiguous");
-                    e.addErrorLine(ambigDef.loc(ctx), "Alternate definition here.");
+                    e.addErrorLine(ambigDef.loc(ctx), "Alternate definition {} here",
+                                   ambigDef.showFullNameWithoutPackagePrefix(ctx));
                 }
             }
         }
@@ -1044,7 +1045,7 @@ public:
             if (curNesting->scope.isClassOrModule()) {
                 auto scopeSym = curNesting->scope.asClassOrModuleRef().data(ctx);
                 const auto ambigDef = scopeSym->findMember(ctx, filler);
-                if (ambigDef.exists() && !ambigDef.loc(ctx).file().data(ctx).isPackage()) {
+                if (ambigDef.exists()) {
                     // Filler name found! Definition is ambiguous.
                     return ambigDef;
                 }

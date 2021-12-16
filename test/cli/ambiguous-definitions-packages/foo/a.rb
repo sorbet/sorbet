@@ -5,7 +5,7 @@ module Opus
     module Foo::D # ambiguous
     end
 
-    module Bar::C # unambiguous -- we do not currently check across package boundaries
+    module Bar::C # ambiguous
     end
   end
 end

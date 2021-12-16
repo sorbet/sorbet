@@ -478,6 +478,7 @@ public:
     // Prints the fully qualified name of the symbol in a format that is suitable for showing to the user (e.g.
     // "Owner::SymbolName")
     std::string showFullName(const GlobalState &gs) const;
+    std::string showFullNameWithoutPackagePrefix(const GlobalState &gs) const;
     std::string toStringFullName(const GlobalState &gs) const;
 
     std::string showRaw(const GlobalState &gs) const {
