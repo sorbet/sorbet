@@ -22,7 +22,7 @@ Type information and documentation on hover
 Go to definition / type definition
 ([demo](https://sorbet.run/#%23%20typed%3A%20true%0A%0A%23%20Both%20lead%20here!%0Aclass%20MyClass%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20def%20foo%3B%20end%0Aend%0A%0Amy_class_instance%20%3D%20MyClass.new%0A%23%20%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%20go%20to%20type%20definition%0A%23%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%5E%5E%5E%5E%5E%5E%5E%20go%20to%20definition%0A)):
 
-<video autoplay loop width="35%" style="display:block;margin-left:auto;margin-right:auto;">
+<video autoplay muted loop width="35%" style="display:block;margin-left:auto;margin-right:auto;">
     <source src="/img/lsp/go_to_def.mp4" type="video/mp4">
 
     Sorry, your browser doesn't support embedded videos.
@@ -37,7 +37,7 @@ Find all references
 Autocomplete, including sig suggestion
 ([demo](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0A%23%20V%20type%20'g'%20here%20and%20accept%20the%20'sig'%20autocomplete%20with%20tab%0Asi%0Adef%20foo%28a%2C%20b%29%0A%20%20%22%23%7Ba%7D%20%23%7Bb%7D%22%0Aend%0A)):
 
-<video autoplay loop width="70%" style="display:block;margin-left:auto;margin-right:auto;">
+<video autoplay muted loop width="70%" style="display:block;margin-left:auto;margin-right:auto;">
     <source src="/img/lsp/autocomplete_sig.mp4" type="video/mp4">
 
     Sorry, your browser doesn't support embedded videos.
@@ -47,7 +47,7 @@ Autocomplete, including sig suggestion
 Rename constants and methods
 ([demo](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20Parent%0A%20%20%23%20%20%20%5E%20Rename%20me!%0A%20%20def%20foo%3B%20end%0A%20%20%23%20%20%20%5E%20Rename%20me!%0Aend%0A%0Aclass%20Klass%20%3C%20Parent%0A%20%20def%20foo%3B%20end%0Aend%0A%0AKlass.new.foo%0AParent.new.foo%0A)):
 
-<video autoplay loop width="30%" style="display:block;margin-left:auto;margin-right:auto;">
+<video autoplay muted loop width="30%" style="display:block;margin-left:auto;margin-right:auto;">
     <source src="/img/lsp/rename.mp4" type="video/mp4">
 
     Sorry, your browser doesn't support embedded videos.
