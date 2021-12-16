@@ -1486,7 +1486,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
             vector<ast::ParsedFile> results;
             uint32_t filesProcessed = 0;
             ast::ParsedFile job;
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+            for (auto result : fileq->popUntilEmpty(job)) {
                 if (result.gotItem()) {
                     filesProcessed++;
                     auto &file = job.file.data(gs);

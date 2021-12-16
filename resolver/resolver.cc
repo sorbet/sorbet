@@ -465,7 +465,7 @@ private:
             ResolveItems<ResolutionItem> job(core::FileRef(), {});
             uint32_t processed = 0;
             uint32_t retries = 0;
-            for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
+            for (auto result : inputq->popUntilEmpty(job)) {
                 if (result.gotItem()) {
                     processed++;
                     core::Context ictx(gs, core::Symbols::root(), job.file);
@@ -1083,7 +1083,7 @@ public:
             ResolveWalkResult walkResult;
             vector<ast::ParsedFile> partiallyResolvedTrees;
             ast::ParsedFile job;
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+            for (auto result : fileq->popUntilEmpty(job)) {
                 if (result.gotItem()) {
                     core::Context ictx(igs, core::Symbols::root(), job.file);
                     job.tree = ast::TreeMap::apply(ictx, constants, std::move(job.tree));
@@ -2474,7 +2474,7 @@ public:
             ResolveTypeMembersAndFieldsWalk walk;
             ResolveTypeMembersAndFieldsResult output;
             ast::ParsedFile job;
-            for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
+            for (auto result : inputq->popUntilEmpty(job)) {
                 if (result.gotItem()) {
                     core::Context ctx(gs, core::Symbols::root(), job.file);
                     job.tree = ast::TreeMap::apply(ctx, walk, std::move(job.tree));
@@ -3246,7 +3246,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
         ResolveSignaturesWalk walk;
         ResolveSignaturesWalk::ResolveSignaturesWalkResult output;
         ast::ParsedFile job;
-        for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
+        for (auto result : inputq->popUntilEmpty(job)) {
             if (result.gotItem()) {
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::ShallowMap::apply(ctx, walk, std::move(job.tree));

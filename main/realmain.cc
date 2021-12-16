@@ -230,7 +230,10 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             Timer timeit(logger, "autogenWorker");
             int idx = 0;
 
-            for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
+            for (auto result : fileq->popUntilEmpty(idx)) {
+                if (!result.gotItem()) {
+                    continue;
+                }
                 ++n;
                 auto &tree = indexed[idx];
                 if (tree.file.data(gs).isPackage()) {

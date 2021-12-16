@@ -1427,7 +1427,10 @@ ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(std::vector<ParsedFile> &&
         workers.multiplexJob("deleteTrees", [fileq, &threadBarrier]() {
             {
                 ast::ParsedFile job;
-                for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                for (auto result : fileq->popUntilEmpty(job)) {
+                    if (!result.gotItem()) {
+                        continue;
+                    }
                     // Do nothing; allow the destructor of `ast::ParsedFile` to run for `job`.
                 }
             }

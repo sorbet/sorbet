@@ -86,7 +86,7 @@ void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spd
         int processedByThread = 0;
         size_t job;
         {
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+            for (auto result : fileq->popUntilEmpty(job)) {
                 if (result.gotItem()) {
                     processedByThread++;
 
@@ -143,7 +143,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
         int processedByThread = 0;
         size_t job;
         {
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+            for (auto result : fileq->popUntilEmpty(job)) {
                 if (result.gotItem()) {
                     if (timeit == nullptr) {
                         timeit = make_unique<Timer>(logger, "computeFileHashesWorker");

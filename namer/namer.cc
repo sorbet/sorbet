@@ -1856,7 +1856,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
         SymbolFinder finder;
         vector<SymbolFinderResult> output;
         ast::ParsedFile job;
-        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+        for (auto result : fileq->popUntilEmpty(job)) {
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
@@ -1926,7 +1926,7 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
         TreeSymbolizer inserter;
         vector<ast::ParsedFile> output;
         ast::ParsedFile job;
-        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+        for (auto result : fileq->popUntilEmpty(job)) {
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);

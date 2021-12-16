@@ -467,7 +467,10 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
             Timer timeit(gs.tracer(), "autogenWriteAutoloadsWorker");
             int idx = 0;
 
-            for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
+            for (auto result : inputq->popUntilEmpty(idx)) {
+                if (!result.gotItem()) {
+                    continue;
+                }
                 ++n;
                 auto &task = tasks[idx];
                 FileOps::writeIfDifferent(task.filePath, task.node.renderAutoloadSrc(gs, alCfg));
