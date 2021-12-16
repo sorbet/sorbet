@@ -325,13 +325,19 @@ unique_ptr<Range> replacementRangeForQuery(const core::GlobalState &gs, core::Lo
     return Range::fromLoc(gs, replacementLoc);
 }
 
+string formatSortIndex(size_t sortIdx) {
+    // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
+    // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
+    return fmt::format("{:06d}", sortIdx);
+}
+
 unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &gs, const LSPConfiguration &config,
                                                        const RubyKeyword &rubyKeyword, const core::Loc queryLoc,
                                                        string_view prefix, size_t sortIdx) {
     auto supportSnippets = config.getClientConfig().clientCompletionItemSnippetSupport;
     auto markupKind = config.getClientConfig().clientCompletionItemMarkupKind;
     auto item = make_unique<CompletionItem>(rubyKeyword.keyword);
-    item->sortText = fmt::format("{:06d}", sortIdx);
+    item->sortText = formatSortIndex(sortIdx);
 
     string replacementText;
     if (rubyKeyword.snippet.has_value() && supportSnippets) {
@@ -384,9 +390,7 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
 
     auto item = make_unique<CompletionItem>(label);
 
-    // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
-    // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
-    item->sortText = fmt::format("{:06d}", sortIdx);
+    item->sortText = formatSortIndex(sortIdx);
 
     if (what.isClassOrModule()) {
         auto whatKlass = what.asClassOrModuleRef();
@@ -443,7 +447,7 @@ unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs
                                                      string_view prefix, size_t sortIdx) {
     auto label = string(local._name.shortName(gs));
     auto item = make_unique<CompletionItem>(label);
-    item->sortText = fmt::format("{:06d}", sortIdx);
+    item->sortText = formatSortIndex(sortIdx);
     item->kind = CompletionItemKind::Variable;
 
     auto replacementText = label;
@@ -590,7 +594,7 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
 
     auto item = make_unique<CompletionItem>("sig");
     item->kind = CompletionItemKind::Method;
-    item->sortText = fmt::format("{:06d}", sortIdx);
+    item->sortText = formatSortIndex(sortIdx);
     item->detail = fmt::format("Suggested sig for {}", targetMethod.data(gs)->name.shortName(gs));
 
     uint32_t queryStart = queryLoc.beginPos();
@@ -680,9 +684,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
 
     auto item = make_unique<CompletionItem>(label);
 
-    // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
-    // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
-    item->sortText = fmt::format("{:06d}", sortIdx);
+    item->sortText = formatSortIndex(sortIdx);
 
     item->kind = CompletionItemKind::Method;
     item->detail = maybeAlias.show(gs);
