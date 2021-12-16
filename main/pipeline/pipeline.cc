@@ -1080,7 +1080,8 @@ void typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what, 
 
             vector<core::FileRef> files;
             {
-                for (auto result : outputq->popUntilEmptyWithTimeout(files, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
+                for (auto result :
+                     outputq->popUntilEmptyWithTimeout(files, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
                     if (result.gotItem()) {
                         for (auto &file : files) {
                             gs->errorQueue->flushErrorsForFile(*gs, file);

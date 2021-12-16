@@ -1123,7 +1123,8 @@ public:
 
         {
             ResolveWalkResult threadResult;
-            for (auto result : resultq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            for (auto result :
+                 resultq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem()) {
                     todo.insert(todo.end(), make_move_iterator(threadResult.todo_.begin()),
                                 make_move_iterator(threadResult.todo_.end()));
@@ -2505,7 +2506,8 @@ public:
 
         {
             ResolveTypeMembersAndFieldsResult threadResult;
-            for (auto result : outputq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            for (auto result :
+                 outputq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem()) {
                     combinedFiles.insert(combinedFiles.end(), make_move_iterator(threadResult.files.begin()),
                                          make_move_iterator(threadResult.files.end()));

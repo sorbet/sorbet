@@ -116,8 +116,7 @@ public:
         return try_pop(elem);
     }
 
-    template <typename Rep, typename Period>
-    class TimedPopper final {
+    template <typename Rep, typename Period> class TimedPopper final {
         AbstractConcurrentBoundedQueue<Elem, Queue> &queue;
         Elem &elem;
         const std::chrono::duration<Rep, Period> &timeout;
@@ -126,8 +125,9 @@ public:
         DequeueResult ret{false, true};
 
     public:
-        TimedPopper(AbstractConcurrentBoundedQueue<Elem, Queue> &queue, Elem &elem, std::chrono::duration<Rep, Period> const &timeout,
-                    spdlog::logger &log, bool silent) : queue(queue), elem(elem), timeout(timeout), log(log), silent(silent) {}
+        TimedPopper(AbstractConcurrentBoundedQueue<Elem, Queue> &queue, Elem &elem,
+                    std::chrono::duration<Rep, Period> const &timeout, spdlog::logger &log, bool silent)
+            : queue(queue), elem(elem), timeout(timeout), log(log), silent(silent) {}
 
         TimedPopper &begin() {
             this->ret = this->queue.wait_pop_timed(this->elem, timeout, log, silent);
@@ -150,9 +150,10 @@ public:
         }
     };
 
-    template<typename Rep, typename Period>
-    inline TimedPopper<Rep, Period> popUntilEmptyWithTimeout(Elem &elem, std::chrono::duration<Rep, Period> const &timeout,
-                                           spdlog::logger &log, bool silent = false) noexcept {
+    template <typename Rep, typename Period>
+    inline TimedPopper<Rep, Period> popUntilEmptyWithTimeout(Elem &elem,
+                                                             std::chrono::duration<Rep, Period> const &timeout,
+                                                             spdlog::logger &log, bool silent = false) noexcept {
         return TimedPopper<Rep, Period>{*this, elem, timeout, log, silent};
     }
 
