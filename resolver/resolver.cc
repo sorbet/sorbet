@@ -948,8 +948,114 @@ public:
             transformAncestor(ctx.withOwner(klass), singleton, ancst, isInclude);
         }
 
+        // Check for ambiguous definitions.
+        if (checkAmbiguousDefinition(ctx)) {
+            const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx);
+            if (ambigDef.exists()) {
+                if (auto e = ctx.beginError(original.loc, core::errors::Resolver::AmbiguousDefinitionError)) {
+                    e.setHeader("Class definition is ambiguous");
+                    e.addErrorLine(ambigDef.loc(ctx), "Alternate definition {} here",
+                                   ambigDef.showFullNameWithoutPackagePrefix(ctx));
+                }
+            }
+        }
+
         nesting_ = nesting_->parent;
         return tree;
+    }
+
+    const bool checkAmbiguousDefinition(core::Context ctx) {
+        if (ctx.state.runningUnderAutogen) {
+            // no need to check in autogen
+            return false;
+        }
+
+        if (ctx.file.data(ctx).isPackage()) {
+            // no need to check package files
+            return false;
+        }
+
+        if (nesting_->scope == core::Symbols::root()) {
+            // no need to check <root> def itself
+            return false;
+        }
+
+        // If current definition is owned by package registry/test, this means it is a package-mangled module.
+        const core::SymbolRef curOwner = nesting_->scope.owner(ctx);
+        if (curOwner == core::Symbols::PackageTests() || curOwner == core::Symbols::PackageRegistry()) {
+            return false;
+        }
+
+        // If current parent is owned by package registry/test, this means we are at package-top-level (and we skip).
+        // If we didn't skip here, we'd end up checking symbols like "Test", "Opus", etc.
+        //
+        // We have a small set of these leading package namespace symbols at Stripe, and we don't expect these to run
+        // into ambiguous definition issues. Skipping checking these saves on significant overhead.
+        const core::SymbolRef curParentOwner = nesting_->parent->scope.owner(ctx);
+        if (curParentOwner == core::Symbols::PackageTests() || curParentOwner == core::Symbols::PackageRegistry()) {
+            return false;
+        }
+
+        // Can't be ambiguous if current definition is single-part, don't check in this case.
+        if (curOwner == nesting_->parent->scope) {
+            return false;
+        }
+
+        return true;
+    }
+
+    const core::SymbolRef findAnyDefinitionAmbiguousWithCurrent(core::Context ctx) {
+        const core::SymbolRef defaultSymbol;
+        auto curSym = nesting_->scope;
+        auto curNesting = nesting_->parent;
+        if (curNesting == nullptr || curNesting->scope == core::Symbols::root()) {
+            // can't be ambiguous if nested directly under root scope
+            return defaultSymbol;
+        }
+
+        // find preceding symbol for current def
+        core::SymbolRef lastSym;
+        while (curSym != curNesting->scope && curSym.exists() && curSym != core::Symbols::root()) {
+            lastSym = curSym;
+            curSym = curSym.owner(ctx);
+        }
+
+        if (!curSym.exists() || (curSym.exists() && curSym == core::Symbols::root())) {
+            // preceding symbol cannot be ambiguous in these cases
+            return defaultSymbol;
+        }
+        auto precedingSymForCurDef = lastSym;
+
+        if (!precedingSymForCurDef.isClassOrModule()) {
+            // only proceed if preceding symbol is a class or module
+            return defaultSymbol;
+        }
+
+        const auto &precedingSymKlass = precedingSymForCurDef.asClassOrModuleRef().data(ctx);
+        if (!precedingSymKlass->isClassOrModuleUndeclared()) {
+            // Not a filler def, but a real def
+            return defaultSymbol;
+        }
+
+        // preceding symbol for current def is a filler
+        core::NameRef filler = precedingSymForCurDef.name(ctx);
+
+        // Look for filler name in all nestings above current nesting.
+        curNesting = curNesting->parent;
+        while (curNesting != nullptr) {
+            if (curNesting->scope.isClassOrModule()) {
+                auto scopeSym = curNesting->scope.asClassOrModuleRef().data(ctx);
+                const auto ambigDef = scopeSym->findMember(ctx, filler);
+                if (ambigDef.exists()) {
+                    // Filler name found! Definition is ambiguous.
+                    return ambigDef;
+                }
+            }
+
+            curNesting = curNesting->parent;
+        }
+
+        return defaultSymbol;
     }
 
     ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
