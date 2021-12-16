@@ -874,7 +874,9 @@ end
 
 ## 5068
 
-Sorbet requires that class or module definitions be namespaced unambiguously. For example, in this code:
+Sorbet requires that class or module definitions be namespaced unambiguously.
+For example, in this code:
+
 ```
 # typed: true
 
@@ -888,8 +890,10 @@ module A
 end
 ```
 
-The definition B::C is ambiguous. In Ruby's runtime, it resolves to B::C (and not A::B::C). However, things are
-different in the presence of a pre-declared filler namespace like below:
+The definition B::C is ambiguous. In Ruby's runtime, it resolves to B::C (and
+not A::B::C). However, things are different in the presence of a pre-declared
+filler namespace like below:
+
 ```
 # typed: true
 
@@ -907,14 +911,19 @@ end
 
 In this case, the definition resolves to A::B::C in Ruby's runtime.
 
-By default, Sorbet assumes the presence of filler namespaces while typechecking, regardless of whether they are explicitly
-predeclared like in the second example. This means that in Sorbet's view, the definition resolves to A::B::C in either case.
+By default, Sorbet assumes the presence of filler namespaces while typechecking,
+regardless of whether they are explicitly predeclared like in the second
+example. This means that in Sorbet's view, the definition resolves to A::B::C in
+either case.
 
-In Stripe's codebase, this is generally not a problem at runtime, as we use Sorbet's own autoloader generation to pre-declare filler namespaces,
-keeping the Ruby runtime's behavior equivalent to Sorbet. However, the autoloader has some edge cases, which can often cause deviations
-between Ruby's runtime and Sorbet. This error helps guard against these issues.
+In Stripe's codebase, this is generally not a problem at runtime, as we use
+Sorbet's own autoloader generation to pre-declare filler namespaces, keeping the
+Ruby runtime's behavior equivalent to Sorbet. However, the autoloader has some
+edge cases, which can often cause deviations between Ruby's runtime and Sorbet.
+This error helps guard against these issues.
 
-Note that this error is only reported when the `--stripe-mode` flag is passed in.
+Note that this error is only reported when the `--stripe-mode` flag is passed
+in.
 
 ## 6002
 
