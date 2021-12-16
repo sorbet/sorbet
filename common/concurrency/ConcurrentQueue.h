@@ -58,6 +58,41 @@ public:
         return ret;
     }
 
+    class PopperSentinel final {};
+
+    class Popper final {
+        AbstractConcurrentBoundedQueue<Elem, Queue> &queue;
+        Elem &elem;
+        DequeueResult ret{false, true};
+
+    public:
+        Popper(AbstractConcurrentBoundedQueue<Elem, Queue> &queue, Elem &elem) : queue(queue), elem(elem) {}
+
+        Popper &begin() {
+            this->ret = this->queue.try_pop(this->elem);
+            return *this;
+        }
+        PopperSentinel end() {
+            return PopperSentinel{};
+        }
+
+        bool operator!=(PopperSentinel &) {
+            return !this->ret.done();
+        }
+
+        void operator++() {
+            this->ret = this->queue.try_pop(this->elem);
+        }
+
+        const DequeueResult &operator*() {
+            return this->ret;
+        }
+    };
+
+    inline Popper popUntilEmpty(Elem &elem) noexcept {
+        return Popper{*this, elem};
+    }
+
     template <typename Rep, typename Period>
     inline DequeueResult wait_pop_timed(Elem &elem, std::chrono::duration<Rep, Period> const &timeout,
                                         spdlog::logger &log, bool silent = false) noexcept {
