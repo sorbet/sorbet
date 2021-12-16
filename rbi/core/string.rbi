@@ -2104,14 +2104,14 @@ class String < Object
         arg0: T.any(Regexp, String),
         arg1: String,
     )
-    .returns(String)
+    .returns(T.nilable(String))
   end
   sig do
     params(
         arg0: T.any(Regexp, String),
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
-    .returns(String)
+    .returns(T.nilable(String))
   end
   def sub!(arg0, arg1=T.unsafe(nil), &blk); end
 
