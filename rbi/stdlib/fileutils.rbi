@@ -94,9 +94,9 @@
 # `:verbose` flags to methods in
 # [`FileUtils`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html).
 module FileUtils
-  LOW_METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
-  METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
-  OPT_TABLE = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+  LOW_METHODS = T.let(T.unsafe(nil), T::Array[Symbol])
+  METHODS = T.let(T.unsafe(nil), T::Array[Symbol])
+  OPT_TABLE = T.let(T.unsafe(nil), T::Hash[String, T::Array[Symbol]])
   VERSION = T.let(T.unsafe(nil), String)
 
   # Copies `src` to `dest`. If `src` is a directory, this method copies all its
@@ -156,7 +156,7 @@ module FileUtils
   # [`remove_entry_secure`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-remove_entry_secure).
   sig do
     params(
-      list: T.any(String, T::Array[T.any(String, Pathname)], Pathname),
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
       force: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
@@ -186,8 +186,8 @@ module FileUtils
   # [`makedirs`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-makedirs)
   sig do
     params(
-      list: T.any(String, Pathname),
-      mode: T.nilable(Integer),
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      mode: T.nilable(T.any(String, Integer)),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
     ).returns(T::Array[String])
@@ -198,8 +198,8 @@ module FileUtils
   # [`mkdir_p`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-mkdir_p)
   sig do
     params(
-      list: T.any(String, Pathname),
-      mode: T.nilable(Integer),
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      mode: T.nilable(T.any(String, Integer)),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
     ).returns(T::Array[String])
@@ -210,8 +210,8 @@ module FileUtils
   # [`mkdir_p`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-mkdir_p)
   sig do
     params(
-      list: T.any(String, Pathname),
-      mode: T.nilable(Integer),
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      mode: T.nilable(T.any(String, Integer)),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
     ).returns(T::Array[String])
@@ -252,12 +252,28 @@ module FileUtils
   #
   # Also aliased as:
   # [`chdir`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-chdir)
-  sig {params(dir: T.untyped, verbose: T.nilable(T::Boolean), block: T.untyped).returns(T.untyped)}
+  sig {
+    type_parameters(:U)
+    .params(
+      dir: T.any(String, Pathname),
+      verbose: T.nilable(T::Boolean),
+      block: T.proc.returns(T.type_parameter(:U)),
+    )
+    .returns(T.type_parameter(:U))
+  }
   module_function def cd(dir, verbose: nil, &block); end
 
   # Alias for:
   # [`cd`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-cd)
-  sig {params(dir: T.untyped, verbose: T.nilable(T::Boolean), block: T.untyped).returns(T.untyped)}
+  sig {
+    type_parameters(:U)
+    .params(
+      dir: T.any(String, Pathname),
+      verbose: T.nilable(T::Boolean),
+      block: T.proc.returns(T.type_parameter(:U)),
+    )
+    .returns(T.type_parameter(:U))
+  }
   module_function def chdir(dir, verbose: nil, &block); end
 
   # Changes permission bits on the named files (in `list`) to the bit pattern
@@ -310,11 +326,11 @@ module FileUtils
   # :   Is the exact nature of the class will be given a specified mode.
   sig do
     params(
-      mode: T.untyped,
-      list: T.untyped,
+      mode: T.nilable(T.any(String, Integer)),
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).returns(T.nilable(Integer))
   end
   module_function def chmod(mode, list, noop: nil, verbose: nil); end
 
@@ -327,12 +343,12 @@ module FileUtils
   # ```
   sig do
     params(
-      mode: T.untyped,
-      list: T.untyped,
+      mode: T.nilable(T.any(String, Integer)),
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
       force: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def chmod_R(mode, list, noop: nil, verbose: nil, force: nil); end
 
@@ -347,12 +363,12 @@ module FileUtils
   # ```
   sig do
     params(
-      user: T.untyped,
-      group: T.untyped,
-      list: T.untyped,
+      user: T.nilable(T.any(Integer, String)),
+      group: T.nilable(T.any(Integer, String)),
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).returns(T.nilable(Integer))
   end
   module_function def chown(user, group, list, noop: nil, verbose: nil); end
 
@@ -367,13 +383,13 @@ module FileUtils
   # ```
   sig do
     params(
-      user: T.untyped,
-      group: T.untyped,
-      list: T.untyped,
+      user: T.nilable(T.any(Integer, String)),
+      group: T.nilable(T.any(Integer, String)),
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
       force: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def chown_R(user, group, list, noop: nil, verbose: nil, force: nil); end
 
@@ -383,7 +399,7 @@ module FileUtils
   # ```ruby
   # p FileUtils.collect_method(:preserve) #=> ["cp", "cp_r", "copy", "install"]
   # ```
-  sig {params(opt: T.untyped).returns(T::Array[String])}
+  sig {params(opt: Symbol).returns(T::Array[String])}
   def self.collect_method(opt); end
 
   # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
@@ -392,7 +408,7 @@ module FileUtils
   # ```ruby
   # p FileUtils.commands  #=> ["chmod", "cp", "cp_r", "install", ...]
   # ```
-  sig {returns(T.untyped)}
+  sig {returns(T::Array[String])}
   def self.commands; end
 
   # Returns true if the contents of a file `a` and a file `b` are identical.
@@ -406,21 +422,21 @@ module FileUtils
   # Also aliased as:
   # [`identical?`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-identical-3F),
   # [`cmp`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-cmp)
-  sig {params(a: T.untyped, b: T.untyped).returns(T::Boolean)}
+  sig {params(a: T.any(String, Pathname), b: T.any(String, Pathname)).returns(T::Boolean)}
   module_function def compare_file(a, b); end
 
   # Alias for:
   # [`compare_file`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-compare_file)
-  sig {params(a: T.untyped, b: T.untyped).returns(T::Boolean)}
+  sig {params(a: T.any(String, Pathname), b: T.any(String, Pathname)).returns(T::Boolean)}
   module_function def cmp(a, b); end
 
   # Alias for:
   # [`compare_file`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-compare_file)
-  sig {params(a: T.untyped, b: T.untyped).returns(T::Boolean)}
+  sig {params(a: T.any(String, Pathname), b: T.any(String, Pathname)).returns(T::Boolean)}
   module_function def identical?(a, b); end
 
   # Returns true if the contents of a stream `a` and `b` are identical.
-  sig {params(a: T.untyped, b: T.untyped).returns(T::Boolean)}
+  sig {params(a: IO, b: IO).returns(T::Boolean)}
   module_function def compare_stream(a, b); end
 
   # Copies a file content `src` to `dest`. If `dest` is a directory, copies
@@ -440,12 +456,12 @@ module FileUtils
   # [`copy`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-copy)
   sig do
     params(
-      src: T.untyped,
-      dest: T.untyped,
+      src: T.any(File, String, Pathname, T::Array[T.any(File, String, Pathname)]),
+      dest: T.any(String, Pathname),
       preserve: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def cp(src, dest, preserve: nil, noop: nil, verbose: nil); end
 
@@ -453,12 +469,12 @@ module FileUtils
   # [`cp`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-cp)
   sig do
     params(
-      src: T.untyped,
-      dest: T.untyped,
+      src: T.any(File, String, Pathname, T::Array[T.any(File, String, Pathname)]),
+      dest: T.any(String, Pathname),
       preserve: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def copy(src, dest, preserve: nil, noop: nil, verbose: nil); end
 
@@ -479,12 +495,12 @@ module FileUtils
   # before copy.
   sig do
     params(
-      src: T.untyped,
-      dest: T.untyped,
+      src: T.any(String, Pathname),
+      dest: T.any(String, Pathname),
       preserve: T::Boolean,
       dereference_root: T::Boolean,
       remove_destination: T::Boolean
-    ).returns(T.untyped)
+    ).void
   end
   module_function def copy_entry(src, dest, preserve = false, dereference_root = false, remove_destination = false); end
 
@@ -492,17 +508,17 @@ module FileUtils
   # path name.
   sig do
     params(
-      src: T.untyped,
-      dest: T.untyped,
+      src: T.any(String, Pathname),
+      dest: T.any(String, Pathname),
       preserve: T::Boolean,
       dereference: T::Boolean
-    ).returns(T.untyped)
+    ).void
   end
   module_function def copy_file(src, dest, preserve = false, dereference = true); end
 
   # Copies stream `src` to `dest`. `src` must respond to read(n) and `dest` must
   # respond to write(str).
-  sig {params(src: T.untyped, dest: T.untyped).returns(T.untyped)}
+  sig {params(src: IO, dest: IO).returns(Integer)}
   module_function def copy_stream(src, dest); end
 
   # Hard link `src` to `dest`. If `src` is a directory, this method links all
@@ -527,13 +543,13 @@ module FileUtils
   # ```
   sig do
     params(
-      src: T.untyped,
-      dest: T.untyped,
+      src: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      dest: T.any(String, Pathname),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
       dereference_root: T::Boolean,
       remove_destination: T::Boolean
-    ).returns(T.untyped)
+    ).void
   end
   module_function def cp_lr(src, dest, noop: nil, verbose: nil, dereference_root: true, remove_destination: false); end
 
@@ -544,7 +560,7 @@ module FileUtils
   # p FileUtils.have_option?(:rm, :force)    #=> true
   # p FileUtils.have_option?(:rm, :preserve) #=> false
   # ```
-  sig {params(mid: T.untyped, opt: T.untyped).returns(T::Boolean)}
+  sig {params(mid: Symbol, opt: Symbol).returns(T::Boolean)}
   def self.have_option?(mid, opt); end
 
   # If `src` is not same as `dest`, copies it and changes the permission mode to
@@ -557,15 +573,15 @@ module FileUtils
   # ```
   sig do
     params(
-      src: T.untyped,
-      dest: T.untyped,
-      mode: T.untyped,
-      owner: T.untyped,
-      group: T.untyped,
+      src: T.any(String, Pathname),
+      dest: T.any(String, Pathname),
+      mode: T.nilable(T.any(String, Integer)),
+      owner: T.nilable(T.any(Integer, String)),
+      group: T.nilable(T.any(Integer, String)),
       preserve: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def install(src, dest, mode: nil, owner: nil, group: nil, preserve: nil, noop: nil, verbose: nil); end
 
@@ -592,12 +608,12 @@ module FileUtils
   # [`link`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-link)
   sig do
     params(
-      src: T.untyped,
-      dest: T.untyped,
+      src: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      dest: T.any(String, Pathname),
       force: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def ln(src, dest, force: nil, noop: nil, verbose: nil); end
 
@@ -605,12 +621,12 @@ module FileUtils
   # [`ln`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-ln)
   sig do
     params(
-      src: T.untyped,
-      dest: T.untyped,
+      src: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      dest: T.any(String, Pathname),
       force: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def link(src, dest, force: nil, noop: nil, verbose: nil); end
 
@@ -626,11 +642,11 @@ module FileUtils
   # before copy.
   sig do
     params(
-      src: T.untyped,
-      dest: T.untyped,
+      src: T.any(String, Pathname),
+      dest: T.any(String, Pathname),
       dereference_root: T::Boolean,
       remove_destination: T::Boolean
-    ).returns(T.untyped)
+    ).void
   end
   module_function def link_entry(src, dest, dereference_root = false, remove_destination = false); end
 
@@ -657,12 +673,12 @@ module FileUtils
   # [`symlink`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-symlink)
   sig do
     params(
-      src: T.untyped,
-      dest: T.untyped,
+      src: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      dest: T.any(String, Pathname),
       force: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def ln_s(src, dest, force: nil, noop: nil, verbose: nil); end
 
@@ -670,12 +686,12 @@ module FileUtils
   # [`ln_s`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-ln_s)
   sig do
     params(
-      src: T.untyped,
-      dest: T.untyped,
+      src: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      dest: T.any(String, Pathname),
       force: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def symlink(src, dest, force: nil, noop: nil, verbose: nil); end
 
@@ -686,11 +702,11 @@ module FileUtils
   # ```
   sig do
     params(
-      src: T.untyped,
-      dest: T.untyped,
+      src: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      dest: T.any(String, Pathname),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def ln_sf(src, dest, noop: nil, verbose: nil); end
 
@@ -704,11 +720,11 @@ module FileUtils
   # ```
   sig do
     params(
-      list: T.untyped,
-      mode: T.untyped,
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      mode: T.nilable(T.any(String, Integer)),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).returns(T::Array[String])
   end
   module_function def mkdir(list, mode: nil, noop: nil, verbose: nil); end
 
@@ -728,13 +744,13 @@ module FileUtils
   # [`move`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-move)
   sig do
     params(
-      src: T.untyped,
-      dest: T.untyped,
+      src: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      dest: T.any(String, Pathname),
       force: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
       secure: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).returns(T.nilable(Integer))
   end
   module_function def mv(src, dest, force: nil, noop: nil, verbose: nil, secure: nil); end
 
@@ -742,13 +758,13 @@ module FileUtils
   # [`mv`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-mv)
   sig do
     params(
-      src: T.untyped,
-      dest: T.untyped,
+      src: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      dest: T.any(String, Pathname),
       force: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
       secure: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).returns(T.nilable(Integer))
   end
   module_function def move(src, dest, force: nil, noop: nil, verbose: nil, secure: nil); end
 
@@ -767,28 +783,28 @@ module FileUtils
   # ```ruby
   # p FileUtils.options_of(:rm)  #=> ["noop", "verbose", "force"]
   # ```
-  sig {params(mid: T.untyped).returns(T::Array[String])}
+  sig {params(mid: Symbol).returns(T::Array[String])}
   def self.options_of(mid); end
 
-  sig {params(name: T.untyped).returns(T.untyped)}
+  sig {params(name: Symbol).void}
   def self.private_module_function(name); end
 
   # Returns the name of the current directory.
   #
   # Also aliased as:
   # [`getwd`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-getwd)
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   module_function def pwd; end
 
   # Alias for:
   # [`pwd`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-pwd)
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   module_function def getwd; end
 
   # Removes a directory `dir` and its contents recursively. This method ignores
   # [`StandardError`](https://docs.ruby-lang.org/en/2.6.0/StandardError.html) if
   # `force` is true.
-  sig {params(path: T.untyped, force: T::Boolean).returns(T.untyped)}
+  sig {params(path: T.any(String, Pathname), force: T::Boolean).returns(Integer)}
   module_function def remove_dir(path, force = false); end
 
   # This method removes a file system entry `path`. `path` might be a regular
@@ -797,7 +813,7 @@ module FileUtils
   #
   # See also
   # [`remove_entry_secure`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-remove_entry_secure).
-  sig {params(path: T.untyped, force: T::Boolean).returns(T.untyped)}
+  sig {params(path: T.any(String, Pathname), force: T::Boolean).returns(Integer)}
   module_function def remove_entry(path, force = false); end
 
   # This method removes a file system entry `path`. `path` shall be a regular
@@ -833,13 +849,13 @@ module FileUtils
   #
   #
   # For fileutils.rb, this vulnerability is reported in [ruby-dev:26100].
-  sig {params(path: T.untyped, force: T::Boolean).returns(T.untyped)}
+  sig {params(path: T.any(String, Pathname), force: T::Boolean).void}
   module_function def remove_entry_secure(path, force = false); end
 
   # Removes a file `path`. This method ignores
   # [`StandardError`](https://docs.ruby-lang.org/en/2.6.0/StandardError.html) if
   # `force` is true.
-  sig {params(path: T.untyped, force: T::Boolean).returns(T.untyped)}
+  sig {params(path: T.any(String, Pathname), force: T::Boolean).returns(Integer)}
   module_function def remove_file(path, force = false); end
 
   # Remove file(s) specified in `list`. This method cannot remove directories.
@@ -856,11 +872,11 @@ module FileUtils
   # [`remove`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-remove)
   sig do
     params(
-      list: T.untyped,
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
       force: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def rm(list, force: nil, noop: nil, verbose: nil); end
 
@@ -868,11 +884,11 @@ module FileUtils
   # [`rm`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-rm)
   sig do
     params(
-      list: T.untyped,
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
       force: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def remove(list, force: nil, noop: nil, verbose: nil); end
 
@@ -885,12 +901,24 @@ module FileUtils
   #
   # Also aliased as:
   # [`safe_unlink`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-safe_unlink)
-  sig {params(list: T.untyped, noop: T.nilable(T::Boolean), verbose: T.nilable(T::Boolean)).returns(T.untyped)}
+  sig do
+    params(
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      noop: T.nilable(T::Boolean),
+      verbose: T.nilable(T::Boolean)
+    ).void
+  end
   module_function def rm_f(list, noop: nil, verbose: nil); end
 
   # Alias for:
   # [`rm_f`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-rm_f)
-  sig {params(list: T.untyped, noop: T.nilable(T::Boolean), verbose: T.nilable(T::Boolean)).returns(T.untyped)}
+  sig do
+    params(
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      noop: T.nilable(T::Boolean),
+      verbose: T.nilable(T::Boolean)
+    ).void
+  end
   module_function def safe_unlink(list, noop: nil, verbose: nil); end
 
   # Equivalent to
@@ -911,7 +939,7 @@ module FileUtils
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
       secure: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def rm_rf(list, noop: nil, verbose: nil, secure: nil); end
 
@@ -919,11 +947,11 @@ module FileUtils
   # [`rm_rf`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-rm_rf)
   sig do
     params(
-      list: T.untyped,
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
       secure: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def rmtree(list, noop: nil, verbose: nil, secure: nil); end
 
@@ -937,11 +965,11 @@ module FileUtils
   # ```
   sig do
     params(
-      list: T.untyped,
-      parents: T.untyped,
+      list: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      parents: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).returns(T.untyped)
+    ).void
   end
   module_function def rmdir(list, parents: nil, noop: nil, verbose: nil); end
 
@@ -952,7 +980,7 @@ module FileUtils
   # FileUtils.uptodate?('hello.o', %w(hello.c hello.h)) or \
   #     system 'make hello.o'
   # ```
-  sig {params(new: T.untyped, old_list: T.untyped).returns(T::Boolean)}
+  sig {params(new: T.any(String, Pathname), old_list: T::Array[T.any(String, Pathname)]).returns(T::Boolean)}
   module_function def uptodate?(new, old_list); end
 end
 
@@ -962,12 +990,12 @@ end
 # equates to passing the `:noop` and `:verbose` flag to methods in
 # [`FileUtils`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html).
 module FileUtils::DryRun
-  LOW_METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
-  METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
-  OPT_TABLE = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+  LOW_METHODS = T.let(T.unsafe(nil), T::Array[Symbol])
+  METHODS = T.let(T.unsafe(nil), T::Array[Symbol])
+  OPT_TABLE = T.let(T.unsafe(nil), T::Hash[String, T::Array[Symbol]])
 end
 
-class FileUtils::Entry_ < Object
+class ::FileUtils::Entry_ < Object
   include FileUtils::StreamUtils_
 
   DIRECTORY_TERM = T.let(T.unsafe(nil), String)
@@ -980,19 +1008,19 @@ class FileUtils::Entry_ < Object
   sig {returns(T::Boolean)}
   def chardev?; end
 
-  sig {params(mode: T.untyped).returns(T.untyped)}
+  sig {params(mode: Integer).returns(Integer)}
   def chmod(mode); end
 
-  sig {params(uid: T.untyped, gid: T.untyped).returns(T.untyped)}
+  sig {params(uid: Integer, gid: Integer).returns(Integer)}
   def chown(uid, gid); end
 
-  sig {params(dest: T.untyped).returns(T.untyped)}
+  sig {params(dest: T.any(String, Pathname)).returns(Integer)}
   def copy(dest); end
 
-  sig {params(dest: T.untyped).returns(T.untyped)}
+  sig {params(dest: T.any(String, Pathname)).returns(Integer)}
   def copy_file(dest); end
 
-  sig {params(path: T.untyped).returns(T.untyped)}
+  sig {params(path: T.any(String, Pathname)).returns(Integer)}
   def copy_metadata(path); end
 
   sig {returns(T::Boolean)}
@@ -1004,7 +1032,7 @@ class FileUtils::Entry_ < Object
   sig {returns(T::Boolean)}
   def door?; end
 
-  sig {returns(T.untyped)}
+  sig {returns(T::Array[FileUtils::Entry_])}
   def entries; end
 
   sig {returns(T::Boolean)}
@@ -1013,64 +1041,86 @@ class FileUtils::Entry_ < Object
   sig {returns(T::Boolean)}
   def file?; end
 
-  sig {params(a: T.untyped, b: T.untyped, deref: T::Boolean).void}
+  sig {params(a: T.nilable(T.any(String, Pathname)), b: T.nilable(T.any(String, Pathname)), deref: T::Boolean).void}
   def initialize(a, b = nil, deref = false); end
 
-  sig {params(dest: T.untyped).returns(T.untyped)}
+  sig {params(dest: T.any(String, Pathname)).returns(Integer)}
   def link(dest); end
 
-  sig {returns(T.untyped)}
+  sig {returns(File::Stat)}
   def lstat; end
 
-  sig {returns(T.untyped)}
+  sig {returns(T.nilable(File::Stat))}
   def lstat!; end
 
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   def path; end
 
   sig {returns(T::Boolean)}
   def pipe?; end
 
-  sig {returns(T.untyped)}
-  def platform_support; end
+  sig do
+    type_parameters(:U)
+    .params(blk: T.proc.returns(T.type_parameter(:U)))
+    .returns(T.type_parameter(:U))
+  end
+  def platform_support(&blk); end
 
-  sig {returns(T.untyped)}
-  def postorder_traverse; end
+  sig do
+    type_parameters(:U)
+    .params(blk: T.proc.returns(T.type_parameter(:U)))
+    .returns(T.type_parameter(:U))
+  end
+  def postorder_traverse(&blk); end
 
-  sig {returns(T.untyped)}
+  sig {returns(T.nilable(T.any(String, Pathname)))}
   def prefix; end
 
-  sig {returns(T.untyped)}
-  def preorder_traverse; end
+  sig do
+    type_parameters(:U)
+    .params(blk: T.proc.returns(T.type_parameter(:U)))
+    .returns(T.type_parameter(:U))
+  end
+  def preorder_traverse(&blk); end
 
-  sig {returns(T.untyped)}
+  sig {returns(T.nilable(T.any(String, Pathname)))}
   def rel; end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def remove; end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def remove_dir1; end
 
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def remove_file; end
 
   sig {returns(T::Boolean)}
   def socket?; end
 
-  sig {returns(T.untyped)}
+  sig {returns(File::Stat)}
   def stat; end
 
-  sig {returns(T.untyped)}
+  sig {returns(T.nilable(File::Stat))}
   def stat!; end
 
   sig {returns(T::Boolean)}
   def symlink?; end
 
-  sig {returns(T.untyped)}
-  def traverse; end
+  sig do
+    type_parameters(:U)
+    .params(blk: T.proc.returns(T.type_parameter(:U)))
+    .returns(T.type_parameter(:U))
+  end
+  def traverse(&blk); end
 
-  sig {params(pre: T.untyped, post: T.untyped).returns(T.untyped)}
+  sig do
+    params(
+      pre: T.proc.params(obj: FileUtils::Entry_).void,
+      post: T.proc.params(obj: FileUtils::Entry_).void
+    )
+    .void
+  end
   def wrap_traverse(pre, post); end
 end
 
@@ -1082,9 +1132,9 @@ end
 # never changes files/directories.  This equates to passing the `:noop` flag to
 # methods in [`FileUtils`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html).
 module FileUtils::NoWrite
-  LOW_METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
-  METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
-  OPT_TABLE = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+  LOW_METHODS = T.let(T.unsafe(nil), T::Array[Symbol])
+  METHODS = T.let(T.unsafe(nil), T::Array[Symbol])
+  OPT_TABLE = T.let(T.unsafe(nil), T::Hash[String, T::Array[Symbol]])
 end
 
 module FileUtils::StreamUtils_
@@ -1096,7 +1146,7 @@ end
 # to methods in
 # [`FileUtils`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html).
 module FileUtils::Verbose
-  LOW_METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
-  METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
-  OPT_TABLE = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+  LOW_METHODS = T.let(T.unsafe(nil), T::Array[Symbol])
+  METHODS = T.let(T.unsafe(nil), T::Array[Symbol])
+  OPT_TABLE = T.let(T.unsafe(nil), T::Hash[String, T::Array[Symbol]])
 end
