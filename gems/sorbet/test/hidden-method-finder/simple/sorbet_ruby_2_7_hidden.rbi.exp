@@ -2914,12 +2914,6 @@ class OpenStruct
   VERSION = ::T.let(nil, ::T.untyped)
 end
 
-class Pathname
-  def fnmatch?(*arg); end
-
-  def make_symlink(arg); end
-end
-
 class Proc
   def <<(arg); end
 
