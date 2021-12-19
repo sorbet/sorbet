@@ -932,16 +932,16 @@ class ImportTree final {
             return importLoc.exists();
         }
 
+        bool isTestImport() {
+            return importType == ImportType::Test;
+        }
+
         bool isFriendImport() {
             return importType == ImportType::Friend;
         }
 
         bool isNormalImport() {
             return importType == ImportType::Normal;
-        }
-
-        bool isFriendOrTestImport() {
-            return importType == ImportType::Friend || importType == ImportType::Test;
         }
 
         bool skipBuildMappingFor(ModuleType moduleType) {
@@ -979,12 +979,13 @@ class ImportTreeBuilder final {
     const FullyQualifiedName *fullPkgName;
     core::NameRef pkgMangledName;
     core::NameRef privatePkgMangledName;
+    const core::Loc *packageLoc;
     ImportTree root;
 
 public:
     ImportTreeBuilder(const PackageInfoImpl &package)
         : fullPkgName(&(package.name.fullName)), pkgMangledName(package.name.mangledName),
-          privatePkgMangledName(package.privateMangledName) {}
+          privatePkgMangledName(package.privateMangledName), packageLoc(&(package.loc)) {}
     ImportTreeBuilder(const ImportTreeBuilder &) = delete;
     ImportTreeBuilder(ImportTreeBuilder &&) = default;
     ImportTreeBuilder &operator=(const ImportTreeBuilder &) = delete;
@@ -1227,16 +1228,22 @@ private:
                 // but effectively use the one from the export site (due to the export-mapping/public module).
                 // This results in the following behavior:
                 // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
-                //                     ^^^^^^^^       jump to package file of `Foo::Bar`
+                //                     ^^^^^^^^       jump to top of package file of `Foo::Bar`
                 //                               ^^^  jump to actual definition of `Baz` class
 
                 // Ensure import's do not add duplicate loc-s in the test_module
-                const bool useImportLoc = source.isEnumeratedImport &&
-                                          (moduleType != ModuleType::PrivateTest || source.isFriendOrTestImport());
-                const auto &importLoc = useImportLoc ? source.importLoc : core::LocOffsets::none();
+                const auto &moduleLoc = [](auto &source, auto packageLoc) {
+                    // normal or test import
+                    if (source.isTestImport() || source.isNormalImport()) {
+                        return source.isEnumeratedImport ? source.importLoc : core::LocOffsets::none();
+                    }
 
-                auto mod = ast::MK::Module(core::LocOffsets::none(), importLoc,
-                                           importModuleName(parts, importLoc, moduleType), {}, std::move(rhs));
+                    // friend import
+                    return packageLoc->offsets();
+                }(source, packageLoc);
+
+                auto mod = ast::MK::Module(core::LocOffsets::none(), moduleLoc,
+                                           importModuleName(parts, moduleLoc, moduleType), {}, std::move(rhs));
                 modRhs.emplace_back(std::move(mod));
             }
         }
