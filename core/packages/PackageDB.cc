@@ -1,5 +1,6 @@
 #include "core/packages/PackageDB.h"
 #include "absl/strings/match.h"
+#include "common/sort.h"
 #include "core/AutocorrectSuggestion.h"
 #include "core/GlobalState.h"
 #include "core/Loc.h"
@@ -77,10 +78,12 @@ UnfreezePackages::UnfreezePackages(PackageDB &db) : db(db) {
 
 UnfreezePackages::~UnfreezePackages() {
     ENFORCE(!db.frozen);
+    fast_sort(db.mangledNames, [&db = this->db](auto a, auto b) -> bool {
+        return PackageInfo::lexCmp(db.getPackageInfo(a).fullName(), db.getPackageInfo(b).fullName());
+    });
+
     db.writerThread = std::thread::id();
     db.frozen = true;
-    // Note in the future we may want to change the data structures involved in a way that requires
-    // a finalization step. Controlling freeze/unfreeze with RAII gives a good hook to do that.
 }
 
 NameRef PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {

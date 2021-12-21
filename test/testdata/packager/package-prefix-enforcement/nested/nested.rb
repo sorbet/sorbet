@@ -40,6 +40,13 @@ module Root
   end
 end
 
+  class Root::Stringy < String
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested`
+end
+
+class Root::Nested::Stringy < String
+end
+
 module Root
   extend T::Sig
 # ^^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested`

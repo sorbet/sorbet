@@ -1,3 +1,7 @@
+parent/b.rb:4: Class or method definition must match enclosing package namespace `Parent` https://srb.help/3713
+     4 |  module Child
+                 ^^^^^
+
 parent/b.rb:4: Redefining constant `Parent::Child` https://srb.help/4012
      4 |  module Child
      5 |    class B; end
@@ -8,4 +12,4 @@ parent/b.rb:5: Can't nest `B` under `Parent::Child` because `Parent::Child` is n
      5 |    class B; end
                   ^
     parent/__package.rb: `Parent::Child` defined here
-Errors: 2
+Errors: 3

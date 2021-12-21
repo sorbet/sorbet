@@ -27,4 +27,9 @@ bool PackageInfo::isPackageModule(const core::GlobalState &gs, core::ClassOrModu
     }
     return false;
 }
+
+bool PackageInfo::lexCmp(const std::vector<core::NameRef> &lhs, const std::vector<core::NameRef> &rhs) {
+    return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
+                                        [](NameRef a, NameRef b) -> bool { return a.rawId() < b.rawId(); });
+}
 } // namespace sorbet::core::packages
