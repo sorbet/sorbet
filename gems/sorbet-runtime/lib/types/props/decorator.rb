@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 # typed: strict
 
-require "set"
-
 # NB: This is not actually a decorator. It's just named that way for consistency
 # with DocumentDecorator and ModelDecorator (which both seem to have been written
 # with an incorrect understanding of the decorator pattern). These "decorators"
@@ -260,6 +258,7 @@ class T::Props::Decorator
     when T::Types::TypedHash, T::Types::FixedHash
       Hash
     when T::Types::TypedSet
+      require "set"
       Set
     when T::Types::Union
       # The below unwraps our T.nilable types for T::Props if we can.

@@ -51,6 +51,10 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     prop :the_hash, T.nilable(T::Hash[String, CustomType])
   end
 
+  class SetStruct < T::Struct
+    prop :set, T.nilable(T::Set[String])
+  end
+
   describe 'typed arrays and hashes' do
     it 'can have string values' do
       doc = StringArrayAndHashStruct.new(
@@ -94,6 +98,14 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
         include T::Props
         prop :fixed_array_prop, T::Utils.coerce([String, Numeric])
       end
+    end
+  end
+
+  describe 'typed sets' do
+    it 'can have set values' do
+      SetStruct.new(
+        set: ::Set.new(['one', 'two', 'three'])
+      )
     end
   end
 
