@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 # typed: strict
 
+require "set"
+
 # NB: This is not actually a decorator. It's just named that way for consistency
 # with DocumentDecorator and ModelDecorator (which both seem to have been written
 # with an incorrect understanding of the decorator pattern). These "decorators"
