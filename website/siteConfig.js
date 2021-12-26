@@ -37,6 +37,11 @@ const users = [
     infoLink: 'https://factorialhr.com/',
   },
   {
+    caption: 'Flexport',
+    image: 'img/flexport-logo.jpg',
+    infoLink: 'https://www.workforce.com/'
+  },
+  {
     caption: 'Grailed',
     image: 'img/grailed-logo.png',
     infoLink: 'https://www.grailed.com/',
@@ -76,11 +81,6 @@ const users = [
     image: 'img/workforce-logo.png',
     infoLink: 'https://www.workforce.com/',
   },
-  {
-    caption: 'Flexport',
-    image: 'img/flexport-logo.jpg',
-    infoLink: 'https://www.workforce.com/'
-  }
 ];
 
 const siteConfig = {
