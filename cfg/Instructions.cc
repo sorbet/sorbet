@@ -124,6 +124,7 @@ Send::Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, uint1
       argLocs(std::move(argLocs)), link(move(link)) {
     ENFORCE(numPosArgs <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs,
             args.size());
+    ENFORCE(args.size() == this->argLocs.size(), "Should have a loc for every arg");
 
     this->args.resize(args.size());
     int i = 0;

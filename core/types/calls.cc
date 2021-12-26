@@ -2447,8 +2447,8 @@ public:
         ENFORCE(args.args.size() == 1);
 
         auto &arg = args.args[0];
-        InlinedVector<LocOffsets, 2> argLocs{args.locs.receiver};
-        CallLocs locs{args.locs.file, args.locs.call, args.locs.call, argLocs};
+        InlinedVector<LocOffsets, 2> argLocs;
+        CallLocs locs{args.locs.file, args.locs.call, args.locs.receiver, argLocs};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs;
 
         DispatchArgs dispatch{core::Names::toA(),
