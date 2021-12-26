@@ -39,7 +39,7 @@ const users = [
   {
     caption: 'Flexport',
     image: 'img/flexport-logo.jpg',
-    infoLink: 'https://www.workforce.com/'
+    infoLink: 'https://flexport.com/'
   },
   {
     caption: 'Grailed',
