@@ -76,6 +76,11 @@ const users = [
     image: 'img/workforce-logo.png',
     infoLink: 'https://www.workforce.com/',
   },
+  {
+    caption: 'Flexport',
+    image: 'img/flexport-logo.jpg',
+    infoLink: 'https://www.workforce.com/'
+  }
 ];
 
 const siteConfig = {
