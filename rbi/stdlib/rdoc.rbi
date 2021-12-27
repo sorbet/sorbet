@@ -9269,6 +9269,173 @@ class RDoc::Store::MissingFileError < ::RDoc::Store::Error
   def store; end
 end
 
+# RDoc::Task creates the following rake tasks to generate and clean up RDoc
+# output:
+#
+# [rdoc]
+# Main task for this RDoc task.
+#
+# [clobber_rdoc]
+# Delete all the rdoc files.  This target is automatically added to the main
+# clobber target.
+#
+# [rerdoc]
+# Rebuild the rdoc files from scratch, even if they are not out of date.
+#
+# Simple Example:
+#
+# require 'rdoc/task'
+#
+# RDoc::Task.new do |rdoc|
+# rdoc.main = "README.rdoc"
+# rdoc.rdoc_files.include("README.rdoc", "lib/**/*.rb")
+# end
+#
+# The +rdoc+ object passed to the block is an RDoc::Task object. See the
+# attributes list for the RDoc::Task class for available customization options.
+#
+# == Specifying different task names
+#
+# You may wish to give the task a different name, such as if you are
+# generating two sets of documentation.  For instance, if you want to have a
+# development set of documentation including private methods:
+#
+# require 'rdoc/task'
+#
+# RDoc::Task.new :rdoc_dev do |rdoc|
+# rdoc.main = "README.doc"
+# rdoc.rdoc_files.include("README.rdoc", "lib/**/*.rb")
+# rdoc.options << "--all"
+# end
+#
+# The tasks would then be named :<em>rdoc_dev</em>,
+# :clobber_<em>rdoc_dev</em>, and :re<em>rdoc_dev</em>.
+#
+# If you wish to have completely different task names, then pass a Hash as
+# first argument. With the <tt>:rdoc</tt>, <tt>:clobber_rdoc</tt> and
+# <tt>:rerdoc</tt> options, you can customize the task names to your liking.
+#
+# For example:
+#
+# require 'rdoc/task'
+#
+# RDoc::Task.new(:rdoc => "rdoc", :clobber_rdoc => "rdoc:clean",
+# :rerdoc => "rdoc:force")
+#
+# This will create the tasks <tt>:rdoc</tt>, <tt>:rdoc:clean</tt> and
+# <tt>:rdoc:force</tt>.
+class RDoc::Task < ::Rake::TaskLib
+  # Create an RDoc task with the given name. See the RDoc::Task class overview
+  # for documentation.
+  def initialize(name = T.unsafe(nil)); end
+
+  # The block passed to this method will be called just before running the
+  # RDoc generator. It is allowed to modify RDoc::Task attributes inside the
+  # block.
+  def before_running_rdoc(&block); end
+
+  # Ensures that +names+ only includes names for the :rdoc, :clobber_rdoc and
+  # :rerdoc.  If other names are given an ArgumentError is raised.
+  def check_names(names); end
+
+  # Task description for the clobber rdoc task or its renamed equivalent
+  def clobber_task_description; end
+
+  # Sets default task values
+  def defaults; end
+
+  # Create the tasks defined by this task lib.
+  def define; end
+
+  # Whether to run the rdoc process as an external shell (default is false)
+  def external; end
+
+  # Whether to run the rdoc process as an external shell (default is false)
+  def external=(_arg0); end
+
+  # Name of format generator (<tt>--format</tt>) used by rdoc. (defaults to
+  # rdoc's default)
+  def generator; end
+
+  # Name of format generator (<tt>--format</tt>) used by rdoc. (defaults to
+  # rdoc's default)
+  def generator=(_arg0); end
+
+  # All source is inline now.  This method is deprecated
+  def inline_source; end
+
+  # All source is inline now.  This method is deprecated
+  def inline_source=(value); end
+
+  # Name of file to be used as the main, top level file of the RDoc. (default
+  # is none)
+  def main; end
+
+  # Name of file to be used as the main, top level file of the RDoc. (default
+  # is none)
+  def main=(_arg0); end
+
+  # Comment markup format.  rdoc, rd and tomdoc are supported.  (default is
+  # 'rdoc')
+  def markup; end
+
+  # Comment markup format.  rdoc, rd and tomdoc are supported.  (default is
+  # 'rdoc')
+  def markup=(_arg0); end
+
+  # Name of the main, top level task.  (default is :rdoc)
+  def name; end
+
+  # Name of the main, top level task.  (default is :rdoc)
+  def name=(_arg0); end
+
+  # List of options that will be supplied to RDoc
+  def option_list; end
+
+  # Additional list of options to be passed rdoc.  (default is [])
+  def options; end
+
+  # Additional list of options to be passed rdoc.  (default is [])
+  def options=(_arg0); end
+
+  # Name of directory to receive the html output files. (default is "html")
+  def rdoc_dir; end
+
+  # Name of directory to receive the html output files. (default is "html")
+  def rdoc_dir=(_arg0); end
+
+  # List of files to be included in the rdoc generation. (default is [])
+  def rdoc_files; end
+
+  # List of files to be included in the rdoc generation. (default is [])
+  def rdoc_files=(_arg0); end
+
+  # Task description for the rdoc task or its renamed equivalent
+  def rdoc_task_description; end
+
+  # Task description for the rerdoc task or its renamed description
+  def rerdoc_task_description; end
+
+  # Name of template to be used by rdoc. (defaults to rdoc's default)
+  def template; end
+
+  # Name of template to be used by rdoc. (defaults to rdoc's default)
+  def template=(_arg0); end
+
+  # Title of RDoc documentation. (defaults to rdoc's default)
+  def title; end
+
+  # Title of RDoc documentation. (defaults to rdoc's default)
+  def title=(_arg0); end
+
+  private
+
+  def clobber_task_name; end
+  def rdoc_target; end
+  def rdoc_task_name; end
+  def rerdoc_task_name; end
+end
+
 # Methods for manipulating comment text
 module RDoc::Text
   # Maps markup formats to classes that can parse them. If the format is
