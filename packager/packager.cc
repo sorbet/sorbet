@@ -585,6 +585,31 @@ public:
         return original;
     }
 
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr original) {
+        auto &def = ast::cast_tree_nonnull<ast::MethodDef>(original);
+        checkBehaviorLoc(ctx, def.declLoc);
+        return original;
+    }
+
+    ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr original) {
+        checkBehaviorLoc(ctx, original.loc());
+        return original;
+    }
+
+    void checkBehaviorLoc(core::Context ctx, core::LocOffsets loc) {
+        if (rootConsts > 0 || nameParts.empty()) {
+            return;
+        }
+        auto &pkgName = requiredNamespace(ctx.state);
+        if (!isPrefix(pkgName, nameParts)) {
+            if (auto e = ctx.beginError(loc, core::errors::Packager::DefinitionPackageMismatch)) {
+                e.setHeader(
+                    "Behavior may not be defined outside of the enclosing package namespace `{}`",
+                    fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx); }));
+            }
+        }
+    }
+
 private:
     void pushConstantLit(ast::UnresolvedConstantLit *lit) {
         auto oldLen = nameParts.size();
