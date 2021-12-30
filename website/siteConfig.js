@@ -37,6 +37,11 @@ const users = [
     infoLink: 'https://factorialhr.com/',
   },
   {
+    caption: 'Flexport',
+    image: 'img/flexport-logo.jpg',
+    infoLink: 'https://flexport.com/',
+  },
+  {
     caption: 'Grailed',
     image: 'img/grailed-logo.png',
     infoLink: 'https://www.grailed.com/',
