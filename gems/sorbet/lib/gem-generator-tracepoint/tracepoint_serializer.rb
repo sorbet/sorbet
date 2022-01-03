@@ -220,13 +220,7 @@ module Sorbet::Private
           location&.match(/^.*\/(jruby)-([\d.]+)\//) || # jvm ruby stdlib
           location&.match(/^.*\/(site_ruby)\/([\d.]+)\//) # rubygems
         if match.nil?
-          # uncomment to generate files for methods outside of gems
-          # {
-          #   path: location,
-          #   gem: location.gsub(/[\/\.]/, '_'),
-          #   version: '1.0.0',
-          # }
-          nil
+          match_via_bundler_specs(location)
         else
           {
             path: match[0],
@@ -261,6 +255,44 @@ module Sorbet::Private
         string = symbol.to_s
         return true if SPECIAL_METHOD_NAMES.include?(string)
         string =~ /^[[:word:]]+[?!=]?$/
+      end
+
+      def match_via_bundler_specs(location)
+        @bundler_specs ||= begin
+          require 'bundler'
+          begin
+            Bundler.load.specs.map do |spec|
+              spec.load_paths.map do |path|
+                [path, [spec.name, spec.version.to_s]]
+              end
+            end.flatten(1).to_h
+          rescue Bundler::BundlerError # bail out on any bundler error
+            {}
+          end
+        rescue LoadError # bundler can't be loaded, abort!
+          {}
+        end
+
+        path_to_find = Pathname.new(location)
+        parent_path, (gem_name, gem_version) = @bundler_specs.detect do |path, _gem|
+          path_to_find.fnmatch?(File.join(path, '**'))
+        end
+
+        if parent_path.nil? || gem_name.nil? || gem_version.nil?
+          # uncomment to generate files for methods outside of gems
+          # {
+          #   path: location,
+          #   gem: location.gsub(/[\/\.]/, '_'),
+          #   version: '1.0.0',
+          # }
+          nil
+        else
+          {
+            path: location,
+            gem: gem_name,
+            version: gem_version,
+          }
+        end
       end
     end
   end
