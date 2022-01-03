@@ -12,7 +12,7 @@
             <url>https://sorbet.org/img/sorbet-logo-white-sparkles.svg</url>
             <link>https://sorbet.org/blog</link>
         </image>
-        <copyright>© 2021 Stripe</copyright>
+        <copyright>© 2022 Stripe</copyright>
         <item>
             <title><![CDATA[Sorbet Compiler: An experimental, ahead-of-time compiler for Ruby]]></title>
             <link>https://sorbet.org/blog/2021/07/30/open-sourcing-sorbet-compiler.html</link>

@@ -7,7 +7,7 @@
     <link rel="alternate" href="https://sorbet.org/blog"/>
     <subtitle>The best place to stay up-to-date with the latest Sorbet news and events.</subtitle>
     <logo>https://sorbet.org/img/sorbet-logo-white-sparkles.svg</logo>
-    <rights>© 2021 Stripe</rights>
+    <rights>© 2022 Stripe</rights>
     <entry>
         <title type="html"><![CDATA[Sorbet Compiler: An experimental, ahead-of-time compiler for Ruby]]></title>
         <id>https://sorbet.org/blog/2021/07/30/open-sourcing-sorbet-compiler.html</id>
