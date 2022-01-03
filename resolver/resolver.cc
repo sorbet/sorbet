@@ -142,10 +142,6 @@ private:
         const AncestorResolutionItem &operator=(const AncestorResolutionItem &rhs) = delete;
     };
 
-    struct AncestorResolutionItems {
-        vector<AncestorResolutionItem> items;
-    };
-
     struct ClassAliasResolutionItem {
         core::SymbolRef lhs;
         ast::ConstantLit *rhs;
