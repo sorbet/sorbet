@@ -1378,10 +1378,21 @@ end
 module Jacobian
 
   # Computes the derivative of `f` at `x`. `fx` is the value of `f` at `x`.
+  def dfdxi(f, fx, x, i); end
+
+  # Computes the derivative of `f` at `x`. `fx` is the value of `f` at `x`.
   def self.dfdxi(f, fx, x, i); end
 
   # Determines the equality of two numbers by comparing to zero, or using the epsilon value
+  def isEqual(a, b, zero = 0.0, e = _); end
+
+  # Determines the equality of two numbers by comparing to zero, or using the epsilon value
   def self.isEqual(a, b, zero = 0.0, e = _); end
+
+  # Computes the
+  # [`Jacobian`](https://docs.ruby-lang.org/en/2.6.0/Jacobian.html)
+  # of `f` at `x`. `fx` is the value of `f` at `x`.
+  def jacobian(f, fx, x); end
 
   # Computes the
   # [`Jacobian`](https://docs.ruby-lang.org/en/2.6.0/Jacobian.html)
@@ -1392,7 +1403,18 @@ end
 # Solves a\*x = b for x, using LU decomposition.
 module LUSolve
   # Performs LU decomposition of the `n` by `n` matrix `a`.
+  def ludecomp(a, n, zero = 0, one = 1); end
+
+  # Performs LU decomposition of the `n` by `n` matrix `a`.
   def self.ludecomp(a, n, zero = 0, one = 1); end
+
+  # Solves `a*x = b` for `x`, using LU decomposition.
+  #
+  # `a` is a matrix, `b` is a constant vector, `x` is the solution vector.
+  #
+  # `ps` is the pivot, a vector which indicates the permutation of rows
+  # performed during LU decomposition.
+  def lusolve(a, b, ps, zero = 0.0); end
 
   # Solves `a*x = b` for `x`, using LU decomposition.
   #
@@ -1443,7 +1465,11 @@ module Newton
   include(::Jacobian)
   include(::LUSolve)
 
+  def nlsolve(f, x); end
+
   def self.nlsolve(f, x); end
+
+  def norm(fv, zero = _); end
 
   def self.norm(fv, zero = _); end
 end
