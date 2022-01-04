@@ -1232,21 +1232,23 @@ private:
                 //                               ^^^  jump to actual definition of `Baz` class
 
                 // Ensure import's do not add duplicate loc-s in the test_module
-                const auto &moduleLoc = [](auto &source, auto packageLoc) {
-                    // normal or test import
-                    if (source.isTestImport() || source.isNormalImport()) {
-                        return source.isEnumeratedImport ? source.importLoc : core::LocOffsets::none();
-                    }
-
-                    // friend import
-                    return packageLoc->offsets();
-                }(source, packageLoc);
+                const auto &moduleLoc = getModuleLoc(source, packageLoc);
 
                 auto mod = ast::MK::Module(core::LocOffsets::none(), moduleLoc,
                                            importModuleName(parts, moduleLoc, moduleType), {}, std::move(rhs));
                 modRhs.emplace_back(std::move(mod));
             }
         }
+    }
+
+    const core::LocOffsets getModuleLoc(ImportTree::Source &source, const core::Loc *packageLoc) {
+        // normal or test import
+        if (source.isTestImport() || source.isNormalImport()) {
+            return source.isEnumeratedImport ? source.importLoc : core::LocOffsets::none();
+        }
+
+        // friend import
+        return packageLoc->offsets();
     }
 
     // Create an error that occurs if a package imports two names where one is a prefix of another. This is disallowed,
