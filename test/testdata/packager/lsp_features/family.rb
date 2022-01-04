@@ -11,7 +11,6 @@ module Simpsons
       sig {returns(String)}
       def son_catchphrase
           Bart::CatchPhrase
-      #   ^^^^ usage: bart
       #   ^^^^ hover: T.class_of(Bart)
       #   ^    show-symbol: Bart
           #     ^^^^^^^^^^^ usage: catchphrase
@@ -20,11 +19,9 @@ module Simpsons
       end
 
       sig {returns(Bart::Character)}
-      #            ^^^^ usage: bart
       #                  ^^^^^^^^^ usage: character
       def son
           Bart::Character.new
-      #   ^^^^ usage: bart
           #     ^^^^^^^^^ usage: character
           #     ^^^^^^^^^ hover: T.class_of(Bart::Character)
           #     ^         show-symbol: Bart::Character
@@ -32,7 +29,6 @@ module Simpsons
           #               ^^^ hover: Description of Character initialize
           Bart::C # error: Unable to resolve constant `C`
           #      ^ completion: CatchPhrase, Character
-      #   ^^^^ usage: bart
       end
   end
 
