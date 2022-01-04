@@ -501,12 +501,6 @@ int realmain(int argc, char *argv[]) {
             gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
         }
     }
-    if (!opts.reportAmbiguousDefinitionErrors) {
-        // TODO (aadi-stripe, 1/16/2022): Determine whether this error should always be reported.
-        if (opts.isolateErrorCode.empty()) {
-            gs->suppressErrorClass(core::errors::Resolver::AmbiguousDefinitionError.code);
-        }
-    }
     if (opts.suggestTyped) {
         gs->ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);
         gs->ignoreErrorClassForSuggestTyped(core::errors::Resolver::SigInFileWithoutSigil.code);

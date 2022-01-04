@@ -157,7 +157,6 @@ struct Options {
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
-    bool reportAmbiguousDefinitionErrors = false;
     bool stripeMode = false;
     bool stripePackages = false;
     std::vector<std::string> extraPackageFilesDirectoryPrefixes;

@@ -329,7 +329,6 @@ TEST_CASE("LSPTest") {
             }
             opts->secondaryTestPackageNamespaces.emplace_back("Critic");
         }
-        opts->reportAmbiguousDefinitionErrors = true;
         // Set to a number that is reasonable large for tests, but small enough that we can have a test to handle this
         // edge case. If you change this number, update the `lsp/fast_path/too_many_files` and `not_enough_files` tests.
         opts->lspMaxFilesOnFastPath = 10;
