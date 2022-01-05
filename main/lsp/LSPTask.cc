@@ -11,6 +11,95 @@
 namespace sorbet::realmain::lsp {
 using namespace std;
 
+namespace {
+
+// Enum used for tracking success/failure for requests. Basically only used to increment the
+// respective counter
+enum class ResponseMessageStatus {
+    // Unknown status (will not increment any counter)
+    Unknown = 0,
+    // Request errored, and returned a RPC error (ResponseMessage::error)
+    Errored,
+    // Request succeeded, but return a known "empty" result for that response type.
+    // (This could be a null result, an empty list, etc. depending on the response type)
+    EmptyResult,
+    // Request succeeded, and returned a meaningful result.
+    Succeeded,
+};
+
+ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
+    if (response.error.has_value()) {
+        ENFORCE(response.error.value() != nullptr);
+        return ResponseMessageStatus::Errored;
+    } else if (response.result.has_value()) {
+        return visit(
+            [](auto &&res) -> ResponseMessageStatus {
+                using T = decay_t<decltype(res)>;
+                if constexpr (is_same_v<T, unique_ptr<SorbetCounters>>) {
+                    // __GETCOUNTERS__
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, unique_ptr<InitializeResult>>) {
+                    // initialize
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, JSONNullObject>) {
+                    // shutdown
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, vector<unique_ptr<DocumentHighlight>>>>) {
+                    // textDocument/documentHighlight
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>) {
+                    // textDocument/documentSymbol
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, vector<unique_ptr<Location>>>>) {
+                    // textDocument/definition, textDocument/typeDefinition, textDocument/references, and
+                    // textDocument/implementation
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, unique_ptr<Hover>>>) {
+                    // textDocument/hover
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, unique_ptr<CompletionList>>) {
+                    // textDocument/completion
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, unique_ptr<PrepareRenameResult>>>) {
+                    // textDocument/prepareRename
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, unique_ptr<WorkspaceEdit>>>) {
+                    // textDocument/rename
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, unique_ptr<SignatureHelp>>>) {
+                    // textDocument/signatureHelp
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, vector<unique_ptr<TextEdit>>>>) {
+                    // textDocument/formatting
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>) {
+                    // textDocument/codeAction
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, vector<unique_ptr<SymbolInformation>>>>) {
+                    // workspace/symbol
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, unique_ptr<SorbetErrorParams>>) {
+                    // sorbet/error
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, unique_ptr<TextDocumentItem>>) {
+                    // sorbet/readFile
+                    return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, std::unique_ptr<SymbolInformation>>>) {
+                    // sorbet/showSymbol
+                    return ResponseMessageStatus::Unknown;
+                } else {
+                    static_assert(always_false_v<T>, "non-exhaustive visitor!");
+                }
+            },
+            response.result.value());
+    } else {
+        ENFORCE(false, "ResponseMessage should have had eithe error or result set");
+        return ResponseMessageStatus::Unknown;
+    }
+}
+
+} // namespace
+
 LSPTask::LSPTask(const LSPConfiguration &config, LSPMethod method) : config(config), method(method) {}
 
 LSPTask::~LSPTask() {
@@ -104,6 +193,21 @@ LSPRequestTask::LSPRequestTask(const LSPConfiguration &config, MessageId id, LSP
 void LSPRequestTask::run(LSPTypecheckerDelegate &typechecker) {
     auto response = runRequest(typechecker);
     ENFORCE(response != nullptr);
+
+    switch (statusForResponse(*response)) {
+        case ResponseMessageStatus::Unknown:
+            break;
+        case ResponseMessageStatus::Errored:
+            prodCategoryCounterInc("lsp.messages.run.errored", methodString());
+            break;
+        case ResponseMessageStatus::EmptyResult:
+            prodCategoryCounterInc("lsp.messages.run.emptyresult", methodString());
+            break;
+        case ResponseMessageStatus::Succeeded:
+            prodCategoryCounterInc("lsp.messages.run.succeeded", methodString());
+            break;
+    }
+
     config.output->write(move(response));
 }
 
