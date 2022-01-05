@@ -625,7 +625,13 @@ int realmain(int argc, char *argv[]) {
             // The trick there is that they would all currently output to the same file, even for
             // multiple input files if we assume the naive implementation, which might not be the
             // API we want to expose.
-            Minimize::indexAndResolveForMinimize(gs, gsForMinimize, opts, *workers, opts.minimizeRBI);
+
+            auto optsForMinimize = opts.clone();
+            // Explicitly turn off the packager, because it doesn't make sense when the whole
+            // project is a single RBI file.
+            optsForMinimize.stripePackages = false;
+
+            Minimize::indexAndResolveForMinimize(gs, gsForMinimize, optsForMinimize, *workers, opts.minimizeRBI);
             Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
 #endif
         }
