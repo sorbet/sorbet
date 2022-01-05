@@ -231,10 +231,8 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
     vector<core::FileRef> frefs;
     {
         core::UnfreezeFileTable fileTableAccess(*initialGS);
-        int i = -1;
         for (auto &file : update.updatedFiles) {
             auto fref = initialGS->findFileByPath(file->path());
-            i++;
             if (fref.exists()) {
                 newlyEvictedFiles[fref] = initialGS->getFiles()[fref.id()];
                 initialGS = core::GlobalState::replaceFile(move(initialGS), fref, file);
