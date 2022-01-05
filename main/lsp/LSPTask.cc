@@ -35,6 +35,8 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
         return visit(
             [](auto &&res) -> ResponseMessageStatus {
                 using T = decay_t<decltype(res)>;
+                // Note: Many of these are Unknown just out of laziness / not needing or wanting to
+                // track them. Feel free to implement any case here more sensibly.
                 if constexpr (is_same_v<T, unique_ptr<SorbetCounters>>) {
                     // __GETCOUNTERS__
                     return ResponseMessageStatus::Unknown;
@@ -53,10 +55,16 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
                 } else if constexpr (is_same_v<T, variant<JSONNullObject, vector<unique_ptr<Location>>>>) {
                     // textDocument/definition, textDocument/typeDefinition, textDocument/references, and
                     // textDocument/implementation
-                    return ResponseMessageStatus::Unknown;
+                    if (const auto *locationsPtr = get_if<vector<unique_ptr<Location>>>(&res)) {
+                        return locationsPtr->empty() ? ResponseMessageStatus::EmptyResult
+                                                     : ResponseMessageStatus::Succeeded;
+                    } else {
+                        return ResponseMessageStatus::EmptyResult;
+                    }
                 } else if constexpr (is_same_v<T, variant<JSONNullObject, unique_ptr<Hover>>>) {
                     // textDocument/hover
-                    return ResponseMessageStatus::Unknown;
+                    return holds_alternative<JSONNullObject>(res) ? ResponseMessageStatus::EmptyResult
+                                                                  : ResponseMessageStatus::Succeeded;
                 } else if constexpr (is_same_v<T, unique_ptr<CompletionList>>) {
                     // textDocument/completion
                     return res->items.empty() ? ResponseMessageStatus::EmptyResult : ResponseMessageStatus::Succeeded;
@@ -86,7 +94,8 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
                     return ResponseMessageStatus::Unknown;
                 } else if constexpr (is_same_v<T, variant<JSONNullObject, std::unique_ptr<SymbolInformation>>>) {
                     // sorbet/showSymbol
-                    return ResponseMessageStatus::Unknown;
+                    return holds_alternative<JSONNullObject>(res) ? ResponseMessageStatus::EmptyResult
+                                                                  : ResponseMessageStatus::Succeeded;
                 } else {
                     static_assert(always_false_v<T>, "non-exhaustive visitor!");
                 }
