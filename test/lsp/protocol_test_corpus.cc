@@ -566,7 +566,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "RequestReportsEmptyResultsMetrics") {
                                                "def foo; end\n"
                                                "end\n"
                                                "A.new.fo\n"
-                                               "A.new.no_completion_results\n")),
+                                               "A.new.no_completion_results\n"
+                                               "A.new.foo\n"
+                                               "\n")),
                       {
                           {"foo.rb", 4, "does not exist"},
                           {"foo.rb", 5, "does not exist"},
@@ -592,6 +594,24 @@ TEST_CASE_FIXTURE(ProtocolTest, "RequestReportsEmptyResultsMetrics") {
     CHECK_EQ(counters2.getCategoryCounter("lsp.messages.run.succeeded", "textDocument.completion"), 0);
     CHECK_EQ(counters2.getCategoryCounter("lsp.messages.run.emptyresult", "textDocument.completion"), 1);
     CHECK_EQ(counters2.getCategoryCounter("lsp.messages.run.errored", "textDocument.completion"), 0);
+
+    send(*getDefinition("foo.rb", 6, 7));
+
+    auto counters3 = getCounters();
+    CHECK_EQ(counters3.getCategoryCounter("lsp.messages.processed", "textDocument.definition"), 1);
+    CHECK_EQ(counters3.getCategoryCounter("lsp.messages.canceled", "textDocument.definition"), 0);
+    CHECK_EQ(counters3.getCategoryCounter("lsp.messages.run.succeeded", "textDocument.definition"), 1);
+    CHECK_EQ(counters3.getCategoryCounter("lsp.messages.run.emptyresult", "textDocument.definition"), 0);
+    CHECK_EQ(counters3.getCategoryCounter("lsp.messages.run.errored", "textDocument.definition"), 0);
+
+    send(*getDefinition("foo.rb", 5, 7));
+
+    auto counters4 = getCounters();
+    CHECK_EQ(counters4.getCategoryCounter("lsp.messages.processed", "textDocument.definition"), 1);
+    CHECK_EQ(counters4.getCategoryCounter("lsp.messages.canceled", "textDocument.definition"), 0);
+    CHECK_EQ(counters4.getCategoryCounter("lsp.messages.run.succeeded", "textDocument.definition"), 0);
+    CHECK_EQ(counters4.getCategoryCounter("lsp.messages.run.emptyresult", "textDocument.definition"), 1);
+    CHECK_EQ(counters4.getCategoryCounter("lsp.messages.run.errored", "textDocument.definition"), 0);
 }
 
 } // namespace sorbet::test::lsp
