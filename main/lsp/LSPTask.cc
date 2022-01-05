@@ -63,8 +63,13 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
                     }
                 } else if constexpr (is_same_v<T, variant<JSONNullObject, unique_ptr<Hover>>>) {
                     // textDocument/hover
-                    return holds_alternative<JSONNullObject>(res) ? ResponseMessageStatus::EmptyResult
-                                                                  : ResponseMessageStatus::Succeeded;
+                    if (const auto *hoverPtr = get_if<unique_ptr<Hover>>(&res)) {
+                        auto &hover = *hoverPtr;
+                        return hover->contents->value.empty() ? ResponseMessageStatus::EmptyResult
+                                                              : ResponseMessageStatus::Succeeded;
+                    } else {
+                        return ResponseMessageStatus::EmptyResult;
+                    }
                 } else if constexpr (is_same_v<T, unique_ptr<CompletionList>>) {
                     // textDocument/completion
                     return res->items.empty() ? ResponseMessageStatus::EmptyResult : ResponseMessageStatus::Succeeded;

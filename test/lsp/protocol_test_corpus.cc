@@ -568,6 +568,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "RequestReportsEmptyResultsMetrics") {
                                                "A.new.fo\n"
                                                "A.new.no_completion_results\n"
                                                "A.new.foo\n"
+                                               "T.unsafe(nil).foo\n"
                                                "\n")),
                       {
                           {"foo.rb", 4, "does not exist"},
@@ -612,6 +613,24 @@ TEST_CASE_FIXTURE(ProtocolTest, "RequestReportsEmptyResultsMetrics") {
     CHECK_EQ(counters4.getCategoryCounter("lsp.messages.run.succeeded", "textDocument.definition"), 0);
     CHECK_EQ(counters4.getCategoryCounter("lsp.messages.run.emptyresult", "textDocument.definition"), 1);
     CHECK_EQ(counters4.getCategoryCounter("lsp.messages.run.errored", "textDocument.definition"), 0);
+
+    send(*hover("foo.rb", 6, 7));
+
+    auto counters5 = getCounters();
+    CHECK_EQ(counters5.getCategoryCounter("lsp.messages.processed", "textDocument.hover"), 1);
+    CHECK_EQ(counters5.getCategoryCounter("lsp.messages.canceled", "textDocument.hover"), 0);
+    CHECK_EQ(counters5.getCategoryCounter("lsp.messages.run.succeeded", "textDocument.hover"), 1);
+    CHECK_EQ(counters5.getCategoryCounter("lsp.messages.run.emptyresult", "textDocument.hover"), 0);
+    CHECK_EQ(counters5.getCategoryCounter("lsp.messages.run.errored", "textDocument.hover"), 0);
+
+    send(*hover("foo.rb", 7, 16));
+
+    auto counters6 = getCounters();
+    CHECK_EQ(counters6.getCategoryCounter("lsp.messages.processed", "textDocument.hover"), 1);
+    CHECK_EQ(counters6.getCategoryCounter("lsp.messages.canceled", "textDocument.hover"), 0);
+    CHECK_EQ(counters6.getCategoryCounter("lsp.messages.run.succeeded", "textDocument.hover"), 0);
+    CHECK_EQ(counters6.getCategoryCounter("lsp.messages.run.emptyresult", "textDocument.hover"), 1);
+    CHECK_EQ(counters6.getCategoryCounter("lsp.messages.run.errored", "textDocument.hover"), 0);
 }
 
 } // namespace sorbet::test::lsp
