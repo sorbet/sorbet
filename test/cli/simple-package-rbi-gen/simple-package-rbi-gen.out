@@ -1,0 +1,9 @@
+No errors! Great job.
+# typed: true
+
+class ::Project::Foo::FooClass
+  extend ::T::Sig
+  def dynamically_defined_method(); end
+  def initialize(value); end
+end
+

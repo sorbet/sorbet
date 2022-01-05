@@ -248,15 +248,20 @@ struct Options {
 
     void flushPrinters();
 
-    Options() = default;
+    Options clone() {
+        Options options(*this);
+        return options;
+    };
 
-    Options(const Options &) = delete;
+    Options() = default;
 
     Options(Options &&) = default;
 
-    Options &operator=(const Options &) = delete;
-
     Options &operator=(Options &&) = delete;
+
+private:
+    Options(const Options &) = default;
+    Options &operator=(const Options &) = default;
 };
 
 void readOptions(
