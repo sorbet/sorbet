@@ -64,14 +64,7 @@ LSPIndexer::~LSPIndexer() {
 
 void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files, WorkerPool &workers) const {
     // Fast abort if all files have hashes.
-    bool allFilesHaveHashes = true;
-    for (const auto &f : files) {
-        if (f != nullptr && f->getFileHash() == nullptr) {
-            allFilesHaveHashes = false;
-            break;
-        }
-    }
-    if (allFilesHaveHashes) {
+    if (absl::c_all_of(files, [](const auto &f) { return f == nullptr || f->getFileHash() != nullptr; })) {
         return;
     }
 
