@@ -24,10 +24,6 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
         gs.suppressErrorClass(sorbet::core::errors::Namer::MultipleBehaviorDefs.code);
     }
 
-    if (!options.reportAmbiguousDefinitionErrors) {
-        gs.suppressErrorClass(sorbet::core::errors::Resolver::AmbiguousDefinitionError.code);
-    }
-
     gs.requiresAncestorEnabled = options.requiresAncestorEnabled;
 
     // Ensure LSP is enabled.

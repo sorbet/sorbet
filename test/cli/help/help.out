@@ -134,8 +134,6 @@ Usage:
                                 that understand them.
       --no-error-count          Do not print the error count summary line
       --autogen-version arg     Autogen version to output
-      --report-ambiguous-definitions
-                                Enable ambiguous definition error enforcement
       --stripe-mode             Enable Stripe specific error enforcement
       --stripe-packages         Enable support for Stripe's internal Ruby
                                 package system

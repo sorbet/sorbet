@@ -353,8 +353,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         cxxopts::value<vector<string>>(), "string");
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
-    options.add_options("advanced")("report-ambiguous-definitions", "Enable ambiguous definition error enforcement",
-                                    cxxopts::value<bool>());
     options.add_options("advanced")("stripe-mode", "Enable Stripe specific error enforcement", cxxopts::value<bool>());
     options.add_options("advanced")("stripe-packages", "Enable support for Stripe's internal Ruby package system",
                                     cxxopts::value<bool>());
@@ -876,7 +874,6 @@ void readOptions(Options &opts,
             }
             opts.autogenVersion = raw["autogen-version"].as<int>();
         }
-        opts.reportAmbiguousDefinitionErrors = raw["report-ambiguous-definitions"].as<bool>();
         opts.stripeMode = raw["stripe-mode"].as<bool>();
         opts.stripePackages = raw["stripe-packages"].as<bool>();
         if (raw.count("extra-package-files-directory-prefix")) {
