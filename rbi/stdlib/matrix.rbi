@@ -129,12 +129,12 @@ class Vector
   # [`Vector`](https://docs.ruby-lang.org/en/2.7.0/Vector.html) addition.
   def +(x); end
 
-  def +@(x); end
+  def +@; end
 
   # [`Vector`](https://docs.ruby-lang.org/en/2.7.0/Vector.html) subtraction.
   def -(x); end
 
-  def -@(x); end
+  def -@; end
 
   # [`Vector`](https://docs.ruby-lang.org/en/2.7.0/Vector.html) division.
   def /(x); end
