@@ -770,7 +770,7 @@ void CompletionTask::findSimilarConstants(const core::GlobalState &gs, const cor
     }
 }
 
-unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
+unique_ptr<ResponseMessage> CompletionTask::runRequestImpl(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
     auto emptyResult = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
 
@@ -885,6 +885,30 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
 
     response->result = make_unique<CompletionList>(false, move(items));
     return response;
+}
+
+unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
+    auto result = runRequestImpl(typechecker);
+
+    if (result->result.has_value()) {
+        if (const auto *completionListPtr = get_if<unique_ptr<CompletionList>>(&result->result.value())) {
+            const auto &completionList = *completionListPtr;
+            if (completionList != nullptr && !completionList->items.empty()) {
+                prodCategoryCounterInc("lsp.messages.run.succeeded", methodString());
+            } else {
+                prodCategoryCounterInc("lsp.messages.run.emptyresult", methodString());
+            }
+        } else {
+            ENFORCE(false, "got wrong result variant for completion task");
+        }
+    } else if (result->error.has_value()) {
+        prodCategoryCounterInc("lsp.messages.run.errored", methodString());
+    } else {
+        ENFORCE(result->error.has_value() || result->result.has_value(),
+                "Neither result nor error were set on completion task result");
+    }
+
+    return result;
 }
 
 } // namespace sorbet::realmain::lsp

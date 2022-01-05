@@ -24,6 +24,9 @@ std::unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, 
 /** Create an LSPMessage containing a textDocument/hover request. */
 std::unique_ptr<LSPMessage> makeHover(int id, std::string_view uri, int line, int character);
 
+/** Create an LSPMessage containing a textDocument/completion request. */
+std::unique_ptr<LSPMessage> makeCompletion(int id, std::string_view uri, int line, int character);
+
 /** Create an LSPMessage containing a WorkspaceSymbol request. */
 std::unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query);
 

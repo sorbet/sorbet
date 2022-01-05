@@ -20,6 +20,8 @@ class CompletionTask final : public LSPRequestTask {
                                                                core::Loc queryLoc, std::string_view prefix,
                                                                size_t sortIdx, uint16_t totalArgs) const;
 
+    std::unique_ptr<ResponseMessage> runRequestImpl(LSPTypecheckerDelegate &typechecker);
+
 public:
     CompletionTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<CompletionParams> params);
 
