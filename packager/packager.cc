@@ -518,12 +518,16 @@ public:
             return tree;
         }
 
-        auto &constantLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
-        pushConstantLit(&constantLit);
+        ast::UnresolvedConstantLit *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
+        if (constantLit == nullptr) {
+            return tree;
+        }
+
+        pushConstantLit(constantLit);
         auto &pkgName = requiredNamespace(ctx.state);
 
         if (rootConsts == 0 && !sharesPrefix(pkgName, nameParts)) {
-            if (auto e = ctx.beginError(constantLit.loc, core::errors::Packager::DefinitionPackageMismatch)) {
+            if (auto e = ctx.beginError(constantLit->loc, core::errors::Packager::DefinitionPackageMismatch)) {
                 e.setHeader(
                     "Class or method definition must match enclosing package namespace `{}`",
                     fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx); }));
@@ -542,11 +546,17 @@ public:
             ENFORCE(skipPush == 0);
             return tree;
         }
-        auto *constantLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
+
         if (skipPush > 0) {
             skipPush--;
             return tree;
         }
+
+        ast::UnresolvedConstantLit *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
+        if (constantLit == nullptr) {
+            return tree;
+        }
+
         popConstantLit(constantLit);
         return tree;
     }
