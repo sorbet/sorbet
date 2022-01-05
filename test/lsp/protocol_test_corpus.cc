@@ -556,4 +556,42 @@ TEST_CASE_FIXTURE(ProtocolTest, "DoesNotCrashOnNonWorkspaceURIs") {
     getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(move(didOpenNotif)));
 }
 
+// Tests that Sorbet reports metrics about the request's response status for certain requests
+TEST_CASE_FIXTURE(ProtocolTest, "RequestReportsEmptyResultsMetrics") {
+    assertDiagnostics(initializeLSP(), {});
+
+    // Create a new file.
+    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                               "class A\n"
+                                               "def foo; end\n"
+                                               "end\n"
+                                               "A.new.fo\n"
+                                               "A.new.no_completion_results\n")),
+                      {
+                          {"foo.rb", 4, "does not exist"},
+                          {"foo.rb", 5, "does not exist"},
+                      });
+
+    // clear counters
+    getCounters();
+
+    send(*completion("foo.rb", 4, 8));
+
+    auto counters1 = getCounters();
+    CHECK_EQ(counters1.getCategoryCounter("lsp.messages.processed", "textDocument.completion"), 1);
+    CHECK_EQ(counters1.getCategoryCounter("lsp.messages.canceled", "textDocument.completion"), 0);
+    CHECK_EQ(counters1.getCategoryCounter("lsp.messages.run.succeeded", "textDocument.completion"), 1);
+    CHECK_EQ(counters1.getCategoryCounter("lsp.messages.run.emptyresult", "textDocument.completion"), 0);
+    CHECK_EQ(counters1.getCategoryCounter("lsp.messages.run.errored", "textDocument.completion"), 0);
+
+    send(*completion("foo.rb", 5, 27));
+
+    auto counters2 = getCounters();
+    CHECK_EQ(counters2.getCategoryCounter("lsp.messages.processed", "textDocument.completion"), 1);
+    CHECK_EQ(counters2.getCategoryCounter("lsp.messages.canceled", "textDocument.completion"), 0);
+    CHECK_EQ(counters2.getCategoryCounter("lsp.messages.run.succeeded", "textDocument.completion"), 0);
+    CHECK_EQ(counters2.getCategoryCounter("lsp.messages.run.emptyresult", "textDocument.completion"), 1);
+    CHECK_EQ(counters2.getCategoryCounter("lsp.messages.run.errored", "textDocument.completion"), 0);
+}
+
 } // namespace sorbet::test::lsp
