@@ -1824,9 +1824,7 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         vector<TypePtr> elems;
         elems.reserve(args.args.size());
-        int i = -1;
         for (auto &elem : args.args) {
-            ++i;
             elems.emplace_back(elem->type);
         }
 
