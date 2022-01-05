@@ -59,7 +59,7 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
                     return ResponseMessageStatus::Unknown;
                 } else if constexpr (is_same_v<T, unique_ptr<CompletionList>>) {
                     // textDocument/completion
-                    return ResponseMessageStatus::Unknown;
+                    return res->items.empty() ? ResponseMessageStatus::EmptyResult : ResponseMessageStatus::Succeeded;
                 } else if constexpr (is_same_v<T, variant<JSONNullObject, unique_ptr<PrepareRenameResult>>>) {
                     // textDocument/prepareRename
                     return ResponseMessageStatus::Unknown;
