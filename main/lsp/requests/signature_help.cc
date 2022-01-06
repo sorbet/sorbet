@@ -69,42 +69,42 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
-    } else {
-        auto &queryResponses = result.responses;
-        int activeParameter = -1;
-        vector<unique_ptr<SignatureInformation>> signatures;
-        if (!queryResponses.empty()) {
-            auto resp = move(queryResponses[0]);
-            // only triggers on sends. Some SignatureHelps are triggered when the variable is being typed.
-            if (auto sendResp = resp->isSend()) {
-                auto sendLocIndex = sendResp->termLoc.beginPos();
-
-                auto fref = config.uri2FileRef(gs, params->textDocument->uri);
-                if (!fref.exists()) {
-                    response->error =
-                        make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                   fmt::format("Unknown file: `{}`", params->textDocument->uri));
-                    return response;
-                }
-                auto src = fref.data(gs).source();
-                auto loc = config.lspPos2Loc(fref, *params->position, gs);
-                string_view call_str = src.substr(sendLocIndex, loc.endPos() - sendLocIndex);
-                int numberCommas = absl::c_count(call_str, ',');
-                // Active parameter depends on number of ,'s in the current string being typed. (0 , = first arg, 1 , =
-                // 2nd arg)
-                activeParameter = numberCommas;
-
-                auto firstDispatchComponentMethod = sendResp->dispatchResult->main.method;
-
-                addSignatureHelpItem(gs, firstDispatchComponentMethod, signatures, *sendResp, numberCommas);
-            }
-        }
-        auto result = make_unique<SignatureHelp>(move(signatures));
-        if (activeParameter != -1) {
-            result->activeParameter = activeParameter;
-        }
-        response->result = move(result);
+        return response;
     }
+
+    auto &queryResponses = result.responses;
+    int activeParameter = -1;
+    vector<unique_ptr<SignatureInformation>> signatures;
+    if (!queryResponses.empty()) {
+        auto resp = move(queryResponses[0]);
+        // only triggers on sends. Some SignatureHelps are triggered when the variable is being typed.
+        if (auto sendResp = resp->isSend()) {
+            auto sendLocIndex = sendResp->termLoc.beginPos();
+
+            auto fref = config.uri2FileRef(gs, params->textDocument->uri);
+            if (!fref.exists()) {
+                response->error = make_unique<ResponseError>(
+                    (int)LSPErrorCodes::InvalidRequest, fmt::format("Unknown file: `{}`", params->textDocument->uri));
+                return response;
+            }
+            auto src = fref.data(gs).source();
+            auto loc = config.lspPos2Loc(fref, *params->position, gs);
+            string_view call_str = src.substr(sendLocIndex, loc.endPos() - sendLocIndex);
+            int numberCommas = absl::c_count(call_str, ',');
+            // Active parameter depends on number of ,'s in the current string being typed. (0 , = first arg, 1 , =
+            // 2nd arg)
+            activeParameter = numberCommas;
+
+            auto firstDispatchComponentMethod = sendResp->dispatchResult->main.method;
+
+            addSignatureHelpItem(gs, firstDispatchComponentMethod, signatures, *sendResp, numberCommas);
+        }
+    }
+    auto result = make_unique<SignatureHelp>(move(signatures));
+    if (activeParameter != -1) {
+        result->activeParameter = activeParameter;
+    }
+    response->result = move(result);
     return response;
 }
 } // namespace sorbet::realmain::lsp
