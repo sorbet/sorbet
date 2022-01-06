@@ -905,7 +905,9 @@ unique_ptr<PackageInfoImpl> getPackageInfo(core::MutableContext ctx, ast::Parsed
                                            const vector<std::string> &extraPackageFilesDirectoryPrefixes) {
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(ctx).sourceType == core::File::Type::Package);
-    // Assumption: Root of AST is <root> class.
+    // Assumption: Root of AST is <root> class. (This won't be true
+    // for `typed: ignore` files, so we should make sure to catch that
+    // elsewhere.)
     ENFORCE(ast::isa_tree<ast::ClassDef>(package.tree));
     ENFORCE(ast::cast_tree_nonnull<ast::ClassDef>(package.tree).symbol == core::Symbols::root());
     auto packageFilePath = package.file.data(ctx).path();
@@ -1465,6 +1467,16 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
         core::packages::UnfreezePackages packages = gs.unfreezePackages();
         for (auto &file : files) {
             if (FileOps::getFileName(file.file.data(gs).path()) == PACKAGE_FILE_NAME) {
+                if (file.file.data(gs).strictLevel == core::StrictLevel::Ignore) {
+                    // if the `__package.rb` file is at `typed:
+                    // ignore`, then we haven't even parsed it, which
+                    // means none of the other stuff here is going to
+                    // actually work (since it all assumes we've got a
+                    // file to actually analyze.) If we've got a
+                    // `typed: ignore` package, then skip it.
+                    continue;
+                }
+
                 file.file.data(gs).sourceType = core::File::Type::Package;
                 core::MutableContext ctx(gs, core::Symbols::root(), file.file);
                 auto pkg = getPackageInfo(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
