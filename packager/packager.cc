@@ -1046,7 +1046,7 @@ struct PackageInfoFinder {
 
     core::StrictLevel getLevelFromExpression(core::MutableContext ctx, ast::ExpressionPtr& tree) {
         auto strlit = ast::cast_tree<ast::Literal>(tree);
-        if (!strlit) {
+        if (!strlit || !strlit->isString(ctx)) {
             if (auto e = ctx.beginError(tree.loc(), core::errors::Packager::InvalidTypedLevel)) {
                 e.setHeader("All package type levels must be specified as string literals");
             }
