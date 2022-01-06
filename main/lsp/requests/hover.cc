@@ -57,7 +57,15 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
     vector<core::Loc> documentationLocations;
     string typeString;
 
-    if (auto c = resp->isConstant()) {
+    if (auto s = resp->isSend()) {
+        auto start = s->dispatchResult.get();
+        if (start != nullptr && start->main.method.exists() && !start->main.receiver.isUntyped()) {
+            auto loc = start->main.method.data(gs)->loc();
+            if (loc.exists()) {
+                documentationLocations.emplace_back(loc);
+            }
+        }
+    } else if (auto c = resp->isConstant()) {
         for (auto loc : c->symbol.locs(gs)) {
             if (loc.exists()) {
                 documentationLocations.emplace_back(loc);
@@ -80,13 +88,6 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
 
     if (auto sendResp = resp->isSend()) {
         auto retType = sendResp->dispatchResult->returnType;
-        auto start = sendResp->dispatchResult.get();
-        if (start != nullptr && start->main.method.exists() && !start->main.receiver.isUntyped()) {
-            auto loc = start->main.method.data(gs)->loc();
-            if (loc.exists()) {
-                documentationLocations.emplace_back(loc);
-            }
-        }
         auto &constraint = sendResp->dispatchResult->main.constr;
         if (constraint) {
             retType = core::Types::instantiate(gs, retType, *constraint);
