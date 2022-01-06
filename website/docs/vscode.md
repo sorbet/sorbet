@@ -4,8 +4,10 @@ title: Extension for Visual Studio Code
 sidebar_label: Visual Studio Code
 ---
 
-The Sorbet extension for Visual Studio Code integrates with the Sorbet language
-server to provide IDE-like features for typed Ruby files.
+The
+[Sorbet extension for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension)
+integrates with the Sorbet language server to provide IDE-like features for
+typed Ruby files.
 
 ## Features
 
@@ -65,8 +67,9 @@ Workspace symbol search:
 
 ## Installing and enabling the Sorbet extension
 
-Install the Sorbet extension from the VS Code extension marketplace. Then, add
-the following configuration to your workspace's `settings.json`:
+Install the
+[Sorbet extension from the VS Code extension marketplace](https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension).
+Then, add the following configuration to your workspace's `settings.json`:
 
 ```JSON
 "sorbet.enabled": true
