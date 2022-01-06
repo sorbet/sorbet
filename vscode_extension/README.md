@@ -1,7 +1,3 @@
-<p align="center">
-  <img alt="Sorbet logo" width="200" src="icon.png">
-</p>
-
 # Ruby Sorbet for VS Code
 
 ## Features:
