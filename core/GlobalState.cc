@@ -110,6 +110,12 @@ struct MethodBuilder {
         return *this;
     }
 
+    MethodBuilder &kwArg(NameRef name) {
+        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        arg.flags.isKeyword = true;
+        return *this;
+    }
+
     MethodRef build() {
         auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
@@ -465,6 +471,8 @@ void GlobalState::initEmpty() {
     method =
         enterMethod(*this, Symbols::PackageSpecSingleton(), Names::restrict_to_service()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_restrict_to_service());
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::sorbet()).kwArg(Names::minTypedLevel()).kwArg(Names::testsMinTypedLevel()).build();
+    ENFORCE(method == Symbols::PackageSpec_sorbet());
 
     klass = synthesizeClass(core::Names::Constants::Encoding());
     ENFORCE(klass == Symbols::Encoding());
