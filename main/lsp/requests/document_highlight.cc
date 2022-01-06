@@ -41,66 +41,66 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
-    } else {
-        // An explicit null indicates that we don't support this request (or that nothing was at the location).
-        // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
-        response->result = variant<JSONNullObject, vector<unique_ptr<DocumentHighlight>>>(JSONNullObject());
-        auto fref = config.uri2FileRef(typechecker.state(), uri);
-        if (!fref.exists()) {
+        return response;
+    }
+
+    // An explicit null indicates that we don't support this request (or that nothing was at the location).
+    // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
+    response->result = variant<JSONNullObject, vector<unique_ptr<DocumentHighlight>>>(JSONNullObject());
+    auto fref = config.uri2FileRef(typechecker.state(), uri);
+    if (!fref.exists()) {
+        return response;
+    }
+    auto &queryResponses = result.responses;
+    if (!queryResponses.empty()) {
+        auto file = config.uri2FileRef(gs, uri);
+        if (!file.exists()) {
             return response;
         }
-        auto &queryResponses = result.responses;
-        if (!queryResponses.empty()) {
-            auto file = config.uri2FileRef(gs, uri);
-            if (!file.exists()) {
-                return response;
-            }
-            const bool fileIsTyped = file.data(gs).strictLevel >= core::StrictLevel::True;
-            auto resp = move(queryResponses[0]);
-            // N.B.: Ignores literals.
-            // If file is untyped, only supports find reference requests from constants and class definitions.
-            if (auto constResp = resp->isConstant()) {
-                response->result =
-                    getHighlights(typechecker, getReferencesToSymbolInFile(typechecker, fref, constResp->symbol));
-            } else if (auto fieldResp = resp->isField()) {
+        const bool fileIsTyped = file.data(gs).strictLevel >= core::StrictLevel::True;
+        auto resp = move(queryResponses[0]);
+        // N.B.: Ignores literals.
+        // If file is untyped, only supports find reference requests from constants and class definitions.
+        if (auto constResp = resp->isConstant()) {
+            response->result =
+                getHighlights(typechecker, getReferencesToSymbolInFile(typechecker, fref, constResp->symbol));
+        } else if (auto fieldResp = resp->isField()) {
+            // This could be a `prop` or `attr_*`, which have multiple associated symbols.
+            response->result = getHighlights(
+                typechecker, getReferencesToAccessorInFile(typechecker, fref,
+                                                           getAccessorInfo(typechecker.state(), fieldResp->symbol),
+                                                           fieldResp->symbol));
+        } else if (auto defResp = resp->isDefinition()) {
+            if (fileIsTyped || defResp->symbol.isClassOrModule()) {
                 // This could be a `prop` or `attr_*`, which have multiple associated symbols.
                 response->result = getHighlights(
                     typechecker, getReferencesToAccessorInFile(typechecker, fref,
-                                                               getAccessorInfo(typechecker.state(), fieldResp->symbol),
-                                                               fieldResp->symbol));
-            } else if (auto defResp = resp->isDefinition()) {
-                if (fileIsTyped || defResp->symbol.isClassOrModule()) {
-                    // This could be a `prop` or `attr_*`, which have multiple associated symbols.
-                    response->result = getHighlights(
-                        typechecker,
-                        getReferencesToAccessorInFile(
-                            typechecker, fref, getAccessorInfo(typechecker.state(), defResp->symbol), defResp->symbol));
-                }
-            } else if (fileIsTyped && resp->isIdent()) {
-                auto identResp = resp->isIdent();
-                auto loc = identResp->termLoc;
-                if (loc.exists()) {
-                    auto run2 = typechecker.query(
-                        core::lsp::Query::createVarQuery(identResp->enclosingMethod, identResp->variable),
-                        {loc.file()});
-                    auto locations = extractLocations(gs, run2.responses);
-                    response->result = locationsToDocumentHighlights(uri, move(locations));
-                }
-            } else if (fileIsTyped && resp->isSend()) {
-                auto sendResp = resp->isSend();
-                auto start = sendResp->dispatchResult.get();
-                vector<unique_ptr<core::lsp::QueryResponse>> references;
-                while (start != nullptr) {
-                    if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
-                        // This could be a `prop` or `attr_*`, which have multiple associated symbols.
-                        references = getReferencesToAccessorInFile(
-                            typechecker, fref, getAccessorInfo(typechecker.state(), start->main.method),
-                            start->main.method, move(references));
-                    }
-                    start = start->secondary.get();
-                }
-                response->result = getHighlights(typechecker, references);
+                                                               getAccessorInfo(typechecker.state(), defResp->symbol),
+                                                               defResp->symbol));
             }
+        } else if (fileIsTyped && resp->isIdent()) {
+            auto identResp = resp->isIdent();
+            auto loc = identResp->termLoc;
+            if (loc.exists()) {
+                auto run2 = typechecker.query(
+                    core::lsp::Query::createVarQuery(identResp->enclosingMethod, identResp->variable), {loc.file()});
+                auto locations = extractLocations(gs, run2.responses);
+                response->result = locationsToDocumentHighlights(uri, move(locations));
+            }
+        } else if (fileIsTyped && resp->isSend()) {
+            auto sendResp = resp->isSend();
+            auto start = sendResp->dispatchResult.get();
+            vector<unique_ptr<core::lsp::QueryResponse>> references;
+            while (start != nullptr) {
+                if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
+                    // This could be a `prop` or `attr_*`, which have multiple associated symbols.
+                    references = getReferencesToAccessorInFile(typechecker, fref,
+                                                               getAccessorInfo(typechecker.state(), start->main.method),
+                                                               start->main.method, move(references));
+                }
+                start = start->secondary.get();
+            }
+            response->result = getHighlights(typechecker, references);
         }
     }
     return response;

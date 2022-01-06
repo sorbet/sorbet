@@ -22,50 +22,51 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
-    } else {
-        auto &queryResponses = result.responses;
-        if (queryResponses.empty()) {
-            // Note: Need to specifically specify the variant type here so the null gets placed into the proper slot.
-            response->result = variant<JSONNullObject, unique_ptr<SymbolInformation>>(JSONNullObject());
-            return response;
-        }
-
-        auto resp = move(queryResponses[0]);
-
-        core::SymbolRef sym;
-        if (auto c = resp->isConstant()) {
-            // Using symbolBeforeDealias instead of symbol here lets us show the name of the actual
-            // constant under the user's cursor, not what it aliases to.
-            sym = c->symbolBeforeDealias;
-        } else if (auto d = resp->isDefinition()) {
-            sym = d->symbol;
-        } else if (auto f = resp->isField()) {
-            sym = f->symbol;
-        } else if (auto s = resp->isSend()) {
-            if (s->dispatchResult->secondary == nullptr) {
-                // Multiple results not currently supported.
-                sym = s->dispatchResult->main.method;
-            }
-        }
-
-        if (!sym.exists()) {
-            // At time of writing, we decided that it only makes sense to respond with information in
-            // this request when there's a Symbol (in the GlobalState sense), and not to respond
-            // with results for say local variables and other things not in the symbol table.
-            response->result = variant<JSONNullObject, unique_ptr<SymbolInformation>>(JSONNullObject());
-            return response;
-        }
-
-        auto result = make_unique<SymbolInformation>(sym.show(gs), symbolRef2SymbolKind(gs, sym),
-                                                     config.loc2Location(gs, sym.loc(gs)));
-
-        auto container = sym.owner(gs);
-        if (container != core::Symbols::root()) {
-            result->containerName = container.show(gs);
-        }
-
-        response->result = std::move(result);
+        return response;
     }
+
+    auto &queryResponses = result.responses;
+    if (queryResponses.empty()) {
+        // Note: Need to specifically specify the variant type here so the null gets placed into the proper slot.
+        response->result = variant<JSONNullObject, unique_ptr<SymbolInformation>>(JSONNullObject());
+        return response;
+    }
+
+    auto resp = move(queryResponses[0]);
+
+    core::SymbolRef sym;
+    if (auto c = resp->isConstant()) {
+        // Using symbolBeforeDealias instead of symbol here lets us show the name of the actual
+        // constant under the user's cursor, not what it aliases to.
+        sym = c->symbolBeforeDealias;
+    } else if (auto d = resp->isDefinition()) {
+        sym = d->symbol;
+    } else if (auto f = resp->isField()) {
+        sym = f->symbol;
+    } else if (auto s = resp->isSend()) {
+        if (s->dispatchResult->secondary == nullptr) {
+            // Multiple results not currently supported.
+            sym = s->dispatchResult->main.method;
+        }
+    }
+
+    if (!sym.exists()) {
+        // At time of writing, we decided that it only makes sense to respond with information in
+        // this request when there's a Symbol (in the GlobalState sense), and not to respond
+        // with results for say local variables and other things not in the symbol table.
+        response->result = variant<JSONNullObject, unique_ptr<SymbolInformation>>(JSONNullObject());
+        return response;
+    }
+
+    auto symInfo = make_unique<SymbolInformation>(sym.show(gs), symbolRef2SymbolKind(gs, sym),
+                                                  config.loc2Location(gs, sym.loc(gs)));
+
+    auto container = sym.owner(gs);
+    if (container != core::Symbols::root()) {
+        symInfo->containerName = container.show(gs);
+    }
+
+    response->result = std::move(symInfo);
     return response;
 }
 

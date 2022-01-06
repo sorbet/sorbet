@@ -57,28 +57,29 @@ unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerDelegat
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
-    } else {
-        auto &queryResponses = result.responses;
-        vector<unique_ptr<Location>> result;
-        if (!queryResponses.empty()) {
-            const bool fileIsTyped =
-                config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
-            auto resp = move(queryResponses[0]);
+        return response;
+    }
 
-            // Only support go-to-type-definition on constants and fields in untyped files.
-            if (resp->isConstant() || resp->isField() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
-                for (auto loc : locsForType(gs, resp->getRetType())) {
-                    addLocIfExists(gs, result, loc);
-                }
-            } else if (fileIsTyped && resp->isSend()) {
-                auto sendResp = resp->isSend();
-                for (auto loc : locsForType(gs, sendResp->dispatchResult->returnType)) {
-                    addLocIfExists(gs, result, loc);
-                }
+    auto &queryResponses = result.responses;
+    vector<unique_ptr<Location>> locations;
+    if (!queryResponses.empty()) {
+        const bool fileIsTyped =
+            config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
+        auto resp = move(queryResponses[0]);
+
+        // Only support go-to-type-definition on constants and fields in untyped files.
+        if (resp->isConstant() || resp->isField() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
+            for (auto loc : locsForType(gs, resp->getRetType())) {
+                addLocIfExists(gs, locations, loc);
+            }
+        } else if (fileIsTyped && resp->isSend()) {
+            auto sendResp = resp->isSend();
+            for (auto loc : locsForType(gs, sendResp->dispatchResult->returnType)) {
+                addLocIfExists(gs, locations, loc);
             }
         }
-        response->result = move(result);
     }
+    response->result = move(locations);
     return response;
 }
 } // namespace sorbet::realmain::lsp
