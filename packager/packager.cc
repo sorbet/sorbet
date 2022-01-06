@@ -1022,7 +1022,56 @@ struct PackageInfoFinder {
             }
         }
 
+        if (send.fun == core::Names::sorbet() && send.numKwArgs() == 2) {
+            for (int i = 0; i < 2; i++) {
+                auto &key = ast::cast_tree_nonnull<ast::Literal>(send.getKwKey(i));
+                ENFORCE(key.isSymbol(ctx));
+
+                auto level = getLevelFromExpression(ctx, send.getKwValue(i));
+                if (key.asSymbol(ctx) == core::Names::minTypedLevel()) {
+                    info->pkgMinStrictLevel = level;
+                } else if (key.asSymbol(ctx) == core::Names::testsMinTypedLevel()) {
+                    info->pkgMinTestStrictLevel = level;
+                } else {
+                    if (auto e = ctx.beginError(key.loc, core::errors::Packager::InvalidTypedLevel)) {
+                        e.setHeader("Unexpected keyword argument `{}` for `{}`", key.asSymbol(ctx).toString(ctx), "sorbet");
+                        e.addErrorLine(core::Loc(ctx.file, key.loc), "Expected either `{}` or `{}`", "min_typed_level", "tests_min_typed_level");
+                    }
+                }
+            }
+        }
+
         return tree;
+    }
+
+    core::StrictLevel getLevelFromExpression(core::MutableContext ctx, ast::ExpressionPtr& tree) {
+        auto strlit = ast::cast_tree<ast::Literal>(tree);
+        if (!strlit) {
+            if (auto e = ctx.beginError(tree.loc(), core::errors::Packager::InvalidTypedLevel)) {
+                e.setHeader("All package type levels must be specified as string literals");
+            }
+            return core::StrictLevel::None;
+        }
+
+        switch (strlit->asString(ctx).rawId()) {
+            case core::Names::ignore().rawId():
+                return core::StrictLevel::Ignore;
+            case core::Names::_false().rawId():
+                return core::StrictLevel::False;
+            case core::Names::_true().rawId():
+                return core::StrictLevel::True;
+            case core::Names::strict().rawId():
+                return core::StrictLevel::Strict;
+            case core::Names::strong().rawId():
+                return core::StrictLevel::Strong;
+            default:
+                if (auto e = ctx.beginError(tree.loc(), core::errors::Packager::InvalidTypedLevel)) {
+                    e.setHeader("Invalid typed level `{}`", tree.toString(ctx));
+                    e.addErrorLine(core::Loc(ctx.file, tree.loc()), "Expected one of: `{}`, `{}`, `{}`, `{}`, or `{}`", "ignore", "false", "true", "strict", "strong");
+                }
+        }
+
+        return core::StrictLevel::None;
     }
 
     ast::ExpressionPtr preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
@@ -1120,6 +1169,7 @@ struct PackageInfoFinder {
             case core::Names::export_().rawId():
             case core::Names::export_for_test().rawId():
             case core::Names::restrict_to_service().rawId():
+            case core::Names::sorbet().rawId():
                 return true;
             default:
                 return false;
