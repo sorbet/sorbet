@@ -2,7 +2,7 @@
   "name": "sorbet-vscode-extension",
   "displayName": "Ruby Sorbet",
   "description": "Ruby IDE features, powered by Sorbet.",
-  "author": "#sorbet-extension",
+  "author": "Stripe Inc.",
   "license": "Apache-2.0",
   "version": "0.3.6",
   "publisher": "sorbet",
