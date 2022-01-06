@@ -5,7 +5,7 @@ title: Open-sourcing the Sorbet VS Code Extension
 
 We’re excited to announce that Stripe’s VS Code extension for Sorbet is now
 [open source](https://github.com/sorbet/sorbet/tree/master/vscode_extension). We’ve designed Sorbet to be used in editors from
-Day 1—Sorbet exposes a flag (`--lsp`) that starts Sorbet in
+Day 1—For the past two years, Sorbet has exposed a flag (`--lsp`) that starts Sorbet in
 [Language Server Protocol](https://microsoft.github.io/language-server-protocol/)
 (LSP) mode. In this mode, Sorbet can respond to many LSP requests, like Go To
 Definition, Find All References, Autocomplete, and more.
