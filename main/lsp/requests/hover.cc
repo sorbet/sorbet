@@ -78,7 +78,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             }
         }
     } else if (resp->isField()) {
-        auto origins = resp->getTypeAndOrigins().origins;
+        const auto &origins = resp->getTypeAndOrigins().origins;
         for (auto loc : origins) {
             if (loc.exists()) {
                 documentationLocations.emplace_back(loc);
