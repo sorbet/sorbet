@@ -34,7 +34,7 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
                 addLocIfExists(gs, locations, loc);
             }
         } else if (resp->isField() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
-            auto retType = resp->getTypeAndOrigins();
+            const auto &retType = resp->getTypeAndOrigins();
             for (auto &originLoc : retType.origins) {
                 addLocIfExists(gs, locations, originLoc);
             }

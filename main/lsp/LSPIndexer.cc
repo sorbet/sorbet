@@ -64,14 +64,7 @@ LSPIndexer::~LSPIndexer() {
 
 void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files, WorkerPool &workers) const {
     // Fast abort if all files have hashes.
-    bool allFilesHaveHashes = true;
-    for (const auto &f : files) {
-        if (f != nullptr && f->getFileHash() == nullptr) {
-            allFilesHaveHashes = false;
-            break;
-        }
-    }
-    if (allFilesHaveHashes) {
+    if (absl::c_all_of(files, [](const auto &f) { return f == nullptr || f->getFileHash() != nullptr; })) {
         return;
     }
 
@@ -107,34 +100,36 @@ bool LSPIndexer::canTakeFastPathInternal(
             logger.debug("Taking slow path because {} is a new file", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
             return false;
-        } else {
-            const auto &oldFile = getOldFile(fref, *initialGS, evictedFiles);
-            // We don't yet have a content hash that works for package files yet. Instead, we check if the package file
-            // source text has changed at all. If it does, we take the slow path.
-            // Only relevant in `--stripe-packages` mode. This prevents LSP editing features like autocomplete from
-            // working in `__package.rb` since every edit causes a slow path.
-            // TODO(jvilk): We could use `PackageInfo` as a `__package.rb` hash -- but we would have to stash it
-            // somewhere. Currently, we discard them after `packager` runs.
-            if (oldFile.sourceType == core::File::Type::Package && oldFile.source() != f->source()) {
-                logger.debug("Taking slow path because {} is a package file", f->path());
-                prodCategoryCounterInc("lsp.slow_path_reason", "package_file");
-                return false;
-            }
-            ENFORCE(oldFile.getFileHash() != nullptr);
-            ENFORCE(f->getFileHash() != nullptr);
-            auto oldHash = *oldFile.getFileHash();
-            auto newHash = *f->getFileHash();
-            ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
-            if (newHash.definitions.hierarchyHash == core::GlobalStateHash::HASH_STATE_INVALID) {
-                logger.debug("Taking slow path because {} has a syntax error", f->path());
-                prodCategoryCounterInc("lsp.slow_path_reason", "syntax_error");
-                return false;
-            } else if (newHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
-                       newHash.definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
-                logger.debug("Taking slow path because {} has changed definitions", f->path());
-                prodCategoryCounterInc("lsp.slow_path_reason", "changed_definition");
-                return false;
-            }
+        }
+
+        const auto &oldFile = getOldFile(fref, *initialGS, evictedFiles);
+        // We don't yet have a content hash that works for package files yet. Instead, we check if the package file
+        // source text has changed at all. If it does, we take the slow path.
+        // Only relevant in `--stripe-packages` mode. This prevents LSP editing features like autocomplete from
+        // working in `__package.rb` since every edit causes a slow path.
+        // TODO(jvilk): We could use `PackageInfo` as a `__package.rb` hash -- but we would have to stash it
+        // somewhere. Currently, we discard them after `packager` runs.
+        if (oldFile.sourceType == core::File::Type::Package && oldFile.source() != f->source()) {
+            logger.debug("Taking slow path because {} is a package file", f->path());
+            prodCategoryCounterInc("lsp.slow_path_reason", "package_file");
+            return false;
+        }
+        ENFORCE(oldFile.getFileHash() != nullptr);
+        ENFORCE(f->getFileHash() != nullptr);
+        auto oldHash = *oldFile.getFileHash();
+        auto newHash = *f->getFileHash();
+        ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
+        if (newHash.definitions.hierarchyHash == core::GlobalStateHash::HASH_STATE_INVALID) {
+            logger.debug("Taking slow path because {} has a syntax error", f->path());
+            prodCategoryCounterInc("lsp.slow_path_reason", "syntax_error");
+            return false;
+        }
+
+        if (newHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
+            newHash.definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
+            logger.debug("Taking slow path because {} has changed definitions", f->path());
+            prodCategoryCounterInc("lsp.slow_path_reason", "changed_definition");
+            return false;
         }
     }
 
