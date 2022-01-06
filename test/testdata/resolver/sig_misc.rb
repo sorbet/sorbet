@@ -103,6 +103,7 @@ class A
   end
 
   sig {}; def test_standard_untyped; end # error: Malformed `sig`: No return type specified. Specify one with .returns()
+# ^^^^^^ error: Malformed `sig`: Signature blocks must contain a single statement
 
   sig {void.foo}; def test_junk_inside; end # error: invalid in this context
      # ^^^^^^^^ error: Method `foo` does not exist
