@@ -100,7 +100,7 @@ bool LSPIndexer::canTakeFastPathInternal(
             logger.debug("Taking slow path because {} is a new file", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
             return false;
-        } 
+        }
 
         const auto &oldFile = getOldFile(fref, *initialGS, evictedFiles);
         // We don't yet have a content hash that works for package files yet. Instead, we check if the package file
