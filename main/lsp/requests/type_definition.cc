@@ -61,7 +61,7 @@ unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerDelegat
     }
 
     auto &queryResponses = result.responses;
-    vector<unique_ptr<Location>> result;
+    vector<unique_ptr<Location>> locations;
     if (!queryResponses.empty()) {
         const bool fileIsTyped =
             config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
@@ -70,16 +70,16 @@ unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerDelegat
         // Only support go-to-type-definition on constants and fields in untyped files.
         if (resp->isConstant() || resp->isField() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
             for (auto loc : locsForType(gs, resp->getRetType())) {
-                addLocIfExists(gs, result, loc);
+                addLocIfExists(gs, locations, loc);
             }
         } else if (fileIsTyped && resp->isSend()) {
             auto sendResp = resp->isSend();
             for (auto loc : locsForType(gs, sendResp->dispatchResult->returnType)) {
-                addLocIfExists(gs, result, loc);
+                addLocIfExists(gs, locations, loc);
             }
         }
     }
-    response->result = move(result);
+    response->result = move(locations);
     return response;
 }
 } // namespace sorbet::realmain::lsp

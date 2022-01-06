@@ -21,7 +21,7 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
     }
 
     auto &queryResponses = result.responses;
-    vector<unique_ptr<Location>> result;
+    vector<unique_ptr<Location>> locations;
     if (!queryResponses.empty()) {
         const bool fileIsTyped =
             config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
@@ -31,30 +31,30 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
         if (auto c = resp->isConstant()) {
             auto sym = c->symbol;
             for (auto loc : sym.locs(gs)) {
-                addLocIfExists(gs, result, loc);
+                addLocIfExists(gs, locations, loc);
             }
         } else if (resp->isField() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
             auto retType = resp->getTypeAndOrigins();
             for (auto &originLoc : retType.origins) {
-                addLocIfExists(gs, result, originLoc);
+                addLocIfExists(gs, locations, originLoc);
             }
         } else if (fileIsTyped && resp->isDefinition()) {
             auto sym = resp->isDefinition()->symbol;
             for (auto loc : sym.locs(gs)) {
-                addLocIfExists(gs, result, loc);
+                addLocIfExists(gs, locations, loc);
             }
         } else if (fileIsTyped && resp->isSend()) {
             auto sendResp = resp->isSend();
             auto start = sendResp->dispatchResult.get();
             while (start != nullptr) {
                 if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
-                    addLocIfExists(gs, result, start->main.method.data(gs)->loc());
+                    addLocIfExists(gs, locations, start->main.method.data(gs)->loc());
                 }
                 start = start->secondary.get();
             }
         }
     }
-    response->result = move(result);
+    response->result = move(locations);
     return response;
 }
 

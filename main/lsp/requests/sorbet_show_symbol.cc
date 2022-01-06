@@ -58,15 +58,15 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
         return response;
     }
 
-    auto result = make_unique<SymbolInformation>(sym.show(gs), symbolRef2SymbolKind(gs, sym),
-                                                 config.loc2Location(gs, sym.loc(gs)));
+    auto symInfo = make_unique<SymbolInformation>(sym.show(gs), symbolRef2SymbolKind(gs, sym),
+                                                  config.loc2Location(gs, sym.loc(gs)));
 
     auto container = sym.owner(gs);
     if (container != core::Symbols::root()) {
-        result->containerName = container.show(gs);
+        symInfo->containerName = container.show(gs);
     }
 
-    response->result = std::move(result);
+    response->result = std::move(symInfo);
     return response;
 }
 

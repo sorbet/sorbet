@@ -100,11 +100,11 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
             addSignatureHelpItem(gs, firstDispatchComponentMethod, signatures, *sendResp, numberCommas);
         }
     }
-    auto result = make_unique<SignatureHelp>(move(signatures));
+    auto sigHelp = make_unique<SignatureHelp>(move(signatures));
     if (activeParameter != -1) {
-        result->activeParameter = activeParameter;
+        sigHelp->activeParameter = activeParameter;
     }
-    response->result = move(result);
+    response->result = move(sigHelp);
     return response;
 }
 } // namespace sorbet::realmain::lsp
