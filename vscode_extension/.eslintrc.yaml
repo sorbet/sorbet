@@ -1,0 +1,38 @@
+---
+root: true
+rules:
+  class-methods-use-this: 0
+  # Allow functions with name starting with capital letter for HOC
+  import/no-named-as-default-member: 0
+  import/no-named-as-default: 0
+  new-cap: 0
+  eslint-comments/no-unused-disable: 2
+  eslint-comments/no-unused-enable: 2
+  prettier/prettier: 2
+  # Turn this off because eslint gets this wrong for instance variables
+  # and the typescript compiler already checks for possibly undefined
+  # variables
+  no-undef: 0
+  # Turn this off because eslint can't seem to figure out imports
+  # and class names used in type declarations, and the typescript
+  # compiler already checks for unused vars
+  no-unused-vars: 0
+  # Allow console.log because official docs seem say this is the
+  # recommended way to have logging from your extension
+  no-console: 0
+  # This is not useful since prettier inserts semicolons everywhere.
+  no-plusplus: 0
+  # This requires way too much space otherwise between fields.
+  lines-between-class-members:
+    - 2
+    - always
+    - exceptAfterSingleLine: true
+extends:
+  - prettier
+plugins:
+  - eslint-comments
+  - prettier
+parser: "@typescript-eslint/parser"
+settings:
+  import/ignore:
+    - node_modules
