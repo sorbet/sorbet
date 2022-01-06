@@ -105,6 +105,52 @@ bool TypeSyntax::isSig(core::Context ctx, const ast::Send &send) {
 
 namespace {
 
+// When a sig was given with multiple statements, autocorrect it to a single chained send.
+void addMultiStatementSigAutocorrect(core::Context ctx, core::ErrorBuilder &e, const ast::ExpressionPtr &blockBody) {
+    auto *insseq = ast::cast_tree<ast::InsSeq>(blockBody);
+    if (insseq == nullptr) {
+        return;
+    }
+
+    vector<core::LocOffsets> locs;
+    for (auto &expr : insseq->stats) {
+        auto *send = ast::cast_tree<ast::Send>(expr);
+        if (send == nullptr || !send->loc.exists()) {
+            return;
+        }
+
+        locs.emplace_back(send->loc);
+    }
+
+    {
+        auto *send = ast::cast_tree<ast::Send>(insseq->expr);
+        if (send == nullptr || !send->loc.exists()) {
+            return;
+        }
+
+        locs.emplace_back(send->loc);
+    }
+
+    auto source = ctx.file.data(ctx).source();
+
+    bool first = true;
+    std::string replacement;
+    for (auto loc : locs) {
+        if (!first) {
+            replacement.append(".");
+        }
+
+        auto len = loc.endLoc - loc.beginLoc;
+        replacement.append(source.substr(loc.beginLoc, len));
+
+        first = false;
+    }
+
+    e.replaceWith("Use a chained sig builder", core::Loc{ctx.file, insseq->loc}, "{}", replacement);
+
+    return;
+}
+
 ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
                                      TypeSyntaxArgs args) {
     ParsedSig sig;
@@ -123,23 +169,12 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
         if (send) {
             sends.emplace_back(send);
         } else {
-            auto insseq = ast::cast_tree<ast::InsSeq>(block->body);
-            if (insseq) {
-                for (auto &stat : insseq->stats) {
-                    send = ast::cast_tree<ast::Send>(stat);
-                    if (!send) {
-                        return sig;
-                    }
-                    sends.emplace_back(send);
-                }
-                send = ast::cast_tree<ast::Send>(insseq->expr);
-                if (!send) {
-                    return sig;
-                }
-                sends.emplace_back(send);
-            } else {
-                return sig;
+            if (auto e = ctx.beginError(sigSend.loc, core::errors::Resolver::InvalidMethodSignature)) {
+                e.setHeader("Malformed `sig`: Signature blocks must contain a single statement");
+                addMultiStatementSigAutocorrect(ctx, e, block->body);
             }
+
+            return sig;
         }
     }
     ENFORCE(!sends.empty());
