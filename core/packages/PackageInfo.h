@@ -2,6 +2,7 @@
 #define SORBET_CORE_PACKAGES_PACKAGEINFO_H
 
 #include "core/NameRef.h"
+#include "core/StrictLevel.h"
 #include "core/SymbolRef.h"
 #include <optional>
 #include <vector>
@@ -23,6 +24,12 @@ public:
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
     virtual core::Loc definitionLoc() const = 0;
     virtual bool exists() const final;
+    virtual StrictLevel minStrictLevel() const {
+        return StrictLevel::None;
+    }
+    virtual StrictLevel minTestStrictLevel() const {
+        return StrictLevel::None;
+    }
 
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
