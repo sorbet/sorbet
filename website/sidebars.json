@@ -4,7 +4,8 @@
       "overview",
       "adopting",
       "metrics",
-      "quickref"
+      "quickref",
+      "vscode"
     ],
     "Static & Runtime": [
       "gradual",
