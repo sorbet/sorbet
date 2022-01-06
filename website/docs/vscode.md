@@ -9,6 +9,48 @@ The
 integrates with the Sorbet language server to provide IDE-like features for
 typed Ruby files.
 
+## Installing and enabling the Sorbet extension
+
+Install the
+[Sorbet extension from the VS Code extension marketplace](https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension).
+Then, add the following configuration to your workspace's `settings.json`:
+
+```JSON
+"sorbet.enabled": true
+```
+
+The next time you open a Ruby file in the workspace, Sorbet will automatically
+try to run via the following command:
+
+```
+bundle exec srb typecheck --lsp
+```
+
+If needed, you can customize how the extension launches Sorbet via the
+`sorbet.lspConfigs` setting:
+
+```json
+"sorbet.lspConfigs": [{
+    "id": "stable",
+    "name": "Sorbet",
+    "description": "Stable Sorbet Ruby IDE features",
+    "cwd": "${workspaceFolder}",
+    "command": [
+      "bundle",
+      "exec",
+      "srb",
+      "typecheck",
+      "--lsp"
+    ]
+}]
+```
+
+Once Sorbet is activated, it will display its status in VS Code's status line.
+For example, this is what you will see when Sorbet is busy typechecking your
+latest edits:
+
+![](/img/lsp/typechecking.gif)
+
 ## Features
 
 Live error squiggles for Sorbet typechecking errors
@@ -64,48 +106,6 @@ Quick fixes (autocorrects) on errors
 Workspace symbol search:
 
 <img src="/img/lsp/symbolsearch.png" width="75%"/>
-
-## Installing and enabling the Sorbet extension
-
-Install the
-[Sorbet extension from the VS Code extension marketplace](https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension).
-Then, add the following configuration to your workspace's `settings.json`:
-
-```JSON
-"sorbet.enabled": true
-```
-
-The next time you open a Ruby file in the workspace, Sorbet will automatically
-try to run via the following command:
-
-```
-bundle exec srb typecheck --lsp
-```
-
-If needed, you can customize how the extension launches Sorbet via the
-`sorbet.lspConfigs` setting:
-
-```json
-"sorbet.lspConfigs": [{
-    "id": "stable",
-    "name": "Sorbet",
-    "description": "Stable Sorbet Ruby IDE features",
-    "cwd": "${workspaceFolder}",
-    "command": [
-      "bundle",
-      "exec",
-      "srb",
-      "typecheck",
-      "--lsp"
-    ]
-}]
-```
-
-Once Sorbet is activated, it will display its status in VS Code's status line.
-For example, this is what you will see when Sorbet is busy typechecking your
-latest edits:
-
-![](/img/lsp/typechecking.gif)
 
 ## Switching between configurations
 
