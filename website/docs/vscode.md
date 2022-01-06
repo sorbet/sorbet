@@ -89,11 +89,11 @@ If needed, you can customize how the extension launches Sorbet via the
     "description": "Stable Sorbet Ruby IDE features",
     "cwd": "${workspaceFolder}",
     "command": [
-    "bundle",
-    "exec",
-    "srb",
-    "typecheck",
-    "--lsp"
+      "bundle",
+      "exec",
+      "srb",
+      "typecheck",
+      "--lsp"
     ]
 }]
 ```
@@ -130,6 +130,34 @@ There are multiple ways to disable the Sorbet extension depending on your goals.
 ## Troubleshooting and FAQ
 
 ### Startup
+
+#### Error: "Sorbet's language server requires a single input directory. However, 0 are configured"
+
+This error can happen if you have not initialized Sorbet in your project. Please
+[follow the instructions](adopting#step-2-initialize-sorbet-in-our-project) to
+initialize Sorbet.
+
+If initializing Sorbet in your project is not desirable or possible, an
+alternative fix is to override the default extension configuration in the
+project's `.vscode/settings.json` file and provide the project directory as
+`"."`:
+
+```json
+"sorbet.lspConfigs": [{
+    "id": "stable",
+    "name": "Sorbet",
+    "description": "Stable Sorbet Ruby IDE features",
+    "cwd": "${workspaceFolder}",
+    "command": [
+      "bundle",
+      "exec",
+      "srb",
+      "typecheck",
+      "--lsp",
+      "."
+    ]
+}]
+```
 
 #### I'm not seeing "Sorbet: Disabled" or "Sorbet: Idle" in the status bar of my VSCode window
 
