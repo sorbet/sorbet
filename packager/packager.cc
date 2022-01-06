@@ -226,6 +226,18 @@ public:
     // These are copied into every package that imports this package.
     vector<Export> exports;
 
+    // the min typed level values as parsed from the package file
+    core::StrictLevel pkgMinStrictLevel = core::StrictLevel::None;
+    core::StrictLevel pkgMinTestStrictLevel = core::StrictLevel::None;
+
+    core::StrictLevel minStrictLevel() const {
+        return pkgMinStrictLevel;
+    }
+
+    core::StrictLevel minTestStrictLevel() const {
+        return pkgMinTestStrictLevel;
+    }
+
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
         ENFORCE(pkg.exists());
