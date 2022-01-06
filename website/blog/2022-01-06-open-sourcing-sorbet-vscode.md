@@ -27,7 +27,7 @@ Today’s release includes:
 ## Showcase
 
 The best way to experience the Sorbet extension for VS Code is to try it out
-yourself. But to showcase a handful of its features, here are some screen
+yourself. To entice you to try it out for yourself, here are some screen
 recordings.
 
 When there are errors in a file, Sorbet will underline them in red. It also
@@ -43,21 +43,21 @@ possible methods and the documentation for that item, including its signature.
 Sorbet can find all references of a constant, method, or variable throughout an
 entire codebase:
 
-<video autoplay muted loop width="100%" style="display:block;margin-left:auto;margin-right:auto;">
+<p><video autoplay muted loop width="100%" style="display:block;margin-left:auto;margin-right:auto;">
     <source src="/img/lsp/references_blog.mp4" type="video/mp4">
 
     Sorry, your browser doesn't support embedded videos.
 
-</video>
+</video></p>
 
 … and having found all those references, it can even rename them automatically:
 
-<video autoplay muted loop width="100%" style="display:block;margin-left:auto;margin-right:auto;">
+<p><video autoplay muted loop width="100%" style="display:block;margin-left:auto;margin-right:auto;">
     <source src="/img/lsp/rename_blog.mp4" type="video/mp4">
 
     Sorry, your browser doesn't support embedded videos.
 
-</video>
+</video></p>
 
 There are also a handful of experimental features that we haven’t quite
 stabilized yet. Feel free to try them out by enabling experimental LSP features
