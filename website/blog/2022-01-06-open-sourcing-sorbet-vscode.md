@@ -45,26 +45,13 @@ entire codebase:
 
 <p><video autoplay muted loop width="100%" style="display:block;margin-left:auto;margin-right:auto;">
     <source src="/img/lsp/references_blog.mp4" type="video/mp4">
-
-    Sorry, your browser doesn't support embedded videos.
-
 </video></p>
 
 … and having found all those references, it can even rename them automatically:
 
 <p><video autoplay muted loop width="100%" style="display:block;margin-left:auto;margin-right:auto;">
     <source src="/img/lsp/rename_blog.mp4" type="video/mp4">
-
-    Sorry, your browser doesn't support embedded videos.
-
 </video></p>
-
-There are also a handful of experimental features that we haven’t quite
-stabilized yet. Feel free to try them out by enabling experimental LSP features
-by reading these docs. One of those features is the signature help tooltip, to
-bring up the name and type of the current argument:
-
-![Sorbet provides a signature helper tooltip while filling in a method’s arguments.](/img/lsp/experimental_blog.png)
 
 ## Acknowledgements
 
