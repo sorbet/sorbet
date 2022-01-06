@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="Sorbet logo" width="200" src="icon.png">
+</p>
+
 # Ruby Sorbet for VS Code
 
 ## Features:
@@ -16,7 +20,7 @@ Provides Ruby editor features using the Sorbet language server:
 By default, this extension attempts to use a Sorbet language server
 that it launches using `bundle exec srb typecheck --lsp`.
 
-In a Ruby environnent that includes the `sorbet` gem, where `srb init` has been
+In a Ruby environment that includes the `sorbet` gem, where `srb init` has been
 run as per [Sorbet's "Getting Started" documentation](https://sorbet.org/docs/adopting),
 this is often sufficient to get started with the Sorbet language server in
 *typed files* (i.e., those marked as `#typed: true` or stricter).
@@ -26,6 +30,9 @@ If VSCode settings are checked into source control, users may wish to set
 `sorbet.userLspConfigs` globally to avoid dirtying/modifying their local
  `.vscode/settings.json`.  (Configs from `sorbet.userLspConfigs` override those from
 `sorbet.lspConfigs` with matching ids.)
+
+Read the [documentation on the Sorbet website](https://sorbet.org/docs/vscode)
+for further information.
 
 ## Caveats/Disclaimers
 
