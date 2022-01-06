@@ -1,25 +1,25 @@
 {
-	"compilerOptions": {
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noImplicitReturns": true,
-		"allowJs": true,
-		"target": "es6",
-		"module": "commonjs",
-		"rootDirs": ["scripts", "src"],
-		"outDir": "out",
-		"lib": ["es7"],
-		"sourceMap": true,
-		"strict": true,
-		"noFallthroughCasesInSwitch": true,
-		"preserveSymlinks": true,
-		"types" : ["node", "sinon", "mocha"]
+  "compilerOptions": {
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "allowJs": true,
+    "target": "es6",
+    "module": "commonjs",
+    "rootDirs": ["scripts", "src"],
+    "outDir": "out",
+    "lib": ["es7"],
+    "sourceMap": true,
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "preserveSymlinks": true,
+    "types" : ["node", "sinon", "mocha"]
   },
   "include": [
     "src/**/*.ts",
-	"scripts/**/*.ts"
+    "scripts/**/*.ts"
   ],
-	"exclude": [
-		"node_modules"
-	]
+  "exclude": [
+    "node_modules"
+  ]
 }
