@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Open-sourcing the Sorbet VS Code Extension · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="We’re excited to announce that Stripe’s VS Code extension for Sorbet is now"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Open-sourcing the Sorbet VS Code Extension · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/blog/2022/01/06/open-sourcing-sorbet-vscode"/><meta property="og:description" content="We’re excited to announce that Stripe’s VS Code extension for Sorbet is now"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-119877071-2', 'auto');
+              ga('send', 'pageview');
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class=""><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class="siteNavGroupActive"><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Recent Posts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Recent Posts</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/blog/2022/01/06/open-sourcing-sorbet-vscode">Open-sourcing the Sorbet VS Code Extension</a></li><li class="navListItem"><a class="navItem" href="/blog/2021/07/30/open-sourcing-sorbet-compiler">Sorbet Compiler: An experimental, ahead-of-time compiler for Ruby</a></li><li class="navListItem"><a class="navItem" href="/blog/2020/07/30/ruby-3-rbs-sorbet">Types in Ruby 3, RBS, and Sorbet</a></li><li class="navListItem"><a class="navItem" href="/blog/2019/12/20/announcing-sorbet-0.5">Announcing Sorbet 0.5</a></li><li class="navListItem"><a class="navItem" href="/blog/2019/06/20/open-sourcing-sorbet">Open-sourcing Sorbet: a fast, powerful type checker for Ruby</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer postContainer blogContainer"><div class="wrapper"><div class="lonePost"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle"><a href="/blog/2022/01/06/open-sourcing-sorbet-vscode">Open-sourcing the Sorbet VS Code Extension</a></h1><p class="post-meta">January 6, 2022</p><div class="authorBlock"></div></header><div><span><p>We’re excited to announce that Stripe’s VS Code extension for Sorbet is now
+<a href="https://github.com/sorbet/sorbet/tree/master/vscode_extension">open source</a>.
+We’ve designed Sorbet to be used in editors from Day 1—For the past two years,
+Sorbet has exposed a flag (<code>--lsp</code>) that starts Sorbet in
+<a href="https://microsoft.github.io/language-server-protocol/">Language Server Protocol</a>
+(LSP) mode. In this mode, Sorbet can respond to many LSP requests, like Go To
+Definition, Find All References, Autocomplete, and more.</p>
+<p>With this release, we’re making it even easier to take advantage of these LSP
+features when working with Sorbet in VS Code. We hope that this extension takes
+some of the guess work out of how to configure and use Sorbet’s LSP mode.</p>
+<!--truncate-->
+<p>Today’s release includes:</p>
+<ul>
+<li>The
+<a href="https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension">pre-built extension</a>
+on the Visual Studio Marketplace</li>
+<li>The <a href="https://github.com/sorbet/sorbet/issues/new/choose">source code</a> for the
+extension, located in the <code>vscode_extension/</code> folder of the Sorbet repo</li>
+<li>Full <a href="https://sorbet.org/docs/vscode">installation and usage instructions</a> in
+the Sorbet docs</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="showcase"></a><a href="#showcase" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Showcase</h2>
+<p>The best way to experience the Sorbet extension for VS Code is to try it out
+yourself. To entice you to try it out for yourself, here are some screen
+recordings.</p>
+<p>When there are errors in a file, Sorbet will underline them in red. It also
+shows a list of all errors in VS Code’s “Problems” window.</p>
+<p><img src="/img/lsp/errorsquiggle_blog.png" alt="Sorbet errors are shown with red squiggles in the editor. Hover to see the full message."></p>
+<p>Sorbet responds with autocompletion results while typing, including a list of
+possible methods and the documentation for that item, including its signature.</p>
+<p><img src="/img/lsp/autocomplete_blog.png" alt="Autocompletion works for constants, methods, and variables"></p>
+<p>Sorbet can find all references of a constant, method, or variable throughout an
+entire codebase:</p>
+<p><video autoplay muted loop width="100%" style="display:block;margin-left:auto;margin-right:auto;">
+    <source src="/img/lsp/references_blog.mp4" type="video/mp4">
+</video></p>
+<p>… and having found all those references, it can even rename them automatically:</p>
+<p><video autoplay muted loop width="100%" style="display:block;margin-left:auto;margin-right:auto;">
+    <source src="/img/lsp/rename_blog.mp4" type="video/mp4">
+</video></p>
+<h2><a class="anchor" aria-hidden="true" id="acknowledgements"></a><a href="#acknowledgements" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Acknowledgements</h2>
+<p>Finally, this release represents the work of many people over the last few
+years, all of whom we’ve grateful for, including but not limited to:</p>
+<ul>
+<li>Ainsley Escorce-Jones</li>
+<li>Akshay Joshi</li>
+<li>Andrew O’Neil</li>
+<li>Anthony Pratti</li>
+<li>Ariel Davis</li>
+<li>Caleb Barde</li>
+<li>Christopher Brown</li>
+<li>Daniel Molina</li>
+<li>Dmitry Petrashko</li>
+<li>G. D. Ritter</li>
+<li>Ilya Zheleznikov</li>
+<li>Jacob Zimmerman</li>
+<li>Joey Pereira</li>
+<li>John Vilk</li>
+<li>Jonathan Fung</li>
+<li>Jérémie Laval</li>
+<li>Kevin Miller</li>
+<li>Lance Lafontaine</li>
+<li>Manjiri Tapaswi</li>
+<li>Mick Killianey</li>
+<li>Nathaniel Roman</li>
+<li>Nelson Elhage</li>
+<li>Patrick Vilhena</li>
+<li>Paul Tarjan</li>
+<li>Penelope Phippen</li>
+<li>Robb Shecter</li>
+<li>Soam Vasani</li>
+<li>Susan Tu</li>
+<li>Sushain Cherivirala</li>
+<li>Trevor Elliott</li>
+<li>Ufuk Kayserilioglu</li>
+<li>Vignesh Shankar</li>
+</ul>
+<p>In particular, John Vilk has been instrumental in leading the development of the
+Sorbet LSP server for the past several years. Thanks to him and all who have
+contributed in the past!</p>
+<p>As always, if you encounter issues or want to suggest features, file an issue
+against
+<a href="https://github.com/sorbet/sorbet/issues/new/choose">the Sorbet issue tracker</a>
+on GitHub, and if you want to come chat with us about Sorbet or the Sorbet VS
+Code extension, <a href="https://sorbet.org/slack">join us on the Sorbet Slack</a>.</p>
+<p>Thanks!<br>
+— The Sorbet team</p>
+</span></div></div><div class="blogSocialSection"></div></div><div class="blog-recent"><a class="button" href="/blog/">Recent Posts</a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#showcase">Showcase</a></li><li><a href="#acknowledgements">Acknowledgements</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'ZYWC6Z01G8',
+                apiKey: 'b05a65e9f8d9f50dc4ec3241db8836c4',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>

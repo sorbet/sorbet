@@ -4,7 +4,7 @@
         <title>Sorbet Blog</title>
         <link>https://sorbet.org/blog</link>
         <description>The best place to stay up-to-date with the latest Sorbet news and events.</description>
-        <lastBuildDate>Fri, 30 Jul 2021 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 06 Jan 2022 06:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <image>
@@ -13,6 +13,23 @@
             <link>https://sorbet.org/blog</link>
         </image>
         <copyright>© 2022 Stripe</copyright>
+        <item>
+            <title><![CDATA[Open-sourcing the Sorbet VS Code Extension]]></title>
+            <link>https://sorbet.org/blog/2022/01/06/open-sourcing-sorbet-vscode.html</link>
+            <guid>https://sorbet.org/blog/2022/01/06/open-sourcing-sorbet-vscode.html</guid>
+            <pubDate>Thu, 06 Jan 2022 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>We’re excited to announce that Stripe’s VS Code extension for Sorbet is now
+<a href="https://github.com/sorbet/sorbet/tree/master/vscode_extension">open source</a>.
+We’ve designed Sorbet to be used in editors from Day 1—For the past two years,
+Sorbet has exposed a flag (<code>--lsp</code>) that starts Sorbet in
+<a href="https://microsoft.github.io/language-server-protocol/">Language Server Protocol</a>
+(LSP) mode. In this mode, Sorbet can respond to many LSP requests, like Go To
+Definition, Find All References, Autocomplete, and more.</p>
+<p>With this release, we’re making it even easier to take advantage of these LSP
+features when working with Sorbet in VS Code. We hope that this extension takes
+some of the guess work out of how to configure and use Sorbet’s LSP mode.</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[Sorbet Compiler: An experimental, ahead-of-time compiler for Ruby]]></title>
             <link>https://sorbet.org/blog/2021/07/30/open-sourcing-sorbet-compiler.html</link>

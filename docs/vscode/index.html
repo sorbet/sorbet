@@ -1,0 +1,401 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Extension for Visual Studio Code · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="The"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Extension for Visual Studio Code · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="The"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-119877071-2', 'auto');
+              ga('send', 'pageview');
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Getting Started</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/metrics">Tracking Adoption</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/vscode">Visual Studio Code</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">T::Struct</a></li><li class="navListItem"><a class="navItem" href="/docs/tenum">T::Enum</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Blocks, Procs, &amp; Lambdas</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes &amp; Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/final">Final Methods &amp; Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/sealed">Sealed Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/attached-class">T.attached_class</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li><li class="navListItem"><a class="navItem" href="/docs/non-forcing-constants">T::NonForcingConstants</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/requires-ancestor">Requiring Ancestors</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/vscode.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Extension for Visual Studio Code</h1></header><article><div><span><p>The
+<a href="https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension">Sorbet extension for Visual Studio Code</a>
+integrates with the Sorbet language server to provide IDE-like features for
+typed Ruby files.</p>
+<h2><a class="anchor" aria-hidden="true" id="installing-and-enabling-the-sorbet-extension"></a><a href="#installing-and-enabling-the-sorbet-extension" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installing and enabling the Sorbet extension</h2>
+<p>Install the
+<a href="https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension">Sorbet extension from the VS Code extension marketplace</a>.
+Then, add the following configuration to your workspace’s <code>settings.json</code>:</p>
+<pre><code class="hljs css language-JSON">"sorbet.enabled": true
+</code></pre>
+<p>The next time you open a Ruby file in the workspace, Sorbet will automatically
+try to run via the following command:</p>
+<pre><code class="hljs"><span class="hljs-title">bundle</span> exec srb typecheck <span class="hljs-comment">--lsp</span>
+</code></pre>
+<p>If needed, you can customize how the extension launches Sorbet via the
+<code>sorbet.lspConfigs</code> setting:</p>
+<pre><code class="hljs css language-json">"sorbet.lspConfigs": [{
+    "id": "stable",
+    "name": "Sorbet",
+    "description": "Stable Sorbet Ruby IDE features",
+    "cwd": "${workspaceFolder}",
+    "command": [
+      "bundle",
+      "exec",
+      "srb",
+      "typecheck",
+      "--lsp"
+    ]
+}]
+</code></pre>
+<p>Once Sorbet is activated, it will display its status in VS Code’s status line.
+For example, this is what you will see when Sorbet is busy typechecking your
+latest edits:</p>
+<p><img src="/img/lsp/typechecking.gif" alt=""></p>
+<h2><a class="anchor" aria-hidden="true" id="features"></a><a href="#features" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Features</h2>
+<p>Live error squiggles for Sorbet typechecking errors
+(<a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Bparams%28a%3A%20String%29.void%7D%0Adef%20foo%28a%29%3B%20end%0A%0Afoo%2810%29">demo</a>):</p>
+<p><img src="/img/lsp/errorsquiggle.png" width="75%"/></p>
+<p>Type information and documentation on hover
+(<a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0A%23%20Documentation%20strings%20can%20use%20_markdown_%0A%23%20*%20That%20includes%20*lists*!%0A%23%0A%23%20Tables%20also%20work%3A%0A%23%0A%23%20%7C%20Column%201%20%7C%20Column%202%20%7C%0A%23%20%7C%20-----%20%7C%20-----%20%7C%0A%23%20%7C%20True%20%20%20%7C%20*False*%20%20%20%7C%0Asig%20%7Breturns%28String%29%7D%0Adef%20my_function%0A%20%20%20%20%22%22%0Aend%0A%0A%0A%0A%0A%0A%0A%0A%0Amy_function%0A%23%20%5E%20hover%20here!">demo</a>):</p>
+<p><img src="/img/lsp/hover.png" width="50%"/></p>
+<p>Go to definition / type definition
+(<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0A%23%20Both%20lead%20here!%0Aclass%20MyClass%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20def%20foo%3B%20end%0Aend%0A%0Amy_class_instance%20%3D%20MyClass.new%0A%23%20%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%20go%20to%20type%20definition%0A%23%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%5E%5E%5E%5E%5E%5E%5E%20go%20to%20definition%0A">demo</a>):</p>
+<video autoplay muted loop width="35%" style="display:block;margin-left:auto;margin-right:auto;">
+    <source src="/img/lsp/go_to_def.mp4" type="video/mp4">
+<pre><code class="hljs">Sorry, your browser doesn't support embedded videos.
+</code></pre>
+</video>
+<p>Find all references
+(<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Parent%0A%20%20def%20foo%3B%20end%0Aend%0A%0Aclass%20NotParent%0A%20%20def%20foo%3B%20end%0Aend%0A%0Aclass%20Child1%20%3C%20Parent%3B%20end%0Aclass%20Child2%20%3C%20Parent%3B%20end%0A%0AParent.new.foo%0A%23%20%20%20%20%20%20%20%20%20%20%5E%5E%5E%20right%20click%20and%20%22Find%20All%20References%22%20here">demo</a>):</p>
+<p><img src="/img/lsp/references.png" width="75%"/></p>
+<p>Autocomplete, including sig suggestion
+(<a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0A%23%20V%20type%20'g'%20here%20and%20accept%20the%20'sig'%20autocomplete%20with%20tab%0Asi%0Adef%20foo%28a%2C%20b%29%0A%20%20%22%23%7Ba%7D%20%23%7Bb%7D%22%0Aend%0A">demo</a>):</p>
+<video autoplay muted loop width="70%" style="display:block;margin-left:auto;margin-right:auto;">
+    <source src="/img/lsp/autocomplete_sig.mp4" type="video/mp4">
+<pre><code class="hljs">Sorry, your browser doesn't support embedded videos.
+</code></pre>
+</video>
+<p>Rename constants and methods
+(<a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20Parent%0A%20%20%23%20%20%20%5E%20Rename%20me!%0A%20%20def%20foo%3B%20end%0A%20%20%23%20%20%20%5E%20Rename%20me!%0Aend%0A%0Aclass%20Klass%20%3C%20Parent%0A%20%20def%20foo%3B%20end%0Aend%0A%0AKlass.new.foo%0AParent.new.foo%0A">demo</a>):</p>
+<video autoplay muted loop width="30%" style="display:block;margin-left:auto;margin-right:auto;">
+    <source src="/img/lsp/rename.mp4" type="video/mp4">
+<pre><code class="hljs">Sorry, your browser doesn't support embedded videos.
+</code></pre>
+</video>
+<p>Quick fixes (autocorrects) on errors
+(<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Breakfast%3B%20end%0A%0ABreekfast.new%0A%23%20%5E%5E%5E%5E%5E%5E%20put%20cursor%20here%20and%20hit%20cmd%20%2B%20.%20%28Mac%29%20or%20ctrl%20%2B%20.%0A">demo</a>):</p>
+<p><img src="/img/lsp/quickfix.png" width="40%"/></p>
+<p>Workspace symbol search:</p>
+<p><img src="/img/lsp/symbolsearch.png" width="75%"/></p>
+<h2><a class="anchor" aria-hidden="true" id="switching-between-configurations"></a><a href="#switching-between-configurations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Switching between configurations</h2>
+<p>The Sorbet extension supports switching between multiple configurations to make
+it easy to try out experimental features. By default, it ships with three
+configurations: stable, beta, and experimental. Workspaces can specify
+alternative configurations via the <code>sorbet.lspConfigs</code> setting.</p>
+<p>Users can select between these configurations on-the-fly by clicking on “Sorbet”
+in VS Code’s status line and selecting &quot;Configure Sorbet&quot;. Sorbet will then
+restart in the chosen configuration. Sorbet will also remember this
+configuration choice for the user’s future sessions in the workspace.</p>
+<h2><a class="anchor" aria-hidden="true" id="disabling-the-sorbet-extension"></a><a href="#disabling-the-sorbet-extension" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Disabling the Sorbet extension</h2>
+<p>There are multiple ways to disable the Sorbet extension depending on your goals.</p>
+<ul>
+<li>You can click on Sorbet in VS Code’s status line and click on <em>Disable
+Sorbet</em>, which will immediately stop Sorbet in that workspace. You will need
+to click on <em>Enable Sorbet</em> to reenable Sorbet in that workspace. This is a
+handy way to temporarily disable Sorbet if it is causing problems.</li>
+<li>Workspaces can set the <code>sorbet.enabled</code> setting to <code>false</code>, which prevents
+Sorbet from running in the workspace.</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="troubleshooting-and-faq"></a><a href="#troubleshooting-and-faq" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Troubleshooting and FAQ</h2>
+<h3><a class="anchor" aria-hidden="true" id="startup"></a><a href="#startup" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Startup</h3>
+<h4><a class="anchor" aria-hidden="true" id="error-sorbets-language-server-requires-a-single-input-directory-however-0-are-configured"></a><a href="#error-sorbets-language-server-requires-a-single-input-directory-however-0-are-configured" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Error: “Sorbet’s language server requires a single input directory. However, 0 are configured”</h4>
+<p>This error can happen if you have not initialized Sorbet in your project. Please
+<a href="adopting#step-2-initialize-sorbet-in-our-project">follow the instructions</a> to
+initialize Sorbet.</p>
+<p>If initializing Sorbet in your project is not desirable or possible, an
+alternative fix is to override the default extension configuration in the
+project’s <code>.vscode/settings.json</code> file and provide the project directory as
+<code>&quot;.&quot;</code>:</p>
+<pre><code class="hljs css language-json">"sorbet.lspConfigs": [{
+    "id": "stable",
+    "name": "Sorbet",
+    "description": "Stable Sorbet Ruby IDE features",
+    "cwd": "${workspaceFolder}",
+    "command": [
+      "bundle",
+      "exec",
+      "srb",
+      "typecheck",
+      "--lsp",
+      "."
+    ]
+}]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="im-not-seeing-sorbet-disabled-or-sorbet-idle-in-the-status-bar-of-my-vscode-window"></a><a href="#im-not-seeing-sorbet-disabled-or-sorbet-idle-in-the-status-bar-of-my-vscode-window" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>I’m not seeing “Sorbet: Disabled” or “Sorbet: Idle” in the status bar of my VSCode window</h4>
+<p>That means the extension isn’t active. Here are some steps to try:</p>
+<ul>
+<li>Did you open a Ruby file? The Sorbet extension isn’t activated until you open
+at least one Ruby file in your editor.</li>
+<li>Make sure your VS Code window is wide enough to display the entire contents of
+the status bar.</li>
+<li>Ensure that you are not using VS Code’s
+<a href="https://code.visualstudio.com/docs/editor/multi-root-workspaces">Multi-root Workspaces</a>
+feature, which this extension does not support.</li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="sorbet-keeps-restarting"></a><a href="#sorbet-keeps-restarting" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sorbet keeps restarting.</h4>
+<p>Click on <em>Sorbet</em> in the status bar, and then click on <em>View Output</em>. A log
+should pop up, and will typically contain some error messages that are causing
+the restart.</p>
+<p>If you see an error that looks like this:</p>
+<pre><code class="hljs">[<span class="hljs-builtin-name">Error</span> - 9:36:32 AM]<span class="hljs-built_in"> Connection </span><span class="hljs-keyword">to</span><span class="hljs-built_in"> server </span>got closed.<span class="hljs-built_in"> Server </span>will <span class="hljs-keyword">not</span> be restarted.
+Running Sorbet LSP with:
+    bundle exec srb typecheck --lsp
+Could <span class="hljs-keyword">not</span> locate Gemfile <span class="hljs-keyword">or</span> .bundle/ directory
+</code></pre>
+<p>…then you probably need to run <code>bundle install</code> to install Sorbet.</p>
+<h3><a class="anchor" aria-hidden="true" id="diagnostics--error-squiggles"></a><a href="#diagnostics--error-squiggles" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Diagnostics / error squiggles</h3>
+<h4><a class="anchor" aria-hidden="true" id="sorbet-is-reporting-diagnostics-error-squiggles-that-dont-make-sense"></a><a href="#sorbet-is-reporting-diagnostics-error-squiggles-that-dont-make-sense" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sorbet is reporting diagnostics (error squiggles) that don’t make sense.</h4>
+<p>If the errors are persistent, and you can reproduce your problem in the sandbox
+at <a href="https://sorbet.run/">https://sorbet.run/</a>, then you’ve found an issue with Sorbet in general, not
+necessarily the VSCode Sorbet extension. Please file a bug tagged with “IDE” on
+the <a href="https://github.com/sorbet/sorbet/issues">issue tracker</a>.</p>
+<p>If the errors are not persistent:</p>
+<ul>
+<li>First, is Sorbet still typechecking? If it is, wait for the status bar to
+display “Sorbet: Idle.” before judging the diagnostics.</li>
+<li>If the diagnostics remain nonsensical when Sorbet is Idle, try restarting
+Sorbet (click on Sorbet in the status bar, and click on Restart Sorbet).</li>
+<li>If the diagnostics become fixed, then you might have discovered a bug in
+Sorbet.</li>
+</ul>
+<p>If you arrive at a set of edits that mess up the diagnostics, please file a bug
+on the <a href="https://github.com/sorbet/sorbet/issues">issue tracker</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="hover"></a><a href="#hover" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Hover</h3>
+<h4><a class="anchor" aria-hidden="true" id="when-i-hover-on-something-vs-code-shows-loading"></a><a href="#when-i-hover-on-something-vs-code-shows-loading" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>When I hover on something, VS Code shows “Loading…”</h4>
+<p>Is Sorbet still typechecking or initializing? If so, this is expected behavior;
+Sorbet cannot show you type information until it finishes catching up with your
+edits. “Loading…” should get replaced with hover information once the status
+bar displays “Sorbet: Typechecking in background” or &quot;Sorbet: Idle&quot;.</p>
+<h4><a class="anchor" aria-hidden="true" id="hover-doesnt-work--hover-isnt-showing-information-for-my-file"></a><a href="#hover-doesnt-work--hover-isnt-showing-information-for-my-file" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Hover doesn’t work / hover isn’t showing information for my file</h4>
+<p>Is the file untyped (<code># typed: false</code> or <code>ignore</code>)? Hover only works in typed
+files. You will need to make your file <code># typed: true</code>.</p>
+<p>Does the file have a syntax error? If so, you need to resolve it before hover
+will work again.</p>
+<p>If the file is typed, Sorbet is &quot;Idle&quot;, and hover isn’t working, try to
+reproduce the problem on <a href="https://sorbet.run">https://sorbet.run</a> and file a bug on the
+<a href="https://github.com/sorbet/sorbet/issues">issue tracker</a>.</p>
+<h4><a class="anchor" aria-hidden="true" id="hover-is-showing-incorrect-type-information-for-something"></a><a href="#hover-is-showing-incorrect-type-information-for-something" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Hover is showing incorrect type information for something.</h4>
+<p>Does your file have a syntax error? If so, resolve it before proceeding.</p>
+<p>If the problem persists with your syntax errors fixed, you may have found a bug
+in Sorbet! Check to see if it’s in the GitHub issue tracker. If you don’t see
+anything relevant there, try to golf the problem down to something small on
+<a href="https://sorbet.run">https://sorbet.run</a> and file a bug on the
+<a href="https://github.com/sorbet/sorbet/issues">issue tracker</a>.</p>
+<h4><a class="anchor" aria-hidden="true" id="hover-is-not-showing-documentation-that-ive-written--is-showing-incorrect-documentation"></a><a href="#hover-is-not-showing-documentation-that-ive-written--is-showing-incorrect-documentation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Hover is not showing documentation that I’ve written / is showing incorrect documentation.</h4>
+<p>Internally, Hover uses the “Go to Definition” logic to locate documentation. If
+“Go to Definition” takes you to the wrong location, then Sorbet doesn’t have the
+type information it needs to locate your documentation.</p>
+<p>Did you include an empty line between your documentation and the thing you are
+defining? We expect documentation to immediately precede the definition (or its
+sig).</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># valid documentation location</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># valid documentation location</span>
+sig {void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+
+sig {void}
+<span class="hljs-comment"># valid documentation location</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># invalid documentation location</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+</code></pre>
+<p>Is this an instance or class variable? The variable
+<a href="/docs/type-annotations#declaring-class-and-instance-variables"><em>must</em> be defined with <code>T.let</code></a>,
+and the documentation must precede the <code>T.let</code>. Otherwise, Sorbet doesn’t see
+that variable as having ever been defined.</p>
+<p>Otherwise, try to reproduce the issue on <a href="https://sorbet.run/">https://sorbet.run/</a> and file a bug on
+the <a href="https://github.com/sorbet/sorbet/issues">issue tracker</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="go-to-definitiongo-to-type-definitionfind-all-references"></a><a href="#go-to-definitiongo-to-type-definitionfind-all-references" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Go to Definition/Go to Type Definition/Find all References</h3>
+<h4><a class="anchor" aria-hidden="true" id="go-to-definitiongo-to-type-definitionfind-all-references-is-not-working--find-all-references-is-missing-some-expected-results"></a><a href="#go-to-definitiongo-to-type-definitionfind-all-references-is-not-working--find-all-references-is-missing-some-expected-results" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Go to Definition/Go to Type Definition/Find all References is not working / Find all References is missing some expected results.</h4>
+<p>First, make sure that Sorbet is running. You should see “Sorbet: Idle” in VS
+Code’s status bar.</p>
+<p>It’s possible that the feature is working as intended. Go to Definition and Find
+all References are not available in all circumstances. A ‘Yes’ entry in the
+following table indicates two distinct things:</p>
+<ul>
+<li>A <em>language construct</em> where these features work. For example, you can right
+click a class reference and go to its definition or find its references in
+typed and untyped files.</li>
+<li>An item that will be included in the results of these features. For example,
+the result of Find all References on a method includes method calls in typed
+files, but not method calls in untyped files.</li>
+</ul>
+<table>
+<thead>
+<tr><th></th><th><code># typed: true</code> or above</th><th><code># typed: false</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Class/module/constant definition or reference</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>ivar (@foo)</td><td>Yes, if defined*</td><td>Yes, if defined*</td></tr>
+<tr><td>cvar (@@foo)</td><td>Yes, if defined*</td><td>Yes, if defined*</td></tr>
+<tr><td>Method definition</td><td>Yes</td><td>Results only**</td></tr>
+<tr><td>Method call</td><td>Yes</td><td>No</td></tr>
+<tr><td>Local variable</td><td>Yes</td><td>No</td></tr>
+</tbody>
+</table>
+<p>* Indicates that the variable
+<a href="/docs/type-annotations#declaring-class-and-instance-variables"><em>must</em> be defined with <code>T.let</code></a>.
+Otherwise, Sorbet doesn’t see that variable as having ever been defined.</p>
+<p>** You cannot use either feature from this language construct, but this item
+will be included in Go to Definition/Find all References results from typed
+files.</p>
+<p>We have these restrictions in place to avoid weird/nonsensical behavior caused
+by untyped files, which may have partial and potentially incorrect type
+information. We heartily encourage you to type files to gain access to these
+features.</p>
+<p>Note that some items marked “Yes” in the table may not work with these features
+if Sorbet does not have the necessary type information. In particular, method
+calls on an object <code>foo</code> where <code>foo</code> is untyped will not be included in Find all
+References and will not work with Go to Definition because Sorbet is unable to
+resolve which method is being called at that location. Using <code># typed: strict</code>
+should suss out most of these untyped locations on a per-file basis.</p>
+<h4><a class="anchor" aria-hidden="true" id="find-all-references-is-slow"></a><a href="#find-all-references-is-slow" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Find all References is slow.</h4>
+<p>The speed of Find all References depends on how many files contain an identifier
+with the same name, as we use that information as a first-pass filter over the
+source files before refining to actual references. For example, searching for
+references to a class’s <code>initialize</code> will involve a scan over most files in a
+project even if the specific <code>initialize</code> you are looking for is only used in
+one file.</p>
+<p>Find all References also waits for “Typechecking in background…” to complete
+so that it does not contend with typechecking for CPU time.</p>
+<h4><a class="anchor" aria-hidden="true" id="go-to-definitiongo-to-type-definition-brought-me-to-what-i-believe-is-the-wrong-location"></a><a href="#go-to-definitiongo-to-type-definition-brought-me-to-what-i-believe-is-the-wrong-location" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Go to Definition/Go to Type Definition brought me to what I believe is the wrong location.</h4>
+<p>Ensure that you see “Sorbet: Idle” and not “Sorbet: Disabled” at the bottom of
+VS Code. If Sorbet is enabled and it is returning a weird/unexpected definition
+site, please try to reproduce the issue on <a href="https://sorbet.run/">https://sorbet.run/</a> and file a bug on
+the <a href="https://github.com/sorbet/sorbet/issues">issue tracker</a>.</p>
+<h4><a class="anchor" aria-hidden="true" id="go-to-definitiongo-to-type-definitionfind-all-references-brought-me-to-a-file-that-i-cannot-edit"></a><a href="#go-to-definitiongo-to-type-definitionfind-all-references-brought-me-to-a-file-that-i-cannot-edit" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Go to Definition/Go to Type Definition/Find all References brought me to a file that I cannot edit.</h4>
+<p>These features may return results in type definitions for core Ruby libraries,
+which are baked directly into the Sorbet executable and are not present on the
+file system.</p>
+<p>In order to display these files in your editor and to support navigating through
+them, we’ve configured the Sorbet extension to display them in this read-only
+view. Note that certain extension features, like hover and Go to Definition,
+will not function in some of these special files.</p>
+<h3><a class="anchor" aria-hidden="true" id="completion"></a><a href="#completion" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Completion</h3>
+<h4><a class="anchor" aria-hidden="true" id="i-dont-see-any-completion-results"></a><a href="#i-dont-see-any-completion-results" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>I don’t see any completion results.</h4>
+<ul>
+<li>Are you in a <code>typed: false</code> file? No completion results are expected.</li>
+<li>Is the place where you’re trying to see results unreachable? For example,
+after a return statement, or in an else condition that can’t happen? Sorbet
+can’t provide completion results here.</li>
+<li>Can you see completion results for other things? Sorbet only supports
+completing local variables, methods, keywords, suggested sigs, classes,
+modules, and constants right now. Notably, it doesn’t support completing the
+names of instance variables.</li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="i-dont-see-any-completion-results-right-after-i-type-a-or-x"></a><a href="#i-dont-see-any-completion-results-right-after-i-type-a-or-x" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>I don’t see any completion results right after I type A:: or x.</h4>
+<p>You’ll have to type at least one character after the dot (like x.f) or after the
+colon (like A::B) before completion results show up.</p>
+<p>We tried to get this working before the initial ship, but it ended up being a
+more complicated change than we expected. We have a couple ideas how to support
+this, so expect this to be supported in the future.</p>
+<h4><a class="anchor" aria-hidden="true" id="the-completion-results-look-wrong"></a><a href="#the-completion-results-look-wrong" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The completion results look wrong.</h4>
+<p>Completion results can come from many different extensions, not just Sorbet. You
+can try to figure out what extension returned the results by looking at the icon
+that VS Code shows in the completion list:</p>
+<p><img src="/img/lsp/vscode-completion-list.png" alt=""></p>
+<p>Results from Sorbet will only ever have 1 of 6 icons (currently): <code>method</code>,
+<code>variable</code>, <code>field</code>, <code>class</code>, <code>interface</code>, <code>module</code>, <code>enum</code>, <code>keyword</code>, and
+<code>snippet</code>.</p>
+<p><strong>Notably</strong>, the abc icon (<code>word</code>) means the results came either from VS Code’s
+<code>editor.wordBasedSuggestions</code> setting or some other generic autocomplete
+extension.</p>
+<p>Also, <code>snippet</code> results can come from other extensions. Snippet results that
+come from Sorbet will always say <code>(sorbet)</code> somewhere in the snippet
+description. Sorbet does not have control over any snippet results that don’t
+say <code>(sorbet)</code> in them; if they look wrong, the only suggestion is to turn them
+off.</p>
+<h4><a class="anchor" aria-hidden="true" id="can-i-have-sorbet-only-suggest-method-names-not-the-entire-snippet-with-types"></a><a href="#can-i-have-sorbet-only-suggest-method-names-not-the-entire-snippet-with-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Can I have Sorbet only suggest method names, not the entire snippet, with types?</h4>
+<p>Sorbet inserts a suggested snippet into the document when accepting a completion
+result.</p>
+<ul>
+<li>Snippet results will have highlighted sections inside them.</li>
+<li>These represent “holes” (tabstops) that you’ll need to fill in—the aim is that
+every tabstop is for a required argument (i.e., optional / default arguments
+won’t be present).</li>
+<li>As the default text for each of these holes, Sorbet uses the type of the
+corresponding argument.</li>
+<li>Press <code>TAB</code> to cycle through the holes (tabstops), or press <code>ESC</code> to deselect
+all the tabstops.</li>
+</ul>
+<p>It is not possible to opt-out of these completion snippets. If you find that
+this is annoying, please let us know.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/quickref"><span class="arrow-prev">← </span><span>Quick Reference</span></a><a class="docs-next button" href="/docs/gradual"><span>Gradual Type Checking</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#installing-and-enabling-the-sorbet-extension">Installing and enabling the Sorbet extension</a></li><li><a href="#features">Features</a></li><li><a href="#switching-between-configurations">Switching between configurations</a></li><li><a href="#disabling-the-sorbet-extension">Disabling the Sorbet extension</a></li><li><a href="#troubleshooting-and-faq">Troubleshooting and FAQ</a><ul class="toc-headings"><li><a href="#startup">Startup</a></li><li><a href="#diagnostics--error-squiggles">Diagnostics / error squiggles</a></li><li><a href="#hover">Hover</a></li><li><a href="#go-to-definitiongo-to-type-definitionfind-all-references">Go to Definition/Go to Type Definition/Find all References</a></li><li><a href="#completion">Completion</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'ZYWC6Z01G8',
+                apiKey: 'b05a65e9f8d9f50dc4ec3241db8836c4',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>

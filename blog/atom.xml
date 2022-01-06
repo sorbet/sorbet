@@ -2,12 +2,32 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://sorbet.org/blog</id>
     <title>Sorbet Blog</title>
-    <updated>2021-07-30T06:00:00.000Z</updated>
+    <updated>2022-01-06T06:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://sorbet.org/blog"/>
     <subtitle>The best place to stay up-to-date with the latest Sorbet news and events.</subtitle>
     <logo>https://sorbet.org/img/sorbet-logo-white-sparkles.svg</logo>
     <rights>© 2022 Stripe</rights>
+    <entry>
+        <title type="html"><![CDATA[Open-sourcing the Sorbet VS Code Extension]]></title>
+        <id>https://sorbet.org/blog/2022/01/06/open-sourcing-sorbet-vscode.html</id>
+        <link href="https://sorbet.org/blog/2022/01/06/open-sourcing-sorbet-vscode.html"/>
+        <updated>2022-01-06T06:00:00.000Z</updated>
+        <summary type="html"><![CDATA[<p>We’re excited to announce that Stripe’s VS Code extension for Sorbet is now
+<a href="https://github.com/sorbet/sorbet/tree/master/vscode_extension">open source</a>.
+We’ve designed Sorbet to be used in editors from Day 1—For the past two years,
+Sorbet has exposed a flag (<code>--lsp</code>) that starts Sorbet in
+<a href="https://microsoft.github.io/language-server-protocol/">Language Server Protocol</a>
+(LSP) mode. In this mode, Sorbet can respond to many LSP requests, like Go To
+Definition, Find All References, Autocomplete, and more.</p>
+<p>With this release, we’re making it even easier to take advantage of these LSP
+features when working with Sorbet in VS Code. We hope that this extension takes
+some of the guess work out of how to configure and use Sorbet’s LSP mode.</p>
+]]></summary>
+        <author>
+            <name/>
+        </author>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Sorbet Compiler: An experimental, ahead-of-time compiler for Ruby]]></title>
         <id>https://sorbet.org/blog/2021/07/30/open-sourcing-sorbet-compiler.html</id>
