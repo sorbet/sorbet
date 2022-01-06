@@ -471,7 +471,10 @@ void GlobalState::initEmpty() {
     method =
         enterMethod(*this, Symbols::PackageSpecSingleton(), Names::restrict_to_service()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_restrict_to_service());
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::sorbet()).kwArg(Names::minTypedLevel()).kwArg(Names::testsMinTypedLevel()).build();
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::sorbet())
+                 .kwArg(Names::minTypedLevel())
+                 .kwArg(Names::testsMinTypedLevel())
+                 .build();
     ENFORCE(method == Symbols::PackageSpec_sorbet());
 
     klass = synthesizeClass(core::Names::Constants::Encoding());
