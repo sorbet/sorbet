@@ -231,6 +231,15 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             file.data(*gs).source().find("# typed:") == string::npos) {
             ADD_FAIL_CHECK_AT(file.data(*gs).path().data(), 1, "Add a `# typed: strict` line to the top of this file");
         }
+
+        // if a file is typed: ignore, then we shouldn't try to parse
+        // it or do anything with it at all
+        if (file.data(*gs).strictLevel == core::StrictLevel::Ignore) {
+            ast::ParsedFile pf{ast::make_expression<ast::EmptyTree>(), file};
+            trees.emplace_back(move(pf));
+            continue;
+        }
+
         unique_ptr<parser::Node> nodes;
         {
             core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
@@ -579,6 +588,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     vector<ast::ParsedFile> newTrees;
     for (auto &f : trees) {
+        if (f.file.data(*gs).strictLevel == core::StrictLevel::Ignore) {
+            newTrees.emplace_back(move(f));
+            continue;
+        }
+
         const int prohibitedLines = f.file.data(*gs).source().size();
         auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.file.data(*gs).source());
         auto newFile =
