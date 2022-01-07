@@ -12,14 +12,14 @@ suggest-sig.rb:92: Method `with_block` uses `yield` but does not mention a block
     93 |  yield
           ^^^^^
 
-suggest-sig.rb:124: Malformed signature: `generated` is invalid in this context https://srb.help/5003
+suggest-sig.rb:124: Malformed `sig`: `generated` is invalid in this context https://srb.help/5003
      124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     suggest-sig.rb:124: Consult https://sorbet.org/docs/sigs for signature syntax
      124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-suggest-sig.rb:135: Malformed signature: `generated` is invalid in this context https://srb.help/5003
+suggest-sig.rb:135: Malformed `sig`: `generated` is invalid in this context https://srb.help/5003
      135 |  params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
      136 |  returns(T.untyped).
      137 |  generated

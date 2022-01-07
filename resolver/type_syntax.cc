@@ -158,7 +158,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
             if (tsend->fun == core::Names::typeParameters()) {
                 if (parent != nullptr) {
                     if (auto e = ctx.beginError(tsend->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed signature; Type parameters can only be specified in outer sig");
+                        e.setHeader("Malformed `{}`: Type parameters can only be specified in outer sig", "sig");
                     }
                     break;
                 }
@@ -170,7 +170,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                             if (typeArgSpec.type) {
                                 if (auto e =
                                         ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                                    e.setHeader("Malformed signature; Type argument `{}` was specified twice",
+                                    e.setHeader("Malformed `{}`: Type argument `{}` was specified twice", "sig",
                                                 name.show(ctx));
                                 }
                             }
@@ -178,12 +178,12 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                             typeArgSpec.loc = core::Loc(ctx.file, arg.loc());
                         } else {
                             if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                                e.setHeader("Malformed signature; Type parameters are specified with symbols");
+                                e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
                             }
                         }
                     } else {
                         if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Malformed signature; Type parameters are specified with symbols");
+                            e.setHeader("Malformed `{}`: Type parameters are specified with symbols");
                         }
                     }
                 }
@@ -192,14 +192,14 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                 for (auto i = 0; i < numKwArgs; ++i) {
                     auto &kwkey = tsend->getKwKey(i);
                     if (auto e = ctx.beginError(kwkey.loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed signature; Type parameters are specified with symbols");
+                        e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
                     }
                 }
 
                 if (tsend->kwSplat()) {
                     if (auto e =
                             ctx.beginError(tsend->kwSplat()->loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed signature; Type parameters are specified with symbols");
+                        e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
                     }
                 }
             }
@@ -452,7 +452,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                 default:
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         reportedInvalidMethod = true;
-                        e.setHeader("Malformed signature: `{}` is invalid in this context", send->fun.show(ctx));
+                        e.setHeader("Malformed `{}`: `{}` is invalid in this context", "sig", send->fun.show(ctx));
                         e.addErrorLine(core::Loc(ctx.file, send->loc),
                                        "Consult https://sorbet.org/docs/sigs for signature syntax");
                     }
@@ -464,7 +464,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                 if (!send->recv.isSelfReference()) {
                     if (!sig.seen.proc) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Malformed signature: `{}` being invoked on an invalid receiver",
+                            e.setHeader("Malformed `{}`: `{}` being invoked on an invalid receiver", "sig",
                                         send->fun.show(ctx));
                         }
                     }
