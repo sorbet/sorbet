@@ -2,13 +2,25 @@ nested/nested.rb:5: Class or method definition must match enclosing package name
      5 |module Wrong
                ^^^^^
 
-nested/nested.rb:6: Class or method definition must match enclosing package namespace `Root::Nested` https://srb.help/3713
-     6 |  class Inside; end
-                ^^^^^^
+nested/nested.rb:40: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested` https://srb.help/3713
+    40 |  sig {returns(NilClass)}
+          ^^^^^^^^^^^^^^^^^^^^^^^
+
+nested/nested.rb:41: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested` https://srb.help/3713
+    41 |  def self.method
+          ^^^^^^^^^^^^^^^
+
+nested/nested.rb:37: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested` https://srb.help/3713
+    37 |  extend T::Sig
+          ^^^^^^^^^^^^^
 
 nested/nested.rb:38: Constants may not be defined outside of the enclosing package namespace `Root::Nested` https://srb.help/3713
     38 |  NOT_IN_PACKAGE = T.let(1, Integer)
           ^^^^^^^^^^^^^^
+
+nested/nested.rb:41: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested` https://srb.help/3713
+    41 |  def self.method
+          ^^^^^^^^^^^^^^^
 
 nested/nested.rb:54: Class or method definition must match enclosing package namespace `Root::Nested` https://srb.help/3713
     54 |module Root::ModNotInPackage
@@ -29,4 +41,4 @@ nested/nested.test.rb:16: Class or method definition must match enclosing packag
 critic_prefix/real.test.rb:13: Constants may not be defined outside of the enclosing package namespace `Critic::SomePkg` https://srb.help/3713
     13 |SomeOtherNamespace::SomePkg::SomeConst = 4
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 8
+Errors: 11
