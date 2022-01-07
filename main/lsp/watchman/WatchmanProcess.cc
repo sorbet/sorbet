@@ -95,7 +95,7 @@ void WatchmanProcess::start() {
         // Ignore exceptions thrown on forked process.
         if (getpid() == mainPid) {
             auto msg = fmt::format(
-                "Error running Watchman (with `{} -j -p--no-pretty`).\nWatchman is required for Sorbet to "
+                "Error running Watchman (with `{} -j -p --no-pretty`).\nWatchman is required for Sorbet to "
                 "detect changes to files made outside of your code editor.\nDon't need Watchman? Run Sorbet "
                 "with `--disable-watchman`.",
                 watchmanPath);
