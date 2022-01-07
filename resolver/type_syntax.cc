@@ -168,7 +168,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
         if (blockBody) {
             send = blockBody;
         } else {
-            if (auto e = ctx.beginError(sigSend.loc, core::errors::Resolver::InvalidMethodSignature)) {
+            if (auto e = ctx.beginError(sigSend.loc, core::errors::Resolver::MultipleStatementsInSig)) {
                 e.setHeader("Malformed `sig`: Signature blocks must contain a single statement");
                 addMultiStatementSigAutocorrect(ctx, e, block->body);
             }
