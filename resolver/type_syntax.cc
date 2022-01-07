@@ -156,18 +156,17 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
     ParsedSig sig;
     sig.origSend = const_cast<ast::Send *>(&sigSend);
 
-    vector<const ast::Send *> sends;
-
+    const ast::Send *send = nullptr;
     if (isTProc(ctx, &sigSend)) {
-        sends.emplace_back(&sigSend);
+        send = &sigSend;
     } else {
         sig.seen.sig = true;
         ENFORCE(sigSend.fun == core::Names::sig());
         auto *block = sigSend.block();
         ENFORCE(block);
-        auto send = ast::cast_tree<ast::Send>(block->body);
-        if (send) {
-            sends.emplace_back(send);
+        auto *blockBody = ast::cast_tree<ast::Send>(block->body);
+        if (blockBody) {
+            send = blockBody;
         } else {
             if (auto e = ctx.beginError(sigSend.loc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Malformed `sig`: Signature blocks must contain a single statement");
@@ -177,7 +176,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
             return sig;
         }
     }
-    ENFORCE(!sends.empty());
+    ENFORCE(send != nullptr);
 
     if (sigSend.numPosArgs() == 2) {
         auto lit = ast::cast_tree<ast::Literal>(sigSend.getPosArg(1));
@@ -186,329 +185,322 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
         }
     }
 
-    for (auto &send : sends) {
-        const ast::Send *tsend = send;
-        // extract type parameters early
-        while (tsend != nullptr) {
-            if (tsend->fun == core::Names::typeParameters()) {
-                if (parent != nullptr) {
-                    if (auto e = ctx.beginError(tsend->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed `{}`: Type parameters can only be specified in outer sig", "sig");
-                    }
-                    break;
+    const ast::Send *tsend = send;
+    // extract type parameters early
+    while (tsend != nullptr) {
+        if (tsend->fun == core::Names::typeParameters()) {
+            if (parent != nullptr) {
+                if (auto e = ctx.beginError(tsend->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                    e.setHeader("Malformed `{}`: Type parameters can only be specified in outer sig", "sig");
                 }
-                for (auto &arg : tsend->posArgs()) {
-                    if (auto c = ast::cast_tree<ast::Literal>(arg)) {
-                        if (c->isSymbol(ctx)) {
-                            auto name = c->asSymbol(ctx);
-                            auto &typeArgSpec = sig.enterTypeArgByName(name);
-                            if (typeArgSpec.type) {
-                                if (auto e =
-                                        ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                                    e.setHeader("Malformed `{}`: Type argument `{}` was specified twice", "sig",
-                                                name.show(ctx));
-                                }
-                            }
-                            typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todoTypeArgument());
-                            typeArgSpec.loc = core::Loc(ctx.file, arg.loc());
-                        } else {
+                break;
+            }
+            for (auto &arg : tsend->posArgs()) {
+                if (auto c = ast::cast_tree<ast::Literal>(arg)) {
+                    if (c->isSymbol(ctx)) {
+                        auto name = c->asSymbol(ctx);
+                        auto &typeArgSpec = sig.enterTypeArgByName(name);
+                        if (typeArgSpec.type) {
                             if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                                e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
+                                e.setHeader("Malformed `{}`: Type argument `{}` was specified twice", "sig",
+                                            name.show(ctx));
                             }
                         }
+                        typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todoTypeArgument());
+                        typeArgSpec.loc = core::Loc(ctx.file, arg.loc());
                     } else {
                         if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Malformed `{}`: Type parameters are specified with symbols");
+                            e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
                         }
                     }
-                }
-
-                const auto numKwArgs = tsend->numKwArgs();
-                for (auto i = 0; i < numKwArgs; ++i) {
-                    auto &kwkey = tsend->getKwKey(i);
-                    if (auto e = ctx.beginError(kwkey.loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
-                    }
-                }
-
-                if (tsend->kwSplat()) {
-                    if (auto e =
-                            ctx.beginError(tsend->kwSplat()->loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
+                } else {
+                    if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Malformed `{}`: Type parameters are specified with symbols");
                     }
                 }
             }
-            tsend = ast::cast_tree<ast::Send>(tsend->recv);
+
+            const auto numKwArgs = tsend->numKwArgs();
+            for (auto i = 0; i < numKwArgs; ++i) {
+                auto &kwkey = tsend->getKwKey(i);
+                if (auto e = ctx.beginError(kwkey.loc(), core::errors::Resolver::InvalidMethodSignature)) {
+                    e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
+                }
+            }
+
+            if (tsend->kwSplat()) {
+                if (auto e = ctx.beginError(tsend->kwSplat()->loc(), core::errors::Resolver::InvalidMethodSignature)) {
+                    e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
+                }
+            }
         }
+        tsend = ast::cast_tree<ast::Send>(tsend->recv);
     }
     if (parent == nullptr) {
         parent = &sig;
     }
 
-    for (auto &send : sends) {
-        while (send != nullptr) {
-            // so we don't report multiple "method does not exist" errors arising from the same expression
-            bool reportedInvalidMethod = false;
-            switch (send->fun.rawId()) {
-                case core::Names::proc().rawId():
-                    sig.seen.proc = true;
+    while (send != nullptr) {
+        // so we don't report multiple "method does not exist" errors arising from the same expression
+        bool reportedInvalidMethod = false;
+        switch (send->fun.rawId()) {
+            case core::Names::proc().rawId():
+                sig.seen.proc = true;
+                break;
+            case core::Names::bind().rawId(): {
+                if (sig.seen.bind) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Malformed `{}`: Multiple calls to `.bind`", send->fun.show(ctx));
+                    }
+                    sig.bind = core::Symbols::noClassOrModule();
+                }
+                sig.seen.bind = true;
+
+                if (send->numPosArgs() != 1) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", "bind", 1,
+                                    send->numPosArgs());
+                    }
                     break;
-                case core::Names::bind().rawId(): {
-                    if (sig.seen.bind) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Malformed `{}`: Multiple calls to `.bind`", send->fun.show(ctx));
-                        }
-                        sig.bind = core::Symbols::noClassOrModule();
-                    }
-                    sig.seen.bind = true;
+                }
 
-                    if (send->numPosArgs() != 1) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", "bind", 1,
-                                        send->numPosArgs());
-                        }
-                        break;
-                    }
-
-                    bool validBind = false;
-                    auto bind = getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args);
-                    if (core::isa_type<core::ClassType>(bind)) {
-                        auto classType = core::cast_type_nonnull<core::ClassType>(bind);
-                        sig.bind = classType.symbol;
+                bool validBind = false;
+                auto bind = getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args);
+                if (core::isa_type<core::ClassType>(bind)) {
+                    auto classType = core::cast_type_nonnull<core::ClassType>(bind);
+                    sig.bind = classType.symbol;
+                    validBind = true;
+                } else if (auto appType = core::cast_type<core::AppliedType>(bind)) {
+                    // When `T.proc.bind` is used with `T.class_of`, pass it
+                    // through as long as it only has the AttachedClass type
+                    // member.
+                    if (appType->klass.data(ctx)->isSingletonClass(ctx) &&
+                        appType->klass.data(ctx)->typeMembers().size() == 1) {
+                        sig.bind = appType->klass;
                         validBind = true;
-                    } else if (auto appType = core::cast_type<core::AppliedType>(bind)) {
-                        // When `T.proc.bind` is used with `T.class_of`, pass it
-                        // through as long as it only has the AttachedClass type
-                        // member.
-                        if (appType->klass.data(ctx)->isSingletonClass(ctx) &&
-                            appType->klass.data(ctx)->typeMembers().size() == 1) {
-                            sig.bind = appType->klass;
-                            validBind = true;
-                        }
                     }
-
-                    if (!validBind) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Malformed `{}`: Can only bind to simple class names", send->fun.show(ctx));
-                        }
-                    }
-
-                    break;
                 }
-                case core::Names::params().rawId(): {
-                    if (sig.seen.params) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Malformed `{}`: Multiple calls to `.params`", send->fun.show(ctx));
-                        }
-                        sig.argTypes.clear();
-                    }
-                    sig.seen.params = true;
 
-                    if (!send->hasKwArgs() && !send->hasPosArgs()) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            auto paramsStr = send->fun.show(ctx);
-                            e.setHeader("`{}` must be given arguments", paramsStr);
-
-                            core::Loc loc{ctx.file, send->loc};
-                            if (auto orig = loc.source(ctx)) {
-                                auto dot = orig->rfind(".");
-                                if (orig->rfind(".") == string::npos) {
-                                    e.replaceWith("Remove this use of `params`", loc, "");
-                                } else {
-                                    e.replaceWith("Remove this use of `params`", loc, "{}", orig->substr(0, dot));
-                                }
-                            }
-                        }
-                        break;
-                    }
-
-                    // `params` only accepts keyword args
-                    if (send->numPosArgs() != 0) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            auto paramsStr = send->fun.show(ctx);
-                            e.setHeader("`{}` expects keyword arguments", paramsStr);
-                            e.addErrorNote("All parameters must be given names in `{}` even if they are positional",
-                                           paramsStr);
-
-                            // when the first argument is a hash, emit an autocorrect to remove the braces
-                            if (send->numPosArgs() == 1) {
-                                if (auto *hash = ast::cast_tree<ast::Hash>(send->getPosArg(0))) {
-                                    // TODO(jez) Use Loc::adjust here
-                                    auto loc = core::Loc(ctx.file, hash->loc.beginPos(), hash->loc.endPos());
-                                    if (auto locSource = loc.source(ctx)) {
-                                        e.replaceWith("Remove braces from keyword args", loc, "{}",
-                                                      locSource->substr(1, locSource->size() - 2));
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    }
-
-                    if (send->hasKwSplat()) {
-                        // TODO(trevor) add an error for this
-                    }
-
-                    auto end = send->numKwArgs();
-                    for (auto i = 0; i < end; ++i) {
-                        auto &key = send->getKwKey(i);
-                        auto &value = send->getKwValue(i);
-                        auto *lit = ast::cast_tree<ast::Literal>(key);
-                        if (lit && lit->isSymbol(ctx)) {
-                            core::NameRef name = lit->asSymbol(ctx);
-                            auto resultAndBind =
-                                getResultTypeAndBindWithSelfTypeParams(ctx, value, *parent, args.withRebind());
-                            sig.argTypes.emplace_back(ParsedSig::ArgSpec{core::Loc(ctx.file, key.loc()), name,
-                                                                         resultAndBind.type, resultAndBind.rebind});
-                        }
-                    }
-                    break;
-                }
-                case core::Names::typeParameters().rawId():
-                    // was handled above
-                    break;
-                case core::Names::abstract().rawId():
-                    if (sig.seen.final) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Method that is both `{}` and `{}` cannot be implemented", "final", "abstract");
-                        }
-                    }
-                    if (sig.seen.override_) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("`{}` cannot be combined with `{}`", "abstract", "override");
-                        }
-                    }
-                    sig.seen.abstract = true;
-                    break;
-                case core::Names::override_().rawId(): {
-                    if (sig.seen.abstract) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("`{}` cannot be combined with `{}`", "override", "abstract");
-                        }
-                    }
-                    sig.seen.override_ = true;
-
-                    if (send->hasPosArgs()) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("`{}` expects keyword arguments", send->fun.show(ctx));
-                        }
-                        break;
-                    }
-
-                    if (send->hasKwArgs()) {
-                        auto end = send->numKwArgs();
-                        for (auto i = 0; i < end; ++i) {
-                            auto &key = send->getKwKey(i);
-                            auto &value = send->getKwValue(i);
-                            auto lit = ast::cast_tree<ast::Literal>(key);
-                            if (lit && lit->isSymbol(ctx)) {
-                                if (lit->asSymbol(ctx) == core::Names::allowIncompatible()) {
-                                    auto val = ast::cast_tree<ast::Literal>(value);
-                                    if (val && val->isTrue(ctx)) {
-                                        sig.seen.incompatibleOverride = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    break;
-                }
-                case core::Names::implementation().rawId():
-                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::ImplementationDeprecated)) {
-                        e.setHeader("Use of `{}` has been replaced by `{}`", "implementation", "override");
-                        auto loc = core::Loc(ctx.file, send->loc);
-                        if (send->recv.isSelfReference()) {
-                            e.replaceWith("Replace with `override`", loc, "override");
-                        } else {
-                            auto recvLoc = core::Loc{ctx.file, send->recv.loc()};
-                            if (auto source = recvLoc.source(ctx)) {
-                                e.replaceWith("Replace with `override`", loc, "{}.override", source.value());
-                            }
-                        }
-                    }
-                    break;
-                case core::Names::overridable().rawId():
-                    if (sig.seen.final) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Method that is both `{}` and `{}` cannot be implemented", "final",
-                                        "overridable");
-                        }
-                    }
-                    sig.seen.overridable = true;
-                    break;
-                case core::Names::returns().rawId(): {
-                    sig.seen.returns = true;
-                    if (send->hasKwArgs()) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("`{}` does not accept keyword arguments", send->fun.show(ctx));
-                            if (!send->hasKwSplat()) {
-                                auto numKwArgs = send->numKwArgs();
-                                auto start = send->getKwKey(0).loc();
-                                auto end = send->getKwValue(numKwArgs - 1).loc();
-                                core::Loc argsLoc(ctx.file, start.beginPos(), end.endPos());
-                                if (argsLoc.exists()) {
-                                    e.replaceWith("Wrap in braces to make a shape type", argsLoc, "{{{}}}",
-                                                  argsLoc.source(ctx).value());
-                                }
-                            }
-                        }
-                        break;
-                    }
-
-                    if (send->numPosArgs() != 1) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", "returns", 1,
-                                        send->numPosArgs());
-                        }
-                        break;
-                    }
-
-                    sig.returns = getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args);
-
-                    break;
-                }
-                case core::Names::void_().rawId():
-                    sig.seen.void_ = true;
-                    sig.returns = core::Types::void_();
-                    break;
-                case core::Names::checked().rawId():
-                    sig.seen.checked = true;
-                    break;
-                case core::Names::onFailure().rawId():
-                    break;
-                case core::Names::final_().rawId():
+                if (!validBind) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        reportedInvalidMethod = true;
-                        e.setHeader("The syntax for declaring a method final is `sig(:final) {{...}}`, not `sig "
-                                    "{{final. ...}}`");
+                        e.setHeader("Malformed `{}`: Can only bind to simple class names", send->fun.show(ctx));
                     }
-                    break;
-                default:
-                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        reportedInvalidMethod = true;
-                        e.setHeader("Malformed `{}`: `{}` is invalid in this context", "sig", send->fun.show(ctx));
-                        e.addErrorLine(core::Loc(ctx.file, send->loc),
-                                       "Consult https://sorbet.org/docs/sigs for signature syntax");
-                    }
+                }
+
+                break;
             }
-            auto recv = ast::cast_tree<ast::Send>(send->recv);
+            case core::Names::params().rawId(): {
+                if (sig.seen.params) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Malformed `{}`: Multiple calls to `.params`", send->fun.show(ctx));
+                    }
+                    sig.argTypes.clear();
+                }
+                sig.seen.params = true;
 
-            // we only report this error if we haven't reported another unknown method error
-            if (!recv && !reportedInvalidMethod) {
-                if (!send->recv.isSelfReference()) {
-                    if (!sig.seen.proc) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Malformed `{}`: `{}` being invoked on an invalid receiver", "sig",
-                                        send->fun.show(ctx));
+                if (!send->hasKwArgs() && !send->hasPosArgs()) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        auto paramsStr = send->fun.show(ctx);
+                        e.setHeader("`{}` must be given arguments", paramsStr);
+
+                        core::Loc loc{ctx.file, send->loc};
+                        if (auto orig = loc.source(ctx)) {
+                            auto dot = orig->rfind(".");
+                            if (orig->rfind(".") == string::npos) {
+                                e.replaceWith("Remove this use of `params`", loc, "");
+                            } else {
+                                e.replaceWith("Remove this use of `params`", loc, "{}", orig->substr(0, dot));
+                            }
                         }
+                    }
+                    break;
+                }
+
+                // `params` only accepts keyword args
+                if (send->numPosArgs() != 0) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        auto paramsStr = send->fun.show(ctx);
+                        e.setHeader("`{}` expects keyword arguments", paramsStr);
+                        e.addErrorNote("All parameters must be given names in `{}` even if they are positional",
+                                       paramsStr);
+
+                        // when the first argument is a hash, emit an autocorrect to remove the braces
+                        if (send->numPosArgs() == 1) {
+                            if (auto *hash = ast::cast_tree<ast::Hash>(send->getPosArg(0))) {
+                                // TODO(jez) Use Loc::adjust here
+                                auto loc = core::Loc(ctx.file, hash->loc.beginPos(), hash->loc.endPos());
+                                if (auto locSource = loc.source(ctx)) {
+                                    e.replaceWith("Remove braces from keyword args", loc, "{}",
+                                                  locSource->substr(1, locSource->size() - 2));
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
+
+                if (send->hasKwSplat()) {
+                    // TODO(trevor) add an error for this
+                }
+
+                auto end = send->numKwArgs();
+                for (auto i = 0; i < end; ++i) {
+                    auto &key = send->getKwKey(i);
+                    auto &value = send->getKwValue(i);
+                    auto *lit = ast::cast_tree<ast::Literal>(key);
+                    if (lit && lit->isSymbol(ctx)) {
+                        core::NameRef name = lit->asSymbol(ctx);
+                        auto resultAndBind =
+                            getResultTypeAndBindWithSelfTypeParams(ctx, value, *parent, args.withRebind());
+                        sig.argTypes.emplace_back(ParsedSig::ArgSpec{core::Loc(ctx.file, key.loc()), name,
+                                                                     resultAndBind.type, resultAndBind.rebind});
                     }
                 }
                 break;
             }
+            case core::Names::typeParameters().rawId():
+                // was handled above
+                break;
+            case core::Names::abstract().rawId():
+                if (sig.seen.final) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Method that is both `{}` and `{}` cannot be implemented", "final", "abstract");
+                    }
+                }
+                if (sig.seen.override_) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("`{}` cannot be combined with `{}`", "abstract", "override");
+                    }
+                }
+                sig.seen.abstract = true;
+                break;
+            case core::Names::override_().rawId(): {
+                if (sig.seen.abstract) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("`{}` cannot be combined with `{}`", "override", "abstract");
+                    }
+                }
+                sig.seen.override_ = true;
 
-            send = recv;
+                if (send->hasPosArgs()) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("`{}` expects keyword arguments", send->fun.show(ctx));
+                    }
+                    break;
+                }
+
+                if (send->hasKwArgs()) {
+                    auto end = send->numKwArgs();
+                    for (auto i = 0; i < end; ++i) {
+                        auto &key = send->getKwKey(i);
+                        auto &value = send->getKwValue(i);
+                        auto lit = ast::cast_tree<ast::Literal>(key);
+                        if (lit && lit->isSymbol(ctx)) {
+                            if (lit->asSymbol(ctx) == core::Names::allowIncompatible()) {
+                                auto val = ast::cast_tree<ast::Literal>(value);
+                                if (val && val->isTrue(ctx)) {
+                                    sig.seen.incompatibleOverride = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                break;
+            }
+            case core::Names::implementation().rawId():
+                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::ImplementationDeprecated)) {
+                    e.setHeader("Use of `{}` has been replaced by `{}`", "implementation", "override");
+                    auto loc = core::Loc(ctx.file, send->loc);
+                    if (send->recv.isSelfReference()) {
+                        e.replaceWith("Replace with `override`", loc, "override");
+                    } else {
+                        auto recvLoc = core::Loc{ctx.file, send->recv.loc()};
+                        if (auto source = recvLoc.source(ctx)) {
+                            e.replaceWith("Replace with `override`", loc, "{}.override", source.value());
+                        }
+                    }
+                }
+                break;
+            case core::Names::overridable().rawId():
+                if (sig.seen.final) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Method that is both `{}` and `{}` cannot be implemented", "final", "overridable");
+                    }
+                }
+                sig.seen.overridable = true;
+                break;
+            case core::Names::returns().rawId(): {
+                sig.seen.returns = true;
+                if (send->hasKwArgs()) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("`{}` does not accept keyword arguments", send->fun.show(ctx));
+                        if (!send->hasKwSplat()) {
+                            auto numKwArgs = send->numKwArgs();
+                            auto start = send->getKwKey(0).loc();
+                            auto end = send->getKwValue(numKwArgs - 1).loc();
+                            core::Loc argsLoc(ctx.file, start.beginPos(), end.endPos());
+                            if (argsLoc.exists()) {
+                                e.replaceWith("Wrap in braces to make a shape type", argsLoc, "{{{}}}",
+                                              argsLoc.source(ctx).value());
+                            }
+                        }
+                    }
+                    break;
+                }
+
+                if (send->numPosArgs() != 1) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", "returns", 1,
+                                    send->numPosArgs());
+                    }
+                    break;
+                }
+
+                sig.returns = getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args);
+
+                break;
+            }
+            case core::Names::void_().rawId():
+                sig.seen.void_ = true;
+                sig.returns = core::Types::void_();
+                break;
+            case core::Names::checked().rawId():
+                sig.seen.checked = true;
+                break;
+            case core::Names::onFailure().rawId():
+                break;
+            case core::Names::final_().rawId():
+                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                    reportedInvalidMethod = true;
+                    e.setHeader("The syntax for declaring a method final is `sig(:final) {{...}}`, not `sig "
+                                "{{final. ...}}`");
+                }
+                break;
+            default:
+                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                    reportedInvalidMethod = true;
+                    e.setHeader("Malformed `{}`: `{}` is invalid in this context", "sig", send->fun.show(ctx));
+                    e.addErrorLine(core::Loc(ctx.file, send->loc),
+                                   "Consult https://sorbet.org/docs/sigs for signature syntax");
+                }
         }
+        auto recv = ast::cast_tree<ast::Send>(send->recv);
+
+        // we only report this error if we haven't reported another unknown method error
+        if (!recv && !reportedInvalidMethod) {
+            if (!send->recv.isSelfReference()) {
+                if (!sig.seen.proc) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Malformed `{}`: `{}` being invoked on an invalid receiver", "sig",
+                                    send->fun.show(ctx));
+                    }
+                }
+            }
+            break;
+        }
+
+        send = recv;
     }
     ENFORCE(sig.seen.sig || sig.seen.proc);
 
