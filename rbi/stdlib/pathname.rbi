@@ -381,7 +381,7 @@ class Pathname < Object
     params(
         blk: T.proc.params(arg0: Pathname).returns(BasicObject),
     )
-    .returns(T.untyped)
+    .void
   end
   sig {returns(T::Enumerator[Pathname])}
   def ascend(&blk); end
@@ -543,7 +543,7 @@ class Pathname < Object
   # if `self` is a file, or
   # [`Dir.unlink`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-unlink)
   # as necessary.
-  sig {returns(T.untyped)}
+  sig {void}
   def delete(); end
 
   # Iterates over and yields a new
@@ -581,7 +581,7 @@ class Pathname < Object
     params(
         blk: T.proc.params(arg0: Pathname).returns(BasicObject),
     )
-    .returns(T.untyped)
+    .void
   end
   sig {returns(T::Enumerator[Pathname])}
   def descend(&blk); end
@@ -642,7 +642,7 @@ class Pathname < Object
         with_directory: T::Boolean,
         blk: T.proc.params(arg0: Pathname).returns(BasicObject),
     )
-    .returns(T.untyped)
+    .void
   end
   def each_child(with_directory = true, &blk); end
 
@@ -653,7 +653,7 @@ class Pathname < Object
     params(
         blk: T.proc.params(arg0: Pathname).returns(BasicObject),
     )
-    .returns(T.untyped)
+    .void
   end
   def each_entry(&blk); end
 
@@ -678,7 +678,7 @@ class Pathname < Object
     params(
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
-    .returns(T.untyped)
+    .void
   end
   sig {returns(T::Enumerator[String])}
   def each_filename(&blk); end
@@ -691,7 +691,7 @@ class Pathname < Object
         limit: Integer,
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
-    .returns(T.untyped)
+    .void
   end
   sig do
     params(
@@ -828,6 +828,19 @@ class Pathname < Object
   end
   def fnmatch(pattern, flags=T.unsafe(nil)); end
 
+  # Return `true` if the receiver matches the given pattern.
+  #
+  # See
+  # [`File.fnmatch`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-fnmatch).
+  sig do
+    params(
+        pattern: String,
+        flags: Integer,
+    )
+    .returns(T::Boolean)
+  end
+  def fnmatch?(pattern, flags=T.unsafe(nil)); end
+
   # Freezes this
   # [`Pathname`](https://docs.ruby-lang.org/en/2.7.0/Pathname.html).
   #
@@ -924,11 +937,23 @@ class Pathname < Object
   # [`File.link`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-link).
   sig do
     params(
-        old: String,
+        old: T.any(String, Pathname),
     )
     .returns(Integer)
   end
   def make_link(old); end
+
+  # Creates a symbolic link.
+  #
+  # See
+  # [`File.symlink`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-symlink).
+  sig do
+    params(
+        old: T.any(String, Pathname),
+    )
+    .returns(Integer)
+  end
+  def make_symlink(old); end
 
   # Create the referenced directory.
   #
@@ -949,7 +974,7 @@ class Pathname < Object
   # [`FileUtils.mkpath`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-mkpath)
   # and
   # [`FileUtils.mkdir_p`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-mkdir_p)
-  sig {returns(T.untyped)}
+  sig {void}
   def mkpath(); end
 
   # Returns `true` if `self` points to a mountpoint.
