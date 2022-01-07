@@ -1,0 +1,7 @@
+tmp="$(mktemp)"
+pre="test/cli/autocorrect-multi-statement-sigs/pre.rb"
+post="test/cli/autocorrect-multi-statement-sigs/post.rb"
+cp "$pre" "$tmp"
+main/sorbet --silence-dev-message -a "$tmp"
+diff "$post" "$tmp"
+rm "$tmp"
