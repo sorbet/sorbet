@@ -71,6 +71,11 @@
         "command": "sorbet.showOutput",
         "title": "Show Output",
         "category": "Sorbet"
+      },
+      {
+        "command": "sorbet.copySymbolToClipboard",
+        "title": "Copy Symbol to Clipboard",
+        "category": "Sorbet"
       }
     ],
     "configuration": {
@@ -263,6 +268,11 @@
         {
           "command": "sorbet.showOutput",
           "when": "editorLangId == ruby"
+        },
+        {
+          "when": "resourceLangId == ruby",
+          "command": "sorbet.copySymbolToClipboard",
+          "group": "9_cutcopypaste"
         }
       ]
     }
