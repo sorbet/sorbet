@@ -1,11 +1,19 @@
 import { ChildProcess, spawn } from "child_process";
-import { workspace, OutputChannel } from "vscode";
+import {
+  workspace,
+  commands,
+  OutputChannel,
+  window as vscodeWindow,
+  env as vscodeEnv,
+} from "vscode";
 import {
   LanguageClient,
   CloseAction,
   ErrorAction,
   ErrorHandler,
-  RevealOutputChannelOn
+  RevealOutputChannelOn,
+  SymbolInformation,
+  TextDocumentPositionParams,
 } from "vscode-languageclient";
 
 import { stopProcess } from "./connections";
@@ -132,6 +140,38 @@ export default class SorbetLanguageClient implements ErrorHandler {
       if (this._status !== ServerStatus.ERROR) {
         // Language client started successfully.
         this._updateStatus(ServerStatus.RUNNING);
+      }
+
+      const caps: any = this._languageClient.initializeResult?.capabilities;
+      if (caps.sorbetShowSymbolProvider) {
+        this._subscriptions.push(
+          commands.registerCommand('sorbet.copySymbolToClipboard', async () => {
+            const editor = vscodeWindow.activeTextEditor;
+            if (!editor) {
+              return;
+            }
+
+            if (!editor.selection.isEmpty) {
+              return; // something is selected, abort
+            }
+
+            const position = editor.selection.active;
+            const params: TextDocumentPositionParams = {
+              textDocument: {
+                uri: editor.document.uri.toString(),
+              },
+              position,
+            };
+            const response: SymbolInformation = await this._languageClient.sendRequest(
+              'sorbet/showSymbol',
+              params,
+            );
+
+            await vscodeEnv.clipboard.writeText(response.name);
+
+            console.log(`Copied ${response.name} to the clipboard.`);
+          }),
+        );
       }
     });
     this._subscriptions.push(this._languageClient.start());
