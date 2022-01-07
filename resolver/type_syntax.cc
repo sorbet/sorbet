@@ -147,8 +147,6 @@ void addMultiStatementSigAutocorrect(core::Context ctx, core::ErrorBuilder &e, c
     }
 
     e.replaceWith("Use a chained sig builder", core::Loc{ctx.file, insseq->loc}, "{}", replacement);
-
-    return;
 }
 
 ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
@@ -169,7 +167,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
             send = blockBody;
         } else {
             if (auto e = ctx.beginError(sigSend.loc, core::errors::Resolver::MultipleStatementsInSig)) {
-                e.setHeader("Malformed `sig`: Signature blocks must contain a single statement");
+                e.setHeader("Malformed `{}`: Signature blocks must contain a single statement", "sig");
                 addMultiStatementSigAutocorrect(ctx, e, block->body);
             }
 
