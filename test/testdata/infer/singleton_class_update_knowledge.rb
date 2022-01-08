@@ -9,7 +9,7 @@ def test1(x)
   if x == A
     T.reveal_type(x) # error: `T.class_of(A)`
   else
-    T.reveal_type(x) # error: `T.any(T.class_of(A), T.class_of(B))`
+    T.reveal_type(x) # error: `T.class_of(B)`
   end
 end
 
@@ -18,7 +18,7 @@ def test2(x)
   if A == x
     T.reveal_type(x) # error: `T.class_of(A)`
   else
-    T.reveal_type(x) # error: `T.any(T.class_of(A), T.class_of(B))`
+    T.reveal_type(x) # error: `T.class_of(B)`
   end
 end
 
@@ -55,7 +55,7 @@ def test5(x)
   if x == C
     T.reveal_type(x) # error: `T.class_of(C)[T.untyped]`
   else
-    T.reveal_type(x) # error: `T.any(T.class_of(C)[T.untyped], T.class_of(D)[T.untyped])`
+    T.reveal_type(x) # error: `T.class_of(D)[T.untyped]`
   end
 end
 
@@ -64,6 +64,6 @@ def test6(x)
   if C == x
     T.reveal_type(x) # error: `T.class_of(C)[T.untyped]`
   else
-    T.reveal_type(x) # error: `T.any(T.class_of(C)[T.untyped], T.class_of(D)[T.untyped])`
+    T.reveal_type(x) # error: `T.class_of(D)[T.untyped]`
   end
 end
