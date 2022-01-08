@@ -497,6 +497,11 @@ class EnforcePackagePrefix final {
     const PackageInfoImpl &pkg;
     const bool isTestFile;
     vector<core::NameRef> nameParts;
+    // Counter to avoid duplicate errors:
+    // - Only emit errors when depth is 0
+    // - Upon emitting an error increment
+    // - Once greater than 0, all preTransform* increment, postTransform* decrement
+    int errorDepth = 0;
     int rootConsts = 0;
     int skipPush = 0;
 
@@ -509,6 +514,10 @@ public:
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>
+            return tree;
+        }
+        if (errorDepth > 0) {
+            errorDepth++;
             return tree;
         }
 
@@ -527,6 +536,8 @@ public:
         auto &pkgName = requiredNamespace(ctx.state);
 
         if (rootConsts == 0 && !sharesPrefix(pkgName, nameParts)) {
+            ENFORCE(errorDepth == 0);
+            errorDepth++;
             if (auto e = ctx.beginError(constantLit->loc, core::errors::Packager::DefinitionPackageMismatch)) {
                 e.setHeader(
                     "Class or method definition must match enclosing package namespace `{}`",
@@ -544,7 +555,16 @@ public:
             ENFORCE(nameParts.size() == 0);
             ENFORCE(rootConsts == 0);
             ENFORCE(skipPush == 0);
+            ENFORCE(errorDepth == 0);
             return tree;
+        }
+
+        if (errorDepth > 0) {
+            errorDepth--;
+            // only continue if this was the first occurrence of the error
+            if (errorDepth > 0) {
+                return tree;
+            }
         }
 
         if (skipPush > 0) {
@@ -562,6 +582,10 @@ public:
     }
 
     ast::ExpressionPtr preTransformAssign(core::Context ctx, ast::ExpressionPtr original) {
+        if (errorDepth > 0) {
+            errorDepth++;
+            return original;
+        }
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(original);
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
 
@@ -571,6 +595,8 @@ public:
                 auto &pkgName = requiredNamespace(ctx.state);
 
                 if (rootConsts == 0 && !isPrefix(pkgName, nameParts)) {
+                    ENFORCE(errorDepth == 0);
+                    errorDepth++;
                     if (auto e = ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
                         e.setHeader("Constants may not be defined outside of the enclosing package namespace `{}`",
                                     fmt::map_join(pkgName.begin(), pkgName.end(),
@@ -583,6 +609,63 @@ public:
         }
 
         return original;
+    }
+
+    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr original) {
+        if (errorDepth > 0) {
+            errorDepth--;
+        }
+        return original;
+    }
+
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr original) {
+        if (errorDepth > 0) {
+            errorDepth++;
+            return original;
+        }
+        auto &def = ast::cast_tree_nonnull<ast::MethodDef>(original);
+        checkBehaviorLoc(ctx, def.declLoc);
+        return original;
+    }
+
+    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr original) {
+        if (errorDepth > 0) {
+            errorDepth--;
+        }
+        return original;
+    }
+
+    ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr original) {
+        if (errorDepth > 0) {
+            errorDepth++;
+            return original;
+        }
+        checkBehaviorLoc(ctx, original.loc());
+        return original;
+    }
+
+    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr original) {
+        if (errorDepth > 0) {
+            errorDepth--;
+        }
+        return original;
+    }
+
+    void checkBehaviorLoc(core::Context ctx, core::LocOffsets loc) {
+        ENFORCE(errorDepth == 0);
+        if (rootConsts > 0 || nameParts.empty()) {
+            return;
+        }
+        auto &pkgName = requiredNamespace(ctx.state);
+        if (!isPrefix(pkgName, nameParts)) {
+            ENFORCE(errorDepth == 0);
+            errorDepth++;
+            if (auto e = ctx.beginError(loc, core::errors::Packager::DefinitionPackageMismatch)) {
+                e.setHeader(
+                    "Class or method behavior may not be defined outside of the enclosing package namespace `{}`",
+                    fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx); }));
+            }
+        }
     }
 
 private:

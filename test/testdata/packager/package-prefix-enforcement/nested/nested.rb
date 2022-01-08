@@ -5,7 +5,6 @@ extend T::Sig
 module Wrong
      # ^^^^^ error: Class or method definition must match enclosing package namespace `Root::Nested`
   class Inside; end
-      # ^^^^^^ error: Class or method definition must match enclosing package namespace `Root::Nested`
 end
 
 Root::Nested::Foo::Bar = nil
@@ -43,11 +42,14 @@ end
 
 module Root
   extend T::Sig
+# ^^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested`
   NOT_IN_PACKAGE = T.let(1, Integer)
 # ^^^^^^^^^^^^^^ error: Constants may not be defined outside of the enclosing package namespace `Root::Nested`
 
   sig {returns(NilClass)}
+# ^^^^^^^^^^^^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested`
   def self.method
+# ^^^^^^^^^^^^^^^ error-with-dupes: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested`
     nil
   end
 end
