@@ -67,3 +67,25 @@ def test6(x)
     T.reveal_type(x) # error: `T.class_of(D)[T.untyped]`
   end
 end
+
+module E; end
+module F; end
+
+sig {params(x: T.any(T.class_of(E), T.class_of(F))).void}
+def test7(x)
+  if x == E
+    T.reveal_type(x) # error: `T.class_of(E)`
+  else
+    T.reveal_type(x) # error: `T.class_of(F)`
+  end
+end
+
+sig {params(x: T.any(T.class_of(E), T.class_of(F))).void}
+def test8(x)
+  if E == x
+    T.reveal_type(x) # error: `T.class_of(E)`
+  else
+    T.reveal_type(x) # error: `T.class_of(F)`
+  end
+end
+
