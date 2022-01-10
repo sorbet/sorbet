@@ -6,13 +6,13 @@
 #include "core/StrictLevel.h"
 #include <string>
 #include <string_view>
-#include <utility>
 
 namespace sorbet::core {
 class GlobalState;
 class File;
 struct GlobalStateHash;
 struct FileHash;
+struct LocOffsets;
 namespace serialize {
 class SerializerImpl;
 }
@@ -82,7 +82,7 @@ public:
     friend class GlobalState;
     friend class ::sorbet::core::serialize::SerializerImpl;
 
-    static std::pair<size_t, size_t> fileStrictSigilLocation(std::string_view source);
+    static LocOffsets fileStrictSigilLocation(std::string_view source);
     static StrictLevel fileStrictSigil(std::string_view source);
     static CompiledLevel fileCompiledSigil(std::string_view source);
 
