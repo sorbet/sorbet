@@ -1819,9 +1819,11 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
         auto isTestFile = file.isPackagedTest();
         // check that the files are indeed as typed as they should be
         if (!isTestFile && file.originalSigil < pkgImpl.minStrictLevel()) {
-            auto [begin, end] = core::File::fileStrictSigilLocation(file.source());
-            if (auto e = ctx.beginError(core::LocOffsets{static_cast<uint32_t>(begin), static_cast<uint32_t>(end)},
-                                        core::errors::Packager::MinTypedLevelViolation)) {
+            auto loc = core::File::fileStrictSigilLocation(file.source());
+            if (!loc.exists()) {
+                loc = core::LocOffsets{0, 0};
+            }
+            if (auto e = ctx.beginError(loc, core::errors::Packager::MinTypedLevelViolation)) {
                 e.setHeader("File `{}` is marked as `{}`, but it belongs to package `{}` which stipulates a minimum "
                             "typed level of `{}`",
                             ctx.file.data(ctx).path(), levelToSigil(file.originalSigil), pkgImpl.name.toString(ctx),
@@ -1829,9 +1831,11 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
             }
         }
         if (isTestFile && file.originalSigil < pkgImpl.minTestStrictLevel()) {
-            auto [begin, end] = core::File::fileStrictSigilLocation(file.source());
-            if (auto e = ctx.beginError(core::LocOffsets{static_cast<uint32_t>(begin), static_cast<uint32_t>(end)},
-                                        core::errors::Packager::MinTypedLevelViolation)) {
+            auto loc = core::File::fileStrictSigilLocation(file.source());
+            if (!loc.exists()) {
+                loc = core::LocOffsets{0, 0};
+            }
+            if (auto e = ctx.beginError(loc, core::errors::Packager::MinTypedLevelViolation)) {
                 e.setHeader("Test file `{}` is marked as `{}`, but it belongs to package `{}` which stipulates a "
                             "minimum typed level of `{}` for tests",
                             ctx.file.data(ctx).path(), levelToSigil(file.originalSigil), pkgImpl.name.toString(ctx),
