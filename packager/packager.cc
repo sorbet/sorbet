@@ -1027,7 +1027,7 @@ struct PackageInfoFinder {
                 } else if (key.asSymbol(ctx) == core::Names::testsMinTypedLevel()) {
                     info->pkgMinTestStrictLevel = level;
                 } else {
-                    if (auto e = ctx.beginError(key.loc, core::errors::Packager::InvalidTypedLevelDeclaration)) {
+                    if (auto e = ctx.beginError(key.loc, core::errors::Packager::InvalidMinTypedLevelDeclaration)) {
                         e.setHeader("Unexpected keyword argument `{}` for `{}`", key.asSymbol(ctx).toString(ctx),
                                     "sorbet");
                         e.addErrorLine(core::Loc(ctx.file, key.loc), "Expected either `{}` or `{}`", "min_typed_level",
@@ -1043,7 +1043,7 @@ struct PackageInfoFinder {
     core::StrictLevel getLevelFromExpression(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto strlit = ast::cast_tree<ast::Literal>(tree);
         if (!strlit || !strlit->isString(ctx)) {
-            if (auto e = ctx.beginError(tree.loc(), core::errors::Packager::InvalidTypedLevelDeclaration)) {
+            if (auto e = ctx.beginError(tree.loc(), core::errors::Packager::InvalidMinTypedLevelDeclaration)) {
                 e.setHeader("All package type levels must be specified as string literals");
             }
             return core::StrictLevel::None;
@@ -1061,7 +1061,7 @@ struct PackageInfoFinder {
             case core::Names::strong().rawId():
                 return core::StrictLevel::Strong;
             default:
-                if (auto e = ctx.beginError(tree.loc(), core::errors::Packager::InvalidTypedLevelDeclaration)) {
+                if (auto e = ctx.beginError(tree.loc(), core::errors::Packager::InvalidMinTypedLevelDeclaration)) {
                     e.setHeader("Invalid typed level `{}`", tree.toString(ctx));
                     e.addErrorLine(core::Loc(ctx.file, tree.loc()), "Expected one of: `{}`, `{}`, `{}`, `{}`, or `{}`",
                                    "ignore", "false", "true", "strict", "strong");
@@ -1815,7 +1815,7 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
         if (!isTestFile && file.originalSigil < pkgImpl.minStrictLevel()) {
             auto [begin, end] = core::File::fileStrictSigilLocation(file.source());
             if (auto e = ctx.beginError(core::LocOffsets{static_cast<uint32_t>(begin), static_cast<uint32_t>(end)},
-                                        core::errors::Packager::TypedLevelViolation)) {
+                                        core::errors::Packager::MinTypedLevelViolation)) {
                 e.setHeader("File `{}` is marked as `{}`, but it belongs to package `{}` which stipulates a minimum "
                             "typed level of `{}`",
                             ctx.file.data(ctx).path(), levelToSigil(file.originalSigil), pkgImpl.name.toString(ctx),
@@ -1825,7 +1825,7 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
         if (isTestFile && file.originalSigil < pkgImpl.minTestStrictLevel()) {
             auto [begin, end] = core::File::fileStrictSigilLocation(file.source());
             if (auto e = ctx.beginError(core::LocOffsets{static_cast<uint32_t>(begin), static_cast<uint32_t>(end)},
-                                        core::errors::Packager::TypedLevelViolation)) {
+                                        core::errors::Packager::MinTypedLevelViolation)) {
                 e.setHeader("Test file `{}` is marked as `{}`, but it belongs to package `{}` which stipulates a "
                             "minimum typed level of `{}` for tests",
                             ctx.file.data(ctx).path(), levelToSigil(file.originalSigil), pkgImpl.name.toString(ctx),
