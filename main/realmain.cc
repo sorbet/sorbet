@@ -767,7 +767,7 @@ int realmain(int argc, char *argv[]) {
         }
 
         auto relativeIgnorePatterns = opts.relativeIgnorePatterns;
-        auto it = find(relativeIgnorePatterns.begin(), relativeIgnorePatterns.end(), "/__package.rb");
+        auto it = absl::c_find(relativeIgnorePatterns, "/__package.rb");
         if (it != relativeIgnorePatterns.end()) {
             relativeIgnorePatterns.erase(it);
         } else {
