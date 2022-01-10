@@ -54,12 +54,20 @@ StrictLevel File::fileStrictSigil(string_view source) {
     // the thing immediately after `typed:`, so we can jump ahead
     // here.
     auto start = sigilLoc.beginPos();
-    start += 6;
+
+    // find the `:`
+    while (start < source.size() && source[start] != ':') {
+        ++start;
+    }
+    // advance past the `:`
+    ++start;
+    // advance past any spaces
     while (start < source.size() && source[start] == ' ') {
         ++start;
     }
 
-    string_view suffix = source.substr(start, sigilLoc.endPos());
+    string_view suffix = source.substr(start, sigilLoc.endPos() - start);
+
     if (suffix == "ignore") {
         return StrictLevel::Ignore;
     } else if (suffix == "false") {
