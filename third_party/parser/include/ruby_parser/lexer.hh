@@ -113,6 +113,9 @@ private:
     std::string tok();
     std::string tok(const char *start);
     std::string tok(const char *start, const char *end);
+    std::string_view tok_view();
+    std::string_view tok_view(const char *start);
+    std::string_view tok_view(const char *start, const char *end);
     void emit(token_type type);
     void emit(token_type type, const std::string &str);
     void emit(token_type type, const std::string &str, const char *start, const char *end);
@@ -123,7 +126,7 @@ private:
     diagnostic::range range(const char *start, const char *end);
     void diagnostic_(dlevel level, dclass type, const std::string &data = "");
     void diagnostic_(dlevel level, dclass type, diagnostic::range &&range, const std::string &data = "");
-    template <typename... Args> int push_literal(Args &&... args);
+    template <typename... Args> int push_literal(Args &&...args);
     int next_state_for_literal(literal &lit);
     literal &literal_();
     int pop_literal();

@@ -178,17 +178,29 @@ void lexer::emit_comment(const char* s, const char* e) {
 }
 
 std::string lexer::tok() {
-  return tok(ts);
+  return std::string{tok_view()};
 }
 
 std::string lexer::tok(const char* start) {
-  return tok(start, te);
+  return std::string{tok_view(start)};
 }
 
 std::string lexer::tok(const char* start, const char* end) {
+  return std::string{tok_view(start, end)};
+}
+
+std::string_view lexer::tok_view() {
+  return tok_view(ts);
+}
+
+std::string_view lexer::tok_view(const char* start) {
+  return tok_view(start, te);
+}
+
+std::string_view lexer::tok_view(const char* start, const char* end) {
   assert(start <= end);
 
-  return std::string(start, (size_t)(end - start));
+  return std::string_view(start, (size_t)(end - start));
 }
 
 char lexer::unescape(uint32_t codepoint) {
