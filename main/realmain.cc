@@ -803,7 +803,6 @@ int realmain(int argc, char *argv[]) {
             logger->error("Cannot write metrics file at `{}`", opts.metricsFile);
         }
     }
-
 #endif
     if (!gs || gs->hadCriticalError() || (gsForMinimize && gsForMinimize->hadCriticalError())) {
         returnCode = 10;
