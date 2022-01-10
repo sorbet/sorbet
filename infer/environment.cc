@@ -492,6 +492,13 @@ bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
         return true;
     }
 
+    // attachedClass on untyped symbol is defined to return itself
+    if (sym != core::Symbols::untyped() && sym.data(ctx)->attachedClass(ctx).exists() &&
+        sym.data(ctx)->isClassOrModuleFinal()) {
+        // This is a Ruby singleton class object
+        return true;
+    }
+
     // The Ruby stdlib has a Singleton module which lets people invent their own singletons.
     return (sym.data(ctx)->derivesFrom(ctx, core::Symbols::Singleton()) && sym.data(ctx)->isClassOrModuleFinal());
 }
@@ -591,26 +598,36 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         ENFORCE(recvType != nullptr);
         if (!argType.isUntyped()) {
             truthy.addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
-        }
-        if (!recvType.isUntyped()) {
-            truthy.addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
-        }
-        if (core::isa_type<core::ClassType>(argType)) {
-            auto s = core::cast_type_nonnull<core::ClassType>(argType);
-            // check if s is a singleton. in this case we can learn that
-            // a failed comparison means that type test would also fail
-            if (isSingleton(ctx, s.symbol)) {
+
+            auto argSymbol = core::Symbols::noClassOrModule();
+            if (core::isa_type<core::ClassType>(argType)) {
+                auto c = core::cast_type_nonnull<core::ClassType>(argType);
+                argSymbol = c.symbol;
+            } else if (core::isa_type<core::AppliedType>(argType)) {
+                auto a = core::cast_type_nonnull<core::AppliedType>(argType);
+                argSymbol = a.klass;
+            }
+            if (argSymbol.exists() && isSingleton(ctx, argSymbol)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
             }
         }
-        if (core::isa_type<core::ClassType>(recvType)) {
-            auto s = core::cast_type_nonnull<core::ClassType>(recvType);
-            // check if s is a singleton. in this case we can learn that
-            // a failed comparison means that type test would also fail
-            if (isSingleton(ctx, s.symbol)) {
+
+        if (!recvType.isUntyped()) {
+            truthy.addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
+
+            core::ClassOrModuleRef recvSymbol = core::Symbols::noClassOrModule();
+            if (core::isa_type<core::ClassType>(recvType)) {
+                auto c = core::cast_type_nonnull<core::ClassType>(recvType);
+                recvSymbol = c.symbol;
+            } else if (core::isa_type<core::AppliedType>(recvType)) {
+                auto a = core::cast_type_nonnull<core::AppliedType>(recvType);
+                recvSymbol = a.klass;
+            }
+            if (recvSymbol.exists() && isSingleton(ctx, recvSymbol)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
             }
         }
+
         whoKnows.sanityCheck();
     } else if (send->fun == core::Names::tripleEq()) {
         if (!knowledgeFilter.isNeeded(local)) {
