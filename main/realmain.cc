@@ -710,14 +710,14 @@ int realmain(int argc, char *argv[]) {
                 return !absl::EndsWith(packageFile, "__package.rb");
             }));
 
-            if (!packageFiles.empty()) {
-                auto packageFileRefs = pipeline::reserveFiles(gs, packageFiles);
-                auto packages = pipeline::index(*gs, packageFileRefs, opts, *workers, nullptr);
-                packager::RBIGenerator::run(*gs, move(packages), opts.packageRBIOutput, *workers);
-            } else {
+            if (packageFiles.empty()) {
                 logger->error("No package files found!");
                 return 1;
             }
+
+            auto packageFileRefs = pipeline::reserveFiles(gs, packageFiles);
+            auto packages = pipeline::index(*gs, packageFileRefs, opts, *workers, nullptr);
+            packager::RBIGenerator::run(*gs, move(packages), opts.packageRBIOutput, *workers);
 #endif
         }
 
