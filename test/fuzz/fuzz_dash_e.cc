@@ -29,7 +29,7 @@ unique_ptr<core::GlobalState> buildInitialGlobalState() {
     typeErrorsConsole->set_level(spd::level::critical);
 
     unique_ptr<core::GlobalState> gs =
-        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
+        make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger));
 
     logger->trace("Doing on-start initialization");
 

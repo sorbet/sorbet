@@ -89,7 +89,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
 
         auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
         auto logger = std::make_shared<spdlog::logger>("null", sink);
-        auto gs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*logger, *logger)));
+        auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
         payload::createInitialGlobalState(gs, *opts, kvstore);
 
         // If caching fails, gs gets modified during payload creation.
@@ -191,7 +191,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
         auto contents = kvstore->read(key);
         REQUIRE_NE(contents.data, nullptr);
 
-        auto gs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*nullLogger, *nullLogger)));
+        auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*nullLogger, *nullLogger));
         payload::createInitialGlobalState(gs, *opts, kvstore);
 
         // If caching fails, gs gets modified during payload creation.
