@@ -1,6 +1,7 @@
 #include "core/Files.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
+#include "core/Loc.h"
 #include "core/NameHash.h"
 #include <vector>
 
@@ -107,7 +108,7 @@ StrictLevel File::fileStrictSigil(string_view source) {
     }
 }
 
-pair<size_t, size_t> File::fileStrictSigilLocation(string_view source) {
+LocOffsets File::fileStrictSigilLocation(string_view source) {
     /*
      * StrictLevel::None: <none>
      * StrictLevel::False: # typed: false
@@ -154,7 +155,7 @@ pair<size_t, size_t> File::fileStrictSigilLocation(string_view source) {
             end -= 1;
         }
 
-        return {comment_start, end};
+        return {static_cast<uint32_t>(comment_start), static_cast<uint32_t>(end)};
     }
 }
 
