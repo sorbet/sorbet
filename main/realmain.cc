@@ -191,7 +191,6 @@ struct AutogenResult {
         // Selectively populated based on print options
         string strval;
         string msgpack;
-        vector<string> classlist;
         optional<autogen::Subclasses::Map> subclasses;
     };
     CounterState counters;
@@ -258,10 +257,6 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 if (!tree.file.data(gs).isRBI()) {
                     // Exclude RBI files because they are not loadable and should not appear in
                     // auto-loader related output.
-                    if (opts.print.AutogenClasslist.enabled) {
-                        Timer timeit(logger, "autogenClasslist");
-                        serialized.classlist = pf.listAllClasses(ctx);
-                    }
                     if (opts.print.AutogenSubclasses.enabled) {
                         Timer timeit(logger, "autogenSubclasses");
                         serialized.subclasses = autogen::Subclasses::listAllSubclasses(
@@ -322,17 +317,6 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         }
     }
 
-    if (opts.print.AutogenClasslist.enabled) {
-        Timer timeit(logger, "autogenClasslistPrint");
-        vector<string> mergedClasslist;
-        for (auto &el : merged) {
-            auto &v = el.classlist;
-            mergedClasslist.insert(mergedClasslist.end(), make_move_iterator(v.begin()), make_move_iterator(v.end()));
-        }
-        fast_sort(mergedClasslist);
-        auto last = unique(mergedClasslist.begin(), mergedClasslist.end());
-        opts.print.AutogenClasslist.fmt("{}\n", fmt::join(mergedClasslist.begin(), last, "\n"));
-    }
     if (opts.print.AutogenSubclasses.enabled) {
         Timer timeit(logger, "autogenSubclassesPrint");
 

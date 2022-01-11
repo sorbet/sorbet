@@ -201,9 +201,8 @@ Usage:
                                 file-table-proto, file-table-messagepack,
                                 file-table-full-json, file-table-full-proto,
                                 file-table-full-messagepack, missing-constants, autogen,
-                                autogen-msgpack, autogen-classlist,
-                                autogen-autoloader, autogen-subclasses, package-tree,
-                                minimized-rbi]
+                                autogen-msgpack, autogen-autoloader,
+                                autogen-subclasses, package-tree, minimized-rbi]
       --trace-parser            Enable bison's parser trace functionality
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of
