@@ -1735,7 +1735,11 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
 
     // Sanity check: __package.rb files _must_ be typed: strict
     if (file.file.data(ctx).originalSigil < core::StrictLevel::Strict) {
-        if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::PackageFileMustBeStrict)) {
+        auto loc = core::File::fileStrictSigilLocation(file.file.data(ctx).source());
+        if (!loc.exists()) {
+            loc = core::LocOffsets{0, 0};
+        }
+        if (auto e = ctx.beginError(loc, core::errors::Packager::PackageFileMustBeStrict)) {
             e.setHeader("Package files must be at least `{}`", "# typed: strict");
         }
     }
