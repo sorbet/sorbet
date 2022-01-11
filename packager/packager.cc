@@ -1828,8 +1828,8 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
                 loc = core::LocOffsets{0, 0};
             }
             if (auto e = ctx.beginError(loc, core::errors::Packager::MinTypedLevelViolation)) {
-                e.setHeader("File `{}` is marked as `{}`, but it belongs to package `{}` which stipulates a minimum "
-                            "typed level of `{}`",
+                e.setHeader("`{}` is marked as `# typed: {}`, but it belongs to package `{}` which requires files "
+                            "to be at least `# typed: {}`",
                             ctx.file.data(ctx).path(), levelToSigil(file.originalSigil), pkgImpl.name.toString(ctx),
                             levelToSigil(pkgImpl.minStrictLevel()));
             }
@@ -1840,8 +1840,8 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
                 loc = core::LocOffsets{0, 0};
             }
             if (auto e = ctx.beginError(loc, core::errors::Packager::MinTypedLevelViolation)) {
-                e.setHeader("Test file `{}` is marked as `{}`, but it belongs to package `{}` which stipulates a "
-                            "minimum typed level of `{}` for tests",
+                e.setHeader("`{}` is marked as `# typed: {}`, but it belongs to package `{}` which requires test "
+                            "files to be at least `# typed: {}`",
                             ctx.file.data(ctx).path(), levelToSigil(file.originalSigil), pkgImpl.name.toString(ctx),
                             levelToSigil(pkgImpl.minTestStrictLevel()));
             }
