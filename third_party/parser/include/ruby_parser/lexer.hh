@@ -58,11 +58,34 @@ private:
     std::stack<literal> literal_stack;
     std::queue<token_t> token_queue;
 
+    // Required by Ragel to implement its finite state machine.
+    // It uses an int to keep track of the state machine's internal state.
+    //
+    // Mnemonic: Current State
     int cs;
+    // Comments for p and pe are in the lexer implementation.
+    // These fields mirror the values that Ragel uses directly.
     const char *_p;
     const char *_pe;
+
+    // We're using an "advanced" feature of Ragel: the abiility to make a scanner, which means we
+    // give a list of pattern alternatives and ask Ragel to select the one that best matches.
+    //
+    // When using Ragel as a scanner, it needs ts, te, and act so that it can backtrack.
+
+    // Start of the token matched by the scanner.
+    //
+    // Mnemonic: Token Start
     const char *ts;
+
+    // One past the end of the toke matched by the scanner.
+    //
+    // Mnemonic: Token End
     const char *te;
+
+    // Used for recording the identity of the last pattern matched for backtracking in the scanner.
+    //
+    // Mnemonic: Action
     int act;
 
     const std::string FORWARD_ARGS = "FORWARD_ARGS";
