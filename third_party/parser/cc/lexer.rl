@@ -2328,7 +2328,7 @@ void lexer::set_state_expr_value() {
 
       '..'
       => {
-        auto ident = tok(ts, te - 2);
+        auto ident = tok_view(ts, te - 2);
         if (version >= ruby_version::RUBY_27) {
           emit(token_type::tBDOT2, ident, ts, te);
         } else {
@@ -2340,7 +2340,7 @@ void lexer::set_state_expr_value() {
 
       '...'
       => {
-        auto ident = tok(ts, te - 2);
+        auto ident = tok_view(ts, te - 2);
         if (version >= ruby_version::RUBY_27) {
           emit(token_type::tBDOT3, ident, ts, te);
         } else {
