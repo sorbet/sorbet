@@ -70,6 +70,7 @@ struct builder {
     ForeignPtr (*defsHead)(SelfPtr builder, const token *def, ForeignPtr definee, const token *dot, const token *name);
     ForeignPtr (*defSingleton)(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, ForeignPtr body, const token *end);
     ForeignPtr (*encodingLiteral)(SelfPtr builder, const token *tok);
+    ForeignPtr (*error_node)(SelfPtr builder, size_t begin, size_t end);
     ForeignPtr (*false_)(SelfPtr builder, const token *tok);
     ForeignPtr (*find_pattern)(SelfPtr builder, const token *lbrack_t, const node_list *elements,
                                const token *rbrack_t);

@@ -505,6 +505,9 @@ void GlobalState::initEmpty() {
     field.data(*this)->resultType =
         make_type<LiteralType>(Symbols::String(), enterNameUTF8(sorbet_full_version_string));
 
+    // ::<ErrorNode>
+    field = enterStaticFieldSymbol(Loc::none(), Symbols::root(), Names::Constants::ErrorNode());
+
     // Synthesize <Magic>.<build-hash>(*vs : T.untyped) => Hash
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::buildHash())
                  .repeatedUntypedArg(Names::arg0())

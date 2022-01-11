@@ -848,6 +848,10 @@ public:
         return make_unique<EncodingLiteral>(tokLoc(tok));
     }
 
+    unique_ptr<Node> error_node(size_t begin, size_t end) {
+        return make_unique<Const>(locOffset(begin, end), nullptr, core::Names::Constants::ErrorNode());
+    }
+
     unique_ptr<Node> false_(const token *tok) {
         return make_unique<False>(tokLoc(tok));
     }
@@ -1971,6 +1975,11 @@ ForeignPtr encodingLiteral(SelfPtr builder, const token *tok) {
     return build->toForeign(build->encodingLiteral(tok));
 }
 
+ForeignPtr error_node(SelfPtr builder, size_t begin, size_t end) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->error_node(begin, end));
+}
+
 ForeignPtr false_(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
     return build->toForeign(build->false_(tok));
@@ -2522,6 +2531,7 @@ struct ruby_parser::builder Builder::interface = {
     defsHead,
     defSingleton,
     encodingLiteral,
+    error_node,
     false_,
     find_pattern,
     fileLiteral,
