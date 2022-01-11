@@ -1360,7 +1360,7 @@ void lexer::set_state_expr_value() {
   regexp_modifiers := |*
       [A-Za-z]+
       => {
-        auto options = tok();
+        auto options = tok_view();
         std::string unknown_options;
 
         for (auto i = options.cbegin(); i != options.cend(); ++i) {
