@@ -94,7 +94,7 @@ namespace ruby_parser {
     bool is_delimiter(std::string_view delimiter) const;
     void clear_buffer();
     void emit_start_token();
-    void emit(token_type tok, std::string& value, const char* s, const char* e);
+    void emit(token_type tok, std::string_view value, const char* s, const char* e);
   };
 }
 

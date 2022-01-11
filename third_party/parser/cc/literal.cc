@@ -307,10 +307,9 @@ void literal::clear_buffer() {
 void literal::emit_start_token() {
   auto str_type_length = 1 /* TODO @str_type.length */;
   auto str_e = heredoc_e ? heredoc_e : str_s + str_type_length;
-  std::string nothing;
-  emit(start_token_type(), nothing, str_s, str_e);
+  emit(start_token_type(), std::string_view{}, str_s, str_e);
 }
 
-void literal::emit(token_type tok, std::string& value, const char* s, const char* e) {
+void literal::emit(token_type tok, std::string_view value, const char* s, const char* e) {
   _lexer.emit(tok, value, s, e);
 }
