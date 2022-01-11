@@ -25,6 +25,8 @@ using namespace std::string_literals;
 %define api.namespace {ruby_parser::bison::typedruby27}
 %define api.prefix {typedruby27}
 %define api.value.type { union parser_value }
+// TODO(jez) Does this degrade parser performance?
+%define api.location.type { location }
 %define api.token.constructor false
 %define parse.assert
 %define parse.error verbose
@@ -445,7 +447,7 @@ namespace typedruby27 {
 	} \
 } while(false);
 
-void parser::error(const std::string &msg) {
+void parser::error(const ruby_parser::location &lloc, const std::string &msg) {
 	std::string error_message = msg;
 
 	int token_type = static_cast<int>(driver.last_token->type());
@@ -469,14 +471,62 @@ void parser::error(const std::string &msg) {
 		error_message);
 }
 
-int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
+int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser::typedruby27 &driver) {
 	auto token = driver.lex.advance();
 	driver.last_token = token;
 	int token_type = static_cast<int>(token->type());
 	assert(token_type >= 0);
 	lval->token = token;
+	lloc->begin = token->start();
+	lloc->end = token->end();
 	return token_type;
 }
+
+// We've patched the lexer to break compatibility with Ruby w.r.t. method calls
+// for methods sharing names with ruby reserved words. See this PR:
+//   https://github.com/sorbet/sorbet/pull/1993
+// That makes some error recovery better, and other parts worse. This fixes the
+// parts it makes worse.
+//
+// The idea is that there's a rule in the parser below like
+//
+//     stmts: ... | stmts terms stmt_or_begin
+//
+// which means that a list of statements grows by adding a 'terms' (\n or ;) and
+// a 'stmt' to an existing list of `stmts`. But when we consider this example:
+//
+// def foo
+//   x = 1
+//   x.
+// end
+//
+// Due to our lexer change, the parser sees `tIDENTIFIER tDOT kEND`, which
+// means there's no 'terms' in between the `stmts` (`x = 1`) and the
+// (recovered) method call "x.", so another error token shows up, and drops a
+// bunch of the already-parsed program.
+//
+// So in rules where we expect something like that to happen, we can call this
+// function to fix up the lookahead token by manually creating a tNL
+int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &driver, size_t prev_end, size_t next_begin) {
+  // This function is super hacky, and is best understood by carefully reading
+  // yylex and where yylex is called inside the generated parser
+  auto fake_token = driver.lex.tok_view(prev_end, next_begin);
+  auto nl_start = fake_token.find('\n');
+  if (nl_start != std::string_view::npos) {
+    token_t lookahead = yyla.value.token;
+    yyla.clear(); // same as yyclearin macro
+    auto nl_type = ruby_parser::token_type::tNL;
+    auto nl_tok = driver.lex.unadvance(lookahead, nl_type, nl_start, nl_start + 1, "\n");
+    yyla.value.token = nl_tok;
+    driver.last_token = nl_tok;
+    return static_cast<int>(nl_tok->type());
+  } else {
+    // no-op
+    return static_cast<int>(yyla.value.token->type());
+  }
+}
+
+#define maybe_inject_tNL(prev_end, next_begin) ((yyla.type) = yytranslate_(maybe_inject_tNL_impl(yyla, driver, (prev_end), (next_begin))))
 
 }}} // namespace
 } // %code
@@ -2299,6 +2349,11 @@ opt_block_args_tail:
                           delimited->begin,
                           delimited->inner,
                           delimited->end);
+                    }
+                | primary_value call_op error
+                    {
+                      $$ = driver.build.call_method_error(self, $1, $2);
+                      maybe_inject_tNL(@2.end, @3.begin);
                     }
                 | primary_value tCOLON2 operation2 paren_args
                     {

@@ -585,6 +585,20 @@ public:
         }
     }
 
+    unique_ptr<Node> call_method_error(unique_ptr<Node> receiver, const token *dot) {
+        auto loc = receiver->loc;
+        if (dot != nullptr) {
+            loc = loc.join(tokLoc(dot));
+        }
+
+        auto method = core::Names::methodNameMissing();
+        if ((dot != nullptr) && dot->view() == "&.") {
+            return make_unique<CSend>(loc, std::move(receiver), method, sorbet::parser::NodeVec{});
+        } else {
+            return make_unique<Send>(loc, std::move(receiver), method, sorbet::parser::NodeVec{});
+        }
+    }
+
     unique_ptr<Node> case_(const token *case_, unique_ptr<Node> expr, sorbet::parser::NodeVec whenBodies,
                            const token *elseTok, unique_ptr<Node> elseBody, const token *end) {
         return make_unique<Case>(tokLoc(case_).join(tokLoc(end)), std::move(expr), std::move(whenBodies),
@@ -1816,6 +1830,11 @@ ForeignPtr call_method(SelfPtr builder, ForeignPtr receiver, const token *dot, c
         build->call_method(build->cast_node(receiver), dot, selector, lparen, build->convertNodeList(args), rparen));
 }
 
+ForeignPtr call_method_error(SelfPtr builder, ForeignPtr receiver, const token *dot) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->call_method_error(build->cast_node(receiver), dot));
+}
+
 ForeignPtr case_(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *whenBodies,
                  const token *elseTok, ForeignPtr elseBody, const token *end) {
     auto build = cast_builder(builder);
@@ -2473,6 +2492,7 @@ struct ruby_parser::builder Builder::interface = {
     blockarg,
     callLambda,
     call_method,
+    call_method_error,
     case_,
     case_match,
     character,
