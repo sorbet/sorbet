@@ -1058,9 +1058,9 @@ struct PackageInfoFinder {
         switch (strlit->asString(ctx).rawId()) {
             case core::Names::ignore().rawId():
                 return core::StrictLevel::Ignore;
-            case core::Names::_false().rawId():
+            case core::Names::false_().rawId():
                 return core::StrictLevel::False;
-            case core::Names::_true().rawId():
+            case core::Names::true_().rawId():
                 return core::StrictLevel::True;
             case core::Names::strict().rawId():
                 return core::StrictLevel::Strict;
