@@ -485,14 +485,14 @@ token_t lexer::advance_() {
 }
 
 void lexer::emit(token_type type) {
-  emit(type, tok());
+  emit(type, tok_view());
 }
 
-void lexer::emit(token_type type, const std::string& str) {
+void lexer::emit(token_type type, std::string_view str) {
   emit(type, str, ts, te);
 }
 
-void lexer::emit(token_type type, const std::string& str, const char* start, const char* end) {
+void lexer::emit(token_type type, std::string_view str, const char* start, const char* end) {
   size_t offset_start = (size_t)(start - source_buffer.data());
   size_t offset_end = (size_t)(end - source_buffer.data());
 
@@ -1007,8 +1007,8 @@ void lexer::set_state_expr_value() {
   };
 
   action extend_string {
-    auto str = tok();
-    std::string lookahead;
+    auto str = tok_view();
+    std::string_view lookahead;
 
     // tLABEL_END is only possible in non-cond context on >= 2.2
     if (version >= ruby_version::RUBY_22 && !cond.active()) {
@@ -1019,7 +1019,7 @@ void lexer::set_state_expr_value() {
         lookahead_e = eof;
       }
 
-      lookahead = std::string(lookahead_s, (size_t)(lookahead_e - lookahead_s));
+      lookahead = std::string_view(lookahead_s, (size_t)(lookahead_e - lookahead_s));
     }
 
     auto& current_literal = literal_();

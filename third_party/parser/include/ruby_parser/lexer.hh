@@ -117,8 +117,8 @@ private:
     std::string_view tok_view(const char *start);
     std::string_view tok_view(const char *start, const char *end);
     void emit(token_type type);
-    void emit(token_type type, const std::string &str);
-    void emit(token_type type, const std::string &str, const char *start, const char *end);
+    void emit(token_type type, std::string_view str);
+    void emit(token_type type, std::string_view str, const char *start, const char *end);
     void emit_do(bool do_block = false);
     void emit_table(const token_table_entry *table);
     void emit_num(const std::string &num);

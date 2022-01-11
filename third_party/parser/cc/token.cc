@@ -3,7 +3,7 @@
 
 using namespace ruby_parser;
 
-token::token(token_type type, size_t start, size_t end, const std::string& str)
+token::token(token_type type, size_t start, size_t end, std::string_view str)
     : _type(type), _start(start), _end(end), _string(str)
 {}
 
