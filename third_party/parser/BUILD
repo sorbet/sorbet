@@ -7,6 +7,7 @@ ragel(
     name = "ragel_lexer",
     src = "cc/lexer.rl",
     language = "c++",
+    ragel_options = ["-G1"],
 )
 
 bison(
