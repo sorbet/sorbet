@@ -353,6 +353,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("stripe-mode", "Enable Stripe specific error enforcement", cxxopts::value<bool>());
     options.add_options("advanced")("stripe-packages", "Enable support for Stripe's internal Ruby package system",
                                     cxxopts::value<bool>());
+    options.add_options("advanced")("stripe-packages-hint-message",
+                                    "Optional hit message to add to packaging related errors",
+                                    cxxopts::value<string>()->default_value(""));
     options.add_options("dev")("extra-package-files-directory-prefix",
                                "Extra parent directories which contain package files. "
                                "This option must be used in conjunction with --stripe-packages",
@@ -900,6 +903,13 @@ void readOptions(Options &opts,
                     throw EarlyReturnWithCode(1);
                 }
                 opts.secondaryTestPackageNamespaces.emplace_back(ns);
+            }
+        }
+        opts.stripePackagesHint = raw["stripe-packages-hint-message"].as<string>();
+        if (!opts.stripePackagesHint.empty() && !opts.stripePackages) {
+            if (!opts.stripePackages) {
+                logger->error("--stripe-packages-hint-message can only be specified in --stripe-packages mode");
+                throw EarlyReturnWithCode(1);
             }
         }
 

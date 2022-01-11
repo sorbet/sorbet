@@ -45,12 +45,15 @@ public:
     const std::vector<core::NameRef> &secondaryTestPackageNamespaceRefs() const;
     const std::vector<std::string> &extraPackageFilesDirectoryPrefixes() const;
 
+    const std::string_view errorHint() const;
+
     // NB: Do not call in hot path, this is SLOW due to string comparison!
     static bool isTestFile(const core::GlobalState &gs, const core::File &file);
 
 private:
     std::vector<NameRef> secondaryTestPackageNamespaceRefs_;
     std::vector<std::string> extraPackageFilesDirectoryPrefixes_;
+    std::string errorHint_;
 
     UnorderedMap<core::NameRef, std::unique_ptr<packages::PackageInfo>> packages_;
     UnorderedMap<std::string, core::NameRef> packagesByPathPrefix;
