@@ -39,8 +39,8 @@ private:
     }
 
 public:
-    template <typename... T> void println(fmt::format_string<T...> fmt, T &&...args) {
-        fmt::format_to(std::back_inserter(out), tabStr);
+    template <typename... Args> void println(fmt::format_string<Args...> fmt, Args &&...args) {
+        fmt::format_to(std::back_inserter(out), "{:{}}", "", this->indent*2);
         fmt::format_to(std::back_inserter(out), fmt, args...);
         fmt::format_to(std::back_inserter(out), "\n");
     }
