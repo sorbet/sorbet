@@ -486,6 +486,15 @@ void ClassType::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(this->symbol.exists());
 }
 
+void AliasType::_sanityCheck(const GlobalState &gs) const {
+    ENFORCE(this->symbol.exists());
+}
+
+void MetaType::_sanityCheck(const GlobalState &gs) const {
+    ENFORCE(!core::isa_type<MetaType>(wrapped));
+    this->wrapped.sanityCheck(gs);
+}
+
 /** Returns type parameters of what reordered in the order of type parameters of asIf
  * If some typeArgs are not present, return NoSymbol
  * */
@@ -567,8 +576,44 @@ bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t
     return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible);
 }
 
+bool ClassType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
+    if (symbol == Symbols::untyped() || symbol == klass) {
+        return true;
+    }
+    return symbol.data(gs)->derivesFrom(gs, klass);
+}
+
+bool OrType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
+    return left.derivesFrom(gs, klass) && right.derivesFrom(gs, klass);
+}
+
+bool AndType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
+    return left.derivesFrom(gs, klass) || right.derivesFrom(gs, klass);
+}
+
+bool AliasType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
+    Exception::raise("AliasType.derivesfrom");
+}
+
 bool TypeVar::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     Exception::raise("should never happen. You're missing a call to either Types::approximate or Types::instantiate");
+}
+
+MetaType::MetaType(const TypePtr &wrapped) : wrapped(move(wrapped)) {
+    categoryCounterInc("types.allocated", "metattype");
+}
+
+bool MetaType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
+    return false;
+}
+
+TypePtr MetaType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
+    // dispatchCall is invoked on them in resolver
+    return nullptr;
+}
+
+TypePtr MetaType::underlying(const GlobalState &gs) const {
+    return Types::Object();
 }
 
 TypeVar::TypeVar(TypeArgumentRef sym) : sym(sym) {

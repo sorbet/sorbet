@@ -461,4 +461,13 @@ string SelfType::show(const GlobalState &gs) const {
 string SelfType::showValue(const GlobalState &gs) const {
     return show(gs);
 }
+
+string MetaType::toStringWithTabs(const GlobalState &gs, int tabs) const {
+    return "MetaType";
+}
+
+string MetaType::show(const GlobalState &gs) const {
+    return "<Type: " + wrapped.show(gs) + ">";
+}
+
 } // namespace sorbet::core
