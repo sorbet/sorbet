@@ -120,6 +120,7 @@ bool hasAngleBrackets(string_view haystack) {
     return absl::c_any_of(haystack, [](char c) { return c == '<' || c == '>'; });
 }
 
+// Note: this will always return `true` for `pattern == ""`.
 bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view pattern) {
     string_view view = name.shortName(gs);
     auto fnd = view.find(pattern);
@@ -920,8 +921,9 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
     auto resp = move(queryResponses[0]);
 
     if (auto sendResp = resp->isSend()) {
-        auto prefix = sendResp->callerSideName.shortName(gs);
-        config.logger->debug("Looking for method similar to {}", prefix);
+        auto callerSideName = sendResp->callerSideName;
+        auto prefix = callerSideName == core::Names::methodNameMissing() ? "" : callerSideName.shortName(gs);
+        config.logger->debug("Looking for method similar to '{}'", prefix);
 
         // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
         // (If there is a method whose name overlaps with a keyword, it will still show up as a _method_ item.)
