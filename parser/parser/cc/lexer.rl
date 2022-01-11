@@ -207,7 +207,7 @@ std::string_view lexer::tok_view(const char* start, const char* end) const {
 }
 
 std::string_view lexer::tok_view(size_t start, size_t end) const {
-  return tok_view(ts + start, ts + end);
+  return tok_view(source_buffer.data() + start, source_buffer.data() + end);
 }
 
 char lexer::unescape(uint32_t codepoint) {
