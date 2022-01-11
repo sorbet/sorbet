@@ -173,7 +173,7 @@ class token {
     std::string _string;
 
 public:
-    token(token_type type, size_t start, size_t end, const std::string &str);
+    token(token_type type, size_t start, size_t end, std::string_view str);
 
     token_type type() const;
     size_t start() const;

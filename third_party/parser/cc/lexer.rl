@@ -485,14 +485,14 @@ token_t lexer::advance_() {
 }
 
 void lexer::emit(token_type type) {
-  emit(type, tok());
+  emit(type, tok_view());
 }
 
-void lexer::emit(token_type type, const std::string& str) {
+void lexer::emit(token_type type, std::string_view str) {
   emit(type, str, ts, te);
 }
 
-void lexer::emit(token_type type, const std::string& str, const char* start, const char* end) {
+void lexer::emit(token_type type, std::string_view str, const char* start, const char* end) {
   size_t offset_start = (size_t)(start - source_buffer.data());
   size_t offset_end = (size_t)(end - source_buffer.data());
 
