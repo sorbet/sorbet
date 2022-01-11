@@ -1074,10 +1074,10 @@ void lexer::set_state_expr_value() {
         // at the same time as an escape symbol, but it is always munged,
         // so this branch also executes for the non-closing-delimiter case
         // for the backslash.
-        auto str = tok();
+        auto str = tok_view();
         current_literal.extend_string(str, ts, te);
       } else {
-        auto str = std::string(&escaped_char, 1);
+        auto str = std::string_view(&escaped_char, 1);
         current_literal.extend_string(str, ts, te);
       }
     } else {
@@ -1091,7 +1091,7 @@ void lexer::set_state_expr_value() {
         // treat '\' as a line continuation, but still dedent the body, so the heredoc above becomes "12\n".
         // This information is emitted as is, without escaping,
         // later this escape sequence (\\\n) gets handled manually in the dedenter
-        auto str = tok();
+        auto str = tok_view();
         current_literal.extend_string(str, ts, te);
       } else if (current_literal.support_line_continuation_via_slash() && escaped_char == '\n') {
         // Heredocs, regexp and a few other types of literals support line
@@ -1181,7 +1181,7 @@ void lexer::set_state_expr_value() {
       // A literal newline is appended if the heredoc was _not_ closed
       // this time (see f break above). See also Literal#nest_and_try_closing
       // for rationale of calling #flush_string here.
-      std::string str = tok();
+      std::string_view str = tok_view();
       current_literal.extend_string(str, ts, te);
       current_literal.flush_string();
     }
@@ -1219,7 +1219,7 @@ void lexer::set_state_expr_value() {
   action extend_interp_digit_var {
     if (version >= ruby_version::RUBY_27) {
       auto& current_literal = literal_();
-      std::string str = tok();
+      std::string_view str = tok_view();
       current_literal.extend_string(str, ts, te);
     } else {
       if (ts[0] == '#' && ts[1] == '@' && ts[2] == '@') {
