@@ -186,7 +186,7 @@ static bool rb_isspace(char c) {
   return c == ' ' || ('\t' <= c && c <= '\r');
 }
 
-static void lstrip(std::string& str) {
+static std::string_view lstrip(std::string_view str) {
   size_t index = 0;
 
   while (index < str.size()) {
@@ -197,20 +197,19 @@ static void lstrip(std::string& str) {
     }
   }
 
-  str.erase(0, index);
+  return str.substr(index);
 }
 
-bool literal::is_delimiter(std::string& delimiter) const {
+bool literal::is_delimiter(std::string_view delimiter) const {
   if (indent) {
-    std::string stripped_delimiter = delimiter;
-    lstrip(stripped_delimiter);
+    std::string_view stripped_delimiter = lstrip(delimiter);
     return end_delim == stripped_delimiter;
   } else {
     return end_delim == delimiter;
   }
 }
 
-static bool lookahead_quoted_label(std::string& lookahead) {
+static bool lookahead_quoted_label(std::string_view lookahead) {
   switch (lookahead.size()) {
     case 0:
       return false;
@@ -223,7 +222,7 @@ static bool lookahead_quoted_label(std::string& lookahead) {
   }
 }
 
-bool literal::nest_and_try_closing(std::string& delimiter, const char* ts, const char* te, std::string lookahead) {
+bool literal::nest_and_try_closing(std::string_view delimiter, const char* ts, const char* te, std::string_view lookahead) {
   if (start_delim.size() > 0 && start_delim == delimiter) {
     _nesting++;
   } else if (is_delimiter(delimiter)) {
@@ -271,7 +270,7 @@ void literal::extend_space(const char* ts, const char* te) {
   }
 }
 
-void literal::extend_string(std::string& str, const char* ts, const char* te) {
+void literal::extend_string(std::string_view str, const char* ts, const char* te) {
   if (!buffer_s) {
     buffer_s = ts;
   }

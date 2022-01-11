@@ -82,16 +82,16 @@ namespace ruby_parser {
     void start_interp_brace();
     bool end_interp_brace_and_try_closing();
 
-    bool nest_and_try_closing(std::string& delimiter, const char* ts, const char* te, std::string lookahead = "");
+    bool nest_and_try_closing(std::string_view delimiter, const char* ts, const char* te, std::string_view lookahead = "");
 
     void extend_space(const char* ts, const char* te);
-    void extend_string(std::string& str, const char* ts, const char* te);
+    void extend_string(std::string_view str, const char* ts, const char* te);
     void extend_content();
 
     void flush_string();
 
   private:
-    bool is_delimiter(std::string& delimiter) const;
+    bool is_delimiter(std::string_view delimiter) const;
     void clear_buffer();
     void emit_start_token();
     void emit(token_type tok, std::string& value, const char* s, const char* e);

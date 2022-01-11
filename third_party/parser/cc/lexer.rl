@@ -1007,8 +1007,8 @@ void lexer::set_state_expr_value() {
   };
 
   action extend_string {
-    auto str = tok();
-    std::string lookahead;
+    auto str = tok_view();
+    std::string_view lookahead;
 
     // tLABEL_END is only possible in non-cond context on >= 2.2
     if (version >= ruby_version::RUBY_22 && !cond.active()) {
@@ -1019,7 +1019,7 @@ void lexer::set_state_expr_value() {
         lookahead_e = eof;
       }
 
-      lookahead = std::string(lookahead_s, (size_t)(lookahead_e - lookahead_s));
+      lookahead = std::string_view(lookahead_s, (size_t)(lookahead_e - lookahead_s));
     }
 
     auto& current_literal = literal_();
