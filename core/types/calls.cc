@@ -524,7 +524,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         }
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
-    } else if (symbol == Symbols::DeclBuilderForProcsSingleton() && args.name.rawId() == Names::new_().rawId()) {
+    } else if (symbol == Symbols::DeclBuilderForProcsSingleton() && args.name == Names::new_()) {
         if (!args.suppressErrors) {
             if (auto e =
                     gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::MetaTypeDispatchCall)) {
@@ -532,6 +532,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             symbol.show(gs));
             }
         }
+        return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+    } else if (args.name == Names::methodNameMissing()) {
+        // We already reported a parse error earlier in the pipeline
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
     }
 

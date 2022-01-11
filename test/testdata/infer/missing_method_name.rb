@@ -7,5 +7,5 @@ end
 sig {params(x: A).void}
 def foo(x)
   puts x
-  x. # error: Method `<method-name-missing>` does not exist on `A`
+  x.
 end # error: unexpected token "end"
