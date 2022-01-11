@@ -419,7 +419,7 @@ static bool split_codepoints(const std::string &str, std::string &output) {
   return true;
 }
 
-static std::string gsub(const std::string&& str, const std::string&& search, const std::string&& replace) {
+static std::string gsub(std::string_view str, const std::string&& search, const std::string&& replace) {
   std::string result;
 
   std::string::size_type from = 0;
@@ -1100,12 +1100,12 @@ void lexer::set_state_expr_value() {
         //   "a\
         //   b"
         // must be parsed as "ab"
-        std::string str = gsub(tok(), "\\\n", "");
+        std::string str = gsub(tok_view(), "\\\n", "");
         current_literal.extend_string(str, ts, te);
       } else if (current_literal.regexp()) {
         // Regular expressions should include escape sequences in their
         // escaped form. On the other hand, escaped newlines are removed.
-        std::string str = gsub(tok(), "\\\n", "");
+        std::string str = gsub(tok_view(), "\\\n", "");
         current_literal.extend_string(str, ts, te);
       } else {
         auto str = escape ? *escape : tok();
