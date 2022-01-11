@@ -510,7 +510,7 @@ void lexer::emit_do(bool do_block) {
 }
 
 void lexer::emit_table(const token_table_entry* table) {
-  auto value = tok();
+  auto value = tok_view();
 
   for (; table->token; ++table) {
     if (value == table->token) {
