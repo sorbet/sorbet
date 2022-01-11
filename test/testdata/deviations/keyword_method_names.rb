@@ -176,7 +176,9 @@ def method_named_redo(x)
   x
     .redo # ok
   x.
-    redo # error: Unsupported node type `Redo`
+    redo
+  # ^^^^ error: unexpected token "redo"
+  # ^^^^ error: Unsupported node type `Redo`
 end
 
 def method_named_rescue(x)
