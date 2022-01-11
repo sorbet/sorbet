@@ -2536,7 +2536,7 @@ void lexer::set_state_expr_value() {
       '__ENCODING__'
       => {
         if (version == ruby_version::RUBY_18) {
-          auto ident = tok();
+          auto ident = tok_view();
 
           emit(token_type::tIDENTIFIER, ident);
 
@@ -2865,11 +2865,11 @@ void lexer::unextend() {
   static_env.pop();
 }
 
-void lexer::declare(const std::string& name) {
-  static_env.top().insert(name);
+void lexer::declare(std::string_view name) {
+  static_env.top().insert(std::string(name));
 }
 
-bool lexer::is_declared(const std::string& identifier) const {
+bool lexer::is_declared(std::string_view identifier) const {
   const environment& env = static_env.top();
 
   return env.find(identifier) != env.end();
