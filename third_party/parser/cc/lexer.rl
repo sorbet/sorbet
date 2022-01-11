@@ -1504,7 +1504,7 @@ void lexer::set_state_expr_value() {
 
   # Ruby is context-sensitive wrt/ local identifiers.
   action local_ident {
-    auto ident = tok();
+    auto ident = tok_view();
 
     emit(token_type::tIDENTIFIER, ident);
 
@@ -2300,7 +2300,7 @@ void lexer::set_state_expr_value() {
         fhold;
 
         if (version == ruby_version::RUBY_18) {
-          auto ident = tok(ts, te - 2);
+          auto ident = tok_view(ts, te - 2);
 
           if (*ts >= 'A' && *ts <= 'Z') {
             emit(token_type::tCONSTANT, ident, ts, te - 2);
