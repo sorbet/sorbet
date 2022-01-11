@@ -1226,6 +1226,17 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                     {
                       $$ = driver.build.assign(self, $1, $2, $3);
                     }
+                | lhs tEQL error
+                    {
+                      // Have to use @2.end for the start of the error node so that completion requests are
+                      // more likely to fall into the query range. Consider:
+                      //     def foo(x)
+                      //       y =
+                      //     end
+                      // @3 will be the `end` token's begin & end, which means a completion query right after
+                      // the `=` would be outside the range of the error_node if we used those locs.
+                      $$ = driver.build.assign(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                    }
                 | var_lhs tOP_ASGN arg_rhs
                     {
                       $$ = driver.build.op_assign(self, $1, $2, $3);
@@ -3785,6 +3796,9 @@ f_opt_paren_args: f_paren_args
                   }
                 | tNL
 
+
+           // "terms" here stands for "terminators" (as in line terminators),
+           // not "terms" as in types & terms
            terms: term
                 | terms tSEMI
 
