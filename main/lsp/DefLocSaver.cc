@@ -82,6 +82,23 @@ ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, 
 
 namespace {
 
+// Keep in mind that DefLocSaver runs before class_flatten runs, so code is not already inside
+// static-init methods necessarily.
+core::MethodRef enclosingMethodFromContext(core::Context ctx) {
+    if (ctx.owner.isMethod()) {
+        return ctx.owner.asMethodRef();
+    } else if (ctx.owner.isClassOrModule()) {
+        if (ctx.owner == core::Symbols::root()) {
+            return ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, {0, 0}));
+        } else {
+            return ctx.state.lookupStaticInitForClass(ctx.owner.asClassOrModuleRef());
+        }
+    } else {
+        ENFORCE(false, "Unexpected owner in context: {}", ctx.owner.show(ctx));
+        return core::MethodRef{};
+    }
+}
+
 void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery,
                   core::SymbolRef symbolBeforeDealias) {
     // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
@@ -107,8 +124,9 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
                 scopes = {symbol.owner(ctx)};
             }
 
+            auto enclosingMethod = enclosingMethodFromContext(ctx);
             auto resp = core::lsp::ConstantResponse(symbol, symbolBeforeDealias, core::Loc(ctx.file, lit->loc), scopes,
-                                                    unresolved.cnst, tp);
+                                                    unresolved.cnst, tp, enclosingMethod);
             core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
         }
         lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope);
