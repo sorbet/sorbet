@@ -152,8 +152,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
 }
 
 bool Printers::isAutogen() const {
-    return Autogen.enabled || AutogenMsgPack.enabled || AutogenSubclasses.enabled ||
-           AutogenAutoloader.enabled;
+    return Autogen.enabled || AutogenMsgPack.enabled || AutogenSubclasses.enabled || AutogenAutoloader.enabled;
 }
 
 struct StopAfterOptions {
