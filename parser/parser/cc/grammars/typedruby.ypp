@@ -1228,13 +1228,17 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                     }
                 | lhs tEQL error
                     {
-                      // Have to use @2.end for the start of the error node so that completion requests are
-                      // more likely to fall into the query range. Consider:
+                      // The choice of location information below is worth explaining. Consider:
                       //     def foo(x)
                       //       y =
+                      //       #  ^
                       //     end
-                      // @3 will be the `end` token's begin & end, which means a completion query right after
-                      // the `=` would be outside the range of the error_node if we used those locs.
+                      // @3 will be the `end` token's begin & end. To get a completion response at the caret,
+                      // the error_node's location has to include the gap between the two tokens. Also, to
+                      // avoid setting the error_node's loc to a zero-width loc (e.g. `y =end`) which Sorbet's
+                      // LSP would skip over when responding to editor queries, we use the error token's
+                      // end location as the end of the error_node's location (instead of strictly setting it
+                      // to the gap).
                       $$ = driver.build.assign(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
                     }
                 | var_lhs tOP_ASGN arg_rhs
