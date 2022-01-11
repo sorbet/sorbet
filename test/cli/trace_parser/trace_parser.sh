@@ -2,4 +2,9 @@
 
 set -euo pipefail
 
-main/sorbet --silence-dev-message --trace-parser test/cli/trace_parser/trace_parser.rb 2>&1
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+
+main/sorbet --silence-dev-message --trace-parser test/cli/trace_parser/trace_parser.rb > "$tmp" 2>&1
+
+head -n 4 "$tmp"
