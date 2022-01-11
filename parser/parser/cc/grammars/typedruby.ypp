@@ -183,6 +183,9 @@ using namespace std::string_literals;
   tBDOT3              1146    // Used to avoid shift/reduce conflicts with productions using `tDOT3`
 ;
 
+%printer { yyo << $$->view(); } tIDENTIFIER
+%printer { yyo << $$->view(); } tCONSTANT
+
 %type <node>
   arg
   arg_rhs
