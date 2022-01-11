@@ -464,7 +464,6 @@ token_t lexer::advance_() {
 
   const char* ident_ts = NULL;
   const char* ident_te = NULL;
-  std::string ident_tok;
 
   %% write exec;
 
@@ -510,7 +509,7 @@ void lexer::emit_do(bool do_block) {
 }
 
 void lexer::emit_table(const token_table_entry* table) {
-  auto value = tok();
+  auto value = tok_view();
 
   for (; !table->token.empty(); ++table) {
     if (value == table->token) {
@@ -1075,10 +1074,10 @@ void lexer::set_state_expr_value() {
         // at the same time as an escape symbol, but it is always munged,
         // so this branch also executes for the non-closing-delimiter case
         // for the backslash.
-        auto str = tok();
+        auto str = tok_view();
         current_literal.extend_string(str, ts, te);
       } else {
-        auto str = std::string(&escaped_char, 1);
+        auto str = std::string_view(&escaped_char, 1);
         current_literal.extend_string(str, ts, te);
       }
     } else {
@@ -1092,7 +1091,7 @@ void lexer::set_state_expr_value() {
         // treat '\' as a line continuation, but still dedent the body, so the heredoc above becomes "12\n".
         // This information is emitted as is, without escaping,
         // later this escape sequence (\\\n) gets handled manually in the dedenter
-        auto str = tok();
+        auto str = tok_view();
         current_literal.extend_string(str, ts, te);
       } else if (current_literal.support_line_continuation_via_slash() && escaped_char == '\n') {
         // Heredocs, regexp and a few other types of literals support line
@@ -1182,7 +1181,7 @@ void lexer::set_state_expr_value() {
       // A literal newline is appended if the heredoc was _not_ closed
       // this time (see f break above). See also Literal#nest_and_try_closing
       // for rationale of calling #flush_string here.
-      std::string str = tok();
+      std::string_view str = tok_view();
       current_literal.extend_string(str, ts, te);
       current_literal.flush_string();
     }
@@ -1220,7 +1219,7 @@ void lexer::set_state_expr_value() {
   action extend_interp_digit_var {
     if (version >= ruby_version::RUBY_27) {
       auto& current_literal = literal_();
-      std::string str = tok();
+      std::string_view str = tok_view();
       current_literal.extend_string(str, ts, te);
     } else {
       if (ts[0] == '#' && ts[1] == '@' && ts[2] == '@') {
@@ -1360,7 +1359,7 @@ void lexer::set_state_expr_value() {
   regexp_modifiers := |*
       [A-Za-z]+
       => {
-        auto options = tok();
+        auto options = tok_view();
         std::string unknown_options;
 
         for (auto i = options.cbegin(); i != options.cend(); ++i) {
@@ -1391,7 +1390,7 @@ void lexer::set_state_expr_value() {
 
       any
       => {
-        emit(token_type::tREGEXP_OPT, tok(ts, te - 1), ts, te - 1);
+        emit(token_type::tREGEXP_OPT, tok_view(ts, te - 1), ts, te - 1);
         fhold;
         fgoto expr_end;
       };
@@ -1505,7 +1504,7 @@ void lexer::set_state_expr_value() {
 
   # Ruby is context-sensitive wrt/ local identifiers.
   action local_ident {
-    auto ident = tok();
+    auto ident = tok_view();
 
     emit(token_type::tIDENTIFIER, ident);
 
@@ -1523,7 +1522,7 @@ void lexer::set_state_expr_value() {
       global_var
       => {
         if (ts[1] >= '1' && ts[1] <= '9') {
-          emit(token_type::tNTH_REF, tok(ts + 1));
+          emit(token_type::tNTH_REF, tok_view(ts + 1));
         } else if (ts[1] == '&' || ts[1] == '`' || ts[1] == '\'' || ts[1] == '+') {
           emit(token_type::tBACK_REF);
         } else {
@@ -1620,7 +1619,7 @@ void lexer::set_state_expr_value() {
   #
   expr_endfn := |*
       label ( any - ':' )
-      => { emit(token_type::tLABEL, tok(ts, te - 2), ts, te - 1);
+      => { emit(token_type::tLABEL, tok_view(ts, te - 2), ts, te - 1);
            fhold; fnext expr_labelarg; fbreak; };
 
       w_space_comment;
@@ -1647,7 +1646,7 @@ void lexer::set_state_expr_value() {
            fnext *arg_or_cmdarg(cmd_state); fbreak; };
 
       bareword ambiguous_fid_suffix
-      => { emit(token_type::tFID, tok(ts, tm), ts, tm);
+      => { emit(token_type::tFID, tok_view(ts, tm), ts, tm);
            fnext *arg_or_cmdarg(cmd_state); p = tm - 1; fbreak; };
 
       # See the comment in `expr_fname`.
@@ -1711,7 +1710,7 @@ void lexer::set_state_expr_value() {
            fnext *arg_or_cmdarg(cmd_state); fbreak; };
 
       bareword ambiguous_fid_suffix
-      => { emit(token_type::tFID, tok(ts, tm), ts, tm);
+      => { emit(token_type::tFID, tok_view(ts, tm), ts, tm);
            fnext *arg_or_cmdarg(cmd_state); p = tm - 1; fbreak; };
 
       # See the comment in `expr_fname`.
@@ -1984,7 +1983,7 @@ void lexer::set_state_expr_value() {
       # +5, -5, - 5
       [+\-] w_any* [0-9]
       => {
-        emit(token_type::tUNARY_NUM, tok(ts, ts + 1), ts, ts + 1);
+        emit(token_type::tUNARY_NUM, tok_view(ts, ts + 1), ts, ts + 1);
         fhold; fnext expr_end; fbreak;
       };
 
@@ -2122,7 +2121,7 @@ void lexer::set_state_expr_value() {
       # :&&, :||
       ':' ('&&' | '||') => {
         fhold; fhold;
-        emit(token_type::tSYMBEG, tok(ts, ts + 1), ts, ts + 1);
+        emit(token_type::tSYMBEG, tok_view(ts, ts + 1), ts, ts + 1);
         fgoto expr_fname;
       };
 
@@ -2144,13 +2143,13 @@ void lexer::set_state_expr_value() {
       # :~@ is :~
       ':' [!~] '@'
       => {
-        emit(token_type::tSYMBEG, tok(ts + 1, ts + 2), ts, te);
+        emit(token_type::tSYMBEG, tok_view(ts + 1, ts + 2), ts, te);
         fnext expr_end; fbreak;
       };
 
       ':' bareword ambiguous_symbol_suffix
       => {
-        emit(token_type::tSYMBOL, tok(ts + 1, tm), ts, tm);
+        emit(token_type::tSYMBOL, tok_view(ts + 1, tm), ts, tm);
         p = tm - 1;
         fnext expr_end; fbreak;
       };
@@ -2158,7 +2157,7 @@ void lexer::set_state_expr_value() {
       ':' ( bareword | global_var | class_var | instance_var |
             operator_fname | operator_arithmetic | operator_rest )
       => {
-        emit(token_type::tSYMBOL, tok(ts + 1), ts, te);
+        emit(token_type::tSYMBOL, tok_view(ts + 1), ts, te);
         fnext expr_end; fbreak;
       };
 
@@ -2173,7 +2172,7 @@ void lexer::set_state_expr_value() {
             diagnostic_(dlevel::ERROR, dclass::IvarName, tok(ts + 1, te));
           }
         } else {
-          emit(token_type::tCOLON, tok(ts, ts + 1), ts, ts + 1);
+          emit(token_type::tCOLON, tok_view(ts, ts + 1), ts, ts + 1);
           p = ts;
         }
         fnext expr_end; fbreak;
@@ -2242,7 +2241,7 @@ void lexer::set_state_expr_value() {
       '||'
       => {
         if (version >= ruby_version::RUBY_27) {
-          emit(token_type::tPIPE, tok(ts, ts + 1), ts, ts + 1);
+          emit(token_type::tPIPE, tok_view(ts, ts + 1), ts, ts + 1);
           fhold;
           fnext expr_beg; fbreak;
         } else {
@@ -2301,7 +2300,7 @@ void lexer::set_state_expr_value() {
         fhold;
 
         if (version == ruby_version::RUBY_18) {
-          auto ident = tok(ts, te - 2);
+          auto ident = tok_view(ts, te - 2);
 
           if (*ts >= 'A' && *ts <= 'Z') {
             emit(token_type::tCONSTANT, ident, ts, te - 2);
@@ -2316,7 +2315,7 @@ void lexer::set_state_expr_value() {
             fnext *arg_or_cmdarg(cmd_state);
           }
         } else {
-          emit(token_type::tLABEL, tok(ts, te - 2), ts, te - 1);
+          emit(token_type::tLABEL, tok_view(ts, te - 2), ts, te - 1);
           fnext expr_labelarg;
         }
 
@@ -2328,7 +2327,7 @@ void lexer::set_state_expr_value() {
 
       '..'
       => {
-        auto ident = tok(ts, te - 2);
+        auto ident = tok_view(ts, te - 2);
         if (version >= ruby_version::RUBY_27) {
           emit(token_type::tBDOT2, ident, ts, te);
         } else {
@@ -2340,7 +2339,7 @@ void lexer::set_state_expr_value() {
 
       '...'
       => {
-        auto ident = tok(ts, te - 2);
+        auto ident = tok_view(ts, te - 2);
         if (version >= ruby_version::RUBY_27) {
           emit(token_type::tBDOT3, ident, ts, te);
         } else {
@@ -2371,10 +2370,10 @@ void lexer::set_state_expr_value() {
       => local_ident;
 
       (call_or_var - keyword)
-        % { ident_tok = tok(ts, te); ident_ts = ts; ident_te = te; }
+        % { ident_ts = ts; ident_te = te; }
       w_space+ '('
       => {
-        emit(token_type::tIDENTIFIER, ident_tok, ident_ts, ident_te);
+        emit(token_type::tIDENTIFIER, tok_view(ident_ts, ident_te), ident_ts, ident_te);
         p = ident_te - 1;
 
         fnext expr_cmdarg;
@@ -2537,7 +2536,7 @@ void lexer::set_state_expr_value() {
       '__ENCODING__'
       => {
         if (version == ruby_version::RUBY_18) {
-          auto ident = tok();
+          auto ident = tok_view();
 
           emit(token_type::tIDENTIFIER, ident);
 
@@ -2602,7 +2601,7 @@ void lexer::set_state_expr_value() {
         if (version == ruby_version::RUBY_18 || version == ruby_version::RUBY_19 || version == ruby_version::RUBY_20) {
           diagnostic_(dlevel::ERROR, dclass::TrailingInNumber, range(te - 1, te), tok(te-1, te));
         } else {
-          emit(token_type::tINTEGER, tok(ts, te - 1), ts, te - 1);
+          emit(token_type::tINTEGER, tok_view(ts, te - 1), ts, te - 1);
           fhold; fbreak;
         }
       };
@@ -2612,7 +2611,7 @@ void lexer::set_state_expr_value() {
         if (version == ruby_version::RUBY_18 || version == ruby_version::RUBY_19 || version == ruby_version::RUBY_20) {
           diagnostic_(dlevel::ERROR, dclass::TrailingInNumber, range(te - 1, te), tok(te - 1, te));
         } else {
-          emit(token_type::tFLOAT, tok(ts, te - 1), ts, te - 1);
+          emit(token_type::tFLOAT, tok_view(ts, te - 1), ts, te - 1);
           fhold; fbreak;
         }
       };
@@ -2662,7 +2661,7 @@ void lexer::set_state_expr_value() {
            fnext *arg_or_cmdarg(cmd_state); fbreak; };
 
       constant ambiguous_const_suffix
-      => { emit(token_type::tCONSTANT, tok(ts, tm), ts, tm);
+      => { emit(token_type::tCONSTANT, tok_view(ts, tm), ts, tm);
            p = tm - 1; fbreak; };
 
       global_var | class_var_v | instance_var_v
@@ -2686,7 +2685,7 @@ void lexer::set_state_expr_value() {
           emit(token_type::tFID);
         } else {
           // Suffix was not consumed, e.g. foo!=
-          emit(token_type::tIDENTIFIER, tok(ts, tm), ts, tm);
+          emit(token_type::tIDENTIFIER, tok_view(ts, tm), ts, tm);
           p = tm - 1;
         }
         fnext expr_arg; fbreak;
@@ -2733,7 +2732,7 @@ void lexer::set_state_expr_value() {
       };
 
       operator_arithmetic '='
-      => { emit(token_type::tOP_ASGN, tok(ts, te - 1));
+      => { emit(token_type::tOP_ASGN, tok_view(ts, te - 1));
            fnext expr_beg; fbreak; };
 
       '?'
@@ -2866,11 +2865,11 @@ void lexer::unextend() {
   static_env.pop();
 }
 
-void lexer::declare(const std::string& name) {
-  static_env.top().insert(name);
+void lexer::declare(std::string_view name) {
+  static_env.top().insert(std::string(name));
 }
 
-bool lexer::is_declared(const std::string& identifier) const {
+bool lexer::is_declared(std::string_view identifier) const {
   const environment& env = static_env.top();
 
   return env.find(identifier) != env.end();

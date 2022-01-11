@@ -32,7 +32,7 @@ enum class ruby_version {
 
 class lexer {
 public:
-    using environment = std::set<std::string>;
+    using environment = std::set<std::string, std::less<void>>;
     struct token_table_entry {
         std::string_view token;
         token_type type;
@@ -163,8 +163,8 @@ public:
     void extend_static();
     void extend_dynamic();
     void unextend();
-    void declare(const std::string &name);
-    bool is_declared(const std::string &identifier) const;
+    void declare(std::string_view name);
+    bool is_declared(std::string_view identifier) const;
     void declare_forward_args();
     bool is_declared_forward_args();
 
