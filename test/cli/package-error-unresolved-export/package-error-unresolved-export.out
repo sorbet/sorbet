@@ -3,6 +3,8 @@ __package.rb:7: Unable to resolve constant `WildlyMisspelled` https://srb.help/5
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     To be exported it must be defined in package `Foo::BasePkg`
+  Note:
+    Try running generate-packages.sh
 
 __package.rb:8: Unable to resolve constant `NameWithTipo` https://srb.help/5002
      8 |  export Foo::BasePkg::NameWithTipo
@@ -14,4 +16,6 @@ __package.rb:8: Unable to resolve constant `NameWithTipo` https://srb.help/5002
     base.rb:7: Did you mean: `Foo::BasePkg::NameWithTypo`?
      7 |  class NameWithTypo; end
           ^^^^^^^^^^^^^^^^^^
+  Note:
+    Try running generate-packages.sh
 Errors: 2
