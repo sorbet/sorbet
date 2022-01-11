@@ -354,7 +354,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("stripe-packages", "Enable support for Stripe's internal Ruby package system",
                                     cxxopts::value<bool>());
     options.add_options("advanced")("stripe-packages-hint-message",
-                                    "Optional hit message to add to packaging related errors",
+                                    "Optional hint message to add to packaging related errors",
                                     cxxopts::value<string>()->default_value(""));
     options.add_options("dev")("extra-package-files-directory-prefix",
                                "Extra parent directories which contain package files. "
