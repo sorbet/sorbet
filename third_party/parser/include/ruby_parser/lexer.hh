@@ -34,7 +34,7 @@ class lexer {
 public:
     using environment = std::set<std::string>;
     struct token_table_entry {
-        const char *token;
+        std::string_view token;
         token_type type;
     };
 
