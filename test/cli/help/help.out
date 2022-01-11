@@ -138,7 +138,7 @@ Usage:
       --stripe-packages         Enable support for Stripe's internal Ruby
                                 package system
       --stripe-packages-hint-message arg
-                                Optional hit message to add to packaging
+                                Optional hint message to add to packaging
                                 related errors (default: "")
       --autogen-autoloader-exclude-require arg
                                 Names that should be excluded from top-level
