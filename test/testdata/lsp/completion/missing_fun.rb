@@ -73,3 +73,9 @@ def test_before_var_assign(x)
   y = nil
 end
 
+sig {params(x: M).void}
+def test_csend(x)
+  x&.
+  #  ^ completion: bar, foo, qux, ...
+end # error: unexpected token "end"
+

@@ -97,4 +97,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   def test_before_var_assign<<todo method>>(x, &<blk>)
     x.y=(nil)
   end
+
+  <self>.sig() do ||
+    <self>.params(:x, <emptyTree>::<C M>).void()
+  end
+
+  def test_csend<<todo method>>(x, &<blk>)
+    begin
+      <assignTemp>$2 = x
+      if ::NilClass.===(<assignTemp>$2)
+        ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$2)
+      else
+        <assignTemp>$2.<method-name-missing>()
+      end
+    end
+  end
 end
