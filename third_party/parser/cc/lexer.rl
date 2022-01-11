@@ -464,7 +464,6 @@ token_t lexer::advance_() {
 
   const char* ident_ts = NULL;
   const char* ident_te = NULL;
-  std::string ident_tok;
 
   %% write exec;
 
@@ -2371,10 +2370,10 @@ void lexer::set_state_expr_value() {
       => local_ident;
 
       (call_or_var - keyword)
-        % { ident_tok = tok(ts, te); ident_ts = ts; ident_te = te; }
+        % { ident_ts = ts; ident_te = te; }
       w_space+ '('
       => {
-        emit(token_type::tIDENTIFIER, ident_tok, ident_ts, ident_te);
+        emit(token_type::tIDENTIFIER, tok_view(ident_ts, ident_te), ident_ts, ident_te);
         p = ident_te - 1;
 
         fnext expr_cmdarg;
