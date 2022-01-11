@@ -454,8 +454,18 @@ token_t lexer::advance_() {
   int cmd_state = command_start;
   command_start = false;
 
+  // When Ragel reads a character, this is it. If we don't break out of its
+  // control loop (e.g., by returning), it will update this to consume more
+  // characters.
+  // Mnemonic: Pointer
   const char* p = _p;
+  // Required by ragel. One past the last character to read.
+  //
+  // Mnemonic: Pointer End
   const char* pe = _pe;
+  // Required by Ragel when using eof actions, because pe might not be the last character.
+  // (Ragel is designed so that the buffer can grow and reallocate as data becomes available)
+  // We always read in all the data, so for us pe == eof, always.
   const char* eof = _pe;
 
   const char* tm = NULL;
