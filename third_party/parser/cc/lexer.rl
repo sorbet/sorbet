@@ -419,7 +419,7 @@ static bool split_codepoints(const std::string &str, std::string &output) {
   return true;
 }
 
-static std::string gsub(std::string_view str, const std::string&& search, const std::string&& replace) {
+static std::string gsub(std::string_view str, std::string_view search, std::string_view replace) {
   std::string result;
 
   std::string::size_type from = 0;
