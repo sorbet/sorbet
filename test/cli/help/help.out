@@ -137,6 +137,9 @@ Usage:
       --stripe-mode             Enable Stripe specific error enforcement
       --stripe-packages         Enable support for Stripe's internal Ruby
                                 package system
+      --stripe-packages-hint-message arg
+                                Optional hint message to add to packaging
+                                related errors (default: "")
       --autogen-autoloader-exclude-require arg
                                 Names that should be excluded from top-level
                                 require statements in autoloader output. (e.g.
