@@ -22,20 +22,13 @@ private:
 
     fmt::memory_buffer out;
     int indent = 0;
-    std::string tabStr = "";
-
-    void resetTabString() {
-        tabStr = string(indent * 2, ' ');
-    }
 
     void tab() {
         indent++;
-        resetTabString();
     }
 
     void untab() {
         indent--;
-        resetTabString();
     }
 
 public:
@@ -46,11 +39,9 @@ public:
     }
 
     void println(string_view arg) {
-        fmt::format_to(std::back_inserter(out), tabStr);
-        // Hack: Intent even w/ multiline strings.
-        string indented = absl::StrReplaceAll(arg, {{"\n", "\n" + tabStr}});
-        std::copy(indented.begin(), indented.end(), std::back_inserter(out));
-        fmt::format_to(std::back_inserter(out), "\n");
+        for (auto line : absl::StrSplit(arg, "\n")) {
+            fmt::format_to(std::back_inserter(out), "{:{}}{}\n", "", this->indent*2, line);
+        }
     }
 
     string toString() {
