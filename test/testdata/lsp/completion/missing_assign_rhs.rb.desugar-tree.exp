@@ -1,0 +1,5 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def test_missing_rhs<<todo method>>(x, &<blk>)
+    y = <emptyTree>::<C <ErrorNode>>
+  end
+end
