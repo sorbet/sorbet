@@ -1,6 +1,8 @@
 #ifndef SORBET_CORE_STRICT_LEVEL_H
 #define SORBET_CORE_STRICT_LEVEL_H
 
+#include <string_view>
+
 namespace sorbet::core {
 enum class StrictLevel {
     // Internal Sorbet errors. There is no syntax to make those errors ignored.
@@ -41,6 +43,8 @@ enum class StrictLevel {
     // members in classes. Useful for .rbi files from the core and stdlib.
     Stdlib = 11,
 };
-} // namespace sorbet::core
 
+std::string_view strictLevelToSigil(StrictLevel level);
+
+} // namespace sorbet::core
 #endif
