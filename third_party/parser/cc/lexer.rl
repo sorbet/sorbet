@@ -270,7 +270,7 @@ static const lexer::token_table_entry PUNCTUATION[] = {
   { "`", token_type::tBACK_REF2 },
   { "!@", token_type::tBANG },
   { "&.", token_type::tANDDOT },
-  { NULL, token_type::error },
+  { "", token_type::error },
 };
 
 static const lexer::token_table_entry PUNCTUATION_BEGIN[] = {
@@ -283,7 +283,7 @@ static const lexer::token_table_entry PUNCTUATION_BEGIN[] = {
   { "(", token_type::tLPAREN },
   { "{", token_type::tLBRACE },
   { "[", token_type::tLBRACK },
-  { NULL, token_type::error },
+  { "", token_type::error },
 };
 
 static const lexer::token_table_entry KEYWORDS[] = {
@@ -328,7 +328,7 @@ static const lexer::token_table_entry KEYWORDS[] = {
   { "__FILE__", token_type::k__FILE__ },
   { "__LINE__", token_type::k__LINE__ },
   { "__ENCODING__", token_type::k__ENCODING__ },
-  { NULL, token_type::error },
+  { "", token_type::error },
 };
 
 static const lexer::token_table_entry KEYWORDS_BEGIN[] = {
@@ -373,7 +373,7 @@ static const lexer::token_table_entry KEYWORDS_BEGIN[] = {
   { "__FILE__", token_type::k__FILE__ },
   { "__LINE__", token_type::k__LINE__ },
   { "__ENCODING__", token_type::k__ENCODING__ },
-  { NULL, token_type::error },
+  { "", token_type::error },
 };
 
 static size_t utf8_encode_char(int32_t uc, std::string &dst) {
@@ -512,7 +512,7 @@ void lexer::emit_do(bool do_block) {
 void lexer::emit_table(const token_table_entry* table) {
   auto value = tok();
 
-  for (; table->token; ++table) {
+  for (; !table->token.empty(); ++table) {
     if (value == table->token) {
       emit(table->type, value);
       return;
