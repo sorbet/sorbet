@@ -158,6 +158,7 @@ struct Options {
     int autogenVersion = 0;
     bool stripeMode = false;
     bool stripePackages = false;
+    std::string stripePackagesHint = "";
     std::vector<std::string> extraPackageFilesDirectoryPrefixes;
     std::vector<std::string> secondaryTestPackageNamespaces;
     std::string typedSource = "";

@@ -69,10 +69,12 @@ public:
         lines.emplace_back(
             core::ErrorLine::from(match.symbol.loc(ctx), "Constant `{}` is defined here:", match.symbol.show(ctx)));
         e.addErrorSection(core::ErrorSection(lines));
+        maybeAddErrorHint(e);
 
         if (auto autocorrect = srcPkg.addExport(ctx, match.symbol, false)) {
             e.addAutocorrect(std::move(*autocorrect));
         }
+        maybeAddErrorHint(e);
     }
 
     void addMissingImportSuggestions(core::ErrorBuilder &e, PackageMatch &match) {
@@ -84,9 +86,11 @@ public:
         lines.emplace_back(core::ErrorLine::from(otherPkg.definitionLoc(), "Do you need to `{}` package `{}`?",
                                                  importName.show(ctx), formatPackageName(otherPkg)));
         e.addErrorSection(core::ErrorSection(lines));
+        maybeAddErrorHint(e);
         if (auto autocorrect = currentPkg.addImport(ctx, otherPkg, isTestFile)) {
             e.addAutocorrect(std::move(*autocorrect));
         }
+        maybeAddErrorHint(e);
     }
 
     bool tryPackageSpecCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
@@ -159,6 +163,7 @@ private:
         } else {
             e.addErrorNote("To be exported it must be defined in package `{}`", formatPackageName(currentPkg));
         }
+        maybeAddErrorHint(e);
     }
 
     void tryUnresolvedImportCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
@@ -200,6 +205,7 @@ private:
         if (!matches.empty()) {
             addReplacementSuggestions(e, unresolved, matches);
         }
+        maybeAddErrorHint(e);
     }
 
     void addReplacementSuggestions(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved,
@@ -212,6 +218,13 @@ private:
                           replacement);
         }
         e.addErrorSection(core::ErrorSection(lines));
+    }
+
+    void maybeAddErrorHint(core::ErrorBuilder &e) {
+        if (db().errorHint().empty()) {
+            return;
+        }
+        e.addErrorNote("{}", db().errorHint());
     }
 
     string formatPackageName(const core::packages::PackageInfo &pkg) const {
