@@ -74,7 +74,6 @@ const vector<PrintOptions> print_options({
     {"missing-constants", &Printers::MissingConstants},
     {"autogen", &Printers::Autogen},
     {"autogen-msgpack", &Printers::AutogenMsgPack},
-    {"autogen-classlist", &Printers::AutogenClasslist},
     {"autogen-autoloader", &Printers::AutogenAutoloader, true, false},
     {"autogen-subclasses", &Printers::AutogenSubclasses},
     {"package-tree", &Printers::Packager, false},
@@ -145,7 +144,6 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         MissingConstants,
         Autogen,
         AutogenMsgPack,
-        AutogenClasslist,
         AutogenAutoloader,
         AutogenSubclasses,
         Packager,
@@ -154,7 +152,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
 }
 
 bool Printers::isAutogen() const {
-    return Autogen.enabled || AutogenMsgPack.enabled || AutogenClasslist.enabled || AutogenSubclasses.enabled ||
+    return Autogen.enabled || AutogenMsgPack.enabled || AutogenSubclasses.enabled ||
            AutogenAutoloader.enabled;
 }
 
