@@ -140,6 +140,9 @@ private:
     std::string_view tok_view(const char *start) const;
     std::string_view tok_view(const char *start, const char *end) const;
     void emit(token_type type);
+    // NB: these overloads will also handle character literals coercing to string_views.
+    // This is fine in a world where tokens only store string_views, as the character
+    // literal data lives in static storage.
     void emit(token_type type, std::string_view str);
     void emit(token_type type, std::string_view str, const char *start, const char *end);
     void emit_do(bool do_block = false);
