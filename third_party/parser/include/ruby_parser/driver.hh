@@ -130,13 +130,16 @@ class current_arg_stack {
     std::vector<std::string> stack;
 
 public:
-    void push(std::string value) {
-        stack.push_back(value);
+    void push(std::string_view value) {
+        stack.emplace_back(value);
     }
 
-    void set(std::string value) {
-        pop();
-        push(value);
+    void set(std::string_view value) {
+        if (stack.empty()) {
+            push(value);
+        } else {
+            stack.back() = value;
+        }
     }
 
     void pop() {
@@ -149,8 +152,9 @@ public:
         stack.clear();
     }
 
-    std::string top() {
-        return stack.empty() ? "" : stack.back();
+    const std::string &top() {
+        static std::string empty("");
+        return stack.empty() ? empty : stack.back();
     }
 };
 
