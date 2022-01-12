@@ -8,6 +8,7 @@
 #include <set>
 #include <stack>
 #include <string>
+#include <vector>
 
 #include "context.hh"
 #include "diagnostic.hh"
@@ -53,6 +54,7 @@ private:
 
     ruby_version version;
     std::string_view source_buffer;
+    std::vector<char> &scratch;
 
     std::stack<environment> static_env;
     std::stack<literal> literal_stack;
@@ -172,7 +174,8 @@ public:
     bool in_kwarg; // true at the end of "def foo a:"
     Context context;
 
-    lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer);
+    lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer,
+          std::vector<char> &scratch);
 
     // Main interface consumed by yylex function in parser
     token_t advance();

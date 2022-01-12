@@ -59,7 +59,10 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file, 
     buffer.reserve(source.size() + 2);
     buffer += source;
     buffer += "\0\0"sv;
-    ruby_parser::typedruby27 driver(buffer, Builder::interface);
+    vector<char> scratch;
+    // This is perhaps a little optimistic, but at least it is a reasonable default.
+    scratch.reserve(buffer.size());
+    ruby_parser::typedruby27 driver(buffer, scratch, Builder::interface);
 
     for (string local : initialLocals) {
         driver.lex.declare(local);
