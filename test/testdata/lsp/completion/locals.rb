@@ -90,3 +90,10 @@ class Wrapper
   x_ # error: does not exist
   # ^ completion: x_inside_class
 end
+
+class B
+  def implicit_block_arg
+    blk # error: does not exist
+    #  ^ completion: (nothing)
+  end
+end
