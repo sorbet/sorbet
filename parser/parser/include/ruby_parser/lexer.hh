@@ -142,11 +142,19 @@ private:
     std::string_view tok_view(const char *start) const;
     std::string_view tok_view(const char *start, const char *end) const;
     void emit(token_type type);
-    // NB: these overloads will also handle character literals coercing to string_views.
-    // This is fine in a world where tokens only store string_views, as the character
-    // literal data lives in static storage.
     void emit(token_type type, std::string_view str);
     void emit(token_type type, std::string_view str, const char *start, const char *end);
+    // Without these overloads, emit(..., "do") would be ambiguous.
+    // It's OK to store points to constants, as they live in static storage and will
+    // therefore not be going away.
+    template<size_t N>
+    void emit(token_type type, const char (&str)[N]) {
+        emit(type, std::string_view{&str[0], N-1});
+    }
+    template<size_t N>
+    void emit(token_type type, const char (&str)[N], const char *start, const char *end) {
+        emit(type, std::string_view{&str[0], N-1}, start, end);
+    }
     void emit_do(bool do_block = false);
     void emit_table(const token_table_entry *table);
     void emit_num(const std::string &num);
