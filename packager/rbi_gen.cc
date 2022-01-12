@@ -221,7 +221,8 @@ private:
             return "";
         }
         enqueueSymbolsInType(type);
-        return type.show(gs);
+        auto options = core::ShowOptions{}.withShowForRBI();
+        return type.show(gs, options);
     }
 
     // Rewrites ruby keywords to non-keywords.
@@ -565,7 +566,7 @@ private:
 
     string typeDeclaration(const core::TypePtr &type) {
         if (type == nullptr) {
-            return absl::StrCat("T.let(T.unsafe(nil), ", core::Types::untypedUntracked().show(gs), ")");
+            return absl::StrCat("T.let(T.unsafe(nil), ", showType(core::Types::untypedUntracked()), ")");
         } else if (core::isa_type<core::AliasType>(type)) {
             auto alias = core::cast_type_nonnull<core::AliasType>(type);
             maybeEmit(alias.symbol);
