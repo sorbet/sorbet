@@ -120,10 +120,10 @@ using namespace std::string_literals;
 
 %% prepush { check_stack_capacity(); }
 
-lexer::lexer(diagnostics_t &diag, ruby_version version, const std::string& source_buffer_)
+lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer)
   : diagnostics(diag)
   , version(version)
-  , source_buffer(source_buffer_ + std::string("\0\0", 2))
+  , source_buffer(source_buffer)
   , cs(lex_en_line_begin)
   , _p(source_buffer.data())
   , _pe(source_buffer.data() + source_buffer.size())
@@ -144,6 +144,9 @@ lexer::lexer(diagnostics_t &diag, ruby_version version, const std::string& sourc
   , herebody_s(nullptr)
   , in_kwarg(false)
 {
+  assert(!source_buffer.empty());
+  assert(source_buffer.back() == '\0');
+
   // ensure the stack is non-empty so we can just double in
   // check_stack_capacity:
   stack.resize(16);
