@@ -518,6 +518,22 @@ void lexer::emit(token_type type, std::string_view str, const char* start, const
   token_queue.push_back(mempool.alloc(type, offset_start, offset_end, str));
 }
 
+void lexer::emit(token_type type, const std::string &str) {
+  emit(type, str, ts, te);
+}
+
+void lexer::emit(token_type type, const std::string &str, const char* start, const char* end) {
+  size_t offset_start = (size_t)(start - source_buffer.data());
+  size_t offset_end = (size_t)(end - source_buffer.data());
+
+  // Copy the string into stable storage.
+  // XXX need to handle the case where scratch doesn't have enough space left.
+  auto scratch_start = this->scratch.size();
+  this->scratch.insert(this->scratch.end(), str.begin(), str.end());
+  auto scratch_view = std::string_view{&this->scratch[scratch_start], this->scratch.size() - scratch_start};
+  token_queue.push(mempool.alloc(type, offset_start, offset_end, scratch_view));
+}
+
 void lexer::emit_do(bool do_block) {
   if (cond.active()) {
     emit(token_type::kDO_COND, "do");

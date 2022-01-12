@@ -155,6 +155,8 @@ private:
     void emit(token_type type, const char (&str)[N], const char *start, const char *end) {
         emit(type, std::string_view{&str[0], N-1}, start, end);
     }
+    void emit(token_type type, const std::string &str);
+    void emit(token_type type, const std::string &str, const char *start, const char *end);
     void emit_do(bool do_block = false);
     void emit_table(const token_table_entry *table);
     void emit_num(const std::string &num);
