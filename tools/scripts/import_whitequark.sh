@@ -14,8 +14,8 @@
 set -euo pipefail
 set -x
 
-REF=49ed4dddfb1bf44d579fda001862149f4b9f7970
-TARGET_RUBY_VERSION="3.0"
+REF=3e421d6bc4d7a480d0a0e7aae23afe714a61ea87
+TARGET_RUBY_VERSION="3.1"
 
 SCRIPT=$(realpath "$0")
 ROOT="$(cd "$(dirname "$SCRIPT")/../.."; pwd)"
