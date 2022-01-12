@@ -54,11 +54,11 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file, 
     Builder builder(gs, file);
     auto source = file.data(gs).source();
     // The lexer requires that its buffers end with a null terminator, which core::File
-    // does not guarantee.
+    // does not guarantee.  Parsing heredocs for some mysterious reason requires two.
     string buffer;
-    buffer.reserve(source.size() + 1);
+    buffer.reserve(source.size() + 2);
     buffer += source;
-    buffer += '\0';
+    buffer += "\0\0"sv;
     ruby_parser::typedruby27 driver(buffer, Builder::interface);
 
     for (string local : initialLocals) {
