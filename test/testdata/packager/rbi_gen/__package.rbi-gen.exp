@@ -15,7 +15,7 @@ module RBIGen::Public::VariousMethods
     @if = T.let(T.unsafe(nil), Integer)
     @unless = T.let(T.unsafe(nil), String)
   end
-  sig {returns(T.deprecated_enum(["hello"]))}
+  sig {returns(String)}
   def dep_enum; end
   def dotdotdot(...); end
   sig {returns(Integer)}
@@ -24,7 +24,7 @@ module RBIGen::Public::VariousMethods
   def if=(ifArg); end
   sig {params(a: RBIGen::Private::PrivateClassPulledInByPrivateMethod).void}
   private def my_method(a); end
-  sig {returns(T.any(String, [T.deprecated_enum([:D]), Integer], Integer))}
+  sig {returns(T.any(String, [Symbol, Integer], Integer))}
   def returns_any_with_literals; end
   sig {returns(T::Array[String])}
   def returns_generic_type; end
