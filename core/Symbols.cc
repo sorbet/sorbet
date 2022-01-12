@@ -422,12 +422,6 @@ string ClassOrModuleRef::show(const GlobalState &gs) const {
         }
     }
 
-    if (sym->name == core::Names::Constants::AttachedClass()) {
-        auto attached = sym->owner.asClassOrModuleRef().data(gs)->attachedClass(gs);
-        ENFORCE(attached.exists());
-        return fmt::format("T.attached_class (of {})", attached.show(gs));
-    }
-
     return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
 }
 
