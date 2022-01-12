@@ -716,6 +716,7 @@ public:
     const core::LocOffsets loc;
 
     core::NameRef fun;
+    const core::LocOffsets funLoc;
 
     struct Flags {
         bool isPrivateOk : 1;
@@ -761,8 +762,8 @@ private:
     ARGS_store args;
 
 public:
-    Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, uint16_t numPosArgs, ARGS_store args,
-         Flags flags = {});
+    Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc, uint16_t numPosArgs,
+         ARGS_store args, Flags flags = {});
 
     ExpressionPtr deepCopy() const;
 
@@ -929,7 +930,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Send, 48, 8);
+CheckSize(Send, 56, 8);
 
 EXPRESSION(Cast) {
 public:

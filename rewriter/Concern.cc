@@ -136,8 +136,9 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
         auto magic = ast::MK::Constant(klass->loc, core::Symbols::Magic());
         auto classMethods =
             ast::MK::UnresolvedConstant(klass->loc, ast::MK::EmptyTree(), core::Names::Constants::ClassMethods());
-        auto sendForMixes = ast::MK::Send2(klass->loc, std::move(magic), core::Names::mixesInClassMethods(),
-                                           ast::MK::Self(klass->loc), std::move(classMethods));
+        auto sendForMixes =
+            ast::MK::Send2(klass->loc, std::move(magic), core::Names::mixesInClassMethods(),
+                           klass->loc.copyWithZeroLength(), ast::MK::Self(klass->loc), std::move(classMethods));
         stats.emplace_back(std::move(sendForMixes));
     }
 

@@ -287,7 +287,8 @@ class LocalNameInserter {
                 posArgsArray = ast::MK::Splat(original.loc, ast::make_expression<ast::Local>(original.loc, arg.arg));
                 if (!posArgsEntries.empty()) {
                     posArgsArray = ast::MK::Send1(original.loc, ast::MK::Array(original.loc, std::move(posArgsEntries)),
-                                                  core::Names::concat(), std::move(posArgsArray));
+                                                  core::Names::concat(), original.loc.copyWithZeroLength(),
+                                                  std::move(posArgsArray));
                     posArgsEntries.clear();
                 }
             } else if (arg.flags.isKeyword()) {
@@ -300,16 +301,16 @@ class LocalNameInserter {
                 ENFORCE(kwArgsHash == nullptr, "Saw multiple keyword splats");
 
                 // TODO(aprocter): is it necessary to duplicate the hash here?
-                kwArgsHash =
-                    ast::MK::Send1(original.loc, ast::MK::Constant(original.loc, core::Symbols::Magic()),
-                                   core::Names::toHashDup(), ast::make_expression<ast::Local>(original.loc, arg.arg));
+                kwArgsHash = ast::MK::Send1(original.loc, ast::MK::Constant(original.loc, core::Symbols::Magic()),
+                                            core::Names::toHashDup(), original.loc.copyWithZeroLength(),
+                                            ast::make_expression<ast::Local>(original.loc, arg.arg));
                 if (!kwArgKeyEntries.empty()) {
                     // TODO(aprocter): it might make more sense to replace this with an InsSeq that calls
                     // <Magic>::<merge-hash>, which is what's done in the desugarer.
                     kwArgsHash = ast::MK::Send1(
                         original.loc,
                         ast::MK::Hash(original.loc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries)),
-                        core::Names::merge(), std::move(kwArgsHash));
+                        core::Names::merge(), original.loc.copyWithZeroLength(), std::move(kwArgsHash));
                     kwArgKeyEntries.clear();
                     kwArgValueEntries.clear();
                 }
@@ -329,6 +330,7 @@ class LocalNameInserter {
         // If there were any posargs after a positional splat, fold them into the splatted array.
         if (posArgsArray != nullptr && !posArgsEntries.empty()) {
             posArgsArray = ast::MK::Send1(original.loc, std::move(posArgsArray), core::Names::concat(),
+                                          original.loc.copyWithZeroLength(),
                                           ast::MK::Array(original.loc, std::move(posArgsEntries)));
             posArgsEntries.clear();
         }

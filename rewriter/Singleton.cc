@@ -75,7 +75,8 @@ void Singleton::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     std::move(cdef->rhs.begin(), it, std::back_inserter(newRHS));
 
     {
-        auto sig = ast::MK::Sig0(loc, ast::MK::Send0(loc, ast::MK::T(loc), core::Names::attachedClass()));
+        auto sig = ast::MK::Sig0(
+            loc, ast::MK::Send0(loc, ast::MK::T(loc), core::Names::attachedClass(), loc.copyWithZeroLength()));
         if (finalKlass) {
             ast::cast_tree_nonnull<ast::Send>(sig).addPosArg(ast::MK::Symbol(loc, core::Names::final_()));
         }

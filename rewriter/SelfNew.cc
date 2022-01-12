@@ -19,7 +19,7 @@ ast::ExpressionPtr convertSelfNew(core::MutableContext ctx, ast::Send *send) {
         args.emplace_back(std::move(*block));
     }
 
-    return ast::MK::SelfNew(send->loc, send->numPosArgs() + 1, std::move(args), send->flags);
+    return ast::MK::SelfNew(send->loc, send->funLoc, send->numPosArgs() + 1, std::move(args), send->flags);
 }
 
 bool isSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {

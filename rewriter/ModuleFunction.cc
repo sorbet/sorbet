@@ -82,7 +82,8 @@ vector<ast::ExpressionPtr> ModuleFunction::rewriteDefn(core::MutableContext ctx,
 
     // this creates a private copy of the method
     auto privateCopy = expr.deepCopy();
-    stats.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::private_(), move(privateCopy)));
+    stats.emplace_back(
+        ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::private_(), loc.copyWithZeroLength(), move(privateCopy)));
 
     // as well as a public static copy of the method signature
     if (prevStat) {
@@ -132,7 +133,8 @@ vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Se
                 }
             }
 
-            stats.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::private_(), lit->deepCopy()));
+            stats.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::private_(),
+                                              loc.copyWithZeroLength(), lit->deepCopy()));
             ast::MethodDef::ARGS_store args;
             args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
             args.emplace_back(ast::make_expression<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));

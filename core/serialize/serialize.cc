@@ -992,6 +992,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             auto &s = ast::cast_tree_nonnull<ast::Send>(what);
             pickle(p, s.loc);
             p.putU4(s.fun.rawId());
+            pickle(p, s.funLoc);
             uint8_t flags;
             static_assert(sizeof(flags) == sizeof(s.flags));
             // Can replace this with std::bit_cast in C++20
@@ -1288,6 +1289,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         case ast::Tag::Send: {
             auto loc = unpickleLocOffsets(p);
             NameRef fun = unpickleNameRef(p, gs);
+            auto funLoc = unpickleLocOffsets(p);
             auto flagsU1 = p.getU1();
             ast::Send::Flags flags;
             static_assert(sizeof(flags) == sizeof(flagsU1));
@@ -1300,7 +1302,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             for (auto &expr : store) {
                 expr = unpickleExpr(p, gs);
             }
-            return ast::MK::Send(loc, std::move(recv), fun, numPosArgs, std::move(store), flags);
+            return ast::MK::Send(loc, std::move(recv), fun, funLoc, numPosArgs, std::move(store), flags);
         }
         case ast::Tag::Block: {
             auto loc = unpickleLocOffsets(p);

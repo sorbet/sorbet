@@ -147,7 +147,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
     // Elem = type_member(fixed: T.untyped)
     {
         auto typeMember =
-            ast::MK::Send(loc, ast::MK::Self(loc), core::Names::typeMember(), 0,
+            ast::MK::Send(loc, ast::MK::Self(loc), core::Names::typeMember(), loc.copyWithZeroLength(), 0,
                           ast::MK::SendArgs(ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc)));
         body.emplace_back(
             ast::MK::Assign(loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),

@@ -231,9 +231,10 @@ Assign::Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs)
     _sanityCheck();
 }
 
-Send::Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, uint16_t numPosArgs, Send::ARGS_store args,
-           Flags flags)
-    : loc(loc), fun(fun), flags(flags), numPosArgs_(numPosArgs), recv(std::move(recv)), args(std::move(args)) {
+Send::Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc, uint16_t numPosArgs,
+           Send::ARGS_store args, Flags flags)
+    : loc(loc), fun(fun), funLoc(funLoc), flags(flags), numPosArgs_(numPosArgs), recv(std::move(recv)),
+      args(std::move(args)) {
     categoryCounterInc("trees", "send");
     if (hasBlock()) {
         counterInc("trees.send.with_block");
@@ -1069,7 +1070,7 @@ void Send::addKwArg(ExpressionPtr key, ExpressionPtr value) {
 }
 
 ExpressionPtr Send::withNewBody(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun) {
-    auto rv = make_expression<Send>(loc, move(recv), fun, numPosArgs_, std::move(args), flags);
+    auto rv = make_expression<Send>(loc, move(recv), fun, funLoc, numPosArgs_, std::move(args), flags);
 
     // Reset important metadata on this function.
     this->numPosArgs_ = 0;

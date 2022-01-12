@@ -34,39 +34,41 @@ public:
         return store;
     }
 
-    static ExpressionPtr Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, uint16_t numPosArgs,
-                              Send::ARGS_store args, Send::Flags flags = {}) {
-        auto send = make_expression<ast::Send>(loc, std::move(recv), fun, numPosArgs, std::move(args), flags);
+    static ExpressionPtr Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc,
+                              uint16_t numPosArgs, Send::ARGS_store args, Send::Flags flags = {}) {
+        auto send = make_expression<ast::Send>(loc, std::move(recv), fun, funLoc, numPosArgs, std::move(args), flags);
         return send;
     }
 
-    static ExpressionPtr Send0(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun) {
+    static ExpressionPtr Send0(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc) {
         Send::ARGS_store nargs;
-        return Send(loc, std::move(recv), fun, 0, std::move(nargs));
+        return Send(loc, std::move(recv), fun, funLoc, 0, std::move(nargs));
     }
 
-    static ExpressionPtr Send0Block(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, ExpressionPtr blk) {
+    static ExpressionPtr Send0Block(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun,
+                                    core::LocOffsets funLoc, ExpressionPtr blk) {
         Send::ARGS_store nargs;
         Send::Flags flags;
         if (blk != nullptr) {
             flags.hasBlock = true;
             nargs.emplace_back(std::move(blk));
         }
-        return Send(loc, std::move(recv), fun, 0, std::move(nargs), flags);
+        return Send(loc, std::move(recv), fun, funLoc, 0, std::move(nargs), flags);
     }
 
-    static ExpressionPtr Send1(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, ExpressionPtr arg1) {
-        return Send(loc, std::move(recv), fun, 1, SendArgs(std::move(arg1)));
+    static ExpressionPtr Send1(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc,
+                               ExpressionPtr arg1) {
+        return Send(loc, std::move(recv), fun, funLoc, 1, SendArgs(std::move(arg1)));
     }
 
-    static ExpressionPtr Send2(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, ExpressionPtr arg1,
-                               ExpressionPtr arg2) {
-        return Send(loc, std::move(recv), fun, 2, SendArgs(std::move(arg1), std::move(arg2)));
+    static ExpressionPtr Send2(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc,
+                               ExpressionPtr arg1, ExpressionPtr arg2) {
+        return Send(loc, std::move(recv), fun, funLoc, 2, SendArgs(std::move(arg1), std::move(arg2)));
     }
 
-    static ExpressionPtr Send3(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, ExpressionPtr arg1,
-                               ExpressionPtr arg2, ExpressionPtr arg3) {
-        return Send(loc, std::move(recv), fun, 3, SendArgs(std::move(arg1), std::move(arg2), std::move(arg3)));
+    static ExpressionPtr Send3(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc,
+                               ExpressionPtr arg1, ExpressionPtr arg2, ExpressionPtr arg3) {
+        return Send(loc, std::move(recv), fun, funLoc, 3, SendArgs(std::move(arg1), std::move(arg2), std::move(arg3)));
     }
 
     static ExpressionPtr Literal(core::LocOffsets loc, const core::TypePtr &tpe) {
@@ -178,12 +180,12 @@ public:
     }
 
     static ExpressionPtr Splat(core::LocOffsets loc, ExpressionPtr arg) {
-        return Send1(loc, Constant(loc, core::Symbols::Magic()), core::Names::splat(), std::move(arg));
+        return Send1(loc, Constant(loc, core::Symbols::Magic()), core::Names::splat(), loc, std::move(arg));
     }
 
     static ExpressionPtr CallWithSplat(core::LocOffsets loc, ExpressionPtr recv, core::NameRef name,
                                        ExpressionPtr args) {
-        return Send3(loc, Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(), std::move(recv),
+        return Send3(loc, Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(), loc, std::move(recv),
                      MK::Symbol(loc, name), std::move(args));
     }
 
@@ -308,7 +310,7 @@ private:
         ENFORCE(args.size() % 2 == 0, "Sig params must be arg name/type pairs");
 
         if (args.size() > 0) {
-            recv = Send(loc, std::move(recv), core::Names::params(), 0, std::move(args));
+            recv = Send(loc, std::move(recv), core::Names::params(), loc, 0, std::move(args));
         }
 
         return recv;
@@ -317,8 +319,8 @@ private:
 public:
     static ExpressionPtr Sig(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr ret) {
         auto params = Params(loc, Self(loc), std::move(args));
-        auto returns = Send1(loc, std::move(params), core::Names::returns(), std::move(ret));
-        auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
+        auto returns = Send1(loc, std::move(params), core::Names::returns(), loc, std::move(ret));
+        auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc,
                          Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
         auto sigSend = ast::cast_tree<ast::Send>(sig);
         sigSend->setBlock(Block0(loc, std::move(returns)));
@@ -328,8 +330,8 @@ public:
 
     static ExpressionPtr SigVoid(core::LocOffsets loc, Send::ARGS_store args) {
         auto params = Params(loc, Self(loc), std::move(args));
-        auto void_ = Send0(loc, std::move(params), core::Names::void_());
-        auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
+        auto void_ = Send0(loc, std::move(params), core::Names::void_(), loc);
+        auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc,
                          Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
         auto sigSend = ast::cast_tree<ast::Send>(sig);
         sigSend->setBlock(Block0(loc, std::move(void_)));
@@ -338,8 +340,8 @@ public:
     }
 
     static ExpressionPtr Sig0(core::LocOffsets loc, ExpressionPtr ret) {
-        auto returns = Send1(loc, Self(loc), core::Names::returns(), std::move(ret));
-        auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
+        auto returns = Send1(loc, Self(loc), core::Names::returns(), loc, std::move(ret));
+        auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc,
                          Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
         auto sigSend = ast::cast_tree<ast::Send>(sig);
         sigSend->setBlock(Block0(loc, std::move(returns)));
@@ -356,19 +358,19 @@ public:
     }
 
     static ExpressionPtr Let(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
-        return Send2(loc, T(loc), core::Names::let(), std::move(value), std::move(type));
+        return Send2(loc, T(loc), core::Names::let(), loc, std::move(value), std::move(type));
     }
 
     static ExpressionPtr AssertType(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
-        return Send2(loc, T(loc), core::Names::assertType(), std::move(value), std::move(type));
+        return Send2(loc, T(loc), core::Names::assertType(), loc, std::move(value), std::move(type));
     }
 
     static ExpressionPtr Unsafe(core::LocOffsets loc, ExpressionPtr inner) {
-        return Send1(loc, T(loc), core::Names::unsafe(), std::move(inner));
+        return Send1(loc, T(loc), core::Names::unsafe(), loc, std::move(inner));
     }
 
     static ExpressionPtr Untyped(core::LocOffsets loc) {
-        return Send0(loc, T(loc), core::Names::untyped());
+        return Send0(loc, T(loc), core::Names::untyped(), loc);
     }
 
     static ExpressionPtr UntypedNil(core::LocOffsets loc) {
@@ -376,30 +378,31 @@ public:
     }
 
     static ExpressionPtr Nilable(core::LocOffsets loc, ExpressionPtr arg) {
-        return Send1(loc, T(loc), core::Names::nilable(), std::move(arg));
+        return Send1(loc, T(loc), core::Names::nilable(), loc, std::move(arg));
     }
 
     static ExpressionPtr KeepForIDE(core::LocOffsets loc, ExpressionPtr arg) {
-        return Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::keepForIde(),
+        return Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::keepForIde(), loc,
                      std::move(arg));
     }
 
     static ExpressionPtr KeepForTypechecking(ExpressionPtr arg) {
         auto loc = core::LocOffsets::none();
         return Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::keepForTypechecking(),
-                     std::move(arg));
+                     loc, std::move(arg));
     }
 
     static ExpressionPtr ZSuper(core::LocOffsets loc) {
         Send::Flags flags;
         flags.isPrivateOk = true;
-        return Send(loc, Self(loc), core::Names::super(), 1, SendArgs(make_expression<ast::ZSuperArgs>(loc)), flags);
+        return Send(loc, Self(loc), core::Names::super(), loc, 1, SendArgs(make_expression<ast::ZSuperArgs>(loc)),
+                    flags);
     }
 
-    static ExpressionPtr SelfNew(core::LocOffsets loc, int numPosArgs, ast::Send::ARGS_store args,
-                                 Send::Flags flags = {}) {
+    static ExpressionPtr SelfNew(core::LocOffsets loc, core::LocOffsets funLoc, int numPosArgs,
+                                 ast::Send::ARGS_store args, Send::Flags flags = {}) {
         auto magic = Constant(loc, core::Symbols::Magic());
-        return Send(loc, std::move(magic), core::Names::selfNew(), numPosArgs, std::move(args), flags);
+        return Send(loc, std::move(magic), core::Names::selfNew(), funLoc, numPosArgs, std::move(args), flags);
     }
 
     static ExpressionPtr DefineTopClassOrModule(core::LocOffsets loc, core::ClassOrModuleRef klass) {
@@ -408,14 +411,14 @@ public:
         flags.isRewriterSynthesized = true;
         // Use a 0-sized loc so that LSP queries for "what is at this location" do not return this synthetic send.
         return Send(core::LocOffsets{loc.beginLoc, loc.beginLoc}, std::move(magic),
-                    core::Names::defineTopClassOrModule(), 1, SendArgs(Constant(loc, klass)), flags);
+                    core::Names::defineTopClassOrModule(), loc, 1, SendArgs(Constant(loc, klass)), flags);
     }
 
     static ExpressionPtr RaiseUnimplemented(core::LocOffsets loc) {
         auto kernel = Constant(loc, core::Symbols::Kernel());
         auto msg = String(loc, core::Names::rewriterRaiseUnimplemented());
         // T.unsafe so that Sorbet doesn't know this unconditionally raises (avoids introducing dead code errors)
-        auto ret = Send1(loc, Unsafe(loc, std::move(kernel)), core::Names::raise(), std::move(msg));
+        auto ret = Send1(loc, Unsafe(loc, std::move(kernel)), core::Names::raise(), loc, std::move(msg));
         cast_tree<ast::Send>(ret)->flags.isRewriterSynthesized = true;
         return ret;
     }
