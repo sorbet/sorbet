@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.email       = 'sorbet@stripe.com'
   s.files       = Dir.glob('lib/**/*')
   s.executables = Dir.glob('bin/**/*').map {|path| path.gsub('bin/', '')}
-  s.homepage    = 'https://sorbet.run'
+  s.homepage    = 'https://sorbet.org'
   s.license     = 'Apache-2.0'
   s.metadata = {
     "source_code_uri" => "https://github.com/sorbet/sorbet"
