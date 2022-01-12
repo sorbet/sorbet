@@ -52,7 +52,7 @@ private:
     pool<token, 64> mempool;
 
     ruby_version version;
-    const std::string source_buffer;
+    std::string_view source_buffer;
 
     std::stack<environment> static_env;
     std::stack<literal> literal_stack;
@@ -169,7 +169,7 @@ public:
     bool in_kwarg; // true at the end of "def foo a:"
     Context context;
 
-    lexer(diagnostics_t &diag, ruby_version version, const std::string &source_buffer_);
+    lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer);
 
     token_t advance();
 

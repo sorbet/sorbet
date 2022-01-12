@@ -53,7 +53,13 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file, 
                              std::vector<std::string> initialLocals) {
     Builder builder(gs, file);
     auto source = file.data(gs).source();
-    ruby_parser::typedruby27 driver(string(source.begin(), source.end()), Builder::interface);
+    // The lexer requires that its buffers end with a null terminator, which core::File
+    // does not guarantee.
+    string buffer;
+    buffer.reserve(source.size() + 1);
+    buffer += source;
+    buffer += '\0';
+    ruby_parser::typedruby27 driver(buffer, Builder::interface);
 
     for (string local : initialLocals) {
         driver.lex.declare(local);
