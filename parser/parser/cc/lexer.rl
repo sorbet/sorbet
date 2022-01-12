@@ -206,7 +206,9 @@ std::string_view lexer::tok_view(const char* start, const char* end) const {
   return std::string_view(start, (size_t)(end - start));
 }
 
-std::string_view lexer::tok_view(size_t start, size_t end) const {
+std::string_view lexer::tok_view_from_offsets(size_t start, size_t end) const {
+  assert(start < source_buffer.size());
+  assert(end <= source_buffer.size());
   return tok_view(source_buffer.data() + start, source_buffer.data() + end);
 }
 

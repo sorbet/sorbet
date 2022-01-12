@@ -179,7 +179,7 @@ public:
     // returns it.
     token_t unadvance(token_t tok_to_push, token_type type, size_t start, size_t end, const std::string &str);
 
-    std::string_view tok_view(size_t start, size_t end) const;
+    std::string_view tok_view_from_offsets(size_t start, size_t end) const;
 
     void set_state_expr_beg();
     void set_state_expr_end();
