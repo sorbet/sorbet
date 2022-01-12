@@ -6,4 +6,10 @@ class A
     y =
     #  ^ completion: x, y, foo, test_missing_rhs, ...
   end # error: unexpected token "end"
+
+  def test_variable_after_method(x)
+    puts 'before'
+    y =
+    #  ^ completion: x, y, foo, test_missing_rhs, ...
+  end # error: unexpected token "end"
 end

@@ -7,5 +7,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def test_missing_rhs<<todo method>>(x, &<blk>)
       y = <emptyTree>::<C <ErrorNode>>
     end
+
+    def test_variable_after_method<<todo method>>(x, &<blk>)
+      begin
+        <self>.puts("before")
+        y = <emptyTree>::<C <ErrorNode>>
+      end
+    end
   end
 end
