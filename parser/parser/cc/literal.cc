@@ -2,6 +2,7 @@
 #include <ruby_parser/literal.hh>
 
 using namespace ruby_parser;
+using namespace std::literals::string_view_literals;
 
 literal::literal(lexer &lexer, literal_type type, std::string delimiter, const char *str_s, const char *heredoc_e,
                  bool indent, bool dedent_body, bool label_allowed)
@@ -243,8 +244,7 @@ void literal::extend_space(const char *ts, const char *te) {
     flush_string();
 
     if (!space_emitted) {
-        std::string nothing;
-        emit(token_type::tSPACE, nothing, ts, te);
+        emit(token_type::tSPACE, ""sv, ts, te);
 
         space_emitted = true;
     }
@@ -287,9 +287,13 @@ void literal::clear_buffer() {
 void literal::emit_start_token() {
     auto str_type_length = 1 /* TODO @str_type.length */;
     auto str_e = heredoc_e ? heredoc_e : str_s + str_type_length;
-    emit(start_token_type(), std::string_view{}, str_s, str_e);
+    emit(start_token_type(), ""sv, str_s, str_e);
 }
 
 void literal::emit(token_type tok, std::string_view value, const char *s, const char *e) {
     _lexer.emit(tok, value, s, e);
+}
+
+void literal::emit(token_type tok, const std::string &value, const char* s, const char* e) {
+  _lexer.emit(tok, value, s, e);
 }
