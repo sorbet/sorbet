@@ -413,8 +413,8 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
             }
             return to_string(buf);
         } else {
-            if (this->klass.data(gs)->isSingletonClass(gs)) {
-                // T.class_of(klass)[arg1, arg2] is never valid syntax.
+            // T.class_of(klass)[arg1, arg2] is never valid syntax in an RBI
+            if (options.showForRBI && this->klass.data(gs)->isSingletonClass(gs)) {
                 return this->klass.show(gs, options);
             }
             fmt::format_to(std::back_inserter(buf), "{}", this->klass.show(gs, options));
