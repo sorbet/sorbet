@@ -758,6 +758,25 @@ NodeDef nodes[] = {
     },
 };
 
+string constructorArgType(FieldType arg) {
+    switch (arg) {
+        case FieldType::Name:
+            return "core::NameRef";
+        case FieldType::Node:
+            return "std::unique_ptr<Node>";
+        case FieldType::NodeVec:
+            return "NodeVec";
+        case FieldType::String:
+            return "std::string_view";
+        case FieldType::Uint:
+            return "uint32_t";
+        case FieldType::Loc:
+            return "core::LocOffsets";
+        case FieldType::Bool:
+            return "bool";
+    }
+}
+
 string fieldType(FieldType arg) {
     switch (arg) {
         case FieldType::Name:
@@ -784,7 +803,7 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
     // generate constructor
     out << "    " << node.name << "(core::LocOffsets loc";
     for (auto &arg : node.fields) {
-        out << ", " << fieldType(arg.type) << " " << arg.name;
+        out << ", " << constructorArgType(arg.type) << " " << arg.name;
     }
     out << ")" << '\n';
     out << "        : Node(loc)";
