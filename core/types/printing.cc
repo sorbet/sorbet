@@ -90,7 +90,8 @@ string TupleType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string TupleType::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
-    return fmt::format("[{}]", fmt::map_join(this->elems, ", ", [&](const auto &el) -> string { return el.show(gs); }));
+    return fmt::format(
+        "[{}]", fmt::map_join(this->elems, ", ", [&](const auto &el) -> string { return el.show(gs, options); }));
 }
 
 string TupleType::showWithMoreInfo(const GlobalState &gs) const {
@@ -159,23 +160,23 @@ string AndType::toStringWithTabs(const GlobalState &gs, int tabs) const {
                        rightBrace ? ")" : "");
 }
 
-string showAnds(const GlobalState &, const TypePtr &, const TypePtr &);
+string showAnds(const GlobalState &, const TypePtr::ShowOptions options, const TypePtr &, const TypePtr &);
 
-string showAndElem(const GlobalState &gs, const TypePtr &ty) {
+string showAndElem(const GlobalState &gs, const TypePtr::ShowOptions options, const TypePtr &ty) {
     if (auto andType = cast_type<AndType>(ty)) {
-        return showAnds(gs, andType->left, andType->right);
+        return showAnds(gs, options, andType->left, andType->right);
     }
-    return ty.show(gs);
+    return ty.show(gs, options);
 }
 
-string showAnds(const GlobalState &gs, const TypePtr &left, const TypePtr &right) {
-    auto leftStr = showAndElem(gs, left);
-    auto rightStr = showAndElem(gs, right);
+string showAnds(const GlobalState &gs, const TypePtr::ShowOptions options, const TypePtr &left, const TypePtr &right) {
+    auto leftStr = showAndElem(gs, options, left);
+    auto rightStr = showAndElem(gs, options, right);
     return fmt::format("{}, {}", leftStr, rightStr);
 }
 
 string AndType::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
-    auto str = showAnds(gs, this->left, this->right);
+    auto str = showAnds(gs, options, this->left, this->right);
     return fmt::format("T.all({})", str);
 }
 
