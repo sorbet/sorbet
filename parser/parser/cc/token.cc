@@ -26,6 +26,6 @@ std::string_view token::view() const {
     return _string;
 }
 
-const std::string &token::asString() const {
-    return _string;
+std::string token::asString() const {
+    return std::string(_string);
 }
