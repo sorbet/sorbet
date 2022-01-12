@@ -27,7 +27,7 @@ string ClassType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string ClassType::show(const GlobalState &gs, ShowOptions options) const {
-    return this->symbol.show(gs);
+    return this->symbol.show(gs, options);
 }
 
 string UnresolvedClassType::toStringWithTabs(const GlobalState &gs, int tabs) const {
@@ -35,7 +35,7 @@ string UnresolvedClassType::toStringWithTabs(const GlobalState &gs, int tabs) co
 }
 
 string UnresolvedClassType::show(const GlobalState &gs, ShowOptions options) const {
-    return fmt::format("{}::{} (unresolved)", this->scope.show(gs),
+    return fmt::format("{}::{} (unresolved)", this->scope.show(gs, options),
                        fmt::map_join(this->names, "::", [&](const auto &el) -> string { return el.show(gs); }));
 }
 
@@ -44,7 +44,7 @@ string UnresolvedAppliedType::toStringWithTabs(const GlobalState &gs, int tabs) 
 }
 
 string UnresolvedAppliedType::show(const GlobalState &gs, ShowOptions options) const {
-    return fmt::format("{}[{}] (unresolved)", this->klass.show(gs),
+    return fmt::format("{}[{}] (unresolved)", this->klass.show(gs, options),
                        fmt::map_join(targs, ", ", [&](auto targ) { return targ.show(gs, options); }));
 }
 
@@ -297,7 +297,7 @@ string OrType::show(const GlobalState &gs, ShowOptions options) const {
     // If str is empty at this point, all of the types present in the flattened
     // OrType are NilClass.
     if (!str.has_value()) {
-        return Symbols::NilClass().show(gs);
+        return Symbols::NilClass().show(gs, options);
     }
 
     string res;
@@ -401,7 +401,7 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
             }
             return to_string(buf);
         } else {
-            fmt::format_to(std::back_inserter(buf), "{}", this->klass.show(gs));
+            fmt::format_to(std::back_inserter(buf), "{}", this->klass.show(gs, options));
         }
     }
     auto targs = this->targs;
@@ -442,7 +442,7 @@ string LambdaParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string LambdaParam::show(const GlobalState &gs, ShowOptions options) const {
-    return this->definition.show(gs);
+    return this->definition.show(gs, options);
 }
 
 string SelfTypeParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
@@ -450,7 +450,7 @@ string SelfTypeParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string SelfTypeParam::show(const GlobalState &gs, ShowOptions options) const {
-    return this->definition.show(gs);
+    return this->definition.show(gs, options);
 }
 
 string SelfType::toStringWithTabs(const GlobalState &gs, int tabs) const {
