@@ -14,5 +14,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         y = <emptyTree>::<C <ErrorNode>>
       end
     end
+
+    def test_variable_end_same_line<<todo method>>(x, &<blk>)
+      begin
+        <self>.puts("before")
+        y = <emptyTree>::<C <ErrorNode>>
+      end
+    end
+
+    def test_variable_end_same_line_after<<todo method>>(x, &<blk>)
+      begin
+        <self>.puts("before")
+        y = <emptyTree>::<C <ErrorNode>>
+      end
+    end
   end
 end
