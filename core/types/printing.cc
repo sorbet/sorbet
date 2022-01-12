@@ -26,16 +26,16 @@ string ClassType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return this->show(gs);
 }
 
-string ClassType::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
-    return this->symbol.show(gs);
+string ClassType::show(const GlobalState &gs, ShowOptions options) const {
+    return this->symbol.show(gs, options);
 }
 
 string UnresolvedClassType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return this->show(gs);
 }
 
-string UnresolvedClassType::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
-    return fmt::format("{}::{} (unresolved)", this->scope.show(gs),
+string UnresolvedClassType::show(const GlobalState &gs, ShowOptions options) const {
+    return fmt::format("{}::{} (unresolved)", this->scope.show(gs, options),
                        fmt::map_join(this->names, "::", [&](const auto &el) -> string { return el.show(gs); }));
 }
 
@@ -43,8 +43,8 @@ string UnresolvedAppliedType::toStringWithTabs(const GlobalState &gs, int tabs) 
     return this->show(gs);
 }
 
-string UnresolvedAppliedType::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
-    return fmt::format("{}[{}] (unresolved)", this->klass.show(gs),
+string UnresolvedAppliedType::show(const GlobalState &gs, ShowOptions options) const {
+    return fmt::format("{}[{}] (unresolved)", this->klass.show(gs, options),
                        fmt::map_join(targs, ", ", [&](auto targ) { return targ.show(gs, options); }));
 }
 
@@ -52,7 +52,7 @@ string LiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return fmt::format("{}({})", this->underlying(gs).toStringWithTabs(gs, tabs), showValue(gs));
 }
 
-string LiteralType::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
+string LiteralType::show(const GlobalState &gs, ShowOptions options) const {
     return fmt::format("{}({})", this->underlying(gs).show(gs, options), showValue(gs));
 }
 
@@ -89,7 +89,7 @@ string TupleType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return to_string(buf);
 }
 
-string TupleType::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
+string TupleType::show(const GlobalState &gs, ShowOptions options) const {
     return fmt::format(
         "[{}]", fmt::map_join(this->elems, ", ", [&](const auto &el) -> string { return el.show(gs, options); }));
 }
@@ -113,7 +113,7 @@ string ShapeType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return to_string(buf);
 }
 
-string ShapeType::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
+string ShapeType::show(const GlobalState &gs, ShowOptions options) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{{");
     auto valueIterator = this->values.begin();
@@ -147,7 +147,7 @@ string AliasType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return fmt::format("AliasType {{ symbol = {} }}", this->symbol.toStringFullName(gs));
 }
 
-string AliasType::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
+string AliasType::show(const GlobalState &gs, ShowOptions options) const {
     return fmt::format("<Alias: {} >", this->symbol.showFullName(gs));
 }
 
@@ -160,22 +160,22 @@ string AndType::toStringWithTabs(const GlobalState &gs, int tabs) const {
                        rightBrace ? ")" : "");
 }
 
-string showAnds(const GlobalState &, const TypePtr::ShowOptions options, const TypePtr &, const TypePtr &);
+string showAnds(const GlobalState &, ShowOptions options, const TypePtr &, const TypePtr &);
 
-string showAndElem(const GlobalState &gs, const TypePtr::ShowOptions options, const TypePtr &ty) {
+string showAndElem(const GlobalState &gs, ShowOptions options, const TypePtr &ty) {
     if (auto andType = cast_type<AndType>(ty)) {
         return showAnds(gs, options, andType->left, andType->right);
     }
     return ty.show(gs, options);
 }
 
-string showAnds(const GlobalState &gs, const TypePtr::ShowOptions options, const TypePtr &left, const TypePtr &right) {
+string showAnds(const GlobalState &gs, ShowOptions options, const TypePtr &left, const TypePtr &right) {
     auto leftStr = showAndElem(gs, options, left);
     auto rightStr = showAndElem(gs, options, right);
     return fmt::format("{}, {}", leftStr, rightStr);
 }
 
-string AndType::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
+string AndType::show(const GlobalState &gs, ShowOptions options) const {
     auto str = showAnds(gs, options, this->left, this->right);
     return fmt::format("T.all({})", str);
 }
@@ -255,11 +255,9 @@ struct OrInfo {
     }
 };
 
-pair<OrInfo, optional<string>> showOrs(const GlobalState &, const TypePtr::ShowOptions options, const TypePtr &,
-                                       const TypePtr &);
+pair<OrInfo, optional<string>> showOrs(const GlobalState &, ShowOptions options, const TypePtr &, const TypePtr &);
 
-pair<OrInfo, optional<string>> showOrElem(const GlobalState &gs, const TypePtr::ShowOptions options,
-                                          const TypePtr &ty) {
+pair<OrInfo, optional<string>> showOrElem(const GlobalState &gs, ShowOptions options, const TypePtr &ty) {
     if (isa_type<ClassType>(ty)) {
         auto classType = cast_type_nonnull<ClassType>(ty);
         if (classType.symbol == Symbols::NilClass()) {
@@ -276,7 +274,7 @@ pair<OrInfo, optional<string>> showOrElem(const GlobalState &gs, const TypePtr::
     return make_pair(OrInfo::otherInfo(), make_optional(ty.show(gs, options)));
 }
 
-pair<OrInfo, optional<string>> showOrs(const GlobalState &gs, const TypePtr::ShowOptions options, const TypePtr &left,
+pair<OrInfo, optional<string>> showOrs(const GlobalState &gs, ShowOptions options, const TypePtr &left,
                                        const TypePtr &right) {
     auto [leftInfo, leftStr] = showOrElem(gs, options, left);
     auto [rightInfo, rightStr] = showOrElem(gs, options, right);
@@ -293,13 +291,13 @@ pair<OrInfo, optional<string>> showOrs(const GlobalState &gs, const TypePtr::Sho
     }
 }
 
-string OrType::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
+string OrType::show(const GlobalState &gs, ShowOptions options) const {
     auto [info, str] = showOrs(gs, options, this->left, this->right);
 
     // If str is empty at this point, all of the types present in the flattened
     // OrType are NilClass.
     if (!str.has_value()) {
-        return Symbols::NilClass().show(gs);
+        return Symbols::NilClass().show(gs, options);
     }
 
     string res;
@@ -322,7 +320,7 @@ string TypeVar::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return fmt::format("TypeVar({})", sym.data(gs)->name.showRaw(gs));
 }
 
-string TypeVar::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
+string TypeVar::show(const GlobalState &gs, ShowOptions options) const {
     auto shown = sym.data(gs)->name.show(gs);
     if (absl::StrContains(shown, " ")) {
         return fmt::format("T.type_parameter(:{})", absl::CEscape(shown));
@@ -356,7 +354,7 @@ string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return to_string(buf);
 }
 
-string AppliedType::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
+string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
     fmt::memory_buffer buf;
     if (this->klass == Symbols::Array()) {
         fmt::format_to(std::back_inserter(buf), "T::Array");
@@ -403,7 +401,7 @@ string AppliedType::show(const GlobalState &gs, const TypePtr::ShowOptions optio
             }
             return to_string(buf);
         } else {
-            fmt::format_to(std::back_inserter(buf), "{}", this->klass.show(gs));
+            fmt::format_to(std::back_inserter(buf), "{}", this->klass.show(gs, options));
         }
     }
     auto targs = this->targs;
@@ -443,23 +441,23 @@ string LambdaParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
     }
 }
 
-string LambdaParam::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
-    return this->definition.show(gs);
+string LambdaParam::show(const GlobalState &gs, ShowOptions options) const {
+    return this->definition.show(gs, options);
 }
 
 string SelfTypeParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return fmt::format("SelfTypeParam({})", this->definition.toStringFullName(gs));
 }
 
-string SelfTypeParam::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
-    return this->definition.show(gs);
+string SelfTypeParam::show(const GlobalState &gs, ShowOptions options) const {
+    return this->definition.show(gs, options);
 }
 
 string SelfType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return show(gs);
 }
 
-string SelfType::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
+string SelfType::show(const GlobalState &gs, ShowOptions options) const {
     return "T.self_type()";
 }
 
@@ -471,7 +469,7 @@ string MetaType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return "MetaType";
 }
 
-string MetaType::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
+string MetaType::show(const GlobalState &gs, ShowOptions options) const {
     return "<Type: " + wrapped.show(gs, options) + ">";
 }
 

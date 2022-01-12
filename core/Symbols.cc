@@ -375,27 +375,27 @@ TypeMemberRef::TypeMemberRef(const GlobalState &from, uint32_t id) : _id(id) {}
 
 TypeArgumentRef::TypeArgumentRef(const GlobalState &from, uint32_t id) : _id(id) {}
 
-string SymbolRef::show(const GlobalState &gs) const {
+string SymbolRef::show(const GlobalState &gs, ShowOptions options) const {
     switch (kind()) {
         case Kind::ClassOrModule:
-            return asClassOrModuleRef().show(gs);
+            return asClassOrModuleRef().show(gs, options);
         case Kind::Method:
-            return asMethodRef().show(gs);
+            return asMethodRef().show(gs, options);
         case Kind::FieldOrStaticField:
-            return asFieldRef().show(gs);
+            return asFieldRef().show(gs, options);
         case Kind::TypeArgument:
-            return asTypeArgumentRef().show(gs);
+            return asTypeArgumentRef().show(gs, options);
         case Kind::TypeMember:
-            return asTypeMemberRef().show(gs);
+            return asTypeMemberRef().show(gs, options);
     }
 }
 
-string ClassOrModuleRef::show(const GlobalState &gs) const {
+string ClassOrModuleRef::show(const GlobalState &gs, ShowOptions options) const {
     auto sym = dataAllowingNone(gs);
     if (sym->isSingletonClass(gs)) {
         auto attached = sym->attachedClass(gs);
         if (attached.exists()) {
-            return fmt::format("T.class_of({})", attached.show(gs));
+            return fmt::format("T.class_of({})", attached.show(gs, options));
         }
     }
 
@@ -425,30 +425,30 @@ string ClassOrModuleRef::show(const GlobalState &gs) const {
     return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
 }
 
-string MethodRef::show(const GlobalState &gs) const {
+string MethodRef::show(const GlobalState &gs, ShowOptions options) const {
     auto sym = data(gs);
     if (sym->owner.data(gs)->isSingletonClass(gs)) {
-        return absl::StrCat(sym->owner.data(gs)->attachedClass(gs).show(gs), ".", sym->name.show(gs));
+        return absl::StrCat(sym->owner.data(gs)->attachedClass(gs).show(gs, options), ".", sym->name.show(gs));
     }
     return showInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
 }
 
-string FieldRef::show(const GlobalState &gs) const {
+string FieldRef::show(const GlobalState &gs, ShowOptions options) const {
     auto sym = dataAllowingNone(gs);
     return showInternal(gs, sym->owner, sym->name, sym->flags.isStaticField ? COLON_SEPARATOR : HASH_SEPARATOR);
 }
 
-string TypeArgumentRef::show(const GlobalState &gs) const {
+string TypeArgumentRef::show(const GlobalState &gs, ShowOptions options) const {
     auto sym = data(gs);
     return showInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
 }
 
-string TypeMemberRef::show(const GlobalState &gs) const {
+string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
     auto sym = data(gs);
     if (sym->name == core::Names::Constants::AttachedClass()) {
         auto attached = sym->owner.asClassOrModuleRef().data(gs)->attachedClass(gs);
         ENFORCE(attached.exists());
-        return fmt::format("T.attached_class (of {})", attached.show(gs));
+        return fmt::format("T.attached_class (of {})", attached.show(gs, options));
     }
     return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
 }

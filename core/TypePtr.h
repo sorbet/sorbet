@@ -2,6 +2,7 @@
 #define SORBET_TYPEPTR_H
 #include "common/common.h"
 #include "core/NameRef.h"
+#include "core/ShowOptions.h"
 #include "core/SymbolRef.h"
 #include <memory>
 
@@ -311,10 +312,8 @@ public:
         return toStringWithTabs(gs);
     }
 
-    struct ShowOptions {};
-
     // User visible type. Should exactly match what the user can write.
-    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
+    std::string show(const GlobalState &gs, ShowOptions options = ShowOptions{}) const;
     // Like show, but can include extra info. Does not necessarily match what the user can type.
     std::string showWithMoreInfo(const GlobalState &gs) const;
 
