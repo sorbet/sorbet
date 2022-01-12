@@ -1157,8 +1157,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 auto cond = MK::Send1(zeroLengthLoc, ast::MK::Constant(zeroLengthRecvLoc, core::Symbols::NilClass()),
                                       core::Names::tripleEq(), MK::Local(zeroLengthRecvLoc, tempRecv));
 
-                unique_ptr<parser::Node> sendNode = make_unique<parser::Send>(
-                    loc, make_unique<parser::LVar>(recvLoc, tempRecv), csend->method, std::move(csend->args));
+                unique_ptr<parser::Node> sendNode =
+                    make_unique<parser::Send>(loc, make_unique<parser::LVar>(recvLoc, tempRecv), csend->method,
+                                              csend->methodLoc, std::move(csend->args));
                 auto send = node2TreeImpl(dctx, std::move(sendNode));
 
                 ExpressionPtr nil =
@@ -1398,7 +1399,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 // Do this by synthesizing a `Send` parse node and letting our
                 // Send desugar handle it.
                 auto method = core::Names::super();
-                auto send = make_unique<parser::Send>(super->loc, nullptr, method, std::move(super->args));
+                auto send = make_unique<parser::Send>(super->loc, nullptr, method, super->loc, std::move(super->args));
                 auto res = node2TreeImpl(dctx, std::move(send));
                 result = std::move(res);
             },

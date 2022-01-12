@@ -172,7 +172,10 @@ NodeDef nodes[] = {
     {
         "CSend",
         "csend",
-        vector<FieldDef>({{"receiver", FieldType::Node}, {"method", FieldType::Name}, {"args", FieldType::NodeVec}}),
+        vector<FieldDef>({{"receiver", FieldType::Node},
+                          {"method", FieldType::Name},
+                          {"methodLoc", FieldType::Loc},
+                          {"args", FieldType::NodeVec}}),
     },
     // @@foo class variable
     {
@@ -661,7 +664,10 @@ NodeDef nodes[] = {
     {
         "Send",
         "send",
-        vector<FieldDef>({{"receiver", FieldType::Node}, {"method", FieldType::Name}, {"args", FieldType::NodeVec}}),
+        vector<FieldDef>({{"receiver", FieldType::Node},
+                          {"method", FieldType::Name},
+                          {"methodLoc", FieldType::Loc},
+                          {"args", FieldType::NodeVec}}),
     },
     // m { |;shadowarg| }
     {
