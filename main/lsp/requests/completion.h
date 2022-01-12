@@ -42,7 +42,7 @@ class CompletionTask final : public LSPRequestTask {
         core::lsp::ConstantResponse::Scopes scopes;
     };
     std::vector<std::unique_ptr<CompletionItem>> getCompletionItems(LSPTypecheckerDelegate &typechecker,
-                                                                    SearchParams params);
+                                                                    SearchParams &params);
 
     std::unique_ptr<CompletionItem> getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker,
                                                                core::DispatchResult &dispatchResult,

@@ -771,7 +771,7 @@ void CompletionTask::findSimilarConstants(const core::GlobalState &gs, const cor
 }
 
 vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypecheckerDelegate &typechecker,
-                                                                      SearchParams params) {
+                                                                      SearchParams &params) {
     const auto &gs = typechecker.state();
 
     // ----- locals -----
