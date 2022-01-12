@@ -221,9 +221,9 @@ public:
 
     unique_ptr<Node> arg(const token *name) {
         core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->string(), loc);
+        checkReservedForNumberedParameters(name->view(), loc);
 
-        return make_unique<Arg>(loc, gs_.enterNameUTF8(name->string()));
+        return make_unique<Arg>(loc, gs_.enterNameUTF8(name->view()));
     }
 
     unique_ptr<Node> args(const token *begin, sorbet::parser::NodeVec args, const token *end, bool check_args) {
@@ -331,9 +331,9 @@ public:
     }
 
     unique_ptr<Node> attrAsgn(unique_ptr<Node> receiver, const token *dot, const token *selector, bool masgn) {
-        core::NameRef method = gs_.enterNameUTF8(selector->string() + "=");
+        core::NameRef method = gs_.enterNameUTF8(selector->view() + "=");
         core::LocOffsets loc = receiver->loc.join(tokLoc(selector));
-        if ((dot != nullptr) && dot->string() == "&.") {
+        if ((dot != nullptr) && dot->view() == "&.") {
             if (masgn) {
                 error(ruby_parser::dclass::CSendInLHSOfMAsgn, tokLoc(dot));
             }
@@ -343,7 +343,7 @@ public:
     }
 
     unique_ptr<Node> backRef(const token *tok) {
-        return make_unique<Backref>(tokLoc(tok), gs_.enterNameUTF8(tok->string()));
+        return make_unique<Backref>(tokLoc(tok), gs_.enterNameUTF8(tok->view()));
     }
 
     unique_ptr<Node> begin(const token *begin, unique_ptr<Node> body, const token *end) {
@@ -433,7 +433,7 @@ public:
         sorbet::parser::NodeVec args;
         args.emplace_back(std::move(arg));
 
-        return make_unique<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->string()), std::move(args));
+        return make_unique<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->view()), std::move(args));
     }
 
     unique_ptr<Node> block(unique_ptr<Node> methodCall, const token *begin, unique_ptr<Node> args,
@@ -509,8 +509,8 @@ public:
 
         if (name != nullptr) {
             loc = tokLoc(name);
-            nm = gs_.enterNameUTF8(name->string());
-            checkReservedForNumberedParameters(name->string(), loc);
+            nm = gs_.enterNameUTF8(name->view());
+            checkReservedForNumberedParameters(name->view(), loc);
         } else {
             loc = tokLoc(amper);
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
@@ -553,10 +553,10 @@ public:
             // when the selector is missing, this is a use of the `call` method.
             method = core::Names::call();
         } else {
-            method = gs_.enterNameUTF8(selector->string());
+            method = gs_.enterNameUTF8(selector->view());
         }
 
-        if ((dot != nullptr) && dot->string() == "&.") {
+        if ((dot != nullptr) && dot->view() == "&.") {
             return make_unique<CSend>(loc, std::move(receiver), method, std::move(args));
         } else {
             return make_unique<Send>(loc, std::move(receiver), method, std::move(args));
@@ -579,11 +579,11 @@ public:
     }
 
     unique_ptr<Node> character(const token *char_) {
-        return make_unique<String>(tokLoc(char_), gs_.enterNameUTF8(char_->string()));
+        return make_unique<String>(tokLoc(char_), gs_.enterNameUTF8(char_->view()));
     }
 
     unique_ptr<Node> complex(const token *tok) {
-        return make_unique<Complex>(tokLoc(tok), tok->string());
+        return make_unique<Complex>(tokLoc(tok), tok->view());
     }
 
     unique_ptr<Node> compstmt(sorbet::parser::NodeVec nodes) {
@@ -629,7 +629,7 @@ public:
     }
 
     unique_ptr<Node> const_(const token *name) {
-        return make_unique<Const>(tokLoc(name), nullptr, gs_.enterNameConstant(name->string()));
+        return make_unique<Const>(tokLoc(name), nullptr, gs_.enterNameConstant(name->view()));
     }
 
     unique_ptr<Node> const_pattern(unique_ptr<Node> const_, const token *begin, unique_ptr<Node> pattern,
@@ -639,12 +639,12 @@ public:
 
     unique_ptr<Node> constFetch(unique_ptr<Node> scope, const token *colon, const token *name) {
         return make_unique<Const>(scope->loc.join(tokLoc(name)), std::move(scope),
-                                  gs_.enterNameConstant(name->string()));
+                                  gs_.enterNameConstant(name->view()));
     }
 
     unique_ptr<Node> constGlobal(const token *colon, const token *name) {
         return make_unique<Const>(tokLoc(colon).join(tokLoc(name)), make_unique<Cbase>(tokLoc(colon)),
-                                  gs_.enterNameConstant(name->string()));
+                                  gs_.enterNameConstant(name->view()));
     }
 
     unique_ptr<Node> constOpAssignable(unique_ptr<Node> node) {
@@ -656,7 +656,7 @@ public:
     }
 
     unique_ptr<Node> cvar(const token *tok) {
-        return make_unique<CVar>(tokLoc(tok), gs_.enterNameUTF8(tok->string()));
+        return make_unique<CVar>(tokLoc(tok), gs_.enterNameUTF8(tok->view()));
     }
 
     unique_ptr<Node> dedentString(unique_ptr<Node> node, size_t dedentLevel) {
@@ -724,7 +724,7 @@ public:
                                       unique_ptr<Node> body) {
         core::LocOffsets declLoc = tokLoc(def, tname).join(maybe_loc(args));
         core::LocOffsets loc = tokLoc(def).join(body->loc);
-        std::string name = tname->string();
+        std::string name = tname->view();
 
         checkEndlessSetter(name, declLoc);
         checkReservedForNumberedParameters(name, declLoc);
@@ -750,9 +750,9 @@ public:
         core::LocOffsets declLoc = tokLoc(def, name).join(maybe_loc(args));
         core::LocOffsets loc = tokLoc(def, end);
 
-        checkReservedForNumberedParameters(name->string(), declLoc);
+        checkReservedForNumberedParameters(name->view(), declLoc);
 
-        return make_unique<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name->string()), std::move(args),
+        return make_unique<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name->view()), std::move(args),
                                       std::move(body));
     }
 
@@ -772,7 +772,7 @@ public:
     unique_ptr<Node> defsHead(const token *def, unique_ptr<Node> definee, const token *dot, const token *name) {
         core::LocOffsets declLoc = tokLoc(def, name);
 
-        return make_unique<DefsHead>(declLoc, std::move(definee), gs_.enterNameUTF8(name->string()));
+        return make_unique<DefsHead>(declLoc, std::move(definee), gs_.enterNameUTF8(name->view()));
     }
 
     unique_ptr<Node> defSingleton(unique_ptr<Node> defHead, unique_ptr<Node> args, unique_ptr<Node> body,
@@ -820,11 +820,11 @@ public:
     }
 
     unique_ptr<Node> float_(const token *tok) {
-        return make_unique<Float>(tokLoc(tok), tok->string());
+        return make_unique<Float>(tokLoc(tok), tok->view());
     }
 
     unique_ptr<Node> floatComplex(const token *tok) {
-        return make_unique<Complex>(tokLoc(tok), tok->string());
+        return make_unique<Complex>(tokLoc(tok), tok->view());
     }
 
     unique_ptr<Node> for_(const token *for_, unique_ptr<Node> iterator, const token *in_, unique_ptr<Node> iteratee,
@@ -845,7 +845,7 @@ public:
     }
 
     unique_ptr<Node> gvar(const token *tok) {
-        return make_unique<GVar>(tokLoc(tok), gs_.enterNameUTF8(tok->string()));
+        return make_unique<GVar>(tokLoc(tok), gs_.enterNameUTF8(tok->view()));
     }
 
     unique_ptr<Node> hash_pattern(const token *begin, sorbet::parser::NodeVec kwargs, const token *end) {
@@ -862,7 +862,7 @@ public:
     }
 
     unique_ptr<Node> ident(const token *tok) {
-        return make_unique<Ident>(tokLoc(tok), gs_.enterNameUTF8(tok->string()));
+        return make_unique<Ident>(tokLoc(tok), gs_.enterNameUTF8(tok->view()));
     }
 
     unique_ptr<Node> if_guard(const token *tok, unique_ptr<Node> if_body) {
@@ -888,11 +888,11 @@ public:
     }
 
     unique_ptr<Node> integer(const token *tok) {
-        return make_unique<Integer>(tokLoc(tok), tok->string());
+        return make_unique<Integer>(tokLoc(tok), tok->view());
     }
 
     unique_ptr<Node> ivar(const token *tok) {
-        return make_unique<IVar>(tokLoc(tok), gs_.enterNameUTF8(tok->string()));
+        return make_unique<IVar>(tokLoc(tok), gs_.enterNameUTF8(tok->view()));
     }
 
     unique_ptr<Node> keywordBreak(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
@@ -949,16 +949,16 @@ public:
 
     unique_ptr<Node> kwarg(const token *name) {
         core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->string(), loc);
+        checkReservedForNumberedParameters(name->view(), loc);
 
-        return make_unique<Kwarg>(loc, gs_.enterNameUTF8(name->string()));
+        return make_unique<Kwarg>(loc, gs_.enterNameUTF8(name->view()));
     }
 
     unique_ptr<Node> kwoptarg(const token *name, unique_ptr<Node> value) {
         core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->string(), loc);
+        checkReservedForNumberedParameters(name->view(), loc);
 
-        return make_unique<Kwoptarg>(loc.join(value->loc), gs_.enterNameUTF8(name->string()), tokLoc(name),
+        return make_unique<Kwoptarg>(loc.join(value->loc), gs_.enterNameUTF8(name->view()), tokLoc(name),
                                      std::move(value));
     }
 
@@ -972,8 +972,8 @@ public:
 
         if (name != nullptr) {
             loc = loc.join(tokLoc(name));
-            nm = gs_.enterNameUTF8(name->string());
-            checkReservedForNumberedParameters(name->string(), loc);
+            nm = gs_.enterNameUTF8(name->view());
+            checkReservedForNumberedParameters(name->view(), loc);
         } else {
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter_);
         }
@@ -1054,7 +1054,7 @@ public:
         core::LocOffsets loc = receiver->loc.join(arg->loc);
         sorbet::parser::NodeVec args;
         args.emplace_back(std::move(arg));
-        return make_unique<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->string()), std::move(args));
+        return make_unique<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->view()), std::move(args));
     }
 
     unique_ptr<Node> match_pattern(unique_ptr<Node> lhs, const token *tok, unique_ptr<Node> rhs) {
@@ -1095,7 +1095,7 @@ public:
     }
 
     unique_ptr<Node> match_var(const token *name) {
-        return match_var_hash(tokLoc(name), name->string());
+        return match_var_hash(tokLoc(name), name->view());
     }
 
     unique_ptr<Node> match_var_hash(core::LocOffsets loc, const std::string name_str) {
@@ -1168,7 +1168,7 @@ public:
     }
 
     unique_ptr<Node> nth_ref(const token *tok) {
-        return make_unique<NthRef>(tokLoc(tok), atoi(tok->string().c_str()));
+        return make_unique<NthRef>(tokLoc(tok), atoi(tok->view().c_str()));
     }
 
     unique_ptr<Node> numparams(sorbet::parser::NodeVec declaringNodes) {
@@ -1187,26 +1187,26 @@ public:
             error(ruby_parser::dclass::BackrefAssignment, lhs->loc);
         }
 
-        if (op->string() == "&&") {
+        if (op->view() == "&&") {
             return make_unique<AndAsgn>(lhs->loc.join(rhs->loc), std::move(lhs), std::move(rhs));
         }
-        if (op->string() == "||") {
+        if (op->view() == "||") {
             return make_unique<OrAsgn>(lhs->loc.join(rhs->loc), std::move(lhs), std::move(rhs));
         }
-        return make_unique<OpAsgn>(lhs->loc.join(rhs->loc), std::move(lhs), gs_.enterNameUTF8(op->string()),
+        return make_unique<OpAsgn>(lhs->loc.join(rhs->loc), std::move(lhs), gs_.enterNameUTF8(op->view()),
                                    std::move(rhs));
     }
 
     unique_ptr<Node> optarg_(const token *name, const token *eql, unique_ptr<Node> value) {
         core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->string(), loc);
+        checkReservedForNumberedParameters(name->view(), loc);
 
-        return make_unique<Optarg>(loc.join(value->loc), gs_.enterNameUTF8(name->string()), tokLoc(name),
+        return make_unique<Optarg>(loc.join(value->loc), gs_.enterNameUTF8(name->view()), tokLoc(name),
                                    std::move(value));
     }
 
     unique_ptr<Node> p_ident(const token *tok) {
-        auto name_str = tok->string();
+        auto name_str = tok->view();
         if (!driver_->lex.is_declared(name_str)) {
             error(ruby_parser::dclass::PatternLVarUndefined, tokLoc(tok), name_str);
         }
@@ -1222,7 +1222,7 @@ public:
             core::LocOffsets{clamp((uint32_t)key->start()), clamp((uint32_t)key->end() - 1)}; // drop the trailing :
 
         return make_unique<Pair>(tokLoc(key).join(maybe_loc(value)),
-                                 make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->string())), std::move(value));
+                                 make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->view())), std::move(value));
     }
 
     unique_ptr<Node> pair_quoted(const token *begin, sorbet::parser::NodeVec parts, const token *end,
@@ -1259,13 +1259,13 @@ public:
     }
 
     unique_ptr<Node> rational(const token *tok) {
-        return make_unique<Rational>(tokLoc(tok), tok->string());
+        return make_unique<Rational>(tokLoc(tok), tok->view());
     }
 
     unique_ptr<Node> rational_complex(const token *tok) {
         // TODO(nelhage): We're losing this information that this was marked as
         // a Rational in the source.
-        return make_unique<Complex>(tokLoc(tok), tok->string());
+        return make_unique<Complex>(tokLoc(tok), tok->view());
     }
 
     unique_ptr<Node> regexp_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end,
@@ -1275,7 +1275,7 @@ public:
     }
 
     unique_ptr<Node> regexp_options(const token *regopt) {
-        return make_unique<Regopt>(tokLoc(regopt), regopt->string());
+        return make_unique<Regopt>(tokLoc(regopt), regopt->view());
     }
 
     unique_ptr<Node> rescue_body(const token *rescue, unique_ptr<Node> excList, const token *assoc,
@@ -1301,8 +1301,8 @@ public:
         if (name != nullptr) {
             nameLoc = tokLoc(name);
             loc = loc.join(nameLoc);
-            nm = gs_.enterNameUTF8(name->string());
-            checkReservedForNumberedParameters(name->string(), nameLoc);
+            nm = gs_.enterNameUTF8(name->view());
+            checkReservedForNumberedParameters(name->view(), nameLoc);
         } else {
             // case like 'def m(*); end'
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::star(), ++uniqueCounter_);
@@ -1317,9 +1317,9 @@ public:
 
     unique_ptr<Node> shadowarg(const token *name) {
         core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->string(), loc);
+        checkReservedForNumberedParameters(name->view(), loc);
 
-        return make_unique<Shadowarg>(loc, gs_.enterNameUTF8(name->string()));
+        return make_unique<Shadowarg>(loc, gs_.enterNameUTF8(name->view()));
     }
 
     unique_ptr<Node> splat(const token *star, unique_ptr<Node> arg) {
@@ -1332,7 +1332,7 @@ public:
     }
 
     unique_ptr<Node> string(const token *string_) {
-        return make_unique<String>(tokLoc(string_), gs_.enterNameUTF8(string_->string()));
+        return make_unique<String>(tokLoc(string_), gs_.enterNameUTF8(string_->view()));
     }
 
     unique_ptr<Node> string_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
@@ -1359,11 +1359,11 @@ public:
     }
 
     unique_ptr<Node> string_internal(const token *string_) {
-        return make_unique<String>(tokLoc(string_), gs_.enterNameUTF8(string_->string()));
+        return make_unique<String>(tokLoc(string_), gs_.enterNameUTF8(string_->view()));
     }
 
     unique_ptr<Node> symbol(const token *symbol) {
-        return make_unique<Symbol>(tokLoc(symbol), gs_.enterNameUTF8(symbol->string()));
+        return make_unique<Symbol>(tokLoc(symbol), gs_.enterNameUTF8(symbol->view()));
     }
 
     unique_ptr<Node> symbol_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
@@ -1381,7 +1381,7 @@ public:
     }
 
     unique_ptr<Node> symbol_internal(const token *symbol) {
-        return make_unique<Symbol>(tokLoc(symbol), gs_.enterNameUTF8(symbol->string()));
+        return make_unique<Symbol>(tokLoc(symbol), gs_.enterNameUTF8(symbol->view()));
     }
 
     unique_ptr<Node> symbols_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
@@ -1414,25 +1414,25 @@ public:
         core::LocOffsets loc = tokLoc(oper).join(receiver->loc);
 
         if (auto *num = parser::cast_node<Integer>(receiver.get())) {
-            return make_unique<Integer>(loc, oper->string() + num->val);
+            return make_unique<Integer>(loc, oper->view() + num->val);
         }
 
         if (oper->type() != ruby_parser::token_type::tTILDE) {
             if (auto *num = parser::cast_node<Float>(receiver.get())) {
-                return make_unique<Float>(loc, oper->string() + num->val);
+                return make_unique<Float>(loc, oper->view() + num->val);
             }
             if (auto *num = parser::cast_node<Rational>(receiver.get())) {
-                return make_unique<Rational>(loc, oper->string() + num->val);
+                return make_unique<Rational>(loc, oper->view() + num->val);
             }
         }
 
         core::NameRef op;
-        if (oper->string() == "+") {
+        if (oper->view() == "+") {
             op = core::Names::unaryPlus();
-        } else if (oper->string() == "-") {
+        } else if (oper->view() == "-") {
             op = core::Names::unaryMinus();
         } else {
-            op = gs_.enterNameUTF8(oper->string());
+            op = gs_.enterNameUTF8(oper->view());
         }
 
         return make_unique<Send>(loc, std::move(receiver), op, sorbet::parser::NodeVec());

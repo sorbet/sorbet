@@ -19,6 +19,6 @@ size_t token::end() const {
   return _end;
 }
 
-const std::string& token::string() const {
+const std::string& token::view() const {
   return _string;
 }

@@ -281,7 +281,7 @@ public:
     virtual ForeignPtr parse(SelfPtr self, bool trace) = 0;
 
     bool valid_kwarg_name(const token *name) {
-        char c = name->string().at(0);
+        char c = name->view().at(0);
         return !(c >= 'A' && c <= 'Z');
     }
 
