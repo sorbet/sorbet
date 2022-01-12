@@ -324,7 +324,7 @@ uint32_t TypePtr::hash(const GlobalState &gs) const {
 #undef HASH
 }
 
-std::string TypePtr::show(const GlobalState &gs, const TypePtr::ShowOptions options) const {
+std::string TypePtr::show(const GlobalState &gs, const ShowOptions options) const {
 #define SHOW(T) return cast_type_nonnull<T>(*this).show(gs, options);
     GENERATE_TAG_SWITCH(tag(), SHOW)
 #undef SHOW

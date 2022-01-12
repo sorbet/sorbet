@@ -3,6 +3,7 @@
 #include "common/common.h"
 #include "core/NameRef.h"
 #include "core/SymbolRef.h"
+#include "core/ShowOptions.h"
 #include <memory>
 
 namespace sorbet::core {
@@ -310,8 +311,6 @@ public:
     std::string toString(const GlobalState &gs) const {
         return toStringWithTabs(gs);
     }
-
-    struct ShowOptions {};
 
     // User visible type. Should exactly match what the user can write.
     std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;

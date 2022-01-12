@@ -5,6 +5,7 @@
 #include "common/Counters.h"
 #include "core/Context.h"
 #include "core/Error.h"
+#include "core/ShowOptions.h"
 #include "core/SymbolRef.h"
 #include "core/TypeConstraint.h"
 #include <memory>
@@ -333,7 +334,7 @@ public:
     ClassType(ClassOrModuleRef symbol);
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
 
@@ -376,7 +377,7 @@ public:
 
     LambdaParam(TypeMemberRef definition, TypePtr lower, TypePtr upper);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     uint32_t hash(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
@@ -394,7 +395,7 @@ public:
 
     SelfTypeParam(const SymbolRef definition);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     uint32_t hash(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
@@ -417,7 +418,7 @@ TYPE_INLINED(AliasType) final {
 public:
     AliasType(SymbolRef other);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     uint32_t hash(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
@@ -447,7 +448,7 @@ TYPE_INLINED(SelfType) final {
 public:
     SelfType();
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     std::string showValue(const GlobalState &gs) const;
     uint32_t hash(const GlobalState &gs) const;
 
@@ -490,7 +491,7 @@ public:
     core::NameRef unsafeAsName() const;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     std::string showValue(const GlobalState &gs) const;
     uint32_t hash(const GlobalState &gs) const;
 
@@ -560,7 +561,7 @@ public:
     TypeArgumentRef sym;
     TypeVar(TypeArgumentRef sym);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     uint32_t hash(const GlobalState &gs) const;
     void _sanityCheck(const GlobalState &gs) const;
 
@@ -577,7 +578,7 @@ public:
     TypePtr right;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
@@ -628,7 +629,7 @@ public:
     TypePtr right;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
 
@@ -671,7 +672,7 @@ public:
     ShapeType(std::vector<TypePtr> keys, std::vector<TypePtr> values);
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     uint32_t hash(const GlobalState &gs) const;
     std::string showWithMoreInfo(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
@@ -695,7 +696,7 @@ public:
     TupleType(std::vector<TypePtr> elements);
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     std::string showWithMoreInfo(const GlobalState &gs) const;
     uint32_t hash(const GlobalState &gs) const;
     void _sanityCheck(const GlobalState &gs) const;
@@ -719,7 +720,7 @@ public:
     AppliedType(ClassOrModuleRef klass, std::vector<TypePtr> targs);
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
@@ -749,7 +750,7 @@ public:
     MetaType(const TypePtr &wrapped);
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     uint32_t hash(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
@@ -911,7 +912,7 @@ public:
     UnresolvedClassType(SymbolRef scope, std::vector<core::NameRef> names)
         : ClassType(core::Symbols::untyped()), scope(scope), names(std::move(names)){};
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     uint32_t hash(const GlobalState &gs) const;
 };
 
@@ -922,7 +923,7 @@ public:
     UnresolvedAppliedType(ClassOrModuleRef klass, std::vector<TypePtr> targs)
         : ClassType(core::Symbols::untyped()), klass(klass), targs(std::move(targs)){};
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs, const TypePtr::ShowOptions options = TypePtr::ShowOptions{}) const;
+    std::string show(const GlobalState &gs, const ShowOptions options = ShowOptions{}) const;
     uint32_t hash(const GlobalState &gs) const;
 };
 
