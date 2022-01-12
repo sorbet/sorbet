@@ -178,7 +178,8 @@ public:
     token_type type() const;
     size_t start() const;
     size_t end() const;
-    const std::string &view() const;
+    std::string_view view() const;
+    const std::string &asString() const;
 };
 
 using token_t = token *;

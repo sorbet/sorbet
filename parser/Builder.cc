@@ -221,7 +221,7 @@ public:
 
     unique_ptr<Node> arg(const token *name) {
         core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->view(), loc);
+        checkReservedForNumberedParameters(name->asString(), loc);
 
         return make_unique<Arg>(loc, gs_.enterNameUTF8(name->view()));
     }
@@ -331,7 +331,7 @@ public:
     }
 
     unique_ptr<Node> attrAsgn(unique_ptr<Node> receiver, const token *dot, const token *selector, bool masgn) {
-        core::NameRef method = gs_.enterNameUTF8(selector->view() + "=");
+        core::NameRef method = gs_.enterNameUTF8(selector->asString() + "=");
         core::LocOffsets loc = receiver->loc.join(tokLoc(selector));
         if ((dot != nullptr) && dot->view() == "&.") {
             if (masgn) {
@@ -510,7 +510,7 @@ public:
         if (name != nullptr) {
             loc = tokLoc(name);
             nm = gs_.enterNameUTF8(name->view());
-            checkReservedForNumberedParameters(name->view(), loc);
+            checkReservedForNumberedParameters(name->asString(), loc);
         } else {
             loc = tokLoc(amper);
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
@@ -724,7 +724,7 @@ public:
                                       unique_ptr<Node> body) {
         core::LocOffsets declLoc = tokLoc(def, tname).join(maybe_loc(args));
         core::LocOffsets loc = tokLoc(def).join(body->loc);
-        std::string name = tname->view();
+        std::string name{tname->view()};
 
         checkEndlessSetter(name, declLoc);
         checkReservedForNumberedParameters(name, declLoc);
@@ -750,7 +750,7 @@ public:
         core::LocOffsets declLoc = tokLoc(def, name).join(maybe_loc(args));
         core::LocOffsets loc = tokLoc(def, end);
 
-        checkReservedForNumberedParameters(name->view(), declLoc);
+        checkReservedForNumberedParameters(name->asString(), declLoc);
 
         return make_unique<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name->view()), std::move(args),
                                       std::move(body));
@@ -949,14 +949,14 @@ public:
 
     unique_ptr<Node> kwarg(const token *name) {
         core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->view(), loc);
+        checkReservedForNumberedParameters(name->asString(), loc);
 
         return make_unique<Kwarg>(loc, gs_.enterNameUTF8(name->view()));
     }
 
     unique_ptr<Node> kwoptarg(const token *name, unique_ptr<Node> value) {
         core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->view(), loc);
+        checkReservedForNumberedParameters(name->asString(), loc);
 
         return make_unique<Kwoptarg>(loc.join(value->loc), gs_.enterNameUTF8(name->view()), tokLoc(name),
                                      std::move(value));
@@ -973,7 +973,7 @@ public:
         if (name != nullptr) {
             loc = loc.join(tokLoc(name));
             nm = gs_.enterNameUTF8(name->view());
-            checkReservedForNumberedParameters(name->view(), loc);
+            checkReservedForNumberedParameters(name->asString(), loc);
         } else {
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter_);
         }
@@ -1095,7 +1095,7 @@ public:
     }
 
     unique_ptr<Node> match_var(const token *name) {
-        return match_var_hash(tokLoc(name), name->view());
+        return match_var_hash(tokLoc(name), name->asString());
     }
 
     unique_ptr<Node> match_var_hash(core::LocOffsets loc, const std::string name_str) {
@@ -1168,7 +1168,7 @@ public:
     }
 
     unique_ptr<Node> nth_ref(const token *tok) {
-        return make_unique<NthRef>(tokLoc(tok), atoi(tok->view().c_str()));
+        return make_unique<NthRef>(tokLoc(tok), atoi(tok->asString().c_str()));
     }
 
     unique_ptr<Node> numparams(sorbet::parser::NodeVec declaringNodes) {
@@ -1199,14 +1199,14 @@ public:
 
     unique_ptr<Node> optarg_(const token *name, const token *eql, unique_ptr<Node> value) {
         core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->view(), loc);
+        checkReservedForNumberedParameters(name->asString(), loc);
 
         return make_unique<Optarg>(loc.join(value->loc), gs_.enterNameUTF8(name->view()), tokLoc(name),
                                    std::move(value));
     }
 
     unique_ptr<Node> p_ident(const token *tok) {
-        auto name_str = tok->view();
+        auto name_str = tok->asString();
         if (!driver_->lex.is_declared(name_str)) {
             error(ruby_parser::dclass::PatternLVarUndefined, tokLoc(tok), name_str);
         }
@@ -1302,7 +1302,7 @@ public:
             nameLoc = tokLoc(name);
             loc = loc.join(nameLoc);
             nm = gs_.enterNameUTF8(name->view());
-            checkReservedForNumberedParameters(name->view(), nameLoc);
+            checkReservedForNumberedParameters(name->asString(), nameLoc);
         } else {
             // case like 'def m(*); end'
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::star(), ++uniqueCounter_);
@@ -1317,7 +1317,7 @@ public:
 
     unique_ptr<Node> shadowarg(const token *name) {
         core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->view(), loc);
+        checkReservedForNumberedParameters(name->asString(), loc);
 
         return make_unique<Shadowarg>(loc, gs_.enterNameUTF8(name->view()));
     }
@@ -1414,15 +1414,15 @@ public:
         core::LocOffsets loc = tokLoc(oper).join(receiver->loc);
 
         if (auto *num = parser::cast_node<Integer>(receiver.get())) {
-            return make_unique<Integer>(loc, oper->view() + num->val);
+            return make_unique<Integer>(loc, oper->asString() + num->val);
         }
 
         if (oper->type() != ruby_parser::token_type::tTILDE) {
             if (auto *num = parser::cast_node<Float>(receiver.get())) {
-                return make_unique<Float>(loc, oper->view() + num->val);
+                return make_unique<Float>(loc, oper->asString() + num->val);
             }
             if (auto *num = parser::cast_node<Rational>(receiver.get())) {
-                return make_unique<Rational>(loc, oper->view() + num->val);
+                return make_unique<Rational>(loc, oper->asString() + num->val);
             }
         }
 
