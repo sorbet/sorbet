@@ -638,8 +638,7 @@ public:
     }
 
     unique_ptr<Node> constFetch(unique_ptr<Node> scope, const token *colon, const token *name) {
-        return make_unique<Const>(scope->loc.join(tokLoc(name)), std::move(scope),
-                                  gs_.enterNameConstant(name->view()));
+        return make_unique<Const>(scope->loc.join(tokLoc(name)), std::move(scope), gs_.enterNameConstant(name->view()));
     }
 
     unique_ptr<Node> constGlobal(const token *colon, const token *name) {
@@ -752,8 +751,7 @@ public:
 
         checkReservedForNumberedParameters(name->asString(), declLoc);
 
-        return make_unique<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name->view()), std::move(args),
-                                      std::move(body));
+        return make_unique<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name->view()), std::move(args), std::move(body));
     }
 
     unique_ptr<Node> defModule(const token *module, unique_ptr<Node> name, unique_ptr<Node> body, const token *end_) {
