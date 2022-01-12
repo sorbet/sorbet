@@ -461,8 +461,8 @@ unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs
     return item;
 }
 
-vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPTypecheckerDelegate &typechecker,
-                                            const core::MethodRef method) {
+vector<core::LocalVariable> localsForMethod(LSPTypecheckerDelegate &typechecker, const core::MethodRef method) {
+    const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{};
     for (auto loc : method.data(gs)->locs()) {
         files.emplace_back(loc.file());
@@ -770,6 +770,104 @@ void CompletionTask::findSimilarConstants(const core::GlobalState &gs, const cor
     }
 }
 
+vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypecheckerDelegate &typechecker,
+                                                                      SearchParams params) {
+    const auto &gs = typechecker.state();
+
+    // ----- locals -----
+
+    vector<core::LocalVariable> similarLocals;
+    if (params.enclosingMethod.exists()) {
+        auto locals = localsForMethod(typechecker, params.enclosingMethod);
+        similarLocals = allSimilarLocals(gs, locals, params.prefix);
+    }
+
+    // ----- keywords -----
+
+    auto similarKeywords = params.suggestKeywords ? allSimilarKeywords(params.prefix) : vector<RubyKeyword>{};
+
+    // ----- methods -----
+
+    SimilarMethodsByName similarMethodsByName;
+    if (params.forMethods != nullopt) {
+        similarMethodsByName = allSimilarMethods(gs, *params.forMethods->dispatchResult, params.prefix);
+        for (auto &[methodName, similarMethods] : similarMethodsByName) {
+            fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
+                if (left.depth != right.depth) {
+                    return left.depth < right.depth;
+                }
+
+                return left.method.id() < right.method.id();
+            });
+        }
+    }
+
+    auto dedupedSimilarMethods = vector<SimilarMethod>{};
+    for (auto &[methodName, similarMethods] : similarMethodsByName) {
+        if (methodName.kind() == core::NameKind::UNIQUE &&
+            methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename) {
+            // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
+            // unique names, because we want each overload to show up but those use unique names.
+            continue;
+        }
+
+        // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
+        auto similarMethod = similarMethods[0];
+
+        if (similarMethod.method.data(gs)->flags.isPrivate && !params.forMethods->isPrivateOk) {
+            continue;
+        }
+
+        dedupedSimilarMethods.emplace_back(similarMethod);
+    }
+
+    fast_sort(dedupedSimilarMethods, [&](const auto &left, const auto &right) -> bool {
+        if (left.depth != right.depth) {
+            return left.depth < right.depth;
+        }
+
+        auto leftShortName = left.method.data(gs)->name.shortName(gs);
+        auto rightShortName = right.method.data(gs)->name.shortName(gs);
+        if (leftShortName != rightShortName) {
+            if (absl::StartsWith(leftShortName, params.prefix) && !absl::StartsWith(rightShortName, params.prefix)) {
+                return true;
+            }
+            if (!absl::StartsWith(leftShortName, params.prefix) && absl::StartsWith(rightShortName, params.prefix)) {
+                return false;
+            }
+
+            return leftShortName < rightShortName;
+        }
+
+        return left.method.id() < right.method.id();
+    });
+
+    // ----- constants -----
+
+    // TODO(jez) Constants
+
+    // ----- final sort -----
+
+    // TODO(jez) Do something smarter here than "all keywords then all locals then all methods"
+
+    vector<unique_ptr<CompletionItem>> items;
+    for (auto &similarKeyword : similarKeywords) {
+        items.push_back(getCompletionItemForKeyword(gs, this->config, similarKeyword, params.queryLoc, params.prefix,
+                                                    items.size()));
+    }
+    for (auto &similarLocal : similarLocals) {
+        items.push_back(
+            getCompletionItemForLocal(gs, this->config, similarLocal, params.queryLoc, params.prefix, items.size()));
+    }
+    for (auto &similarMethod : dedupedSimilarMethods) {
+        items.push_back(getCompletionItemForMethod(
+            typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType,
+            similarMethod.constr.get(), params.queryLoc, params.prefix, items.size(), params.forMethods->totalArgs));
+    }
+
+    return items;
+}
+
 unique_ptr<ResponseMessage> CompletionTask::runRequestImpl(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
     auto emptyResult = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
@@ -809,76 +907,21 @@ unique_ptr<ResponseMessage> CompletionTask::runRequestImpl(LSPTypecheckerDelegat
         config.logger->debug("Looking for method similar to {}", prefix);
 
         // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
-        auto similarKeywords = sendResp->isPrivateOk ? allSimilarKeywords(prefix) : vector<RubyKeyword>{};
-        auto dispatchResult = sendResp->dispatchResult;
-        auto similarMethodsByName = allSimilarMethods(gs, *dispatchResult, prefix);
-        for (auto &[methodName, similarMethods] : similarMethodsByName) {
-            fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
-                if (left.depth != right.depth) {
-                    return left.depth < right.depth;
-                }
-
-                return left.method.id() < right.method.id();
-            });
-        }
-
-        auto locals = localsForMethod(gs, typechecker, sendResp->enclosingMethod);
-
-        auto similarLocals =
-            sendResp->isPrivateOk ? allSimilarLocals(gs, locals, prefix) : vector<core::LocalVariable>{};
-
-        auto deduped = vector<SimilarMethod>{};
-        for (auto &[methodName, similarMethods] : similarMethodsByName) {
-            if (methodName.kind() == core::NameKind::UNIQUE &&
-                methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename) {
-                // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
-                // unique names, because we want each overload to show up but those use unique names.
-                continue;
-            }
-
-            // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
-            auto similarMethod = similarMethods[0];
-
-            if (similarMethod.method.data(gs)->flags.isPrivate && !sendResp->isPrivateOk) {
-                continue;
-            }
-
-            deduped.emplace_back(similarMethod);
-        }
-
-        fast_sort(deduped, [&](const auto &left, const auto &right) -> bool {
-            if (left.depth != right.depth) {
-                return left.depth < right.depth;
-            }
-
-            auto leftShortName = left.method.data(gs)->name.shortName(gs);
-            auto rightShortName = right.method.data(gs)->name.shortName(gs);
-            if (leftShortName != rightShortName) {
-                if (absl::StartsWith(leftShortName, prefix) && !absl::StartsWith(rightShortName, prefix)) {
-                    return true;
-                }
-                if (!absl::StartsWith(leftShortName, prefix) && absl::StartsWith(rightShortName, prefix)) {
-                    return false;
-                }
-
-                return leftShortName < rightShortName;
-            }
-
-            return left.method.id() < right.method.id();
-        });
-
-        // TODO(jez) Do something smarter here than "all keywords then all locals then all methods"
-        for (auto &similarKeyword : similarKeywords) {
-            items.push_back(getCompletionItemForKeyword(gs, config, similarKeyword, queryLoc, prefix, items.size()));
-        }
-        for (auto &similarLocal : similarLocals) {
-            items.push_back(getCompletionItemForLocal(gs, config, similarLocal, queryLoc, prefix, items.size()));
-        }
-        for (auto &similarMethod : deduped) {
-            items.push_back(getCompletionItemForMethod(typechecker, *dispatchResult, similarMethod.method,
-                                                       similarMethod.receiverType, similarMethod.constr.get(), queryLoc,
-                                                       prefix, items.size(), sendResp->totalArgs));
-        }
+        // (If there is a method whose name overlaps with a keyword, it will still show up as a _method_ item.)
+        auto suggestKeywords = sendResp->isPrivateOk;
+        auto params = SearchParams{
+            queryLoc, prefix,
+            MethodSearchParams{
+                sendResp->dispatchResult,
+                sendResp->totalArgs,
+                sendResp->isPrivateOk,
+            },
+            suggestKeywords,
+            // No receiver means that local variables are allowed here.
+            sendResp->isPrivateOk ? sendResp->enclosingMethod : core::MethodRef{},
+            core::lsp::ConstantResponse::Scopes{}, // constants don't make sense here
+        };
+        items = this->getCompletionItems(typechecker, params);
     } else if (auto constantResp = resp->isConstant()) {
         findSimilarConstants(gs, *constantResp, queryLoc, items);
     }
