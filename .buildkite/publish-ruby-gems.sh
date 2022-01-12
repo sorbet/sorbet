@@ -83,3 +83,11 @@ if ! gem list --remote rubygems.org --exact 'sorbet' | grep -q "$release_version
 else
   echo "$gem_archive already published."
 fi
+
+gem_archive="_out_/gems/sorbet-static-and-runtime-$release_version.gem"
+echo "Attempting to publish $gem_archive"
+if ! gem list --remote rubygems.org --exact 'sorbet-static-and-runtime' | grep -q "$release_version"; then
+  with_backoff gem push --verbose "$gem_archive"
+else
+  echo "$gem_archive already published."
+fi
