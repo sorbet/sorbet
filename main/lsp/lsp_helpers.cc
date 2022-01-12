@@ -42,12 +42,6 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     return false;
 }
 
-bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view pattern) {
-    string_view view = name.shortName(gs);
-    auto fnd = view.find(pattern);
-    return fnd != string_view::npos;
-}
-
 unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, string_view rubyMarkup,
                                            optional<string_view> explanation) {
     // format rubyMarkup

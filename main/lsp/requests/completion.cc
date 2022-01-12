@@ -120,6 +120,12 @@ bool hasAngleBrackets(string_view haystack) {
     return absl::c_any_of(haystack, [](char c) { return c == '<' || c == '>'; });
 }
 
+bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view pattern) {
+    string_view view = name.shortName(gs);
+    auto fnd = view.find(pattern);
+    return fnd != string_view::npos;
+}
+
 using SimilarMethodsByName = UnorderedMap<core::NameRef, vector<SimilarMethod>>;
 
 // First of pair is "found at this depth in the ancestor hierarchy"
@@ -234,6 +240,11 @@ vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const 
                                              string_view prefix) {
     auto result = vector<core::LocalVariable>{};
     for (const auto &local : locals) {
+        if (hasAngleBrackets(local._name.shortName(gs))) {
+            // Gets rid of locals like <blk>
+            continue;
+        }
+
         if (hasSimilarName(gs, local._name, prefix)) {
             result.emplace_back(local);
         }

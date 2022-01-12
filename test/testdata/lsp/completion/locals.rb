@@ -94,6 +94,6 @@ end
 class B
   def implicit_block_arg
     blk # error: does not exist
-    #  ^ completion: <blk>
+    #  ^ completion: (nothing)
   end
 end
