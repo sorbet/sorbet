@@ -38,8 +38,8 @@ size_t rbtoken_get_end(const ruby_parser::token *tok) {
 }
 
 size_t rbtoken_get_string(const ruby_parser::token *tok, const char **out_ptr) {
-    *out_ptr = tok->string().data();
-    return tok->string().size();
+    *out_ptr = tok->view().data();
+    return tok->view().size();
 }
 
 size_t rblist_get_length(const ruby_parser::node_list *list) {

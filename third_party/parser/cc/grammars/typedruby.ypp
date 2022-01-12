@@ -2111,7 +2111,7 @@ opt_block_args_tail:
             bvar: tIDENTIFIER
                     {
                       auto ident = $1;
-                      driver.lex.declare(ident->string());
+                      driver.lex.declare(ident->view());
                       $$ = driver.build.shadowarg(self, ident);
                     }
                 | f_bad_arg
@@ -3374,14 +3374,14 @@ f_opt_paren_args: f_paren_args
                 | tIDENTIFIER
                     {
                       auto ident = $1;
-                      driver.lex.declare(ident->string());
+                      driver.lex.declare(ident->view());
                       driver.numparam_stack.set_ordinary_params();
                       $$ = ident;
                     }
 
       f_arg_asgn: f_norm_arg
                     {
-                      driver.current_arg_stack.set($1[0].string());
+                      driver.current_arg_stack.set($1[0].view());
                       $$ = $1;
                     }
 
@@ -3413,8 +3413,8 @@ f_opt_paren_args: f_paren_args
                         driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ArgumentConst, label);
                         YYERROR;
                       }
-                      driver.lex.declare(label->string());
-                      driver.current_arg_stack.set($1[0].string());
+                      driver.lex.declare(label->view());
+                      driver.current_arg_stack.set($1[0].view());
                       driver.numparam_stack.set_ordinary_params();
                       $$ = label;
                     }
@@ -3472,7 +3472,7 @@ f_opt_paren_args: f_paren_args
                     {
                       auto ident = $2;
 
-                      driver.lex.declare(ident->string());
+                      driver.lex.declare(ident->view());
 
                       auto kwrestarg = driver.build.kwrestarg(self, $1, ident);
 
@@ -3525,7 +3525,7 @@ f_opt_paren_args: f_paren_args
                     {
                       auto ident = $2;
 
-                      driver.lex.declare(ident->string());
+                      driver.lex.declare(ident->view());
 
                       auto restarg = driver.build.restarg(self, $1, ident);
 
@@ -3544,7 +3544,7 @@ f_opt_paren_args: f_paren_args
                     {
                       auto ident = $2;
 
-                      driver.lex.declare(ident->string());
+                      driver.lex.declare(ident->view());
 
                       auto blockarg = driver.build.blockarg(self, $1, ident);
 
