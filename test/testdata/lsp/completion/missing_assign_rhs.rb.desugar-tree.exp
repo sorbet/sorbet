@@ -1,5 +1,11 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def test_missing_rhs<<todo method>>(x, &<blk>)
-    y = <emptyTree>::<C <ErrorNode>>
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def test_missing_rhs<<todo method>>(x, &<blk>)
+      y = <emptyTree>::<C <ErrorNode>>
+    end
   end
 end

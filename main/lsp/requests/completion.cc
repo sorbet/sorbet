@@ -226,6 +226,11 @@ vector<RubyKeyword> allSimilarKeywords(string_view prefix) {
     ENFORCE(absl::c_is_sorted(rubyKeywords, [](auto &left, auto &right) { return left.keyword < right.keyword; }),
             "rubyKeywords is not sorted by keyword; completion results will be out of order");
 
+    if (prefix == "") {
+        // Since we suggest keyword snippets first, they're just noise when the prefix is empty
+        return {};
+    }
+
     auto result = vector<RubyKeyword>{};
     for (const auto &rubyKeyword : rubyKeywords) {
         if (absl::StartsWith(rubyKeyword.keyword, prefix)) {
@@ -669,7 +674,7 @@ bool isSimilarConstant(const core::GlobalState &gs, string_view prefix, core::Sy
 vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalState &gs, const LSPConfiguration &config,
                                                            string_view prefix,
                                                            core::lsp::ConstantResponse::Scopes &scopes,
-                                                           core::Loc queryLoc) {
+                                                           core::Loc queryLoc, size_t initialSortIdx) {
     config.logger->debug("Looking for constant similar to {}", prefix);
     ENFORCE(!scopes.empty());
 
@@ -690,7 +695,8 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
         // We should probably at least sort by whether the prefix of the suggested constant matches.
         for (auto [_name, sym] : scope.asClassOrModuleRef().data(gs)->membersStableOrderSlow(gs)) {
             if (isSimilarConstant(gs, prefix, sym)) {
-                items.push_back(getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, items.size()));
+                items.push_back(
+                    getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, initialSortIdx + items.size()));
             }
         }
     }
@@ -713,7 +719,8 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
 
         for (auto [_name, sym] : ancestor.data(gs)->membersStableOrderSlow(gs)) {
             if (isSimilarConstant(gs, prefix, sym)) {
-                items.push_back(getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, items.size()));
+                items.push_back(
+                    getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, initialSortIdx + items.size()));
             }
         }
     }
@@ -879,7 +886,8 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     }
 
     if (!params.scopes.empty()) {
-        auto similarConsts = allSimilarConstantItems(gs, this->config, params.prefix, params.scopes, params.queryLoc);
+        auto similarConsts =
+            allSimilarConstantItems(gs, this->config, params.prefix, params.scopes, params.queryLoc, items.size());
         move(similarConsts.begin(), similarConsts.end(), back_inserter(items));
     }
 
@@ -944,14 +952,41 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
         };
         items = this->getCompletionItems(typechecker, params);
     } else if (auto constantResp = resp->isConstant()) {
-        auto prefix = constantResp->name.shortName(gs);
-        // TODO(jez) Start searching for methods, keywords, and locals on future branch with better parse error recovery
-        auto methodSearchParams = nullopt;
-        auto suggestKeywords = false;
-        auto enclosingMethod = core::MethodRef{};
-        auto params = SearchParams{
-            queryLoc, prefix, methodSearchParams, suggestKeywords, enclosingMethod, std::move(constantResp->scopes),
-        };
+        SearchParams params;
+        if (constantResp->name == core::Names::Constants::ErrorNode()) {
+            // We're only getting a ConstantResult from the LSP because that's how we model "the
+            // user typed nothing. Manually craft a set of options that make sense to suggest here.
+            auto prefix = "";
+            // Create a fake DispatchResult to get method results
+            auto returnType = core::Types::untypedUntracked();
+            auto receiverType = constantResp->enclosingMethod.data(gs)->owner.data(gs)->externalType(); // self
+            auto dispatchMethod = core::MethodRef{};
+            size_t totalArgs = 0;
+            auto isPrivateOk = true;
+            auto methodSearchParams = MethodSearchParams{
+                make_shared<core::DispatchResult>(returnType, receiverType, dispatchMethod),
+                totalArgs,
+                isPrivateOk,
+            };
+            auto suggestKeywords = true;
+            params = SearchParams{
+                queryLoc,
+                prefix,
+                methodSearchParams,
+                suggestKeywords,
+                constantResp->enclosingMethod, // locals
+                constantResp->scopes,
+            };
+        } else {
+            // Normal constant response.
+            auto prefix = constantResp->name.shortName(gs);
+            auto methodSearchParams = nullopt;
+            auto suggestKeywords = false;
+            auto enclosingMethod = core::MethodRef{};
+            params = SearchParams{
+                queryLoc, prefix, methodSearchParams, suggestKeywords, enclosingMethod, std::move(constantResp->scopes),
+            };
+        }
         items = this->getCompletionItems(typechecker, params);
     }
 
