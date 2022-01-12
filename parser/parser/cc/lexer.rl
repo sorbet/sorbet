@@ -120,10 +120,11 @@ using namespace std::string_literals;
 
 %% prepush { check_stack_capacity(); }
 
-lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer)
+lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer, std::vector<char> &scratch)
   : diagnostics(diag)
   , version(version)
   , source_buffer(source_buffer)
+  , scratch(scratch)
   , cs(lex_en_line_begin)
   , _p(source_buffer.data())
   , _pe(source_buffer.data() + source_buffer.size())
