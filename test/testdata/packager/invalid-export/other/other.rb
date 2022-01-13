@@ -4,7 +4,7 @@
 class Other::OtherClass
   Foo::Bar::Exists.hello # This ref still works
   Foo::Bar::Exists.helloXX
-# ^^^^^^^^^^^^^^^^^^^^^^^^ error: Method `helloXX` does not exist on `T.class_of(Foo::Bar::Exists)`
+  #                ^^^^^^^ error: Method `helloXX` does not exist on `T.class_of(Foo::Bar::Exists)`
 
 
   # Note this is a weird quirk that in this package `NotDefined` exists as a stub. This is safe
