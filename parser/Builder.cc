@@ -118,8 +118,12 @@ public:
         return std::min(off, maxOff_);
     }
 
+    core::LocOffsets locOffset(const size_t start, const size_t end) {
+        return core::LocOffsets{clamp((uint32_t)start), clamp((uint32_t)end)};
+    }
+
     core::LocOffsets tokLoc(const token *tok) {
-        return core::LocOffsets{clamp((uint32_t)tok->start()), clamp((uint32_t)tok->end())};
+        return locOffset(tok->start(), tok->end());
     }
 
     core::LocOffsets maybe_loc(unique_ptr<Node> &node) {
@@ -130,7 +134,7 @@ public:
     }
 
     core::LocOffsets tokLoc(const token *begin, const token *end) {
-        return core::LocOffsets{clamp((uint32_t)begin->start()), clamp((uint32_t)end->end())};
+        return locOffset(begin->start(), end->end());
     }
 
     core::LocOffsets collectionLoc(const token *begin, sorbet::parser::NodeVec &elts, const token *end) {
@@ -591,11 +595,13 @@ public:
             loc = loc.join(tokLoc(dot));
         }
 
+        auto methodLoc = locOffset(loc.endPos(), loc.endPos());
+
         auto method = core::Names::methodNameMissing();
         if ((dot != nullptr) && dot->view() == "&.") {
-            return make_unique<CSend>(loc, std::move(receiver), method, sorbet::parser::NodeVec{});
+            return make_unique<CSend>(loc, std::move(receiver), method, methodLoc, sorbet::parser::NodeVec{});
         } else {
-            return make_unique<Send>(loc, std::move(receiver), method, sorbet::parser::NodeVec{});
+            return make_unique<Send>(loc, std::move(receiver), method, methodLoc, sorbet::parser::NodeVec{});
         }
     }
 

@@ -26,10 +26,10 @@ end
 # The weird thing is that this is actually a valid Ruby program.
 sig {params(x: M).void}
 def test_completion_before_method(x)
-  x. # error: Method `puts` does not exist on `M`
+  x.
   # ^ completion: (nothing)
   # TODO(jez) Improve the completion results for this case
-  puts 'after'
+  puts 'after' # error: Method `puts` does not exist on `M`
 end
 
 class TestClass1
@@ -67,10 +67,10 @@ end # error: unexpected token "end"
 # The weird thing is that this is actually a valid Ruby program.
 sig {params(x: M).void}
 def test_before_var_assign(x)
-  x. # error: Method `y=` does not exist on `M`
+  x.
   # ^ completion: (nothing)
   # TODO(jez) Improve the completion results for this case
-  y = nil
+  y = nil # error: Method `y=` does not exist on `M`
 end
 
 sig {params(x: M).void}
