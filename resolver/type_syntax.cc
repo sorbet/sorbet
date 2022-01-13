@@ -1106,10 +1106,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             // uninitialized variables. Inside of a signature we shouldn't need this:
             auto originForUninitialized = core::Loc::none();
             core::CallLocs locs{
-                ctx.file,
-                s.loc,
-                recvi->loc,
-                argLocs,
+                ctx.file, s.loc, recvi->loc, s.loc.copyWithZeroLength(), argLocs,
             };
             auto suppressErrors = false;
             core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),

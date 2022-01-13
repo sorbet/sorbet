@@ -802,6 +802,7 @@ struct CallLocs final {
     FileRef file;
     LocOffsets call;
     LocOffsets receiver;
+    LocOffsets fun;
     InlinedVector<LocOffsets, 2> &args;
 };
 

@@ -1764,7 +1764,8 @@ void applySig(const GlobalState &gs, const DispatchArgs &args, DispatchResult &r
          ++loc) {
         callLocsArgs.emplace_back(*loc);
     }
-    CallLocs callLocs{args.locs.file, args.locs.call, callLocsReceiver, callLocsArgs};
+    // TODO(jez) Double check this
+    CallLocs callLocs{args.locs.file, args.locs.call, callLocsReceiver, args.locs.fun, callLocsArgs};
 
     uint16_t numPosArgs = args.numPosArgs - (1 + argsToDropOffEnd);
     auto dispatchArgsArgs = InlinedVector<const TypeAndOrigins *, 2>{};
@@ -1998,7 +1999,7 @@ public:
         InlinedVector<const TypeAndOrigins *, 2> sendArgs =
             Magic_callWithSplat::generateSendArgs(posTuple, kwTuple, sendArgStore, args.argLoc(2));
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
         DispatchArgs innerArgs{fn,
                                sendLocs,
                                numPosArgs,
@@ -2032,8 +2033,8 @@ class Magic_callWithBlock : public IntrinsicMethod {
 
 private:
     static TypePtr typeToProc(const GlobalState &gs, const TypeAndOrigins &blockType, core::FileRef file,
-                              LocOffsets callLoc, LocOffsets receiverLoc, Loc originForUninitialized, bool isPrivateOk,
-                              bool suppressErrors) {
+                              LocOffsets callLoc, LocOffsets receiverLoc, LocOffsets funLoc, Loc originForUninitialized,
+                              bool isPrivateOk, bool suppressErrors) {
         auto nonNilBlockType = blockType;
         auto typeIsNilable = false;
         if (Types::isSubType(gs, Types::nilClass(), blockType.type)) {
@@ -2048,7 +2049,7 @@ private:
         NameRef to_proc = core::Names::toProc();
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         InlinedVector<LocOffsets, 2> sendArgLocs;
-        CallLocs sendLocs{file, callLoc, receiverLoc, sendArgLocs};
+        CallLocs sendLocs{file, callLoc, receiverLoc, funLoc, sendArgLocs};
         DispatchArgs innerArgs{to_proc,
                                sendLocs,
                                0,
@@ -2236,11 +2237,11 @@ public:
         for (auto &arg : sendArgStore) {
             sendArgs.emplace_back(&arg);
         }
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
-        TypePtr finalBlockType =
-            Magic_callWithBlock::typeToProc(gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2],
-                                            args.originForUninitialized, args.isPrivateOk, args.suppressErrors);
+        TypePtr finalBlockType = Magic_callWithBlock::typeToProc(
+            gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2], args.locs.fun,
+            args.originForUninitialized, args.isPrivateOk, args.suppressErrors);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
         res.main.constr = make_unique<TypeConstraint>();
@@ -2329,11 +2330,11 @@ public:
         InlinedVector<const TypeAndOrigins *, 2> sendArgs =
             Magic_callWithSplat::generateSendArgs(posTuple, kwTuple, sendArgStore, args.argLoc(2));
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
-        TypePtr finalBlockType =
-            Magic_callWithBlock::typeToProc(gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4],
-                                            args.originForUninitialized, args.isPrivateOk, args.suppressErrors);
+        TypePtr finalBlockType = Magic_callWithBlock::typeToProc(
+            gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4], args.locs.fun,
+            args.originForUninitialized, args.isPrivateOk, args.suppressErrors);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
         res.main.constr = make_unique<TypeConstraint>();
@@ -2409,7 +2410,7 @@ public:
             sendArgStore.emplace_back(args.args[i]);
             sendArgLocs.emplace_back(args.locs.args[i]);
         }
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
         DispatchArgs innerArgs{Names::new_(),    sendLocs,           numPosArgs,
                                sendArgStore,     selfTy.type,        selfTy,
@@ -2446,7 +2447,7 @@ public:
 
         auto &arg = args.args[0];
         InlinedVector<LocOffsets, 2> argLocs{args.locs.receiver};
-        CallLocs locs{args.locs.file, args.locs.call, args.locs.call, argLocs};
+        CallLocs locs{args.locs.file, args.locs.call, args.locs.call, args.locs.fun, argLocs};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs;
 
         DispatchArgs dispatch{core::Names::toA(),
@@ -2829,7 +2830,7 @@ public:
 
         auto &arg = args.args[0];
         InlinedVector<LocOffsets, 2> argLocs;
-        CallLocs locs{args.locs.file, args.locs.call, args.locs.call, argLocs};
+        CallLocs locs{args.locs.file, args.locs.call, args.locs.call, args.locs.fun, argLocs};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs;
 
         DispatchArgs dispatch{core::Names::toHash(),
@@ -2865,7 +2866,7 @@ class Magic_mergeHash : public IntrinsicMethod {
         sendArgs.emplace_back(args.args[1]);
         sendArgLocs.emplace_back(args.locs.args[1]);
 
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, sendArgLocs};
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, args.locs.fun, sendArgLocs};
 
         // emulate a call to `resType#merge`
         DispatchArgs mergeArgs{core::Names::merge(),
@@ -2930,7 +2931,7 @@ class Magic_mergeHashValues : public IntrinsicMethod {
         auto hashLoc = args.locs.args[1].join(args.locs.args.back());
         sendArgLocs.emplace_back(hashLoc);
 
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, sendArgLocs};
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, args.locs.fun, sendArgLocs};
 
         // emulate a call to `resType#merge` with a shape argument
         DispatchArgs mergeArgs{core::Names::merge(),
@@ -2962,7 +2963,7 @@ class Array_flatten : public IntrinsicMethod {
 
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         InlinedVector<LocOffsets, 2> sendArgLocs;
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, sendArgLocs};
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, args.locs.fun, sendArgLocs};
 
         DispatchArgs innerArgs{toAry,
                                sendLocs,
@@ -3260,10 +3261,7 @@ public:
         auto hash = make_type<ClassType>(core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs));
         InlinedVector<LocOffsets, 2> argLocs{args.locs.receiver};
         CallLocs locs{
-            args.locs.file,
-            args.locs.call,
-            args.locs.call,
-            argLocs,
+            args.locs.file, args.locs.call, args.locs.call, args.locs.fun, argLocs,
         };
         TypeAndOrigins myType{args.selfType, {args.receiverLoc()}};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs{&myType};
