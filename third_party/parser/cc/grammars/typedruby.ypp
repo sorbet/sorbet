@@ -229,6 +229,7 @@ using namespace std::string_literals;
   mlhs_node
   mrhs_arg
   none
+  nonlocal_var
   numeric
   opt_block_param
   p_alt
@@ -237,6 +238,7 @@ using namespace std::string_literals;
   p_const
   p_expr
   p_expr_basic
+  p_expr_ref
   p_kw
   p_kw_label
   p_primitive
@@ -2463,6 +2465,7 @@ opt_block_args_tail:
                       driver.pattern_hash_keys.push();
                     }
     p_expr_basic: p_value
+                | p_variable
                 | p_const p_lparen p_args rparen
                     {
                       driver.pattern_hash_keys.pop();
@@ -2721,8 +2724,8 @@ opt_block_args_tail:
                     {
                       $$ = driver.build.range_exclusive(self, $1, $2, nullptr);
                     }
-                | p_variable
                 | p_var_ref
+                | p_expr_ref
                 | p_const
                 | tBDOT2 p_primitive
                     {
@@ -2768,6 +2771,16 @@ opt_block_args_tail:
                       auto pid = driver.build.p_ident(self, $2);
                       auto lvar = driver.build.accessible(self, pid);
                       $$ = driver.build.pin(self, $1, lvar);
+                    }
+                | tCARET nonlocal_var
+                    {
+                      auto non_lvar = driver.build.accessible(self, $2);
+                      $$ = driver.build.pin(self, $1, non_lvar);
+                    }
+        p_expr_ref: tCARET tLPAREN expr_value tRPAREN
+                    {
+                      auto expr = driver.build.begin(self, $2, $3, $4);
+                      $$ = driver.build.pin(self, $1, expr);
                     }
          p_const: tCOLON3 cname
                     {
@@ -3072,6 +3085,19 @@ regexp_contents: // nothing
                     {
                       driver.lex.set_state_expr_end();
                       $$ = driver.build.floatComplex(self, $1);
+                    }
+
+        nonlocal_var: tIVAR
+                    {
+                      $$ = driver.build.ivar(self, $1);
+                    }
+                | tGVAR
+                    {
+                      $$ = driver.build.gvar(self, $1);
+                    }
+                | tCVAR
+                    {
+                      $$ = driver.build.cvar(self, $1);
                     }
 
    user_variable: tIDENTIFIER
