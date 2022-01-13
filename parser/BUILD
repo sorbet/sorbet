@@ -22,7 +22,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//core",
-        "//third_party/parser",
+        "//parser/parser",
         "@com_google_absl//absl/algorithm:container",
     ],
 )
@@ -58,10 +58,10 @@ genrule(
     outs = [
         "diagnostics.cc",
     ],
-    cmd = "$(location //third_party/parser:generate_diagnostics) dclassStrings > $(location diagnostics.cc) && \
+    cmd = "$(location //parser/parser:generate_diagnostics) dclassStrings > $(location diagnostics.cc) && \
            $(location //tools:clang-format) -i $(location diagnostics.cc)",
     tools = [
-        "//third_party/parser:generate_diagnostics",
+        "//parser/parser:generate_diagnostics",
         "//tools:clang-format",
     ],
 )
