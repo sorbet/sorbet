@@ -1119,10 +1119,13 @@ public:
                 const UnorderedSet<core::ClassOrModuleRef> &pkgNamespaces)
         : gs(gs), pkg(pkg), pkgNamespace(lookupFQN(gs, pkg.fullName()).asClassOrModuleRef()),
           pkgTestNamespace(getPkgTestNamespace(gs, pkg)), pkgNamespaces(pkgNamespaces) {
-        const auto flatFiles = gs.lookupClassSymbol(core::Symbols::Opus(), gs.lookupNameConstant("Flatfiles"));
-        if (flatFiles.exists()) {
-            flatfileRecord = gs.lookupClassSymbol(flatFiles, gs.lookupNameConstant("Record"));
-            flatfileXMLNode = gs.lookupClassSymbol(flatFiles, gs.lookupNameConstant("MarkupLanguageNodeStruct"));
+        const auto name = gs.lookupNameConstant("Flatfiles");
+        if (name.exists()) {
+            const auto flatFiles = gs.lookupClassSymbol(core::Symbols::Opus(), name);
+            if (flatFiles.exists()) {
+                flatfileRecord = gs.lookupClassSymbol(flatFiles, gs.lookupNameConstant("Record"));
+                flatfileXMLNode = gs.lookupClassSymbol(flatFiles, gs.lookupNameConstant("MarkupLanguageNodeStruct"));
+            }
         }
     }
 
