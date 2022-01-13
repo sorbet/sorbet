@@ -7,6 +7,10 @@ module M
   def qux; end
 end
 
+module Outer
+  module Inner; end
+end
+
 sig {params(x: M).void}
 def test_completion_after_method(x)
   puts 'before'
@@ -69,6 +73,18 @@ def test_before_var_assign(x)
   x.
   # ^ completion: bar, foo, qux, ...
   y = nil # error: Method `y=` does not exist on `M`
+end
+
+# This is also technically a valid Ruby program, but Sorbet doesn't support it
+sig {params(x: M).void}
+def test_before_constant_lit(x)
+  x.
+  # ^ completion: bar, foo, qux, ...
+  Outer # error: does not exist
+
+  x. # error: Dynamic constant reference
+  # ^ completion: bar, foo, qux, ...
+  Outer::Inner # error: Method `Outer` does not exist on `M`
 end
 
 sig {params(x: M).void}

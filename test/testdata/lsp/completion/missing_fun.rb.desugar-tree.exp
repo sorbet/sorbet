@@ -15,6 +15,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
+  module <emptyTree>::<C Outer><<C <todo sym>>> < ()
+    module <emptyTree>::<C Inner><<C <todo sym>>> < ()
+      <emptyTree>
+    end
+  end
+
   <self>.sig() do ||
     <self>.params(:x, <emptyTree>::<C M>).void()
   end
@@ -96,6 +102,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def test_before_var_assign<<todo method>>(x, &<blk>)
     x.y=(nil)
+  end
+
+  <self>.sig() do ||
+    <self>.params(:x, <emptyTree>::<C M>).void()
+  end
+
+  def test_before_constant_lit<<todo method>>(x, &<blk>)
+    begin
+      x.Outer()
+      x.Outer()::<C Inner>
+    end
   end
 
   <self>.sig() do ||
