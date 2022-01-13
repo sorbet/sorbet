@@ -24,6 +24,19 @@ This should install cleanly in most Ruby development environments, but see
 ["What platforms does Sorbet support?" in the FAQ](/docs/faq#what-platforms-does-sorbet-support)
 for some important caveats.
 
+Alternatively we can use the `sorbet-static-and-runtime` gem to install both
+`sorbet` and `sorbet-runtime` and keep them synchronized at the same version:
+
+```ruby
+# -- Gemfile --
+
+gem 'sorbet-static-and-runtime'
+```
+
+Note that this is not the recommended way to add Sorbet to our project if we
+work on a gem as it would declare `sorbet` as a runtime dependency instead of a
+development one.
+
 ### Verify installation
 
 To test that everything is working so far, we can run these commands:
