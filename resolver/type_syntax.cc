@@ -55,8 +55,8 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::Context ctx, ast::
 namespace {
 
 // Parse a literal type for use with `T.deprecated_enum`. If the type is indeed a literal, this will return the
-// `underlying` of that literal. The effect of this change is that `T.deprecated_enum(["a", "b", true])` will be parsed
-// as the type `T.any(String, TrueClass)`.
+// `underlying` of that literal. The effect of using `underlying` is that `T.deprecated_enum(["a", "b", true])` will be
+// parsed as the type `T.any(String, TrueClass)`.
 core::TypePtr getResultLiteral(core::Context ctx, const ast::ExpressionPtr &expr) {
     core::TypePtr result;
     typecase(
