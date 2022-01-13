@@ -22,7 +22,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//core",
-        "//parser/typedruby_fork:parser",
+        "//parser/parser:parser",
         "@com_google_absl//absl/algorithm:container",
     ],
 )
@@ -58,10 +58,10 @@ genrule(
     outs = [
         "diagnostics.cc",
     ],
-    cmd = "$(location //parser/typedruby_fork:generate_diagnostics) dclassStrings > $(location diagnostics.cc) && \
+    cmd = "$(location //parser/parser:generate_diagnostics) dclassStrings > $(location diagnostics.cc) && \
            $(location //tools:clang-format) -i $(location diagnostics.cc)",
     tools = [
-        "//parser/typedruby_fork:generate_diagnostics",
+        "//parser/parser:generate_diagnostics",
         "//tools:clang-format",
     ],
 )
