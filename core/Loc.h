@@ -25,6 +25,10 @@ struct LocOffsets {
     bool exists() const {
         return endLoc != INVALID_POS_LOC && beginLoc != INVALID_POS_LOC;
     }
+    bool empty() const {
+        ENFORCE_NO_TIMER(exists());
+        return beginLoc == endLoc;
+    }
     static LocOffsets none() {
         return LocOffsets{INVALID_POS_LOC, INVALID_POS_LOC};
     }
@@ -64,6 +68,10 @@ public:
 
     bool exists() const {
         return storage.fileRef != 0 && storage.offsets.exists();
+    }
+    bool empty() const {
+        ENFORCE_NO_TIMER(exists());
+        return storage.offsets.empty();
     }
 
     Loc join(Loc other) const;

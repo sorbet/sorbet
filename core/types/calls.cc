@@ -572,7 +572,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             return result;
         }
         auto funLoc = args.funLoc();
-        auto errLoc = (funLoc.exists() && funLoc.beginPos() != funLoc.endPos()) ? args.funLoc() : args.callLoc();
+        auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
         // This is a hack. We want to always be able to build the error object
         // so that it is not immediately sent to GlobalState::_error
         // and recorded.
@@ -608,7 +608,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             if (receiverLoc.exists() && (gs.suggestUnsafe.has_value() ||
                                          (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
                 auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
-                if (receiverLoc.beginPos() == receiverLoc.endPos()) {
+                if (receiverLoc.empty()) {
                     auto shortName = args.name.shortName(gs);
                     auto beginAdjust = -2;                     // (&
                     auto endAdjust = 1 + shortName.size() + 1; // :foo)

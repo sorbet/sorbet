@@ -595,9 +595,10 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                         prefix += 2;
                     }
 
-                    auto replaceLoc =
-                        core::Loc(ctx.file, send.loc).adjustLen(ctx, prefix, char_traits<char>::length("T.enum"));
-                    e.replaceWith("Replace with `T.deprecated_enum`", replaceLoc, "{}", "T.deprecated_enum");
+                    if (send.funLoc.exists() && !send.funLoc.empty()) {
+                        e.replaceWith("Replace with `deprecated_enum`", core::Loc(ctx.file, send.funLoc), "{}",
+                                      "deprecated_enum");
+                    }
                 }
             }
 
