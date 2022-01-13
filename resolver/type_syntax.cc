@@ -52,10 +52,21 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::Context ctx, ast::
     return result;
 }
 
+namespace {
+
+// Parse a literal type for use with `T.deprecated_enum`. If the type is indeed a literal, this will return the
+// `underlying` of that literal. The effect of using `underlying` is that `T.deprecated_enum(["a", "b", true])` will be
+// parsed as the type `T.any(String, TrueClass)`.
 core::TypePtr getResultLiteral(core::Context ctx, const ast::ExpressionPtr &expr) {
     core::TypePtr result;
     typecase(
-        expr, [&](const ast::Literal &lit) { result = lit.value; },
+        expr,
+        [&](const ast::Literal &lit) {
+            result = lit.value;
+            if (core::isa_type<core::LiteralType>(result)) {
+                result = core::cast_type_nonnull<core::LiteralType>(result).underlying(ctx);
+            }
+        },
         [&](const ast::ExpressionPtr &e) {
             if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Unsupported type literal");
@@ -78,6 +89,8 @@ bool isTProc(core::Context ctx, const ast::Send *send) {
     }
     return false;
 }
+
+} // namespace
 
 bool TypeSyntax::isSig(core::Context ctx, const ast::Send &send) {
     if (send.fun != core::Names::sig()) {
