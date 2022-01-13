@@ -881,14 +881,14 @@ public:
     unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, sorbet::parser::NodeVec indexes,
                            const token *rbrack) {
         return make_unique<Send>(receiver->loc.join(tokLoc(rbrack)), std::move(receiver), core::Names::squareBrackets(),
-                                 tokLoc(lbrack, rbrack), std::move(indexes));
+                                 tokLoc(lbrack).copyWithZeroLength(), std::move(indexes));
     }
 
     unique_ptr<Node> indexAsgn(unique_ptr<Node> receiver, const token *lbrack, sorbet::parser::NodeVec indexes,
                                const token *rbrack) {
-        // TODO(jez) seems wrong
         return make_unique<Send>(receiver->loc.join(tokLoc(rbrack)), std::move(receiver),
-                                 core::Names::squareBracketsEq(), tokLoc(lbrack, rbrack), std::move(indexes));
+                                 core::Names::squareBracketsEq(), tokLoc(lbrack).copyWithZeroLength(),
+                                 std::move(indexes));
     }
 
     unique_ptr<Node> integer(const token *tok) {
