@@ -130,7 +130,7 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
             tags.push_back(DiagnosticTag::Unnecessary);
             diagnostic->tags = move(tags);
         }
-        diagnostic->severity = DiagnosticSeverity::Error;
+        diagnostic->severity = DiagnosticSeverity::Information;
 
         if (!error->autocorrects.empty()) {
             diagnostic->message += " (fix available)";
