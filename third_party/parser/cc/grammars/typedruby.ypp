@@ -3087,7 +3087,7 @@ regexp_contents: // nothing
                       $$ = driver.build.floatComplex(self, $1);
                     }
 
-    nonlocal_var: tIVAR
+        nonlocal_var: tIVAR
                     {
                       $$ = driver.build.ivar(self, $1);
                     }
