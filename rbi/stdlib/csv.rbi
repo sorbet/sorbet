@@ -1172,6 +1172,8 @@ end
 # The error thrown when the parser encounters illegal
 # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) formatting.
 class CSV::MalformedCSVError < RuntimeError
+  sig { params(message: String, line_number: Integer).void }
+  def initialize(message, line_number); end
 end
 
 # A [`CSV::Table`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html) is a
