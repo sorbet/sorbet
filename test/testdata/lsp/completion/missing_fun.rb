@@ -27,8 +27,7 @@ end
 sig {params(x: M).void}
 def test_completion_before_method(x)
   x.
-  # ^ completion: (nothing)
-  # TODO(jez) Improve the completion results for this case
+  # ^ completion: bar, foo, qux, ...
   puts 'after' # error: Method `puts` does not exist on `M`
 end
 
@@ -68,8 +67,7 @@ end # error: unexpected token "end"
 sig {params(x: M).void}
 def test_before_var_assign(x)
   x.
-  # ^ completion: (nothing)
-  # TODO(jez) Improve the completion results for this case
+  # ^ completion: bar, foo, qux, ...
   y = nil # error: Method `y=` does not exist on `M`
 end
 

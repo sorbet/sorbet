@@ -922,7 +922,9 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
 
     if (auto sendResp = resp->isSend()) {
         auto callerSideName = sendResp->callerSideName;
-        auto prefix = callerSideName == core::Names::methodNameMissing() ? "" : callerSideName.shortName(gs);
+        auto prefix = (callerSideName == core::Names::methodNameMissing() || !sendResp->funLoc.contains(queryLoc))
+                          ? ""
+                          : callerSideName.shortName(gs);
         config.logger->debug("Looking for method similar to '{}'", prefix);
 
         // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
