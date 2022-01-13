@@ -2777,7 +2777,7 @@ opt_block_args_tail:
                       auto non_lvar = driver.build.accessible(self, $2);
                       $$ = driver.build.pin(self, $1, non_lvar);
                     }
-       p_expr_ref: tCARET tLPAREN expr_value tRPAREN
+        p_expr_ref: tCARET tLPAREN expr_value tRPAREN
                     {
                       auto expr = driver.build.begin(self, $2, $3, $4);
                       $$ = driver.build.pin(self, $1, expr);
