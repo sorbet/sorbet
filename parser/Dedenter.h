@@ -1,3 +1,4 @@
+#include <optional>
 #include <string>
 
 namespace sorbet::parser {
@@ -7,13 +8,15 @@ class Dedenter final {
 public:
     Dedenter(int level) : dedentLevel(level), spacesToRemove(level) {}
 
-    std::string dedent(std::string_view str);
+    std::optional<std::string> dedent(std::string_view str);
 
     void interrupt() {
         at_line_begin = false;
     }
 
 private:
+    void update_state(std::string_view dedented_string);
+
     const unsigned int dedentLevel;
     bool at_line_begin = true;
     unsigned int spacesToRemove;
