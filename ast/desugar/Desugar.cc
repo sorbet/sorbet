@@ -1097,7 +1097,6 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                     auto prevValue = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
                                               std::move(readArgs), s->flags);
-                    // TODO(jez) Try to write a test for this one
                     auto newValue = MK::Send1(sendLoc, std::move(prevValue), opAsgn->op, sendLoc.copyWithZeroLength(),
                                               std::move(rhs));
                     auto numPosAssgnArgs = numPosArgs + 1;

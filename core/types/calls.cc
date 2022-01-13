@@ -1766,7 +1766,6 @@ void applySig(const GlobalState &gs, const DispatchArgs &args, DispatchResult &r
          ++loc) {
         callLocsArgs.emplace_back(*loc);
     }
-    // TODO(jez) Double check this
     CallLocs callLocs{args.locs.file, args.locs.call, callLocsReceiver, args.locs.fun, callLocsArgs};
 
     uint16_t numPosArgs = args.numPosArgs - (1 + argsToDropOffEnd);

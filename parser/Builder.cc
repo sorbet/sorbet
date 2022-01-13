@@ -209,7 +209,6 @@ public:
                 checkCircularArgumentReferences(node.get(), name_str);
                 return make_unique<LVar>(node->loc, id->name);
             } else {
-                // TODO(jez) what the heck is this
                 return make_unique<Send>(node->loc, nullptr, id->name, node->loc, sorbet::parser::NodeVec());
             }
         }
@@ -274,9 +273,8 @@ public:
     unique_ptr<Node> assign(unique_ptr<Node> lhs, const token *eql, unique_ptr<Node> rhs) {
         core::LocOffsets loc = lhs->loc.join(rhs->loc);
 
-        // TODO(jez) What should we put for the methodLoc here?
-        // x.foo = 1
-        // The behavior below currently does `foo =` for the methodLoc
+        // In `x.foo = 1`, the behavior below currently does `foo =` for the methodLoc
+        // That might be wrong. Punting for now.
         if (auto *s = parser::cast_node<Send>(lhs.get())) {
             s->args.emplace_back(std::move(rhs));
             return make_unique<Send>(loc, std::move(s->receiver), s->method, s->methodLoc.join(tokLoc(eql)),
@@ -1158,22 +1156,22 @@ public:
     }
 
     unique_ptr<Node> not_op(const token *not_, const token *begin, unique_ptr<Node> receiver, const token *end) {
+        auto notLoc = tokLoc(not_);
         if (receiver != nullptr) {
             core::LocOffsets loc;
             if (end != nullptr) {
-                loc = tokLoc(not_).join(tokLoc(end));
+                loc = notLoc.join(tokLoc(end));
             } else {
-                loc = tokLoc(not_).join(receiver->loc);
+                loc = notLoc.join(receiver->loc);
             }
-            return make_unique<Send>(loc, transformCondition(std::move(receiver)), core::Names::bang(), tokLoc(not_),
+            return make_unique<Send>(loc, transformCondition(std::move(receiver)), core::Names::bang(), notLoc,
                                      sorbet::parser::NodeVec());
         }
 
         ENFORCE(begin != nullptr && end != nullptr);
         auto body = make_unique<Begin>(tokLoc(begin).join(tokLoc(end)), sorbet::parser::NodeVec());
-        // TODO(jez) seems wrong
-        return make_unique<Send>(tokLoc(not_).join(body->loc), std::move(body), core::Names::bang(), tokLoc(not_),
-                                 sorbet::parser::NodeVec());
+        return make_unique<Send>(notLoc.join(body->loc), std::move(body), core::Names::bang(),
+                                 notLoc.copyWithZeroLength(), sorbet::parser::NodeVec());
     }
 
     unique_ptr<Node> nth_ref(const token *tok) {
