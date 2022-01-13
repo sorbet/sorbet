@@ -33,14 +33,14 @@ private:
 
 public:
     template <typename... Args> void println(fmt::format_string<Args...> fmt, Args &&...args) {
-        fmt::format_to(std::back_inserter(out), "{:{}}", "", this->indent*2);
+        fmt::format_to(std::back_inserter(out), "{:{}}", "", this->indent * 2);
         fmt::format_to(std::back_inserter(out), fmt, args...);
         fmt::format_to(std::back_inserter(out), "\n");
     }
 
     void println(string_view arg) {
         for (auto line : absl::StrSplit(arg, "\n")) {
-            fmt::format_to(std::back_inserter(out), "{:{}}{}\n", "", this->indent*2, line);
+            fmt::format_to(std::back_inserter(out), "{:{}}{}\n", "", this->indent * 2, line);
         }
     }
 
