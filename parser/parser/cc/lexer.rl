@@ -2825,7 +2825,7 @@ void lexer::set_state_expr_value() {
           // next line as a separate statement.
           //
           // Note: block comments before leading dot are not supported on any version of Ruby.
-          emit(token_type::tNL, std::string(), newline_s, newline_s + 1);
+          emit(token_type::tNL, "", newline_s, newline_s + 1);
           fhold; fnext line_begin; fbreak;
         }
       };
@@ -2834,7 +2834,7 @@ void lexer::set_state_expr_value() {
       => { p = tm - 1; fgoto expr_end; };
 
       any
-      => { emit(token_type::tNL, std::string(), newline_s, newline_s + 1);
+      => { emit(token_type::tNL, "", newline_s, newline_s + 1);
            fhold; fnext line_begin; fbreak; };
   *|;
 
