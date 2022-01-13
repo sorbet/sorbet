@@ -4,6 +4,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    <self>.attr_writer(:foo_writer)
+
     def test_missing_rhs<<todo method>>(x, &<blk>)
       y = <emptyTree>::<C <ErrorNode>>
     end
@@ -27,6 +29,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.puts("before")
         y = <emptyTree>::<C <ErrorNode>>
       end
+    end
+
+    def test_attr_writer<<todo method>>(x, &<blk>)
+      <self>.foo_writer=(<emptyTree>::<C <ErrorNode>>)
     end
   end
 end
