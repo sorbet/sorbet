@@ -571,12 +571,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // Short circuit here to avoid constructing an expensive error message.
             return result;
         }
+        auto funLoc = args.funLoc();
+        auto errLoc = (funLoc.exists() && funLoc.beginPos() != funLoc.endPos()) ? args.funLoc() : args.callLoc();
         // This is a hack. We want to always be able to build the error object
         // so that it is not immediately sent to GlobalState::_error
         // and recorded.
         // Instead, the error always should get queued up in the
         // errors list of the result so that the caller can deal with the error.
-        auto e = gs.beginError(args.callLoc(), errors::Infer::UnknownMethod);
+        auto e = gs.beginError(errLoc, errors::Infer::UnknownMethod);
         if (e) {
             string thisStr = args.thisType.show(gs);
             if (args.fullType.type != args.thisType) {
