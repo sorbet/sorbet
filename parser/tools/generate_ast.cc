@@ -1034,7 +1034,8 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             case FieldType::Loc:
                 out << "      bool showFull = true;";
-                out << R"(    fmt::format_to(std::back_inserter(buf),  "\"loc\" : \"{}\")" << maybeComma << "\\n\", "
+                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                    << maybeComma << "\\n\", "
                     << "core::Loc(file, " << arg.name << ").filePosToString(gs, showFull));\n";
                 break;
             case FieldType::Bool:
