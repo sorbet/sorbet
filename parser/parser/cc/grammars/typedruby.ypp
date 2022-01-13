@@ -187,6 +187,7 @@ using namespace std::string_literals;
 
 %printer { yyo << $$->view(); } tIDENTIFIER
 %printer { yyo << $$->view(); } tCONSTANT
+%printer { yyo << $$->view() << ":"; } tLABEL
 
 %type <node>
   arg
