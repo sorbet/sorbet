@@ -1,6 +1,6 @@
 autocorrect-private-not-suggested.rb:11: Method `my_private_metho` does not exist on `A` https://srb.help/7003
     11 |A.new.my_private_metho
-        ^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^^^^^^^
   Got A originating from:
     autocorrect-private-not-suggested.rb:11:
     11 |A.new.my_private_metho

@@ -249,7 +249,7 @@ suggest-sig.rb:155: This function does not have a `sig` https://srb.help/7017
 
 suggest-sig.rb:124: Method `generated` does not exist on `T::Private::Methods::DeclBuilder` https://srb.help/7003
      124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                                                         ^^^^^^^^^
   Got T::Private::Methods::DeclBuilder originating from:
     suggest-sig.rb:124:
      124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
@@ -259,10 +259,9 @@ suggest-sig.rb:124: Method `generated` does not exist on `T::Private::Methods::D
      124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
                                                                          ^^^^^^^^^
 
-suggest-sig.rb:135: Method `generated` does not exist on `T::Private::Methods::DeclBuilder` https://srb.help/7003
-     135 |  params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
-     136 |  returns(T.untyped).
+suggest-sig.rb:137: Method `generated` does not exist on `T::Private::Methods::DeclBuilder` https://srb.help/7003
      137 |  generated
+            ^^^^^^^^^
   Got T::Private::Methods::DeclBuilder originating from:
     suggest-sig.rb:135:
      135 |  params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
@@ -322,11 +321,11 @@ suggest-sig.rb:112: This function does not have a `sig` https://srb.help/7017
 
 suggest-sig.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` https://srb.help/7003
      108 |  sig {params(merchant: Merchant).void}
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            ^^^
 
 suggest-sig.rb:108: Method `params` does not exist on `T.class_of(TestCarash)` https://srb.help/7003
      108 |  sig {params(merchant: Merchant).void}
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 ^^^^^^
 
 suggest-sig.rb:166: This function does not have a `sig` https://srb.help/7017
      166 |  def self.test1(x:, y:)

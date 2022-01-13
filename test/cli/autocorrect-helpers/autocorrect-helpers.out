@@ -80,7 +80,7 @@ autocorrect-helpers.rb:26: Method `sealed!` does not exist on `T.class_of(S6)` h
 
 autocorrect-helpers.rb:30: Method `mixes_in_class_methods` does not exist on `T.class_of(S7)` https://srb.help/7003
     30 |  mixes_in_class_methods(S1)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     autocorrect-helpers.rb:30: Inserted `  extend T::Helpers
 `

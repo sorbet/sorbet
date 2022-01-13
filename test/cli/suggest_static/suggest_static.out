@@ -1,6 +1,6 @@
 test/cli/suggest_static/suggest_static.rb:11: Method `foo` does not exist on `A` https://srb.help/7003
     11 |A.new.foo
-        ^^^^^^^^^
+              ^^^
   Got A originating from:
     test/cli/suggest_static/suggest_static.rb:11:
     11 |A.new.foo

@@ -44,7 +44,7 @@ suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argu
 
 suggest_t_unsafe.rb:13: Method `even?` does not exist on `String` component of `T.any(Integer, String)` https://srb.help/7003
     13 |bar.even?
-        ^^^^^^^^^
+            ^^^^^
   Got T.any(Integer, String) originating from:
     suggest_t_unsafe.rb:12:
     12 |bar = T.let(1, T.any(Integer, String))
@@ -160,7 +160,7 @@ suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argu
 
 suggest_t_unsafe.rb:13: Method `even?` does not exist on `String` component of `T.any(Integer, String)` https://srb.help/7003
     13 |bar.even?
-        ^^^^^^^^^
+            ^^^^^
   Got T.any(Integer, String) originating from:
     suggest_t_unsafe.rb:12:
     12 |bar = T.let(1, T.any(Integer, String))

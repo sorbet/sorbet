@@ -2,25 +2,25 @@ deprecated-enum.rb:29: `T.enum` has been renamed to `T.deprecated_enum` https://
     29 |T.cast(:yes, T.enum([:yes]))
                      ^^^^^^^^^^^^^^
   Autocorrect: Done
-    deprecated-enum.rb:29: Replaced with `T.deprecated_enum`
+    deprecated-enum.rb:29: Replaced with `deprecated_enum`
     29 |T.cast(:yes, T.enum([:yes]))
-                     ^^^^^^
+                       ^^^^
 
 deprecated-enum.rb:5: `T.enum` has been renamed to `T.deprecated_enum` https://srb.help/5004
      5 |sig {params(x: T.enum([:yes, :no])).void}
                        ^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    deprecated-enum.rb:5: Replaced with `T.deprecated_enum`
+    deprecated-enum.rb:5: Replaced with `deprecated_enum`
      5 |sig {params(x: T.enum([:yes, :no])).void}
-                       ^^^^^^
+                         ^^^^
 
 deprecated-enum.rb:9: `T.enum` has been renamed to `T.deprecated_enum` https://srb.help/5004
      9 |sig {params(x: ::T.enum([:yes, :no])).void}
                        ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    deprecated-enum.rb:9: Replaced with `T.deprecated_enum`
+    deprecated-enum.rb:9: Replaced with `deprecated_enum`
      9 |sig {params(x: ::T.enum([:yes, :no])).void}
-                         ^^^^^^
+                           ^^^^
 
 deprecated-enum.rb:13: `T.enum` has been renamed to `T.deprecated_enum` https://srb.help/5004
     13 |sig {params(x: T.enum(
@@ -28,9 +28,9 @@ deprecated-enum.rb:13: `T.enum` has been renamed to `T.deprecated_enum` https://
     15 |
     16 |  [:yes, :no])).void}
   Autocorrect: Done
-    deprecated-enum.rb:13: Replaced with `T.deprecated_enum`
+    deprecated-enum.rb:13: Replaced with `deprecated_enum`
     13 |sig {params(x: T.enum(
-                       ^^^^^^
+                         ^^^^
 
 deprecated-enum.rb:20: `T.enum` has been renamed to `T.deprecated_enum` https://srb.help/5004
     20 |sig {params(x: ::T.enum(
@@ -38,13 +38,13 @@ deprecated-enum.rb:20: `T.enum` has been renamed to `T.deprecated_enum` https://
     22 |
     23 |  [:yes, :no])).void}
   Autocorrect: Done
-    deprecated-enum.rb:20: Replaced with `T.deprecated_enum`
+    deprecated-enum.rb:20: Replaced with `deprecated_enum`
     20 |sig {params(x: ::T.enum(
-                         ^^^^^^
+                           ^^^^
 
 deprecated-enum.rb:5: Method `enum` does not exist on `T.class_of(T)` https://srb.help/7003
      5 |sig {params(x: T.enum([:yes, :no])).void}
-                       ^^^^^^^^^^^^^^^^^^^
+                         ^^^^
   Got T.class_of(T) originating from:
     deprecated-enum.rb:5:
      5 |sig {params(x: T.enum([:yes, :no])).void}
@@ -52,7 +52,7 @@ deprecated-enum.rb:5: Method `enum` does not exist on `T.class_of(T)` https://sr
 
 deprecated-enum.rb:9: Method `enum` does not exist on `T.class_of(T)` https://srb.help/7003
      9 |sig {params(x: ::T.enum([:yes, :no])).void}
-                       ^^^^^^^^^^^^^^^^^^^^^
+                           ^^^^
   Got T.class_of(T) originating from:
     deprecated-enum.rb:9:
      9 |sig {params(x: ::T.enum([:yes, :no])).void}
@@ -60,9 +60,7 @@ deprecated-enum.rb:9: Method `enum` does not exist on `T.class_of(T)` https://sr
 
 deprecated-enum.rb:13: Method `enum` does not exist on `T.class_of(T)` https://srb.help/7003
     13 |sig {params(x: T.enum(
-    14 |
-    15 |
-    16 |  [:yes, :no])).void}
+                         ^^^^
   Got T.class_of(T) originating from:
     deprecated-enum.rb:13:
     13 |sig {params(x: T.enum(
@@ -70,9 +68,7 @@ deprecated-enum.rb:13: Method `enum` does not exist on `T.class_of(T)` https://s
 
 deprecated-enum.rb:20: Method `enum` does not exist on `T.class_of(T)` https://srb.help/7003
     20 |sig {params(x: ::T.enum(
-    21 |
-    22 |
-    23 |  [:yes, :no])).void}
+                           ^^^^
   Got T.class_of(T) originating from:
     deprecated-enum.rb:20:
     20 |sig {params(x: ::T.enum(
@@ -80,7 +76,7 @@ deprecated-enum.rb:20: Method `enum` does not exist on `T.class_of(T)` https://s
 
 deprecated-enum.rb:28: Method `enum` does not exist on `T.class_of(T)` https://srb.help/7003
     28 |T.cast(:yes, T.enum)
-                     ^^^^^^
+                       ^^^^
   Got T.class_of(T) originating from:
     deprecated-enum.rb:28:
     28 |T.cast(:yes, T.enum)
@@ -88,7 +84,7 @@ deprecated-enum.rb:28: Method `enum` does not exist on `T.class_of(T)` https://s
 
 deprecated-enum.rb:29: Method `enum` does not exist on `T.class_of(T)` https://srb.help/7003
     29 |T.cast(:yes, T.enum([:yes]))
-                     ^^^^^^^^^^^^^^
+                       ^^^^
   Got T.class_of(T) originating from:
     deprecated-enum.rb:29:
     29 |T.cast(:yes, T.enum([:yes]))
