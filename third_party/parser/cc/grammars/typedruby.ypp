@@ -727,7 +727,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                       $<boolean>$ = driver.lex.in_kwarg;
                       driver.lex.in_kwarg = true;
                     }
-                  p_expr
+                  p_top_expr_body
                     {
                       driver.lex.in_kwarg = $<boolean>3;
                       $$ = driver.build.match_pattern(self, $1, $2, $4);
@@ -741,7 +741,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                       $<boolean>$ = driver.lex.in_kwarg;
                       driver.lex.in_kwarg = true;
                     }
-                  p_expr
+                  p_top_expr_body
                     {
                       driver.lex.in_kwarg = $<boolean>3;
                       $$ = driver.build.match_pattern_p(self, $1, $2, $4);

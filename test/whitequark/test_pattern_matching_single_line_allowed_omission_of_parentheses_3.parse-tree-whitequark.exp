@@ -1,0 +1,9 @@
+s(:begin,
+  s(:match_pattern_p,
+    s(:hash,
+      s(:pair,
+        s(:sym, :a),
+        s(:int, "1"))),
+    s(:hash_pattern,
+      s(:match_var, :a))),
+  s(:lvar, :a))
