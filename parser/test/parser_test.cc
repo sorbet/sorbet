@@ -10,6 +10,7 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include <fstream>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -48,7 +49,8 @@ TEST_CASE("TestDedent") { // NOLINT
     };
     for (auto &tc : cases) {
         sorbet::parser::Dedenter dedent(tc.level);
-        string got = dedent.dedent(tc.in);
-        CHECK_EQ(got, tc.out);
+        optional<string> got = dedent.dedent(tc.in);
+        CHECK(got.has_value());
+        CHECK_EQ(*got, tc.out);
     }
 }

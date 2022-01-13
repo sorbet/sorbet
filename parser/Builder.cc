@@ -30,9 +30,29 @@ using std::vector;
 
 namespace sorbet::parser {
 
-string Dedenter::dedent(string_view str) {
-    string out;
+void Dedenter::update_state(string_view dedented_string) {
+    if (!dedented_string.empty() && dedented_string.back() == '\n') {
+        at_line_begin = true;
+        spacesToRemove = dedentLevel;
+    } else {
+        at_line_begin = false;
+    }
+}
 
+std::optional<string> Dedenter::dedent(string_view str) {
+    // The common case is strings that:
+    // - do not have embedded newlines; and
+    // - do not require dedenting.
+    // Detecting such cases enables us to skip re-allocating the string.
+    const bool has_newline = str.find("\\\n") != string::npos;
+    if (!has_newline) {
+        if (!at_line_begin || (!str.empty() && (str[0] != ' ' && str[0] != '\t'))) {
+            update_state(str);
+            return std::nullopt;
+        }
+    }
+
+    string out;
     vector<string_view> lines = absl::StrSplit(str, "\\\n");
     if (!at_line_begin && !lines.empty()) {
         out.append(lines[0]);
@@ -75,13 +95,8 @@ string Dedenter::dedent(string_view str) {
         }
     }
 
-    if (!out.empty() && out.back() == '\n') {
-        at_line_begin = true;
-        spacesToRemove = dedentLevel;
-    } else {
-        at_line_begin = false;
-    }
-    return out;
+    update_state(out);
+    return std::move(out);
 }
 
 class Builder::Impl {
@@ -666,19 +681,25 @@ public:
             node.get(),
 
             [&](String *s) {
-                std::string dedented = dedenter.dedent(s->val.shortName(gs_));
-                result = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
+                auto str = s->val.shortName(gs_);
+                std::optional<std::string> dedented = dedenter.dedent(str);
+                result = make_unique<String>(s->loc, dedented ? gs_.enterNameUTF8(*dedented) : s->val);
             },
 
             [&](DString *d) {
                 sorbet::parser::NodeVec parts;
                 for (auto &p : d->nodes) {
                     if (auto *s = parser::cast_node<String>(p.get())) {
-                        std::string dedented = dedenter.dedent(s->val.shortName(gs_));
-                        if (dedented.empty()) {
+                        auto str = s->val.shortName(gs_);
+                        std::optional<std::string> dedented = dedenter.dedent(str);
+                        if (!dedented && str.empty()) {
                             continue;
                         }
-                        unique_ptr<Node> newstr = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
+                        if (dedented && dedented->empty()) {
+                            continue;
+                        }
+                        unique_ptr<Node> newstr =
+                            make_unique<String>(s->loc, dedented ? gs_.enterNameUTF8(*dedented) : s->val);
                         parts.emplace_back(std::move(newstr));
                     } else {
                         dedenter.interrupt();
@@ -692,11 +713,16 @@ public:
                 sorbet::parser::NodeVec parts;
                 for (auto &p : d->nodes) {
                     if (auto *s = parser::cast_node<String>(p.get())) {
-                        std::string dedented = dedenter.dedent(s->val.shortName(gs_));
-                        if (dedented.empty()) {
+                        auto str = s->val.shortName(gs_);
+                        std::optional<std::string> dedented = dedenter.dedent(str);
+                        if (!dedented && str.empty()) {
                             continue;
                         }
-                        unique_ptr<Node> newstr = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
+                        if (dedented && dedented->empty()) {
+                            continue;
+                        }
+                        unique_ptr<Node> newstr =
+                            make_unique<String>(s->loc, dedented ? gs_.enterNameUTF8(*dedented) : s->val);
                         parts.emplace_back(std::move(newstr));
                     } else {
                         dedenter.interrupt();
