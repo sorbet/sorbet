@@ -108,18 +108,20 @@ namespace {
 
 class BuilderImpl {
 public:
-    BuilderImpl(core::GlobalState &gs, core::FileRef file, ruby_parser::driver *driver) : gs_(gs), file_(file), driver_(driver) {
-        this->maxOff_ = file.data(gs).source().size();
-        foreignNodes_.emplace_back();
-    }
+    BuilderImpl(core::GlobalState &gs, core::FileRef file, const vector<std::string> &initialLocals, string_view buffer);
 
     core::GlobalState &gs_;
     core::FileRef file_;
     uint16_t uniqueCounter_ = 1;
     uint32_t maxOff_;
-    ruby_parser::driver *driver_;
+    ruby_parser::driver driver_;
 
     vector<unique_ptr<Node>> foreignNodes_;
+
+    Builder::BuildResult build(bool trace) {
+        auto ast = cast_node(driver_.parse(this, trace));
+        return Builder::BuildResult{std::move(ast), std::move(driver_.diagnostics)};
+    }
 
     uint32_t clamp(uint32_t off) {
         return std::min(off, maxOff_);
@@ -180,7 +182,7 @@ public:
     }
 
     void error(ruby_parser::dclass err, core::LocOffsets loc, std::string data = "") {
-        driver_->external_diagnostic(ruby_parser::dlevel::ERROR, err, loc.beginPos(), loc.endPos(), data);
+        driver_.external_diagnostic(ruby_parser::dlevel::ERROR, err, loc.beginPos(), loc.endPos(), data);
     }
 
     /* Begin callback methods */
@@ -189,13 +191,13 @@ public:
         if (auto *id = parser::cast_node<Ident>(node.get())) {
             ENFORCE(id->name.kind() == core::NameKind::UTF8);
             auto name_str = id->name.show(gs_);
-            if (isNumberedParameterName(name_str) && driver_->lex.context.inDynamicBlock()) {
-                if (driver_->numparam_stack.seen_ordinary_params()) {
+            if (isNumberedParameterName(name_str) && driver_.lex.context.inDynamicBlock()) {
+                if (driver_.numparam_stack.seen_ordinary_params()) {
                     error(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
                 }
 
-                auto raw_context = driver_->lex.context.stackCopy();
-                auto raw_numparam_stack = driver_->numparam_stack.stackCopy();
+                auto raw_context = driver_.lex.context.stackCopy();
+                auto raw_numparam_stack = driver_.numparam_stack.stackCopy();
 
                 // ignore current block scope
                 raw_context.pop_back();
@@ -220,14 +222,14 @@ public:
                     }
                 }
 
-                driver_->lex.declare(name_str);
+                driver_.lex.declare(name_str);
                 auto intro = make_unique<LVar>(node->loc, id->name);
-                auto decls = driver_->alloc.node_list();
+                auto decls = driver_.alloc.node_list();
                 decls->emplace_back(toForeign(std::move(intro)));
-                driver_->numparam_stack.regis(name_str[1] - 48, std::move(decls));
+                driver_.numparam_stack.regis(name_str[1] - 48, std::move(decls));
             }
 
-            if (driver_->lex.is_declared(name_str)) {
+            if (driver_.lex.is_declared(name_str)) {
                 checkCircularArgumentReferences(node.get(), name_str);
                 return make_unique<LVar>(node->loc, id->name);
             } else {
@@ -315,12 +317,12 @@ public:
             auto name_str = id->name.show(gs_);
             checkReservedForNumberedParameters(name_str, id->loc);
 
-            driver_->lex.declare(name_str);
+            driver_.lex.declare(name_str);
             return make_unique<LVarLhs>(id->loc, id->name);
         } else if (auto *iv = parser::cast_node<IVar>(node.get())) {
             return make_unique<IVarLhs>(iv->loc, iv->name);
         } else if (auto *c = parser::cast_node<Const>(node.get())) {
-            if (!driver_->lex.context.dynamicConstDefintinionAllowed()) {
+            if (!driver_.lex.context.dynamicConstDefintinionAllowed()) {
                 error(ruby_parser::dclass::DynamicConst, node->loc);
             }
             return make_unique<ConstLhs>(c->loc, std::move(c->scope), c->name);
@@ -875,7 +877,7 @@ public:
     }
 
     unique_ptr<Node> forwarded_args(const token *dots) {
-        if (!driver_->lex.is_declared_forward_args()) {
+        if (!driver_.lex.is_declared_forward_args()) {
             error(ruby_parser::dclass::UnexpectedToken, tokLoc(dots), "\"...\"");
         }
         return make_unique<ForwardedArgs>(tokLoc(dots));
@@ -1088,7 +1090,7 @@ public:
         // TODO(nelhage): If the LHS here is a regex literal with (?<...>..)
         // groups, Ruby will autovivify the match groups as locals. If we were
         // to support that, we'd need to analyze that here and call
-        // `driver_->lex.declare`.
+        // `driver_.lex.declare`.
         core::LocOffsets loc = receiver->loc.join(arg->loc);
         sorbet::parser::NodeVec args;
         args.emplace_back(std::move(arg));
@@ -1140,7 +1142,7 @@ public:
     unique_ptr<Node> match_var_hash(core::LocOffsets loc, const std::string name_str) {
         checkLVarName(name_str, loc);
         checkDuplicatePatternVariable(name_str, loc);
-        driver_->lex.declare(name_str);
+        driver_.lex.declare(name_str);
         return make_unique<MatchVar>(loc, gs_.enterNameUTF8(name_str));
     }
 
@@ -1154,7 +1156,7 @@ public:
             auto name_str = str->val.show(gs_);
             checkLVarName(name_str, loc);
             checkDuplicatePatternVariable(name_str, loc);
-            driver_->lex.declare(name_str);
+            driver_.lex.declare(name_str);
             return make_unique<MatchVar>(loc, gs_.enterNameUTF8(name_str));
         }
         // If we get here, the string contains an interpolation
@@ -1247,7 +1249,7 @@ public:
 
     unique_ptr<Node> p_ident(const token *tok) {
         auto name_str = tok->asString();
-        if (!driver_->lex.is_declared(name_str)) {
+        if (!driver_.lex.is_declared(name_str)) {
             error(ruby_parser::dclass::PatternLVarUndefined, tokLoc(tok), name_str);
         }
         return ident(tok);
@@ -1574,7 +1576,7 @@ public:
     }
 
     void checkCircularArgumentReferences(const Node *node, std::string name) {
-        if (name == driver_->current_arg_stack.top()) {
+        if (name == driver_.current_arg_stack.top()) {
             error(ruby_parser::dclass::CircularArgumentReference, node->loc, name);
         }
     }
@@ -1620,19 +1622,19 @@ public:
             return;
         }
 
-        if (driver_->pattern_variables.declared(name)) {
+        if (driver_.pattern_variables.declared(name)) {
             error(ruby_parser::dclass::PatternDuplicateVariable, loc, name);
         }
 
-        driver_->pattern_variables.declare(name);
+        driver_.pattern_variables.declare(name);
     }
 
     void checkDuplicatePatternKey(std::string name, core::LocOffsets loc) {
-        if (driver_->pattern_hash_keys.declared(name)) {
+        if (driver_.pattern_hash_keys.declared(name)) {
             error(ruby_parser::dclass::PatternDuplicateKey, loc, name);
         }
 
-        driver_->pattern_hash_keys.declare(name);
+        driver_.pattern_hash_keys.declare(name);
     }
 
     void checkEndlessSetter(std::string name, core::LocOffsets loc) {
@@ -2580,6 +2582,17 @@ struct ruby_parser::builder interface = {
     words_compose,
     xstring_compose,
 };
+
+BuilderImpl::BuilderImpl(core::GlobalState &gs, core::FileRef file, const vector<std::string> &initialLocals, string_view buffer)
+    : gs_(gs), file_(file), driver_(ruby_parser::ruby_version::RUBY_27, buffer, interface) {
+    this->maxOff_ = file.data(gs).source().size();
+    foreignNodes_.emplace_back();
+
+    for (auto &local : initialLocals) {
+        driver_.lex.declare(local);
+    }
+}
+
 }; // namespace
 
 Builder::BuildResult Builder::build(const vector<string> &initialLocals, bool trace) {
@@ -2590,15 +2603,9 @@ Builder::BuildResult Builder::build(const vector<string> &initialLocals, bool tr
     buffer.reserve(source.size() + 2);
     buffer += source;
     buffer += "\0\0"sv;
-    ruby_parser::driver driver(ruby_parser::ruby_version::RUBY_27, buffer, interface);
 
-    for (auto &local : initialLocals) {
-        driver.lex.declare(local);
-    }
-
-    BuilderImpl impl(this->gs_, this->file_, &driver);
-    auto ast = impl.cast_node(driver.parse(&impl, trace));
-    return BuildResult{std::move(ast), std::move(driver.diagnostics)};
+    BuilderImpl impl(this->gs_, this->file_, initialLocals, buffer);
+    return impl.build(trace);
 }
 
 } // namespace sorbet::parser
