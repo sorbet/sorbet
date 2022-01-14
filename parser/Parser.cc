@@ -53,11 +53,7 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file, 
                              std::vector<std::string> initialLocals) {
     Builder builder(gs, file);
 
-    for (string local : initialLocals) {
-        driver.lex.declare(local);
-    }
-
-    auto buildResult = builder.build(trace);
+    auto buildResult = builder.build(initialLocals, trace);
     ErrorToError::run(gs, file, buildResult.diagnostics);
 
     if (!buildResult.ast) {

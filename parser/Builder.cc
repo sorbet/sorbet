@@ -2439,7 +2439,7 @@ ForeignPtr xstring_compose(SelfPtr builder, const token *begin, const node_list 
 }
 }; // namespace
 
-Builder::BuildResult Builder::build(bool trace) {
+Builder::BuildResult Builder::build(const vector<string> &initialLocals, bool trace) {
     auto source = this->file_.data(this->gs_).source();
     // The lexer requires that its buffers end with a null terminator, which core::File
     // does not guarantee.  Parsing heredocs for some mysterious reason requires two.
@@ -2449,8 +2449,12 @@ Builder::BuildResult Builder::build(bool trace) {
     buffer += "\0\0"sv;
     ruby_parser::typedruby27 driver(buffer, Builder::interface);
 
-    BuilderImpl impl(this->gs_, this->file_, driver);
-    auto ast = impl.cast_node(driver->parse(&impl, trace));
+    for (auto &local : initialLocals) {
+        driver.lex.declare(local);
+    }
+
+    BuilderImpl impl(this->gs_, this->file_, &driver);
+    auto ast = impl.cast_node(driver.parse(&impl, trace));
     return BuildResult{std::move(ast), std::move(driver.diagnostics)};
 }
 

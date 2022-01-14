@@ -23,7 +23,7 @@ public:
         std::unique_ptr<Node> ast;
         ruby_parser::diagnostics_t diagnostics;
     };
-    BuildResult build(bool trace);
+    BuildResult build(const std::vector<std::string> &initialLocals, bool trace);
 
 private:
     core::GlobalState &gs_;
