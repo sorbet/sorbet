@@ -1251,27 +1251,27 @@ void RBIGenerator::run(core::GlobalState &gs, vector<ast::ParsedFile> packageFil
         inputq->push(move(package), 1);
     }
 
-    const core::GlobalState &rogs = gs;
-    workers.multiplexJob("RBIGenerator", [inputq, outputDir, &threadBarrier, &rogs, &packageNamespaces]() {
-        core::NameRef job;
-        for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
-            if (result.gotItem()) {
-                auto output = runOnce(rogs, job, packageNamespaces);
-                if (!output.rbi.empty()) {
-                    FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".rbi"), output.rbi);
-                    FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".deps.json"),
-                                   output.rbiPackageDependencies);
-                }
+    workers.multiplexJob(
+        "RBIGenerator", [inputq, outputDir, &threadBarrier, &rogs = std::as_const(gs), &packageNamespaces]() {
+            core::NameRef job;
+            for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
+                if (result.gotItem()) {
+                    auto output = runOnce(rogs, job, packageNamespaces);
+                    if (!output.rbi.empty()) {
+                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".rbi"), output.rbi);
+                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".deps.json"),
+                                       output.rbiPackageDependencies);
+                    }
 
-                if (!output.testRBI.empty()) {
-                    FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.rbi"), output.testRBI);
-                    FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.deps.json"),
-                                   output.testRBIPackageDependencies);
+                    if (!output.testRBI.empty()) {
+                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.rbi"), output.testRBI);
+                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.deps.json"),
+                                       output.testRBIPackageDependencies);
+                    }
                 }
             }
-        }
-        threadBarrier.DecrementCount();
-    });
+            threadBarrier.DecrementCount();
+        });
     threadBarrier.Wait();
 }
 } // namespace sorbet::packager
