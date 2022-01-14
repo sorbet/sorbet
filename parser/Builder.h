@@ -21,10 +21,9 @@ public:
 
     std::unique_ptr<Node> build(ruby_parser::base_driver *driver, bool trace);
 
-    class Impl;
-
 private:
-    std::unique_ptr<Impl> impl_;
+    core::GlobalState &gs_;
+    core::FileRef file_;
 };
 }; // namespace sorbet::parser
 

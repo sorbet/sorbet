@@ -99,14 +99,19 @@ std::optional<string> Dedenter::dedent(string_view str) {
     return std::move(out);
 }
 
-class Builder::Impl {
+Builder::Builder(GlobalState &gs, core::FileRef file) : gs_(gs), file_(file) {}
+Builder::~Builder() = default;
+
+namespace {
+
+class BuilderImpl {
 public:
-    Impl(GlobalState &gs, core::FileRef file) : gs_(gs), file_(file) {
+    BuilderImpl(core::GlobalState &gs, core::FileRef file, ruby_parser::base_driver *driver) : gs_(gs), file_(file), driver_(driver) {
         this->maxOff_ = file.data(gs).source().size();
         foreignNodes_.emplace_back();
     }
 
-    GlobalState &gs_;
+    core::GlobalState &gs_;
     core::FileRef file_;
     uint16_t uniqueCounter_ = 1;
     uint32_t maxOff_;
@@ -1695,18 +1700,8 @@ public:
     }
 };
 
-Builder::Builder(GlobalState &gs, core::FileRef file) : impl_(new Builder::Impl(gs, file)) {}
-Builder::~Builder() = default;
-
-}; // namespace sorbet::parser
-
-namespace {
-
-using sorbet::parser::Builder;
-using sorbet::parser::Node;
-
-Builder::Impl *cast_builder(SelfPtr builder) {
-    return const_cast<Builder::Impl *>(reinterpret_cast<const Builder::Impl *>(builder));
+BuilderImpl *cast_builder(SelfPtr builder) {
+    return const_cast<BuilderImpl *>(reinterpret_cast<const BuilderImpl *>(builder));
 }
 
 ForeignPtr accessible(SelfPtr builder, ForeignPtr node) {
@@ -2444,11 +2439,9 @@ ForeignPtr xstring_compose(SelfPtr builder, const token *begin, const node_list 
 }
 }; // namespace
 
-namespace sorbet::parser {
-
 unique_ptr<Node> Builder::build(ruby_parser::base_driver *driver, bool trace) {
-    impl_->driver_ = driver;
-    return impl_->cast_node(driver->parse(impl_.get(), trace));
+    BuilderImpl impl(this->gs_, this->file_, driver);
+    return impl.cast_node(driver->parse(&impl, trace));
 }
 
 struct ruby_parser::builder Builder::interface = {
