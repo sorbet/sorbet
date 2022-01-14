@@ -391,7 +391,7 @@ package(default_visibility = ["//visibility:public"])
         urls = urls,
         sha256 = sha256,
         strip_prefix = strip_prefix,
-        build_file = ruby_patched_build,
+        build_file = ruby_build,
         patches = ["@com_stripe_ruby_typer//third_party/ruby:gc-remove-write-barrier.patch"],
     )
 
