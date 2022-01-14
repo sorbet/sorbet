@@ -57,15 +57,15 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file, 
         driver.lex.declare(local);
     }
 
-    auto ast = unique_ptr<Node>(builder.build(trace));
-    ErrorToError::run(gs, file, driver.diagnostics);
+    auto buildResult = builder.build(trace);
+    ErrorToError::run(gs, file, buildResult.diagnostics);
 
-    if (!ast) {
+    if (!buildResult.ast) {
         core::LocOffsets loc{0, 0};
         NodeVec empty;
         return make_unique<Begin>(loc, std::move(empty));
     }
 
-    return ast;
+    return std::move(buildResult.ast);
 }
 }; // namespace sorbet::parser

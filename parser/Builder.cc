@@ -2439,7 +2439,7 @@ ForeignPtr xstring_compose(SelfPtr builder, const token *begin, const node_list 
 }
 }; // namespace
 
-unique_ptr<Node> Builder::build(bool trace) {
+Builder::BuildResult Builder::build(bool trace) {
     auto source = this->file_.data(this->gs_).source();
     // The lexer requires that its buffers end with a null terminator, which core::File
     // does not guarantee.  Parsing heredocs for some mysterious reason requires two.
@@ -2450,7 +2450,8 @@ unique_ptr<Node> Builder::build(bool trace) {
     ruby_parser::typedruby27 driver(buffer, Builder::interface);
 
     BuilderImpl impl(this->gs_, this->file_, driver);
-    return impl.cast_node(driver->parse(&impl, trace));
+    auto ast = impl.cast_node(driver->parse(&impl, trace));
+    return BuildResult{std::move(ast), std::move(driver.diagnostics)};
 }
 
 struct ruby_parser::builder Builder::interface = {
