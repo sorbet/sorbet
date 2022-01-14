@@ -3741,7 +3741,6 @@ f_opt_paren_args: f_paren_args
                     }
                 | tLABEL assoc
                     {
-                      // TODO(jez) Manually emit an error here
                       driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, $1);
                       auto result = driver.alloc.node_list();
                       auto err = driver.build.error_node(self, @1.end, @2.begin);
