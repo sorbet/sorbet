@@ -2,7 +2,7 @@
 foo = a(b
 if @c && foo # error: unexpected token "if"
   d
-end # error: unexpected token "end"
+end
 
 if @d && foo
 end
