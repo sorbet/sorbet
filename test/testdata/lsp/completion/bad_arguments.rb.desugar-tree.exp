@@ -6,7 +6,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   def various_bad_commas_in_send<<todo method>>(a, b, x, y, &<blk>)
     begin
       <self>.foo(<emptyTree>::<C <ErrorNode>>, :x, x)
-      <self>.foo(:x, x)
+      <self>.foo(:x, x, :a, <self>.a())
       <self>.foo(a, <emptyTree>::<C <ErrorNode>>, :y, y)
       <self>.foo(a, :x, <emptyTree>::<C <ErrorNode>>, :y, <emptyTree>::<C <ErrorNode>>)
       <self>.foo(a, <self>.x(), :y, y)

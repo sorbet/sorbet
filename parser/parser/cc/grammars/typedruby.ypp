@@ -3767,6 +3767,14 @@ f_opt_paren_args: f_paren_args
                     {
                       $$ = $1;
                     }
+                | assocs tCOMMA tIDENTIFIER error
+                    {
+                      auto &list = $1;
+                      // TODO(jez) Return a special function call like `<kw__a` so that you can complete kwargs
+                      auto err = driver.build.call_method(self, nullptr, nullptr, $3, nullptr, nullptr, nullptr);
+                      list->emplace_back(driver.build.pair_keyword(self, $3, err));
+                      $$ = list;
+                    }
                 // There's quite a bit going on in these next two. What we'd really like is to do something like
                 //     assoc error assoc
                 // to handle user code like this:
