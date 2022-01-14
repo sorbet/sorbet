@@ -8,6 +8,10 @@ ragel(
     src = "cc/lexer.rl",
     language = "c++",
     ragel_options = select({
+        # emscripten builds are usually dealing with small amounts of Ruby source,
+        # so they don't need a super-fast parser.
+        "@com_stripe_ruby_typer//tools/config:webasm_opt": [],
+        "@com_stripe_ruby_typer//tools/config:webasm": [],
         "@com_stripe_ruby_typer//tools/config:opt": ["-G1"],
         "//conditions:default": [],
     }),

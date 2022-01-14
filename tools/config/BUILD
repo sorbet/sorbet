@@ -40,6 +40,14 @@ config_setting(
 )
 
 config_setting(
+    name = "webasm_opt",
+    values = {
+        "cpu": "webasm",
+        "compilation_mode": "opt",
+    },
+)
+
+config_setting(
     name = "linkshared",
     values = {
         "define": "linkshared=true",
