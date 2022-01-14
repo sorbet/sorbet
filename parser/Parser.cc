@@ -2,7 +2,7 @@
 #include "Builder.h"
 #include "core/Loc.h"
 #include "core/errors/parser.h"
-#include "ruby_parser/driver.hh"
+#include "ruby_parser/diagnostic.hh"
 #include <algorithm>
 
 template class std::unique_ptr<sorbet::parser::Node>;
