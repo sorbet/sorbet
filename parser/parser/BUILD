@@ -23,7 +23,10 @@ bison(
     bison_options = [
         "-Wno-empty-rule",
         "-Wno-precedence",
-    ],
+    ] + select({
+        "@com_stripe_ruby_typer//tools/config:dbg": ["--debug"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_binary(

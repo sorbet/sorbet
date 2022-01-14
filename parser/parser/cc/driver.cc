@@ -15,7 +15,9 @@ typedruby27::typedruby27(std::string_view source, sorbet::StableStringStorage<> 
 
 ForeignPtr typedruby27::parse(SelfPtr self, bool trace) {
     bison::typedruby27::parser p(*this, self);
+#if DEBUG_MODE
     p.set_debug_level(trace ? 1 : 0);
+#endif
     p.parse();
     return ast;
 }
