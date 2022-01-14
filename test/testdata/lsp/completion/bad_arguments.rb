@@ -1,7 +1,5 @@
 # typed: true
 
-# TODO(jez) Also the parser output before+after
-
 def foo(*args, **kwargs); end
 
 def various_bad_commas_in_send(a, b, x, y)
