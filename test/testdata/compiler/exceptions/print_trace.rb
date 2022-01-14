@@ -14,7 +14,7 @@ rescue => e
   T.must(e.backtrace).each do |line|
     puts line
       .sub(path, '')
-      .sub(%r{^/.*bazel-out/([^/]+)/bin/external/sorbet_ruby_2_7/}, 'bazel-out/\1/bin/external/sorbet_ruby_2_7/')
+      .sub(%r{^/.*bazel-out/([^/]+)/bin/external/sorbet_ruby_2_7_for_compiler/}, 'bazel-out/\1/bin/external/sorbet_ruby_2_7_for_compiler/')
       .sub(%r{.*test/patch_require.rb:.*}, 'test/patch_require.rb:<censored>:')
       .sub(%r{^.*tmp\..*:}, '<censored>') # OSX
       .sub(%r{^/tmp.*:}, '<censored>')    # linux

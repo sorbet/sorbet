@@ -136,7 +136,7 @@ module SorbetBenchmark
   def self.gather_results(topdir, benchmarks, baseline, verbose)
     Dir.chdir(topdir)
 
-    sorbet_ruby_target = "@sorbet_ruby_2_7//:ruby"
+    sorbet_ruby_target = "@sorbet_ruby_2_7_for_compiler//:ruby"
 
     check_call(["./bazel", "build", "//compiler:sorbet", sorbet_ruby_target, "-c", "opt"])
     check_call(["./bazel", "run", sorbet_ruby_target, "-c", "opt", "--", "--version"])
@@ -145,7 +145,7 @@ module SorbetBenchmark
 
     pwd = Dir.pwd
 
-    ruby = "#{pwd}/bazel-bin/external/sorbet_ruby_2_7/ruby"
+    ruby = "#{pwd}/bazel-bin/external/sorbet_ruby_2_7_for_compiler/ruby"
     sorbet = "#{pwd}"
 
     startup_time = average_runtime(startup_command(ruby, sorbet))

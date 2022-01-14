@@ -85,7 +85,7 @@ if [[ "$llvmir" != /* ]]; then
   llvmir="$PWD/$llvmir"
 fi
 
-ruby="./bazel-bin/external/sorbet_ruby_2_7/toolchain/bin/ruby"
+ruby="./bazel-bin/external/sorbet_ruby_2_7_for_compiler/toolchain/bin/ruby"
 sorbet_runtime="./gems/sorbet-runtime/lib/sorbet-runtime.rb"
 
 echo
@@ -93,14 +93,14 @@ info "Building Ruby..."
 
 if [ -n "$debug" ]; then
   if [ -n "$use_gdb" ]; then
-    ./bazel build @sorbet_ruby_2_7//:ruby --config dbg --config=static-libs
+    ./bazel build @sorbet_ruby_2_7_for_compiler//:ruby --config dbg --config=static-libs
     command=("${GDB:-gdb}" "--args" "${ruby}")
   else
-    ./bazel build @sorbet_ruby_2_7//:ruby --config dbg --config=static-libs
+    ./bazel build @sorbet_ruby_2_7_for_compiler//:ruby --config dbg --config=static-libs
     command=("${LLDB:-lldb}" "--" "${ruby}")
   fi
 else
-  ./bazel build @sorbet_ruby_2_7//:ruby -c opt
+  ./bazel build @sorbet_ruby_2_7_for_compiler//:ruby -c opt
   command=( "${ruby}" )
 fi
 

@@ -3,7 +3,10 @@
 load("@com_stripe_ruby_typer//third_party/ruby:build-ruby.bzl", "ruby")
 
 ruby(
-    append_srcs = [],
+    append_srcs = [
+        "@com_stripe_ruby_typer//compiler/ruby-static-exports:vm_append_files",
+        "@com_stripe_ruby_typer//compiler/IREmitter/Payload/patches:vm_append_files",
+    ],
     configure_flags = [
         "--enable-shared",
         "--sysconfdir=/etc",
@@ -34,7 +37,10 @@ ruby(
         "-Wdate-time",
         "-D_FORTIFY_SOURCE=2",
     ],
-    extra_srcs = [],
+    extra_srcs = [
+        "@com_stripe_ruby_typer//sorbet_version:sorbet_version_srcs",
+        "@com_stripe_ruby_typer//compiler/IREmitter/Payload:vm_payload_srcs",
+    ],
     gems = [
         "@bundler_stripe//file",
     ],
@@ -49,6 +55,7 @@ ruby(
         ],
         "//conditions:default": [],
     }),
+    post_build_patches = ["@com_stripe_ruby_typer//third_party/ruby:sorbet_ruby_bundler.patch"],
     rubygems = "@rubygems_update_stripe//file",
     deps = select({
         "@com_stripe_ruby_typer//tools/config:darwin": [

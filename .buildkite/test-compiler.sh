@@ -26,7 +26,7 @@ err=0
 # Build sorbet_ruby once with gcc, to ensure that we can build it without depending on the clang toolchain in the
 # sandbox
 echo "--- building ruby with gcc"
-./bazel build @sorbet_ruby_2_7//:ruby --crosstool_top=@bazel_tools//tools/cpp:toolchain
+./bazel build @sorbet_ruby_2_7_for_compiler//:ruby --crosstool_top=@bazel_tools//tools/cpp:toolchain
 
 echo "+++ running tests"
 
