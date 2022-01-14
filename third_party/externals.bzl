@@ -363,8 +363,7 @@ package(default_visibility = ["//visibility:public"])
         sha256 = "7bfe4e5e274191e56da8d127c79df10d9120feb8650e4bad29238f4b2773a661",
     )
 
-    ruby_unpatched_build = "@com_stripe_ruby_typer//third_party/ruby:ruby_unpatched.BUILD"
-    ruby_patched_build = "@com_stripe_ruby_typer//third_party/ruby:ruby_patched.BUILD"
+    ruby_build = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD"
     ruby_for_compiler_build = "@com_stripe_ruby_typer//third_party/ruby:ruby_for_compiler.BUILD"
 
     http_archive(
@@ -372,7 +371,7 @@ package(default_visibility = ["//visibility:public"])
         urls = _ruby_urls("2.6/ruby-2.6.5.tar.gz"),
         sha256 = "66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d",
         strip_prefix = "ruby-2.6.5",
-        build_file = ruby_unpatched_build,
+        build_file = ruby_build,
     )
 
     urls = _ruby_urls("2.7/ruby-2.7.2.tar.gz")
@@ -384,7 +383,7 @@ package(default_visibility = ["//visibility:public"])
         urls = urls,
         sha256 = sha256,
         strip_prefix = strip_prefix,
-        build_file = ruby_unpatched_build,
+        build_file = ruby_build,
     )
 
     http_archive(
