@@ -3741,7 +3741,7 @@ f_opt_paren_args: f_paren_args
                     }
                 | tLABEL assoc
                     {
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, $1);
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, $1, "tLABEL");
                       auto result = driver.alloc.node_list();
                       auto err = driver.build.error_node(self, @1.end, @2.begin);
                       result->emplace_back(driver.build.pair_keyword(self, $1, err));
