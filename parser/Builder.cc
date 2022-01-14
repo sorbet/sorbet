@@ -2438,28 +2438,8 @@ ForeignPtr xstring_compose(SelfPtr builder, const token *begin, const node_list 
     auto build = cast_builder(builder);
     return build->toForeign(build->xstring_compose(begin, build->convertNodeList(parts), end));
 }
-}; // namespace
 
-Builder::BuildResult Builder::build(const vector<string> &initialLocals, bool trace) {
-    auto source = this->file_.data(this->gs_).source();
-    // The lexer requires that its buffers end with a null terminator, which core::File
-    // does not guarantee.  Parsing heredocs for some mysterious reason requires two.
-    string buffer;
-    buffer.reserve(source.size() + 2);
-    buffer += source;
-    buffer += "\0\0"sv;
-    ruby_parser::typedruby27 driver(buffer, Builder::interface);
-
-    for (auto &local : initialLocals) {
-        driver.lex.declare(local);
-    }
-
-    BuilderImpl impl(this->gs_, this->file_, &driver);
-    auto ast = impl.cast_node(driver.parse(&impl, trace));
-    return BuildResult{std::move(ast), std::move(driver.diagnostics)};
-}
-
-struct ruby_parser::builder Builder::interface = {
+struct ruby_parser::builder interface = {
     accessible,
     alias,
     arg,
@@ -2599,4 +2579,25 @@ struct ruby_parser::builder Builder::interface = {
     words_compose,
     xstring_compose,
 };
+}; // namespace
+
+Builder::BuildResult Builder::build(const vector<string> &initialLocals, bool trace) {
+    auto source = this->file_.data(this->gs_).source();
+    // The lexer requires that its buffers end with a null terminator, which core::File
+    // does not guarantee.  Parsing heredocs for some mysterious reason requires two.
+    string buffer;
+    buffer.reserve(source.size() + 2);
+    buffer += source;
+    buffer += "\0\0"sv;
+    ruby_parser::typedruby27 driver(buffer, interface);
+
+    for (auto &local : initialLocals) {
+        driver.lex.declare(local);
+    }
+
+    BuilderImpl impl(this->gs_, this->file_, &driver);
+    auto ast = impl.cast_node(driver.parse(&impl, trace));
+    return BuildResult{std::move(ast), std::move(driver.diagnostics)};
+}
+
 } // namespace sorbet::parser

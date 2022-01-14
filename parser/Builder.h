@@ -1,7 +1,6 @@
 #ifndef SORBET_PARSER_BUILDER_H
 #define SORBET_PARSER_BUILDER_H
 
-#include "ruby_parser/builder.hh"
 #include "ruby_parser/driver.hh"
 
 #include "core/core.h"
@@ -16,8 +15,6 @@ class Builder final {
 public:
     Builder(sorbet::core::GlobalState &gs, sorbet::core::FileRef file);
     ~Builder();
-
-    static ruby_parser::builder interface;
 
     struct BuildResult {
         std::unique_ptr<Node> ast;
