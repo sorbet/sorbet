@@ -9,6 +9,7 @@
 
 #include "ruby_parser/builder.hh"
 #include "ruby_parser/diagnostic.hh"
+#include "ruby_parser/driver.hh"
 
 #include "absl/algorithm/container.h"
 #include <algorithm>

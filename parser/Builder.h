@@ -1,7 +1,7 @@
 #ifndef SORBET_PARSER_BUILDER_H
 #define SORBET_PARSER_BUILDER_H
 
-#include "ruby_parser/driver.hh"
+#include "ruby_parser/diagnostic.hh"
 
 #include "core/core.h"
 
