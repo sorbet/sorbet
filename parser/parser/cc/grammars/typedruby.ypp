@@ -1608,6 +1608,10 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                     {
                       $$ = driver.alloc.node_list($1);
                     }
+                | error
+                    {
+                      $$ = driver.alloc.node_list(driver.build.error_node(self, @1.begin, @1.end));
+                    }
                 | tSTAR arg_value
                     {
                       $$ = driver.alloc.node_list(driver.build.splat(self, $1, $2));
@@ -1617,6 +1621,12 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                       auto &list = $1;
                       list->emplace_back($3);
                       $$ = list;
+                    }
+                | args tCOMMA error
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.error_node(self, @2.end, @3.end));
+                      $$ = $1;
                     }
                 | args tCOMMA tSTAR arg_value
                     {
@@ -3729,11 +3739,25 @@ f_opt_paren_args: f_paren_args
                     {
                       $$ = driver.alloc.node_list($1);
                     }
+                | tLABEL assoc
+                    {
+                      // TODO(jez) Manually emit an error here
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, $1);
+                      auto result = driver.alloc.node_list();
+                      auto err = driver.build.error_node(self, @1.end, @2.begin);
+                      result->emplace_back(driver.build.pair_keyword(self, $1, err));
+                      result->emplace_back($2);
+                      $$ = result;
+                    }
                 | assocs tCOMMA assoc
                     {
                       auto &list = $1;
                       list->emplace_back($3);
                       $$ = list;
+                    }
+                | assocs tCOMMA error
+                    {
+                      $$ = $1;
                     }
 
            assoc: arg_value tASSOC arg_value
