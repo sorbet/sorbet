@@ -19,7 +19,7 @@ public:
 
     static ruby_parser::builder interface;
 
-    std::unique_ptr<Node> build(ruby_parser::base_driver *driver, bool trace);
+    std::unique_ptr<Node> build(bool trace);
 
 private:
     core::GlobalState &gs_;

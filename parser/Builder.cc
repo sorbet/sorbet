@@ -2439,7 +2439,16 @@ ForeignPtr xstring_compose(SelfPtr builder, const token *begin, const node_list 
 }
 }; // namespace
 
-unique_ptr<Node> Builder::build(ruby_parser::base_driver *driver, bool trace) {
+unique_ptr<Node> Builder::build(bool trace) {
+    auto source = this->file_.data(this->gs_).source();
+    // The lexer requires that its buffers end with a null terminator, which core::File
+    // does not guarantee.  Parsing heredocs for some mysterious reason requires two.
+    string buffer;
+    buffer.reserve(source.size() + 2);
+    buffer += source;
+    buffer += "\0\0"sv;
+    ruby_parser::typedruby27 driver(buffer, Builder::interface);
+
     BuilderImpl impl(this->gs_, this->file_, driver);
     return impl.cast_node(driver->parse(&impl, trace));
 }
