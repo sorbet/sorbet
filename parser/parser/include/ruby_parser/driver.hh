@@ -91,7 +91,7 @@ class mempool {
     pool<ruby_parser::node_with_token, 32> _node_with_token;
     pool<ruby_parser::case_body, 32> _case_body;
     pool<ruby_parser::state_stack, 8> _stacks;
-    friend class base_driver;
+    friend class driver;
 
 public:
     mempool() = default;
@@ -174,7 +174,7 @@ class max_numparam_stack {
 
     std::vector<NumparamScope> stack;
 
-    friend class base_driver;
+    friend class driver;
 
 public:
     max_numparam_stack() = default;
@@ -232,7 +232,7 @@ public:
 
 class pattern_variables_stack {
     std::vector<std::set<std::string>> stack;
-    friend class base_driver;
+    friend class driver;
 
 public:
     pattern_variables_stack() {
@@ -260,7 +260,7 @@ public:
     }
 };
 
-class base_driver {
+class driver final {
 public:
     diagnostics_t diagnostics;
     const builder &build;
@@ -276,9 +276,9 @@ public:
     ForeignPtr ast;
     token_t last_token;
 
-    base_driver(ruby_version version, std::string_view source, const struct builder &builder);
-    virtual ~base_driver() {}
-    virtual ForeignPtr parse(SelfPtr self, bool trace) = 0;
+    driver(ruby_version version, std::string_view source, const struct builder &builder);
+    ~driver() {}
+    ForeignPtr parse(SelfPtr self, bool trace);
 
     bool valid_kwarg_name(const token *name) {
         char c = name->view().at(0);
@@ -299,13 +299,6 @@ public:
             pending_error = true;
         }
     }
-};
-
-class typedruby27 : public base_driver {
-public:
-    typedruby27(std::string_view source, const struct builder &builder);
-    virtual ForeignPtr parse(SelfPtr self, bool trace);
-    ~typedruby27() {}
 };
 
 } // namespace ruby_parser

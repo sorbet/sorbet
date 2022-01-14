@@ -21,7 +21,7 @@ using namespace std::string_literals;
 #endif
 }
 
-%param { ruby_parser::typedruby27& driver }
+%param { ruby_parser::driver& driver }
 %parse-param { ruby_parser::SelfPtr self }
 %define api.namespace {ruby_parser::bison::typedruby27}
 %define api.prefix {typedruby27}
@@ -467,7 +467,7 @@ void parser::error(const std::string &msg) {
 		error_message);
 }
 
-int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
+int yylex(parser::semantic_type *lval, ruby_parser::driver &driver) {
 	auto token = driver.lex.advance();
 	driver.last_token = token;
 	int token_type = static_cast<int>(token->type());

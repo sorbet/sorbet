@@ -108,7 +108,7 @@ namespace {
 
 class BuilderImpl {
 public:
-    BuilderImpl(core::GlobalState &gs, core::FileRef file, ruby_parser::base_driver *driver) : gs_(gs), file_(file), driver_(driver) {
+    BuilderImpl(core::GlobalState &gs, core::FileRef file, ruby_parser::driver *driver) : gs_(gs), file_(file), driver_(driver) {
         this->maxOff_ = file.data(gs).source().size();
         foreignNodes_.emplace_back();
     }
@@ -117,7 +117,7 @@ public:
     core::FileRef file_;
     uint16_t uniqueCounter_ = 1;
     uint32_t maxOff_;
-    ruby_parser::base_driver *driver_;
+    ruby_parser::driver *driver_;
 
     vector<unique_ptr<Node>> foreignNodes_;
 
@@ -2590,7 +2590,7 @@ Builder::BuildResult Builder::build(const vector<string> &initialLocals, bool tr
     buffer.reserve(source.size() + 2);
     buffer += source;
     buffer += "\0\0"sv;
-    ruby_parser::typedruby27 driver(buffer, interface);
+    ruby_parser::driver driver(ruby_parser::ruby_version::RUBY_27, buffer, interface);
 
     for (auto &local : initialLocals) {
         driver.lex.declare(local);
