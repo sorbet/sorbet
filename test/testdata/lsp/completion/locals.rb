@@ -43,11 +43,10 @@ def before_after
   x_2 = 1
 end
 
-# We don't yet complete locals when the position is already a valid local
 def already_valid_local
   x_1 = nil
   x_1
-  #  ^ completion: (nothing)
+  #  ^ completion: x_1
 end
 
 class A
