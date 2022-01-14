@@ -3,16 +3,12 @@
 
 #include <memory>
 
+#include "builder.hh"
 #include "diagnostic.hh"
 #include "lexer.hh"
 #include "node.hh"
 
 namespace ruby_parser {
-
-struct builder;
-
-using ForeignPtr = const void *;
-using SelfPtr = const void *;
 
 struct node_list {
     node_list() = default;
@@ -263,7 +259,7 @@ public:
 class driver final {
 public:
     diagnostics_t diagnostics;
-    const builder &build;
+    const sorbet::parser::BuilderForwarder &build;
     lexer lex;
     mempool alloc;
     current_arg_stack current_arg_stack;
@@ -276,7 +272,7 @@ public:
     ForeignPtr ast;
     token_t last_token;
 
-    driver(ruby_version version, std::string_view source, const struct builder &builder);
+    driver(ruby_version version, std::string_view source, const sorbet::parser::BuilderForwarder &builder);
     ~driver() {}
     ForeignPtr parse(SelfPtr self, bool trace);
 

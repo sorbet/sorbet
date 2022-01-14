@@ -1704,887 +1704,752 @@ public:
     }
 };
 
+}
+
 BuilderImpl *cast_builder(SelfPtr builder) {
     return const_cast<BuilderImpl *>(reinterpret_cast<const BuilderImpl *>(builder));
 }
 
-ForeignPtr accessible(SelfPtr builder, ForeignPtr node) {
+ForeignPtr BuilderForwarder::accessible(SelfPtr builder, ForeignPtr node) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->accessible(build->cast_node(node)));
 }
 
-ForeignPtr alias(SelfPtr builder, const token *alias, ForeignPtr to, ForeignPtr from) {
+ForeignPtr BuilderForwarder::alias(SelfPtr builder, const token *alias, ForeignPtr to, ForeignPtr from) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->alias(alias, build->cast_node(to), build->cast_node(from)));
 }
 
-ForeignPtr arg(SelfPtr builder, const token *name) {
+ForeignPtr BuilderForwarder::arg(SelfPtr builder, const token *name) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->arg(name));
 }
 
-ForeignPtr args(SelfPtr builder, const token *begin, const node_list *args, const token *end, bool check_args) {
+ForeignPtr BuilderForwarder::args(SelfPtr builder, const token *begin, const node_list *args, const token *end, bool check_args) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->args(begin, build->convertNodeList(args), end, check_args));
 }
 
-ForeignPtr array(SelfPtr builder, const token *begin, const node_list *elements, const token *end) {
+ForeignPtr BuilderForwarder::array(SelfPtr builder, const token *begin, const node_list *elements, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->array(begin, build->convertNodeList(elements), end));
 }
 
-ForeignPtr array_pattern(SelfPtr builder, const token *begin, const node_list *elements, const token *end) {
+ForeignPtr BuilderForwarder::array_pattern(SelfPtr builder, const token *begin, const node_list *elements, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->array_pattern(begin, build->convertNodeList(elements), end));
 }
 
-ForeignPtr assign(SelfPtr builder, ForeignPtr lhs, const token *eql, ForeignPtr rhs) {
+ForeignPtr BuilderForwarder::assign(SelfPtr builder, ForeignPtr lhs, const token *eql, ForeignPtr rhs) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->assign(build->cast_node(lhs), eql, build->cast_node(rhs)));
 }
 
-ForeignPtr assignable(SelfPtr builder, ForeignPtr node) {
+ForeignPtr BuilderForwarder::assignable(SelfPtr builder, ForeignPtr node) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->assignable(build->cast_node(node)));
 }
 
-ForeignPtr associate(SelfPtr builder, const token *begin, const node_list *pairs, const token *end) {
+ForeignPtr BuilderForwarder::associate(SelfPtr builder, const token *begin, const node_list *pairs, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->associate(begin, build->convertNodeList(pairs), end));
 }
 
-ForeignPtr attrAsgn(SelfPtr builder, ForeignPtr receiver, const token *dot, const token *selector, bool masgn) {
+ForeignPtr BuilderForwarder::attrAsgn(SelfPtr builder, ForeignPtr receiver, const token *dot, const token *selector, bool masgn) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->attrAsgn(build->cast_node(receiver), dot, selector, masgn));
 }
 
-ForeignPtr backRef(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::backRef(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->backRef(tok));
 }
 
-ForeignPtr begin(SelfPtr builder, const token *begin, ForeignPtr body, const token *end) {
+ForeignPtr BuilderForwarder::begin(SelfPtr builder, const token *begin, ForeignPtr body, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->begin(begin, build->cast_node(body), end));
 }
 
-ForeignPtr beginBody(SelfPtr builder, ForeignPtr body, const node_list *rescueBodies, const token *elseTok,
-                     ForeignPtr else_, const token *ensure_tok, ForeignPtr ensure) {
+ForeignPtr BuilderForwarder::beginBody(SelfPtr builder, ForeignPtr body, const node_list *rescueBodies, const token *elseTok,
+                     ForeignPtr else_, const token *ensure_tok, ForeignPtr ensure) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->beginBody(build->cast_node(body), build->convertNodeList(rescueBodies), elseTok,
                                              build->cast_node(else_), ensure_tok, build->cast_node(ensure)));
 }
 
-ForeignPtr beginKeyword(SelfPtr builder, const token *begin, ForeignPtr body, const token *end) {
+ForeignPtr BuilderForwarder::beginKeyword(SelfPtr builder, const token *begin, ForeignPtr body, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->beginKeyword(begin, build->cast_node(body), end));
 }
 
-ForeignPtr binaryOp(SelfPtr builder, ForeignPtr receiver, const token *oper, ForeignPtr arg) {
+ForeignPtr BuilderForwarder::binaryOp(SelfPtr builder, ForeignPtr receiver, const token *oper, ForeignPtr arg) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->binaryOp(build->cast_node(receiver), oper, build->cast_node(arg)));
 }
 
-ForeignPtr block(SelfPtr builder, ForeignPtr methodCall, const token *begin, ForeignPtr args, ForeignPtr body,
-                 const token *end) {
+ForeignPtr BuilderForwarder::block(SelfPtr builder, ForeignPtr methodCall, const token *begin, ForeignPtr args, ForeignPtr body,
+                 const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(
-        build->block(build->cast_node(methodCall), begin, build->cast_node(args), build->cast_node(body), end));
+                            build->block(build->cast_node(methodCall), begin, build->cast_node(args), build->cast_node(body), end));
 }
 
-ForeignPtr blockPass(SelfPtr builder, const token *amper, ForeignPtr arg) {
+ForeignPtr BuilderForwarder::blockPass(SelfPtr builder, const token *amper, ForeignPtr arg) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->blockPass(amper, build->cast_node(arg)));
 }
 
-ForeignPtr blockarg(SelfPtr builder, const token *amper, const token *name) {
+ForeignPtr BuilderForwarder::blockarg(SelfPtr builder, const token *amper, const token *name) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->blockarg(amper, name));
 }
 
-ForeignPtr callLambda(SelfPtr builder, const token *lambda) {
+ForeignPtr BuilderForwarder::callLambda(SelfPtr builder, const token *lambda) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->callLambda(lambda));
 }
 
-ForeignPtr call_method(SelfPtr builder, ForeignPtr receiver, const token *dot, const token *selector,
-                       const token *lparen, const node_list *args, const token *rparen) {
+ForeignPtr BuilderForwarder::call_method(SelfPtr builder, ForeignPtr receiver, const token *dot, const token *selector,
+                       const token *lparen, const node_list *args, const token *rparen) const {
     auto build = cast_builder(builder);
     return build->toForeign(
-        build->call_method(build->cast_node(receiver), dot, selector, lparen, build->convertNodeList(args), rparen));
+                            build->call_method(build->cast_node(receiver), dot, selector, lparen, build->convertNodeList(args), rparen));
 }
 
-ForeignPtr case_(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *whenBodies,
-                 const token *elseTok, ForeignPtr elseBody, const token *end) {
+ForeignPtr BuilderForwarder::case_(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *whenBodies,
+                 const token *elseTok, ForeignPtr elseBody, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->case_(case_, build->cast_node(expr), build->convertNodeList(whenBodies), elseTok,
                                          build->cast_node(elseBody), end));
 }
 
-ForeignPtr case_match(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *inBodies,
-                      const token *elseTok, ForeignPtr elseBody, const token *end) {
+ForeignPtr BuilderForwarder::case_match(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *inBodies,
+                      const token *elseTok, ForeignPtr elseBody, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->case_match(case_, build->cast_node(expr), build->convertNodeList(inBodies), elseTok,
                                               build->cast_node(elseBody), end));
 }
 
-ForeignPtr character(SelfPtr builder, const token *char_) {
+ForeignPtr BuilderForwarder::character(SelfPtr builder, const token *char_) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->character(char_));
 }
 
-ForeignPtr complex(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::complex(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->complex(tok));
 }
 
-ForeignPtr compstmt(SelfPtr builder, const node_list *node) {
+ForeignPtr BuilderForwarder::compstmt(SelfPtr builder, const node_list *node) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->compstmt(build->convertNodeList(node)));
 }
 
-ForeignPtr condition(SelfPtr builder, const token *cond_tok, ForeignPtr cond, const token *then, ForeignPtr ifTrue,
-                     const token *else_, ForeignPtr ifFalse, const token *end) {
+ForeignPtr BuilderForwarder::condition(SelfPtr builder, const token *cond_tok, ForeignPtr cond, const token *then, ForeignPtr ifTrue,
+                     const token *else_, ForeignPtr ifFalse, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->condition(cond_tok, build->cast_node(cond), then, build->cast_node(ifTrue), else_,
                                              build->cast_node(ifFalse), end));
 }
 
-ForeignPtr conditionMod(SelfPtr builder, ForeignPtr ifTrue, ForeignPtr ifFalse, ForeignPtr cond) {
+ForeignPtr BuilderForwarder::conditionMod(SelfPtr builder, ForeignPtr ifTrue, ForeignPtr ifFalse, ForeignPtr cond) const {
     auto build = cast_builder(builder);
     return build->toForeign(
-        build->conditionMod(build->cast_node(ifTrue), build->cast_node(ifFalse), build->cast_node(cond)));
+                            build->conditionMod(build->cast_node(ifTrue), build->cast_node(ifFalse), build->cast_node(cond)));
 }
 
-ForeignPtr const_(SelfPtr builder, const token *name) {
+ForeignPtr BuilderForwarder::const_(SelfPtr builder, const token *name) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->const_(name));
 }
 
-ForeignPtr constFetch(SelfPtr builder, ForeignPtr scope, const token *colon, const token *name) {
+ForeignPtr BuilderForwarder::constFetch(SelfPtr builder, ForeignPtr scope, const token *colon, const token *name) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->constFetch(build->cast_node(scope), colon, name));
 }
 
-ForeignPtr const_pattern(SelfPtr builder, ForeignPtr const_, const token *begin, ForeignPtr pattern, const token *end) {
+ForeignPtr BuilderForwarder::const_pattern(SelfPtr builder, ForeignPtr const_, const token *begin, ForeignPtr pattern, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->const_pattern(build->cast_node(const_), begin, build->cast_node(pattern), end));
 }
 
-ForeignPtr constGlobal(SelfPtr builder, const token *colon, const token *name) {
+ForeignPtr BuilderForwarder::constGlobal(SelfPtr builder, const token *colon, const token *name) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->constGlobal(colon, name));
 }
 
-ForeignPtr constOpAssignable(SelfPtr builder, ForeignPtr node) {
+ForeignPtr BuilderForwarder::constOpAssignable(SelfPtr builder, ForeignPtr node) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->constOpAssignable(build->cast_node(node)));
 }
 
-ForeignPtr cvar(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::cvar(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->cvar(tok));
 }
 
-ForeignPtr dedentString(SelfPtr builder, ForeignPtr node, size_t dedentLevel) {
+ForeignPtr BuilderForwarder::dedentString(SelfPtr builder, ForeignPtr node, size_t dedentLevel) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->dedentString(build->cast_node(node), dedentLevel));
 }
 
-ForeignPtr def_class(SelfPtr builder, const token *class_, ForeignPtr name, const token *lt_, ForeignPtr superclass,
-                     ForeignPtr body, const token *end_) {
+ForeignPtr BuilderForwarder::def_class(SelfPtr builder, const token *class_, ForeignPtr name, const token *lt_, ForeignPtr superclass,
+                     ForeignPtr body, const token *end_) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->def_class(class_, build->cast_node(name), lt_, build->cast_node(superclass),
                                              build->cast_node(body), end_));
 }
 
-ForeignPtr defMethod(SelfPtr builder, const token *def, const token *name, ForeignPtr args, ForeignPtr body,
-                     const token *end) {
+ForeignPtr BuilderForwarder::defMethod(SelfPtr builder, const token *def, const token *name, ForeignPtr args, ForeignPtr body,
+                     const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->defMethod(def, name, build->cast_node(args), build->cast_node(body), end));
 }
 
-ForeignPtr defModule(SelfPtr builder, const token *module, ForeignPtr name, ForeignPtr body, const token *end_) {
+ForeignPtr BuilderForwarder::defModule(SelfPtr builder, const token *module, ForeignPtr name, ForeignPtr body, const token *end_) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->defModule(module, build->cast_node(name), build->cast_node(body), end_));
 }
 
-ForeignPtr def_sclass(SelfPtr builder, const token *class_, const token *lshft_, ForeignPtr expr, ForeignPtr body,
-                      const token *end_) {
+ForeignPtr BuilderForwarder::def_sclass(SelfPtr builder, const token *class_, const token *lshft_, ForeignPtr expr, ForeignPtr body,
+                      const token *end_) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->def_sclass(class_, lshft_, build->cast_node(expr), build->cast_node(body), end_));
 }
 
-ForeignPtr defsHead(SelfPtr builder, const token *def, ForeignPtr definee, const token *dot, const token *name) {
+ForeignPtr BuilderForwarder::defsHead(SelfPtr builder, const token *def, ForeignPtr definee, const token *dot, const token *name) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->defsHead(def, build->cast_node(definee), dot, name));
 }
 
-ForeignPtr defEndlessMethod(SelfPtr builder, const token *def, const token *name, ForeignPtr args, const token *equal,
-                            ForeignPtr body) {
+ForeignPtr BuilderForwarder::defEndlessMethod(SelfPtr builder, const token *def, const token *name, ForeignPtr args, const token *equal,
+                            ForeignPtr body) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->defEndlessMethod(def, name, build->cast_node(args), equal, build->cast_node(body)));
 }
 
-ForeignPtr defEndlessSingleton(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, const token *equal,
-                               ForeignPtr body) {
+ForeignPtr BuilderForwarder::defEndlessSingleton(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, const token *equal,
+                               ForeignPtr body) const {
     auto build = cast_builder(builder);
     return build->toForeign(
-        build->defEndlessSingleton(build->cast_node(defHead), build->cast_node(args), equal, build->cast_node(body)));
+                            build->defEndlessSingleton(build->cast_node(defHead), build->cast_node(args), equal, build->cast_node(body)));
 }
 
-ForeignPtr defSingleton(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, ForeignPtr body, const token *end) {
+ForeignPtr BuilderForwarder::defSingleton(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, ForeignPtr body, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(
-        build->defSingleton(build->cast_node(defHead), build->cast_node(args), build->cast_node(body), end));
+                            build->defSingleton(build->cast_node(defHead), build->cast_node(args), build->cast_node(body), end));
 }
 
-ForeignPtr encodingLiteral(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::encodingLiteral(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->encodingLiteral(tok));
 }
 
-ForeignPtr false_(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::false_(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->false_(tok));
 }
 
-ForeignPtr find_pattern(SelfPtr builder, const token *lbrack_t, const node_list *elements, const token *rbrack_t) {
+ForeignPtr BuilderForwarder::find_pattern(SelfPtr builder, const token *lbrack_t, const node_list *elements, const token *rbrack_t) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->find_pattern(lbrack_t, build->convertNodeList(elements), rbrack_t));
 }
 
-ForeignPtr fileLiteral(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::fileLiteral(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->fileLiteral(tok));
 }
 
-ForeignPtr float_(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::float_(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->float_(tok));
 }
 
-ForeignPtr floatComplex(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::floatComplex(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->floatComplex(tok));
 }
 
-ForeignPtr for_(SelfPtr builder, const token *for_, ForeignPtr iterator, const token *in_, ForeignPtr iteratee,
-                const token *do_, ForeignPtr body, const token *end) {
+ForeignPtr BuilderForwarder::for_(SelfPtr builder, const token *for_, ForeignPtr iterator, const token *in_, ForeignPtr iteratee,
+                const token *do_, ForeignPtr body, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->for_(for_, build->cast_node(iterator), in_, build->cast_node(iteratee), do_,
                                         build->cast_node(body), end));
 }
 
-ForeignPtr forward_arg(SelfPtr builder, const token *begin, const token *dots, const token *end) {
+ForeignPtr BuilderForwarder::forward_arg(SelfPtr builder, const token *begin, const token *dots, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->forward_arg(begin, dots, end));
 }
 
-ForeignPtr forwarded_args(SelfPtr builder, const token *dots) {
+ForeignPtr BuilderForwarder::forwarded_args(SelfPtr builder, const token *dots) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->forwarded_args(dots));
 }
 
-ForeignPtr gvar(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::gvar(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->gvar(tok));
 }
 
-ForeignPtr hash_pattern(SelfPtr builder, const token *begin, const node_list *kwargs, const token *end) {
+ForeignPtr BuilderForwarder::hash_pattern(SelfPtr builder, const token *begin, const node_list *kwargs, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->hash_pattern(begin, build->convertNodeList(kwargs), end));
 }
 
-ForeignPtr if_guard(SelfPtr builder, const token *tok, ForeignPtr ifBody) {
+ForeignPtr BuilderForwarder::if_guard(SelfPtr builder, const token *tok, ForeignPtr ifBody) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->if_guard(tok, build->cast_node(ifBody)));
 }
 
-ForeignPtr ident(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::ident(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->ident(tok));
 }
 
-ForeignPtr in_pattern(SelfPtr builder, const token *tok, ForeignPtr pattern, ForeignPtr guard, const token *thenToken,
-                      ForeignPtr body) {
+ForeignPtr BuilderForwarder::in_pattern(SelfPtr builder, const token *tok, ForeignPtr pattern, ForeignPtr guard, const token *thenToken,
+                      ForeignPtr body) const {
     auto build = cast_builder(builder);
     return build->toForeign(
-        build->in_pattern(tok, build->cast_node(pattern), build->cast_node(guard), thenToken, build->cast_node(body)));
+                            build->in_pattern(tok, build->cast_node(pattern), build->cast_node(guard), thenToken, build->cast_node(body)));
 }
 
-ForeignPtr index(SelfPtr builder, ForeignPtr receiver, const token *lbrack, const node_list *indexes,
-                 const token *rbrack) {
+ForeignPtr BuilderForwarder::index(SelfPtr builder, ForeignPtr receiver, const token *lbrack, const node_list *indexes,
+                 const token *rbrack) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->index(build->cast_node(receiver), lbrack, build->convertNodeList(indexes), rbrack));
 }
 
-ForeignPtr indexAsgn(SelfPtr builder, ForeignPtr receiver, const token *lbrack, const node_list *indexes,
-                     const token *rbrack) {
+ForeignPtr BuilderForwarder::indexAsgn(SelfPtr builder, ForeignPtr receiver, const token *lbrack, const node_list *indexes,
+                     const token *rbrack) const {
     auto build = cast_builder(builder);
     return build->toForeign(
-        build->indexAsgn(build->cast_node(receiver), lbrack, build->convertNodeList(indexes), rbrack));
+                            build->indexAsgn(build->cast_node(receiver), lbrack, build->convertNodeList(indexes), rbrack));
 }
 
-ForeignPtr integer(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::integer(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->integer(tok));
 }
 
-ForeignPtr ivar(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::ivar(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->ivar(tok));
 }
 
-ForeignPtr keywordBreak(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
-                        const token *rparen) {
+ForeignPtr BuilderForwarder::keywordBreak(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
+                        const token *rparen) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->keywordBreak(keyword, lparen, build->convertNodeList(args), rparen));
 }
 
-ForeignPtr keywordDefined(SelfPtr builder, const token *keyword, ForeignPtr arg) {
+ForeignPtr BuilderForwarder::keywordDefined(SelfPtr builder, const token *keyword, ForeignPtr arg) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->keywordDefined(keyword, build->cast_node(arg)));
 }
 
-ForeignPtr keywordNext(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
-                       const token *rparen) {
+ForeignPtr BuilderForwarder::keywordNext(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
+                       const token *rparen) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->keywordNext(keyword, lparen, build->convertNodeList(args), rparen));
 }
 
-ForeignPtr keywordRedo(SelfPtr builder, const token *keyword) {
+ForeignPtr BuilderForwarder::keywordRedo(SelfPtr builder, const token *keyword) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->keywordRedo(keyword));
 }
 
-ForeignPtr keywordRetry(SelfPtr builder, const token *keyword) {
+ForeignPtr BuilderForwarder::keywordRetry(SelfPtr builder, const token *keyword) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->keywordRetry(keyword));
 }
 
-ForeignPtr keywordReturn(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
-                         const token *rparen) {
+ForeignPtr BuilderForwarder::keywordReturn(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
+                         const token *rparen) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->keywordReturn(keyword, lparen, build->convertNodeList(args), rparen));
 }
 
-ForeignPtr keywordSuper(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
-                        const token *rparen) {
+ForeignPtr BuilderForwarder::keywordSuper(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
+                        const token *rparen) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->keywordSuper(keyword, lparen, build->convertNodeList(args), rparen));
 }
 
-ForeignPtr keywordYield(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
-                        const token *rparen) {
+ForeignPtr BuilderForwarder::keywordYield(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
+                        const token *rparen) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->keywordYield(keyword, lparen, build->convertNodeList(args), rparen));
 }
 
-ForeignPtr keywordZsuper(SelfPtr builder, const token *keyword) {
+ForeignPtr BuilderForwarder::keywordZsuper(SelfPtr builder, const token *keyword) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->keywordZsuper(keyword));
 }
 
-ForeignPtr kwarg(SelfPtr builder, const token *name) {
+ForeignPtr BuilderForwarder::kwarg(SelfPtr builder, const token *name) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->kwarg(name));
 }
 
-ForeignPtr kwoptarg(SelfPtr builder, const token *name, ForeignPtr value) {
+ForeignPtr BuilderForwarder::kwoptarg(SelfPtr builder, const token *name, ForeignPtr value) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->kwoptarg(name, build->cast_node(value)));
 }
 
-ForeignPtr kwnilarg(SelfPtr builder, const token *dstar, const token *nil) {
+ForeignPtr BuilderForwarder::kwnilarg(SelfPtr builder, const token *dstar, const token *nil) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->kwnilarg(dstar, nil));
 }
 
-ForeignPtr kwrestarg(SelfPtr builder, const token *dstar, const token *name) {
+ForeignPtr BuilderForwarder::kwrestarg(SelfPtr builder, const token *dstar, const token *name) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->kwrestarg(dstar, name));
 }
 
-ForeignPtr kwsplat(SelfPtr builder, const token *dstar, ForeignPtr arg) {
+ForeignPtr BuilderForwarder::kwsplat(SelfPtr builder, const token *dstar, ForeignPtr arg) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->kwsplat(dstar, build->cast_node(arg)));
 }
 
-ForeignPtr line_literal(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::line_literal(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->line_literal(tok));
 }
 
-ForeignPtr logicalAnd(SelfPtr builder, ForeignPtr lhs, const token *op, ForeignPtr rhs) {
+ForeignPtr BuilderForwarder::logicalAnd(SelfPtr builder, ForeignPtr lhs, const token *op, ForeignPtr rhs) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->logicalAnd(build->cast_node(lhs), op, build->cast_node(rhs)));
 }
 
-ForeignPtr logicalOr(SelfPtr builder, ForeignPtr lhs, const token *op, ForeignPtr rhs) {
+ForeignPtr BuilderForwarder::logicalOr(SelfPtr builder, ForeignPtr lhs, const token *op, ForeignPtr rhs) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->logicalOr(build->cast_node(lhs), op, build->cast_node(rhs)));
 }
 
-ForeignPtr loopUntil(SelfPtr builder, const token *keyword, ForeignPtr cond, const token *do_, ForeignPtr body,
-                     const token *end) {
+ForeignPtr BuilderForwarder::loopUntil(SelfPtr builder, const token *keyword, ForeignPtr cond, const token *do_, ForeignPtr body,
+                     const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->loopUntil(keyword, build->cast_node(cond), do_, build->cast_node(body), end));
 }
 
-ForeignPtr loopUntil_mod(SelfPtr builder, ForeignPtr body, ForeignPtr cond) {
+ForeignPtr BuilderForwarder::loopUntil_mod(SelfPtr builder, ForeignPtr body, ForeignPtr cond) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->loopUntil_mod(build->cast_node(body), build->cast_node(cond)));
 }
 
-ForeignPtr loop_while(SelfPtr builder, const token *keyword, ForeignPtr cond, const token *do_, ForeignPtr body,
-                      const token *end) {
+ForeignPtr BuilderForwarder::loop_while(SelfPtr builder, const token *keyword, ForeignPtr cond, const token *do_, ForeignPtr body,
+                      const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->loop_while(keyword, build->cast_node(cond), do_, build->cast_node(body), end));
 }
 
-ForeignPtr loop_while_mod(SelfPtr builder, ForeignPtr body, ForeignPtr cond) {
+ForeignPtr BuilderForwarder::loop_while_mod(SelfPtr builder, ForeignPtr body, ForeignPtr cond) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->loop_while_mod(build->cast_node(body), build->cast_node(cond)));
 }
 
-ForeignPtr match_alt(SelfPtr builder, ForeignPtr left, const token *pipe, ForeignPtr right) {
+ForeignPtr BuilderForwarder::match_alt(SelfPtr builder, ForeignPtr left, const token *pipe, ForeignPtr right) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->match_alt(build->cast_node(left), pipe, build->cast_node(right)));
 }
 
-ForeignPtr match_as(SelfPtr builder, ForeignPtr value, const token *assoc, ForeignPtr as) {
+ForeignPtr BuilderForwarder::match_as(SelfPtr builder, ForeignPtr value, const token *assoc, ForeignPtr as) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->match_as(build->cast_node(value), assoc, build->cast_node(as)));
 }
 
-ForeignPtr match_label(SelfPtr builder, ForeignPtr label) {
+ForeignPtr BuilderForwarder::match_label(SelfPtr builder, ForeignPtr label) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->match_label(build->cast_node(label)));
 }
 
-ForeignPtr match_pattern(SelfPtr builder, ForeignPtr lhs, const token *tok, ForeignPtr rhs) {
+ForeignPtr BuilderForwarder::match_pattern(SelfPtr builder, ForeignPtr lhs, const token *tok, ForeignPtr rhs) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->match_pattern(build->cast_node(lhs), tok, build->cast_node(rhs)));
 }
 
-ForeignPtr match_pattern_p(SelfPtr builder, ForeignPtr lhs, const token *tok, ForeignPtr rhs) {
+ForeignPtr BuilderForwarder::match_pattern_p(SelfPtr builder, ForeignPtr lhs, const token *tok, ForeignPtr rhs) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->match_pattern_p(build->cast_node(lhs), tok, build->cast_node(rhs)));
 }
 
-ForeignPtr match_nil_pattern(SelfPtr builder, const token *dstar, const token *nil) {
+ForeignPtr BuilderForwarder::match_nil_pattern(SelfPtr builder, const token *dstar, const token *nil) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->match_nil_pattern(dstar, nil));
 }
 
-ForeignPtr match_op(SelfPtr builder, ForeignPtr receiver, const token *oper, ForeignPtr arg) {
+ForeignPtr BuilderForwarder::match_op(SelfPtr builder, ForeignPtr receiver, const token *oper, ForeignPtr arg) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->match_op(build->cast_node(receiver), oper, build->cast_node(arg)));
 }
 
-ForeignPtr match_pair(SelfPtr builder, ForeignPtr label, ForeignPtr value) {
+ForeignPtr BuilderForwarder::match_pair(SelfPtr builder, ForeignPtr label, ForeignPtr value) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->match_pair(build->cast_node(label), build->cast_node(value)));
 }
 
-ForeignPtr match_rest(SelfPtr builder, const token *star, const token *name) {
+ForeignPtr BuilderForwarder::match_rest(SelfPtr builder, const token *star, const token *name) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->match_rest(star, name));
 }
 
-ForeignPtr match_var(SelfPtr builder, const token *name) {
+ForeignPtr BuilderForwarder::match_var(SelfPtr builder, const token *name) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->match_var(name));
 }
 
-ForeignPtr match_with_trailing_comma(SelfPtr builder, ForeignPtr match) {
+ForeignPtr BuilderForwarder::match_with_trailing_comma(SelfPtr builder, ForeignPtr match) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->match_with_trailing_comma(build->cast_node(match)));
 }
 
-ForeignPtr multi_assign(SelfPtr builder, ForeignPtr mlhs, ForeignPtr rhs) {
+ForeignPtr BuilderForwarder::multi_assign(SelfPtr builder, ForeignPtr mlhs, ForeignPtr rhs) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->multi_assign(build->cast_node(mlhs), build->cast_node(rhs)));
 }
 
-ForeignPtr multi_lhs(SelfPtr builder, const token *begin, const node_list *items, const token *end) {
+ForeignPtr BuilderForwarder::multi_lhs(SelfPtr builder, const token *begin, const node_list *items, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->multi_lhs(begin, build->convertNodeList(items), end));
 }
 
-ForeignPtr multi_lhs1(SelfPtr builder, const token *begin, ForeignPtr item, const token *end) {
+ForeignPtr BuilderForwarder::multi_lhs1(SelfPtr builder, const token *begin, ForeignPtr item, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->multi_lhs1(begin, build->cast_node(item), end));
 }
 
-ForeignPtr nil(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::nil(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->nil(tok));
 }
 
-ForeignPtr not_op(SelfPtr builder, const token *not_, const token *begin, ForeignPtr receiver, const token *end) {
+ForeignPtr BuilderForwarder::not_op(SelfPtr builder, const token *not_, const token *begin, ForeignPtr receiver, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->not_op(not_, begin, build->cast_node(receiver), end));
 }
 
-ForeignPtr nth_ref(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::nth_ref(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->nth_ref(tok));
 }
 
-ForeignPtr numparams(SelfPtr builder, const node_list *declaringNodes) {
+ForeignPtr BuilderForwarder::numparams(SelfPtr builder, const node_list *declaringNodes) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->numparams(build->convertNodeList(declaringNodes)));
 }
 
-ForeignPtr numblock(SelfPtr builder, ForeignPtr methodCall, const token *begin, ForeignPtr args, ForeignPtr body,
-                    const token *end) {
+ForeignPtr BuilderForwarder::numblock(SelfPtr builder, ForeignPtr methodCall, const token *begin, ForeignPtr args, ForeignPtr body,
+                    const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(
-        build->block(build->cast_node(methodCall), begin, build->cast_node(args), build->cast_node(body), end));
+                            build->block(build->cast_node(methodCall), begin, build->cast_node(args), build->cast_node(body), end));
 }
 
-ForeignPtr op_assign(SelfPtr builder, ForeignPtr lhs, const token *op, ForeignPtr rhs) {
+ForeignPtr BuilderForwarder::op_assign(SelfPtr builder, ForeignPtr lhs, const token *op, ForeignPtr rhs) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->op_assign(build->cast_node(lhs), op, build->cast_node(rhs)));
 }
 
-ForeignPtr optarg_(SelfPtr builder, const token *name, const token *eql, ForeignPtr value) {
+ForeignPtr BuilderForwarder::optarg(SelfPtr builder, const token *name, const token *eql, ForeignPtr value) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->optarg_(name, eql, build->cast_node(value)));
 }
 
-ForeignPtr p_ident(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::p_ident(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->p_ident(tok));
 }
 
-ForeignPtr pair(SelfPtr builder, ForeignPtr key, const token *assoc, ForeignPtr value) {
+ForeignPtr BuilderForwarder::pair(SelfPtr builder, ForeignPtr key, const token *assoc, ForeignPtr value) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->pair(build->cast_node(key), assoc, build->cast_node(value)));
 }
 
-ForeignPtr pair_keyword(SelfPtr builder, const token *key, ForeignPtr value) {
+ForeignPtr BuilderForwarder::pair_keyword(SelfPtr builder, const token *key, ForeignPtr value) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->pair_keyword(key, build->cast_node(value)));
 }
 
-ForeignPtr pair_quoted(SelfPtr builder, const token *begin, const node_list *parts, const token *end,
-                       ForeignPtr value) {
+ForeignPtr BuilderForwarder::pair_quoted(SelfPtr builder, const token *begin, const node_list *parts, const token *end,
+                       ForeignPtr value) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->pair_quoted(begin, build->convertNodeList(parts), end, build->cast_node(value)));
 }
 
-ForeignPtr pin(SelfPtr builder, const token *tok, ForeignPtr var) {
+ForeignPtr BuilderForwarder::pin(SelfPtr builder, const token *tok, ForeignPtr var) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->pin(tok, build->cast_node(var)));
 }
 
-ForeignPtr postexe(SelfPtr builder, const token *begin, ForeignPtr node, const token *rbrace) {
+ForeignPtr BuilderForwarder::postexe(SelfPtr builder, const token *begin, ForeignPtr node, const token *rbrace) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->postexe(begin, build->cast_node(node), rbrace));
 }
 
-ForeignPtr preexe(SelfPtr builder, const token *begin, ForeignPtr node, const token *rbrace) {
+ForeignPtr BuilderForwarder::preexe(SelfPtr builder, const token *begin, ForeignPtr node, const token *rbrace) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->preexe(begin, build->cast_node(node), rbrace));
 }
 
-ForeignPtr procarg0(SelfPtr builder, ForeignPtr arg) {
+ForeignPtr BuilderForwarder::procarg0(SelfPtr builder, ForeignPtr arg) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->procarg0(build->cast_node(arg)));
 }
 
-ForeignPtr range_exclusive(SelfPtr builder, ForeignPtr lhs, const token *oper, ForeignPtr rhs) {
+ForeignPtr BuilderForwarder::range_exclusive(SelfPtr builder, ForeignPtr lhs, const token *oper, ForeignPtr rhs) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->range_exclusive(build->cast_node(lhs), oper, build->cast_node(rhs)));
 }
 
-ForeignPtr range_inclusive(SelfPtr builder, ForeignPtr lhs, const token *oper, ForeignPtr rhs) {
+ForeignPtr BuilderForwarder::range_inclusive(SelfPtr builder, ForeignPtr lhs, const token *oper, ForeignPtr rhs) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->range_inclusive(build->cast_node(lhs), oper, build->cast_node(rhs)));
 }
 
-ForeignPtr rational(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::rational(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->rational(tok));
 }
 
-ForeignPtr rational_complex(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::rational_complex(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->rational_complex(tok));
 }
 
-ForeignPtr regexp_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end,
-                          ForeignPtr options) {
+ForeignPtr BuilderForwarder::regexp_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end,
+                          ForeignPtr options) const {
     auto build = cast_builder(builder);
     return build->toForeign(
-        build->regexp_compose(begin, build->convertNodeList(parts), end, build->cast_node(options)));
+                            build->regexp_compose(begin, build->convertNodeList(parts), end, build->cast_node(options)));
 }
 
-ForeignPtr regexp_options(SelfPtr builder, const token *regopt) {
+ForeignPtr BuilderForwarder::regexp_options(SelfPtr builder, const token *regopt) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->regexp_options(regopt));
 }
 
-ForeignPtr rescue_body(SelfPtr builder, const token *rescue, ForeignPtr excList, const token *assoc, ForeignPtr excVar,
-                       const token *then, ForeignPtr body) {
+ForeignPtr BuilderForwarder::rescue_body(SelfPtr builder, const token *rescue, ForeignPtr excList, const token *assoc, ForeignPtr excVar,
+                       const token *then, ForeignPtr body) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->rescue_body(rescue, build->cast_node(excList), assoc, build->cast_node(excVar), then,
                                                build->cast_node(body)));
 }
 
-ForeignPtr restarg(SelfPtr builder, const token *star, const token *name) {
+ForeignPtr BuilderForwarder::restarg(SelfPtr builder, const token *star, const token *name) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->restarg(star, name));
 }
 
-ForeignPtr self_(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::self_(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->self_(tok));
 }
 
-ForeignPtr shadowarg(SelfPtr builder, const token *name) {
+ForeignPtr BuilderForwarder::shadowarg(SelfPtr builder, const token *name) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->shadowarg(name));
 }
 
-ForeignPtr splat(SelfPtr builder, const token *star, ForeignPtr arg) {
+ForeignPtr BuilderForwarder::splat(SelfPtr builder, const token *star, ForeignPtr arg) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->splat(star, build->cast_node(arg)));
 }
 
-ForeignPtr splat_mlhs(SelfPtr builder, const token *star, ForeignPtr arg) {
+ForeignPtr BuilderForwarder::splat_mlhs(SelfPtr builder, const token *star, ForeignPtr arg) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->splat_mlhs(star, build->cast_node(arg)));
 }
 
-ForeignPtr string_(SelfPtr builder, const token *string_) {
+ForeignPtr BuilderForwarder::string(SelfPtr builder, const token *string_) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->string(string_));
 }
 
-ForeignPtr string_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) {
+ForeignPtr BuilderForwarder::string_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->string_compose(begin, build->convertNodeList(parts), end));
 }
 
-ForeignPtr string_internal(SelfPtr builder, const token *string_) {
+ForeignPtr BuilderForwarder::string_internal(SelfPtr builder, const token *string_) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->string_internal(string_));
 }
 
-ForeignPtr symbol(SelfPtr builder, const token *symbol) {
+ForeignPtr BuilderForwarder::symbol(SelfPtr builder, const token *symbol) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->symbol(symbol));
 }
 
-ForeignPtr symbol_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) {
+ForeignPtr BuilderForwarder::symbol_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->symbol_compose(begin, build->convertNodeList(parts), end));
 }
 
-ForeignPtr symbol_internal(SelfPtr builder, const token *symbol) {
+ForeignPtr BuilderForwarder::symbol_internal(SelfPtr builder, const token *symbol) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->symbol_internal(symbol));
 }
 
-ForeignPtr symbols_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) {
+ForeignPtr BuilderForwarder::symbols_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->symbols_compose(begin, build->convertNodeList(parts), end));
 }
 
-ForeignPtr ternary(SelfPtr builder, ForeignPtr cond, const token *question, ForeignPtr ifTrue, const token *colon,
-                   ForeignPtr ifFalse) {
+ForeignPtr BuilderForwarder::ternary(SelfPtr builder, ForeignPtr cond, const token *question, ForeignPtr ifTrue, const token *colon,
+                   ForeignPtr ifFalse) const {
     auto build = cast_builder(builder);
     return build->toForeign(
-        build->ternary(build->cast_node(cond), question, build->cast_node(ifTrue), colon, build->cast_node(ifFalse)));
+                            build->ternary(build->cast_node(cond), question, build->cast_node(ifTrue), colon, build->cast_node(ifFalse)));
 }
 
-ForeignPtr true_(SelfPtr builder, const token *tok) {
+ForeignPtr BuilderForwarder::true_(SelfPtr builder, const token *tok) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->true_(tok));
 }
 
-ForeignPtr unary_op(SelfPtr builder, const token *oper, ForeignPtr receiver) {
+ForeignPtr BuilderForwarder::unary_op(SelfPtr builder, const token *oper, ForeignPtr receiver) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->unary_op(oper, build->cast_node(receiver)));
 }
 
-ForeignPtr undefMethod(SelfPtr builder, const token *undef, const node_list *name_list) {
+ForeignPtr BuilderForwarder::undefMethod(SelfPtr builder, const token *undef, const node_list *name_list) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->undefMethod(undef, build->convertNodeList(name_list)));
 }
 
-ForeignPtr unless_guard(SelfPtr builder, const token *unlessGuard, ForeignPtr unlessBody) {
+ForeignPtr BuilderForwarder::unless_guard(SelfPtr builder, const token *unlessGuard, ForeignPtr unlessBody) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->unless_guard(unlessGuard, build->cast_node(unlessBody)));
 }
 
-ForeignPtr when(SelfPtr builder, const token *when, const node_list *patterns, const token *then, ForeignPtr body) {
+ForeignPtr BuilderForwarder::when(SelfPtr builder, const token *when, const node_list *patterns, const token *then, ForeignPtr body) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->when(when, build->convertNodeList(patterns), then, build->cast_node(body)));
 }
 
-ForeignPtr word(SelfPtr builder, const node_list *parts) {
+ForeignPtr BuilderForwarder::word(SelfPtr builder, const node_list *parts) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->word(build->convertNodeList(parts)));
 }
 
-ForeignPtr words_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) {
+ForeignPtr BuilderForwarder::words_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->words_compose(begin, build->convertNodeList(parts), end));
 }
 
-ForeignPtr xstring_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) {
+ForeignPtr BuilderForwarder::xstring_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end) const {
     auto build = cast_builder(builder);
     return build->toForeign(build->xstring_compose(begin, build->convertNodeList(parts), end));
 }
 
-struct ruby_parser::builder interface = {
-    accessible,
-    alias,
-    arg,
-    args,
-    array,
-    array_pattern,
-    assign,
-    assignable,
-    associate,
-    attrAsgn,
-    backRef,
-    begin,
-    beginBody,
-    beginKeyword,
-    binaryOp,
-    block,
-    blockPass,
-    blockarg,
-    callLambda,
-    call_method,
-    case_,
-    case_match,
-    character,
-    complex,
-    compstmt,
-    condition,
-    conditionMod,
-    const_,
-    const_pattern,
-    constFetch,
-    constGlobal,
-    constOpAssignable,
-    cvar,
-    dedentString,
-    def_class,
-    defEndlessMethod,
-    defEndlessSingleton,
-    defMethod,
-    defModule,
-    def_sclass,
-    defsHead,
-    defSingleton,
-    encodingLiteral,
-    false_,
-    find_pattern,
-    fileLiteral,
-    float_,
-    floatComplex,
-    for_,
-    forward_arg,
-    forwarded_args,
-    gvar,
-    hash_pattern,
-    ident,
-    if_guard,
-    in_pattern,
-    index,
-    indexAsgn,
-    integer,
-    ivar,
-    keywordBreak,
-    keywordDefined,
-    keywordNext,
-    keywordRedo,
-    keywordRetry,
-    keywordReturn,
-    keywordSuper,
-    keywordYield,
-    keywordZsuper,
-    kwarg,
-    kwoptarg,
-    kwnilarg,
-    kwrestarg,
-    kwsplat,
-    line_literal,
-    logicalAnd,
-    logicalOr,
-    loopUntil,
-    loopUntil_mod,
-    loop_while,
-    loop_while_mod,
-    match_alt,
-    match_as,
-    match_label,
-    match_pattern,
-    match_pattern_p,
-    match_nil_pattern,
-    match_op,
-    match_pair,
-    match_rest,
-    match_var,
-    match_with_trailing_comma,
-    multi_assign,
-    multi_lhs,
-    multi_lhs1,
-    nil,
-    not_op,
-    nth_ref,
-    numparams,
-    numblock,
-    op_assign,
-    optarg_,
-    p_ident,
-    pair,
-    pair_keyword,
-    pair_quoted,
-    pin,
-    postexe,
-    preexe,
-    procarg0,
-    range_exclusive,
-    range_inclusive,
-    rational,
-    rational_complex,
-    regexp_compose,
-    regexp_options,
-    rescue_body,
-    restarg,
-    self_,
-    shadowarg,
-    splat,
-    splat_mlhs,
-    string_,
-    string_compose,
-    string_internal,
-    symbol,
-    symbol_compose,
-    symbol_internal,
-    symbols_compose,
-    ternary,
-    true_,
-    unary_op,
-    undefMethod,
-    unless_guard,
-    when,
-    word,
-    words_compose,
-    xstring_compose,
-};
+namespace {
+
+BuilderForwarder forwarder;
 
 BuilderImpl::BuilderImpl(core::GlobalState &gs, core::FileRef file, const vector<std::string> &initialLocals, string_view buffer)
-    : gs_(gs), file_(file), driver_(ruby_parser::ruby_version::RUBY_27, buffer, interface) {
+    : gs_(gs), file_(file), driver_(ruby_parser::ruby_version::RUBY_27, buffer, forwarder) {
     this->maxOff_ = file.data(gs).source().size();
     foreignNodes_.emplace_back();
 

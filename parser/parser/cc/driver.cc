@@ -6,7 +6,7 @@
 
 namespace ruby_parser {
 
-driver::driver(ruby_version version, std::string_view source, const struct builder &builder)
+driver::driver(ruby_version version, std::string_view source, const sorbet::parser::BuilderForwarder &builder)
     : build(builder), lex(diagnostics, version, source), pending_error(false), def_level(0), ast(nullptr) {}
 
 ForeignPtr driver::parse(SelfPtr self, bool trace) {
