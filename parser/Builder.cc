@@ -21,6 +21,7 @@ using ruby_parser::SelfPtr;
 using ruby_parser::token;
 
 using sorbet::core::GlobalState;
+using namespace std::literals::string_view_literals;
 using std::make_unique;
 using std::string;
 using std::string_view;
