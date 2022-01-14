@@ -11,7 +11,7 @@ sh_binary(
     srcs = ["run.sh"],
     data = [
         "//compiler:sorbet",
-        "@sorbet_ruby_2_7//:ruby",
+        "@sorbet_ruby_2_7_for_compiler//:ruby",
     ],
     tags = ["compiler"],
     deps = ["@bazel_tools//tools/bash/runfiles"],

@@ -11,7 +11,7 @@ base_tag="v2_7_2"
 patch_branch="sorbet_ruby_2_7"
 
 # Filename for the patch in the repo.
-patch_filename="sorbet_ruby_2_7.patch"
+patch_filename="sorbet_ruby_2_7_for_compiler.patch"
 
 # We'll let GitHub generate the patch for us.
 patch_source_url="https://github.com/sorbet/ruby/compare/${base_tag}...${patch_branch}.patch"
