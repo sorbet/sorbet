@@ -170,7 +170,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
     auto &print = opts.print;
     ast::ParsedFile rewriten{nullptr, file};
 
-    Timer timeit(lgs.tracer(), "indexOne");
+    Timer timeit(lgs.tracer(), "indexOne", {{"file", string(file.data(lgs).path())}});
     try {
         if (!tree) {
             // tree isn't cached. Need to start from parser
