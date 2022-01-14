@@ -4,7 +4,6 @@
 
 %code requires {
   #include <ruby_parser/builder.hh>
-  #include <ruby_parser/node.hh>
   #include <ruby_parser/token.hh>
   #include <ruby_parser/lexer.hh>
   #include <ruby_parser/driver.hh>

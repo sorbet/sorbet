@@ -5,11 +5,13 @@
 #include <type_traits>
 #include <vector>
 
-#include "driver.hh"
-#include "node.hh"
-#include "token.hh"
-
 namespace ruby_parser {
+
+using ForeignPtr = const void *;
+using SelfPtr = const void *;
+
+struct node_list;
+struct token;
 
 struct builder {
     ForeignPtr (*accessible)(SelfPtr builder, ForeignPtr node);
