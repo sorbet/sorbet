@@ -38,8 +38,13 @@ def various_bad_commas_in_send(a, b, x, y)
   foo(a, x: , y: y)
   #         ^ completion: todo
 
+
+  foo(x: x y: y)
+  #       ^ completion: todo
+  foo(a: a, x: x y: y)
+  #             ^ completion: todo
+
   # TODO(jez) these are kind of tricky, which is unfortunate becuase they're
   # also important for completion
   # foo(a, x y: y)
-  # foo(a, x: x y: y)
 end

@@ -23,6 +23,7 @@ struct builder {
     ForeignPtr (*assign)(SelfPtr builder, ForeignPtr lhs, const token *eql, ForeignPtr rhs);
     ForeignPtr (*assignable)(SelfPtr builder, ForeignPtr node);
     ForeignPtr (*associate)(SelfPtr builder, const token *begin, const node_list *pairs, const token *end);
+    ForeignPtr (*assoc_error)(SelfPtr builder, const token *label, const token *fcall);
     ForeignPtr (*attrAsgn)(SelfPtr builder, ForeignPtr receiver, const token *dot, const token *selector, bool masgn);
     ForeignPtr (*backRef)(SelfPtr builder, const token *tok);
     ForeignPtr (*begin)(SelfPtr builder, const token *begin, ForeignPtr body, const token *end);
