@@ -6,7 +6,6 @@
 #include "builder.hh"
 #include "diagnostic.hh"
 #include "lexer.hh"
-#include "node.hh"
 
 namespace ruby_parser {
 
