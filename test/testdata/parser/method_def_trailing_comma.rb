@@ -1,3 +1,5 @@
+# typed: false
+
 def comma_after_pos_args(x, y,)
 end
 
