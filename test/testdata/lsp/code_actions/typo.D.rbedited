@@ -9,18 +9,18 @@ end
 
 def test
   Foo.new.baz(42)
-# ^^^^^^^^^^^^^^^ error: Method `baz` does not exist on `Foo`
-# ^^^^^^^^^^^^^^^ apply-code-action: [A] Replace with `bar`
+#         ^^^     error: Method `baz` does not exist on `Foo`
+#         ^^^     apply-code-action: [A] Replace with `bar`
 
   Foo.net
-# ^^^^^^^ error: Method `net` does not exist on `T.class_of(Foo)`
-# ^^^^^^^ apply-code-action: [B] Replace with `new`
+#     ^^^ error: Method `net` does not exist on `T.class_of(Foo)`
+#     ^^^ apply-code-action: [B] Replace with `new`
 
   Foo.new
 # ^^^ error: Unable to resolve constant `Boo`
 # ^^^ apply-code-action: [D] Replace with `Foo`
 
   Boo(1)
-# ^^^^^^ error: Method `Boo` does not exist on `Object`
-# ^^^^^^ apply-code-action: [C] Replace with `Foo.new`
+# ^^^    error: Method `Boo` does not exist on `Object`
+# ^^^    apply-code-action: [C] Replace with `Foo.new`
 end

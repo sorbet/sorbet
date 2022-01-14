@@ -132,6 +132,7 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
     auto singletonAsgn = ast::MK::Assign(
         stat.loc(), std::move(asgn->lhs),
         ast::MK::Send2(stat.loc(), ast::MK::Constant(stat.loc(), core::Symbols::T()), core::Names::uncheckedLet(),
+                       stat.loc().copyWithZeroLength(),
                        rhs->withNewBody(stat.loc(), classCnst.deepCopy(), core::Names::new_()), std::move(classCnst)));
     vector<ast::ExpressionPtr> result;
     result.emplace_back(std::move(classDef));
@@ -166,10 +167,11 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.clear();
     klass->rhs.reserve(oldRHS.size());
     auto loc = klass->declLoc;
-    klass->rhs.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::extend(),
+    auto locZero = loc.copyWithZeroLength();
+    klass->rhs.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::extend(), locZero,
                                            ast::MK::Constant(loc, core::Symbols::T_Helpers())));
-    klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareAbstract()));
-    klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareSealed()));
+    klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareAbstract(), locZero));
+    klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareSealed(), locZero));
     for (auto &stat : oldRHS) {
         if (auto enumsDo = asEnumsDo(stat)) {
             auto *block = enumsDo->block();

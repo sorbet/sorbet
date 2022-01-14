@@ -224,7 +224,7 @@ public:
                 checkCircularArgumentReferences(node.get(), name_str);
                 return make_unique<LVar>(node->loc, id->name);
             } else {
-                return make_unique<Send>(node->loc, nullptr, id->name, sorbet::parser::NodeVec());
+                return make_unique<Send>(node->loc, nullptr, id->name, node->loc, sorbet::parser::NodeVec());
             }
         }
         return node;
@@ -288,12 +288,16 @@ public:
     unique_ptr<Node> assign(unique_ptr<Node> lhs, const token *eql, unique_ptr<Node> rhs) {
         core::LocOffsets loc = lhs->loc.join(rhs->loc);
 
+        // In `x.foo = 1`, the behavior below currently does `foo =` for the methodLoc
+        // That might be wrong. Punting for now.
         if (auto *s = parser::cast_node<Send>(lhs.get())) {
             s->args.emplace_back(std::move(rhs));
-            return make_unique<Send>(loc, std::move(s->receiver), s->method, std::move(s->args));
+            return make_unique<Send>(loc, std::move(s->receiver), s->method, s->methodLoc.join(tokLoc(eql)),
+                                     std::move(s->args));
         } else if (auto *s = parser::cast_node<CSend>(lhs.get())) {
             s->args.emplace_back(std::move(rhs));
-            return make_unique<CSend>(loc, std::move(s->receiver), s->method, std::move(s->args));
+            return make_unique<CSend>(loc, std::move(s->receiver), s->method, s->methodLoc.join(tokLoc(eql)),
+                                      std::move(s->args));
         } else {
             return make_unique<Assign>(loc, std::move(lhs), std::move(rhs));
         }
@@ -347,14 +351,15 @@ public:
 
     unique_ptr<Node> attrAsgn(unique_ptr<Node> receiver, const token *dot, const token *selector, bool masgn) {
         core::NameRef method = gs_.enterNameUTF8(selector->asString() + "=");
-        core::LocOffsets loc = receiver->loc.join(tokLoc(selector));
+        auto selectorLoc = tokLoc(selector);
+        core::LocOffsets loc = receiver->loc.join(selectorLoc);
         if ((dot != nullptr) && dot->view() == "&.") {
             if (masgn) {
                 error(ruby_parser::dclass::CSendInLHSOfMAsgn, tokLoc(dot));
             }
-            return make_unique<CSend>(loc, std::move(receiver), method, sorbet::parser::NodeVec());
+            return make_unique<CSend>(loc, std::move(receiver), method, selectorLoc, sorbet::parser::NodeVec());
         }
-        return make_unique<Send>(loc, std::move(receiver), method, sorbet::parser::NodeVec());
+        return make_unique<Send>(loc, std::move(receiver), method, selectorLoc, sorbet::parser::NodeVec());
     }
 
     unique_ptr<Node> backRef(const token *tok) {
@@ -448,7 +453,8 @@ public:
         sorbet::parser::NodeVec args;
         args.emplace_back(std::move(arg));
 
-        return make_unique<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->view()), std::move(args));
+        return make_unique<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->view()), tokLoc(oper),
+                                 std::move(args));
     }
 
     unique_ptr<Node> block(unique_ptr<Node> methodCall, const token *begin, unique_ptr<Node> args,
@@ -537,7 +543,7 @@ public:
     unique_ptr<Node> callLambda(const token *lambda) {
         auto loc = tokLoc(lambda);
         auto kernel = make_unique<Const>(loc, nullptr, core::Names::Constants::Kernel());
-        return make_unique<Send>(loc, std::move(kernel), core::Names::lambda(), NodeVec());
+        return make_unique<Send>(loc, std::move(kernel), core::Names::lambda(), loc, NodeVec());
     }
 
     unique_ptr<Node> call_method(unique_ptr<Node> receiver, const token *dot, const token *selector,
@@ -572,9 +578,9 @@ public:
         }
 
         if ((dot != nullptr) && dot->view() == "&.") {
-            return make_unique<CSend>(loc, std::move(receiver), method, std::move(args));
+            return make_unique<CSend>(loc, std::move(receiver), method, selectorLoc, std::move(args));
         } else {
-            return make_unique<Send>(loc, std::move(receiver), method, std::move(args));
+            return make_unique<Send>(loc, std::move(receiver), method, selectorLoc, std::move(args));
         }
     }
 
@@ -902,13 +908,14 @@ public:
     unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, sorbet::parser::NodeVec indexes,
                            const token *rbrack) {
         return make_unique<Send>(receiver->loc.join(tokLoc(rbrack)), std::move(receiver), core::Names::squareBrackets(),
-                                 std::move(indexes));
+                                 tokLoc(lbrack).copyWithZeroLength(), std::move(indexes));
     }
 
     unique_ptr<Node> indexAsgn(unique_ptr<Node> receiver, const token *lbrack, sorbet::parser::NodeVec indexes,
                                const token *rbrack) {
         return make_unique<Send>(receiver->loc.join(tokLoc(rbrack)), std::move(receiver),
-                                 core::Names::squareBracketsEq(), std::move(indexes));
+                                 core::Names::squareBracketsEq(), tokLoc(lbrack).copyWithZeroLength(),
+                                 std::move(indexes));
     }
 
     unique_ptr<Node> integer(const token *tok) {
@@ -1078,7 +1085,8 @@ public:
         core::LocOffsets loc = receiver->loc.join(arg->loc);
         sorbet::parser::NodeVec args;
         args.emplace_back(std::move(arg));
-        return make_unique<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->view()), std::move(args));
+        return make_unique<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->view()), tokLoc(oper),
+                                 std::move(args));
     }
 
     unique_ptr<Node> match_pattern(unique_ptr<Node> lhs, const token *tok, unique_ptr<Node> rhs) {
@@ -1174,21 +1182,22 @@ public:
     }
 
     unique_ptr<Node> not_op(const token *not_, const token *begin, unique_ptr<Node> receiver, const token *end) {
+        auto notLoc = tokLoc(not_);
         if (receiver != nullptr) {
             core::LocOffsets loc;
             if (end != nullptr) {
-                loc = tokLoc(not_).join(tokLoc(end));
+                loc = notLoc.join(tokLoc(end));
             } else {
-                loc = tokLoc(not_).join(receiver->loc);
+                loc = notLoc.join(receiver->loc);
             }
-            return make_unique<Send>(loc, transformCondition(std::move(receiver)), core::Names::bang(),
+            return make_unique<Send>(loc, transformCondition(std::move(receiver)), core::Names::bang(), notLoc,
                                      sorbet::parser::NodeVec());
         }
 
         ENFORCE(begin != nullptr && end != nullptr);
         auto body = make_unique<Begin>(tokLoc(begin).join(tokLoc(end)), sorbet::parser::NodeVec());
-        return make_unique<Send>(tokLoc(not_).join(body->loc), std::move(body), core::Names::bang(),
-                                 sorbet::parser::NodeVec());
+        return make_unique<Send>(notLoc.join(body->loc), std::move(body), core::Names::bang(),
+                                 notLoc.copyWithZeroLength(), sorbet::parser::NodeVec());
     }
 
     unique_ptr<Node> nth_ref(const token *tok) {
@@ -1459,7 +1468,7 @@ public:
             op = gs_.enterNameUTF8(oper->view());
         }
 
-        return make_unique<Send>(loc, std::move(receiver), op, sorbet::parser::NodeVec());
+        return make_unique<Send>(loc, std::move(receiver), op, tokLoc(oper), sorbet::parser::NodeVec());
     }
 
     unique_ptr<Node> undefMethod(const token *undef, sorbet::parser::NodeVec name_list) {

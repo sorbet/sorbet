@@ -19,7 +19,7 @@ module Readable
 
   included do
     before_create :do_this
-  # ^^^^^^^^^^^^^^^^^^^^^^ error: Method `before_create` does not exist on `T.class_of(Readable)`
+  # ^^^^^^^^^^^^^ error: Method `before_create` does not exist on `T.class_of(Readable)`
   end
 end
 
@@ -29,7 +29,7 @@ module Writable
   included do
     T.bind(self, T.any(T.class_of(Article), T.class_of(Post)))
     some_class_method :name
-  # ^^^^^^^^^^^^^^^^^^^^^^^ error: Method `some_class_method` does not exist on `T.class_of(Article)` component of `T.any(T.class_of(Article), T.class_of(Post))`
+  # ^^^^^^^^^^^^^^^^^ error: Method `some_class_method` does not exist on `T.class_of(Article)` component of `T.any(T.class_of(Article), T.class_of(Post))`
   end
 end
 

@@ -378,7 +378,8 @@ public:
             return ast::MK::EmptyTree();
         } else {
             return ast::MK::Send3(loc, ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()), keepName,
-                                  ast::MK::Self(loc), ast::MK::Symbol(loc, name), ast::MK::Symbol(loc, kind));
+                                  loc.copyWithZeroLength(), ast::MK::Self(loc), ast::MK::Symbol(loc, name),
+                                  ast::MK::Symbol(loc, kind));
         }
     };
 

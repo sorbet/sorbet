@@ -305,6 +305,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
     vector<ast::ExpressionPtr> nodes;
 
     const auto loc = ret.loc;
+    const auto locZero = loc.copyWithZeroLength();
     const auto name = ret.name;
     const auto nameLoc = ret.nameLoc;
 
@@ -312,6 +313,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
 
     const auto computedByMethodName = ret.computedByMethodName;
     const auto computedByMethodNameLoc = ret.computedByMethodNameLoc;
+    const auto computedByMethodNameLocZero = computedByMethodNameLoc.copyWithZeroLength();
 
     auto ivarName = name.addAt(ctx);
 
@@ -321,10 +323,12 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         // Given `const :foo, type, computed_by: <name>`, where <name> is a Symbol pointing to a class method,
         // assert that the method takes 1 argument (of any type), and returns the same type as the prop,
         // via `T.assert_type!(self.class.compute_foo(T.unsafe(nil)), type)` in the getter.
-        auto selfSendClass = ast::MK::Send0(computedByMethodNameLoc, ast::MK::Self(loc), core::Names::class_());
+        auto selfSendClass = ast::MK::Send0(computedByMethodNameLoc, ast::MK::Self(loc), core::Names::class_(),
+                                            computedByMethodNameLocZero);
         auto raiseUnimplemented = ast::MK::RaiseUnimplemented(computedByMethodNameLoc);
-        auto sendComputedMethod = ast::MK::Send1(computedByMethodNameLoc, std::move(selfSendClass),
-                                                 computedByMethodName, std::move(raiseUnimplemented));
+        auto sendComputedMethod =
+            ast::MK::Send1(computedByMethodNameLoc, std::move(selfSendClass), computedByMethodName,
+                           computedByMethodNameLocZero, std::move(raiseUnimplemented));
         auto assertTypeMatches =
             ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod), ASTUtil::dupType(getType));
         auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseUnimplemented(loc));
@@ -340,7 +344,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
                 nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName), flags));
             } else {
                 // Need to hide the instance variable access, because there wasn't a typed constructor to declare it
-                auto ivarGet = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::instanceVariableGet(),
+                auto ivarGet = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::instanceVariableGet(), locZero,
                                               ast::MK::Symbol(nameLoc, ivarName));
                 nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(ivarGet), flags));
             }
@@ -354,13 +358,13 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
 
             auto arg2 = ast::MK::Local(loc, core::Names::arg2());
 
-            auto ivarGet = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::instanceVariableGet(),
+            auto ivarGet = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::instanceVariableGet(), locZero,
                                           ast::MK::Symbol(nameLoc, ivarName));
             auto assign = ast::MK::Assign(loc, arg2.deepCopy(), std::move(ivarGet));
 
-            auto class_ = ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::class_());
-            auto decorator = ast::MK::Send0(loc, std::move(class_), core::Names::decorator());
-            auto propGetLogic = ast::MK::Send3(loc, std::move(decorator), core::Names::propGetLogic(),
+            auto class_ = ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::class_(), locZero);
+            auto decorator = ast::MK::Send0(loc, std::move(class_), core::Names::decorator(), locZero);
+            auto propGetLogic = ast::MK::Send3(loc, std::move(decorator), core::Names::propGetLogic(), locZero,
                                                ast::MK::Self(loc), ast::MK::Symbol(nameLoc, name), std::move(arg2));
 
             auto insSeq = ast::MK::InsSeq1(loc, std::move(assign), std::move(propGetLogic));
@@ -391,7 +395,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
                     nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
                 } else {
                     // need to hide the instance variable access, because there wasn't a typed constructor to declare it
-                    auto ivarSet = ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(),
+                    auto ivarSet = ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(), locZero,
                                                   ast::MK::Symbol(nameLoc, ivarName),
                                                   ast::MK::Local(nameLoc, core::Names::arg0()));
                     nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
@@ -399,11 +403,12 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
             } else {
                 // need to hide the instance variable access, because there wasn't a typed constructor to declare it
                 auto ivarSet =
-                    ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(),
+                    ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(), locZero,
                                    ast::MK::Symbol(nameLoc, ivarName), ast::MK::Local(nameLoc, core::Names::arg0()));
                 auto tConfig = ast::MK::Constant(loc, core::Symbols::T_Configuration());
-                auto propFreezeHandler = ast::MK::Send0(loc, std::move(tConfig), core::Names::propFreezeHandler());
-                auto propFreezeLogic = ast::MK::Send2(loc, std::move(propFreezeHandler), core::Names::call(),
+                auto propFreezeHandler =
+                    ast::MK::Send0(loc, std::move(tConfig), core::Names::propFreezeHandler(), locZero);
+                auto propFreezeLogic = ast::MK::Send2(loc, std::move(propFreezeHandler), core::Names::call(), locZero,
                                                       ast::MK::Self(loc), ast::MK::Symbol(loc, name));
                 auto insSeq = ast::MK::InsSeq1(loc, std::move(propFreezeLogic), std::move(ivarSet));
                 nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(insSeq)));

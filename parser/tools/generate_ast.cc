@@ -172,7 +172,10 @@ NodeDef nodes[] = {
     {
         "CSend",
         "csend",
-        vector<FieldDef>({{"receiver", FieldType::Node}, {"method", FieldType::Name}, {"args", FieldType::NodeVec}}),
+        vector<FieldDef>({{"receiver", FieldType::Node},
+                          {"method", FieldType::Name},
+                          {"methodLoc", FieldType::Loc},
+                          {"args", FieldType::NodeVec}}),
     },
     // @@foo class variable
     {
@@ -661,7 +664,10 @@ NodeDef nodes[] = {
     {
         "Send",
         "send",
-        vector<FieldDef>({{"receiver", FieldType::Node}, {"method", FieldType::Name}, {"args", FieldType::NodeVec}}),
+        vector<FieldDef>({{"receiver", FieldType::Node},
+                          {"method", FieldType::Name},
+                          {"methodLoc", FieldType::Loc},
+                          {"args", FieldType::NodeVec}}),
     },
     // m { |;shadowarg| }
     {
@@ -1028,7 +1034,8 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             case FieldType::Loc:
                 out << "      bool showFull = true;";
-                out << R"(    fmt::format_to(std::back_inserter(buf),  "\"loc\" : \"{}\")" << maybeComma << "\\n\", "
+                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                    << maybeComma << "\\n\", "
                     << "core::Loc(file, " << arg.name << ").filePosToString(gs, showFull));\n";
                 break;
             case FieldType::Bool:

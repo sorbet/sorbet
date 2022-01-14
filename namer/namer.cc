@@ -1732,6 +1732,7 @@ public:
                 e.setHeader("`{}` cannot be used at the top-level", "type_member");
             }
             auto send = ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
+                                            asgn.loc.copyWithZeroLength(),
                                             ast::MK::Block0(asgn.loc, ast::MK::Untyped(asgn.loc)));
 
             return handleAssignment(ctx,
@@ -1745,7 +1746,7 @@ public:
                     e.setHeader("Too many args in type definition");
                 }
                 auto send = ast::MK::Send1(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
-                                           ast::MK::Untyped(asgn.loc));
+                                           asgn.loc.copyWithZeroLength(), ast::MK::Untyped(asgn.loc));
                 return handleAssignment(
                     ctx, ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
             }

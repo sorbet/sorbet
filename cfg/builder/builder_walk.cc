@@ -131,8 +131,9 @@ BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *curr
     synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
 
     auto isPrivateOk = false;
-    current->exprs.emplace_back(cctx.target, h.loc,
-                                make_insn<Send>(magic, method, h.loc, vars.size(), vars, locs, isPrivateOk));
+    current->exprs.emplace_back(
+        cctx.target, h.loc,
+        make_insn<Send>(magic, h.loc, method, core::LocOffsets::none(), vars.size(), vars, locs, isPrivateOk));
     return current;
 }
 
@@ -421,7 +422,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         argFlags.emplace_back(e.flags);
                     }
                     auto link = make_shared<core::SendAndBlockLink>(s.fun, move(argFlags), newRubyRegionId);
-                    auto send = make_insn<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs(), args, argLocs,
+                    auto send = make_insn<Send>(recv, s.recv.loc(), s.fun, s.funLoc, s.numPosArgs(), args, argLocs,
                                                 !!s.flags.isPrivateOk, link);
                     LocalRef sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
                     auto solveConstraint = make_insn<SolveConstraint>(link, sendTemp);
@@ -528,8 +529,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                      */
                 } else {
                     current->exprs.emplace_back(cctx.target, s.loc,
-                                                make_insn<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs(), args,
-                                                                argLocs, !!s.flags.isPrivateOk));
+                                                make_insn<Send>(recv, s.recv.loc(), s.fun, s.funLoc, s.numPosArgs(),
+                                                                args, argLocs, !!s.flags.isPrivateOk));
                 }
 
                 ret = current;
@@ -594,8 +595,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     // by the VM itself; and b) may not actually happen depending on the frames
                     // that the break unwinds through.
                     synthesizeExpr(afterBreak, ignored, core::LocOffsets::none(),
-                                   make_insn<Send>(magic, core::Names::blockBreak(), core::LocOffsets::none(),
-                                                   args.size(), args, locs, isPrivateOk));
+                                   make_insn<Send>(magic, core::LocOffsets::none(), core::Names::blockBreak(),
+                                                   core::LocOffsets::none(), args.size(), args, locs, isPrivateOk));
                 }
 
                 afterBreak->exprs.emplace_back(cctx.blockBreakTarget, a.loc, make_insn<Ident>(blockBreakAssign));
@@ -627,8 +628,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     InlinedVector<core::LocOffsets, 2> argLocs{};
                     auto isPrivateOk = false;
                     synthesizeExpr(current, retryTemp, core::LocOffsets::none(),
-                                   make_insn<Send>(magic, core::Names::retry(), what.loc(), args.size(), args, argLocs,
-                                                   isPrivateOk));
+                                   make_insn<Send>(magic, what.loc(), core::Names::retry(), core::LocOffsets::none(),
+                                                   args.size(), args, argLocs, isPrivateOk));
                     unconditionalJump(current, cctx.rescueScope, cctx.inWhat, a.loc);
                 }
                 ret = cctx.inWhat.deadBlock();
@@ -695,8 +696,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     auto args = {exceptionValue};
                     auto argLocs = {what.loc()};
                     synthesizeExpr(caseBody, res, rescueCase->loc,
-                                   make_insn<Send>(magic, core::Names::keepForCfg(), rescueCase->loc, args.size(), args,
-                                                   argLocs, isPrivateOk));
+                                   make_insn<Send>(magic, rescueCase->loc, core::Names::keepForCfg(),
+                                                   core::LocOffsets::none(), args.size(), args, argLocs, isPrivateOk));
 
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError
@@ -716,9 +717,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                         auto isPrivateOk = false;
                         rescueHandlersBlock->exprs.emplace_back(isaCheck, loc,
-                                                                make_insn<Send>(localVar, core::Names::isA_p(), loc,
-                                                                                args.size(), args, argLocs,
-                                                                                isPrivateOk));
+                                                                make_insn<Send>(localVar, loc, core::Names::isA_p(),
+                                                                                core::LocOffsets::none(), args.size(),
+                                                                                args, argLocs, isPrivateOk));
 
                         auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops, handlersRubyRegionId);
                         conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
@@ -759,9 +760,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 LocalRef magic = cctx.newTemporary(core::Names::magic());
                 synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
                 auto isPrivateOk = false;
-                current->exprs.emplace_back(
-                    cctx.target, a.loc,
-                    make_insn<Send>(magic, core::Names::buildArray(), a.loc, vars.size(), vars, locs, isPrivateOk));
+                current->exprs.emplace_back(cctx.target, a.loc,
+                                            make_insn<Send>(magic, a.loc, core::Names::buildArray(),
+                                                            core::LocOffsets::none(), vars.size(), vars, locs,
+                                                            isPrivateOk));
                 ret = current;
             },
 

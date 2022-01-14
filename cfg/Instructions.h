@@ -110,19 +110,20 @@ public:
     uint16_t numPosArgs;
     core::NameRef fun;
     VariableUseSite recv;
+    core::LocOffsets funLoc;
     core::LocOffsets receiverLoc;
     InlinedVector<VariableUseSite, 2> args;
     InlinedVector<core::LocOffsets, 2> argLocs;
     std::shared_ptr<core::SendAndBlockLink> link;
 
-    Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, uint16_t numPosArgs,
+    Send(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc, uint16_t numPosArgs,
          const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> argLocs, bool isPrivateOk = false,
          const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
 
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Send, 136, 8);
+CheckSize(Send, 144, 8);
 
 INSN(Return) : public Instruction {
 public:

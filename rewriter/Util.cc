@@ -39,7 +39,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
                 args.emplace_back(std::move(dupedValue));
             }
 
-            return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, 0, std::move(args));
+            return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, send->funLoc, 0, std::move(args));
         }
 
         for (auto &arg : send->nonBlockArgs()) {
@@ -51,7 +51,8 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             args.emplace_back(std::move(dupArg));
         }
 
-        return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, send->numPosArgs(), std::move(args));
+        return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, send->funLoc, send->numPosArgs(),
+                             std::move(args));
     }
 
     auto *ident = ast::cast_tree<ast::ConstantLit>(orig);
@@ -260,7 +261,7 @@ ast::ExpressionPtr ASTUtil::mkSet(core::Context ctx, core::LocOffsets loc, core:
 }
 
 ast::ExpressionPtr ASTUtil::mkNilable(core::LocOffsets loc, ast::ExpressionPtr type) {
-    return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::nilable(), move(type));
+    return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::nilable(), loc.copyWithZeroLength(), move(type));
 }
 
 namespace {

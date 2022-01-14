@@ -1746,7 +1746,7 @@ class ResolveTypeMembersAndFieldsWalk {
                     loc = job.asgn->loc;
                 }
                 job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
-                                               core::Names::suggestType(), move(rhs));
+                                               core::Names::suggestType(), loc.copyWithZeroLength(), move(rhs));
             }
             return resultType;
         } else if (!core::isa_type<core::AliasType>(data->resultType)) {
@@ -2838,7 +2838,8 @@ private:
             }
 
             auto self = ast::MK::Self(mdef.loc);
-            mdef.rhs = ast::MK::Send(mdef.loc, std::move(self), core::Names::super(), numPosArgs, std::move(args));
+            mdef.rhs = ast::MK::Send(mdef.loc, std::move(self), core::Names::super(), mdef.loc.copyWithZeroLength(),
+                                     numPosArgs, std::move(args));
         } else if (mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
             if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                 e.setHeader("All methods in an interface must be declared abstract");

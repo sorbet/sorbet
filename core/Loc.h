@@ -25,11 +25,15 @@ struct LocOffsets {
     bool exists() const {
         return endLoc != INVALID_POS_LOC && beginLoc != INVALID_POS_LOC;
     }
+    bool empty() const {
+        ENFORCE_NO_TIMER(exists());
+        return beginLoc == endLoc;
+    }
     static LocOffsets none() {
         return LocOffsets{INVALID_POS_LOC, INVALID_POS_LOC};
     }
     LocOffsets join(LocOffsets other) const;
-    // For a given Loc, returns a zero-length version that starts at the same location.
+    // For a given LocOffsets, returns a zero-length version that starts at the same location.
     LocOffsets copyWithZeroLength() const {
         return LocOffsets{beginPos(), beginPos()};
     }
@@ -65,8 +69,17 @@ public:
     bool exists() const {
         return storage.fileRef != 0 && storage.offsets.exists();
     }
+    bool empty() const {
+        ENFORCE_NO_TIMER(exists());
+        return storage.offsets.empty();
+    }
 
     Loc join(Loc other) const;
+
+    // For a given Loc, returns a zero-length version that starts at the same location.
+    Loc copyWithZeroLength() const {
+        return {this->storage.fileRef, this->storage.offsets.copyWithZeroLength()};
+    }
 
     uint32_t beginPos() const {
         return storage.offsets.beginLoc;

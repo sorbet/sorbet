@@ -44,7 +44,8 @@ public:
             movedConstants.emplace_back(createConstAssign(*asgn));
 
             auto module = ast::MK::Constant(asgn->loc, core::Symbols::Module());
-            return ast::MK::Send2(asgn->loc, move(module), core::Names::constSet(), move(name), move(asgn->rhs));
+            return ast::MK::Send2(asgn->loc, move(module), core::Names::constSet(), asgn->loc.copyWithZeroLength(),
+                                  move(name), move(asgn->rhs));
         }
 
         return tree;
@@ -219,7 +220,8 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             }
 
             auto blk = ast::MK::Block(send->loc, move(body), std::move(new_args));
-            auto each = ast::MK::Send0Block(send->loc, iteratee.deepCopy(), core::Names::each(), move(blk));
+            auto each = ast::MK::Send0Block(send->loc, iteratee.deepCopy(), core::Names::each(),
+                                            send->loc.copyWithZeroLength(), move(blk));
             // put that into a method def named the appropriate thing
             auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, send->loc, move(name), move(each)));
             // add back any moved constants
@@ -333,7 +335,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto iteratee = getIteratee(send->getPosArg(0));
         // and then reconstruct the send but with a modified body
         return ast::MK::Send(
-            send->loc, ast::MK::Self(send->loc), send->fun, 1,
+            send->loc, ast::MK::Self(send->loc), send->fun, send->funLoc, 1,
             ast::MK::SendArgs(
                 move(send->getPosArg(0)),
                 ast::MK::Block(block->loc,

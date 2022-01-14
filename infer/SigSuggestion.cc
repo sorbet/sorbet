@@ -109,10 +109,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
     }
 
     core::CallLocs locs{
-        ctx.file,
-        bindLoc,
-        snd->receiverLoc,
-        snd->argLocs,
+        ctx.file, bindLoc, snd->receiverLoc, snd->funLoc, snd->argLocs,
     };
 
     auto numPosArgs = snd->numPosArgs;

@@ -925,10 +925,7 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
 
     InlinedVector<core::LocOffsets, 2> argLocs{loc.offsets()};
     core::CallLocs locs{
-        ctx.file,
-        loc.offsets(),
-        loc.offsets(),
-        argLocs,
+        ctx.file, loc.offsets(), loc.offsets(), loc.offsets(), argLocs,
     };
 
     core::DispatchArgs dispatchArgs{core::Names::flatten(), locs,    1,   args, recvType.type, recvType,
@@ -970,10 +967,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     checkFullyDefined = false;
                 }
                 core::CallLocs locs{
-                    ctx.file,
-                    bind.loc,
-                    send.receiverLoc,
-                    send.argLocs,
+                    ctx.file, bind.loc, send.receiverLoc, send.funLoc, send.argLocs,
                 };
 
                 // This is the main place where we type check a method, so we default by assuming
@@ -1220,10 +1214,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 InlinedVector<core::LocOffsets, 2> argLocs;
                 argLocs.emplace_back(bind.loc);
                 core::CallLocs locs{
-                    ctx.file,
-                    bind.loc,
-                    bind.loc,
-                    argLocs,
+                    ctx.file, bind.loc, bind.loc, bind.loc, argLocs,
                 };
 
                 const auto numPosArgs = 1;

@@ -803,6 +803,7 @@ struct CallLocs final {
     FileRef file;
     LocOffsets call;
     LocOffsets receiver;
+    LocOffsets fun;
     InlinedVector<LocOffsets, 2> &args;
 };
 
@@ -844,6 +845,9 @@ struct DispatchArgs {
     }
     Loc receiverLoc() const {
         return core::Loc(locs.file, locs.receiver);
+    }
+    Loc funLoc() const {
+        return core::Loc(locs.file, locs.fun);
     }
     Loc argLoc(size_t i) const {
         return core::Loc(locs.file, locs.args[i]);
