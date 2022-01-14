@@ -794,6 +794,37 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     return item;
 }
 
+CompletionTask::MethodSearchParams CompletionTask::methodSearchParamsForEmptyAssign(const core::GlobalState &gs,
+                                                                                    core::MethodRef enclosingMethod) {
+    auto returnType = core::Types::untypedUntracked();
+    auto receiverType = enclosingMethod.data(gs)->owner.data(gs)->externalType(); // self
+    auto dispatchMethod = core::MethodRef{};
+    size_t totalArgs = 0;
+    auto isPrivateOk = true;
+    return MethodSearchParams{
+        make_shared<core::DispatchResult>(returnType, receiverType, dispatchMethod),
+        totalArgs,
+        isPrivateOk,
+    };
+}
+
+// Manually craft a set of SearchParams that correspond to en "empty" cursor position
+CompletionTask::SearchParams CompletionTask::searchParamsForEmptyAssign(const core::GlobalState &gs, core::Loc queryLoc,
+                                                                        core::MethodRef enclosingMethod,
+                                                                        core::lsp::ConstantResponse::Scopes scopes) {
+    auto prefix = "";
+    // Create a fake DispatchResult to get method results
+    auto suggestKeywords = true;
+    return SearchParams{
+        queryLoc,
+        prefix,
+        methodSearchParamsForEmptyAssign(gs, enclosingMethod),
+        suggestKeywords,
+        enclosingMethod, // locals
+        core::lsp::ConstantResponse::Scopes{enclosingMethod.data(gs)->owner},
+    };
+}
+
 vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypecheckerDelegate &typechecker,
                                                                       SearchParams &params) {
     const auto &gs = typechecker.state();
@@ -955,28 +986,8 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
         SearchParams params;
         if (constantResp->name == core::Names::Constants::ErrorNode()) {
             // We're only getting a ConstantResult from the LSP because that's how we model "the
-            // user typed nothing. Manually craft a set of options that make sense to suggest here.
-            auto prefix = "";
-            // Create a fake DispatchResult to get method results
-            auto returnType = core::Types::untypedUntracked();
-            auto receiverType = constantResp->enclosingMethod.data(gs)->owner.data(gs)->externalType(); // self
-            auto dispatchMethod = core::MethodRef{};
-            size_t totalArgs = 0;
-            auto isPrivateOk = true;
-            auto methodSearchParams = MethodSearchParams{
-                make_shared<core::DispatchResult>(returnType, receiverType, dispatchMethod),
-                totalArgs,
-                isPrivateOk,
-            };
-            auto suggestKeywords = true;
-            params = SearchParams{
-                queryLoc,
-                prefix,
-                methodSearchParams,
-                suggestKeywords,
-                constantResp->enclosingMethod, // locals
-                constantResp->scopes,
-            };
+            // user typed nothing.
+            params = searchParamsForEmptyAssign(gs, queryLoc, constantResp->enclosingMethod, constantResp->scopes);
         } else {
             // Normal constant response.
             auto prefix = constantResp->name.shortName(gs);
@@ -988,6 +999,36 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             };
         }
         items = this->getCompletionItems(typechecker, params);
+    } else if (auto identResp = resp->isIdent()) {
+        auto varName = identResp->variable._name.shortName(gs);
+        auto nameLen = static_cast<int32_t>(varName.size());
+
+        auto termLocPrefix = identResp->termLoc.adjustLen(gs, 0, nameLen);
+
+        if (queryLoc.adjustLen(gs, -1 * nameLen, nameLen).source(gs) == varName) {
+            // Cursor at end of variable name
+            auto suggestKeywords = true;
+            auto prefix = varName;
+            auto params = SearchParams{
+                queryLoc,
+                prefix,
+                methodSearchParamsForEmptyAssign(gs, identResp->enclosingMethod),
+                suggestKeywords,
+                identResp->enclosingMethod,
+                core::lsp::ConstantResponse::Scopes{identResp->enclosingMethod.data(gs)->owner},
+            };
+            items = this->getCompletionItems(typechecker, params);
+        } else if (termLocPrefix.source(gs) == varName && !termLocPrefix.contains(queryLoc)) {
+            // This is *probably* (but not definitely necessarily) an IdentResponse for an
+            // assignment, with the cursor somewhere on the RHS of the `=` but before having typed
+            // anything. This case is super common for code like this (cursor is `|`):
+            //     x =|
+            //     y = nil
+            // This technically parses and comes back as an IdentResponse for the whole `x =`
+            // assignment. Let's just toss that away and suggest with an empty prefix.
+            auto params = searchParamsForEmptyAssign(gs, queryLoc, identResp->enclosingMethod, {});
+            items = this->getCompletionItems(typechecker, params);
+        }
     }
 
     response->result = make_unique<CompletionList>(false, move(items));

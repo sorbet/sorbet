@@ -34,5 +34,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def test_attr_writer<<todo method>>(x, &<blk>)
       <self>.foo_writer=(<emptyTree>::<C <ErrorNode>>)
     end
+
+    def test_before_variable<<todo method>>(x, &<blk>)
+      y = z = nil
+    end
   end
 end

@@ -30,4 +30,10 @@ class A
     self.foo_writer =
     #                ^ completion: x, foo, foo_writer=, ...
   end # error: unexpected token "end"
+
+  def test_before_variable(x)
+    y =
+    #  ^ completion: x, y, z, foo, ...
+    z = nil
+  end
 end
