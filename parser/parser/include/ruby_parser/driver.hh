@@ -3,16 +3,12 @@
 
 #include <memory>
 
+#include "builder.hh"
 #include "diagnostic.hh"
 #include "lexer.hh"
 #include "node.hh"
 
 namespace ruby_parser {
-
-struct builder;
-
-using ForeignPtr = const void *;
-using SelfPtr = const void *;
 
 struct node_list {
     node_list() = default;
