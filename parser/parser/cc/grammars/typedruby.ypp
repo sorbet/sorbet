@@ -1557,6 +1557,15 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                       args->concat($4);
                       $$ = args;
                     }
+                // There's an explanation of what's going on in this rule in the `assocs` rule.
+                | args tCOMMA fcall error assocs opt_block_arg
+                    {
+                      auto &args = $1;
+                      args->emplace_back(driver.build.call_method(self, nullptr, nullptr, $3, nullptr, nullptr, nullptr));
+                      args->emplace_back(driver.build.associate(self, nullptr, $5, nullptr));
+                      args->concat($6);
+                      $$ = args;
+                    }
                 | block_arg
                     {
                       $$ = driver.alloc.node_list($1);
