@@ -1937,6 +1937,14 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                       driver.lex.context.pop();
                       driver.current_arg_stack.pop();
                     }
+                | kDEF error
+                    {
+                      // TODO(jez) Special case a completion snippet for `def` similar to how we do
+                      // for `sig`. Might want to consider a special parser builder that sets the name
+                      // to something like `<def>` to make it easier to detect and also easier to
+                      // prevent the errors about "Method `def` does not exist".
+                      $$ = driver.build.call_method(self, nullptr, nullptr, $1, nullptr, nullptr, nullptr);
+                    }
                 | kBREAK
                     {
                       $$ = driver.build.keywordBreak(self, $1, nullptr, nullptr, nullptr);

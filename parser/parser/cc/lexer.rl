@@ -1613,6 +1613,40 @@ void lexer::set_state_expr_value() {
       ':'
       => { fhold; fgoto expr_beg; };
 
+      # Normally Ruby allows newline characters between the kDEF and the method
+      # name. In practice, no one uses that feature of Ruby, and it's much more
+      # convenient to be able to recover from a single extra `kDEF` token in
+      # the source code (can be the target of completion requests, etc.).
+      # Consider this example:
+      #     def
+      #     def foo; end
+      # By default, Ruby attempts to parse it like this:
+      #     def def foo;
+      #     end
+      # This is actually a succesful parse result, but likely not what the user
+      # wanted, given the tNL in the source code. Worse, for this example:
+      #     def
+      #     sig {void}
+      #     def foo; end
+      # it attempts to parse it like like this:
+      #     def sig {void}
+      #       def foo; end
+      #     <EOF>
+      # If bison consumes *anything* (like the `sig`) above before encountering
+      # an error and shifting the error token, everything it consumed up to the
+      # syntax error will have to be dropped in order for a rule like
+      #     | kDEF error
+      # to match. But then the problem repeats, because the `{void}` that
+      # remains is an error, and we throw more away.
+      #
+      # Emitting a tNL token between kDEF and the method name ensures that we
+      # force bison to discover a syntax error immediately, which then makes
+      # recovery possible, at the cost of breaking with Ruby compatibility.
+      # (Note that the actual tNL is emitted by fhold'ing and letting expr_end
+      # emit it.)
+      w_newline
+      => { fhold; fgoto expr_end; };
+
       '%s' c_any
       => {
         if (version == ruby_version::RUBY_23) {
@@ -2141,6 +2175,7 @@ void lexer::set_state_expr_value() {
       ':' ('&&' | '||') => {
         fhold; fhold;
         emit(token_type::tSYMBEG, tok_view(ts, ts + 1), ts, ts + 1);
+        // TODO(jez) Your change affects this rule, write a test.
         fgoto expr_fname;
       };
 
