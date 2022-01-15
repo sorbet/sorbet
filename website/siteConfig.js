@@ -52,6 +52,11 @@ const users = [
     infoLink: 'https://gusto.com/',
   },
   {
+    caption: 'Hummingbird',
+    image: 'img/hummingbird-logo.png',
+    infoLink: 'https://hummingbird.co/',
+  },
+  {
     caption: 'Kickstarter',
     image: 'img/kickstarter-logo.png',
     infoLink: 'https://www.kickstarter.com/',
