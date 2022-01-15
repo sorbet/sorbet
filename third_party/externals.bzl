@@ -296,6 +296,13 @@ package(default_visibility = ["//visibility:public"])
         build_file = "@com_stripe_ruby_typer//third_party/openssl:darwin.BUILD",
     )
 
+    # The default location of Homebrew is slightly different on arm64 Mac.
+    native.new_local_repository(
+        name = "system_ssl_darwin_arm64",
+        path = "/opt/homebrew/opt/openssl",
+        build_file = "@com_stripe_ruby_typer//third_party/openssl:darwin.BUILD",
+    )
+
     native.new_local_repository(
         name = "system_ssl_linux",
         path = "/usr",

@@ -12,6 +12,7 @@ cc_library(
         exclude = ["flycheck_*"],
     ) + select({
         "//tools/config:darwin": ["os/mac.cc"],
+        "//tools/config:darwin_arm64": ["os/mac.cc"],
         "//tools/config:webasm": ["os/emscripten.cc"],
         "//conditions:default": ["os/linux.cc"],
     }),
