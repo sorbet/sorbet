@@ -17,11 +17,6 @@ const users = [
   },
   // End Sorbet early adopters. Please alphabetize below this comment.
   {
-    caption: 'Atrium',
-    image: 'img/atrium-logo.jpg',
-    infoLink: 'https://www.atrium.co/',
-  },
-  {
     caption: 'Chan Zuckerberg Initiative',
     image: 'img/czi-logo.svg',
     infoLink: 'https://chanzuckerberg.com/',
