@@ -143,6 +143,23 @@ class Class < Module
   sig {returns(T.nilable(String))}
   def name(); end
 
+  # Returns an array of classes where the receiver is the direct superclass of
+  # the class, excluding singleton classes. The order of the returned array is
+  # not defined.
+  #
+  # ```ruby
+  # class A; end
+  # class B < A; end
+  # class C < B; end
+  # class D < A; end
+  #
+  # A.subclasses        #=> [D, B]
+  # B.subclasses        #=> [C]
+  # C.subclasses        #=> []
+  # ```
+  sig { returns(T::Array[Class]) }
+  def subclasses(); end
+
   # Returns the superclass of *class*, or `nil`.
   #
   # ```ruby
