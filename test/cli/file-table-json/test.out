@@ -550,6 +550,12 @@
    "min_error_level": "Max"
   },
   {
+   "path": "https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/error_highlight.rbi",
+   "sigil": "Stdlib",
+   "strict": "Stdlib",
+   "min_error_level": "Max"
+  },
+  {
    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/etc.rbi",
    "sigil": "Stdlib",
    "strict": "Stdlib",
