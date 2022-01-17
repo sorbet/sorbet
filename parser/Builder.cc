@@ -181,7 +181,8 @@ public:
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
         if (auto *id = parser::cast_node<Ident>(node.get())) {
             ENFORCE(id->name.kind() == core::NameKind::UTF8);
-            auto name_str = id->name.show(gs_);
+            // Because of the above enforce, we can use shortName here instead of show.
+            auto name_str = id->name.shortName(gs_);
             if (isNumberedParameterName(name_str) && driver_->lex.context.inDynamicBlock()) {
                 if (driver_->numparam_stack.seen_ordinary_params()) {
                     error(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
@@ -1566,9 +1567,9 @@ public:
         return parser::isa_node<String>(firstPart) || parser::isa_node<DString>(firstPart);
     }
 
-    void checkCircularArgumentReferences(const Node *node, std::string name) {
+    void checkCircularArgumentReferences(const Node *node, std::string_view name) {
         if (name == driver_->current_arg_stack.top()) {
-            error(ruby_parser::dclass::CircularArgumentReference, node->loc, name);
+            error(ruby_parser::dclass::CircularArgumentReference, node->loc, std::string(name));
         }
     }
 
