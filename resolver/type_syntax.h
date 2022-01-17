@@ -53,6 +53,7 @@ struct ParsedSig {
         bool checked = false;
         bool final = false;
         bool incompatibleOverride = false;
+        bool packagePrivate_ = false;
     } seen;
 
     TypeArgSpec &enterTypeArgByName(core::NameRef name);
