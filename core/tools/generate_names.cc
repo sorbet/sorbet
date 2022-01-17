@@ -108,6 +108,7 @@ NameDef names[] = {
     {"params"},
     {"final_", "final"},
     {"returns"},
+    {"packagePrivate_", "packageprivate"},
     {"void_", "void"},
     {"VOID", "VOID", true},
     {"checked"},
