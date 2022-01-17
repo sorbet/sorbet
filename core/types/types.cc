@@ -795,6 +795,18 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
     return ret;
 }
 
+core::ClassOrModuleRef Types::getClassForAppliedOrClassType(const GlobalState &gs, const TypePtr &ty) {
+    if (isa_type<ClassType>(ty)) {
+        auto s = cast_type_nonnull<ClassType>(ty);
+        return s.symbol;
+    } else if (isa_type<AppliedType>(ty)) {
+        auto at = cast_type_nonnull<AppliedType>(ty);
+        return at.klass;
+    }
+
+    return core::Symbols::noClassOrModule();
+}
+
 core::ClassOrModuleRef Types::getRepresentedClass(const GlobalState &gs, const TypePtr &ty) {
     if (!ty.derivesFrom(gs, core::Symbols::Module())) {
         return core::Symbols::noClassOrModule();

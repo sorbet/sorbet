@@ -1010,6 +1010,22 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         }
                     }
 
+                    if (it->main.method.exists() && it->main.method.data(ctx)->flags.isPackagePrivate) {
+                        core::ClassOrModuleRef klass =
+                            core::Types::getClassForAppliedOrClassType(ctx, it->main.receiver);
+                        if (klass.exists()) {
+                            const auto &curPkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
+                            if (curPkg.mangledName() != core::NameRef::noName() && !curPkg.ownsSymbol(ctx, klass)) {
+                                if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PackagePrivateMethod)) {
+                                    e.setHeader("Non-package-private call to package-private method `{}` on `{}`",
+                                                it->main.method.data(ctx)->name.show(ctx), it->main.receiver.show(ctx));
+                                    e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined in `{}` here",
+                                                   it->main.method.data(ctx)->owner.show(ctx));
+                                }
+                            }
+                        }
+                    }
+
                     lspQueryMatch = lspQueryMatch || lspQuery.matchesSymbol(it->main.method);
                     it = it->secondary.get();
                 }
