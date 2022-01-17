@@ -2869,6 +2869,9 @@ private:
         if (sig.seen.incompatibleOverride) {
             method.data(ctx)->flags.isIncompatibleOverride = true;
         }
+        if (sig.seen.packagePrivate_) {
+            method.data(ctx)->flags.isPackagePrivate = true;
+        }
         if (!sig.typeArgs.empty()) {
             method.data(ctx)->flags.isGenericMethod = true;
             for (auto &typeSpec : sig.typeArgs) {
