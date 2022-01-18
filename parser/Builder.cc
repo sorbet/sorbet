@@ -306,10 +306,10 @@ public:
 
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
         if (auto *id = parser::cast_node<Ident>(node.get())) {
-            auto name_str = id->name.show(gs_);
-            checkReservedForNumberedParameters(name_str, id->loc);
+            auto name = id->name.shortName(gs_);
+            checkReservedForNumberedParameters(name, id->loc);
 
-            driver_->lex.declare(name_str);
+            driver_->lex.declare(name);
             return make_unique<LVarLhs>(id->loc, id->name);
         } else if (auto *iv = parser::cast_node<IVar>(node.get())) {
             return make_unique<IVarLhs>(iv->loc, iv->name);
