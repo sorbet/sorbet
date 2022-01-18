@@ -76,10 +76,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@foo)
-        <self>.class().decorator().prop_get_logic(<self>, :foo, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -87,10 +84,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :foo)
-        <self>.instance_variable_set(:@foo, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -133,10 +127,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def default<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@default)
-        <self>.class().decorator().prop_get_logic(<self>, :default, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -144,10 +135,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def default=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :default)
-        <self>.instance_variable_set(:@default, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -155,10 +143,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def t_nilable<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@t_nilable)
-        <self>.class().decorator().prop_get_logic(<self>, :t_nilable, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -166,10 +151,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def t_nilable=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :t_nilable)
-        <self>.instance_variable_set(:@t_nilable, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -177,10 +159,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def array<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@array)
-        <self>.class().decorator().prop_get_logic(<self>, :array, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -188,10 +167,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def array=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :array)
-        <self>.instance_variable_set(:@array, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -199,10 +175,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def t_array<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@t_array)
-        <self>.class().decorator().prop_get_logic(<self>, :t_array, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -210,10 +183,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def t_array=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :t_array)
-        <self>.instance_variable_set(:@t_array, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -221,10 +191,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def hash_of<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@hash_of)
-        <self>.class().decorator().prop_get_logic(<self>, :hash_of, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -232,10 +199,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def hash_of=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :hash_of)
-        <self>.instance_variable_set(:@hash_of, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -243,10 +207,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def const_explicit<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@const_explicit)
-        <self>.class().decorator().prop_get_logic(<self>, :const_explicit, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -254,10 +215,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def const<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@const)
-        <self>.class().decorator().prop_get_logic(<self>, :const, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -265,10 +223,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def enum_prop<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@enum_prop)
-        <self>.class().decorator().prop_get_logic(<self>, :enum_prop, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -284,10 +239,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@foreign)
-        <self>.class().decorator().prop_get_logic(<self>, :foreign, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -295,10 +247,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign)
-        <self>.instance_variable_set(:@foreign, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -322,10 +271,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_lazy<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@foreign_lazy)
-        <self>.class().decorator().prop_get_logic(<self>, :foreign_lazy, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -333,10 +279,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_lazy=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_lazy)
-        <self>.instance_variable_set(:@foreign_lazy, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -360,10 +303,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_proc<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@foreign_proc)
-        <self>.class().decorator().prop_get_logic(<self>, :foreign_proc, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -371,10 +311,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_proc=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_proc)
-        <self>.instance_variable_set(:@foreign_proc, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -398,10 +335,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_invalid<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@foreign_invalid)
-        <self>.class().decorator().prop_get_logic(<self>, :foreign_invalid, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -409,10 +343,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_invalid=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_invalid)
-        <self>.instance_variable_set(:@foreign_invalid, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -444,10 +375,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def ifunset=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :ifunset)
-        <self>.instance_variable_set(:@ifunset, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -463,10 +391,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def ifunset_nilable=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :ifunset_nilable)
-        <self>.instance_variable_set(:@ifunset_nilable, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -474,10 +399,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def empty_hash_rules<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@empty_hash_rules)
-        <self>.class().decorator().prop_get_logic(<self>, :empty_hash_rules, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -485,10 +407,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def empty_hash_rules=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :empty_hash_rules)
-        <self>.instance_variable_set(:@empty_hash_rules, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -496,10 +415,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def hash_rules<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@hash_rules)
-        <self>.class().decorator().prop_get_logic(<self>, :hash_rules, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -625,10 +541,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def token<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@token)
-        <self>.class().decorator().prop_get_logic(<self>, :token, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -636,10 +549,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def token=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :token)
-        <self>.instance_variable_set(:@token, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -647,10 +557,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def created<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@created)
-        <self>.class().decorator().prop_get_logic(<self>, :created, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -658,10 +565,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def created=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :created)
-        <self>.instance_variable_set(:@created, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
@@ -697,10 +601,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def token<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@token)
-        <self>.class().decorator().prop_get_logic(<self>, :token, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -708,10 +609,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def token=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :token)
-        <self>.instance_variable_set(:@token, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -719,10 +617,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def created<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@created)
-        <self>.class().decorator().prop_get_logic(<self>, :created, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.include(<emptyTree>::<C T>::<C Props>)

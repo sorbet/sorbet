@@ -57,7 +57,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def using_t_struct_prop<<todo method>>(&<blk>)
-      @using_t_struct_prop
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -65,7 +65,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def using_t_struct_prop=<<todo method>>(arg0, &<blk>)
-      @using_t_struct_prop = arg0
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -73,7 +73,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def using_t_struct_const<<todo method>>(&<blk>)
-      @using_t_struct_const
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <runtime method definition of initialize>

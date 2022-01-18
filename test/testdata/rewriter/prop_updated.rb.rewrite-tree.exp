@@ -32,7 +32,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def updated<<todo method>>(&<blk>)
-      <self>.instance_variable_get(:@updated)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -40,10 +40,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def updated=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :updated)
-        <self>.instance_variable_set(:@updated, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)

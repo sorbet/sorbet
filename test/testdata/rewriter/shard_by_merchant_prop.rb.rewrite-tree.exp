@@ -26,10 +26,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def merchant<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@merchant)
-        <self>.class().decorator().prop_get_logic(<self>, :merchant, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
@@ -47,10 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def merchant<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@merchant)
-        <self>.class().decorator().prop_get_logic(<self>, :merchant, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.include(<emptyTree>::<C T>::<C Props>)

@@ -5,10 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def array_of_explicit<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@array_of_explicit)
-        <self>.class().decorator().prop_get_logic(<self>, :array_of_explicit, arg2)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -16,10 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def array_of_explicit=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :array_of_explicit)
-        <self>.instance_variable_set(:@array_of_explicit, arg0)
-      end
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.prop(:type, :type, <emptyTree>::<C String>)
