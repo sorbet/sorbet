@@ -1,3 +1,4 @@
+# compiled: true
 # typed: true
 
 module Opus::Autogen::Tokens

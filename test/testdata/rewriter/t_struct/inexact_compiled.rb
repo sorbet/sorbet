@@ -1,3 +1,4 @@
+# compiled: true
 # typed: strict
 
 class Inexact < T::InexactStruct

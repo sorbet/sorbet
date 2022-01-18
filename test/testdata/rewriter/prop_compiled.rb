@@ -1,3 +1,4 @@
+# compiled: true
 # typed: true
 class NotAODM
     def self.prop(*args); end

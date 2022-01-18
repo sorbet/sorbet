@@ -1,3 +1,4 @@
+# compiled: true
 # typed: true
 
 class ComputingProps
