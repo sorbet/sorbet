@@ -5,7 +5,7 @@ module A::A2
 
   sig {void}
   def baz
-    # A.foo
-    # A.new.foo
+    A.foo
+    A.new.foo
   end
 end
