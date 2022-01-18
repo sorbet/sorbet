@@ -1673,7 +1673,7 @@ public:
                parser::isa_node<Hash>(&node);
     }
 
-    void checkReservedForNumberedParameters(std::string name, core::LocOffsets loc) {
+    void checkReservedForNumberedParameters(std::string_view name, core::LocOffsets loc) {
         if (isNumberedParameterName(name)) {
             core::Loc location = core::Loc(file_, loc);
 
