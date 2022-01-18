@@ -12,4 +12,10 @@ class A
   def foo
     '1'
   end
+
+  sig {void}
+  def test
+    self.class.foo
+    foo
+  end
 end
