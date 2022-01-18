@@ -532,7 +532,7 @@ public:
         if (name != nullptr) {
             loc = tokLoc(name);
             nm = gs_.enterNameUTF8(name->view());
-            checkReservedForNumberedParameters(name->asString(), loc);
+            checkReservedForNumberedParameters(name->view(), loc);
         } else {
             loc = tokLoc(amper);
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
@@ -782,7 +782,7 @@ public:
         core::LocOffsets declLoc = tokLoc(def, name).join(maybe_loc(args));
         core::LocOffsets loc = tokLoc(def, end);
 
-        checkReservedForNumberedParameters(name->asString(), declLoc);
+        checkReservedForNumberedParameters(name->view(), declLoc);
 
         return make_unique<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name->view()), std::move(args), std::move(body));
     }
@@ -981,14 +981,14 @@ public:
 
     unique_ptr<Node> kwarg(const token *name) {
         core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->asString(), loc);
+        checkReservedForNumberedParameters(name->view(), loc);
 
         return make_unique<Kwarg>(loc, gs_.enterNameUTF8(name->view()));
     }
 
     unique_ptr<Node> kwoptarg(const token *name, unique_ptr<Node> value) {
         core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->asString(), loc);
+        checkReservedForNumberedParameters(name->view(), loc);
 
         return make_unique<Kwoptarg>(loc.join(value->loc), gs_.enterNameUTF8(name->view()), tokLoc(name),
                                      std::move(value));
@@ -1005,7 +1005,7 @@ public:
         if (name != nullptr) {
             loc = loc.join(tokLoc(name));
             nm = gs_.enterNameUTF8(name->view());
-            checkReservedForNumberedParameters(name->asString(), loc);
+            checkReservedForNumberedParameters(name->view(), loc);
         } else {
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter_);
         }
@@ -1233,7 +1233,7 @@ public:
 
     unique_ptr<Node> optarg_(const token *name, const token *eql, unique_ptr<Node> value) {
         core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->asString(), loc);
+        checkReservedForNumberedParameters(name->view(), loc);
 
         return make_unique<Optarg>(loc.join(value->loc), gs_.enterNameUTF8(name->view()), tokLoc(name),
                                    std::move(value));
@@ -1336,7 +1336,7 @@ public:
             nameLoc = tokLoc(name);
             loc = loc.join(nameLoc);
             nm = gs_.enterNameUTF8(name->view());
-            checkReservedForNumberedParameters(name->asString(), nameLoc);
+            checkReservedForNumberedParameters(name->view(), nameLoc);
         } else {
             // case like 'def m(*); end'
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::star(), ++uniqueCounter_);
@@ -1351,7 +1351,7 @@ public:
 
     unique_ptr<Node> shadowarg(const token *name) {
         core::LocOffsets loc = tokLoc(name);
-        checkReservedForNumberedParameters(name->asString(), loc);
+        checkReservedForNumberedParameters(name->view(), loc);
 
         return make_unique<Shadowarg>(loc, gs_.enterNameUTF8(name->view()));
     }
