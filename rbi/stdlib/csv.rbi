@@ -271,9 +271,9 @@ class CSV < Object
         path: T.any(String, ::Sorbet::Private::Static::IOLike),
         mode: String,
         options: BasicObject,
-        blk: T.nilable(T.proc.params(arg0: T.any(T::Array[T.nilable(T.untyped)], CSV::Row)).void),
+        blk: T.nilable(T.proc.params(arg0: T.any(T::Array[T.untyped], CSV::Row)).void),
     )
-    .returns(T.nilable(T::Enumerator[T.any(T::Array[T.nilable(T.untyped)], CSV::Row)]))
+    .returns(T.nilable(T::Enumerator[T.any(T::Array[T.untyped], CSV::Row)]))
   end
   def self.foreach(path, mode="r", **options, &blk); end
 
@@ -485,7 +485,7 @@ class CSV < Object
     .returns(
       T.any(
         CSV::Table,
-        T::Array[T::Array[T.nilable(T.untyped)]],
+        T::Array[T::Array[T.untyped]],
       )
     )
   end
@@ -493,7 +493,7 @@ class CSV < Object
     params(
         str: String,
         options: T::Hash[Symbol, T.untyped],
-        blk: T.proc.params(arg0: T.any(CSV::Row, T::Array[T.nilable(T.untyped)])).void
+        blk: T.proc.params(arg0: T.any(CSV::Row, T::Array[T.untyped])).void
     ).void
   end
   def self.parse(str, options=T.unsafe(nil), &blk); end
@@ -941,7 +941,7 @@ class CSV::Row < Object
   include Enumerable
 
   extend T::Generic
-  Elem = type_member(:out, fixed: T.nilable(T.untyped))
+  Elem = type_member(:out, fixed: T.untyped)
 
   # Construct a new
   # [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) from
@@ -1189,7 +1189,7 @@ class CSV::Table < Object
   include Enumerable
 
   extend T::Generic
-  Elem = type_member(:out, fixed: T.any(CSV::Row, T::Array[T.nilable(T.untyped)]))
+  Elem = type_member(:out, fixed: T.any(CSV::Row, T::Array[T.untyped]))
 
   # Constructs a new
   # [`CSV::Table`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html) from
@@ -1225,7 +1225,7 @@ class CSV::Table < Object
   # This method returns the table for chaining.
   sig do
     params(
-      row_or_array: T.any(CSV::Row, T::Array[T.nilable(T.untyped)])
+      row_or_array: T.any(CSV::Row, T::Array[T.untyped])
     ).returns(T.self_type)
   end
   def <<(row_or_array); end
@@ -1247,7 +1247,7 @@ class CSV::Table < Object
   # no effect on the table.
   sig { params(index_or_header: Integer).returns(T.nilable(Elem)) }
   sig { params(index_or_header: T::Range[Integer]).returns(T::Array[Elem]) }
-  sig { params(index_or_header: BasicObject).returns(T::Array[T.nilable(T.untyped)]) }
+  sig { params(index_or_header: BasicObject).returns(T::Array[T.untyped]) }
   def [](index_or_header); end
 
   # In the default mixed mode, this method assigns rows for index access and
@@ -1360,7 +1360,7 @@ class CSV::Table < Object
   # objects by calling dig at each step, returning nil if any intermediate step
   # is nil.
   sig { params(index_or_header: BasicObject).returns(Elem) }
-  sig { params(index_or_header: BasicObject, index_or_headers: BasicObject).returns(T.nilable(T.untyped)) }
+  sig { params(index_or_header: BasicObject, index_or_headers: BasicObject).returns(T.untyped) }
   def dig(index_or_header, *index_or_headers); end
 
   # In the default mixed mode or row mode, iteration is the standard row major
@@ -1410,7 +1410,7 @@ class CSV::Table < Object
   # This method returns the table for chaining.
   sig do
     params(
-      rows: T.any(CSV::Row, T::Array[T.nilable(T.untyped)])
+      rows: T.any(CSV::Row, T::Array[T.untyped])
     ).returns(T.self_type)
   end
   def push(*rows); end
@@ -1421,7 +1421,7 @@ class CSV::Table < Object
   # Returns the table as an
   # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of Arrays. Headers
   # will be the first row, then all of the field rows will follow.
-  sig { returns(T::Array[T::Array[T.nilable(T.untyped)]]) }
+  sig { returns(T::Array[T::Array[T.untyped]]) }
   def to_a; end
 
   # Returns the table as a complete
