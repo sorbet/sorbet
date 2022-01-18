@@ -105,6 +105,7 @@ bool wantTypedInitialize(SyntacticSuperClass syntacticSuperClass) {
 struct PropContext {
     SyntacticSuperClass syntacticSuperClass = SyntacticSuperClass::Unknown;
     ast::ClassDef::Kind classDefKind;
+    bool needsRealPropBodies;
 };
 
 struct PropInfo {
@@ -353,7 +354,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
 
     nodes.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(getType)));
 
-    if (computedByMethodName.exists()) {
+    if (propContext.needsRealPropBodies && computedByMethodName.exists()) {
         // Given `const :foo, type, computed_by: <name>`, where <name> is a Symbol pointing to a class method,
         // assert that the method takes 1 argument (of any type), and returns the same type as the prop,
         // via `T.assert_type!(self.class.compute_foo(T.unsafe(nil)), type)` in the getter.
@@ -367,10 +368,10 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
             ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod), ASTUtil::dupType(getType));
         auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseUnimplemented(loc));
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
-    } else if (propContext.classDefKind == ast::ClassDef::Kind::Module) {
+    } else if (propContext.needsRealPropBodies && propContext.classDefKind == ast::ClassDef::Kind::Module) {
         // Not all modules include Kernel, can't make an initialize, etc. so we're punting on props in modules rn.
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
-    } else if (ret.ifunset == nullptr) {
+    } else if (propContext.needsRealPropBodies && ret.ifunset == nullptr) {
         if (knownNonModel(propContext.syntacticSuperClass)) {
             ast::MethodDef::Flags flags;
             flags.isAttrReader = true;
@@ -418,10 +419,10 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         sigArgs.emplace_back(ASTUtil::dupType(setType));
         nodes.emplace_back(ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType)));
 
-        if (propContext.classDefKind == ast::ClassDef::Kind::Module) {
+        if (propContext.needsRealPropBodies && propContext.classDefKind == ast::ClassDef::Kind::Module) {
             // Not all modules include Kernel, can't make an initialize, etc. so we're punting on props in modules rn.
             nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
-        } else if (ret.enum_ == nullptr) {
+        } else if (propContext.needsRealPropBodies && ret.enum_ == nullptr) {
             if (knownNonDocument(propContext.syntacticSuperClass)) {
                 if (wantTypedInitialize(propContext.syntacticSuperClass)) {
                     auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
@@ -599,7 +600,14 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
             syntacticSuperClass = SyntacticSuperClass::ChalkODMDocument;
         }
     }
-    auto propContext = PropContext{syntacticSuperClass, klass->kind};
+    // The compiler is going to turn the bodies of rewritten prop methods into actual
+    // code, so they need to be faithful replications of runtime behavior.  If we're
+    // not compiling the file, however, then the static checker only really cares about
+    // the sigs and we can put some smaller untyped representation in the methods.
+    //
+    // This change saves ~2% memory on large codebases with many props.
+    const bool needsRealPropBodies = ctx.file.data(ctx.state).compiledLevel == core::CompiledLevel::True;
+    auto propContext = PropContext{syntacticSuperClass, klass->kind, needsRealPropBodies};
     UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceNodes;
     replaceNodes.reserve(klass->rhs.size());
     vector<PropInfo> props;
