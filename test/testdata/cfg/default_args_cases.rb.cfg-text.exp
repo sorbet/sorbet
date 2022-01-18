@@ -219,7 +219,7 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(Test), <block-pre-call-temp
 # backedges
 # - bb2(rubyRegionId=1)
 bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(Test)):
-    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$7, sig>
+    <statTemp>$3: T::Private::Methods::DeclBuilder = Solve<<block-pre-call-temp>$7, sig>
     <self>: T.class_of(Test) = <selfRestore>$8
     <cfgAlias>$38: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <block-pre-call-temp>$40: Sorbet::Private::Static::Void = <cfgAlias>$38: T.class_of(Sorbet::Private::Static).sig(<self>: T.class_of(Test))
@@ -262,7 +262,7 @@ bb6[rubyRegionId=2, firstDead=-1](<self>: T.class_of(Test), <block-pre-call-temp
 # backedges
 # - bb6(rubyRegionId=2)
 bb7[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$40: Sorbet::Private::Static::Void, <selfRestore>$41: T.class_of(Test)):
-    <statTemp>$36: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$40, sig>
+    <statTemp>$36: T::Private::Methods::DeclBuilder = Solve<<block-pre-call-temp>$40, sig>
     <self>: T.class_of(Test) = <selfRestore>$41
     <cfgAlias>$59: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <block-pre-call-temp>$61: Sorbet::Private::Static::Void = <cfgAlias>$59: T.class_of(Sorbet::Private::Static).sig(<self>: T.class_of(Test))
@@ -297,7 +297,7 @@ bb10[rubyRegionId=3, firstDead=-1](<self>: T.class_of(Test), <block-pre-call-tem
 # backedges
 # - bb10(rubyRegionId=3)
 bb11[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$61: Sorbet::Private::Static::Void, <selfRestore>$62: T.class_of(Test)):
-    <statTemp>$57: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$61, sig>
+    <statTemp>$57: T::Private::Methods::DeclBuilder = Solve<<block-pre-call-temp>$61, sig>
     <self>: T.class_of(Test) = <selfRestore>$62
     <cfgAlias>$81: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$83: T.class_of(T) = alias <C T>

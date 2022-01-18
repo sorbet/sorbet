@@ -3,20 +3,37 @@ class T::Private::Methods::DeclBuilder
   sig {params(params: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def type_parameters(*params); end
 
-  sig {returns(T::Private::Methods::DeclBuilder)}
-  def abstract; end
+  sig do
+    params(
+      blk: T.nilable(T.proc.bind(T::Private::Methods::DeclBuilder).void)
+    ).returns(T::Private::Methods::DeclBuilder)
+  end
+  def abstract(&blk); end
 
-  sig {returns(T::Private::Methods::DeclBuilder)}
-  def final; end
+  sig do
+    params(
+      blk: T.nilable(T.proc.bind(T::Private::Methods::DeclBuilder).void)
+    ).returns(T::Private::Methods::DeclBuilder)
+  end
+  def final(&blk); end
 
   sig {returns(T::Private::Methods::DeclBuilder)}
   def implementation; end
 
-  sig {params(allow_incompatible: T::Boolean).returns(T::Private::Methods::DeclBuilder)}
-  def override(allow_incompatible: false); end
+  sig do
+    params(
+      allow_incompatible: T::Boolean,
+      blk: T.nilable(T.proc.bind(T::Private::Methods::DeclBuilder).void)
+    ).returns(T::Private::Methods::DeclBuilder)
+  end
+  def override(allow_incompatible: false, &blk); end
 
-  sig {returns(T::Private::Methods::DeclBuilder)}
-  def overridable; end
+  sig do
+    params(
+      blk: T.nilable(T.proc.bind(T::Private::Methods::DeclBuilder).void)
+    ).returns(T::Private::Methods::DeclBuilder)
+  end
+  def overridable(&blk); end
 
   sig {params(claz: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def bind(claz); end

@@ -7,13 +7,13 @@
 class Normal
   extend T::Sig
 
-  sig # error: no block
+  sig # error: Signature declarations expect a block
   #  ^ completion: sig
   #  ^ apply-completion: [A] item: 0
   def nullary_returns_nil
   end
 
-  sig # error: no block
+  sig # error: Signature declarations expect a block
   #  ^ completion: sig
   #  ^ apply-completion: [B] item: 0
   def typed_params_and_returns(x)
@@ -24,5 +24,6 @@ end
 class NoSigInScope
   sig # error: does not exist
   #  ^ completion: (nothing)
+# ^^^ error: Signature declarations expect a block
   def no_results_without_extend_tsig; end
 end

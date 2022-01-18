@@ -5,7 +5,7 @@ class Module
 end
 
 class A
-  sig # error: no block
+  sig # error: Signature declarations expect a block
   #  ^ apply-completion: [A] item: 0
   def foo; end
 
