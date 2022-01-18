@@ -271,128 +271,38 @@ module Psych
   NOT_GIVEN = T.let(T.unsafe(nil), Object)
 
   ###
-  # Load `yaml` in to a Ruby data structure. If multiple documents are provided,
-  # the object contained in the first document will be returned. `filename` will
-  # be used in the exception message if any exception is raised while parsing.
-  # If `yaml` is empty, it returns the specified `fallback` return value, which
-  # defaults to `false`.
+  # Load +yaml+ in to a Ruby data structure.  If multiple documents are
+  # provided, the object contained in the first document will be returned.
+  # +filename+ will be used in the exception message if any exception
+  # is raised while parsing.  If +yaml+ is empty, it returns
+  # the specified +fallback+ return value, which defaults to +false+.
   #
-  # Raises a
-  # [`Psych::SyntaxError`](https://docs.ruby-lang.org/en/2.7.0/Psych/SyntaxError.html)
-  # when a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) syntax error
-  # is detected.
+  # Raises a Psych::SyntaxError when a YAML syntax error is detected.
   #
   # Example:
   #
-  # ```ruby
-  # Psych.load("--- a")             # => 'a'
-  # Psych.load("---\n - a\n - b")   # => ['a', 'b']
+  #   Psych.load("--- a")             # => 'a'
+  #   Psych.load("---\n - a\n - b")   # => ['a', 'b']
   #
-  # begin
-  #   Psych.load("--- `", filename: "file.txt")
-  # rescue Psych::SyntaxError => ex
-  #   ex.file    # => 'file.txt'
-  #   ex.message # => "(file.txt): found character that cannot start any token"
-  # end
-  # ```
+  #   begin
+  #     Psych.load("--- `", filename: "file.txt")
+  #   rescue Psych::SyntaxError => ex
+  #     ex.file    # => 'file.txt'
+  #     ex.message # => "(file.txt): found character that cannot start any token"
+  #   end
   #
-  # When the optional `symbolize_names` keyword argument is set to a true value,
-  # returns symbols for keys in
-  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) objects (default:
-  # strings).
+  # When the optional +symbolize_names+ keyword argument is set to a
+  # true value, returns symbols for keys in Hash objects (default: strings).
   #
-  # ```ruby
-  # Psych.load("---\n foo: bar")                         # => {"foo"=>"bar"}
-  # Psych.load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
-  # ```
+  #   Psych.load("---\n foo: bar")                         # => {"foo"=>"bar"}
+  #   Psych.load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
   #
-  # Raises a [`TypeError`](https://docs.ruby-lang.org/en/2.7.0/TypeError.html)
-  # when `yaml` parameter is
-  # [`NilClass`](https://docs.ruby-lang.org/en/2.7.0/NilClass.html)
+  # Raises a TypeError when `yaml` parameter is NilClass.  This method is
+  # similar to `safe_load` except that `Symbol` objects are allowed by default.
   #
-  # NOTE: This method \*should not\* be used to parse untrusted documents, such
-  # as [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) documents that
-  # are supplied via user input. Instead, please use the
-  # [`safe_load`](https://docs.ruby-lang.org/en/2.7.0/Psych.html#method-c-safe_load)
-  # method.
   sig do
     params(
       yaml: T.any(String, StringIO, IO),
-      legacy_filename: Object,
-      filename: T.nilable(String),
-      fallback: T.untyped,
-      symbolize_names: T::Boolean,
-      freeze: T::Boolean,
-    )
-    .returns(T.untyped)
-  end
-  def self.load(yaml, legacy_filename = T.unsafe(nil), filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil)); end
-
-  ###
-  # Safely load the yaml string in `yaml`. By default, only the following
-  # classes are allowed to be deserialized:
-  #
-  # *   [`TrueClass`](https://docs.ruby-lang.org/en/2.7.0/TrueClass.html)
-  # *   [`FalseClass`](https://docs.ruby-lang.org/en/2.7.0/FalseClass.html)
-  # *   [`NilClass`](https://docs.ruby-lang.org/en/2.7.0/NilClass.html)
-  # *   [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html)
-  # *   [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
-  # *   [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
-  # *   [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
-  #
-  #
-  # Recursive data structures are not allowed by default. Arbitrary classes can
-  # be allowed by adding those classes to the `permitted_classes` keyword
-  # argument. They are additive. For example, to allow
-  # [`Date`](https://docs.ruby-lang.org/en/2.7.0/Date.html) deserialization:
-  #
-  # ```ruby
-  # Psych.safe_load(yaml, permitted_classes: [Date])
-  # ```
-  #
-  # Now the [`Date`](https://docs.ruby-lang.org/en/2.7.0/Date.html) class can be
-  # loaded in addition to the classes listed above.
-  #
-  # Aliases can be explicitly allowed by changing the `aliases` keyword
-  # argument. For example:
-  #
-  # ```ruby
-  # x = []
-  # x << x
-  # yaml = Psych.dump x
-  # Psych.safe_load yaml               # => raises an exception
-  # Psych.safe_load yaml, aliases: true # => loads the aliases
-  # ```
-  #
-  # A
-  # [`Psych::DisallowedClass`](https://docs.ruby-lang.org/en/2.7.0/Psych/DisallowedClass.html)
-  # exception will be raised if the yaml contains a class that isn't in the
-  # `permitted_classes` list.
-  #
-  # A
-  # [`Psych::BadAlias`](https://docs.ruby-lang.org/en/2.7.0/Psych/BadAlias.html)
-  # exception will be raised if the yaml contains aliases but the `aliases`
-  # keyword argument is set to false.
-  #
-  # `filename` will be used in the exception message if any exception is raised
-  # while parsing.
-  #
-  # When the optional `symbolize_names` keyword argument is set to a true value,
-  # returns symbols for keys in
-  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) objects (default:
-  # strings).
-  #
-  # ```ruby
-  # Psych.safe_load("---\n foo: bar")                         # => {"foo"=>"bar"}
-  # Psych.safe_load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
-  # ```
-  sig do
-    params(
-      yaml: T.any(String, StringIO, IO),
-      legacy_permitted_classes: Object,
-      legacy_permitted_symbols: Object,
-      legacy_aliases: Object,
-      legacy_filename: Object,
       permitted_classes: T::Array[Class],
       permitted_symbols: T::Array[Symbol],
       aliases: T::Boolean,
@@ -403,7 +313,68 @@ module Psych
     )
     .returns(T.untyped)
   end
-  def self.safe_load(yaml, legacy_permitted_classes = T.unsafe(nil), legacy_permitted_symbols = T.unsafe(nil), legacy_aliases = T.unsafe(nil), legacy_filename = T.unsafe(nil), permitted_classes: T.unsafe(nil), permitted_symbols: T.unsafe(nil), aliases: T.unsafe(nil), filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil)); end
+  def self.load(yaml, permitted_classes: [Symbol], permitted_symbols: [], aliases: false, filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: false, freeze: false); end
+
+  ###
+  # Safely load the yaml string in +yaml+.  By default, only the following
+  # classes are allowed to be deserialized:
+  #
+  # * [`TrueClass`](https://docs.ruby-lang.org/en/3.1/TrueClass.html)
+  # * [`FalseClass`](`https://docs.ruby-lang.org/en/3.1/FalseClass.html)
+  # * [`NilClass`](`https://docs.ruby-lang.org/en/3.1/NilClass.html)
+  # * [`Integer`](`https://docs.ruby-lang.org/en/3.1/Integer.html)
+  # * [`Float`](`https://docs.ruby-lang.org/en/3.1/Float.html)
+  # * [`String`](`https://docs.ruby-lang.org/en/3.1/String.html)
+  # * [`Array`](`https://docs.ruby-lang.org/en/3.1/Array.html)
+  # * [`Hash`](https://docs.ruby-lang.org/en/3.1/Hash.html)
+
+  #
+  # Recursive data structures are not allowed by default.  Arbitrary classes
+  # can be allowed by adding those classes to the +permitted_classes+ keyword argument.  They are
+  # additive.  For example, to allow Date deserialization:
+  #
+  #   Psych.safe_load(yaml, permitted_classes: [Date])
+  #
+  # Now the Date class can be loaded in addition to the classes listed above.
+  #
+  # Aliases can be explicitly allowed by changing the +aliases+ keyword argument.
+  # For example:
+  #
+  #   x = []
+  #   x << x
+  #   yaml = Psych.dump x
+  #   Psych.safe_load yaml               # => raises an exception
+  #   Psych.safe_load yaml, aliases: true # => loads the aliases
+  #
+  # A Psych::DisallowedClass exception will be raised if the yaml contains a
+  # class that isn't in the +permitted_classes+ list.
+  #
+  # A Psych::BadAlias exception will be raised if the yaml contains aliases
+  # but the +aliases+ keyword argument is set to false.
+  #
+  # +filename+ will be used in the exception message if any exception is raised
+  # while parsing.
+  #
+  # When the optional +symbolize_names+ keyword argument is set to a
+  # true value, returns symbols for keys in Hash objects (default: strings).
+  #
+  #   Psych.safe_load("---\n foo: bar")                         # => {"foo"=>"bar"}
+  #   Psych.safe_load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
+  #
+  sig do
+    params(
+      yaml: T.any(String, StringIO, IO),
+      permitted_classes: T::Array[Class],
+      permitted_symbols: T::Array[Symbol],
+      aliases: T::Boolean,
+      filename: T.nilable(String),
+      fallback: T.untyped,
+      symbolize_names: T::Boolean,
+      freeze: T::Boolean,
+    )
+    .returns(T.untyped)
+  end
+  def self.safe_load(yaml, permitted_classes: [], permitted_symbols: [], aliases: false, filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: false, freeze: false); end
 
   ###
   # Parse a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) string in
