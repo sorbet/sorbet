@@ -25,6 +25,20 @@ bool isTNilable(const ast::ExpressionPtr &expr) {
     return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv);
 }
 
+bool isTUntyped(const ast::ExpressionPtr &expr) {
+    auto *send = ast::cast_tree<ast::Send>(expr);
+    return send != nullptr && send->fun == core::Names::untyped() && isT(send->recv);
+}
+
+bool isTNilableTUntyped(const ast::ExpressionPtr &expr) {
+    if (!isTNilable(expr)) {
+        return false;
+    }
+
+    auto &body = ast::cast_tree_nonnull<ast::Send>(expr);
+    return body.numPosArgs() == 1 && !body.hasKwArgs() && !body.hasBlock() && isTUntyped(body.getPosArg(0));
+}
+
 bool isTStruct(const ast::ExpressionPtr &expr) {
     auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() && isT(struct_->scope);
@@ -235,6 +249,27 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         return std::nullopt;
     }
 
+    if (isTNilableTUntyped(ret.type)) {
+        auto loc = ret.type.loc();
+        if (auto e = ctx.beginError(loc, core::errors::Rewriter::NilableUntyped)) {
+            e.setHeader("`{}` is the same as `{}`", "T.nilable(T.untyped)", "T.untyped");
+            e.replaceWith("Use `T.untyped`", core::Loc{ctx.file, loc}, "T.untyped");
+
+            bool addDefault = true;
+            if (rulesTree != nullptr) {
+                auto *rules = ast::cast_tree<ast::Hash>(rulesTree);
+                addDefault = !ASTUtil::hasHashValue(ctx, *rules, core::Names::default_());
+            }
+
+            if (addDefault) {
+                auto end = core::Loc{ctx.file, core::LocOffsets{send->loc.endPos(), send->loc.endPos()}};
+                e.replaceWith("Add `default: nil`", end, ", default: nil");
+            }
+        }
+
+        // rewrite the type to T.untyped to avoid re-raising the same error later on.
+        ret.type = ast::MK::Untyped(loc);
+    }
     // ----- Parse any extra options -----
     if (rulesTree) {
         auto *rules = ast::cast_tree<ast::Hash>(rulesTree);
