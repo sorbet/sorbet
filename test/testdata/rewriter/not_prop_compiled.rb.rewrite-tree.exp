@@ -1,0 +1,43 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C ThingsWhichUsedToBePropSyntax><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Array>)
+    end
+
+    def array_of_explicit<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@array_of_explicit)
+        <self>.class().decorator().prop_get_logic(<self>, :array_of_explicit, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C Array>).returns(<emptyTree>::<C Array>)
+    end
+
+    def array_of_explicit=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :array_of_explicit)
+        <self>.instance_variable_set(:@array_of_explicit, arg0)
+      end
+    end
+
+    <self>.prop(:type, :type, <emptyTree>::<C String>)
+
+    <self>.prop(:object)
+
+    <self>.prop(:array_of, :array, <emptyTree>::<C String>)
+
+    <self>.prop(:array_of_explicit, <emptyTree>::<C Array>, :array, <emptyTree>::<C String>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :array_of_explicit, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :array_of_explicit=, :normal)
+
+    <self>.prop(:no_class_arg, :type, <emptyTree>::<C Array>, :immutable, true, :array, <emptyTree>::<C String>)
+
+    <self>.prop(:proc_type, :type, <emptyTree>::<C T>.proc().params(:x, <emptyTree>::<C Integer>).void())
+
+    <self>.prop(:enum_prop, :enum, ["hello", "goodbye"])
+  end
+end

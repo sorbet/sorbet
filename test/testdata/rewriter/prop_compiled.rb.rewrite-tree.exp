@@ -1,0 +1,822 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def main<<todo method>>(&<blk>)
+    begin
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo=("b"))
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo2())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo2=("b"))
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().default())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().t_nilable())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().t_array())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().hash_of())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().const_explicit())
+      <emptyTree>::<C AdvancedODM>.new().const_explicit=("b")
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().const())
+      <emptyTree>::<C AdvancedODM>.new().const=("b")
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().enum_prop())
+      <emptyTree>::<C AdvancedODM>.new().enum_prop=("hello")
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_!())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_lazy_())
+      <emptyTree>::<C AdvancedODM>.new().foreign_invalid_()
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers>.new().token())
+      <emptyTree>::<C PropHelpers>.new().token=("tok_token")
+      <emptyTree>::<C PropHelpers>.new().token=(nil)
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers>.new().created())
+      <emptyTree>::<C PropHelpers>.new().created=(0.000000)
+      <emptyTree>::<C PropHelpers>.new().created=(nil)
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers2>.new().token())
+      <emptyTree>::<C PropHelpers2>.new().token=("tok_token")
+      <emptyTree>::<C PropHelpers2>.new().token=(nil)
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers2>.new().created())
+      <emptyTree>::<C PropHelpers2>.new().created=(0.000000)
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C EncryptedProp>.new().foo())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C EncryptedProp>.new().encrypted_foo())
+      <emptyTree>::<C EncryptedProp>.new().foo=("hello")
+      <emptyTree>::<C EncryptedProp>.new().foo=(nil)
+      <emptyTree>::<C EncryptedProp>.new().bar=("hello")
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().ifunset())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().ifunset_nilable())
+      <emptyTree>::<C AdvancedODM>.new().ifunset=(nil)
+      <emptyTree>::<C AdvancedODM>.new().ifunset_nilable=(nil)
+    end
+  end
+
+  class <emptyTree>::<C NotAODM><<C <todo sym>>> < (::<todo sym>)
+    def self.prop<<todo method>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :prop, :normal)
+
+    <self>.prop()
+
+    <self>.prop(:foo, :not_a_string)
+
+    <self>.prop("not_a_symbol", <emptyTree>::<C String>)
+
+    <self>.prop(:foo, <emptyTree>::<C String>, "not_a_hash")
+
+    <self>.prop("too", <emptyTree>::<C String>, {}, "many")
+
+    <self>.optional(:company_name, <emptyTree>::<C String>, :nonempty_string)
+
+    <self>.optional(:day, <emptyTree>::<C IntegerParam>.new(:min, 1, :max, 31))
+
+    <self>.optional(:name, <emptyTree>::<C StringParam>.alphanumeric())
+
+    <self>.optional(:how_many, <emptyTree>::<C Opus>::<C Param>::<C CaseParam>.new(<self>.how_many_cases(), <emptyTree>::<C Opus>::<C Param>::<C ParamSpecsParam>.new(<emptyTree>::<C Default>)))
+
+    <self>.optional(:optional_param, <emptyTree>::<C IntegerParam>.new())
+  end
+
+  class <emptyTree>::<C SomeODM><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@foo)
+        <self>.class().decorator().prop_get_logic(<self>, :foo, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foo=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foo)
+        <self>.instance_variable_set(:@foo, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    def foo2<<todo method>>(&<blk>)
+      <emptyTree>::<C T>.cast(<emptyTree>::<C T>.unsafe(nil), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foo2=<<todo method>>(arg0, &<blk>)
+      <emptyTree>::<C T>.cast(nil, <emptyTree>::<C String>)
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.prop(:foo, <emptyTree>::<C String>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo2, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo2=, :normal)
+  end
+
+  class <emptyTree>::<C ForeignClass><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C AdvancedODM><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def default<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@default)
+        <self>.class().decorator().prop_get_logic(<self>, :default, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def default=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :default)
+        <self>.instance_variable_set(:@default, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    def t_nilable<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@t_nilable)
+        <self>.class().decorator().prop_get_logic(<self>, :t_nilable, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    def t_nilable=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :t_nilable)
+        <self>.instance_variable_set(:@t_nilable, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Array>)
+    end
+
+    def array<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@array)
+        <self>.class().decorator().prop_get_logic(<self>, :array, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C Array>).returns(<emptyTree>::<C Array>)
+    end
+
+    def array=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :array)
+        <self>.instance_variable_set(:@array, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
+    end
+
+    def t_array<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@t_array)
+        <self>.class().decorator().prop_get_logic(<self>, :t_array, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)).returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
+    end
+
+    def t_array=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :t_array)
+        <self>.instance_variable_set(:@t_array, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+    end
+
+    def hash_of<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@hash_of)
+        <self>.class().decorator().prop_get_logic(<self>, :hash_of, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>)).returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+    end
+
+    def hash_of=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :hash_of)
+        <self>.instance_variable_set(:@hash_of, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def const_explicit<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@const_explicit)
+        <self>.class().decorator().prop_get_logic(<self>, :const_explicit, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def const<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@const)
+        <self>.class().decorator().prop_get_logic(<self>, :const, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def enum_prop<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@enum_prop)
+        <self>.class().decorator().prop_get_logic(<self>, :enum_prop, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def enum_prop=<<todo method>>(arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def foreign<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@foreign)
+        <self>.class().decorator().prop_get_logic(<self>, :foreign, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign)
+        <self>.instance_variable_set(:@foreign, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:opts, ::T.untyped()).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
+    end
+
+    def foreign_<<todo method>>(*opts:, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:opts, ::T.untyped()).returns(<emptyTree>::<C ForeignClass>)
+    end
+
+    def foreign_!<<todo method>>(*opts:, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_lazy<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@foreign_lazy)
+        <self>.class().decorator().prop_get_logic(<self>, :foreign_lazy, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_lazy=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_lazy)
+        <self>.instance_variable_set(:@foreign_lazy, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:opts, ::T.untyped()).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
+    end
+
+    def foreign_lazy_<<todo method>>(*opts:, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:opts, ::T.untyped()).returns(<emptyTree>::<C ForeignClass>)
+    end
+
+    def foreign_lazy_!<<todo method>>(*opts:, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_proc<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@foreign_proc)
+        <self>.class().decorator().prop_get_logic(<self>, :foreign_proc, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_proc=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_proc)
+        <self>.instance_variable_set(:@foreign_proc, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:opts, ::T.untyped()).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
+    end
+
+    def foreign_proc_<<todo method>>(*opts:, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:opts, ::T.untyped()).returns(<emptyTree>::<C ForeignClass>)
+    end
+
+    def foreign_proc_!<<todo method>>(*opts:, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_invalid<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@foreign_invalid)
+        <self>.class().decorator().prop_get_logic(<self>, :foreign_invalid, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_invalid=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_invalid)
+        <self>.instance_variable_set(:@foreign_invalid, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:opts, ::T.untyped()).returns(::T.untyped())
+    end
+
+    def foreign_invalid_<<todo method>>(*opts:, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:opts, ::T.untyped()).returns(::T.untyped())
+    end
+
+    def foreign_invalid_!<<todo method>>(*opts:, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def ifunset<<todo method>>(&<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def ifunset=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :ifunset)
+        <self>.instance_variable_set(:@ifunset, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    def ifunset_nilable<<todo method>>(&<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    def ifunset_nilable=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :ifunset_nilable)
+        <self>.instance_variable_set(:@ifunset_nilable, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def empty_hash_rules<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@empty_hash_rules)
+        <self>.class().decorator().prop_get_logic(<self>, :empty_hash_rules, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def empty_hash_rules=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :empty_hash_rules)
+        <self>.instance_variable_set(:@empty_hash_rules, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def hash_rules<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@hash_rules)
+        <self>.class().decorator().prop_get_logic(<self>, :hash_rules, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def hash_rules=<<todo method>>(arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.prop(:default, <emptyTree>::<C String>, :default, "", :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :default, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :default=, :normal)
+
+    <self>.prop(:t_nilable, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>), :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :t_nilable, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :t_nilable=, :normal)
+
+    <self>.prop(:array, <emptyTree>::<C Array>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :array, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :array=, :normal)
+
+    <self>.prop(:t_array, <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>), :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :t_array, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :t_array=, :normal)
+
+    <self>.prop(:hash_of, <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>), :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :hash_of, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :hash_of=, :normal)
+
+    <self>.prop(:const_explicit, <emptyTree>::<C String>, :immutable, true, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :const_explicit, :genericPropGetter)
+
+    <self>.const(:const, <emptyTree>::<C String>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :const, :genericPropGetter)
+
+    <self>.prop(:enum_prop, <emptyTree>::<C String>, :enum, ["hello", "goodbye"], :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :enum_prop, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :enum_prop=, :normal)
+
+    <self>.prop(:foreign, <emptyTree>::<C String>, :foreign, <emptyTree>::<C ForeignClass>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign=, :normal)
+
+    <self>.prop(:foreign_lazy, <emptyTree>::<C String>, :foreign, <emptyTree>::<C Kernel>.lambda() do ||
+        <emptyTree>::<C ForeignClass>
+      end, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy=, :normal)
+
+    <self>.prop(:foreign_proc, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
+        <emptyTree>::<C ForeignClass>
+      end, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc=, :normal)
+
+    <self>.prop(:foreign_invalid, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
+        :not_a_type
+      end, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid=, :normal)
+
+    <self>.prop(:ifunset, <emptyTree>::<C String>, :ifunset, "", :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :ifunset, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :ifunset=, :normal)
+
+    <self>.prop(:ifunset_nilable, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>), :ifunset, "", :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :ifunset_nilable, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :ifunset_nilable=, :normal)
+
+    <self>.prop(:empty_hash_rules, <emptyTree>::<C String>, {:without_accessors => true})
+
+    ::Sorbet::Private::Static.keep_def(<self>, :empty_hash_rules, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :empty_hash_rules=, :normal)
+
+    <self>.prop(:hash_rules, <emptyTree>::<C String>, {:enum => ["hello", "goodbye"], :without_accessors => true})
+
+    ::Sorbet::Private::Static.keep_def(<self>, :hash_rules, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :hash_rules=, :normal)
+  end
+
+  class <emptyTree>::<C PropHelpers><<C <todo sym>>> < (::<todo sym>)
+    def self.token_prop<<todo method>>(opts = {}, &<blk>)
+      <emptyTree>
+    end
+
+    def self.created_prop<<todo method>>(opts = {}, &<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::String)
+    end
+
+    def token<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@token)
+        <self>.class().decorator().prop_get_logic(<self>, :token, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, ::String).returns(::String)
+    end
+
+    def token=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :token)
+        <self>.instance_variable_set(:@token, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::Float)
+    end
+
+    def created<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@created)
+        <self>.class().decorator().prop_get_logic(<self>, :created, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, ::Float).returns(::Float)
+    end
+
+    def created=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :created)
+        <self>.instance_variable_set(:@created, arg0)
+      end
+    end
+
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :token_prop, :normal)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :created_prop, :normal)
+
+    <self>.token_prop(:without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :token, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :token=, :normal)
+
+    <self>.created_prop(:without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :created, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :created=, :normal)
+  end
+
+  class <emptyTree>::<C PropHelpers2><<C <todo sym>>> < (::<todo sym>)
+    def self.timestamped_token_prop<<todo method>>(opts = {}, &<blk>)
+      <emptyTree>
+    end
+
+    def self.created_prop<<todo method>>(opts = {}, &<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::String)
+    end
+
+    def token<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@token)
+        <self>.class().decorator().prop_get_logic(<self>, :token, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, ::String).returns(::String)
+    end
+
+    def token=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :token)
+        <self>.instance_variable_set(:@token, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::Float)
+    end
+
+    def created<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@created)
+        <self>.class().decorator().prop_get_logic(<self>, :created, arg2)
+      end
+    end
+
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :timestamped_token_prop, :normal)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :created_prop, :normal)
+
+    <self>.timestamped_token_prop(:without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :token, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :token=, :normal)
+
+    <self>.created_prop(:immutable, true, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :created, :genericPropGetter)
+  end
+
+  class <emptyTree>::<C Chalk>::<C ODM>::<C Document><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue><<C <todo sym>>> < (<emptyTree>::<C Chalk>::<C ODM>::<C Document>)
+  end
+
+  class <emptyTree>::<C EncryptedProp><<C <todo sym>>> < (::<todo sym>)
+    def self.encrypted_prop<<todo method>>(opts = {}, &<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::T.nilable(::String))
+    end
+
+    def foo<<todo method>>(&<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+    end
+
+    def encrypted_foo<<todo method>>(&<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, ::T.nilable(::String)).returns(::T.nilable(::String))
+    end
+
+    def foo=<<todo method>>(arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, ::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>)).returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+    end
+
+    def encrypted_foo=<<todo method>>(arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::T.nilable(::String))
+    end
+
+    def bar<<todo method>>(&<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+    end
+
+    def encrypted_bar<<todo method>>(&<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :encrypted_prop, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :encrypted_foo, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :encrypted_foo=, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :encrypted_bar, :normal)
+  end
+
+  ::Sorbet::Private::Static.keep_def(<self>, :main, :normal)
+end

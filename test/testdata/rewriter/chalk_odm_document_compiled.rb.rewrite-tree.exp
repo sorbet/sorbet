@@ -1,0 +1,78 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Chalk>::<C ODM>::<C Document><<C <todo sym>>> < (::<todo sym>)
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.include(<emptyTree>::<C T>::<C Props>::<C Serializable>)
+
+    <self>.include(<emptyTree>::<C T>::<C Props>::<C WeakConstructor>)
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+  end
+
+  class <emptyTree>::<C MyParentDocument><<C <todo sym>>> < (<emptyTree>::<C Chalk>::<C ODM>::<C Document>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def my_parent_method<<todo method>>(&<blk>)
+      <self>.instance_variable_get(:@my_parent_method)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def my_parent_method=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :my_parent_method)
+        <self>.instance_variable_set(:@my_parent_method, arg0)
+      end
+    end
+
+    <self>.prop(:my_parent_method, <emptyTree>::<C String>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method, :attr_reader)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method=, :normal)
+  end
+
+  class <emptyTree>::<C MyChildDocument><<C <todo sym>>> < (<emptyTree>::<C MyParentDocument>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def my_child_method<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@my_child_method)
+        <self>.class().decorator().prop_get_logic(<self>, :my_child_method, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def my_child_method=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :my_child_method)
+        <self>.instance_variable_set(:@my_child_method, arg0)
+      end
+    end
+
+    <self>.prop(:my_child_method, <emptyTree>::<C Integer>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method=, :normal)
+  end
+
+  <emptyTree>::<C MyParentDocument>.new()
+
+  <emptyTree>::<C MyChildDocument>.new()
+
+  <self>.p(<emptyTree>::<C MyParentDocument>.new(:my_parent_method, "hello").my_parent_method())
+
+  <self>.p(<emptyTree>::<C MyChildDocument>.new(:my_child_method, 42).my_child_method())
+end

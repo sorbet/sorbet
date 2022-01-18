@@ -1,0 +1,48 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Nilable><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:foo, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)).void()
+    end
+
+    def initialize<<todo method>>(foo: = nil, &<blk>)
+      begin
+        @foo = ::T.let(foo, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+        nil
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def foo<<todo method>>(&<blk>)
+      @foo
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def foo=<<todo method>>(arg0, &<blk>)
+      @foo = arg0
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+
+    <self>.prop(:foo, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>), :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Nilable>.new().foo())
+
+  <emptyTree>::<C Nilable>.new(:foo, "no")
+
+  <emptyTree>::<C Nilable>.new(:foo, 3, :bar, 4)
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Nilable>.new(:foo, 3).foo())
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Nilable>.new(:foo, nil).foo())
+end

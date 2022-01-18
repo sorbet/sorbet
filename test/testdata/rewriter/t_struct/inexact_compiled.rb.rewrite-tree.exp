@@ -1,0 +1,83 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Inexact><<C <todo sym>>> < (<emptyTree>::<C T>::<C InexactStruct>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <self>.instance_variable_get(:@foo)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo=<<todo method>>(arg0, &<blk>)
+      <self>.instance_variable_set(:@foo, arg0)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def bar<<todo method>>(&<blk>)
+      <self>.instance_variable_get(:@bar)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def bar=<<todo method>>(arg0, &<blk>)
+      <self>.instance_variable_set(:@bar, arg0)
+    end
+
+    <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+
+    <self>.prop(:bar, <emptyTree>::<C String>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :attr_reader)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
+  end
+
+  <emptyTree>::<C Inexact>.new()
+
+  <emptyTree>::<C Inexact>.new(:foo, 3, :bar, "hey")
+
+  <emptyTree>::<C Inexact>.new(:foo, false, :quz, [1, 2, 5])
+
+  class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Inexact>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Symbol>)
+    end
+
+    def qux<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@qux)
+        <self>.class().decorator().prop_get_logic(<self>, :qux, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C Symbol>).returns(<emptyTree>::<C Symbol>)
+    end
+
+    def qux=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :qux)
+        <self>.instance_variable_set(:@qux, arg0)
+      end
+    end
+
+    <self>.prop(:qux, <emptyTree>::<C Symbol>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :qux, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :qux=, :normal)
+  end
+end

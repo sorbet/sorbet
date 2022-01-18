@@ -1,0 +1,46 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C ForgotTStructOrTProps><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@foo)
+        <self>.class().decorator().prop_get_logic(<self>, :foo, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foo)
+        <self>.instance_variable_set(:@foo, arg0)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def bar<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@bar)
+        <self>.class().decorator().prop_get_logic(<self>, :bar, arg2)
+      end
+    end
+
+    <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :genericPropGetter)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+
+    <self>.const(:bar, <emptyTree>::<C Integer>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :genericPropGetter)
+  end
+end

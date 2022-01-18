@@ -1,0 +1,58 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Override><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:foo, <emptyTree>::<C String>).void()
+    end
+
+    def initialize<<todo method>>(foo:, &<blk>)
+      begin
+        @foo = ::T.let(foo, <emptyTree>::<C String>)
+        nil
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      @foo
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foo=<<todo method>>(arg0, &<blk>)
+      @foo = arg0
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:foo, <emptyTree>::<C Integer>).void()
+    end
+
+    def initialize<<todo method>>(foo:, &<blk>)
+      <self>.puts("override")
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.prop(:foo, <emptyTree>::<C String>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+  end
+
+  <emptyTree>::<C Override>.new()
+
+  <emptyTree>::<C Override>.new(:foo, "no")
+
+  <emptyTree>::<C Override>.new(:foo, 3, :bar, 4)
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Override>.new(:foo, 3).foo())
+end

@@ -1,0 +1,69 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C SomeDefault><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:foo, <emptyTree>::<C Integer>, :bar, <emptyTree>::<C T>::<C Boolean>).void()
+    end
+
+    def initialize<<todo method>>(foo:, bar: = false, &<blk>)
+      begin
+        @foo = ::T.let(foo, <emptyTree>::<C Integer>)
+        @bar = ::T.let(bar, <emptyTree>::<C T>::<C Boolean>)
+        nil
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      @foo
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo=<<todo method>>(arg0, &<blk>)
+      @foo = arg0
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C T>::<C Boolean>)
+    end
+
+    def bar<<todo method>>(&<blk>)
+      @bar
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C T>::<C Boolean>).returns(<emptyTree>::<C T>::<C Boolean>)
+    end
+
+    def bar=<<todo method>>(arg0, &<blk>)
+      @bar = arg0
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+
+    <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+
+    <self>.prop(:bar, <emptyTree>::<C T>::<C Boolean>, :default, false, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :attr_reader)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
+  end
+
+  <emptyTree>::<C SomeDefault>.new(:foo, 1)
+
+  <emptyTree>::<C SomeDefault>.new(:foo, 2, :bar, true)
+
+  <emptyTree>::<C SomeDefault>.new(:foo, 3, :bar, false)
+
+  <emptyTree>::<C SomeDefault>.new()
+end

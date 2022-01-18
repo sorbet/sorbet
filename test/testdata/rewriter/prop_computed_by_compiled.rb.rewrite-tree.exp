@@ -1,0 +1,150 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C ComputingProps><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def num_ok<<todo method>>(&<blk>)
+      begin
+        ::T.assert_type!(<self>.class().compute_num_ok(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <emptyTree>::<C Integer>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:n, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def self.compute_num_ok<<todo method>>(n, &<blk>)
+      10
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def missing<<todo method>>(&<blk>)
+      begin
+        ::T.assert_type!(<self>.class().compute_missing(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <emptyTree>::<C Integer>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def num_wrong_value<<todo method>>(&<blk>)
+      begin
+        ::T.assert_type!(<self>.class().compute_num_wrong_value(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <emptyTree>::<C Integer>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:inputs, <emptyTree>::<C T>.untyped()).returns(<emptyTree>::<C String>)
+    end
+
+    def self.compute_num_wrong_value<<todo method>>(inputs, &<blk>)
+      "not_an_integer"
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def num_wrong_type<<todo method>>(&<blk>)
+      begin
+        ::T.assert_type!(<self>.class().compute_num_wrong_type(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <emptyTree>::<C Integer>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:inputs, <emptyTree>::<C T>.untyped()).returns(<emptyTree>::<C Integer>)
+    end
+
+    def self.compute_num_wrong_type<<todo method>>(inputs, &<blk>)
+      "not_an_integer"
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def not_a_symbol<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@not_a_symbol)
+        <self>.class().decorator().prop_get_logic(<self>, :not_a_symbol, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def symbol_in_variable<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@symbol_in_variable)
+        <self>.class().decorator().prop_get_logic(<self>, :symbol_in_variable, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def num_unknown_type<<todo method>>(&<blk>)
+      begin
+        ::T.assert_type!(<self>.class().compute_num_unknown_type(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <emptyTree>::<C Integer>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+    end
+
+    def self.compute_num_unknown_type<<todo method>>(inputs, &<blk>)
+      <emptyTree>::<C T>.untyped()
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.const(:num_ok, <emptyTree>::<C Integer>, :computed_by, :compute_num_ok, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :num_ok, :normal)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :compute_num_ok, :normal)
+
+    <self>.const(:missing, <emptyTree>::<C Integer>, :computed_by, :compute_missing, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :missing, :normal)
+
+    <self>.const(:num_wrong_value, <emptyTree>::<C Integer>, :computed_by, :compute_num_wrong_value, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :num_wrong_value, :normal)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :compute_num_wrong_value, :normal)
+
+    <self>.const(:num_wrong_type, <emptyTree>::<C Integer>, :computed_by, :compute_num_wrong_type, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :num_wrong_type, :normal)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :compute_num_wrong_type, :normal)
+
+    <self>.const(:not_a_symbol, <emptyTree>::<C String>, :computed_by, "not_a_symbol", :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :not_a_symbol, :genericPropGetter)
+
+    symbol_in_variable = :symbol_in_variable
+
+    <self>.const(:symbol_in_variable, <emptyTree>::<C String>, :computed_by, symbol_in_variable, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :symbol_in_variable, :genericPropGetter)
+
+    <self>.const(:num_unknown_type, <emptyTree>::<C Integer>, :computed_by, :compute_num_unknown_type, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :num_unknown_type, :normal)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :compute_num_unknown_type, :normal)
+  end
+end

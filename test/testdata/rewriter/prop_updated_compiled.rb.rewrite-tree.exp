@@ -1,0 +1,61 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Chalk>::<C ODM>::<C Document><<C <todo sym>>> < (::<todo sym>)
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.include(<emptyTree>::<C T>::<C Props>::<C Serializable>)
+
+    <self>.include(<emptyTree>::<C T>::<C Props>::<C WeakConstructor>)
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+  end
+
+  module <emptyTree>::<C Chalk>::<C ODM><<C <todo sym>>> < ()
+    <emptyTree>::<C DeprecatedNumeric> = <emptyTree>::<C Numeric>
+  end
+
+  class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C Chalk>::<C ODM>::<C Document>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:opts, <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C T>.untyped(), <emptyTree>::<C T>.untyped())).void()
+    end
+
+    def self.updated_prop<<todo method>>(opts = {}, &<blk>)
+      begin
+        opts.[]=(:extra, opts.fetch(:extra, {}).merge(:DEPRECATED_dynamic_prop, true))
+        <self>.prop(:updated, <emptyTree>::<C T>.nilable(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>), opts)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>))
+    end
+
+    def updated<<todo method>>(&<blk>)
+      <self>.instance_variable_get(:@updated)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, ::T.nilable(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>)).returns(::T.nilable(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>))
+    end
+
+    def updated=<<todo method>>(arg0, &<blk>)
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :updated)
+        <self>.instance_variable_set(:@updated, arg0)
+      end
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :updated_prop, :normal)
+
+    <self>.updated_prop(:without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :updated, :attr_reader)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :updated=, :normal)
+  end
+
+  updated_at = <emptyTree>::<C T>.reveal_type(<emptyTree>::<C A>.new().updated())
+end
