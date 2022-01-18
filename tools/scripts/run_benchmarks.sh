@@ -69,8 +69,8 @@ mkdir -p tmp/bench
 
 # TODO(jez) Careful! These must use the same configuration!
 # (Alternatively: be sure to compile the right one right before it's used.)
-./bazel build //compiler:sorbet @sorbet_ruby_2_7//:ruby -c opt
-./bazel run @sorbet_ruby_2_7//:ruby -c opt -- --version
+./bazel build //compiler:sorbet @sorbet_ruby_2_7_for_compiler//:ruby -c opt
+./bazel run @sorbet_ruby_2_7_for_compiler//:ruby -c opt -- --version
 
 if [ "${#benchmarks[@]}" -eq 0 ]; then
   if [ "$baseline" != "" ]; then
@@ -85,7 +85,7 @@ if [ "${#benchmarks[@]}" -eq 0 ]; then
 fi
 
 
-ruby="${repo_root}/bazel-bin/external/sorbet_ruby_2_7/ruby"
+ruby="${repo_root}/bazel-bin/external/sorbet_ruby_2_7_for_compiler/ruby"
 
 command=()
 

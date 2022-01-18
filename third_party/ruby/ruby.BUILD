@@ -3,6 +3,7 @@
 load("@com_stripe_ruby_typer//third_party/ruby:build-ruby.bzl", "ruby")
 
 ruby(
+    append_srcs = [],
     configure_flags = [
         "--enable-shared",
         "--sysconfdir=/etc",
@@ -33,9 +34,7 @@ ruby(
         "-Wdate-time",
         "-D_FORTIFY_SOURCE=2",
     ],
-    extra_srcs = [
-        "@com_stripe_ruby_typer//sorbet_version:sorbet_version_srcs",
-    ],
+    extra_srcs = [],
     gems = [
         "@bundler_stripe//file",
     ],

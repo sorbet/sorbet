@@ -88,8 +88,8 @@ payload_files = [
     visibility = ["//visibility:public"],
     deps = [
         "@com_stripe_ruby_typer//sorbet_version",
-        "@sorbet_ruby_2_7//:headers",
-        "@sorbet_ruby_2_7//:headers-internal",
+        "@sorbet_ruby_2_7_for_compiler//:headers",
+        "@sorbet_ruby_2_7_for_compiler//:headers-internal",
     ],
 ) for name, srcs in payload_files]
 

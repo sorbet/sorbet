@@ -11,7 +11,7 @@ Compiler-generated artifacts in a stock Ruby VM. To build our custom VM, run the
 following command:
 
 ```shell
-$ bazel build @sorbet_ruby_2_7//:ruby.tar.gz \
+$ bazel build @sorbet_ruby_2_7_for_compiler//:ruby.tar.gz \
     --config=release-linux \
     --crosstool_top=@bazel_tools//tools/cpp:toolchain
 ```
@@ -31,13 +31,13 @@ The flags that we give are:
   doesn't relocate well.
 
 Once this build has finished, the archive
-`bazel-bin/external/sorbet_ruby_2_7/ruby.tar.gz` will contain the build of
-Ruby 2.7 with our patches applied. Copy that TAR file out of the Bazel tree and
-extract it in a scratchpad directory:
+`bazel-bin/external/sorbet_ruby_2_7_for_compiler/ruby.tar.gz` will contain the
+build of Ruby 2.7 with our patches applied. Copy that TAR file out of the Bazel
+tree and extract it in a scratchpad directory:
 
 ```shell
 $ mkdir scratchpad
-$ cp bazel-bin/external/sorbet_ruby_2_7/ruby.tar.gz scratchpad
+$ cp bazel-bin/external/sorbet_ruby_2_7_for_compiler/ruby.tar.gz scratchpad
 $ tar -xf scratchpad/ruby.tar.gz -C scratchpad
 ```
 
