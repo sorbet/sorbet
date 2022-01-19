@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+#include "common/StableStringStorage.h"
+
 #include "context.hh"
 #include "diagnostic.hh"
 #include "literal.hh"
@@ -54,7 +56,7 @@ private:
 
     ruby_version version;
     std::string_view source_buffer;
-    std::vector<char> &scratch;
+    sorbet::StableStringStorage<> &scratch;
 
     std::stack<environment> static_env;
     std::stack<literal> literal_stack;
@@ -185,7 +187,7 @@ public:
     Context context;
 
     lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer,
-          std::vector<char> &scratch);
+          sorbet::StableStringStorage<> &scratch);
 
     // Main interface consumed by yylex function in parser
     token_t advance();

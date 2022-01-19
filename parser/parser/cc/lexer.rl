@@ -120,7 +120,7 @@ using namespace std::string_literals;
 
 %% prepush { check_stack_capacity(); }
 
-lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer, std::vector<char> &scratch)
+lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer, sorbet::StableStringStorage<> &scratch)
   : diagnostics(diag)
   , version(version)
   , source_buffer(source_buffer)
@@ -527,10 +527,7 @@ void lexer::emit(token_type type, const std::string &str, const char* start, con
   size_t offset_end = (size_t)(end - source_buffer.data());
 
   // Copy the string into stable storage.
-  // XXX need to handle the case where scratch doesn't have enough space left.
-  auto scratch_start = this->scratch.size();
-  this->scratch.insert(this->scratch.end(), str.begin(), str.end());
-  auto scratch_view = std::string_view{&this->scratch[scratch_start], this->scratch.size() - scratch_start};
+  auto scratch_view = scratch.enterString(str);
   token_queue.push(mempool.alloc(type, offset_start, offset_end, scratch_view));
 }
 

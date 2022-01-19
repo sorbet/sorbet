@@ -7,7 +7,7 @@
 
 namespace sorbet {
 
-template <size_t PageSize>
+template <size_t PageSize = 4096>
 class StableStringStorage {
 public:
     StableStringStorage() = default;
