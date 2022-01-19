@@ -25,6 +25,8 @@ module T::Types
       case other
       when ClassOf
         @type <= other.type
+      when Simple
+        @type.is_a?(other.raw_type)
       else
         false
       end
