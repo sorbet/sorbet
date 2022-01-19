@@ -795,7 +795,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
     return ret;
 }
 
-core::ClassOrModuleRef Types::getClassForAppliedOrClassType(const GlobalState &gs, const TypePtr &ty) {
+core::ClassOrModuleRef Types::getClassForAppliedOrClassType(const TypePtr &ty) {
     if (isa_type<ClassType>(ty)) {
         auto s = cast_type_nonnull<ClassType>(ty);
         return s.symbol;

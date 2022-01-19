@@ -1338,15 +1338,10 @@ class Module < Object
   # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) arguments are
   # converted to symbols.
   #
-  # ```ruby
-  # class SimpleSingleton  # Not thread safe
-  #   private_class_method :new
-  #   def SimpleSingleton.create(*args, &block)
-  #     @me = new(*args, &block) if ! @me
-  #     @me
-  #   end
+  # class A
+  #   package_private def a(); end
   # end
-  # ```
+  #
   sig do
     params(
         arg0: T.any(Symbol, String),
@@ -1361,12 +1356,8 @@ class Module < Object
   # converted to symbols.
   #
   # ```ruby
-  # class SimpleSingleton  # Not thread safe
-  #   private_class_method :new
-  #   def SimpleSingleton.create(*args, &block)
-  #     @me = new(*args, &block) if ! @me
-  #     @me
-  #   end
+  # class SimpleSingleton
+  #   package_private_class_method :new
   # end
   # ```
   sig do

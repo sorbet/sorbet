@@ -175,7 +175,7 @@ public:
     /** Unwrap SelfTypeParam instances that belong to the given owner, to a bare LambdaParam */
     static TypePtr unwrapSelfTypeParam(Context ctx, const TypePtr &ty);
 
-    static core::ClassOrModuleRef getClassForAppliedOrClassType(const GlobalState &gs, const core::TypePtr &ty);
+    static core::ClassOrModuleRef getClassForAppliedOrClassType(const core::TypePtr &ty);
 
     // Given a type, return a SymbolRef for the Ruby class that has that type, or no symbol if no such class exists.
     // This is an internal method for implementing intrinsics. In the future we should make all updateKnowledge methods
