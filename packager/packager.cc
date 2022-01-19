@@ -572,6 +572,10 @@ public:
         return nameParts.size();
     }
 
+    const vector<core::NameRef> &currentConstantName() const {
+        return nameParts;
+    }
+
     core::NameRef packageForNamespace(core::Context ctx) const {
         if (curPkg.empty()) {
             return core::NameRef::noName();
@@ -723,7 +727,7 @@ public:
         }
 
         pushConstantLit(ctx, constantLit);
-        auto &pkgName = requiredNamespace(ctx.state);
+        auto &pkgName = requiredNamespace(ctx);
 
         if (rootConsts == 0) {
             if (hasParentClass(classDef)) {
@@ -737,6 +741,7 @@ public:
                     e.setHeader("Class or method definition must match enclosing package namespace `{}`",
                                 fmt::map_join(pkgName.begin(), pkgName.end(),
                                               "::", [&](const auto &nr) { return nr.show(ctx); }));
+                    addPackageSuggestion(ctx, e);
                 }
             }
         }
@@ -779,7 +784,7 @@ public:
 
         if (lhs != nullptr && rootConsts == 0) {
             pushConstantLit(ctx, lhs);
-            auto &pkgName = requiredNamespace(ctx.state);
+            auto &pkgName = requiredNamespace(ctx);
 
             if (rootConsts == 0 && namespaces.packageForNamespace(ctx) != pkg.mangledName()) {
                 ENFORCE(errorDepth == 0);
@@ -788,6 +793,7 @@ public:
                     e.setHeader("Constants may not be defined outside of the enclosing package namespace `{}`",
                                 fmt::map_join(pkgName.begin(), pkgName.end(),
                                               "::", [&](const auto &nr) { return nr.show(ctx); }));
+                    addPackageSuggestion(ctx, e);
                 }
             }
 
@@ -850,6 +856,7 @@ public:
                 e.setHeader(
                     "Class or method behavior may not be defined outside of the enclosing package namespace `{}`",
                     fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx); }));
+                addPackageSuggestion(ctx, e);
             }
         }
     }
@@ -904,6 +911,16 @@ private:
     bool hasParentClass(const ast::ClassDef &def) const {
         return def.kind == ast::ClassDef::Kind::Class && !def.ancestors.empty() &&
                ast::isa_tree<ast::UnresolvedConstantLit>(def.ancestors[0]);
+    }
+
+    void addPackageSuggestion(core::Context ctx, core::ErrorBuilder &e) const {
+        auto cnstPkg = namespaces.packageForNamespace(ctx);
+        if (cnstPkg.exists()) {
+            e.addErrorNote("Constant `{}` should either be defined in directory `{}` to match its package, or "
+                           "re-namespaced to be within `{}`",
+                           absl::StrJoin(namespaces.currentConstantName(), "::", NameFormatter(ctx)),
+                           pkg.pathPrefixes().front(), absl::StrJoin(requiredNamespace(ctx), "::", NameFormatter(ctx)));
+        }
     }
 };
 
