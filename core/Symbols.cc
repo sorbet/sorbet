@@ -1251,6 +1251,8 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
         methodFlags.emplace_back("private");
     } else if (sym->flags.isProtected) {
         methodFlags.emplace_back("protected");
+    } else if (sym->flags.isPackagePrivate) {
+        methodFlags.emplace_back("package_private");
     }
 
     if (sym->flags.isAbstract) {
