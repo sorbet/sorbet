@@ -15,27 +15,27 @@ namespace {
 // these helpers work on a purely syntactic level. for instance, this function determines if an expression is `T`,
 // either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
 // users, but we don't know that information in the Rewriter passes.
-bool isT(ast::ExpressionPtr &expr) {
+bool isT(const ast::ExpressionPtr &expr) {
     auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScope(t->scope);
 }
 
-bool isTNilable(ast::ExpressionPtr &expr) {
+bool isTNilable(const ast::ExpressionPtr &expr) {
     auto *nilable = ast::cast_tree<ast::Send>(expr);
     return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv);
 }
 
-bool isTStruct(ast::ExpressionPtr &expr) {
+bool isTStruct(const ast::ExpressionPtr &expr) {
     auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() && isT(struct_->scope);
 }
 
-bool isTInexactStruct(ast::ExpressionPtr &expr) {
+bool isTInexactStruct(const ast::ExpressionPtr &expr) {
     auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->cnst == core::Names::Constants::InexactStruct() && isT(struct_->scope);
 }
 
-bool isChalkODMDocument(ast::ExpressionPtr &expr) {
+bool isChalkODMDocument(const ast::ExpressionPtr &expr) {
     auto *document = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (document == nullptr || document->cnst != core::Names::Constants::Document()) {
         return false;
