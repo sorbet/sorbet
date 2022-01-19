@@ -3,18 +3,18 @@
 ###
 # # Overview
 #
-# [`Psych`](https://docs.ruby-lang.org/en/2.7.0/Psych.html) is a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) parser and emitter.
-# [`Psych`](https://docs.ruby-lang.org/en/2.7.0/Psych.html) leverages libyaml
-# [Home page: https://pyyaml.org/wiki/LibYAML] or [HG repo:
-# https://bitbucket.org/xi/libyaml] for its
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) parsing and emitting
+# [`Psych`](https://docs.ruby-lang.org/en/3.1/Psych.html) is a
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) parser and emitter.
+# [`Psych`](https://docs.ruby-lang.org/en/3.1/Psych.html) leverages libyaml
+# [Home page: https://pyyaml.org/wiki/LibYAML] or [git repo:
+# https://github.com/yaml/libyaml] for its
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) parsing and emitting
 # capabilities. In addition to wrapping libyaml,
-# [`Psych`](https://docs.ruby-lang.org/en/2.7.0/Psych.html) also knows how to
+# [`Psych`](https://docs.ruby-lang.org/en/3.1/Psych.html) also knows how to
 # serialize and de-serialize most Ruby objects to and from the
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) format.
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) format.
 #
-# # I NEED TO PARSE OR EMIT [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) RIGHT NOW!
+# # I NEED TO PARSE OR EMIT [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) RIGHT NOW!
 #
 # ```ruby
 # # Parse some YAML
@@ -27,54 +27,55 @@
 #
 # Got more time on your hands?  Keep on reading!
 #
-# ## [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) Parsing
+# ## [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) Parsing
 #
-# [`Psych`](https://docs.ruby-lang.org/en/2.7.0/Psych.html) provides a range of
-# interfaces for parsing a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document ranging from
-# low level to high level, depending on your parsing needs. At the lowest level,
-# is an event based parser. Mid level is access to the raw
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) AST, and at the
+# [`Psych`](https://docs.ruby-lang.org/en/3.1/Psych.html) provides a range of
+# interfaces for parsing a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html)
+# document ranging from low level to high level, depending on your parsing
+# needs. At the lowest level, is an event based parser. Mid level is access to
+# the raw [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) AST, and at the
 # highest level is the ability to unmarshal
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) to Ruby objects.
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) to Ruby objects.
 #
-# ## [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) Emitting
+# ## [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) Emitting
 #
-# [`Psych`](https://docs.ruby-lang.org/en/2.7.0/Psych.html) provides a range of
+# [`Psych`](https://docs.ruby-lang.org/en/3.1/Psych.html) provides a range of
 # interfaces ranging from low to high level for producing
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) documents. Very
-# similar to the [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) parsing
-# interfaces, [`Psych`](https://docs.ruby-lang.org/en/2.7.0/Psych.html) provides
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) documents. Very similar
+# to the [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) parsing
+# interfaces, [`Psych`](https://docs.ruby-lang.org/en/3.1/Psych.html) provides
 # at the lowest level, an event based system, mid-level is building a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) AST, and the highest
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) AST, and the highest
 # level is converting a Ruby object straight to a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document.
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document.
 #
 # ## High-level API
 #
 # ### Parsing
 #
-# The high level [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) parser
-# provided by [`Psych`](https://docs.ruby-lang.org/en/2.7.0/Psych.html) simply
-# takes [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) as input and
+# The high level [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) parser
+# provided by [`Psych`](https://docs.ruby-lang.org/en/3.1/Psych.html) simply
+# takes [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) as input and
 # returns a Ruby data structure. For information on using the high level parser
-# see
-# [`Psych.load`](https://docs.ruby-lang.org/en/2.7.0/Psych.html#method-c-load)
+# see [`Psych.load`](https://docs.ruby-lang.org/en/3.1/Psych.html#method-c-load)
 #
 # #### Reading from a string
 #
 # ```ruby
-# Psych.load("--- a")             # => 'a'
-# Psych.load("---\n - a\n - b")   # => ['a', 'b']
+# Psych.safe_load("--- a")             # => 'a'
+# Psych.safe_load("---\n - a\n - b")   # => ['a', 'b']
+# # From a trusted string:
+# Psych.load("--- !ruby/range\nbegin: 0\nend: 42\nexcl: false\n") # => 0..42
 # ```
 #
 # #### Reading from a file
 #
 # ```ruby
-# Psych.load_file("database.yml")
+# Psych.safe_load_file("data.yml", permitted_classes: [Date])
+# Psych.load_file("trusted_database.yml")
 # ```
 #
-# #### [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html) handling
+# #### [`Exception`](https://docs.ruby-lang.org/en/3.1/Exception.html) handling
 #
 # ```ruby
 # begin
@@ -89,11 +90,11 @@
 # ### Emitting
 #
 # The high level emitter has the easiest interface.
-# [`Psych`](https://docs.ruby-lang.org/en/2.7.0/Psych.html) simply takes a Ruby
+# [`Psych`](https://docs.ruby-lang.org/en/3.1/Psych.html) simply takes a Ruby
 # data structure and converts it to a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document. See
-# [`Psych.dump`](https://docs.ruby-lang.org/en/2.7.0/Psych.html#method-c-dump)
-# for more information on dumping a Ruby data structure.
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document. See
+# [`Psych.dump`](https://docs.ruby-lang.org/en/3.1/Psych.html#method-c-dump) for
+# more information on dumping a Ruby data structure.
 #
 # #### Writing to a string
 #
@@ -125,18 +126,18 @@
 #
 # ### Parsing
 #
-# [`Psych`](https://docs.ruby-lang.org/en/2.7.0/Psych.html) provides access to
-# an AST produced from parsing a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document. This tree is
+# [`Psych`](https://docs.ruby-lang.org/en/3.1/Psych.html) provides access to an
+# AST produced from parsing a
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document. This tree is
 # built using the
-# [`Psych::Parser`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser.html) and
-# [`Psych::TreeBuilder`](https://docs.ruby-lang.org/en/2.7.0/Psych/TreeBuilder.html).
+# [`Psych::Parser`](https://docs.ruby-lang.org/en/3.1/Psych/Parser.html) and
+# [`Psych::TreeBuilder`](https://docs.ruby-lang.org/en/3.1/Psych/TreeBuilder.html).
 # The AST can be examined and manipulated freely. Please see
-# [`Psych::parse_stream`](https://docs.ruby-lang.org/en/2.7.0/Psych.html#method-c-parse_stream),
-# [`Psych::Nodes`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes.html), and
-# [`Psych::Nodes::Node`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Node.html)
+# [`Psych::parse_stream`](https://docs.ruby-lang.org/en/3.1/Psych.html#method-c-parse_stream),
+# [`Psych::Nodes`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes.html), and
+# [`Psych::Nodes::Node`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Node.html)
 # for more information on dealing with
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) syntax trees.
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) syntax trees.
 #
 # #### Reading from a string
 #
@@ -158,7 +159,7 @@
 # Psych.parse_file('database.yml')
 # ```
 #
-# #### [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html) handling
+# #### [`Exception`](https://docs.ruby-lang.org/en/3.1/Exception.html) handling
 #
 # ```ruby
 # begin
@@ -173,15 +174,15 @@
 # ### Emitting
 #
 # At the mid level is building an AST. This AST is exactly the same as the AST
-# used when parsing a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html)
+# used when parsing a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html)
 # document. Users can build an AST by hand and the AST knows how to emit itself
-# as a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document. See
-# [`Psych::Nodes`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes.html),
-# [`Psych::Nodes::Node`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Node.html),
+# as a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document. See
+# [`Psych::Nodes`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes.html),
+# [`Psych::Nodes::Node`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Node.html),
 # and
-# [`Psych::TreeBuilder`](https://docs.ruby-lang.org/en/2.7.0/Psych/TreeBuilder.html)
+# [`Psych::TreeBuilder`](https://docs.ruby-lang.org/en/3.1/Psych/TreeBuilder.html)
 # for more information on building a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) AST.
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) AST.
 #
 # #### Writing to a string
 #
@@ -208,13 +209,13 @@
 # ### Parsing
 #
 # The lowest level parser should be used when the
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) input is already
-# known, and the developer does not want to pay the price of building an AST or
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) input is already known,
+# and the developer does not want to pay the price of building an AST or
 # automatic detection and conversion to Ruby objects. See
-# [`Psych::Parser`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser.html) for
+# [`Psych::Parser`](https://docs.ruby-lang.org/en/3.1/Psych/Parser.html) for
 # more information on using the event based parser.
 #
-# #### Reading to [`Psych::Nodes::Stream`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Stream.html) structure
+# #### Reading to [`Psych::Nodes::Stream`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Stream.html) structure
 #
 # ```ruby
 # parser = Psych::Parser.new(TreeBuilder.new) # => #<Psych::Parser>
@@ -240,13 +241,12 @@
 # ### Emitting
 #
 # The lowest level emitter is an event based system. Events are sent to a
-# [`Psych::Emitter`](https://docs.ruby-lang.org/en/2.7.0/Psych/Emitter.html)
+# [`Psych::Emitter`](https://docs.ruby-lang.org/en/3.1/Psych/Emitter.html)
 # object. That object knows how to convert the events to a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document. This
-# interface should be used when document format is known in advance or speed is
-# a concern. See
-# [`Psych::Emitter`](https://docs.ruby-lang.org/en/2.7.0/Psych/Emitter.html) for
-# more information.
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document. This interface
+# should be used when document format is known in advance or speed is a concern.
+# See [`Psych::Emitter`](https://docs.ruby-lang.org/en/3.1/Psych/Emitter.html)
+# for more information.
 #
 # #### Writing to a Ruby structure
 #
@@ -265,44 +265,18 @@
 # ```
 module Psych
   # The version of libyaml
-  # [`Psych`](https://docs.ruby-lang.org/en/2.7.0/Psych.html) is using
+  # [`Psych`](https://docs.ruby-lang.org/en/3.1/Psych.html) is using
   LIBYAML_VERSION = T.let(T.unsafe(nil), String)
   # Deprecation guard
   NOT_GIVEN = T.let(T.unsafe(nil), Object)
 
   ###
-  # Load +yaml+ in to a Ruby data structure.  If multiple documents are
-  # provided, the object contained in the first document will be returned.
-  # +filename+ will be used in the exception message if any exception
-  # is raised while parsing.  If +yaml+ is empty, it returns
-  # the specified +fallback+ return value, which defaults to +false+.
-  #
-  # Raises a Psych::SyntaxError when a YAML syntax error is detected.
-  #
-  # Example:
-  #
-  #   Psych.load("--- a")             # => 'a'
-  #   Psych.load("---\n - a\n - b")   # => ['a', 'b']
-  #
-  #   begin
-  #     Psych.load("--- `", filename: "file.txt")
-  #   rescue Psych::SyntaxError => ex
-  #     ex.file    # => 'file.txt'
-  #     ex.message # => "(file.txt): found character that cannot start any token"
-  #   end
-  #
-  # When the optional +symbolize_names+ keyword argument is set to a
-  # true value, returns symbols for keys in Hash objects (default: strings).
-  #
-  #   Psych.load("---\n foo: bar")                         # => {"foo"=>"bar"}
-  #   Psych.load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
-  #
-  # Raises a TypeError when `yaml` parameter is NilClass.  This method is
-  # similar to `safe_load` except that `Symbol` objects are allowed by default.
-  #
+  # Alias for:
+  # [`safe_load`](https://docs.ruby-lang.org/en/3.1/Psych.html#method-c-safe_load)
   sig do
     params(
       yaml: T.any(String, StringIO, IO),
+      legacy_filename: Object,
       permitted_classes: T::Array[Class],
       permitted_symbols: T::Array[Symbol],
       aliases: T::Boolean,
@@ -313,54 +287,66 @@ module Psych
     )
     .returns(T.untyped)
   end
-  def self.load(yaml, permitted_classes: [Symbol], permitted_symbols: [], aliases: false, filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: false, freeze: false); end
+  def self.load(yaml, legacy_filename = T.unsafe(nil), permitted_classes: [Symbol], permitted_symbols: [], aliases: false, filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: false, freeze: false); end
 
   ###
-  # Safely load the yaml string in +yaml+.  By default, only the following
+  # Safely load the yaml string in `yaml`. By default, only the following
   # classes are allowed to be deserialized:
   #
-  # * [`TrueClass`](https://docs.ruby-lang.org/en/3.1/TrueClass.html)
-  # * [`FalseClass`](`https://docs.ruby-lang.org/en/3.1/FalseClass.html)
-  # * [`NilClass`](`https://docs.ruby-lang.org/en/3.1/NilClass.html)
-  # * [`Integer`](`https://docs.ruby-lang.org/en/3.1/Integer.html)
-  # * [`Float`](`https://docs.ruby-lang.org/en/3.1/Float.html)
-  # * [`String`](`https://docs.ruby-lang.org/en/3.1/String.html)
-  # * [`Array`](`https://docs.ruby-lang.org/en/3.1/Array.html)
-  # * [`Hash`](https://docs.ruby-lang.org/en/3.1/Hash.html)
-
+  # *   [`TrueClass`](https://docs.ruby-lang.org/en/3.1/TrueClass.html)
+  # *   [`FalseClass`](https://docs.ruby-lang.org/en/3.1/FalseClass.html)
+  # *   [`NilClass`](https://docs.ruby-lang.org/en/3.1/NilClass.html)
+  # *   [`Integer`](https://docs.ruby-lang.org/en/3.1/Integer.html)
+  # *   [`Float`](https://docs.ruby-lang.org/en/3.1/Float.html)
+  # *   [`String`](https://docs.ruby-lang.org/en/3.1/String.html)
+  # *   [`Array`](https://docs.ruby-lang.org/en/3.1/Array.html)
+  # *   [`Hash`](https://docs.ruby-lang.org/en/3.1/Hash.html)
   #
-  # Recursive data structures are not allowed by default.  Arbitrary classes
-  # can be allowed by adding those classes to the +permitted_classes+ keyword argument.  They are
-  # additive.  For example, to allow Date deserialization:
   #
-  #   Psych.safe_load(yaml, permitted_classes: [Date])
+  # Recursive data structures are not allowed by default. Arbitrary classes can
+  # be allowed by adding those classes to the `permitted_classes` keyword
+  # argument. They are additive. For example, to allow
+  # [`Date`](https://docs.ruby-lang.org/en/3.1/Date.html) deserialization:
   #
-  # Now the Date class can be loaded in addition to the classes listed above.
+  # ```ruby
+  # Psych.safe_load(yaml, permitted_classes: [Date])
+  # ```
   #
-  # Aliases can be explicitly allowed by changing the +aliases+ keyword argument.
-  # For example:
+  # Now the [`Date`](https://docs.ruby-lang.org/en/3.1/Date.html) class can be
+  # loaded in addition to the classes listed above.
   #
-  #   x = []
-  #   x << x
-  #   yaml = Psych.dump x
-  #   Psych.safe_load yaml               # => raises an exception
-  #   Psych.safe_load yaml, aliases: true # => loads the aliases
+  # Aliases can be explicitly allowed by changing the `aliases` keyword
+  # argument. For example:
   #
-  # A Psych::DisallowedClass exception will be raised if the yaml contains a
-  # class that isn't in the +permitted_classes+ list.
+  # ```ruby
+  # x = []
+  # x << x
+  # yaml = Psych.dump x
+  # Psych.safe_load yaml               # => raises an exception
+  # Psych.safe_load yaml, aliases: true # => loads the aliases
+  # ```
   #
-  # A Psych::BadAlias exception will be raised if the yaml contains aliases
-  # but the +aliases+ keyword argument is set to false.
+  # A
+  # [`Psych::DisallowedClass`](https://docs.ruby-lang.org/en/3.1/Psych/DisallowedClass.html)
+  # exception will be raised if the yaml contains a class that isn't in the
+  # `permitted_classes` list.
   #
-  # +filename+ will be used in the exception message if any exception is raised
+  # A [`Psych::BadAlias`](https://docs.ruby-lang.org/en/3.1/Psych/BadAlias.html)
+  # exception will be raised if the yaml contains aliases but the `aliases`
+  # keyword argument is set to false.
+  #
+  # `filename` will be used in the exception message if any exception is raised
   # while parsing.
   #
-  # When the optional +symbolize_names+ keyword argument is set to a
-  # true value, returns symbols for keys in Hash objects (default: strings).
+  # When the optional `symbolize_names` keyword argument is set to a true value,
+  # returns symbols for keys in
+  # [`Hash`](https://docs.ruby-lang.org/en/3.1/Hash.html) objects (default:
+  # strings).
   #
-  #   Psych.safe_load("---\n foo: bar")                         # => {"foo"=>"bar"}
-  #   Psych.safe_load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
-  #
+  # ```ruby
+  # Psych.safe_load("---\n foo: bar")                         # => {"foo"=>"bar"}
+  # Psych.safe_load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
+  # ```
   sig do
     params(
       yaml: T.any(String, StringIO, IO),
@@ -377,17 +363,17 @@ module Psych
   def self.safe_load(yaml, permitted_classes: [], permitted_symbols: [], aliases: false, filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: false, freeze: false); end
 
   ###
-  # Parse a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) string in
+  # Parse a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) string in
   # `yaml`. Returns the
-  # [`Psych::Nodes::Document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Document.html).
+  # [`Psych::Nodes::Document`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Document.html).
   # `filename` is used in the exception message if a
-  # [`Psych::SyntaxError`](https://docs.ruby-lang.org/en/2.7.0/Psych/SyntaxError.html)
+  # [`Psych::SyntaxError`](https://docs.ruby-lang.org/en/3.1/Psych/SyntaxError.html)
   # is raised.
   #
   # Raises a
-  # [`Psych::SyntaxError`](https://docs.ruby-lang.org/en/2.7.0/Psych/SyntaxError.html)
-  # when a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) syntax error
-  # is detected.
+  # [`Psych::SyntaxError`](https://docs.ruby-lang.org/en/3.1/Psych/SyntaxError.html)
+  # when a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) syntax error is
+  # detected.
   #
   # Example:
   #
@@ -402,9 +388,9 @@ module Psych
   # end
   # ```
   #
-  # See [`Psych::Nodes`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes.html)
-  # for more information about
-  # [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) AST.
+  # See [`Psych::Nodes`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes.html) for
+  # more information about [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html)
+  # AST.
   sig do
     params(
       yaml: T.any(String, StringIO, IO),
@@ -418,12 +404,12 @@ module Psych
 
   ###
   # Parse a file at `filename`. Returns the
-  # [`Psych::Nodes::Document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Document.html).
+  # [`Psych::Nodes::Document`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Document.html).
   #
   # Raises a
-  # [`Psych::SyntaxError`](https://docs.ruby-lang.org/en/2.7.0/Psych/SyntaxError.html)
-  # when a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) syntax error
-  # is detected.
+  # [`Psych::SyntaxError`](https://docs.ruby-lang.org/en/3.1/Psych/SyntaxError.html)
+  # when a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) syntax error is
+  # detected.
   sig do
     params(
       filename: String,
@@ -439,23 +425,23 @@ module Psych
   def self.parser; end
 
   ###
-  # Parse a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) string in
+  # Parse a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) string in
   # `yaml`. Returns the
-  # [`Psych::Nodes::Stream`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Stream.html).
+  # [`Psych::Nodes::Stream`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Stream.html).
   # This method can handle multiple
-  # [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) documents contained
-  # in `yaml`. `filename` is used in the exception message if a
-  # [`Psych::SyntaxError`](https://docs.ruby-lang.org/en/2.7.0/Psych/SyntaxError.html)
+  # [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) documents contained in
+  # `yaml`. `filename` is used in the exception message if a
+  # [`Psych::SyntaxError`](https://docs.ruby-lang.org/en/3.1/Psych/SyntaxError.html)
   # is raised.
   #
   # If a block is given, a
-  # [`Psych::Nodes::Document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Document.html)
+  # [`Psych::Nodes::Document`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Document.html)
   # node will be yielded to the block as it's being parsed.
   #
   # Raises a
-  # [`Psych::SyntaxError`](https://docs.ruby-lang.org/en/2.7.0/Psych/SyntaxError.html)
-  # when a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) syntax error
-  # is detected.
+  # [`Psych::SyntaxError`](https://docs.ruby-lang.org/en/3.1/Psych/SyntaxError.html)
+  # when a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) syntax error is
+  # detected.
   #
   # Example:
   #
@@ -474,13 +460,13 @@ module Psych
   # end
   # ```
   #
-  # Raises a [`TypeError`](https://docs.ruby-lang.org/en/2.7.0/TypeError.html)
-  # when [`NilClass`](https://docs.ruby-lang.org/en/2.7.0/NilClass.html) is
+  # Raises a [`TypeError`](https://docs.ruby-lang.org/en/3.1/TypeError.html)
+  # when [`NilClass`](https://docs.ruby-lang.org/en/3.1/NilClass.html) is
   # passed.
   #
-  # See [`Psych::Nodes`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes.html)
-  # for more information about
-  # [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) AST.
+  # See [`Psych::Nodes`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes.html) for
+  # more information about [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html)
+  # AST.
   sig do
     params(
       yaml: T.any(String, StringIO, IO),
@@ -494,11 +480,11 @@ module Psych
 
   ###
   # Dump Ruby object `o` to a
-  # [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) string. Optional
+  # [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) string. Optional
   # `options` may be passed in to control the output format. If an
-  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object is passed in, the
-  # [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) will be dumped to
-  # that [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
+  # [`IO`](https://docs.ruby-lang.org/en/3.1/IO.html) object is passed in, the
+  # [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) will be dumped to that
+  # [`IO`](https://docs.ruby-lang.org/en/3.1/IO.html) object.
   #
   # Currently supported options are:
   #
@@ -512,9 +498,8 @@ module Psych
   #
   #     Default: `0` (meaning "wrap at 81").
   # `:canonical`
-  # :   Write "canonical"
-  #     [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) form (very
-  #     verbose, yet strictly formal).
+  # :   Write "canonical" [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html)
+  #     form (very verbose, yet strictly formal).
   #
   #     Default: `false`.
   # `:header`
@@ -561,7 +546,7 @@ module Psych
 
   ###
   # Dump Ruby `object` to a
-  # [`JSON`](https://docs.ruby-lang.org/en/2.7.0/JSON.html) string.
+  # [`JSON`](https://docs.ruby-lang.org/en/3.1/JSON.html) string.
   sig { params(object: T.untyped).returns(String) }
   def self.to_json(object); end
 
@@ -593,9 +578,10 @@ module Psych
   def self.load_stream(yaml, legacy_filename = T.unsafe(nil), filename: T.unsafe(nil), fallback: T.unsafe(nil)); end
 
   ###
-  # Load the document contained in `filename`. Returns the yaml contained in
+  # Loads the document contained in `filename`. Returns the yaml contained in
   # `filename` as a Ruby object, or if the file is empty, it returns the
-  # specified `fallback` return value, which defaults to `false`.
+  # specified `fallback` return value, which defaults to `false`. See load for
+  # options.
   sig { params(filename: T.any(String, Pathname), kwargs: T.untyped).returns(T.untyped) }
   def self.load_file(filename, **kwargs); end
 end
@@ -663,11 +649,11 @@ class Psych::ClassLoader::Restricted < Psych::ClassLoader
 end
 
 # If an object defines `encode_with`, then an instance of
-# [`Psych::Coder`](https://docs.ruby-lang.org/en/2.7.0/Psych/Coder.html) will be
+# [`Psych::Coder`](https://docs.ruby-lang.org/en/3.1/Psych/Coder.html) will be
 # passed to the method when the object is being serialized. The
-# [`Coder`](https://docs.ruby-lang.org/en/2.7.0/Psych/Coder.html) automatically
+# [`Coder`](https://docs.ruby-lang.org/en/3.1/Psych/Coder.html) automatically
 # assumes a
-# [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Mapping.html)
+# [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Mapping.html)
 # is being emitted. Other objects like Sequence and Scalar may be emitted if
 # `seq=` or `scalar=` are called, respectively.
 class Psych::Coder
@@ -675,11 +661,11 @@ class Psych::Coder
   def [](k); end
 
   # Also aliased as:
-  # [`add`](https://docs.ruby-lang.org/en/2.7.0/Psych/Coder.html#method-i-add)
+  # [`add`](https://docs.ruby-lang.org/en/3.1/Psych/Coder.html#method-i-add)
   def []=(k, v); end
 
   # Alias for:
-  # [`[]=`](https://docs.ruby-lang.org/en/2.7.0/Psych/Coder.html#method-i-5B-5D-3D)
+  # [`[]=`](https://docs.ruby-lang.org/en/3.1/Psych/Coder.html#method-i-5B-5D-3D)
   def add(k, v); end
 
   def implicit(); end
@@ -741,45 +727,45 @@ class Psych::Emitter < Psych::Handler
   # Emit an alias with `anchor`.
   #
   # See
-  # [`Psych::Handler#alias`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-alias)
+  # [`Psych::Handler#alias`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html#method-i-alias)
   def alias(arg0); end
 
   # Get the output style, canonical or not.
   def canonical(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the output style to
+  # [`Set`](https://docs.ruby-lang.org/en/3.1/Set.html) the output style to
   # canonical, or not.
   def canonical=(canonical); end
 
   # End a document emission with an `implicit` ending.
   #
   # See
-  # [`Psych::Handler#end_document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-end_document)
+  # [`Psych::Handler#end_document`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html#method-i-end_document)
   def end_document(arg0); end
 
   # Emit the end of a mapping.
   #
   # See
-  # [`Psych::Handler#end_mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-end_mapping)
+  # [`Psych::Handler#end_mapping`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html#method-i-end_mapping)
   def end_mapping(); end
 
   # End sequence emission.
   #
   # See
-  # [`Psych::Handler#end_sequence`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-end_sequence)
+  # [`Psych::Handler#end_sequence`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html#method-i-end_sequence)
   def end_sequence(); end
 
   # End a stream emission
   #
   # See
-  # [`Psych::Handler#end_stream`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-end_stream)
+  # [`Psych::Handler#end_stream`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html#method-i-end_stream)
   def end_stream(); end
 
   # Get the indentation level.
   def indentation(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the indentation level
-  # to `level`. The level must be less than 10 and greater than 1.
+  # [`Set`](https://docs.ruby-lang.org/en/3.1/Set.html) the indentation level to
+  # `level`. The level must be less than 10 and greater than 1.
   def indentation=(indentation); end
 
   def initialize(*arg0); end
@@ -787,65 +773,65 @@ class Psych::Emitter < Psych::Handler
   # Get the preferred line width.
   def line_width(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the preferred line
-  # with to `width`.
+  # [`Set`](https://docs.ruby-lang.org/en/3.1/Set.html) the preferred line with
+  # to `width`.
   def line_width=(line_width); end
 
   # Emit a scalar with `value`, `anchor`, `tag`, and a `plain` or `quoted`
   # string type with `style`.
   #
   # See
-  # [`Psych::Handler#scalar`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-scalar)
+  # [`Psych::Handler#scalar`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html#method-i-scalar)
   def scalar(arg0, arg1, arg2, arg3, arg4, arg5); end
 
   # Start a document emission with
-  # [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) `version`, `tags`,
-  # and an `implicit` start.
+  # [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) `version`, `tags`, and
+  # an `implicit` start.
   #
   # See
-  # [`Psych::Handler#start_document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-start_document)
+  # [`Psych::Handler#start_document`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html#method-i-start_document)
   def start_document(arg0, arg1, arg2); end
 
-  # Start emitting a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) map
+  # Start emitting a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) map
   # with `anchor`, `tag`, an `implicit` start and end, and `style`.
   #
   # See
-  # [`Psych::Handler#start_mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-start_mapping)
+  # [`Psych::Handler#start_mapping`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html#method-i-start_mapping)
   def start_mapping(arg0, arg1, arg2, arg3); end
 
   # Start emitting a sequence with `anchor`, a `tag`, `implicit` sequence start
   # and end, along with `style`.
   #
   # See
-  # [`Psych::Handler#start_sequence`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-start_sequence)
+  # [`Psych::Handler#start_sequence`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html#method-i-start_sequence)
   def start_sequence(arg0, arg1, arg2, arg3); end
 
   # Start a stream emission with `encoding`
   #
   # See
-  # [`Psych::Handler#start_stream`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-start_stream)
+  # [`Psych::Handler#start_stream`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html#method-i-start_stream)
   def start_stream(arg0); end
 end
 
-# [`Psych::Handler`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html) is
-# an abstract base class that defines the events used when dealing with
-# [`Psych::Parser`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser.html).
+# [`Psych::Handler`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html) is an
+# abstract base class that defines the events used when dealing with
+# [`Psych::Parser`](https://docs.ruby-lang.org/en/3.1/Psych/Parser.html).
 # Clients who want to use
-# [`Psych::Parser`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser.html)
-# should implement a class that inherits from
-# [`Psych::Handler`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html) and
+# [`Psych::Parser`](https://docs.ruby-lang.org/en/3.1/Psych/Parser.html) should
+# implement a class that inherits from
+# [`Psych::Handler`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html) and
 # define events that they can handle.
 #
-# [`Psych::Handler`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html)
+# [`Psych::Handler`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html)
 # defines all events that
-# [`Psych::Parser`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser.html) can
+# [`Psych::Parser`](https://docs.ruby-lang.org/en/3.1/Psych/Parser.html) can
 # possibly send to event handlers.
 #
-# See [`Psych::Parser`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser.html)
-# for more details
+# See [`Psych::Parser`](https://docs.ruby-lang.org/en/3.1/Psych/Parser.html) for
+# more details
 class Psych::Handler
   # Events that a
-  # [`Handler`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html) should
+  # [`Handler`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html) should
   # respond to.
   EVENTS = ::T.unsafe(nil)
   # Default dumping options
@@ -900,8 +886,8 @@ class Psych::Handler
   # Called when a sequence ends.
   def end_sequence(); end
 
-  # Called when the [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html)
-  # stream ends
+  # Called when the [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) stream
+  # ends
   def end_stream(); end
 
   # Called before each event with line/column information.
@@ -912,15 +898,15 @@ class Psych::Handler
   #
   # `value` is the string value of the scalar `anchor` is an associated anchor
   # or nil `tag` is an associated tag or nil `plain` is a boolean value `quoted`
-  # is a boolean value `style` is an integer idicating the string style
+  # is a boolean value `style` is an integer indicating the string style
   #
   # See the constants in
-  # [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Scalar.html)
+  # [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Scalar.html)
   # for the possible values of `style`
   #
   # ### Example
   #
-  # Here is a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document
+  # Here is a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document
   # that exercises most of the possible ways this method can be called:
   #
   # ```
@@ -934,7 +920,7 @@ class Psych::Handler
   #   newlines
   # ```
   #
-  # The above [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document
+  # The above [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document
   # contains a list with four strings. Here are the parameters sent to this
   # method in the same order:
   #
@@ -951,7 +937,7 @@ class Psych::Handler
   # `tag_directives`, if the document is `implicit`.
   #
   # `version` will be an array of integers indicating the
-  # [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) version being dealt
+  # [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) version being dealt
   # with, `tag_directives` is a list of tuples indicating the prefix and suffix
   # of each tag, and `implicit` is a boolean indicating whether the document is
   # started implicitly.
@@ -967,7 +953,7 @@ class Psych::Handler
   # ```
   #
   # The parameters for
-  # [`start_document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-start_document)
+  # [`start_document`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html#method-i-start_document)
   # must be this:
   #
   # ```ruby
@@ -985,12 +971,12 @@ class Psych::Handler
   # mapping style.
   #
   # See the constants in
-  # [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Mapping.html)
+  # [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Mapping.html)
   # for the possible values of `style`.
   #
   # ### Example
   #
-  # Here is a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document
+  # Here is a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document
   # that exercises most of the possible ways this method can be called:
   #
   # ```
@@ -1000,7 +986,7 @@ class Psych::Handler
   #   hello: world
   # ```
   #
-  # The above [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document
+  # The above [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document
   # consists of three maps, an outer map that contains two inner maps. Below is
   # a matrix of the parameters sent in order to represent these three maps:
   #
@@ -1020,12 +1006,12 @@ class Psych::Handler
   # the list style.
   #
   # See the constants in
-  # [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Sequence.html)
+  # [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Sequence.html)
   # for the possible values of `style`.
   #
   # ### Example
   #
-  # Here is a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document
+  # Here is a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document
   # that exercises most of the possible ways this method can be called:
   #
   # ```
@@ -1037,7 +1023,7 @@ class Psych::Handler
   #   - b
   # ```
   #
-  # The above [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document
+  # The above [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document
   # consists of three lists, an outer list that contains two inner lists. Here
   # is a matrix of the parameters sent to represent these lists:
   #
@@ -1050,11 +1036,11 @@ class Psych::Handler
   def start_sequence(anchor, tag, implicit, style); end
 
   # Called with `encoding` when the
-  # [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) stream starts. This
+  # [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) stream starts. This
   # method is called once per stream. A stream may contain multiple documents.
   #
   # See the constants in
-  # [`Psych::Parser`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser.html) for
+  # [`Psych::Parser`](https://docs.ruby-lang.org/en/3.1/Psych/Parser.html) for
   # the possible values of `encoding`.
   def start_stream(encoding); end
 
@@ -1063,7 +1049,7 @@ class Psych::Handler
 end
 
 # Configuration options for dumping
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html).
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html).
 class Psych::Handler::DumperOptions
 
   def canonical(); end
@@ -1116,10 +1102,10 @@ class Psych::JSON::Stream::Emitter < Psych::Stream::Emitter
   include ::Psych::JSON::YAMLEvents
 end
 
-# [`Psych::JSON::TreeBuilder`](https://docs.ruby-lang.org/en/2.7.0/Psych/JSON/TreeBuilder.html)
+# [`Psych::JSON::TreeBuilder`](https://docs.ruby-lang.org/en/3.1/Psych/JSON/TreeBuilder.html)
 # is an event based AST builder. Events are sent to an instance of
-# [`Psych::JSON::TreeBuilder`](https://docs.ruby-lang.org/en/2.7.0/Psych/JSON/TreeBuilder.html)
-# and a [`JSON`](https://docs.ruby-lang.org/en/2.7.0/Psych/JSON.html) AST is
+# [`Psych::JSON::TreeBuilder`](https://docs.ruby-lang.org/en/3.1/Psych/JSON/TreeBuilder.html)
+# and a [`JSON`](https://docs.ruby-lang.org/en/3.1/Psych/JSON.html) AST is
 # constructed.
 class Psych::JSON::TreeBuilder < Psych::TreeBuilder
   include ::Psych::JSON::YAMLEvents
@@ -1141,24 +1127,23 @@ end
 # # Overview
 #
 # When using
-# [`Psych.load`](https://docs.ruby-lang.org/en/2.7.0/Psych.html#method-c-load)
-# to deserialize a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html)
-# document, the document is translated to an intermediary AST. That intermediary
-# AST is then translated in to a Ruby object graph.
+# [`Psych.load`](https://docs.ruby-lang.org/en/3.1/Psych.html#method-c-load) to
+# deserialize a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document,
+# the document is translated to an intermediary AST. That intermediary AST is
+# then translated in to a Ruby object graph.
 #
 # In the opposite direction, when using
-# [`Psych.dump`](https://docs.ruby-lang.org/en/2.7.0/Psych.html#method-c-dump),
+# [`Psych.dump`](https://docs.ruby-lang.org/en/3.1/Psych.html#method-c-dump),
 # the Ruby object graph is translated to an intermediary AST which is then
-# converted to a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html)
-# document.
+# converted to a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document.
 #
-# [`Psych::Nodes`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes.html)
-# contains all of the classes that make up the nodes of a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) AST. You can manually
+# [`Psych::Nodes`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes.html) contains
+# all of the classes that make up the nodes of a
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) AST. You can manually
 # build an AST and use one of the visitors (see
-# [`Psych::Visitors`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors.html))
-# to convert that AST to either a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document or to a Ruby
+# [`Psych::Visitors`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors.html)) to
+# convert that AST to either a
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document or to a Ruby
 # object graph.
 #
 # Here is an example of building an AST that represents a list with one scalar:
@@ -1178,57 +1163,57 @@ end
 #
 # The stream is the root of the tree. We can then convert the tree to YAML:
 #
-# ```
+# ```ruby
 # stream.to_yaml => "---\n- foo\n"
 # ```
 #
 # Or convert it to Ruby:
 #
-# ```
+# ```ruby
 # stream.to_ruby => [["foo"]]
 # ```
 #
-# ## [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) AST Requirements
+# ## [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) AST Requirements
 #
-# A valid [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) AST **must**
+# A valid [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) AST **must**
 # have one
-# [`Psych::Nodes::Stream`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Stream.html)
+# [`Psych::Nodes::Stream`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Stream.html)
 # at the root. A
-# [`Psych::Nodes::Stream`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Stream.html)
+# [`Psych::Nodes::Stream`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Stream.html)
 # node must have 1 or more
-# [`Psych::Nodes::Document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Document.html)
+# [`Psych::Nodes::Document`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Document.html)
 # nodes as children.
 #
-# [`Psych::Nodes::Document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Document.html)
+# [`Psych::Nodes::Document`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Document.html)
 # nodes must have one and **only** one child. That child may be one of:
 #
-# *   [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Sequence.html)
-# *   [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Mapping.html)
-# *   [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Scalar.html)
+# *   [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Sequence.html)
+# *   [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Mapping.html)
+# *   [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Scalar.html)
 #
 #
-# [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Sequence.html)
+# [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Sequence.html)
 # and
-# [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Mapping.html)
+# [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Mapping.html)
 # nodes may have many children, but
-# [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Mapping.html)
+# [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Mapping.html)
 # nodes should have an even number of children.
 #
 # All of these are valid children for
-# [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Sequence.html)
+# [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Sequence.html)
 # and
-# [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Mapping.html)
+# [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Mapping.html)
 # nodes:
 #
-# *   [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Sequence.html)
-# *   [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Mapping.html)
-# *   [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Scalar.html)
-# *   [`Psych::Nodes::Alias`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Alias.html)
+# *   [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Sequence.html)
+# *   [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Mapping.html)
+# *   [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Scalar.html)
+# *   [`Psych::Nodes::Alias`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Alias.html)
 #
 #
-# [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Scalar.html)
+# [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Scalar.html)
 # and
-# [`Psych::Nodes::Alias`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Alias.html)
+# [`Psych::Nodes::Alias`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Alias.html)
 # are both terminal nodes and should not have any children.
 module Psych::Nodes
 end
@@ -1237,7 +1222,7 @@ end
 # points to an `anchor`.
 #
 # A
-# [`Psych::Nodes::Alias`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Alias.html)
+# [`Psych::Nodes::Alias`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Alias.html)
 # is a terminal node and may have no children.
 class Psych::Nodes::Alias < Psych::Nodes::Node
   include Enumerable
@@ -1255,17 +1240,17 @@ class Psych::Nodes::Alias < Psych::Nodes::Node
   def initialize(anchor); end
 end
 
-# This represents a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html)
-# [`Document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Document.html).
+# This represents a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html)
+# [`Document`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Document.html).
 # This node must be a child of
-# [`Psych::Nodes::Stream`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Stream.html).
+# [`Psych::Nodes::Stream`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Stream.html).
 # A
-# [`Psych::Nodes::Document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Document.html)
+# [`Psych::Nodes::Document`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Document.html)
 # must have one child, and that child may be one of the following:
 #
-# *   [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Sequence.html)
-# *   [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Mapping.html)
-# *   [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Scalar.html)
+# *   [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Sequence.html)
+# *   [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Mapping.html)
+# *   [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Scalar.html)
 class Psych::Nodes::Document < Psych::Nodes::Node
   include Enumerable
   extend T::Generic
@@ -1288,7 +1273,7 @@ class Psych::Nodes::Document < Psych::Nodes::Node
   def initialize(version=T.unsafe(nil), tag_directives=T.unsafe(nil), implicit=T.unsafe(nil)); end
 
   # Returns the root node. A
-  # [`Document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Document.html)
+  # [`Document`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Document.html)
   # may only have one root node: http://yaml.org/spec/1.1/#id898031
   def root(); end
 
@@ -1298,11 +1283,11 @@ class Psych::Nodes::Document < Psych::Nodes::Node
   # A list of tag directives for this document
   def tag_directives=(tag_directives); end
 
-  # The version of the [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html)
+  # The version of the [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html)
   # document
   def version(); end
 
-  # The version of the [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html)
+  # The version of the [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html)
   # document
   def version=(version); end
 end
@@ -1310,16 +1295,16 @@ end
 # This class represents a [YAML Mapping](http://yaml.org/spec/1.1/#mapping).
 #
 # A
-# [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Mapping.html)
+# [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Mapping.html)
 # node may have 0 or more children, but must have an even number of children.
 # Here are the valid children a
-# [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Mapping.html)
+# [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Mapping.html)
 # node may have:
 #
-# *   [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Sequence.html)
-# *   [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Mapping.html)
-# *   [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Scalar.html)
-# *   [`Psych::Nodes::Alias`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Alias.html)
+# *   [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Sequence.html)
+# *   [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Mapping.html)
+# *   [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Scalar.html)
+# *   [`Psych::Nodes::Alias`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Alias.html)
 class Psych::Nodes::Mapping < Psych::Nodes::Node
   include Enumerable
   extend T::Generic
@@ -1362,8 +1347,8 @@ class Psych::Nodes::Mapping < Psych::Nodes::Node
 end
 
 # The base class for any
-# [`Node`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Node.html) in a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) parse tree. This class
+# [`Node`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Node.html) in a
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) parse tree. This class
 # should never be instantiated.
 class Psych::Nodes::Node
   include Enumerable
@@ -1420,28 +1405,27 @@ class Psych::Nodes::Node
   # Convert this node to Ruby.
   #
   # See also
-  # [`Psych::Visitors::ToRuby`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors/ToRuby.html)
+  # [`Psych::Visitors::ToRuby`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors/ToRuby.html)
   #
   # Also aliased as:
-  # [`transform`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Node.html#method-i-transform)
+  # [`transform`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Node.html#method-i-transform)
   def to_ruby(); end
 
   # Alias for:
-  # [`yaml`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Node.html#method-i-yaml)
+  # [`yaml`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Node.html#method-i-yaml)
   def to_yaml(io=T.unsafe(nil), options=T.unsafe(nil)); end
 
   # Alias for:
-  # [`to_ruby`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Node.html#method-i-to_ruby)
+  # [`to_ruby`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Node.html#method-i-to_ruby)
   def transform(); end
 
-  # Convert this node to
-  # [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html).
+  # Convert this node to [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html).
   #
   # See also
-  # [`Psych::Visitors::Emitter`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors/Emitter.html)
+  # [`Psych::Visitors::Emitter`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors/Emitter.html)
   #
   # Also aliased as:
-  # [`to_yaml`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Node.html#method-i-to_yaml)
+  # [`to_yaml`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Node.html#method-i-to_yaml)
   def yaml(io=T.unsafe(nil), options=T.unsafe(nil)); end
 end
 
@@ -1510,8 +1494,8 @@ end
 # This class represents a [YAML
 # sequence](http://yaml.org/spec/1.1/#sequence/syntax).
 #
-# A [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) sequence is
-# basically a list, and looks like this:
+# A [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) sequence is basically
+# a list, and looks like this:
 #
 # ```
 # %YAML 1.1
@@ -1520,7 +1504,7 @@ end
 # - a Sequence
 # ```
 #
-# A [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) sequence may have an
+# A [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) sequence may have an
 # anchor like this:
 #
 # ```
@@ -1532,8 +1516,8 @@ end
 # ]
 # ```
 #
-# A [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) sequence may also
-# have a tag like this:
+# A [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) sequence may also have
+# a tag like this:
 #
 # ```
 # %YAML 1.1
@@ -1545,14 +1529,14 @@ end
 # ```
 #
 # This class represents a sequence in a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document. A
-# [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Sequence.html)
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document. A
+# [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Sequence.html)
 # node may have 0 or more children. Valid children for this node are:
 #
-# *   [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Sequence.html)
-# *   [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Mapping.html)
-# *   [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Scalar.html)
-# *   [`Psych::Nodes::Alias`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Alias.html)
+# *   [`Psych::Nodes::Sequence`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Sequence.html)
+# *   [`Psych::Nodes::Mapping`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Mapping.html)
+# *   [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Scalar.html)
+# *   [`Psych::Nodes::Alias`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Alias.html)
 class Psych::Nodes::Sequence < Psych::Nodes::Node
   include Enumerable
   extend T::Generic
@@ -1594,13 +1578,13 @@ class Psych::Nodes::Sequence < Psych::Nodes::Node
   def tag=(tag); end
 end
 
-# Represents a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) stream.
+# Represents a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) stream.
 # This is the root node for any
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) parse tree. This node
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) parse tree. This node
 # must have one or more child nodes. The only valid child node for a
-# [`Psych::Nodes::Stream`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Stream.html)
+# [`Psych::Nodes::Stream`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Stream.html)
 # node is
-# [`Psych::Nodes::Document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Document.html).
+# [`Psych::Nodes::Document`](https://docs.ruby-lang.org/en/3.1/Psych/Nodes/Document.html).
 class Psych::Nodes::Stream < Psych::Nodes::Node
   include Enumerable
   extend T::Generic
@@ -1634,23 +1618,22 @@ class Psych::Omap < Hash
   Elem = type_member(:out, fixed: T.untyped)
 end
 
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) event parser class.
-# This class parses a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html)
-# document and calls events on the handler that is passed to the constructor.
-# The events can be used for things such as constructing a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) AST or deserializing
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) documents. It can even
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) event parser class. This
+# class parses a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document
+# and calls events on the handler that is passed to the constructor. The events
+# can be used for things such as constructing a
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) AST or deserializing
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) documents. It can even
 # be fed back to
-# [`Psych::Emitter`](https://docs.ruby-lang.org/en/2.7.0/Psych/Emitter.html) to
+# [`Psych::Emitter`](https://docs.ruby-lang.org/en/3.1/Psych/Emitter.html) to
 # emit the same document that was parsed.
 #
-# See [`Psych::Handler`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html)
+# See [`Psych::Handler`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html)
 # for documentation on the events that
-# [`Psych::Parser`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser.html)
-# emits.
+# [`Psych::Parser`](https://docs.ruby-lang.org/en/3.1/Psych/Parser.html) emits.
 #
 # Here is an example that prints out ever scalar found in a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document:
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document:
 #
 # ```ruby
 # # Handler for detecting scalar values
@@ -1665,31 +1648,31 @@ end
 # ```
 #
 # Here is an example that feeds the parser back in to
-# [`Psych::Emitter`](https://docs.ruby-lang.org/en/2.7.0/Psych/Emitter.html).
-# The [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document is read
-# from STDIN and written back out to STDERR:
+# [`Psych::Emitter`](https://docs.ruby-lang.org/en/3.1/Psych/Emitter.html). The
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document is read from
+# STDIN and written back out to STDERR:
 #
 # ```ruby
 # parser = Psych::Parser.new(Psych::Emitter.new($stderr))
 # parser.parse($stdin)
 # ```
 #
-# [`Psych`](https://docs.ruby-lang.org/en/2.7.0/Psych.html) uses
-# [`Psych::Parser`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser.html) in
+# [`Psych`](https://docs.ruby-lang.org/en/3.1/Psych.html) uses
+# [`Psych::Parser`](https://docs.ruby-lang.org/en/3.1/Psych/Parser.html) in
 # combination with
-# [`Psych::TreeBuilder`](https://docs.ruby-lang.org/en/2.7.0/Psych/TreeBuilder.html)
+# [`Psych::TreeBuilder`](https://docs.ruby-lang.org/en/3.1/Psych/TreeBuilder.html)
 # to construct an AST of the parsed
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document.
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document.
 class Psych::Parser
   # Let the parser choose the encoding
   ANY = ::T.unsafe(nil)
-  # UTF-16-BE [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
-  # with BOM
+  # UTF-16-BE [`Encoding`](https://docs.ruby-lang.org/en/3.1/Encoding.html) with
+  # BOM
   UTF16BE = ::T.unsafe(nil)
-  # UTF-16-LE [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
-  # with BOM
+  # UTF-16-LE [`Encoding`](https://docs.ruby-lang.org/en/3.1/Encoding.html) with
+  # BOM
   UTF16LE = ::T.unsafe(nil)
-  # UTF-8 [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
+  # UTF-8 [`Encoding`](https://docs.ruby-lang.org/en/3.1/Encoding.html)
   UTF8 = ::T.unsafe(nil)
 
   def external_encoding=(external_encoding); end
@@ -1703,17 +1686,17 @@ class Psych::Parser
   def initialize(handler=T.unsafe(nil)); end
 
   # Returns a
-  # [`Psych::Parser::Mark`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser/Mark.html)
+  # [`Psych::Parser::Mark`](https://docs.ruby-lang.org/en/3.1/Psych/Parser/Mark.html)
   # object that contains line, column, and index information.
   def mark(); end
 
-  # Parse the [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document
+  # Parse the [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document
   # contained in `yaml`. Events will be called on the handler set on the parser
   # instance.
   #
-  # See [`Psych::Parser`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser.html)
+  # See [`Psych::Parser`](https://docs.ruby-lang.org/en/3.1/Psych/Parser.html)
   # and
-  # [`Psych::Parser#handler`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser.html#attribute-i-handler)
+  # [`Psych::Parser#handler`](https://docs.ruby-lang.org/en/3.1/Psych/Parser.html#attribute-i-handler)
   def parse(*arg0); end
 end
 
@@ -1734,7 +1717,8 @@ end
 
 # Scan scalars for built in types
 class Psych::ScalarScanner
-  # Taken from http://yaml.org/type/float.html
+  # Taken from http://yaml.org/type/float.html Base 60, [-+]inf and NaN are
+  # handled separately
   FLOAT = ::T.unsafe(nil)
   # Taken from http://yaml.org/type/int.html
   INTEGER = ::T.unsafe(nil)
@@ -1748,7 +1732,7 @@ class Psych::ScalarScanner
   # Parse and return an int from `string`
   def parse_int(string); end
 
-  # Parse and return a [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html)
+  # Parse and return a [`Time`](https://docs.ruby-lang.org/en/3.1/Time.html)
   # from `string`
   def parse_time(string); end
 
@@ -1764,11 +1748,10 @@ class Psych::Set < Hash
   Elem = type_member(:out, fixed: T.untyped)
 end
 
-# [`Psych::Stream`](https://docs.ruby-lang.org/en/2.7.0/Psych/Stream.html) is a
-# streaming [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) emitter. It
-# will not buffer your [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html),
-# but send it straight to an
-# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
+# [`Psych::Stream`](https://docs.ruby-lang.org/en/3.1/Psych/Stream.html) is a
+# streaming [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) emitter. It
+# will not buffer your [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html),
+# but send it straight to an [`IO`](https://docs.ruby-lang.org/en/3.1/IO.html).
 #
 # Here is an example use:
 #
@@ -1779,12 +1762,12 @@ end
 # stream.finish
 # ```
 #
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) will be immediately
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) will be immediately
 # emitted to $stdout with no buffering.
 #
-# [`Psych::Stream#start`](https://docs.ruby-lang.org/en/2.7.0/Psych/Streaming.html#method-i-start)
+# [`Psych::Stream#start`](https://docs.ruby-lang.org/en/3.1/Psych/Streaming.html#method-i-start)
 # will take a block and ensure that
-# [`Psych::Stream#finish`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors/YAMLTree.html#method-i-finish)
+# [`Psych::Stream#finish`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors/YAMLTree.html#method-i-finish)
 # is called, so you can do this form:
 #
 # ```ruby
@@ -1814,7 +1797,7 @@ end
 module Psych::Streaming::ClassMethods
 
   # Create a new streaming emitter. Emitter will print to `io`. See
-  # [`Psych::Stream`](https://docs.ruby-lang.org/en/2.7.0/Psych/Stream.html) for
+  # [`Psych::Stream`](https://docs.ruby-lang.org/en/3.1/Psych/Stream.html) for
   # an example.
   def new(io); end
 end
@@ -1837,9 +1820,9 @@ class Psych::SyntaxError < Psych::Exception
 end
 
 # This class works in conjunction with
-# [`Psych::Parser`](https://docs.ruby-lang.org/en/2.7.0/Psych/Parser.html) to
+# [`Psych::Parser`](https://docs.ruby-lang.org/en/3.1/Psych/Parser.html) to
 # build an in-memory parse tree that represents a
-# [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) document.
+# [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) document.
 #
 # ## Example
 #
@@ -1849,18 +1832,18 @@ end
 # tree = parser.handler.root
 # ```
 #
-# See [`Psych::Handler`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html)
+# See [`Psych::Handler`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html)
 # for documentation on the event methods used in this class.
 class Psych::TreeBuilder < Psych::Handler
 
   def alias(anchor); end
 
   # Handles
-  # [`end_document`](https://docs.ruby-lang.org/en/2.7.0/Psych/TreeBuilder.html#method-i-end_document)
+  # [`end_document`](https://docs.ruby-lang.org/en/3.1/Psych/TreeBuilder.html#method-i-end_document)
   # events with `version`, `tag_directives`, and `implicit` styling.
   #
   # See
-  # [`Psych::Handler#start_document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-start_document)
+  # [`Psych::Handler#start_document`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html#method-i-start_document)
   def end_document(implicit_end=T.unsafe(nil)); end
 
   def end_mapping(); end
@@ -1879,11 +1862,11 @@ class Psych::TreeBuilder < Psych::Handler
   def scalar(value, anchor, tag, plain, quoted, style); end
 
   # Handles
-  # [`start_document`](https://docs.ruby-lang.org/en/2.7.0/Psych/TreeBuilder.html#method-i-start_document)
+  # [`start_document`](https://docs.ruby-lang.org/en/3.1/Psych/TreeBuilder.html#method-i-start_document)
   # events with `version`, `tag_directives`, and `implicit` styling.
   #
   # See
-  # [`Psych::Handler#start_document`](https://docs.ruby-lang.org/en/2.7.0/Psych/Handler.html#method-i-start_document)
+  # [`Psych::Handler#start_document`](https://docs.ruby-lang.org/en/3.1/Psych/Handler.html#method-i-start_document)
   def start_document(version, tag_directives, implicit); end
 
   def start_mapping(anchor, tag, implicit, style); end
@@ -1934,8 +1917,8 @@ class Psych::Visitors::NoAliasRuby < Psych::Visitors::ToRuby
   def visit_Psych_Nodes_Alias(o); end
 end
 
-# This class walks a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html)
-# AST, converting each node to Ruby
+# This class walks a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) AST,
+# converting each node to Ruby
 class Psych::Visitors::ToRuby < Psych::Visitors::Visitor
   SHOVEL = ::T.unsafe(nil)
 
@@ -1966,8 +1949,8 @@ class Psych::Visitors::Visitor
   def accept(target); end
 end
 
-# [`YAMLTree`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors/YAMLTree.html)
-# builds a [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) ast given a
+# [`YAMLTree`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors/YAMLTree.html)
+# builds a [`YAML`](https://docs.ruby-lang.org/en/3.1/YAML.html) ast given a
 # Ruby object. For example:
 #
 # ```ruby
@@ -1978,7 +1961,7 @@ end
 class Psych::Visitors::YAMLTree < Psych::Visitors::Visitor
 
   # Alias for:
-  # [`push`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors/YAMLTree.html#method-i-push)
+  # [`push`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors/YAMLTree.html#method-i-push)
   def <<(object); end
 
   def accept(target); end
@@ -1992,7 +1975,7 @@ class Psych::Visitors::YAMLTree < Psych::Visitors::Visitor
   def initialize(emitter, ss, options); end
 
   # Also aliased as:
-  # [`<<`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors/YAMLTree.html#method-i-3C-3C)
+  # [`&lt;&lt;`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors/YAMLTree.html#method-i-3C-3C)
   def push(object); end
 
   def start(encoding=T.unsafe(nil)); end
@@ -2014,13 +1997,13 @@ class Psych::Visitors::YAMLTree < Psych::Visitors::Visitor
   def visit_Complex(o); end
 
   # Alias for:
-  # [`visit_Integer`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors/YAMLTree.html#method-i-visit_Integer)
+  # [`visit_Integer`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors/YAMLTree.html#method-i-visit_Integer)
   def visit_Date(o); end
 
   def visit_DateTime(o); end
 
   # Alias for:
-  # [`visit_Object`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors/YAMLTree.html#method-i-visit_Object)
+  # [`visit_Object`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors/YAMLTree.html#method-i-visit_Object)
   def visit_Delegator(o); end
 
   def visit_Encoding(o); end
@@ -2030,7 +2013,7 @@ class Psych::Visitors::YAMLTree < Psych::Visitors::Visitor
   def visit_Exception(o); end
 
   # Alias for:
-  # [`visit_Integer`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors/YAMLTree.html#method-i-visit_Integer)
+  # [`visit_Integer`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors/YAMLTree.html#method-i-visit_Integer)
   def visit_FalseClass(o); end
 
   def visit_Float(o); end
@@ -2038,9 +2021,9 @@ class Psych::Visitors::YAMLTree < Psych::Visitors::Visitor
   def visit_Hash(o); end
 
   # Also aliased as:
-  # [`visit_TrueClass`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors/YAMLTree.html#method-i-visit_TrueClass),
-  # [`visit_FalseClass`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors/YAMLTree.html#method-i-visit_FalseClass),
-  # [`visit_Date`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors/YAMLTree.html#method-i-visit_Date)
+  # [`visit_TrueClass`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors/YAMLTree.html#method-i-visit_TrueClass),
+  # [`visit_FalseClass`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors/YAMLTree.html#method-i-visit_FalseClass),
+  # [`visit_Date`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors/YAMLTree.html#method-i-visit_Date)
   def visit_Integer(o); end
 
   def visit_Module(o); end
@@ -2050,7 +2033,7 @@ class Psych::Visitors::YAMLTree < Psych::Visitors::Visitor
   def visit_NilClass(o); end
 
   # Also aliased as:
-  # [`visit_Delegator`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors/YAMLTree.html#method-i-visit_Delegator)
+  # [`visit_Delegator`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors/YAMLTree.html#method-i-visit_Delegator)
   def visit_Object(o); end
 
   def visit_Psych_Omap(o); end
@@ -2072,7 +2055,7 @@ class Psych::Visitors::YAMLTree < Psych::Visitors::Visitor
   def visit_Time(o); end
 
   # Alias for:
-  # [`visit_Integer`](https://docs.ruby-lang.org/en/2.7.0/Psych/Visitors/YAMLTree.html#method-i-visit_Integer)
+  # [`visit_Integer`](https://docs.ruby-lang.org/en/3.1/Psych/Visitors/YAMLTree.html#method-i-visit_Integer)
   def visit_TrueClass(o); end
 
   def self.create(options=T.unsafe(nil), emitter=T.unsafe(nil)); end
