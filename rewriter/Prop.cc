@@ -354,7 +354,9 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
 
     nodes.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(getType)));
 
-    if (propContext.needsRealPropBodies && computedByMethodName.exists()) {
+    // Generate a real prop body for computed_by: props so Sorbet can assert the
+    // existence of the computed_by: method.
+    if (computedByMethodName.exists()) {
         // Given `const :foo, type, computed_by: <name>`, where <name> is a Symbol pointing to a class method,
         // assert that the method takes 1 argument (of any type), and returns the same type as the prop,
         // via `T.assert_type!(self.class.compute_foo(T.unsafe(nil)), type)` in the getter.
