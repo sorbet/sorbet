@@ -551,7 +551,7 @@ class CSV < Object
         path: String,
         options: T::Hash[Symbol, T.untyped],
     )
-    .returns(T::Array[T::Array[T.nilable(String)]])
+    .returns(T.any(CSV::Table, T::Array[T::Array[T.nilable(String)]]))
   end
   def self.read(path, options=T.unsafe(nil)); end
 
@@ -983,6 +983,7 @@ class CSV::Row < Object
 
   # Alias for:
   # [`field`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-field)
+  sig { params(header_or_index: T.any(String, Integer), minimum_index: T.nilable(Integer)).returns(T.nilable(String)) }
   def [](header_or_index, minimum_index = _); end
 
   # Looks up the field by the semantics described in
@@ -1044,6 +1045,7 @@ class CSV::Row < Object
   #
   # Also aliased as:
   # [`[]`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-5B-5D)
+  sig { params(header_or_index: T.any(String, Integer), minimum_index: T.nilable(Integer)).returns(T.nilable(String)) }
   def field(header_or_index, minimum_index = _); end
 
   # Returns `true` if `data` matches a field in this row, and `false` otherwise.
@@ -1374,7 +1376,7 @@ class CSV::Table < Object
   # If no block is given, an
   # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) is
   # returned.
-  sig { params(block: T.proc.params(arg0: T.untyped).void).returns(T.self_type) }
+  sig { params(block: T.proc.params(arg0: T.any(CSV::Row, T::Array[T.untyped])).void).returns(T.self_type) }
   sig { returns(T::Enumerator[T.untyped]) }
   def each(&block); end
 
