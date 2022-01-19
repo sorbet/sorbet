@@ -5,7 +5,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def num_ok<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::T.assert_type!(<self>.class().compute_num_ok(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <emptyTree>::<C Integer>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -21,7 +24,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def missing<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::T.assert_type!(<self>.class().compute_missing(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <emptyTree>::<C Integer>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -29,7 +35,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def num_wrong_value<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::T.assert_type!(<self>.class().compute_num_wrong_value(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <emptyTree>::<C Integer>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -45,7 +54,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def num_wrong_type<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::T.assert_type!(<self>.class().compute_num_wrong_type(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <emptyTree>::<C Integer>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -77,7 +89,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def num_unknown_type<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::T.assert_type!(<self>.class().compute_num_unknown_type(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <emptyTree>::<C Integer>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
     end
 
     def self.compute_num_unknown_type<<todo method>>(inputs, &<blk>)
