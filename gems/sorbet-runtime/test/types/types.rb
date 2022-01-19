@@ -1318,6 +1318,21 @@ module Opus::Types::Test
         it "returns false for a superclass" do
           assert_equal(false, subtype?(T.class_of(Base), T.class_of(Sub)))
         end
+
+        it "returns true for a simple superclass" do
+          assert_equal(true, subtype?(T.class_of(Base), Module))
+          assert_equal(true, subtype?(T.class_of(Sub), Module))
+
+          custom_module = Class.new(Module)
+          mod = custom_module.new
+
+          assert_equal(true, subtype?(T.class_of(mod), Module))
+          assert_equal(true, subtype?(T.class_of(mod), custom_module))
+        end
+
+        it "returns false for a simple unrelated class" do
+          assert_equal(false, subtype?(T.class_of(Base), Mixin1))
+        end
       end
 
       describe 'tuples' do
