@@ -20,3 +20,23 @@ class D
   end
 end
 
+class E
+  package_private def self.foo
+  end
+end
+
+class F
+  package_private_class_method def foo
+  end
+end
+
+class G
+  package_private def foo
+  end
+end
+
+class H
+  package_private_class_method def self.foo
+  end
+end
+

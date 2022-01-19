@@ -2,7 +2,7 @@
 # typed: true
 
 module T::Private::Methods
-  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :raw, :packageprivate)
+  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :raw)
 
   class DeclBuilder
     attr_reader :decl
@@ -28,8 +28,7 @@ module T::Private::Methods
         ARG_NOT_PROVIDED, # on_failure
         nil, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
-        raw,
-        false, # packageprivate
+        raw
       )
     end
 
@@ -43,17 +42,6 @@ module T::Private::Methods
         raise BuilderError.new("params expects keyword arguments")
       end
       decl.params = params
-
-      self
-    end
-
-    def packageprivate
-      check_live!
-      if decl.packageprivate
-        raise BuilderError.new("You can't call .packageprivate twice.")
-      end
-
-      decl.packageprivate = true
 
       self
     end

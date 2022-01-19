@@ -24,9 +24,6 @@ class T::Private::Methods::DeclBuilder
   sig {params(params: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def params(**params); end
 
-  sig {returns(T::Private::Methods::DeclBuilder)}
-  def packageprivate; end
-
   sig {params(type: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def returns(type); end
 
