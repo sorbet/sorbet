@@ -497,10 +497,10 @@ token_t lexer::advance_() {
 
   if (cs == lex_error) {
     size_t start = (size_t)(p - source_buffer.data());
-    return mempool.alloc(token_type::error, start, start + 1, std::string(p - 1, 1));
+    return mempool.alloc(token_type::error, start, start + 1, std::string_view(p - 1, 1));
   }
 
-  return mempool.alloc(token_type::eof, source_buffer.size(), source_buffer.size(), "");
+  return mempool.alloc(token_type::eof, source_buffer.size(), source_buffer.size(), std::string_view("", 0));
 }
 
 void lexer::emit(token_type type) {
