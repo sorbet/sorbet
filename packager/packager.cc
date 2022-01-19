@@ -528,15 +528,31 @@ uint16_t findPackageIndex(core::Context ctx, const PackageInfoImpl &pkg) {
            packages.begin();
 }
 
-class PackageNamespaces final { // TODO better name
+// Interface for traversing the tree of package namespaces.
+// Compactly represent current position in this tree with begin/end offsets. This relies on
+// lexicographic sorting of the packages vector. Push operations take advantage of binary search
+// to be O(log(end - begin)).
+//
+// For example with names=[Foo, Bar]
+// 0 Foo
+// 1 Foo::Bar::Baz    <-- begin
+// 2 Foo::Bar::Blub
+// 3 Foo::Buzz        <-- end
+// 4 Quuz::Bang
+// 5 Yaz
+// 6 <end of list>
+class PackageNamespaces final {
     using Bound = pair<uint16_t, uint16_t>;
 
-    const vector<core::NameRef> &packages; // Mangled names
-    const PackageInfoImpl &filePkg;
+    const vector<core::NameRef> &packages; // Mangled names sorted lexicographically
+    const PackageInfoImpl &filePkg;        // Package for current file
+    // Current bounds:
     uint16_t begin;
     uint16_t end;
+
     const bool isTestFile;
     const uint16_t filePkgIdx;
+
     int skips = 0;
     vector<Bound> bounds;
     vector<core::NameRef> nameParts;
