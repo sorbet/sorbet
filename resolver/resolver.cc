@@ -2869,9 +2869,6 @@ private:
         if (sig.seen.incompatibleOverride) {
             method.data(ctx)->flags.isIncompatibleOverride = true;
         }
-        if (sig.seen.packagePrivate_) {
-            method.data(ctx)->flags.isPackagePrivate = true;
-        }
         if (!sig.typeArgs.empty()) {
             method.data(ctx)->flags.isGenericMethod = true;
             for (auto &typeSpec : sig.typeArgs) {
@@ -3123,7 +3120,9 @@ private:
 
                 if (send.numPosArgs() == 1 &&
                     (send.fun == core::Names::public_() || send.fun == core::Names::private_() ||
-                     send.fun == core::Names::privateClassMethod() || send.fun == core::Names::protected_())) {
+                     send.fun == core::Names::privateClassMethod() || send.fun == core::Names::protected_() ||
+                     send.fun == core::Names::packagePrivateClassMethod() ||
+                     send.fun == core::Names::packagePrivate())) {
                     processStatement(ctx, send.getPosArg(0), lastSigs);
                     return;
                 }

@@ -476,9 +476,6 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                 sig.seen.void_ = true;
                 sig.returns = core::Types::void_();
                 break;
-            case core::Names::packagePrivate_().rawId():
-                sig.seen.packagePrivate_ = true;
-                break;
             case core::Names::checked().rawId():
                 sig.seen.checked = true;
                 break;

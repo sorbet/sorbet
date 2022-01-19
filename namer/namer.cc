@@ -493,6 +493,8 @@ public:
                 }
                 break;
             }
+            case core::Names::packagePrivate().rawId():
+            case core::Names::packagePrivateClassMethod().rawId():
             case core::Names::private_().rawId():
             case core::Names::protected_().rawId():
             case core::Names::public_().rawId():
@@ -1074,7 +1076,7 @@ class SymbolDefiner {
         ENFORCE(mod.kind == Modifier::Kind::Method);
 
         auto owner = ctx.owner.enclosingClass(ctx);
-        if (mod.name == core::Names::privateClassMethod()) {
+        if (mod.name == core::Names::privateClassMethod() || mod.name == core::Names::packagePrivateClassMethod()) {
             owner = owner.data(ctx)->singletonClass(ctx);
         }
         auto method = ctx.state.lookupMethodSymbol(owner, mod.target);
@@ -1083,6 +1085,10 @@ class SymbolDefiner {
                 case core::Names::private_().rawId():
                 case core::Names::privateClassMethod().rawId():
                     method.data(ctx)->flags.isPrivate = true;
+                    break;
+                case core::Names::packagePrivate().rawId():
+                case core::Names::packagePrivateClassMethod().rawId():
+                    method.data(ctx)->flags.isPackagePrivate = true;
                     break;
                 case core::Names::protected_().rawId():
                     method.data(ctx)->flags.isProtected = true;
