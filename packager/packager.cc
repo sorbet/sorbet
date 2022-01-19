@@ -605,6 +605,8 @@ public:
                 foundTestNS = true;
                 return;
             } else if (!isTestNamespace(ctx, name)) {
+                // Inside a test file, but not inside a test namespace. Set bounds such that
+                // begin == end, stopping any subsequent search.
                 bounds.emplace_back(begin, end);
                 nameParts.emplace_back(name);
                 begin = end = 0;
@@ -613,6 +615,8 @@ public:
         }
 
         if (idx > 0 && end - begin == 1 && packages[begin] == filePkg.mangledName()) {
+            // We have descended into a package with no sub-packages. At this point it is safe to
+            // skip tracking of deeper constants.
             curPkg.emplace_back(packages[begin], SKIP_BOUND_VAL);
             skips++;
             return;
@@ -636,7 +640,7 @@ public:
         if (begin != end) {
             auto &pkgInfo = ctx.state.packageDB().getPackageInfo(*lb);
             ENFORCE(pkgInfo.exists());
-            if (bounds.size() == pkgInfo.fullName().size()) {
+            if (nameParts.size() == pkgInfo.fullName().size()) {
                 curPkg.emplace_back(*lb, bounds.size());
             }
         }
