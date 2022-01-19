@@ -154,8 +154,7 @@ public:
     FileRef enterFile(const std::shared_ptr<File> &file);
     FileRef enterNewFileAt(const std::shared_ptr<File> &file, FileRef id);
     FileRef reserveFileRef(std::string path);
-    static std::unique_ptr<GlobalState> replaceFile(std::unique_ptr<GlobalState> inWhat, FileRef whatFile,
-                                                    const std::shared_ptr<File> &withWhat);
+    void replaceFile(FileRef whatFile, const std::shared_ptr<File> &withWhat);
     static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
     FileRef findFileByPath(std::string_view path) const;
 

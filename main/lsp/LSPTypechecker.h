@@ -34,9 +34,8 @@ class UndoState;
 class LSPTypechecker final {
     /** Contains the ID of the thread responsible for typechecking. */
     std::thread::id typecheckerThreadId;
-    /** GlobalState used for typechecking. Mutable because typechecking routines, even when not changing the GlobalState
-     * instance, actively consume and replace GlobalState. */
-    mutable std::unique_ptr<core::GlobalState> gs;
+    /** GlobalState used for typechecking. */
+    std::unique_ptr<core::GlobalState> gs;
     /** Trees that have been indexed (with initialGS) and can be reused between different runs */
     std::vector<ast::ParsedFile> indexed;
     /** Trees that have been indexed (with finalGS) and can be reused between different runs */

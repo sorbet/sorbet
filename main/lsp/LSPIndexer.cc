@@ -230,7 +230,7 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
             auto fref = initialGS->findFileByPath(file->path());
             if (fref.exists()) {
                 newlyEvictedFiles[fref] = initialGS->getFiles()[fref.id()];
-                initialGS = core::GlobalState::replaceFile(move(initialGS), fref, file);
+                initialGS->replaceFile(fref, file);
             } else {
                 // This file update adds a new file to GlobalState.
                 update.hasNewFiles = true;
