@@ -294,6 +294,6 @@ void literal::emit(token_type tok, std::string_view value, const char *s, const 
     _lexer.emit(tok, value, s, e);
 }
 
-void literal::emit(token_type tok, const std::string &value, const char* s, const char* e) {
-  _lexer.emit(tok, value, s, e);
+void literal::emit(token_type tok, const std::string &value, const char *s, const char *e) {
+    _lexer.emit(tok, value, s, e);
 }

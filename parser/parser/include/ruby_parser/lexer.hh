@@ -149,13 +149,11 @@ private:
     // Without these overloads, emit(..., "do") would be ambiguous.
     // It's OK to store points to constants, as they live in static storage and will
     // therefore not be going away.
-    template<size_t N>
-    void emit(token_type type, const char (&str)[N]) {
-        emit(type, std::string_view{&str[0], N-1});
+    template <size_t N> void emit(token_type type, const char (&str)[N]) {
+        emit(type, std::string_view{&str[0], N - 1});
     }
-    template<size_t N>
-    void emit(token_type type, const char (&str)[N], const char *start, const char *end) {
-        emit(type, std::string_view{&str[0], N-1}, start, end);
+    template <size_t N> void emit(token_type type, const char (&str)[N], const char *start, const char *end) {
+        emit(type, std::string_view{&str[0], N - 1}, start, end);
     }
     void emit(token_type type, const std::string &str);
     void emit(token_type type, const std::string &str, const char *start, const char *end);

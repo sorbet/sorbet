@@ -2,19 +2,20 @@
 #define SORBET_STABLE_STRING_STORAGE_H
 
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 namespace sorbet {
 
-template <size_t PageSize = 4096>
-class StableStringStorage {
+template <size_t PageSize = 4096> class StableStringStorage {
 public:
     StableStringStorage() = default;
 
     StableStringStorage &operator=(const StableStringStorage &rhs);
 
-    bool empty() const { return strings.empty(); }
+    bool empty() const {
+        return strings.empty();
+    }
     std::string_view enterString(std::string_view str);
 
 private:
@@ -29,8 +30,7 @@ StableStringStorage<PageSize> &StableStringStorage<PageSize>::operator=(const St
     return *this;
 }
 
-template <size_t PageSize>
-std::string_view StableStringStorage<PageSize>::enterString(std::string_view str) {
+template <size_t PageSize> std::string_view StableStringStorage<PageSize>::enterString(std::string_view str) {
     char *from = nullptr;
     if (str.size() > PageSize) {
         auto &inserted = strings.emplace_back(std::make_unique<std::vector<char>>(str.size()));

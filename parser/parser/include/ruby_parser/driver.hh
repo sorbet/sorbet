@@ -275,7 +275,8 @@ public:
     ForeignPtr ast;
     token_t last_token;
 
-    base_driver(ruby_version version, std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder);
+    base_driver(ruby_version version, std::string_view source, sorbet::StableStringStorage<> &scratch,
+                const struct builder &builder);
     virtual ~base_driver() {}
     virtual ForeignPtr parse(SelfPtr self, bool trace) = 0;
 
