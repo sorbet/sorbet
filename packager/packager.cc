@@ -156,7 +156,40 @@ struct Export {
     }
 };
 
-class PackageInfoImpl final : public sorbet::core::packages::PackageInfo {
+// For a given vector of NameRefs, this represents the "next" vector that does not begin with its
+// prefix (without actually constructing it). Consider the following sorted names:
+//
+// [A B]
+// [A B C]
+// [A B D E]
+//    <<<< Position of LexNext([A B]) roughly equivalent to [A B <Infinity>]
+// [X Y]
+// [X Y Z]
+class LexNext final {
+    const vector<core::NameRef> &names;
+
+public:
+    LexNext(const vector<core::NameRef> &names) : names(names) {}
+
+    bool operator<(const vector<core::NameRef> &rhs) const {
+        // Lexicographic comparison:
+        for (auto lhsIt = names.begin(), rhsIt = rhs.begin(); lhsIt != names.end() && rhsIt != rhs.end();
+             ++lhsIt, ++rhsIt) {
+            if (lhsIt->rawId() < rhsIt->rawId()) {
+                return true;
+            } else if (rhsIt->rawId() < lhsIt->rawId()) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    bool operator<(const Export &e) const {
+        return *this < e.parts();
+    }
+};
+
+class PackageInfoImpl final : public core::packages::PackageInfo {
 public:
     core::NameRef mangledName() const {
         return name.mangledName;
@@ -194,12 +227,12 @@ public:
     vector<Export> exports;
 
     // PackageInfoImpl is the only implementation of PackageInfoImpl
-    const static PackageInfoImpl &from(const sorbet::core::packages::PackageInfo &pkg) {
+    const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
         ENFORCE(pkg.exists());
         return reinterpret_cast<const PackageInfoImpl &>(pkg); // TODO is there a more idiomatic way to do this?
     }
 
-    static PackageInfoImpl &from(sorbet::core::packages::PackageInfo &pkg) {
+    static PackageInfoImpl &from(core::packages::PackageInfo &pkg) {
         ENFORCE(pkg.exists());
         return reinterpret_cast<PackageInfoImpl &>(pkg); // TODO is there a more idiomatic way to do this?
     }
@@ -479,34 +512,202 @@ ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameR
     return target;
 }
 
-bool isPrefix(const vector<core::NameRef> &prefix, const vector<core::NameRef> &names) {
-    size_t minSize = std::min(prefix.size(), names.size());
-    ENFORCE(minSize > 0);
-    return std::equal(prefix.begin(), prefix.end(), names.begin(), names.begin() + minSize);
+// Binary search to find a packages index in the global packages list
+uint16_t findPackageIndex(core::Context ctx, const PackageInfoImpl &pkg) {
+    auto &packages = ctx.state.packageDB().packages();
+    return std::lower_bound(packages.begin(), packages.end(), pkg.fullName(),
+                            [ctx](auto pkgName, auto &curFileFullName) {
+                                auto &pkg = ctx.state.packageDB().getPackageInfo(pkgName);
+                                return core::packages::PackageInfo::lexCmp(pkg.fullName(), curFileFullName);
+                            }) -
+           packages.begin();
 }
 
-bool sharesPrefix(const vector<core::NameRef> &a, const vector<core::NameRef> &b) {
-    size_t minSize = std::min(a.size(), b.size());
-    ENFORCE(minSize > 0);
-    return std::equal(a.begin(), a.begin() + minSize, b.begin(), b.begin() + minSize);
-}
+// Interface for traversing the tree of package namespaces.
+// Compactly represent current position in this tree with begin/end offsets. This relies on
+// lexicographic sorting of the packages vector. Push operations take advantage of binary search
+// to be O(log(end - begin)).
+//
+// For example with names=[Foo, Bar]
+// 0 Foo
+// 1 Foo::Bar::Baz    <-- begin
+// 2 Foo::Bar::Blub
+// 3 Foo::Buzz        <-- end
+// 4 Quuz::Bang
+// 5 Yaz
+// 6 <end of list>
+class PackageNamespaces final {
+    using Bound = pair<uint16_t, uint16_t>;
+
+    const vector<core::NameRef> &packages; // Mangled names sorted lexicographically
+    const PackageInfoImpl &filePkg;        // Package for current file
+    // Current bounds:
+    uint16_t begin;
+    uint16_t end;
+
+    const bool isTestFile;
+    const uint16_t filePkgIdx;
+
+    // Count of pushes once we have narrowed down to one possible package:
+    int skips = 0;
+
+    vector<Bound> bounds;
+    vector<core::NameRef> nameParts;
+    vector<pair<core::NameRef, uint16_t>> curPkg;
+    bool foundTestNS = false;
+
+    static constexpr uint16_t SKIP_BOUND_VAL = 0;
+
+public:
+    PackageNamespaces(core::Context ctx, const PackageInfoImpl &filePkg, bool isTestFile)
+        : packages(ctx.state.packageDB().packages()), filePkg(filePkg), begin(0), end(packages.size()),
+          isTestFile(isTestFile), filePkgIdx(findPackageIndex(ctx, filePkg)) {
+        ENFORCE(packages.size() < numeric_limits<uint16_t>::max());
+    }
+
+    int depth() const {
+        return nameParts.size();
+    }
+
+    const vector<core::NameRef> &currentConstantName() const {
+        return nameParts;
+    }
+
+    core::NameRef packageForNamespace(core::Context ctx) const {
+        if (curPkg.empty()) {
+            return core::NameRef::noName();
+        }
+        return curPkg.back().first;
+    }
+
+    bool onPackagePath(core::Context ctx) {
+        if (begin <= filePkgIdx && filePkgIdx < end) {
+            return true;
+        }
+        if (!curPkg.empty() && curPkg.back().first == filePkg.mangledName()) {
+            return true;
+        }
+        return false;
+    }
+
+    void pushName(core::Context ctx, core::NameRef name) {
+        if (skips > 0) {
+            skips++;
+            return;
+        }
+        bool boundsEmpty = bounds.empty();
+
+        if (isTestFile && boundsEmpty && !foundTestNS) {
+            if (isPrimaryTestNamespace(name)) {
+                foundTestNS = true;
+                return;
+            } else if (!isTestNamespace(ctx, name)) {
+                // Inside a test file, but not inside a test namespace. Set bounds such that
+                // begin == end, stopping any subsequent search.
+                bounds.emplace_back(begin, end);
+                nameParts.emplace_back(name);
+                begin = end = 0;
+                return;
+            }
+        }
+
+        if (!boundsEmpty && end - begin == 1 && packages[begin] == filePkg.mangledName()) {
+            // We have descended into a package with no sub-packages. At this point it is safe to
+            // skip tracking of deeper constants.
+            curPkg.emplace_back(packages[begin], SKIP_BOUND_VAL);
+            skips++;
+            return;
+        }
+
+        bounds.emplace_back(begin, end);
+        nameParts.emplace_back(name);
+        auto lb = std::lower_bound(packages.begin() + begin, packages.begin() + end, nameParts,
+                                   [ctx](auto pkgNr, auto &nameParts) -> bool {
+                                       return core::packages::PackageInfo::lexCmp(
+                                           ctx.state.packageDB().getPackageInfo(pkgNr).fullName(), nameParts);
+                                   });
+        auto ub =
+            std::upper_bound(lb, packages.begin() + end, LexNext(nameParts), [ctx](auto &next, auto pkgNr) -> bool {
+                return next < ctx.state.packageDB().getPackageInfo(pkgNr).fullName();
+            });
+
+        begin = lb - packages.begin();
+        end = ub - packages.begin();
+
+        if (begin != end) {
+            auto &pkgInfo = ctx.state.packageDB().getPackageInfo(*lb);
+            ENFORCE(pkgInfo.exists());
+            if (nameParts.size() == pkgInfo.fullName().size()) {
+                curPkg.emplace_back(*lb, bounds.size());
+            }
+        }
+    }
+
+    void popName() {
+        auto prevSkips = skips;
+        if (skips > 0) {
+            skips--;
+            if (skips > 0) {
+                return;
+            }
+        }
+
+        if (isTestFile && bounds.size() == 0 && foundTestNS) {
+            ENFORCE(nameParts.empty());
+            foundTestNS = false;
+            return;
+        }
+
+        if (prevSkips == 1) {
+            ENFORCE(curPkg.back().second == SKIP_BOUND_VAL);
+            curPkg.pop_back();
+            return;
+        }
+
+        if (begin != end && !curPkg.empty()) {
+            ENFORCE(!curPkg.empty());
+            auto back = curPkg.back();
+            if (bounds.size() == back.second) {
+                curPkg.pop_back();
+            }
+        }
+        ENFORCE(!bounds.empty());
+        begin = bounds.back().first;
+        end = bounds.back().second;
+        bounds.pop_back();
+        nameParts.pop_back();
+    }
+
+    ~PackageNamespaces() {
+        // Book-keeping sanity checks
+        ENFORCE(bounds.empty());
+        ENFORCE(nameParts.empty());
+        ENFORCE(begin == 0);
+        ENFORCE(end = packages.size());
+        ENFORCE(curPkg.empty());
+        ENFORCE(!foundTestNS);
+        ENFORCE(skips == 0);
+    }
+};
 
 // Visitor that ensures for constants defined within a package that all have the package as a
 // prefix.
 class EnforcePackagePrefix final {
     const PackageInfoImpl &pkg;
     const bool isTestFile;
-    vector<core::NameRef> nameParts;
+    PackageNamespaces namespaces;
     // Counter to avoid duplicate errors:
     // - Only emit errors when depth is 0
     // - Upon emitting an error increment
     // - Once greater than 0, all preTransform* increment, postTransform* decrement
     int errorDepth = 0;
     int rootConsts = 0;
-    int skipPush = 0;
+    bool useTestNamespace = false;
+    vector<core::NameRef> tmpNameParts;
 
 public:
-    EnforcePackagePrefix(const PackageInfoImpl &pkg, bool isTestFile) : pkg(pkg), isTestFile(isTestFile) {
+    EnforcePackagePrefix(core::Context ctx, const PackageInfoImpl &pkg, bool isTestFile)
+        : pkg(pkg), isTestFile(isTestFile), namespaces(ctx, pkg, isTestFile) {
         ENFORCE(pkg.exists());
     }
 
@@ -521,30 +722,30 @@ public:
             return tree;
         }
 
-        if (nameParts.size() > 0 && nameParts.size() > requiredNamespace(ctx.state).size()) {
-            // At this depth we can stop checking the prefixes since beyond the end of the prefix.
-            skipPush++;
-            return tree;
-        }
-
         ast::UnresolvedConstantLit *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
         if (constantLit == nullptr) {
             return tree;
         }
 
-        pushConstantLit(constantLit);
-        auto &pkgName = requiredNamespace(ctx.state);
+        pushConstantLit(ctx, constantLit);
+        auto &pkgName = requiredNamespace(ctx);
 
-        if (rootConsts == 0 && !sharesPrefix(pkgName, nameParts)) {
-            ENFORCE(errorDepth == 0);
-            errorDepth++;
-            if (auto e = ctx.beginError(constantLit->loc, core::errors::Packager::DefinitionPackageMismatch)) {
-                e.setHeader(
-                    "Class or method definition must match enclosing package namespace `{}`",
-                    fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx); }));
+        if (rootConsts == 0) {
+            if (hasParentClass(classDef)) {
+                // A class definition that includes a parent `class Foo::Bar < Baz`
+                // must be made in that package
+                checkBehaviorLoc(ctx, classDef.declLoc);
+            } else if (!namespaces.onPackagePath(ctx)) {
+                ENFORCE(errorDepth == 0);
+                errorDepth++;
+                if (auto e = ctx.beginError(constantLit->loc, core::errors::Packager::DefinitionPackageMismatch)) {
+                    e.setHeader("Class or method definition must match enclosing package namespace `{}`",
+                                fmt::map_join(pkgName.begin(), pkgName.end(),
+                                              "::", [&](const auto &nr) { return nr.show(ctx); }));
+                    addPackageSuggestion(ctx, e);
+                }
             }
         }
-
         return tree;
     }
 
@@ -552,9 +753,7 @@ public:
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Sanity check bookkeeping
-            ENFORCE(nameParts.size() == 0);
             ENFORCE(rootConsts == 0);
-            ENFORCE(skipPush == 0);
             ENFORCE(errorDepth == 0);
             return tree;
         }
@@ -565,11 +764,6 @@ public:
             if (errorDepth > 0) {
                 return tree;
             }
-        }
-
-        if (skipPush > 0) {
-            skipPush--;
-            return tree;
         }
 
         ast::UnresolvedConstantLit *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
@@ -590,22 +784,21 @@ public:
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
 
         if (lhs != nullptr && rootConsts == 0) {
-            if (nameParts.size() == 0 || nameParts.size() < requiredNamespace(ctx.state).size()) {
-                pushConstantLit(lhs);
-                auto &pkgName = requiredNamespace(ctx.state);
+            pushConstantLit(ctx, lhs);
+            auto &pkgName = requiredNamespace(ctx);
 
-                if (rootConsts == 0 && !isPrefix(pkgName, nameParts)) {
-                    ENFORCE(errorDepth == 0);
-                    errorDepth++;
-                    if (auto e = ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
-                        e.setHeader("Constants may not be defined outside of the enclosing package namespace `{}`",
-                                    fmt::map_join(pkgName.begin(), pkgName.end(),
-                                                  "::", [&](const auto &nr) { return nr.show(ctx); }));
-                    }
+            if (rootConsts == 0 && namespaces.packageForNamespace(ctx) != pkg.mangledName()) {
+                ENFORCE(errorDepth == 0);
+                errorDepth++;
+                if (auto e = ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
+                    e.setHeader("Constants may not be defined outside of the enclosing package namespace `{}`",
+                                fmt::map_join(pkgName.begin(), pkgName.end(),
+                                              "::", [&](const auto &nr) { return nr.show(ctx); }));
+                    addPackageSuggestion(ctx, e);
                 }
-
-                popConstantLit(lhs);
             }
+
+            popConstantLit(lhs);
         }
 
         return original;
@@ -653,26 +846,28 @@ public:
 
     void checkBehaviorLoc(core::Context ctx, core::LocOffsets loc) {
         ENFORCE(errorDepth == 0);
-        if (rootConsts > 0 || nameParts.empty()) {
+        if (rootConsts > 0 || namespaces.depth() == 0) {
             return;
         }
-        auto &pkgName = requiredNamespace(ctx.state);
-        if (!isPrefix(pkgName, nameParts)) {
+        auto &pkgName = requiredNamespace(ctx);
+        if (namespaces.packageForNamespace(ctx) != pkg.mangledName()) {
             ENFORCE(errorDepth == 0);
             errorDepth++;
             if (auto e = ctx.beginError(loc, core::errors::Packager::DefinitionPackageMismatch)) {
                 e.setHeader(
                     "Class or method behavior may not be defined outside of the enclosing package namespace `{}`",
                     fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx); }));
+                addPackageSuggestion(ctx, e);
             }
         }
     }
 
 private:
-    void pushConstantLit(ast::UnresolvedConstantLit *lit) {
-        auto oldLen = nameParts.size();
+    void pushConstantLit(core::Context ctx, ast::UnresolvedConstantLit *lit) {
+        ENFORCE(tmpNameParts.empty());
+        auto prevDepth = namespaces.depth();
         while (lit != nullptr) {
-            nameParts.emplace_back(lit->cnst);
+            tmpNameParts.emplace_back(lit->cnst);
             auto *scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
             lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
             if (scope != nullptr) {
@@ -681,12 +876,25 @@ private:
                 rootConsts++;
             }
         }
-        reverse(nameParts.begin() + oldLen, nameParts.end());
+        if (rootConsts == 0) {
+            for (auto it = tmpNameParts.rbegin(); it != tmpNameParts.rend(); ++it) {
+                namespaces.pushName(ctx, *it);
+            }
+        }
+
+        if (prevDepth == 0 && isTestFile && namespaces.depth() > 0) {
+            useTestNamespace = isPrimaryTestNamespace(tmpNameParts.back()) ||
+                               !isSecondaryTestNamespace(ctx, pkg.name.fullName.parts[0]);
+        }
+
+        tmpNameParts.clear();
     }
 
     void popConstantLit(ast::UnresolvedConstantLit *lit) {
         while (lit != nullptr) {
-            nameParts.pop_back();
+            if (rootConsts == 0) {
+                namespaces.popName();
+            }
             auto *scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
             lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
             if (scope != nullptr) {
@@ -698,13 +906,21 @@ private:
     }
 
     const vector<core::NameRef> &requiredNamespace(const core::GlobalState &gs) const {
-        if (isTestFile) {
-            if (!isPrimaryTestNamespace(nameParts[0]) && isSecondaryTestNamespace(gs, pkg.name.fullName.parts[0])) {
-                return pkg.name.fullName.parts;
-            }
-            return pkg.name.fullTestPkgName.parts;
-        } else {
-            return pkg.name.fullName.parts;
+        return useTestNamespace ? pkg.name.fullTestPkgName.parts : pkg.name.fullName.parts;
+    }
+
+    bool hasParentClass(const ast::ClassDef &def) const {
+        return def.kind == ast::ClassDef::Kind::Class && !def.ancestors.empty() &&
+               ast::isa_tree<ast::UnresolvedConstantLit>(def.ancestors[0]);
+    }
+
+    void addPackageSuggestion(core::Context ctx, core::ErrorBuilder &e) const {
+        auto cnstPkg = namespaces.packageForNamespace(ctx);
+        if (cnstPkg.exists()) {
+            e.addErrorNote("Constant `{}` should either be defined in directory `{}` to match its package, or "
+                           "re-namespaced to be within `{}`",
+                           absl::StrJoin(namespaces.currentConstantName(), "::", NameFormatter(ctx)),
+                           pkg.pathPrefixes().front(), absl::StrJoin(requiredNamespace(ctx), "::", NameFormatter(ctx)));
         }
     }
 };
@@ -848,22 +1064,23 @@ struct PackageInfoFinder {
         if (exported.empty()) {
             return;
         }
-        fast_sort(exported, [](const auto &a, const auto &b) -> bool { return a.parts().size() < b.parts().size(); });
-        // TODO(nroman) If this is too slow could probably be sped up with lexigraphic sort.
-        for (auto longer = exported.begin() + 1; longer != exported.end(); longer++) {
-            for (auto shorter = exported.begin(); shorter != longer; shorter++) {
-                if (std::equal(shorter->parts().begin(), shorter->parts().end(), longer->parts().begin()) &&
-                    !allowedExportPrefix(ctx, *shorter, *longer)) {
+        fast_sort(exported, [](const auto &a, const auto &b) -> bool {
+            return core::packages::PackageInfo::lexCmp(a.parts(), b.parts());
+        });
+        for (auto it = exported.begin(); it != exported.end();) {
+            LexNext upperBound(it->parts());
+            auto longer = it + 1;
+            for (; longer != exported.end() && !(upperBound < *longer); ++longer) {
+                if (!allowedExportPrefix(ctx, *it, *longer)) {
                     if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
-                        e.setHeader(
-                            "Cannot export `{}` because another exported name `{}` is a prefix of it",
-                            fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }),
-                            fmt::map_join(shorter->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
-                        e.addErrorLine(shorter->fqn.loc, "Prefix exported here");
+                        e.setHeader("Cannot export `{}` because another exported name `{}` is a prefix of it",
+                                    fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }),
+                                    fmt::map_join(it->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
+                        e.addErrorLine(it->fqn.loc, "Prefix exported here");
                     }
-                    break; // Only need to find the shortest conflicting export
                 }
             }
+            it = longer;
         }
 
         ENFORCE(info->exports.empty());
@@ -1398,7 +1615,7 @@ ast::ParsedFile wrapFileInPackageModule(core::Context ctx, ast::ParsedFile file,
     }
 
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
-    EnforcePackagePrefix enforcePrefix(pkg, isTestFile);
+    EnforcePackagePrefix enforcePrefix(ctx, pkg, isTestFile);
     file.tree = ast::ShallowMap::apply(ctx, enforcePrefix, move(file.tree));
 
     auto wrapperName = isTestFile ? core::Names::Constants::PackageTests() : core::Names::Constants::PackageRegistry();

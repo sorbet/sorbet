@@ -29,7 +29,9 @@ public:
     const PackageInfo &getPackageInfo(core::NameRef mangledName) const;
 
     bool empty() const;
-    // Get mangled names for all packages
+    // Get mangled names for all packages.
+    // Packages are ordered lexicographically with respect to the NameRef's that make up their
+    // namespaces.
     const std::vector<core::NameRef> &packages() const;
 
     PackageDB deepCopy() const;

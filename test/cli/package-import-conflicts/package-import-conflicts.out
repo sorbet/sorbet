@@ -11,4 +11,10 @@ imports_both/__package.rb:5: Conflicting import sources for `A::B` https://srb.h
     imports_both/__package.rb:4: Conflict from
      4 |  import A
                  ^
-Errors: 2
+
+a/a.rb:4: Class or method definition must match enclosing package namespace `A` https://srb.help/3713
+     4 |  class B; end
+                ^
+  Note:
+    Constant `A::B` should either be defined in directory `./a/` to match its package, or re-namespaced to be within `A`
+Errors: 3
