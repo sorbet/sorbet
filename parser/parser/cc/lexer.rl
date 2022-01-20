@@ -1189,7 +1189,7 @@ void lexer::set_state_expr_value() {
       }
     } else {
       // Try ending the literal with a newline.
-      auto str = tok();
+      auto str = tok_view();
       if (current_literal.nest_and_try_closing(str, ts, te)) {
         fnext *pop_literal(); fbreak;
       }
