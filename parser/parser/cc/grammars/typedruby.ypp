@@ -3616,6 +3616,11 @@ f_opt_paren_args: f_paren_args
                     {
                       $$ = driver.build.pair_keyword(self, $1, $2);
                     }
+                | tLABEL
+                    {
+                      auto method_call = driver.build.call_method(self, nullptr, nullptr, $1, nullptr, nullptr, nullptr);
+                      $$ = driver.build.pair_keyword(self, $1, method_call);
+                    }
                 | tSTRING_BEG string_contents tLABEL_END arg_value
                     {
                       $$ = driver.build.pair_quoted(self, $1, $2, $3, $4);
