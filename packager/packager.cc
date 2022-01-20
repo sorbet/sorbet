@@ -172,21 +172,16 @@ public:
     LexNext(const vector<core::NameRef> &names) : names(names) {}
 
     bool operator<(const vector<core::NameRef> &rhs) const {
-        auto lhsIt = names.begin();
-        auto rhsIt = rhs.begin();
         // Lexicographic comparison:
-        for (; lhsIt <= names.end() && rhsIt != rhs.end(); ++lhsIt, ++rhsIt) {
-            // Treat this.names.end() as if it were the max value.
-            if (lhsIt == names.end()) {
-                return false;
-            }
+        for (auto lhsIt = names.begin(), rhsIt = rhs.begin(); lhsIt != names.end() && rhsIt != rhs.end();
+             ++lhsIt, ++rhsIt) {
             if (lhsIt->rawId() < rhsIt->rawId()) {
                 return true;
             } else if (rhsIt->rawId() < lhsIt->rawId()) {
                 return false;
             }
         }
-        return (lhsIt == names.end()) && (rhsIt != rhs.end());
+        return false;
     }
 
     bool operator<(const Export &e) const {
@@ -553,7 +548,9 @@ class PackageNamespaces final {
     const bool isTestFile;
     const uint16_t filePkgIdx;
 
+    // Count of pushes once we have narrowed down to one possible package:
     int skips = 0;
+
     vector<Bound> bounds;
     vector<core::NameRef> nameParts;
     vector<pair<core::NameRef, uint16_t>> curPkg;
@@ -598,9 +595,9 @@ public:
             skips++;
             return;
         }
-        uint16_t idx = bounds.size();
+        bool boundsEmpty = bounds.empty();
 
-        if (isTestFile && idx == 0 && !foundTestNS) {
+        if (isTestFile && boundsEmpty && !foundTestNS) {
             if (isPrimaryTestNamespace(name)) {
                 foundTestNS = true;
                 return;
@@ -614,7 +611,7 @@ public:
             }
         }
 
-        if (idx > 0 && end - begin == 1 && packages[begin] == filePkg.mangledName()) {
+        if (!boundsEmpty && end - begin == 1 && packages[begin] == filePkg.mangledName()) {
             // We have descended into a package with no sub-packages. At this point it is safe to
             // skip tracking of deeper constants.
             curPkg.emplace_back(packages[begin], SKIP_BOUND_VAL);
