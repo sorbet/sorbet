@@ -11,6 +11,11 @@ template <size_t PageSize = 4096> class StableStringStorage {
 public:
     StableStringStorage() = default;
 
+    // We override the copy constructor and assignment because we need to ensure
+    // that `currentPagePosition` in the copy forces a separate page to be allocated.
+    // The pages may be shared between `StableStringStorage` instances, but only
+    // one instance is ever permitted to write to a single page.
+    StableStringStorage(const StableStringStorage &rhs);
     StableStringStorage &operator=(const StableStringStorage &rhs);
 
     bool empty() const {
@@ -22,6 +27,10 @@ private:
     std::vector<std::shared_ptr<std::vector<char>>> strings;
     size_t currentPagePosition = PageSize + 1;
 };
+
+template <size_t PageSize>
+StableStringStorage<PageSize>::StableStringStorage(const StableStringStorage<PageSize> &rhs)
+    : strings(rhs.string), currentPagePosition(PageSize + 1) {}
 
 template <size_t PageSize>
 StableStringStorage<PageSize> &StableStringStorage<PageSize>::operator=(const StableStringStorage<PageSize> &rhs) {
