@@ -22,7 +22,7 @@ lib/test.rb:3: Unable to resolve constant `Parlour` https://srb.help/5002
     https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/json.rbi#L974: Did you mean: `JSON::Ext::Parser`?
      974 |class JSON::Ext::Parser
           ^^^^^^^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/psych.rbi#L1712: Did you mean: `Psych::Parser`?
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/psych.rbi#L1715: Did you mean: `Psych::Parser`?
     1712 |class Psych::Parser
           ^^^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/racc.rbi#L3: Did you mean: `Racc::Parser`?
