@@ -12,6 +12,8 @@ class StableStringStorage {
 public:
     StableStringStorage() = default;
 
+    StableStringStorage &operator=(const StableStringStorage &rhs);
+
     bool empty() const { return strings.empty(); }
     std::string_view enterString(std::string_view str);
 
@@ -19,6 +21,13 @@ private:
     std::vector<std::shared_ptr<std::vector<char>>> strings;
     size_t currentPagePosition = PageSize + 1;
 };
+
+template <size_t PageSize>
+StableStringStorage<PageSize> &StableStringStorage<PageSize>::operator=(const StableStringStorage<PageSize> &rhs) {
+    this->strings = rhs.strings;
+    this->currentPagePosition = PageSize + 1;
+    return *this;
+}
 
 template <size_t PageSize>
 std::string_view StableStringStorage<PageSize>::enterString(std::string_view str) {
