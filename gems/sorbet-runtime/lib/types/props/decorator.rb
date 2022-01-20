@@ -290,7 +290,7 @@ class T::Props::Decorator
   def prop_defined(name, cls, rules={})
     cls = T::Utils.resolve_alias(cls)
 
-    if T::Utils::Nilable.is_union_with_nilclass(cls)
+    if T::Utils::Nilable.is_union_with_nilclass(cls) || (rules.key?(:default) && rules[:default].nil?)
       # :_tnilable is introduced internally for performance purpose so that clients do not need to call
       # T::Utils::Nilable.is_tnilable(cls) again.
       # It is strictly internal: clients should always use T::Props::Utils.required_prop?() or

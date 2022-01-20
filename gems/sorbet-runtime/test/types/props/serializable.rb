@@ -39,6 +39,9 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :trueprop, T::Boolean, default: true
     prop :falseprop, T::Boolean, default: false
     prop :factoryprop, T::Boolean, factory: -> {true}
+
+    prop :untyped_prop1, T.untyped, default: nil
+    const :untyped_const1, T.untyped, default: nil
   end
 
   describe ':default and :factory' do

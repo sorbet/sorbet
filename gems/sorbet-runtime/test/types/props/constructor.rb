@@ -16,6 +16,11 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
     prop :objs, T::Array[Inner]
   end
 
+  class UntypedField < T::Struct
+    const :untyped_const, T.untyped, default: nil
+    prop :untyped_prop, T.untyped, default: nil
+  end
+
   it "raises when omitting a required prop" do
     err = assert_raises(ArgumentError) do
       MyStruct.new(foo: 'foo')
@@ -52,5 +57,9 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
   it 'can pass objects to an array of subdocs' do
     o = Outer.new(objs: [Inner.new(i: 4), Inner.new(i: 5)])
     assert_equal([4, 5], o.objs.map(&:i))
+  end
+
+  it 'can default untyped fields' do
+    UntypedField.new
   end
 end
