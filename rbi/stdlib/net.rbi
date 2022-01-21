@@ -4368,7 +4368,9 @@ end
 #
 # multipart?
 # :   Returns false.
-class Net::IMAP::BodyTypeAttachment
+class Net::IMAP::BodyTypeAttachment < Struct
+  Elem = type_member(fixed: T.untyped)
+
   def media_type(); end
 
   def media_type=(_); end
@@ -4427,7 +4429,9 @@ end
 #
 # multipart?
 # :   Returns false.
-class Net::IMAP::BodyTypeBasic
+class Net::IMAP::BodyTypeBasic < Struct
+  Elem = type_member(fixed: T.untyped)
+
   def content_id(); end
 
   def content_id=(_); end
@@ -4479,7 +4483,9 @@ class Net::IMAP::BodyTypeBasic
   def subtype=(_); end
 end
 
-class Net::IMAP::BodyTypeExtension
+class Net::IMAP::BodyTypeExtension < Struct
+  Elem = type_member(fixed: T.untyped)
+
   def content_id(); end
 
   def content_id=(_); end
@@ -4527,7 +4533,9 @@ end
 # [`Net::IMAP::BodyTypeMessage`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeMessage.html)
 # has all methods of
 # [`Net::IMAP::BodyTypeText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeText.html).
-class Net::IMAP::BodyTypeMessage
+class Net::IMAP::BodyTypeMessage < Struct
+  Elem = type_member(fixed: T.untyped)
+
   def body(); end
 
   def body=(_); end
@@ -4621,7 +4629,9 @@ end
 #
 # multipart?
 # :   Returns true.
-class Net::IMAP::BodyTypeMultipart
+class Net::IMAP::BodyTypeMultipart < Struct
+  Elem = type_member(fixed: T.untyped)
+
   def disposition(); end
 
   def disposition=(_); end
@@ -4670,7 +4680,9 @@ end
 # [`Net::IMAP::BodyTypeText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeText.html)
 # has all fields of
 # [`Net::IMAP::BodyTypeBasic`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeBasic.html).
-class Net::IMAP::BodyTypeText
+class Net::IMAP::BodyTypeText < Struct
+  Elem = type_member(fixed: T.untyped)
+
   def content_id(); end
 
   def content_id=(_); end
