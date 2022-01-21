@@ -1085,7 +1085,7 @@ public:
         core::NameRef nm;
 
         if (name != nullptr) {
-            loc = loc.join(tokLoc(name));
+            loc = tokLoc(name);
             nm = gs_.enterNameUTF8(name->view());
             checkReservedForNumberedParameters(name->view(), loc);
         } else {

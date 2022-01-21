@@ -844,7 +844,15 @@ class SymbolDefiner {
 
         core::NameRef name;
         if (parsedArg.flags.isKeyword) {
-            name = parsedArg.local._name;
+            if (parsedArg.flags.isRepeated) {
+                if (parsedArg.local._name == core::Names::fwdKwargs()) {
+                    name = core::Names::fwdKwargs();
+                } else {
+                    name = core::Names::kwargs();
+                }
+            } else {
+                name = parsedArg.local._name;
+            }
         } else if (parsedArg.flags.isBlock) {
             name = core::Names::blkArg();
         } else {
