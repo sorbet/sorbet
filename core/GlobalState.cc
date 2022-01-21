@@ -1957,12 +1957,10 @@ void GlobalState::markAsPayload() {
     }
 }
 
-unique_ptr<GlobalState> GlobalState::replaceFile(unique_ptr<GlobalState> inWhat, FileRef whatFile,
-                                                 const shared_ptr<File> &withWhat) {
-    ENFORCE(whatFile.id() < inWhat->filesUsed());
-    ENFORCE(whatFile.dataAllowingUnsafe(*inWhat).path() == withWhat->path());
-    inWhat->files[whatFile.id()] = withWhat;
-    return inWhat;
+void GlobalState::replaceFile(FileRef whatFile, const shared_ptr<File> &withWhat) {
+    ENFORCE(whatFile.id() < filesUsed());
+    ENFORCE(whatFile.dataAllowingUnsafe(*this).path() == withWhat->path());
+    files[whatFile.id()] = withWhat;
 }
 
 FileRef GlobalState::findFileByPath(string_view path) const {

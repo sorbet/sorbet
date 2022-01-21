@@ -205,7 +205,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 set_difference(oldMethodHashes.begin(), oldMethodHashes.end(), newMethodHashes.begin(),
                                newMethodHashes.end(), inserter(changedMethodHashes, changedMethodHashes.begin()));
 
-                gs = core::GlobalState::replaceFile(move(gs), fref, f);
+                gs->replaceFile(fref, f);
                 // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
                 fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
                 subset.emplace_back(fref);
@@ -271,7 +271,7 @@ pair<unique_ptr<core::GlobalState>, ast::ParsedFile>
 updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file, const options::Options &opts) {
     core::FileRef fref = gs->findFileByPath(file->path());
     if (fref.exists()) {
-        gs = core::GlobalState::replaceFile(move(gs), fref, file);
+        gs->replaceFile(fref, file);
     } else {
         fref = gs->enterFile(file);
     }

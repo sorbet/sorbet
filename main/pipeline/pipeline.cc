@@ -813,7 +813,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                     auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(*gs).source());
                     auto newFile = make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource),
                                                            f.file.data(*gs).sourceType);
-                    gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
+                    gs->replaceFile(f.file, move(newFile));
                     f.file.data(*gs).strictLevel = decideStrictLevel(*gs, f.file, opts);
                     auto reIndexed = indexOne(opts, *gs, f.file);
                     vector<ast::ParsedFile> toBeReResolved;
@@ -993,7 +993,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
     return ast::ParsedFilesOrCancelled(move(what));
 }
 
-void typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what, const options::Options &opts,
+void typecheck(const unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                WorkerPool &workers, bool cancelable,
                optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
                bool intentionallyLeakASTs) {

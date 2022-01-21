@@ -598,7 +598,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.file.data(*gs).source());
         auto newFile =
             make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource), f.file.data(*gs).sourceType);
-        gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
+        gs->replaceFile(f.file, move(newFile));
 
         // this replicates the logic of pipeline::indexOne
         auto trace = false;
