@@ -45,6 +45,7 @@ enum class StrictLevel {
 };
 
 std::string_view strictLevelToSigil(StrictLevel level);
+std::string_view strictLevelToString(StrictLevel level);
 
 } // namespace sorbet::core
 #endif
