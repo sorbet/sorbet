@@ -39,6 +39,14 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :trueprop, T::Boolean, default: true
     prop :falseprop, T::Boolean, default: false
     prop :factoryprop, T::Boolean, factory: -> {true}
+
+    prop :untyped_prop1, T.untyped, default: nil
+    const :untyped_const1, T.untyped, default: nil
+  end
+
+  class NilDefaultRequired < T::Struct
+    const :integer_const_nil_default, Integer, default: nil
+    prop :integer_prop_nil_default, Integer, default: nil
   end
 
   describe ':default and :factory' do
@@ -77,6 +85,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     assert_equal(
       Set[:trueprop, :falseprop, :factoryprop],
       DefaultsStruct.decorator.required_props.to_set
+    )
+
+    assert_equal(
+      Set[:integer_const_nil_default, :integer_prop_nil_default],
+      NilDefaultRequired.decorator.required_props.to_set
     )
   end
 

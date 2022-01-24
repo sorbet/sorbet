@@ -277,6 +277,24 @@ class T::Props::Decorator
     end
   end
 
+  # Returns `true` when the type of the prop is nilable, or the field is typed
+  # as `T.untyped`, a `:default` is present in the rules hash, and its value is
+  # `nil`. The latter case is a workaround for explicitly not supporting the use
+  # of `T.nilable(T.untyped)`.
+  #
+  # checked(:never) - Rules hash is expensive to check
+  sig do
+    params(
+      cls: PropTypeOrClass,
+      rules: Rules,
+    )
+    .void
+    .checked(:never)
+  end
+  private def prop_nilable?(cls, rules)
+    T::Utils::Nilable.is_union_with_nilclass(cls) || (cls == T.untyped && rules.key?(:default) && rules[:default].nil?)
+  end
+
   # checked(:never) - Rules hash is expensive to check
   sig do
     params(
@@ -290,7 +308,7 @@ class T::Props::Decorator
   def prop_defined(name, cls, rules={})
     cls = T::Utils.resolve_alias(cls)
 
-    if T::Utils::Nilable.is_union_with_nilclass(cls)
+    if prop_nilable?(cls, rules)
       # :_tnilable is introduced internally for performance purpose so that clients do not need to call
       # T::Utils::Nilable.is_tnilable(cls) again.
       # It is strictly internal: clients should always use T::Props::Utils.required_prop?() or
