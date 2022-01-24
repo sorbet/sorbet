@@ -290,7 +290,7 @@ class T::Props::Decorator
     .checked(:never)
   end
   private def prop_nilable?(cls, rules)
-    T::Utils::Nilable.is_union_with_nilclass(cls) || (rules.key?(:default) && rules[:default].nil?)
+    T::Utils::Nilable.is_union_with_nilclass(cls) || (cls == T.untyped && rules.key?(:default) && rules[:default].nil?)
   end
 
   # checked(:never) - Rules hash is expensive to check
