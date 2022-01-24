@@ -319,6 +319,9 @@ module Psych
     params(
       yaml: T.any(String, StringIO, IO),
       legacy_filename: Object,
+      permitted_classes: T::Array[Class],
+      permitted_symbols: T::Array[Symbol],
+      aliases: T::Boolean,
       filename: T.nilable(String),
       fallback: T.untyped,
       symbolize_names: T::Boolean,
@@ -326,7 +329,7 @@ module Psych
     )
     .returns(T.untyped)
   end
-  def self.load(yaml, legacy_filename = T.unsafe(nil), filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil)); end
+  def self.load(yaml, legacy_filename = T.unsafe(nil), permitted_classes: [Symbol], permitted_symbols: [], aliases: false, filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil)); end
 
   ###
   # Safely load the yaml string in `yaml`. By default, only the following
