@@ -1785,12 +1785,11 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                     // surfaced that error to the user. Nothing to do here.
                     continue;
                 }
-                auto &prevPgk = gs.packageDB().getPackageInfo(pkg->mangledName());
-                if (prevPgk.exists() && prevPgk.definitionLoc() != pkg->definitionLoc()) {
+                auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
+                if (prevPkg.exists() && prevPkg.definitionLoc() != pkg->definitionLoc()) {
                     if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
                         auto pkgName = pkg->name.toString(ctx);
                         e.setHeader("Redefinition of package `{}`", pkgName);
-                        auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
                         e.addErrorLine(prevPkg.definitionLoc(), "Package `{}` originally defined here", pkgName);
                     }
                 } else {
