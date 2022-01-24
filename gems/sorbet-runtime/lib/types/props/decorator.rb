@@ -277,8 +277,10 @@ class T::Props::Decorator
     end
   end
 
-  # Returns `true` when the type of the prop is nilable, or a `:default` is
-  # present in the rules hash, and its value is `nil`.
+  # Returns `true` when the type of the prop is nilable, or the field is typed
+  # as `T.untyped`, a `:default` is present in the rules hash, and its value is
+  # `nil`. The latter case is a workaround for explicitly not supporting the use
+  # of `T.nilable(T.untyped)`.
   #
   # checked(:never) - Rules hash is expensive to check
   sig do
