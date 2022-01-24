@@ -719,12 +719,6 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("`{}` has been renamed to `{}`", "T.enum", "T.deprecated_enum");
 
-                    auto prefix = 0;
-                    auto sendSource = ctx.locAt(send.loc).source(ctx);
-                    if (sendSource.has_value() && absl::StartsWith(sendSource.value(), "::")) {
-                        prefix += 2;
-                    }
-
                     if (send.funLoc.exists() && !send.funLoc.empty()) {
                         e.replaceWith("Replace with `deprecated_enum`", ctx.locAt(send.funLoc), "{}",
                                       "deprecated_enum");
