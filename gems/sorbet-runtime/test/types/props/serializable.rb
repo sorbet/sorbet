@@ -44,6 +44,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     const :untyped_const1, T.untyped, default: nil
   end
 
+  class NilDefaultRequired < T::Struct
+    const :integer_const_nil_default, Integer, default: nil
+    prop :integer_prop_nil_default, Integer, default: nil
+  end
+
   describe ':default and :factory' do
     it 'defaults do not override on from_hash' do
       m = DefaultsStruct.from_hash('prop1' => 'value',
@@ -80,6 +85,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     assert_equal(
       Set[:trueprop, :falseprop, :factoryprop],
       DefaultsStruct.decorator.required_props.to_set
+    )
+
+    assert_equal(
+      Set[:integer_const_nil_default, :integer_prop_nil_default],
+      NilDefaultRequired.decorator.required_props.to_set
     )
   end
 
