@@ -1,0 +1,13 @@
+You can't pass both `--print=payload-sources` and `--no-stdlib`.
+--------------------------------------------------------------------------
+You can't pass both `--print=payload-sources` and `-e`.
+--------------------------------------------------------------------------
+You can't pass both `--print=payload-sources` and paths to typecheck.
+--------------------------------------------------------------------------
+core/array.rbi:class Array < Object
+core/object.rbi:class Object < BasicObject
+stdlib/base64.rbi:module Base64
+--------------------------------------------------------------------------
+core/array.rbi:class Array < Object
+core/object.rbi:class Object < BasicObject
+stdlib/base64.rbi:module Base64
