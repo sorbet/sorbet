@@ -10,7 +10,7 @@ namespace sorbet::realmain::lsp {
 SorbetWorkspaceEditTask::SorbetWorkspaceEditTask(const LSPConfiguration &config,
                                                  unique_ptr<SorbetWorkspaceEditParams> params)
     : LSPDangerousTypecheckerTask(config, LSPMethod::SorbetWorkspaceEdit),
-      latencyCancelSlowPath(make_unique<Timer>(*config.logger, "latency.cancel_slow_path")), params(move(params)) {
+      latencyCancelSlowPath(make_unique<Timer>("latency.cancel_slow_path")), params(move(params)) {
     if (this->params->updates.empty()) {
         latencyCancelSlowPath->cancel();
     }

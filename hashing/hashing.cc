@@ -146,7 +146,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     if (timeit == nullptr) {
-                        timeit = make_unique<Timer>(logger, "computeFileHashesWorker");
+                        timeit = make_unique<Timer>("computeFileHashesWorker");
                     }
                     processedByThread++;
 

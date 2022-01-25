@@ -387,7 +387,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
 
         ENFORCE(gs->lspQuery.isEmpty());
         if (gs->sleepInSlowPath) {
-            Timer::timedSleep(3000ms, *logger, "slow_path.resolve.sleep");
+            Timer::timedSleep(3000ms, "slow_path.resolve.sleep");
         }
         auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers);
         if (!maybeResolved.hasResult()) {
@@ -399,7 +399,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
             ENFORCE(tree.file.exists());
         }
         if (gs->sleepInSlowPath) {
-            Timer::timedSleep(3000ms, *logger, "slow_path.typecheck.sleep");
+            Timer::timedSleep(3000ms, "slow_path.typecheck.sleep");
         }
 
         // Inform the fast path that this global state is OK for typechecking as resolution has completed.
@@ -417,7 +417,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         // [Test only] Wait for a preemption if one is expected.
         while (updates.preemptionsExpected > 0) {
             while (!preemptManager->tryRunScheduledPreemptionTask(*gs)) {
-                Timer::timedSleep(1ms, *logger, "slow_path.expected_preemption.sleep");
+                Timer::timedSleep(1ms, "slow_path.expected_preemption.sleep");
             }
             updates.preemptionsExpected--;
         }
@@ -425,7 +425,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         // [Test only] Wait for a cancellation if one is expected.
         if (updates.cancellationExpected) {
             while (!epochManager.wasTypecheckingCanceled()) {
-                Timer::timedSleep(1ms, *logger, "slow_path.expected_cancellation.sleep");
+                Timer::timedSleep(1ms, "slow_path.expected_cancellation.sleep");
             }
             return;
         }

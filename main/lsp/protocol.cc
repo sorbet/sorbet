@@ -51,9 +51,9 @@ CounterState mergeCounters(CounterState counters) {
 }
 
 void tagNewRequest(spd::logger &logger, LSPMessage &msg) {
-    msg.latencyTimer = make_unique<Timer>(logger, "task_latency",
-                                          initializer_list<int>{50, 100, 250, 500, 1000, 1500, 2000, 2500, 5000, 10000,
-                                                                15000, 20000, 25000, 30000, 35000, 40000});
+    msg.latencyTimer =
+        make_unique<Timer>("task_latency", initializer_list<int>{50, 100, 250, 500, 1000, 1500, 2000, 2500, 5000, 10000,
+                                                                 15000, 20000, 25000, 30000, 35000, 40000});
 }
 } // namespace
 
@@ -169,7 +169,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
             // Thread that executes this lambda is called reader thread.
             // This thread _intentionally_ does not capture `this`.
             NotifyOnDestruction notify(messageQueueMutex, messageQueue.terminate);
-            auto timeit = make_unique<Timer>(logger, "getNewRequest");
+            auto timeit = make_unique<Timer>("getNewRequest");
             while (true) {
                 auto readResult = input->read();
                 if (readResult.result == FileOps::ReadResult::ErrorOrEof) {
@@ -184,7 +184,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                         messageQueue.counters = mergeCounters(move(messageQueue.counters));
                         messageQueue.pendingRequests.push_back(move(msg));
                         // Reset span now that we've found a request.
-                        timeit = make_unique<Timer>(logger, "getNewRequest");
+                        timeit = make_unique<Timer>("getNewRequest");
                     }
                     // Check if it's time to exit.
                     if (messageQueue.terminate) {

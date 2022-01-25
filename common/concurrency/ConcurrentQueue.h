@@ -67,7 +67,7 @@ public:
             if (ret.shouldRetry) {
                 std::unique_ptr<sorbet::Timer> time;
                 if (!silent) {
-                    time = std::make_unique<sorbet::Timer>(log, "wait_pop_timed");
+                    time = std::make_unique<sorbet::Timer>("wait_pop_timed");
                 }
                 ret.returned = _queue.wait_dequeue_timed(elem, timeout);
             } else { // all elements has been pushed, no need to wait.

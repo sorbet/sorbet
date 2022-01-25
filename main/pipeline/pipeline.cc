@@ -1153,7 +1153,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
                 if (result.gotItem()) {
                     processedByThread++;
                     if (timeit == nullptr) {
-                        timeit = make_unique<Timer>(gs.tracer(), "cacheTreesAndFilesWorker");
+                        timeit = make_unique<Timer>("cacheTreesAndFilesWorker");
                     }
 
                     if (!job->file.exists()) {

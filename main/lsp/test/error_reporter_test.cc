@@ -236,13 +236,13 @@ TEST_CASE("FirstAndLastLatencyReporting") {
                                                  vector<core::AutocorrectSuggestion>(), false));
 
     vector<unique_ptr<Timer>> diagnosticLatencyTimers;
-    diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
+    diagnosticLatencyTimers.emplace_back(make_unique<Timer>("last_diagnostic_latency"));
 
     er.beginEpoch(epoch, false, move(diagnosticLatencyTimers));
-    Timer::timedSleep(chrono::milliseconds(50), *logger, "delay so timer is reported");
+    Timer::timedSleep(chrono::milliseconds(50), "delay so timer is reported");
     er.pushDiagnostics(epoch, fref, errors, *gs);
 
-    Timer::timedSleep(chrono::milliseconds(60), *logger, "delay so timer is reported");
+    Timer::timedSleep(chrono::milliseconds(60), "delay so timer is reported");
     er.pushDiagnostics(epoch, fref, errors, *gs);
     er.endEpoch(epoch);
 
@@ -285,15 +285,15 @@ TEST_CASE("FirstAndLastLatencyAboutEqualWhenNoErrors") {
     vector<unique_ptr<core::Error>> emptyErrorList;
 
     vector<unique_ptr<Timer>> diagnosticLatencyTimers;
-    diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
+    diagnosticLatencyTimers.emplace_back(make_unique<Timer>("last_diagnostic_latency"));
 
     auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
 
-    diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
+    diagnosticLatencyTimers.emplace_back(make_unique<Timer>("last_diagnostic_latency"));
     er.beginEpoch(epoch, false, move(diagnosticLatencyTimers));
-    Timer::timedSleep(chrono::milliseconds(50), *logger, "delay so timer is reported");
+    Timer::timedSleep(chrono::milliseconds(50), "delay so timer is reported");
     er.pushDiagnostics(epoch, fref, emptyErrorList, *gs);
-    Timer::timedSleep(chrono::milliseconds(50), *logger, "delay so timer is reported");
+    Timer::timedSleep(chrono::milliseconds(50), "delay so timer is reported");
     er.endEpoch(epoch);
 
     auto counters = getAndClearThreadCounters();
@@ -328,11 +328,11 @@ TEST_CASE("FirstAndLastLatencyNotReportedWhenEpochIsCancelled") {
     vector<unique_ptr<core::Error>> emptyErrorList;
 
     vector<unique_ptr<Timer>> diagnosticLatencyTimers;
-    diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
+    diagnosticLatencyTimers.emplace_back(make_unique<Timer>("last_diagnostic_latency"));
 
     er.beginEpoch(epoch, false, move(diagnosticLatencyTimers));
 
-    Timer::timedSleep(chrono::milliseconds(50), *logger, "delay so timer is reported");
+    Timer::timedSleep(chrono::milliseconds(50), "delay so timer is reported");
     er.pushDiagnostics(epoch, fref, emptyErrorList, *gs);
     er.endEpoch(epoch, /*committed*/ false);
 
@@ -368,7 +368,7 @@ TEST_CASE("filesWithErrorsSince") {
                                                  vector<core::AutocorrectSuggestion>(), false));
 
     vector<unique_ptr<Timer>> diagnosticLatencyTimers;
-    diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
+    diagnosticLatencyTimers.emplace_back(make_unique<Timer>("last_diagnostic_latency"));
 
     er.beginEpoch(epoch, false, move(diagnosticLatencyTimers));
     er.pushDiagnostics(epoch, fref, errors, *gs);
