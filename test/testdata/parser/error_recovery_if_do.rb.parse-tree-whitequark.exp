@@ -1,2 +1,4 @@
 s(:class,
-  s(:const, nil, :A), nil, nil)
+  s(:const, nil, :A), nil,
+  s(:if,
+    s(:str, "thing"), nil, nil))
