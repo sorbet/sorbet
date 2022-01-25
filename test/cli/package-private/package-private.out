@@ -1,21 +1,28 @@
-b/b.rb:8: Non-package-private call to package-private method `foo` on `T.class_of(A)` https://srb.help/7036
+b/b.rb:8: Method `foo` on `T.class_of(A)` is package-private and cannot be called from package `B` https://srb.help/7036
      8 |    A.foo
             ^^^^^
     a/a.rb:7: Defined in `T.class_of(A)` here
      7 |  package_private_class_method def self.foo
                                        ^^^^^^^^^^^^
 
-b/b.rb:9: Non-package-private call to package-private method `foo` on `A` https://srb.help/7036
+b/b.rb:9: Method `foo` on `A` is package-private and cannot be called from package `B` https://srb.help/7036
      9 |    A.new.foo
             ^^^^^^^^^
     a/a.rb:12: Defined in `A` here
     12 |  package_private def foo
                           ^^^^^^^
 
-b/b.rb:12: Non-package-private call to package-private method `foo` on `A` https://srb.help/7036
+b/b.rb:12: Method `foo` on `A` is package-private and cannot be called from package `B` https://srb.help/7036
     12 |    f.foo
             ^^^^^
     a/a.rb:12: Defined in `A` here
     12 |  package_private def foo
                           ^^^^^^^
-Errors: 3
+
+b/b.rb:19: Method `foo` on `A` is package-private and cannot be called from package `B` https://srb.help/7036
+    19 |    c_and_a.foo
+            ^^^^^^^^^^^
+    a/a.rb:12: Defined in `A` here
+    12 |  package_private def foo
+                          ^^^^^^^
+Errors: 4
