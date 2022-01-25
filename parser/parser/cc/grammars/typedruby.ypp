@@ -3476,6 +3476,10 @@ f_opt_paren_args: f_paren_args
                       list->emplace_back($3);
                       $$ = list;
                     }
+                | f_arg tCOMMA error
+                    {
+                      $$ = $1;
+                    }
 
          f_label: tLABEL
                     {
@@ -3625,6 +3629,10 @@ f_opt_paren_args: f_paren_args
  opt_f_block_arg: tCOMMA f_block_arg
                     {
                       $$ = $2;
+                    }
+                | tCOMMA error
+                    {
+                      $$ = driver.alloc.node_list();
                     }
                 |
                     {

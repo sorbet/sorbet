@@ -16,6 +16,7 @@ trap 'rm -f "$COMMAND_FILE"' EXIT
 
 passes=(
   parse-tree
+  parse-tree-whitequark
   parse-tree-json
   desugar-tree
   desugar-tree-raw
