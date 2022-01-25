@@ -448,6 +448,15 @@ namespace typedruby27 {
 	} \
 } while(false);
 
+// When changing this function, make sure to ALWAYS report a diagnostic!
+// Otherwise, Sorbet could sometimes say things parse when they shouldn't
+// because the parser uses the `error` token for error recovery, which will end
+// up producing a parse tree in many cases, even when there was a syntax error.
+//
+// (Note that Bison always calls this error reporting callback, even if the
+// error token ends up being matched by a production rule, unlike some
+// other parser generators which only report a syntax error if the `error`
+// token was NOT consumed, like in Happy for Haskell.)
 void parser::error(const ruby_parser::location &lloc, const std::string &msg) {
 	std::string error_message = msg;
 
