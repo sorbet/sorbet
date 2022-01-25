@@ -55,6 +55,7 @@ NameDef names[] = {
     {"defined_p", "defined?"},
     {"undef"},
     {"each"},
+    {"subclasses"},
 
     // Used in parser for error recovery
     {"methodNameMissing", "<method-name-missing>"},

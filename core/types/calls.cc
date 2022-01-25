@@ -1625,6 +1625,13 @@ public:
     }
 } Class_new;
 
+class Class_subclasses : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        res.returnType = Types::arrayOf(gs, args.thisType);
+    }
+} Class_subclasses;
+
 class T_Generic_squareBrackets : public IntrinsicMethod {
 public:
     // This method is actually special: not only is it called from processBinding in infer, it's
@@ -3436,6 +3443,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},
 
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::new_(), &Class_new},
+    {Symbols::Class(), Intrinsic::Kind::Instance, Names::subclasses(), &Class_subclasses},
 
     {Symbols::Sorbet_Private_Static(), Intrinsic::Kind::Singleton, Names::sig(), &SorbetPrivateStatic_sig},
     {Symbols::Sorbet_Private_Static_ResolvedSig(), Intrinsic::Kind::Singleton, Names::sig(),
