@@ -313,7 +313,10 @@ public:
     }
 
     // User visible type. Should exactly match what the user can write.
-    std::string show(const GlobalState &gs, ShowOptions options = ShowOptions{}) const;
+    std::string show(const GlobalState &gs) const {
+        return show(gs, {});
+    };
+    std::string show(const GlobalState &gs, ShowOptions options) const;
     // Like show, but can include extra info. Does not necessarily match what the user can type.
     std::string showWithMoreInfo(const GlobalState &gs) const;
 

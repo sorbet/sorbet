@@ -133,7 +133,10 @@ public:
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
     std::string toStringFullName(const GlobalState &gs) const;
-    std::string show(const GlobalState &gs, ShowOptions options = ShowOptions{}) const;
+    std::string show(const GlobalState &gs) const {
+        return show(gs, {});
+    };
+    std::string show(const GlobalState &gs, ShowOptions options) const;
 };
 CheckSize(ClassOrModuleRef, 4, 4);
 
@@ -177,7 +180,10 @@ public:
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
     std::string toStringFullName(const GlobalState &gs) const;
-    std::string show(const GlobalState &gs, ShowOptions options = ShowOptions{}) const;
+    std::string show(const GlobalState &gs) const {
+        return show(gs, {});
+    };
+    std::string show(const GlobalState &gs, ShowOptions options) const;
 
     bool operator==(const MethodRef &rhs) const;
 
@@ -219,7 +225,10 @@ public:
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
     std::string toStringFullName(const GlobalState &gs) const;
-    std::string show(const GlobalState &gs, ShowOptions options = ShowOptions{}) const;
+    std::string show(const GlobalState &gs) const {
+        return show(gs, {});
+    };
+    std::string show(const GlobalState &gs, ShowOptions options) const;
 
     bool operator==(const FieldRef &rhs) const;
 
@@ -260,7 +269,10 @@ public:
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
     std::string toStringFullName(const GlobalState &gs) const;
-    std::string show(const GlobalState &gs, ShowOptions options = ShowOptions{}) const;
+    std::string show(const GlobalState &gs) const {
+        return show(gs, {});
+    };
+    std::string show(const GlobalState &gs, ShowOptions options) const;
 
     bool operator==(const TypeMemberRef &rhs) const;
 
@@ -302,7 +314,10 @@ public:
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
     std::string toStringFullName(const GlobalState &gs) const;
-    std::string show(const GlobalState &gs, ShowOptions options = ShowOptions{}) const;
+    std::string show(const GlobalState &gs) const {
+        return show(gs, {});
+    };
+    std::string show(const GlobalState &gs, ShowOptions options) const;
 
     bool operator==(const TypeArgumentRef &rhs) const;
 
@@ -493,7 +508,10 @@ public:
         return toStringWithOptions(gs, 0, showFull, showRaw);
     }
     // Renders the full name of this Symbol in a form suitable for user display.
-    std::string show(const GlobalState &gs, ShowOptions options = ShowOptions{}) const;
+    std::string show(const GlobalState &gs) const {
+        return show(gs, {});
+    };
+    std::string show(const GlobalState &gs, ShowOptions options) const;
 };
 CheckSize(SymbolRef, 4, 4);
 
