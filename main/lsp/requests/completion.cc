@@ -964,24 +964,49 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
         auto prefix = (callerSideName == core::Names::methodNameMissing() || !sendResp->funLoc.contains(queryLoc))
                           ? ""
                           : callerSideName.shortName(gs);
-        config.logger->debug("Looking for method similar to '{}'", prefix);
+        if (prefix == "" && queryLoc.adjust(gs, -2, 0).source(gs) == "::") {
+            // Probably a case like this:
+            //   A::|
+            //   puts
+            // which parses as a method call (A.puts()) instead of a constant.
 
-        // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
-        // (If there is a method whose name overlaps with a keyword, it will still show up as a _method_ item.)
-        auto suggestKeywords = sendResp->isPrivateOk;
-        auto params = SearchParams{
-            queryLoc, prefix,
-            MethodSearchParams{
-                sendResp->dispatchResult,
-                sendResp->totalArgs,
-                sendResp->isPrivateOk,
-            },
-            suggestKeywords,
-            // No receiver means that local variables are allowed here.
-            sendResp->isPrivateOk ? sendResp->enclosingMethod : core::MethodRef{},
-            core::lsp::ConstantResponse::Scopes{}, // constants don't make sense here
-        };
-        items = this->getCompletionItems(typechecker, params);
+            auto scopes = core::lsp::ConstantResponse::Scopes{};
+            // We're ignoring the other dispatch components here, because the fast that we saw `::`
+            // in the source means that it's likely a constant lit, not something with a fancy type.
+            // Also since it's a constant lit, it probably has type `T.class_of(...)`, so we want
+            // the represented type for the sake of constant lookup.
+            auto recv = core::Types::getRepresentedClass(gs, sendResp->dispatchResult->main.receiver);
+            if (recv.exists()) {
+                scopes.emplace_back(recv);
+            }
+
+            auto params = SearchParams{
+                queryLoc,
+                prefix,
+                nullopt,           // do not suggest methods
+                false,             // do not suggest keywords
+                core::MethodRef{}, // do not suggest locals
+                scopes,
+            };
+            items = this->getCompletionItems(typechecker, params);
+        } else {
+            // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
+            // (If there is a method whose name overlaps with a keyword, it will still show up as a _method_ item.)
+            auto suggestKeywords = sendResp->isPrivateOk;
+            auto params = SearchParams{
+                queryLoc, prefix,
+                MethodSearchParams{
+                    sendResp->dispatchResult,
+                    sendResp->totalArgs,
+                    sendResp->isPrivateOk,
+                },
+                suggestKeywords,
+                // No receiver means that local variables are allowed here.
+                sendResp->isPrivateOk ? sendResp->enclosingMethod : core::MethodRef{},
+                core::lsp::ConstantResponse::Scopes{}, // constants don't make sense here
+            };
+            items = this->getCompletionItems(typechecker, params);
+        }
     } else if (auto constantResp = resp->isConstant()) {
         SearchParams params;
         if (constantResp->name == core::Names::Constants::ErrorNode()) {
@@ -990,7 +1015,20 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             params = searchParamsForEmptyAssign(gs, queryLoc, constantResp->enclosingMethod, constantResp->scopes);
         } else {
             // Normal constant response.
-            auto prefix = constantResp->name.shortName(gs);
+            auto name = constantResp->name;
+            auto prefix = name == core::Names::Constants::ConstantNameMissing() ? "" : name.shortName(gs);
+            if (prefix != "") {
+                auto behindCursor = queryLoc.adjust(gs, -1 * static_cast<int32_t>(prefix.size()), 0);
+                auto precedingChar = queryLoc.adjust(gs, -1, 0);
+                if (behindCursor.source(gs) != prefix && precedingChar.source(gs) == ":") {
+                    // Probably a case like this:
+                    //   A::|
+                    //   B::C
+                    // which parses (so we don't get ConstantNameMissing), but we don't want to use
+                    // `B` as the completion prefix.
+                    prefix = "";
+                }
+            }
             auto methodSearchParams = nullopt;
             auto suggestKeywords = false;
             auto enclosingMethod = core::MethodRef{};

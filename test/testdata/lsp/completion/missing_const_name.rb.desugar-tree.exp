@@ -1,0 +1,36 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Outer><<C <todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<C Middle><<C <todo sym>>> < (::<todo sym>)
+      class <emptyTree>::<C Inner><<C <todo sym>>> < (::<todo sym>)
+        <emptyTree>
+      end
+    end
+  end
+
+  def test_constant_completion_with_no_name<<todo method>>(&<blk>)
+    <emptyTree>::<C Outer>::<C <ConstantNameMissing>>
+  end
+
+  def test_constant_completion_adjacent_missing_names<<todo method>>(&<blk>)
+    <emptyTree>::<C Outer>::<C Outer>::<C Middle>::<C <ConstantNameMissing>>
+  end
+
+  def test_constant_completion_before_method<<todo method>>(&<blk>)
+    <emptyTree>::<C Outer>.puts()
+  end
+
+  def test_constant_completion_before_keyword<<todo method>>(&<blk>)
+    begin
+      <emptyTree>::<C Outer>::<C <ConstantNameMissing>>
+      <emptyTree>
+    end
+  end
+
+  def test_constant_completion_before_variable<<todo method>>(x, &<blk>)
+    <emptyTree>::<C Outer>.x()
+  end
+
+  def test_constant_completion_empty_scope<<todo method>>(x, &<blk>)
+    <emptyTree>
+  end
+end

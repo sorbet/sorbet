@@ -28,6 +28,8 @@ using std::type_info;
 using std::unique_ptr;
 using std::vector;
 
+extern const char *dclassStrings[];
+
 namespace sorbet::parser {
 
 void Dedenter::update_state(string_view dedented_string) {
@@ -688,6 +690,11 @@ public:
 
     unique_ptr<Node> constFetch(unique_ptr<Node> scope, const token *colon, const token *name) {
         return make_unique<Const>(scope->loc.join(tokLoc(name)), std::move(scope), gs_.enterNameConstant(name->view()));
+    }
+
+    unique_ptr<Node> constFetchError(unique_ptr<Node> scope, const token *colon) {
+        return make_unique<Const>(scope->loc.join(tokLoc(colon)), std::move(scope),
+                                  core::Names::Constants::ConstantNameMissing());
     }
 
     unique_ptr<Node> constGlobal(const token *colon, const token *name) {
@@ -1909,6 +1916,11 @@ ForeignPtr constFetch(SelfPtr builder, ForeignPtr scope, const token *colon, con
     return build->toForeign(build->constFetch(build->cast_node(scope), colon, name));
 }
 
+ForeignPtr constFetchError(SelfPtr builder, ForeignPtr scope, const token *colon) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->constFetchError(build->cast_node(scope), colon));
+}
+
 ForeignPtr const_pattern(SelfPtr builder, ForeignPtr const_, const token *begin, ForeignPtr pattern, const token *end) {
     auto build = cast_builder(builder);
     return build->toForeign(build->const_pattern(build->cast_node(const_), begin, build->cast_node(pattern), end));
@@ -2531,6 +2543,7 @@ struct ruby_parser::builder Builder::interface = {
     const_,
     const_pattern,
     constFetch,
+    constFetchError,
     constGlobal,
     constOpAssignable,
     cvar,

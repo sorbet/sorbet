@@ -48,6 +48,7 @@ tuple<string, string> MESSAGES[] = {
     {"OddHash", "odd number of entries for a hash"},
     {"SingletonLiteral", "cannot define a singleton method for a literal"},
     {"DynamicConst", "dynamic constant assignment"},
+    {"ConstWithoutName", "expected constant name following \\\"::\\\""},
     {"ConstReassignment", "constant re-assignment"},
     {"ModuleInDef", "module definition in method body"},
     {"ClassInDef", "class definition in method body"},
