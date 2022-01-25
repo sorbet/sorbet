@@ -28,8 +28,6 @@ using std::type_info;
 using std::unique_ptr;
 using std::vector;
 
-extern const char *dclassStrings[];
-
 namespace sorbet::parser {
 
 void Dedenter::update_state(string_view dedented_string) {
