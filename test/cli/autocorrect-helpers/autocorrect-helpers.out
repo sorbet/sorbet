@@ -87,8 +87,8 @@ autocorrect-helpers.rb:30: Method `mixes_in_class_methods` does not exist on `T.
     30 |  mixes_in_class_methods(S1)
         ^
   Did you mean:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#L1524: `Module#public_class_method`
-    1524 |  def public_class_method(*arg0); end
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#L1489: `Module#public_class_method`
+    1489 |  def public_class_method(*arg0); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 9
 

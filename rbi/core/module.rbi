@@ -1333,41 +1333,6 @@ class Module < Object
   end
   def private_class_method(*arg0); end
 
-  # Makes a method package-private.
-  #
-  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) arguments are
-  # converted to symbols.
-  #
-  # class A
-  #   package_private def a(); end
-  # end
-  #
-  sig do
-    params(
-        arg0: T.any(Symbol, String),
-    )
-    .returns(T.self_type)
-  end
-  def package_private(*arg0); end
-
-  # Makes class methods package-private.
-  #
-  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) arguments are
-  # converted to symbols.
-  #
-  # ```ruby
-  # class SimpleSingleton
-  #   package_private_class_method :new
-  # end
-  # ```
-  sig do
-    params(
-        arg0: T.any(Symbol, String),
-    )
-    .returns(T.self_type)
-  end
-  def package_private_class_method(*arg0); end
-
   # Makes a list of existing constants private.
   sig do
     params(
