@@ -26,30 +26,26 @@ vector<ast::ExpressionPtr> Private::run(core::MutableContext ctx, ast::Send *sen
     if (send->fun == core::Names::private_() && mdef->flags.isSelfMethod) {
         if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::PrivateMethodMismatch)) {
             e.setHeader("Use `{}` to define private class methods", "private_class_method");
-            auto beginPos = send->loc.beginPos();
-            auto replacementLoc = core::Loc{ctx.file, beginPos, beginPos + 7};
+            auto replacementLoc = core::Loc{ctx.file, send->funLoc};
             e.replaceWith("Replace with `private_class_method`", replacementLoc, "private_class_method");
         }
     } else if (send->fun == core::Names::privateClassMethod() && !mdef->flags.isSelfMethod) {
         if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::PrivateMethodMismatch)) {
             e.setHeader("Use `{}` to define private instance methods", "private");
-            auto beginPos = send->loc.beginPos();
-            auto replacementLoc = core::Loc{ctx.file, beginPos, beginPos + 20};
+            auto replacementLoc = core::Loc{ctx.file, send->funLoc};
             e.replaceWith("Replace with `private`", replacementLoc, "private");
         }
     } else if (send->fun == core::Names::packagePrivate() && mdef->flags.isSelfMethod) {
         if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::PrivateMethodMismatch)) {
             e.setHeader("Use `{}` to define package-private class methods", "package_private_class_method");
-            auto beginPos = send->loc.beginPos();
-            auto replacementLoc = core::Loc{ctx.file, beginPos, beginPos + 15};
+            auto replacementLoc = core::Loc{ctx.file, send->funLoc};
             e.replaceWith("Replace with `package_private_class_method`", replacementLoc,
                           "package_private_class_method");
         }
     } else if (send->fun == core::Names::packagePrivateClassMethod() && !mdef->flags.isSelfMethod) {
         if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::PrivateMethodMismatch)) {
             e.setHeader("Use `{}` to define package-private instance methods", "package_private");
-            auto beginPos = send->loc.beginPos();
-            auto replacementLoc = core::Loc{ctx.file, beginPos, beginPos + 28};
+            auto replacementLoc = core::Loc{ctx.file, send->funLoc};
             e.replaceWith("Replace with `package_private`", replacementLoc, "package_private");
         }
     }

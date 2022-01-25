@@ -18,30 +18,7 @@ const SendResponse *QueryResponse::isSend() const {
 }
 
 const optional<core::Loc> SendResponse::getMethodNameLoc(const core::GlobalState &gs) const {
-    auto methodName = this->callerSideName.show(gs);
-    auto expr = termLoc.source(gs);
-    if (!expr.has_value()) {
-        return nullopt;
-    }
-    // We parse two forms of send expressions:
-    //   <receiver expr><whitespace?>.<whitespace?><method>
-    //   <method>
-    // All other forms (operator overloads etc) cause nullopt to be returned.
-    string::size_type methodNameOffset = receiverLoc.endPos() - termLoc.beginPos();
-    if (methodNameOffset != 0) {
-        methodNameOffset = expr.value().find_first_of(".", methodNameOffset) + 1;
-        methodNameOffset = expr.value().find_first_not_of(" \t", methodNameOffset);
-    }
-    // TODO(jez) Use Loc::adjust here
-    auto offsets = termLoc.offsets();
-    offsets.beginLoc += methodNameOffset;
-    offsets.endLoc = offsets.beginLoc + methodName.length();
-    auto methodNameLoc = core::Loc(termLoc.file(), offsets);
-    if (offsets.endPos() > termLoc.endPos() || !methodNameLoc.exists() ||
-        methodName != methodNameLoc.source(gs).value()) {
-        return nullopt;
-    }
-    return optional<core::Loc>(methodNameLoc);
+    return (this->funLoc.exists() && !this->funLoc.empty()) ? make_optional<core::Loc>(this->funLoc) : nullopt;
 }
 
 const IdentResponse *QueryResponse::isIdent() const {
