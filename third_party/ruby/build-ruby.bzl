@@ -9,15 +9,16 @@ fi
 hermetic_tar() {
     SRC="$1"
     OUT="$2"
-    FLAGS="${3:-}"
+    shift 2
+    PATHS="${@:-.}"
     # Check if our tar supports --sort (we assume --sort support implies --mtime support)
     if [[ $(tar --sort 2>&1) =~ 'requires an argument' ]]; then
-        tar --sort=name --owner=0 --group=0 --numeric-owner --mtime='UTC 1970-01-01 00:00' -h -C "$SRC" $FLAGS -rf "$OUT" .
+        tar --sort=name --owner=0 --group=0 --numeric-owner --mtime='UTC 1970-01-01 00:00' -h -C "$SRC" -rf "$OUT" $PATHS
     elif [[ $(tar --mtime 2>&1) =~ 'requires an argument' ]]; then
-        (cd "$SRC" && find . -print0) | LC_ALL=C sort -z | tar -h -C "$SRC" --no-recursion --null -T - --owner=0 --group=0 --numeric-owner --mtime='UTC 1970-01-01 00:00' $FLAGS -rf "$OUT" .
+        (cd "$SRC" && find . -print0) | LC_ALL=C sort -z | tar -h -C "$SRC" --no-recursion --null -T - --owner=0 --group=0 --numeric-owner --mtime='UTC 1970-01-01 00:00' -rf "$OUT" $PATHS
     else
         # Oh well, no hermetic tar for you
-        tar -h -C "$SRC" $FLAGS -rf "$OUT" .
+        tar -h -C "$SRC" -rf "$OUT" $PATHS
     fi
 }
 """
@@ -391,7 +392,8 @@ toolchain="$base/{toolchain}"
 
 archive="$(mktemp)"
 
-hermetic_tar "$toolchain" "${{archive}}"
+# explicitly exclude internal_incdir and static_libs
+hermetic_tar "$toolchain" "${{archive}}" bin lib include share
 gzip -c "${{archive}}" > "{output}"
 
 rm "${{archive}}"
