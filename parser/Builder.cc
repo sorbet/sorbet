@@ -354,6 +354,13 @@ public:
         return make_unique<Hash>(collectionLoc(begin, pairs, end), isKwargs, std::move(pairs));
     }
 
+    unique_ptr<Node> assoc_error(const token *label, const token *fcall) {
+        auto recv = nullptr;
+        auto method = gs_.enterNameUTF8(fcall->view());
+        auto send = make_unique<Send>(tokLoc(fcall), recv, method, tokLoc(fcall), NodeVec());
+        return pair_keyword(label, std::move(send));
+    }
+
     unique_ptr<Node> attrAsgn(unique_ptr<Node> receiver, const token *dot, const token *selector, bool masgn) {
         core::NameRef method = gs_.enterNameUTF8(selector->asString() + "=");
         auto selectorLoc = tokLoc(selector);
@@ -1779,6 +1786,11 @@ ForeignPtr associate(SelfPtr builder, const token *begin, const node_list *pairs
     return build->toForeign(build->associate(begin, build->convertNodeList(pairs), end));
 }
 
+ForeignPtr assoc_error(SelfPtr builder, const token *label, const token *fcall) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->assoc_error(label, fcall));
+}
+
 ForeignPtr attrAsgn(SelfPtr builder, ForeignPtr receiver, const token *dot, const token *selector, bool masgn) {
     auto build = cast_builder(builder);
     return build->toForeign(build->attrAsgn(build->cast_node(receiver), dot, selector, masgn));
@@ -2496,6 +2508,7 @@ struct ruby_parser::builder Builder::interface = {
     assign,
     assignable,
     associate,
+    assoc_error,
     attrAsgn,
     backRef,
     begin,

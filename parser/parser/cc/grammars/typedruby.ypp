@@ -1557,6 +1557,15 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                       args->concat($4);
                       $$ = args;
                     }
+                // There's an explanation of what's going on in this rule in the `assocs` rule.
+                | args tCOMMA fcall error assocs opt_block_arg
+                    {
+                      auto &args = $1;
+                      args->emplace_back(driver.build.call_method(self, nullptr, nullptr, $3, nullptr, nullptr, nullptr));
+                      args->emplace_back(driver.build.associate(self, nullptr, $5, nullptr));
+                      args->concat($6);
+                      $$ = args;
+                    }
                 | block_arg
                     {
                       $$ = driver.alloc.node_list($1);
@@ -1608,6 +1617,10 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                     {
                       $$ = driver.alloc.node_list($1);
                     }
+                | error
+                    {
+                      $$ = driver.alloc.node_list(driver.build.error_node(self, @1.begin, @1.end));
+                    }
                 | tSTAR arg_value
                     {
                       $$ = driver.alloc.node_list(driver.build.splat(self, $1, $2));
@@ -1617,6 +1630,12 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                       auto &list = $1;
                       list->emplace_back($3);
                       $$ = list;
+                    }
+                | args tCOMMA error
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.error_node(self, @2.end, @3.end));
+                      $$ = $1;
                     }
                 | args tCOMMA tSTAR arg_value
                     {
@@ -3729,10 +3748,60 @@ f_opt_paren_args: f_paren_args
                     {
                       $$ = driver.alloc.node_list($1);
                     }
+                | tLABEL assoc
+                    {
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, $1, "tLABEL");
+                      auto result = driver.alloc.node_list();
+                      auto err = driver.build.error_node(self, @1.end, @2.begin);
+                      result->emplace_back(driver.build.pair_keyword(self, $1, err));
+                      result->emplace_back($2);
+                      $$ = result;
+                    }
                 | assocs tCOMMA assoc
                     {
                       auto &list = $1;
                       list->emplace_back($3);
+                      $$ = list;
+                    }
+                | assocs tCOMMA error
+                    {
+                      $$ = $1;
+                    }
+                | assocs tCOMMA tIDENTIFIER error
+                    {
+                      auto &list = $1;
+                      // TODO(jez) Return a special function call like `<kw__a` so that you can complete kwargs
+                      auto err = driver.build.call_method(self, nullptr, nullptr, $3, nullptr, nullptr, nullptr);
+                      list->emplace_back(driver.build.pair_keyword(self, $3, err));
+                      $$ = list;
+                    }
+                // There's quite a bit going on in these next two. What we'd really like is to do something like
+                //     assoc error assoc
+                // to handle user code like this:
+                //     f(a: b x: y)
+                // (imagine that the user is in the middle of typing out the `b`, and we want to provide completion)
+                // We can't do that, because by default, the `tLABEL` (x:) that comes after the `b` tricks the parser
+                // into thinking that an fcall is coming, like how `b x: y` is valid Ruby code. But Ruby has banned
+                // that syntax in args (for the obvious reason that it's ambigous with keyword args). So it gets
+                // halfway done with parsing it as an fcall, and realizes theres an error.
+                //
+                // And the last bit is that since there's no tCOMMA (the user is still filling in the arg, hasn't
+                // gotten to the comma yet), we have to also pull in the following assoc, which we know is there
+                // because the only reason why we're seeing `fcall error` is that there was a tLABEL in the lookahead
+                //
+                // And then we have to repeat it to deal with whether this happens at the beginning of the keywords,
+                // or in the middle.
+                | tLABEL fcall error assoc
+                    {
+                      auto result = driver.alloc.node_list(driver.build.assoc_error(self, $1, $2));
+                      result->emplace_back($4);
+                      $$ = result;
+                    }
+                | assocs tCOMMA tLABEL fcall error assoc
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.assoc_error(self, $3, $4));
+                      list->emplace_back($6);
                       $$ = list;
                     }
 
