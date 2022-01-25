@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "builder.hh"
+#include "common/common.h"
 #include "diagnostic.hh"
 #include "lexer.hh"
 
@@ -293,6 +294,12 @@ public:
         if (lvl == dlevel::ERROR) {
             pending_error = true;
         }
+    }
+
+    template <class... Args> void replace_last_diagnostic(Args &&...args) {
+        ENFORCE(!diagnostics.empty());
+        diagnostics.pop_back();
+        diagnostics.emplace_back(std::forward<Args>(args)...);
     }
 };
 
