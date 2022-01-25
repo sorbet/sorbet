@@ -1,0 +1,11 @@
+s(:def, :rescued,
+  s(:args,
+    s(:arg, :x)),
+  s(:rescue,
+    s(:send, nil, :raise,
+      s(:str, "to be caught")),
+    s(:resbody, nil, nil,
+      s(:dstr,
+        s(:str, "instance "),
+        s(:begin,
+          s(:lvar, :x)))), nil))

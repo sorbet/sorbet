@@ -1,0 +1,4 @@
+s(:defs,
+  s(:send, nil, :obj), :foo, nil,
+  s(:send, nil, :puts,
+    s(:str, "Hello")))

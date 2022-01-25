@@ -686,6 +686,52 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                       $$ = driver.build.op_assign(self, driver.build.call_method(self, $1, $2, $3, nullptr, nullptr, nullptr), $4, $5);
                       DIAGCHECK();
                     }
+                | defn_head f_opt_paren_args tEQL command
+                    {
+                      $$ = driver.build.defEndlessMethod(self, $1->begin, $1->end, $2, $3, $4);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | defn_head f_opt_paren_args tEQL command kRESCUE_MOD arg
+                    {
+                      auto rescue_body = driver.build.rescue_body(self, $5, nullptr, nullptr, nullptr, nullptr, $6);
+                      auto method_body = driver.build.beginBody(self, $4, driver.alloc.node_list(rescue_body), nullptr, nullptr, nullptr, nullptr);
+
+                      $$ = driver.build.defEndlessMethod(self, $1->begin, $1->end, $2, $3, method_body);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | defs_head f_opt_paren_args tEQL command
+                    {
+                      $$ = driver.build.defEndlessSingleton(self, $1, $2, $3, $4);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | defs_head f_opt_paren_args tEQL command kRESCUE_MOD arg
+                    {
+                      auto rescue_body = driver.build.rescue_body(self, $5, nullptr, nullptr, nullptr, nullptr, $6);
+                      auto method_body = driver.build.beginBody(self, $4, driver.alloc.node_list(rescue_body), nullptr, nullptr, nullptr, nullptr);
+
+                      $$ = driver.build.defEndlessSingleton(self, $1, $2, $3, method_body);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
                 | backref tOP_ASGN command_rhs
                     {
                       $$ = driver.build.op_assign(self, $1, $2, $3);
