@@ -1,11 +1,23 @@
-DefMethod {
-  name = <U test_constant_only_scope>
-  args = NULL
-  body = Const {
-    scope = Const {
-      scope = NULL
-      name = <C <U A>>
+Begin {
+  stmts = [
+    Class {
+      name = Const {
+        scope = NULL
+        name = <C <U A>>
+      }
+      superclass = NULL
+      body = NULL
     }
-    name = <C <U <ConstantNameMissing>>>
-  }
+    DefMethod {
+      name = <U test_constant_only_scope>
+      args = NULL
+      body = Const {
+        scope = Const {
+          scope = NULL
+          name = <C <U A>>
+        }
+        name = <C <U <ConstantNameMissing>>>
+      }
+    }
+  ]
 }
