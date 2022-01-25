@@ -44,7 +44,11 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     serverCap->renameProvider = make_unique<RenameOptions>(true);
 
     auto completionProvider = make_unique<CompletionOptions>();
-    completionProvider->triggerCharacters = {"."};
+    if (opts.lspNewTriggerCharactersEnabled) {
+        completionProvider->triggerCharacters = {".", ":", " "};
+    } else {
+        completionProvider->triggerCharacters = {"."};
+    }
     serverCap->completionProvider = move(completionProvider);
 
     response->result = make_unique<InitializeResult>(move(serverCap));
