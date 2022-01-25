@@ -446,7 +446,7 @@ NodeDef nodes[] = {
         "match_as",
         vector<FieldDef>({{"value", FieldType::Node}, {"as", FieldType::Node}}),
     },
-    // [regex literal] =~ value; autovivifies local vars from match grops
+    // [regex literal] =~ value; autovivifies local vars from match groups
     {
         "MatchAsgn",
         "match_with_lvasgn",

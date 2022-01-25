@@ -225,6 +225,11 @@ public:
                 driver_->numparam_stack.regis(name_str[1] - 48, std::move(decls));
             }
 
+            auto last_char = name_str.back();
+            if (last_char == '?' || last_char == '!') {
+                error(ruby_parser::dclass::InvalidIdToGet, id->loc, std::string(name_str));
+            }
+
             if (driver_->lex.is_declared(name_str)) {
                 if (!hasCircularArgumentReferences(node.get(), name_str)) {
                     return make_unique<LVar>(node->loc, id->name);
@@ -346,6 +351,9 @@ public:
             return make_unique<CVarLhs>(cv->loc, cv->name);
         } else if (auto *gv = parser::cast_node<GVar>(node.get())) {
             return make_unique<GVarLhs>(gv->loc, gv->name);
+        } else if (auto *mv = parser::cast_node<MatchVar>(node.get())) {
+            checkReservedForNumberedParameters(mv->name.shortName(gs_), mv->loc);
+            return make_unique<MatchVar>(*mv);
         } else if (parser::isa_node<Backref>(node.get()) || parser::isa_node<NthRef>(node.get())) {
             error(ruby_parser::dclass::BackrefAssignment, node->loc);
             return make_unique<Nil>(node->loc);
@@ -1326,6 +1334,22 @@ public:
 
         return make_unique<Pair>(tokLoc(key).join(maybe_loc(value)),
                                  make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->view())), std::move(value));
+    }
+
+    unique_ptr<Node> pair_label(const token *key) {
+        unique_ptr<Node> value;
+        if (islower(key->view().at(0))) {
+            value = ident(key);
+        } else {
+            value = const_(key);
+        }
+
+        auto keyLoc =
+            core::LocOffsets{clamp((uint32_t)key->start()), clamp((uint32_t)key->end() - 1)}; // drop the trailing :
+        auto accessible_value = accessible(std::move(value));
+        return make_unique<Pair>(tokLoc(key).join(maybe_loc(accessible_value)),
+                                 make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->view())),
+                                 std::move(accessible_value));
     }
 
     unique_ptr<Node> pair_quoted(const token *begin, sorbet::parser::NodeVec parts, const token *end,
@@ -2385,6 +2409,11 @@ ForeignPtr pair_keyword(SelfPtr builder, const token *key, ForeignPtr value) {
     return build->toForeign(build->pair_keyword(key, build->cast_node(value)));
 }
 
+ForeignPtr pair_label(SelfPtr builder, const token *key) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->pair_label(key));
+}
+
 ForeignPtr pair_quoted(SelfPtr builder, const token *begin, const node_list *parts, const token *end,
                        ForeignPtr value) {
     auto build = cast_builder(builder);
@@ -2681,6 +2710,7 @@ struct ruby_parser::builder Builder::interface = {
     p_ident,
     pair,
     pair_keyword,
+    pair_label,
     pair_quoted,
     pin,
     postexe,
