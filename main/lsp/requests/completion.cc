@@ -226,6 +226,11 @@ vector<RubyKeyword> allSimilarKeywords(string_view prefix) {
     ENFORCE(absl::c_is_sorted(rubyKeywords, [](auto &left, auto &right) { return left.keyword < right.keyword; }),
             "rubyKeywords is not sorted by keyword; completion results will be out of order");
 
+    if (prefix == "") {
+        // Since we suggest keyword snippets first, they're just noise when the prefix is empty
+        return {};
+    }
+
     auto result = vector<RubyKeyword>{};
     for (const auto &rubyKeyword : rubyKeywords) {
         if (absl::StartsWith(rubyKeyword.keyword, prefix)) {
@@ -669,7 +674,7 @@ bool isSimilarConstant(const core::GlobalState &gs, string_view prefix, core::Sy
 vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalState &gs, const LSPConfiguration &config,
                                                            string_view prefix,
                                                            core::lsp::ConstantResponse::Scopes &scopes,
-                                                           core::Loc queryLoc) {
+                                                           core::Loc queryLoc, size_t initialSortIdx) {
     config.logger->debug("Looking for constant similar to {}", prefix);
     ENFORCE(!scopes.empty());
 
@@ -690,7 +695,8 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
         // We should probably at least sort by whether the prefix of the suggested constant matches.
         for (auto [_name, sym] : scope.asClassOrModuleRef().data(gs)->membersStableOrderSlow(gs)) {
             if (isSimilarConstant(gs, prefix, sym)) {
-                items.push_back(getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, items.size()));
+                items.push_back(
+                    getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, initialSortIdx + items.size()));
             }
         }
     }
@@ -713,7 +719,8 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
 
         for (auto [_name, sym] : ancestor.data(gs)->membersStableOrderSlow(gs)) {
             if (isSimilarConstant(gs, prefix, sym)) {
-                items.push_back(getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, items.size()));
+                items.push_back(
+                    getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, initialSortIdx + items.size()));
             }
         }
     }
@@ -785,6 +792,37 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     }
 
     return item;
+}
+
+CompletionTask::MethodSearchParams CompletionTask::methodSearchParamsForEmptyAssign(const core::GlobalState &gs,
+                                                                                    core::MethodRef enclosingMethod) {
+    auto returnType = core::Types::untypedUntracked();
+    auto receiverType = enclosingMethod.data(gs)->owner.data(gs)->externalType(); // self
+    auto dispatchMethod = core::MethodRef{};
+    size_t totalArgs = 0;
+    auto isPrivateOk = true;
+    return MethodSearchParams{
+        make_shared<core::DispatchResult>(returnType, receiverType, dispatchMethod),
+        totalArgs,
+        isPrivateOk,
+    };
+}
+
+// Manually craft a set of SearchParams that correspond to en "empty" cursor position
+CompletionTask::SearchParams CompletionTask::searchParamsForEmptyAssign(const core::GlobalState &gs, core::Loc queryLoc,
+                                                                        core::MethodRef enclosingMethod,
+                                                                        core::lsp::ConstantResponse::Scopes scopes) {
+    auto prefix = "";
+    // Create a fake DispatchResult to get method results
+    auto suggestKeywords = true;
+    return SearchParams{
+        queryLoc,
+        prefix,
+        methodSearchParamsForEmptyAssign(gs, enclosingMethod),
+        suggestKeywords,
+        enclosingMethod, // locals
+        core::lsp::ConstantResponse::Scopes{enclosingMethod.data(gs)->owner},
+    };
 }
 
 vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypecheckerDelegate &typechecker,
@@ -879,7 +917,8 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     }
 
     if (!params.scopes.empty()) {
-        auto similarConsts = allSimilarConstantItems(gs, this->config, params.prefix, params.scopes, params.queryLoc);
+        auto similarConsts =
+            allSimilarConstantItems(gs, this->config, params.prefix, params.scopes, params.queryLoc, items.size());
         move(similarConsts.begin(), similarConsts.end(), back_inserter(items));
     }
 
@@ -944,15 +983,52 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
         };
         items = this->getCompletionItems(typechecker, params);
     } else if (auto constantResp = resp->isConstant()) {
-        auto prefix = constantResp->name.shortName(gs);
-        // TODO(jez) Start searching for methods, keywords, and locals on future branch with better parse error recovery
-        auto methodSearchParams = nullopt;
-        auto suggestKeywords = false;
-        auto enclosingMethod = core::MethodRef{};
-        auto params = SearchParams{
-            queryLoc, prefix, methodSearchParams, suggestKeywords, enclosingMethod, std::move(constantResp->scopes),
-        };
+        SearchParams params;
+        if (constantResp->name == core::Names::Constants::ErrorNode()) {
+            // We're only getting a ConstantResult from the LSP because that's how we model "the
+            // user typed nothing.
+            params = searchParamsForEmptyAssign(gs, queryLoc, constantResp->enclosingMethod, constantResp->scopes);
+        } else {
+            // Normal constant response.
+            auto prefix = constantResp->name.shortName(gs);
+            auto methodSearchParams = nullopt;
+            auto suggestKeywords = false;
+            auto enclosingMethod = core::MethodRef{};
+            params = SearchParams{
+                queryLoc, prefix, methodSearchParams, suggestKeywords, enclosingMethod, std::move(constantResp->scopes),
+            };
+        }
         items = this->getCompletionItems(typechecker, params);
+    } else if (auto identResp = resp->isIdent()) {
+        auto varName = identResp->variable._name.shortName(gs);
+        auto nameLen = static_cast<int32_t>(varName.size());
+
+        auto termLocPrefix = identResp->termLoc.adjustLen(gs, 0, nameLen);
+
+        if (queryLoc.adjustLen(gs, -1 * nameLen, nameLen).source(gs) == varName) {
+            // Cursor at end of variable name
+            auto suggestKeywords = true;
+            auto prefix = varName;
+            auto params = SearchParams{
+                queryLoc,
+                prefix,
+                methodSearchParamsForEmptyAssign(gs, identResp->enclosingMethod),
+                suggestKeywords,
+                identResp->enclosingMethod,
+                core::lsp::ConstantResponse::Scopes{identResp->enclosingMethod.data(gs)->owner},
+            };
+            items = this->getCompletionItems(typechecker, params);
+        } else if (termLocPrefix.source(gs) == varName && !termLocPrefix.contains(queryLoc)) {
+            // This is *probably* (but not definitely necessarily) an IdentResponse for an
+            // assignment, with the cursor somewhere on the RHS of the `=` but before having typed
+            // anything. This case is super common for code like this (cursor is `|`):
+            //     x =|
+            //     y = nil
+            // This technically parses and comes back as an IdentResponse for the whole `x =`
+            // assignment. Let's just toss that away and suggest with an empty prefix.
+            auto params = searchParamsForEmptyAssign(gs, queryLoc, identResp->enclosingMethod, {});
+            items = this->getCompletionItems(typechecker, params);
+        }
     }
 
     response->result = make_unique<CompletionList>(false, move(items));

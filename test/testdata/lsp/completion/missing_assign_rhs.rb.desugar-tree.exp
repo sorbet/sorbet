@@ -1,0 +1,42 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.attr_writer(:foo_writer)
+
+    def test_missing_rhs<<todo method>>(x, &<blk>)
+      y = <emptyTree>::<C <ErrorNode>>
+    end
+
+    def test_variable_after_method<<todo method>>(x, &<blk>)
+      begin
+        <self>.puts("before")
+        y = <emptyTree>::<C <ErrorNode>>
+      end
+    end
+
+    def test_variable_end_same_line<<todo method>>(x, &<blk>)
+      begin
+        <self>.puts("before")
+        y = <emptyTree>::<C <ErrorNode>>
+      end
+    end
+
+    def test_variable_end_same_line_after<<todo method>>(x, &<blk>)
+      begin
+        <self>.puts("before")
+        y = <emptyTree>::<C <ErrorNode>>
+      end
+    end
+
+    def test_attr_writer<<todo method>>(x, &<blk>)
+      <self>.foo_writer=(<emptyTree>::<C <ErrorNode>>)
+    end
+
+    def test_before_variable<<todo method>>(x, &<blk>)
+      y = z = nil
+    end
+  end
+end

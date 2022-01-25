@@ -976,7 +976,7 @@ public:
 
     static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 203;
     static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 44;
-    static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 3;
+    static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 4;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
     static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 100;
 };

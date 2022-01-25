@@ -1,8 +1,8 @@
 # typed: true
 foo = a(b
 if @c && foo # error: unexpected token "if"
-  d # error: This code is unreachable
-end
+  d
+end # error: unexpected token "end"
 
 if @d && foo
 end

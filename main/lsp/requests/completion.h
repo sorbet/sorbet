@@ -37,6 +37,11 @@ class CompletionTask final : public LSPRequestTask {
         // If empty(), won't suggest constants.
         core::lsp::ConstantResponse::Scopes scopes;
     };
+    static MethodSearchParams methodSearchParamsForEmptyAssign(const core::GlobalState &gs,
+                                                               core::MethodRef enclosingMethod);
+    static SearchParams searchParamsForEmptyAssign(const core::GlobalState &gs, core::Loc queryLoc,
+                                                   core::MethodRef enclosingMethod,
+                                                   core::lsp::ConstantResponse::Scopes scopes);
     std::vector<std::unique_ptr<CompletionItem>> getCompletionItems(LSPTypecheckerDelegate &typechecker,
                                                                     SearchParams &params);
 

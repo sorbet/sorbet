@@ -1,12 +1,33 @@
 DefMethod {
   name = <U test_method_with_multiple_stmts>
   args = NULL
-  body = Assign {
-    lhs = LVarLhs {
-      name = <U y>
-    }
-    rhs = Integer {
-      val = "1"
-    }
+  body = Begin {
+    stmts = [
+      Assign {
+        lhs = LVarLhs {
+          name = <U x>
+        }
+        rhs = Integer {
+          val = "1"
+        }
+      }
+      Assign {
+        lhs = LVarLhs {
+          name = <U x>
+        }
+        rhs = Const {
+          scope = NULL
+          name = <C <U <ErrorNode>>>
+        }
+      }
+      Assign {
+        lhs = LVarLhs {
+          name = <U y>
+        }
+        rhs = Integer {
+          val = "1"
+        }
+      }
+    ]
   }
 }

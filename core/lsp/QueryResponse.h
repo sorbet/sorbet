@@ -50,9 +50,9 @@ class ConstantResponse final {
 public:
     using Scopes = InlinedVector<core::SymbolRef, 1>;
     ConstantResponse(core::SymbolRef symbol, core::SymbolRef symbolBeforeDealias, core::Loc termLoc, Scopes scopes,
-                     core::NameRef name, core::TypeAndOrigins retType)
+                     core::NameRef name, core::TypeAndOrigins retType, core::MethodRef enclosingMethod)
         : symbol(symbol), symbolBeforeDealias(symbolBeforeDealias), termLoc(termLoc), scopes(scopes), name(name),
-          retType(std::move(retType)){};
+          retType(std::move(retType)), enclosingMethod(enclosingMethod){};
     const core::SymbolRef symbol;
     // You probably don't want this. Almost all of Sorbet's type system operates on dealiased
     // symbols transparently (e.g., for a constant like `X = Integer`, Sorbet reports that `''` is
@@ -66,6 +66,7 @@ public:
     const Scopes scopes;
     const core::NameRef name;
     const core::TypeAndOrigins retType;
+    const core::MethodRef enclosingMethod;
 };
 
 class FieldResponse final {
