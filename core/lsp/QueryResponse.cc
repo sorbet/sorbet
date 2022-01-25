@@ -18,7 +18,7 @@ const SendResponse *QueryResponse::isSend() const {
 }
 
 const optional<core::Loc> SendResponse::getMethodNameLoc(const core::GlobalState &gs) const {
-    return (this->funLoc.exists() && !this->funLoc.empty()) ? optional{this->funLoc} : nullopt;
+    return (this->funLoc.exists() && !this->funLoc.empty()) ? make_optional<core::Loc>(this->funLoc) : nullopt;
 }
 
 const IdentResponse *QueryResponse::isIdent() const {
