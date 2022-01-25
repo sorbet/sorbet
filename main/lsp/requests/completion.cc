@@ -971,7 +971,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             // which parses as a method call (A.puts()) instead of a constant.
 
             auto scopes = core::lsp::ConstantResponse::Scopes{};
-            // We're ignoring the other dispatch components here, because the fast that we saw `::`
+            // We're ignoring the other dispatch components here, because the fact that we saw `::`
             // in the source means that it's likely a constant lit, not something with a fancy type.
             // Also since it's a constant lit, it probably has type `T.class_of(...)`, so we want
             // the represented type for the sake of constant lookup.
