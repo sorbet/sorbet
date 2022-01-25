@@ -41,9 +41,9 @@ microseconds Timer::clock_gettime_coarse() {
     return {(tp.tv_sec * 1'000'000L) + (tp.tv_nsec / 1'000L)};
 }
 
-Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
-             microseconds start, initializer_list<int> histogramBuckets)
-    : log(log), name(name), prev(prev), self{0}, start(start), endTime{0} {
+Timer::Timer(ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args, microseconds start,
+             initializer_list<int> histogramBuckets)
+    : name(name), prev(prev), self{0}, start(start), endTime{0} {
     if (args.size() != 0) {
         this->args = make_unique<vector<pair<ConstExprStr, string>>>(args);
     }
@@ -53,37 +53,21 @@ Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_li
     }
 }
 
-Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
+Timer::Timer(ConstExprStr name) : Timer(name, initializer_list<pair<ConstExprStr, string>>{}){};
+Timer::Timer(ConstExprStr name, initializer_list<int> histogramBuckets)
+    : Timer(name, FlowId{0}, {}, histogramBuckets) {}
+Timer::Timer(ConstExprStr name, FlowId prev) : Timer(name, prev, {}, {}){};
+Timer::Timer(ConstExprStr name, initializer_list<pair<ConstExprStr, string>> args) : Timer(name, FlowId{0}, args, {}){};
+Timer::Timer(ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args)
+    : Timer(name, prev, args, {}){};
+Timer::Timer(ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
              initializer_list<int> histogramBuckets)
-    : Timer(log, name, prev, args, clock_gettime_coarse(), histogramBuckets){};
-
-Timer::Timer(spdlog::logger &log, ConstExprStr name, initializer_list<pair<ConstExprStr, string>> args)
-    : Timer(log, name, FlowId{0}, args, {}){};
-
-Timer::Timer(spdlog::logger &log, ConstExprStr name, initializer_list<int> histogramBuckets)
-    : Timer(log, name, FlowId{0}, {}, histogramBuckets) {}
-
-Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name, FlowId prev,
-             initializer_list<pair<ConstExprStr, string>> args)
-    : Timer(*log, name, prev, args, {}){};
-
-Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name,
-             initializer_list<pair<ConstExprStr, string>> args)
-    : Timer(*log, name, args){};
-
-Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name)
-    : Timer(*log, name, initializer_list<pair<ConstExprStr, string>>{}){};
-Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name, FlowId prev) : Timer(*log, name, prev, {}, {}){};
-
-Timer::Timer(spdlog::logger &log, ConstExprStr name)
-    : Timer(log, name, initializer_list<pair<ConstExprStr, string>>{}){};
-Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev) : Timer(log, name, prev, {}, {}){};
+    : Timer(name, prev, args, clock_gettime_coarse(), histogramBuckets){};
 
 // Explicitly define to avoid reporting the timer twice.
 Timer::Timer(Timer &&timer)
-    : log(timer.log), name(timer.name), prev(timer.prev), self(timer.self), args(move(timer.args)),
-      tags(move(timer.tags)), start(timer.start), histogramBuckets(move(timer.histogramBuckets)),
-      canceled(timer.canceled) {
+    : name(timer.name), prev(timer.prev), self(timer.self), args(move(timer.args)), tags(move(timer.tags)),
+      start(timer.start), histogramBuckets(move(timer.histogramBuckets)), canceled(timer.canceled) {
     // Don't report a latency metric for the moved timer.
     timer.cancel();
 }
@@ -109,7 +93,7 @@ Timer Timer::clone() const {
 }
 
 Timer Timer::clone(ConstExprStr name) const {
-    Timer forked(log, name, prev, {}, start, {});
+    Timer forked(name, prev, {}, start, {});
     if (this->args != nullptr) {
         forked.args = make_unique<vector<pair<ConstExprStr, string>>>(*args);
     }
