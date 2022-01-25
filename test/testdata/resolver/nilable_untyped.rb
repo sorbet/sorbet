@@ -11,7 +11,7 @@ Bad = T.type_alias {T.nilable(T.untyped)}
 # still `T.untyped`, but it's hard to distinguish that from a case where
 # `T.untyped` was returned because the argument type failed to parse in
 # type_syntax.cc. The compromise here is to only raise the error when we
-# encounter `T.nilable(T.untyped)` explicitly foo.
+# encounter `T.nilable(T.untyped)` explicitly.
 Untyped = T.type_alias {T.untyped}
 Tricky = T.type_alias {T.nilable(Untyped)}
 
