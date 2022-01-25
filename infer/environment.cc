@@ -1014,7 +1014,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         core::ClassOrModuleRef klass = it->main.method.data(ctx)->owner;
                         if (klass.exists()) {
                             const auto &curPkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
-                            if (curPkg.mangledName() != core::NameRef::noName() && !curPkg.ownsSymbol(ctx, klass)) {
+                            if (curPkg.exists() && !curPkg.ownsSymbol(ctx, klass)) {
                                 if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PackagePrivateMethod)) {
                                     e.setHeader("Non-package-private call to package-private method `{}` on `{}`",
                                                 it->main.method.data(ctx)->name.show(ctx), it->main.receiver.show(ctx));
