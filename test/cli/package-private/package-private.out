@@ -18,4 +18,11 @@ b/b.rb:12: Non-package-private call to package-private method `foo` on `A` https
     a/a.rb:12: Defined in `A` here
     12 |  package_private def foo
                           ^^^^^^^
-Errors: 3
+
+b/b.rb:19: Non-package-private call to package-private method `foo` on `T.all(B::C, A)` https://srb.help/7036
+    19 |    c_and_a.foo
+            ^^^^^^^^^^^
+    a/a.rb:12: Defined in `A` here
+    12 |  package_private def foo
+                          ^^^^^^^
+Errors: 4
