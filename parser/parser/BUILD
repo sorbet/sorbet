@@ -70,6 +70,7 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//common",
         "@com_google_absl//absl/strings",
     ],
 )

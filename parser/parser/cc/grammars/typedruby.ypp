@@ -1574,8 +1574,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                       args->emplace_back(driver.build.associate(self, nullptr, $5, nullptr));
                       args->concat($6);
                       $$ = args;
-                      driver.diagnostics.pop_back();
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@3.end, @4.begin), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@3.end, @4.begin), "\",\"");
                     }
                 | block_arg
                     {
@@ -1647,8 +1646,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                       auto &list = $1;
                       list->emplace_back(driver.build.error_node(self, @2.end, @3.end));
                       $$ = $1;
-                      driver.diagnostics.pop_back();
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.begin, @2.end), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.begin, @2.end), "\",\"");
                     }
                 | args tCOMMA tSTAR arg_value
                     {
@@ -1732,8 +1730,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                     {
                       $$ = driver.build.constFetchError(self, $1, $2);
                       maybe_inject_tNL(@2.end, @3.begin);
-                      driver.diagnostics.pop_back();
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ConstWithoutName, diagnostic::range(@2.begin, @2.end));
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::ConstWithoutName, diagnostic::range(@2.begin, @2.end));
                     }
                 | tCOLON3 tCONSTANT
                     {
@@ -3592,8 +3589,7 @@ f_opt_paren_args: f_paren_args
                 | f_arg tCOMMA error
                     {
                       $$ = $1;
-                      driver.diagnostics.pop_back();
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.begin, @2.end), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.begin, @2.end), "\",\"");
                     }
 
          f_label: tLABEL
@@ -3748,8 +3744,7 @@ f_opt_paren_args: f_paren_args
                 | tCOMMA error
                     {
                       $$ = driver.alloc.node_list();
-                      driver.diagnostics.pop_back();
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@1.begin, @1.end), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@1.begin, @1.end), "\",\"");
                     }
                 |
                     {
@@ -3790,8 +3785,7 @@ f_opt_paren_args: f_paren_args
                 | assocs tCOMMA error
                     {
                       $$ = $1;
-                      driver.diagnostics.pop_back();
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.begin, @2.end), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.begin, @2.end), "\",\"");
                     }
                 | assocs tCOMMA tIDENTIFIER error
                     {
@@ -3800,8 +3794,7 @@ f_opt_paren_args: f_paren_args
                       auto err = driver.build.call_method(self, nullptr, nullptr, $3, nullptr, nullptr, nullptr);
                       list->emplace_back(driver.build.pair_keyword(self, $3, err));
                       $$ = list;
-                      driver.diagnostics.pop_back();
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::PositionalAfterKeyword, diagnostic::range(@3.begin, @3.end), $3->asString());
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::PositionalAfterKeyword, diagnostic::range(@3.begin, @3.end), $3->asString());
                     }
                 // There's quite a bit going on in these next two. What we'd really like is to do something like
                 //     assoc error assoc
@@ -3824,8 +3817,7 @@ f_opt_paren_args: f_paren_args
                       auto result = driver.alloc.node_list(driver.build.assoc_error(self, $1, $2));
                       result->emplace_back($4);
                       $$ = result;
-                      driver.diagnostics.pop_back();
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@2.end, @3.begin), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@2.end, @3.begin), "\",\"");
                     }
                 | assocs tCOMMA tLABEL fcall error assoc
                     {
@@ -3833,8 +3825,7 @@ f_opt_paren_args: f_paren_args
                       list->emplace_back(driver.build.assoc_error(self, $3, $4));
                       list->emplace_back($6);
                       $$ = list;
-                      driver.diagnostics.pop_back();
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@4.end, @5.begin), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@4.end, @5.begin), "\",\"");
                     }
 
            assoc: arg_value tASSOC arg_value
