@@ -422,15 +422,8 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
             case core::Names::implementation().rawId():
                 if (auto e = ctx.beginError(send->loc, core::errors::Resolver::ImplementationDeprecated)) {
                     e.setHeader("Use of `{}` has been replaced by `{}`", "implementation", "override");
-                    auto loc = core::Loc(ctx.file, send->loc);
-                    if (send->recv.isSelfReference()) {
-                        e.replaceWith("Replace with `override`", loc, "override");
-                    } else {
-                        auto recvLoc = core::Loc{ctx.file, send->recv.loc()};
-                        if (auto source = recvLoc.source(ctx)) {
-                            e.replaceWith("Replace with `override`", loc, "{}.override", source.value());
-                        }
-                    }
+                    auto loc = core::Loc(ctx.file, send->funLoc);
+                    e.replaceWith("Replace with `override`", loc, "override");
                 }
                 break;
             case core::Names::overridable().rawId():
