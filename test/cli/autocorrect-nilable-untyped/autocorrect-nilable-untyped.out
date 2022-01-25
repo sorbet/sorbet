@@ -1,0 +1,119 @@
+autocorrect-nilable-untyped.rb:6: `T.nilable(T.untyped)` is the same as `T.untyped` https://srb.help/3512
+     6 |  prop :a, T.nilable(T.untyped)
+                   ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-nilable-untyped.rb:6: Replaced with `T.untyped`
+     6 |  prop :a, T.nilable(T.untyped)
+                   ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-nilable-untyped.rb:6: Inserted `, default: nil`
+     6 |  prop :a, T.nilable(T.untyped)
+                                       ^
+
+autocorrect-nilable-untyped.rb:7: `T.nilable(T.untyped)` is the same as `T.untyped` https://srb.help/3512
+     7 |  prop :b, T.nilable(T.untyped), default: "Hello"
+                   ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-nilable-untyped.rb:7: Replaced with `T.untyped`
+     7 |  prop :b, T.nilable(T.untyped), default: "Hello"
+                   ^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-nilable-untyped.rb:8: `T.nilable(T.untyped)` is the same as `T.untyped` https://srb.help/3512
+     8 |  const :c, T.nilable(T.untyped)
+                    ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-nilable-untyped.rb:8: Replaced with `T.untyped`
+     8 |  const :c, T.nilable(T.untyped)
+                    ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-nilable-untyped.rb:8: Inserted `, default: nil`
+     8 |  const :c, T.nilable(T.untyped)
+                                        ^
+
+autocorrect-nilable-untyped.rb:9: `T.nilable(T.untyped)` is the same as `T.untyped` https://srb.help/3512
+     9 |  const :d, T.nilable(T.untyped), default: "Hello"
+                    ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-nilable-untyped.rb:9: Replaced with `T.untyped`
+     9 |  const :d, T.nilable(T.untyped), default: "Hello"
+                    ^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-nilable-untyped.rb:34: `T.nilable(T.untyped)` is the same as `T.untyped` https://srb.help/5070
+    34 |  Elem = type_member(upper: T.nilable(T.untyped))
+                                    ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-nilable-untyped.rb:34: Replaced with `T.untyped`
+    34 |  Elem = type_member(upper: T.nilable(T.untyped))
+                                    ^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-nilable-untyped.rb:18: `T.nilable(T.untyped)` is the same as `T.untyped` https://srb.help/5070
+    18 |    res = T.let('hi', T.nilable(T.untyped))
+                              ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-nilable-untyped.rb:18: Replaced with `T.untyped`
+    18 |    res = T.let('hi', T.nilable(T.untyped))
+                              ^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-nilable-untyped.rb:11: `T.nilable(T.untyped)` is the same as `T.untyped` https://srb.help/5070
+    11 |  sig {params(x: T.nilable(T.untyped)).returns(T.nilable(T.untyped))}
+                                                       ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-nilable-untyped.rb:11: Replaced with `T.untyped`
+    11 |  sig {params(x: T.nilable(T.untyped)).returns(T.nilable(T.untyped))}
+                                                       ^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-nilable-untyped.rb:11: `T.nilable(T.untyped)` is the same as `T.untyped` https://srb.help/5070
+    11 |  sig {params(x: T.nilable(T.untyped)).returns(T.nilable(T.untyped))}
+                         ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-nilable-untyped.rb:11: Replaced with `T.untyped`
+    11 |  sig {params(x: T.nilable(T.untyped)).returns(T.nilable(T.untyped))}
+                         ^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-nilable-untyped.rb:16: `T.nilable(T.untyped)` is the same as `T.untyped` https://srb.help/5070
+    16 |  sig {returns(T.nilable(T.untyped))}
+                       ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-nilable-untyped.rb:16: Replaced with `T.untyped`
+    16 |  sig {returns(T.nilable(T.untyped))}
+                       ^^^^^^^^^^^^^^^^^^^^
+Errors: 9
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+class A < T::Struct
+  extend T::Sig
+
+  prop :a, T.untyped, default: nil
+  prop :b, T.untyped, default: "Hello"
+  const :c, T.untyped, default: nil
+  const :d, T.untyped, default: "Hello"
+
+  sig {params(x: T.untyped).returns(T.untyped)}
+  def test1(x)
+    x
+  end
+
+  sig {returns(T.untyped)}
+  def test2
+    res = T.let('hi', T.untyped)
+    res
+  end
+
+  X = T.type_alias{T.untyped}
+  sig {returns(T.nilable(X))}
+  def test3
+    nil
+  end
+
+end
+
+class B
+  extend T::Sig
+  extend T::Generic
+
+  Elem = type_member(upper: T.untyped)
+
+end
