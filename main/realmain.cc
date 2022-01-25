@@ -695,8 +695,6 @@ int realmain(int argc, char *argv[]) {
 
     if (opts.enableCounters) {
         logger->warn("" + getCounterStatistics());
-    } else {
-        logger->debug("" + getCounterStatistics());
     }
 
     auto counters = getAndClearThreadCounters();
