@@ -539,7 +539,25 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(),
                                               core::Symbols::noClassOrModule()}; // error will be reported in infer.
             }
+
             auto result = getResultTypeAndBindWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
+            if (result.type.isUntyped()) {
+                // As a compromise, only raise the error when the argument is syntactically `T.untyped`, as arguments of
+                // type `T.untyped` can arise through other errors. This isn't ideal as it allows cases like:
+                //
+                // > X = T.type_alias {T.untyped}
+                // > Y = T.type_alias {T.nilable(X)}
+                //
+                auto *arg = ast::cast_tree<ast::Send>(send.getPosArg(0));
+                if (arg != nullptr && arg->fun == core::Names::untyped() && !arg->hasPosArgs() && !arg->hasKwArgs()) {
+                    if (auto e = ctx.beginError(send.loc, core::errors::Resolver::NilableUntyped)) {
+                        e.setHeader("`{}` is the same as `{}`", "T.nilable(T.untyped)", "T.untyped");
+                        e.replaceWith("Replace with `T.untyped`", core::Loc{ctx.file, send.loc}, "T.untyped");
+                    }
+                }
+                return result;
+            }
+
             return TypeSyntax::ResultType{core::Types::any(ctx, result.type, core::Types::nilClass()), result.rebind};
         }
         case core::Names::all().rawId(): {
