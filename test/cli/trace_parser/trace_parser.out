@@ -1,4 +1,4 @@
 Starting parse
 Entering state 0
-Reading a token: Next token is token "class" ()
-Shifting token "class" ()
+Reading a token: Next token is token "class" ([15,20): )
+Shifting token "class" ([15,20): )

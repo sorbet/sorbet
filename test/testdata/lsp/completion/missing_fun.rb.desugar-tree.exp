@@ -1,0 +1,132 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  module <emptyTree>::<C M><<C <todo sym>>> < ()
+    def bar<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def qux<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+  end
+
+  module <emptyTree>::<C Outer><<C <todo sym>>> < ()
+    module <emptyTree>::<C Inner><<C <todo sym>>> < ()
+      <emptyTree>
+    end
+  end
+
+  <self>.sig() do ||
+    <self>.params(:x, <emptyTree>::<C M>).void()
+  end
+
+  def test_completion_after_method<<todo method>>(x, &<blk>)
+    begin
+      <self>.puts("before")
+      x.<method-name-missing>()
+    end
+  end
+
+  <self>.sig() do ||
+    <self>.params(:x, <emptyTree>::<C M>).void()
+  end
+
+  def test_completion_between_keywords<<todo method>>(x, &<blk>)
+    begin
+      <emptyTree>
+      x.<method-name-missing>()
+      <emptyTree>
+    end
+  end
+
+  <self>.sig() do ||
+    <self>.params(:x, <emptyTree>::<C M>).void()
+  end
+
+  def test_completion_before_method<<todo method>>(x, &<blk>)
+    x.puts("after")
+  end
+
+  class <emptyTree>::<C TestClass1><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    def before<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.sig() do ||
+      <self>.params(:x, <emptyTree>::<C M>).void()
+    end
+
+    def test_method_in_class<<todo method>>(x, &<blk>)
+      x.<method-name-missing>()
+    end
+
+    def after<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+  end
+
+  <self>.sig() do ||
+    <self>.params(:x, <emptyTree>::<C M>).void()
+  end
+
+  def test_lonely_dot<<todo method>>(x, &<blk>)
+    x.<method-name-missing>()
+  end
+
+  <self>.sig() do ||
+    <self>.params(:x, <emptyTree>::<C M>).void()
+  end
+
+  def test_inside_parens<<todo method>>(x, &<blk>)
+    <self>.puts(x.<method-name-missing>())
+  end
+
+  <self>.sig() do ||
+    <self>.params(:x, <emptyTree>::<C M>).void()
+  end
+
+  def test_first_arg_no_parens<<todo method>>(x, &<blk>)
+    <self>.puts(x.<method-name-missing>())
+  end
+
+  <self>.sig() do ||
+    <self>.params(:x, <emptyTree>::<C M>).void()
+  end
+
+  def test_before_var_assign<<todo method>>(x, &<blk>)
+    x.y=(nil)
+  end
+
+  <self>.sig() do ||
+    <self>.params(:x, <emptyTree>::<C M>).void()
+  end
+
+  def test_before_constant_lit<<todo method>>(x, &<blk>)
+    begin
+      x.Outer()
+      x.Outer()::<C Inner>
+    end
+  end
+
+  <self>.sig() do ||
+    <self>.params(:x, <emptyTree>::<C M>).void()
+  end
+
+  def test_csend<<todo method>>(x, &<blk>)
+    begin
+      <assignTemp>$2 = x
+      if ::NilClass.===(<assignTemp>$2)
+        ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$2)
+      else
+        <assignTemp>$2.<method-name-missing>()
+      end
+    end
+  end
+end

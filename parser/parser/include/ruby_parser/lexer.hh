@@ -56,7 +56,7 @@ private:
 
     std::stack<environment> static_env;
     std::stack<literal> literal_stack;
-    std::queue<token_t> token_queue;
+    std::deque<token_t> token_queue;
 
     // Required by Ragel to implement its finite state machine.
     // It uses an int to keep track of the state machine's internal state.
@@ -133,12 +133,12 @@ private:
     int arg_or_cmdarg(int cmd_state);
     void emit_comment(const char *s, const char *e);
     char unescape(uint32_t cp);
-    std::string tok();
-    std::string tok(const char *start);
-    std::string tok(const char *start, const char *end);
-    std::string_view tok_view();
-    std::string_view tok_view(const char *start);
-    std::string_view tok_view(const char *start, const char *end);
+    std::string tok() const;
+    std::string tok(const char *start) const;
+    std::string tok(const char *start, const char *end) const;
+    std::string_view tok_view() const;
+    std::string_view tok_view(const char *start) const;
+    std::string_view tok_view(const char *start, const char *end) const;
     void emit(token_type type);
     void emit(token_type type, std::string_view str);
     void emit(token_type type, std::string_view str, const char *start, const char *end);
@@ -171,7 +171,15 @@ public:
 
     lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer);
 
+    // Main interface consumed by yylex function in parser
     token_t advance();
+
+    // Useful for error recovery. Manually pushes `tok_to_push` (usually: the parser's current
+    // lookahead token) back onto the front of the token_queue, and then allocates a new token and
+    // returns it.
+    token_t unadvance(token_t tok_to_push, token_type type, size_t start, size_t end, const std::string &str);
+
+    std::string_view tok_view_from_offsets(size_t start, size_t end) const;
 
     void set_state_expr_beg();
     void set_state_expr_end();

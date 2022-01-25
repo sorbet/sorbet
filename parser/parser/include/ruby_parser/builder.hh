@@ -37,6 +37,7 @@ struct builder {
     ForeignPtr (*callLambda)(SelfPtr builder, const token *lambda);
     ForeignPtr (*call_method)(SelfPtr builder, ForeignPtr receiver, const token *dot, const token *selector,
                               const token *lparen, const node_list *args, const token *rparen);
+    ForeignPtr (*call_method_error)(SelfPtr builder, ForeignPtr receiver, const token *dot);
     ForeignPtr (*case_)(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *whenBodies,
                         const token *elseTok, ForeignPtr elseBody, const token *end);
     ForeignPtr (*case_match)(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *inBodies,

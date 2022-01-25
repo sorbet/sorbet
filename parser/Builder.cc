@@ -118,8 +118,12 @@ public:
         return std::min(off, maxOff_);
     }
 
+    core::LocOffsets locOffset(const size_t start, const size_t end) {
+        return core::LocOffsets{clamp((uint32_t)start), clamp((uint32_t)end)};
+    }
+
     core::LocOffsets tokLoc(const token *tok) {
-        return core::LocOffsets{clamp((uint32_t)tok->start()), clamp((uint32_t)tok->end())};
+        return locOffset(tok->start(), tok->end());
     }
 
     core::LocOffsets maybe_loc(unique_ptr<Node> &node) {
@@ -130,7 +134,7 @@ public:
     }
 
     core::LocOffsets tokLoc(const token *begin, const token *end) {
-        return core::LocOffsets{clamp((uint32_t)begin->start()), clamp((uint32_t)end->end())};
+        return locOffset(begin->start(), end->end());
     }
 
     core::LocOffsets collectionLoc(const token *begin, sorbet::parser::NodeVec &elts, const token *end) {
@@ -582,6 +586,22 @@ public:
             return make_unique<CSend>(loc, std::move(receiver), method, selectorLoc, std::move(args));
         } else {
             return make_unique<Send>(loc, std::move(receiver), method, selectorLoc, std::move(args));
+        }
+    }
+
+    unique_ptr<Node> call_method_error(unique_ptr<Node> receiver, const token *dot) {
+        auto loc = receiver->loc;
+        if (dot != nullptr) {
+            loc = loc.join(tokLoc(dot));
+        }
+
+        auto methodLoc = locOffset(loc.endPos(), loc.endPos());
+
+        auto method = core::Names::methodNameMissing();
+        if ((dot != nullptr) && dot->view() == "&.") {
+            return make_unique<CSend>(loc, std::move(receiver), method, methodLoc, sorbet::parser::NodeVec{});
+        } else {
+            return make_unique<Send>(loc, std::move(receiver), method, methodLoc, sorbet::parser::NodeVec{});
         }
     }
 
@@ -1816,6 +1836,11 @@ ForeignPtr call_method(SelfPtr builder, ForeignPtr receiver, const token *dot, c
         build->call_method(build->cast_node(receiver), dot, selector, lparen, build->convertNodeList(args), rparen));
 }
 
+ForeignPtr call_method_error(SelfPtr builder, ForeignPtr receiver, const token *dot) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->call_method_error(build->cast_node(receiver), dot));
+}
+
 ForeignPtr case_(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *whenBodies,
                  const token *elseTok, ForeignPtr elseBody, const token *end) {
     auto build = cast_builder(builder);
@@ -2473,6 +2498,7 @@ struct ruby_parser::builder Builder::interface = {
     blockarg,
     callLambda,
     call_method,
+    call_method_error,
     case_,
     case_match,
     character,

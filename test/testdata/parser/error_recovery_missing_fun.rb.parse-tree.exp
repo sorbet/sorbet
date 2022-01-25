@@ -9,7 +9,14 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Send {
+        receiver = LVar {
+          name = <U x>
+        }
+        method = <U <method-name-missing>>
+        args = [
+        ]
+      }
     }
     DefMethod {
       name = <U test_method_without_fun_name_plus_before>
@@ -20,7 +27,26 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Assign {
+            lhs = LVarLhs {
+              name = <U before>
+            }
+            rhs = Integer {
+              val = "1"
+            }
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U test_method_without_fun_name_plus_after>

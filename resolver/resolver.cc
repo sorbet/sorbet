@@ -901,6 +901,27 @@ private:
         todoAncestors_.emplace_back(std::move(job));
     }
 
+    ast::ExpressionPtr walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
+        if (auto *c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
+            c->scope = walkUnresolvedConstantLit(ctx, std::move(c->scope));
+            auto loc = c->loc;
+            auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
+            ResolutionItem job{nesting_, ast::cast_tree<ast::ConstantLit>(out)};
+            if (resolveJob(ctx, job)) {
+                categoryCounterInc("resolve.constants.nonancestor", "firstpass");
+            } else {
+                todo_.emplace_back(std::move(job));
+            }
+            return out;
+        } else if (ast::isa_tree<ast::EmptyTree>(tree) || ast::isa_tree<ast::ConstantLit>(tree)) {
+            return tree;
+        } else {
+            // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
+            // Still want to do our best to recover (for e.g., LSP queries)
+            return ast::TreeMap::apply(ctx, *this, std::move(tree));
+        }
+    }
+
 public:
     ResolveConstantsWalk() : nesting_(nullptr) {}
 
@@ -910,19 +931,7 @@ public:
     }
 
     ast::ExpressionPtr postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
-        auto &c = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree);
-        if (ast::isa_tree<ast::UnresolvedConstantLit>(c.scope)) {
-            c.scope = postTransformUnresolvedConstantLit(ctx, std::move(c.scope));
-        }
-        auto loc = c.loc;
-        auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
-        ResolutionItem job{nesting_, ast::cast_tree<ast::ConstantLit>(out)};
-        if (resolveJob(ctx, job)) {
-            categoryCounterInc("resolve.constants.nonancestor", "firstpass");
-        } else {
-            todo_.emplace_back(std::move(job));
-        }
-        return out;
+        return walkUnresolvedConstantLit(ctx, std::move(tree));
     }
 
     ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {

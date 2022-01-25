@@ -56,6 +56,9 @@ NameDef names[] = {
     {"undef"},
     {"each"},
 
+    // Used in parser for error recovery
+    {"methodNameMissing", "<method-name-missing>"},
+
     // used in CFG for temporaries
     {"whileTemp", "<whileTemp>"},
     {"ifTemp", "<ifTemp>"},

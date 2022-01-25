@@ -180,30 +180,36 @@ void lexer::emit_comment(const char* s, const char* e) {
   (void)e;
 }
 
-std::string lexer::tok() {
+std::string lexer::tok() const {
   return std::string{tok_view()};
 }
 
-std::string lexer::tok(const char* start) {
+std::string lexer::tok(const char* start) const {
   return std::string{tok_view(start)};
 }
 
-std::string lexer::tok(const char* start, const char* end) {
+std::string lexer::tok(const char* start, const char* end) const {
   return std::string{tok_view(start, end)};
 }
 
-std::string_view lexer::tok_view() {
+std::string_view lexer::tok_view() const {
   return tok_view(ts);
 }
 
-std::string_view lexer::tok_view(const char* start) {
+std::string_view lexer::tok_view(const char* start) const {
   return tok_view(start, te);
 }
 
-std::string_view lexer::tok_view(const char* start, const char* end) {
+std::string_view lexer::tok_view(const char* start, const char* end) const {
   assert(start <= end);
 
   return std::string_view(start, (size_t)(end - start));
+}
+
+std::string_view lexer::tok_view_from_offsets(size_t start, size_t end) const {
+  assert(start < source_buffer.size());
+  assert(end <= source_buffer.size());
+  return tok_view(source_buffer.data() + start, source_buffer.data() + end);
 }
 
 char lexer::unescape(uint32_t codepoint) {
@@ -450,7 +456,7 @@ static bool eof_codepoint(char c) {
 token_t lexer::advance_() {
   if (!token_queue.empty()) {
     token_t token = token_queue.front();
-    token_queue.pop();
+    token_queue.pop_front();
     return token;
   }
 
@@ -484,7 +490,7 @@ token_t lexer::advance_() {
 
   if (!token_queue.empty()) {
     token_t token = token_queue.front();
-    token_queue.pop();
+    token_queue.pop_front();
     return token;
   }
 
@@ -508,7 +514,7 @@ void lexer::emit(token_type type, std::string_view str, const char* start, const
   size_t offset_start = (size_t)(start - source_buffer.data());
   size_t offset_end = (size_t)(end - source_buffer.data());
 
-  token_queue.push(mempool.alloc(type, offset_start, offset_end, str));
+  token_queue.push_back(mempool.alloc(type, offset_start, offset_end, str));
 }
 
 void lexer::emit_do(bool do_block) {
@@ -2859,6 +2865,17 @@ token_t lexer::advance() {
   last_token_s = tok->start();
   last_token_e = tok->end();
   return tok;
+}
+
+token_t lexer::unadvance(token_t tok_to_push, token_type type, size_t start, size_t end, const std::string &str) {
+  token_queue.push_front(tok_to_push);
+
+  auto new_tok = mempool.alloc(type, start, end, str);
+
+  last_token_s = start;
+  last_token_e = end;
+
+  return new_tok;
 }
 
 void lexer::extend_static() {

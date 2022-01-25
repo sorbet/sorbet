@@ -31,7 +31,38 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U begin>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U begin>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          Kwbegin {
+            stmts = [
+            ]
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_break>
@@ -42,7 +73,38 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U break>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U break>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          Break {
+            exprs = [
+            ]
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_case>
@@ -139,7 +201,34 @@ Begin {
         ]
       }
       body = Ensure {
-        body = NULL
+        body = Begin {
+          stmts = [
+            Send {
+              receiver = LVar {
+                name = <U x>
+              }
+              method = <U ensure>
+              args = [
+              ]
+            }
+            Send {
+              receiver = LVar {
+                name = <U x>
+              }
+              method = <U ensure>
+              args = [
+              ]
+            }
+            Send {
+              receiver = LVar {
+                name = <U x>
+              }
+              method = <U <method-name-missing>>
+              args = [
+              ]
+            }
+          ]
+        }
         ensure = NULL
       }
     }
@@ -152,7 +241,36 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U false>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U false>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          False {
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_for>
@@ -207,7 +325,38 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U next>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U next>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          Next {
+            exprs = [
+            ]
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_nil>
@@ -218,7 +367,36 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U nil>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U nil>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          Nil {
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_not>
@@ -251,7 +429,36 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U redo>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U redo>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          Redo {
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_rescue>
@@ -273,7 +480,36 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U retry>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U retry>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          Retry {
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_return>
@@ -284,7 +520,38 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U return>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U return>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          Return {
+            exprs = [
+            ]
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_self>
@@ -295,7 +562,36 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U self>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U self>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          Self {
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_super>
@@ -306,7 +602,36 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U super>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U super>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          ZSuper {
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_then>
@@ -328,7 +653,36 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U true>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U true>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          True {
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_unless>
@@ -383,7 +737,38 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U yield>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U yield>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          Yield {
+            exprs = [
+            ]
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_end>
@@ -394,7 +779,34 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U end>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U end>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+        ]
+      }
     }
   ]
 }

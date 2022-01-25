@@ -3,7 +3,32 @@ Begin {
     DefMethod {
       name = <U foo>
       args = NULL
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = Send {
+              receiver = NULL
+              method = <U x>
+              args = [
+              ]
+            }
+            method = <U end>
+            args = [
+            ]
+          }
+          Send {
+            receiver = Send {
+              receiver = NULL
+              method = <U x>
+              args = [
+              ]
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+        ]
+      }
     }
     Send {
       receiver = Send {
