@@ -38,6 +38,7 @@ tuple<string, string> MESSAGES[] = {
     {"InvalidAssignment", "cannot assign to a keyword"},
     {"ModuleNameConst", "class or module name must be a constant literal"},
     {"UnexpectedToken", "unexpected token {}"},
+    {"MissingToken", "missing token {}"},
     {"ArgumentConst", "formal argument cannot be a constant"},
     {"ArgumentIvar", "formal argument cannot be an instance variable"},
     {"ArgumentGvar", "formal argument cannot be a global variable"},
@@ -66,6 +67,7 @@ tuple<string, string> MESSAGES[] = {
     {"PatternLVarUndefined", "no such local variable: {}"},
     {"PatternDuplicateVariable", "duplicate variable name {}"},
     {"PatternDuplicateKey", "duplicate hash pattern key {}"},
+    {"PositionalAfterKeyword", "positional arg \\\"{}\\\" after keyword arg"},
 
     // Parser warnings
     {"UselessElse", "else without rescue is useless"},

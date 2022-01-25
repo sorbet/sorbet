@@ -16,7 +16,7 @@ def various_bad_commas_in_send(a, b, x, y)
   #         ^ completion: alias, and, a, ...
   #          ^ completion: alias, and, a, ...
   #         ^ error: Method `a` does not exist
-  #          ^ error: unexpected token ")"
+  #         ^ error: positional arg "a" after keyword arg
 
   foo(a, , y: y) # error: unexpected token ","
   #      ^ completion: a, b, x, y, ...
@@ -31,7 +31,7 @@ def various_bad_commas_in_send(a, b, x, y)
   foo(a, x y: y)
   #       ^ completion: x, ...
   #      ^ error: Method `x` does not exist
-  #        ^^ error: unexpected token tLABEL
+  #       ^ error: missing token ","
 
   # Inserting new keyword arg into list
   foo(a, x: y: y) # error: unexpected token tLABEL
@@ -49,9 +49,9 @@ def various_bad_commas_in_send(a, b, x, y)
   foo(x: x y: y)
   #       ^ completion: x, ...
   #      ^ error: Method `x` does not exist
-  #        ^^ error: unexpected token tLABEL
+  #       ^ error: missing token ","
   foo(a: a, x: x y: y)
   #             ^ completion: x, ...
   #            ^ error: Method `x` does not exist
-  #              ^^ error: unexpected token tLABEL
+  #             ^ error: missing token ","
 end
