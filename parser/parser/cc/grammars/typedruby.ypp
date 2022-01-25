@@ -1728,6 +1728,13 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                     {
                       $$ = driver.build.constFetch(self, $1, $2, $3);
                     }
+                | primary_value tCOLON2 error
+                    {
+                      $$ = driver.build.constFetchError(self, $1, $2);
+                      maybe_inject_tNL(@2.end, @3.begin);
+                      driver.diagnostics.pop_back();
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ConstWithoutName, diagnostic::range(@2.begin, @2.end));
+                    }
                 | tCOLON3 tCONSTANT
                     {
                       $$ = driver.build.constGlobal(self, $1, $2);

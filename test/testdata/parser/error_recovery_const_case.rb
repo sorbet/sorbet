@@ -2,7 +2,8 @@
 
 def foo(x)
   Integer::
-  case x # error: unexpected token
+ #       ^^ error: expected constant name following "::"
+  case x
   when Integer
   end
-end # error: unexpected token
+end

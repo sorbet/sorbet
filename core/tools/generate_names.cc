@@ -59,6 +59,7 @@ NameDef names[] = {
 
     // Used in parser for error recovery
     {"methodNameMissing", "<method-name-missing>"},
+    {"ConstantNameMissing", "<ConstantNameMissing>", true},
     {"ErrorNode", "<ErrorNode>", true},
 
     // used in CFG for temporaries

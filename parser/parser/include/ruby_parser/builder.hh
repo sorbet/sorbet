@@ -53,6 +53,7 @@ struct builder {
     ForeignPtr (*const_pattern)(SelfPtr builder, ForeignPtr const_, const token *begin, ForeignPtr pattern,
                                 const token *end);
     ForeignPtr (*constFetch)(SelfPtr builder, ForeignPtr scope, const token *colon, const token *name);
+    ForeignPtr (*constFetchError)(SelfPtr builder, ForeignPtr scope, const token *colon);
     ForeignPtr (*constGlobal)(SelfPtr builder, const token *colon, const token *name);
     ForeignPtr (*constOpAssignable)(SelfPtr builder, ForeignPtr node);
     ForeignPtr (*cvar)(SelfPtr builder, const token *tok);

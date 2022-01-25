@@ -1,5 +1,6 @@
 # typed: false
-# Should still see at least method def (not body)
+class A; end
 def test_constant_only_scope
   A::
-end # error: unexpected token
+  #^^ error: expected constant name following "::"
+end

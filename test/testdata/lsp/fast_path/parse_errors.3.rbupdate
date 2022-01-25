@@ -14,5 +14,5 @@ def test_2
 end # error: unexpected token
 
 def test_3
-  A::
-end # error: unexpected token
+  A:: # error: expected constant name
+end
