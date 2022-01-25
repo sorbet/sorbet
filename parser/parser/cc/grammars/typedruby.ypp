@@ -3746,7 +3746,9 @@ f_opt_paren_args: f_paren_args
                     }
                 | tLABEL
                     {
-                      auto method_call = driver.build.call_method(self, nullptr, nullptr, $1, nullptr, nullptr, nullptr);
+                      auto *selector = $1;
+                      selector->setEnd(selector->end() - 1);
+                      auto method_call = driver.build.call_method(self, nullptr, nullptr, selector, nullptr, nullptr, nullptr);
                       $$ = driver.build.pair_keyword(self, $1, method_call);
                     }
                 | tSTRING_BEG string_contents tLABEL_END arg_value

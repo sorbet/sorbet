@@ -18,6 +18,10 @@ size_t token::end() const {
     return _end;
 }
 
+void token::setEnd(size_t end) {
+    this->_end = end;
+}
+
 std::string_view token::view() const {
     return _string;
 }
