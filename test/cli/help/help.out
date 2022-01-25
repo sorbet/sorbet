@@ -104,6 +104,9 @@ Usage:
       --enable-experimental-lsp-signature-help
                                 Enable experimental LSP feature: Signature
                                 Help
+      --enable-experimental-lsp-completion-trigger-characters
+                                Enable experimental LSP feature: extra
+                                trigger characters
       --enable-experimental-requires-ancestor
                                 Enable experimental `requires_ancestor`
                                 annotation
