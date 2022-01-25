@@ -1,4 +1,5 @@
 #include "environment.h"
+#include "common/formatting.h"
 #include "common/sort.h"
 #include "common/typecase.h"
 #include "core/GlobalState.h"
@@ -1016,8 +1017,13 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             const auto &curPkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
                             if (curPkg.exists() && !curPkg.ownsSymbol(ctx, klass)) {
                                 if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PackagePrivateMethod)) {
-                                    e.setHeader("Non-package-private call to package-private method `{}` on `{}`",
-                                                it->main.method.data(ctx)->name.show(ctx), it->main.receiver.show(ctx));
+                                    auto &curPkgName = curPkg.fullName();
+                                    // TODO (aadi-stripe, add name of owning package to message).
+                                    e.setHeader(
+                                        "Method `{}` on `{}` is package-private and cannot be called from package `{}`",
+                                        it->main.method.data(ctx)->name.show(ctx), klass.show(ctx),
+                                        fmt::map_join(curPkgName.begin(), curPkgName.end(),
+                                                      "::", [&](const auto &nr) { return nr.show(ctx); }));
                                     e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined in `{}` here",
                                                    it->main.method.data(ctx)->owner.show(ctx));
                                 }
