@@ -239,7 +239,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
 
     // First pass: prefix-only matches on namespace
     {
-        Timer timeit(gs.tracer(), "SymbolMatcher::doQuery::pass1");
+        Timer timeit("SymbolMatcher::doQuery::pass1");
         for (auto [kind, size] : symbolKinds) {
             for (uint32_t i = 0; i < size; ++i) {
                 auto sym = core::SymbolRef(gs, kind, i);
@@ -256,7 +256,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     // owner-namespaces.
     vector<pair<core::SymbolRef, int>> candidates;
     {
-        Timer timeit(gs.tracer(), "SymbolMatcher::doQuery::pass2");
+        Timer timeit("SymbolMatcher::doQuery::pass2");
         for (auto [kind, size] : symbolKinds) {
             for (uint32_t i = 0; i < size; ++i) {
                 auto symbolRef = core::SymbolRef(gs, kind, i);
@@ -326,7 +326,7 @@ bool WorkspaceSymbolsTask::isDelayable() const {
 }
 
 unique_ptr<ResponseMessage> WorkspaceSymbolsTask::runRequest(LSPTypecheckerDelegate &typechecker) {
-    Timer timeit(typechecker.state().tracer(), "LSPLoop::handleWorkspaceSymbols");
+    Timer timeit("LSPLoop::handleWorkspaceSymbols");
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::WorkspaceSymbol);
     ShowOperation op(config, ShowOperation::Kind::References);
     SymbolMatcher matcher(config, typechecker.state());

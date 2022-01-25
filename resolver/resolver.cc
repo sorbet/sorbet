@@ -851,7 +851,7 @@ private:
         if (!ancestorSym.data(ctx)->isClassOrModuleSealed()) {
             return;
         }
-        Timer timeit(ctx.state.tracer(), "resolver.registerSealedSubclass");
+        Timer timeit("resolver.registerSealedSubclass");
 
         ancestorSym.data(ctx)->recordSealedSubclass(ctx, job.klass);
     }
@@ -1184,7 +1184,7 @@ public:
 
     static vector<ast::ParsedFile> resolveConstants(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                     WorkerPool &workers) {
-        Timer timeit(gs.tracer(), "resolver.resolve_constants");
+        Timer timeit("resolver.resolve_constants");
         const core::GlobalState &igs = gs;
         auto resultq = make_shared<BlockingBoundedQueue<ResolveWalkResult>>(trees.size());
         auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
@@ -1193,7 +1193,7 @@ public:
         }
 
         workers.multiplexJob("resolveConstantsWalk", [&igs, fileq, resultq]() {
-            Timer timeit(igs.tracer(), "ResolveConstantsWorker");
+            Timer timeit("ResolveConstantsWorker");
             ResolveConstantsWalk constants;
             ResolveWalkResult walkResult;
             vector<ast::ParsedFile> partiallyResolvedTrees;
@@ -1282,7 +1282,7 @@ public:
         ENFORCE(todoRequiredAncestors.empty() || gs.requiresAncestorEnabled);
         fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
 
-        Timer timeit1(gs.tracer(), "resolver.resolve_constants.fixed_point");
+        Timer timeit1("resolver.resolve_constants.fixed_point");
 
         bool progress = true;
         bool first = true; // we need to run at least once to force class aliases and type aliases
@@ -1291,7 +1291,7 @@ public:
             first = false;
             counterInc("resolve.constants.retries");
             {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.ancestors");
+                Timer timeit("resolver.resolve_constants.fixed_point.ancestors");
                 // This is an optimization. The order should not matter semantically
                 // We try to resolve most ancestors second because this makes us much more likely to resolve
                 // everything else.
@@ -1318,12 +1318,12 @@ public:
                 progress = retries > 0;
             }
             {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
+                Timer timeit("resolver.resolve_constants.fixed_point.constants");
                 bool resolvedSomeConstants = resolveConstants(gs, todo, workers);
                 progress = progress || resolvedSomeConstants;
             }
             {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.class_aliases");
+                Timer timeit("resolver.resolve_constants.fixed_point.class_aliases");
                 // This is an optimization. The order should not matter semantically
                 // This is done as a "pre-step" because the first iteration of this effectively ran in TreeMap.
                 // every item in todoClassAliases implicitly depends on an item in item in todo
@@ -1347,7 +1347,7 @@ public:
                 progress = progress || retries > 0;
             }
             {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.type_aliases");
+                Timer timeit("resolver.resolve_constants.fixed_point.type_aliases");
                 long retries = 0;
                 auto it = remove_if(todoTypeAliases.begin(), todoTypeAliases.end(),
                                     [&gs, &retries](ResolveItems<TypeAliasResolutionItem> &job) -> bool {
@@ -1368,7 +1368,7 @@ public:
         }
 
         {
-            Timer timeit(gs.tracer(), "resolver.mixes_in_class_methods");
+            Timer timeit("resolver.mixes_in_class_methods");
             for (auto &job : todoClassMethods) {
                 for (auto &todo : job.items) {
                     resolveClassMethodsJob(gs, todo);
@@ -1378,7 +1378,7 @@ public:
         }
 
         {
-            Timer timeit(gs.tracer(), "resolver.requires_ancestor");
+            Timer timeit("resolver.requires_ancestor");
             for (auto &job : todoRequiredAncestors) {
                 for (auto &todo : job.items) {
                     resolveRequiredAncestorsJob(gs, todo);
@@ -1433,7 +1433,7 @@ public:
         // Note that this is missing alias stubbing, thus resolveJob needs to be able to handle missing aliases.
 
         {
-            Timer timeit(gs.tracer(), "resolver.resolve_constants.errors");
+            Timer timeit("resolver.resolve_constants.errors");
             // Only give suggestions for the first several constants, because fuzzy suggestions are expensive.
             int suggestionCount = 0;
             for (auto &job : todo) {
@@ -2059,7 +2059,7 @@ class ResolveTypeMembersAndFieldsWalk {
     }
 
     static void computeExternalTypes(core::GlobalState &gs) {
-        Timer timeit(gs.tracer(), "resolver.computeExternalType");
+        Timer timeit("resolver.computeExternalType");
         // Ensure all symbols have `externalType` computed.
         for (uint32_t i = 1; i < gs.classAndModulesUsed(); i++) {
             core::ClassOrModuleRef(gs, i).data(gs)->unsafeComputeExternalType(gs);
@@ -2575,7 +2575,7 @@ public:
     }
 
     static vector<ast::ParsedFile> run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
-        Timer timeit(gs.tracer(), "resolver.type_params");
+        Timer timeit("resolver.type_params");
 
         auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
         auto outputq = make_shared<BlockingBoundedQueue<ResolveTypeMembersAndFieldsResult>>(trees.size());
@@ -2585,7 +2585,7 @@ public:
         trees.clear();
 
         workers.multiplexJob("resolveTypeParamsWalk", [&gs, inputq, outputq]() -> void {
-            Timer timeit(gs.tracer(), "resolveTypeParamsWalkWorker");
+            Timer timeit("resolveTypeParamsWalkWorker");
             ResolveTypeMembersAndFieldsWalk walk;
             ResolveTypeMembersAndFieldsResult output;
             ast::ParsedFile job;
@@ -3350,7 +3350,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
 
 ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                   WorkerPool &workers) {
-    Timer timeit(gs.tracer(), "resolver.sigs_vars_and_flatten");
+    Timer timeit("resolver.sigs_vars_and_flatten");
     auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
     auto outputq = make_shared<BlockingBoundedQueue<ResolveSignaturesWalk::ResolveSignaturesWalkResult>>(trees.size());
 
@@ -3404,7 +3404,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
             const ResolveSignaturesWalk::ResolveFileSignatures &right) -> bool { return left.file < right.file; });
 
     {
-        Timer timeit(gs.tracer(), "resolver.resolve_sigs");
+        Timer timeit("resolver.resolve_sigs");
         for (auto &file : combinedFileJobs) {
             for (auto &job : file.sigs) {
                 core::MutableContext ctx(gs, job.owner, file.file);
@@ -3422,7 +3422,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
 
 void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
     if (debug_mode) {
-        Timer timeit(gs.tracer(), "resolver.sanity_check");
+        Timer timeit("resolver.sanity_check");
         ResolveSanityCheckWalk sanity;
         for (auto &tree : trees) {
             core::MutableContext ctx(gs, core::Symbols::root(), tree.file);

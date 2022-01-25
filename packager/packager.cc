@@ -1738,7 +1738,7 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
 // Re-write source files to be in packages. This is only called if no package definitions were
 // changed.
 vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::ParsedFile> files) {
-    Timer timeit(gs.tracer(), "packager.rewriteFilesFast");
+    Timer timeit("packager.rewriteFilesFast");
     for (auto i = 0; i < files.size(); i++) {
         core::Context ctx(gs, core::Symbols::root(), files[i].file);
         if (files[i].file.data(gs).isPackage()) {
@@ -1756,13 +1756,13 @@ vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::Pars
 }
 
 vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files) {
-    Timer timeit(gs.tracer(), "packager");
+    Timer timeit("packager");
     // Ensure files are in canonical order.
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
 
     // Step 1: Find packages and determine their imports/exports.
     {
-        Timer timeit(gs.tracer(), "packager.findPackages");
+        Timer timeit("packager.findPackages");
         core::UnfreezeNameTable unfreeze(gs);
         core::packages::UnfreezePackages packages = gs.unfreezePackages();
         for (auto &file : files) {
@@ -1803,7 +1803,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
     // * Find package files and rewrite them into virtual AST mappings.
     // * Find files within each package and rewrite each to be wrapped by their virtual package namespace.
     {
-        Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
+        Timer timeit("packager.rewritePackagesAndFiles");
 
         auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(files.size());
         auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(files.size());
@@ -1812,7 +1812,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
         }
 
         workers.multiplexJob("rewritePackagesAndFiles", [&gs, fileq, resultq]() {
-            Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
+            Timer timeit("packager.rewritePackagesAndFilesWorker");
             vector<ast::ParsedFile> results;
             uint32_t filesProcessed = 0;
             ast::ParsedFile job;

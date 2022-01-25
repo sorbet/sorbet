@@ -53,7 +53,7 @@ public:
         timeUntilRun = nullptr;
         started.Notify();
         {
-            Timer timeit(config.logger, "LSPTask::run");
+            Timer timeit("LSPTask::run");
             timeit.setTag("method", task->methodString());
             task->run(*delegate);
         }
@@ -83,7 +83,7 @@ public:
         : config(config), task(move(task)), typechecker(typechecker), workers(workers){};
 
     void run() override {
-        Timer timeit(config.logger, "LSPDangerousTypecheckerTask::runSpecial");
+        Timer timeit("LSPDangerousTypecheckerTask::runSpecial");
         timeit.setTag("method", task->methodString());
         task->runSpecial(typechecker, workers);
     }

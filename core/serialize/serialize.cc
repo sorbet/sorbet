@@ -99,7 +99,7 @@ vector<uint8_t> Pickler::result() {
 }
 
 UnPickler::UnPickler(const uint8_t *const compressed, spdlog::logger &tracer) : pos(0) {
-    Timer timeit(tracer, "Unpickler::UnPickler");
+    Timer timeit("Unpickler::UnPickler");
     int compressedSize;
     memcpy(&compressedSize, compressed, SIZE_BYTES);
     int uncompressedSize;
@@ -691,7 +691,7 @@ Field SerializerImpl::unpickleField(UnPickler &p, const GlobalState *gs) {
 }
 
 Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
-    Timer timeit(gs.tracer(), "pickleGlobalState");
+    Timer timeit("pickleGlobalState");
     Pickler result;
     result.putU4(Serializer::VERSION);
     result.putU4(gs.kvstoreUuid);
@@ -770,7 +770,7 @@ uint32_t SerializerImpl::unpickleGSUUID(UnPickler &p) {
 }
 
 void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
-    Timer timeit(result.tracer(), "unpickleGS");
+    Timer timeit("unpickleGS");
     result.creation = timeit.getFlowEdge();
     if (p.getU4() != Serializer::VERSION) {
         Exception::raise("Payload version mismatch");
@@ -799,7 +799,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     vector<pair<unsigned int, unsigned int>> namesByHash(std::move(result.namesByHash));
     namesByHash.clear();
     {
-        Timer timeit(result.tracer(), "readFiles");
+        Timer timeit("readFiles");
 
         int filesSize = p.getU4();
         files.reserve(filesSize);
@@ -813,7 +813,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     }
 
     {
-        Timer timeit(result.tracer(), "readNames");
+        Timer timeit("readNames");
 
         int namesSize = p.getU4();
         ENFORCE(namesSize > 0);
@@ -836,7 +836,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     }
 
     {
-        Timer timeit(result.tracer(), "readSymbols");
+        Timer timeit("readSymbols");
 
         int classAndModuleSize = p.getU4();
         ENFORCE(classAndModuleSize > 0);
@@ -875,7 +875,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     }
 
     {
-        Timer timeit(result.tracer(), "readNameTable");
+        Timer timeit("readNameTable");
         int namesByHashSize = p.getU4();
         namesByHash.reserve(namesByHashSize);
         for (int i = 0; i < namesByHashSize; i++) {
@@ -895,7 +895,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     }
 
     {
-        Timer timeit(result.tracer(), "moving");
+        Timer timeit("moving");
         result.fileRefByPath = std::move(fileRefByPath);
         result.files = std::move(files);
         result.utf8Names = std::move(utf8Names);
@@ -937,7 +937,7 @@ vector<uint8_t> Serializer::store(GlobalState &gs) {
 }
 
 std::vector<uint8_t> Serializer::storePayloadAndNameTable(GlobalState &gs) {
-    Timer timeit(gs.tracer(), "Serializer::storePayloadAndNameTable");
+    Timer timeit("Serializer::storePayloadAndNameTable");
     Pickler p = SerializerImpl::pickle(gs, true);
     return p.result();
 }

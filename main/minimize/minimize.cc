@@ -403,7 +403,7 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
 
 void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &sourceGS, unique_ptr<core::GlobalState> &rbiGS,
                                           options::Options &opts, WorkerPool &workers, std::string minimizeRBI) {
-    Timer timeit(sourceGS->tracer(), "Minimize::indexAndResolveForMinimize");
+    Timer timeit("Minimize::indexAndResolveForMinimize");
 
     ENFORCE(!sourceGS->findFileByPath(minimizeRBI).exists(),
             "--minimize-to-rbi will yield empty file because {} was already processed by the main pipeline",
@@ -432,7 +432,7 @@ void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &sourceG
 
 void Minimize::writeDiff(const core::GlobalState &sourceGS, const core::GlobalState &rbiGS,
                          options::PrinterConfig &outfile) {
-    Timer timeit(sourceGS.tracer(), "Minimize::writeDiff");
+    Timer timeit("Minimize::writeDiff");
 
     outfile.fmt("# typed: true\n\n");
 

@@ -772,7 +772,7 @@ public:
 } // namespace
 
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
-    Timer timeit(ctx.state.tracer(), "validateSymbols");
+    Timer timeit("validateSymbols");
 
     ValidateWalk validate;
     tree.tree = ast::ShallowMap::apply(ctx, validate, std::move(tree.tree));

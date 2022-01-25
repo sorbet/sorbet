@@ -12,7 +12,7 @@ using namespace std;
 namespace sorbet::infer {
 
 unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
-    Timer timeit(ctx.state.tracer(), "Inference::run", {{"func", string(cfg->symbol.toStringFullName(ctx))}});
+    Timer timeit("Inference::run", {{"func", string(cfg->symbol.toStringFullName(ctx))}});
     ENFORCE(cfg->symbol == ctx.owner.asMethodRef());
     auto methodLoc = cfg->symbol.data(ctx)->loc();
     prodCounterInc("types.input.methods.typechecked");

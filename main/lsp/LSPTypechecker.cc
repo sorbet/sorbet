@@ -170,7 +170,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     // This path only works for fast path updates.
     ENFORCE(updates.canTakeFastPath);
 
-    Timer timeit(config->logger, "fast_path");
+    Timer timeit("fast_path");
     vector<core::FileRef> subset;
     vector<core::NameHash> changedHashes;
     // Replace error queue with one that is owned by this thread.
@@ -283,7 +283,7 @@ updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file,
 bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &ignore,
                                  vector<ast::ParsedFile> &out) const {
     auto &logger = *config->logger;
-    Timer timeit(logger, "slow_path.copy_indexes");
+    Timer timeit("slow_path.copy_indexes");
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
     for (int i = 0; i < indexed.size(); i++) {
         fileq->push(i, 1);
@@ -338,7 +338,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
 
     auto &logger = config->logger;
     unique_ptr<ShowOperation> slowPathOp = make_unique<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
-    Timer timeit(logger, "slow_path");
+    Timer timeit("slow_path");
     ENFORCE(!updates.canTakeFastPath || config->disableFastPath);
     ENFORCE(updates.updatedGS.has_value());
     if (!updates.updatedGS.has_value()) {
@@ -533,7 +533,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     auto queryCollector = make_shared<QueryCollector>();
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, queryCollector);
 
-    Timer timeit(config->logger, "query");
+    Timer timeit("query");
     prodCategoryCounterInc("lsp.updates", "query");
     ENFORCE(gs->errorQueue->isEmpty());
     ENFORCE(gs->lspQuery.isEmpty());

@@ -109,7 +109,7 @@ ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
 
 unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
                                    bool trace) {
-    Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
+    Timer timeit("runParser", {{"file", string(file.data(gs).path())}});
     unique_ptr<parser::Node> nodes;
     {
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
@@ -132,7 +132,7 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
                               const options::Printers &print) {
-    Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
+    Timer timeit("runDesugar", {{"file", string(file.data(gs).path())}});
     ast::ExpressionPtr ast;
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
@@ -150,13 +150,13 @@ ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_
 
 ast::ExpressionPtr runRewriter(core::GlobalState &gs, core::FileRef file, ast::ExpressionPtr ast) {
     core::MutableContext ctx(gs, core::Symbols::root(), file);
-    Timer timeit(gs.tracer(), "runRewriter", {{"file", string(file.data(gs).path())}});
+    Timer timeit("runRewriter", {{"file", string(file.data(gs).path())}});
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
     return rewriter::Rewriter::run(ctx, move(ast));
 }
 
 ast::ParsedFile runLocalVars(core::GlobalState &gs, ast::ParsedFile tree) {
-    Timer timeit(gs.tracer(), "runLocalVars", {{"file", string(tree.file.data(gs).path())}});
+    Timer timeit("runLocalVars", {{"file", string(tree.file.data(gs).path())}});
     core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
     return sorbet::local_vars::LocalVars::run(ctx, move(tree));
 }
@@ -170,7 +170,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
     auto &print = opts.print;
     ast::ParsedFile rewriten{nullptr, file};
 
-    Timer timeit(lgs.tracer(), "indexOne", {{"file", string(file.data(lgs).path())}});
+    Timer timeit("indexOne", {{"file", string(file.data(lgs).path())}});
     try {
         if (!tree) {
             // tree isn't cached. Need to start from parser
@@ -225,12 +225,12 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
     try {
 #ifndef SORBET_REALMAIN_MIN
         if (opts.stripePackages) {
-            Timer timeit(gs.tracer(), "incremental_packager");
+            Timer timeit("incremental_packager");
             what = packager::Packager::runIncremental(gs, move(what));
         }
 #endif
         {
-            Timer timeit(gs.tracer(), "incremental_naming");
+            Timer timeit("incremental_naming");
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
             auto emptyWorkers = WorkerPool::create(0, gs.tracer());
@@ -247,7 +247,7 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
         }
 
         {
-            Timer timeit(gs.tracer(), "incremental_resolve");
+            Timer timeit("incremental_resolve");
             gs.tracer().trace("Resolving (incremental pass)...");
             // TODO: We should eventually be able to freeze the symbol and name tables, but overloads currently pose
             // a problem.
@@ -274,7 +274,7 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
 }
 
 vector<core::FileRef> reserveFiles(unique_ptr<core::GlobalState> &gs, const vector<string> &files) {
-    Timer timeit(gs->tracer(), "reserveFiles");
+    Timer timeit("reserveFiles");
     vector<core::FileRef> ret;
     ret.reserve(files.size());
     core::UnfreezeFileTable unfreezeFiles(*gs);
@@ -374,7 +374,7 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
         return ast;
     }
     auto fileName = file.dataAllowingUnsafe(gs).path();
-    Timer timeit(gs.tracer(), "readFileWithStrictnessOverrides", {{"file", string(fileName)}});
+    Timer timeit("readFileWithStrictnessOverrides", {{"file", string(fileName)}});
     string src;
     bool fileFound = true;
     try {
@@ -455,13 +455,13 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
                                           shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
                                           WorkerPool &workers, const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
-    Timer timeit(cgs.tracer(), "mergeIndexResults");
+    Timer timeit("mergeIndexResults");
 
     auto batchq = make_shared<ConcurrentBoundedQueue<IndexSubstitutionJob>>(input->bound);
     vector<ast::ParsedFile> ret;
 
     {
-        Timer timeit(cgs.tracer(), "mergeGlobalStates");
+        Timer timeit("mergeGlobalStates");
         IndexThreadResultPack threadResult;
         for (auto result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer());
              !result.done(); result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
@@ -474,11 +474,11 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
     }
 
     {
-        Timer timeit(cgs.tracer(), "substituteTrees");
+        Timer timeit("substituteTrees");
         auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(batchq->bound);
 
         workers.multiplexJob("substituteTrees", [&cgs, batchq, resultq]() {
-            Timer timeit(cgs.tracer(), "substituteTreesWorker");
+            Timer timeit("substituteTreesWorker");
             IndexSubstitutionJob job;
             for (auto result = batchq->try_pop(job); !result.done(); result = batchq->try_pop(job)) {
                 if (result.gotItem()) {
@@ -513,7 +513,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
 vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<core::FileRef> &files,
                                            const options::Options &opts, WorkerPool &workers,
                                            const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    Timer timeit(baseGs.tracer(), "indexSuppliedFiles");
+    Timer timeit("indexSuppliedFiles");
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
     for (auto &file : files) {
@@ -523,7 +523,7 @@ vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<cor
     std::shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex();
 
     workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore]() {
-        Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
+        Timer timeit("indexSuppliedFilesWorker");
 
         // clone the empty global state to avoid manually re-entering everything, and copy the base filetable so that
         // file sources are available.
@@ -556,7 +556,7 @@ vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<cor
 
 vector<ast::ParsedFile> index(core::GlobalState &gs, vector<core::FileRef> files, const options::Options &opts,
                               WorkerPool &workers, const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    Timer timeit(gs.tracer(), "index");
+    Timer timeit("index");
     vector<ast::ParsedFile> ret;
     vector<ast::ParsedFile> empty;
 
@@ -623,7 +623,7 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         return;
     }
 
-    Timer timeit(ctx.state.tracer(), "typecheckOne", {{"file", string(f.data(ctx).path())}});
+    Timer timeit("typecheckOne", {{"file", string(f.data(ctx).path())}});
     try {
         if (opts.print.CFG.enabled) {
             opts.print.CFG.fmt("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
@@ -664,7 +664,7 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
                                 WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     if (opts.stripePackages) {
-        Timer timeit(gs.tracer(), "package");
+        Timer timeit("package");
         {
             core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
@@ -685,7 +685,7 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
 
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                                  WorkerPool &workers) {
-    Timer timeit(gs.tracer(), "name");
+    Timer timeit("name");
     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
     auto result = namer::Namer::run(gs, move(what), workers);
@@ -708,7 +708,7 @@ public:
 
 vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const options::Options &opts,
                                               vector<ast::ParsedFile> what) {
-    Timer timeit(gs.tracer(), "printMissingConstants");
+    Timer timeit("printMissingConstants");
     GatherUnresolvedConstantsWalk walk;
     for (auto &resolved : what) {
         core::MutableContext ctx(gs, core::Symbols::root(), resolved.file);
@@ -795,7 +795,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         if (opts.stopAfterPhase != options::Phase::NAMER) {
             ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
             {
-                Timer timeit(gs->tracer(), "resolving");
+                Timer timeit("resolving");
                 core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
                 core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
                 auto maybeResult = resolver::Resolver::run(*gs, move(what), workers);
@@ -1006,7 +1006,7 @@ void typecheck(const unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> 
     const uint32_t epoch = epochManager.getStatus().epoch;
 
     {
-        Timer timeit(gs->tracer(), "typecheck");
+        Timer timeit("typecheck");
         if (preemptionManager) {
             // Before kicking off typechecking, check if we need to preempt.
             (*preemptionManager)->tryRunScheduledPreemptionTask(*gs);
@@ -1134,7 +1134,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
         return false;
     }
 
-    Timer timeit(gs.tracer(), "pipeline::cacheTreesAndFiles");
+    Timer timeit("pipeline::cacheTreesAndFiles");
 
     // Compress files in parallel.
     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile *>>(parsedFiles.size());

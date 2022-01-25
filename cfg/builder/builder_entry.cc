@@ -8,7 +8,7 @@ using namespace std;
 namespace sorbet::cfg {
 
 unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
-    Timer timeit(ctx.state.tracer(), "cfg");
+    Timer timeit("cfg");
     ENFORCE(md.symbol.exists());
     ENFORCE(!md.symbol.data(ctx)->flags.isOverloaded);
     unique_ptr<CFG> res(new CFG); // private constructor

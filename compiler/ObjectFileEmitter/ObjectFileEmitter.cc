@@ -53,7 +53,7 @@ constexpr int optLevel = 2;
 
 bool outputObjectFile(spdlog::logger &logger, llvm::legacy::PassManager &pm, const string &rubyFileName,
                       const string &fileName, unique_ptr<llvm::Module> module, llvm::TargetMachine *targetMachine) {
-    Timer timer(logger, "objectFileEmission", {{"file", rubyFileName}});
+    Timer timer("objectFileEmission", {{"file", rubyFileName}});
     std::error_code ec;
     llvm::raw_fd_ostream dest(fileName, ec, llvm::sys::fs::OF_None);
 
@@ -428,7 +428,7 @@ void ObjectFileEmitter::init() {
         pm.add(llvm::createPrintModulePass(optllFile.value(), ""));
     }
     {
-        Timer timer(logger, "functionPasses");
+        Timer timer("functionPasses");
 
         fnPasses.doInitialization();
         for (llvm::Function &func : *module) {
