@@ -1,5 +1,11 @@
 DefMethod {
   name = <U test_constant_only_scope>
   args = NULL
-  body = NULL
+  body = Const {
+    scope = Const {
+      scope = NULL
+      name = <C <U A>>
+    }
+    name = <C <U <ConstantNameMissing>>>
+  }
 }
