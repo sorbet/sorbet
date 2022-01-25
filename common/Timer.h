@@ -51,8 +51,6 @@ public:
     // We could also make this more generic to allow more sleep duration types.
     static void timedSleep(const std::chrono::microseconds &sleep_duration, spdlog::logger &log, ConstExprStr name) {
         Timer timer(log, name);
-        auto dur = std::chrono::duration<double, std::milli>(sleep_duration);
-        log.debug("{}: sleeping for {}ms", name.str, dur.count());
         std::this_thread::sleep_for(sleep_duration);
     }
 

@@ -150,8 +150,6 @@ Timer::~Timer() {
     auto dur = microseconds{clock.usec - start.usec};
     if (!canceled && dur.usec > clock_threshold_coarse.usec) {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
-        auto durMs = (clock.usec - start.usec) / 1'000;
-        log.debug("{}: {}ms", this->name.str, durMs);
         sorbet::timingAdd(this->name, start, clock, move(args), move(tags), self, prev, move(histogramBuckets));
     }
 }
