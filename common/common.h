@@ -52,13 +52,12 @@ template <class E> using UnorderedSet = absl::flat_hash_set<E>;
 // Please use this to explicitly write down what assumptions was the code written under.
 // One day they might be violated and you'll help the next person debug the issue.
 // Emits a timer so that expensive checks show up in traces in debug builds.
-#define ENFORCE(...)                                                                                              \
-    do {                                                                                                          \
-        if (::sorbet::debug_mode) {                                                                               \
-            auto __enforceTimer =                                                                                 \
-                ::sorbet::Timer(*(::spdlog::default_logger_raw()), "ENFORCE(" __FILE__ ":" QUOTED(__LINE__) ")"); \
-            ENFORCE_NO_TIMER(__VA_ARGS__);                                                                        \
-        }                                                                                                         \
+#define ENFORCE(...)                                                                             \
+    do {                                                                                         \
+        if (::sorbet::debug_mode) {                                                              \
+            auto __enforceTimer = ::sorbet::Timer("ENFORCE(" __FILE__ ":" QUOTED(__LINE__) ")"); \
+            ENFORCE_NO_TIMER(__VA_ARGS__);                                                       \
+        }                                                                                        \
     } while (false);
 
 #ifdef SKIP_SLOW_ENFORCE
