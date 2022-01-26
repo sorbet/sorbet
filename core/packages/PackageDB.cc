@@ -168,12 +168,6 @@ const std::string_view PackageDB::errorHint() const {
     return errorHint_;
 }
 
-bool PackageDB::isTestFile(const core::GlobalState &gs, const core::File &file) {
-    // TODO: (aadi-stripe, 11/26/2021) see if these can all be changed to use getPrintablePath
-    return absl::EndsWith(file.path(), ".test.rb") || absl::StartsWith(file.path(), "./test/") ||
-           absl::StrContains(gs.getPrintablePath(file.path()), "/test/");
-}
-
 PackageDB PackageDB::deepCopy() const {
     ENFORCE(frozen);
     PackageDB result;

@@ -49,9 +49,6 @@ public:
 
     const std::string_view errorHint() const;
 
-    // NB: Do not call in hot path, this is SLOW due to string comparison!
-    static bool isTestFile(const core::GlobalState &gs, const core::File &file);
-
 private:
     std::vector<NameRef> secondaryTestPackageNamespaceRefs_;
     std::vector<std::string> extraPackageFilesDirectoryPrefixes_;
