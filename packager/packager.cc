@@ -258,13 +258,23 @@ public:
 
     vector<MissingExportMatch> findMissingExports(core::Context ctx, core::SymbolRef scope, core::NameRef name) const {
         vector<MissingExportMatch> res;
+        if (core::packages::PackageDB::isTestFile(ctx, ctx.file.data(ctx))) {
+            // fmt::print("FIND MISSING TEST {} {} {}\n", scope.show(ctx), name.show(ctx), this->mangledName().show(ctx));
+
+            core::SymbolRef sym = findPrivateSymbol(ctx, scope, /* test */ false);
+            if (sym.exists() && sym.isClassOrModule()) {
+                res.emplace_back(MissingExportMatch{sym, this->mangledName()});
+                return res;
+                // fmt::print("FOUND {}\n", sym.show(ctx));
+            }
+        }
         for (auto &imported : importedPackageNames) {
             auto &info = ctx.state.packageDB().getPackageInfo(imported.name.mangledName);
             if (!info.exists()) {
                 continue;
             }
 
-            core::SymbolRef sym = PackageInfoImpl::from(info).findPrivateSymbol(ctx, scope, false);
+            core::SymbolRef sym = PackageInfoImpl::from(info).findPrivateSymbol(ctx, scope, /* test */ false);
             if (sym.exists() && sym.isClassOrModule()) {
                 sym = sym.asClassOrModuleRef().data(ctx)->findMember(ctx, name);
                 if (sym.exists()) {
@@ -272,7 +282,7 @@ public:
                 }
             }
             if (core::packages::PackageDB::isTestFile(ctx, ctx.file.data(ctx))) {
-                sym = PackageInfoImpl::from(info).findPrivateSymbol(ctx, scope, true);
+                sym = PackageInfoImpl::from(info).findPrivateSymbol(ctx, scope, /* test */ true);
                 if (sym.exists() && sym.isClassOrModule()) {
                     sym = sym.asClassOrModuleRef().data(ctx)->findMember(ctx, name);
                     if (sym.exists()) {
@@ -387,9 +397,14 @@ public:
 private:
     // Recursively walk up a symbol's scope from the package's internal module.
     core::SymbolRef findPrivateSymbol(const core::GlobalState &gs, core::SymbolRef sym, bool test) const {
+        // fmt::print("Find {}\n", sym.exists() ? sym.show(gs) : "<NONE>");
+        // TODO CLEANUP
         if (!sym.exists() || sym == core::Symbols::root()) {
-            return core::SymbolRef();
+            // fmt::print("A\n");
+            return internalModule(gs, test);
+            // return core::SymbolRef();
         } else if (sym.name(gs).isPackagerName(gs)) {
+            // fmt::print("B\n");
             return internalModule(gs, test);
         }
         auto owner = findPrivateSymbol(gs, sym.owner(gs), test);
