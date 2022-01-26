@@ -159,6 +159,7 @@ struct Options {
     bool stripeMode = false;
     bool stripePackages = false;
     std::string stripePackagesHint = "";
+    std::vector<std::string> stripePackagesLayerNames;
     std::vector<std::string> extraPackageFilesDirectoryPrefixes;
     std::vector<std::string> secondaryTestPackageNamespaces;
     std::string typedSource = "";

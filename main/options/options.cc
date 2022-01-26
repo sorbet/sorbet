@@ -356,6 +356,11 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("stripe-packages-hint-message",
                                     "Optional hint message to add to packaging related errors",
                                     cxxopts::value<string>()->default_value(""));
+    options.add_options("advanced")("stripe-packages-layers",
+                                    "The possible layers a package can belong to, comma-"
+                                    "separated and ordered such that a layer can depend on any layer listed before it."
+                                    "If specified, at least 2 layers must be provided.",
+                                    cxxopts::value<vector<string>>(), "layer1,layer2,layer3");
     options.add_options("dev")("extra-package-files-directory-prefix",
                                "Extra parent directories which contain package files. "
                                "This option must be used in conjunction with --stripe-packages",
@@ -903,6 +908,26 @@ void readOptions(Options &opts,
                     throw EarlyReturnWithCode(1);
                 }
                 opts.secondaryTestPackageNamespaces.emplace_back(ns);
+            }
+        }
+        if (raw.count("stripe-packages-layers")) {
+            if (!opts.stripePackages) {
+                logger->error("--stripe-packages-layers can only be specified in --stripe-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+            auto argsLayerNames = raw["stripe-packages-layers"].as<vector<string>>();
+            if (argsLayerNames.size() < 2 || argsLayerNames.size() >= 255) {
+                logger->error("At least 2 layers must be passed to --stripe-packages-layers (max 254)");
+                throw EarlyReturnWithCode(1);
+            }
+            std::regex layerValid("[a-zA-Z0-9-_]+");
+            for (const string &layerName : argsLayerNames) {
+                if (!std::regex_match(layerName, layerValid)) {
+                    logger->error("--stripe-packages-layers must contain items that are alphanumeric using hyphen (-) "
+                                  " or underscore (_) as separators.");
+                    throw EarlyReturnWithCode(1);
+                }
+                opts.stripePackagesLayerNames.emplace_back(layerName);
             }
         }
         opts.stripePackagesHint = raw["stripe-packages-hint-message"].as<string>();
