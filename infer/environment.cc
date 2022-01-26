@@ -1076,7 +1076,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                                       ctx.owner.asMethodRef()));
                 }
 
-                ENFORCE(ctx.file.data(ctx).hasParseErrors() || !tp.origins.empty(), "Inferencer did not assign location");
+                ENFORCE(ctx.file.data(ctx).hasParseErrors() || !tp.origins.empty(),
+                        "Inferencer did not assign location");
             },
             [&](cfg::Alias &a) {
                 core::SymbolRef symbol = a.what.dealias(ctx);
