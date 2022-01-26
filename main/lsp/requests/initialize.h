@@ -12,6 +12,8 @@ class InitializeTask final : public LSPRequestTask {
 public:
     InitializeTask(LSPConfiguration &config, MessageId id, std::unique_ptr<InitializeParams> params);
 
+    static const std::vector<std::string> TRIGGER_CHARACTERS;
+
 protected:
     bool canPreempt(const LSPIndexer &indexer) const override;
 

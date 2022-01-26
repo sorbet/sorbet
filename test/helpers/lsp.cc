@@ -5,6 +5,7 @@
 #include "common/common.h"
 #include "common/sort.h"
 #include "main/lsp/LSPConfiguration.h"
+#include "main/lsp/requests/initialize.h"
 #include "test/helpers/lsp.h"
 
 namespace sorbet::test {
@@ -195,12 +196,7 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     CHECK(capabilities.completionProvider.has_value());
     if (capabilities.completionProvider.has_value()) {
         auto &completionProvider = *(capabilities.completionProvider);
-        auto triggerCharacters = completionProvider->triggerCharacters.value_or(vector<string>({}));
-        CHECK_EQ(2, triggerCharacters.size());
-        if (triggerCharacters.size() == 2) {
-            CHECK_EQ(".", triggerCharacters.at(0));
-            CHECK_EQ(":", triggerCharacters.at(1));
-        }
+        CHECK_EQ(realmain::lsp::InitializeTask::TRIGGER_CHARACTERS, completionProvider->triggerCharacters);
     }
 
     CHECK(capabilities.signatureHelpProvider.has_value());
