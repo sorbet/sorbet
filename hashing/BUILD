@@ -16,6 +16,7 @@ cc_library(
         "//core",
         "//main/options",
         "//main/pipeline",
+        "@rapidjson",
     ],
 )
 
@@ -37,5 +38,6 @@ cc_library(
         "//core",
         "//main/options",
         "//main/pipeline:pipeline-orig",
+        "@rapidjson",
     ],
 )
