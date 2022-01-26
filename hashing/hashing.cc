@@ -77,7 +77,7 @@ void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spd
         fileq->push(i, 1);
     }
 
-    logger.debug("Computing state hashes for {} files", files.size());
+    logger.trace("Computing state hashes for {} files", files.size());
 
     auto resultq =
         make_shared<BlockingBoundedQueue<vector<pair<size_t, unique_ptr<const core::FileHash>>>>>(files.size());
@@ -131,7 +131,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
         fileq->push(i, 1);
     }
 
-    logger.debug("Computing state hashes for {} files", asts.size());
+    logger.trace("Computing state hashes for {} files", asts.size());
 
     const core::GlobalState &sharedGs = *gs;
     auto resultq =

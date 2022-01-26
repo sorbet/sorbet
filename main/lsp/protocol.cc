@@ -74,7 +74,7 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &message
                     &messageQueue));
                 // Only terminate once incoming queue is drained.
                 if (messageQueue.terminate && messageQueue.pendingRequests.empty()) {
-                    config->logger->debug("Preprocessor terminating");
+                    config->logger->trace("Preprocessor terminating");
                     return;
                 }
                 msg = move(messageQueue.pendingRequests.front());
@@ -159,7 +159,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                                 make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
                         }
                     }
-                    logger->debug("Watchman terminating");
+                    logger->trace("Watchman terminating");
                 }
             });
     }
@@ -193,7 +193,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     }
                 }
             }
-            logger->debug("Reader thread terminating");
+            logger->trace("Reader thread terminating");
         });
 
     // Bridges the gap between the {reader, watchman} threads and the typechecking thread.
@@ -241,7 +241,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     auto scheduleToken = typecheckerCoord.trySchedulePreemption(move(preemptTask));
 
                     if (scheduleToken != nullptr) {
-                        logger->debug("[Processing] Preempting slow path for task {}", methodStr);
+                        logger->trace("[Processing] Preempting slow path for task {}", methodStr);
                         // Preemption scheduling success!
                         // In this if statement **only**, `taskQueueMutex` protects all accesses to LSPIndexer. This is
                         // needed to linearize the indexing of edits, which may happen in the typechecking thread if a
@@ -267,9 +267,9 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                             taskQueueMutex->Unlock();
                             finished.WaitForNotification();
                             taskQueueMutex->Lock();
-                            logger->debug("[Processing] Preemption for task {} complete", methodStr);
+                            logger->trace("[Processing] Preemption for task {} complete", methodStr);
                         } else {
-                            logger->debug("[Processing] Canceled scheduled preemption for task {}", methodStr);
+                            logger->trace("[Processing] Canceled scheduled preemption for task {}", methodStr);
                         }
 
                         // At this point, we are guaranteed that the scheduled task has run or has been canceled.
@@ -288,7 +288,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                 }
             }
 
-            logger->debug("[Processing] Running task {} normally", convertLSPMethodToString(task->method));
+            logger->trace("[Processing] Running task {} normally", convertLSPMethodToString(task->method));
             runTask(move(task));
 
             if (config->isInitialized() && !initializedNotification.HasBeenNotified()) {
@@ -310,7 +310,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
         }
     }
 
-    logger->debug("Processor terminating");
+    logger->trace("Processor terminating");
     auto gs = typecheckerCoord.shutdown();
     if (gs) {
         return gs;
