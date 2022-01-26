@@ -196,9 +196,10 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     if (capabilities.completionProvider.has_value()) {
         auto &completionProvider = *(capabilities.completionProvider);
         auto triggerCharacters = completionProvider->triggerCharacters.value_or(vector<string>({}));
-        CHECK_EQ(1, triggerCharacters.size());
-        if (triggerCharacters.size() == 1) {
+        CHECK_EQ(2, triggerCharacters.size());
+        if (triggerCharacters.size() == 2) {
             CHECK_EQ(".", triggerCharacters.at(0));
+            CHECK_EQ(":", triggerCharacters.at(1));
         }
     }
 
