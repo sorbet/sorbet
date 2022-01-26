@@ -1285,10 +1285,14 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::DefMethod *method) {
-                bool isSelf = false;
-                ExpressionPtr res =
-                    buildMethod(dctx, method->loc, method->declLoc, method->name, method->args, method->body, isSelf);
-                result = std::move(res);
+                if (dctx.ctx.state.runningUnderAutogen) {
+                    result = MK::EmptyTree();
+                } else {
+                    bool isSelf = false;
+                    ExpressionPtr res =
+                        buildMethod(dctx, method->loc, method->declLoc, method->name, method->args, method->body, isSelf);
+                    result = std::move(res);
+                }
             },
             [&](parser::DefS *method) {
                 auto *self = parser::cast_node<parser::Self>(method->singleton.get());
