@@ -143,6 +143,11 @@ Usage:
       --stripe-packages-hint-message arg
                                 Optional hint message to add to packaging
                                 related errors (default: "")
+      --stripe-packages-layers layer1,layer2,layer3
+                                The possible layers a package can belong to,
+                                comma-separated and ordered such that a layer
+                                can depend on any layer listed before it.If
+                                specified, at least 2 layers must be provided.
       --autogen-autoloader-exclude-require arg
                                 Names that should be excluded from top-level
                                 require statements in autoloader output. (e.g.
