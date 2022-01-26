@@ -129,6 +129,7 @@ private:
 
         Flags(std::string_view path);
     };
+    CheckSize(Flags, 1, 1);
 
     Flags flags;
 
