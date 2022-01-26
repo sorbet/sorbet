@@ -1,0 +1,4 @@
+specifies-layer/__package.rb:4: Packages may only specify layers when --stripe-package-layers is set https://srb.help/3717
+     4 |  layer 'good_layer_name'
+          ^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 1

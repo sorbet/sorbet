@@ -1,0 +1,4 @@
+layer-violating-pkg/__package.rb:7: Layering violation: package `LayerViolatingPackage` with layer `middle` imports package `HighestLayerPackage` which has layer `highest` https://srb.help/3718
+     7 |  import HighestLayerPackage
+                 ^^^^^^^^^^^^^^^^^^^
+Errors: 1

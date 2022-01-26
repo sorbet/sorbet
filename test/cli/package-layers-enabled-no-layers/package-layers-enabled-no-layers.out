@@ -1,0 +1,4 @@
+no-layer-specified/__package.rb:3: --stripe-package-layers was set, but package `B` doesn't have a layer defined https://srb.help/3719
+     3 |class B < PackageSpec
+     4 |end
+Errors: 1

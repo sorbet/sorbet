@@ -515,6 +515,41 @@ ast::ExpressionPtr prependPackageScope(const core::GlobalState &gs, ast::Express
     return scope;
 }
 
+sorbet::core::packages::Layer verifyLayer(core::Context ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
+    auto target = ast::cast_tree<ast::Literal>(expr);
+    const auto &packageDB = ctx.state.packageDB();
+    const auto layerNames = packageDB.layerNames();
+    if ((target == nullptr && layerNames.size() > 0) || !target->isString(ctx.state)) {
+        if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidLayer)) {
+            auto layers = fmt::map_join(
+                layerNames, ", ", [&ctx](const auto &el) -> auto { return el.show(ctx); });
+            string errHeader = fmt::format("Argument to `{}` must be a valid layer name ({})", fun.show(ctx), layers);
+            e.setHeader(errHeader);
+        }
+        return sorbet::core::packages::Layer(0);
+    }
+
+    core::NameRef targetLayerName = target->asString(ctx.state);
+    auto targetLayer = sorbet::core::packages::Layer(255);
+    for (int i = 0; i < layerNames.size(); i++) {
+        if (targetLayerName == layerNames[i]) {
+            targetLayer = sorbet::core::packages::Layer(i);
+        }
+    }
+    if (targetLayer == sorbet::core::packages::Layer(255)) {
+        if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidLayer)) {
+            auto layers = fmt::map_join(
+                layerNames, ", ", [&ctx](const auto &el) -> auto { return el.show(ctx); });
+            string errHeader = fmt::format("Argument to `{}` is `{}` but must be a valid layer name ({})",
+                                           fun.show(ctx), targetLayerName.toString(ctx), layers);
+            e.setHeader(errHeader);
+        }
+        return sorbet::core::packages::Layer(0);
+    }
+
+    return targetLayer;
+}
+
 ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
     auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (target == nullptr) {
@@ -985,6 +1020,13 @@ struct PackageInfoFinder {
                 arg = prependInternalPackageName(ctx, move(send.getPosArg(0)));
             }
         }
+        if (send.fun == core::Names::layer() && send.numPosArgs() == 1) {
+            if (ctx.state.packageDB().layerNames().size()) {
+                info->layer_ = verifyLayer(ctx, core::Names::layer(), send.getPosArg(0));
+            } else if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
+                e.setHeader("Packages may only specify layers when --stripe-package-layers is set");
+            }
+        }
         if (send.fun == core::Names::export_for_test() && send.numPosArgs() == 1) {
             // null indicates an invalid export.
             if (auto target = verifyConstant(ctx, core::Names::export_for_test(), send.getPosArg(0))) {
@@ -1339,6 +1381,16 @@ public:
                                    "Previous package import found here");
                 }
 
+                continue;
+            }
+
+            if (import.type == ImportType::Normal && package.layer() < importedPackage.layer()) {
+                if (auto e = ctx.beginError(imported.loc, core::errors::Packager::ImportLayeringViolation)) {
+                    e.setHeader(
+                        "Layering violation: package `{}` with layer `{}` imports package `{}` which has layer `{}`",
+                        package.name.toString(ctx), package.layer().show(ctx).toString(ctx.state),
+                        imported.toString(ctx), importedPackage.layer().show(ctx).toString(ctx.state));
+                }
                 continue;
             }
 
@@ -1807,6 +1859,14 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                         e.addErrorLine(prevPkg.definitionLoc(), "Package `{}` originally defined here", pkgName);
                     }
                 } else {
+                    if (ctx.state.packageDB().layerNames().size() > 0 && !pkg->layer().exists()) {
+                        if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::MissingLayer)) {
+                            auto pkgName = pkg->name.toString(ctx);
+                            e.setHeader(
+                                "--stripe-package-layers was set, but package `{}` doesn't have a layer defined",
+                                pkgName);
+                        }
+                    }
                     packages.db.enterPackage(move(pkg));
                 }
             }
