@@ -402,7 +402,8 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::ClassOrM
             sym.name(gs) == core::Names::unresolvedAncestors()) {
             continue;
         }
-        if (auto e = gs.beginError(sym.loc(gs), core::errors::Resolver::FinalModuleNonFinalMethod)) {
+        auto defLoc = sym.loc(gs);
+        if (auto e = gs.beginError(defLoc, core::errors::Resolver::FinalModuleNonFinalMethod)) {
             e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
                         errMsgClass.show(gs), sym.name(gs).show(gs));
         }
