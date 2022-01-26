@@ -72,8 +72,6 @@ public:
         TombStone,
     };
 
-    bool cached = false;         // If 'true', file is completely cached in kvstore.
-    bool hasParseErrors = false; // some reasonable invariants don't hold for invalid files
     // Epoch is _only_ used in LSP mode. Do not depend on it elsewhere.
     // TODO(jvilk): Delurk epoch usage and use something like pointer equality to check if a file has changed.
     const uint32_t epoch;
@@ -92,6 +90,15 @@ public:
     bool isRBI() const;
     bool isStdlib() const;
     bool isPackage() const;
+
+    // flag accessors
+    bool isPackagedTest() const;
+
+    bool hasParseErrors() const;
+    void setHasParseErrors(bool value);
+
+    bool cached() const;
+    void setCached(bool value);
 
     File(std::string &&path_, std::string &&source_, Type sourceType, uint32_t epoch = 0);
     File(File &&other) = delete;
@@ -112,6 +119,19 @@ public:
     static std::string censorFilePathForSnapshotTests(std::string_view orig);
 
 private:
+    struct Flags {
+        // if 'true' file is completely cached in kvstore
+        bool cached : 1;
+        // some reasonable invariants don't hold for invalid files
+        bool hasParseErrors : 1;
+        // only relevant in --stripe-packages mode: is the file a `.test.rb` file?
+        bool isPackagedTest : 1;
+
+        Flags() : cached(false), hasParseErrors(false), isPackagedTest(false) {};
+    };
+
+    Flags flags;
+
     const std::string path_;
     const std::string source_;
     mutable std::shared_ptr<std::vector<int>> lineBreaks_;
