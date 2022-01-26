@@ -185,7 +185,7 @@ void File::setFileHash(unique_ptr<const FileHash> hash) {
     // If hash_ != nullptr, then the contents of hash_ and hash should be identical.
     // Avoid needlessly invalidating references to *hash_.
     if (hash_ == nullptr) {
-        cached = false;
+        flags.cached = false;
         hash_ = move(hash);
     }
 }
@@ -296,6 +296,26 @@ string File::censorFilePathForSnapshotTests(string_view orig) {
     } else {
         return string(result);
     }
+}
+
+bool File::isPackagedTest() const {
+    return flags.isPackagedTest;
+}
+
+bool File::hasParseErrors() const {
+    return flags.hasParseErrors;
+}
+
+void File::setHasParseErrors(bool value) {
+    flags.hasParseErrors = value;
+}
+
+bool File::cached() const {
+    return flags.cached;
+}
+
+void File::setCached(bool value) {
+    flags.cached = value;
 }
 
 } // namespace sorbet::core
