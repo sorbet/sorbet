@@ -29,7 +29,7 @@ public:
             return;
         }
         uint32_t maxOff = file.data(gs).source().size();
-        file.data(gs).hasParseErrors = true;
+        file.data(gs).setHasParseErrors(true);
         for (auto &diag : diagnostics) {
             switch (diag.level()) {
                 case ruby_parser::dlevel::NOTE:
