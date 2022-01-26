@@ -229,7 +229,6 @@ struct Options {
     bool lspDocumentSymbolEnabled = false;
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
-    bool lspNewTriggerCharactersEnabled = false;
 
     // Experimental feature `requires_ancestor`
     bool requiresAncestorEnabled = false;
