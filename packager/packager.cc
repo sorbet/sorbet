@@ -12,6 +12,7 @@
 #include "core/AutocorrectSuggestion.h"
 #include "core/Unfreeze.h"
 #include "core/errors/packager.h"
+#include "core/packages/Layer.h"
 #include "core/packages/PackageInfo.h"
 #include <sys/stat.h>
 
@@ -207,6 +208,10 @@ public:
         return loc;
     }
 
+    core::packages::Layer layer() const {
+        return layer_;
+    }
+
     // The possible path prefixes associated with files in the package, including path separator at end.
     vector<std::string> packagePathPrefixes;
     PackageName name;
@@ -220,6 +225,8 @@ public:
 
     // loc for the package definition. Used for error messages.
     core::Loc loc;
+    // Layer info for the package.
+    sorbet::core::packages::Layer layer_;
     // The names of each package imported by this package.
     vector<Import> importedPackageNames;
     // List of exported items that form the body of this package's public API.

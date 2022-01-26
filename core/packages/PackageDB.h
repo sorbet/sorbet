@@ -49,12 +49,17 @@ public:
 
     const std::string_view errorHint() const;
 
+    const std::string_view getLayerName(uint8_t layerRank) const;
+    const uint8_t getLayerRank(std::string layerName) const;
+    const std::size_t getLayerCount() const;
+
     // NB: Do not call in hot path, this is SLOW due to string comparison!
     static bool isTestFile(const core::GlobalState &gs, const core::File &file);
 
 private:
     std::vector<NameRef> secondaryTestPackageNamespaceRefs_;
     std::vector<std::string> extraPackageFilesDirectoryPrefixes_;
+    std::vector<std::string> layerNames_;
     std::string errorHint_;
 
     UnorderedMap<core::NameRef, std::unique_ptr<packages::PackageInfo>> packages_;
