@@ -127,7 +127,7 @@ private:
         // only relevant in --stripe-packages mode: is the file a `.test.rb` file?
         bool isPackagedTest : 1;
 
-        Flags() : cached(false), hasParseErrors(false), isPackagedTest(false) {};
+        Flags(std::string_view path);
     };
 
     Flags flags;
