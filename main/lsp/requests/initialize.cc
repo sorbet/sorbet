@@ -4,6 +4,9 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
+
+const std::vector<std::string> InitializeTask::TRIGGER_CHARACTERS = {".", ":"};
+
 InitializeTask::InitializeTask(LSPConfiguration &config, MessageId id, std::unique_ptr<InitializeParams> params)
     : LSPRequestTask(config, id, LSPMethod::Initialize), mutableConfig(config), params(move(params)) {}
 
@@ -44,11 +47,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     serverCap->renameProvider = make_unique<RenameOptions>(true);
 
     auto completionProvider = make_unique<CompletionOptions>();
-    if (opts.lspNewTriggerCharactersEnabled) {
-        completionProvider->triggerCharacters = {".", ":", " "};
-    } else {
-        completionProvider->triggerCharacters = {"."};
-    }
+    completionProvider->triggerCharacters = TRIGGER_CHARACTERS;
     serverCap->completionProvider = move(completionProvider);
 
     response->result = make_unique<InitializeResult>(move(serverCap));

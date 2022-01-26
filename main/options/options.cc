@@ -323,8 +323,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Enable experimental LSP feature: Document Highlight");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
-    options.add_options("advanced")("enable-experimental-lsp-completion-trigger-characters",
-                                    "Enable experimental LSP feature: extra trigger characters");
     options.add_options("advanced")("enable-experimental-requires-ancestor",
                                     "Enable experimental `requires_ancestor` annotation");
 
@@ -722,8 +720,6 @@ void readOptions(Options &opts,
         opts.lspDocumentHighlightEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
-        opts.lspNewTriggerCharactersEnabled =
-            opts.lspAllBetaFeaturesEnabled || raw["enable-experimental-lsp-completion-trigger-characters"].as<bool>();
         opts.lspDocumentFormatRubyfmtEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>();
 
