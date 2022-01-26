@@ -466,6 +466,9 @@ void GlobalState::initEmpty() {
         enterMethod(*this, Symbols::PackageSpecSingleton(), Names::restrict_to_service()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_restrict_to_service());
 
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::layer()).arg(Names::arg0()).build();
+    ENFORCE(method == Symbols::PackageSpec_layer());
+
     klass = synthesizeClass(core::Names::Constants::Encoding());
     ENFORCE(klass == Symbols::Encoding());
 
@@ -1980,6 +1983,7 @@ const packages::PackageDB &GlobalState::packageDB() const {
 
 void GlobalState::setPackagerOptions(const std::vector<std::string> &secondaryTestPackageNamespaces,
                                      const std::vector<std::string> &extraPackageFilesDirectoryPrefixes,
+                                     const std::vector<std::string> &layerNames,
                                      std::string errorHint) {
     ENFORCE(packageDB_.secondaryTestPackageNamespaceRefs_.size() == 0);
     ENFORCE(!packageDB_.frozen);
@@ -1989,6 +1993,7 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &secondaryTe
     }
 
     packageDB_.extraPackageFilesDirectoryPrefixes_ = extraPackageFilesDirectoryPrefixes;
+    packageDB_.layerNames_ = layerNames;
     packageDB_.errorHint_ = errorHint;
 }
 
