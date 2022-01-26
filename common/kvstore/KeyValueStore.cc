@@ -330,7 +330,7 @@ unique_ptr<KeyValueStore> OwnedKeyValueStore::bestEffortCommit(spdlog::logger &l
     if (ownedKvstore == nullptr) {
         return nullptr;
     }
-    Timer timeit(logger, "kvstore.bestEffortCommit");
+    Timer timeit("kvstore.bestEffortCommit");
     ownedKvstore->commit();
     return move(ownedKvstore->kvstore);
 }

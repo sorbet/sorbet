@@ -13,7 +13,7 @@ WorkerPool::~WorkerPool() {
 }
 
 WorkerPoolImpl::WorkerPoolImpl(int size, spd::logger &logger) : _size(size), logger(logger) {
-    logger.debug("Creating {} worker threads", _size);
+    logger.trace("Creating {} worker threads", _size);
     if (sorbet::emscripten_build) {
         ENFORCE(size == 0);
         this->_size = 0;
@@ -36,20 +36,20 @@ WorkerPoolImpl::WorkerPoolImpl(int size, spd::logger &logger) : _size(size), log
                         Task_ task;
                         setCurrentThreadName(threadIdleName);
                         ptr->wait_dequeue(task);
-                        logger.debug("Worker got task");
+                        logger.trace("Worker got task");
                         repeat = task();
                     }
                 },
                 pinToCore));
         }
     }
-    logger.debug("Worker threads created");
+    logger.trace("Worker threads created");
 }
 
 WorkerPoolImpl::~WorkerPoolImpl() {
     auto &logger = this->logger;
     multiplexJob_([&logger]() {
-        logger.debug("Killing worker thread");
+        logger.trace("Killing worker thread");
         return false;
     });
     // join will be called when destructing joinable;
@@ -69,7 +69,7 @@ void WorkerPoolImpl::multiplexJob(string_view taskName, WorkerPool::Task t) {
 }
 
 void WorkerPoolImpl::multiplexJob_(WorkerPoolImpl::Task_ t) {
-    logger.debug("Multiplexing job");
+    logger.trace("Multiplexing job");
     for (int i = 0; i < _size; i++) {
         const bool enqueued = threadQueues[i]->enqueue(t);
         ENFORCE(enqueued, "Failed to enqueue (did we surpass MAX_SUBQUEUE_SIZE items enqueued?)");

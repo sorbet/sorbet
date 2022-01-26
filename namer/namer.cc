@@ -1849,7 +1849,7 @@ private:
 
 vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                        WorkerPool &workers) {
-    Timer timeit(gs.tracer(), "naming.findSymbols");
+    Timer timeit("naming.findSymbols");
     auto resultq = make_shared<BlockingBoundedQueue<vector<SymbolFinderResult>>>(trees.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
     vector<SymbolFinderResult> allFoundDefinitions;
@@ -1859,13 +1859,13 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
     }
 
     workers.multiplexJob("findSymbols", [&gs, fileq, resultq]() {
-        Timer timeit(gs.tracer(), "naming.findSymbolsWorker");
+        Timer timeit("naming.findSymbolsWorker");
         SymbolFinder finder;
         vector<SymbolFinderResult> output;
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
-                Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", string(job.file.data(gs).path())}});
+                Timer timeit("naming.findSymbolsOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::ShallowMap::apply(ctx, finder, std::move(job.tree));
                 SymbolFinderResult jobOutput{move(job), finder.getAndClearFoundDefinitions()};
@@ -1897,7 +1897,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
 
 ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions,
                                           WorkerPool &workers) {
-    Timer timeit(gs.tracer(), "naming.defineSymbols");
+    Timer timeit("naming.defineSymbols");
     vector<ast::ParsedFile> output;
     output.reserve(allFoundDefinitions.size());
     const auto &epochManager = *gs.epochManager;
@@ -1921,7 +1921,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
 
 vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                        WorkerPool &workers) {
-    Timer timeit(gs.tracer(), "naming.symbolizeTrees");
+    Timer timeit("naming.symbolizeTrees");
     auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(trees.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
     for (auto &tree : trees) {
@@ -1929,13 +1929,13 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
     }
 
     workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq]() {
-        Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
+        Timer timeit("naming.symbolizeTreesWorker");
         TreeSymbolizer inserter;
         vector<ast::ParsedFile> output;
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
-                Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(job.file.data(gs).path())}});
+                Timer timeit("naming.symbolizeTreesOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::ShallowMap::apply(ctx, inserter, std::move(job.tree));
                 output.emplace_back(move(job));

@@ -90,7 +90,7 @@ CFG::CFG() {
 }
 
 CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
-    Timer timeit(ctx.state.tracer(), "findAllReadsAndWrites");
+    Timer timeit("findAllReadsAndWrites");
     CFG::ReadsAndWrites target(maxBasicBlockId, numLocalVariables());
 
     for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
@@ -145,7 +145,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
     vector<pair<int, int>> usageCounts(this->numLocalVariables());
 
     {
-        Timer timeit(ctx.state.tracer(), "privates1");
+        Timer timeit("privates1");
 
         for (auto blockId = 0; blockId < maxBasicBlockId; blockId++) {
             UIntSet blockReadsAndWrites = target.reads[blockId];
@@ -159,7 +159,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
         }
     }
     {
-        Timer timeit(ctx.state.tracer(), "privates2");
+        Timer timeit("privates2");
         auto local = 0;
         vector<UIntSet> writesToRemove(maxBasicBlockId, UIntSet(numLocalVariables()));
         for (const auto &usages : usageCounts) {

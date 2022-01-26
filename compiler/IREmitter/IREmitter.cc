@@ -919,7 +919,7 @@ void emitDirectWrapper(CompilerState &cs, const ast::MethodDef &md, const IREmit
 }
 
 void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) {
-    Timer timer(cs.gs.tracer(), "IREmitter::run");
+    Timer timer("IREmitter::run");
     cfg::CFG::UnfreezeCFGLocalVariables unfreezeVars(cfg);
 
     llvm::Function *func;

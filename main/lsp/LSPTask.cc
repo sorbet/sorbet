@@ -246,7 +246,7 @@ bool LSPRequestTask::cancel(const MessageId &id) {
 
 LSPQueryResult LSPTask::queryByLoc(LSPTypecheckerDelegate &typechecker, string_view uri, const Position &pos,
                                    const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
-    Timer timeit(config.logger, "setupLSPQueryByLoc");
+    Timer timeit("setupLSPQueryByLoc");
     const core::GlobalState &gs = typechecker.state();
     auto fref = config.uri2FileRef(gs, uri);
     if (!fref.exists()) {
@@ -268,13 +268,13 @@ LSPQueryResult LSPTask::queryByLoc(LSPTypecheckerDelegate &typechecker, string_v
 
 LSPQueryResult LSPTask::queryBySymbolInFiles(LSPTypecheckerDelegate &typechecker, core::SymbolRef sym,
                                              vector<core::FileRef> frefs) const {
-    Timer timeit(config.logger, "setupLSPQueryBySymbolInFiles");
+    Timer timeit("setupLSPQueryBySymbolInFiles");
     ENFORCE(sym.exists());
     return typechecker.query(core::lsp::Query::createSymbolQuery(sym), frefs);
 }
 
 LSPQueryResult LSPTask::queryBySymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef sym) const {
-    Timer timeit(config.logger, "setupLSPQueryBySymbol");
+    Timer timeit("setupLSPQueryBySymbol");
     ENFORCE(sym.exists());
     vector<core::FileRef> frefs;
     const core::GlobalState &gs = typechecker.state();
@@ -611,7 +611,7 @@ void LSPQueuePreemptionTask::run(LSPTypecheckerDelegate &tc) {
             taskQueue.pendingTasks.pop_front();
 
             {
-                Timer timeit(config.logger, "LSPTask::index");
+                Timer timeit("LSPTask::index");
                 timeit.setTag("method", task->methodString());
                 // Index while holding lock to prevent races with processing thread.
                 task->index(indexer);
@@ -622,7 +622,7 @@ void LSPQueuePreemptionTask::run(LSPTypecheckerDelegate &tc) {
         if (task->finalPhase() == Phase::INDEX) {
             continue;
         }
-        Timer timeit(config.logger, "LSPTask::run");
+        Timer timeit("LSPTask::run");
         timeit.setTag("method", task->methodString());
         task->run(tc);
     }

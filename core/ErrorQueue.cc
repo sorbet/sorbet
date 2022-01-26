@@ -14,7 +14,7 @@ ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, shared_pt
 void ErrorQueue::flushAllErrors(const GlobalState &gs) {
     checkOwned();
 
-    Timer timeit(tracer, "ErrorQueue::flushAllErrors");
+    Timer timeit("ErrorQueue::flushAllErrors");
     auto collectedErrors = drainAll();
 
     for (auto &it : collectedErrors) {
@@ -26,7 +26,7 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     checkOwned();
 
     filesFlushedCount.fetch_add(1);
-    Timer timeit(tracer, "ErrorQueue::flushErrorsForFile");
+    Timer timeit("ErrorQueue::flushErrorsForFile");
 
     core::ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {

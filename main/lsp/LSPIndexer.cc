@@ -78,7 +78,7 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) 
 bool LSPIndexer::canTakeFastPathInternal(
     const vector<shared_ptr<core::File>> &changedFiles,
     const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
-    Timer timeit(config->logger, "fast_path_decision");
+    Timer timeit("fast_path_decision");
     auto &logger = *config->logger;
     logger.debug("Trying to see if fast path is available after {} file changes", changedFiles.size());
     if (config->disableFastPath) {
@@ -177,12 +177,12 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
                                                           make_shared<core::NullFlusher>());
 
     vector<ast::ParsedFile> indexed;
-    Timer timeit(config->logger, "initial_index");
+    Timer timeit("initial_index");
     ShowOperation op(*config, ShowOperation::Kind::Indexing);
     vector<core::FileRef> inputFiles;
     unique_ptr<const OwnedKeyValueStore> ownedKvstore = cache::ownIfUnchanged(*initialGS, move(kvstore));
     {
-        Timer timeit(config->logger, "reIndexFromFileSystem");
+        Timer timeit("reIndexFromFileSystem");
         inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
         indexed.resize(initialGS->filesUsed());
 
@@ -212,7 +212,7 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
 }
 
 LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {
-    Timer timeit(config->logger, "LSPIndexer::commitEdit");
+    Timer timeit("LSPIndexer::commitEdit");
     LSPFileUpdates update;
     update.epoch = edit.epoch;
     update.editCount = edit.mergeCount + 1;

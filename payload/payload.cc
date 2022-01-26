@@ -18,7 +18,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
     if (kvstore) {
         auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
         if (maybeGsBytes.data != nullptr) {
-            Timer timeit(gs->tracer(), "read_global_state.kvstore");
+            Timer timeit("read_global_state.kvstore");
             core::serialize::Serializer::loadGlobalState(*gs, maybeGsBytes.data);
             for (unsigned int i = 1; i < gs->filesUsed(); i++) {
                 core::FileRef fref(i);
@@ -36,10 +36,10 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
 
     const uint8_t *const nameTablePayload = getNameTablePayload;
     if (nameTablePayload == nullptr) {
-        Timer timeit(gs->tracer(), "read_global_state.source");
+        Timer timeit("read_global_state.source");
         sorbet::rbi::populateRBIsInto(gs);
     } else {
-        Timer timeit(gs->tracer(), "read_global_state.binary");
+        Timer timeit("read_global_state.binary");
         core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);
     }
     ENFORCE(gs->utf8NamesUsed() < core::GlobalState::PAYLOAD_MAX_UTF8_NAME_COUNT,
@@ -98,7 +98,7 @@ bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &
         // Verify that no other GlobalState was written to kvstore between when we read GlobalState and wrote it
         // into the databaase.
         if (kvstoreUnchangedSinceGsCreation(gs, maybeGsBytes.data)) {
-            Timer timeit(gs.tracer(), "write_global_state.kvstore");
+            Timer timeit("write_global_state.kvstore");
             // Generate a new UUID, since this GS has changed since it was read.
             gs.kvstoreUuid = Random::uniformU4();
             kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(gs));

@@ -39,18 +39,18 @@ void WatchmanProcess::start() {
         // Note 2: `empty_on_fresh_instance` prevents Watchman from sending entire contents of folder if this
         // subscription starts the daemon / causes the daemon to watch this folder for the first time.
         string subscribeCommand = fmt::format(
-            "[\"subscribe\", \"{}\", \"{}\", {{\n"
-            "  \"expression\": [\"allof\", "
-            "    [\"type\", \"f\"],\n"
-            "    [\"anyof\", {}],\n"
+            "[\"subscribe\", \"{}\", \"{}\", {{"
+            "\"expression\": [\"allof\", "
+            "[\"type\", \"f\"], "
+            "[\"anyof\", {}], "
             // Exclude rsync tmpfiles
-            "    [\"not\", [\"match\", \"**/.~tmp~/**\", \"wholename\", {{\"includedotfiles\": true}}]]\n"
-            "  ],\n"
-            "  \"defer_vcs\": false,\n"
-            "  \"fields\": [\"name\"],\n"
-            "  \"empty_on_fresh_instance\": true\n"
-            "}}]\n",
-            workSpace, subscriptionName, fmt::map_join(extensions, ",", [](const std::string &ext) -> string {
+            "[\"not\", [\"match\", \"**/.~tmp~/**\", \"wholename\", {{\"includedotfiles\": true}}]]"
+            "], "
+            "\"defer_vcs\": false, "
+            "\"fields\": [\"name\"], "
+            "\"empty_on_fresh_instance\": true"
+            "}}]",
+            workSpace, subscriptionName, fmt::map_join(extensions, ", ", [](const std::string &ext) -> string {
                 return fmt::format("[\"suffix\", \"{}\"]", ext);
             }));
         p.send(subscribeCommand.c_str(), subscribeCommand.size());

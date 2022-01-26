@@ -30,7 +30,7 @@ bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock
 }
 
 void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) {
-    Timer timeit(config->logger, "LSPLoop::sendCountersToStatsd");
+    Timer timeit("LSPLoop::sendCountersToStatsd");
     ENFORCE(this_thread::get_id() == mainThreadId, "sendCounterToStatsd can only be called from the main LSP thread.");
     const auto &opts = config->opts;
     // Record process and version stats. Do this BEFORE clearing the thread counters!
