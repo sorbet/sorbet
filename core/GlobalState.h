@@ -160,7 +160,8 @@ public:
 
     const packages::PackageDB &packageDB() const;
     void setPackagerOptions(const std::vector<std::string> &secondaryTestPackageNamespaces,
-                            const std::vector<std::string> &extraPackageFilesDirectoryPrefixes, std::string errorHint);
+                            const std::vector<std::string> &extraPackageFilesDirectoryPrefixes,
+                            const std::vector<std::string> &layerNames, std::string errorHint);
     packages::UnfreezePackages unfreezePackages();
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName);
