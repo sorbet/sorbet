@@ -1,0 +1,8 @@
+another-bad-name/__package.rb:4: Argument to `layer` is `another_bad_name` but must be a valid layer name (good_layer_name) https://srb.help/3717
+     4 |  layer 'another_bad_name'
+                ^^^^^^^^^^^^^^^^^^
+
+bad-layer-name/__package.rb:4: Argument to `layer` is `bad_layer_name` but must be a valid layer name (good_layer_name) https://srb.help/3717
+     4 |  layer 'bad_layer_name'
+                ^^^^^^^^^^^^^^^^
+Errors: 2

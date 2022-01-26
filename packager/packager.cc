@@ -509,6 +509,40 @@ ast::ExpressionPtr prependPackageScope(const core::GlobalState &gs, ast::Express
     return scope;
 }
 
+uint8_t verifyLayer(core::MutableContext ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
+    auto target = ast::cast_tree<ast::Literal>(expr);
+    const auto &packageDB = ctx.state.packageDB();
+    if ((target == nullptr && packageDB.getLayerCount() > 0) || !target->isString(ctx.state)) {
+        if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidLayer)) {
+            string layers;
+            layers.append(packageDB.getLayerName(0));
+            for (int i = 1; i < packageDB.getLayerCount(); i++) {
+                layers.append(", ");
+                layers.append(packageDB.getLayerName(i));
+            }
+            e.setHeader("Argument to `{}` must be a valid layer name ({})", fun.show(ctx), layers);
+        }
+        return 0;
+    } 
+    
+    string layerName = target->asString(ctx.state).toString(ctx.state);
+    uint8_t layerRank = packageDB.getLayerRank(layerName);
+    if (layerRank == 255) {
+        if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidLayer)) {
+            string layers;
+            layers.append(packageDB.getLayerName(0));
+            for (int i = 1; i < packageDB.getLayerCount(); i++) {
+                layers.append(", ");
+                layers.append(packageDB.getLayerName(i));
+            }
+            e.setHeader("Argument to `{}` is `{}` but must be a valid layer name ({})", fun.show(ctx), layerName, layers);
+        }
+        return 0;
+    }
+
+    return layerRank;
+}
+
 ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
     auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (target == nullptr) {
@@ -979,6 +1013,10 @@ struct PackageInfoFinder {
                 arg = prependInternalPackageName(ctx, move(send.getPosArg(0)));
             }
         }
+        if (ctx.state.packageDB().getLayerCount() && send.fun == core::Names::layer() && send.numPosArgs() == 1) {
+            auto layerRank = verifyLayer(ctx, core::Names::layer(), send.getPosArg(0));
+            info->layer_ = core::packages::Layer(layerRank);
+        }
         if (send.fun == core::Names::export_for_test() && send.numPosArgs() == 1) {
             // null indicates an invalid export.
             if (auto target = verifyConstant(ctx, core::Names::export_for_test(), send.getPosArg(0))) {
@@ -1333,6 +1371,15 @@ public:
                                    "Previous package import found here");
                 }
 
+                continue;
+            }
+
+            if (package.layer() < importedPackage.layer()) {
+                if (auto e = ctx.beginError(imported.loc, core::errors::Packager::ImportLayeringViolation)) {
+                    e.setHeader("Layering violation: package `{}` with layer `{}` imports package `{}` which has layer `{}`", 
+                    package.name.toString(ctx), package.layer().show(ctx), 
+                    imported.toString(ctx), importedPackage.layer().show(ctx));
+                }
                 continue;
             }
 
