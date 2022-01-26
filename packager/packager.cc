@@ -259,13 +259,11 @@ public:
     vector<MissingExportMatch> findMissingExports(core::Context ctx, core::SymbolRef scope, core::NameRef name) const {
         vector<MissingExportMatch> res;
         if (core::packages::PackageDB::isTestFile(ctx, ctx.file.data(ctx))) {
-            // fmt::print("FIND MISSING TEST {} {} {}\n", scope.show(ctx), name.show(ctx), this->mangledName().show(ctx));
-
+            // In a test file first look to see in our own package to see if it's missing an `export_for_test`
             core::SymbolRef sym = findPrivateSymbol(ctx, scope, /* test */ false);
             if (sym.exists() && sym.isClassOrModule()) {
                 res.emplace_back(MissingExportMatch{sym, this->mangledName()});
                 return res;
-                // fmt::print("FOUND {}\n", sym.show(ctx));
             }
         }
         for (auto &imported : importedPackageNames) {
@@ -397,14 +395,7 @@ public:
 private:
     // Recursively walk up a symbol's scope from the package's internal module.
     core::SymbolRef findPrivateSymbol(const core::GlobalState &gs, core::SymbolRef sym, bool test) const {
-        // fmt::print("Find {}\n", sym.exists() ? sym.show(gs) : "<NONE>");
-        // TODO CLEANUP
-        if (!sym.exists() || sym == core::Symbols::root()) {
-            // fmt::print("A\n");
-            return internalModule(gs, test);
-            // return core::SymbolRef();
-        } else if (sym.name(gs).isPackagerName(gs)) {
-            // fmt::print("B\n");
+        if (!sym.exists() || sym == core::Symbols::root() || sym.name(gs).isPackagerName(gs)) {
             return internalModule(gs, test);
         }
         auto owner = findPrivateSymbol(gs, sym.owner(gs), test);
