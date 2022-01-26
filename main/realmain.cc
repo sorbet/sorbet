@@ -383,7 +383,11 @@ int realmain(int argc, char *argv[]) {
         // TODO(jvilk): Reduce size once LSP logging is less chunderous.
         auto fileSink =
             make_shared<spdlog::sinks::rotating_file_sink_mt>(opts.debugLogFile, ((size_t)1) * 1024 * 1024 * 1024, 3);
-        fileSink->set_level(spd::level::debug);
+        if (opts.logLevel >= 2) {
+            fileSink->set_level(spd::level::trace);
+        } else {
+            fileSink->set_level(spd::level::debug);
+        }
         { // replace console & fatal loggers
             vector<spd::sink_ptr> sinks{stderrColorSink, fileSink};
             auto combinedLogger = make_shared<spd::logger>("consoleAndFile", begin(sinks), end(sinks));
