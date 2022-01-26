@@ -4,6 +4,7 @@
 #include "core/AutocorrectSuggestion.h"
 #include "core/GlobalState.h"
 #include "core/Loc.h"
+#include "core/packages/Layer.h"
 
 using namespace std;
 
@@ -34,6 +35,11 @@ public:
     Loc definitionLoc() const {
         notImplemented();
         return Loc::none();
+    }
+
+    sorbet::core::packages::Layer layer() const {
+        notImplemented();
+        return Layer(-1);
     }
 
     std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
@@ -168,6 +174,10 @@ const std::string_view PackageDB::errorHint() const {
     return errorHint_;
 }
 
+const std::vector<NameRef> &PackageDB::layerNames() const {
+    return layerNames_;
+}
+
 PackageDB PackageDB::deepCopy() const {
     ENFORCE(frozen);
     PackageDB result;
@@ -177,6 +187,7 @@ PackageDB PackageDB::deepCopy() const {
     }
     result.secondaryTestPackageNamespaceRefs_ = this->secondaryTestPackageNamespaceRefs_;
     result.extraPackageFilesDirectoryPrefixes_ = this->extraPackageFilesDirectoryPrefixes_;
+    result.layerNames_ = this->layerNames_;
     result.packagesByPathPrefix = this->packagesByPathPrefix;
     result.mangledNames = this->mangledNames;
     result.errorHint_ = this->errorHint_;

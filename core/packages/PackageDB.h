@@ -49,9 +49,12 @@ public:
 
     const std::string_view errorHint() const;
 
+    const std::vector<NameRef> &layerNames() const;
+
 private:
     std::vector<NameRef> secondaryTestPackageNamespaceRefs_;
     std::vector<std::string> extraPackageFilesDirectoryPrefixes_;
+    std::vector<NameRef> layerNames_;
     std::string errorHint_;
 
     UnorderedMap<core::NameRef, std::unique_ptr<packages::PackageInfo>> packages_;
@@ -62,6 +65,7 @@ private:
     std::thread::id writerThread;
 
     friend class UnfreezePackages;
+    friend class Layer;
 };
 
 } // namespace sorbet::core::packages

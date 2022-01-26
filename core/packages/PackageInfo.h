@@ -3,6 +3,7 @@
 
 #include "core/NameRef.h"
 #include "core/SymbolRef.h"
+#include "core/packages/Layer.h"
 #include <optional>
 #include <vector>
 
@@ -22,6 +23,7 @@ public:
     virtual const std::vector<std::string> &pathPrefixes() const = 0;
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
     virtual core::Loc definitionLoc() const = 0;
+    virtual sorbet::core::packages::Layer layer() const = 0;
     virtual bool exists() const final;
 
     // autocorrects
