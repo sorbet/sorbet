@@ -167,7 +167,7 @@ CompiledLevel File::fileCompiledSigil(string_view source) {
 }
 
 bool isTestPath(string_view path) {
-    return absl::EndsWith(path, ".test.rb") || absl::StartsWith(path, "./test/") || absl::StrContains(path, "/test/");
+    return absl::EndsWith(path, ".test.rb") || absl::StrContains(path, "/test/");
 }
 
 File::Flags::Flags(string_view path) : cached(false), hasParseErrors(false), isPackagedTest(isTestPath(path)) {}
