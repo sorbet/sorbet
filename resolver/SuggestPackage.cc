@@ -61,6 +61,11 @@ public:
     }
 
     void addMissingExportSuggestions(core::ErrorBuilder &e, core::packages::PackageInfo::MissingExportMatch match) {
+        if (match.srcPkg == currentPkg.mangledName() &&
+            core::packages::PackageDB::isTestFile(ctx, ctx.file.data(ctx))) {
+            addMissingExportForTestSuggestion(e, match);
+            return;
+        }
         vector<core::ErrorLine> lines;
         auto &srcPkg = db().getPackageInfo(match.srcPkg);
         lines.emplace_back(core::ErrorLine::from(srcPkg.definitionLoc(), "Do you need to `{} {}` in package `{}`?",
@@ -69,9 +74,27 @@ public:
         lines.emplace_back(
             core::ErrorLine::from(match.symbol.loc(ctx), "Constant `{}` is defined here:", match.symbol.show(ctx)));
         e.addErrorSection(core::ErrorSection(lines));
+
         maybeAddErrorHint(e);
 
-        if (auto autocorrect = srcPkg.addExport(ctx, match.symbol, false)) {
+        if (auto autocorrect = srcPkg.addExport(ctx, match.symbol, /* isPrivateTestExport */ false)) {
+            e.addAutocorrect(std::move(*autocorrect));
+        }
+    }
+
+    void addMissingExportForTestSuggestion(core::ErrorBuilder &e,
+                                           core::packages::PackageInfo::MissingExportMatch match) {
+        vector<core::ErrorLine> lines;
+        auto &srcPkg = db().getPackageInfo(match.srcPkg);
+        lines.emplace_back(core::ErrorLine::from(
+            srcPkg.definitionLoc(),
+            "To expose this name to a package's own tests it must be exported. Do you need to `{} {}` in this package?",
+            core::Names::export_for_test().show(ctx), match.symbol.show(ctx)));
+        lines.emplace_back(
+            core::ErrorLine::from(match.symbol.loc(ctx), "Constant `{}` is defined here:", match.symbol.show(ctx)));
+        e.addErrorSection(core::ErrorSection(lines));
+
+        if (auto autocorrect = srcPkg.addExport(ctx, match.symbol, /* isPrivateTestExport */ true)) {
             e.addAutocorrect(std::move(*autocorrect));
         }
         maybeAddErrorHint(e);
