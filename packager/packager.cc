@@ -1115,6 +1115,7 @@ struct PackageInfoFinder {
             case core::Names::export_().rawId():
             case core::Names::export_for_test().rawId():
             case core::Names::restrict_to_service().rawId():
+            case core::Names::layer().rawId():
                 return true;
             default:
                 return false;
