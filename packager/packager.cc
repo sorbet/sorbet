@@ -1728,8 +1728,8 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
 
         // Wrap the file in a package module (ending with _Package_Private) to put it by default in the package's
         // private namespace (private-by-default paradigm).
-        parsedFile = wrapFileInPackageModule(ctx, move(parsedFile), pkgImpl.privateMangledName, pkgImpl,
-                                             file.isPackagedTest());
+        parsedFile =
+            wrapFileInPackageModule(ctx, move(parsedFile), pkgImpl.privateMangledName, pkgImpl, file.isPackagedTest());
     } else {
         // Don't transform, but raise an error on the first line.
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {

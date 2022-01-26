@@ -61,8 +61,7 @@ public:
     }
 
     void addMissingExportSuggestions(core::ErrorBuilder &e, core::packages::PackageInfo::MissingExportMatch match) {
-        if (match.srcPkg == currentPkg.mangledName() &&
-            ctx.file.data(ctx).isPackagedTest()) {
+        if (match.srcPkg == currentPkg.mangledName() && ctx.file.data(ctx).isPackagedTest()) {
             addMissingExportForTestSuggestion(e, match);
             return;
         }
