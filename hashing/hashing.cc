@@ -68,7 +68,7 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_
 
             core::GlobalStateHash invalid;
             invalid.hierarchyHash = core::GlobalStateHash::HASH_STATE_INVALID;
-            return make_unique<core::FileHash>(move(*lgs->hash()), move(usageHash));
+            return make_unique<core::FileHash>(move(invalid), move(usageHash));
         }
     }
 
