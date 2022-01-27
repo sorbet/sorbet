@@ -1,24 +1,72 @@
-5c5
-< sig { params(stuff: T::Array).void }
----
-> sig { params(stuff: T::Array[T.untyped]).void }
-8c8
-< sig { params(stuff: T::Hash).void }
----
-> sig { params(stuff: T::Hash[T.untyped, T.untyped]).void }
-11c11
-< sig { params(stuff: T::Set).void }
----
-> sig { params(stuff: T::Set[T.untyped]).void }
-14c14
-< sig { params(stuff: T::Range).void }
----
-> sig { params(stuff: T::Range[T.untyped]).void }
-17c17
-< sig { params(stuff: T::Enumerable).void }
----
-> sig { params(stuff: T::Enumerable[T.untyped]).void }
-20c20
-< sig { params(stuff: T::Enumerator).void }
----
-> sig { params(stuff: T::Enumerator[T.untyped]).void }
+autocorrect-bare-stdlib-generics.rb:5: Malformed type declaration. Generic class without type arguments `T::Array` https://srb.help/5045
+     5 |sig { params(stuff: T::Array).void }
+                            ^^^^^^^^
+  Autocorrect: Done
+    autocorrect-bare-stdlib-generics.rb:5: Replaced with `T::Array[T.untyped]`
+     5 |sig { params(stuff: T::Array).void }
+                            ^^^^^^^^
+
+autocorrect-bare-stdlib-generics.rb:8: Malformed type declaration. Generic class without type arguments `T::Hash` https://srb.help/5045
+     8 |sig { params(stuff: T::Hash).void }
+                            ^^^^^^^
+  Autocorrect: Done
+    autocorrect-bare-stdlib-generics.rb:8: Replaced with `T::Hash[T.untyped, T.untyped]`
+     8 |sig { params(stuff: T::Hash).void }
+                            ^^^^^^^
+
+autocorrect-bare-stdlib-generics.rb:11: Malformed type declaration. Generic class without type arguments `T::Set` https://srb.help/5045
+    11 |sig { params(stuff: T::Set).void }
+                            ^^^^^^
+  Autocorrect: Done
+    autocorrect-bare-stdlib-generics.rb:11: Replaced with `T::Set[T.untyped]`
+    11 |sig { params(stuff: T::Set).void }
+                            ^^^^^^
+
+autocorrect-bare-stdlib-generics.rb:14: Malformed type declaration. Generic class without type arguments `T::Range` https://srb.help/5045
+    14 |sig { params(stuff: T::Range).void }
+                            ^^^^^^^^
+  Autocorrect: Done
+    autocorrect-bare-stdlib-generics.rb:14: Replaced with `T::Range[T.untyped]`
+    14 |sig { params(stuff: T::Range).void }
+                            ^^^^^^^^
+
+autocorrect-bare-stdlib-generics.rb:17: Malformed type declaration. Generic class without type arguments `T::Enumerable` https://srb.help/5045
+    17 |sig { params(stuff: T::Enumerable).void }
+                            ^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-bare-stdlib-generics.rb:17: Replaced with `T::Enumerable[T.untyped]`
+    17 |sig { params(stuff: T::Enumerable).void }
+                            ^^^^^^^^^^^^^
+
+autocorrect-bare-stdlib-generics.rb:20: Malformed type declaration. Generic class without type arguments `T::Enumerator` https://srb.help/5045
+    20 |sig { params(stuff: T::Enumerator).void }
+                            ^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-bare-stdlib-generics.rb:20: Replaced with `T::Enumerator[T.untyped]`
+    20 |sig { params(stuff: T::Enumerator).void }
+                            ^^^^^^^^^^^^^
+Errors: 6
+
+--------------------------------------------------------------------------
+
+# typed: strict
+
+extend T::Sig
+
+sig { params(stuff: T::Array[T.untyped]).void }
+def bare_array(stuff); end
+
+sig { params(stuff: T::Hash[T.untyped, T.untyped]).void }
+def bare_hash(stuff); end
+
+sig { params(stuff: T::Set[T.untyped]).void }
+def bare_set(stuff); end
+
+sig { params(stuff: T::Range[T.untyped]).void }
+def bare_range(stuff); end
+
+sig { params(stuff: T::Enumerable[T.untyped]).void }
+def bare_enumerable(stuff); end
+
+sig { params(stuff: T::Enumerator[T.untyped]).void }
+def bare_enumerator(stuff); end
