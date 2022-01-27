@@ -1,4 +1,33 @@
-Begin {
-  stmts = [
-  ]
+Class {
+  name = Const {
+    scope = NULL
+    name = <C <U A>>
+  }
+  superclass = NULL
+  body = Begin {
+    stmts = [
+      DefMethod {
+        name = <U foo>
+        args = NULL
+        body = If {
+          condition = True {
+          }
+          then_ = NULL
+          else_ = NULL
+        }
+      }
+      Class {
+        name = Const {
+          scope = NULL
+          name = <C <U B>>
+        }
+        superclass = NULL
+        body = DefMethod {
+          name = <U bar>
+          args = NULL
+          body = NULL
+        }
+      }
+    ]
+  }
 }
