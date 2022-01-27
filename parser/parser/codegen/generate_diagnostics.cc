@@ -44,20 +44,15 @@ tuple<string, string> MESSAGES[] = {
     {"ArgumentGvar", "formal argument cannot be a global variable"},
     {"ArgumentCvar", "formal argument cannot be a class variable"},
     {"DuplicateArgument", "duplicate argument name {}"},
-    {"EmptySymbol", "empty symbol literal"},
     {"EndlessSetter", "setter method cannot be defined in an endless method definition"},
-    {"OddHash", "odd number of entries for a hash"},
     {"SingletonLiteral", "cannot define a singleton method for a literal"},
     {"DynamicConst", "dynamic constant assignment"},
     {"ConstWithoutName", "expected constant name following \\\"::\\\""},
-    {"ConstReassignment", "constant re-assignment"},
     {"ModuleInDef", "module definition in method body"},
     {"ClassInDef", "class definition in method body"},
     {"UnexpectedPercentStr", "{}: unknown type of percent-literal"},
     {"BlockAndBlockarg", "both block argument and literal block are passed"},
-    {"MasgnAsCondition", "multiple assignment in conditional context"},
     {"BlockGivenToYield", "block given to yield"},
-    {"InvalidRegexp", "{}"},
     {"InvalidReturn", "invalid return in class/module body"},
     {"CSendInLHSOfMAsgn", "&. inside multiple assignment destination"},
     {"OrdinaryParamDefined", "can't use numbered params when ordinary params were also defined"},
@@ -72,16 +67,6 @@ tuple<string, string> MESSAGES[] = {
 
     // Parser warnings
     {"UselessElse", "else without rescue is useless"},
-
-    // Parser errors that are not Ruby errors
-    {"InvalidEncoding", "literal contains escape sequences incompatible with UTF-8"},
-
-    // Rewriter diagnostics
-    {"InvalidAction", "cannot {}"},
-    {"Clobbered", "clobbered by: {}"},
-
-    // TypedRuby diagnostics
-    {"NotStaticCpathInGeninst", "type name in generic instance must be a static constant path"},
 };
 
 void generateDclass() {
