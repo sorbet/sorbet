@@ -621,19 +621,21 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") 
 
     // Introduce slow path in unrelated file; will cancel.
     sendAsync(*openFile("bar.rb", "# typed: true\n"
-                                  "class Bar\n"
+                                  "lass\n"
                                   "  extend T::Sig\n"
                                   "  sig{returns(Integer)}\n"
                                   "  def hi\n"
                                   "    10\n"
                                   "  end\n"
+                                  "end\n"
                                   ""));
 
     // Send fence to clear out the pipeline.
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
                       {
                           {"foo.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
-                          {"bar.rb", 6, "unexpected"},
+                          {"bar.rb", 1, "does not exist"},
+                          {"bar.rb", 7, "unexpected"},
                       });
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
                          /* assertUniqueStartTimes */ false);
