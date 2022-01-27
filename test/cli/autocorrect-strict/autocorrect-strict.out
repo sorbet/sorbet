@@ -1,0 +1,50 @@
+autocorrect-strict.rb:8: Unsupported literal in type syntax https://srb.help/5003
+     8 |  sig {returns(nil)}
+                       ^^^
+  Autocorrect: Done
+    autocorrect-strict.rb:8: Replaced with `NilClass`
+     8 |  sig {returns(nil)}
+                       ^^^
+
+autocorrect-strict.rb:13: Use `T::Array[...]`, not `Array[...]` to declare a typed `Array` https://srb.help/5026
+    13 |  sig {returns(Array[Integer])}
+                       ^^^^^^^^^^^^^^
+  Note:
+    `Array[...]` will raise at runtime because this generic was defined in the standard library
+  Autocorrect: Done
+    autocorrect-strict.rb:13: Replaced with `T::Array`
+    13 |  sig {returns(Array[Integer])}
+                       ^^^^^
+
+autocorrect-strict.rb:3: `T.must` called on `Integer(3)`, which is never `nil` https://srb.help/7015
+     3 |x = T.must(3)
+            ^^^^^^^^^
+  Got `Integer(3)` originating from:
+    autocorrect-strict.rb:3:
+     3 |x = T.must(3)
+                   ^
+  Autocorrect: Done
+    autocorrect-strict.rb:3: Replaced with `3`
+     3 |x = T.must(3)
+            ^^^^^^^^^
+Errors: 3
+
+--------------------------------------------------------------------------
+
+# typed: strict
+
+x = 3
+
+class C
+  extend T::Sig
+
+  sig {returns(NilClass)}
+  def ret_nil
+    nil
+  end
+
+  sig {returns(T::Array[Integer])}
+  def ret_arr
+    []
+  end
+end
