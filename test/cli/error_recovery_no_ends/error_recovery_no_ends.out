@@ -1,0 +1,26 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def foo<<todo method>>(x, &<blk>)
+      if x
+        <self>.puts("hello")
+      else
+        <emptyTree>
+      end
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+end
+-------------------------------------
+test/cli/error_recovery_no_ends/error_recovery_no_ends.rb:6: unexpected token "end of file" https://srb.help/2001
+     6 |      puts 'hello'
+     7 |
+
+test/cli/error_recovery_no_ends/error_recovery_no_ends.rb:6: unexpected token "end of file" https://srb.help/2001
+     6 |      puts 'hello'
+     7 |
+
+test/cli/error_recovery_no_ends/error_recovery_no_ends.rb:6: unexpected token "end of file" https://srb.help/2001
+     6 |      puts 'hello'
+     7 |
+Errors: 3
