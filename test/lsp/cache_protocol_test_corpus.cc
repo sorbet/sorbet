@@ -97,7 +97,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
 
         core::File file{string(filePath), string(fileContents), core::File::Type::Normal};
         auto tree = core::serialize::Serializer::loadTree(*gs, file, contents.data);
-        CHECK(file.cached);
+        CHECK(file.cached());
         CHECK_NE(file.getFileHash(), nullptr);
         CHECK_NE(tree, nullptr);
 
@@ -149,7 +149,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
 
         core::File file{string(filePath), string(updatedFileContents), core::File::Type::Normal};
         auto cachedFile = core::serialize::Serializer::loadTree(*gs, file, updatedFileData.data);
-        CHECK(file.cached);
+        CHECK(file.cached());
         CHECK_NE(file.getFileHash(), nullptr);
         CHECK_NE(cachedFile, nullptr);
     }
@@ -199,7 +199,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
 
         core::File file{string(filePath), string(fileContents), core::File::Type::Normal};
         auto tree = core::serialize::Serializer::loadTree(*gs, file, contents.data);
-        CHECK(file.cached);
+        CHECK(file.cached());
         CHECK_NE(file.getFileHash(), nullptr);
         CHECK_NE(tree, nullptr);
     }

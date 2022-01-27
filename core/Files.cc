@@ -166,8 +166,14 @@ CompiledLevel File::fileCompiledSigil(string_view source) {
     }
 }
 
+bool isTestPath(string_view path) {
+    return absl::EndsWith(path, ".test.rb") || absl::StrContains(path, "/test/");
+}
+
+File::Flags::Flags(string_view path) : cached(false), hasParseErrors(false), isPackagedTest(isTestPath(path)) {}
+
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
-    : epoch(epoch), sourceType(sourceType), path_(move(path_)), source_(move(source_)),
+    : epoch(epoch), sourceType(sourceType), flags(File::Flags(path_)), path_(move(path_)), source_(move(source_)),
       originalSigil(fileStrictSigil(this->source_)), strictLevel(originalSigil),
       compiledLevel(fileCompiledSigil(this->source_)) {}
 
@@ -185,7 +191,7 @@ void File::setFileHash(unique_ptr<const FileHash> hash) {
     // If hash_ != nullptr, then the contents of hash_ and hash should be identical.
     // Avoid needlessly invalidating references to *hash_.
     if (hash_ == nullptr) {
-        cached = false;
+        flags.cached = false;
         hash_ = move(hash);
     }
 }
@@ -296,6 +302,26 @@ string File::censorFilePathForSnapshotTests(string_view orig) {
     } else {
         return string(result);
     }
+}
+
+bool File::isPackagedTest() const {
+    return flags.isPackagedTest;
+}
+
+bool File::hasParseErrors() const {
+    return flags.hasParseErrors;
+}
+
+void File::setHasParseErrors(bool value) {
+    flags.hasParseErrors = value;
+}
+
+bool File::cached() const {
+    return flags.cached;
+}
+
+void File::setCached(bool value) {
+    flags.cached = value;
 }
 
 } // namespace sorbet::core

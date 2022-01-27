@@ -974,7 +974,7 @@ ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File 
     }
     file.setFileHash(SerializerImpl::unpickleFileHash(p));
     // cached must be set _after_ setting the file hash, as setFileHash unsets the cached flag
-    file.cached = true;
+    file.setCached(true);
     return SerializerImpl::unpickleExpr(p, gs);
 }
 

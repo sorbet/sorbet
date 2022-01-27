@@ -61,8 +61,7 @@ public:
     }
 
     void addMissingExportSuggestions(core::ErrorBuilder &e, core::packages::PackageInfo::MissingExportMatch match) {
-        if (match.srcPkg == currentPkg.mangledName() &&
-            core::packages::PackageDB::isTestFile(ctx, ctx.file.data(ctx))) {
+        if (match.srcPkg == currentPkg.mangledName() && ctx.file.data(ctx).isPackagedTest()) {
             addMissingExportForTestSuggestion(e, match);
             return;
         }
@@ -103,7 +102,7 @@ public:
     void addMissingImportSuggestions(core::ErrorBuilder &e, PackageMatch &match) {
         vector<core::ErrorLine> lines;
         auto &otherPkg = db().getPackageInfo(match.mangledName);
-        bool isTestFile = core::packages::PackageDB::isTestFile(ctx, ctx.file.data(ctx));
+        bool isTestFile = ctx.file.data(ctx).isPackagedTest();
         auto importName = isTestFile ? core::Names::test_import() : core::Names::import();
 
         lines.emplace_back(core::ErrorLine::from(otherPkg.definitionLoc(), "Do you need to `{}` package `{}`?",

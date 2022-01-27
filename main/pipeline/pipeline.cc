@@ -442,7 +442,7 @@ struct IndexSubstitutionJob {
     IndexSubstitutionJob(core::GlobalState &to, IndexResult res)
         : threadGs{std::move(res.gs)}, subst{}, trees{std::move(res.trees)} {
         to.mergeFileTable(*this->threadGs);
-        if (absl::c_any_of(this->trees, [this](auto &parsed) { return !parsed.file.data(*this->threadGs).cached; })) {
+        if (absl::c_any_of(this->trees, [this](auto &parsed) { return !parsed.file.data(*this->threadGs).cached(); })) {
             this->subst.emplace(*this->threadGs, to);
         }
     }
@@ -485,7 +485,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
                     if (job.subst.has_value()) {
                         for (auto &tree : job.trees) {
                             auto file = tree.file;
-                            if (!file.data(cgs).cached) {
+                            if (!file.data(cgs).cached()) {
                                 core::MutableContext ctx(cgs, core::Symbols::root(), file);
                                 tree.tree = ast::Substitute::run(ctx, *job.subst, move(tree.tree));
                             }
@@ -1161,7 +1161,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
                     }
 
                     auto &file = job->file.data(gs);
-                    if (!file.cached && !file.hasParseErrors) {
+                    if (!file.cached() && !file.hasParseErrors()) {
                         threadResult.emplace_back(fileKey(file), core::serialize::Serializer::storeTree(file, *job));
                         // Stream out compressed files so that writes happen in parallel with processing.
                         if (processedByThread > 100) {

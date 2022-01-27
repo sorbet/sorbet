@@ -258,7 +258,7 @@ public:
 
     vector<MissingExportMatch> findMissingExports(core::Context ctx, core::SymbolRef scope, core::NameRef name) const {
         vector<MissingExportMatch> res;
-        if (core::packages::PackageDB::isTestFile(ctx, ctx.file.data(ctx))) {
+        if (ctx.file.data(ctx).isPackagedTest()) {
             // In a test file first look to see in our own package to see if it's missing an `export_for_test`
             core::SymbolRef sym = findPrivateSymbol(ctx, scope, /* test */ false);
             if (sym.exists() && sym.isClassOrModule()) {
@@ -279,7 +279,7 @@ public:
                     res.emplace_back(MissingExportMatch{sym, imported.name.mangledName});
                 }
             }
-            if (core::packages::PackageDB::isTestFile(ctx, ctx.file.data(ctx))) {
+            if (ctx.file.data(ctx).isPackagedTest()) {
                 sym = PackageInfoImpl::from(info).findPrivateSymbol(ctx, scope, /* test */ true);
                 if (sym.exists() && sym.isClassOrModule()) {
                     sym = sym.asClassOrModuleRef().data(ctx)->findMember(ctx, name);
@@ -1728,8 +1728,8 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
 
         // Wrap the file in a package module (ending with _Package_Private) to put it by default in the package's
         // private namespace (private-by-default paradigm).
-        parsedFile = wrapFileInPackageModule(ctx, move(parsedFile), pkgImpl.privateMangledName, pkgImpl,
-                                             core::packages::PackageDB::isTestFile(ctx, file));
+        parsedFile =
+            wrapFileInPackageModule(ctx, move(parsedFile), pkgImpl.privateMangledName, pkgImpl, file.isPackagedTest());
     } else {
         // Don't transform, but raise an error on the first line.
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
