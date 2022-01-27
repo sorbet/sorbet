@@ -1,0 +1,33 @@
+autocorrect-remove-body.rb:7: Abstract methods must not contain any code in their body https://srb.help/5019
+     7 |  def foo; 3 end
+                   ^
+  Autocorrect: Done
+    autocorrect-remove-body.rb:7: Deleted
+     7 |  def foo; 3 end
+                   ^
+
+autocorrect-remove-body.rbi:3: RBI methods must not have code https://srb.help/3010
+     3 |  def foo; 3 end
+                   ^
+  Autocorrect: Done
+    autocorrect-remove-body.rbi:3: Deleted
+     3 |  def foo; 3 end
+                   ^
+Errors: 2
+
+--------------------------------------------------------------------------
+
+----- rb -----
+# typed: true
+class A
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+  sig {abstract.void}
+  def foo;  end
+end
+----- rbi -----
+# typed: true
+class C
+  def foo;  end
+end

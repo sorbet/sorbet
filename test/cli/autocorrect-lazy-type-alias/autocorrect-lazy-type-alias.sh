@@ -1,10 +1,23 @@
-tmp="$(mktemp).rb"
-pre="test/cli/autocorrect-lazy-type-alias/pre.rb"
-post="test/cli/autocorrect-lazy-type-alias/post.rb"
-cp "$pre" "$tmp"
-main/sorbet --silence-dev-message -a "$tmp"
-echo "BEGIN DIFF"
-diff "$post" "$tmp"
-echo "END DIFF"
+#!/usr/bin/env bash
 
-rm -f "$tmp"
+cwd="$(pwd)"
+infile="$cwd/test/cli/autocorrect-lazy-type-alias/autocorrect-lazy-type-alias.rb"
+
+tmp="$(mktemp -d)"
+
+cp "$infile" "$tmp"
+
+cd "$tmp" || exit 1
+if "$cwd/main/sorbet" --silence-dev-message -a autocorrect-lazy-type-alias.rb 2>&1; then
+  echo "Expected to fail!"
+  exit 1
+fi
+
+echo
+echo --------------------------------------------------------------------------
+echo
+
+# Also cat the file, to make that the autocorrect applied
+cat autocorrect-lazy-type-alias.rb
+
+rm autocorrect-lazy-type-alias.rb

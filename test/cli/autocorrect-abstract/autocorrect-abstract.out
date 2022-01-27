@@ -1,0 +1,17 @@
+autocorrect-abstract.rb:5: Classes can't be interfaces. Use `abstract!` instead of `interface!` https://srb.help/4013
+     5 |  interface!
+          ^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-abstract.rb:5: Replaced with `abstract!`
+     5 |  interface!
+          ^^^^^^^^^^
+Errors: 1
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+class BadInterface
+  extend T::Helpers
+  abstract!
+end

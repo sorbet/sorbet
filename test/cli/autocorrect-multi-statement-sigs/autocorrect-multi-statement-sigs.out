@@ -1,0 +1,35 @@
+autocorrect-multi-statement-sigs.rb:6: Malformed `sig`: Signature blocks must contain a single statement https://srb.help/5069
+     6 |  sig do
+     7 |    overridable
+     8 |    params(a: String)
+     9 |    returns(Integer)
+    10 |  end
+  Autocorrect: Done
+    autocorrect-multi-statement-sigs.rb:7: Replaced with `overridable.params(a: String).returns(Integer)`
+     7 |    overridable
+     8 |    params(a: String)
+     9 |    returns(Integer)
+
+autocorrect-multi-statement-sigs.rb:6: Malformed `sig`: No return type specified. Specify one with .returns() https://srb.help/5003
+     6 |  sig do
+     7 |    overridable
+     8 |    params(a: String)
+     9 |    returns(Integer)
+    10 |  end
+Errors: 2
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+class Test
+  extend T::Sig
+
+  sig do
+    overridable.params(a: String).returns(Integer)
+  end
+  def foo(a)
+    10
+  end
+
+end
