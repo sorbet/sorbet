@@ -336,7 +336,7 @@ public:
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
         if (auto *id = parser::cast_node<Ident>(node.get())) {
             auto name = id->name.shortName(gs_);
-            checkReservedForNumberedParameters(name, id->loc);
+            checkAssignmentToNumberedParameters(name, id->loc);
 
             driver_->lex.declare(name);
             return make_unique<LVarLhs>(id->loc, id->name);
@@ -352,8 +352,9 @@ public:
         } else if (auto *gv = parser::cast_node<GVar>(node.get())) {
             return make_unique<GVarLhs>(gv->loc, gv->name);
         } else if (auto *mv = parser::cast_node<MatchVar>(node.get())) {
-            checkReservedForNumberedParameters(mv->name.shortName(gs_), mv->loc);
-            return make_unique<MatchVar>(*mv);
+            auto name = mv->name.shortName(gs_);
+            checkAssignmentToNumberedParameters(name, mv->loc);
+            return node;
         } else if (parser::isa_node<Backref>(node.get()) || parser::isa_node<NthRef>(node.get())) {
             error(ruby_parser::dclass::BackrefAssignment, node->loc);
             return make_unique<Nil>(node->loc);
@@ -1783,6 +1784,22 @@ public:
                parser::isa_node<DString>(&node) || parser::isa_node<Symbol>(&node) ||
                parser::isa_node<DSymbol>(&node) || parser::isa_node<Regexp>(&node) || parser::isa_node<Array>(&node) ||
                parser::isa_node<Hash>(&node);
+    }
+
+    void checkAssignmentToNumberedParameters(std::string_view name, core::LocOffsets loc) {
+        if (driver_->lex.context.inDynamicBlock() && isNumberedParameterName(name) &&
+            driver_->numparam_stack.seen_numparams()) {
+            std::cout << "Assignment error" << std::endl;
+            core::Loc location = core::Loc(file_, loc);
+            if (auto e = gs_.beginError(location, core::errors::Parser::AssignmentToNumparamError)) {
+                e.setHeader("cannot assign to numbered parameter `{}`", name);
+                e.addErrorNote("Reserved numbered parameter names are not allowed starting with Ruby 3.0. Use `{}` to "
+                               "disable this check",
+                               "--suppress-error-code=2004");
+            }
+        } else {
+            checkReservedForNumberedParameters(name, loc);
+        }
     }
 
     void checkReservedForNumberedParameters(std::string_view name, core::LocOffsets loc) {
