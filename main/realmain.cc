@@ -706,9 +706,10 @@ int realmain(int argc, char *argv[]) {
             }
             auto packageFiles = opts.fs->listFilesInDir(opts.rawInputDirNames[0], opts.allowedExtensions, true,
                                                         opts.absoluteIgnorePatterns, relativeIgnorePatterns);
-            packageFiles.erase(remove_if(packageFiles.begin(), packageFiles.end(), [](const auto &packageFile) {
-                return !absl::EndsWith(packageFile, "__package.rb");
-            }));
+            packageFiles.erase(
+                remove_if(packageFiles.begin(), packageFiles.end(),
+                          [](const auto &packageFile) { return !absl::EndsWith(packageFile, "__package.rb"); }),
+                packageFiles.end());
 
             if (packageFiles.empty()) {
                 logger->error("No package files found!");
