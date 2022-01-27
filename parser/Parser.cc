@@ -25,11 +25,11 @@ class ErrorToError {
 
     static void maybeAddAutocorrect(core::ErrorBuilder &e, core::Loc loc, ruby_parser::dclass errorClass) {
         switch (errorClass) {
-        case ruby_parser::dclass::IfInsteadOfItForTest:
-            e.replaceWith("Replace with `it`", loc, "it");
-            break;
-        default:
-            break;
+            case ruby_parser::dclass::IfInsteadOfItForTest:
+                e.replaceWith("Replace with `it`", loc, "it");
+                break;
+            default:
+                break;
         }
     }
 
