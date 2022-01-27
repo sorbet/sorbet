@@ -1,2 +1,84 @@
-BEGIN DIFF
-END DIFF
+autocorrect-lazy-type-alias.rb:1: No block given to `T.type_alias` https://srb.help/5043
+     1 |MyAlias = T.type_alias(T.any(Integer, String))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-lazy-type-alias.rb:1: Replaced with `T.type_alias {T.any(Integer, String)}`
+     1 |MyAlias = T.type_alias(T.any(Integer, String))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-lazy-type-alias.rb:3: No block given to `T.type_alias` https://srb.help/5043
+     3 |HashWithCurly = T.type_alias({foo: String, bar: Integer})
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-lazy-type-alias.rb:3: Replaced with `T.type_alias {{foo: String, bar: Integer}}`
+     3 |HashWithCurly = T.type_alias({foo: String, bar: Integer})
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-lazy-type-alias.rb:5: No block given to `T.type_alias` https://srb.help/5043
+     5 |BareHash = T.type_alias(foo: String, bar: Integer)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-lazy-type-alias.rb:5: Replaced with `T.type_alias {{foo: String, bar: Integer}}`
+     5 |BareHash = T.type_alias(foo: String, bar: Integer)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-lazy-type-alias.rb:9: No block given to `T.type_alias` https://srb.help/5043
+     9 |    Multiline = T.type_alias(T.any(
+    10 |      String,
+    11 |      Integer
+    12 |    ))
+  Autocorrect: Done
+    autocorrect-lazy-type-alias.rb:9: Replaced with `T.type_alias do
+      T.any(
+        String,
+        Integer
+      )
+    end`
+     9 |    Multiline = T.type_alias(T.any(
+    10 |      String,
+    11 |      Integer
+    12 |    ))
+
+autocorrect-lazy-type-alias.rb:14: No block given to `T.type_alias` https://srb.help/5043
+    14 |    MyType = T.type_alias(
+    15 |      foo: String,
+    16 |      bar: T.nilable(Integer),
+    17 |    )
+  Autocorrect: Done
+    autocorrect-lazy-type-alias.rb:14: Replaced with `T.type_alias do
+      {
+        foo: String,
+        bar: T.nilable(Integer)
+      }
+    end`
+    14 |    MyType = T.type_alias(
+    15 |      foo: String,
+    16 |      bar: T.nilable(Integer),
+    17 |    )
+Errors: 5
+
+--------------------------------------------------------------------------
+
+MyAlias = T.type_alias {T.any(Integer, String)}
+
+HashWithCurly = T.type_alias {{foo: String, bar: Integer}}
+
+BareHash = T.type_alias {{foo: String, bar: Integer}}
+
+module Bar
+  class Foo
+    Multiline = T.type_alias do
+      T.any(
+        String,
+        Integer
+      )
+    end
+
+    MyType = T.type_alias do
+      {
+        foo: String,
+        bar: T.nilable(Integer)
+      }
+    end
+  end
+end
