@@ -564,17 +564,31 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") 
     assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
 
     // bar has no error
-    assertDiagnostics(
-        send(*openFile("bar.rb",
-                       "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(Integer)}\ndef hi\n10\nend\nend\n")),
-        {});
+    assertDiagnostics(send(*openFile("bar.rb", "# typed: true\n"
+                                               "class Bar\n"
+                                               "  extend T::Sig\n"
+                                               "  sig{returns(Integer)}\n"
+                                               "  def hi\n"
+                                               "    10\n"
+                                               "  end\n"
+                                               "end\n"
+                                               "")),
+                      {});
 
     // Slow path: New file, no error
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     sendAsync(*openFile("foo.rb", ""));
     sendAsync(*changeFile("foo.rb",
-                          "# typed: true\nclass Foo\nextend T::Sig\nsig {returns(Integer)}\ndef foo\n10\nend\nend\n", 2,
-                          true, 1));
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  extend T::Sig\n"
+                          "  sig {returns(Integer)}\n"
+                          "  def foo\n"
+                          "    10\n"
+                          "  end\n"
+                          "end\n"
+                          "",
+                          2, true, 1));
 
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
@@ -586,8 +600,17 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") 
     }
 
     // Introduce error fast path: Will preempt.
-    sendAsync(*changeFile(
-        "foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nsig {returns(Integer)}\ndef foo\n'hi'\nend\nend\n", 2));
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  extend T::Sig\n"
+                          "  sig {returns(Integer)}\n"
+                          "  def foo\n"
+                          "    'hi'\n"
+                          "  end\n"
+                          "end\n"
+                          "",
+                          2));
 
     // Wait for typechecking to begin to avoid races.
     {
@@ -597,12 +620,21 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") 
     }
 
     // Introduce slow path in unrelated file; will cancel.
-    sendAsync(*openFile("bar.rb", "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(Integer)}\ndef hi\n10\nend"));
+    sendAsync(*openFile("bar.rb", "# typed: true\n"
+                                  "class Bar\n"
+                                  "  extend T::Sig\n"
+                                  "  sig{returns(Integer)}\n"
+                                  "  def hi\n"
+                                  "    10\n"
+                                  "  end\n"
+                                  ""));
 
     // Send fence to clear out the pipeline.
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
-                      {{"foo.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
-                       {"bar.rb", 6, "unexpected"}});
+                      {
+                          {"foo.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
+                          {"bar.rb", 6, "unexpected"},
+                      });
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
                          /* assertUniqueStartTimes */ false);
 }
