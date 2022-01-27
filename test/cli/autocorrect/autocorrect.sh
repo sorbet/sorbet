@@ -1,6 +1,23 @@
-tmp="$(mktemp)"
-file="test/cli/autocorrect/autocorrect.rb"
-cp "$file" "$tmp"
-main/sorbet --silence-dev-message -a "$tmp"
-diff "$file" "$tmp"
-rm "$tmp"
+#!/usr/bin/env bash
+
+cwd="$(pwd)"
+infile="$cwd/test/cli/autocorrect/autocorrect.rb"
+
+tmp="$(mktemp -d)"
+
+cp "$infile" "$tmp"
+
+cd "$tmp" || exit 1
+if "$cwd/main/sorbet" --silence-dev-message -a autocorrect.rb 2>&1; then
+  echo "Expected to fail!"
+  exit 1
+fi
+
+echo
+echo --------------------------------------------------------------------------
+echo
+
+# Also cat the file, to make that the autocorrect applied
+cat autocorrect.rb
+
+rm autocorrect.rb
