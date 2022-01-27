@@ -36,6 +36,7 @@ mkdir -p _out_
   --test_tag_filters=-compiler \
   --build_tag_filters=-compiler \
   --build_tests_only \
+  --test_verbose_timeout_warnings \
   @gems//... \
   //gems/sorbet/test/snapshot \
   //gems/sorbet/test/hidden-method-finder \
