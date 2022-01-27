@@ -83,12 +83,14 @@ const users = [
   },
 ];
 
+const BASE_URL = '/';
+
 const siteConfig = {
   title: 'Sorbet',
   tagline: 'A static type checker for Ruby',
   url: 'https://sorbet.org',
   cname: 'sorbet.org',
-  baseUrl: '/',
+  baseUrl: BASE_URL,
   editUrl: 'https://github.com/sorbet/sorbet/edit/master/website/docs/',
 
   // Used for publishing and more
@@ -150,7 +152,12 @@ const siteConfig = {
   },
 
   // Add custom scripts here that would be placed in <script> tags.
-  scripts: [],
+  scripts: [
+    {
+      src: `${BASE_URL}js/stripe-internal-csat.js`,
+      async: true,
+    },
+  ],
 
   // Put Table of Contents on the right side of the page
   onPageNav: 'separate',
