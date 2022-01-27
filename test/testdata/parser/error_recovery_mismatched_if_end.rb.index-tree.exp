@@ -1,0 +1,26 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def foo<<todo method>>(x, &<blk>)
+      begin
+        if x
+          <self>.puts("hello")
+        else
+          <emptyTree>
+        end
+        ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def bar<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+end

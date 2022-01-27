@@ -2878,6 +2878,10 @@ token_t lexer::unadvance(token_t tok_to_push, token_type type, size_t start, siz
   return new_tok;
 }
 
+void lexer::unadvance(token_t tok_to_push) {
+  token_queue.push_front(tok_to_push);
+}
+
 void lexer::extend_static() {
   static_env.emplace();
 }

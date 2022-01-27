@@ -178,6 +178,8 @@ public:
     // lookahead token) back onto the front of the token_queue, and then allocates a new token and
     // returns it.
     token_t unadvance(token_t tok_to_push, token_type type, size_t start, size_t end, const std::string &str);
+    // Like the above, but don't create a new token.
+    void unadvance(token_t tok_to_push);
 
     std::string_view tok_view_from_offsets(size_t start, size_t end) const;
 

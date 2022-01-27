@@ -350,6 +350,7 @@ using namespace std::string_literals;
   f_norm_arg
   fcall
   fname
+  kend_or_eof
   kwrest_mark
   op
   operation
@@ -1697,7 +1698,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                       $<stack>$ = driver.copy_stack();
                       driver.lex.cmdarg.clear();
                     }
-                    bodystmt kEND
+                    bodystmt kend_or_eof
                     {
                       driver.replace_stack($<stack>2);
                       $$ = driver.build.beginKeyword(self, $1, $3, $4);
@@ -1814,14 +1815,14 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                         lambda->end);
                       DIAGCHECK();
                     }
-                | kIF expr_value then compstmt if_tail kEND
+                | kIF expr_value then compstmt if_tail kend_or_eof
                     {
                       auto &else_ = $5;
                       $$ = driver.build.condition(self, $1, $2, $3, $4,
                         else_ ? else_->tok : nullptr,
                         else_ ? else_->nod : nullptr, $6);
                     }
-                | kIF strings kDO compstmt if_tail kEND
+                | kIF strings kDO compstmt if_tail kend_or_eof
                     {
                       // TODO(jez) If we had proper Sorbet diagnostics here, we could have a "did you mean"
                       // error line that suggested changing `if` to `it`
@@ -1831,22 +1832,22 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                         else_ ? else_->tok : nullptr,
                         else_ ? else_->nod : nullptr, $6);
                     }
-                | kUNLESS expr_value then compstmt opt_else kEND
+                | kUNLESS expr_value then compstmt opt_else kend_or_eof
                     {
                       auto &else_ = $5;
                       $$ = driver.build.condition(self, $1, $2, $3,
                         else_ ? else_->nod : nullptr,
 			                  else_ ? else_->tok : nullptr, $4, $6);
                     }
-                | kWHILE expr_value_do compstmt kEND
+                | kWHILE expr_value_do compstmt kend_or_eof
                     {
                       $$ = driver.build.loop_while(self, $1, $2->nod, $2->tok, $3, $4);
                     }
-                | kUNTIL expr_value_do compstmt kEND
+                | kUNTIL expr_value_do compstmt kend_or_eof
                     {
                       $$ = driver.build.loopUntil(self, $1, $2->nod, $2->tok, $3, $4);
                     }
-                | kCASE expr_value opt_terms case_body kEND
+                | kCASE expr_value opt_terms case_body kend_or_eof
                     {
                       auto &case_body = $4;
                       auto &else_ = case_body->els;
@@ -1855,7 +1856,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                         else_ ? else_->tok : nullptr,
 			                  else_ ? else_->nod : nullptr, $5);
                     }
-                | kCASE            opt_terms case_body kEND
+                | kCASE            opt_terms case_body kend_or_eof
                     {
                       auto &case_body = $3;
                       auto &else_ = case_body->els;
@@ -1864,7 +1865,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                         else_ ? else_->tok : nullptr,
 			                  else_ ? else_->nod : nullptr, $4);
                     }
-                 | kCASE expr_value opt_terms p_case_body kEND
+                 | kCASE expr_value opt_terms p_case_body kend_or_eof
                     {
                       auto &case_body = $4;
                       auto &else_ = case_body->els;
@@ -1873,7 +1874,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                         else_ ? else_->tok : nullptr,
 			                  else_ ? else_->nod : nullptr, $5);
                     }
-                | kFOR for_var kIN expr_value_do compstmt kEND
+                | kFOR for_var kIN expr_value_do compstmt kend_or_eof
                     {
                       $$ = driver.build.for_(self, $1, $2, $3, $4->nod, $4->tok, $5, $6);
                     }
@@ -1884,7 +1885,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                       driver.lex.cond.push(false);
                       driver.lex.context.push(Context::State::CLASS);
                     }
-                    bodystmt kEND
+                    bodystmt kend_or_eof
                     {
                       if (!driver.lex.context.classDefintinionAllowed()) {
                         driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ClassInDef, $1);
@@ -1912,7 +1913,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                       driver.lex.cond.push(false);
                       driver.lex.context.push(Context::State::SCLASS);
                     }
-                    bodystmt kEND
+                    bodystmt kend_or_eof
                     {
                       $$ = driver.build.def_sclass(self, $1, $2, $3, $6, $7);
 
@@ -1927,7 +1928,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                       driver.lex.cmdarg.push(false);
                       driver.lex.context.push(Context::State::MODULE);
                     }
-                    bodystmt kEND
+                    bodystmt kend_or_eof
                     {
                       if (!driver.lex.context.moduleDefintinionAllowed()) {
                         driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ModuleInDef, $1);
@@ -1943,7 +1944,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                       driver.lex.unextend();
                       driver.lex.context.pop();
                     }
-                | defn_head f_arglist bodystmt kEND
+                | defn_head f_arglist bodystmt kend_or_eof
                     {
                       $$ = driver.build.defMethod(self, $1->begin, $1->end, $2, $3, $4);
 
@@ -1953,7 +1954,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                       driver.lex.context.pop();
                       driver.current_arg_stack.pop();
                     }
-                | defs_head f_arglist bodystmt kEND
+                | defs_head f_arglist bodystmt kend_or_eof
                     {
                       $$ = driver.build.defSingleton(self, $1, $2, $3, $4);
                       DIAGCHECK();
@@ -1982,6 +1983,14 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                     }
 
    primary_value: primary
+
+     kend_or_eof: kEND
+                | eof
+                    {
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@1.begin, @1.end), "\"end of file\"");
+                      driver.lex.unadvance(yyla.value.token);
+                      yyclearin;
+                    }
 
         k_return: kRETURN
                     {
@@ -2335,7 +2344,7 @@ opt_block_args_tail:
                     {
                       driver.lex.context.push(Context::State::LAMBDA);
                     }
-                  bodystmt kEND
+                  bodystmt kend_or_eof
                     {
                       $$ = driver.alloc.delimited_block($1, nullptr, $3, $4);
                       driver.lex.context.pop();
@@ -2345,7 +2354,7 @@ opt_block_args_tail:
                     {
                       driver.lex.context.push(Context::State::BLOCK);
                     }
-                  do_body kEND
+                  do_body kend_or_eof
                     {
                       auto &delimited_block = $3;
                       delimited_block->begin = $1;
@@ -2478,7 +2487,7 @@ opt_block_args_tail:
                     {
                       driver.lex.context.push(Context::State::BLOCK);
                     }
-                  do_body kEND
+                  do_body kend_or_eof
                     {
                       auto &block = $3;
                       block->begin = $1;
