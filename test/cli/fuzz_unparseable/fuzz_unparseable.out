@@ -1,0 +1,16 @@
+test/cli/fuzz_unparseable/fuzz_unparseable.rb:2: unexpected token tIDENTIFIER https://srb.help/2001
+     2 |r *[1]g#typed:true
+              ^
+
+test/cli/fuzz_unparseable/fuzz_unparseable.rb:3: unexpected token "end of file" https://srb.help/2001
+     3 |m do
+     4 |
+
+test/cli/fuzz_unparseable/fuzz_unparseable.rb:2: Method `g` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     2 |r *[1]g#typed:true
+              ^
+
+test/cli/fuzz_unparseable/fuzz_unparseable.rb:3: Method `m` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     3 |m do
+        ^
+Errors: 4
