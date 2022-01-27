@@ -1224,7 +1224,7 @@ unique_ptr<PackageInfoImpl> getPackageInfo(core::MutableContext ctx, ast::Parsed
     if (finder.info) {
         finder.info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
         const string_view shortName = finder.info->name.mangledName.shortName(ctx.state);
-        const string_view dirNameFromShortName = shortName.substr(0, shortName.find(core::PACKAGE_SUFFIX));
+        const string_view dirNameFromShortName = shortName.substr(0, shortName.rfind(core::PACKAGE_SUFFIX));
 
         for (const string &prefix : extraPackageFilesDirectoryPrefixes) {
             string additionalDirPath = absl::StrCat(prefix, dirNameFromShortName, "/");
