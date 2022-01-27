@@ -840,38 +840,33 @@ module Opus::Types::Test
     end
 
     describe 'TypeAlias' do
-      # TODO nroman get rid of this helper after `T.type_alias` accepts a block.
-      def make_type_alias(&blk)
-        T::Private::Types::TypeAlias.new(blk)
-      end
-
       it 'delegates name' do
-        type = make_type_alias {T.any(Integer, String)}
+        type = T.type_alias {T.any(Integer, String)}
         assert_equal('T.any(Integer, String)', type.name)
       end
 
       it 'delegates equality' do
-        assert(T.any(Integer, String) == make_type_alias {T.any(Integer, String)})
-        assert(make_type_alias {T.any(Integer, String)} == T.any(Integer, String))
-        assert(make_type_alias {T.any(Integer, String)} == make_type_alias {T.any(Integer, String)})
+        assert(T.any(Integer, String) == T.type_alias {T.any(Integer, String)})
+        assert(T.type_alias {T.any(Integer, String)} == T.any(Integer, String))
+        assert(T.type_alias {T.any(Integer, String)} == T.type_alias {T.any(Integer, String)})
 
-        refute(make_type_alias {T.any(Integer, Float)} == make_type_alias {T.any(Integer, String)})
+        refute(T.type_alias {T.any(Integer, Float)} == T.type_alias {T.any(Integer, String)})
       end
 
       it 'passes a validation' do
-        type = make_type_alias {T.any(Integer, String)}
+        type = T.type_alias {T.any(Integer, String)}
         msg = check_error_message_for_obj(type, 1)
         assert_nil(msg)
       end
 
       it 'provides errors on failed validation' do
-        type = make_type_alias {T.any(Integer, String)}
+        type = T.type_alias {T.any(Integer, String)}
         msg = check_error_message_for_obj(type, true)
         assert_equal('Expected type T.any(Integer, String), got type TrueClass', msg)
       end
 
       it 'defers block evaluation' do
-        crash_type = make_type_alias {raise 'crash'}
+        crash_type = T.type_alias {raise 'crash'}
         assert_raises(RuntimeError) do
           check_error_message_for_obj(crash_type, 1)
         end
