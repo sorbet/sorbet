@@ -23,6 +23,16 @@ class ErrorToError {
         return min((uint32_t)(pos), maxOff);
     }
 
+    static void maybeAddAutocorrect(core::ErrorBuilder &e, core::Loc loc, ruby_parser::dclass errorClass) {
+        switch (errorClass) {
+        case ruby_parser::dclass::IfInsteadOfItForTest:
+            e.replaceWith("Replace with `it`", loc, "it");
+            break;
+        default:
+            break;
+        }
+    }
+
 public:
     static void run(core::GlobalState &gs, core::FileRef file, ruby_parser::diagnostics_t diagnostics) {
         if (diagnostics.empty()) {
@@ -44,6 +54,7 @@ public:
             if (auto e = gs.beginError(loc, core::errors::Parser::ParserError)) {
                 e.setHeader("{}",
                             fmt::vformat(dclassStrings[(int)diag.error_class()], fmt::make_format_args(diag.data())));
+                maybeAddAutocorrect(e, loc, diag.error_class());
             }
         }
     }
