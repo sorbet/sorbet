@@ -2642,7 +2642,7 @@ public:
         }
 
         // Put files into a consistent order for subsequent passes.
-        fast_sort(combinedFiles, [](auto &a, auto &b) -> bool { return a.file.id() < b.file.id(); });
+        fast_sort(combinedFiles, [](auto &a, auto &b) -> bool { return a.file < b.file; });
 
         for (auto &threadTodo : combinedTodoUntypedResultTypes) {
             for (auto sym : threadTodo) {
