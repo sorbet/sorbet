@@ -247,7 +247,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     fast_sort(subset);
     subset.resize(std::distance(subset.begin(), std::unique(subset.begin(), subset.end())));
 
-    config->logger->debug("Taking fast path");
+    config->logger->debug("Running fast path");
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
     for (auto &f : subset) {

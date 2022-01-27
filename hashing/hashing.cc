@@ -7,6 +7,7 @@
 #include "core/NameSubstitution.h"
 #include "core/Unfreeze.h"
 #include "main/pipeline/pipeline.h"
+#include "rapidjson/writer.h"
 
 using namespace std;
 namespace sorbet::hashing {
@@ -27,8 +28,50 @@ pair<ast::ParsedFile, core::UsageHash> rewriteAST(const core::GlobalState &origi
     return make_pair<ast::ParsedFile, core::UsageHash>(move(rewritten), subst.getAllNames());
 }
 
-unique_ptr<core::FileHash> computeFileHashForAST(unique_ptr<core::GlobalState> &lgs, core::UsageHash usageHash,
-                                                 ast::ParsedFile file) {
+bool isEmptyParseResult(const core::GlobalState &gs, const ast::ExpressionPtr &tree) {
+    if (ast::isa_tree<ast::EmptyTree>(tree)) {
+        return true;
+    }
+
+    auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
+    if (classDef == nullptr || classDef->symbol != core::Symbols::root() || classDef->rhs.empty()) {
+        return false;
+    }
+
+    auto *rhsLiteral = ast::cast_tree<ast::Literal>(classDef->rhs[0]);
+    return rhsLiteral != nullptr && rhsLiteral->isNil(gs);
+}
+
+unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_ptr<core::GlobalState> &lgs,
+                                                 core::UsageHash usageHash, ast::ParsedFile file) {
+    if (file.file.data(*lgs).hasParseErrors) {
+        if (isEmptyParseResult(*lgs, file.tree)) {
+            rapidjson::StringBuffer result;
+            rapidjson::Writer<rapidjson::StringBuffer> writer(result);
+
+            {
+                writer.StartObject();
+
+                writer.String("compute_file_hash_for_ast_empty");
+                writer.Bool(true);
+
+                writer.String("file_path");
+                writer.String(string(file.file.data(*lgs).path()));
+
+                writer.String("contents");
+                writer.String(string(file.file.data(*lgs).source()));
+
+                writer.EndObject();
+            }
+
+            logger.debug(result.GetString());
+
+            core::GlobalStateHash invalid;
+            invalid.hierarchyHash = core::GlobalStateHash::HASH_STATE_INVALID;
+            return make_unique<core::FileHash>(move(invalid), move(usageHash));
+        }
+    }
+
     vector<ast::ParsedFile> single;
     single.emplace_back(move(file));
 
@@ -65,7 +108,7 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
     core::LazyNameSubstitution subst(*lgs, *lgs);
     core::MutableContext ctx(*lgs, core::Symbols::root(), fref);
     ast.tree = ast::Substitute::run(ctx, subst, move(ast.tree));
-    return computeFileHashForAST(lgs, subst.getAllNames(), move(ast));
+    return computeFileHashForAST(logger, lgs, subst.getAllNames(), move(ast));
 }
 }; // namespace
 
@@ -161,7 +204,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
                     auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, ast);
 
                     threadResult.emplace_back(ast.file,
-                                              computeFileHashForAST(lgs, move(usageHash), move(rewrittenAST)));
+                                              computeFileHashForAST(logger, lgs, move(usageHash), move(rewrittenAST)));
                 }
             }
         }

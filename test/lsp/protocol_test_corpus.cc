@@ -633,4 +633,34 @@ TEST_CASE_FIXTURE(ProtocolTest, "RequestReportsEmptyResultsMetrics") {
     CHECK_EQ(counters6.getCategoryCounter("lsp.messages.run.errored", "textDocument.hover"), 0);
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "ReportsSyntaxErrors") {
+    assertDiagnostics(initializeLSP(), {});
+
+    // Create a new file.
+    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                               "class A\n"
+                                               "def foo; end\n"
+                                               "end\n"
+                                               "\n")),
+                      {});
+
+    // clear counters
+    getCounters();
+
+    assertDiagnostics(send(*changeFile("foo.rb",
+                                       "# typed: true\n"
+                                       "class A\n"
+                                       "def foo; en\n"
+                                       "end\n"
+                                       "\n",
+                                       2)),
+                      {
+                          {"foo.rb", 5, "unexpected token \"end of file\""},
+                      });
+
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "syntax_error"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "changed_definition"), 0);
+}
+
 } // namespace sorbet::test::lsp
