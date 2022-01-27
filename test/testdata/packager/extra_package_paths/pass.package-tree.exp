@@ -3,12 +3,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Project>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C Project>::<C Foo>)
 
-    <self>.import(<emptyTree>::<C Project>::<C Baz>)
+    <self>.import(<emptyTree>::<C Project>::<C Baz>::<C Package>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project><<C <todo sym>>> < ()
-      <emptyTree>::<C Baz> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package$1>::<C Project>::<C Baz>
+    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project>::<C Baz><<C <todo sym>>> < ()
+      <emptyTree>::<C Package> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package$1>::<C Project>::<C Baz>::<C Package>
     end
 
     module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project><<C <todo sym>>> < ()
@@ -17,8 +17,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project><<C <todo sym>>> < ()
-      <emptyTree>::<C Baz> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package$1>::<C Project>::<C Baz>
+    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project>::<C Baz><<C <todo sym>>> < ()
+      <emptyTree>::<C Package> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package$1>::<C Project>::<C Baz>::<C Package>
     end
 
     module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project><<C <todo sym>>> < ()
@@ -49,7 +49,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def bar2<<todo method>>(&<blk>)
-        <emptyTree>::<C Project>::<C Baz>::<C C>.c()
+        <emptyTree>::<C Project>::<C Baz>::<C Package>::<C C>.c()
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
@@ -62,43 +62,45 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/extra_package_paths/baz/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C Baz><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Private$1>::<C Project>::<C Baz>::<C C>)
+  class <emptyTree>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package_Private$1>::<C Project>::<C Baz>::<C Package>::<C C>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Baz_Package_Private$1>::<C Project>::<C Baz><<C <todo sym>>> < ()
-      <emptyTree>::<C C> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Private$1>::<C Project>::<C Baz>::<C C>
+    module <emptyTree>::<C Project_Baz_Package_Package_Private$1>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < ()
+      <emptyTree>::<C C> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package_Private$1>::<C Project>::<C Baz>::<C Package>::<C C>
     end
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Baz_Package$1>::<C Project>::<C Baz><<C <todo sym>>> < ()
-      <emptyTree>::<C C> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Private$1>::<C Project>::<C Baz>::<C C>
+    module <emptyTree>::<C Project_Baz_Package_Package$1>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < ()
+      <emptyTree>::<C C> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package_Private$1>::<C Project>::<C Baz>::<C Package>::<C C>
     end
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
-# -- test/testdata/packager/extra_package_paths/extra/Project_Baz/c.rb --
+# -- test/testdata/packager/extra_package_paths/extra/Project_Baz_Package/c.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Private$1><<C <todo sym>>> < ()
-    class <emptyTree>::<C Project>::<C Baz>::<C C><<C <todo sym>>> < (::<todo sym>)
-      ::Sorbet::Private::Static.sig(<self>) do ||
-        <self>.void()
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package_Private$1><<C <todo sym>>> < ()
+    module <emptyTree>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < ()
+      class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
+        ::Sorbet::Private::Static.sig(<self>) do ||
+          <self>.void()
+        end
+
+        def self.c<<todo method>>(&<blk>)
+          <emptyTree>
+        end
+
+        <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+        ::Sorbet::Private::Static.keep_self_def(<self>, :c, :normal)
       end
-
-      def self.c<<todo method>>(&<blk>)
-        <emptyTree>
-      end
-
-      <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-      ::Sorbet::Private::Static.keep_self_def(<self>, :c, :normal)
     end
   end
 end

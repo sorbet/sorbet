@@ -6,5 +6,5 @@
 
 class Project::Bar < PackageSpec
   import Project::Foo
-  import Project::Baz
+  import Project::Baz::Package
 end
