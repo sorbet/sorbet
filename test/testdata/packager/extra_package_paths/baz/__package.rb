@@ -2,6 +2,6 @@
 
 # typed: strict
 
-class Project::Baz < PackageSpec
-  export Project::Baz::C
+class Project::Baz::Package < PackageSpec
+  export Project::Baz::Package::C
 end

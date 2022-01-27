@@ -12,6 +12,6 @@ class Project::Bar::Bar
 
   sig { void }
   def bar2
-    Project::Baz::C.c
+    Project::Baz::Package::C.c
   end
 end
