@@ -60,7 +60,7 @@ UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(const GlobalState &gs
     // Sort the locs backwards
     auto compare = [](const AutocorrectSuggestion::Edit &left, const AutocorrectSuggestion::Edit &right) {
         if (left.loc.file() != right.loc.file()) {
-            return left.loc.file().id() > right.loc.file().id();
+            return left.loc.file() > right.loc.file();
         }
 
         auto a = left.loc.beginPos();
