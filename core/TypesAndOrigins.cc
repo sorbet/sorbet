@@ -32,7 +32,7 @@ vector<ErrorLine> TypeAndOrigins::origins2Explanations(const GlobalState &gs, Lo
         }
 
         if (left.file() != right.file()) {
-            return left.file().id() < right.file().id();
+            return left.file() < right.file();
         }
         if (left.beginPos() != right.beginPos()) {
             return left.beginPos() < right.beginPos();

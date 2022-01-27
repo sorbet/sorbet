@@ -1268,19 +1268,14 @@ public:
 
         // Note: `todo` does not need to be sorted. There are no ordering effects on error production.
 
-        fast_sort(todoAncestors,
-                  [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
-        fast_sort(todoClassAliases,
-                  [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
-        fast_sort(todoTypeAliases,
-                  [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
-        fast_sort(todoClassMethods,
-                  [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
-        fast_sort(todoRequiredAncestors,
-                  [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
+        fast_sort(todoAncestors, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
+        fast_sort(todoClassAliases, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
+        fast_sort(todoTypeAliases, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
+        fast_sort(todoClassMethods, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
+        fast_sort(todoRequiredAncestors, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
 
         ENFORCE(todoRequiredAncestors.empty() || gs.requiresAncestorEnabled);
-        fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
+        fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
 
         Timer timeit1("resolver.resolve_constants.fixed_point");
 
@@ -2647,7 +2642,7 @@ public:
         }
 
         // Put files into a consistent order for subsequent passes.
-        fast_sort(combinedFiles, [](auto &a, auto &b) -> bool { return a.file.id() < b.file.id(); });
+        fast_sort(combinedFiles, [](auto &a, auto &b) -> bool { return a.file < b.file; });
 
         for (auto &threadTodo : combinedTodoUntypedResultTypes) {
             for (auto sym : threadTodo) {
