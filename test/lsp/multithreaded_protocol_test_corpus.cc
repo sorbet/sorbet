@@ -104,7 +104,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     // Slow path edits two files. One introduces error.
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     // Syntax error in foo.rb.
-    sendAsync(*changeFile("foo.rb", "# typed: true\n\nclass Foo\ndef noend\nend\n", 2, true));
+    sendAsync(*changeFile("foo.rb", "# typed: true\n\nlass Foo\ndef noend\nend\n", 2, true));
     // Pause to differentiate message times
     this_thread::sleep_for(chrono::milliseconds(2));
     // Typechecking error in bar.rb
@@ -430,7 +430,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndT
         {});
 
     // Slow path: foo.rb will have a syntax error
-    sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\n", 2, true, 1));
+    sendAsync(*changeFile("foo.rb", "# typed: true\nlass Foo\nextend T::Sig\n", 2, true, 1));
 
     // Wait for typechecking to begin to avoid races.
     {
@@ -484,7 +484,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndB
         {});
 
     // Slow path: foo.rb will have a syntax error
-    sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig", 2, false, 1));
+    sendAsync(*changeFile("foo.rb", "# typed: true\nlass Foo\nextend T::Sig", 2, false, 1));
 
     // Wait for typechecking to begin to avoid races.
     {
@@ -501,7 +501,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndB
     // Send a no-op to clear out the pipeline.
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
                       {
-                          {"foo.rb", 2, "unexpected token"},
+                          {"foo.rb", 1, "Method `lass` does not exist on `T.class_of(<root>)`"},
+                          {"foo.rb", 1, "Unable to resolve constant `Foo`"},
                           {"bar.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
                           {"baz.rb", 5, "Expected `String` but found `Integer` for method result type"},
                       });
@@ -530,7 +531,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatR
 
     // Slow path: Introduce syntax error to foo.rb and change method sig in bar.rb to fix error in baz.rb
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
-    sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\n", 2, true));
+    sendAsync(*changeFile("foo.rb", "# typed: true\nlass Foo\nextend T::Sig\n", 2, true));
     sendAsync(*changeFile(
         "bar.rb", "# typed: true\n\nclass Bar\nextend T::Sig\n\nsig{returns(String)}\ndef str\n'10'\nend\nend\n", 2,
         true));

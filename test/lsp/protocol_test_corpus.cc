@@ -647,15 +647,16 @@ TEST_CASE_FIXTURE(ProtocolTest, "ReportsSyntaxErrors") {
     // clear counters
     getCounters();
 
+    // The goal here is to find a snippet that both produces an empty parse and reports a parse error.
+    // This gets harder as the parser gets better at not producing empty parses, but in any case, we
+    // want this test to show that IF it produces an empty parse result with an error, that the
+    // `syntax_error` counter is incremented.
     assertDiagnostics(send(*changeFile("foo.rb",
-                                       "# typed: true\n"
-                                       "class A\n"
-                                       "def foo; en\n"
-                                       "end\n"
+                                       "alias\n"
                                        "\n",
                                        2)),
                       {
-                          {"foo.rb", 5, "unexpected token \"end of file\""},
+                          {"foo.rb", 2, "unexpected token \"end of file\""},
                       });
 
     auto counters = getCounters();
