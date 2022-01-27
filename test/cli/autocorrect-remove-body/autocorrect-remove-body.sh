@@ -1,9 +1,26 @@
-for ext in rb rbi; do
-  tmp="$(mktemp).$ext"
-  pre="test/cli/autocorrect-remove-body/pre.$ext"
-  post="test/cli/autocorrect-remove-body/post.$ext"
-  cp "$pre" "$tmp"
-  main/sorbet --silence-dev-message -a "$tmp"
-  diff "$post" "$tmp"
-  rm "$tmp"
-done
+#!/usr/bin/env bash
+
+cwd="$(pwd)"
+
+tmp="$(mktemp -d)"
+
+cp "$cwd/test/cli/autocorrect-remove-body/autocorrect-remove-body".* "$tmp"
+
+cd "$tmp" || exit 1
+if "$cwd/main/sorbet" --silence-dev-message -a autocorrect-remove-body.rb autocorrect-remove-body.rbi 2>&1; then
+  echo "Expected to fail!"
+  exit 1
+fi
+
+echo
+echo --------------------------------------------------------------------------
+echo
+
+# Also cat the file, to make that the autocorrect applied
+echo ----- rb -----
+cat autocorrect-remove-body.rb
+echo ----- rbi -----
+cat autocorrect-remove-body.rbi
+
+rm autocorrect-remove-body.rb
+rm autocorrect-remove-body.rbi
