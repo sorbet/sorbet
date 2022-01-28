@@ -257,7 +257,12 @@ optional<string_view> Loc::source(const GlobalState &gs) const {
         return nullopt;
     } else {
         auto source = this->file().data(gs).source();
-        return source.substr(beginPos(), endPos() - beginPos());
+        // TODO: this should be unnecessary
+        if (endPos() < source.size()) {
+            return source.substr(beginPos(), endPos() - beginPos());
+        } else {
+            return nullopt;
+        }
     }
 }
 
