@@ -2,6 +2,7 @@
 #define SORBET_GLOBAL_STATE_H
 #include "absl/synchronization/mutex.h"
 
+#include "common/StableStringStorage.h"
 #include "core/Error.h"
 #include "core/Files.h"
 #include "core/Loc.h"
@@ -300,9 +301,8 @@ private:
     std::vector<DeepCloneHistoryEntry> deepCloneHistory;
 
     static constexpr int STRINGS_PAGE_SIZE = 4096;
-    std::vector<std::shared_ptr<std::vector<char>>> strings;
+    StableStringStorage<STRINGS_PAGE_SIZE> strings;
     std::string_view enterString(std::string_view nm);
-    uint16_t stringsLastPageUsed = STRINGS_PAGE_SIZE + 1;
     std::vector<UTF8Name> utf8Names;
     std::vector<ConstantName> constantNames;
     std::vector<UniqueName> uniqueNames;

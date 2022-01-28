@@ -173,17 +173,21 @@ class token {
     token_type _type;
     size_t _start;
     size_t _end;
-    std::string _string;
+    std::string_view _string;
 
 public:
     token(token_type type, size_t start, size_t end, std::string_view str);
+    // Don't allow people to rely on implicit conversion to std::string_view:
+    // they should make sure their string views live in storage that will outlive
+    // the lexer.
+    token(token_type type, size_t start, size_t end, const std::string &str) = delete;
 
     token_type type() const;
     size_t start() const;
     size_t end() const;
     void setEnd(size_t end);
     std::string_view view() const;
-    const std::string &asString() const;
+    std::string asString() const;
 };
 
 using token_t = token *;

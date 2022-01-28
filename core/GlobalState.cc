@@ -1157,35 +1157,9 @@ string_view GlobalState::enterString(string_view nm) {
             ENFORCE(nm.find(">") == string::npos);
         }
     });
-    char *from = nullptr;
-    if (nm.size() > GlobalState::STRINGS_PAGE_SIZE) {
-        auto &inserted = strings.emplace_back(make_unique<vector<char>>(nm.size()));
-        from = inserted->data();
-        if (strings.size() > 1) {
-            // last page wasn't full, keep it in the end
-            swap(*(strings.end() - 1), *(strings.end() - 2));
-
-            // NOTE: we do not update `stringsLastPageUsed` here because it refers to the offset into the last page,
-            // which is swapped in by the line above.
-        } else {
-            // Insert a new empty page at the end to enforce the invariant that inserting a huge string will always
-            // leave a page that can be written to at the end of the table.
-            strings.emplace_back(make_unique<vector<char>>(GlobalState::STRINGS_PAGE_SIZE));
-            stringsLastPageUsed = 0;
-        }
-    } else {
-        if (stringsLastPageUsed + nm.size() > GlobalState::STRINGS_PAGE_SIZE) {
-            strings.emplace_back(make_unique<vector<char>>(GlobalState::STRINGS_PAGE_SIZE));
-            // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - stringsLastPageUsed);
-            stringsLastPageUsed = 0;
-        }
-        from = strings.back()->data() + stringsLastPageUsed;
-        stringsLastPageUsed += nm.size();
-    }
-
+    auto ret = strings.enterString(nm);
     counterInc("strings");
-    memcpy(from, nm.data(), nm.size());
-    return string_view(from, nm.size());
+    return ret;
 }
 
 NameRef GlobalState::lookupNameUTF8(string_view nm) const {
@@ -1737,7 +1711,6 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
         DeepCloneHistoryEntry{this->globalStateId, utf8NamesUsed(), constantNamesUsed(), uniqueNamesUsed()});
 
     result->strings = this->strings;
-    result->stringsLastPageUsed = STRINGS_PAGE_SIZE;
     result->files = this->files;
     result->fileRefByPath = this->fileRefByPath;
     result->lspQuery = this->lspQuery;

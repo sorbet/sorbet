@@ -8,6 +8,9 @@
 #include <set>
 #include <stack>
 #include <string>
+#include <vector>
+
+#include "common/StableStringStorage.h"
 
 #include "context.hh"
 #include "diagnostic.hh"
@@ -53,6 +56,7 @@ private:
 
     ruby_version version;
     std::string_view source_buffer;
+    sorbet::StableStringStorage<> &scratch;
 
     std::stack<environment> static_env;
     std::stack<literal> literal_stack;
@@ -142,6 +146,17 @@ private:
     void emit(token_type type);
     void emit(token_type type, std::string_view str);
     void emit(token_type type, std::string_view str, const char *start, const char *end);
+    // Without these overloads, emit(..., "do") would be ambiguous.
+    // It's OK to store points to constants, as they live in static storage and will
+    // therefore not be going away.
+    template <size_t N> void emit(token_type type, const char (&str)[N]) {
+        emit(type, std::string_view{&str[0], N - 1});
+    }
+    template <size_t N> void emit(token_type type, const char (&str)[N], const char *start, const char *end) {
+        emit(type, std::string_view{&str[0], N - 1}, start, end);
+    }
+    void emit(token_type type, const std::string &str);
+    void emit(token_type type, const std::string &str, const char *start, const char *end);
     void emit_do(bool do_block = false);
     void emit_table(const token_table_entry *table);
     void emit_num(const std::string &num);
@@ -169,7 +184,8 @@ public:
     bool in_kwarg; // true at the end of "def foo a:"
     Context context;
 
-    lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer);
+    lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer,
+          sorbet::StableStringStorage<> &scratch);
 
     // Main interface consumed by yylex function in parser
     token_t advance();

@@ -120,10 +120,11 @@ using namespace std::string_literals;
 
 %% prepush { check_stack_capacity(); }
 
-lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer)
+lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer, sorbet::StableStringStorage<> &scratch)
   : diagnostics(diag)
   , version(version)
   , source_buffer(source_buffer)
+  , scratch(scratch)
   , cs(lex_en_line_begin)
   , _p(source_buffer.data())
   , _pe(source_buffer.data() + source_buffer.size())
@@ -496,10 +497,10 @@ token_t lexer::advance_() {
 
   if (cs == lex_error) {
     size_t start = (size_t)(p - source_buffer.data());
-    return mempool.alloc(token_type::error, start, start + 1, std::string(p - 1, 1));
+    return mempool.alloc(token_type::error, start, start + 1, std::string_view(p - 1, 1));
   }
 
-  return mempool.alloc(token_type::eof, source_buffer.size(), source_buffer.size(), "");
+  return mempool.alloc(token_type::eof, source_buffer.size(), source_buffer.size(), std::string_view("", 0));
 }
 
 void lexer::emit(token_type type) {
@@ -515,6 +516,19 @@ void lexer::emit(token_type type, std::string_view str, const char* start, const
   size_t offset_end = (size_t)(end - source_buffer.data());
 
   token_queue.push_back(mempool.alloc(type, offset_start, offset_end, str));
+}
+
+void lexer::emit(token_type type, const std::string &str) {
+  emit(type, str, ts, te);
+}
+
+void lexer::emit(token_type type, const std::string &str, const char* start, const char* end) {
+  size_t offset_start = (size_t)(start - source_buffer.data());
+  size_t offset_end = (size_t)(end - source_buffer.data());
+
+  // Copy the string into stable storage.
+  auto scratch_view = scratch.enterString(str);
+  token_queue.push_back(mempool.alloc(type, offset_start, offset_end, scratch_view));
 }
 
 void lexer::emit_do(bool do_block) {
@@ -1175,7 +1189,7 @@ void lexer::set_state_expr_value() {
       }
     } else {
       // Try ending the literal with a newline.
-      auto str = tok();
+      auto str = tok_view();
       if (current_literal.nest_and_try_closing(str, ts, te)) {
         fnext *pop_literal(); fbreak;
       }
@@ -2808,7 +2822,7 @@ void lexer::set_state_expr_value() {
           // next line as a separate statement.
           //
           // Note: block comments before leading dot are not supported on any version of Ruby.
-          emit(token_type::tNL, std::string(), newline_s, newline_s + 1);
+          emit(token_type::tNL, "", newline_s, newline_s + 1);
           fhold; fnext line_begin; fbreak;
         }
       };
@@ -2817,7 +2831,7 @@ void lexer::set_state_expr_value() {
       => { p = tm - 1; fgoto expr_end; };
 
       any
-      => { emit(token_type::tNL, std::string(), newline_s, newline_s + 1);
+      => { emit(token_type::tNL, "", newline_s, newline_s + 1);
            fhold; fnext line_begin; fbreak; };
   *|;
 
@@ -2870,7 +2884,8 @@ token_t lexer::advance() {
 token_t lexer::unadvance(token_t tok_to_push, token_type type, size_t start, size_t end, const std::string &str) {
   token_queue.push_front(tok_to_push);
 
-  auto new_tok = mempool.alloc(type, start, end, str);
+  auto scratch_view = scratch.enterString(str);
+  auto new_tok = mempool.alloc(type, start, end, scratch_view);
 
   last_token_s = start;
   last_token_e = end;
