@@ -1823,7 +1823,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                     }
                 | kIF strings kDO compstmt if_tail kEND
                     {
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::IfInsteadOfItForTest, diagnostic::range(@1.begin, @1.end), "\"if\"");
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::IfInsteadOfItForTest, diagnostic::range(@1.begin, @1.end));
                       auto &else_ = $5;
                       $$ = driver.build.condition(self, $1, $2, $3, $4,
                         else_ ? else_->tok : nullptr,
