@@ -7,7 +7,7 @@ module ::Opus::Flatfiles
 
     sig {params(name: T.untyped, type: T.untyped).void}
     def self.dsl_required(name, type); end
-    
+
     sig {params(blk: T.proc.void).void}
     def self.flatfile(&blk); end
 
@@ -23,7 +23,7 @@ module ::Opus::Flatfiles
 
   class MarkupLanguageNodeStruct
     extend T::Sig
-    
+
     sig {params(blk: T.proc.void).void}
     def self.flatfile(&blk); end
 
@@ -106,7 +106,7 @@ module RBIGen::Public
 
   class MyEnum < T::Enum
     extend T::Sig
-    
+
     enums do
       Spades = new
       Hearts = new
@@ -122,7 +122,7 @@ module RBIGen::Public
 
   class MyStruct < T::Struct
     extend T::Sig
-    
+
     prop :foo, Integer
     const :bar, T.nilable(String)
     const :quz, Float, default: 0.5
@@ -166,7 +166,7 @@ module RBIGen::Public
 
   class FieldCheck
     extend T::Sig
-  
+
     Alias = RBIGen::Public::FieldCheck
     Constant = T.let(0, Integer)
     AliasConstant = T.let(RBIGen::Public::FieldCheck, T.class_of(RBIGen::Public::FieldCheck))
@@ -207,7 +207,7 @@ module RBIGen::Public
 
   class ClassWithTypeParams
     extend T::Generic
-    
+
     A = type_template(fixed: RBIGen::Private::PrivateClassPulledInByTypeTemplate)
     B = type_template()
     C = type_member()
@@ -295,7 +295,7 @@ module RBIGen::Public
     @static_field = T.let(10, Integer)
     class << self
       extend Forwardable
-      
+
       def_delegators :@static_field, :method1, :method2
       def_delegator :@static_field, :method3
     end
@@ -308,7 +308,7 @@ module RBIGen::Public
 
   MaybeString = T.type_alias {T.nilable(String)}
   ShapeType = T.type_alias{{:$str => String}}
-  
+
   class AttachedClassType
     extend T::Sig
 
