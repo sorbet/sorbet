@@ -2,6 +2,6 @@
 
 class A
   if 'thing' do
-  #          ^^ error: unexpected token "do"
+# ^^ error: Unexpected token "if"; did you mean "it"?
   end
 end

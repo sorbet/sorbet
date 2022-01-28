@@ -64,6 +64,7 @@ tuple<string, string> MESSAGES[] = {
     {"PatternDuplicateVariable", "duplicate variable name {}"},
     {"PatternDuplicateKey", "duplicate hash pattern key {}"},
     {"PositionalAfterKeyword", "positional arg \\\"{}\\\" after keyword arg"},
+    {"IfInsteadOfItForTest", "Unexpected token \\\"if\\\"; did you mean \\\"it\\\"?"},
 
     // Parser warnings
     {"UselessElse", "else without rescue is useless"},

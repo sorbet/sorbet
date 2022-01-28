@@ -1823,9 +1823,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &d
                     }
                 | kIF strings kDO compstmt if_tail kEND
                     {
-                      // TODO(jez) If we had proper Sorbet diagnostics here, we could have a "did you mean"
-                      // error line that suggested changing `if` to `it`
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@3.begin, @3.end), "\"do\"");
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::IfInsteadOfItForTest, diagnostic::range(@1.begin, @1.end));
                       auto &else_ = $5;
                       $$ = driver.build.condition(self, $1, $2, $3, $4,
                         else_ ? else_->tok : nullptr,
