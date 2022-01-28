@@ -528,7 +528,7 @@ void lexer::emit(token_type type, const std::string &str, const char* start, con
 
   // Copy the string into stable storage.
   auto scratch_view = scratch.enterString(str);
-  token_queue.push(mempool.alloc(type, offset_start, offset_end, scratch_view));
+  token_queue.push_back(mempool.alloc(type, offset_start, offset_end, scratch_view));
 }
 
 void lexer::emit_do(bool do_block) {
