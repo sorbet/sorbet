@@ -19,7 +19,7 @@ core::MethodRef enclosingMethod(core::Context ctx, core::Loc loc) {
 
     return enclosingMethod;
 }
-}
+} // namespace
 
 ast::ExpressionPtr LocalVarSaver::postTransformBlock(core::Context ctx, ast::ExpressionPtr tree) {
     auto &block = ast::cast_tree_nonnull<ast::Block>(tree);
@@ -31,8 +31,8 @@ ast::ExpressionPtr LocalVarSaver::postTransformBlock(core::Context ctx, ast::Exp
             if (lspQueryMatch) {
                 core::TypeAndOrigins tp;
                 core::lsp::QueryResponse::pushQueryResponse(
-                    ctx, core::lsp::IdentResponse(core::Loc(ctx.file, localExp->loc), localExp->localVariable, tp,
-                                                  method));
+                    ctx,
+                    core::lsp::IdentResponse(core::Loc(ctx.file, localExp->loc), localExp->localVariable, tp, method));
             }
         }
     }
