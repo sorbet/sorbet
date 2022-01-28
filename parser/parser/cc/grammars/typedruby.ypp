@@ -3654,6 +3654,21 @@ f_opt_paren_args: f_paren_args
                     {
                       $$ = driver.alloc.node_list($1);
                     }
+                | f_kwarg tCOMMA f_label f_kw
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.kwarg(self, $3));
+                      list->emplace_back($4);
+                      $$ = list;
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@3.end, @4.begin), "\",\"");
+                    }
+                | f_label f_kw
+                    {
+                      auto list = driver.alloc.node_list(driver.build.kwarg(self, $1));
+                      list->emplace_back($2);
+                      $$ = list;
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@1.end, @2.begin), "\",\"");
+                    }
                 | f_kwarg tCOMMA f_kw
                     {
                       auto &list = $1;
