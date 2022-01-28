@@ -310,6 +310,10 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     }
     if (opts.print.AutogenAutoloader.enabled) {
         {
+            Timer timeit(logger, "autogenMarkPackages");
+            autogen::DefTreeBuilder::markPackages(gs, root);
+        }
+        {
             Timer timeit(logger, "autogenAutoloaderPrune");
             autogen::DefTreeBuilder::collapseSameFileDefs(gs, autoloaderCfg, root);
         }
