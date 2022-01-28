@@ -464,6 +464,10 @@ void validateSealedAncestorHelper(core::Context ctx, const core::ClassOrModuleRe
         }
 
         auto klassFile = bestNonRBIFile(ctx, klass);
+        if (klassFile.data(ctx).isPackageRBI()) {
+            continue;
+        }
+
         if (absl::c_any_of(mixin.data(ctx)->sealedLocs(ctx),
                            [klassFile](auto loc) { return loc.file() == klassFile; })) {
             continue;
@@ -479,15 +483,19 @@ void validateSealedAncestorHelper(core::Context ctx, const core::ClassOrModuleRe
 
 void validateSealed(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ClassDef &classDef) {
     const auto superClass = klass.data(ctx)->superClass();
-    if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed()) {
-        auto file = bestNonRBIFile(ctx, klass);
-        if (!absl::c_any_of(superClass.data(ctx)->sealedLocs(ctx), [file](auto loc) { return loc.file() == file; })) {
-            if (auto e =
-                    ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::SealedAncestor)) {
-                e.setHeader("`{}` is sealed and cannot be inherited by `{}`", superClass.show(ctx), klass.show(ctx));
-                for (auto loc : superClass.data(ctx)->sealedLocs(ctx)) {
-                    e.addErrorLine(loc, "`{}` was marked sealed and can only be inherited in this file",
-                                   superClass.show(ctx));
+    if (!ctx.file.data(ctx).isPackageRBI()) {
+        if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed()) {
+            auto file = bestNonRBIFile(ctx, klass);
+            if (!absl::c_any_of(superClass.data(ctx)->sealedLocs(ctx),
+                                [file](auto loc) { return loc.file() == file; })) {
+                if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, superClass),
+                                            core::errors::Resolver::SealedAncestor)) {
+                    e.setHeader("`{}` is sealed and cannot be inherited by `{}`", superClass.show(ctx),
+                                klass.show(ctx));
+                    for (auto loc : superClass.data(ctx)->sealedLocs(ctx)) {
+                        e.addErrorLine(loc, "`{}` was marked sealed and can only be inherited in this file",
+                                       superClass.show(ctx));
+                    }
                 }
             }
         }
