@@ -2492,7 +2492,6 @@ opt_block_args_tail:
                       driver.lex.context.pop();
                     }
 
-
       brace_body:   {
                       driver.lex.extend_dynamic();
                       driver.numparam_stack.push(driver.alloc.node_list());
