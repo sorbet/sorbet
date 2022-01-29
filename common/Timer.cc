@@ -151,6 +151,11 @@ Timer::~Timer() {
     if (!canceled && dur.usec > clock_threshold_coarse.usec) {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
         sorbet::timingAdd(this->name, start, clock, move(args), move(tags), self, prev, move(histogramBuckets));
+        auto one_week = microseconds{24LL * 60 * 60 * 1000 * 1000};
+        if (dur.usec > one_week.usec) {
+            log.error("timer_exceeds_one_week name={} dur_usec={} sorbet_version={}", this->name.str, dur.usec,
+                      sorbet_full_version_string);
+        }
     }
 }
 
