@@ -1857,8 +1857,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     // strict mode
                     auto blockArgName = dctx.enclosingBlockArg;
                     if (blockArgName == core::Names::blkArg()) {
-                        if (auto e = dctx.ctx.state.beginError(core::Loc(dctx.ctx.file, dctx.enclosingMethodLoc),
-                                                               core::errors::Desugar::UnnamedBlockParameter)) {
+                        if (auto e = dctx.ctx.beginError(dctx.enclosingMethodLoc,
+                                                         core::errors::Desugar::UnnamedBlockParameter)) {
                             e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
                                         dctx.enclosingMethodName.show(dctx.ctx), "yield");
                             e.addErrorLine(core::Loc(dctx.ctx.file, loc), "Arising from use of `{}` in method body",
