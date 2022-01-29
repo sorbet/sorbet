@@ -2492,6 +2492,7 @@ opt_block_args_tail:
                       driver.lex.context.pop();
                     }
 
+
       brace_body:   {
                       driver.lex.extend_dynamic();
                       driver.numparam_stack.push(driver.alloc.node_list());
@@ -2506,6 +2507,12 @@ opt_block_args_tail:
                       }
                       driver.numparam_stack.pop();
                       driver.lex.unextend();
+                    }
+                  | tAMPER arg_value
+                    {
+                      $$ = driver.alloc.delimited_block(nullptr, nullptr, nullptr, nullptr);
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::CurlyBracesAroundBlockPass,
+                        diagnostic::range(@1.begin, @2.end));
                     }
 
          do_body:   {
