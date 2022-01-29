@@ -478,7 +478,8 @@ unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs
     return item;
 }
 
-vector<core::LocalVariable> localsForMethod(LSPTypecheckerDelegate &typechecker, const core::MethodRef method, const core::Loc queryLoc) {
+vector<core::LocalVariable> localsForMethod(LSPTypecheckerDelegate &typechecker, const core::MethodRef method,
+                                            const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{};
     for (auto loc : method.data(gs)->locs()) {
