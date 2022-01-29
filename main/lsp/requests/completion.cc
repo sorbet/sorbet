@@ -478,7 +478,8 @@ unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs
     return item;
 }
 
-vector<core::LocalVariable> localsForMethod(LSPTypecheckerDelegate &typechecker, const core::MethodRef method) {
+vector<core::LocalVariable> localsForMethod(LSPTypecheckerDelegate &typechecker, const core::MethodRef method,
+                                            const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{};
     for (auto loc : method.data(gs)->locs()) {
@@ -487,7 +488,7 @@ vector<core::LocalVariable> localsForMethod(LSPTypecheckerDelegate &typechecker,
     auto resolved = typechecker.getResolved(files);
 
     // Instantiate localVarFinder outside loop so that result accumualates over every time we TreeMap::apply
-    LocalVarFinder localVarFinder(method);
+    LocalVarFinder localVarFinder(method, queryLoc);
     for (auto &t : resolved) {
         auto ctx = core::Context(gs, core::Symbols::root(), t.file);
         t.tree = ast::TreeMap::apply(ctx, localVarFinder, move(t.tree));
@@ -833,7 +834,7 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
 
     vector<core::LocalVariable> similarLocals;
     if (params.enclosingMethod.exists()) {
-        auto locals = localsForMethod(typechecker, params.enclosingMethod);
+        auto locals = localsForMethod(typechecker, params.enclosingMethod, params.queryLoc);
         similarLocals = allSimilarLocals(gs, locals, params.prefix);
     }
 
