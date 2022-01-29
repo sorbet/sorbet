@@ -323,7 +323,6 @@ private:
         if (!method.exists()) {
             return "";
         }
-
         auto methodData = method.data(gs);
 
         string visibility = "";
@@ -965,13 +964,6 @@ private:
         if (method.data(gs)->name == core::Names::staticInit()) {
             return;
         }
-
-        // This method will still be available at runtime, but not exposing it through the package interface means that
-        // we'll raise errors statically if it's used.
-        if (method.data(gs)->flags.isPackagePrivate) {
-            return;
-        }
-
         emittedSymbols.insert(method);
 
         // Note: We have to emit private methods because `include`ing a module with private methods will make those
