@@ -201,9 +201,6 @@ struct Options {
     std::string metricsSha = "none";
     std::map<std::string, std::string> metricsExtraTags; // be super careful with cardinality here
 
-    std::string dumpPackageInfo = "";
-    std::string packageRBIOutput = "";
-
     // Contains the allowed extensions Sorbet can parse.
     UnorderedSet<std::string> allowedExtensions;
     // Contains the file names passed in to Sorbet.

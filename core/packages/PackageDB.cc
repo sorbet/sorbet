@@ -57,19 +57,6 @@ public:
         return false;
     }
 
-    std::vector<std::vector<core::NameRef>> exports() const {
-        return vector<vector<core::NameRef>>();
-    }
-    std::vector<std::vector<core::NameRef>> testExports() const {
-        return vector<vector<core::NameRef>>();
-    }
-    std::vector<std::vector<core::NameRef>> imports() const {
-        return vector<vector<core::NameRef>>();
-    }
-    std::vector<std::vector<core::NameRef>> testImports() const {
-        return vector<vector<core::NameRef>>();
-    }
-
     ~NonePackage() {}
 
 private:
