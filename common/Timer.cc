@@ -83,7 +83,7 @@ Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev) : Timer(log, n
 Timer::Timer(Timer &&timer)
     : log(timer.log), name(timer.name), prev(timer.prev), self(timer.self), args(move(timer.args)),
       tags(move(timer.tags)), start(timer.start), histogramBuckets(move(timer.histogramBuckets)),
-      canceled(timer.canceled) {
+      canceled(timer.canceled), endTime(microseconds{0}) {
     // Don't report a latency metric for the moved timer.
     timer.cancel();
 }
