@@ -1847,7 +1847,7 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
 }
 
 vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files) {
-    Timer timeit("packager");
+    Timer timeit(gs.tracer(), "packager");
 
     files = findPackages(gs, workers, std::move(files));
 
