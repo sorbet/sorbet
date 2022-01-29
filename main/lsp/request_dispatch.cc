@@ -39,7 +39,7 @@ void LSPLoop::processRequests(vector<unique_ptr<LSPMessage>> messages) {
 void LSPLoop::runTask(unique_ptr<LSPTask> task) {
     prodCategoryCounterInc("lsp.messages.processed", task->methodString());
     {
-        Timer timeit("LSPTask::index");
+        Timer timeit(config->logger, "LSPTask::index");
         timeit.setTag("method", task->methodString());
         task->index(indexer);
     }
