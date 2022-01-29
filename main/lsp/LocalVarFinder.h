@@ -21,6 +21,7 @@ public:
     LocalVarFinder(core::MethodRef targetMethod, core::Loc queryLoc) : targetMethod(targetMethod), queryLoc(queryLoc) {}
 
     ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr assign);
+    ast::ExpressionPtr preTransformBlock(core::Context ctx, ast::ExpressionPtr block);
     ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr methodDef);
     ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr methodDef);
     ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr classDef);

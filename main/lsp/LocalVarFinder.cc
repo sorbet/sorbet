@@ -6,6 +6,28 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
+ast::ExpressionPtr LocalVarFinder::preTransformBlock(core::Context ctx, ast::ExpressionPtr tree) {
+    ENFORCE(!methodStack.empty());
+
+    auto &block = ast::cast_tree_nonnull<ast::Block>(tree);
+    auto loc = core::Loc{ctx.file, block.loc};
+
+    if (methodStack.back() != this->targetMethod) {
+        return tree;
+    }
+
+    if (!loc.contains(this->queryLoc)) {
+        return tree;
+    }
+
+    auto parsedArgs = ast::ArgParsing::parseArgs(block.args);
+    for (const auto &parsedArg : parsedArgs) {
+        this->result_.emplace_back(parsedArg.local);
+    }
+
+    return tree;
+}
+
 ast::ExpressionPtr LocalVarFinder::postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
     ENFORCE(!methodStack.empty());
 
