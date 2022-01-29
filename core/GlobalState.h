@@ -228,6 +228,7 @@ public:
     // Think very hard before looking at this value in namer / resolver!
     // (hint: probably you want to find an alternate solution)
     bool runningUnderAutogen = false;
+    bool runningUnderAutogenSubclassMode = false;
     bool censorForSnapshotTests = false;
 
     bool sleepInSlowPath = false;

@@ -466,6 +466,9 @@ int realmain(int argc, char *argv[]) {
     if (opts.print.isAutogen()) {
         gs->runningUnderAutogen = true;
     }
+    if (opts.print.AutogenSubclasses.enabled) {
+        gs->runningUnderAutogenSubclassMode = true;
+    }
     if (opts.censorForSnapshotTests) {
         gs->censorForSnapshotTests = true;
     }

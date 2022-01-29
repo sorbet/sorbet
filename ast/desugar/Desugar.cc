@@ -1285,23 +1285,31 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::DefMethod *method) {
-                bool isSelf = false;
-                ExpressionPtr res =
-                    buildMethod(dctx, method->loc, method->declLoc, method->name, method->args, method->body, isSelf);
-                result = std::move(res);
+                if (dctx.ctx.state.runningUnderAutogenSubclassMode) {
+                  result = MK::EmptyTree();
+                } else {
+                    bool isSelf = false;
+                    ExpressionPtr res =
+                        buildMethod(dctx, method->loc, method->declLoc, method->name, method->args, method->body, isSelf);
+                    result = std::move(res);
+                }
             },
             [&](parser::DefS *method) {
-                auto *self = parser::cast_node<parser::Self>(method->singleton.get());
-                if (self == nullptr) {
-                    if (auto e =
-                            dctx.ctx.beginError(method->singleton->loc, core::errors::Desugar::InvalidSingletonDef)) {
-                        e.setHeader("`{}` is only supported for `{}`", "def EXPRESSION.method", "def self.method");
+                if (dctx.ctx.state.runningUnderAutogenSubclassMode) {
+                  result = MK::EmptyTree();
+                } else {
+                    auto *self = parser::cast_node<parser::Self>(method->singleton.get());
+                    if (self == nullptr) {
+                        if (auto e =
+                                dctx.ctx.beginError(method->singleton->loc, core::errors::Desugar::InvalidSingletonDef)) {
+                            e.setHeader("`{}` is only supported for `{}`", "def EXPRESSION.method", "def self.method");
+                        }
                     }
+                    bool isSelf = true;
+                    ExpressionPtr res =
+                        buildMethod(dctx, method->loc, method->declLoc, method->name, method->args, method->body, isSelf);
+                    result = std::move(res);
                 }
-                bool isSelf = true;
-                ExpressionPtr res =
-                    buildMethod(dctx, method->loc, method->declLoc, method->name, method->args, method->body, isSelf);
-                result = std::move(res);
             },
             [&](parser::SClass *sclass) {
                 // This will be a nested ClassDef which we leave in the tree
