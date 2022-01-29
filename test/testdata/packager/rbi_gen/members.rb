@@ -58,6 +58,22 @@ module RBIGen::DirectlyExported
   MyString = String
 end
 
+module RBIGen::Sealed
+
+  class Parent
+    extend T::Helpers
+
+    sealed!
+  end
+
+  class Child < Parent
+  end
+
+  class TestChild < Parent
+  end
+
+end
+
 module RBIGen::Public
   class RefersToPrivateTypes
     extend T::Sig
