@@ -217,6 +217,9 @@ class RBIGen::Public::ClassWithTypeParams < Object
   A = type_template(fixed: RBIGen::Private::PrivateClassPulledInByTypeTemplate)
   B = type_template()
 end
+class RBIGen::Public::ClassWithPrivateMethods < Object
+  extend T::Sig
+end
 class RBIGen::Public::AttachedClassType < Object
   extend T::Sig
   sig {params(a: T.proc.params(arg0: T.attached_class).void).void}
