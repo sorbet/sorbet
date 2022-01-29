@@ -464,6 +464,9 @@ void validateSealedAncestorHelper(core::Context ctx, const core::ClassOrModuleRe
         }
 
         auto klassFile = bestNonRBIFile(ctx, klass);
+
+        // See the comment on the isPackageRBI call in `validateSealed` for more information about why we skip package
+        // rbi files here.
         if (klassFile.data(ctx).isPackageRBI()) {
             continue;
         }
@@ -483,9 +486,17 @@ void validateSealedAncestorHelper(core::Context ctx, const core::ClassOrModuleRe
 
 void validateSealed(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ClassDef &classDef) {
     const auto superClass = klass.data(ctx)->superClass();
-    if (!ctx.file.data(ctx).isPackageRBI()) {
-        if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed()) {
-            auto file = bestNonRBIFile(ctx, klass);
+
+    if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed()) {
+        auto file = bestNonRBIFile(ctx, klass);
+
+        // Normally we would skip rbis for the purpose of checking `sealed!`, but when running in stripe-packages mode
+        // this may be the only definition available. Additionally, if the sealed class contains subclasses that are
+        // exported through the package interface and for tests, the subclasses will be spread across multiple rbi files
+        // (the `.package.rbi` and the `.test.package.rbi` files). Because this check would fail in those situations and
+        // the rbi files will have been generated from valid sources, we assume that they are correct here and skip the
+        // check.
+        if (!file.data(ctx).isPackageRBI()) {
             if (!absl::c_any_of(superClass.data(ctx)->sealedLocs(ctx),
                                 [file](auto loc) { return loc.file() == file; })) {
                 if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, superClass),
