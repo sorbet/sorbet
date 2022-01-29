@@ -250,7 +250,7 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
         return;
     }
 
-    Timer timeit("removeDeadAssigns");
+    Timer timeit(ctx.state.tracer(), "removeDeadAssigns");
     for (auto &it : cfg.basicBlocks) {
         /* remove dead variables */
         it->exprs.erase(
@@ -338,7 +338,7 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
     vector<UIntSet> upperBounds1;
     bool changed = true;
     {
-        Timer timeit("upperBounds1");
+        Timer timeit(ctx.state.tracer(), "upperBounds1");
         upperBounds1 = readsByBlock;
         while (changed) {
             changed = false;
@@ -379,7 +379,7 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
 
     changed = true;
     {
-        Timer timeit("upperBounds2");
+        Timer timeit(ctx.state.tracer(), "upperBounds2");
         while (changed) {
             changed = false;
             for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
@@ -397,7 +397,7 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
         }
     }
     {
-        Timer timeit("upperBoundsMerge");
+        Timer timeit(ctx.state.tracer(), "upperBoundsMerge");
         /** Combine two upper bounds */
         for (auto &it : cfg.basicBlocks) {
             // Intentionally mutate upperBounds1 here for return value.

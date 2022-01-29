@@ -214,7 +214,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
         if (child_pid == 0) {
             // Child process; wait for file to exist before writing to cache.
             while (!FileOps::exists(signalFile)) {
-                Timer::timedSleep(chrono::microseconds(1000), "Waiting for signal");
+                Timer::timedSleep(chrono::microseconds(1000), *nullLogger, "Waiting for signal");
             }
 
             // Let's update a file and write over the cache.

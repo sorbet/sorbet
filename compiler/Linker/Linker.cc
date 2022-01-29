@@ -6,7 +6,7 @@ using namespace std;
 namespace sorbet::compiler {
 enum class OS { Lin, Darwin };
 bool Linker::run(spdlog::logger &log, vector<string> objectFiles, string outputFile) {
-    Timer timer("linking");
+    Timer timer(log, "linking");
     OS os;
 #if defined(__linux__)
     os = OS::Lin;

@@ -1583,7 +1583,7 @@ void GlobalState::sanityCheck() const {
         return;
     }
 
-    Timer timeit("GlobalState::sanityCheck");
+    Timer timeit(tracer(), "GlobalState::sanityCheck");
     ENFORCE(namesUsedTotal() > 0, "empty name table size");
     ENFORCE(!strings.empty(), "empty string table size");
     ENFORCE(!namesByHash.empty(), "empty name hash table size");
@@ -1691,7 +1691,7 @@ bool GlobalState::unfreezeSymbolTable() {
 }
 
 unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
-    Timer timeit("GlobalState::deepCopy", this->creation);
+    Timer timeit(tracer(), "GlobalState::deepCopy", this->creation);
     this->sanityCheck();
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
@@ -1775,7 +1775,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->packageDB_ = packageDB_.deepCopy();
     result->sanityCheck();
     {
-        Timer timeit2("GlobalState::deepCopyOut");
+        Timer timeit2(tracer(), "GlobalState::deepCopyOut");
         result->creation = timeit2.getFlowEdge();
     }
     return result;

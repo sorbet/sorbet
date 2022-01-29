@@ -657,7 +657,7 @@ void readOptions(Options &opts,
                  char *argv[],
                  const vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
-    Timer timeit("readOptions");
+    Timer timeit(*logger, "readOptions");
     cxxopts::Options options = buildOptions(semanticExtensionProviders);
     try {
         cxxopts::ParseResult raw = ConfigParser::parseConfig(logger, argc, argv, options);
