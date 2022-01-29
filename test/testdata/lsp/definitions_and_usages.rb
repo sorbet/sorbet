@@ -47,6 +47,14 @@ class TestClass
     bar + 10
   # ^^^ usage: barOpt 1,2
   end
+
+  def method_with_block_inside
+    [].each do |var|
+              # ^^^ def: var
+      var
+    # ^^^ usage: var
+    end
+  end
 end
 
 # Introduced to avoid awkward indenting.
