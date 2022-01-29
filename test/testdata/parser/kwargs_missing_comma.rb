@@ -18,4 +18,10 @@ class A
                       # error: missing token ","
     puts
   end
+
+  def example5(merchant:request: etc:)
+                      # error: missing token ","
+                              # ^ error: missing token ","
+    puts
+  end
 end
