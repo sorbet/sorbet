@@ -66,6 +66,7 @@ tuple<string, string> MESSAGES[] = {
     {"PositionalAfterKeyword", "positional arg \\\"{}\\\" after keyword arg"},
     {"IfInsteadOfItForTest", "Unexpected token \\\"if\\\"; did you mean \\\"it\\\"?"},
     {"MissingCommaBetweenKwargs", "missing \\\",\\\" between keyword args"},
+    {"CurlyBracesAroundBlockPass", "block pass should not be enclosed in curly braces"},
 
     // Parser warnings
     {"UselessElse", "else without rescue is useless"},
