@@ -138,6 +138,9 @@ void ErrorBuilder::addErrorSection(ErrorSection &&section) {
 
 void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     ENFORCE(state == State::WillBuild);
+    auto sectionTitle = gs.autocorrect ? "Autocorrect: Done" : "Autocorrect: Use `-a` to autocorrect";
+
+    std::vector<ErrorLine> messages;
     for (auto &edit : autocorrect.edits) {
         uint32_t n = edit.loc.endPos() - edit.loc.beginPos();
         if (gs.autocorrect) {
@@ -146,15 +149,16 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
                     ? ErrorLine::from(edit.loc, "Deleted")
                     : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Inserted" : "Replaced with", edit.replacement);
 
-            addErrorSection(ErrorSection("Autocorrect: Done", {line}));
+            messages.emplace_back(std::move(line));
         } else {
             auto line = edit.replacement == "" ? ErrorLine::from(edit.loc, "Delete")
                                                : ErrorLine::from(edit.loc, "{} `{}`",
                                                                  n == 0 ? "Insert" : "Replace with", edit.replacement);
 
-            addErrorSection(ErrorSection("Autocorrect: Use `-a` to autocorrect", {line}));
+            messages.emplace_back(std::move(line));
         }
     }
+    addErrorSection(ErrorSection{sectionTitle, std::move(messages)});
     this->autocorrects.emplace_back(move(autocorrect));
 }
 

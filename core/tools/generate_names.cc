@@ -375,6 +375,7 @@ NameDef names[] = {
     {"unresolvedAncestors", "<unresolved-ancestors>"},
     {"defineTopClassOrModule", "<define-top-class-or-module>"},
     {"nilForSafeNavigation", "<nil-for-safe-navigation>"},
+    {"checkAndAnd", "<check-and-and>"},
 
     {"isA_p", "is_a?"},
     {"kindOf_p", "kind_of?"},

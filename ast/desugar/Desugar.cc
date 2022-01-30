@@ -1059,9 +1059,38 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto iff = MK::If(loc, std::move(cond), std::move(rhs), std::move(lhs));
                     result = std::move(iff);
                 } else {
-                    core::NameRef tempName = dctx.freshNameUnique(core::Names::andAnd());
-                    auto temp = MK::Assign(loc, tempName, std::move(lhs));
-                    auto iff = MK::If(loc, MK::Local(loc, tempName), std::move(rhs), MK::Local(loc, tempName));
+                    // TODO(jez) completion test
+                    // TODO(jez) private test (both implicit and explicit self)
+                    // TODO(jez) parser::Or as well?
+                    // TODO(jez) Can we make this handle `!(...).nil?` and `(...).is_a?(...)` or is that hard?
+                    // TODO(jez) This doesn't generalize to all `if` conditions like
+                    //   if a.foo; a.foo.even?; end
+                    // is that ok?
+                    auto andAndTemp = dctx.freshNameUnique(core::Names::andAnd());
+
+                    auto *lhsSend = ast::cast_tree<ast::Send>(lhs);
+                    auto *rhsSend = ast::cast_tree<ast::Send>(rhs);
+
+                    ExpressionPtr thenp;
+                    if (lhsSend != nullptr && rhsSend != nullptr) {
+                        auto lhsSource = core::Loc(dctx.ctx.file, lhsSend->loc).source(dctx.ctx);
+                        auto rhsRecvSource = core::Loc(dctx.ctx.file, rhsSend->recv.loc()).source(dctx.ctx);
+                        if (lhsSource.has_value() && lhsSource == rhsRecvSource) {
+                            // TODO(jez) What locs should we be using?
+                            rhsSend->insertPosArg(0, std::move(rhsSend->recv));
+                            rhsSend->insertPosArg(1, MK::Local(loc, andAndTemp));
+                            rhsSend->insertPosArg(2, MK::Symbol(rhsSend->funLoc, rhsSend->fun));
+                            rhsSend->recv = MK::Constant(loc, core::Symbols::Magic());
+                            rhsSend->fun = core::Names::checkAndAnd();
+                            thenp = std::move(rhs);
+                        } else {
+                            thenp = std::move(rhs);
+                        }
+                    } else {
+                        thenp = std::move(rhs);
+                    }
+                    auto temp = MK::Assign(loc, andAndTemp, std::move(lhs));
+                    auto iff = MK::If(loc, MK::Local(loc, andAndTemp), std::move(thenp), MK::Local(loc, andAndTemp));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
                     result = std::move(wrapped);
                 }

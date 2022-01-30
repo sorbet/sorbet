@@ -606,6 +606,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             if (!explanations.empty()) {
                 e.addErrorSection(
                     ErrorSection("Got " + args.fullType.type.show(gs) + " originating from:", explanations));
+                // TODO(jez) fix this
             }
             auto receiverLoc = core::Loc{args.locs.file, args.locs.receiver};
             if (receiverLoc.exists() && (gs.suggestUnsafe.has_value() ||
@@ -2451,6 +2452,137 @@ public:
     }
 } Magic_selfNew;
 
+class Magic_checkAndAnd : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        // args[0] is recv
+        // args[1] is the && tmp var
+        // args[2] is the method name
+        // args[3...] are the args
+
+        ENFORCE(args.args.size() >= 3, "Desugar invariant failed");
+        if (args.args.size() < 3) {
+            return;
+        }
+
+        auto selfTy = *args.args[0];
+        auto selfTyAndAnd = *args.args[1];
+
+        if (!isa_type<LiteralType>(args.args[2]->type)) {
+            return;
+        }
+        auto lit = cast_type_nonnull<LiteralType>(args.args[2]->type);
+        if (!lit.derivesFrom(gs, Symbols::Symbol())) {
+            return;
+        }
+        auto fun = lit.asName(gs);
+
+        uint16_t numPosArgs = args.numPosArgs - 3;
+
+        InlinedVector<const TypeAndOrigins *, 2> sendArgStore;
+        InlinedVector<LocOffsets, 2> sendArgLocs;
+        for (int i = 3; i < args.args.size(); ++i) {
+            sendArgStore.emplace_back(args.args[i]);
+            sendArgLocs.emplace_back(args.locs.args[i]);
+        }
+        auto recvLoc = args.locs.args[0];
+        CallLocs sendLocs{args.locs.file, args.locs.call, recvLoc, args.locs.fun, sendArgLocs};
+
+        DispatchArgs innerArgs{
+            fun,
+            sendLocs,
+            numPosArgs,
+            sendArgStore,
+            selfTy.type,
+            selfTy,
+            selfTy.type,
+            args.block,
+            args.originForUninitialized,
+            args.isPrivateOk,
+            args.suppressErrors,
+        };
+        auto dispatched = selfTy.type.dispatchCall(gs, innerArgs);
+
+        auto multipleComponents = dispatched.secondary != nullptr;
+        if (multipleComponents) {
+            int unknownMethodOnNilClassErrors = 0;
+            for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
+                for (auto &err : it->main.errors) {
+                    if (err->what == core::errors::Infer::UnknownMethod && it->main.receiver.isNilClass()) {
+                        unknownMethodOnNilClassErrors++;
+                    }
+                }
+            }
+
+            if (unknownMethodOnNilClassErrors == 1 && !core::Types::isSubType(gs, selfTy.type, selfTyAndAnd.type)) {
+                DispatchArgs newInnerArgs{
+                    fun,
+                    sendLocs,
+                    numPosArgs,
+                    sendArgStore,
+                    selfTyAndAnd.type,
+                    selfTyAndAnd,
+                    selfTyAndAnd.type,
+                    args.block,
+                    args.originForUninitialized,
+                    args.isPrivateOk,
+                    args.suppressErrors,
+                };
+                auto retried = selfTyAndAnd.type.dispatchCall(gs, newInnerArgs);
+
+                auto foundErrorOnRetry = false;
+                for (auto it = &retried; it != nullptr; it = it->secondary.get()) {
+                    foundErrorOnRetry |= !it->main.errors.empty();
+                }
+
+                if (!foundErrorOnRetry) {
+                    for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
+                        for (auto &err : it->main.errors) {
+                            if (err->what == core::errors::Infer::UnknownMethod && it->main.receiver.isNilClass()) {
+                                auto newErr = gs.beginError(err->loc, core::errors::Infer::CallAfterAndAnd);
+                                newErr.setHeader("Call to method `{}` after `{}` assumes result type doesn't change",
+                                                 fun.show(gs), "&&");
+                                auto header = ErrorColors::format(
+                                    "Saw type narrowed to `{}` before `{}`:", selfTyAndAnd.type.show(gs), "&&");
+                                newErr.addErrorSection(ErrorSection(
+                                    header, selfTyAndAnd.origins2Explanations(gs, args.originForUninitialized)));
+                                newErr.addErrorSection(selfTy.explainGot(gs, args.originForUninitialized));
+
+                                newErr.addErrorNote("Sorbet never assumes that a method called twice returns the same "
+                                                    "result both times.\n    Either factor out a variable or use `{}`",
+                                                    "&.");
+
+                                auto funLoc = core::Loc(args.locs.file, args.locs.fun);
+                                if (funLoc.exists() && !funLoc.empty() &&
+                                    funLoc.adjustLen(gs, -1, 1).source(gs) == ".") {
+                                    auto andAndLoc = args.locs.args[1];
+                                    newErr.addAutocorrect(AutocorrectSuggestion{
+                                        "Refactor to use `&.`",
+                                        {
+                                            AutocorrectSuggestion::Edit{
+                                                core::Loc(args.locs.file, andAndLoc.beginPos(), recvLoc.beginPos()),
+                                                "",
+                                            },
+                                            AutocorrectSuggestion::Edit{funLoc.adjustLen(gs, -1, 1), "&."},
+                                        },
+                                    });
+                                }
+
+                                err = newErr.build();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (auto &err : res.main.errors) {
+            dispatched.main.errors.emplace_back(std::move(err));
+        }
+        res = std::move(dispatched);
+    }
+} Magic_checkAndAnd;
+
 class Magic_splat : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -3458,6 +3590,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestType(), &Magic_suggestUntypedConstantType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::selfNew(), &Magic_selfNew},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::checkAndAnd(), &Magic_checkAndAnd},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::splat(), &Magic_splat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::toHashDup(), &Magic_toHash},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::toHashNoDup(), &Magic_toHash},

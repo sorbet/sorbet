@@ -1,38 +1,77 @@
-autocorrect_and_and.rb:12: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+autocorrect_and_and.rb:12: Call to method `even?` after `&&` assumes result type doesn't change https://srb.help/7037
     12 |    if a.foo && a.foo.even?
                               ^^^^^
-  Got T.nilable(Integer) originating from:
+  Saw type narrowed to `Integer` before `&&`:
+    autocorrect_and_and.rb:12:
+    12 |    if a.foo && a.foo.even?
+               ^^^^^
+    autocorrect_and_and.rb:12:
+    12 |    if a.foo && a.foo.even?
+               ^^^^^^^^^^^^^^^^^^^^
+  Got `T.nilable(Integer)` originating from:
     autocorrect_and_and.rb:12:
     12 |    if a.foo && a.foo.even?
                         ^^^^^
+  Note:
+    Sorbet never assumes that a method called twice returns the same result both times.
+    Either factor out a variable or use `&.`
   Autocorrect: Done
-    autocorrect_and_and.rb:12: Replaced with `T.must(a.foo)`
+    autocorrect_and_and.rb:12: Deleted
     12 |    if a.foo && a.foo.even?
-                        ^^^^^
+               ^^^^^^^^^
+    autocorrect_and_and.rb:12: Replaced with `&.`
+    12 |    if a.foo && a.foo.even?
+                             ^
 
-autocorrect_and_and.rb:17: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+autocorrect_and_and.rb:17: Call to method `even?` after `&&` assumes result type doesn't change https://srb.help/7037
     17 |        a.foo.even?
                       ^^^^^
-  Got T.nilable(Integer) originating from:
+  Saw type narrowed to `Integer` before `&&`:
+    autocorrect_and_and.rb:16:
+    16 |    if a.foo &&
+               ^^^^^
+    autocorrect_and_and.rb:16:
+    16 |    if a.foo &&
+    17 |        a.foo.even?
+  Got `T.nilable(Integer)` originating from:
     autocorrect_and_and.rb:17:
     17 |        a.foo.even?
                 ^^^^^
+  Note:
+    Sorbet never assumes that a method called twice returns the same result both times.
+    Either factor out a variable or use `&.`
   Autocorrect: Done
-    autocorrect_and_and.rb:17: Replaced with `T.must(a.foo)`
+    autocorrect_and_and.rb:16: Deleted
+    16 |    if a.foo &&
     17 |        a.foo.even?
-                ^^^^^
+    autocorrect_and_and.rb:17: Replaced with `&.`
+    17 |        a.foo.even?
+                     ^
 
-autocorrect_and_and.rb:22: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+autocorrect_and_and.rb:22: Call to method `even?` after `&&` assumes result type doesn't change https://srb.help/7037
     22 |        foo.even?
                     ^^^^^
-  Got T.nilable(Integer) originating from:
+  Saw type narrowed to `Integer` before `&&`:
+    autocorrect_and_and.rb:21:
+    21 |    if foo &&
+               ^^^
+    autocorrect_and_and.rb:21:
+    21 |    if foo &&
+    22 |        foo.even?
+  Got `T.nilable(Integer)` originating from:
     autocorrect_and_and.rb:22:
     22 |        foo.even?
                 ^^^
+  Note:
+    Sorbet never assumes that a method called twice returns the same result both times.
+    Either factor out a variable or use `&.`
   Autocorrect: Done
-    autocorrect_and_and.rb:22: Replaced with `T.must(foo)`
+    autocorrect_and_and.rb:21: Deleted
+    21 |    if foo &&
     22 |        foo.even?
-                ^^^
+    autocorrect_and_and.rb:22: Replaced with `&.`
+    22 |        foo.even?
+                   ^
 Errors: 3
 
 --------------------------------------------------------------------------
@@ -48,17 +87,15 @@ class A
   def bar
     a = A.new
 
-    if a.foo && T.must(a.foo).even?
+    if a.foo&.even?
       puts a.foo
     end
 
-    if a.foo &&
-        T.must(a.foo).even?
+    if a.foo&.even?
       puts a.foo
     end
 
-    if foo &&
-        T.must(foo).even?
+    if foo&.even?
       puts a.foo
     end
   end
