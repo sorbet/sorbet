@@ -1,0 +1,65 @@
+autocorrect_and_and.rb:12: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    12 |    if a.foo && a.foo.even?
+                              ^^^^^
+  Got T.nilable(Integer) originating from:
+    autocorrect_and_and.rb:12:
+    12 |    if a.foo && a.foo.even?
+                        ^^^^^
+  Autocorrect: Done
+    autocorrect_and_and.rb:12: Replaced with `T.must(a.foo)`
+    12 |    if a.foo && a.foo.even?
+                        ^^^^^
+
+autocorrect_and_and.rb:17: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    17 |        a.foo.even?
+                      ^^^^^
+  Got T.nilable(Integer) originating from:
+    autocorrect_and_and.rb:17:
+    17 |        a.foo.even?
+                ^^^^^
+  Autocorrect: Done
+    autocorrect_and_and.rb:17: Replaced with `T.must(a.foo)`
+    17 |        a.foo.even?
+                ^^^^^
+
+autocorrect_and_and.rb:22: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    22 |        foo.even?
+                    ^^^^^
+  Got T.nilable(Integer) originating from:
+    autocorrect_and_and.rb:22:
+    22 |        foo.even?
+                ^^^
+  Autocorrect: Done
+    autocorrect_and_and.rb:22: Replaced with `T.must(foo)`
+    22 |        foo.even?
+                ^^^
+Errors: 3
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+class A
+  extend T::Sig
+
+  sig {returns(T.nilable(Integer))}
+  def foo; nil; end
+
+  def bar
+    a = A.new
+
+    if a.foo && T.must(a.foo).even?
+      puts a.foo
+    end
+
+    if a.foo &&
+        T.must(a.foo).even?
+      puts a.foo
+    end
+
+    if foo &&
+        T.must(foo).even?
+      puts a.foo
+    end
+  end
+end
