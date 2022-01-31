@@ -602,11 +602,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 }
             }
-            auto explanations = args.fullType.origins2Explanations(gs, args.originForUninitialized);
-            if (!explanations.empty()) {
-                e.addErrorSection(
-                    ErrorSection("Got " + args.fullType.type.show(gs) + " originating from:", explanations));
-            }
+            e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
             auto receiverLoc = core::Loc{args.locs.file, args.locs.receiver};
             if (receiverLoc.exists() && (gs.suggestUnsafe.has_value() ||
                                          (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
