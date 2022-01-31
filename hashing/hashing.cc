@@ -98,7 +98,7 @@ core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<cor
 
 unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat, spdlog::logger &logger,
                                                   const realmain::options::Options &hashingOpts) {
-    Timer timeit("computeFileHash");
+    Timer timeit(logger, "computeFileHash");
     unique_ptr<core::GlobalState> lgs;
     core::FileRef fref = makeEmptyGlobalStateForFile(logger, move(forWhat), /* out param */ lgs, hashingOpts);
     auto ast = realmain::pipeline::indexOne(opts(), *lgs, fref);
@@ -114,7 +114,7 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
 
 void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spdlog::logger &logger,
                                 WorkerPool &workers, const realmain::options::Options &opts) {
-    Timer timeit("computeFileHashes");
+    Timer timeit(logger, "computeFileHashes");
     auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
     for (size_t i = 0; i < files.size(); i++) {
         fileq->push(i, 1);
@@ -179,7 +179,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
     const core::GlobalState &sharedGs = *gs;
     auto resultq =
         make_shared<BlockingBoundedQueue<vector<pair<core::FileRef, unique_ptr<const core::FileHash>>>>>(asts.size());
-    Timer timeit("computeFileHashes");
+    Timer timeit(logger, "computeFileHashes");
     workers.multiplexJob("lspStateHash", [fileq, resultq, &asts, &sharedGs, &logger, &opts]() {
         unique_ptr<Timer> timeit;
         vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
@@ -189,7 +189,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     if (timeit == nullptr) {
-                        timeit = make_unique<Timer>("computeFileHashesWorker");
+                        timeit = make_unique<Timer>(logger, "computeFileHashesWorker");
                     }
                     processedByThread++;
 

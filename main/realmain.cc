@@ -200,7 +200,7 @@ struct AutogenResult {
 
 void runAutogen(const core::GlobalState &gs, options::Options &opts, const autogen::AutoloaderConfig &autoloaderCfg,
                 WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
-    Timer timeit("autogen");
+    Timer timeit(logger, "autogen");
 
     // extract all the packages we can find. (This ought to be pretty fast: if it's not, then we can move this into the
     // parallel loop below.)
@@ -226,7 +226,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         int n = 0;
         int autogenVersion = opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
         {
-            Timer timeit("autogenWorker");
+            Timer timeit(logger, "autogenWorker");
             int idx = 0;
 
             for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
@@ -246,11 +246,11 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 AutogenResult::Serialized serialized;
 
                 if (opts.print.Autogen.enabled) {
-                    Timer timeit("autogenToString");
+                    Timer timeit(logger, "autogenToString");
                     serialized.strval = pf.toString(ctx, autogenVersion);
                 }
                 if (opts.print.AutogenMsgPack.enabled) {
-                    Timer timeit("autogenToMsgpack");
+                    Timer timeit(logger, "autogenToMsgpack");
                     serialized.msgpack = pf.toMsgpack(ctx, autogenVersion);
                 }
 
@@ -258,13 +258,13 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                     // Exclude RBI files because they are not loadable and should not appear in
                     // auto-loader related output.
                     if (opts.print.AutogenSubclasses.enabled) {
-                        Timer timeit("autogenSubclasses");
+                        Timer timeit(logger, "autogenSubclasses");
                         serialized.subclasses = autogen::Subclasses::listAllSubclasses(
                             ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
                             opts.autogenSubclassesRelativeIgnorePatterns);
                     }
                     if (opts.print.AutogenAutoloader.enabled) {
-                        Timer timeit("autogenNamedDefs");
+                        Timer timeit(logger, "autogenNamedDefs");
                         autogen::DefTreeBuilder::addParsedFileDefinitions(ctx, autoloaderCfg, out.defTree, pf);
                     }
                 }
@@ -289,13 +289,13 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             merged[print.first] = move(print.second);
         }
         if (opts.print.AutogenAutoloader.enabled) {
-            Timer timeit("autogenAutoloaderDefTreeMerge");
+            Timer timeit(logger, "autogenAutoloaderDefTreeMerge");
             root = autogen::DefTreeBuilder::merge(gs, move(root), move(*out.defTree));
         }
     }
 
     {
-        Timer timeit("autogenDependencyDBPrint");
+        Timer timeit(logger, "autogenDependencyDBPrint");
         for (auto &elem : merged) {
             if (opts.print.Autogen.enabled) {
                 opts.print.Autogen.print(elem.strval);
@@ -307,18 +307,18 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     }
     if (opts.print.AutogenAutoloader.enabled) {
         {
-            Timer timeit("autogenAutoloaderPrune");
+            Timer timeit(logger, "autogenAutoloaderPrune");
             autogen::DefTreeBuilder::collapseSameFileDefs(gs, autoloaderCfg, root);
         }
         {
-            Timer timeit("autogenAutoloaderWrite");
+            Timer timeit(logger, "autogenAutoloaderWrite");
             autogen::AutoloadWriter::writeAutoloads(gs, workers, autoloaderCfg, opts.print.AutogenAutoloader.outputPath,
                                                     root);
         }
     }
 
     if (opts.print.AutogenSubclasses.enabled) {
-        Timer timeit("autogenSubclassesPrint");
+        Timer timeit(logger, "autogenSubclassesPrint");
 
         // Merge the {Parent: Set{Child1, Child2}} maps from each thread
         autogen::Subclasses::Map childMap;
@@ -344,7 +344,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     }
 
     if (opts.autoloaderConfig.packagedAutoloader) {
-        Timer timeit("autogenPackageAutoloads");
+        Timer timeit(logger, "autogenPackageAutoloads");
         autogen::AutoloadWriter::writePackageAutoloads(gs, autoloaderCfg, opts.print.AutogenAutoloader.outputPath,
                                                        packageq);
     }
@@ -525,7 +525,7 @@ int realmain(int argc, char *argv[]) {
         gs = loop.runLSP(make_shared<lsp::LSPFDInput>(logger, STDIN_FILENO)).value_or(nullptr);
 #endif
     } else {
-        Timer timeall("wall_time");
+        Timer timeall(logger, "wall_time");
         vector<core::FileRef> inputFiles;
         logger->trace("Files: ");
 

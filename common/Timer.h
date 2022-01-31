@@ -8,17 +8,24 @@
 namespace sorbet {
 
 class Timer {
-    Timer(ConstExprStr name, FlowId prev, std::initializer_list<std::pair<ConstExprStr, std::string>> args,
-          microseconds start, std::initializer_list<int> histogramBuckets);
+    Timer(spdlog::logger &log, ConstExprStr name, FlowId prev,
+          std::initializer_list<std::pair<ConstExprStr, std::string>> args, microseconds start,
+          std::initializer_list<int> histogramBuckets);
 
 public:
-    Timer(ConstExprStr name);
-    Timer(ConstExprStr name, std::initializer_list<int> histogramBuckets);
-    Timer(ConstExprStr name, FlowId prev);
-    Timer(ConstExprStr name, std::initializer_list<std::pair<ConstExprStr, std::string>> args);
-    Timer(ConstExprStr name, FlowId prev, std::initializer_list<std::pair<ConstExprStr, std::string>> args);
-    Timer(ConstExprStr name, FlowId prev, std::initializer_list<std::pair<ConstExprStr, std::string>> args,
+    Timer(spdlog::logger &log, ConstExprStr name);
+    Timer(spdlog::logger &log, ConstExprStr name, std::initializer_list<int> histogramBuckets);
+    Timer(spdlog::logger &log, ConstExprStr name, FlowId prev);
+    Timer(spdlog::logger &log, ConstExprStr name, std::initializer_list<std::pair<ConstExprStr, std::string>> args);
+    Timer(spdlog::logger &log, ConstExprStr name, FlowId prev,
+          std::initializer_list<std::pair<ConstExprStr, std::string>> args,
           std::initializer_list<int> histogramBuckets);
+    Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name, FlowId prev);
+    Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name);
+    Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name, FlowId prev,
+          std::initializer_list<std::pair<ConstExprStr, std::string>> args);
+    Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name,
+          std::initializer_list<std::pair<ConstExprStr, std::string>> args);
     // Delete copy constructor to avoid accidentally copying and reporting a timer twice.
     Timer(const Timer &) = delete;
     // Define custom move constructor to avoid reporting moved timers.
@@ -42,8 +49,8 @@ public:
 
     // TODO We could add more overloads for this if we need them (to create other kinds of Timers)
     // We could also make this more generic to allow more sleep duration types.
-    static void timedSleep(const std::chrono::microseconds &sleep_duration, ConstExprStr name) {
-        Timer timer(name);
+    static void timedSleep(const std::chrono::microseconds &sleep_duration, spdlog::logger &log, ConstExprStr name) {
+        Timer timer(log, name);
         std::this_thread::sleep_for(sleep_duration);
     }
 
@@ -52,6 +59,7 @@ public:
     void setEndTime();
 
 private:
+    spdlog::logger &log;
     ConstExprStr name;
     FlowId prev;
     FlowId self;

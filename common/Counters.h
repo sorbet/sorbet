@@ -50,6 +50,7 @@ class CounterStateDatabase;
 // using its abstractions for computing on and gathering times were a substantial overhead.
 struct microseconds {
     int64_t usec;
+    microseconds(int64_t usec) : usec(usec) {}
 };
 
 struct CounterState {

@@ -464,7 +464,7 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
     workers.multiplexJob("runAutogenWriteAutoloads", [&gs, &tasks, &alCfg, inputq, outputq]() {
         int n = 0;
         {
-            Timer timeit("autogenWriteAutoloadsWorker");
+            Timer timeit(gs.tracer(), "autogenWriteAutoloadsWorker");
             int idx = 0;
 
             for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {

@@ -170,7 +170,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     // This path only works for fast path updates.
     ENFORCE(updates.canTakeFastPath);
 
-    Timer timeit("fast_path");
+    Timer timeit(config->logger, "fast_path");
     vector<core::FileRef> subset;
     vector<core::NameHash> changedHashes;
     // Replace error queue with one that is owned by this thread.
@@ -283,7 +283,7 @@ updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file,
 bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &ignore,
                                  vector<ast::ParsedFile> &out) const {
     auto &logger = *config->logger;
-    Timer timeit("slow_path.copy_indexes");
+    Timer timeit(logger, "slow_path.copy_indexes");
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
     for (int i = 0; i < indexed.size(); i++) {
         fileq->push(i, 1);
@@ -338,7 +338,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
 
     auto &logger = config->logger;
     unique_ptr<ShowOperation> slowPathOp = make_unique<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
-    Timer timeit("slow_path");
+    Timer timeit(logger, "slow_path");
     ENFORCE(!updates.canTakeFastPath || config->disableFastPath);
     ENFORCE(updates.updatedGS.has_value());
     if (!updates.updatedGS.has_value()) {
@@ -387,7 +387,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
 
         ENFORCE(gs->lspQuery.isEmpty());
         if (gs->sleepInSlowPath) {
-            Timer::timedSleep(3000ms, "slow_path.resolve.sleep");
+            Timer::timedSleep(3000ms, *logger, "slow_path.resolve.sleep");
         }
         auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers);
         if (!maybeResolved.hasResult()) {
@@ -399,7 +399,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
             ENFORCE(tree.file.exists());
         }
         if (gs->sleepInSlowPath) {
-            Timer::timedSleep(3000ms, "slow_path.typecheck.sleep");
+            Timer::timedSleep(3000ms, *logger, "slow_path.typecheck.sleep");
         }
 
         // Inform the fast path that this global state is OK for typechecking as resolution has completed.
@@ -417,7 +417,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         // [Test only] Wait for a preemption if one is expected.
         while (updates.preemptionsExpected > 0) {
             while (!preemptManager->tryRunScheduledPreemptionTask(*gs)) {
-                Timer::timedSleep(1ms, "slow_path.expected_preemption.sleep");
+                Timer::timedSleep(1ms, *logger, "slow_path.expected_preemption.sleep");
             }
             updates.preemptionsExpected--;
         }
@@ -425,7 +425,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         // [Test only] Wait for a cancellation if one is expected.
         if (updates.cancellationExpected) {
             while (!epochManager.wasTypecheckingCanceled()) {
-                Timer::timedSleep(1ms, "slow_path.expected_cancellation.sleep");
+                Timer::timedSleep(1ms, *logger, "slow_path.expected_cancellation.sleep");
             }
             return;
         }
@@ -533,7 +533,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     auto queryCollector = make_shared<QueryCollector>();
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, queryCollector);
 
-    Timer timeit("query");
+    Timer timeit(config->logger, "query");
     prodCategoryCounterInc("lsp.updates", "query");
     ENFORCE(gs->errorQueue->isEmpty());
     ENFORCE(gs->lspQuery.isEmpty());
