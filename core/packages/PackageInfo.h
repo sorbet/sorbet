@@ -20,6 +20,10 @@ public:
     virtual core::NameRef mangledName() const = 0;
     virtual const std::vector<core::NameRef> &fullName() const = 0;
     virtual const std::vector<std::string> &pathPrefixes() const = 0;
+    virtual std::vector<std::vector<core::NameRef>> exports() const = 0;
+    virtual std::vector<std::vector<core::NameRef>> testExports() const = 0;
+    virtual std::vector<std::vector<core::NameRef>> imports() const = 0;
+    virtual std::vector<std::vector<core::NameRef>> testImports() const = 0;
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
     virtual core::Loc definitionLoc() const = 0;
     virtual bool exists() const final;
