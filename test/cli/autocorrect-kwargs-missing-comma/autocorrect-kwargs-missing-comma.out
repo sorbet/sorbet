@@ -1,0 +1,72 @@
+autocorrect-kwargs-missing-comma.rb:4: missing "," between keyword args https://srb.help/2001
+     4 |  def example1(slug:, token:, merchant:request:)
+                                               ^
+  Autocorrect: Done
+    autocorrect-kwargs-missing-comma.rb:4: Inserted `, `
+     4 |  def example1(slug:, token:, merchant:request:)
+                                               ^
+
+autocorrect-kwargs-missing-comma.rb:7: missing "," between keyword args https://srb.help/2001
+     7 |  def example2(merchant: request:)
+                                ^
+  Autocorrect: Done
+    autocorrect-kwargs-missing-comma.rb:7: Replaced with `, `
+     7 |  def example2(merchant: request:)
+                                ^
+
+autocorrect-kwargs-missing-comma.rb:10: missing "," between keyword args https://srb.help/2001
+    10 |  def example3(merchant:request:)
+                                ^
+  Autocorrect: Done
+    autocorrect-kwargs-missing-comma.rb:10: Inserted `, `
+    10 |  def example3(merchant:request:)
+                                ^
+
+autocorrect-kwargs-missing-comma.rb:14: missing "," between keyword args https://srb.help/2001
+    14 |  def example4(merchant:request:, etc:)
+                                ^
+  Autocorrect: Done
+    autocorrect-kwargs-missing-comma.rb:14: Inserted `, `
+    14 |  def example4(merchant:request:, etc:)
+                                ^
+
+autocorrect-kwargs-missing-comma.rb:18: missing "," between keyword args https://srb.help/2001
+    18 |  def example5(merchant:request: etc:)
+                                ^
+  Autocorrect: Done
+    autocorrect-kwargs-missing-comma.rb:18: Inserted `, `
+    18 |  def example5(merchant:request: etc:)
+                                ^
+
+autocorrect-kwargs-missing-comma.rb:18: missing "," between keyword args https://srb.help/2001
+    18 |  def example5(merchant:request: etc:)
+                                        ^
+  Autocorrect: Done
+    autocorrect-kwargs-missing-comma.rb:18: Replaced with `, `
+    18 |  def example5(merchant:request: etc:)
+                                        ^
+Errors: 6
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+class A
+  def example1(slug:, token:, merchant:, request:)
+  end
+  
+  def example2(merchant:, request:)
+  end
+
+  def example3(merchant:, request:)
+    puts
+  end
+
+  def example4(merchant:, request:, etc:)
+    puts
+  end
+
+  def example5(merchant:, request:, etc:)
+    puts
+  end
+end

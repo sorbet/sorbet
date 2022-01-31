@@ -29,6 +29,9 @@ class ErrorToError {
             case ruby_parser::dclass::IfInsteadOfItForTest:
                 e.replaceWith("Replace with `it`", loc, "it");
                 break;
+            case ruby_parser::dclass::MissingCommaBetweenKwargs:
+                e.replaceWith("Insert a comma", loc, ", ");
+                break;
             default:
                 break;
         }
