@@ -2,7 +2,7 @@ No errors! Great job.
 test/cli/cache-dsl/attr_accessor.rb:7: Method `prop=` does not exist on `A` https://srb.help/7003
      7 |a.prop = 7
           ^^^^^^
-  Got A originating from:
+  Got `A` originating from:
     test/cli/cache-dsl/attr_accessor.rb:6:
      6 |a = A.new
             ^^^^^
@@ -14,7 +14,7 @@ test/cli/cache-dsl/attr_accessor.rb:7: Method `prop=` does not exist on `A` http
 test/cli/cache-dsl/attr_accessor.rb:8: Method `prop` does not exist on `A` https://srb.help/7003
      8 |a.prop
           ^^^^
-  Got A originating from:
+  Got `A` originating from:
     test/cli/cache-dsl/attr_accessor.rb:6:
      6 |a = A.new
             ^^^^^
@@ -26,7 +26,7 @@ Errors: 2
 test/cli/cache-dsl/attr_accessor.rb:7: Method `prop=` does not exist on `A` https://srb.help/7003
      7 |a.prop = 7
           ^^^^^^
-  Got A originating from:
+  Got `A` originating from:
     test/cli/cache-dsl/attr_accessor.rb:6:
      6 |a = A.new
             ^^^^^
@@ -38,7 +38,7 @@ test/cli/cache-dsl/attr_accessor.rb:7: Method `prop=` does not exist on `A` http
 test/cli/cache-dsl/attr_accessor.rb:8: Method `prop` does not exist on `A` https://srb.help/7003
      8 |a.prop
           ^^^^
-  Got A originating from:
+  Got `A` originating from:
     test/cli/cache-dsl/attr_accessor.rb:6:
      6 |a = A.new
             ^^^^^

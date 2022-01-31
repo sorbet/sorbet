@@ -1,7 +1,7 @@
 suggest_t_must.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
      4 |foo[0]
         ^^^^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     suggest_t_must.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -29,7 +29,7 @@ suggest_t_must.rb:6: Expected `String` but found `T.nilable(String)` for argumen
 suggest_t_must.rb:8: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
      8 |T::Array[T.nilable(Integer)].new.map(&:even?)
                                               ^^^^^^
-  Got T.nilable(Integer) originating from:
+  Got `T.nilable(Integer)` originating from:
     suggest_t_must.rb:8:
      8 |T::Array[T.nilable(Integer)].new.map(&:even?)
                                               ^
