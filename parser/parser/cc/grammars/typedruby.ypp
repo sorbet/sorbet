@@ -419,6 +419,9 @@ using namespace std::string_literals;
 
 %code requires {
 
+namespace ruby_parser {
+namespace bison {
+namespace TYPEDRUBY27 {
 union parser_value {
   ruby_parser::token *token;
   ruby_parser::delimited_node_list *delimited_list;
@@ -431,6 +434,9 @@ union parser_value {
   size_t size;
   bool boolean;
 };
+}
+}
+}
 
 }
 

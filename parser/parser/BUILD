@@ -57,10 +57,17 @@ bison(
     bison_options = [
         "-Wno-empty-rule",
         "-Wno-precedence",
-    ] + select({
-        "@com_stripe_ruby_typer//tools/config:dbg": ["--debug"],
-        "//conditions:default": [],
-    }),
+    ],
+)
+
+bison(
+    name = "typedruby_debug_bison",
+    src = "typedruby_debug.ypp",
+    bison_options = [
+        "-Wno-empty-rule",
+        "-Wno-precedence",
+        "--debug",
+    ],
 )
 
 cc_binary(
@@ -92,6 +99,7 @@ cc_library(
         ":gen_diagnostics_dclass",
         ":ragel_lexer",
         ":typedruby_release_bison",
+        ":typedruby_debug_bison",
     ],
     hdrs = glob(["include/**/*.hh"]),
     copts = [

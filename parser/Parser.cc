@@ -72,14 +72,19 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file, 
     buffer += source;
     buffer += "\0\0"sv;
     StableStringStorage<> scratch;
-    ruby_parser::typedruby_release27 driver(buffer, scratch, Builder::interface);
-
-    for (string local : initialLocals) {
-        driver.lex.declare(local);
+    unique_ptr<ruby_parser::base_driver> driver;
+    if (trace) {
+        driver = make_unique<ruby_parser::typedruby_debug27>(buffer, scratch, Builder::interface);
+    } else {
+        driver = make_unique<ruby_parser::typedruby_release27>(buffer, scratch, Builder::interface);
     }
 
-    auto ast = unique_ptr<Node>(builder.build(&driver, trace));
-    ErrorToError::run(gs, file, driver.diagnostics);
+    for (string local : initialLocals) {
+        driver->lex.declare(local);
+    }
+
+    auto ast = unique_ptr<Node>(builder.build(driver.get(), trace));
+    ErrorToError::run(gs, file, driver->diagnostics);
 
     if (!ast) {
         core::LocOffsets loc{0, 0};
