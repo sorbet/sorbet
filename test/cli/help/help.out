@@ -240,10 +240,6 @@ Usage:
                                 Error code to include in reporting. Errors
                                 not mentioned will be silenced. This option can
                                 be passed multiple times.
-      --package-rbi-output arg  Serialize package RBIs to folder. (default:
-                                "")
-      --dump-package-info arg   Dump package info in JSON form to the given
-                                file. (default: "")
       --suppress-error-code errorCode
                                 Error code to exclude from reporting. Errors
                                 mentioned will be silenced. This option can be

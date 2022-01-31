@@ -168,7 +168,6 @@ public:
     }
 
     NameRef addEq(GlobalState &gs) const;
-    NameRef lookupWithEq(const GlobalState &gs) const;
     NameRef addQuestion(GlobalState &gs) const;
 
     NameRef addAt(GlobalState &gs) const;

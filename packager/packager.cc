@@ -224,7 +224,7 @@ public:
     vector<Import> importedPackageNames;
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
-    vector<Export> exports_;
+    vector<Export> exports;
 
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
@@ -327,8 +327,8 @@ public:
             // either before the first export, or if we have no
             // exports, then right before the final `end`
             uint32_t exportLoc;
-            if (!exports_.empty()) {
-                exportLoc = exports_.front().fqn.loc.beginPos() - "export "sv.size() - 1;
+            if (!exports.empty()) {
+                exportLoc = exports.front().fqn.loc.beginPos() - "export "sv.size() - 1;
             } else {
                 exportLoc = loc.endPos() - "end"sv.size() - 1;
             }
@@ -360,8 +360,8 @@ public:
                                                     bool isPrivateTestExport) const {
         auto insertionLoc = core::Loc::none(loc.file());
         // first let's try adding it to the end of the imports.
-        if (!exports_.empty()) {
-            auto lastOffset = exports_.back().fqn.loc;
+        if (!exports.empty()) {
+            auto lastOffset = exports.back().fqn.loc;
             insertionLoc = {loc.file(), lastOffset.endPos(), lastOffset.endPos()};
         } else {
             // if we don't have any imports, then we can try adding it
@@ -390,43 +390,6 @@ public:
             fmt::format("Export `{}` in package `{}`", strName, name.toString(gs)),
             {{insertionLoc, fmt::format("\n  {} {}", isPrivateTestExport ? "export_for_test" : "export", strName)}});
         return {suggestion};
-    }
-
-    vector<vector<core::NameRef>> exports() const {
-        vector<vector<core::NameRef>> rv;
-        for (auto &e : exports_) {
-            if (e.type == ExportType::Public) {
-                rv.emplace_back(e.fqn.parts);
-            }
-        }
-        return rv;
-    }
-    vector<vector<core::NameRef>> testExports() const {
-        vector<vector<core::NameRef>> rv;
-        for (auto &e : exports_) {
-            if (e.type == ExportType::PrivateTest) {
-                rv.emplace_back(e.fqn.parts);
-            }
-        }
-        return rv;
-    }
-    vector<vector<core::NameRef>> imports() const {
-        vector<vector<core::NameRef>> rv;
-        for (auto &i : importedPackageNames) {
-            if (i.type == ImportType::Normal) {
-                rv.emplace_back(i.name.fullName.parts);
-            }
-        }
-        return rv;
-    }
-    vector<vector<core::NameRef>> testImports() const {
-        vector<vector<core::NameRef>> rv;
-        for (auto &i : importedPackageNames) {
-            if (i.type == ImportType::Test) {
-                rv.emplace_back(i.name.fullName.parts);
-            }
-        }
-        return rv;
     }
 
 private:
@@ -1126,8 +1089,8 @@ struct PackageInfoFinder {
             it = longer;
         }
 
-        ENFORCE(info->exports_.empty());
-        std::swap(exported, info->exports_);
+        ENFORCE(info->exports.empty());
+        std::swap(exported, info->exports);
     }
 
     bool allowedExportPrefix(core::Context ctx, const Export &shorter, const Export &longer) {
@@ -1400,7 +1363,7 @@ public:
     // Add the exports of a package as "friend-imports" into the import tree. These are used for building the package's
     // Test, Public and PublicTest modules.
     void mergePublicInterface(core::Context ctx, const PackageInfoImpl &pkg, ExportType type) {
-        for (const auto &exp : pkg.exports_) {
+        for (const auto &exp : pkg.exports) {
             if (exp.type != type) {
                 continue;
             }
@@ -1431,7 +1394,7 @@ private:
     // Enumerate and add all exported names from an imported package into the import tree
     void mergeAllExportsFromImportedPackage(core::Context ctx, const PackageInfoImpl &importedPackage,
                                             const Import &import) {
-        for (const auto &exp : importedPackage.exports_) {
+        for (const auto &exp : importedPackage.exports) {
             if (exp.type == ExportType::Public) {
                 addImport(ctx, importedPackage, import.name.loc, exp.fqn, import.type, true);
             }
@@ -1441,10 +1404,10 @@ private:
     // Add the entire top-level exported namespaces of an imported package into the import tree
     void mergeTopLevelExportFromImportedPackage(core::Context ctx, const PackageInfoImpl &importedPackage,
                                                 const Import &import) {
-        const bool exportsTestConstant = absl::c_any_of(importedPackage.exports_, [&](const auto &exp) -> bool {
+        const bool exportsTestConstant = absl::c_any_of(importedPackage.exports, [&](const auto &exp) -> bool {
             return exp.type == ExportType::Public && isPrimaryTestNamespace(exp.fqn.parts[0]);
         });
-        const bool exportsRealConstant = absl::c_any_of(importedPackage.exports_, [&](const auto &exp) -> bool {
+        const bool exportsRealConstant = absl::c_any_of(importedPackage.exports, [&](const auto &exp) -> bool {
             return exp.type == ExportType::Public && !isPrimaryTestNamespace(exp.fqn.parts[0]);
         });
 
@@ -1772,7 +1735,7 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
             e.setHeader("File `{}` does not belong to a package; add a `{}` file to one "
                         "of its parent directories",
-                        ctx.file.data(ctx).path(), PACKAGE_FILE_NAME);
+                        ctx.file.data(ctx).path(), "__package.rb");
         }
     }
     return parsedFile;
@@ -1798,8 +1761,8 @@ vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::Pars
     return files;
 }
 
-vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool &workers,
-                                               vector<ast::ParsedFile> files) {
+vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files) {
+    Timer timeit("packager");
     // Ensure files are in canonical order.
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
 
@@ -1841,14 +1804,6 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
             }
         }
     }
-
-    return files;
-}
-
-vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files) {
-    Timer timeit("packager");
-
-    files = findPackages(gs, workers, std::move(files));
 
     // Step 2:
     // * Find package files and rewrite them into virtual AST mappings.
@@ -1920,92 +1875,6 @@ ast::ParsedFile Packager::removePackageModules(core::Context ctx, ast::ParsedFil
     PrunePackageModules prune(intentionallyLeakASTs);
     pf.tree = ast::ShallowMap::apply(ctx, prune, move(pf.tree));
     return pf;
-}
-
-namespace {
-
-class ImportFormatter final {
-    const core::GlobalState &gs;
-
-public:
-    ImportFormatter(const core::GlobalState &gs) : gs(gs) {}
-
-    void operator()(std::string *out, const vector<core::NameRef> &name) const {
-        fmt::format_to(back_inserter(*out), "\"{}\"", absl::StrJoin(name, "::", NameFormatter(gs)));
-    }
-};
-
-class FileListFormatter final {
-    const core::GlobalState &gs;
-
-public:
-    FileListFormatter(const core::GlobalState &gs) : gs(gs) {}
-
-    void operator()(std::string *out, core::FileRef file) const {
-        out->append("\"");
-        out->append(file.data(gs).path());
-        out->append("\"");
-    }
-};
-
-struct PackageFiles {
-    vector<core::FileRef> files;
-    vector<core::FileRef> testFiles;
-};
-
-class PackageInfoFormatter final {
-    const core::GlobalState &gs;
-    const UnorderedMap<core::NameRef, PackageFiles> &packageFiles;
-
-public:
-    PackageInfoFormatter(const core::GlobalState &gs, const UnorderedMap<core::NameRef, PackageFiles> &packageFiles)
-        : gs(gs), packageFiles(packageFiles) {}
-
-    void operator()(std::string *out, core::NameRef mangledName) const {
-        const auto &pkg = gs.packageDB().getPackageInfo(mangledName);
-        out->append("{{");
-        out->append("\"name\":");
-        fmt::format_to(back_inserter(*out), "\"{}\",", absl::StrJoin(pkg.fullName(), "::", NameFormatter(gs)));
-        out->append("\"imports\":[");
-        fmt::format_to(back_inserter(*out), absl::StrJoin(pkg.imports(), ",", ImportFormatter(gs)));
-        out->append("],\"testImports\":[");
-        fmt::format_to(back_inserter(*out), absl::StrJoin(pkg.testImports(), ",", ImportFormatter(gs)));
-        out->append("],\"files\":[");
-        const auto it = packageFiles.find(mangledName);
-        if (it != packageFiles.end()) {
-            fmt::format_to(back_inserter(*out), absl::StrJoin(it->second.files, ",", FileListFormatter(gs)));
-        }
-        out->append("], \"testFiles\":[");
-        if (it != packageFiles.end()) {
-            fmt::format_to(back_inserter(*out), absl::StrJoin(it->second.testFiles, ",", FileListFormatter(gs)));
-        }
-        out->append("]}}");
-    }
-};
-
-} // namespace
-
-void Packager::dumpPackageInfo(const core::GlobalState &gs, std::string outputFile) {
-    const auto &pkgDB = gs.packageDB();
-    // package => files
-    UnorderedMap<core::NameRef, PackageFiles> packageFiles;
-    for (uint32_t i = 1; i < gs.filesUsed(); ++i) {
-        core::FileRef file(i);
-        const auto &pkg = pkgDB.getPackageForFile(gs, file);
-        if (pkg.exists()) {
-            if (file.data(gs).isPackagedTest()) {
-                packageFiles[pkg.mangledName()].testFiles.emplace_back(file);
-            } else {
-                packageFiles[pkg.mangledName()].files.emplace_back(file);
-            }
-        }
-    }
-
-    fmt::memory_buffer out;
-    fmt::format_to(back_inserter(out), "[");
-    fmt::format_to(back_inserter(out), absl::StrJoin(pkgDB.packages(), ",", PackageInfoFormatter(gs, packageFiles)));
-    fmt::format_to(back_inserter(out), "]");
-    FileOps::write(outputFile, fmt::to_string(out));
 }
 
 } // namespace sorbet::packager

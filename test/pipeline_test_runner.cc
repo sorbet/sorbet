@@ -32,7 +32,6 @@
 #include "main/minimize/minimize.h"
 #include "namer/namer.h"
 #include "packager/packager.h"
-#include "packager/rbi_gen.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "resolver/resolver.h"
@@ -87,7 +86,7 @@ UnorderedSet<string> knownExpectations = {"parse-tree",       "parse-tree-json",
                                           "flatten-tree",     "flatten-tree-raw", "cfg",
                                           "cfg-raw",          "cfg-text",         "autogen",
                                           "document-symbols", "package-tree",     "document-formatting-rubyfmt",
-                                          "autocorrects",     "minimized-rbi",    "rbi-gen"};
+                                          "autocorrects",     "minimized-rbi"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
@@ -198,11 +197,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         gs->suggestUnsafe = "T.unsafe";
     }
 
-    unique_ptr<core::GlobalState> emptyGs;
-    if (!test.minimizeRBI.empty() || test.expectations.contains("rbi-gen")) {
+    unique_ptr<core::GlobalState> gsForMinimize;
+    if (!test.minimizeRBI.empty()) {
         // Copy GlobalState after initializing it, but before rest of pipeline, so that it
         // represents an "empty" GlobalState.
-        emptyGs = gs->deepCopy();
+        gsForMinimize = gs->deepCopy();
     }
 
     // Parser
@@ -321,75 +320,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
             });
         }
-
-        if (test.expectations.contains("rbi-gen")) {
-            auto rbiGenGs = emptyGs->deepCopy();
-            rbiGenGs->errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
-            // If there is a rbi-gen exp file, we need to retypecheck the files w/o packager mode and run RBI
-            // generation for every package.
-            vector<core::FileRef> files;
-            {
-                core::UnfreezeFileTable fileTableAccess(*rbiGenGs);
-
-                for (auto &sourceFile : test.sourceFiles) {
-                    auto fref = rbiGenGs->enterFile(test.sourceFileContents[test.folder + sourceFile]);
-                    files.emplace_back(fref);
-                }
-            }
-
-            vector<ast::ParsedFile> trees;
-            vector<ast::ParsedFile> packageTrees;
-            // Index
-            for (auto file : files) {
-                core::UnfreezeNameTable nameTableAccess(*rbiGenGs); // enters original strings
-
-                auto trace = false;
-                auto nodes = parser::Parser::run(*rbiGenGs, file, trace);
-                core::MutableContext ctx(*rbiGenGs, core::Symbols::root(), file);
-                auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file};
-                tree = ast::ParsedFile{rewriter::Rewriter::run(ctx, move(tree.tree)), tree.file};
-                tree = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(tree)));
-
-                if (FileOps::getFileName(tree.file.data(*rbiGenGs).path()) == packageFileName) {
-                    packageTrees.emplace_back(move(tree));
-                } else {
-                    trees.emplace_back(move(tree));
-                }
-            }
-
-            // Namer
-            {
-                core::UnfreezeNameTable nameTableAccess(*rbiGenGs);     // creates singletons and class names
-                core::UnfreezeSymbolTable symbolTableAccess(*rbiGenGs); // enters symbols
-                trees = move(namer::Namer::run(*rbiGenGs, move(trees), *workers).result());
-            }
-
-            // Resolver
-            {
-                core::UnfreezeNameTable nameTableAccess(*rbiGenGs);     // Resolver::defineAttr
-                core::UnfreezeSymbolTable symbolTableAccess(*rbiGenGs); // enters stubs
-                trees = move(resolver::Resolver::run(*rbiGenGs, move(trees), *workers).result());
-            }
-
-            // RBI generation
-            {
-                auto packageNamespaces =
-                    packager::RBIGenerator::buildPackageNamespace(*rbiGenGs, packageTrees, *workers);
-                for (auto &package : rbiGenGs->packageDB().packages()) {
-                    auto output = packager::RBIGenerator::runOnce(*rbiGenGs, package, packageNamespaces);
-                    if (!output.rbi.empty()) {
-                        handler.addObserved(*rbiGenGs, "rbi-gen", [&]() {
-                            return absl::StrCat("# ", test.folder, output.baseFilePath, ".rbi\n", output.rbi);
-                        });
-                    }
-                    if (!output.testRBI.empty()) {
-                        handler.addObserved(*rbiGenGs, "rbi-gen", [&]() {
-                            return absl::StrCat("# ", test.folder, output.baseFilePath, ".test.rbi\n", output.testRBI);
-                        });
-                    }
-                }
-            }
-        }
     }
 
     for (auto &tree : trees) {
@@ -453,7 +383,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     if (!test.minimizeRBI.empty()) {
-        auto gsForMinimize = emptyGs->deepCopy();
         auto opts = realmain::options::Options{};
         auto minimizeRBI = test.folder + test.minimizeRBI;
         realmain::Minimize::indexAndResolveForMinimize(gs, gsForMinimize, opts, *workers, minimizeRBI);
