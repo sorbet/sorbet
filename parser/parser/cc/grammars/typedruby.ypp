@@ -3651,6 +3651,8 @@ f_opt_paren_args: f_paren_args
                       $$ = list;
                     }
 
+                // Matches extra (syntactically incorrect) labels stacked up before an f_kw, for error recovery from
+                // missing commas (e.g. def foo(x:, y: z:))
   f_extra_labels: f_label
                     {
                       $$ = driver.alloc.node_list(driver.build.kwarg(self, $1));
@@ -3660,33 +3662,34 @@ f_opt_paren_args: f_paren_args
                       auto &list = $1;
                       list->emplace_back(driver.build.kwarg(self, $2));
                       $$ = list;
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@1.end, @2.begin), "\",\"");
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingCommaBetweenKwargs, diagnostic::range(@1.end, @2.begin));
                     }
 
          f_kwarg: f_kw
                     {
                       $$ = driver.alloc.node_list($1);
                     }
+                | f_kwarg tCOMMA f_kw
+                    {
+                      auto &list = $1;
+                      list->emplace_back($3);
+                      $$ = list;
+                    }
+                // Recovery rules for when commas are missing between kwargs.
                 | f_kwarg tCOMMA f_extra_labels f_kw
                     {
                       auto &list = $1;
                       list->concat($3);
                       list->emplace_back($4);
                       $$ = list;
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@3.end, @4.begin), "\",\"");
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingCommaBetweenKwargs, diagnostic::range(@3.end, @4.begin));
                     }
                 | f_extra_labels f_kw
                     {
                       auto &list = $1;
                       list->emplace_back($2);
                       $$ = list;
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@1.end, @2.begin), "\",\"");
-                    }
-                | f_kwarg tCOMMA f_kw
-                    {
-                      auto &list = $1;
-                      list->emplace_back($3);
-                      $$ = list;
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingCommaBetweenKwargs, diagnostic::range(@1.end, @2.begin));
                     }
 
      kwrest_mark: tPOW | tDSTAR
