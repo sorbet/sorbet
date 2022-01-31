@@ -72,7 +72,7 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file, 
     buffer += source;
     buffer += "\0\0"sv;
     StableStringStorage<> scratch;
-    ruby_parser::typedruby27 driver(buffer, scratch, Builder::interface);
+    ruby_parser::typedruby_release27 driver(buffer, scratch, Builder::interface);
 
     for (string local : initialLocals) {
         driver.lex.declare(local);
