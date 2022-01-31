@@ -2542,11 +2542,11 @@ public:
                                 auto newErr = gs.beginError(err->loc, core::errors::Infer::CallAfterAndAnd);
                                 newErr.setHeader("Call to method `{}` after `{}` assumes result type doesn't change",
                                                  fun.show(gs), "&&");
+                                newErr.addErrorSection(selfTy.explainGot(gs, args.originForUninitialized));
                                 auto header = ErrorColors::format(
-                                    "Saw type narrowed to `{}` before `{}`:", selfTyAndAnd.type.show(gs), "&&");
+                                    "Type had been narrowed to `{}` before `{}`:", selfTyAndAnd.type.show(gs), "&&");
                                 newErr.addErrorSection(ErrorSection(
                                     header, selfTyAndAnd.origins2Explanations(gs, args.originForUninitialized)));
-                                newErr.addErrorSection(selfTy.explainGot(gs, args.originForUninitialized));
 
                                 newErr.addErrorNote("Sorbet never assumes that a method called twice returns the same "
                                                     "result both times.\n    Either factor out a variable or use `{}`",
