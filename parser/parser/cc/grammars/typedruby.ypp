@@ -29,6 +29,8 @@ using namespace std::string_literals;
 %define api.location.type { location }
 %define api.token.constructor false
 %define parse.error verbose
+// Note that we don't use %parse.trace here; we build different versions with and
+// without --debug (which turns on %parse.trace) instead.
 
 // mirrored in inc/ruby_parser/token.hh
 // if any of these token values are changed here, the header must be updated
