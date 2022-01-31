@@ -76,6 +76,9 @@ namespace sorbet::packager {
  */
 class Packager final {
 public:
+    static std::vector<ast::ParsedFile> findPackages(core::GlobalState &gs, WorkerPool &workers,
+                                                     std::vector<ast::ParsedFile> files);
+
     static std::vector<ast::ParsedFile> run(core::GlobalState &gs, WorkerPool &workers,
                                             std::vector<ast::ParsedFile> files);
 
@@ -87,6 +90,8 @@ public:
     // class itself during typecheck.
     static ast::ParsedFile removePackageModules(core::Context ctx, ast::ParsedFile pf,
                                                 bool intentionallyLeakASTs = false);
+
+    static void dumpPackageInfo(const core::GlobalState &gs, std::string output);
 
     Packager() = delete;
 };

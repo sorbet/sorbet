@@ -1,0 +1,36 @@
+# test/testdata/packager/lsp_features/Simpsons_Package.rbi
+# typed: true
+
+class Simpsons::Family < Object
+  sig {returns(Bart::Character)}
+  def son; end
+  sig {returns(String)}
+  def son_catchphrase; end
+  extend T::Sig
+end
+
+# test/testdata/packager/lsp_features/Simpsons_Package.test.rbi
+# typed: true
+
+class Simpsons::Private < Object
+end
+
+# test/testdata/packager/lsp_features/Bart_Package.rbi
+# typed: true
+
+Bart::CatchPhrase = T.let(T.unsafe(nil), String)
+class Bart::Character < Object
+  sig {void}
+  def initialize; end
+  extend T::Sig
+end
+
+# test/testdata/packager/lsp_features/Krabappel_Package.test.rbi
+# typed: true
+
+class Test::Krabappel::Popquiz < Object
+  sig {void}
+  def surprise!; end
+  extend T::Sig
+end
+

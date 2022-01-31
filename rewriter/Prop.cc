@@ -140,13 +140,13 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             ret.isImmutable = true;
             break;
         case core::Names::tokenProp().rawId():
-        case core::Names::timestampedTokenProp().rawId():
+        case core::Names::timestampedTokenProp().rawId(): {
             ret.name = core::Names::token();
-            ret.nameLoc =
-                core::LocOffsets{send->loc.beginPos() + (send->fun == core::Names::timestampedTokenProp() ? 12 : 0),
-                                 send->loc.endPos() - 5}; // get the 'token' part of it
+            auto beginPos = send->loc.beginPos() + (send->fun == core::Names::timestampedTokenProp() ? 12 : 0);
+            ret.nameLoc = core::LocOffsets{beginPos, beginPos + 5}; // get the 'token' part of it
             ret.type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
+        }
         case core::Names::createdProp().rawId():
             ret.name = core::Names::created();
             // 5 is the length of the _prop suffix

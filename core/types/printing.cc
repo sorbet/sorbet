@@ -53,6 +53,11 @@ string LiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string LiteralType::show(const GlobalState &gs, ShowOptions options) const {
+    if (options.showForRBI) {
+        // RBI generator: Users type the class name, not `String("value")`.
+        return fmt::format("{}", this->underlying(gs).show(gs, options));
+    }
+
     return fmt::format("{}({})", this->underlying(gs).show(gs, options), showValue(gs));
 }
 
@@ -124,15 +129,20 @@ string ShapeType::show(const GlobalState &gs, ShowOptions options) const {
         } else {
             fmt::format_to(std::back_inserter(buf), ", ");
         }
-        auto underlying = cast_type_nonnull<LiteralType>(key).underlying(gs);
-        ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
-        if (undSymbol == Symbols::Symbol()) {
-            fmt::format_to(std::back_inserter(buf), "{}: {}", cast_type_nonnull<LiteralType>(key).asName(gs).show(gs),
-                           (*valueIterator).show(gs, options));
+
+        const auto &keyLiteral = cast_type_nonnull<LiteralType>(key);
+        const auto &value = *valueIterator;
+
+        // properties beginning with $ need to be printed as :$prop => type.
+        if (keyLiteral.literalKind == core::LiteralType::LiteralTypeKind::Symbol &&
+            !absl::StartsWith(keyLiteral.asName(gs).shortName(gs), "$")) {
+            fmt::format_to(std::back_inserter(buf), "{}: {}", keyLiteral.asName(gs).show(gs), value.show(gs, options));
         } else {
-            fmt::format_to(std::back_inserter(buf), "{} => {}", key.show(gs, options),
-                           (*valueIterator).show(gs, options));
+            fmt::format_to(std::back_inserter(buf), "{} => {}",
+                           options.showForRBI ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options),
+                           value.show(gs, options));
         }
+
         ++valueIterator;
     }
     fmt::format_to(std::back_inserter(buf), "}}");
@@ -148,6 +158,9 @@ string AliasType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string AliasType::show(const GlobalState &gs, ShowOptions options) const {
+    if (options.showForRBI) {
+        return this->symbol.show(gs);
+    }
     return fmt::format("<Alias: {} >", this->symbol.showFullName(gs));
 }
 
@@ -401,6 +414,10 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
             }
             return to_string(buf);
         } else {
+            // T.class_of(klass)[arg1, arg2] is never valid syntax in an RBI
+            if (options.showForRBI && this->klass.data(gs)->isSingletonClass(gs)) {
+                return this->klass.show(gs, options);
+            }
             fmt::format_to(std::back_inserter(buf), "{}", this->klass.show(gs, options));
         }
     }
