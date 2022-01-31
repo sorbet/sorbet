@@ -606,7 +606,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             if (!explanations.empty()) {
                 e.addErrorSection(
                     ErrorSection("Got " + args.fullType.type.show(gs) + " originating from:", explanations));
-                // TODO(jez) fix this
             }
             auto receiverLoc = core::Loc{args.locs.file, args.locs.receiver};
             if (receiverLoc.exists() && (gs.suggestUnsafe.has_value() ||
@@ -2539,36 +2538,39 @@ public:
                     for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
                         for (auto &err : it->main.errors) {
                             if (err->what == core::errors::Infer::UnknownMethod && it->main.receiver.isNilClass()) {
-                                auto newErr = gs.beginError(err->loc, core::errors::Infer::CallAfterAndAnd);
-                                newErr.setHeader("Call to method `{}` after `{}` assumes result type doesn't change",
-                                                 fun.show(gs), "&&");
-                                newErr.addErrorSection(selfTy.explainGot(gs, args.originForUninitialized));
-                                auto header = ErrorColors::format(
-                                    "Type had been narrowed to `{}` before `{}`:", selfTyAndAnd.type.show(gs), "&&");
-                                newErr.addErrorSection(ErrorSection(
-                                    header, selfTyAndAnd.origins2Explanations(gs, args.originForUninitialized)));
+                                if (auto newErr = gs.beginError(err->loc, core::errors::Infer::CallAfterAndAnd)) {
+                                    newErr.setHeader(
+                                        "Call to method `{}` after `{}` assumes result type doesn't change",
+                                        fun.show(gs), "&&");
+                                    newErr.addErrorSection(selfTy.explainGot(gs, args.originForUninitialized));
+                                    auto header = ErrorColors::format("Type had been narrowed to `{}` before `{}`:",
+                                                                      selfTyAndAnd.type.show(gs), "&&");
+                                    newErr.addErrorSection(ErrorSection(
+                                        header, selfTyAndAnd.origins2Explanations(gs, args.originForUninitialized)));
 
-                                newErr.addErrorNote("Sorbet never assumes that a method called twice returns the same "
-                                                    "result both times.\n    Either factor out a variable or use `{}`",
-                                                    "&.");
+                                    newErr.addErrorNote(
+                                        "Sorbet never assumes that a method called twice returns the same "
+                                        "result both times.\n    Either factor out a variable or use `{}`",
+                                        "&.");
 
-                                auto funLoc = core::Loc(args.locs.file, args.locs.fun);
-                                if (funLoc.exists() && !funLoc.empty() &&
-                                    funLoc.adjustLen(gs, -1, 1).source(gs) == ".") {
-                                    auto andAndLoc = args.locs.args[1];
-                                    newErr.addAutocorrect(AutocorrectSuggestion{
-                                        "Refactor to use `&.`",
-                                        {
-                                            AutocorrectSuggestion::Edit{
-                                                core::Loc(args.locs.file, andAndLoc.beginPos(), recvLoc.beginPos()),
-                                                "",
+                                    auto funLoc = core::Loc(args.locs.file, args.locs.fun);
+                                    if (funLoc.exists() && !funLoc.empty() &&
+                                        funLoc.adjustLen(gs, -1, 1).source(gs) == ".") {
+                                        auto andAndLoc = args.locs.args[1];
+                                        newErr.addAutocorrect(AutocorrectSuggestion{
+                                            "Refactor to use `&.`",
+                                            {
+                                                AutocorrectSuggestion::Edit{
+                                                    core::Loc(args.locs.file, andAndLoc.beginPos(), recvLoc.beginPos()),
+                                                    "",
+                                                },
+                                                AutocorrectSuggestion::Edit{funLoc.adjustLen(gs, -1, 1), "&."},
                                             },
-                                            AutocorrectSuggestion::Edit{funLoc.adjustLen(gs, -1, 1), "&."},
-                                        },
-                                    });
-                                }
+                                        });
+                                    }
 
-                                err = newErr.build();
+                                    err = newErr.build();
+                                }
                             }
                         }
                     }

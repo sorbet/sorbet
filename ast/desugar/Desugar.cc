@@ -1059,13 +1059,6 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto iff = MK::If(loc, std::move(cond), std::move(rhs), std::move(lhs));
                     result = std::move(iff);
                 } else {
-                    // TODO(jez) completion test
-                    // TODO(jez) private test (both implicit and explicit self)
-                    // TODO(jez) parser::Or as well?
-                    // TODO(jez) Can we make this handle `!(...).nil?` and `(...).is_a?(...)` or is that hard?
-                    // TODO(jez) This doesn't generalize to all `if` conditions like
-                    //   if a.foo; a.foo.even?; end
-                    // is that ok?
                     auto andAndTemp = dctx.freshNameUnique(core::Names::andAnd());
 
                     auto *lhsSend = ast::cast_tree<ast::Send>(lhs);
@@ -1076,11 +1069,12 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         auto lhsSource = core::Loc(dctx.ctx.file, lhsSend->loc).source(dctx.ctx);
                         auto rhsRecvSource = core::Loc(dctx.ctx.file, rhsSend->recv.loc()).source(dctx.ctx);
                         if (lhsSource.has_value() && lhsSource == rhsRecvSource) {
-                            // TODO(jez) What locs should we be using?
+                            // Have to use zero-width locs here so that these auto-generated things
+                            // don't show up in e.g. completion requests.
                             rhsSend->insertPosArg(0, std::move(rhsSend->recv));
-                            rhsSend->insertPosArg(1, MK::Local(loc, andAndTemp));
-                            rhsSend->insertPosArg(2, MK::Symbol(rhsSend->funLoc, rhsSend->fun));
-                            rhsSend->recv = MK::Constant(loc, core::Symbols::Magic());
+                            rhsSend->insertPosArg(1, MK::Local(loc.copyWithZeroLength(), andAndTemp));
+                            rhsSend->insertPosArg(2, MK::Symbol(rhsSend->funLoc.copyWithZeroLength(), rhsSend->fun));
+                            rhsSend->recv = MK::Constant(loc.copyWithZeroLength(), core::Symbols::Magic());
                             rhsSend->fun = core::Names::checkAndAnd();
                             thenp = std::move(rhs);
                         } else {

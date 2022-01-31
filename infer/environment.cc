@@ -1045,11 +1045,18 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     retainedResult = make_shared<core::DispatchResult>(std::move(dispatched));
                 }
                 if (lspQueryMatch) {
+                    auto fun = send.fun;
+                    if (fun == core::Names::checkAndAnd() && core::isa_type<core::LiteralType>(args[2]->type)) {
+                        auto lit = core::cast_type_nonnull<core::LiteralType>(args[2]->type);
+                        if (lit.derivesFrom(ctx, core::Symbols::Symbol())) {
+                            fun = lit.asName(ctx);
+                        }
+                    }
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::SendResponse(core::Loc(ctx.file, bind.loc), retainedResult, send.fun,
-                                                     send.isPrivateOk, ctx.owner.asMethodRef(),
-                                                     core::Loc(ctx.file, send.receiverLoc),
-                                                     core::Loc(ctx.file, send.funLoc), send.args.size()));
+                        ctx,
+                        core::lsp::SendResponse(core::Loc(ctx.file, bind.loc), retainedResult, fun, send.isPrivateOk,
+                                                ctx.owner.asMethodRef(), core::Loc(ctx.file, send.receiverLoc),
+                                                core::Loc(ctx.file, send.funLoc), send.args.size()));
                 }
                 if (send.link) {
                     // This should eventually become ENFORCEs but currently they are wrong
