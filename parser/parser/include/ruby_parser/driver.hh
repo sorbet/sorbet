@@ -307,11 +307,18 @@ public:
     }
 };
 
-class typedruby27 : public base_driver {
+class typedruby_release27 : public base_driver {
 public:
-    typedruby27(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder);
+    typedruby_release27(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder);
     virtual ForeignPtr parse(SelfPtr self, bool trace);
-    ~typedruby27() {}
+    ~typedruby_release27() {}
+};
+
+class typedruby_debug27 : public base_driver {
+public:
+    typedruby_debug27(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder);
+    virtual ForeignPtr parse(SelfPtr self, bool trace);
+    ~typedruby_debug27() {}
 };
 
 } // namespace ruby_parser

@@ -20,17 +20,17 @@ using namespace std::string_literals;
 #endif
 }
 
-%param { ruby_parser::typedruby27& driver }
+%param { ruby_parser::TYPEDRUBY27& driver }
 %parse-param { ruby_parser::SelfPtr self }
-%define api.namespace {ruby_parser::bison::typedruby27}
-%define api.prefix {typedruby27}
+%define api.namespace {ruby_parser::bison::TYPEDRUBY27}
+%define api.prefix {TYPEDRUBY27}
 %define api.value.type { union parser_value }
 // TODO(jez) Does this degrade parser performance?
 %define api.location.type { location }
 %define api.token.constructor false
-%define parse.assert
 %define parse.error verbose
-%define parse.trace
+// Note that we don't use %parse.trace here; we build different versions with and
+// without --debug (which turns on %parse.trace) instead.
 
 // mirrored in inc/ruby_parser/token.hh
 // if any of these token values are changed here, the header must be updated
@@ -421,6 +421,9 @@ using namespace std::string_literals;
 
 %code requires {
 
+namespace ruby_parser {
+namespace bison {
+namespace TYPEDRUBY27 {
 union parser_value {
   ruby_parser::token *token;
   ruby_parser::delimited_node_list *delimited_list;
@@ -433,13 +436,16 @@ union parser_value {
   size_t size;
   bool boolean;
 };
+}
+}
+}
 
 }
 
 %code {
 namespace ruby_parser {
 namespace bison {
-namespace typedruby27 {
+namespace TYPEDRUBY27 {
 
 #define DIAGCHECK() do { \
 	if (driver.pending_error) { \
@@ -481,7 +487,7 @@ void parser::error(const ruby_parser::location &lloc, const std::string &msg) {
 		error_message);
 }
 
-int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser::typedruby27 &driver) {
+int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser::TYPEDRUBY27 &driver) {
 	auto token = driver.lex.advance();
 	driver.last_token = token;
 	int token_type = static_cast<int>(token->type());
@@ -517,7 +523,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
 //
 // So in rules where we expect something like that to happen, we can call this
 // function to fix up the lookahead token by manually creating a tNL
-int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::typedruby27 &driver, size_t prev_end, size_t next_begin) {
+int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::TYPEDRUBY27 &driver, size_t prev_end, size_t next_begin) {
   // This function is super hacky, and is best understood by carefully reading
   // yylex and where yylex is called inside the generated parser
   auto fake_token = driver.lex.tok_view_from_offsets(prev_end, next_begin);

@@ -17,12 +17,56 @@ ragel(
     }),
 )
 
+# It is occasionally useful to have traces of parser behavior.  But turning on
+# tracing results in ~4% slower parsing, which seems high enough that it's worth
+# doing something different.  To avoid behavior differences between debug and
+# non-debug builds, we compile the ruby grammar twice, once with tracing built-in
+# and once without.
+sh_binary(
+    name = "munge_grammar",
+    srcs = ["munge_grammar.sh"],
+)
+
+genrule(
+    name = "generate_release_bison_grammar",
+    srcs = ["cc/grammars/typedruby.ypp"],
+    outs = [
+        "typedruby_release.ypp",
+    ],
+    cmd = "$(location :munge_grammar) $(location cc/grammars/typedruby.ypp) $(location typedruby_release.ypp)",
+    tools = [
+        ":munge_grammar",
+    ],
+)
+
+genrule(
+    name = "generate_debug_bison_grammar",
+    srcs = ["cc/grammars/typedruby.ypp"],
+    outs = [
+        "typedruby_debug.ypp",
+    ],
+    cmd = "$(location :munge_grammar) $(location cc/grammars/typedruby.ypp) $(location typedruby_debug.ypp)",
+    tools = [
+        ":munge_grammar",
+    ],
+)
+
 bison(
-    name = "typedruby_bison",
-    src = "cc/grammars/typedruby.ypp",
+    name = "typedruby_release_bison",
+    src = "typedruby_release.ypp",
     bison_options = [
         "-Wno-empty-rule",
         "-Wno-precedence",
+    ],
+)
+
+bison(
+    name = "typedruby_debug_bison",
+    src = "typedruby_debug.ypp",
+    bison_options = [
+        "-Wno-empty-rule",
+        "-Wno-precedence",
+        "--debug",
     ],
 )
 
@@ -54,7 +98,8 @@ cc_library(
     srcs = glob(["cc/*.cc"]) + [
         ":gen_diagnostics_dclass",
         ":ragel_lexer",
-        ":typedruby_bison",
+        ":typedruby_release_bison",
+        ":typedruby_debug_bison",
     ],
     hdrs = glob(["include/**/*.hh"]),
     copts = [
