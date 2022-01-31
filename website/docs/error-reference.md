@@ -1568,8 +1568,8 @@ end
 
 ## 7037
 
-See [this doc for more
-information](flow-sensitive.md#limitations-of-flow-sensitivity).
+See
+[this doc for more information](flow-sensitive.md#limitations-of-flow-sensitivity).
 
 In general, Sorbet can't know that two calls to identical methods return
 identical things, because in general methods are not pure.
