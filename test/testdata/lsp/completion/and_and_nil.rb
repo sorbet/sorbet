@@ -9,7 +9,7 @@ class A
   def bar
     a = A.new
 
-    # Remember: we only show completion results that are valid. Asking for
+    # Remember, we only show completion results that are valid. Asking for
     # completion results for `a.foo.even?` here would not return any results.
     if a.foo && a.foo.to_s.empty?
       #                   ^ completion: to_s
