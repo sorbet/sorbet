@@ -131,9 +131,11 @@ void ErrorBuilder::_setHeader(string &&header) {
     this->header = move(header);
 }
 
-void ErrorBuilder::addErrorSection(ErrorSection &&section) {
+void ErrorBuilder::addErrorSection(optional<ErrorSection> &&section) {
     ENFORCE(state == State::WillBuild);
-    this->sections.emplace_back(move(section));
+    if (section.has_value()) {
+        this->sections.emplace_back(move(*section));
+    }
 }
 
 void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
