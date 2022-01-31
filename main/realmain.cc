@@ -229,7 +229,10 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             Timer timeit("autogenWorker");
             int idx = 0;
 
-            for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
+            for (auto result : fileq->popUntilEmpty(idx)) {
+                if (!result.gotItem()) {
+                    continue;
+                }
                 ++n;
                 auto &tree = indexed[idx];
                 if (tree.file.data(gs).isPackage()) {
@@ -279,8 +282,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
 
     autogen::DefTree root;
     AutogenResult out;
-    for (auto res = resultq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), *logger); !res.done();
-         res = resultq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), *logger)) {
+    for (auto res : resultq->popUntilEmptyWithTimeout(out, WorkerPool::BLOCK_INTERVAL(), *logger)) {
         if (!res.gotItem()) {
             continue;
         }

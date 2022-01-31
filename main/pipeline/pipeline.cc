@@ -463,8 +463,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
     {
         Timer timeit("mergeGlobalStates");
         IndexThreadResultPack threadResult;
-        for (auto result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer());
-             !result.done(); result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
+        for (auto result : input->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
             if (result.gotItem()) {
                 counterConsume(move(threadResult.counters));
                 auto numTrees = threadResult.res.trees.size();
@@ -480,7 +479,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
         workers.multiplexJob("substituteTrees", [&cgs, batchq, resultq]() {
             Timer timeit("substituteTreesWorker");
             IndexSubstitutionJob job;
-            for (auto result = batchq->try_pop(job); !result.done(); result = batchq->try_pop(job)) {
+            for (auto result : batchq->popUntilEmpty(job)) {
                 if (result.gotItem()) {
                     if (job.subst.has_value()) {
                         for (auto &tree : job.trees) {
@@ -498,8 +497,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
         });
 
         vector<ast::ParsedFile> trees;
-        for (auto result = resultq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), cgs.tracer()); !result.done();
-             result = resultq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
+        for (auto result : resultq->popUntilEmptyWithTimeout(trees, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
             if (result.gotItem()) {
                 ret.insert(ret.end(), std::make_move_iterator(trees.begin()), std::make_move_iterator(trees.end()));
                 progress.reportProgress(resultq->doneEstimate());
@@ -533,7 +531,7 @@ vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<cor
 
         {
             core::FileRef job;
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+            for (auto result : fileq->popUntilEmpty(job)) {
                 if (result.gotItem()) {
                     core::FileRef file = job;
                     auto cachedTree = readFileWithStrictnessOverrides(*localGs, file, opts, kvstore);
@@ -1042,7 +1040,7 @@ void typecheck(const unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> 
                 int processedByThread = 0;
 
                 {
-                    for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                    for (auto result : fileq->popUntilEmpty(job)) {
                         if (result.gotItem()) {
                             unique_ptr<absl::ReaderMutexLock> lock;
                             if (preemptionManager) {
@@ -1083,9 +1081,8 @@ void typecheck(const unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> 
 
             vector<core::FileRef> files;
             {
-                for (auto result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
-                     !result.done();
-                     result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
+                for (auto result :
+                     outputq->popUntilEmptyWithTimeout(files, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
                     if (result.gotItem()) {
                         for (auto &file : files) {
                             gs->errorQueue->flushErrorsForFile(*gs, file);
@@ -1108,8 +1105,7 @@ void typecheck(const unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> 
                                      [counterq]() { counterq->push(getAndClearThreadCounters(), 1); });
                 {
                     sorbet::CounterState counters;
-                    for (auto result = counterq->try_pop(counters); !result.done();
-                         result = counterq->try_pop(counters)) {
+                    for (auto result : counterq->popUntilEmpty(counters)) {
                         if (result.gotItem()) {
                             counterConsume(move(counters));
                         }
@@ -1149,7 +1145,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
         ast::ParsedFile *job = nullptr;
         unique_ptr<Timer> timeit;
         {
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+            for (auto result : fileq->popUntilEmpty(job)) {
                 if (result.gotItem()) {
                     processedByThread++;
                     if (timeit == nullptr) {
@@ -1181,9 +1177,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
     bool written = false;
     {
         vector<pair<string, vector<uint8_t>>> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+        for (auto result : resultq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
                 for (auto &a : threadResult) {
                     kvstore->write(move(a.first), move(a.second));

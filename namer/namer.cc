@@ -1863,7 +1863,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
         SymbolFinder finder;
         vector<SymbolFinderResult> output;
         ast::ParsedFile job;
-        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+        for (auto result : fileq->popUntilEmpty(job)) {
             if (result.gotItem()) {
                 Timer timeit("naming.findSymbolsOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
@@ -1880,9 +1880,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
 
     {
         vector<SymbolFinderResult> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+        for (auto result : resultq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
                 allFoundDefinitions.insert(allFoundDefinitions.end(), make_move_iterator(threadResult.begin()),
                                            make_move_iterator(threadResult.end()));
@@ -1933,7 +1931,7 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
         TreeSymbolizer inserter;
         vector<ast::ParsedFile> output;
         ast::ParsedFile job;
-        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+        for (auto result : fileq->popUntilEmpty(job)) {
             if (result.gotItem()) {
                 Timer timeit("naming.symbolizeTreesOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
@@ -1949,9 +1947,7 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
 
     {
         vector<ast::ParsedFile> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+        for (auto result : resultq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
                 trees.insert(trees.end(), make_move_iterator(threadResult.begin()),
                              make_move_iterator(threadResult.end()));

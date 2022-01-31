@@ -465,7 +465,7 @@ private:
             ResolveItems<ResolutionItem> job(core::FileRef(), {});
             uint32_t processed = 0;
             uint32_t retries = 0;
-            for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
+            for (auto result : inputq->popUntilEmpty(job)) {
                 if (result.gotItem()) {
                     processed++;
                     core::Context ictx(gs, core::Symbols::root(), job.file);
@@ -487,9 +487,7 @@ private:
 
         uint32_t retries = 0;
         pair<uint32_t, vector<ResolveItems<ResolutionItem>>> threadResult;
-        for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+        for (auto result : outputq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
                 retries += threadResult.first;
                 jobs.insert(jobs.end(), make_move_iterator(threadResult.second.begin()),
@@ -1198,7 +1196,7 @@ public:
             ResolveWalkResult walkResult;
             vector<ast::ParsedFile> partiallyResolvedTrees;
             ast::ParsedFile job;
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+            for (auto result : fileq->popUntilEmpty(job)) {
                 if (result.gotItem()) {
                     core::Context ictx(igs, core::Symbols::root(), job.file);
                     job.tree = ast::TreeMap::apply(ictx, constants, std::move(job.tree));
@@ -1240,9 +1238,8 @@ public:
 
         {
             ResolveWalkResult threadResult;
-            for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-                 !result.done();
-                 result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            for (auto result :
+                 resultq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem()) {
                     todo.insert(todo.end(), make_move_iterator(threadResult.todo_.begin()),
                                 make_move_iterator(threadResult.todo_.end()));
@@ -2584,7 +2581,7 @@ public:
             ResolveTypeMembersAndFieldsWalk walk;
             ResolveTypeMembersAndFieldsResult output;
             ast::ParsedFile job;
-            for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
+            for (auto result : inputq->popUntilEmpty(job)) {
                 if (result.gotItem()) {
                     core::Context ctx(gs, core::Symbols::root(), job.file);
                     job.tree = ast::TreeMap::apply(ctx, walk, std::move(job.tree));
@@ -2619,9 +2616,8 @@ public:
 
         {
             ResolveTypeMembersAndFieldsResult threadResult;
-            for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-                 !result.done();
-                 result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            for (auto result :
+                 outputq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem()) {
                     combinedFiles.insert(combinedFiles.end(), make_move_iterator(threadResult.files.begin()),
                                          make_move_iterator(threadResult.files.end()));
@@ -3359,7 +3355,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
         ResolveSignaturesWalk walk;
         ResolveSignaturesWalk::ResolveSignaturesWalkResult output;
         ast::ParsedFile job;
-        for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
+        for (auto result : inputq->popUntilEmpty(job)) {
             if (result.gotItem()) {
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::ShallowMap::apply(ctx, walk, std::move(job.tree));
@@ -3379,9 +3375,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
     vector<ResolveSignaturesWalk::ResolveFileSignatures> combinedFileJobs;
     {
         ResolveSignaturesWalk::ResolveSignaturesWalkResult threadResult;
-        for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+        for (auto result : outputq->popUntilEmptyWithTimeout(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
                 trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
                              make_move_iterator(threadResult.trees.end()));

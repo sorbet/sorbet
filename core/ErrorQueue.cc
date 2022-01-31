@@ -29,7 +29,10 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     Timer timeit("ErrorQueue::flushErrorsForFile");
 
     core::ErrorQueueMessage msg;
-    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
+    for (auto result : queue.popUntilEmpty(msg)) {
+        if (!result.gotItem()) {
+            break;
+        }
         collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
     }
 
@@ -70,7 +73,10 @@ UnorderedMap<core::FileRef, vector<unique_ptr<core::ErrorQueueMessage>>> ErrorQu
     checkOwned();
 
     core::ErrorQueueMessage msg;
-    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
+    for (auto result : queue.popUntilEmpty(msg)) {
+        if (!result.gotItem()) {
+            break;
+        }
         collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
     }
 
