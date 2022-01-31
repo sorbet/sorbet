@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 infile="$1"
 outfile="$2"
 replacement="$(basename ${outfile} .ypp)"
