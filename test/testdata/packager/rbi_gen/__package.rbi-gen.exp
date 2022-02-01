@@ -1,6 +1,12 @@
 # test/testdata/packager/rbi_gen/RBIGen_Package.rbi
 # typed: true
 
+class RBIGen::Sealed::Child < RBIGen::Sealed::Parent
+end
+class RBIGen::Sealed::Parent < Object
+  sealed!
+  extend T::Helpers
+end
 RBIGen::DirectlyExported::MyString = String
 module RBIGen::Public
 end
@@ -255,6 +261,8 @@ end
 # test/testdata/packager/rbi_gen/RBIGen_Package.test.rbi
 # typed: true
 
+class RBIGen::Sealed::TestChild < RBIGen::Sealed::Parent
+end
 class RBIGen::Private::PrivateClassForTests < Object
 end
 module Test::RBIGen

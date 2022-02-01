@@ -1266,13 +1266,14 @@ void RBIGenerator::run(core::GlobalState &gs, vector<ast::ParsedFile> packageFil
                 if (result.gotItem()) {
                     auto output = runOnce(rogs, job, packageNamespaces);
                     if (!output.rbi.empty()) {
-                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".rbi"), output.rbi);
+                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".package.rbi"), output.rbi);
                         FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".deps.json"),
                                        output.rbiPackageDependencies);
                     }
 
                     if (!output.testRBI.empty()) {
-                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.rbi"), output.testRBI);
+                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.package.rbi"),
+                                       output.testRBI);
                         FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.deps.json"),
                                        output.testRBIPackageDependencies);
                     }

@@ -464,6 +464,13 @@ void validateSealedAncestorHelper(core::Context ctx, const core::ClassOrModuleRe
         }
 
         auto klassFile = bestNonRBIFile(ctx, klass);
+
+        // See the comment on the isPackageRBI call in `validateSealed` for more information about why we skip package
+        // rbi files here.
+        if (klassFile.data(ctx).isPackageRBI()) {
+            continue;
+        }
+
         if (absl::c_any_of(mixin.data(ctx)->sealedLocs(ctx),
                            [klassFile](auto loc) { return loc.file() == klassFile; })) {
             continue;
@@ -479,15 +486,26 @@ void validateSealedAncestorHelper(core::Context ctx, const core::ClassOrModuleRe
 
 void validateSealed(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ClassDef &classDef) {
     const auto superClass = klass.data(ctx)->superClass();
+
     if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed()) {
         auto file = bestNonRBIFile(ctx, klass);
-        if (!absl::c_any_of(superClass.data(ctx)->sealedLocs(ctx), [file](auto loc) { return loc.file() == file; })) {
-            if (auto e =
-                    ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::SealedAncestor)) {
-                e.setHeader("`{}` is sealed and cannot be inherited by `{}`", superClass.show(ctx), klass.show(ctx));
-                for (auto loc : superClass.data(ctx)->sealedLocs(ctx)) {
-                    e.addErrorLine(loc, "`{}` was marked sealed and can only be inherited in this file",
-                                   superClass.show(ctx));
+
+        // Normally we would skip RBIs for the purpose of checking `sealed!`, but when running in stripe-packages mode
+        // this may be the only definition available. Additionally, if some of the sealed subclasses are only exported
+        // for use in tests, those subclasses will be appear in a separate `.test.package.rbi` file, despite the parent
+        // class being defined in a `.package.rbi` file. Because this check would fail in those situations and the RBI
+        // files will have been generated from valid sources, we assume that they are correct here and skip the check.
+        if (!file.data(ctx).isPackageRBI()) {
+            if (!absl::c_any_of(superClass.data(ctx)->sealedLocs(ctx),
+                                [file](auto loc) { return loc.file() == file; })) {
+                if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, superClass),
+                                            core::errors::Resolver::SealedAncestor)) {
+                    e.setHeader("`{}` is sealed and cannot be inherited by `{}`", superClass.show(ctx),
+                                klass.show(ctx));
+                    for (auto loc : superClass.data(ctx)->sealedLocs(ctx)) {
+                        e.addErrorLine(loc, "`{}` was marked sealed and can only be inherited in this file",
+                                       superClass.show(ctx));
+                    }
                 }
             }
         }
