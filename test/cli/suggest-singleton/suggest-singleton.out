@@ -1,7 +1,7 @@
 test/cli/suggest-singleton/suggest-singleton.rb:9: Method `foo` does not exist on `T.class_of(A)` https://srb.help/7003
      9 |A.foo
           ^^^
-  Got T.class_of(A) originating from:
+  Got `T.class_of(A)` originating from:
     test/cli/suggest-singleton/suggest-singleton.rb:9:
      9 |A.foo
         ^
@@ -13,7 +13,7 @@ test/cli/suggest-singleton/suggest-singleton.rb:9: Method `foo` does not exist o
 test/cli/suggest-singleton/suggest-singleton.rb:10: Method `bar` does not exist on `A` https://srb.help/7003
     10 |A.new.bar
               ^^^
-  Got A originating from:
+  Got `A` originating from:
     test/cli/suggest-singleton/suggest-singleton.rb:10:
     10 |A.new.bar
         ^^^^^

@@ -1,7 +1,7 @@
 config-file.rb:2: Method `+` does not exist on `Symbol` component of `Symbol(:sym)` https://srb.help/7003
      2 |puts :sym + ''
                   ^
-  Got Symbol(:sym) originating from:
+  Got `Symbol(:sym)` originating from:
     config-file.rb:2:
      2 |puts :sym + ''
              ^^^^

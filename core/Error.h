@@ -147,7 +147,7 @@ public:
         ENFORCE(state != State::DidBuild);
         return state == State::WillBuild;
     }
-    void addErrorSection(ErrorSection &&section);
+    void addErrorSection(std::optional<ErrorSection> &&section);
     template <typename... Args> void addErrorLine(Loc loc, fmt::format_string<Args...> msg, Args &&...args) {
         std::string formatted = ErrorColors::format(msg, std::forward<Args>(args)...);
         addErrorSection(ErrorSection({ErrorLine(loc, formatted)}));

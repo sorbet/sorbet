@@ -74,9 +74,14 @@ ErrorSection TypeAndOrigins::explainExpected(const GlobalState &gs, const string
     return ErrorSection(header, this->origins2Explanations(gs, originForUninitialized));
 }
 
-ErrorSection TypeAndOrigins::explainGot(const GlobalState &gs, Loc originForUninitialized) const {
+optional<ErrorSection> TypeAndOrigins::explainGot(const GlobalState &gs, Loc originForUninitialized) const {
     auto header = ErrorColors::format("Got `{}` originating from:", this->type.showWithMoreInfo(gs));
-    return ErrorSection(header, this->origins2Explanations(gs, originForUninitialized));
+    auto explanations = this->origins2Explanations(gs, originForUninitialized);
+    if (explanations.empty()) {
+        return nullopt;
+    } else {
+        return ErrorSection(header, explanations);
+    }
 }
 
 TypeAndOrigins::~TypeAndOrigins() noexcept {

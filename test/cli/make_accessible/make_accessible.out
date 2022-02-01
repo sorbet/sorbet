@@ -1,7 +1,7 @@
 test/cli/make_accessible/suit.rb:17: Method `spades` does not exist on `T.class_of(Suit)` https://srb.help/7003
     17 |Suit.spades
              ^^^^^^
-  Got T.class_of(Suit) originating from:
+  Got `T.class_of(Suit)` originating from:
     test/cli/make_accessible/suit.rb:17:
     17 |Suit.spades
         ^^^^

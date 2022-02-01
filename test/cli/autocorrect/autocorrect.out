@@ -17,7 +17,7 @@ autocorrect.rb:19: Method `params` does not exist on `T.class_of(<root>)` https:
 autocorrect.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
      4 |foo[0]
         ^^^^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -61,7 +61,7 @@ autocorrect.rb:10: Expected `String` but found `T.nilable(String)` for argument 
 autocorrect.rb:12: Method `bar` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     12 |foo.bar ||= "a"
             ^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -69,7 +69,7 @@ autocorrect.rb:12: Method `bar` does not exist on `String` component of `T.nilab
 autocorrect.rb:12: Method `bar` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     12 |foo.bar ||= "a"
             ^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -81,7 +81,7 @@ autocorrect.rb:12: Method `bar` does not exist on `NilClass` component of `T.nil
 autocorrect.rb:12: Method `bar=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     12 |foo.bar ||= "a"
         ^^^^^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -93,7 +93,7 @@ autocorrect.rb:12: Method `bar=` does not exist on `String` component of `T.nila
 autocorrect.rb:12: Method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     12 |foo.bar ||= "a"
         ^^^^^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -105,7 +105,7 @@ autocorrect.rb:12: Method `bar=` does not exist on `NilClass` component of `T.ni
 autocorrect.rb:13: Method `bar` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     13 |foo.bar &&= "a"
             ^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -113,7 +113,7 @@ autocorrect.rb:13: Method `bar` does not exist on `String` component of `T.nilab
 autocorrect.rb:13: Method `bar` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     13 |foo.bar &&= "a"
             ^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -125,7 +125,7 @@ autocorrect.rb:13: Method `bar` does not exist on `NilClass` component of `T.nil
 autocorrect.rb:13: Method `bar=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     13 |foo.bar &&= "a"
         ^^^^^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -137,7 +137,7 @@ autocorrect.rb:13: Method `bar=` does not exist on `String` component of `T.nila
 autocorrect.rb:13: Method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     13 |foo.bar &&= "a"
         ^^^^^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -149,7 +149,7 @@ autocorrect.rb:13: Method `bar=` does not exist on `NilClass` component of `T.ni
 autocorrect.rb:14: Method `bar` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     14 |foo.bar |= "a"
             ^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -157,7 +157,7 @@ autocorrect.rb:14: Method `bar` does not exist on `String` component of `T.nilab
 autocorrect.rb:14: Method `bar` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     14 |foo.bar |= "a"
             ^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -169,7 +169,7 @@ autocorrect.rb:14: Method `bar` does not exist on `NilClass` component of `T.nil
 autocorrect.rb:14: Method `bar=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     14 |foo.bar |= "a"
         ^^^^^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -181,7 +181,7 @@ autocorrect.rb:14: Method `bar=` does not exist on `String` component of `T.nila
 autocorrect.rb:14: Method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     14 |foo.bar |= "a"
         ^^^^^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -193,7 +193,7 @@ autocorrect.rb:14: Method `bar=` does not exist on `NilClass` component of `T.ni
 autocorrect.rb:15: Method `bar` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     15 |foo.bar &= "a"
             ^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -201,7 +201,7 @@ autocorrect.rb:15: Method `bar` does not exist on `String` component of `T.nilab
 autocorrect.rb:15: Method `bar` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     15 |foo.bar &= "a"
             ^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -213,7 +213,7 @@ autocorrect.rb:15: Method `bar` does not exist on `NilClass` component of `T.nil
 autocorrect.rb:15: Method `bar=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     15 |foo.bar &= "a"
         ^^^^^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -225,7 +225,7 @@ autocorrect.rb:15: Method `bar=` does not exist on `String` component of `T.nila
 autocorrect.rb:15: Method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     15 |foo.bar &= "a"
         ^^^^^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -237,7 +237,7 @@ autocorrect.rb:15: Method `bar=` does not exist on `NilClass` component of `T.ni
 autocorrect.rb:17: Method `[]` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
     17 |[1].max_by {|l,r| 1}[2]
         ^^^^^^^^^^^^^^^^^^^^^^^
-  Got T.nilable(Integer) originating from:
+  Got `T.nilable(Integer)` originating from:
     autocorrect.rb:17:
     17 |[1].max_by {|l,r| 1}[2]
         ^^^^^^^^^^^^^^^^^^^^

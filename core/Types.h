@@ -826,7 +826,7 @@ public:
 
     static ErrorSection explainExpected(const GlobalState &gs, TypePtr type, Loc origin, const std::string &for_);
     ErrorSection explainExpected(const GlobalState &gs, const std::string &for_, Loc originForUninitialized) const;
-    ErrorSection explainGot(const GlobalState &gs, Loc originForUninitialized) const;
+    std::optional<ErrorSection> explainGot(const GlobalState &gs, Loc originForUninitialized) const;
 
     ~TypeAndOrigins() noexcept;
     TypeAndOrigins() = default;
