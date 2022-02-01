@@ -226,7 +226,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     }
                 } else {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed `{}`: Type parameters are specified with symbols");
+                        e.setHeader("Unexpected `{}`: Type parameters are specified with symbols", arg.nodeName());
                     }
                 }
             }
