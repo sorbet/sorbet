@@ -120,9 +120,10 @@ using namespace std::string_literals;
 
 %% prepush { check_stack_capacity(); }
 
-lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer, sorbet::StableStringStorage<> &scratch)
+lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view path, std::string_view source_buffer, sorbet::StableStringStorage<> &scratch)
   : diagnostics(diag)
   , version(version)
+  , path(path)
   , source_buffer(source_buffer)
   , scratch(scratch)
   , cs(lex_en_line_begin)
@@ -707,6 +708,10 @@ void lexer::set_state_expr_value() {
     //
     // This action is embedded directly into c_nl, as it is idempotent and
     // there are no cases when we need to skip it.
+    if (p < newline_s) {
+      fprintf(stderr, "newline_s = 0x%p p = 0x%p path = '%s'\n", newline_s, p, std::string(path).c_str());
+      throw std::runtime_error("lexer_newline_invariant_failed");
+    }
     newline_s = p;
   }
 

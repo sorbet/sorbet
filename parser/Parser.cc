@@ -77,9 +77,10 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file, 
     StableStringStorage<> scratch;
     unique_ptr<ruby_parser::base_driver> driver;
     if (trace) {
-        driver = make_unique<ruby_parser::typedruby_debug27>(buffer, scratch, Builder::interface);
+        driver = make_unique<ruby_parser::typedruby_debug27>(file.data(gs).path(), buffer, scratch, Builder::interface);
     } else {
-        driver = make_unique<ruby_parser::typedruby_release27>(buffer, scratch, Builder::interface);
+        driver =
+            make_unique<ruby_parser::typedruby_release27>(file.data(gs).path(), buffer, scratch, Builder::interface);
     }
 
     for (string local : initialLocals) {

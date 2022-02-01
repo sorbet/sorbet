@@ -55,6 +55,7 @@ private:
     pool<token, 64> mempool;
 
     ruby_version version;
+    std::string_view path;
     std::string_view source_buffer;
     sorbet::StableStringStorage<> &scratch;
 
@@ -184,7 +185,7 @@ public:
     bool in_kwarg; // true at the end of "def foo a:"
     Context context;
 
-    lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer,
+    lexer(diagnostics_t &diag, ruby_version version, std::string_view path, std::string_view source_buffer,
           sorbet::StableStringStorage<> &scratch);
 
     // Main interface consumed by yylex function in parser
