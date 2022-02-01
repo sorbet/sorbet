@@ -76,7 +76,7 @@ autocorrect_and_and.rb:22: Call to method `even?` after `&&` assumes result type
 autocorrect_and_and.rb:29: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
     29 |        a.foo.even?
                       ^^^^^
-  Got T.nilable(Integer) originating from:
+  Got `T.nilable(Integer)` originating from:
     autocorrect_and_and.rb:29:
     29 |        a.foo.even?
                 ^^^^^
