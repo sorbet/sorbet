@@ -231,10 +231,10 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     }
     size_t ceilingScore = INT_MAX;
 
-    const vector<pair<core::SymbolRef::Kind, uint>> symbolKinds = {
-        {core::SymbolRef::Kind::ClassOrModule, gs.classAndModulesUsed()},
-        {core::SymbolRef::Kind::FieldOrStaticField, gs.fieldsUsed()},
-        {core::SymbolRef::Kind::Method, gs.methodsUsed()},
+    const std::array<pair<core::SymbolRef::Kind, size_t>, 3> symbolKinds{
+        std::make_pair(core::SymbolRef::Kind::ClassOrModule, gs.classAndModulesUsed()),
+        std::make_pair(core::SymbolRef::Kind::FieldOrStaticField, gs.fieldsUsed()),
+        std::make_pair(core::SymbolRef::Kind::Method, gs.methodsUsed()),
     };
 
     // First pass: prefix-only matches on namespace
