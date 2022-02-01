@@ -72,7 +72,37 @@ autocorrect_and_and.rb:22: Call to method `even?` after `&&` assumes result type
     autocorrect_and_and.rb:22: Replaced with `&.`
     22 |        foo.even?
                    ^
-Errors: 3
+
+autocorrect_and_and.rb:29: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    29 |        a.foo.even?
+                      ^^^^^
+  Got T.nilable(Integer) originating from:
+    autocorrect_and_and.rb:29:
+    29 |        a.foo.even?
+                ^^^^^
+  Autocorrect: Done
+    autocorrect_and_and.rb:29: Replaced with `T.must(a.foo)`
+    29 |        a.foo.even?
+                ^^^^^
+
+autocorrect_and_and.rb:36: Call to method `even?` after `&&` assumes result type doesn't change https://srb.help/7037
+    36 |        even?
+                ^^^^^
+  Got `T.nilable(Integer)` originating from:
+    autocorrect_and_and.rb:35:
+    35 |    if a.foo && a.foo.
+                        ^^^^^
+  Type had been narrowed to `Integer` before `&&`:
+    autocorrect_and_and.rb:35:
+    35 |    if a.foo && a.foo.
+               ^^^^^
+    autocorrect_and_and.rb:35:
+    35 |    if a.foo && a.foo.
+    36 |        even?
+  Note:
+    Sorbet never assumes that a method called twice returns the same result both times.
+    Either factor out a variable or use `&.`
+Errors: 5
 
 --------------------------------------------------------------------------
 
@@ -98,5 +128,20 @@ class A
     if foo&.even?
       puts a.foo
     end
+
+    # Wildly, this is valid method call syntax.
+    # Our current implementation will not trigger.
+    if a . foo &&
+        T.must(a.foo).even?
+      puts a.foo
+    end
+
+    # Our autocorrect is very simplicit right now.
+    # It will not fire when the `.` and method name are on separate lines.
+    if a.foo && a.foo.
+        even?
+      puts a.foo
+    end
+
   end
 end
