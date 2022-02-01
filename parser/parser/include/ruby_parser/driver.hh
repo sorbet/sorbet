@@ -59,13 +59,14 @@ struct delimited_node_list {
 
 struct delimited_block {
     delimited_block() = default;
-    delimited_block(const token_t &begin, ForeignPtr args, ForeignPtr body, const token_t &end)
-        : begin(begin), args(args), body(body), end(end) {}
+    delimited_block(const token_t &begin, ForeignPtr args, ForeignPtr body, const token_t &end, bool invalidBlockPass)
+        : begin(begin), args(args), body(body), end(end), invalidBlockPass(invalidBlockPass) {}
 
     token_t begin = nullptr;
     ForeignPtr args = nullptr;
     ForeignPtr body = nullptr;
     token_t end = nullptr;
+    bool invalidBlockPass = false;
 };
 
 struct node_with_token {

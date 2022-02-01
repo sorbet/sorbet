@@ -586,7 +586,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::TYPEDRUBY27 &d
 
      begin_block: tLCURLY top_compstmt tRCURLY
                     {
-                      $$ = driver.alloc.delimited_block($1, nullptr, $2, $3);
+                      $$ = driver.alloc.delimited_block($1, nullptr, $2, $3, false);
                     }
 
         bodystmt: compstmt opt_rescue opt_else opt_ensure
@@ -921,6 +921,10 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::TYPEDRUBY27 &d
                       auto &block = $3;
                       block->begin = $1;
                       block->end = $4;
+                      if (block->invalidBlockPass) {
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::CurlyBracesAroundBlockPass,
+                          diagnostic::range(@1.begin, @4.end));
+                      }
                       $$ = block;
                       driver.lex.context.pop();
                     }
@@ -2333,7 +2337,7 @@ opt_block_args_tail:
                     }
                   compstmt tRCURLY
                     {
-                      $$ = driver.alloc.delimited_block($1, nullptr, $3, $4);
+                      $$ = driver.alloc.delimited_block($1, nullptr, $3, $4, false);
                       driver.lex.context.pop();
                     }
                 | kDO_LAMBDA
@@ -2342,7 +2346,7 @@ opt_block_args_tail:
                     }
                   bodystmt kEND
                     {
-                      $$ = driver.alloc.delimited_block($1, nullptr, $3, $4);
+                      $$ = driver.alloc.delimited_block($1, nullptr, $3, $4, false);
                       driver.lex.context.pop();
                     }
 
@@ -2476,6 +2480,10 @@ opt_block_args_tail:
                       auto &block = $3;
                       block->begin = $1;
                       block->end = $4;
+                      if (block->invalidBlockPass) {
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::CurlyBracesAroundBlockPass,
+                          diagnostic::range(@1.begin, @4.end));
+                      }
                       $$ = block;
                       driver.lex.context.pop();
                     }
@@ -2500,18 +2508,16 @@ opt_block_args_tail:
                     {
                       if (driver.numparam_stack.seen_numparams()) {
                         auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->decls);
-                        $$ = driver.alloc.delimited_block(nullptr, numparams, $3, nullptr);
+                        $$ = driver.alloc.delimited_block(nullptr, numparams, $3, nullptr, false);
                       } else {
-                        $$ = driver.alloc.delimited_block(nullptr, $2, $3, nullptr);
+                        $$ = driver.alloc.delimited_block(nullptr, $2, $3, nullptr, false);
                       }
                       driver.numparam_stack.pop();
                       driver.lex.unextend();
                     }
                   | tAMPER arg_value
                     {
-                      $$ = driver.alloc.delimited_block(nullptr, nullptr, nullptr, nullptr);
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::CurlyBracesAroundBlockPass,
-                        diagnostic::range(@1.begin, @2.end));
+                      $$ = driver.alloc.delimited_block(nullptr, driver.build.args(nullptr, nullptr, nullptr, nullptr, false), $2, nullptr, true);
                     }
 
          do_body:   {
@@ -2525,9 +2531,9 @@ opt_block_args_tail:
                     {
                       if (driver.numparam_stack.seen_numparams()) {
                         auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->decls);
-                        $$ = driver.alloc.delimited_block(nullptr, numparams, $4, nullptr);
+                        $$ = driver.alloc.delimited_block(nullptr, numparams, $4, nullptr, false);
                       } else {
-                        $$ = driver.alloc.delimited_block(nullptr, $3, $4, nullptr);
+                        $$ = driver.alloc.delimited_block(nullptr, $3, $4, nullptr, false);
                       }
                       driver.lex.unextend();
 

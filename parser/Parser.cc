@@ -24,7 +24,8 @@ class ErrorToError {
         return min((uint32_t)(pos), maxOff);
     }
 
-    static void maybeAddAutocorrect(core::ErrorBuilder &e, core::Loc loc, ruby_parser::dclass errorClass) {
+    static void maybeAddAutocorrect(core::GlobalState &gs, core::ErrorBuilder &e, core::Loc loc,
+                                    ruby_parser::dclass errorClass) {
         switch (errorClass) {
             case ruby_parser::dclass::IfInsteadOfItForTest:
                 e.replaceWith("Replace with `it`", loc, "it");
@@ -32,6 +33,22 @@ class ErrorToError {
             case ruby_parser::dclass::MissingCommaBetweenKwargs:
                 e.replaceWith("Insert a comma", loc, ", ");
                 break;
+            case ruby_parser::dclass::CurlyBracesAroundBlockPass: {
+                auto source = loc.source(gs);
+                if (source.has_value()) {
+                    auto replacement = string(loc.source(gs).value());
+                    size_t lCurlyPos = replacement.find("{");
+                    if (lCurlyPos != string::npos) {
+                        replacement = replacement.erase(lCurlyPos, 1);
+                        size_t rCurlyPos = replacement.rfind("}");
+                        if (rCurlyPos != string::npos) {
+                            replacement = replacement.erase(rCurlyPos, 1);
+                            e.replaceWith("Remove the curly braces", loc, replacement);
+                        }
+                    }
+                }
+                break;
+            }
             default:
                 break;
         }
@@ -58,7 +75,7 @@ public:
             if (auto e = gs.beginError(loc, core::errors::Parser::ParserError)) {
                 e.setHeader("{}",
                             fmt::vformat(dclassStrings[(int)diag.error_class()], fmt::make_format_args(diag.data())));
-                maybeAddAutocorrect(e, loc, diag.error_class());
+                maybeAddAutocorrect(gs, e, loc, diag.error_class());
             }
         }
     }
