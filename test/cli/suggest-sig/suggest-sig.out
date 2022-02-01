@@ -313,7 +313,6 @@ suggest-sig.rb:112: This function does not have a `sig` https://srb.help/7017
   `
      112 |  def self.load_account_business_profile(merchant)
             ^
-  Autocorrect: Done
     suggest-sig.rb:105: Inserted `  extend T::Sig
 `
      105 |  class Merchant

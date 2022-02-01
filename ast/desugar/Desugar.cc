@@ -1059,9 +1059,32 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto iff = MK::If(loc, std::move(cond), std::move(rhs), std::move(lhs));
                     result = std::move(iff);
                 } else {
-                    core::NameRef tempName = dctx.freshNameUnique(core::Names::andAnd());
-                    auto temp = MK::Assign(loc, tempName, std::move(lhs));
-                    auto iff = MK::If(loc, MK::Local(loc, tempName), std::move(rhs), MK::Local(loc, tempName));
+                    auto andAndTemp = dctx.freshNameUnique(core::Names::andAnd());
+
+                    auto *lhsSend = ast::cast_tree<ast::Send>(lhs);
+                    auto *rhsSend = ast::cast_tree<ast::Send>(rhs);
+
+                    ExpressionPtr thenp;
+                    if (lhsSend != nullptr && rhsSend != nullptr) {
+                        auto lhsSource = core::Loc(dctx.ctx.file, lhsSend->loc).source(dctx.ctx);
+                        auto rhsRecvSource = core::Loc(dctx.ctx.file, rhsSend->recv.loc()).source(dctx.ctx);
+                        if (lhsSource.has_value() && lhsSource == rhsRecvSource) {
+                            // Have to use zero-width locs here so that these auto-generated things
+                            // don't show up in e.g. completion requests.
+                            rhsSend->insertPosArg(0, std::move(rhsSend->recv));
+                            rhsSend->insertPosArg(1, MK::Local(loc.copyWithZeroLength(), andAndTemp));
+                            rhsSend->insertPosArg(2, MK::Symbol(rhsSend->funLoc.copyWithZeroLength(), rhsSend->fun));
+                            rhsSend->recv = MK::Constant(loc.copyWithZeroLength(), core::Symbols::Magic());
+                            rhsSend->fun = core::Names::checkAndAnd();
+                            thenp = std::move(rhs);
+                        } else {
+                            thenp = std::move(rhs);
+                        }
+                    } else {
+                        thenp = std::move(rhs);
+                    }
+                    auto temp = MK::Assign(loc, andAndTemp, std::move(lhs));
+                    auto iff = MK::If(loc, MK::Local(loc, andAndTemp), std::move(thenp), MK::Local(loc, andAndTemp));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
                     result = std::move(wrapped);
                 }
@@ -1857,8 +1880,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     // strict mode
                     auto blockArgName = dctx.enclosingBlockArg;
                     if (blockArgName == core::Names::blkArg()) {
-                        if (auto e = dctx.ctx.state.beginError(core::Loc(dctx.ctx.file, dctx.enclosingMethodLoc),
-                                                               core::errors::Desugar::UnnamedBlockParameter)) {
+                        if (auto e = dctx.ctx.beginError(dctx.enclosingMethodLoc,
+                                                         core::errors::Desugar::UnnamedBlockParameter)) {
                             e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
                                         dctx.enclosingMethodName.show(dctx.ctx), "yield");
                             e.addErrorLine(core::Loc(dctx.ctx.file, loc), "Arising from use of `{}` in method body",
