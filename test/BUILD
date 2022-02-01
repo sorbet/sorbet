@@ -220,7 +220,6 @@ pipeline_tests(
         ],
     ),
     "PosTests",
-    filter = "PosTests",
 )
 
 pipeline_tests(
@@ -232,7 +231,6 @@ pipeline_tests(
         ],
     ),
     "PackagerTests",
-    filter = "PackagerTests",
 )
 
 pipeline_tests(
@@ -242,7 +240,6 @@ pipeline_tests(
         "whitequark/**/*.exp",
     ]),
     "WhitequarkParserTests",
-    filter = "WhitequarkParserTests",
 )
 
 pipeline_tests(
@@ -259,7 +256,6 @@ pipeline_tests(
         ],
     ),
     "LSPTests",
-    filter = "LSPTests",
 )
 
 test_suite(
