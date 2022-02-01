@@ -810,6 +810,10 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                     {
                       $$ = driver.build.logicalAnd(self, $1, $2, $3);
                     }
+                | kAND error
+                    {
+                      $$ = driver.build.error_node(self, @1.begin, @1.end);
+                    }
                 | expr kOR expr
                     {
                       $$ = driver.build.logicalOr(self, $1, $2, $3);

@@ -15,6 +15,8 @@ def method_named_alias(x)
     .alias # ok
   x.
     alias # error: unexpected token
+    # need these here because Sorbet will try to parse 'alias end def' otherwise
+    foo bar
 end
 
 def method_named_and(x)
@@ -51,7 +53,7 @@ def method_named_case(x)
     .case # ok
   x.
     case # error: unexpected token
-end # error: unexpected token
+end
 
 def method_named_class(x)
   x.class # ok
