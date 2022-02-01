@@ -130,7 +130,7 @@ class A
     end
 
     # Wildly, this is valid method call syntax.
-    # Our current implementation will not trigger.
+    # Our current implementation will not trigger (not even the error).
     if a . foo &&
         T.must(a.foo).even?
       puts a.foo
