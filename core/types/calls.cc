@@ -2454,12 +2454,17 @@ public:
 class Magic_checkAndAnd : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        // <Magic>.<check-and-and> is created when desugaring for the purpose of adding a more
+        // specific error message when using `&&`. The normal error is something like "Method not
+        // found on NilClass" which is common enough and confusing enough that it warrants getting
+        // special wording (especially for first-time Sorbet users).
+        //
         // args[0] is recv
         // args[1] is the && tmp var
         // args[2] is the method name
         // args[3...] are the args
 
-        ENFORCE(args.args.size() >= 3, "Desugar invariant failed");
+        ENFORCE(args.args.size() >= 3, "Desugar should have created call to <check-and-and> with exactly 3 args");
         if (args.args.size() < 3) {
             return;
         }
