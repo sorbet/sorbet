@@ -2517,7 +2517,8 @@ opt_block_args_tail:
                     }
                   | tAMPER arg_value
                     {
-                      $$ = driver.alloc.delimited_block(nullptr, driver.build.args(nullptr, nullptr, nullptr, nullptr, false), $2, nullptr, true);
+                      auto args = driver.build.args(self, nullptr, driver.alloc.node_list(), nullptr, false);
+                      $$ = driver.alloc.delimited_block(nullptr, args, $2, nullptr, true);
                     }
 
          do_body:   {
