@@ -706,18 +706,11 @@ int realmain(int argc, char *argv[]) {
                 return 1;
             }
 
-            auto relativeIgnorePatterns = opts.relativeIgnorePatterns;
-            auto it = absl::c_find(relativeIgnorePatterns, "/__package.rb");
-            if (it != relativeIgnorePatterns.end()) {
-                relativeIgnorePatterns.erase(it);
-            } else {
-                Exception::raise("Couldn't find ignore pattern.");
-            }
             auto packageFiles = opts.fs->listFilesInDir(opts.rawInputDirNames[0], opts.allowedExtensions, true,
-                                                        opts.absoluteIgnorePatterns, relativeIgnorePatterns);
+                                                        opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
             packageFiles.erase(
                 remove_if(packageFiles.begin(), packageFiles.end(),
-                          [](const auto &packageFile) { return !absl::EndsWith(packageFile, "__package.rb"); }),
+                          [](const auto &packageFile) { return !absl::EndsWith(packageFile, "/__package.rb"); }),
                 packageFiles.end());
 
             if (packageFiles.empty()) {
