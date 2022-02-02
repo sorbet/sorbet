@@ -498,10 +498,10 @@ token_t lexer::advance_() {
 
   if (cs == lex_error) {
     size_t start = (size_t)(p - source_buffer.data());
-    return mempool.alloc(token_type::error, start, start + 1, std::string_view(p - 1, 1));
+    return mempool.alloc(token_type::error, start, start + 1, std::string_view(p - 1, 1), cur_line_start());
   }
 
-  return mempool.alloc(token_type::eof, source_buffer.size(), source_buffer.size(), std::string_view("", 0));
+  return mempool.alloc(token_type::eof, source_buffer.size(), source_buffer.size(), std::string_view("", 0), cur_line_start());
 }
 
 void lexer::emit(token_type type) {
@@ -516,7 +516,8 @@ void lexer::emit(token_type type, std::string_view str, const char* start, const
   size_t offset_start = (size_t)(start - source_buffer.data());
   size_t offset_end = (size_t)(end - source_buffer.data());
 
-  token_queue.push_back(mempool.alloc(type, offset_start, offset_end, str));
+  size_t line = type == token_type::tNL ? SIZE_MAX : cur_line_start();
+  token_queue.push_back(mempool.alloc(type, offset_start, offset_end, str, line));
 }
 
 void lexer::emit(token_type type, const std::string &str) {
@@ -527,9 +528,10 @@ void lexer::emit(token_type type, const std::string &str, const char* start, con
   size_t offset_start = (size_t)(start - source_buffer.data());
   size_t offset_end = (size_t)(end - source_buffer.data());
 
+  size_t line = type == token_type::tNL ? SIZE_MAX : cur_line_start();
   // Copy the string into stable storage.
   auto scratch_view = scratch.enterString(str);
-  token_queue.push_back(mempool.alloc(type, offset_start, offset_end, scratch_view));
+  token_queue.push_back(mempool.alloc(type, offset_start, offset_end, scratch_view, line));
 }
 
 void lexer::emit_do(bool do_block) {

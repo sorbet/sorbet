@@ -7,6 +7,8 @@
 
 namespace ruby_parser {
 
+// TODO(jez) I think that I only need line information for tokens.
+// struct location can be used for nonterminals as well, which is weird.
 struct location {
     size_t begin;
     size_t end;

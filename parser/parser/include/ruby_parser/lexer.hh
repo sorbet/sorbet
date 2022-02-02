@@ -137,6 +137,9 @@ private:
 
     bool traceLexer;
 
+    size_t cur_line_start() {
+        return this->newline_s ? (this->newline_s - this->source_buffer.data()) + 1 : 0;
+    }
     void check_stack_capacity();
     int stack_pop();
     int arg_or_cmdarg(int cmd_state);
