@@ -2,7 +2,7 @@ autocorrect-block-pass-curly-braces.rb:5: block pass should not be enclosed in c
      5 |    f {&:foo}
               ^^^^^^^
   Autocorrect: Done
-    autocorrect-block-pass-curly-braces.rb:5: Replaced with `&:foo`
+    autocorrect-block-pass-curly-braces.rb:5: Replaced with `(&:foo)`
      5 |    f {&:foo}
               ^^^^^^^
 
@@ -10,7 +10,7 @@ autocorrect-block-pass-curly-braces.rb:9: block pass should not be enclosed in c
      9 |    g {&(1+1)}
               ^^^^^^^^
   Autocorrect: Done
-    autocorrect-block-pass-curly-braces.rb:9: Replaced with `&(1+1)`
+    autocorrect-block-pass-curly-braces.rb:9: Replaced with `(&(1+1))`
      9 |    g {&(1+1)}
               ^^^^^^^^
 
@@ -18,8 +18,8 @@ autocorrect-block-pass-curly-braces.rb:13: block pass should not be enclosed in 
     13 |    h {&(T.unsafe(true) ? :sneeze
     14 |                        : :cough)}
   Autocorrect: Done
-    autocorrect-block-pass-curly-braces.rb:13: Replaced with `&(T.unsafe(true) ? :sneeze
-                        : :cough)`
+    autocorrect-block-pass-curly-braces.rb:13: Replaced with `(&(T.unsafe(true) ? :sneeze
+                        : :cough))`
     13 |    h {&(T.unsafe(true) ? :sneeze
     14 |                        : :cough)}
 Errors: 3
@@ -30,15 +30,15 @@ Errors: 3
 
 class A
   def f
-    f &:foo
+    f (&:foo)
   end
 
   def g
-    g &(1+1)
+    g (&(1+1))
   end
 
   def h
-    h &(T.unsafe(true) ? :sneeze
-                        : :cough)
+    h (&(T.unsafe(true) ? :sneeze
+                        : :cough))
   end
 end

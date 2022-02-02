@@ -38,13 +38,11 @@ class ErrorToError {
                 if (source.has_value()) {
                     auto replacement = string(loc.source(gs).value());
                     size_t lCurlyPos = replacement.find("{");
-                    if (lCurlyPos != string::npos) {
-                        replacement = replacement.erase(lCurlyPos, 1);
-                        size_t rCurlyPos = replacement.rfind("}");
-                        if (rCurlyPos != string::npos) {
-                            replacement = replacement.erase(rCurlyPos, 1);
-                            e.replaceWith("Remove the curly braces", loc, replacement);
-                        }
+                    size_t rCurlyPos = replacement.rfind("}");
+                    if (lCurlyPos != string::npos && rCurlyPos != string::npos) {
+                        replacement[lCurlyPos] = '(';
+                        replacement[rCurlyPos] = ')';
+                        e.replaceWith("Replace the curly braces with parens", loc, replacement);
                     }
                 }
                 break;
