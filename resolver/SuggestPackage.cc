@@ -31,6 +31,7 @@ void symbol2NameParts(core::Context ctx, core::SymbolRef symbol, vector<core::Na
 
 struct PackageMatch {
     core::NameRef mangledName;
+    std::optional<core::packages::ImportType> existingImportType;
 };
 
 class PackageContext final {
@@ -57,6 +58,22 @@ public:
 
             findPackagesWithPrefix(prefix, matches);
         }
+
+        // Filter out duplicate imports from suggestions:
+        bool isTestFile = ctx.file.data(ctx).isPackagedTest();
+        auto it = remove_if(matches.begin(), matches.end(), [&](auto m) {
+            if (m.existingImportType == nullopt) {
+                return false;
+            }
+            switch (*m.existingImportType) {
+                case core::packages::ImportType::Normal:
+                    return true; // This is already imported
+                case core::packages::ImportType::Test:
+                    return isTestFile; // This is already test_imported
+            }
+        });
+        matches.erase(it, matches.end());
+
         return matches;
     }
 
@@ -108,7 +125,6 @@ public:
         lines.emplace_back(core::ErrorLine::from(otherPkg.definitionLoc(), "Do you need to `{}` package `{}`?",
                                                  importName.show(ctx), formatPackageName(otherPkg)));
         e.addErrorSection(core::ErrorSection(lines));
-        maybeAddErrorHint(e);
         if (auto autocorrect = currentPkg.addImport(ctx, otherPkg, isTestFile)) {
             e.addAutocorrect(std::move(*autocorrect));
         }
@@ -150,7 +166,7 @@ private:
             auto &fullName = other.fullName();
             if (fullName.size() >= prefixSize && canImport(other) &&
                 std::equal(fullName.begin(), fullName.begin() + prefixSize, prefixBegin)) {
-                matches.emplace_back(PackageMatch{name});
+                matches.emplace_back(PackageMatch{name, currentPkg.importsPackage(other)});
             }
         }
     }
@@ -276,7 +292,24 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
         return pkgCtx.tryPackageSpecCorrections(e, unresolved);
     }
 
-    if (ast::cast_tree<ast::ConstantLit>(unresolved.scope) != nullptr) {
+    vector<PackageMatch> missingImports;
+    if (auto unresScope = ast::cast_tree<ast::ConstantLit>(unresolved.scope)) {
+        missingImports = pkgCtx.findPossibleMissingImports({unresScope->symbol}, unresolved.cnst);
+    } else {
+        missingImports = pkgCtx.findPossibleMissingImports(scopes, unresolved.cnst);
+    }
+
+    if (missingImports.size() > 3) {
+        missingImports.resize(3);
+    }
+    if (!missingImports.empty()) {
+        for (auto match : missingImports) {
+            pkgCtx.addMissingImportSuggestions(e, match);
+        }
+        return true;
+    }
+
+    if (auto scope = ast::cast_tree<ast::ConstantLit>(unresolved.scope)) {
         auto missingExports = pkgCtx.currentPkg.findMissingExports(
             ctx, ast::cast_tree_nonnull<ast::ConstantLit>(unresolved.scope).symbol, unresolved.cnst);
         if (missingExports.size() > 5) {
@@ -289,17 +322,6 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
             return true;
         }
     }
-
-    vector<PackageMatch> missingImports = pkgCtx.findPossibleMissingImports(scopes, unresolved.cnst);
-    if (missingImports.empty()) {
-        return false;
-    }
-    if (missingImports.size() > 5) {
-        missingImports.resize(5);
-    }
-    for (auto match : missingImports) {
-        pkgCtx.addMissingImportSuggestions(e, match);
-    }
-    return true;
+    return false;
 }
 } // namespace sorbet::resolver
