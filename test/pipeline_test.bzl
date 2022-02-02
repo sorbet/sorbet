@@ -133,7 +133,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_args = [], tag
             data += native.glob(["{}.*.minimize.rbi".format(prefix)])
 
         exp_test(
-            name = "test_{}/{}".format(test_name_prefix, name),
+            name = test_name,
             runner = runner,
             data = data,
             test = sentinel,
