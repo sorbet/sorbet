@@ -3,9 +3,6 @@
 # enable-packager: true
 
 class Simpsons < PackageSpec
-    # ^^^^^^^^ symbol-search: "Simpsons", name = "Simpsons", container = "(nothing)"
-    # ^^^^^^^^ symbol-search: "Simpsons", name = "Simpsons", container = "Simpsons"
-    # ^^^^^^^^ symbol-search: "Simpsons", name = "Simpsons", container = "<PackageTests>::Simpsons_Package_Private"
     # ^ show-symbol: Simpsons
     # go-to-def on a reference to Bart within the package goes here, but go-to-def on Bart in `import Bart` goes to the
     # package.
