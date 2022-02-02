@@ -70,6 +70,11 @@ public:
         return vector<vector<core::NameRef>>();
     }
 
+    std::optional<ImportType> importsPackage(const PackageInfo &other) const {
+        notImplemented();
+        return nullopt;
+    }
+
     ~NonePackage() {}
 
 private:
