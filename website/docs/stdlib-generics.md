@@ -9,6 +9,26 @@ sidebar_label: Arrays & Hashes
 Sorbet supports generic types. The syntax looks likes `MyClass[Elem]`. For user
 defined generic classes, it's possible to make this valid Ruby syntax.
 
+```ruby
+# typed: true
+class Box
+  extend T::Sig
+  extend T::Generic
+
+  Elem = type_member
+
+  sig {returns(Elem)}
+  attr_reader :x
+
+  sig {params(x: Elem).returns(Elem)}
+  attr_writer :x
+end
+
+Box[Integer].new.x + Box[String].new.x # error
+Box[Integer].new.x -= 10 # good
+Box[String].new.x -= 10 # bad Method - does not exist on String
+```
+
 However, it's not possible to change the syntax for classes in the Ruby standard
 library that should be generic. To make up for this, we use wrappers in the `T`
 namespace to represent them:
