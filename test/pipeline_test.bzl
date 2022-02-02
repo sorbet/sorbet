@@ -63,42 +63,44 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_args = [], tag
     folder_test_dir = "/packager/"
 
     for path in all_paths:
-        if path.endswith(".rb") or path.endswith(".rbi"):
-            packager_pos = path.find(folder_test_dir)
-            if packager_pos >= 0:
-                # This is a folder test.
-                final_dirsep = path.find("/", packager_pos + len(folder_test_dir))
-                if final_dirsep >= 0:
-                    test_name = path[0:final_dirsep]
-                    current = tests.get(test_name)
-                    if None == current:
-                        data = {
-                            "path": test_name,
-                            "prefix": test_name + "/",
-                            "sentinel": test_name,
-                            "isMultiFile": False,
-                            "isDirectory": True,
-                            "disabled": "disabled" in test_name,
-                        }
-                        tests[test_name] = data
-                    continue
+        if not path.endswith(".rb") and not path.endswith(".rbi"):
+            continue
 
-            # This is not a folder test (common case)
-            prefix = dropExtension(basename(path).partition("__")[0])
+        packager_pos = path.find(folder_test_dir)
+        if packager_pos >= 0:
+            # This is a folder test.
+            final_dirsep = path.find("/", packager_pos + len(folder_test_dir))
+            if final_dirsep >= 0:
+                test_name = path[0:final_dirsep]
+                current = tests.get(test_name)
+                if None == current:
+                    data = {
+                        "path": test_name,
+                        "prefix": test_name + "/",
+                        "sentinel": test_name,
+                        "isMultiFile": False,
+                        "isDirectory": True,
+                        "disabled": "disabled" in test_name,
+                    }
+                    tests[test_name] = data
+                continue
 
-            test_name = dirname(path) + "/" + prefix
+        # This is not a folder test (common case)
+        prefix = dropExtension(basename(path).partition("__")[0])
 
-            current = tests.get(test_name)
-            if None == current:
-                data = {
-                    "path": dirname(path),
-                    "prefix": "{}/{}".format(dirname(path), prefix),
-                    "sentinel": path,
-                    "isMultiFile": "__" in path,
-                    "isDirectory": False,
-                    "disabled": "disabled" in path,
-                }
-                tests[test_name] = data
+        test_name = dirname(path) + "/" + prefix
+
+        current = tests.get(test_name)
+        if None == current:
+            data = {
+                "path": dirname(path),
+                "prefix": "{}/{}".format(dirname(path), prefix),
+                "sentinel": path,
+                "isMultiFile": "__" in path,
+                "isDirectory": False,
+                "disabled": "disabled" in path,
+            }
+            tests[test_name] = data
 
     runner = _TEST_RUNNERS.get(test_name_prefix)
     if None == runner:
@@ -133,7 +135,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_args = [], tag
             data += native.glob(["{}.*.minimize.rbi".format(prefix)])
 
         exp_test(
-            name = "test_{}/{}".format(test_name_prefix, name),
+            name = test_name,
             runner = runner,
             data = data,
             test = sentinel,
