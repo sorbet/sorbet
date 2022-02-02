@@ -486,7 +486,7 @@ void parser::error(const ruby_parser::location &lloc, const std::string &msg) {
 
 	driver.diagnostics.emplace_back(
 		dlevel::ERROR, dclass::UnexpectedToken,
-		diagnostic::range(driver.lex.last_token_s, driver.lex.last_token_e),
+		diagnostic::range(lloc.begin, lloc.end),
 		error_message);
 }
 
