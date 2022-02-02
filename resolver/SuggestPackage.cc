@@ -275,10 +275,10 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
                                            const ast::ConstantLit::ResolutionScopes &scopes,
                                            ast::UnresolvedConstantLit &unresolved) {
     // Search strategy:
-    // 1. Look for un-exported names in packages *this package already imports* that defined the
-    //    unresolved literal.
-    // 2. Look for packages that we did not import that match the prefix of the unresolved constant
+    // 1. Look for packages that we did not import that match the prefix of the unresolved constant
     //    literal.
+    // 2. Look for un-exported names in packages *this package already imports* that defined the
+    //    unresolved literal.
     // Both of above look for EXACT matches only. If neither of these find anything we fall back to
     // the resolver's default behavior (Symbol::findMemberFuzzyMatch).
     if (ctx.state.packageDB().empty()) {
@@ -298,22 +298,21 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
     } else {
         missingImports = pkgCtx.findPossibleMissingImports(scopes, unresolved.cnst);
     }
-
-    if (missingImports.size() > 3) {
-        missingImports.resize(3);
-    }
     if (!missingImports.empty()) {
+        if (missingImports.size() > 3) {
+            missingImports.resize(3);
+        }
         for (auto match : missingImports) {
             pkgCtx.addMissingImportSuggestions(e, match);
         }
         return true;
     }
 
-    if (auto scope = ast::cast_tree<ast::ConstantLit>(unresolved.scope)) {
+    if (ast::isa_tree<ast::ConstantLit>(unresolved.scope)) {
         auto missingExports = pkgCtx.currentPkg.findMissingExports(
             ctx, ast::cast_tree_nonnull<ast::ConstantLit>(unresolved.scope).symbol, unresolved.cnst);
-        if (missingExports.size() > 5) {
-            missingExports.resize(5);
+        if (missingExports.size() > 3) {
+            missingExports.resize(3);
         }
         if (!missingExports.empty()) {
             for (auto match : missingExports) {
