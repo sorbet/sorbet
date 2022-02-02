@@ -697,6 +697,11 @@ int realmain(int argc, char *argv[]) {
                 return 1;
             }
 
+            if (!FileOps::dirExists(opts.packageRBIOutput)) {
+                logger->error("Directory {} for serialized package RBIs does not exist.", opts.packageRBIOutput);
+                return 1;
+            }
+
             auto relativeIgnorePatterns = opts.relativeIgnorePatterns;
             auto it = absl::c_find(relativeIgnorePatterns, "/__package.rb");
             if (it != relativeIgnorePatterns.end()) {
