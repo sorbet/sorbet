@@ -245,8 +245,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         {
             core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
-            auto trace = false;
-            nodes = parser::Parser::run(*gs, file, trace);
+            auto settings = parser::Parser::Settings{};
+            nodes = parser::Parser::run(*gs, file, settings);
         }
 
         handler.drainErrors(*gs);
@@ -343,8 +343,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             for (auto file : files) {
                 core::UnfreezeNameTable nameTableAccess(*rbiGenGs); // enters original strings
 
-                auto trace = false;
-                auto nodes = parser::Parser::run(*rbiGenGs, file, trace);
+                auto settings = parser::Parser::Settings{};
+                auto nodes = parser::Parser::run(*rbiGenGs, file, settings);
                 core::MutableContext ctx(*rbiGenGs, core::Symbols::root(), file);
                 auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file};
                 tree = ast::ParsedFile{rewriter::Rewriter::run(ctx, move(tree.tree)), tree.file};
@@ -672,8 +672,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         gs->replaceFile(f.file, move(newFile));
 
         // this replicates the logic of pipeline::indexOne
-        auto trace = false;
-        auto nodes = parser::Parser::run(*gs, f.file, trace);
+        auto settings = parser::Parser::Settings{};
+        auto nodes = parser::Parser::run(*gs, f.file, settings);
         handler.addObserved(*gs, "parse-tree", [&]() { return nodes->toString(*gs); });
         handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes->toJSON(*gs); });
 

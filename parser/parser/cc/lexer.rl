@@ -120,7 +120,7 @@ using namespace std::string_literals;
 
 %% prepush { check_stack_capacity(); }
 
-lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer, sorbet::StableStringStorage<> &scratch)
+lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer, sorbet::StableStringStorage<> &scratch, bool traceLexer)
   : diagnostics(diag)
   , version(version)
   , source_buffer(source_buffer)
@@ -143,6 +143,7 @@ lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_
   , num_xfrm(num_xfrm_type::NONE)
   , escape_s(nullptr)
   , herebody_s(nullptr)
+  , traceLexer(traceLexer)
   , in_kwarg(false)
 {
   assert(!source_buffer.empty());
@@ -2875,6 +2876,11 @@ void lexer::set_state_expr_value() {
 
 token_t lexer::advance() {
   auto tok = advance_();
+
+  if (this->traceLexer) {
+    std::cerr << *tok << std::endl;
+  }
+
   return tok;
 }
 

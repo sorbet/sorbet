@@ -404,6 +404,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
 
     // Developer options
     options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");
+    options.add_options("dev")("trace-lexer", "Emit the lexer's token stream in a debug format");
     options.add_options("dev")("trace-parser", "Enable bison's parser trace functionality");
     options.add_options("dev")("autogen-subclasses-parent",
                                "Parent classes for which generate a list of subclasses. "
@@ -839,6 +840,7 @@ void readOptions(Options &opts,
             opts.suggestUnsafe = raw["suggest-unsafe"].as<string>();
         }
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
+        opts.traceLexer = raw["trace-lexer"].as<bool>();
         opts.traceParser = raw["trace-parser"].as<bool>();
         opts.stressIncrementalResolver = raw["stress-incremental-resolver"].as<bool>();
         opts.sleepInSlowPath = raw["sleep-in-slow-path"].as<bool>();

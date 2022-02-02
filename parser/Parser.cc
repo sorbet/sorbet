@@ -79,7 +79,7 @@ public:
     }
 };
 
-unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file, bool trace,
+unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file, Parser::Settings settings,
                              std::vector<std::string> initialLocals) {
     Builder builder(gs, file);
     auto source = file.data(gs).source();
@@ -91,17 +91,19 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file, 
     buffer += "\0\0"sv;
     StableStringStorage<> scratch;
     unique_ptr<ruby_parser::base_driver> driver;
-    if (trace) {
-        driver = make_unique<ruby_parser::typedruby_debug27>(buffer, scratch, Builder::interface);
+    if (settings.traceParser) {
+        driver =
+            make_unique<ruby_parser::typedruby_debug27>(buffer, scratch, Builder::interface, !!settings.traceLexer);
     } else {
-        driver = make_unique<ruby_parser::typedruby_release27>(buffer, scratch, Builder::interface);
+        driver =
+            make_unique<ruby_parser::typedruby_release27>(buffer, scratch, Builder::interface, !!settings.traceLexer);
     }
 
     for (string local : initialLocals) {
         driver->lex.declare(local);
     }
 
-    auto ast = unique_ptr<Node>(builder.build(driver.get(), trace));
+    auto ast = unique_ptr<Node>(builder.build(driver.get(), settings.traceParser));
     ErrorToError::run(gs, file, driver->diagnostics);
 
     if (!ast) {

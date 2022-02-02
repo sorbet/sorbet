@@ -28,8 +28,8 @@ TEST_CASE("SimpleDesugar") { // NOLINT
     sorbet::core::UnfreezeFileTable ft(gs);
 
     sorbet::core::FileRef fileId = gs.enterFile("<test>", "def hello_world; p :hello; end");
-    auto trace = false;
-    auto ast = sorbet::parser::Parser::run(gs, fileId, trace);
+    auto settings = sorbet::parser::Parser::Settings{};
+    auto ast = sorbet::parser::Parser::run(gs, fileId, settings);
     sorbet::core::MutableContext ctx(gs, sorbet::core::Symbols::root(), fileId);
     auto o1 = sorbet::ast::desugar::node2Tree(ctx, move(ast));
 }

@@ -29,3 +29,9 @@ std::string_view token::view() const {
 std::string token::asString() const {
     return std::string(_string);
 }
+
+std::ostream &operator<<(std::ostream &o, const ruby_parser::token &token) {
+    return o << "ruby_parser::token{.start = " << token.start() << ", .end = " << token.end()
+             << ", .type = " << ruby_parser::token::tokenTypeName(token.type()) << ", .str = \"" << token.view()
+             << "\" }";
+}
