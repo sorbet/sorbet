@@ -210,6 +210,7 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
             fmt::format_to(std::back_inserter(buf), "{}.on_autoload('{}')\n", alCfg.registryModule, fullName);
             predeclare(gs, fullName, buf);
         }
+
         if (!children.empty()) {
             fmt::format_to(std::back_inserter(buf), "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
             vector<pair<core::NameRef, string>> childNames;
@@ -221,6 +222,14 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
                                children.at(pair.first)->path(gs));
             }
             fmt::format_to(std::back_inserter(buf), "}})\n", fullName);
+        }
+
+        if (pkgName.exists()) {
+            ENFORCE(!gs.packageDB().empty());
+            const string_view shortName = pkgName.shortName(gs);
+            const string_view mungedName = shortName.substr(0, shortName.size() - core::PACKAGE_SUFFIX.size());
+            fmt::format_to(std::back_inserter(buf), "\n{}.register_package({}, '{}')\n", alCfg.registryModule, fullName,
+                           mungedName);
         }
     } else if (type == Definition::Type::Casgn || type == Definition::Type::Alias ||
                type == Definition::Type::TypeAlias) {
@@ -315,6 +324,26 @@ void DefTreeBuilder::addParsedFileDefinitions(const core::GlobalState &gs, const
     }
 }
 
+void DefTree::markPackageNamespace(core::NameRef mangledName, const vector<core::NameRef> &nameParts) {
+    DefTree *node = this;
+    for (auto nr : nameParts) {
+        auto it = node->children.find(nr);
+        if (it == node->children.end()) {
+            return;
+        }
+        node = it->second.get();
+    }
+    ENFORCE(!pkgName.exists(), "Package name should not be already set");
+    node->pkgName = mangledName;
+}
+
+void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root) {
+    for (auto nr : gs.packageDB().packages()) {
+        auto &pkg = gs.packageDB().getPackageInfo(nr);
+        root.markPackageNamespace(pkg.mangledName(), pkg.fullName());
+    }
+}
+
 void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
                                   std::unique_ptr<DefTree> &root, NamedDefinition ndef) {
     if (!alCfg.include(ndef)) {
@@ -384,7 +413,7 @@ void DefTreeBuilder::collapseSameFileDefs(const core::GlobalState &gs, const Aut
                   // for why
         auto &child = copyIt->second;
 
-        if (child->hasDifferentFile(definingFile)) {
+        if (child->pkgName.exists() || child->hasDifferentFile(definingFile)) {
             collapseSameFileDefs(gs, alCfg, *child);
         } else {
             root.children.erase(copyIt);
