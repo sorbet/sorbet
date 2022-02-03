@@ -367,6 +367,8 @@ using namespace std::string_literals;
   then
   relop
   k_return
+  lcurly_block_start
+  lbrace_cmd_block_start
 
 %type <delimited_list>
   defn_head
@@ -912,16 +914,26 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::TYPEDRUBY27 &d
                       $$ = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
                     }
 
- cmd_brace_block: tLBRACE_ARG
+lbrace_cmd_block_start:
+                  tLBRACE_ARG { driver.lex.context.push(Context::State::BLOCK); $$ = $1; }
+ cmd_brace_block: lbrace_cmd_block_start brace_body tRCURLY
                     {
-                      driver.lex.context.push(Context::State::BLOCK);
+                      auto &block = $2;
+                      block->begin = $1;
+                      block->end = $3;
+                      $$ = block;
+                      driver.lex.context.pop();
                     }
-                  brace_body tRCURLY
+                  // Error-recovery case for typos like "foo {&:bar}"
+                | lbrace_cmd_block_start tAMPER arg_value tRCURLY
                     {
-                      auto &block = $3;
+                      auto args = driver.build.args(self, nullptr, driver.alloc.node_list(), nullptr, false);
+                      auto block = driver.alloc.delimited_block(nullptr, args, $3, nullptr);
                       block->begin = $1;
                       block->end = $4;
                       $$ = block;
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::CurlyBracesAroundBlockPass,
+                          diagnostic::range(@1.begin, @4.end));
                       driver.lex.context.pop();
                     }
 
@@ -2466,17 +2478,26 @@ opt_block_args_tail:
                     {
                       $$ = driver.build.index(self, $1, $2, $3, $4);
                     }
-
-     brace_block: tLCURLY
+lcurly_block_start:
+                  tLCURLY { driver.lex.context.push(Context::State::BLOCK); $$ = $1; }
+     brace_block: lcurly_block_start brace_body tRCURLY
                     {
-                      driver.lex.context.push(Context::State::BLOCK);
+                      auto &block = $2;
+                      block->begin = $1;
+                      block->end = $3;
+                      $$ = block;
+                      driver.lex.context.pop();
                     }
-                  brace_body tRCURLY
+                  // Error-recovery case for typos like "foo {&:bar}"
+                | lcurly_block_start tAMPER arg_value tRCURLY
                     {
-                      auto &block = $3;
+                      auto args = driver.build.args(self, nullptr, driver.alloc.node_list(), nullptr, false);
+                      auto block = driver.alloc.delimited_block(nullptr, args, $3, nullptr);
                       block->begin = $1;
                       block->end = $4;
                       $$ = block;
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::CurlyBracesAroundBlockPass,
+                          diagnostic::range(@1.begin, @4.end));
                       driver.lex.context.pop();
                     }
                 | kDO
