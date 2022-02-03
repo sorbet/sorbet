@@ -290,6 +290,14 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                         sig.bind = appType->klass;
                         validBind = true;
                     }
+                } else if (auto arg = ast::cast_tree<ast::Send>(send->getPosArg(0))) {
+                    if (arg->fun == core::Names::selfType()) {
+                        sig.bind = core::Symbols::BindToSelfType();
+                        validBind = true;
+                    } else if (arg->fun == core::Names::attachedClass()) {
+                        sig.bind = core::Symbols::BindToAttachedClass();
+                        validBind = true;
+                    }
                 }
 
                 if (!validBind) {
@@ -991,7 +999,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
         },
         [&](const ast::Send &s) {
             if (isTProc(ctx, &s)) {
-                auto sig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args.withoutSelfType());
+                auto sig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args);
                 if (sig.bind.exists()) {
                     if (!args.allowRebind) {
                         if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
