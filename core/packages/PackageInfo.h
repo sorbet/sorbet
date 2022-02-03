@@ -15,6 +15,11 @@ class Context;
 } // namespace sorbet::core
 
 namespace sorbet::core::packages {
+enum class ImportType {
+    Normal,
+    Test,
+};
+
 class PackageInfo {
 public:
     virtual core::NameRef mangledName() const = 0;
@@ -27,6 +32,8 @@ public:
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
     virtual core::Loc definitionLoc() const = 0;
     virtual bool exists() const final;
+
+    virtual std::optional<ImportType> importsPackage(const PackageInfo &other) const = 0;
 
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,

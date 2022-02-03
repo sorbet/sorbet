@@ -108,6 +108,10 @@ struct PackageName {
     bool operator==(const PackageName &rhs) const {
         return mangledName == rhs.mangledName;
     }
+
+    bool operator!=(const PackageName &rhs) const {
+        return mangledName != rhs.mangledName;
+    }
 };
 
 enum class ImportType {
@@ -309,12 +313,15 @@ public:
     optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                     bool isTestImport) const {
         auto &info = PackageInfoImpl::from(pkg);
-        for (auto import : importedPackageNames) {
-            // check if we already import this, and if so, don't
-            // return an autocorrect
-            if (import.name == info.name) {
-                return nullopt;
+        for (auto &import : importedPackageNames) {
+            if (import.name != info.name) {
+                continue;
             }
+            if (!isTestImport && import.type == ImportType::Test) {
+                return convertTestImport(gs, info, core::Loc(definitionLoc().file(), import.name.loc));
+            }
+            // we already import this, and if so, don't return an autocorrect
+            return nullopt;
         }
 
         core::Loc insertionLoc = loc.adjust(gs, core::INVALID_POS_LOC, core::INVALID_POS_LOC);
@@ -392,6 +399,14 @@ public:
         return {suggestion};
     }
 
+    core::AutocorrectSuggestion convertTestImport(const core::GlobalState &gs, const PackageInfoImpl &pkg,
+                                                  core::Loc importLoc) const {
+        auto [lineStart, _] = importLoc.findStartOfLine(gs);
+        core::Loc replaceLoc(importLoc.file(), lineStart.beginPos(), importLoc.endPos());
+        return core::AutocorrectSuggestion(fmt::format("Convert `{}` to `{}`", "test_import", "import"),
+                                           {{replaceLoc, fmt::format("import {}", pkg.name.toString(gs))}});
+    }
+
     vector<vector<core::NameRef>> exports() const {
         vector<vector<core::NameRef>> rv;
         for (auto &e : exports_) {
@@ -427,6 +442,24 @@ public:
             }
         }
         return rv;
+    }
+
+    std::optional<core::packages::ImportType> importsPackage(const PackageInfo &other) const {
+        ENFORCE(other.exists());
+        auto imp =
+            absl::c_find_if(importedPackageNames, [&](auto &i) { return i.name.mangledName == other.mangledName(); });
+        if (imp == importedPackageNames.end()) {
+            return nullopt;
+        }
+        switch (imp->type) {
+            case ImportType::Normal:
+                return core::packages::ImportType::Normal;
+            case ImportType::Test:
+                return core::packages::ImportType::Test;
+            case ImportType::Friend:
+                ENFORCE(false, "Should not happen");
+                return nullopt;
+        }
     }
 
 private:
