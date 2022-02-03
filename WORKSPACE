@@ -22,6 +22,7 @@ llvm_toolchain(
 )
 
 load("@llvm_toolchain_13_0_0//:toolchains.bzl", "llvm_register_toolchains")
+
 llvm_register_toolchains()
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
