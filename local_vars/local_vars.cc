@@ -94,13 +94,11 @@ class LocalNameInserter {
 
     vector<NamedArg> nameArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &methodArgs) {
         vector<NamedArg> namedArgs;
-        UnorderedSet<core::NameRef> nameSet;
         for (auto &arg : methodArgs) {
             if (!ast::isa_reference(arg)) {
                 Exception::raise("Must be a reference!");
             }
             auto named = nameArg(move(arg));
-            nameSet.insert(named.name);
             namedArgs.emplace_back(move(named));
         }
 
