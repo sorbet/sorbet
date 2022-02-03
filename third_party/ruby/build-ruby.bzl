@@ -562,6 +562,53 @@ _ruby_internal_headers = rule(
     implementation = _ruby_internal_headers_impl,
 )
 
+def _rubyfmt_static_deps_impl(ctx):
+    ruby_info = ctx.attr.ruby[RubyInfo]
+
+    libs = [ruby_info.static_lib_ruby, ruby_info.static_lib_ripper]
+    cc_toolchain = find_cpp_toolchain(ctx)
+
+    cc_toolchain = ctx.attr._cc_toolchain[cc_common.CcToolchainInfo]
+    feature_configuration = cc_common.configure_features(
+        ctx = ctx,
+        cc_toolchain = cc_toolchain,
+        requested_features = ctx.features,
+        unsupported_features = ctx.disabled_features,
+    )
+
+    build = []
+
+    for file in libs:
+        library_to_link = cc_common.create_library_to_link(
+            cc_toolchain = cc_toolchain,
+            actions = ctx.actions,
+            feature_configuration = feature_configuration,
+            static_library = file,
+        )
+        build.append(library_to_link)
+
+    build = depset(build)
+    li = cc_common.create_linker_input(
+        owner = ctx.label,
+        libraries = build,
+    )
+    lc = cc_common.create_linking_context(linker_inputs = depset([li]))
+    return [CcInfo(linking_context = lc)]
+
+_rubyfmt_static_deps = rule(
+    attrs = {
+        "ruby": attr.label(
+            providers = [CcInfo],
+        ),
+        "_cc_toolchain": attr.label(
+            default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
+        ),
+    },
+    fragments = ["cpp"],
+    implementation = _rubyfmt_static_deps_impl,
+    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+)
+
 def ruby(rubygems, gems, extra_srcs = None, append_srcs = None, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
     """
     Define a ruby build.
