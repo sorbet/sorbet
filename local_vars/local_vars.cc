@@ -188,9 +188,9 @@ class LocalNameInserter {
 
         for (auto &named : namedArgs) {
             args.emplace_back(move(named.expr));
-            auto frame = scopeStack.back();
-            scopeStack.back().locals[named.name] = named.local;
-            scopeStack.back().args.emplace_back(LocalFrame::Arg{named.local, named.flags});
+            auto &frame = scopeStack.back();
+            frame.locals[named.name] = named.local;
+            frame.args.emplace_back(LocalFrame::Arg{named.local, named.flags});
         }
 
         return args;
