@@ -94,13 +94,11 @@ class LocalNameInserter {
 
     vector<NamedArg> nameArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &methodArgs) {
         vector<NamedArg> namedArgs;
-        UnorderedSet<core::NameRef> nameSet;
         for (auto &arg : methodArgs) {
             if (!ast::isa_reference(arg)) {
                 Exception::raise("Must be a reference!");
             }
             auto named = nameArg(move(arg));
-            nameSet.insert(named.name);
             namedArgs.emplace_back(move(named));
         }
 
@@ -190,9 +188,9 @@ class LocalNameInserter {
 
         for (auto &named : namedArgs) {
             args.emplace_back(move(named.expr));
-            auto frame = scopeStack.back();
-            scopeStack.back().locals[named.name] = named.local;
-            scopeStack.back().args.emplace_back(LocalFrame::Arg{named.local, named.flags});
+            auto &frame = scopeStack.back();
+            frame.locals[named.name] = named.local;
+            frame.args.emplace_back(LocalFrame::Arg{named.local, named.flags});
         }
 
         return args;
@@ -516,8 +514,8 @@ public:
             core::LocalVariable &cur = frame.locals[nm.name];
             if (!cur.exists()) {
                 cur = enterLocal(nm.name);
-                frame.locals[nm.name] = cur;
             }
+            ENFORCE(cur.exists());
             return ast::make_expression<ast::Local>(nm.loc, cur);
         } else {
             return tree;
