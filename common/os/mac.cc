@@ -69,7 +69,7 @@ bool amIBeingDebugged()
 
 bool stopInDebugger() {
     if (amIBeingDebugged()) {
-        __asm__("int $3");
+        __builtin_debugtrap();
         return true;
     }
     return false;

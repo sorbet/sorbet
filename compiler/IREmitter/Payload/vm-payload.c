@@ -54,7 +54,7 @@ const char *sorbet_dbg_p(VALUE obj) {
 }
 
 void sorbet_stopInDebugger() {
-    __asm__("int $3");
+    __builtin_debugtrap();
 }
 
 // ****
