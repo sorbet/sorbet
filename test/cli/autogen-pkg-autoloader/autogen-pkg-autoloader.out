@@ -11,8 +11,10 @@ end
 
 Opus::Require.autoload_map(RootPackage, {
   Foo: "autoloader/RootPackage/Foo.rb",
+  Nested: "autoloader/RootPackage/Nested.rb",
   Yabba: "autoloader/RootPackage/Yabba.rb",
 })
+Opus::Require.register_package(RootPackage, 'RootPackage')
 
 --- output/RootPackage/Foo.rb
 # frozen_string_literal: true
@@ -139,6 +141,18 @@ require 'in_method'
 require 'my_gem'
 
 Opus::Require.for_autoload(nil, "test/cli/autogen-pkg-autoloader/foo.rb", [RootPackage::Foo, :TOP_LEVEL_CONST])
+
+--- output/RootPackage/Nested.rb
+# frozen_string_literal: true
+# typed: true
+
+Opus::Require.on_autoload('RootPackage::Nested')
+
+module RootPackage::Nested
+end
+Opus::Require.register_package(RootPackage::Nested, 'RootPackage::Nested')
+
+Opus::Require.for_autoload(RootPackage::Nested, "test/cli/autogen-pkg-autoloader/nested/nested.rb")
 
 --- output/RootPackage/Yabba.rb
 # frozen_string_literal: true

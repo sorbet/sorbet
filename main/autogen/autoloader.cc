@@ -222,6 +222,11 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
             }
             fmt::format_to(std::back_inserter(buf), "}})\n", fullName);
         }
+        if (pkgName.exists()) {
+            ENFORCE(!gs.packageDB().empty());
+            fmt::format_to(std::back_inserter(buf), "{}.register_package({}, '{}')\n", alCfg.registryModule, fullName,
+                           fullName);
+        }
     } else if (type == Definition::Type::Casgn || type == Definition::Type::Alias ||
                type == Definition::Type::TypeAlias) {
         ENFORCE(qname.size() > 1);
@@ -301,6 +306,19 @@ const NamedDefinition &DefTree::definition(const core::GlobalState &gs) const {
     }
 }
 
+void DefTree::markPackageNamespace(core::NameRef mangledName, const vector<core::NameRef> &nameParts) {
+    DefTree *node = this;
+    for (auto nr : nameParts) {
+        auto it = node->children.find(nr);
+        if (it == node->children.end()) {
+            return;
+        }
+        node = it->second.get();
+    }
+    ENFORCE(!pkgName.exists(), "Package name should not be already set");
+    node->pkgName = mangledName;
+}
+
 void DefTreeBuilder::addParsedFileDefinitions(const core::GlobalState &gs, const AutoloaderConfig &alConfig,
                                               std::unique_ptr<DefTree> &root, ParsedFile &pf) {
     ENFORCE(root->root());
@@ -368,6 +386,13 @@ void DefTreeBuilder::updateNonBehaviorDef(const core::GlobalState &gs, DefTree &
     }
 }
 
+void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root) {
+    for (auto nr : gs.packageDB().packages()) {
+        auto &pkg = gs.packageDB().getPackageInfo(nr);
+        root.markPackageNamespace(pkg.mangledName(), pkg.fullName());
+    }
+}
+
 void DefTreeBuilder::collapseSameFileDefs(const core::GlobalState &gs, const AutoloaderConfig &alCfg, DefTree &root) {
     core::FileRef definingFile;
     if (!root.namedDefs.empty()) {
@@ -384,7 +409,7 @@ void DefTreeBuilder::collapseSameFileDefs(const core::GlobalState &gs, const Aut
                   // for why
         auto &child = copyIt->second;
 
-        if (child->hasDifferentFile(definingFile)) {
+        if (child->pkgName.exists() || child->hasDifferentFile(definingFile)) {
             collapseSameFileDefs(gs, alCfg, *child);
         } else {
             root.children.erase(copyIt);

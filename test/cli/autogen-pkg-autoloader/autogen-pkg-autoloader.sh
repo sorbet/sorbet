@@ -22,6 +22,7 @@ mkdir output
   --autogen-autoloader-ignore=scripts/ \
   --autogen-autoloader-preamble "$preamble" \
   test/cli/autogen-pkg-autoloader/{foo,bar,bar2,errors,__package}.rb \
+  test/cli/autogen-pkg-autoloader/nested/*.rb \
   test/cli/autogen-pkg-autoloader/scripts/baz.rb 2>&1
 
 for file in $(find output -type f | sort); do
