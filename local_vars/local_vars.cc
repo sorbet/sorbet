@@ -516,8 +516,8 @@ public:
             core::LocalVariable &cur = frame.locals[nm.name];
             if (!cur.exists()) {
                 cur = enterLocal(nm.name);
-                frame.locals[nm.name] = cur;
             }
+            ENFORCE(cur.exists());
             return ast::make_expression<ast::Local>(nm.loc, cur);
         } else {
             return tree;
