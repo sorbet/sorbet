@@ -429,9 +429,10 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::ClassOrM
                 auto line_start = prev_line_end + 1;
                 auto line = source.substr(line_start, line_end - line_start);
                 line = absl::StripAsciiWhitespace(line);
-                // We skip empty lines, contra LSP's documentation finder.  But
-                // we permit empty lines (i.e. whitespace) prior to the symbol
-                // definition.
+                // We do not skip empty lines, contra LSP's documentation finder.
+                // But as we are starting from just before the method definition,
+                // the beginning of that line could look like an empty line, and
+                // we want to move to the previous line in that case.
                 if (line.empty()) {
                     if (!startFromDefinition) {
                         break;
