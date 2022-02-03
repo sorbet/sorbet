@@ -803,7 +803,7 @@ private:
                         if (name == core::Names::initialize()) {
                             // Defer outputting until we gather fields.
                             initializeMethod = member.asMethodRef();
-                        } else if (!isStorageMethod(member.asMethodRef())) {
+                        } else {
                             pendingMethods.emplace_back(member.asMethodRef());
                         }
                         break;
@@ -838,6 +838,10 @@ private:
                 vector<core::MethodRef> propMethods;
                 // Done in two phases to prevent mutating `pendingMethods` in loop body.
                 for (auto method : pendingMethods) {
+                    if (isStorageMethod(method)) {
+                        continue;
+                    }
+
                     if (isPropMethod(method)) {
                         propMethods.emplace_back(method);
                     }
