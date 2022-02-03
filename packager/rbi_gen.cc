@@ -646,6 +646,12 @@ private:
         }
     }
 
+    // Some entries in the method table exist only to store metadata. This predicate returns true for those methods.
+    bool isStorageMethod(core::MethodRef method) {
+        auto name = method.data(gs)->name;
+        return name == core::Names::mixedInClassMethods();
+    }
+
     bool isPropMethod(core::MethodRef method) {
         if (absl::EndsWith(method.data(gs)->name.shortName(gs), "=")) {
             // If there is a prop= method, there will be a prop method.
@@ -797,7 +803,7 @@ private:
                         if (name == core::Names::initialize()) {
                             // Defer outputting until we gather fields.
                             initializeMethod = member.asMethodRef();
-                        } else {
+                        } else if (!isStorageMethod(member.asMethodRef())) {
                             pendingMethods.emplace_back(member.asMethodRef());
                         }
                         break;
