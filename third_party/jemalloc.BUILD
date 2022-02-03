@@ -25,6 +25,8 @@ JEMALLOC_BUILD_COMMAND = """
   export CC=$$(absolutize $(CC))
   export CXX=$$(absolutize $(CC))
   [ "$$(uname)" = "Linux" ] && export AR=$$(absolutize $(AR))
+  [ "$$(uname)" = "Darwin" ] && export DEVELOPER_DIR=$$(xcode-select --print-path)
+  [ "$$(uname)" = "Darwin" ] && export SDKROOT=$$(xcrun --show-sdk-path)
   export NM=$$(absolutize $(NM))
   export OBJCOPY=$$(absolutize $(OBJCOPY))
   export CFLAGS=$(CC_FLAGS)
