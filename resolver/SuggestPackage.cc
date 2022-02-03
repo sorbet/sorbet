@@ -61,7 +61,7 @@ public:
 
         // Filter out duplicate imports from suggestions:
         bool isTestFile = ctx.file.data(ctx).isPackagedTest();
-        auto it = remove_if(matches.begin(), matches.end(), [&](auto m) {
+        auto it = remove_if(matches.begin(), matches.end(), [&](auto &m) {
             if (m.existingImportType == nullopt) {
                 return false;
             }
