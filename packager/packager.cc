@@ -1850,6 +1850,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
 
     files = findPackages(gs, workers, std::move(files));
     if (gs.runningUnderAutogen) {
+        // Autogen only requires package metadata. Remove the package files.
         auto it = std::remove_if(files.begin(), files.end(),
                                  [&gs](auto &file) -> bool { return file.file.data(gs).isPackage(); });
         files.erase(it, files.end());
