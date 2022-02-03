@@ -410,14 +410,7 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::ClassOrM
                         errMsgClass.show(gs), sym.name(gs).show(gs));
 
             // We don't have a direct link to the signature for the method, so we
-            // heuristically look for the matching signature.  This heuristic
-            // assumes that sigs and method definitions appear on separate lines
-            // and would get tripped up by something like:
-            //
-            // sig {...}; def foo; ...; end
-            // def bar; ... end
-            //
-            // finding the `sig` for `bar` even though the `sig` belongs to `foo`.
+            // heuristically look for the matching signature.
             auto source = defLoc.file().data(gs).source();
             core::LocOffsets sigLocOffsets;
 
