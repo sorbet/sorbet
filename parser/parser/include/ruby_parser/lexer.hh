@@ -97,7 +97,10 @@ private:
     // State before =begin / =end block comment
     int cs_before_block_comment;
 
+    // Used by ragel to store integer values representing states (see `cs`).
     std::vector<int> stack;
+    // Used by ragel. Represents an index into `stack` representing the next available spot on the
+    // top of the stack.
     int top;
 
     const char *eq_begin_s; // location of last encountered =begin
@@ -190,12 +193,16 @@ public:
     // Main interface consumed by yylex function in parser
     token_t advance();
 
-    // Useful for error recovery. Manually pushes `tok_to_push` (usually: the parser's current
-    // lookahead token) back onto the front of the token_queue, and then allocates a new token and
-    // returns it.
-    token_t unadvance(token_t tok_to_push, token_type type, size_t start, size_t end, const std::string &str);
-
     std::string_view tok_view_from_offsets(size_t start, size_t end) const;
+
+    // Useful for error recovery. Manually sets `_p` so that the next call to `advance` starts
+    // from the desired location. If you're using this, you likely want to set the lexer state
+    // menually with one of the below helpers.
+    //
+    // Note: this method is experimental--it should only be used for error recovery, and might not
+    // actually reset all the state it needs to yet.
+    // TODO(jez, 2022-04-02) Determine whether this is still experimental
+    void rewind_and_reset_to_expr_end(size_t newPos);
 
     void set_state_expr_beg();
     void set_state_expr_end();
