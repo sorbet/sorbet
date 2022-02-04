@@ -7,7 +7,15 @@ namespace sorbet::parser {
 
 class Parser final {
 public:
-    static std::unique_ptr<Node> run(core::GlobalState &gs, core::FileRef file, bool trace,
+    struct Settings {
+        bool traceLexer : 1;
+        bool traceParser : 1;
+
+        Settings() : traceLexer(false), traceParser(false) {}
+        Settings(bool traceLexer, bool traceParser) : traceLexer(traceLexer), traceParser(traceParser) {}
+    };
+
+    static std::unique_ptr<Node> run(core::GlobalState &gs, core::FileRef file, Settings settings,
                                      std::vector<std::string> initialLocals = {});
 };
 

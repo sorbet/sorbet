@@ -206,6 +206,8 @@ Usage:
                                 file-table-full-messagepack, missing-constants, autogen,
                                 autogen-msgpack, autogen-autoloader,
                                 autogen-subclasses, package-tree, minimized-rbi]
+      --trace-lexer             Emit the lexer's token stream in a debug
+                                format
       --trace-parser            Enable bison's parser trace functionality
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of

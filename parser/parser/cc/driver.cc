@@ -8,12 +8,13 @@
 namespace ruby_parser {
 
 base_driver::base_driver(ruby_version version, std::string_view source, sorbet::StableStringStorage<> &scratch,
-                         const struct builder &builder)
-    : build(builder), lex(diagnostics, version, source, scratch), pending_error(false), def_level(0), ast(nullptr) {}
+                         const struct builder &builder, bool traceLexer)
+    : build(builder), lex(diagnostics, version, source, scratch, traceLexer), pending_error(false), def_level(0),
+      ast(nullptr) {}
 
 typedruby_release27::typedruby_release27(std::string_view source, sorbet::StableStringStorage<> &scratch,
-                                         const struct builder &builder)
-    : base_driver(ruby_version::RUBY_27, source, scratch, builder) {}
+                                         const struct builder &builder, bool traceLexer)
+    : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer) {}
 
 ForeignPtr typedruby_release27::parse(SelfPtr self, bool) {
     bison::typedruby_release27::parser p(*this, self);
@@ -22,12 +23,12 @@ ForeignPtr typedruby_release27::parse(SelfPtr self, bool) {
 }
 
 typedruby_debug27::typedruby_debug27(std::string_view source, sorbet::StableStringStorage<> &scratch,
-                                     const struct builder &builder)
-    : base_driver(ruby_version::RUBY_27, source, scratch, builder) {}
+                                     const struct builder &builder, bool traceLexer)
+    : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer) {}
 
-ForeignPtr typedruby_debug27::parse(SelfPtr self, bool trace) {
+ForeignPtr typedruby_debug27::parse(SelfPtr self, bool traceParser) {
     bison::typedruby_debug27::parser p(*this, self);
-    p.set_debug_level(trace ? 1 : 0);
+    p.set_debug_level(traceParser ? 1 : 0);
     p.parse();
     return ast;
 }

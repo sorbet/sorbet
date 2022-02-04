@@ -188,9 +188,23 @@ public:
     void setEnd(size_t end);
     std::string_view view() const;
     std::string asString() const;
+
+    static std::string_view tokenTypeName(token_type type) {
+#ifndef YYBISON
+        switch (type) {
+#define XX(name, value)    \
+    case token_type::name: \
+        return std::string_view(#name);
+            RUBY_PARSER_TOKEN_TYPES(XX)
+#undef XX
+        }
+#endif
+    }
 };
 
 using token_t = token *;
 } // namespace ruby_parser
+
+std::ostream &operator<<(std::ostream &o, const ruby_parser::token &token);
 
 #endif

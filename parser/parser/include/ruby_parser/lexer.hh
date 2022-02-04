@@ -135,6 +135,8 @@ private:
     // indentation purposes.
     optional_size dedentLevel_;
 
+    bool traceLexer;
+
     void check_stack_capacity();
     int stack_pop();
     int arg_or_cmdarg(int cmd_state);
@@ -181,14 +183,11 @@ public:
     state_stack cond;
     state_stack cmdarg;
 
-    size_t last_token_s;
-    size_t last_token_e;
-
     bool in_kwarg; // true at the end of "def foo a:"
     Context context;
 
     lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer,
-          sorbet::StableStringStorage<> &scratch);
+          sorbet::StableStringStorage<> &scratch, bool traceLexer);
 
     // Main interface consumed by yylex function in parser
     token_t advance();

@@ -108,12 +108,13 @@ ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
 }
 
 unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
-                                   bool trace) {
+                                   bool traceLexer, bool traceParser) {
     Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
     unique_ptr<parser::Node> nodes;
     {
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
-        nodes = parser::Parser::run(gs, file, trace);
+        auto settings = parser::Parser::Settings{traceLexer, traceParser};
+        nodes = parser::Parser::run(gs, file, settings);
     }
     if (print.ParseTree.enabled) {
         print.ParseTree.fmt("{}\n", nodes->toStringWithTabs(gs, 0));
@@ -177,7 +178,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (file.data(lgs).strictLevel == core::StrictLevel::Ignore) {
                 return emptyParsedFile(file);
             }
-            auto parseTree = runParser(lgs, file, print, opts.traceParser);
+            auto parseTree = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
             if (opts.stopAfterPhase == options::Phase::PARSER) {
                 return emptyParsedFile(file);
             }

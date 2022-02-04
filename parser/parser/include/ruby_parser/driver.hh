@@ -276,9 +276,9 @@ public:
     token_t last_token;
 
     base_driver(ruby_version version, std::string_view source, sorbet::StableStringStorage<> &scratch,
-                const struct builder &builder);
+                const struct builder &builder, bool traceLexer);
     virtual ~base_driver() {}
-    virtual ForeignPtr parse(SelfPtr self, bool trace) = 0;
+    virtual ForeignPtr parse(SelfPtr self, bool traceParser) = 0;
 
     bool valid_kwarg_name(const token *name) {
         char c = name->view().at(0);
@@ -309,15 +309,17 @@ public:
 
 class typedruby_release27 : public base_driver {
 public:
-    typedruby_release27(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder);
-    virtual ForeignPtr parse(SelfPtr self, bool trace);
+    typedruby_release27(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder,
+                        bool traceLexer);
+    virtual ForeignPtr parse(SelfPtr self, bool traceParser);
     ~typedruby_release27() {}
 };
 
 class typedruby_debug27 : public base_driver {
 public:
-    typedruby_debug27(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder);
-    virtual ForeignPtr parse(SelfPtr self, bool trace);
+    typedruby_debug27(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder,
+                      bool traceLexer);
+    virtual ForeignPtr parse(SelfPtr self, bool traceParser);
     ~typedruby_debug27() {}
 };
 
