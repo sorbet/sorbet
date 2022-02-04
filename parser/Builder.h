@@ -19,7 +19,9 @@ public:
 
     static ruby_parser::builder interface;
 
-    std::unique_ptr<Node> build(ruby_parser::base_driver *driver, bool trace);
+    // Marked `const` so that `Parser::run` can confidently reuse one `Builder` object across
+    // multiple parses.
+    std::unique_ptr<Node> build(ruby_parser::base_driver *driver, bool trace) const;
 
     class Impl;
 
