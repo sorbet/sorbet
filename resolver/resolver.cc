@@ -1093,13 +1093,11 @@ public:
                 }
             }
             auto *block = send->block();
-            auto typeAliasItem = TypeAliasResolutionItem{id->symbol, ctx.file, &block->body};
-            this->todoTypeAliases_.emplace_back(std::move(typeAliasItem));
+            this->todoTypeAliases_.emplace_back(id->symbol, ctx.file, &block->body);
 
             // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
             // we'll still emit a warning when the rhs of a type alias doesn't resolve.
-            auto item = ResolutionItem{nesting_, id};
-            this->todo_.emplace_back(std::move(item));
+            this->todo_.emplace_back(nesting_, id);
             return tree;
         }
 
@@ -1108,11 +1106,9 @@ public:
             return tree;
         }
 
-        auto item = ClassAliasResolutionItem{id->symbol, rhs};
-
         // TODO(perf) currently, by construction the last item in resolve todo list is the one this alias depends on
         // We may be able to get some perf by using this
-        this->todoClassAliases_.emplace_back(std::move(item));
+        this->todoClassAliases_.emplace_back(id->symbol, rhs);
         return tree;
     }
 
@@ -1120,20 +1116,17 @@ public:
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         if (send.recv.isSelfReference()) {
             if (send.fun == core::Names::mixesInClassMethods()) {
-                auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
-                this->todoClassMethods_.emplace_back(move(item));
+                this->todoClassMethods_.emplace_back(ctx.file, ctx.owner, &send);
             } else if (send.fun == core::Names::requiresAncestor()) {
                 if (ctx.state.requiresAncestorEnabled) {
-                    auto item = RequireAncestorResolutionItem{ctx.file, ctx.owner.asClassOrModuleRef(), &send};
-                    this->todoRequiredAncestors_.emplace_back(move(item));
+                    this->todoRequiredAncestors_.emplace_back(ctx.file, ctx.owner.asClassOrModuleRef(), &send);
                 }
             }
         } else {
             auto recvAsConstantLit = ast::cast_tree<ast::ConstantLit>(send.recv);
             if (recvAsConstantLit != nullptr && recvAsConstantLit->symbol == core::Symbols::Magic() &&
                 send.fun == core::Names::mixesInClassMethods()) {
-                auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
-                this->todoClassMethods_.emplace_back(move(item));
+                this->todoClassMethods_.emplace_back(ctx.file, ctx.owner, &send);
             }
         }
         return tree;
