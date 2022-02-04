@@ -2,7 +2,7 @@
   <img alt="Sorbet logo" width="200" src="docs/logo/sorbet-logo-purple-sparkles.svg">
 </p>
 
-# Sorbet
+# Sorbet Scribble Scrabble
 
 This repository contains Sorbet, a fast, powerful type checker designed for Ruby.
 It aims to be easy to add to existing codebases with gradual types, and fast to
