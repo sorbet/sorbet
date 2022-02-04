@@ -158,6 +158,73 @@ lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_
   cs_before_block_comment = lex_en_line_begin;
 }
 
+// At the moment, having a method like this instead of using Ragel to properly
+// track indentation at the time we emit a token could be a recipe for really
+// bad performance (having a function like this makes lexing accidentally
+// quadratic in the worst case).
+//
+// While we're saved by the fact that ~most files don't have syntax errors and
+// this method should only be called when there are syntax errors, it's still
+// prudent to not make things excessively slow. This method attempts to exit
+// after doing the least amount of work possible.
+//
+// We may want to revisit this (e.g. to simplify or move into the state machine)
+int lexer::compare_indent_level(token_t left, token_t right) {
+    // token::lineStart is non-sensical for tNL tokens
+    assert(left->type() != token_type::tNL && right->type() != token_type::tNL);
+
+    const auto leftStart = left->start();
+    const auto leftLineStart = left->lineStart();
+    const auto rightStart = right->start();
+    const auto rightLineStart = right->lineStart();
+
+    // optimization: tokens start on same line
+    if (leftStart == rightStart) {
+        return 0;
+    }
+
+    // attempt to defeat pathological cases (extremely long lines)
+    if ((leftStart - leftLineStart > 100) || (rightStart - rightLineStart > 100)) {
+        // In this case, lie say that the indentation level is the same.
+        // This will basically mean falling back to the indendation-agnostic behavior.
+        // We could alternatively attempt to return some sort of error state here.
+        return 0;
+    }
+
+    auto *data = this->source_buffer.data();
+    auto *leftPtr = data + leftLineStart;
+    const auto * const leftStartPtr = data + leftStart;
+    auto *rightPtr = data + rightLineStart;
+    const auto * const rightStartPtr = data + rightStart;
+
+    while (leftPtr <= leftStartPtr && rightPtr <= rightStartPtr) {
+        auto leftChar = *leftPtr;
+        auto rightChar = *rightPtr;
+        auto leftIsSpace = leftChar == ' ' || leftChar == '\t';
+        auto rightIsSpace = rightChar == ' ' || rightChar == '\t';
+
+        if (leftIsSpace && !rightIsSpace) {
+            return -1; // left < right
+        } else if (!leftIsSpace && !rightIsSpace) {
+            return 0; // left == right
+        } else if (!leftIsSpace && rightIsSpace) {
+            return 1;  // left > right
+        } else if (leftChar == rightChar) {
+            leftPtr++;
+            rightPtr++;
+        } else {
+            // mismatched indent. give up and say equal
+            // TODO(jez) Might want to handle this case better
+            return 0;
+        }
+    }
+
+    // This is weird. One or both of the tokens' first characters was a whitespace character.
+    // Assert so that we can add a test case if we ever find this in the wild.
+    assert(false);
+    return 0;
+}
+
 void lexer::check_stack_capacity() {
     if (stack.size() == (size_t)top) {
     stack.resize(stack.size() * 2);

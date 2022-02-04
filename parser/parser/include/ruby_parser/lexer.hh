@@ -206,6 +206,8 @@ public:
     // TODO(jez, 2022-04-02) Determine whether this is still experimental
     void rewind_and_reset_to_expr_end(size_t newPos);
 
+    int compare_indent_level(token_t left, token_t right);
+
     void set_state_expr_beg();
     void set_state_expr_end();
     void set_state_expr_endarg();
