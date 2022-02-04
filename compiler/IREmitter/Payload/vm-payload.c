@@ -20,6 +20,7 @@
 // reason
 #include "internal.h"
 #include "ruby.h"
+#include <signal.h>
 
 // This is probably a bad idea but is needed for so many things
 #include "vm_core.h"
@@ -54,7 +55,7 @@ const char *sorbet_dbg_p(VALUE obj) {
 }
 
 void sorbet_stopInDebugger() {
-    __asm__("int $3");
+    raise(SIGTRAP);
 }
 
 // ****
