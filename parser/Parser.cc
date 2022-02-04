@@ -16,6 +16,8 @@ extern const char *dclassStrings[];
 
 using namespace std;
 
+namespace {
+
 class ErrorToError {
     static uint32_t translatePos(size_t pos, uint32_t maxOff) {
         if (pos == 0) {
@@ -79,17 +81,8 @@ public:
     }
 };
 
-unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file, Parser::Settings settings,
-                             std::vector<std::string> initialLocals) {
-    Builder builder(gs, file);
-    auto source = file.data(gs).source();
-    // The lexer requires that its buffers end with a null terminator, which core::File
-    // does not guarantee.  Parsing heredocs for some mysterious reason requires two.
-    string buffer;
-    buffer.reserve(source.size() + 2);
-    buffer += source;
-    buffer += "\0\0"sv;
-    StableStringStorage<> scratch;
+unique_ptr<ruby_parser::base_driver> makeDriver(Parser::Settings settings, string_view buffer,
+                                                StableStringStorage<> &scratch, const vector<string> &initialLocals) {
     unique_ptr<ruby_parser::base_driver> driver;
     if (settings.traceParser) {
         driver =
@@ -103,13 +96,30 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file, 
         driver->lex.declare(local);
     }
 
-    auto ast = unique_ptr<Node>(builder.build(driver.get(), settings.traceParser));
+    return driver;
+}
+
+} // namespace
+
+unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::Settings settings,
+                             vector<string> initialLocals) {
+    Builder builder(gs, file);
+    auto source = file.data(gs).source();
+    // The lexer requires that its buffers end with a null terminator, which core::File
+    // does not guarantee.  Parsing heredocs for some mysterious reason requires two.
+    string buffer;
+    buffer.reserve(source.size() + 2);
+    buffer += source;
+    buffer += "\0\0"sv;
+    StableStringStorage<> scratch;
+
+    auto driver = makeDriver(settings, buffer, scratch, initialLocals);
+    auto ast = builder.build(driver.get(), settings.traceParser);
+
     ErrorToError::run(gs, file, driver->diagnostics);
 
     if (!ast) {
-        core::LocOffsets loc{0, 0};
-        NodeVec empty;
-        return make_unique<Begin>(loc, std::move(empty));
+        return make_unique<Begin>(core::LocOffsets{0, 0}, NodeVec{});
     }
 
     return ast;
