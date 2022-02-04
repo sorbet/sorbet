@@ -393,6 +393,10 @@ module RBIGen::Public
     mixes_in_class_methods(ClassMethods)
   end
 
+  class IncludesMixin
+    include MixesInClassMethods
+  end
+
   class Flatfile < Opus::Flatfiles::Record
     dsl_required :deprecated?, String
 

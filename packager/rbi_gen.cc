@@ -646,6 +646,12 @@ private:
         }
     }
 
+    // Some entries in the method table exist only to store metadata. This predicate returns true for those methods.
+    bool isStorageMethod(core::MethodRef method) {
+        auto name = method.data(gs)->name;
+        return name == core::Names::mixedInClassMethods();
+    }
+
     bool isPropMethod(core::MethodRef method) {
         if (absl::EndsWith(method.data(gs)->name.shortName(gs), "=")) {
             // If there is a prop= method, there will be a prop method.
@@ -832,6 +838,10 @@ private:
                 vector<core::MethodRef> propMethods;
                 // Done in two phases to prevent mutating `pendingMethods` in loop body.
                 for (auto method : pendingMethods) {
+                    if (isStorageMethod(method)) {
+                        continue;
+                    }
+
                     if (isPropMethod(method)) {
                         propMethods.emplace_back(method);
                     }

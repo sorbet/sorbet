@@ -145,6 +145,10 @@ class RBIGen::Public::InheritsInitializer < RBIGen::Public::HasInitializer
   end
   extend T::Helpers
 end
+class RBIGen::Public::IncludesMixin < Object
+  include RBIGen::Public::MixesInClassMethods
+  extend RBIGen::Public::MixesInClassMethods::ClassMethods
+end
 class RBIGen::Public::HasInitializer < Object
   sig {params(a: Integer).void}
   def initialize(a); end
