@@ -1830,6 +1830,11 @@ lbrace_cmd_block_start:
                         else_ ? else_->tok : nullptr,
                         else_ ? else_->nod : nullptr, $6);
                     }
+                | kIF error
+                    {
+                      auto err = driver.build.error_node(self, @1.end, @2.begin);
+                      $$ = driver.build.condition(self, $1, err, nullptr, nullptr, nullptr, nullptr, nullptr);
+                    }
                 | kIF strings kDO compstmt if_tail kEND
                     {
                       driver.diagnostics.emplace_back(dlevel::ERROR, dclass::IfInsteadOfItForTest, diagnostic::range(@1.begin, @1.end));
