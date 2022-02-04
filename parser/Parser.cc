@@ -85,11 +85,11 @@ unique_ptr<ruby_parser::base_driver> makeDriver(Parser::Settings settings, strin
                                                 StableStringStorage<> &scratch, const vector<string> &initialLocals) {
     unique_ptr<ruby_parser::base_driver> driver;
     if (settings.traceParser) {
-        driver =
-            make_unique<ruby_parser::typedruby_debug27>(buffer, scratch, Builder::interface, !!settings.traceLexer);
+        driver = make_unique<ruby_parser::typedruby_debug27>(buffer, scratch, Builder::interface, !!settings.traceLexer,
+                                                             !!settings.indentationAware);
     } else {
-        driver =
-            make_unique<ruby_parser::typedruby_release27>(buffer, scratch, Builder::interface, !!settings.traceLexer);
+        driver = make_unique<ruby_parser::typedruby_release27>(buffer, scratch, Builder::interface,
+                                                               !!settings.traceLexer, !!settings.indentationAware);
     }
 
     for (string local : initialLocals) {

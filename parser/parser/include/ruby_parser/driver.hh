@@ -273,6 +273,8 @@ public:
     bool pending_error;
     size_t def_level;
     ForeignPtr ast;
+    // true when in indentation-aware error recovery mode
+    bool indentationAware;
     token_t last_token;
 
     // Stores a reference to the private yytname_ field from the generated bison parser,
@@ -289,7 +291,7 @@ public:
     std::function<void()> clear_lookahead;
 
     base_driver(ruby_version version, std::string_view source, sorbet::StableStringStorage<> &scratch,
-                const struct builder &builder, bool traceLexer);
+                const struct builder &builder, bool traceLexer, bool indentationAware);
     virtual ~base_driver() {}
     virtual ForeignPtr parse(SelfPtr self, bool traceParser) = 0;
 
@@ -353,7 +355,7 @@ public:
 class typedruby_release27 : public base_driver {
 public:
     typedruby_release27(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder,
-                        bool traceLexer);
+                        bool traceLexer, bool indentationAware);
     virtual ForeignPtr parse(SelfPtr self, bool traceParser);
     ~typedruby_release27() {}
 };
@@ -361,7 +363,7 @@ public:
 class typedruby_debug27 : public base_driver {
 public:
     typedruby_debug27(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder,
-                      bool traceLexer);
+                      bool traceLexer, bool indentationAware);
     virtual ForeignPtr parse(SelfPtr self, bool traceParser);
     ~typedruby_debug27() {}
 };

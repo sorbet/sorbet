@@ -8,9 +8,9 @@
 namespace ruby_parser {
 
 base_driver::base_driver(ruby_version version, std::string_view source, sorbet::StableStringStorage<> &scratch,
-                         const struct builder &builder, bool traceLexer)
+                         const struct builder &builder, bool traceLexer, bool indentationAware)
     : build(builder), lex(diagnostics, version, source, scratch, traceLexer), pending_error(false), def_level(0),
-      ast(nullptr) {}
+      ast(nullptr), indentationAware(indentationAware) {}
 
 const char *const base_driver::token_name(token_type type) {
     // We have two tokens matching `..` and `...`. Bison won't let us specify the same
@@ -34,8 +34,8 @@ void base_driver::rewind_and_reset(size_t newPos) {
 }
 
 typedruby_release27::typedruby_release27(std::string_view source, sorbet::StableStringStorage<> &scratch,
-                                         const struct builder &builder, bool traceLexer)
-    : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer) {}
+                                         const struct builder &builder, bool traceLexer, bool indentationAware)
+    : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer, indentationAware) {}
 
 ForeignPtr typedruby_release27::parse(SelfPtr self, bool) {
     bison::typedruby_release27::parser p(*this, self);
@@ -44,8 +44,8 @@ ForeignPtr typedruby_release27::parse(SelfPtr self, bool) {
 }
 
 typedruby_debug27::typedruby_debug27(std::string_view source, sorbet::StableStringStorage<> &scratch,
-                                     const struct builder &builder, bool traceLexer)
-    : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer) {}
+                                     const struct builder &builder, bool traceLexer, bool indentationAware)
+    : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer, indentationAware) {}
 
 ForeignPtr typedruby_debug27::parse(SelfPtr self, bool traceParser) {
     bison::typedruby_debug27::parser p(*this, self);
