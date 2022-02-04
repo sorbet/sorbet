@@ -200,16 +200,10 @@ SimilarMethodsByName allSimilarMethods(const core::GlobalState &gs, core::Dispat
                                        string_view prefix) {
     auto result = similarMethodsForReceiver(gs, dispatchResult.main.receiver, prefix);
 
-    // Convert to shared_ptr and take ownership
-    shared_ptr<core::TypeConstraint> constr = move(dispatchResult.main.constr);
-
     for (auto &[methodName, similarMethods] : result) {
         for (auto &similarMethod : similarMethods) {
             ENFORCE(similarMethod.receiverType == nullptr, "About to overwrite non-null receiverType");
             similarMethod.receiverType = dispatchResult.main.receiver;
-
-            ENFORCE(similarMethod.constr == nullptr, "About to overwrite non-null constr");
-            similarMethod.constr = constr;
         }
     }
 
@@ -912,9 +906,18 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
             getCompletionItemForLocal(gs, this->config, similarLocal, params.queryLoc, params.prefix, items.size()));
     }
     for (auto &similarMethod : dedupedSimilarMethods) {
+        // Even though we might have one or more TypeConstraints on the DispatchResult that triggered this completion
+        // request, those constraints are the result of solving the current method. These new methods we're about to
+        // suggest are their own methods with their own type variables, so it doesn't make sense to use the old
+        // constraint for the new methods.
+        //
+        // What this means in practice is that the prettified `sig` in the completion documentation will show
+        // `T.type_parameter(:U)` instead of a solved type.
+        auto constr = nullptr;
+
         items.push_back(getCompletionItemForMethod(
-            typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType,
-            similarMethod.constr.get(), params.queryLoc, params.prefix, items.size(), params.forMethods->totalArgs));
+            typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType, constr,
+            params.queryLoc, params.prefix, items.size(), params.forMethods->totalArgs));
     }
 
     if (!params.scopes.empty()) {
