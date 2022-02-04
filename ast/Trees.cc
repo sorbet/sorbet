@@ -304,12 +304,6 @@ ConstantLit::fullUnresolvedPath(const core::GlobalState &gs) const {
     }
     ENFORCE(this->resolutionScopes != nullptr && !this->resolutionScopes->empty());
 
-    // TODO: investigate why this is necessary, it being after the ENFORCE suggests that it only happens in a release
-    // build
-    if (this->resolutionScopes == nullptr) {
-        return nullopt;
-    }
-
     vector<core::NameRef> namesFailedToResolve;
     auto *nested = this;
     {
