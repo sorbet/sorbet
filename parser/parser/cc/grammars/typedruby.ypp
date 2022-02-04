@@ -367,6 +367,8 @@ using namespace std::string_literals;
   then
   relop
   k_return
+  lcurly_block_start
+  lbrace_cmd_block_start
 
 %type <delimited_list>
   defn_head
@@ -523,27 +525,14 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
 // bunch of the already-parsed program.
 //
 // So in rules where we expect something like that to happen, we can call this
-// function to fix up the lookahead token by manually creating a tNL
-int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::TYPEDRUBY27 &driver, size_t prev_end, size_t next_begin) {
-  // This function is super hacky, and is best understood by carefully reading
-  // yylex and where yylex is called inside the generated parser
-  auto fake_token = driver.lex.tok_view_from_offsets(prev_end, next_begin);
-  auto nl_start = fake_token.find('\n');
-  if (nl_start != std::string_view::npos) {
-    token_t lookahead = yyla.value.token;
-    yyla.clear(); // same as yyclearin macro
-    auto nl_type = ruby_parser::token_type::tNL;
-    auto nl_tok = driver.lex.unadvance(lookahead, nl_type, nl_start, nl_start + 1, "\n");
-    yyla.value.token = nl_tok;
-    driver.last_token = nl_tok;
-    return static_cast<int>(nl_tok->type());
-  } else {
-    // no-op
-    return static_cast<int>(yyla.value.token->type());
-  }
-}
-
-#define maybe_inject_tNL(prev_end, next_begin) ((yyla.type) = yytranslate_(maybe_inject_tNL_impl(yyla, driver, (prev_end), (next_begin))))
+// function to request that the lexer start again after `tDOT` token in the
+// expr_end state.
+#define rewind_and_reset(newPos)     \
+  do {                               \
+    yyclearin;                       \
+    driver.lex.rewind(newPos);       \
+    driver.lex.set_state_expr_end(); \
+  } while (false);
 
 }}} // namespace
 } // %code
@@ -823,6 +812,10 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::TYPEDRUBY27 &d
                     {
                       $$ = driver.build.logicalAnd(self, $1, $2, $3);
                     }
+                | kAND error
+                    {
+                      $$ = driver.build.error_node(self, @1.begin, @1.end);
+                    }
                 | expr kOR expr
                     {
                       $$ = driver.build.logicalOr(self, $1, $2, $3);
@@ -912,16 +905,26 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::TYPEDRUBY27 &d
                       $$ = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
                     }
 
- cmd_brace_block: tLBRACE_ARG
+lbrace_cmd_block_start:
+                  tLBRACE_ARG { driver.lex.context.push(Context::State::BLOCK); $$ = $1; }
+ cmd_brace_block: lbrace_cmd_block_start brace_body tRCURLY
                     {
-                      driver.lex.context.push(Context::State::BLOCK);
+                      auto &block = $2;
+                      block->begin = $1;
+                      block->end = $3;
+                      $$ = block;
+                      driver.lex.context.pop();
                     }
-                  brace_body tRCURLY
+                  // Error-recovery case for typos like "foo {&:bar}"
+                | lbrace_cmd_block_start tAMPER arg_value tRCURLY
                     {
-                      auto &block = $3;
+                      auto args = driver.build.args(self, nullptr, driver.alloc.node_list(), nullptr, false);
+                      auto block = driver.alloc.delimited_block(nullptr, args, $3, nullptr);
                       block->begin = $1;
                       block->end = $4;
                       $$ = block;
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::CurlyBracesAroundBlockPass,
+                          diagnostic::range(@1.begin, @4.end));
                       driver.lex.context.pop();
                     }
 
@@ -1574,7 +1577,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::TYPEDRUBY27 &d
                       $$ = args;
                     }
                 // There's an explanation of what's going on in this rule in the `assocs` rule.
-                | args tCOMMA fcall error assocs opt_block_arg
+                /* | args tCOMMA fcall error assocs opt_block_arg
                     {
                       auto &args = $1;
                       args->emplace_back(driver.build.call_method(self, nullptr, nullptr, $3, nullptr, nullptr, nullptr));
@@ -1582,7 +1585,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::TYPEDRUBY27 &d
                       args->concat($6);
                       $$ = args;
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@3.end, @4.begin), "\",\"");
-                    }
+                    } */
                 | block_arg
                     {
                       $$ = driver.alloc.node_list($1);
@@ -1634,10 +1637,10 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::TYPEDRUBY27 &d
                     {
                       $$ = driver.alloc.node_list($1);
                     }
-                | error
+                /* | error
                     {
                       $$ = driver.alloc.node_list(driver.build.error_node(self, @1.begin, @1.end));
-                    }
+                    } */
                 | tSTAR arg_value
                     {
                       $$ = driver.alloc.node_list(driver.build.splat(self, $1, $2));
@@ -1648,13 +1651,13 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::TYPEDRUBY27 &d
                       list->emplace_back($3);
                       $$ = list;
                     }
-                | args tCOMMA error
+                /* | args tCOMMA error
                     {
                       auto &list = $1;
                       list->emplace_back(driver.build.error_node(self, @2.end, @3.end));
                       $$ = $1;
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.begin, @2.end), "\",\"");
-                    }
+                    } */
                 | args tCOMMA tSTAR arg_value
                     {
                       auto &list = $1;
@@ -1736,7 +1739,7 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::TYPEDRUBY27 &d
                 | primary_value tCOLON2 error
                     {
                       $$ = driver.build.constFetchError(self, $1, $2);
-                      maybe_inject_tNL(@2.end, @3.begin);
+                      rewind_and_reset(@2.end);
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::ConstWithoutName, diagnostic::range(@2.begin, @2.end));
                     }
                 | tCOLON3 tCONSTANT
@@ -1746,6 +1749,15 @@ int maybe_inject_tNL_impl(parser::symbol_type &yyla, ruby_parser::TYPEDRUBY27 &d
                 | tLBRACK aref_args tRBRACK
                     {
                       $$ = driver.build.array(self, $1, $2, $3);
+                    }
+                | tLBRACK aref_args error
+                    {
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@2.begin, @2.end), "\"]\"");
+                      $$ = driver.build.array(self, $1, $2, $1);
+                    }
+                | tLBRACK tNL
+                    {
+                      $$ = driver.build.array(self, $1, driver.alloc.node_list(), $2);
                     }
                 | tLBRACE assoc_list tRCURLY
                     {
@@ -2420,7 +2432,7 @@ opt_block_args_tail:
                 | primary_value call_op error
                     {
                       $$ = driver.build.call_method_error(self, $1, $2);
-                      maybe_inject_tNL(@2.end, @3.begin);
+                      rewind_and_reset(@2.end);
                     }
                 | primary_value tCOLON2 operation2 paren_args
                     {
@@ -2466,17 +2478,26 @@ opt_block_args_tail:
                     {
                       $$ = driver.build.index(self, $1, $2, $3, $4);
                     }
-
-     brace_block: tLCURLY
+lcurly_block_start:
+                  tLCURLY { driver.lex.context.push(Context::State::BLOCK); $$ = $1; }
+     brace_block: lcurly_block_start brace_body tRCURLY
                     {
-                      driver.lex.context.push(Context::State::BLOCK);
+                      auto &block = $2;
+                      block->begin = $1;
+                      block->end = $3;
+                      $$ = block;
+                      driver.lex.context.pop();
                     }
-                  brace_body tRCURLY
+                  // Error-recovery case for typos like "foo {&:bar}"
+                | lcurly_block_start tAMPER arg_value tRCURLY
                     {
-                      auto &block = $3;
+                      auto args = driver.build.args(self, nullptr, driver.alloc.node_list(), nullptr, false);
+                      auto block = driver.alloc.delimited_block(nullptr, args, $3, nullptr);
                       block->begin = $1;
                       block->end = $4;
                       $$ = block;
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::CurlyBracesAroundBlockPass,
+                          diagnostic::range(@1.begin, @4.end));
                       driver.lex.context.pop();
                     }
                 | kDO
@@ -3827,11 +3848,11 @@ f_opt_paren_args: f_paren_args
                       list->emplace_back($3);
                       $$ = list;
                     }
-                | assocs tCOMMA error
+                /* | assocs tCOMMA error
                     {
                       $$ = $1;
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.begin, @2.end), "\",\"");
-                    }
+                    } */
                 | assocs tCOMMA tIDENTIFIER error
                     {
                       auto &list = $1;
@@ -3857,7 +3878,7 @@ f_opt_paren_args: f_paren_args
                 //
                 // And then we have to repeat it to deal with whether this happens at the beginning of the keywords,
                 // or in the middle.
-                | tLABEL fcall error assoc
+                /* | tLABEL fcall error assoc
                     {
                       auto result = driver.alloc.node_list(driver.build.assoc_error(self, $1, $2));
                       result->emplace_back($4);
@@ -3871,7 +3892,7 @@ f_opt_paren_args: f_paren_args
                       list->emplace_back($6);
                       $$ = list;
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@4.end, @5.begin), "\",\"");
-                    }
+                    } */
 
            assoc: arg_value tASSOC arg_value
                     {

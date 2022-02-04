@@ -9,7 +9,42 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U alias>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U alias>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          Alias {
+            from = Symbol {
+              val = <U foo>
+            }
+            to = Symbol {
+              val = <U bar>
+            }
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_and>
@@ -20,7 +55,38 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U and>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U and>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          Const {
+            scope = NULL
+            name = <C <U <ErrorNode>>>
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_begin>
@@ -469,7 +535,44 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Rescue {
+        body = Begin {
+          stmts = [
+            Send {
+              receiver = LVar {
+                name = <U x>
+              }
+              method = <U rescue>
+              args = [
+              ]
+            }
+            Send {
+              receiver = LVar {
+                name = <U x>
+              }
+              method = <U rescue>
+              args = [
+              ]
+            }
+            Send {
+              receiver = LVar {
+                name = <U x>
+              }
+              method = <U <method-name-missing>>
+              args = [
+              ]
+            }
+          ]
+        }
+        rescue = [
+          Resbody {
+            exception = NULL
+            var = NULL
+            body = NULL
+          }
+        ]
+        else_ = NULL
+      }
     }
     DefMethod {
       name = <U method_named_retry>

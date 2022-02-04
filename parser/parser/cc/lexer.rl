@@ -2881,16 +2881,9 @@ token_t lexer::advance() {
   return tok;
 }
 
-token_t lexer::unadvance(token_t tok_to_push, token_type type, size_t start, size_t end, const std::string &str) {
-  token_queue.push_front(tok_to_push);
-
-  auto scratch_view = scratch.enterString(str);
-  auto new_tok = mempool.alloc(type, start, end, scratch_view);
-
-  last_token_s = start;
-  last_token_e = end;
-
-  return new_tok;
+void lexer::rewind(size_t newPos) {
+  assert(newPos <= source_buffer.size());
+  this->_p = this->source_buffer.data() + newPos;
 }
 
 void lexer::extend_static() {

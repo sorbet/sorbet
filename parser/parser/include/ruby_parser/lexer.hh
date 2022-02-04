@@ -190,12 +190,12 @@ public:
     // Main interface consumed by yylex function in parser
     token_t advance();
 
-    // Useful for error recovery. Manually pushes `tok_to_push` (usually: the parser's current
-    // lookahead token) back onto the front of the token_queue, and then allocates a new token and
-    // returns it.
-    token_t unadvance(token_t tok_to_push, token_type type, size_t start, size_t end, const std::string &str);
-
     std::string_view tok_view_from_offsets(size_t start, size_t end) const;
+
+    // Useful for error recovery. Manually sets `_p` so that the next call to `advance` starts
+    // from the desired location. If you're using this, you likely want to set the lexer state
+    // menually with one of the below helpers.
+    void rewind(size_t newPos);
 
     void set_state_expr_beg();
     void set_state_expr_end();
