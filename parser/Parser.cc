@@ -121,17 +121,11 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
     // Marked `const` so that we can re-use across multiple `build()` invocations
     const Builder builder(gs, file);
 
-    // `buffer` and `scratch` can also be shared by both drivers
-    auto source = file.data(gs).source();
-    // The lexer requires that its buffers end with a null terminator, which core::File
-    // does not guarantee.  Parsing heredocs for some mysterious reason requires two.
-    string buffer;
-    buffer.reserve(source.size() + 2);
-    buffer += source;
-    buffer += "\0\0"sv;
+    // `source` and `scratch` can also be shared by both drivers
+    const auto source = file.data(gs).source();
     StableStringStorage<> scratch;
 
-    auto driver = makeDriver(settings, buffer, scratch, initialLocals);
+    auto driver = makeDriver(settings, source, scratch, initialLocals);
     auto ast = builder.build(driver.get(), settings.traceParser);
 
     // Always report the original parse errors. If we need to run the parser again, we'll only
@@ -150,7 +144,7 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
 
     Timer timeit(gs.tracer(), "withIndentationAware");
 
-    auto driverRetry = makeDriver(settings.withIndentationAware(), buffer, scratch, initialLocals);
+    auto driverRetry = makeDriver(settings.withIndentationAware(), source, scratch, initialLocals);
     auto astRetry = builder.build(driverRetry.get(), settings.traceParser);
 
     if (astRetry == nullptr) {

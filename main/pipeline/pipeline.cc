@@ -380,7 +380,10 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
     string src;
     bool fileFound = true;
     try {
-        src = opts.fs->readFile(fileName);
+        // The lexer requires that its buffers end with a null terminator, which core::File
+        // does not guarantee.  Parsing heredocs for some mysterious reason requires two.
+        auto nullPaddding = 2;
+        src = opts.fs->readFile(fileName, nullPaddding);
     } catch (FileNotFoundException e) {
         // continue with an empty source, because the
         // assertion below requires every input file to map
