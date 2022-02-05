@@ -288,7 +288,7 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
 void SerializerImpl::pickle(Pickler &p, const File &what) {
     p.putU1((uint8_t)what.sourceType);
     p.putStr(what.path());
-    p.putStr(what.source());
+    p.putStr(what.null_terminated_source());
     pickle(p, what.getFileHash());
 }
 

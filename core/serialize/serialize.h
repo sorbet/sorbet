@@ -6,7 +6,7 @@
 namespace sorbet::core::serialize {
 class Serializer {
 public:
-    static const uint32_t VERSION = 6;
+    static const uint32_t VERSION = 7;
 
     // Serialize a global state.
     static std::vector<uint8_t> store(GlobalState &gs);
