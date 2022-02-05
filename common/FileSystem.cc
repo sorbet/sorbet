@@ -4,8 +4,8 @@
 namespace sorbet {
 using namespace std;
 
-string OSFileSystem::readFile(string_view path) const {
-    return FileOps::read(path);
+string OSFileSystem::readFile(string_view path, size_t nullPadding) const {
+    return FileOps::read(path, nullPadding);
 }
 
 void OSFileSystem::writeFile(string_view filename, string_view text) {

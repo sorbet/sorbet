@@ -15,8 +15,11 @@ public:
     FileSystem() = default;
     virtual ~FileSystem() = default;
 
-    /** Read the file at the given path. Throws a `FileNotFoundException` if not found. */
-    virtual std::string readFile(std::string_view path) const = 0;
+    /**
+     * Read the file at the given path. Throws a `FileNotFoundException` if not found.
+     * `nullPadding` is how many null bytes (`\0`) to append to the file contents after reading.
+     */
+    virtual std::string readFile(std::string_view path, size_t nullPadding = 0) const = 0;
 
     /** Writes the specified data to the given file. */
     virtual void writeFile(std::string_view filename, std::string_view text) = 0;
@@ -43,7 +46,7 @@ class OSFileSystem final : public FileSystem {
 public:
     OSFileSystem() = default;
 
-    std::string readFile(std::string_view path) const override;
+    std::string readFile(std::string_view path, size_t nullPadding = 0) const override;
     void writeFile(std::string_view filename, std::string_view text) override;
     std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
                                             bool recursive, const std::vector<std::string> &absoluteIgnorePatterns,
