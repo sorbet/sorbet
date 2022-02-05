@@ -275,6 +275,16 @@ public:
     ForeignPtr ast;
     token_t last_token;
 
+    // Stores a reference to the private yytname_ field from the generated bison parser,
+    // which lets us look up pretty token names.
+    const char *const *yytname;
+
+    // Stores a reference to the private yytranslate_ field from bison,
+    // which lets us convert our token IDs to bison's token IDs so that we can look them up in yytname_.
+    //
+    // yytranslate_ is a static method, so we don't have to worry about binding `this`
+    std::function<unsigned char(int)> yytranslate;
+
     base_driver(ruby_version version, std::string_view source, sorbet::StableStringStorage<> &scratch,
                 const struct builder &builder, bool traceLexer);
     virtual ~base_driver() {}
@@ -305,6 +315,8 @@ public:
         diagnostics.pop_back();
         diagnostics.emplace_back(std::forward<Args>(args)...);
     }
+
+    const char *const token_name(token_type type);
 };
 
 class typedruby_release27 : public base_driver {

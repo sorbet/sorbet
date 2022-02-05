@@ -12,6 +12,22 @@ base_driver::base_driver(ruby_version version, std::string_view source, sorbet::
     : build(builder), lex(diagnostics, version, source, scratch, traceLexer), pending_error(false), def_level(0),
       ast(nullptr) {}
 
+const char *const base_driver::token_name(token_type type) {
+    // We have two tokens matching `..` and `...`. Bison won't let us specify the same
+    // human-readable string for both of them (because bison lets you use those names like ".."
+    // directly in the productcion rules, which would lead to ambiguity).
+    //
+    // This hack allows to display the real token string instead of tBDOT2/tBDOT3 in parsing errors.
+    switch (type) {
+        case token_type::tBDOT2:
+            return "\"..\"";
+        case token_type::tBDOT3:
+            return "\"...\"";
+        default:
+            return this->yytname[this->yytranslate(static_cast<int>(type))];
+    }
+}
+
 typedruby_release27::typedruby_release27(std::string_view source, sorbet::StableStringStorage<> &scratch,
                                          const struct builder &builder, bool traceLexer)
     : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer) {}

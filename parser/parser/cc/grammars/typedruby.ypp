@@ -22,6 +22,13 @@ using namespace std::string_literals;
 
 %param { ruby_parser::TYPEDRUBY27& driver }
 %parse-param { ruby_parser::SelfPtr self }
+// This code runs at the beginning of typedruby_release27::parser::parse()
+// We use it to stash some otherwise-private members of the parser so that we
+// don't have to write helper functions entirely in C macros.
+%initial-action {
+  this->driver.yytname = this->yytname_;
+  this->driver.yytranslate = this->yytranslate_;
+}
 %define api.namespace {ruby_parser::bison::TYPEDRUBY27}
 %define api.prefix {TYPEDRUBY27}
 %define api.value.type { union parser_value }
@@ -468,19 +475,7 @@ namespace TYPEDRUBY27 {
 // token was NOT consumed, like in Happy for Haskell.)
 void parser::error(const ruby_parser::location &lloc, const std::string &msg) {
 	std::string error_message = msg;
-
-	int token_type = static_cast<int>(driver.last_token->type());
-	const char* token_str_name = yytname_[yytranslate_(token_type)];
-
-	if (token_type == token_type::tBDOT2) {
-		// Because we have two tokens matching `..`, we can't set the token name as `..` directly.
-		// This hack allows to display the real token string instead of `tBDOT2` in parsing errors.
-		error_message = "\"..\"";
-	} else if (token_type == token_type::tBDOT3) {
-		// Because we have two tokens matching `...`, we can't set the token name as `...` directly.
-		// This hack allows to display the real token string instead of `tBDOT3` in parsing errors.
-		error_message = "\"...\"";
-	} else if (token_str_name != nullptr) {
+	if (auto *token_str_name = driver.token_name(driver.last_token->type())) {
 		error_message = token_str_name;
 	}
 
