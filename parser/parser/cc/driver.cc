@@ -33,6 +33,15 @@ void base_driver::rewind_and_reset(size_t newPos) {
     this->lex.rewind_and_reset_to_expr_end(newPos);
 }
 
+void base_driver::rewind_if_dedented(token_t token, token_t kEND, location &kEND_loc) {
+    if (this->indentationAware && this->lex.compare_indent_level(token, kEND) < 0) {
+        this->rewind_and_reset(kEND_loc.begin);
+        const char *token_str_name = this->token_name(token->type());
+        this->diagnostics.emplace_back(dlevel::ERROR, dclass::DedentedEnd,
+                                       diagnostic::range(kEND_loc.begin, kEND_loc.end), token_str_name);
+    }
+}
+
 typedruby_release27::typedruby_release27(std::string_view source, sorbet::StableStringStorage<> &scratch,
                                          const struct builder &builder, bool traceLexer, bool indentationAware)
     : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer, indentationAware) {}
