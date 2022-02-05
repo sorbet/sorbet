@@ -7,10 +7,10 @@ class A
   def test1
     if x.f
     puts 'inside if'
-  end
+  end # error: Closing "end" token was not indented as far as "if" token
     # We this ends up at the class top-level, not inside test1
     puts 'after if but inside test1'
-  end # error: Closing "end" token was not indented as far as "if" token
+  end
 
   # This ends up outside of `A`, but maybe it's better than showing nothing in
   # the whole file.
