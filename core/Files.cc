@@ -191,7 +191,8 @@ File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(File::Flags(path_)), path_(move(path_)), source_(move(source_)),
       originalSigil(fileStrictSigil(this->source_)), strictLevel(originalSigil),
       compiledLevel(fileCompiledSigil(this->source_)) {
-    ENFORCE(this->source_.size() >= 2 && string_view(this->source_.data() + this->source_.size() - 2, 2) == "\0\0"sv);
+    ENFORCE(sourceType == File::Type::NotYetRead ||
+            (this->source_.size() >= 2 && string_view(this->source_.data() + this->source_.size() - 2, 2) == "\0\0"sv));
 }
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
