@@ -123,6 +123,9 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
 
     // `source` and `scratch` can also be shared by both drivers
     const auto source = file.data(gs).source();
+    // The lexer requires that its buffers end with a null terminator, which core::File
+    // does not guarantee.  Parsing heredocs for some mysterious reason requires two.
+    ENFORCE(source.size() >= 2 && string_view(source.data() + source.size() - 2, 2) == "\0\0");
     StableStringStorage<> scratch;
 
     auto driver = makeDriver(settings, source, scratch, initialLocals);
